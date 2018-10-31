@@ -28,7 +28,8 @@ namespace detail {
         {
             return -0.8;
         }
-        else if (themeName == "Custom") {
+        else if (themeName == "Custom")
+        {
             return getSettings()->customThemeMultiplier.getValue();
         }
 
@@ -214,7 +215,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->messages.textColors.system = QColor(140, 127, 127);
 
     this->messages.backgrounds.regular = splits.background;
-    this->messages.backgrounds.alternate = getColor(0, sat, 0.93);
+    this->messages.backgrounds.alternate = getColor(0, sat, 0.95);
 
     if (isLight_)
     {

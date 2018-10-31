@@ -184,8 +184,8 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
                                        getSettings()->separateMessages));
 
     // alternate
-    layout.append(this->createCheckBox(
-        "Alternate background", getSettings()->alternateMessageBackground));
+    layout.append(this->createCheckBox("Alternate background",
+                                       getSettings()->alternateMessages));
 
     layout.append(
         this->createCheckBox("Compact emotes", getSettings()->compactEmotes));
@@ -204,14 +204,14 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
 
     // bold usernames
     layout.append(this->createCheckBox("Bold mentions (@username)",
-                                       getSettings()->enableUsernameBold));
+                                       getSettings()->boldUsernames));
 
     // --
     layout.emplace<Line>(false);
 
     // lowercase links
     layout.append(this->createCheckBox("Lowercase domains",
-                                       getSettings()->enableLowercaseLink));
+                                       getSettings()->lowercaseDomains));
 
     // collapsing
     {
@@ -249,22 +249,11 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
 
 void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
 {
-    /*
-    emotes.append(
-        this->createCheckBox("Enable Twitch emotes",
-    getSettings()->enableTwitchEmotes));
-    emotes.append(this->createCheckBox("Enable BetterTTV emotes for Twitch",
-                                       getSettings()->enableBttvEmotes));
-    emotes.append(this->createCheckBox("Enable FrankerFaceZ emotes for Twitch",
-                                       getSettings()->enableFfzEmotes));
-    emotes.append(this->createCheckBox("Enable emojis",
-    getSettings()->enableEmojis));
-    */
     layout.append(
-        this->createCheckBox("Animations", getSettings()->enableGifAnimations));
+        this->createCheckBox("Animations", getSettings()->animateEmotes));
     layout.append(
         this->createCheckBox("Animations only when chatterino has focus",
-                             getSettings()->enableAnimationsWhenFocused));
+                             getSettings()->animationsWhenFocused));
 
     auto scaleBox = layout.emplace<QHBoxLayout>().withoutMargin();
     {
@@ -315,11 +304,12 @@ void LookPage::addEmoteTab(LayoutCreator<QVBoxLayout> layout)
 void LookPage::addSplitHeaderTab(LayoutCreator<QVBoxLayout> layout)
 {
     layout.append(
-        this->createCheckBox("Show uptime", getSettings()->showUptime));
+        this->createCheckBox("Show uptime", getSettings()->headerUptime));
     layout.append(this->createCheckBox("Show viewer count",
-                                       getSettings()->showViewerCount));
-    layout.append(this->createCheckBox("Show game", getSettings()->showGame));
-    layout.append(this->createCheckBox("Show title", getSettings()->showTitle));
+                                       getSettings()->headerViewerCount));
+    layout.append(this->createCheckBox("Show game", getSettings()->headerGame));
+    layout.append(
+        this->createCheckBox("Show title", getSettings()->headerStreamTitle));
 
     layout->addStretch(1);
 }

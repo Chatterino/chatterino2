@@ -12,8 +12,10 @@ namespace chatterino {
 
 class SettingsDialogTab;
 
-class SettingsPage : public QWidget
+class SettingsPage : public QFrame
 {
+    Q_OBJECT
+
 public:
     SettingsPage(const QString &name, const QString &iconResource);
 

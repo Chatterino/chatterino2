@@ -93,6 +93,13 @@ public:
         return *this;
     }
 
+    LayoutCreator<T> withoutSpacing()
+    {
+        this->item_->setSpacing(0);
+
+        return *this;
+    }
+
     template <typename Q = T,
               typename std::enable_if<std::is_base_of<QWidget, Q>::value,
                                       int>::type = 0>

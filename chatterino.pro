@@ -264,7 +264,9 @@ SOURCES += \
     src/widgets/settingspages/AdvancedPage.cpp \
     src/util/IncognitoBrowser.cpp \
     src/widgets/splits/ClosedSplits.cpp \
-    src/providers/ffz/FfzModBadge.cpp
+    src/providers/ffz/FfzModBadge.cpp \
+    src/widgets/settingspages/GeneralPage.cpp \
+    src/util/FuzzyConvert.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -468,7 +470,9 @@ HEADERS  += \
     src/widgets/settingspages/AdvancedPage.hpp \
     src/util/IncognitoBrowser.hpp \
     src/widgets/splits/ClosedSplits.hpp \
-    src/providers/ffz/FfzModBadge.hpp
+    src/providers/ffz/FfzModBadge.hpp \
+    src/widgets/settingspages/GeneralPage.hpp \
+    src/util/FuzzyConvert.hpp
 
 RESOURCES += \
     resources/resources.qrc \

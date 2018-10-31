@@ -28,7 +28,7 @@ void LinkResolver::getLinkInfo(
         if (statusCode == 200)
         {
             response = root.value("tooltip").toString();
-            if (getSettings()->enableUnshortLinks)
+            if (getSettings()->unshortLinks)
             {
                 linkString = root.value("link").toString();
             }

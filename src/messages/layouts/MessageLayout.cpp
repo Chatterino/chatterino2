@@ -237,7 +237,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     {
         backgroundColor = app->themes->messages.backgrounds.subscription;
     }
-    else if (getSettings()->alternateMessageBackground.getValue() &&
+    else if (getSettings()->alternateMessages.getValue() &&
              this->flags.has(MessageLayoutFlag::AlternateBackground))
     {
         backgroundColor = app->themes->messages.backgrounds.alternate;

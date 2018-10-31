@@ -25,7 +25,7 @@ public:
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
-    BoolSetting enableAnimationsWhenFocused = {
+    BoolSetting animationsWhenFocused = {
         "/appearance/enableAnimationsWhenFocused", false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
                                       "h:mm"};
@@ -48,26 +48,27 @@ public:
     //    {"/appearance/messages/collapseLongMessages", false};
     IntSetting collpseMessagesMinLines = {
         "/appearance/messages/collapseMessagesMinLines", 0};
-    BoolSetting alternateMessageBackground = {
+    BoolSetting alternateMessages = {
         "/appearance/messages/alternateMessageBackground", false};
     IntSetting uiScale = {"/appearance/uiScale", 0};
     IntSetting boldScale = {"/appearance/boldScale", 57};
     BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
+    BoolSetting showTabLive = {"/appearance/showTabLiveButton", false};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
                                          false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
     BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
     BoolSetting enableSmoothScrollingNewMessages = {
         "/appearance/smoothScrollingNewMessages", false};
-    BoolSetting enableUsernameBold = {"/appearance/messages/boldUsernames",
-                                      false};
+    BoolSetting boldUsernames = {"/appearance/messages/boldUsernames", false};
     // BoolSetting customizable splitheader
-    BoolSetting showViewerCount = {"/appearance/splitheader/showViewerCount",
-                                   false};
-    BoolSetting showTitle = {"/appearance/splitheader/showTitle", false};
-    BoolSetting showGame = {"/appearance/splitheader/showGame", false};
-    BoolSetting showUptime = {"/appearance/splitheader/showUptime", false};
+    BoolSetting headerViewerCount = {"/appearance/splitheader/showViewerCount",
+                                     false};
+    BoolSetting headerStreamTitle = {"/appearance/splitheader/showTitle",
+                                     false};
+    BoolSetting headerGame = {"/appearance/splitheader/showGame", false};
+    BoolSetting headerUptime = {"/appearance/splitheader/showUptime", false};
     FloatSetting customThemeMultiplier = {"/appearance/customThemeMultiplier",
                                           -0.5f};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
@@ -100,7 +101,7 @@ public:
     IntSetting smallStreamerLimit = {
         "/behaviour/autocompletion/smallStreamerLimit", 1000};
 
-    BoolSetting pauseChatHover = {"/behaviour/pauseChatHover", false};
+    BoolSetting pauseChatOnHover = {"/behaviour/pauseChatHover", false};
 
     /// Commands
     BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};
@@ -112,16 +113,16 @@ public:
     BoolSetting enableBttvEmotes = {"/emotes/enableBTTVEmotes", true};
     BoolSetting enableFfzEmotes = {"/emotes/enableFFZEmotes", true};
     BoolSetting enableEmojis = {"/emotes/enableEmojis", true};
-    BoolSetting enableGifAnimations = {"/emotes/enableGifAnimations", true};
+    BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
 
     QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
-    BoolSetting enableLinkInfoTooltip = {"/links/linkInfoTooltip", false};
-    BoolSetting enableUnshortLinks = {"/links/unshortLinks", false};
-    BoolSetting enableLowercaseLink = {"/links/linkLowercase", true};
+    BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};
+    BoolSetting unshortLinks = {"/links/unshortLinks", false};
+    BoolSetting lowercaseDomains = {"/links/linkLowercase", true};
 
     /// Ignored phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",

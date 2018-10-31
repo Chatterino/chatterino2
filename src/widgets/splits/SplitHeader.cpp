@@ -102,13 +102,13 @@ namespace {
             title += " (live)";
 
         // description
-        if (settings.showUptime)
+        if (settings.headerUptime)
             title += " - " + s.uptime;
-        if (settings.showViewerCount)
+        if (settings.headerViewerCount)
             title += " - " + QString::number(s.viewerCount);
-        if (settings.showGame)
+        if (settings.headerGame)
             title += " - " + s.game;
-        if (settings.showTitle)
+        if (settings.headerStreamTitle)
             title += " - " + s.title;
 
         return title;
@@ -142,10 +142,10 @@ SplitHeader::SplitHeader(Split *_split)
                          [this] { this->updateModerationModeIcon(); });
 
     auto _ = [this](const auto &, const auto &) { this->updateChannelText(); };
-    getSettings()->showViewerCount.connect(_, this->managedConnections_);
-    getSettings()->showTitle.connect(_, this->managedConnections_);
-    getSettings()->showGame.connect(_, this->managedConnections_);
-    getSettings()->showUptime.connect(_, this->managedConnections_);
+    getSettings()->headerViewerCount.connect(_, this->managedConnections_);
+    getSettings()->headerStreamTitle.connect(_, this->managedConnections_);
+    getSettings()->headerGame.connect(_, this->managedConnections_);
+    getSettings()->headerUptime.connect(_, this->managedConnections_);
 }
 
 void SplitHeader::initializeLayout()

@@ -927,7 +927,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
-    if (getSettings()->pauseChatHover.getValue())
+    if (getSettings()->pauseChatOnHover.getValue())
     {
         this->pause(CHAT_HOVER_PAUSE_DURATION);
     }
@@ -1117,7 +1117,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         tooltipWidget->hide();
     }
-    else if (isLinkValid && !getSettings()->enableLinkInfoTooltip)
+    else if (isLinkValid && !getSettings()->linkInfoTooltip)
     {
         tooltipWidget->hide();
     }

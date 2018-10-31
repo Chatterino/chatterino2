@@ -10,7 +10,7 @@ void GIFTimer::initialize()
 {
     this->timer.setInterval(30);
 
-    getSettings()->enableGifAnimations.connect([this](bool enabled, auto) {
+    getSettings()->animateEmotes.connect([this](bool enabled, auto) {
         if (enabled)
             this->timer.start();
         else
@@ -18,7 +18,7 @@ void GIFTimer::initialize()
     });
 
     QObject::connect(&this->timer, &QTimer::timeout, [this] {
-        if (getSettings()->enableAnimationsWhenFocused &&
+        if (getSettings()->animationsWhenFocused &&
             qApp->activeWindow() == nullptr)
             return;
 

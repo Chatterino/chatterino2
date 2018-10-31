@@ -11,6 +11,7 @@
 #include "widgets/settingspages/EmotesPage.hpp"
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 #include "widgets/settingspages/FeelPage.hpp"
+#include "widgets/settingspages/GeneralPage.hpp"
 #include "widgets/settingspages/HighlightingPage.hpp"
 #include "widgets/settingspages/IgnoresPage.hpp"
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
@@ -36,6 +37,8 @@ SettingsDialog::SettingsDialog()
 
     this->overrideBackgroundColor_ = QColor("#282828");
     this->themeChangedEvent();
+
+    this->resize(766, 600);
 }
 
 void SettingsDialog::initUi()
@@ -43,11 +46,17 @@ void SettingsDialog::initUi()
     LayoutCreator<SettingsDialog> layoutCreator(this);
 
     // tab pages
-    layoutCreator.emplace<QWidget>()
+    layoutCreator.setLayoutType<QHBoxLayout>()
+        .withoutSpacing()
+        .emplace<QWidget>()
         .assign(&this->ui_.tabContainerContainer)
         .emplace<QVBoxLayout>()
         .withoutMargin()
         .assign(&this->ui_.tabContainer);
+
+    this->ui_.tabContainerContainer->layout()->setContentsMargins(8, 8, 0, 8);
+
+    this->layout()->setSpacing(0);
 
     // right side layout
     auto right = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
@@ -64,6 +73,8 @@ void SettingsDialog::initUi()
                 buttons->addButton("Cancel", QDialogButtonBox::NoRole);
         }
     }
+
+    this->ui_.pageStack->setMargin(0);
 
     // ---- misc
     this->ui_.tabContainerContainer->setObjectName("tabWidget");
@@ -82,14 +93,19 @@ SettingsDialog *SettingsDialog::getHandle()
 
 void SettingsDialog::addTabs()
 {
+    this->ui_.tabContainer->setMargin(0);
     this->ui_.tabContainer->setSpacing(0);
 
-    this->addTab(new AccountsPage);
+    this->addTab(new GeneralPage);
 
     this->ui_.tabContainer->addSpacing(16);
 
-    this->addTab(new LookPage);
-    this->addTab(new FeelPage);
+    this->addTab(new AccountsPage);
+
+    //    this->ui_.tabContainer->addSpacing(16);
+
+    //    this->addTab(new LookPage);
+    //    this->addTab(new FeelPage);
 
     this->ui_.tabContainer->addSpacing(16);
 
@@ -105,7 +121,7 @@ void SettingsDialog::addTabs()
     this->addTab(this->ui_.moderationPage = new ModerationPage);
     this->addTab(new NotificationPage);
     //    this->addTab(new SpecialChannelsPage);
-    this->addTab(new BrowserExtensionPage);
+    //    this->addTab(new BrowserExtensionPage);
     this->addTab(new ExternalToolsPage);
     this->addTab(new AdvancedPage);
 
@@ -139,7 +155,8 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab)
     }
 
     tab->setSelected(true);
-    tab->setStyleSheet("background: #555; color: #FFF");
+    tab->setStyleSheet(
+        "background: #161616; color: #4FC3F7; border: 1px solid #111");
     this->selectedTab_ = tab;
 }
 
@@ -201,7 +218,7 @@ void SettingsDialog::scaleChangedEvent(float newDpi)
 
     this->setStyleSheet(styleSheet);
 
-    this->ui_.tabContainerContainer->setFixedWidth(int(200 * newDpi));
+    this->ui_.tabContainerContainer->setFixedWidth(int(150 * newDpi));
 }
 
 void SettingsDialog::themeChangedEvent()

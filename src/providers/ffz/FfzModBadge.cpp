@@ -48,6 +48,7 @@ void FfzModBadge::loadCustomModBadge()
                            Url{url}};
 
         this->badge_ = std::make_shared<Emote>(emote);
+        //        getBadge.execute();
 
         return Success;
     });

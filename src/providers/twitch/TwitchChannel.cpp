@@ -474,12 +474,9 @@ void TwitchChannel::refreshLiveStatus()
 
     QString url("https://api.twitch.tv/kraken/streams/" + roomID);
 
-    //<<<<<<< HEAD
     //    auto request = makeGetStreamRequest(roomID, QThread::currentThread());
-    //=======
     auto request = NetworkRequest::twitchRequest(url);
     request.setCaller(QThread::currentThread());
-    //>>>>>>> 9bfbdefd2f0972a738230d5b95a009f73b1dd933
 
     request.onSuccess(
         [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {

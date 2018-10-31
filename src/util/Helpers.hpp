@@ -19,43 +19,28 @@ static QString CreateUUID()
 
 static QString createLink(const QString &url, bool file = false)
 {
-    if (file)
-    {
-        return QString("<a href=\"file:///" + url +
-                       "\"><span style=\"color: white;\">" + url +
-                       "</span></a>");
-    }
-
-    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" +
-                   url + "</span></a>");
+    return QString("<a href=\"") + (file ? "file:///" : "") + url + "\">" +
+           url + "</a>";
 }
 
 static QString createNamedLink(const QString &url, const QString &name,
                                bool file = false)
 {
-    if (file)
-    {
-        return QString("<a href=\"file:///" + url +
-                       "\"><span style=\"color: white;\">" + name +
-                       "</span></a>");
-    }
-
-    return QString("<a href=\"" + url + "\"><span style=\"color: white;\">" +
-                   name + "</span></a>");
+    return QString("<a href=\"") + (file ? "file:///" : "") + url + "\">" +
+           name + "</a>";
 }
 
 static QString shortenString(const QString &str, unsigned maxWidth = 50)
 {
-    if (str.size() <= maxWidth)
+    auto shortened = QString(str);
+
+    if (str.size() > int(maxWidth))
     {
-        return str;
+        shortened.resize(int(maxWidth));
+        shortened += "...";
     }
 
-    QString shortenedStr = str;
-    shortenedStr.resize(47);
-    shortenedStr += "...";
-
-    return shortenedStr;
+    return shortened;
 }
 
 }  // namespace chatterino

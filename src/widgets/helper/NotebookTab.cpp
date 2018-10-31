@@ -39,6 +39,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
     getSettings()->showTabCloseButton.connect(
         boost::bind(&NotebookTab::hideTabXChanged, this, _1),
         this->managedConnections_);
+    getSettings()->showTabLive.connect([this](auto, auto) { this->update(); },
+                                       this->managedConnections_);
 
     this->setMouseTracking(true);
 
@@ -311,7 +313,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
             : (windowFocused ? colors.line.regular : colors.line.unfocused));
 
     // draw live indicator
-    if (this->isLive_)
+    if (this->isLive_ && getSettings()->showTabLive)
     {
         painter.setPen(QColor(Qt::GlobalColor::red));
         painter.setRenderHint(QPainter::Antialiasing);
@@ -355,6 +357,8 @@ void NotebookTab::paintEvent(QPaintEvent *)
     // draw close x
     if (this->shouldDrawXButton())
     {
+        painter.setRenderHint(QPainter::Antialiasing, false);
+
         QRect xRect = this->getXRect();
         if (!xRect.isNull())
         {

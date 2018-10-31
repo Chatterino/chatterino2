@@ -82,8 +82,8 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->enableEmojis);
     this->wordFlagsListener_.addSetting(settings->enableFfzEmotes);
     this->wordFlagsListener_.addSetting(settings->enableTwitchEmotes);
-    this->wordFlagsListener_.addSetting(settings->enableUsernameBold);
-    this->wordFlagsListener_.addSetting(settings->enableLowercaseLink);
+    this->wordFlagsListener_.addSetting(settings->boldUsernames);
+    this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
     this->wordFlagsListener_.cb = [this](auto) {
         this->updateWordTypeMask();  //
     };
@@ -127,7 +127,7 @@ void WindowManager::updateWordTypeMask()
 
     // bits
     flags.set(MEF::BitsAmount);
-    flags.set(settings->enableGifAnimations ? MEF::BitsAnimated
+    flags.set(settings->animateEmotes ? MEF::BitsAnimated
                                             : MEF::BitsStatic);
 
     // badges
@@ -147,9 +147,9 @@ void WindowManager::updateWordTypeMask()
     // misc
     flags.set(MEF::AlwaysShow);
     flags.set(MEF::Collapsed);
-    flags.set(settings->enableUsernameBold ? MEF::BoldUsername
+    flags.set(settings->boldUsernames ? MEF::BoldUsername
                                            : MEF::NonBoldUsername);
-    flags.set(settings->enableLowercaseLink ? MEF::LowercaseLink
+    flags.set(settings->lowercaseDomains ? MEF::LowercaseLink
                                             : MEF::OriginalLink);
 
     // update flags
@@ -384,7 +384,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
     settings.timestampFormat.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.alternateMessageBackground.connect(
+    settings.alternateMessages.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });
     settings.separateMessages.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });

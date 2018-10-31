@@ -44,18 +44,17 @@ FeelPage::FeelPage()
 
         form->addRow("Pause chat:",
                      this->createCheckBox(PAUSE_HOVERING,
-                                          getSettings()->pauseChatHover));
+                                          getSettings()->pauseChatOnHover));
 
         form->addRow("Mouse scroll speed:", this->createMouseScrollSlider());
         form->addRow("Links:",
                      this->createCheckBox("Open links only on double click",
                                           getSettings()->linksDoubleClickOnly));
-        form->addRow(
-            "", this->createCheckBox("Show link info in tooltips",
-                                     getSettings()->enableLinkInfoTooltip));
+        form->addRow("", this->createCheckBox("Show link info in tooltips",
+                                              getSettings()->linkInfoTooltip));
         form->addRow(
             "", this->createCheckBox("Auto unshort links (requires restart)",
-                                     getSettings()->enableUnshortLinks));
+                                     getSettings()->unshortLinks));
     }
 
     layout->addSpacing(16);
