@@ -642,7 +642,7 @@ float WindowManager::getUiScaleValue(int scale)
 {
     static auto scales = new float[16]{.5f, .6f, .7f, .8f, .9f, 1, 1.2f, 1.4f,
                                        1.6f, 1.8f, 2, 2.33f, 2.66f, 3, 3.5f, 4};
-    return scales[clampUiScale(scale) + 5];
+    return scales[clampUiScale(scale) + (-uiScaleMin)];
 }
 
 }  // namespace chatterino
