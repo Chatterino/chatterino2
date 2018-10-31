@@ -254,6 +254,10 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addSpacing(16);
     layout.addSeperator();
 
+    layout.addTitle2("Misc");
+    layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
+    layout.addCheckbox("Grey out historic messages", s.greyOutHistoricMessages);
+
     /*
     layout.addTitle2("Cache");
     layout.addDescription("Chatterino saves files on disk to speed up loading "
