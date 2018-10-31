@@ -77,9 +77,12 @@ ComboBox *SettingsLayout::addDropdown(const QString &text,
 
 ComboBox *SettingsLayout::addDropdown(
     const QString &text, const QStringList &items,
-    pajlada::Settings::Setting<QString> &setting)
+    pajlada::Settings::Setting<QString> &setting, bool editable)
 {
     auto combo = this->addDropdown(text, items);
+
+    if (editable)
+        combo->setEditable(true);
 
     // update when setting changes
     setting.connect(
@@ -185,8 +188,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addTitle("Messages");
     layout.addCheckbox("Timestamps", s.showTimestamps);
     layout.addDropdown("Timestamp format",
-                       {"hh:mm", "h:mm", "hh:mm a", "h:mm a"},
-                       s.timestampFormat);
+                       {"h:mm", "hh:mm", "h:mm a", "hh:mm a"},
+                       s.timestampFormat, true);
     layout.addDropdown<int>(
         "Collapse messages",
         {"Never", "Longer than 2 lines", "Longer than 3 lines",

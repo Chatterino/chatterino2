@@ -75,7 +75,8 @@ public:
     QCheckBox *addCheckbox(const QString &text, BoolSetting &setting);
     ComboBox *addDropdown(const QString &text, const QStringList &items);
     ComboBox *addDropdown(const QString &text, const QStringList &items,
-                          pajlada::Settings::Setting<QString> &setting);
+                          pajlada::Settings::Setting<QString> &setting,
+                          bool editable = false);
 
     template <typename T>
     ComboBox *addDropdown(
