@@ -4,9 +4,11 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
+#include "Application.hpp"
 #include "boost/variant.hpp"
 #include "pajlada/signals/signal.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 class QLabel;
