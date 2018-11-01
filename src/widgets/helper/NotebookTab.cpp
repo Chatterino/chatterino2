@@ -300,14 +300,14 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     // fill the tab background
     auto bgRect = rect();
-    bgRect.setTop(bgRect.top() + 2);
+    bgRect.setTop(ceil((this->selected_ ? 0.f : 1.f) * scale));
 
     painter.fillRect(bgRect, tabBackground);
 
     // top line
     painter.fillRect(
-        QRectF(0, (this->selected_ ? 0.f : 1.f) * scale, this->width(),
-               (this->selected_ ? 2.f : 1.f) * scale),
+        QRectF(0, ceil((this->selected_ ? 0.f : 1.f) * scale), this->width(),
+               ceil((this->selected_ ? 2.f : 1.f) * scale)),
         this->mouseOver_
             ? colors.line.hover
             : (windowFocused ? colors.line.regular : colors.line.unfocused));

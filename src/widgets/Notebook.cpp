@@ -395,7 +395,7 @@ void Notebook::performLayout(bool animated)
 
         /// Layout tab
         item.tab->moveAnimated(QPoint(x, y), animated);
-        x += item.tab->width() + int(scale * 1);
+        x += item.tab->width() + std::max<int>(1, int(scale * 1));
     }
 
     /// Update which tabs are in the last row
