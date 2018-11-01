@@ -215,7 +215,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->messages.textColors.system = QColor(140, 127, 127);
 
     this->messages.backgrounds.regular = splits.background;
-    this->messages.backgrounds.alternate = getColor(0, sat, 0.95);
+    this->messages.backgrounds.alternate = getColor(0, sat, 0.96);
 
     if (isLight_)
     {

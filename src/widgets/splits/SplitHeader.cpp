@@ -500,7 +500,9 @@ void SplitHeader::paintEvent(QPaintEvent *)
 
     painter.fillRect(rect(), this->theme->splits.header.background);
     painter.setPen(this->theme->splits.header.border);
-    painter.drawRect(0, 0, width() - 1, height() - 1);
+    painter.drawRect(0, 0, width() - 1, height() - 2);
+    painter.fillRect(0, height() - 1, width(), 1,
+                     this->theme->splits.background);
 }
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)
