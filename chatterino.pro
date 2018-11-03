@@ -17,7 +17,11 @@ DEFINES           += QT_DEPRECATED_WARNINGS
 PRECOMPILED_HEADER = src/PrecompiledHeader.hpp
 CONFIG            += precompile_header
 
-QMAKE_CXXFLAGS += -std=c++17
+win32-msvc* {
+    QMAKE_CXXFLAGS += /std:c++17
+} else {
+    QMAKE_CXXFLAGS += -std=c++17
+}
 
 debug {
     DEFINES += QT_DEBUG
