@@ -620,26 +620,31 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
 {
     std::vector<MessageLayoutPtr> messageRefs;
     messageRefs.resize(messages.size());
+
+    /// Create message layouts
     for (size_t i = 0; i < messages.size(); i++)
     {
-        messageRefs.at(i) = MessageLayoutPtr(new MessageLayout(messages.at(i)));
+        auto layout = new MessageLayout(messages.at(i));
+
+        // alternate color
+        if (!this->lastMessageHasAlternateBackgroundReverse_)
+            layout->flags.set(MessageLayoutFlag::AlternateBackground);
+        this->lastMessageHasAlternateBackgroundReverse_ =
+            !this->lastMessageHasAlternateBackgroundReverse_;
+
+        messageRefs.at(i) = MessageLayoutPtr(layout);
     }
 
-    //    if (!this->isPaused())
+    /// Add the messages at the start
+    if (this->messages.pushFront(messageRefs).size() > 0)
     {
-        if (this->messages.pushFront(messageRefs).size() > 0)
-        {
-            if (this->scrollBar_->isAtBottom())
-            {
-                this->scrollBar_->scrollToBottom();
-            }
-            else
-            {
-                this->scrollBar_->offset(qreal(messages.size()));
-            }
-        }
+        if (this->scrollBar_->isAtBottom())
+            this->scrollBar_->scrollToBottom();
+        else
+            this->scrollBar_->offset(qreal(messages.size()));
     }
 
+    /// Add highlights
     std::vector<ScrollbarHighlight> highlights;
     highlights.reserve(messages.size());
     for (size_t i = 0; i < messages.size(); i++)

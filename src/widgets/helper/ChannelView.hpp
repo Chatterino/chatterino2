@@ -149,6 +149,7 @@ private:
     bool updateQueued_ = false;
     bool messageWasAdded_ = false;
     bool lastMessageHasAlternateBackground_ = false;
+    bool lastMessageHasAlternateBackgroundReverse_ = true;
 
     QTimer pauseTimer_;
     std::unordered_map<PauseReason, boost::optional<SteadyClock::time_point>>
