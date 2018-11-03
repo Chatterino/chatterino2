@@ -970,11 +970,12 @@ void ChannelView::wheelEvent(QWheelEvent *event)
 
 void ChannelView::enterEvent(QEvent *)
 {
-    //    this->pause(PAUSE_TIME);
 }
 
 void ChannelView::leaveEvent(QEvent *)
 {
+    this->unpause(PauseReason::Mouse);
+
     this->queueLayout();
 }
 
