@@ -163,7 +163,7 @@ void CompletionModel::refresh(const QString &prefix)
         }
 
         // Commands
-        for (auto &command : getApp()->commands->items.getVector())
+        for (auto &command : getApp()->commands->items_.getVector())
         {
             addString(command.name, TaggedString::Command);
         }

@@ -41,7 +41,7 @@ CommandPage::CommandPage()
     view->setTitles({"Trigger", "Command"});
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
     view->addButtonPressed.connect([] {
-        getApp()->commands->items.appendItem(
+        getApp()->commands->items_.appendItem(
             Command{"/command", "I made a new command HeyGuys"});
     });
 

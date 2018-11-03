@@ -33,12 +33,13 @@
 
 namespace chatterino {
 
-CommandController::CommandController()
+void CommandController::initialize(Settings &, Paths &paths)
 {
+    // Update commands map when the vector of commands has been updated
     auto addFirstMatchToMap = [this](auto args) {
         this->commandsMap_.remove(args.item.name);
 
-        for (const Command &cmd : this->items.getVector())
+        for (const Command &cmd : this->items_.getVector())
         {
             if (cmd.name == args.item.name)
             {
@@ -47,70 +48,51 @@ CommandController::CommandController()
             }
         }
     };
+    this->items_.itemInserted.connect(addFirstMatchToMap);
+    this->items_.itemRemoved.connect(addFirstMatchToMap);
 
-    this->items.itemInserted.connect(addFirstMatchToMap);
-    this->items.itemRemoved.connect(addFirstMatchToMap);
-}
+    // Initialize setting manager for commands.json
+    auto path = combinePath(paths.settingsDirectory, "commands.json");
+    this->sm_ = std::make_shared<pajlada::Settings::SettingManager>();
+    this->sm_->setPath(path.toStdString());
 
-void CommandController::initialize(Settings &, Paths &paths)
-{
-    this->load(paths);
-}
+    // Delayed initialization of the setting storing all commands
+    this->commandsSetting_.reset(
+        new pajlada::Settings::Setting<std::vector<Command>>("/commands",
+                                                             this->sm_));
 
-void CommandController::load(Paths &paths)
-{
-    this->filePath_ = combinePath(paths.settingsDirectory, "commands.txt");
+    // Update the setting when the vector of commands has been updated (most
+    // likely from the settings dialog)
+    this->items_.delayedItemsChanged.connect([this] {  //
+        this->commandsSetting_->setValue(this->items_.getVector());
+    });
 
-    QFile textFile(this->filePath_);
-    if (!textFile.open(QIODevice::ReadOnly))
+    // Load commands from commands.json
+    this->sm_->load();
+
+    // Add loaded commands to our vector of commands (which will update the map
+    // of commands)
+    for (const auto &command : this->commandsSetting_->getValue())
     {
-        // No commands file created yet
-        return;
+        this->items_.appendItem(command);
     }
-
-    QList<QByteArray> test = textFile.readAll().split('\n');
-
-    for (const auto &command : test)
-    {
-        if (command.isEmpty())
-        {
-            continue;
-        }
-
-        this->items.appendItem(Command(command));
-    }
-
-    textFile.close();
 }
 
 void CommandController::save()
 {
-    QFile textFile(this->filePath_);
-    if (!textFile.open(QIODevice::WriteOnly))
-    {
-        log("[CommandController::saveCommands] Unable to open {} for writing",
-            this->filePath_);
-        return;
-    }
-
-    for (const Command &cmd : this->items.getVector())
-    {
-        textFile.write((cmd.toString() + "\n").toUtf8());
-    }
-
-    textFile.close();
+    this->sm_->save();
 }
 
 CommandModel *CommandController::createModel(QObject *parent)
 {
     CommandModel *model = new CommandModel(parent);
-    model->init(&this->items);
+    model->init(&this->items_);
 
     return model;
 }
 
-QString CommandController::execCommand(const QString &textNoEmoji, ChannelPtr channel,
-                                       bool dryRun)
+QString CommandController::execCommand(const QString &textNoEmoji,
+                                       ChannelPtr channel, bool dryRun)
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
     QStringList words = text.split(' ', QString::SkipEmptyParts);
@@ -156,10 +138,12 @@ QString CommandController::execCommand(const QString &textNoEmoji, ChannelPtr ch
                 const auto &ffzemotes = app->twitch.server->getFfzEmotes();
                 auto flags = MessageElementFlags();
                 auto emote = boost::optional<EmotePtr>{};
-                for (int i = 2; i < words.length(); i++) {
+                for (int i = 2; i < words.length(); i++)
+                {
                     {  // twitch emote
                         auto it = accemotes.emotes.find({words[i]});
-                        if (it != accemotes.emotes.end()) {
+                        if (it != accemotes.emotes.end())
+                        {
                             b.emplace<EmoteElement>(
                                 it->second, MessageElementFlag::TwitchEmote);
                             continue;
@@ -167,19 +151,24 @@ QString CommandController::execCommand(const QString &textNoEmoji, ChannelPtr ch
                     }  // twitch emote
 
                     {  // bttv/ffz emote
-                        if ((emote = bttvemotes.emote({words[i]}))) {
+                        if ((emote = bttvemotes.emote({words[i]})))
+                        {
                             flags = MessageElementFlag::BttvEmote;
-                        } else if ((emote = ffzemotes.emote({words[i]}))) {
+                        }
+                        else if ((emote = ffzemotes.emote({words[i]})))
+                        {
                             flags = MessageElementFlag::FfzEmote;
                         }
-                        if (emote) {
+                        if (emote)
+                        {
                             b.emplace<EmoteElement>(emote.get(), flags);
                             continue;
                         }
                     }  // bttv/ffz emote
                     {  // emoji/text
                         for (auto &variant :
-                             app->emotes->emojis.parse(words[i])) {
+                             app->emotes->emojis.parse(words[i]))
+                        {
                             constexpr const static struct {
                                 void operator()(EmotePtr emote,
                                                 MessageBuilder &b) const
@@ -207,7 +196,8 @@ QString CommandController::execCommand(const QString &textNoEmoji, ChannelPtr ch
 
                 app->twitch.server->sendMessage("jtv", text);
 
-                if (getSettings()->inlineWhispers) {
+                if (getSettings()->inlineWhispers)
+                {
                     app->twitch.server->forEachChannel(
                         [&messagexD](ChannelPtr _channel) {
                             _channel->addMessage(messagexD);
