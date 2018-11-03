@@ -22,7 +22,7 @@ public:
     {
     }
 
-    std::size_t getLength()
+    std::size_t size()
     {
         return this->length_;
     }

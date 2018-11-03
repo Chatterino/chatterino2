@@ -264,7 +264,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
     // draw highlights
     auto snapshot = this->getHighlightSnapshot();
-    size_t snapshotLength = snapshot.getLength();
+    size_t snapshotLength = snapshot.size();
 
     if (snapshotLength == 0)
     {

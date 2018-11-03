@@ -172,7 +172,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     this->subEmotesView_->setChannel(subChannel);
     this->channelEmotesView_->setChannel(channelChannel);
 
-    if (subChannel->getMessageSnapshot().getLength() == 0)
+    if (subChannel->getMessageSnapshot().size() == 0)
     {
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);

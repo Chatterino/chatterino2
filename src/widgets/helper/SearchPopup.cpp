@@ -74,7 +74,7 @@ void SearchPopup::performSearch()
 
     ChannelPtr channel(new Channel("search", Channel::Type::None));
 
-    for (size_t i = 0; i < this->snapshot_.getLength(); i++)
+    for (size_t i = 0; i < this->snapshot_.size(); i++)
     {
         MessagePtr message = this->snapshot_[i];
 

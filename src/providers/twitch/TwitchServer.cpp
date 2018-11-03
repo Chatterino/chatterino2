@@ -4,6 +4,8 @@
 #include "common/Common.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -180,6 +182,23 @@ std::shared_ptr<Channel> TwitchServer::getCustomChannel(
     if (channelName == "/mentions")
     {
         return this->mentionsChannel;
+    }
+
+    if (channelName == "$$$")
+    {
+        static auto channel =
+            std::make_shared<Channel>("$$$", chatterino::Channel::Type::Misc);
+        static auto timer = [&] {
+            auto timer = new QTimer;
+            QObject::connect(timer, &QTimer::timeout, [] {
+                channel->addMessage(
+                    makeSystemMessage(QTime::currentTime().toString()));
+            });
+            timer->start(500);
+            return timer;
+        }();
+
+        return channel;
     }
 
     return nullptr;

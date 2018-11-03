@@ -114,11 +114,13 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->initializeScrollbar();
     this->initializeSignals();
 
-    this->pauseTimeout_.setSingleShot(true);
-    QObject::connect(&this->pauseTimeout_, &QTimer::timeout, [this] {
-        this->pausedTemporarily_ = false;
-        this->updatePauseStatus();
-        this->layoutMessages();
+    this->pauseTimer_.setSingleShot(true);
+    QObject::connect(&this->pauseTimer_, &QTimer::timeout, this, [this] {
+        /// remove elements that are finite
+        for (auto it = this->pauses_.begin(); it != this->pauses_.end();)
+            it = it->second ? this->pauses_.erase(it) : ++it;
+
+        this->updatePauseTimer();
     });
 
     auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
@@ -150,7 +152,7 @@ void ChannelView::initializeLayout()
 void ChannelView::initializeScrollbar()
 {
     this->scrollBar_->getCurrentValueChanged().connect([this] {
-        this->actuallyLayoutMessages(true);
+        this->performLayout(true);
 
         this->goToBottom_->setVisible(this->enableScrollingToBottom_ &&
                                       this->scrollBar_->isVisible() &&
@@ -158,17 +160,13 @@ void ChannelView::initializeScrollbar()
 
         this->queueUpdate();
     });
-
-    this->scrollBar_->getDesiredValueChanged().connect([this] {
-        this->pausedByScrollingUp_ = !this->scrollBar_->isAtBottom();
-    });
 }
 
 void ChannelView::initializeSignals()
 {
     this->connections_.push_back(
         getApp()->windows->wordFlagsChanged.connect([this] {
-            this->layoutMessages();
+            this->queueLayout();
             this->update();
         }));
 
@@ -181,18 +179,100 @@ void ChannelView::initializeSignals()
     connections_.push_back(
         getApp()->windows->layout.connect([&](Channel *channel) {
             if (channel == nullptr || this->channel_.get() == channel)
-                this->layoutMessages();
+                this->queueLayout();
         }));
 
-    connections_.push_back(getApp()->fonts->fontChanged.connect(
-        [this] { this->layoutMessages(); }));
+    connections_.push_back(
+        getApp()->fonts->fontChanged.connect([this] { this->queueLayout(); }));
+}
+
+bool ChannelView::paused() const
+{
+    /// No elements in the map -> not paused
+    return !this->pauses_.empty();
+}
+
+void ChannelView::pause(PauseReason reason, boost::optional<uint> msecs)
+{
+    if (msecs)
+    {
+        /// Msecs has a value
+        auto timePoint =
+            SteadyClock::now() + std::chrono::milliseconds(msecs.get());
+        auto it = this->pauses_.find(reason);
+
+        if (it == this->pauses_.end())
+        {
+            /// No value found so we insert a new one.
+            this->pauses_[reason] = timePoint;
+        }
+        else
+        {
+            /// If the new time point is newer then we override.
+            if (it->second && it->second.get() < timePoint)
+                it->second = timePoint;
+        }
+    }
+    else
+    {
+        /// Msecs is none -> pause is infinite.
+        /// We just override the value.
+        this->pauses_[reason] = boost::none;
+    }
+
+    this->updatePauseTimer();
+}
+
+void ChannelView::unpause(PauseReason reason)
+{
+    /// Remove the value from the map
+    this->pauses_.erase(reason);
+
+    this->updatePauseTimer();
+}
+
+void ChannelView::updatePauseTimer()
+{
+    using namespace std::chrono;
+
+    if (this->pauses_.empty())
+    {
+        /// No pauses so we can stop the timer
+        this->pauseEnd = boost::none;
+        this->pauseTimer_.stop();
+
+        this->queueLayout();
+    }
+    else if (std::any_of(this->pauses_.begin(), this->pauses_.end(),
+                         [](auto &&value) { return !value.second; }))
+    {
+        /// Some of the pauses are infinite
+        this->pauseEnd = boost::none;
+        this->pauseTimer_.stop();
+    }
+    else
+    {
+        /// Get the maximum pause
+        auto max = std::max_element(
+                       this->pauses_.begin(), this->pauses_.end(),
+                       [](auto &&a, auto &&b) { return a.second > b.second; })
+                       ->second.get();
+
+        if (max != this->pauseEnd)
+        {
+            /// Start the timer
+            this->pauseEnd = max;
+            this->pauseTimer_.start(
+                duration_cast<milliseconds>(max - SteadyClock::now()));
+        }
+    }
 }
 
 void ChannelView::themeChangedEvent()
 {
     BaseWidget::themeChangedEvent();
 
-    this->layoutMessages();
+    this->queueLayout();
 }
 
 void ChannelView::queueUpdate()
@@ -208,10 +288,10 @@ void ChannelView::queueUpdate()
     //    this->updateTimer.start();
 }
 
-void ChannelView::layoutMessages()
+void ChannelView::queueLayout()
 {
     //    if (!this->layoutCooldown->isActive()) {
-    this->actuallyLayoutMessages();
+    this->performLayout();
 
     //        this->layoutCooldown->start();
     //    } else {
@@ -219,79 +299,86 @@ void ChannelView::layoutMessages()
     //    }
 }
 
-void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
+void ChannelView::performLayout(bool causedByScrollbar)
 {
-    //    BenchmarkGuard benchmark("layout");
+    // BenchmarkGuard benchmark("layout");
 
-    auto messagesSnapshot = this->getMessagesSnapshot();
+    /// Get messages and check if there are at least 1
+    auto messages = this->getMessagesSnapshot();
 
-    if (messagesSnapshot.getLength() == 0)
-    {
-        this->scrollBar_->setVisible(false);
-
-        return;
-    }
-
-    bool redrawRequired = false;
-    bool showScrollbar = false;
-
-    // Bool indicating whether or not we were showing all messages
-    // True if one of the following statements are true:
-    // The scrollbar was not visible
-    // The scrollbar was visible and at the bottom
     this->showingLatestMessages_ =
         this->scrollBar_->isAtBottom() || !this->scrollBar_->isVisible();
 
-    size_t start = size_t(this->scrollBar_->getCurrentValue());
-    int layoutWidth = this->getLayoutWidth();
+    /// Layout visible messages
+    this->layoutVisibleMessages(messages);
 
-    MessageElementFlags flags = this->getFlags();
+    /// Update scrollbar
+    this->updateScrollbar(messages, causedByScrollbar);
+}
 
-    // layout the visible messages in the view
-    if (messagesSnapshot.getLength() > start)
+void ChannelView::layoutVisibleMessages(
+    LimitedQueueSnapshot<MessageLayoutPtr> &messages)
+{
+    const auto start = size_t(this->scrollBar_->getCurrentValue());
+    const auto layoutWidth = this->getLayoutWidth();
+    const auto flags = this->getFlags();
+    auto redrawRequired = false;
+
+    if (messages.size() > start)
     {
-        int y = int(-(messagesSnapshot[start]->getHeight() *
-                      (fmod(this->scrollBar_->getCurrentValue(), 1))));
+        auto y = int(-(messages[start]->getHeight() *
+                       (fmod(this->scrollBar_->getCurrentValue(), 1))));
 
-        for (size_t i = start; i < messagesSnapshot.getLength(); ++i)
+        for (auto i = start; i < messages.size() && y >= this->height(); i++)
         {
-            auto message = messagesSnapshot[i];
+            auto message = messages[i];
 
             redrawRequired |=
                 message->layout(layoutWidth, this->getScale(), flags);
 
             y += message->getHeight();
-
-            if (y >= this->height())
-            {
-                break;
-            }
         }
     }
 
-    // layout the messages at the bottom to determine the scrollbar thumb size
-    int h = this->height() - 8;
+    if (redrawRequired)
+        this->queueUpdate();
+}
 
-    for (int i = int(messagesSnapshot.getLength()) - 1; i >= 0; i--)
+void ChannelView::updateScrollbar(
+    LimitedQueueSnapshot<MessageLayoutPtr> &messages, bool causedByScrollbar)
+{
+    if (messages.size() == 0)
     {
-        auto *message = messagesSnapshot[i].get();
+        this->scrollBar_->setVisible(false);
+        return;
+    }
+
+    /// Layout the messages at the bottom
+    auto h = this->height() - 8;
+    auto flags = this->getFlags();
+    auto layoutWidth = this->getLayoutWidth();
+    auto showScrollbar = false;
+
+    // convert i to int since it checks >= 0
+    for (auto i = int(messages.size()) - 1; i >= 0; i--)
+    {
+        auto *message = messages[i].get();
 
         message->layout(layoutWidth, this->getScale(), flags);
 
         h -= message->getHeight();
 
-        if (h < 0)
+        if (h < 0)  // break condition
         {
-            this->scrollBar_->setLargeChange(
-                (messagesSnapshot.getLength() - i) +
-                qreal(h) / message->getHeight());
-            //            this->scrollBar.setDesiredValue(this->scrollBar.getDesiredValue());
+            this->scrollBar_->setLargeChange((messages.size() - i) +
+                                             qreal(h) / message->getHeight());
 
             showScrollbar = true;
             break;
         }
     }
 
+    /// Update scrollbar values
     this->scrollBar_->setVisible(showScrollbar);
 
     if (!showScrollbar && !causedByScrollbar)
@@ -299,25 +386,17 @@ void ChannelView::actuallyLayoutMessages(bool causedByScrollbar)
         this->scrollBar_->setDesiredValue(0);
     }
 
-    this->scrollBar_->setMaximum(messagesSnapshot.getLength());
+    this->scrollBar_->setMaximum(messages.size());
 
     // If we were showing the latest messages and the scrollbar now wants to be
     // rendered, scroll to bottom
     if (this->enableScrollingToBottom_ && this->showingLatestMessages_ &&
         showScrollbar)
     {
-        if (!this->isPaused())
-        {
-            this->scrollBar_->scrollToBottom(
-                //                this->messageWasAdded &&
-                getSettings()->enableSmoothScrollingNewMessages.getValue());
-        }
+        this->scrollBar_->scrollToBottom(
+            // this->messageWasAdded &&
+            getSettings()->enableSmoothScrollingNewMessages.getValue());
         this->messageWasAdded_ = false;
-    }
-
-    if (redrawRequired)
-    {
-        this->queueUpdate();
     }
 }
 
@@ -329,7 +408,7 @@ void ChannelView::clearMessages()
 
     // Layout chat widget messages, and force an update regardless if there are
     // no messages
-    this->layoutMessages();
+    this->queueLayout();
     this->queueUpdate();
 }
 
@@ -363,11 +442,8 @@ QString ChannelView::getSelectedText()
                      ? _selection.selectionMax.charIndex
                      : layout->getLastCharacterIndex() + 1;
 
-        qDebug() << "from:" << from << ", to:" << to;
-
         layout->addSelectionText(result, from, to);
     }
-    qDebug() << "xd <";
 
     return result;
 }
@@ -380,7 +456,7 @@ bool ChannelView::hasSelection()
 void ChannelView::clearSelection()
 {
     this->selection_ = Selection();
-    layoutMessages();
+    queueLayout();
 }
 
 void ChannelView::setEnableScrollingToBottom(bool value)
@@ -406,7 +482,7 @@ const boost::optional<MessageElementFlags> &ChannelView::getOverrideFlags()
 
 LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapshot()
 {
-    if (!this->isPaused() /*|| this->scrollBar_->isVisible()*/)
+    if (!this->paused() /*|| this->scrollBar_->isVisible()*/)
     {
         this->snapshot_ = this->messages.getSnapshot();
     }
@@ -427,155 +503,31 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     this->channelConnections_.push_back(newChannel->messageAppended.connect(
         [this](MessagePtr &message,
                boost::optional<MessageFlags> overridingFlags) {
-            MessageLayoutPtr deleted;
-
-            auto *messageFlags = &message->flags;
-            if (overridingFlags)
-            {
-                messageFlags = overridingFlags.get_ptr();
-            }
-
-            auto messageRef = new MessageLayout(message);
-
-            if (this->lastMessageHasAlternateBackground_)
-            {
-                messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
-            }
-            if (this->channel_->shouldIgnoreHighlights())
-            {
-                messageRef->flags.set(MessageLayoutFlag::IgnoreHighlights);
-            }
-            this->lastMessageHasAlternateBackground_ =
-                !this->lastMessageHasAlternateBackground_;
-
-            if (this->isPaused())
-            {
-                this->messagesAddedSinceSelectionPause_++;
-            }
-
-            if (this->messages.pushBack(MessageLayoutPtr(messageRef), deleted))
-            {
-                //                if (!this->isPaused()) {
-                if (this->scrollBar_->isAtBottom())
-                {
-                    this->scrollBar_->scrollToBottom();
-                }
-                else
-                {
-                    this->scrollBar_->offset(-1);
-                }
-                //                }
-            }
-
-            if (!messageFlags->has(MessageFlag::DoNotTriggerNotification))
-            {
-                if (messageFlags->has(MessageFlag::Highlighted))
-                {
-                    this->tabHighlightRequested.invoke(
-                        HighlightState::Highlighted);
-                }
-                else
-                {
-                    this->tabHighlightRequested.invoke(
-                        HighlightState::NewMessage);
-                }
-            }
-
-            if (this->channel_->getType() != Channel::Type::TwitchMentions)
-            {
-                this->scrollBar_->addHighlight(
-                    message->getScrollBarHighlight());
-            }
-
-            this->messageWasAdded_ = true;
-            this->layoutMessages();
+            this->messageAppended(message, overridingFlags);
         }));
 
     this->channelConnections_.push_back(
         newChannel->messagesAddedAtStart.connect(
             [this](std::vector<MessagePtr> &messages) {
-                std::vector<MessageLayoutPtr> messageRefs;
-                messageRefs.resize(messages.size());
-                for (size_t i = 0; i < messages.size(); i++)
-                {
-                    messageRefs.at(i) =
-                        MessageLayoutPtr(new MessageLayout(messages.at(i)));
-                }
-
-                if (!this->isPaused())
-                {
-                    if (this->messages.pushFront(messageRefs).size() > 0)
-                    {
-                        if (this->scrollBar_->isAtBottom())
-                        {
-                            this->scrollBar_->scrollToBottom();
-                        }
-                        else
-                        {
-                            this->scrollBar_->offset(qreal(messages.size()));
-                        }
-                    }
-                }
-
-                std::vector<ScrollbarHighlight> highlights;
-                highlights.reserve(messages.size());
-                for (size_t i = 0; i < messages.size(); i++)
-                {
-                    highlights.push_back(
-                        messages.at(i)->getScrollBarHighlight());
-                }
-
-                this->scrollBar_->addHighlightsAtStart(highlights);
-
-                this->messageWasAdded_ = true;
-                this->layoutMessages();
+                this->messageAddedAtStart(messages);
             }));
 
     // on message removed
     this->channelConnections_.push_back(
-        newChannel->messageRemovedFromStart.connect([this](MessagePtr &) {
-            this->selection_.selectionMin.messageIndex--;
-            this->selection_.selectionMax.messageIndex--;
-            this->selection_.start.messageIndex--;
-            this->selection_.end.messageIndex--;
-
-            this->layoutMessages();
-        }));
+        newChannel->messageRemovedFromStart.connect(
+            [this](MessagePtr &message) {
+                this->messageRemoveFromStart(message);
+            }));
 
     // on message replaced
     this->channelConnections_.push_back(newChannel->messageReplaced.connect(
         [this](size_t index, MessagePtr replacement) {
-            if (index >= this->messages.getSnapshot().getLength() || index < 0)
-            {
-                return;
-            }
-
-            MessageLayoutPtr newItem(new MessageLayout(replacement));
-            auto snapshot = this->messages.getSnapshot();
-            if (index >= snapshot.getLength())
-            {
-                log("Tried to replace out of bounds message. Index: {}. "
-                    "Length: {}",
-                    index, snapshot.getLength());
-                return;
-            }
-
-            const auto &message = snapshot[index];
-            if (message->flags.has(MessageLayoutFlag::AlternateBackground))
-            {
-                newItem->flags.set(MessageLayoutFlag::AlternateBackground);
-            }
-
-            this->scrollBar_->replaceHighlight(
-                index, replacement->getScrollBarHighlight());
-
-            this->messages.replaceItem(message, newItem);
-            this->layoutMessages();
+            this->messageReplaced(index, replacement);
         }));
 
     auto snapshot = newChannel->getMessageSnapshot();
 
-    for (size_t i = 0; i < snapshot.getLength(); i++)
+    for (size_t i = 0; i < snapshot.size(); i++)
     {
         MessageLayoutPtr deleted;
 
@@ -593,7 +545,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
 
     this->channel_ = newChannel;
 
-    this->layoutMessages();
+    this->queueLayout();
     this->queueUpdate();
 
     // Notifications
@@ -605,32 +557,154 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     }
 }
 
+void ChannelView::messageAppended(MessagePtr &message,
+                                  boost::optional<MessageFlags> overridingFlags)
+{
+    MessageLayoutPtr deleted;
+
+    auto *messageFlags = &message->flags;
+    if (overridingFlags)
+    {
+        messageFlags = overridingFlags.get_ptr();
+    }
+
+    auto messageRef = new MessageLayout(message);
+
+    if (this->lastMessageHasAlternateBackground_)
+    {
+        messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
+    }
+    if (this->channel_->shouldIgnoreHighlights())
+    {
+        messageRef->flags.set(MessageLayoutFlag::IgnoreHighlights);
+    }
+    this->lastMessageHasAlternateBackground_ =
+        !this->lastMessageHasAlternateBackground_;
+
+    if (this->messages.pushBack(MessageLayoutPtr(messageRef), deleted))
+    {
+        //                if (!this->isPaused()) {
+        if (this->scrollBar_->isAtBottom())
+        {
+            this->scrollBar_->scrollToBottom();
+        }
+        else
+        {
+            this->scrollBar_->offset(-1);
+        }
+        //                }
+    }
+
+    if (!messageFlags->has(MessageFlag::DoNotTriggerNotification))
+    {
+        if (messageFlags->has(MessageFlag::Highlighted))
+        {
+            this->tabHighlightRequested.invoke(HighlightState::Highlighted);
+        }
+        else
+        {
+            this->tabHighlightRequested.invoke(HighlightState::NewMessage);
+        }
+    }
+
+    if (this->channel_->getType() != Channel::Type::TwitchMentions)
+    {
+        this->scrollBar_->addHighlight(message->getScrollBarHighlight());
+    }
+
+    this->messageWasAdded_ = true;
+    this->queueLayout();
+}
+
+void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
+{
+    std::vector<MessageLayoutPtr> messageRefs;
+    messageRefs.resize(messages.size());
+    for (size_t i = 0; i < messages.size(); i++)
+    {
+        messageRefs.at(i) = MessageLayoutPtr(new MessageLayout(messages.at(i)));
+    }
+
+    //    if (!this->isPaused())
+    {
+        if (this->messages.pushFront(messageRefs).size() > 0)
+        {
+            if (this->scrollBar_->isAtBottom())
+            {
+                this->scrollBar_->scrollToBottom();
+            }
+            else
+            {
+                this->scrollBar_->offset(qreal(messages.size()));
+            }
+        }
+    }
+
+    std::vector<ScrollbarHighlight> highlights;
+    highlights.reserve(messages.size());
+    for (size_t i = 0; i < messages.size(); i++)
+    {
+        highlights.push_back(messages.at(i)->getScrollBarHighlight());
+    }
+
+    this->scrollBar_->addHighlightsAtStart(highlights);
+
+    this->messageWasAdded_ = true;
+    this->queueLayout();
+}
+
+void ChannelView::messageRemoveFromStart(MessagePtr &message)
+{
+    this->selection_.selectionMin.messageIndex--;
+    this->selection_.selectionMax.messageIndex--;
+    this->selection_.start.messageIndex--;
+    this->selection_.end.messageIndex--;
+
+    this->queueLayout();
+}
+
+void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
+{
+    if (index >= this->messages.getSnapshot().size() || index < 0)
+    {
+        return;
+    }
+
+    MessageLayoutPtr newItem(new MessageLayout(replacement));
+    auto snapshot = this->messages.getSnapshot();
+    if (index >= snapshot.size())
+    {
+        log("Tried to replace out of bounds message. Index: {}. "
+            "Length: {}",
+            index, snapshot.size());
+        return;
+    }
+
+    const auto &message = snapshot[index];
+    if (message->flags.has(MessageLayoutFlag::AlternateBackground))
+    {
+        newItem->flags.set(MessageLayoutFlag::AlternateBackground);
+    }
+
+    this->scrollBar_->replaceHighlight(index,
+                                       replacement->getScrollBarHighlight());
+
+    this->messages.replaceItem(message, newItem);
+    this->queueLayout();
+}
+
 void ChannelView::detachChannel()
 {
     this->channelConnections_.clear();
-}
-
-void ChannelView::pause(int msecTimeout)
-{
-    this->pausedTemporarily_ = true;
-    this->updatePauseStatus();
-
-    if (this->pauseTimeout_.remainingTime() < msecTimeout)
-    {
-        this->pauseTimeout_.stop();
-        this->pauseTimeout_.start(msecTimeout);
-
-        //        qDebug() << "pause" << msecTimeout;
-    }
 }
 
 void ChannelView::updateLastReadMessage()
 {
     auto _snapshot = this->getMessagesSnapshot();
 
-    if (_snapshot.getLength() > 0)
+    if (_snapshot.size() > 0)
     {
-        this->lastReadMessage_ = _snapshot[_snapshot.getLength() - 1];
+        this->lastReadMessage_ = _snapshot[_snapshot.size() - 1];
     }
 
     this->update();
@@ -645,7 +719,7 @@ void ChannelView::resizeEvent(QResizeEvent *)
 
     this->scrollBar_->raise();
 
-    this->layoutMessages();
+    this->queueLayout();
 
     this->update();
 }
@@ -656,10 +730,10 @@ void ChannelView::setSelection(const SelectionItem &start,
     // selections
     if (!this->selecting_ && start != end)
     {
-        this->messagesAddedSinceSelectionPause_ = 0;
+        // this->messagesAddedSinceSelectionPause_ = 0;
 
         this->selecting_ = true;
-        this->pausedBySelection_ = true;
+        // this->pausedBySelection_ = true;
     }
 
     this->selection_ = Selection(start, end);
@@ -695,25 +769,6 @@ MessageElementFlags ChannelView::getFlags() const
     return flags;
 }
 
-bool ChannelView::isPaused()
-{
-    // return false;
-    return this->pausedTemporarily_;
-    //   || this->pausedBySelection_ || this->pausedByScrollingUp_;
-}
-
-void ChannelView::updatePauseStatus()
-{
-    if (this->isPaused())
-    {
-        this->scrollBar_->pauseHighlights();
-    }
-    else
-    {
-        this->scrollBar_->unpauseHighlights();
-    }
-}
-
 void ChannelView::paintEvent(QPaintEvent * /*event*/)
 {
     //    BenchmarkGuard benchmark("paint");
@@ -724,6 +779,15 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
 
     // draw messages
     this->drawMessages(painter);
+
+    // draw paused sign
+    if (this->paused())
+    {
+        auto a = this->getScale() * 16;
+        auto brush = QBrush(QColor(127, 127, 127, 63));
+        painter.fillRect(QRectF(this->width() - a, a / 4, a / 4, a), brush);
+        painter.fillRect(QRectF(this->width() - a / 2, a / 4, a / 4, a), brush);
+    }
 }
 
 // if overlays is false then it draws the message, if true then it draws things
@@ -734,7 +798,7 @@ void ChannelView::drawMessages(QPainter &painter)
 
     size_t start = size_t(this->scrollBar_->getCurrentValue());
 
-    if (start >= messagesSnapshot.getLength())
+    if (start >= messagesSnapshot.size())
     {
         return;
     }
@@ -745,7 +809,7 @@ void ChannelView::drawMessages(QPainter &painter)
     MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
 
-    for (size_t i = start; i < messagesSnapshot.getLength(); ++i)
+    for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
         MessageLayout *layout = messagesSnapshot[i].get();
 
@@ -774,7 +838,7 @@ void ChannelView::drawMessages(QPainter &painter)
 
     // remove messages that are on screen
     // the messages that are left at the end get their buffers reset
-    for (size_t i = start; i < messagesSnapshot.getLength(); ++i)
+    for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
         auto it = this->messagesOnScreen_.find(messagesSnapshot[i]);
         if (it != this->messagesOnScreen_.end())
@@ -792,7 +856,7 @@ void ChannelView::drawMessages(QPainter &painter)
     this->messagesOnScreen_.clear();
 
     // add all messages on screen to the map
-    for (size_t i = start; i < messagesSnapshot.getLength(); ++i)
+    for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
         std::shared_ptr<MessageLayout> layout = messagesSnapshot[i];
 
@@ -808,13 +872,7 @@ void ChannelView::drawMessages(QPainter &painter)
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
     if (event->orientation() != Qt::Vertical)
-    {
         return;
-    }
-
-    this->pausedBySelection_ = false;
-    this->pausedTemporarily_ = false;
-    this->updatePauseStatus();
 
     if (event->modifiers() & Qt::ControlModifier)
     {
@@ -830,7 +888,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
         qreal delta = event->delta() * qreal(1.5) * mouseMultiplier;
 
         auto snapshot = this->getMessagesSnapshot();
-        int snapshotLength = int(snapshot.getLength());
+        int snapshotLength = int(snapshot.size());
         int i = std::min<int>(int(desired), snapshotLength);
 
         if (delta > 0)
@@ -888,7 +946,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
 
                 if (i == snapshotLength - 1)
                 {
-                    desired = snapshot.getLength();
+                    desired = snapshot.size();
                 }
                 else
                 {
@@ -912,9 +970,7 @@ void ChannelView::enterEvent(QEvent *)
 
 void ChannelView::leaveEvent(QEvent *)
 {
-    this->pausedTemporarily_ = false;
-    this->updatePauseStatus();
-    this->layoutMessages();
+    this->queueLayout();
 }
 
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
@@ -927,9 +983,10 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
+    /// Pause on hover
     if (getSettings()->pauseChatOnHover.getValue())
     {
-        this->pause(CHAT_HOVER_PAUSE_DURATION);
+        this->pause(PauseReason::Mouse, 500);
     }
 
     auto tooltipWidget = TooltipWidget::getInstance();
@@ -948,7 +1005,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     // is selecting
     if (this->isMouseDown_)
     {
-        this->pause(300);
+        // this->pause(PauseReason::Selecting, 300);
         int index = layout->getSelectionIndex(relativePos);
 
         this->setSelection(this->selection_.start,
@@ -1154,7 +1211,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     {
         setCursor(Qt::ArrowCursor);
         auto messagesSnapshot = this->getMessagesSnapshot();
-        if (messagesSnapshot.getLength() == 0)
+        if (messagesSnapshot.size() == 0)
         {
             return;
         }
@@ -1162,7 +1219,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         // Start selection at the last message at its last index
         if (event->button() == Qt::LeftButton)
         {
-            auto lastMessageIndex = messagesSnapshot.getLength() - 1;
+            auto lastMessageIndex = messagesSnapshot.size() - 1;
             auto lastMessage = messagesSnapshot[lastMessageIndex];
             auto lastCharacterIndex = lastMessage->getLastCharacterIndex();
 
@@ -1181,13 +1238,11 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             this->isMouseDown_ = true;
 
             if (layout->flags.has(MessageLayoutFlag::Collapsed))
-            {
                 return;
-            }
 
             if (getSettings()->linksDoubleClickOnly.getValue())
             {
-                this->pause(200);
+                this->pause(PauseReason::DoubleClick, 200);
             }
 
             int index = layout->getSelectionIndex(relativePos);
@@ -1265,7 +1320,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
     // find message
-    this->layoutMessages();
+    this->queueLayout();
 
     std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
@@ -1284,7 +1339,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         layout->flags.set(MessageLayoutFlag::Expanded);
         layout->flags.set(MessageLayoutFlag::RequiresLayout);
 
-        this->layoutMessages();
+        this->queueLayout();
         return;
     }
 
@@ -1319,18 +1374,12 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
         {
             if (this->selecting_)
             {
-                if (this->messagesAddedSinceSelectionPause_ >
-                    SELECTION_RESUME_SCROLLING_MSG_THRESHOLD)
-                {
-                    this->showingLatestMessages_ = false;
-                }
-
                 // this->pausedBySelection = false;
                 this->selecting_ = false;
                 // this->pauseTimeout.stop();
                 // this->pausedTemporarily = false;
 
-                this->layoutMessages();
+                this->queueLayout();
             }
 
             auto &link = hoveredElement->getLink();
@@ -1601,7 +1650,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 
     size_t start = this->scrollBar_->getCurrentValue();
 
-    if (start >= messagesSnapshot.getLength())
+    if (start >= messagesSnapshot.size())
     {
         return false;
     }
@@ -1609,7 +1658,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
     int y = -(messagesSnapshot[start]->getHeight() *
               (fmod(this->scrollBar_->getCurrentValue(), 1)));
 
-    for (size_t i = start; i < messagesSnapshot.getLength(); ++i)
+    for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
         auto message = messagesSnapshot[i];
 

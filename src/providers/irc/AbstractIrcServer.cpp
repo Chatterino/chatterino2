@@ -244,13 +244,13 @@ void AbstractIrcServer::onConnected()
 
         LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
 
-        bool replaceMessage = snapshot.getLength() > 0 &&
-                              snapshot[snapshot.getLength() - 1]->flags.has(
+        bool replaceMessage = snapshot.size() > 0 &&
+                              snapshot[snapshot.size() - 1]->flags.has(
                                   MessageFlag::DisconnectedMessage);
 
         if (replaceMessage)
         {
-            chan->replaceMessage(snapshot[snapshot.getLength() - 1],
+            chan->replaceMessage(snapshot[snapshot.size() - 1],
                                  reconnected);
             continue;
         }

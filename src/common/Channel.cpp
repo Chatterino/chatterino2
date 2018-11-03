@@ -88,7 +88,7 @@ void Channel::addMessage(MessagePtr message,
 void Channel::addOrReplaceTimeout(MessagePtr message)
 {
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
-    int snapshotLength = snapshot.getLength();
+    int snapshotLength = snapshot.size();
 
     int end = std::max(0, snapshotLength - 20);
 
@@ -169,7 +169,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
 void Channel::disableAllMessages()
 {
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
-    int snapshotLength = snapshot.getLength();
+    int snapshotLength = snapshot.size();
     for (int i = 0; i < snapshotLength; i++)
     {
         auto &message = snapshot[i];
