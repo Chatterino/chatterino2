@@ -46,7 +46,8 @@ public:
 
     bool isLoggedIn() const;
 
-    QStringSetting currentUsername{"/accounts/current", ""};
+    pajlada::Settings::Setting<QString> currentUsername{"/accounts/current",
+                                                        ""};
     pajlada::Signals::NoArgSignal currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
 
