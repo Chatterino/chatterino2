@@ -130,8 +130,8 @@ public:
 
     pajlada::Signals::NoArgSignal updated;
 
-    pajlada::Settings::Setting<QString> themeName;
-    pajlada::Settings::Setting<double> themeHue;
+    QStringSetting themeName{"/appearance/theme/name", "Dark"};
+    DoubleSetting themeHue{"/appearance/theme/hue", 0.0};
 
 private:
     void actuallyUpdate(double hue, double multiplier);

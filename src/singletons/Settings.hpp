@@ -12,7 +12,7 @@
 namespace chatterino {
 
 void _actuallyRegisterSetting(
-    std::weak_ptr<pajlada::Settings::ISettingData> setting);
+    std::weak_ptr<pajlada::Settings::SettingData> setting);
 
 class Settings
 {

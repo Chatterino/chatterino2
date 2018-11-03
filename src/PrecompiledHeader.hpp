@@ -138,7 +138,7 @@
 #    include <map>
 #    include <memory>
 #    include <mutex>
-#    include <pajlada/settings/serialize.hpp>
+#    include <pajlada/serialize.hpp>
 #    include <pajlada/settings/setting.hpp>
 #    include <pajlada/settings/settinglistener.hpp>
 #    include <pajlada/signals/connection.hpp>

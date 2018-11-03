@@ -156,7 +156,7 @@ private:
     void initLayout(SettingsLayout &layout);
     void initExtra();
 
-    std::string getFont(const DropdownArgs &args) const;
+    QString getFont(const DropdownArgs &args) const;
 
     DescriptionLabel *cachePath{};
 };

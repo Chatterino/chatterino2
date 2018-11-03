@@ -1,5 +1,5 @@
 # settings
-DEFINES += PAJLADA_SETTINGS_NO_BOOST
+DEFINES += PAJLADA_SETTINGS_BOOST_FILESYSTEM
 
 SOURCES += \
            $$PWD/../lib/settings/src/settings/settingdata.cpp \

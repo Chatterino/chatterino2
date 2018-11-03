@@ -5,7 +5,7 @@
 
 #include <QRegularExpression>
 #include <QString>
-#include <pajlada/settings/serialize.hpp>
+#include <pajlada/serialize.hpp>
 
 #include <memory>
 
@@ -68,42 +68,38 @@ private:
 }  // namespace chatterino
 
 namespace pajlada {
-namespace Settings {
 
-    template <>
-    struct Serialize<chatterino::HighlightBlacklistUser> {
-        static rapidjson::Value get(
-            const chatterino::HighlightBlacklistUser &value,
-            rapidjson::Document::AllocatorType &a)
+template <>
+struct Serialize<chatterino::HighlightBlacklistUser> {
+    static rapidjson::Value get(const chatterino::HighlightBlacklistUser &value,
+                                rapidjson::Document::AllocatorType &a)
+    {
+        rapidjson::Value ret(rapidjson::kObjectType);
+
+        chatterino::rj::set(ret, "pattern", value.getPattern(), a);
+        chatterino::rj::set(ret, "regex", value.isRegex(), a);
+
+        return ret;
+    }
+};
+
+template <>
+struct Deserialize<chatterino::HighlightBlacklistUser> {
+    static chatterino::HighlightBlacklistUser get(const rapidjson::Value &value)
+    {
+        QString pattern;
+        bool isRegex = false;
+
+        if (!value.IsObject())
         {
-            rapidjson::Value ret(rapidjson::kObjectType);
-
-            AddMember(ret, "pattern", value.getPattern(), a);
-            AddMember(ret, "regex", value.isRegex(), a);
-
-            return ret;
-        }
-    };
-
-    template <>
-    struct Deserialize<chatterino::HighlightBlacklistUser> {
-        static chatterino::HighlightBlacklistUser get(
-            const rapidjson::Value &value)
-        {
-            QString pattern;
-            bool isRegex = false;
-
-            if (!value.IsObject())
-            {
-                return chatterino::HighlightBlacklistUser(pattern, isRegex);
-            }
-
-            chatterino::rj::getSafe(value, "pattern", pattern);
-            chatterino::rj::getSafe(value, "regex", isRegex);
-
             return chatterino::HighlightBlacklistUser(pattern, isRegex);
         }
-    };
 
-}  // namespace Settings
+        chatterino::rj::getSafe(value, "pattern", pattern);
+        chatterino::rj::getSafe(value, "regex", isRegex);
+
+        return chatterino::HighlightBlacklistUser(pattern, isRegex);
+    }
+};
+
 }  // namespace pajlada

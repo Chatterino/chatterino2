@@ -49,7 +49,7 @@ public:
     void moveAnimated(QPoint pos, bool animated = true);
 
     QRect getDesiredRect() const;
-    void hideTabXChanged(bool);
+    void hideTabXChanged();
 
 protected:
     virtual void themeChangedEvent() override;

@@ -32,37 +32,43 @@ Fonts::Fonts()
 
 void Fonts::initialize(Settings &, Paths &)
 {
-    this->chatFontFamily.connect([this](const std::string &, auto) {
-        assertInGuiThread();
+    this->chatFontFamily.connect(
+        [this]() {
+            assertInGuiThread();
 
-        for (auto &map : this->fontsByType_)
-        {
-            map.clear();
-        }
-        this->fontChanged.invoke();
-    });
+            for (auto &map : this->fontsByType_)
+            {
+                map.clear();
+            }
+            this->fontChanged.invoke();
+        },
+        false);
 
-    this->chatFontSize.connect([this](const int &, auto) {
-        assertInGuiThread();
+    this->chatFontSize.connect(
+        [this]() {
+            assertInGuiThread();
 
-        for (auto &map : this->fontsByType_)
-        {
-            map.clear();
-        }
-        this->fontChanged.invoke();
-    });
+            for (auto &map : this->fontsByType_)
+            {
+                map.clear();
+            }
+            this->fontChanged.invoke();
+        },
+        false);
 
-    getSettings()->boldScale.connect([this](const int &, auto) {
-        assertInGuiThread();
+    getSettings()->boldScale.connect(
+        [this]() {
+            assertInGuiThread();
 
-        getApp()->windows->incGeneration();
+            getApp()->windows->incGeneration();
 
-        for (auto &map : this->fontsByType_)
-        {
-            map.clear();
-        }
-        this->fontChanged.invoke();
-    });
+            for (auto &map : this->fontsByType_)
+            {
+                map.clear();
+            }
+            this->fontChanged.invoke();
+        },
+        false);
 }
 
 QFont Fonts::getFont(FontStyle type, float scale)
@@ -118,7 +124,7 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
             1, false, QFont::Weight(getSettings()->boldScale.getValue())};
         auto data = sizeScale[type];
         return FontData(
-            QFont(QString::fromStdString(this->chatFontFamily.getValue()),
+            QFont(this->chatFontFamily.getValue(),
                   int(this->chatFontSize.getValue() * data.scale * scale),
                   data.weight, data.italic));
     }

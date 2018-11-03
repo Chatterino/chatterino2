@@ -1,14 +1,15 @@
 #pragma once
 
+#include "common/ChatterinoSetting.hpp"
 #include "common/Singleton.hpp"
 
 #include <QFont>
 #include <QFontDatabase>
 #include <QFontMetrics>
-#include <array>
 #include <boost/noncopyable.hpp>
-#include <pajlada/settings/setting.hpp>
 #include <pajlada/signals/signal.hpp>
+
+#include <array>
 #include <unordered_map>
 
 namespace chatterino {
@@ -49,8 +50,8 @@ public:
     QFont getFont(FontStyle type, float scale);
     QFontMetrics getFontMetrics(FontStyle type, float scale);
 
-    pajlada::Settings::Setting<std::string> chatFontFamily;
-    pajlada::Settings::Setting<int> chatFontSize;
+    QStringSetting chatFontFamily;
+    IntSetting chatFontSize;
 
     pajlada::Signals::NoArgSignal fontChanged;
 

@@ -56,9 +56,9 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
 
     this->init();
 
-    this->connections_.managedConnect(
-        getSettings()->uiScale.getValueChangedSignal(),
-        [this](auto, auto) { postToThread([this] { this->updateScale(); }); });
+    getSettings()->uiScale.connect(
+        [this]() { postToThread([this] { this->updateScale(); }); },
+        this->connections_);
 
     this->updateScale();
 
@@ -133,8 +133,8 @@ void BaseWindow::init()
                                              ? Qt::WindowActive
                                              : Qt::WindowMaximized);
                                  });
-                QObject::connect(_exitButton, &TitleBarButton::leftClicked, this,
-                                 [this] { this->close(); });
+                QObject::connect(_exitButton, &TitleBarButton::leftClicked,
+                                 this, [this] { this->close(); });
 
                 this->ui_.minButton = _minButton;
                 this->ui_.maxButton = _maxButton;

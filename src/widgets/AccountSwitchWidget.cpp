@@ -50,8 +50,7 @@ AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
             }
             else
             {
-                app->accounts->twitch.currentUsername =
-                    newUsername.toStdString();
+                app->accounts->twitch.currentUsername = newUsername;
             }
         }
     });

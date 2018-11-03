@@ -9,13 +9,15 @@ message(----)
 QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util
-CONFIG            += c++14
+CONFIG            += c++17
 INCLUDEPATH       += src/
 TARGET             = chatterino
 TEMPLATE           = app
 DEFINES           += QT_DEPRECATED_WARNINGS
 PRECOMPILED_HEADER = src/PrecompiledHeader.hpp
 CONFIG            += precompile_header
+
+QMAKE_CXXFLAGS += -std=c++17
 
 debug {
     DEFINES += QT_DEBUG
@@ -43,6 +45,7 @@ macx {
 
 # Submodules
 include(dependencies/rapidjson.pri)
+include(dependencies/serialize.pri)
 include(dependencies/settings.pri)
 include(dependencies/signals.pri)
 include(dependencies/humanize.pri)

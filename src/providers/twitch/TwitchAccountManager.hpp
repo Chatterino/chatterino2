@@ -1,10 +1,9 @@
 #pragma once
 
+#include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "util/SharedPtrElementLess.hpp"
-
-#include <pajlada/settings/setting.hpp>
 
 #include <mutex>
 #include <vector>
@@ -47,8 +46,7 @@ public:
 
     bool isLoggedIn() const;
 
-    pajlada::Settings::Setting<std::string> currentUsername = {
-        "/accounts/current", ""};
+    QStringSetting currentUsername{"/accounts/current", ""};
     pajlada::Signals::NoArgSignal currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
 

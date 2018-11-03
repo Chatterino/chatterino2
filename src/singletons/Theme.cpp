@@ -39,8 +39,6 @@ namespace detail {
 }  // namespace detail
 
 Theme::Theme()
-    : themeName("/appearance/theme/name", "Dark")
-    , themeHue("/appearance/theme/hue", 0.0)
 {
     this->update();
 

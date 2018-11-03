@@ -79,25 +79,25 @@ void TwitchAccountManager::reloadUsers()
             continue;
         }
 
-        std::string username = pajlada::Settings::Setting<std::string>::get(
+        auto username = pajlada::Settings::Setting<QString>::get(
             "/accounts/" + uid + "/username");
-        std::string userID = pajlada::Settings::Setting<std::string>::get(
-            "/accounts/" + uid + "/userID");
-        std::string clientID = pajlada::Settings::Setting<std::string>::get(
+        auto userID = pajlada::Settings::Setting<QString>::get("/accounts/" +
+                                                               uid + "/userID");
+        auto clientID = pajlada::Settings::Setting<QString>::get(
             "/accounts/" + uid + "/clientID");
-        std::string oauthToken = pajlada::Settings::Setting<std::string>::get(
+        auto oauthToken = pajlada::Settings::Setting<QString>::get(
             "/accounts/" + uid + "/oauthToken");
 
-        if (username.empty() || userID.empty() || clientID.empty() ||
-            oauthToken.empty())
+        if (username.isEmpty() || userID.isEmpty() || clientID.isEmpty() ||
+            oauthToken.isEmpty())
         {
             continue;
         }
 
-        userData.username = qS(username).trimmed();
-        userData.userID = qS(userID).trimmed();
-        userData.clientID = qS(clientID).trimmed();
-        userData.oauthToken = qS(oauthToken).trimmed();
+        userData.username = username.trimmed();
+        userData.userID = userID.trimmed();
+        userData.clientID = clientID.trimmed();
+        userData.oauthToken = oauthToken.trimmed();
 
         switch (this->addUser(userData))
         {
@@ -138,8 +138,7 @@ void TwitchAccountManager::load()
 {
     this->reloadUsers();
 
-    this->currentUsername.connect([this](const auto &newValue, auto) {
-        QString newUsername(QString::fromStdString(newValue));
+    this->currentUsername.connect([this](const QString &newUsername) {
         auto user = this->findUserByUsername(newUsername);
         if (user)
         {
@@ -175,14 +174,14 @@ bool TwitchAccountManager::removeUser(TwitchAccount *account)
 {
     const auto &accs = this->accounts.getVector();
 
-    std::string userID(account->getUserId().toStdString());
-    if (!userID.empty())
+    auto userID(account->getUserId());
+    if (!userID.isEmpty())
     {
-        pajlada::Settings::SettingManager::removeSetting("/accounts/uid" +
-                                                         userID);
+        pajlada::Settings::SettingManager::removeSetting(
+            fS("/accounts/uid{}", userID));
     }
 
-    if (account->getUserName() == qS(this->currentUsername.getValue()))
+    if (account->getUserName() == this->currentUsername)
     {
         // The user that was removed is the current user, log into the anonymous
         // user

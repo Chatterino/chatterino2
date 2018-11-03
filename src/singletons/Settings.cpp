@@ -8,12 +8,12 @@
 
 namespace chatterino {
 
-std::vector<std::weak_ptr<pajlada::Settings::ISettingData>> _settings;
+std::vector<std::weak_ptr<pajlada::Settings::SettingData>> _settings;
 
 Settings *Settings::instance = nullptr;
 
 void _actuallyRegisterSetting(
-    std::weak_ptr<pajlada::Settings::ISettingData> setting)
+    std::weak_ptr<pajlada::Settings::SettingData> setting)
 {
     _settings.push_back(setting);
 }
@@ -24,7 +24,15 @@ Settings::Settings(Paths &paths)
 
     QString settingsPath = paths.settingsDirectory + "/settings.json";
 
-    pajlada::Settings::SettingManager::gLoad(qPrintable(settingsPath));
+    // get global instance of the settings library
+    auto settingsInstance = pajlada::Settings::SettingManager::getInstance();
+
+    settingsInstance->load(qPrintable(settingsPath));
+
+    settingsInstance->setBackupEnabled(true);
+    settingsInstance->setBackupSlots(9);
+    settingsInstance->saveMethod =
+        pajlada::Settings::SettingManager::SaveMethod::SaveOnExit;
 }
 
 Settings &Settings::getInstance()
@@ -46,13 +54,20 @@ void Settings::saveSnapshot()
         }
 
         rapidjson::Value key(setting->getPath().c_str(), a);
-        rapidjson::Value val = setting->marshalInto(*d);
+        auto curVal = setting->unmarshalJSON();
+        if (curVal == nullptr)
+        {
+            continue;
+        }
+
+        rapidjson::Value val;
+        val.CopyFrom(*curVal, a);
         d->AddMember(key.Move(), val.Move(), a);
     }
 
-    this->snapshot_.reset(d);
+    // log("Snapshot state: {}", rj::stringify(*d));
 
-    log("hehe: {}", pajlada::Settings::SettingManager::stringify(*d));
+    this->snapshot_.reset(d);
 }
 
 void Settings::restoreSnapshot()
@@ -62,26 +77,29 @@ void Settings::restoreSnapshot()
         return;
     }
 
-    const auto &snapshotObject = this->snapshot_->GetObject();
+    const auto &snapshot = *(this->snapshot_.get());
+
+    if (!snapshot.IsObject())
+    {
+        return;
+    }
 
     for (const auto &weakSetting : _settings)
     {
         auto setting = weakSetting.lock();
         if (!setting)
         {
-            log("Error stage 1 of loading");
             continue;
         }
 
         const char *path = setting->getPath().c_str();
 
-        if (!snapshotObject.HasMember(path))
+        if (!snapshot.HasMember(path))
         {
-            log("Error stage 2 of loading");
             continue;
         }
 
-        setting->unmarshalValue(snapshotObject[path]);
+        setting->marshalJSON(snapshot[path]);
     }
 }
 

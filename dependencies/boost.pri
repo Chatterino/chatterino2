@@ -17,5 +17,5 @@ win32 {
 
     LIBS += -L$$BOOST_DIRECTORY\\$$BOOST_LIB_SUFFIX
 } else {
-    LIBS += -lboost_system
+    LIBS += -lboost_system -lboost_filesystem
 }

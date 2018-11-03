@@ -36,8 +36,8 @@ NotebookTab::NotebookTab(Notebook *notebook)
     this->positionChangedAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::InCubic));
 
-    getSettings()->showTabCloseButton.connect(
-        boost::bind(&NotebookTab::hideTabXChanged, this, _1),
+    getSettings()->showTabCloseButton.connectSimple(
+        boost::bind(&NotebookTab::hideTabXChanged, this),
         this->managedConnections_);
     getSettings()->showTabLive.connect([this](auto, auto) { this->update(); },
                                        this->managedConnections_);
@@ -230,7 +230,7 @@ QRect NotebookTab::getDesiredRect() const
     return QRect(this->positionAnimationDesiredPoint_, size());
 }
 
-void NotebookTab::hideTabXChanged(bool)
+void NotebookTab::hideTabXChanged()
 {
     this->updateSize();
     this->update();

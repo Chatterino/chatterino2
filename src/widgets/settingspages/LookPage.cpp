@@ -532,17 +532,15 @@ QLayout *LookPage::createFontChanger()
     QLabel *label = new QLabel();
     layout->addWidget(label);
 
-    auto updateFontFamilyLabel = [=](auto) {
-        label->setText(
-            "Font (" +
-            QString::fromStdString(app->fonts->chatFontFamily.getValue()) +
-            ", " + QString::number(app->fonts->chatFontSize) + "pt)");
+    auto updateFontFamilyLabel = [=]() {
+        label->setText("Font (" + app->fonts->chatFontFamily.getValue() + ", " +
+                       QString::number(app->fonts->chatFontSize) + "pt)");
     };
 
-    app->fonts->chatFontFamily.connectSimple(updateFontFamilyLabel,
-                                             this->managedConnections_);
-    app->fonts->chatFontSize.connectSimple(updateFontFamilyLabel,
-                                           this->managedConnections_);
+    app->fonts->chatFontFamily.connect(updateFontFamilyLabel,
+                                       this->managedConnections_);
+    app->fonts->chatFontSize.connect(updateFontFamilyLabel,
+                                     this->managedConnections_);
 
     // BUTTON
     QPushButton *button = new QPushButton("Select");
@@ -554,11 +552,11 @@ QLayout *LookPage::createFontChanger()
 
         dialog.setWindowFlag(Qt::WindowStaysOnTopHint);
 
-        dialog.connect(
-            &dialog, &QFontDialog::fontSelected, [=](const QFont &font) {
-                app->fonts->chatFontFamily = font.family().toStdString();
-                app->fonts->chatFontSize = font.pointSize();
-            });
+        dialog.connect(&dialog, &QFontDialog::fontSelected,
+                       [=](const QFont &font) {
+                           app->fonts->chatFontFamily = font.family();
+                           app->fonts->chatFontSize = font.pointSize();
+                       });
 
         dialog.show();
         dialog.exec();

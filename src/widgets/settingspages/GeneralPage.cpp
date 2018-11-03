@@ -148,10 +148,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addTitle("Appearance");
     layout.addDropdown("Theme", {"White", "Light", "Dark", "Black"},
                        getApp()->themes->themeName);
-    layout.addDropdown<std::string>(
+    layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
-        getApp()->fonts->chatFontFamily,
-        [](auto val) { return QString::fromStdString(val); },
+        getApp()->fonts->chatFontFamily, [](auto val) { return val; },
         [this](auto args) { return this->getFont(args); });
     layout.addDropdown<int>(
         "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
@@ -220,7 +219,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Animate only when focused", s.animationsWhenFocused);
     layout.addDropdown("Emoji set",
                        {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
-                        "Apple", "Google", "Messenger"});
+                        "Apple", "Google", "Messenger"},
+                       s.emojiSet);
 
     layout.addTitle("Badges");
     layout.addCheckbox("Show authority badges (staff, admin, turbo, etc)",
@@ -311,7 +311,7 @@ void GeneralPage::initExtra()
     }
 }
 
-std::string GeneralPage::getFont(const DropdownArgs &args) const
+QString GeneralPage::getFont(const DropdownArgs &args) const
 {
     if (args.combobox->currentIndex() == args.combobox->count() - 1)
     {
@@ -325,11 +325,11 @@ std::string GeneralPage::getFont(const DropdownArgs &args) const
         auto font = dialog.getFont(&ok);
 
         if (ok)
-            return font.family().toStdString();
+            return font.family();
         else
-            return args.combobox->itemText(0).toStdString();
+            return args.combobox->itemText(0);
     }
-    return args.value.toStdString();
+    return args.value;
 }
 
 }  // namespace chatterino

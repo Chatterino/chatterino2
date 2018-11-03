@@ -4,7 +4,7 @@
 
 namespace chatterino {
 
-void _registerSetting(std::weak_ptr<pajlada::Settings::ISettingData> setting)
+void _registerSetting(std::weak_ptr<pajlada::Settings::SettingData> setting)
 {
     _actuallyRegisterSetting(setting);
 }

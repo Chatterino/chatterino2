@@ -24,3 +24,6 @@
 	path = lib/WinToast
 	url = https://github.com/mohabouje/WinToast.git
 	
+[submodule "lib/serialize"]
+	path = lib/serialize
+	url = https://github.com/pajlada/serialize.git

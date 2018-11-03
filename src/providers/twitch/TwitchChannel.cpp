@@ -470,8 +470,6 @@ void TwitchChannel::refreshLiveStatus()
         return;
     }
 
-    log("[TwitchChannel:{}] Refreshing live status", this->getName());
-
     QString url("https://api.twitch.tv/kraken/streams/" + roomID);
 
     //    auto request = makeGetStreamRequest(roomID, QThread::currentThread());
