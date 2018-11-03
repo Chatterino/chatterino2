@@ -96,7 +96,9 @@ UserInfoPopup::UserInfoPopup()
 
         QObject::connect(viewLogs.getElement(), &Button::leftClicked, [this] {
             auto logs = new LogsPopup();
-            logs->setInfo(this->channel_, this->userName_);
+            logs->setChannel(this->channel_);
+            logs->setTargetUserName(this->userName_);
+            logs->getLogs();
             logs->setAttribute(Qt::WA_DeleteOnClose);
             logs->show();
         });

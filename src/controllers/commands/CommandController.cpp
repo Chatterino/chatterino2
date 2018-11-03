@@ -378,35 +378,34 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             auto app = getApp();
 
             auto logs = new LogsPopup();
-            QString target;
+            QString target = words.at(1);
 
-            if (words.at(1).at(0) == "@")
+            if (target.at(0) == '@')
             {
-                target = words.at(1).mid(1);
+                target = target.mid(1);
             }
-            else
-            {
-                target = words.at(1);
-            }
+
+            logs->setTargetUserName(target);
+
+            std::shared_ptr<Channel> logsChannel = channel;
 
             if (words.size() == 3)
             {
                 QString channelName = words.at(2);
-                if (words.at(2).at(0) == "#")
+                if (words.at(2).at(0) == '#')
                 {
-                    channelName = words.at(2).mid(1);
+                    channelName = channelName.mid(1);
                 }
-                auto logsChannel =
+
+                logs->setChannelName(channelName);
+
+                logsChannel =
                     app->twitch.server->getChannelOrEmpty(channelName);
-                if (logsChannel != nullptr)
-                {
-                    logs->setInfo(logsChannel, target);
-                }
             }
-            else
-            {
-                logs->setInfo(channel, target);
-            }
+
+            logs->setChannel(logsChannel);
+
+            logs->getLogs();
             logs->setAttribute(Qt::WA_DeleteOnClose);
             logs->show();
             return "";

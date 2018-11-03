@@ -3,6 +3,7 @@
 #include "IrcMessage"
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
+#include "debug/Log.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -33,29 +34,47 @@ void LogsPopup::initLayout()
     this->setLayout(layout);
 }
 
-void LogsPopup::setInfo(ChannelPtr channel, QString userName)
+void LogsPopup::setChannelName(QString channelName)
+{
+    this->channelName_ = channelName;
+}
+
+void LogsPopup::setChannel(std::shared_ptr<Channel> channel)
 {
     this->channel_ = channel;
+}
+
+void LogsPopup::setTargetUserName(QString userName)
+{
     this->userName_ = userName;
+}
 
-    if (auto twitchChannel =
-        dynamic_cast<TwitchChannel *>(this->channel_.get()))
+void LogsPopup::getLogs()
+{
+    if (this->channel_ && !this->channel_->isEmpty())
     {
-        this->channelName_ = twitchChannel->getName();
+        if (auto twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->channel_.get()))
+        {
+            this->channelName_ = twitchChannel->getName();
+            this->getLogviewerLogs(twitchChannel->roomId());
+
+            this->setWindowTitle(this->userName_ + "'s logs in #" +
+                                 this->channelName_);
+            return;
+        }
     }
-    else
+
+    if (!this->channelName_.isEmpty())
     {
+        PartialTwitchUser::byName(this->channelName_)
+            .getId(
+                [=](const QString &roomID) { this->getLogviewerLogs(roomID); },
+                this);
         return;
-    }  
+    }
 
-    // Get channel ID.
-    PartialTwitchUser::byName(this->channelName_)
-        .getId([=](const QString &roomID) {
-            this->getLogviewerLogs(roomID); 
-        }, this);
-
-    this->setWindowTitle(this->userName_ + "'s logs in #" +
-                         this->channelName_);
+    log("Unable to get logs, no channel name or something specified");
 }
 
 void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
@@ -68,7 +87,6 @@ void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
 
 void LogsPopup::getLogviewerLogs(const QString &roomID)
 {
-
     auto url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
                    .arg(this->channelName_, this->userName_);
 
@@ -115,7 +133,6 @@ void LogsPopup::getLogviewerLogs(const QString &roomID)
 
 void LogsPopup::getOverrustleLogs()
 {
-
     QString url =
         QString("https://overrustlelogs.net/api/v1/stalk/%1/%2.json?limit=500")
             .arg(this->channelName_, this->userName_);
@@ -130,11 +147,11 @@ void LogsPopup::getOverrustleLogs()
         box->show();
         box->raise();
 
-        static QSet<int> closeButtons {
+        static QSet<int> closeButtons{
             QMessageBox::Ok,
             QMessageBox::Close,
         };
-        if (closeButtons.contains(box->exec())) 
+        if (closeButtons.contains(box->exec()))
         {
             this->close();
         }

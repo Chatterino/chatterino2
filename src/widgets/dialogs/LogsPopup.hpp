@@ -18,7 +18,11 @@ class LogsPopup : public BaseWindow
 public:
     LogsPopup();
 
-    void setInfo(std::shared_ptr<Channel> channel, QString userName);
+    void setChannelName(QString channelName);
+    void setChannel(std::shared_ptr<Channel> channel);
+    void setTargetUserName(QString userName);
+
+    void getLogs();
 
 private:
     ChannelView *channelView_ = nullptr;
