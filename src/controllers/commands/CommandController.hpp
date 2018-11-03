@@ -37,6 +37,7 @@ private:
     void load(Paths &paths);
 
     QMap<QString, Command> commandsMap_;
+    int maxSpaces_ = 0;
 
     std::mutex mutex_;
 

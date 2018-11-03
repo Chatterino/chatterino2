@@ -47,6 +47,19 @@ void CommandController::initialize(Settings &, Paths &paths)
                 break;
             }
         }
+
+        int maxSpaces = 0;
+
+        for (const Command &cmd : this->items_.getVector())
+        {
+            auto localMaxSpaces = cmd.name.count(' ');
+            if (localMaxSpaces > maxSpaces)
+            {
+                maxSpaces = localMaxSpaces;
+            }
+        }
+
+        this->maxSpaces_ = maxSpaces;
     };
     this->items_.itemInserted.connect(addFirstMatchToMap);
     this->items_.itemRemoved.connect(addFirstMatchToMap);
@@ -96,330 +109,330 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
     QStringList words = text.split(' ', QString::SkipEmptyParts);
-    Command command;
 
+    std::lock_guard<std::mutex> lock(this->mutex_);
+
+    if (words.length() == 0)
     {
-        std::lock_guard<std::mutex> lock(this->mutex_);
-
-        if (words.length() == 0)
-        {
-            return text;
-        }
-
-        QString commandName = words[0];
-
-        // works in a valid twitch channel and /whispers, etc...
-        if (!dryRun && channel->isTwitchChannel())
-        {
-            if (commandName == "/w")
-            {
-                if (words.length() <= 2)
-                {
-                    return "";
-                }
-
-                auto app = getApp();
-
-                MessageBuilder b;
-
-                b.emplace<TimestampElement>();
-                b.emplace<TextElement>(
-                    app->accounts->twitch.getCurrent()->getUserName(),
-                    MessageElementFlag::Text, MessageColor::Text,
-                    FontStyle::ChatMediumBold);
-                b.emplace<TextElement>("->", MessageElementFlag::Text);
-                b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
-                                       MessageColor::Text,
-                                       FontStyle::ChatMediumBold);
-
-                const auto &acc = app->accounts->twitch.getCurrent();
-                const auto &accemotes = *acc->accessEmotes();
-                const auto &bttvemotes = app->twitch.server->getBttvEmotes();
-                const auto &ffzemotes = app->twitch.server->getFfzEmotes();
-                auto flags = MessageElementFlags();
-                auto emote = boost::optional<EmotePtr>{};
-                for (int i = 2; i < words.length(); i++)
-                {
-                    {  // twitch emote
-                        auto it = accemotes.emotes.find({words[i]});
-                        if (it != accemotes.emotes.end())
-                        {
-                            b.emplace<EmoteElement>(
-                                it->second, MessageElementFlag::TwitchEmote);
-                            continue;
-                        }
-                    }  // twitch emote
-
-                    {  // bttv/ffz emote
-                        if ((emote = bttvemotes.emote({words[i]})))
-                        {
-                            flags = MessageElementFlag::BttvEmote;
-                        }
-                        else if ((emote = ffzemotes.emote({words[i]})))
-                        {
-                            flags = MessageElementFlag::FfzEmote;
-                        }
-                        if (emote)
-                        {
-                            b.emplace<EmoteElement>(emote.get(), flags);
-                            continue;
-                        }
-                    }  // bttv/ffz emote
-                    {  // emoji/text
-                        for (auto &variant :
-                             app->emotes->emojis.parse(words[i]))
-                        {
-                            constexpr const static struct {
-                                void operator()(EmotePtr emote,
-                                                MessageBuilder &b) const
-                                {
-                                    b.emplace<EmoteElement>(
-                                        emote, MessageElementFlag::EmojiAll);
-                                }
-                                void operator()(const QString &string,
-                                                MessageBuilder &b) const
-                                {
-                                    b.emplace<TextElement>(
-                                        string, MessageElementFlag::Text);
-                                }
-                            } visitor;
-                            boost::apply_visitor(
-                                [&b](auto &&arg) { visitor(arg, b); }, variant);
-                        }  // emoji/text
-                    }
-                }
-
-                b->flags.set(MessageFlag::DoNotTriggerNotification);
-                auto messagexD = b.release();
-
-                app->twitch.server->whispersChannel->addMessage(messagexD);
-
-                app->twitch.server->sendMessage("jtv", text);
-
-                if (getSettings()->inlineWhispers)
-                {
-                    app->twitch.server->forEachChannel(
-                        [&messagexD](ChannelPtr _channel) {
-                            _channel->addMessage(messagexD);
-                        });
-                }
-
-                return "";
-            }
-        }
-
-        // check if default command exists
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-
-        // works only in a valid twitch channel
-        if (!dryRun && twitchChannel != nullptr)
-        {
-            if (commandName == "/debug-args")
-            {
-                QString msg = QApplication::instance()->arguments().join(' ');
-
-                channel->addMessage(makeSystemMessage(msg));
-
-                return "";
-            }
-            else if (commandName == "/uptime")
-            {
-                const auto &streamStatus = twitchChannel->accessStreamStatus();
-
-                QString messageText = streamStatus->live
-                                          ? streamStatus->uptime
-                                          : "Channel is not live.";
-
-                channel->addMessage(makeSystemMessage(messageText));
-
-                return "";
-            }
-            else if (commandName == "/ignore")
-            {
-                if (words.size() < 2)
-                {
-                    channel->addMessage(
-                        makeSystemMessage("Usage: /ignore [user]"));
-                    return "";
-                }
-                auto app = getApp();
-
-                auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
-
-                if (user->isAnon())
-                {
-                    channel->addMessage(makeSystemMessage(
-                        "You must be logged in to ignore someone"));
-                    return "";
-                }
-
-                user->ignore(
-                    target, [channel](auto resultCode, const QString &message) {
-                        channel->addMessage(makeSystemMessage(message));
-                    });
-
-                return "";
-            }
-            else if (commandName == "/unignore")
-            {
-                if (words.size() < 2)
-                {
-                    channel->addMessage(
-                        makeSystemMessage("Usage: /unignore [user]"));
-                    return "";
-                }
-                auto app = getApp();
-
-                auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
-
-                if (user->isAnon())
-                {
-                    channel->addMessage(makeSystemMessage(
-                        "You must be logged in to ignore someone"));
-                    return "";
-                }
-
-                user->unignore(
-                    target, [channel](auto resultCode, const QString &message) {
-                        channel->addMessage(makeSystemMessage(message));
-                    });
-
-                return "";
-            }
-            else if (commandName == "/follow")
-            {
-                if (words.size() < 2)
-                {
-                    channel->addMessage(
-                        makeSystemMessage("Usage: /follow [user]"));
-                    return "";
-                }
-                auto app = getApp();
-
-                auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
-
-                if (user->isAnon())
-                {
-                    channel->addMessage(makeSystemMessage(
-                        "You must be logged in to follow someone"));
-                    return "";
-                }
-
-                TwitchApi::findUserId(
-                    target, [user, channel, target](QString userId) {
-                        if (userId.isEmpty())
-                        {
-                            channel->addMessage(makeSystemMessage(
-                                "User " + target + " could not be followed!"));
-                            return;
-                        }
-                        user->followUser(userId, [channel, target]() {
-                            channel->addMessage(makeSystemMessage(
-                                "You successfully followed " + target));
-                        });
-                    });
-
-                return "";
-            }
-            else if (commandName == "/unfollow")
-            {
-                if (words.size() < 2)
-                {
-                    channel->addMessage(
-                        makeSystemMessage("Usage: /unfollow [user]"));
-                    return "";
-                }
-                auto app = getApp();
-
-                auto user = app->accounts->twitch.getCurrent();
-                auto target = words.at(1);
-
-                if (user->isAnon())
-                {
-                    channel->addMessage(makeSystemMessage(
-                        "You must be logged in to follow someone"));
-                    return "";
-                }
-
-                TwitchApi::findUserId(
-                    target, [user, channel, target](QString userId) {
-                        if (userId.isEmpty())
-                        {
-                            channel->addMessage(makeSystemMessage(
-                                "User " + target + " could not be followed!"));
-                            return;
-                        }
-                        user->unfollowUser(userId, [channel, target]() {
-                            channel->addMessage(makeSystemMessage(
-                                "You successfully unfollowed " + target));
-                        });
-                    });
-
-                return "";
-            }
-            else if (commandName == "/logs")
-            {
-                if (words.size() < 2)
-                {
-                    channel->addMessage(
-                        makeSystemMessage("Usage: /logs [user] (channel)"));
-                    return "";
-                }
-                auto app = getApp();
-
-                auto logs = new LogsPopup();
-                QString target;
-
-                if (words.at(1).at(0) == "@")
-                {
-                    target = words.at(1).mid(1);
-                }
-                else
-                {
-                    target = words.at(1);
-                }
-
-                if (words.size() == 3)
-                {
-                    QString channelName = words.at(2);
-                    if (words.at(2).at(0) == "#")
-                    {
-                        channelName = words.at(2).mid(1);
-                    }
-                    auto logsChannel =
-                        app->twitch.server->getChannelOrEmpty(channelName);
-                    if (logsChannel == nullptr)
-                    {
-                    }
-                    else
-                    {
-                        logs->setInfo(logsChannel, target);
-                    }
-                }
-                else
-                {
-                    logs->setInfo(channel, target);
-                }
-                logs->setAttribute(Qt::WA_DeleteOnClose);
-                logs->show();
-                return "";
-            }
-        }
-
-        // check if custom command exists
-        auto it = this->commandsMap_.find(commandName);
-        if (it == this->commandsMap_.end())
-        {
-            return text;
-        }
-
-        command = it.value();
+        return text;
     }
 
-    return this->execCustomCommand(words, command);
+    QString commandName = words[0];
+
+    // works in a valid twitch channel and /whispers, etc...
+    if (!dryRun && channel->isTwitchChannel())
+    {
+        if (commandName == "/w")
+        {
+            if (words.length() <= 2)
+            {
+                return "";
+            }
+
+            auto app = getApp();
+
+            MessageBuilder b;
+
+            b.emplace<TimestampElement>();
+            b.emplace<TextElement>(
+                app->accounts->twitch.getCurrent()->getUserName(),
+                MessageElementFlag::Text, MessageColor::Text,
+                FontStyle::ChatMediumBold);
+            b.emplace<TextElement>("->", MessageElementFlag::Text);
+            b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
+                                   MessageColor::Text,
+                                   FontStyle::ChatMediumBold);
+
+            const auto &acc = app->accounts->twitch.getCurrent();
+            const auto &accemotes = *acc->accessEmotes();
+            const auto &bttvemotes = app->twitch.server->getBttvEmotes();
+            const auto &ffzemotes = app->twitch.server->getFfzEmotes();
+            auto flags = MessageElementFlags();
+            auto emote = boost::optional<EmotePtr>{};
+            for (int i = 2; i < words.length(); i++)
+            {
+                {  // twitch emote
+                    auto it = accemotes.emotes.find({words[i]});
+                    if (it != accemotes.emotes.end())
+                    {
+                        b.emplace<EmoteElement>(
+                            it->second, MessageElementFlag::TwitchEmote);
+                        continue;
+                    }
+                }  // twitch emote
+
+                {  // bttv/ffz emote
+                    if ((emote = bttvemotes.emote({words[i]})))
+                    {
+                        flags = MessageElementFlag::BttvEmote;
+                    }
+                    else if ((emote = ffzemotes.emote({words[i]})))
+                    {
+                        flags = MessageElementFlag::FfzEmote;
+                    }
+                    if (emote)
+                    {
+                        b.emplace<EmoteElement>(emote.get(), flags);
+                        continue;
+                    }
+                }  // bttv/ffz emote
+                {  // emoji/text
+                    for (auto &variant : app->emotes->emojis.parse(words[i]))
+                    {
+                        constexpr const static struct {
+                            void operator()(EmotePtr emote,
+                                            MessageBuilder &b) const
+                            {
+                                b.emplace<EmoteElement>(
+                                    emote, MessageElementFlag::EmojiAll);
+                            }
+                            void operator()(const QString &string,
+                                            MessageBuilder &b) const
+                            {
+                                b.emplace<TextElement>(
+                                    string, MessageElementFlag::Text);
+                            }
+                        } visitor;
+                        boost::apply_visitor(
+                            [&b](auto &&arg) { visitor(arg, b); }, variant);
+                    }  // emoji/text
+                }
+            }
+
+            b->flags.set(MessageFlag::DoNotTriggerNotification);
+            auto messagexD = b.release();
+
+            app->twitch.server->whispersChannel->addMessage(messagexD);
+
+            app->twitch.server->sendMessage("jtv", text);
+
+            if (getSettings()->inlineWhispers)
+            {
+                app->twitch.server->forEachChannel(
+                    [&messagexD](ChannelPtr _channel) {
+                        _channel->addMessage(messagexD);
+                    });
+            }
+
+            return "";
+        }
+    }
+
+    // check if default command exists
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+    // works only in a valid twitch channel
+    if (!dryRun && twitchChannel != nullptr)
+    {
+        if (commandName == "/debug-args")
+        {
+            QString msg = QApplication::instance()->arguments().join(' ');
+
+            channel->addMessage(makeSystemMessage(msg));
+
+            return "";
+        }
+        else if (commandName == "/uptime")
+        {
+            const auto &streamStatus = twitchChannel->accessStreamStatus();
+
+            QString messageText = streamStatus->live ? streamStatus->uptime
+                                                     : "Channel is not live.";
+
+            channel->addMessage(makeSystemMessage(messageText));
+
+            return "";
+        }
+        else if (commandName == "/ignore")
+        {
+            if (words.size() < 2)
+            {
+                channel->addMessage(makeSystemMessage("Usage: /ignore [user]"));
+                return "";
+            }
+            auto app = getApp();
+
+            auto user = app->accounts->twitch.getCurrent();
+            auto target = words.at(1);
+
+            if (user->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to ignore someone"));
+                return "";
+            }
+
+            user->ignore(target,
+                         [channel](auto resultCode, const QString &message) {
+                             channel->addMessage(makeSystemMessage(message));
+                         });
+
+            return "";
+        }
+        else if (commandName == "/unignore")
+        {
+            if (words.size() < 2)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /unignore [user]"));
+                return "";
+            }
+            auto app = getApp();
+
+            auto user = app->accounts->twitch.getCurrent();
+            auto target = words.at(1);
+
+            if (user->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to ignore someone"));
+                return "";
+            }
+
+            user->unignore(target,
+                           [channel](auto resultCode, const QString &message) {
+                               channel->addMessage(makeSystemMessage(message));
+                           });
+
+            return "";
+        }
+        else if (commandName == "/follow")
+        {
+            if (words.size() < 2)
+            {
+                channel->addMessage(makeSystemMessage("Usage: /follow [user]"));
+                return "";
+            }
+            auto app = getApp();
+
+            auto user = app->accounts->twitch.getCurrent();
+            auto target = words.at(1);
+
+            if (user->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to follow someone"));
+                return "";
+            }
+
+            TwitchApi::findUserId(
+                target, [user, channel, target](QString userId) {
+                    if (userId.isEmpty())
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            "User " + target + " could not be followed!"));
+                        return;
+                    }
+                    user->followUser(userId, [channel, target]() {
+                        channel->addMessage(makeSystemMessage(
+                            "You successfully followed " + target));
+                    });
+                });
+
+            return "";
+        }
+        else if (commandName == "/unfollow")
+        {
+            if (words.size() < 2)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /unfollow [user]"));
+                return "";
+            }
+            auto app = getApp();
+
+            auto user = app->accounts->twitch.getCurrent();
+            auto target = words.at(1);
+
+            if (user->isAnon())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "You must be logged in to follow someone"));
+                return "";
+            }
+
+            TwitchApi::findUserId(
+                target, [user, channel, target](QString userId) {
+                    if (userId.isEmpty())
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            "User " + target + " could not be followed!"));
+                        return;
+                    }
+                    user->unfollowUser(userId, [channel, target]() {
+                        channel->addMessage(makeSystemMessage(
+                            "You successfully unfollowed " + target));
+                    });
+                });
+
+            return "";
+        }
+        else if (commandName == "/logs")
+        {
+            if (words.size() < 2)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /logs [user] (channel)"));
+                return "";
+            }
+            auto app = getApp();
+
+            auto logs = new LogsPopup();
+            QString target;
+
+            if (words.at(1).at(0) == "@")
+            {
+                target = words.at(1).mid(1);
+            }
+            else
+            {
+                target = words.at(1);
+            }
+
+            if (words.size() == 3)
+            {
+                QString channelName = words.at(2);
+                if (words.at(2).at(0) == "#")
+                {
+                    channelName = words.at(2).mid(1);
+                }
+                auto logsChannel =
+                    app->twitch.server->getChannelOrEmpty(channelName);
+                if (logsChannel != nullptr)
+                {
+                    logs->setInfo(logsChannel, target);
+                }
+            }
+            else
+            {
+                logs->setInfo(channel, target);
+            }
+            logs->setAttribute(Qt::WA_DeleteOnClose);
+            logs->show();
+            return "";
+        }
+    }
+
+    // check if custom command exists
+    auto it = this->commandsMap_.find(commandName);
+    if (it != this->commandsMap_.end())
+    {
+        return this->execCustomCommand(words, it.value());
+    }
+
+    auto maxSpaces = std::min(this->maxSpaces_, words.length() - 1);
+    for (int i = 0; i < maxSpaces; ++i)
+    {
+        commandName += ' ' + words[i + 1];
+
+        auto it = this->commandsMap_.find(commandName);
+        if (it != this->commandsMap_.end())
+        {
+            return this->execCustomCommand(words, it.value());
+        }
+    }
+
+    return text;
 }
 
 QString CommandController::execCustomCommand(const QStringList &words,
