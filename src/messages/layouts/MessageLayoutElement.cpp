@@ -99,6 +99,7 @@ void ImageLayoutElement::addCopyTextToString(QString &str, int from,
     if (emoteElement)
     {
         str += emoteElement->getEmote()->getCopyString();
+        str.replace("&lt;", "<").replace("&gt;", ">");
         if (this->hasTrailingSpace())
         {
             str += " ";
