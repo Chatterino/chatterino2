@@ -153,11 +153,6 @@ void ChannelView::initializeScrollbar()
 {
     this->scrollBar_->getCurrentValueChanged().connect([this] {
         this->performLayout(true);
-
-        this->goToBottom_->setVisible(this->enableScrollingToBottom_ &&
-                                      this->scrollBar_->isVisible() &&
-                                      !this->scrollBar_->isAtBottom());
-
         this->queueUpdate();
     });
 }
@@ -314,6 +309,10 @@ void ChannelView::performLayout(bool causedByScrollbar)
 
     /// Update scrollbar
     this->updateScrollbar(messages, causedByScrollbar);
+
+    this->goToBottom_->setVisible(this->enableScrollingToBottom_ &&
+                                  this->scrollBar_->isVisible() &&
+                                  !this->scrollBar_->isAtBottom());
 }
 
 void ChannelView::layoutVisibleMessages(
