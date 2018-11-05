@@ -4,6 +4,7 @@
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 
@@ -99,7 +100,7 @@ void ImageLayoutElement::addCopyTextToString(QString &str, int from,
     if (emoteElement)
     {
         str += emoteElement->getEmote()->getCopyString();
-        str.replace("&lt;", "<").replace("&gt;", ">");
+        str = TwitchEmotes::cleanUpEmoteCode(EmoteName{str});
         if (this->hasTrailingSpace())
         {
             str += " ";

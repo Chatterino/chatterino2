@@ -13,37 +13,6 @@
 
 namespace chatterino {
 
-namespace {
-
-    EmoteName cleanUpCode(const EmoteName &dirtyEmoteCode)
-    {
-        auto cleanCode = dirtyEmoteCode.string;
-        cleanCode.detach();
-
-        static QMap<QString, QString> emoteNameReplacements{
-            {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},
-            {"\\&lt\\;3", "&lt;3"},     {"\\:-?(o|O)", ":O"},
-            {"\\:-?(p|P)", ":P"},       {"\\:-?[\\\\/]", ":/"},
-            {"\\:-?[z|Z|\\|]", ":Z"},   {"\\:-?\\(", ":("},
-            {"\\:-?\\)", ":)"},         {"\\:-?D", ":D"},
-            {"\\;-?(p|P)", ";P"},       {"\\;-?\\)", ";)"},
-            {"R-?\\)", "R)"},           {"B-?\\)", "B)"},
-        };
-
-        auto it = emoteNameReplacements.find(dirtyEmoteCode.string);
-        if (it != emoteNameReplacements.end())
-        {
-            cleanCode = it.value();
-        }
-
-        cleanCode.replace("&lt;", "<");
-        cleanCode.replace("&gt;", ">");
-
-        return {cleanCode};
-    }
-
-}  // namespace
-
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
     : Account(ProviderId::Twitch)
@@ -491,7 +460,7 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
             auto code = EmoteName{_code};
             auto id = EmoteId{QString::number(idNumber)};
 
-            auto cleanCode = cleanUpCode(code);
+            auto cleanCode = EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
             emoteSet->emotes.emplace_back(TwitchEmote{id, cleanCode});
             emoteData->allEmoteNames.push_back(cleanCode);
 
