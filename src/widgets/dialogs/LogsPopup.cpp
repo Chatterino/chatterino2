@@ -91,7 +91,7 @@ void LogsPopup::getLogviewerLogs(const QString &roomID)
                    .arg(this->channelName_, this->userName_);
 
     NetworkRequest req(url);
-    req.setCaller(QThread::currentThread());
+    req.setCaller(this);
 
     req.onError([this](int errorCode) {
         this->getOverrustleLogs();
@@ -138,7 +138,7 @@ void LogsPopup::getOverrustleLogs()
             .arg(this->channelName_, this->userName_);
 
     NetworkRequest req(url);
-    req.setCaller(QThread::currentThread());
+    req.setCaller(this);
     req.onError([this](int errorCode) {
         auto box = new QMessageBox(
             QMessageBox::Information, "Error getting logs",
