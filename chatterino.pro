@@ -9,7 +9,20 @@ message(----)
 QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util
-CONFIG            += c++17
+macx {
+    # osx
+    CONFIG            += c++14
+    DEFINES += PAJLADA_SETTINGS_BOOST_OPTIONAL
+} else {
+    CONFIG            += c++17
+    win32-msvc* {
+        # win32 msvc
+        QMAKE_CXXFLAGS += /std:c++17
+    } else {
+        # clang/gcc on linux or win32
+        QMAKE_CXXFLAGS += -std=c++17
+    }
+}
 INCLUDEPATH       += src/
 TARGET             = chatterino
 TEMPLATE           = app
@@ -17,11 +30,6 @@ DEFINES           += QT_DEPRECATED_WARNINGS
 PRECOMPILED_HEADER = src/PrecompiledHeader.hpp
 CONFIG            += precompile_header
 
-win32-msvc* {
-    QMAKE_CXXFLAGS += /std:c++17
-} else {
-    QMAKE_CXXFLAGS += -std=c++17
-}
 
 debug {
     DEFINES += QT_DEBUG
