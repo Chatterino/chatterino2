@@ -550,9 +550,9 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     // Notifications
     if (auto tc = dynamic_cast<TwitchChannel *>(newChannel.get()))
     {
-        tc->liveStatusChanged.connect([this]() {
+        this->connections_.push_back(tc->liveStatusChanged.connect([this]() {
             this->liveStatusChanged.invoke();  //
-        });
+        }));
     }
 }
 
