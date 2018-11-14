@@ -68,19 +68,6 @@ SplitNotebook &Window::getNotebook()
     return *this->notebook_;
 }
 
-void Window::repaintVisibleChatWidgets(Channel *channel)
-{
-    auto page = this->notebook_->getOrAddSelectedPage();
-
-    for (const auto &split : page->getSplits())
-    {
-        if (channel == nullptr || channel == split->getChannel().get())
-        {
-            split->layoutMessages();
-        }
-    }
-}
-
 bool Window::event(QEvent *event)
 {
     switch (event->type())

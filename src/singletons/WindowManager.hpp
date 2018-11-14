@@ -67,14 +67,6 @@ public:
     MessageElementFlags getWordFlags();
     void updateWordTypeMask();
 
-    pajlada::Signals::NoArgSignal repaintGifs;
-
-    // This signal fires whenever views rendering a channel, or all views if the
-    // channel is a nullptr, need to redo their layout
-    pajlada::Signals::Signal<Channel *> layout;
-
-    pajlada::Signals::NoArgSignal wordFlagsChanged;
-
     // Sends an alert to the main window
     // It reads the `longAlert` setting to decide whether the alert will expire
     // or not
@@ -84,6 +76,15 @@ public:
     // If a save was already queued up, we reset the to happen in 10 seconds
     // again
     void queueSave();
+
+    /// Signals
+    pajlada::Signals::NoArgSignal gifRepaintRequested;
+
+    // This signal fires whenever views rendering a channel, or all views if the
+    // channel is a nullptr, need to redo their layout
+    pajlada::Signals::Signal<Channel *> layoutRequested;
+
+    pajlada::Signals::NoArgSignal wordFlagsChanged;
 
 private:
     void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);

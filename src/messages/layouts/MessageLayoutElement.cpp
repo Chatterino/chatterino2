@@ -174,9 +174,9 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
                                      const QSize &_size, QColor _color,
                                      FontStyle _style, float _scale)
     : MessageLayoutElement(_creator, _size)
-    , color(_color)
-    , style(_style)
-    , scale(_scale)
+    , color_(_color)
+    , style_(_style)
+    , scale_(_scale)
 {
     this->setText(_text);
 }
@@ -212,9 +212,9 @@ void TextLayoutElement::paint(QPainter &painter)
 {
     auto app = getApp();
 
-    painter.setPen(this->color);
+    painter.setPen(this->color_);
 
-    painter.setFont(app->fonts->getFont(this->style, this->scale));
+    painter.setFont(app->fonts->getFont(this->style_, this->scale_));
 
     painter.drawText(
         QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
@@ -234,7 +234,8 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
 
     auto app = getApp();
 
-    QFontMetrics metrics = app->fonts->getFontMetrics(this->style, this->scale);
+    QFontMetrics metrics =
+        app->fonts->getFontMetrics(this->style_, this->scale_);
 
     int x = this->getRect().left();
 
@@ -264,7 +265,8 @@ int TextLayoutElement::getXFromIndex(int index)
 {
     auto app = getApp();
 
-    QFontMetrics metrics = app->fonts->getFontMetrics(this->style, this->scale);
+    QFontMetrics metrics =
+        app->fonts->getFontMetrics(this->style_, this->scale_);
 
     if (index <= 0)
     {

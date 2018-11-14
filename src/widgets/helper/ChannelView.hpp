@@ -65,11 +65,14 @@ public:
     const boost::optional<MessageElementFlags> &getOverrideFlags() const;
     void updateLastReadMessage();
 
+    /// Pausing
     bool paused() const;
     void pause(PauseReason reason, boost::optional<uint> msecs = boost::none);
     void unpause(PauseReason reason);
 
+    ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
+
     LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
     void queueLayout();
 
@@ -117,8 +120,6 @@ private:
     void messageAddedAtStart(std::vector<MessagePtr> &messages);
     void messageRemoveFromStart(MessagePtr &message);
     void messageReplaced(size_t index, MessagePtr &replacement);
-
-    void detachChannel();
 
     void performLayout(bool causedByScollbar = false);
     void layoutVisibleMessages(
@@ -177,7 +178,7 @@ private:
     bool isMouseDown_ = false;
     bool isRightMouseDown_ = false;
     bool isDoubleClick_ = false;
-    DoubleClickSelection dCSelection_;
+    DoubleClickSelection doubleClickSelection_;
     QPointF lastPressPosition_;
     QPointF lastRightPressPosition_;
     QPointF lastDClickPosition_;
@@ -186,7 +187,7 @@ private:
     Selection selection_;
     bool selecting_ = false;
 
-    LimitedQueue<MessageLayoutPtr> messages;
+    LimitedQueue<MessageLayoutPtr> messages_;
 
     pajlada::Signals::Connection messageAppendedConnection_;
     pajlada::Signals::Connection messageAddedAtStartConnection_;

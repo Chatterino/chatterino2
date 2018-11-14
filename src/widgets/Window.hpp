@@ -25,8 +25,6 @@ public:
     WindowType getType();
     SplitNotebook &getNotebook();
 
-    void repaintVisibleChatWidgets(Channel *channel = nullptr);
-
     pajlada::Signals::NoArgSignal closed;
 
 protected:

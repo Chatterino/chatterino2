@@ -1,8 +1,8 @@
 #include "widgets/splits/Split.hpp"
 
-#include "controllers/accounts/AccountController.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -106,7 +106,7 @@ Split::Split(QWidget *parent)
     // CTRL+F: Search
     createShortcut(this, "CTRL+F", &Split::showSearch);
 
-	// F5: reload emotes
+    // F5: reload emotes
     createShortcut(this, "F5", &Split::reloadChannelAndSubscriberEmotes);
 
     // F12
@@ -318,11 +318,6 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         this->selectChannelDialog_ = nullptr;
     });
     this->selectChannelDialog_ = dialog;
-}
-
-void Split::layoutMessages()
-{
-    this->view_->queueLayout();
 }
 
 void Split::updateGifEmotes()
@@ -658,7 +653,6 @@ void Split::reloadChannelAndSubscriberEmotes()
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
         twitchChannel->refreshChannelEmotes();
 }
-
 
 template <typename Iter, typename RandomGenerator>
 static Iter select_randomly(Iter start, Iter end, RandomGenerator &g)

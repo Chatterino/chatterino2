@@ -80,8 +80,8 @@ class TextLayoutElement : public MessageLayoutElement
 {
 public:
     TextLayoutElement(MessageElement &creator_, QString &text,
-                      const QSize &size, QColor color, FontStyle style,
-                      float scale);
+                      const QSize &size, QColor color_, FontStyle style_,
+                      float scale_);
 
     void listenToLinkChanges();
 
@@ -95,9 +95,9 @@ protected:
     int getXFromIndex(int index) override;
 
 private:
-    QColor color;
-    FontStyle style;
-    float scale;
+    QColor color_;
+    FontStyle style_;
+    float scale_;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 };

@@ -168,13 +168,16 @@ void ChannelView::initializeSignals()
     getSettings()->showLastMessageIndicator.connect(
         [this](auto, auto) { this->update(); }, this->connections_);
 
-    connections_.push_back(
-        getApp()->windows->repaintGifs.connect([&] { this->queueUpdate(); }));
+    connections_.push_back(getApp()->windows->gifRepaintRequested.connect(
+        [&] { this->queueUpdate(); }));
 
     connections_.push_back(
-        getApp()->windows->layout.connect([&](Channel *channel) {
-            if (channel == nullptr || this->channel_.get() == channel)
+        getApp()->windows->layoutRequested.connect([&](Channel *channel) {
+            if (this->isVisible() &&
+                (channel == nullptr || this->channel_.get() == channel))
+            {
                 this->queueLayout();
+            }
         }));
 
     connections_.push_back(
@@ -402,13 +405,9 @@ void ChannelView::updateScrollbar(
 void ChannelView::clearMessages()
 {
     // Clear all stored messages in this chat widget
-    this->messages.clear();
+    this->messages_.clear();
     this->scrollBar_->clearHighlights();
-
-    // Layout chat widget messages, and force an update regardless if there are
-    // no messages
     this->queueLayout();
-    this->queueUpdate();
 }
 
 Scrollbar &ChannelView::getScrollBar()
@@ -483,18 +482,21 @@ LimitedQueueSnapshot<MessageLayoutPtr> ChannelView::getMessagesSnapshot()
 {
     if (!this->paused() /*|| this->scrollBar_->isVisible()*/)
     {
-        this->snapshot_ = this->messages.getSnapshot();
+        this->snapshot_ = this->messages_.getSnapshot();
     }
 
     return this->snapshot_;
 }
 
+ChannelPtr ChannelView::channel()
+{
+    return this->channel_;
+}
+
 void ChannelView::setChannel(ChannelPtr newChannel)
 {
-    if (this->channel_)
-    {
-        this->detachChannel();
-    }
+    /// Clear connections from the last channel
+    this->channelConnections_.clear();
 
     this->clearMessages();
 
@@ -539,7 +541,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
         this->lastMessageHasAlternateBackground_ =
             !this->lastMessageHasAlternateBackground_;
 
-        this->messages.pushBack(MessageLayoutPtr(messageRef), deleted);
+        this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted);
     }
 
     this->channel_ = newChannel;
@@ -580,7 +582,7 @@ void ChannelView::messageAppended(MessagePtr &message,
     this->lastMessageHasAlternateBackground_ =
         !this->lastMessageHasAlternateBackground_;
 
-    if (this->messages.pushBack(MessageLayoutPtr(messageRef), deleted))
+    if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
     {
         //                if (!this->isPaused()) {
         if (this->scrollBar_->isAtBottom())
@@ -635,7 +637,7 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     }
 
     /// Add the messages at the start
-    if (this->messages.pushFront(messageRefs).size() > 0)
+    if (this->messages_.pushFront(messageRefs).size() > 0)
     {
         if (this->scrollBar_->isAtBottom())
             this->scrollBar_->scrollToBottom();
@@ -669,13 +671,13 @@ void ChannelView::messageRemoveFromStart(MessagePtr &message)
 
 void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
 {
-    if (index >= this->messages.getSnapshot().size() || index < 0)
+    if (index >= this->messages_.getSnapshot().size() || index < 0)
     {
         return;
     }
 
     MessageLayoutPtr newItem(new MessageLayout(replacement));
-    auto snapshot = this->messages.getSnapshot();
+    auto snapshot = this->messages_.getSnapshot();
     if (index >= snapshot.size())
     {
         log("Tried to replace out of bounds message. Index: {}. "
@@ -693,13 +695,8 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     this->scrollBar_->replaceHighlight(index,
                                        replacement->getScrollBarHighlight());
 
-    this->messages.replaceItem(message, newItem);
+    this->messages_.replaceItem(message, newItem);
     this->queueLayout();
-}
-
-void ChannelView::detachChannel()
-{
-    this->channelConnections_.clear();
 }
 
 void ChannelView::updateLastReadMessage()
@@ -1048,18 +1045,18 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         SelectionItem newEnd(messageIndex, wordEnd);
 
         // Selection changed in same message
-        if (messageIndex == this->dCSelection_.origMessageIndex)
+        if (messageIndex == this->doubleClickSelection_.origMessageIndex)
         {
             // Selecting to the left
             if (wordStart < this->selection_.start.charIndex &&
-                !this->dCSelection_.selectingRight)
+                !this->doubleClickSelection_.selectingRight)
             {
-                this->dCSelection_.selectingLeft = true;
+                this->doubleClickSelection_.selectingLeft = true;
                 // Ensure that the original word stays selected(Edge case)
-                if (wordStart > this->dCSelection_.originalEnd)
+                if (wordStart > this->doubleClickSelection_.originalEnd)
                 {
-                    this->setSelection(this->dCSelection_.origStartItem,
-                                       newEnd);
+                    this->setSelection(
+                        this->doubleClickSelection_.origStartItem, newEnd);
                 }
                 else
                 {
@@ -1068,14 +1065,14 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 // Selecting to the right
             }
             else if (wordEnd > this->selection_.end.charIndex &&
-                     !this->dCSelection_.selectingLeft)
+                     !this->doubleClickSelection_.selectingLeft)
             {
-                this->dCSelection_.selectingRight = true;
+                this->doubleClickSelection_.selectingRight = true;
                 // Ensure that the original word stays selected(Edge case)
-                if (wordEnd < this->dCSelection_.originalStart)
+                if (wordEnd < this->doubleClickSelection_.originalStart)
                 {
                     this->setSelection(newStart,
-                                       this->dCSelection_.origEndItem);
+                                       this->doubleClickSelection_.origEndItem);
                 }
                 else
                 {
@@ -1084,14 +1081,14 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
             // Swapping from selecting left to selecting right
             if (wordStart > this->selection_.start.charIndex &&
-                !this->dCSelection_.selectingRight)
+                !this->doubleClickSelection_.selectingRight)
             {
-                if (wordStart > this->dCSelection_.originalEnd)
+                if (wordStart > this->doubleClickSelection_.originalEnd)
                 {
-                    this->dCSelection_.selectingLeft = false;
-                    this->dCSelection_.selectingRight = true;
-                    this->setSelection(this->dCSelection_.origStartItem,
-                                       newEnd);
+                    this->doubleClickSelection_.selectingLeft = false;
+                    this->doubleClickSelection_.selectingRight = true;
+                    this->setSelection(
+                        this->doubleClickSelection_.origStartItem, newEnd);
                 }
                 else
                 {
@@ -1100,14 +1097,14 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 // Swapping from selecting right to selecting left
             }
             else if (wordEnd < this->selection_.end.charIndex &&
-                     !this->dCSelection_.selectingLeft)
+                     !this->doubleClickSelection_.selectingLeft)
             {
-                if (wordEnd < this->dCSelection_.originalStart)
+                if (wordEnd < this->doubleClickSelection_.originalStart)
                 {
-                    this->dCSelection_.selectingLeft = true;
-                    this->dCSelection_.selectingRight = false;
+                    this->doubleClickSelection_.selectingLeft = true;
+                    this->doubleClickSelection_.selectingRight = false;
                     this->setSelection(newStart,
-                                       this->dCSelection_.origEndItem);
+                                       this->doubleClickSelection_.origEndItem);
                 }
                 else
                 {
@@ -1122,38 +1119,40 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             if (messageIndex < this->selection_.start.messageIndex)
             {
                 // Swapping from left to right selecting
-                if (!this->dCSelection_.selectingLeft)
+                if (!this->doubleClickSelection_.selectingLeft)
                 {
-                    this->dCSelection_.selectingLeft = true;
-                    this->dCSelection_.selectingRight = false;
+                    this->doubleClickSelection_.selectingLeft = true;
+                    this->doubleClickSelection_.selectingRight = false;
                 }
                 if (wordStart < this->selection_.start.charIndex &&
-                    !this->dCSelection_.selectingRight)
+                    !this->doubleClickSelection_.selectingRight)
                 {
-                    this->dCSelection_.selectingLeft = true;
+                    this->doubleClickSelection_.selectingLeft = true;
                 }
-                this->setSelection(newStart, this->dCSelection_.origEndItem);
+                this->setSelection(newStart,
+                                   this->doubleClickSelection_.origEndItem);
                 // Message under the original
             }
             else if (messageIndex > this->selection_.end.messageIndex)
             {
                 // Swapping from right to left selecting
-                if (!this->dCSelection_.selectingRight)
+                if (!this->doubleClickSelection_.selectingRight)
                 {
-                    this->dCSelection_.selectingLeft = false;
-                    this->dCSelection_.selectingRight = true;
+                    this->doubleClickSelection_.selectingLeft = false;
+                    this->doubleClickSelection_.selectingRight = true;
                 }
                 if (wordEnd > this->selection_.end.charIndex &&
-                    !this->dCSelection_.selectingLeft)
+                    !this->doubleClickSelection_.selectingLeft)
                 {
-                    this->dCSelection_.selectingRight = true;
+                    this->doubleClickSelection_.selectingRight = true;
                 }
-                this->setSelection(this->dCSelection_.origStartItem, newEnd);
+                this->setSelection(this->doubleClickSelection_.origStartItem,
+                                   newEnd);
                 // Selection changed in non original message
             }
             else
             {
-                if (this->dCSelection_.selectingLeft)
+                if (this->doubleClickSelection_.selectingLeft)
                 {
                     this->setSelection(newStart, this->selection_.end);
                 }
@@ -1164,11 +1163,11 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
         }
         // Reset direction of selection
-        if (wordStart == this->dCSelection_.originalStart &&
-            wordEnd == this->dCSelection_.originalEnd)
+        if (wordStart == this->doubleClickSelection_.originalStart &&
+            wordEnd == this->doubleClickSelection_.originalEnd)
         {
-            this->dCSelection_.selectingLeft =
-                this->dCSelection_.selectingRight = false;
+            this->doubleClickSelection_.selectingLeft =
+                this->doubleClickSelection_.selectingRight = false;
         }
     }
 
@@ -1274,8 +1273,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     // check if mouse was pressed
     if (event->button() == Qt::LeftButton)
     {
-        this->dCSelection_.selectingLeft = this->dCSelection_.selectingRight =
-            false;
+        this->doubleClickSelection_.selectingLeft =
+            this->doubleClickSelection_.selectingRight = false;
         if (this->isDoubleClick_)
         {
             this->isDoubleClick_ = false;
@@ -1560,6 +1559,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         this->clickTimer_->start();
         return;
     }
+
     if (!this->isMouseDown_)
     {
         this->isDoubleClick_ = true;
@@ -1574,11 +1574,11 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         SelectionItem wordMin(messageIndex, wordStart);
         SelectionItem wordMax(messageIndex, wordEnd);
 
-        this->dCSelection_.originalStart = wordStart;
-        this->dCSelection_.originalEnd = wordEnd;
-        this->dCSelection_.origMessageIndex = messageIndex;
-        this->dCSelection_.origStartItem = wordMin;
-        this->dCSelection_.origEndItem = wordMax;
+        this->doubleClickSelection_.originalStart = wordStart;
+        this->doubleClickSelection_.originalEnd = wordEnd;
+        this->doubleClickSelection_.origMessageIndex = messageIndex;
+        this->doubleClickSelection_.origStartItem = wordMin;
+        this->doubleClickSelection_.origEndItem = wordMax;
 
         this->setSelection(wordMin, wordMax);
     }

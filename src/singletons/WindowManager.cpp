@@ -127,8 +127,7 @@ void WindowManager::updateWordTypeMask()
 
     // bits
     flags.set(MEF::BitsAmount);
-    flags.set(settings->animateEmotes ? MEF::BitsAnimated
-                                            : MEF::BitsStatic);
+    flags.set(settings->animateEmotes ? MEF::BitsAnimated : MEF::BitsStatic);
 
     // badges
     flags.set(settings->showBadgesGlobalAuthority ? MEF::BadgeGlobalAuthority
@@ -148,9 +147,9 @@ void WindowManager::updateWordTypeMask()
     flags.set(MEF::AlwaysShow);
     flags.set(MEF::Collapsed);
     flags.set(settings->boldUsernames ? MEF::BoldUsername
-                                           : MEF::NonBoldUsername);
+                                      : MEF::NonBoldUsername);
     flags.set(settings->lowercaseDomains ? MEF::LowercaseLink
-                                            : MEF::OriginalLink);
+                                         : MEF::OriginalLink);
 
     // update flags
     MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);
@@ -165,7 +164,7 @@ void WindowManager::updateWordTypeMask()
 
 void WindowManager::layoutChannelViews(Channel *channel)
 {
-    this->layout.invoke(channel);
+    this->layoutRequested.invoke(channel);
 }
 
 void WindowManager::forceLayoutChannelViews()
@@ -176,15 +175,12 @@ void WindowManager::forceLayoutChannelViews()
 
 void WindowManager::repaintVisibleChatWidgets(Channel *channel)
 {
-    if (this->mainWindow_ != nullptr)
-    {
-        this->mainWindow_->repaintVisibleChatWidgets(channel);
-    }
+    this->layoutRequested.invoke(channel);
 }
 
 void WindowManager::repaintGifEmotes()
 {
-    this->repaintGifs.invoke();
+    this->gifRepaintRequested.invoke();
 }
 
 // void WindowManager::updateAll()
