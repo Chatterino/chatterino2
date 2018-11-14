@@ -1195,6 +1195,14 @@ void TwitchMessageBuilder::appendTwitchBadges()
                     ->setTooltip((*badgeEmote)->tooltip.string);
                 continue;
             }
+            if (auto badge = this->twitchChannel->globalTwitchBadges().badge(
+                    splits[0], splits[1]))
+            {
+                this->emplace<EmoteElement>(badge.get(),
+                                            MessageElementFlag::BadgeVanity)
+                    ->setTooltip((*badge)->tooltip.string);
+                continue;
+            }
         }
     }
 }
