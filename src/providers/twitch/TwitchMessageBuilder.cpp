@@ -183,9 +183,18 @@ MessagePtr TwitchMessageBuilder::build()
     auto app = getApp();
     const auto &phrases = app->ignores->phrases.getVector();
     auto removeEmotesInRange =
-        [](int pos, int len,
+        [&message = this->originalMessage_](int pos, int len,
            std::vector<std::tuple<int, EmotePtr, EmoteName>>
                &twitchEmotes) mutable {
+            int emotePos = 0;
+            for(int i = 0; i < pos; ++i) {
+                ++emotePos;
+                if (message.at(i).isLowSurrogate()) {
+                    --emotePos;
+                }
+            }
+            pos = emotePos;
+
             auto it =
                 std::partition(twitchEmotes.begin(), twitchEmotes.end(),
                                [pos, len](const auto &item) {
