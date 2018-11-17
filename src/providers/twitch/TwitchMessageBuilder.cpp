@@ -174,11 +174,18 @@ MessagePtr TwitchMessageBuilder::build()
     if (iterator != this->tags.end())
     {
         QStringList emoteString = iterator.value().toString().split('/');
-
+        std::vector<int> correctPositions;
+        for (int i = 0; i < this->originalMessage_.size(); ++i) {
+            if (!this->originalMessage_.at(i).isLowSurrogate()) {
+                correctPositions.push_back(i);
+            }
+        }
         for (QString emote : emoteString)
         {
-            this->appendTwitchEmote(emote, twitchEmotes);
+            this->appendTwitchEmote(emote, twitchEmotes, correctPositions);
         }
+
+
     }
     auto app = getApp();
     const auto &phrases = app->ignores->phrases.getVector();
@@ -186,15 +193,6 @@ MessagePtr TwitchMessageBuilder::build()
         [&message = this->originalMessage_](int pos, int len,
            std::vector<std::tuple<int, EmotePtr, EmoteName>>
                &twitchEmotes) mutable {
-            int emotePos = 0;
-            for(int i = 0; i < pos; ++i) {
-                ++emotePos;
-                if (message.at(i).isLowSurrogate()) {
-                    --emotePos;
-                }
-            }
-            pos = emotePos;
-
             auto it =
                 std::partition(twitchEmotes.begin(), twitchEmotes.end(),
                                [pos, len](const auto &item) {
@@ -461,17 +459,7 @@ void TwitchMessageBuilder::addWords(
                                  variant);
         }
 
-        for (int j = 0; j < word.size(); j++)
-        {
-            i++;
-
-            if (word.at(j).isHighSurrogate())
-            {
-                j++;
-            }
-        }
-
-        i++;
+        i += word.size() + 1;
     }
 }
 
@@ -944,7 +932,8 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 
 void TwitchMessageBuilder::appendTwitchEmote(
     const QString &emote,
-    std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec)
+    std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec,
+    std::vector<int> & correctPositions)
 {
     auto app = getApp();
     if (!emote.contains(':'))
@@ -972,8 +961,8 @@ void TwitchMessageBuilder::appendTwitchEmote(
             return;
         }
 
-        auto start = coords.at(0).toInt();
-        auto end = coords.at(1).toInt();
+        auto start = correctPositions[coords.at(0).toInt()];
+        auto end = correctPositions[coords.at(1).toInt()];
 
         if (start >= end || start < 0 || end > this->originalMessage_.length())
         {
