@@ -108,6 +108,7 @@ void IgnoresPage::onShow()
     {
         users << ignoredUser.name;
     }
+    users.sort(Qt::CaseInsensitive);
     this->userListModel_.setStringList(users);
 }
 
