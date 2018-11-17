@@ -175,8 +175,10 @@ MessagePtr TwitchMessageBuilder::build()
     {
         QStringList emoteString = iterator.value().toString().split('/');
         std::vector<int> correctPositions;
-        for (int i = 0; i < this->originalMessage_.size(); ++i) {
-            if (!this->originalMessage_.at(i).isLowSurrogate()) {
+        for (int i = 0; i < this->originalMessage_.size(); ++i)
+        {
+            if (!this->originalMessage_.at(i).isLowSurrogate())
+            {
                 correctPositions.push_back(i);
             }
         }
@@ -184,13 +186,11 @@ MessagePtr TwitchMessageBuilder::build()
         {
             this->appendTwitchEmote(emote, twitchEmotes, correctPositions);
         }
-
-
     }
     auto app = getApp();
     const auto &phrases = app->ignores->phrases.getVector();
     auto removeEmotesInRange =
-        [&message = this->originalMessage_](int pos, int len,
+        [](int pos, int len,
            std::vector<std::tuple<int, EmotePtr, EmoteName>>
                &twitchEmotes) mutable {
             auto it =
@@ -933,7 +933,7 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 void TwitchMessageBuilder::appendTwitchEmote(
     const QString &emote,
     std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec,
-    std::vector<int> & correctPositions)
+    std::vector<int> &correctPositions)
 {
     auto app = getApp();
     if (!emote.contains(':'))
@@ -985,19 +985,24 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
     // Special channels, like /whispers and /channels return here
     // This means they will not render any BTTV or FFZ emotes
-    if (this->twitchChannel == nullptr) {
+    if (this->twitchChannel == nullptr)
+    {
         auto *app = getApp();
         const auto &bttvemotes = app->twitch.server->getBttvEmotes();
         const auto &ffzemotes = app->twitch.server->getFfzEmotes();
         auto flags = MessageElementFlags();
         auto emote = boost::optional<EmotePtr>{};
         {  // bttv/ffz emote
-            if ((emote = bttvemotes.emote(name))) {
+            if ((emote = bttvemotes.emote(name)))
+            {
                 flags = MessageElementFlag::BttvEmote;
-            } else if ((emote = ffzemotes.emote(name))) {
+            }
+            else if ((emote = ffzemotes.emote(name)))
+            {
                 flags = MessageElementFlag::FfzEmote;
             }
-            if (emote) {
+            if (emote)
+            {
                 this->emplace<EmoteElement>(emote.get(), flags);
                 return Success;
             }
