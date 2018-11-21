@@ -149,7 +149,7 @@ void SplitOverlay::paintEvent(QPaintEvent *)
 
 void SplitOverlay::resizeEvent(QResizeEvent *event)
 {
-    float _scale = this->getScale();
+    float _scale = this->scale();
     bool wideEnough = event->size().width() > 150 * _scale;
     bool highEnough = event->size().height() > 150 * _scale;
 

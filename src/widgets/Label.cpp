@@ -90,10 +90,10 @@ void Label::paintEvent(QPaintEvent *)
 
     QPainter painter(this);
     QFontMetrics metrics = app->fonts->getFontMetrics(
-        this->getFontStyle(), this->getScale() * 96.f / this->logicalDpiX() *
+        this->getFontStyle(), this->scale() * 96.f / this->logicalDpiX() *
                                   this->devicePixelRatioF());
     painter.setFont(app->fonts->getFont(
-        this->getFontStyle(), this->getScale() * 96.f / this->logicalDpiX() *
+        this->getFontStyle(), this->scale() * 96.f / this->logicalDpiX() *
                                   this->devicePixelRatioF()));
 
     int offset = this->getOffset();
@@ -121,7 +121,7 @@ void Label::updateSize()
     auto app = getApp();
 
     QFontMetrics metrics =
-        app->fonts->getFontMetrics(this->fontStyle_, this->getScale());
+        app->fonts->getFontMetrics(this->fontStyle_, this->scale());
 
     int width = metrics.width(this->text_) + (2 * this->getOffset());
     int height = metrics.height();
@@ -132,7 +132,7 @@ void Label::updateSize()
 
 int Label::getOffset()
 {
-    return this->hasOffset_ ? int(8 * this->getScale()) : 0;
+    return this->hasOffset_ ? int(8 * this->scale()) : 0;
 }
 
 }  // namespace chatterino

@@ -48,7 +48,7 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
 
     this->style()->drawPrimitive(QStyle::PE_Widget, &opt, &painter, this);
 
-    int a = (this->height() - (20 * this->getScale())) / 2;
+    int a = (this->height() - (20 * this->scale())) / 2;
     QPixmap pixmap = this->ui_.icon.pixmap(
         QSize(this->height() - a * 2, this->height() - a * 2));
 

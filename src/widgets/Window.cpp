@@ -50,11 +50,11 @@ Window::Window(WindowType type)
 
     if (type == WindowType::Main)
     {
-        this->resize(int(600 * this->getScale()), int(500 * this->getScale()));
+        this->resize(int(600 * this->scale()), int(500 * this->scale()));
     }
     else
     {
-        this->resize(int(300 * this->getScale()), int(500 * this->getScale()));
+        this->resize(int(300 * this->scale()), int(500 * this->scale()));
     }
 }
 
@@ -192,7 +192,7 @@ void Window::addCustomTitlebarButtons()
         getApp()->windows->showAccountSelectPopup(this->userLabel_->mapToGlobal(
             this->userLabel_->rect().bottomLeft()));
     });
-    this->userLabel_->setMinimumWidth(20 * getScale());
+    this->userLabel_->setMinimumWidth(20 * scale());
 }
 
 void Window::addDebugStuff()

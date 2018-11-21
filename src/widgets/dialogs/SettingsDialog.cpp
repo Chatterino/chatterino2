@@ -33,7 +33,7 @@ SettingsDialog::SettingsDialog()
     this->initUi();
     this->addTabs();
 
-    this->scaleChangedEvent(this->getScale());
+    this->scaleChangedEvent(this->scale());
 
     this->overrideBackgroundColor_ = QColor("#111111");
     this->themeChangedEvent();

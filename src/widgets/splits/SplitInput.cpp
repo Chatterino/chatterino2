@@ -40,7 +40,7 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     // misc
     this->installKeyPressedEvent();
-    this->scaleChangedEvent(this->getScale());
+    this->scaleChangedEvent(this->scale());
 }
 
 void SplitInput::initLayout()
@@ -76,11 +76,11 @@ void SplitInput::initLayout()
 
     // set edit font
     this->ui_.textEdit->setFont(
-        app->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
+        app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
 
     this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
         this->ui_.textEdit->setFont(
-            app->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
+            app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
     }));
 
     // open emote popup
@@ -111,9 +111,9 @@ void SplitInput::scaleChangedEvent(float scale)
     this->updateEmoteButton();
 
     // set maximum height
-    this->setMaximumHeight(int(150 * this->getScale()));
+    this->setMaximumHeight(int(150 * this->scale()));
     this->ui_.textEdit->setFont(
-        getApp()->fonts->getFont(FontStyle::ChatMedium, this->getScale()));
+        getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale()));
 }
 
 void SplitInput::themeChangedEvent()
@@ -128,14 +128,14 @@ void SplitInput::themeChangedEvent()
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
     this->ui_.hbox->setMargin(
-        int((this->theme->isLightTheme() ? 4 : 2) * this->getScale()));
+        int((this->theme->isLightTheme() ? 4 : 2) * this->scale()));
 
     this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
 }
 
 void SplitInput::updateEmoteButton()
 {
-    float scale = this->getScale();
+    float scale = this->scale();
 
     QString text = "<img src=':/buttons/emote.svg' width='xD' height='xD' />";
     text.replace("xD", QString::number(int(12 * scale)));
@@ -172,8 +172,8 @@ void SplitInput::openEmotePopup()
         });
     }
 
-    this->emotePopup_->resize(int(300 * this->emotePopup_->getScale()),
-                              int(500 * this->emotePopup_->getScale()));
+    this->emotePopup_->resize(int(300 * this->emotePopup_->scale()),
+                              int(500 * this->emotePopup_->scale()));
     this->emotePopup_->loadChannel(this->split_->getChannel());
     this->emotePopup_->show();
     this->emotePopup_->activateWindow();
@@ -428,7 +428,7 @@ void SplitInput::editTextChanged()
 
     if (text.length() > 0 && getSettings()->showMessageLength)
     {
-        labelText = QString::number(text.length());       
+        labelText = QString::number(text.length());
     }
     else
     {
@@ -444,7 +444,7 @@ void SplitInput::paintEvent(QPaintEvent *)
 
     if (this->theme->isLightTheme())
     {
-        int s = int(3 * this->getScale());
+        int s = int(3 * this->scale());
         QRect rect = this->rect().marginsRemoved(QMargins(s - 1, s - 1, s, s));
 
         painter.fillRect(rect, this->theme->splits.input.background);
@@ -454,7 +454,7 @@ void SplitInput::paintEvent(QPaintEvent *)
     }
     else
     {
-        int s = int(1 * this->getScale());
+        int s = int(1 * this->scale());
         QRect rect = this->rect().marginsRemoved(QMargins(s - 1, s - 1, s, s));
 
         painter.fillRect(rect, this->theme->splits.input.background);

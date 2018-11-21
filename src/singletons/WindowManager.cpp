@@ -84,9 +84,10 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->enableTwitchEmotes);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
-    this->wordFlagsListener_.cb = [this](auto) {
-        this->updateWordTypeMask();  //
-    };
+    // REMOVED
+    // this->wordFlagsListener_.cb = [this](auto) {
+    //    this->updateWordTypeMask();  //
+    //};
 
     this->saveTimer = new QTimer;
 

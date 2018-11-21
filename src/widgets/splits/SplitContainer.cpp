@@ -406,7 +406,7 @@ void SplitContainer::layout()
     std::vector<ResizeRect> _resizeRects;
     this->baseNode_.layout(
         Split::modifierStatus == showAddSplitRegions || this->isDragging_,
-        this->getScale(), _dropRects, _resizeRects);
+        this->scale(), _dropRects, _resizeRects);
 
     this->dropRects_ = _dropRects;
 

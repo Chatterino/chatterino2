@@ -20,7 +20,7 @@ Scrollbar::Scrollbar(ChannelView *parent)
     : BaseWidget(parent)
     , currentValueAnimation_(this, "currentValue_")
 {
-    resize(int(16 * this->getScale()), 100);
+    resize(int(16 * this->scale()), 100);
     this->currentValueAnimation_.setDuration(150);
     this->currentValueAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::OutCubic));
@@ -237,7 +237,7 @@ void Scrollbar::printCurrentState(const QString &prefix) const
 void Scrollbar::paintEvent(QPaintEvent *)
 {
     bool mouseOver = this->mouseOverIndex_ != -1;
-    int xOffset = mouseOver ? 0 : width() - int(4 * this->getScale());
+    int xOffset = mouseOver ? 0 : width() - int(4 * this->scale());
 
     QPainter painter(this);
     painter.fillRect(rect(), this->theme->scrollbars.background);
@@ -320,7 +320,7 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
 void Scrollbar::resizeEvent(QResizeEvent *)
 {
-    this->resize(int(16 * this->getScale()), this->height());
+    this->resize(int(16 * this->scale()), this->height());
 }
 
 void Scrollbar::mouseMoveEvent(QMouseEvent *event)

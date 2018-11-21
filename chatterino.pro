@@ -6,34 +6,20 @@
 
 message(----)
 
+# define project shit
 QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util
-macx {
-    # osx
-    CONFIG            += c++14
-    DEFINES += PAJLADA_SETTINGS_BOOST_OPTIONAL
-} else {
-    CONFIG            += c++17
-    win32-msvc* {
-        # win32 msvc
-        QMAKE_CXXFLAGS += /std:c++17
-    } else {
-        # clang/gcc on linux or win32
-        QMAKE_CXXFLAGS += -std=c++17
-    }
-}
+
 INCLUDEPATH       += src/
 TARGET             = chatterino
 TEMPLATE           = app
-DEFINES           += QT_DEPRECATED_WARNINGS
 PRECOMPILED_HEADER = src/PrecompiledHeader.hpp
 CONFIG            += precompile_header
 
-
-debug {
-    DEFINES += QT_DEBUG
-}
+# include appbase
+include(../appbase/appbase/main/main.pro)
+INCLUDEPATH += ../appbase/appbase/main
 
 useBreakpad {
     LIBS += -L$$PWD/lib/qBreakpad/handler/build
@@ -50,23 +36,17 @@ equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
 #macx:ICON = resources/images/chatterino2.icns
 win32:RC_FILE = resources/windows.rc
 
-
 macx {
     LIBS += -L/usr/local/lib
 }
 
 # Submodules
-include(dependencies/rapidjson.pri)
-include(dependencies/serialize.pri)
-include(dependencies/settings.pri)
-include(dependencies/signals.pri)
 include(dependencies/humanize.pri)
 include(dependencies/fmt.pri)
 DEFINES += IRC_NAMESPACE=Communi
 include(dependencies/libcommuni.pri)
 include(dependencies/websocketpp.pri)
 include(dependencies/openssl.pri)
-include(dependencies/boost.pri)
 include(dependencies/wintoast.pri)
 
 # Optional feature: QtWebEngine
@@ -75,43 +55,6 @@ include(dependencies/wintoast.pri)
 #    QT += webenginewidgets
 #    DEFINES += "USEWEBENGINE"
 #}
-
-linux {
-    LIBS += -lrt
-}
-
-win32 {
-    LIBS += -luser32
-}
-
-# OSX include directory
-macx {
-    INCLUDEPATH += /usr/local/include
-    INCLUDEPATH += /usr/local/opt/openssl/include
-    LIBS += -L/usr/local/opt/openssl/lib
-}
-
-# Optional dependency on Windows SDK 7
-!contains(QMAKE_TARGET.arch, x86_64) {
-    win32:exists(C:\Program Files\Microsoft SDKs\Windows\v7.1\Include\Windows.h) {
-        LIBS += -L"C:\Program Files\Microsoft SDKs\Windows\v7.1\Lib" \
-            -ldwmapi
-
-        DEFINES += "USEWINSDK"
-        message(Using Windows SDK 7)
-    }
-}
-
-# Optional dependency on Windows SDK 10
-contains(QMAKE_TARGET.arch, x86_64) {
-    WIN_SDK_VERSION = $$(WindowsSDKVersion)
-    !isEmpty(WIN_SDK_VERSION) {
-        !equals(WIN_SDK_VERSION, "\\") {
-            DEFINES += "USEWINSDK"
-            message(Using Windows SDK 10)
-        }
-    }
-}
 
 werr {
     QMAKE_CXXFLAGS += -Werror
@@ -184,7 +127,6 @@ SOURCES += \
     src/widgets/AccountSwitchPopupWidget.cpp \
     src/widgets/AccountSwitchWidget.cpp \
     src/widgets/AttachedWindow.cpp \
-    src/widgets/BaseWidget.cpp \
     src/widgets/BaseWindow.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
     src/widgets/dialogs/LastRunCrashDialog.cpp \
@@ -381,7 +323,6 @@ HEADERS  += \
     src/widgets/AccountSwitchPopupWidget.hpp \
     src/widgets/AccountSwitchWidget.hpp \
     src/widgets/AttachedWindow.hpp \
-    src/widgets/BaseWidget.hpp \
     src/widgets/BaseWindow.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
@@ -497,56 +438,7 @@ DISTFILES +=
 
 FORMS +=
 
-# Define warning flags for Chatterino
-win32-msvc* {
-    QMAKE_CXXFLAGS_WARN_ON = /W4
-    # 4714 - function marked as __forceinline not inlined
-    # 4996 - occurs when the compiler encounters a function or variable that is marked as deprecated.
-    #        These functions may have a different preferred name, may be insecure or have
-    #        a more secure variant, or may be obsolete.
-    # 4505 - unreferenced local version has been removed
-    # 4127 - conditional expression is constant
-    # 4503 - decorated name length exceeded, name was truncated
-    # 4100 - unreferences formal parameter
-    # 4305 - possible truncation of data
-    # 4267 - possible loss of data in return
-    QMAKE_CXXFLAGS_WARN_ON += /wd4714
-    QMAKE_CXXFLAGS_WARN_ON += /wd4996
-    QMAKE_CXXFLAGS_WARN_ON += /wd4505
-    QMAKE_CXXFLAGS_WARN_ON += /wd4127
-    QMAKE_CXXFLAGS_WARN_ON += /wd4503
-    QMAKE_CXXFLAGS_WARN_ON += /wd4100
-    QMAKE_CXXFLAGS_WARN_ON += /wd4305
-    QMAKE_CXXFLAGS_WARN_ON += /wd4267
-
-} else {
-    QMAKE_CXXFLAGS_WARN_ON = -Wall
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-function
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-switch
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-deprecated-declarations
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-sign-compare
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-variable
-
-    # Disabling strict-aliasing warnings for now, although we probably want to re-enable this in the future
-    QMAKE_CXXFLAGS_WARN_ON += -Wno-strict-aliasing
-
-    QMAKE_CXXFLAGS_WARN_ON += -Werror=return-type
-
-    equals(QMAKE_CXX, "clang++") {
-        QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-local-typedef
-        QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-private-field
-    } else {
-        QMAKE_CXXFLAGS_WARN_ON += -Wno-class-memaccess
-    }
-}
-
 # do not use windows min/max macros
 #win32 {
 #    DEFINES += NOMINMAX
 #}
-
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
-
-linux {
-    QMAKE_LFLAGS += -lrt
-}

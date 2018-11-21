@@ -80,7 +80,7 @@ void TooltipWidget::updateFont()
     auto app = getApp();
 
     this->setFont(
-        app->fonts->getFont(FontStyle::ChatMediumSmall, this->getScale()));
+        app->fonts->getFont(FontStyle::ChatMediumSmall, this->scale()));
 }
 
 void TooltipWidget::setText(QString text)

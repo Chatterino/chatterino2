@@ -560,7 +560,7 @@ void SplitHeader::mouseMoveEvent(QMouseEvent *event)
 {
     if (this->dragging_)
     {
-        if (distance(this->dragStart_, event->pos()) > 15 * this->getScale())
+        if (distance(this->dragStart_, event->pos()) > 15 * this->scale())
         {
             this->split_->drag();
             this->dragging_ = false;

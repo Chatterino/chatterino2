@@ -120,7 +120,7 @@ void Button::paintEvent(QPaintEvent *)
         }
 
         QRect rect = this->rect();
-        int s = this->enableMargin_ ? int(6 * this->getScale()) : 0;
+        int s = this->enableMargin_ ? int(6 * this->scale()) : 0;
 
         rect.moveLeft(s);
         rect.setRight(rect.right() - s - s);

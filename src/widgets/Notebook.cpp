@@ -283,7 +283,7 @@ QWidget *Notebook::tabAt(QPoint point, int &index, int maxWidth)
     for (auto &item : this->items_)
     {
         auto rect = item.tab->getDesiredRect();
-        rect.setHeight(int(this->getScale() * 24));
+        rect.setHeight(int(this->scale() * 24));
 
         rect.setWidth(std::min(maxWidth, rect.width()));
 
@@ -334,7 +334,7 @@ void Notebook::setShowAddButton(bool value)
 
 void Notebook::scaleChangedEvent(float scale)
 {
-    float h = (NOTEBOOK_TAB_HEIGHT - 1) * this->getScale();
+    float h = (NOTEBOOK_TAB_HEIGHT - 1) * this->scale();
 
     this->addButton_->setFixedSize(h, h);
 
@@ -351,8 +351,8 @@ void Notebook::resizeEvent(QResizeEvent *)
 
 void Notebook::performLayout(bool animated)
 {
-    const auto left = int(2 * this->getScale());
-    const auto scale = this->getScale();
+    const auto left = int(2 * this->scale());
+    const auto scale = this->scale();
     const auto tabHeight = int(NOTEBOOK_TAB_HEIGHT * scale);
     const auto addButtonWidth = this->showAddButton_ ? tabHeight : 0;
 
@@ -449,7 +449,7 @@ void Notebook::paintEvent(QPaintEvent *event)
     BaseWidget::paintEvent(event);
 
     QPainter painter(this);
-    painter.fillRect(0, this->lineY_, this->width(), int(2 * this->getScale()),
+    painter.fillRect(0, this->lineY_, this->width(), int(2 * this->scale()),
                      this->theme->tabs.bottomLine);
 }
 

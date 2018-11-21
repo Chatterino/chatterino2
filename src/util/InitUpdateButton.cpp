@@ -15,7 +15,7 @@ void initUpdateButton(Button &button,
         auto dialog = new UpdateDialog();
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
         dialog->move(button.mapToGlobal(
-            QPoint(int(-100 * button.getScale()), button.height())));
+            QPoint(int(-100 * button.scale()), button.height())));
         dialog->show();
         dialog->raise();
 

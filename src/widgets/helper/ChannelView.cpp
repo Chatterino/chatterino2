@@ -336,7 +336,7 @@ void ChannelView::layoutVisibleMessages(
             auto message = messages[i];
 
             redrawRequired |=
-                message->layout(layoutWidth, this->getScale(), flags);
+                message->layout(layoutWidth, this->scale(), flags);
 
             y += message->getHeight();
         }
@@ -366,7 +366,7 @@ void ChannelView::updateScrollbar(
     {
         auto *message = messages[i].get();
 
-        message->layout(layoutWidth, this->getScale(), flags);
+        message->layout(layoutWidth, this->scale(), flags);
 
         h -= message->getHeight();
 
@@ -784,7 +784,7 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     // draw paused sign
     if (this->paused())
     {
-        auto a = this->getScale() * 16;
+        auto a = this->scale() * 16;
         auto brush = QBrush(QColor(127, 127, 127, 63));
         painter.fillRect(QRectF(this->width() - a, a / 4, a / 4, a), brush);
         painter.fillRect(QRectF(this->width() - a / 2, a / 4, a / 4, a), brush);
@@ -918,7 +918,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 else
                 {
                     snapshot[i - 1]->layout(this->getLayoutWidth(),
-                                            this->getScale(), this->getFlags());
+                                            this->scale(), this->getFlags());
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i - 1]->getHeight();
                 }
@@ -952,7 +952,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
                 else
                 {
                     snapshot[i + 1]->layout(this->getLayoutWidth(),
-                                            this->getScale(), this->getFlags());
+                                            this->scale(), this->getFlags());
 
                     scrollFactor = 1;
                     currentScrollLeft = snapshot[i + 1]->getHeight();
@@ -1605,7 +1605,7 @@ void ChannelView::showUserInfoPopup(const QString &userName)
     auto *userPopup = new UserInfoPopup;
     userPopup->setData(userName, this->channel_);
     userPopup->setActionOnFocusLoss(BaseWindow::Delete);
-    QPoint offset(int(150 * this->getScale()), int(70 * this->getScale()));
+    QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     userPopup->move(QCursor::pos() - offset);
     userPopup->show();
 }
@@ -1684,7 +1684,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 int ChannelView::getLayoutWidth() const
 {
     if (this->scrollBar_->isVisible())
-        return int(this->width() - 8 * this->getScale());
+        return int(this->width() - 8 * this->scale());
 
     return this->width();
 }

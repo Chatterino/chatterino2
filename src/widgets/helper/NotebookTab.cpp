@@ -84,12 +84,12 @@ void NotebookTab::themeChangedEvent()
 
 void NotebookTab::updateSize()
 {
-    float scale = getScale();
+    float scale = this->scale();
 
     int width;
     QFontMetrics metrics = getApp()->fonts->getFontMetrics(
         FontStyle::UiTabs,
-        float(qreal(this->getScale()) * this->devicePixelRatioF()));
+        float(qreal(this->scale()) * this->devicePixelRatioF()));
 
     if (this->hasXButton())
     {
@@ -267,7 +267,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
 {
     auto app = getApp();
     QPainter painter(this);
-    float scale = this->getScale();
+    float scale = this->scale();
 
     painter.setFont(getApp()->fonts->getFont(
         FontStyle::UiTabs,
@@ -572,7 +572,7 @@ QRect NotebookTab::getXRect()
     //        return QRect();
     //    }
 
-    float s = this->getScale();
+    float s = this->scale();
     return QRect(this->width() - static_cast<int>(20 * s),
                  static_cast<int>(9 * s), static_cast<int>(16 * s),
                  static_cast<int>(16 * s));

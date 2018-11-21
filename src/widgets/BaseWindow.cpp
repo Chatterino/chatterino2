@@ -68,9 +68,9 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     //    QTimer::this->scaleChangedEvent(this->getScale());
 }
 
-float BaseWindow::getScale() const
+float BaseWindow::scale() const
 {
-    return this->getOverrideScale().value_or(this->scale_);
+    return this->overrideScale().value_or(this->scale_);
 }
 
 BaseWindow::Flags BaseWindow::getFlags()
@@ -597,7 +597,7 @@ void BaseWindow::calcButtonsSizes()
         return;
     }
 
-    if ((this->width() / this->getScale()) < 300)
+    if ((this->width() / this->scale()) < 300)
     {
         if (this->ui_.minButton)
             this->ui_.minButton->setScaleIndependantSize(30, 30);
@@ -729,7 +729,7 @@ bool BaseWindow::handleSIZE(MSG *msg)
         {
             if (msg->wParam == SIZE_MAXIMIZED)
             {
-                auto offset = int(this->getScale() * 8);
+                auto offset = int(this->scale() * 8);
 
                 this->ui_.windowLayout->setContentsMargins(offset, offset,
                                                            offset, offset);

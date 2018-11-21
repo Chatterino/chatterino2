@@ -1,6 +1,6 @@
 #pragma once
 
-#include "BaseWidget.hpp"
+#include "widgets/BaseWidget.hpp"
 
 #include <functional>
 #include <pajlada/signals/signalholder.hpp>
@@ -48,7 +48,7 @@ public:
 
     void moveTo(QWidget *widget, QPoint point, bool offset = true);
 
-    virtual float getScale() const override;
+    virtual float scale() const override;
 
     Flags getFlags();
 

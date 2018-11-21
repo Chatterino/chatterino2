@@ -3,6 +3,7 @@
 #include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
+#include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 namespace chatterino {
@@ -99,7 +100,7 @@ private:
     Window *selectedWindow_{};
 
     MessageElementFlags wordFlags_{};
-    pajlada::Settings::SettingListener wordFlagsListener_;
+    pajlada::SettingListener wordFlagsListener_;
 
     QTimer *saveTimer;
 };
