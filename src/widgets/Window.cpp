@@ -16,7 +16,7 @@
 #include "widgets/dialogs/WelcomeDialog.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/NotebookTab.hpp"
-#include "widgets/helper/Shortcut.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"

@@ -17,7 +17,7 @@ class Theme final : public Singleton
 public:
     Theme();
 
-    inline bool isLightTheme() const
+    bool isLightTheme() const
     {
         return this->isLight_;
     }

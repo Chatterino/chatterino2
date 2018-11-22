@@ -23,7 +23,7 @@
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/helper/SearchPopup.hpp"
-#include "widgets/helper/Shortcut.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitHeader.hpp"

@@ -16,6 +16,8 @@ TARGET             = chatterino
 TEMPLATE           = app
 PRECOMPILED_HEADER = src/PrecompiledHeader.hpp
 CONFIG            += precompile_header
+DEFINES           += CHATTERINO
+DEFINES           += "AB_NAMESPACE=chatterino"
 
 useBreakpad {
     LIBS += -L$$PWD/lib/qBreakpad/handler/build
@@ -39,7 +41,6 @@ macx {
 # Submodules
 include(lib/appbase.pri)
 include(lib/humanize.pri)
-include(lib/fmt.pri)
 DEFINES += IRC_NAMESPACE=Communi
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
@@ -114,11 +115,9 @@ SOURCES += \
     src/util/DebugCount.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamLink.cpp \
-    src/util/WindowsHelper.cpp \
     src/widgets/AccountSwitchPopupWidget.cpp \
     src/widgets/AccountSwitchWidget.cpp \
     src/widgets/AttachedWindow.cpp \
-    src/widgets/BaseWindow.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
     src/widgets/dialogs/LastRunCrashDialog.cpp \
     src/widgets/dialogs/LoginDialog.cpp \
@@ -142,7 +141,6 @@ SOURCES += \
     src/widgets/helper/SettingsDialogTab.cpp \
     src/widgets/helper/SignalLabel.cpp \
     src/widgets/helper/TitlebarButton.cpp \
-    src/widgets/Label.cpp \
     src/widgets/Notebook.cpp \
     src/widgets/Scrollbar.cpp \
     src/widgets/settingspages/AboutPage.cpp \
@@ -164,13 +162,11 @@ SOURCES += \
     src/widgets/splits/SplitInput.cpp \
     src/widgets/splits/SplitOverlay.cpp \
     src/widgets/StreamView.cpp \
-    src/widgets/TooltipWidget.cpp \
     src/widgets/Window.cpp \
     src/common/LinkParser.cpp \
     src/controllers/moderationactions/ModerationActions.cpp \
     src/singletons/NativeMessaging.cpp \
     src/singletons/Emotes.cpp \
-    src/singletons/Fonts.cpp \
     src/singletons/Logging.cpp \
     src/singletons/Paths.cpp \
     src/singletons/Resources.cpp \
@@ -204,7 +200,6 @@ SOURCES += \
     src/controllers/notifications/NotificationModel.cpp \
     src/singletons/Toasts.cpp \
     src/common/DownloadManager.cpp \
-    src/widgets/helper/EffectLabel.cpp \
     src/widgets/helper/Button.cpp \
     src/messages/MessageContainer.cpp \
     src/debug/Benchmark.cpp \
@@ -233,7 +228,6 @@ HEADERS  += \
     src/common/NetworkWorker.hpp \
     src/common/NullablePtr.hpp \
     src/common/ProviderId.hpp \
-    src/util/RapidJsonSerializeQString.hpp \
     src/common/SignalVectorModel.hpp \
     src/common/Version.hpp \
     src/controllers/accounts/Account.hpp \
@@ -303,18 +297,15 @@ HEADERS  += \
     src/util/Helpers.hpp \
     src/util/IrcHelpers.hpp \
     src/util/LayoutCreator.hpp \
-    src/util/PostToThread.hpp \
     src/util/QStringHash.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamLink.hpp \
-    src/util/WindowsHelper.hpp \
     src/widgets/AccountSwitchPopupWidget.hpp \
     src/widgets/AccountSwitchWidget.hpp \
     src/widgets/AttachedWindow.hpp \
-    src/widgets/BaseWindow.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
     src/widgets/dialogs/LoginDialog.hpp \
@@ -337,10 +328,8 @@ HEADERS  += \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
-    src/widgets/helper/Shortcut.hpp \
     src/widgets/helper/SignalLabel.hpp \
     src/widgets/helper/TitlebarButton.hpp \
-    src/widgets/Label.hpp \
     src/widgets/Notebook.hpp \
     src/widgets/Scrollbar.hpp \
     src/widgets/settingspages/AboutPage.hpp \
@@ -362,14 +351,12 @@ HEADERS  += \
     src/widgets/splits/SplitInput.hpp \
     src/widgets/splits/SplitOverlay.hpp \
     src/widgets/StreamView.hpp \
-    src/widgets/TooltipWidget.hpp \
     src/widgets/Window.hpp \
     src/providers/twitch/TwitchCommon.hpp \
     src/util/IsBigEndian.hpp \
     src/common/LinkParser.hpp \
     src/controllers/moderationactions/ModerationActions.hpp \
     src/singletons/Emotes.hpp \
-    src/singletons/Fonts.hpp \
     src/singletons/Logging.hpp \
     src/singletons/Paths.hpp \
     src/singletons/Resources.hpp \
@@ -409,7 +396,6 @@ HEADERS  += \
     src/controllers/notifications/NotificationModel.hpp \
     src/singletons/Toasts.hpp \
     src/common/DownloadManager.hpp \
-    src/widgets/helper/EffectLabel.hpp \
     src/util/LayoutHelper.hpp \
     src/widgets/helper/Button.hpp \
     src/messages/MessageContainer.hpp \
