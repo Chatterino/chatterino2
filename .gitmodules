@@ -1,18 +1,9 @@
 [submodule "lib/libcommuni"]
 	path = lib/libcommuni
 	url = https://github.com/hemirt/libcommuni
-[submodule "lib/settings"]
-	path = lib/settings
-	url = https://github.com/pajlada/settings
 [submodule "lib/humanize"]
 	path = lib/humanize
 	url = https://github.com/pajlada/humanize.git
-[submodule "lib/signals"]
-	path = lib/signals
-	url = https://github.com/pajlada/signals.git
-[submodule "lib/rapidjson"]
-	path = lib/rapidjson
-	url = https://github.com/Tencent/rapidjson.git
 [submodule "lib/websocketpp"]
 	path = lib/websocketpp
 	url = https://github.com/zaphoyd/websocketpp.git
@@ -24,6 +15,3 @@
 	path = lib/WinToast
 	url = https://github.com/mohabouje/WinToast.git
 	
-[submodule "lib/serialize"]
-	path = lib/serialize
-	url = https://github.com/pajlada/serialize.git

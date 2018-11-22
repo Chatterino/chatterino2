@@ -41,13 +41,13 @@ macx {
 }
 
 # Submodules
-include(dependencies/humanize.pri)
-include(dependencies/fmt.pri)
+include(lib/humanize.pri)
+include(lib/fmt.pri)
 DEFINES += IRC_NAMESPACE=Communi
-include(dependencies/libcommuni.pri)
-include(dependencies/websocketpp.pri)
-include(dependencies/openssl.pri)
-include(dependencies/wintoast.pri)
+include(lib/libcommuni.pri)
+include(lib/websocketpp.pri)
+include(lib/openssl.pri)
+include(lib/wintoast.pri)
 
 # Optional feature: QtWebEngine
 #exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
