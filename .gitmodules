@@ -15,3 +15,6 @@
 	path = lib/WinToast
 	url = https://github.com/mohabouje/WinToast.git
 	
+[submodule "lib/appbase"]
+	path = lib/appbase
+	url = https://github.com/fourtf/appbase

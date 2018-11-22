@@ -17,10 +17,6 @@ TEMPLATE           = app
 PRECOMPILED_HEADER = src/PrecompiledHeader.hpp
 CONFIG            += precompile_header
 
-# include appbase
-include(../appbase/appbase/main/main.pro)
-INCLUDEPATH += ../appbase/appbase/main
-
 useBreakpad {
     LIBS += -L$$PWD/lib/qBreakpad/handler/build
     include(lib/qBreakpad/qBreakpad.pri)
@@ -41,6 +37,7 @@ macx {
 }
 
 # Submodules
+include(lib/appbase.pri)
 include(lib/humanize.pri)
 include(lib/fmt.pri)
 DEFINES += IRC_NAMESPACE=Communi
@@ -55,12 +52,6 @@ include(lib/wintoast.pri)
 #    QT += webenginewidgets
 #    DEFINES += "USEWEBENGINE"
 #}
-
-werr {
-    QMAKE_CXXFLAGS += -Werror
-
-    message("Enabling error on warning")
-}
 
 SOURCES += \
     src/Application.cpp \
