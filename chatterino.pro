@@ -108,7 +108,6 @@ SOURCES += \
     src/providers/twitch/TwitchMessageBuilder.cpp \
     src/providers/twitch/TwitchServer.cpp \
     src/providers/twitch/TwitchUser.cpp \
-    src/common/ChatterinoSetting.cpp \
     src/singletons/helper/GifTimer.cpp \
     src/singletons/helper/LoggingChannel.cpp \
     src/controllers/moderationactions/ModerationAction.cpp \
@@ -141,7 +140,6 @@ SOURCES += \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
     src/widgets/helper/SignalLabel.cpp \
-    src/widgets/helper/TitlebarButton.cpp \
     src/widgets/Notebook.cpp \
     src/widgets/Scrollbar.cpp \
     src/widgets/settingspages/AboutPage.cpp \
@@ -201,9 +199,7 @@ SOURCES += \
     src/controllers/notifications/NotificationModel.cpp \
     src/singletons/Toasts.cpp \
     src/common/DownloadManager.cpp \
-    src/widgets/helper/Button.cpp \
     src/messages/MessageContainer.cpp \
-    src/debug/Benchmark.cpp \
     src/common/UsernameSet.cpp \
     src/widgets/settingspages/AdvancedPage.cpp \
     src/util/IncognitoBrowser.cpp \
@@ -250,9 +246,6 @@ HEADERS  += \
     src/controllers/taggedusers/TaggedUser.hpp \
     src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
-    src/debug/AssertInGuiThread.hpp \
-    src/debug/Benchmark.hpp \
-    src/debug/Log.hpp \
     src/messages/Image.hpp \
     src/messages/layouts/MessageLayout.hpp \
     src/messages/layouts/MessageLayoutContainer.hpp \
@@ -285,7 +278,6 @@ HEADERS  += \
     src/providers/twitch/TwitchMessageBuilder.hpp \
     src/providers/twitch/TwitchServer.hpp \
     src/providers/twitch/TwitchUser.hpp \
-    src/common/ChatterinoSetting.hpp \
     src/singletons/helper/GifTimer.hpp \
     src/singletons/helper/LoggingChannel.hpp \
     src/controllers/moderationactions/ModerationAction.hpp \
@@ -295,7 +287,6 @@ HEADERS  += \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
     src/util/DistanceBetweenPoints.hpp \
-    src/util/Helpers.hpp \
     src/util/IrcHelpers.hpp \
     src/util/LayoutCreator.hpp \
     src/util/QStringHash.hpp \
@@ -330,7 +321,6 @@ HEADERS  += \
     src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
     src/widgets/helper/SignalLabel.hpp \
-    src/widgets/helper/TitlebarButton.hpp \
     src/widgets/Notebook.hpp \
     src/widgets/Scrollbar.hpp \
     src/widgets/settingspages/AboutPage.hpp \
@@ -367,7 +357,6 @@ HEADERS  += \
     src/singletons/Theme.hpp \
     src/common/SignalVector.hpp \
     src/widgets/dialogs/LogsPopup.hpp \
-    src/common/Singleton.hpp \
     src/controllers/moderationactions/ModerationActionModel.hpp \
     src/widgets/settingspages/LookPage.hpp \
     src/widgets/settingspages/FeelPage.hpp \
@@ -398,7 +387,6 @@ HEADERS  += \
     src/singletons/Toasts.hpp \
     src/common/DownloadManager.hpp \
     src/util/LayoutHelper.hpp \
-    src/widgets/helper/Button.hpp \
     src/messages/MessageContainer.hpp \
     src/common/UsernameSet.hpp \
     src/widgets/settingspages/AdvancedPage.hpp \

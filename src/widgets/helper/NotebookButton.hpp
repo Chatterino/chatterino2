@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Button.hpp"
+#include "widgets/helper/Button.hpp"
 
 #include <QWidget>
 

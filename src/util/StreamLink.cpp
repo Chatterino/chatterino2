@@ -1,9 +1,9 @@
 #include "util/StreamLink.hpp"
 
 #include "Application.hpp"
-#include "Helpers.hpp"
 #include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Helpers.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 
 #include <QErrorMessage>
