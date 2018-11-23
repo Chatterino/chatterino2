@@ -18,6 +18,7 @@ PRECOMPILED_HEADER = src/PrecompiledHeader.hpp
 CONFIG            += precompile_header
 DEFINES           += CHATTERINO
 DEFINES           += "AB_NAMESPACE=chatterino"
+CONFIG            += AB_NOT_STANDALONE
 
 useBreakpad {
     LIBS += -L$$PWD/lib/qBreakpad/handler/build
