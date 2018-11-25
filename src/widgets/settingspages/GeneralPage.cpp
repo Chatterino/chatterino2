@@ -158,12 +158,18 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         getApp()->fonts->chatFontSize,
         [](auto val) { return QString::number(val) + "pt"; },
         [](auto args) { return fuzzyToInt(args.value, 10); });
-    layout.addDropdown<int>(
+    layout.addDropdown<float>(
         "UI Scale",
         {"0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "Default", "1.2x", "1.4x",
          "1.6x", "1.8x", "2x", "2.33x", "2.66x", "3x", "3.5x", "4x"},
-        s.uiScale, [](auto val) { return val + 5; },
-        [](auto args) { return args.index - 5; }, false);
+        s.uiScale,
+        [](auto val) {
+            if (val == 1)
+                return QString("Default");
+            else
+                return QString::number(val) + "x";
+        },
+        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
     layout.addCheckbox("Always on top", s.windowTopMost);
 
     layout.addTitle("Interface");

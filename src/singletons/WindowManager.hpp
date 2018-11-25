@@ -27,13 +27,6 @@ public:
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
     static IndirectChannel decodeChannel(const QJsonObject &obj);
 
-    static int clampUiScale(int scale);
-    static float getUiScaleValue();
-    static float getUiScaleValue(int scale);
-
-    static const int uiScaleMin;
-    static const int uiScaleMax;
-
     void showSettingsDialog(
         SettingsDialogPreference preference = SettingsDialogPreference());
 

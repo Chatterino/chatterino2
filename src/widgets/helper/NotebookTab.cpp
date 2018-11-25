@@ -100,7 +100,14 @@ void NotebookTab::updateSize()
         width = (metrics.width(this->getTitle()) + int(16 * scale));
     }
 
-    width = clamp(width, this->height(), int(150 * scale));
+    if (this->height() > 150 * scale)
+    {
+        width = this->height();
+    }
+    else
+    {
+        width = clamp(width, this->height(), int(150 * scale));
+    }
     auto height = int(NOTEBOOK_TAB_HEIGHT * scale);
 
     if (this->width() != width || this->height() != height)

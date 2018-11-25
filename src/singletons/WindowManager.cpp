@@ -32,9 +32,6 @@ namespace chatterino {
 using SplitNode = SplitContainer::Node;
 using SplitDirection = SplitContainer::Direction;
 
-const int WindowManager::uiScaleMin = -5;
-const int WindowManager::uiScaleMax = 10;
-
 void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
 {
     QTimer::singleShot(
@@ -623,57 +620,6 @@ int WindowManager::getGeneration() const
 void WindowManager::incGeneration()
 {
     this->generation_++;
-}
-
-int WindowManager::clampUiScale(int scale)
-{
-    return clamp(scale, uiScaleMin, uiScaleMax);
-}
-
-float WindowManager::getUiScaleValue()
-{
-    return getUiScaleValue(getSettings()->uiScale.getValue());
-}
-
-float WindowManager::getUiScaleValue(int scale)
-{
-    switch (clampUiScale(scale))
-    {
-        case -5:
-            return 0.5f;
-        case -4:
-            return 0.6f;
-        case -3:
-            return 0.7f;
-        case -2:
-            return 0.8f;
-        case -1:
-            return 0.9f;
-        case 0:
-            return 1;
-        case 1:
-            return 1.2f;
-        case 2:
-            return 1.4f;
-        case 3:
-            return 1.6f;
-        case 4:
-            return 1.8f;
-        case 5:
-            return 2;
-        case 6:
-            return 2.33f;
-        case 7:
-            return 2.66f;
-        case 8:
-            return 3;
-        case 9:
-            return 3.5f;
-        case 10:
-            return 4;
-        default:
-            assert(false);
-    }
 }
 
 }  // namespace chatterino

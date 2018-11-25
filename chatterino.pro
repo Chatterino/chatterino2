@@ -206,14 +206,12 @@ SOURCES += \
     src/widgets/splits/ClosedSplits.cpp \
     src/providers/ffz/FfzModBadge.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
-    src/util/FuzzyConvert.cpp
 
 HEADERS  += \
     src/Application.hpp \
     src/common/Channel.hpp \
     src/common/Common.hpp \
     src/common/CompletionModel.hpp \
-    src/common/FlagsEnum.hpp \
     src/common/Atomic.hpp \
     src/common/NetworkCommon.hpp \
     src/common/NetworkData.hpp \
@@ -282,10 +280,8 @@ HEADERS  += \
     src/singletons/helper/LoggingChannel.hpp \
     src/controllers/moderationactions/ModerationAction.hpp \
     src/singletons/WindowManager.hpp \
-    src/util/CombinePath.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
-    src/util/DistanceBetweenPoints.hpp \
     src/util/IrcHelpers.hpp \
     src/util/LayoutCreator.hpp \
     src/util/QStringHash.hpp \
@@ -365,7 +361,6 @@ HEADERS  += \
     src/providers/twitch/TwitchApi.hpp \
     src/messages/Emote.hpp \
     src/messages/ImageSet.hpp \
-    src/common/Outcome.hpp \
     src/providers/bttv/BttvEmotes.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/ffz/FfzEmotes.hpp \
@@ -383,7 +378,6 @@ HEADERS  += \
     src/controllers/notifications/NotificationModel.hpp \
     src/singletons/Toasts.hpp \
     src/common/DownloadManager.hpp \
-    src/util/LayoutHelper.hpp \
     src/messages/MessageContainer.hpp \
     src/common/UsernameSet.hpp \
     src/widgets/settingspages/AdvancedPage.hpp \
@@ -391,7 +385,6 @@ HEADERS  += \
     src/widgets/splits/ClosedSplits.hpp \
     src/providers/ffz/FfzModBadge.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
-    src/util/FuzzyConvert.hpp
 
 RESOURCES += \
     resources/resources.qrc \

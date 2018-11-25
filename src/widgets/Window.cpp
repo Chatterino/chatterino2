@@ -9,6 +9,7 @@
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -16,7 +17,6 @@
 #include "widgets/dialogs/WelcomeDialog.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/NotebookTab.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
@@ -289,8 +289,8 @@ void Window::addShortcuts()
         auto s = new QShortcut(QKeySequence::ZoomIn, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            getSettings()->uiScale.setValue(WindowManager::clampUiScale(
-                getSettings()->uiScale.getValue() + 1));
+            getSettings()->setClampedUiScale(
+                getSettings()->getClampedUiScale() + 0.1f);
         });
     }
 
@@ -299,8 +299,8 @@ void Window::addShortcuts()
         auto s = new QShortcut(QKeySequence::ZoomOut, this);
         s->setContext(Qt::WindowShortcut);
         QObject::connect(s, &QShortcut::activated, this, [] {
-            getSettings()->uiScale.setValue(WindowManager::clampUiScale(
-                getSettings()->uiScale.getValue() - 1));
+            getSettings()->setClampedUiScale(
+                getSettings()->getClampedUiScale() - 0.1f);
         });
     }
 

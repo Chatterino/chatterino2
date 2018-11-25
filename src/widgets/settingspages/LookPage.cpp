@@ -125,13 +125,6 @@ void LookPage::addInterfaceTab(LayoutCreator<QVBoxLayout> layout)
         box->addStretch(1);
     }
 
-    // ui scale
-    {
-        auto box = layout.emplace<QHBoxLayout>().withoutMargin();
-        box.emplace<QLabel>("Window scale: ");
-        box.append(this->createUiScaleSlider());
-    }
-
     layout.append(
         this->createCheckBox(WINDOW_TOPMOST, getSettings()->windowTopMost));
 
@@ -563,34 +556,6 @@ QLayout *LookPage::createFontChanger()
     });
 
     layout->addStretch(1);
-
-    return layout;
-}
-
-QLayout *LookPage::createUiScaleSlider()
-{
-    auto layout = new QHBoxLayout();
-    auto slider = new QSlider(Qt::Horizontal);
-    auto label = new QLabel();
-    layout->addWidget(slider);
-    layout->addWidget(label);
-
-    slider->setMinimum(WindowManager::uiScaleMin);
-    slider->setMaximum(WindowManager::uiScaleMax);
-    slider->setValue(
-        WindowManager::clampUiScale(getSettings()->uiScale.getValue()));
-
-    label->setMinimumWidth(100);
-
-    QObject::connect(slider, &QSlider::valueChanged, [](auto value) {
-        getSettings()->uiScale.setValue(value);
-    });
-
-    getSettings()->uiScale.connect(
-        [label](auto, auto) {
-            label->setText(QString::number(WindowManager::getUiScaleValue()));
-        },
-        this->connections_);
 
     return layout;
 }

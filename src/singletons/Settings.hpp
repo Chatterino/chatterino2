@@ -193,3 +193,7 @@ private:
 };
 
 }  // namespace chatterino
+
+#ifdef CHATTERINO
+#    include "singletons/Settings.hpp"
+#endif
