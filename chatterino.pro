@@ -18,6 +18,8 @@ PRECOMPILED_HEADER = src/PrecompiledHeader.hpp
 CONFIG            += precompile_header
 DEFINES           += CHATTERINO
 DEFINES           += "AB_NAMESPACE=chatterino"
+DEFINES           += AB_CUSTOM_THEME
+DEFINES           += AB_CUSTOM_SETTINGS
 CONFIG            += AB_NOT_STANDALONE
 
 useBreakpad {
@@ -139,7 +141,6 @@ SOURCES += \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
-    src/widgets/helper/SignalLabel.cpp \
     src/widgets/Notebook.cpp \
     src/widgets/Scrollbar.cpp \
     src/widgets/settingspages/AboutPage.cpp \
@@ -195,7 +196,6 @@ SOURCES += \
     src/RunGui.cpp \
     src/BrowserExtension.cpp \
     src/util/FormatTime.cpp \
-    src/util/FunctionEventFilter.cpp \
     src/controllers/notifications/NotificationModel.cpp \
     src/singletons/Toasts.cpp \
     src/common/DownloadManager.cpp \
@@ -282,7 +282,6 @@ HEADERS  += \
     src/singletons/helper/LoggingChannel.hpp \
     src/controllers/moderationactions/ModerationAction.hpp \
     src/singletons/WindowManager.hpp \
-    src/util/Clamp.hpp \
     src/util/CombinePath.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
@@ -320,7 +319,6 @@ HEADERS  += \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
-    src/widgets/helper/SignalLabel.hpp \
     src/widgets/Notebook.hpp \
     src/widgets/Scrollbar.hpp \
     src/widgets/settingspages/AboutPage.hpp \
@@ -382,7 +380,6 @@ HEADERS  += \
     src/RunGui.hpp \
     src/BrowserExtension.hpp \
     src/util/FormatTime.hpp \
-    src/util/FunctionEventFilter.hpp \
     src/controllers/notifications/NotificationModel.hpp \
     src/singletons/Toasts.hpp \
     src/common/DownloadManager.hpp \

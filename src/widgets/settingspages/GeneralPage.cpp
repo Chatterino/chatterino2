@@ -6,6 +6,7 @@
 
 #include "Application.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/Paths.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/FuzzyConvert.hpp"

@@ -7,6 +7,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchServer.hpp"
+#include "singletons/Paths.hpp"
 
 #ifdef Q_OS_WIN
 

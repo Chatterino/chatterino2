@@ -1,8 +1,7 @@
 #pragma once
 
-#include "Paths.hpp"
+#include "ABSettings.hpp"
 
-#include "common/ChatterinoSetting.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 
@@ -11,15 +10,12 @@
 
 namespace chatterino {
 
-void _actuallyRegisterSetting(
-    std::weak_ptr<pajlada::Settings::SettingData> setting);
-
-class Settings
+class Settings : public ABSettings
 {
     static Settings *instance;
 
 public:
-    Settings(Paths &paths);
+    Settings(const QString &settingsDirectory);
 
     static Settings &getInstance();
 
@@ -50,9 +46,7 @@ public:
         "/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessages = {
         "/appearance/messages/alternateMessageBackground", false};
-    IntSetting uiScale = {"/appearance/uiScale", 0};
     IntSetting boldScale = {"/appearance/boldScale", 57};
-    BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", false};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
@@ -194,15 +188,8 @@ public:
 
     QStringSetting cachePath = {"/cache/path", ""};
 
-    void saveSnapshot();
-    void restoreSnapshot();
-
 private:
     void updateModerationActions();
-
-    std::unique_ptr<rapidjson::Document> snapshot_;
 };
-
-Settings *getSettings();
 
 }  // namespace chatterino

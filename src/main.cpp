@@ -27,7 +27,7 @@ int main(int argc, char **argv)
     else
     {
         Paths paths;
-        Settings settings(paths);
+        Settings settings(paths.settingsDirectory);
 
         runGui(a, paths, settings);
     }
