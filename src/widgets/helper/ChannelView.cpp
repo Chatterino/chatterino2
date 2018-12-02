@@ -273,6 +273,17 @@ void ChannelView::themeChangedEvent()
     this->queueLayout();
 }
 
+void ChannelView::scaleChangedEvent(float scale)
+{
+    BaseWidget::scaleChangedEvent(scale);
+
+    if (this->goToBottom_)
+    {
+        this->goToBottom_->getLabel().setFont(
+            getFonts()->getFont(FontStyle::UiMedium, this->qtFontScale()));
+    }
+}
+
 void ChannelView::queueUpdate()
 {
     //    if (this->updateTimer.isActive()) {
@@ -716,7 +727,8 @@ void ChannelView::resizeEvent(QResizeEvent *)
     this->scrollBar_->setGeometry(this->width() - this->scrollBar_->width(), 0,
                                   this->scrollBar_->width(), this->height());
 
-    this->goToBottom_->setGeometry(0, this->height() - 32, this->width(), 32);
+    this->goToBottom_->setGeometry(0, this->height() - int(this->scale() * 26),
+                                   this->width(), int(this->scale() * 26));
 
     this->scrollBar_->raise();
 

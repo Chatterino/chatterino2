@@ -58,26 +58,43 @@ const ImagePtr &ImageSet::getImage3() const
 
 const ImagePtr &ImageSet::getImage(float scale) const
 {
-    scale *= getSettings()->emoteScale;
+    // get best image based on scale
+    auto &&result = [&]() -> const std::shared_ptr<Image> & {
+        scale *= getSettings()->emoteScale;
 
-    int quality = 1;
+        int quality = 1;
 
-    if (scale > 2.001f)
-        quality = 3;
-    else if (scale > 1.001f)
-        quality = 2;
+        if (scale > 2.001f)
+            quality = 3;
+        else if (scale > 1.001f)
+            quality = 2;
 
-    if (!this->imageX3_->isEmpty() && quality == 3)
-    {
-        return this->imageX3_;
-    }
+        if (!this->imageX3_->isEmpty() && quality == 3)
+        {
+            return this->imageX3_;
+        }
 
-    if (!this->imageX2_->isEmpty() && quality == 2)
-    {
+        if (!this->imageX2_->isEmpty() && quality == 2)
+        {
+            return this->imageX2_;
+        }
+
+        return this->imageX1_;
+    }();
+
+    // prefere other image if selected image is not loaded yet
+    if (result->pixmap())
+        return result;
+    else if (this->imageX1_->pixmap())
+        return this->imageX1_;
+    else if (this->imageX2_ && !this->imageX2_->isEmpty() &&
+             this->imageX2_->pixmap())
         return this->imageX2_;
-    }
-
-    return this->imageX1_;
+    else if (this->imageX3_ && !this->imageX3_->isEmpty() &&
+             this->imageX3_->pixmap())
+        return this->imageX3_;
+    else
+        return result;
 }
 
 bool ImageSet::operator==(const ImageSet &other) const

@@ -311,6 +311,7 @@ void Image::load()
     req.setExecuteConcurrently(true);
     req.setCaller(&this->object_);
     req.setUseQuickLoadCache(true);
+
     req.onSuccess([that = this, weak = weakOf(this)](auto result) -> Outcome {
         auto shared = weak.lock();
         if (!shared)
@@ -331,6 +332,7 @@ void Image::load()
 
         return Success;
     });
+
     req.onError([weak = weakOf(this)](auto result) -> bool {
         auto shared = weak.lock();
         if (!shared)
