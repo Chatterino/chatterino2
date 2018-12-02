@@ -234,20 +234,17 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
 
     auto app = getApp();
 
-    QFontMetrics metrics =
-        app->fonts->getFontMetrics(this->style_, this->scale_);
+    auto metrics = app->fonts->getFontMetrics(this->style_, this->scale_);
+    auto x = this->getRect().left();
 
-    int x = this->getRect().left();
-
-    for (int i = 0; i < this->getText().size(); i++)
+    for (auto i = 0; i < this->getText().size(); i++)
     {
-        auto &text = this->getText();
+        auto &&text = this->getText();
         auto width = metrics.width(this->getText()[i]);
 
         if (x + width > abs.x())
         {
-            if (text.size() > i + 1 &&
-                QChar::isLowSurrogate(text[i].unicode()))  //
+            if (text.size() > i + 1 && QChar::isLowSurrogate(text[i].unicode()))
             {
                 i++;
             }
@@ -258,7 +255,12 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
         x += width;
     }
 
-    return this->getSelectionIndexCount();
+    //    if (this->hasTrailingSpace() && abs.x() < this->getRect().right())
+    //    {
+    //        return this->getSelectionIndexCount() - 1;
+    //    }
+
+    return this->getSelectionIndexCount() - (this->hasTrailingSpace() ? 1 : 0);
 }
 
 int TextLayoutElement::getXFromIndex(int index)

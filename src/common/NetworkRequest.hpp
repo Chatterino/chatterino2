@@ -10,7 +10,7 @@ namespace chatterino {
 
 struct NetworkData;
 
-class NetworkRequest
+class NetworkRequest final
 {
     // Stores all data about the request that needs to be passed around to each
     // part of the request

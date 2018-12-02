@@ -62,9 +62,9 @@ const ImagePtr &ImageSet::getImage(float scale) const
 
     int quality = 1;
 
-    if (scale > 2.999)
+    if (scale > 2.001f)
         quality = 3;
-    else if (scale > 1.5)
+    else if (scale > 1.001f)
         quality = 2;
 
     if (!this->imageX3_->isEmpty() && quality == 3)

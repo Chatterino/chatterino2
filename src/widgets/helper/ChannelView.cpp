@@ -1684,7 +1684,7 @@ bool ChannelView::tryGetMessageAt(QPoint p,
 int ChannelView::getLayoutWidth() const
 {
     if (this->scrollBar_->isVisible())
-        return int(this->width() - 8 * this->scale());
+        return int(this->width() - scrollbarPadding * this->scale());
 
     return this->width();
 }

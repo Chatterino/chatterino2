@@ -96,7 +96,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     // top margin
     if (this->elements_.size() == 0)
     {
-        this->currentY_ = this->margin.top * this->scale_;
+        this->currentY_ = int(this->margin.top * this->scale_);
     }
 
     int newLineHeight = element->getRect().height();
@@ -169,7 +169,8 @@ void MessageLayoutContainer::breakLine()
         }
 
         element->setPosition(
-            QPoint(element->getRect().x() + xOffset + this->margin.left,
+            QPoint(element->getRect().x() + xOffset +
+                       int(this->margin.left * this->scale_),
                    element->getRect().y() + this->lineHeight_ + yExtra));
     }
 
@@ -198,7 +199,7 @@ void MessageLayoutContainer::breakLine()
 
     this->currentX_ = 0;
     this->currentY_ += this->lineHeight_;
-    this->height_ = this->currentY_ + (this->margin.bottom * this->scale_);
+    this->height_ = this->currentY_ + int(this->margin.bottom * this->scale_);
     this->lineHeight_ = 0;
     this->line_++;
 }
@@ -211,7 +212,8 @@ bool MessageLayoutContainer::atStartOfLine()
 bool MessageLayoutContainer::fitsInLine(int _width)
 {
     return this->currentX_ + _width <=
-           (this->width_ - this->margin.left - this->margin.right -
+           (this->width_ - int(this->margin.left * this->scale_) -
+            int(this->margin.right * this->scale_) -
             (this->line_ + 1 == MAX_UNCOLLAPSED_LINES ? this->dotdotdotWidth_
                                                       : 0));
 }
@@ -517,6 +519,8 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
 
     for (int i = 0; i < lineEnd; i++)
     {
+        auto &&element = this->elements_[i];
+
         // end of line
         if (i == lineEnd)
         {
@@ -526,18 +530,20 @@ int MessageLayoutContainer::getSelectionIndex(QPoint point)
         // before line
         if (i < lineStart)
         {
-            index += this->elements_[i]->getSelectionIndexCount();
+            index += element->getSelectionIndexCount();
             continue;
         }
 
         // this is the word
-        if (point.x() <= this->elements_[i]->getRect().right())
+        auto rightMargin = element->hasTrailingSpace() ? this->spaceWidth_ : 0;
+
+        if (point.x() <= element->getRect().right() + rightMargin)
         {
-            index += this->elements_[i]->getMouseOverIndex(point);
+            index += element->getMouseOverIndex(point);
             break;
         }
 
-        index += this->elements_[i]->getSelectionIndexCount();
+        index += element->getSelectionIndexCount();
     }
 
     return index;

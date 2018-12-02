@@ -201,6 +201,9 @@ private:
 
     std::unordered_set<std::shared_ptr<MessageLayout>> messagesOnScreen_;
 
+    static constexpr int leftPadding = 8;
+    static constexpr int scrollbarPadding = 8;
+
 private slots:
     void wordFlagsChanged()
     {

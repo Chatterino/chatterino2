@@ -11,6 +11,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
@@ -23,7 +24,6 @@
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "widgets/helper/SearchPopup.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitHeader.hpp"
@@ -297,7 +297,7 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         return;
     }
 
-    SelectChannelDialog *dialog = new SelectChannelDialog(this);
+    auto dialog = new SelectChannelDialog(this);
     if (!empty)
     {
         dialog->setSelectedChannel(this->getIndirectChannel());
