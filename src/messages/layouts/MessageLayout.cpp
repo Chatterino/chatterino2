@@ -250,7 +250,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     // draw message
     this->container_->paintElements(painter);
 
-    //#ifdef FOURTF
+#ifdef FOURTF
     // debug
     painter.setPen(QColor(255, 0, 0));
     painter.drawRect(buffer->rect().x(), buffer->rect().y(),
@@ -263,7 +263,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
                      QString::number(this->layoutCount_) + ", " +
                          QString::number(++this->bufferUpdatedCount_),
                      option);
-    //#endif
+#endif
 }
 
 void MessageLayout::invalidateBuffer()
