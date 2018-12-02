@@ -75,6 +75,7 @@ private:
     int currentLayoutWidth_ = -1;
     int layoutState_ = -1;
     float scale_ = -1;
+    unsigned int layoutCount_ = 0;
     unsigned int bufferUpdatedCount_ = 0;
 
     MessageElementFlags currentWordFlags_;

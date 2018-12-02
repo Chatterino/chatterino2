@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ABSettings.hpp"
+#include "BaseSettings.hpp"
 
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"

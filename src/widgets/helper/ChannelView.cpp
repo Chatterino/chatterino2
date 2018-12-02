@@ -352,7 +352,7 @@ void ChannelView::layoutVisibleMessages(
         auto y = int(-(messages[start]->getHeight() *
                        (fmod(this->scrollBar_->getCurrentValue(), 1))));
 
-        for (auto i = start; i < messages.size() && y >= this->height(); i++)
+        for (auto i = start; i < messages.size() && y <= this->height(); i++)
         {
             auto message = messages[i];
 

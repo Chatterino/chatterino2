@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ABTheme.hpp"
+#include "BaseTheme.hpp"
 #include "common/Singleton.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 
@@ -13,7 +13,7 @@ namespace chatterino {
 
 class WindowManager;
 
-class Theme final : public Singleton, public ABTheme
+class Theme final : public Singleton, public BaseTheme
 {
 public:
     Theme();

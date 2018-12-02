@@ -101,6 +101,8 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 
 void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
 {
+    this->layoutCount_++;
+
     auto messageFlags = this->message_->flags;
 
     if (this->flags.has(MessageLayoutFlag::Expanded) ||
@@ -248,7 +250,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     // draw message
     this->container_->paintElements(painter);
 
-#ifdef FOURTF
+    //#ifdef FOURTF
     // debug
     painter.setPen(QColor(255, 0, 0));
     painter.drawRect(buffer->rect().x(), buffer->rect().y(),
@@ -257,9 +259,11 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     QTextOption option;
     option.setAlignment(Qt::AlignRight | Qt::AlignTop);
 
-    painter.drawText(QRectF(1, 1, this->container.getWidth() - 3, 1000),
-                     QString::number(++this->bufferUpdatedCount), option);
-#endif
+    painter.drawText(QRectF(1, 1, this->container_->getWidth() - 3, 1000),
+                     QString::number(this->layoutCount_) + ", " +
+                         QString::number(++this->bufferUpdatedCount_),
+                     option);
+    //#endif
 }
 
 void MessageLayout::invalidateBuffer()

@@ -21,7 +21,7 @@ Theme::Theme()
 // multiplier: 1 = white, 0.8 = light, -0.8 dark, -1 black
 void Theme::actuallyUpdate(double hue, double multiplier)
 {
-    ABTheme::actuallyUpdate(hue, multiplier);
+    BaseTheme::actuallyUpdate(hue, multiplier);
 
     auto getColor = [multiplier](double h, double s, double l, double a = 1.0) {
         return QColor::fromHslF(h, s, ((l - 0.5) * multiplier) + 0.5, a);
