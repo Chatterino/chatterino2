@@ -66,6 +66,8 @@ public:
     void updateLastReadMessage();
 
     /// Pausing
+    bool pausable() const;
+    void setPausable(bool value);
     bool paused() const;
     void pause(PauseReason reason, boost::optional<uint> msecs = boost::none);
     void unpause(PauseReason reason);
@@ -153,6 +155,7 @@ private:
     bool lastMessageHasAlternateBackground_ = false;
     bool lastMessageHasAlternateBackgroundReverse_ = true;
 
+    bool pausable_ = false;
     QTimer pauseTimer_;
     std::unordered_map<PauseReason, boost::optional<SteadyClock::time_point>>
         pauses_;

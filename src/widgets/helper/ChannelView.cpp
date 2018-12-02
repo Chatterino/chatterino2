@@ -184,10 +184,20 @@ void ChannelView::initializeSignals()
         getApp()->fonts->fontChanged.connect([this] { this->queueLayout(); }));
 }
 
+bool ChannelView::pausable() const
+{
+    return pausable_;
+}
+
+void ChannelView::setPausable(bool value)
+{
+    this->pausable_ = value;
+}
+
 bool ChannelView::paused() const
 {
     /// No elements in the map -> not paused
-    return !this->pauses_.empty();
+    return this->pausable() && !this->pauses_.empty();
 }
 
 void ChannelView::pause(PauseReason reason, boost::optional<uint> msecs)

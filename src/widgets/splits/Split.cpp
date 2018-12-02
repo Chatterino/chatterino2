@@ -88,6 +88,7 @@ Split::Split(QWidget *parent)
     , overlay_(new SplitOverlay(this))
 {
     this->setMouseTracking(true);
+    this->view_->setPausable(true);
 
     this->vbox_->setSpacing(0);
     this->vbox_->setMargin(1);
@@ -124,8 +125,7 @@ Split::Split(QWidget *parent)
 
     this->input_->ui_.textEdit->installEventFilter(parent);
 
-    this->view_->mouseDown.connect([this](QMouseEvent *) {
-        //
+    this->view_->mouseDown.connect([this](QMouseEvent *) {  //
         this->giveFocus(Qt::MouseFocusReason);
     });
     this->view_->selectionChanged.connect([this]() {
