@@ -159,7 +159,8 @@ private:
     QTimer pauseTimer_;
     std::unordered_map<PauseReason, boost::optional<SteadyClock::time_point>>
         pauses_;
-    boost::optional<SteadyClock::time_point> pauseEnd;
+    boost::optional<SteadyClock::time_point> pauseEnd_;
+    int pauseScrollOffset_ = 0;
 
     boost::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;

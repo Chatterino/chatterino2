@@ -189,6 +189,11 @@ std::shared_ptr<Channel> TwitchServer::getCustomChannel(
         static auto channel =
             std::make_shared<Channel>("$$$", chatterino::Channel::Type::Misc);
         static auto timer = [&] {
+            for (auto i = 0; i < 1000; i++)
+            {
+                channel->addMessage(makeSystemMessage(QString::number(i + 1)));
+            }
+
             auto timer = new QTimer;
             QObject::connect(timer, &QTimer::timeout, [] {
                 channel->addMessage(

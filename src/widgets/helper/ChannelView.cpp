@@ -246,8 +246,11 @@ void ChannelView::updatePauseTimer()
     if (this->pauses_.empty())
     {
         /// No pauses so we can stop the timer
-        this->pauseEnd = boost::none;
+        this->pauseEnd_ = boost::none;
         this->pauseTimer_.stop();
+
+        this->scrollBar_->offset(this->pauseScrollOffset_);
+        this->pauseScrollOffset_ = 0;
 
         this->queueLayout();
     }
@@ -255,7 +258,7 @@ void ChannelView::updatePauseTimer()
                          [](auto &&value) { return !value.second; }))
     {
         /// Some of the pauses are infinite
-        this->pauseEnd = boost::none;
+        this->pauseEnd_ = boost::none;
         this->pauseTimer_.stop();
     }
     else
@@ -266,10 +269,10 @@ void ChannelView::updatePauseTimer()
                        [](auto &&a, auto &&b) { return a.second > b.second; })
                        ->second.get();
 
-        if (max != this->pauseEnd)
+        if (max != this->pauseEnd_)
         {
             /// Start the timer
-            this->pauseEnd = max;
+            this->pauseEnd_ = max;
             this->pauseTimer_.start(
                 duration_cast<milliseconds>(max - SteadyClock::now()));
         }
@@ -605,16 +608,18 @@ void ChannelView::messageAppended(MessagePtr &message,
 
     if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
     {
-        //                if (!this->isPaused()) {
-        if (this->scrollBar_->isAtBottom())
+        if (this->paused())
         {
-            this->scrollBar_->scrollToBottom();
+            if (!this->scrollBar_->isAtBottom())
+                this->pauseScrollOffset_--;
         }
         else
         {
-            this->scrollBar_->offset(-1);
+            if (this->scrollBar_->isAtBottom())
+                this->scrollBar_->scrollToBottom();
+            else
+                this->scrollBar_->offset(-1);
         }
-        //                }
     }
 
     if (!messageFlags->has(MessageFlag::DoNotTriggerNotification))
@@ -692,7 +697,7 @@ void ChannelView::messageRemoveFromStart(MessagePtr &message)
 
 void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
 {
-    if (index >= this->messages_.getSnapshot().size() || index < 0)
+    if (index >= this->messages_.getSnapshot().size())
     {
         return;
     }
