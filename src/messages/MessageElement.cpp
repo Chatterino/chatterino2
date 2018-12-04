@@ -73,6 +73,23 @@ MessageElement *MessageElement::updateLink()
     return this;
 }
 
+// Empty
+EmptyElement::EmptyElement()
+    : MessageElement(MessageElementFlag::None)
+{
+}
+
+void EmptyElement::addToContainer(MessageLayoutContainer &container,
+                                  MessageElementFlags flags)
+{
+}
+
+EmptyElement &EmptyElement::instance()
+{
+    static EmptyElement instance;
+    return instance;
+}
+
 // IMAGE
 ImageElement::ImageElement(ImagePtr image, MessageElementFlags flags)
     : MessageElement(flags)

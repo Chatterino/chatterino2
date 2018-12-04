@@ -264,17 +264,18 @@ void ChannelView::updatePauseTimer()
     else
     {
         /// Get the maximum pause
-        auto max = std::max_element(
-                       this->pauses_.begin(), this->pauses_.end(),
-                       [](auto &&a, auto &&b) { return a.second > b.second; })
-                       ->second.get();
+        auto pauseEnd =
+            std::max_element(
+                this->pauses_.begin(), this->pauses_.end(),
+                [](auto &&a, auto &&b) { return a.second > b.second; })
+                ->second.get();
 
-        if (max != this->pauseEnd_)
+        if (pauseEnd != this->pauseEnd_)
         {
             /// Start the timer
-            this->pauseEnd_ = max;
+            this->pauseEnd_ = pauseEnd;
             this->pauseTimer_.start(
-                duration_cast<milliseconds>(max - SteadyClock::now()));
+                duration_cast<milliseconds>(pauseEnd - SteadyClock::now()));
         }
     }
 }

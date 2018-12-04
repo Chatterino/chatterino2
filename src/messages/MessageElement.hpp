@@ -148,6 +148,21 @@ private:
     MessageElementFlags flags_;
 };
 
+// used when layout element doesn't have a creator
+class EmptyElement : public MessageElement
+{
+public:
+    EmptyElement();
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+    static EmptyElement &instance();
+
+private:
+    ImagePtr image_;
+};
+
 // contains a simple image
 class ImageElement : public MessageElement
 {

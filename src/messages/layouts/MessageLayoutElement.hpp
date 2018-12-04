@@ -125,4 +125,25 @@ private:
     QString line2;
 };
 
+class TestLayoutElement : public MessageLayoutElement
+{
+public:
+    TestLayoutElement(MessageElement &creator, const QSize &size,
+                      const QColor &background, bool end);
+
+protected:
+    void addCopyTextToString(QString &str, int from = 0,
+                             int to = INT_MAX) const override;
+    int getSelectionIndexCount() const override;
+    void paint(QPainter &painter) override;
+    void paintAnimated(QPainter &painter, int yOffset) override;
+    int getMouseOverIndex(const QPoint &abs) const override;
+    int getXFromIndex(int index) override;
+
+private:
+    QSize size_;
+    QColor background_;
+    bool end_;
+};
+
 }  // namespace chatterino

@@ -157,7 +157,7 @@ void MessageLayoutContainer::breakLine()
         int yExtra = 0;
         if (isCompactEmote)
         {
-            yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
+            // yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
         }
 
         //        if (element->getCreator().getFlags() &
@@ -165,7 +165,8 @@ void MessageLayoutContainer::breakLine()
         //        {
         if (element->getRect().height() < this->textLineHeight_)
         {
-            yExtra -= (this->textLineHeight_ - element->getRect().height()) / 2;
+            // yExtra -= (this->textLineHeight_ - element->getRect().height()) /
+            // 2;
         }
 
         element->setPosition(

@@ -366,4 +366,72 @@ int TextIconLayoutElement::getXFromIndex(int index)
     }
 }
 
+// TestLayoutElement
+TestLayoutElement::TestLayoutElement(MessageElement &element, const QSize &size,
+                                     const QColor &background, bool end)
+    : MessageLayoutElement(element, size)
+    , size_(size)
+    , background_(background)
+    , end_(end)
+{
+}
+
+void TestLayoutElement::addCopyTextToString(QString &str, int from,
+                                            int to) const
+{
+}
+
+int TestLayoutElement::getSelectionIndexCount() const
+{
+    return 0;
+}
+
+void TestLayoutElement::paint(QPainter &painter)
+{
+    const auto dy = this->getRect().y();
+    const auto color = end_ ? background_ : QColor(0, 0, 0, 127);
+
+    // make zig zag
+    auto polygon = QPolygon();
+    for (auto x = size_.height() / -2; x < size_.width() + 16;
+         x += size_.height())
+    {
+        polygon.push_back({x, dy + 0});
+        polygon.push_back({x + size_.height(), dy + size_.height()});
+        x += size_.height();
+        polygon.push_back({x, dy + size_.height()});
+        polygon.push_back({x + size_.height(), dy + 0});
+    }
+
+    // finish polygon
+    polygon.push_back({size_.width(), 1000});
+    polygon.push_back({0, 1000});
+
+    // finish polygon
+    polygon.push_back({size_.width(), 1000});
+    polygon.push_back({0, 1000});
+
+    // turn into path
+    auto path = QPainterPath();
+    path.addPolygon(polygon);
+
+    // draw
+    painter.fillPath(path, color);
+    painter.strokePath(path, QColor(127, 127, 127, 127));
+}
+
+void TestLayoutElement::paintAnimated(QPainter &painter, int yOffset)
+{
+}
+
+int TestLayoutElement::getMouseOverIndex(const QPoint &abs) const
+{
+    return 0;
+}
+
+int TestLayoutElement::getXFromIndex(int index)
+{
+    return 0;
+}
+
 }  // namespace chatterino

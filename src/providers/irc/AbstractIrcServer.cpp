@@ -231,8 +231,11 @@ void AbstractIrcServer::onConnected()
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    auto connected = makeSystemMessage("connected to chat");
-    auto reconnected = makeSystemMessage("reconnected to chat");
+    auto connected = makeSystemMessage("connected");
+    connected->flags.set(MessageFlag::ConnectedMessage);
+    connected->flags.set(MessageFlag::Centered);
+    auto reconnected = makeSystemMessage("reconnected");
+    reconnected->flags.set(MessageFlag::ConnectedMessage);
 
     for (std::weak_ptr<Channel> &weak : this->channels.values())
     {
@@ -244,14 +247,13 @@ void AbstractIrcServer::onConnected()
 
         LimitedQueueSnapshot<MessagePtr> snapshot = chan->getMessageSnapshot();
 
-        bool replaceMessage = snapshot.size() > 0 &&
-                              snapshot[snapshot.size() - 1]->flags.has(
-                                  MessageFlag::DisconnectedMessage);
+        bool replaceMessage =
+            snapshot.size() > 0 && snapshot[snapshot.size() - 1]->flags.has(
+                                       MessageFlag::DisconnectedMessage);
 
         if (replaceMessage)
         {
-            chan->replaceMessage(snapshot[snapshot.size() - 1],
-                                 reconnected);
+            chan->replaceMessage(snapshot[snapshot.size() - 1], reconnected);
             continue;
         }
 
@@ -265,7 +267,7 @@ void AbstractIrcServer::onDisconnected()
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    MessageBuilder b(systemMessage, "disconnected from chat");
+    MessageBuilder b(systemMessage, "disconnected");
     b->flags.set(MessageFlag::DisconnectedMessage);
     auto disconnected = b.release();
 

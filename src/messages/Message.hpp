@@ -22,11 +22,12 @@ enum class MessageFlag : uint16_t {
     Disabled = (1 << 5),
     DisableCompactEmotes = (1 << 6),
     Collapsed = (1 << 7),
-    DisconnectedMessage = (1 << 8),
-    Untimeout = (1 << 9),
-    PubSub = (1 << 10),
-    Subscription = (1 << 11),
-    Notification = (1 << 12),
+    ConnectedMessage = (1 << 8),
+    DisconnectedMessage = (1 << 9),
+    Untimeout = (1 << 10),
+    PubSub = (1 << 11),
+    Subscription = (1 << 12),
+    Notification = (1 << 13),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
