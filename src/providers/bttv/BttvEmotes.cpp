@@ -41,7 +41,7 @@ namespace {
                      Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
                      Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
                      Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
-                 Tooltip{name.string + "<br />Global BTTV Emote"},
+                 Tooltip{name.string + "<br />Global BetterTTV Emote"},
                  Url{"https://manage.betterttv.net/emotes/" + id.string}});
 
             emotes[name] =
@@ -77,7 +77,7 @@ namespace {
                      Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
                      Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
                      Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
-                 Tooltip{name.string + "<br />Channel Bttv Emote"},
+                 Tooltip{name.string + "<br />Channel BetterTTV Emote"},
                  Url{"https://manage.betterttv.net/emotes/" + id.string}});
 
             emotes[name] = cachedOrMake(std::move(emote), id);
