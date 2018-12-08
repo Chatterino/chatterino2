@@ -76,9 +76,9 @@ namespace {
     {
         return QStringList{"<style>.center { text-align: center; }</style>",
                            "<p class=\"center\">",
-                           s.title,
+                           s.title.toHtmlEscaped(),
                            "<br><br>",
-                           s.game,
+                           s.game.toHtmlEscaped(),
                            "<br>",
                            s.rerun ? "Vod-casting" : "Live",
                            " for ",
