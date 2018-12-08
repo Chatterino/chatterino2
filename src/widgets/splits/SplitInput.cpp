@@ -208,7 +208,7 @@ void SplitInput::installKeyPressedEvent()
             if (!(event->modifiers() & Qt::ControlModifier))
             {
                 this->currMsg_ = QString();
-                this->ui_.textEdit->setText(QString());
+                this->ui_.textEdit->setPlainText(QString());
             }
             this->prevIndex_ = this->prevMsg_.size();
         }
@@ -237,7 +237,7 @@ void SplitInput::installKeyPressedEvent()
                     }
 
                     this->prevIndex_--;
-                    this->ui_.textEdit->setText(
+                    this->ui_.textEdit->setPlainText(
                         this->prevMsg_.at(this->prevIndex_));
 
                     QTextCursor cursor = this->ui_.textEdit->textCursor();
@@ -275,7 +275,7 @@ void SplitInput::installKeyPressedEvent()
                     this->prevIndex_ != this->prevMsg_.size())
                 {
                     this->prevIndex_++;
-                    this->ui_.textEdit->setText(
+                    this->ui_.textEdit->setPlainText(
                         this->prevMsg_.at(this->prevIndex_));
                 }
                 else
@@ -285,7 +285,7 @@ void SplitInput::installKeyPressedEvent()
                     {
                         // If user has just come from a message history
                         // Then simply get currMsg_.
-                        this->ui_.textEdit->setText(this->currMsg_);
+                        this->ui_.textEdit->setPlainText(this->currMsg_);
                     }
                     else if (message != this->currMsg_)
                     {
