@@ -110,7 +110,7 @@ Split::Split(QWidget *parent)
     // F5: reload emotes
     createShortcut(this, "F5", &Split::reloadChannelAndSubscriberEmotes);
 
-    // F12
+    // F10
     createShortcut(this, "F10", [] {
         auto *popup = new DebugPopup;
         popup->setAttribute(Qt::WA_DeleteOnClose);
