@@ -72,6 +72,10 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
+
+    // Highlighted Messages
+    this->messages.backgrounds.highlighted =
+        QColor(getSettings()->highlightColor);
 }
 
 void Theme::normalizeColor(QColor &color)
