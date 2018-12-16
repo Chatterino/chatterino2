@@ -29,12 +29,12 @@ Note: This installation will take about 1.5 GB of disk space.
 
 ## OpenSSL
 ### For our websocket library, we need OpenSSL 1.1
-1. Download OpenSSL for windows, version `1.1.0i`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_0i.exe)**
+1. Download OpenSSL for windows, version `1.1.0j`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_0j.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
 ### For Qt SSL, we need OpenSSL 1.0
-1. Download OpenSSL for windows, version `1.0.2p`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2p.exe)**
+1. Download OpenSSL for windows, version `1.0.2q`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2q.exe)**
 2. When prompted, install it to any arbitrary empty directory.
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 4. Copy the OpenSSL 1.0 files from its `/bin` folder to `C:/local/bin` (You will need to create the folder)
@@ -105,4 +105,4 @@ To produce all supplement files for a standalone build, follow these steps (adju
  
  5. The `releases` directory will now be populated with all the required files to make the chatterino build standalone.
 
-You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist package must be present, as usual - see the [README](REAMDE.md)).
+You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist package must be present, as usual - see the [README](README.md)).
