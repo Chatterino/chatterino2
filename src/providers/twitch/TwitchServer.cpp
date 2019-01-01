@@ -81,8 +81,13 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
     connection->sendCommand(
         Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
 
+    connection->setSecure(true);
+
+    // https://dev.twitch.tv/docs/irc/guide/#connecting-to-twitch-irc
+    // SSL disabled: irc://irc.chat.twitch.tv:6667
+    // SSL enabled: irc://irc.chat.twitch.tv:6697
     connection->setHost("irc.chat.twitch.tv");
-    connection->setPort(6667);
+    connection->setPort(6697);
 }
 
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
