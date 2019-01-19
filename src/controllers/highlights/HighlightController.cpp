@@ -35,6 +35,15 @@ void HighlightController::initialize(Settings &settings, Paths &paths)
     this->blacklistedUsers.delayedItemsChanged.connect([this] {
         this->blacklistSetting_.setValue(this->blacklistedUsers.getVector());
     });
+
+    for (const HighlightPhrase &user : this->userSetting_.getValue())
+    {
+        this->highlightedUsers.appendItem(user);
+    }
+
+    this->highlightedUsers.delayedItemsChanged.connect([this] {  //
+        this->userSetting_.setValue(this->highlightedUsers.getVector());
+    });
 }
 
 HighlightModel *HighlightController::createModel(QObject *parent)
