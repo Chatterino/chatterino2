@@ -152,12 +152,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
         getApp()->fonts->chatFontFamily, [](auto val) { return val; },
-        [this](auto args) { return this->getFont(args); });
+        [this](auto args) { return this->getFont(args); }, true);
     layout.addDropdown<int>(
         "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
         getApp()->fonts->chatFontSize,
         [](auto val) { return QString::number(val) + "pt"; },
-        [](auto args) { return fuzzyToInt(args.value, 10); });
+        [](auto args) { return fuzzyToInt(args.value, 10); }, true);
     layout.addDropdown<float>(
         "UI Scale",
         {"0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "Default", "1.2x", "1.4x",
@@ -169,7 +169,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             else
                 return QString::number(val) + "x";
         },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+        [](auto args) { return fuzzyToFloat(args.value, 1.f); }, false);
     layout.addCheckbox("Always on top", s.windowTopMost);
 
     layout.addTitle("Interface");
@@ -182,7 +182,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             else
                 return QString::number(val) + "x";
         },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+        [](auto args) { return fuzzyToFloat(args.value, 1.f); }, false);
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
     layout.addCheckbox("Smooth scrolling on new messages.",
                        s.enableSmoothScrollingNewMessages);
@@ -195,17 +195,18 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Timestamps", s.showTimestamps);
     layout.addDropdown("Timestamp format",
                        {"h:mm", "hh:mm", "h:mm a", "hh:mm a"},
-                       s.timestampFormat, true);
+                       s.timestampFormat);
     layout.addDropdown<int>(
         "Collapse messages",
         {"Never", "Longer than 2 lines", "Longer than 3 lines",
          "Longer than 4 lines", "Longer than 5 lines"},
         s.collpseMessagesMinLines,
         [](auto val) {
-            return val ? QString("After ") + QString::number(val) + " lines"
+            return val ? QString("Longer than ") + QString::number(val) +
+                             " lines"
                        : QString("Never");
         },
-        [](auto args) { return fuzzyToInt(args.value, 0); });
+        [](auto args) { return fuzzyToInt(args.value, 0); }, false);
     layout.addCheckbox("Seperate with lines", s.separateMessages);
     layout.addCheckbox("Alternate background color", s.alternateMessages);
     // layout.addCheckbox("Mark last message you read");
@@ -221,7 +222,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             else
                 return QString::number(val) + "x";
         },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+        [](auto args) { return fuzzyToFloat(args.value, 1.f); }, false);
     layout.addCheckbox("Gif animations", s.animateEmotes);
     layout.addCheckbox("Animate only when focused", s.animationsWhenFocused);
     layout.addDropdown("Emoji set",
