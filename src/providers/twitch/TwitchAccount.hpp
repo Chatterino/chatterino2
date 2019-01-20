@@ -109,10 +109,8 @@ public:
     AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
-    void autoModAllow(const QString msgID,
-                      std::function<void()> successCallback);
-    void autoModDeny(const QString msgID,
-                     std::function<void()> successCallback);
+    void autoModAllow(const QString msgID);
+    void autoModDeny(const QString msgID);
 
 private:
     void parseEmotes(const rapidjson::Document &document);

@@ -414,14 +414,47 @@ AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
 }
 
 // AutoModActions
-void TwitchAccount::autoModAllow(const QString msgID,
-                                 std::function<void()> successCallback)
+void TwitchAccount::autoModAllow(const QString msgID)
 {
+    QString url("https://api.twitch.tv/kraken/chat/twitchbot/approve");
+
+    NetworkRequest req(url);
+    auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
+    qDebug() << qba;
+    req.setPayload(qba);
+    req.setCaller(QThread::currentThread());
+    req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+
+    req.onError([=](int errorCode) {
+        qDebug() << "you just got an error 4HEad" << errorCode;
+        return true;
+    });
+
+    req.onReplyCreated([=](QNetworkReply *reply) -> void {
+        //
+        //
+        return;
+    });
+
+    req.execute();
 }
 
-void TwitchAccount::autoModDeny(const QString msgID,
-                                std::function<void()> successCallback)
+void TwitchAccount::autoModDeny(const QString msgID)
 {
+    QString url("https://api.twitch.tv/kraken/chat/twitchbot/deny");
+
+    NetworkRequest req(url);
+    auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
+    qDebug() << qba;
+    req.setPayload(qba);
+    req.setCaller(QThread::currentThread());
+    req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+
+    req.onError([=](int errorCode) {
+        qDebug() << "you just got an error 4HEad" << errorCode;
+        return true;
+    });
+    req.execute();
 }
 
 void TwitchAccount::parseEmotes(const rapidjson::Document &root)
