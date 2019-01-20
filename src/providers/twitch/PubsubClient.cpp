@@ -577,40 +577,50 @@ PubSub::PubSub()
     this->moderationActionHandlers["denied_automod_message"] =
         [this](const auto &data, const auto &roomID) {
             // This message got denied by a moderator
+            AutomodUserAction action(data, roomID);
+
+            getCreatedByUser(data, action.source);
             qDebug() << "test2222";
+            qDebug() << QString::fromStdString(rj::stringify(data));
         };
 
     this->moderationActionHandlers["add_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
             // A term has been added
             qDebug() << "test3333";
+            qDebug() << QString::fromStdString(rj::stringify(data));
         };
 
     this->moderationActionHandlers["approved_automod_message"] =
         [this](const auto &data, const auto &roomID) {
             // This message got approved by a moderator
             qDebug() << "test5555";
+            qDebug() << QString::fromStdString(rj::stringify(data));
         };
 
     this->moderationActionHandlers["add_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
             // This term got a pass through automod
             qDebug() << "test6666";
+            qDebug() << QString::fromStdString(rj::stringify(data));
         };
     this->moderationActionHandlers["modified_automod_properties"] =
         [this](const auto &data, const auto &roomID) {
             // The automod settings got modified
             qDebug() << "test4444";
+            qDebug() << QString::fromStdString(rj::stringify(data));
         };
     this->moderationActionHandlers["delete_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
             // This term got deleted
             qDebug() << "test7777";
+            qDebug() << QString::fromStdString(rj::stringify(data));
         };
     this->moderationActionHandlers["delete_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
             // This term got deleted
             qDebug() << "test8888";
+            qDebug() << QString::fromStdString(rj::stringify(data));
         };
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
     this->websocketClient.clear_access_channels(

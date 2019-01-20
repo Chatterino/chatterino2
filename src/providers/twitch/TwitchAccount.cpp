@@ -419,26 +419,19 @@ void TwitchAccount::autoModAllow(const QString msgID)
     QString url("https://api.twitch.tv/kraken/chat/twitchbot/approve");
 
     NetworkRequest req(url, NetworkRequestType::Post);
-    req.setRawHeader("Content-type", "application/json");
-    /*req.setRawHeader curl - i - H 'Client-ID: abcd' -
-        H 'Accept: application/vnd.twitchtv.v5+json' -
-        H 'Authorization: OAuth efgh' -
-        H "Content-type: application/json" --data '{"msg_id":"msgid"}';*/
+    req.setRawHeader("Content-Type", "application/json");
+
     auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
     qDebug() << qba;
+
+    req.setRawHeader("Content-Length", QByteArray::number(qba.size()));
     req.setPayload(qba);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
     req.onError([=](int errorCode) {
-        qDebug() << "you just got an error 4HEad" << errorCode;
+        log("[TwitchAccounts::autoModAllow] Error {}", errorCode);
         return true;
-    });
-
-    req.onReplyCreated([=](QNetworkReply *reply) -> void {
-        //
-        //
-        return;
     });
 
     req.execute();
@@ -449,15 +442,17 @@ void TwitchAccount::autoModDeny(const QString msgID)
     QString url("https://api.twitch.tv/kraken/chat/twitchbot/deny");
 
     NetworkRequest req(url, NetworkRequestType::Post);
-    req.setRawHeader("Content-type", "application/json");
+    req.setRawHeader("Content-Type", "application/json");
     auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
     qDebug() << qba;
+
+    req.setRawHeader("Content-Length", QByteArray::number(qba.size()));
     req.setPayload(qba);
     req.setCaller(QThread::currentThread());
     req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
 
     req.onError([=](int errorCode) {
-        qDebug() << "you just got an error 4HEad" << errorCode;
+        log("[TwitchAccounts::autoModDeny] Error {}", errorCode);
         return true;
     });
     req.execute();
