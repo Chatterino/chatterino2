@@ -3,8 +3,7 @@
 
 namespace chatterino {
 
-class Resources2 : public Singleton
-{
+class Resources2 : public Singleton {
 public:
     Resources2();
 
@@ -45,6 +44,7 @@ public:
     } split;
     struct {
         QPixmap admin;
+        QPixmap automod;
         QPixmap broadcaster;
         QPixmap cheer1;
         QPixmap globalmod;

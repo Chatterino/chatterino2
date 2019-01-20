@@ -112,6 +112,8 @@ public:
 
             Signal<BanAction> userBanned;
             Signal<UnbanAction> userUnbanned;
+
+            Signal<AutomodAction> automodMessage;
         } moderation;
 
         struct {

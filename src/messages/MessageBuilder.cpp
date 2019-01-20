@@ -1,6 +1,8 @@
 #include "MessageBuilder.hpp"
 
+//#include "Application.hpp"
 #include "common/LinkParser.hpp"
+//#include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/PubsubActions.hpp"
@@ -11,12 +13,55 @@
 #include "util/IrcHelpers.hpp"
 
 #include <QDateTime>
+//#include <QImageReader>
 
 namespace chatterino {
 
 MessagePtr makeSystemMessage(const QString &text)
 {
     return MessageBuilder(systemMessage, text).release();
+}
+
+std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
+    const AutomodAction &action)
+{
+    auto builder = MessageBuilder();
+
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::PubSub);
+
+    // Crashes the program atm
+    // builder.emplace<ImageElement>(
+    //        Image::fromPixmap(getApp()->resources->twitch.automod),
+    //        MessageElementFlag::BadgeChannelAuthority)
+    //    ->setTooltip("AutoMod");
+    builder.emplace<TextElement>(
+        "AutoMod:", MessageElementFlag::NonBoldUsername,
+        MessageColor(QColor("green")));
+    builder.emplace<TextElement>(
+        ("Held a message for reason: " + action.reason +
+         ". Allow will post it in chat."),
+        MessageElementFlag::Text, MessageColor::Text);
+    builder.message().flags.set(MessageFlag::AutoMod);
+
+    auto message1 = builder.release();
+
+    builder = MessageBuilder();
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::PubSub);
+
+    builder
+        .emplace<TextElement>(action.target.name + ":",
+                              MessageElementFlag::NonBoldUsername,
+                              MessageColor(QColor("red")))
+        ->setLink({Link::UserInfo, action.target.name});
+    builder.emplace<TextElement>(action.message, MessageElementFlag::Text,
+                                 MessageColor::Text);
+    builder.message().flags.set(MessageFlag::AutoMod);
+
+    auto message2 = builder.release();
+
+    return std::make_pair(message1, message2);
 }
 
 MessageBuilder::MessageBuilder()

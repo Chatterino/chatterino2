@@ -520,6 +520,91 @@ PubSub::PubSub()
         }
     };
 
+    this->moderationActionHandlers["automod_rejected"] =
+        [this](const auto &data, const auto &roomID) {
+            // Display the automod message and prompt the allow/deny
+            AutomodAction action(data, roomID);
+
+            getCreatedByUser(data, action.source);
+            getTargetUser(data, action.target);
+
+            qDebug() << "test1111";
+            try
+            {
+                const auto &args = getArgs(data);
+
+                if (args.Size() < 1)
+                {
+                    return;
+                }
+
+                if (!rj::getSafe(args[0], action.target.name))
+                {
+                    return;
+                }
+
+                if (args.Size() >= 2)
+                {
+                    if (!rj::getSafe(args[1], action.message))
+                    {
+                        return;
+                    }
+                }
+
+                if (args.Size() >= 3)
+                {
+                    if (!rj::getSafe(args[2], action.reason))
+                    {
+                        return;
+                    }
+                }
+
+                this->signals_.moderation.automodMessage.invoke(action);
+            }
+            catch (const std::runtime_error &ex)
+            {
+                log("Error parsing moderation action: {}", ex.what());
+            }
+        };
+
+    this->moderationActionHandlers["denied_automod_message"] =
+        [this](const auto &data, const auto &roomID) {
+            // This message got denied by a moderator
+            qDebug() << "test2222";
+        };
+
+    this->moderationActionHandlers["add_blocked_term"] =
+        [this](const auto &data, const auto &roomID) {
+            // A term has been added
+            qDebug() << "test3333";
+        };
+
+    this->moderationActionHandlers["approved_automod_message"] =
+        [this](const auto &data, const auto &roomID) {
+            // This message got approved by a moderator
+            qDebug() << "test5555";
+        };
+
+    this->moderationActionHandlers["add_permitted_term"] =
+        [this](const auto &data, const auto &roomID) {
+            // This term got a pass through automod
+            qDebug() << "test6666";
+        };
+    this->moderationActionHandlers["modified_automod_properties"] =
+        [this](const auto &data, const auto &roomID) {
+            // The automod settings got modified
+            qDebug() << "test4444";
+        };
+    this->moderationActionHandlers["delete_blocked_term"] =
+        [this](const auto &data, const auto &roomID) {
+            // This term got deleted
+            qDebug() << "test7777";
+        };
+    this->moderationActionHandlers["delete_permitted_term"] =
+        [this](const auto &data, const auto &roomID) {
+            // This term got deleted
+            qDebug() << "test8888";
+        };
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
     this->websocketClient.clear_access_channels(
         websocketpp::log::alevel::frame_payload);
