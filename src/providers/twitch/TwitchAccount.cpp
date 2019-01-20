@@ -418,7 +418,12 @@ void TwitchAccount::autoModAllow(const QString msgID)
 {
     QString url("https://api.twitch.tv/kraken/chat/twitchbot/approve");
 
-    NetworkRequest req(url);
+    NetworkRequest req(url, NetworkRequestType::Post);
+    req.setRawHeader("Content-type", "application/json");
+    /*req.setRawHeader curl - i - H 'Client-ID: abcd' -
+        H 'Accept: application/vnd.twitchtv.v5+json' -
+        H 'Authorization: OAuth efgh' -
+        H "Content-type: application/json" --data '{"msg_id":"msgid"}';*/
     auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
     qDebug() << qba;
     req.setPayload(qba);
@@ -443,7 +448,8 @@ void TwitchAccount::autoModDeny(const QString msgID)
 {
     QString url("https://api.twitch.tv/kraken/chat/twitchbot/deny");
 
-    NetworkRequest req(url);
+    NetworkRequest req(url, NetworkRequestType::Post);
+    req.setRawHeader("Content-type", "application/json");
     auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
     qDebug() << qba;
     req.setPayload(qba);

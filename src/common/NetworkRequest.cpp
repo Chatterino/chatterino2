@@ -147,6 +147,12 @@ void NetworkRequest::execute()
         }
         break;
 
+        case NetworkRequestType::Post:
+        {
+            this->doRequest();
+        }
+        break;
+
         default:
         {
             log("[Execute] Unhandled request type");
@@ -216,6 +222,10 @@ void NetworkRequest::doRequest()
                 case NetworkRequestType::Delete:
                     return NetworkManager::accessManager.deleteResource(
                         data->request_);
+
+                case NetworkRequestType::Post:
+                    return NetworkManager::accessManager.post(data->request_,
+                                                              data->payload_);
 
                 default:
                     return nullptr;
