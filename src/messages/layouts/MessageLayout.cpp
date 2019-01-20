@@ -270,7 +270,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     }
     else if (this->message_->flags.has(MessageFlag::AutoMod))
     {
-        backgroundColor = app->themes->messages.backgrounds.automod;
+        backgroundColor = QColor("#404040");
     }
 
     painter.fillRect(buffer->rect(), backgroundColor);

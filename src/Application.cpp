@@ -244,9 +244,8 @@ void Application::initPubsub()
                 return;
             }
 
-            auto p = makeAutomodMessage(action);
-
-            postToThread([chan, p] {
+            postToThread([chan, action] {
+                auto p = makeAutomodMessage(action);
                 chan->addMessage(p.first);
                 chan->addMessage(p.second);
             });

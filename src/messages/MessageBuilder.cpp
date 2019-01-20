@@ -1,8 +1,8 @@
 #include "MessageBuilder.hpp"
 
-//#include "Application.hpp"
+#include "Application.hpp"
 #include "common/LinkParser.hpp"
-//#include "messages/Image.hpp"
+#include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/PubsubActions.hpp"
@@ -13,7 +13,7 @@
 #include "util/IrcHelpers.hpp"
 
 #include <QDateTime>
-//#include <QImageReader>
+#include <QImageReader>
 
 namespace chatterino {
 
@@ -30,18 +30,30 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     builder.emplace<TimestampElement>();
     builder.message().flags.set(MessageFlag::PubSub);
 
-    // Crashes the program atm
-    // builder.emplace<ImageElement>(
-    //        Image::fromPixmap(getApp()->resources->twitch.automod),
-    //        MessageElementFlag::BadgeChannelAuthority)
-    //    ->setTooltip("AutoMod");
+    builder
+        .emplace<ImageElement>(
+            Image::fromPixmap(getApp()->resources->twitch.automod),
+            MessageElementFlag::BadgeChannelAuthority)
+        ->setTooltip("AutoMod");
     builder.emplace<TextElement>(
         "AutoMod:", MessageElementFlag::NonBoldUsername,
-        MessageColor(QColor("green")));
+        MessageColor(QColor("blue")));
     builder.emplace<TextElement>(
         ("Held a message for reason: " + action.reason +
          ". Allow will post it in chat."),
         MessageElementFlag::Text, MessageColor::Text);
+    builder
+        .emplace<TextElement>(" Allow", MessageElementFlag::Text,
+                              MessageColor(QColor("green")),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::AutoModAllow, action.msgID});
+    builder
+        .emplace<TextElement>(" Deny", MessageElementFlag::Text,
+                              MessageColor(QColor("red")),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::AutoModDeny, action.msgID});
+    builder.emplace<TextElement>(action.msgID, MessageElementFlag::Text,
+                                 MessageColor::Text);
     builder.message().flags.set(MessageFlag::AutoMod);
 
     auto message1 = builder.release();

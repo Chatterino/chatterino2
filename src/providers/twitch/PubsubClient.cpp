@@ -532,6 +532,8 @@ PubSub::PubSub()
             try
             {
                 const auto &args = getArgs(data);
+                const auto &msgID = getMsgID(data);
+                // qDebug() << QString::fromStdString(rj::stringify(data));
 
                 if (args.Size() < 1)
                 {
@@ -557,6 +559,11 @@ PubSub::PubSub()
                     {
                         return;
                     }
+                }
+
+                if (!rj::getSafe(msgID, action.msgID))
+                {
+                    return;
                 }
 
                 this->signals_.moderation.automodMessage.invoke(action);
@@ -624,7 +631,7 @@ PubSub::PubSub()
 
     // Add an initial client
     this->addClient();
-}
+}  // namespace chatterino
 
 void PubSub::addClient()
 {

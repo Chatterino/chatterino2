@@ -1671,6 +1671,13 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
 
+        case Link::AutoModAllow:
+        {
+        }
+        case Link::AutoModDeny:
+        {
+        }
+
         default:;
     }
 }

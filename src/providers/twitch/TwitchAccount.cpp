@@ -413,6 +413,8 @@ AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
     return this->emotes_.accessConst();
 }
 
+// AutoModActions
+
 void TwitchAccount::parseEmotes(const rapidjson::Document &root)
 {
     auto emoteData = this->emotes_.access();

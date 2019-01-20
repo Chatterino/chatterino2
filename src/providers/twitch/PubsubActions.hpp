@@ -113,6 +113,8 @@ struct AutomodAction : PubSubAction {
     QString message;
 
     QString reason;
+
+    QString msgID;
 };
 
 }  // namespace chatterino

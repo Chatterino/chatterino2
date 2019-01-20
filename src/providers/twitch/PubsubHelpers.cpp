@@ -23,6 +23,18 @@ const rapidjson::Value &getArgs(const rapidjson::Value &data)
     return args;
 }
 
+const rapidjson::Value &getMsgID(const rapidjson::Value &data)
+{
+    if (!data.HasMember("msg_id"))
+    {
+        throw std::runtime_error("Missing member msg_id");
+    }
+
+    const auto &msgID = data["msg_id"];
+
+    return msgID;
+}
+
 bool getCreatedByUser(const rapidjson::Value &data, ActionUser &user)
 {
     return rj::getSafe(data, "created_by", user.name) &&
