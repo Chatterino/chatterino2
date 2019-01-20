@@ -414,6 +414,15 @@ AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
 }
 
 // AutoModActions
+void TwitchAccount::autoModAllow(const QString msgID,
+                                 std::function<void()> successCallback)
+{
+}
+
+void TwitchAccount::autoModDeny(const QString msgID,
+                                std::function<void()> successCallback)
+{
+}
 
 void TwitchAccount::parseEmotes(const rapidjson::Document &root)
 {
