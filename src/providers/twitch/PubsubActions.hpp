@@ -123,6 +123,8 @@ struct AutomodUserAction : PubSubAction {
     ActionUser target;
 
     QString message;
+
+    qint8 type;
 };
 
 }  // namespace chatterino

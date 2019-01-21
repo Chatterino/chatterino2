@@ -40,10 +40,10 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
         MessageColor(QColor("blue")));
     builder.emplace<TextElement>(
         ("Held a message for reason: " + action.reason +
-         ". Allow will post it in chat."),
+         ". Allow will post it in chat. "),
         MessageElementFlag::Text, MessageColor::Text);
     builder
-        .emplace<TextElement>(" Allow", MessageElementFlag::Text,
+        .emplace<TextElement>("Allow", MessageElementFlag::Text,
                               MessageColor(QColor("green")),
                               FontStyle::ChatMediumBold)
         ->setLink({Link::AutoModAllow, action.msgID});
@@ -52,8 +52,9 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
                               MessageColor(QColor("red")),
                               FontStyle::ChatMediumBold)
         ->setLink({Link::AutoModDeny, action.msgID});
-    builder.emplace<TextElement>(action.msgID, MessageElementFlag::Text,
-                                 MessageColor::Text);
+    // builder.emplace<TextElement>(action.msgID,
+    // MessageElementFlag::Text,
+    //                             MessageColor::Text);
     builder.message().flags.set(MessageFlag::AutoMod);
 
     auto message1 = builder.release();
@@ -234,6 +235,47 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
     this->message().searchText = text;
+}
+
+MessageBuilder::MessageBuilder(const AutomodUserAction &action)
+    : MessageBuilder()
+{
+    this->emplace<TimestampElement>();
+    this->message().flags.set(MessageFlag::System);
+
+    QString text;
+    if (action.type == 1)
+    {
+        text = QString("%1 added %2 as a permitted term on AutoMod.")
+                   .arg(action.source.name)
+                   .arg(action.message);
+    }
+    else if (action.type == 2)
+    {
+        text = QString("%1 added %2 as a blocked term on AutoMod.")
+                   .arg(action.source.name)
+                   .arg(action.message);
+    }
+    else if (action.type == 3)
+    {
+        text = QString("%1 removed %2 as a permitted term term on AutoMod.")
+                   .arg(action.source.name)
+                   .arg(action.message);
+    }
+    else if (action.type == 4)
+    {
+        text = QString("%1 removed %2 as a blocked term on AutoMod.")
+                   .arg(action.source.name)
+                   .arg(action.message);
+    }
+    else if (action.type == 5)
+    {
+        text = QString("%1 modified the AutoMod properties.")
+                   .arg(action.source.name);
+    }
+
+    this->emplace<TextElement>(text, MessageElementFlag::Text,
+                               MessageColor::System);
 }
 
 Message *MessageBuilder::operator->()

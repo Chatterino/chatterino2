@@ -528,12 +528,10 @@ PubSub::PubSub()
             getCreatedByUser(data, action.source);
             getTargetUser(data, action.target);
 
-            qDebug() << "test1111";
             try
             {
                 const auto &args = getArgs(data);
                 const auto &msgID = getMsgID(data);
-                // qDebug() << QString::fromStdString(rj::stringify(data));
 
                 if (args.Size() < 1)
                 {
@@ -574,54 +572,144 @@ PubSub::PubSub()
             }
         };
 
-    this->moderationActionHandlers["denied_automod_message"] =
+    this->moderationActionHandlers["add_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
-            // This message got denied by a moderator
+            // This term got a pass through automod
             AutomodUserAction action(data, roomID);
-
             getCreatedByUser(data, action.source);
-            qDebug() << "test2222";
-            qDebug() << QString::fromStdString(rj::stringify(data));
+
+            try
+            {
+                const auto &args = getArgs(data);
+                action.type = 1;
+
+                if (args.Size() < 1)
+                {
+                    return;
+                }
+
+                if (!rj::getSafe(args[0], action.message))
+                {
+                    return;
+                }
+
+                this->signals_.moderation.automodUserMessage.invoke(action);
+            }
+            catch (const std::runtime_error &ex)
+            {
+                log("Error parsing moderation action: {}", ex.what());
+            }
         };
 
     this->moderationActionHandlers["add_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
             // A term has been added
-            qDebug() << "test3333";
-            qDebug() << QString::fromStdString(rj::stringify(data));
+            AutomodUserAction action(data, roomID);
+            getCreatedByUser(data, action.source);
+
+            try
+            {
+                const auto &args = getArgs(data);
+                action.type = 2;
+
+                if (args.Size() < 1)
+                {
+                    return;
+                }
+
+                if (!rj::getSafe(args[0], action.message))
+                {
+                    return;
+                }
+
+                this->signals_.moderation.automodUserMessage.invoke(action);
+            }
+            catch (const std::runtime_error &ex)
+            {
+                log("Error parsing moderation action: {}", ex.what());
+            }
+        };
+
+    this->moderationActionHandlers["delete_permitted_term"] =
+        [this](const auto &data, const auto &roomID) {
+            // This term got deleted
+            AutomodUserAction action(data, roomID);
+            getCreatedByUser(data, action.source);
+
+            try
+            {
+                const auto &args = getArgs(data);
+                action.type = 3;
+
+                if (args.Size() < 1)
+                {
+                    return;
+                }
+
+                if (!rj::getSafe(args[0], action.message))
+                {
+                    return;
+                }
+
+                this->signals_.moderation.automodUserMessage.invoke(action);
+            }
+            catch (const std::runtime_error &ex)
+            {
+                log("Error parsing moderation action: {}", ex.what());
+            }
+        };
+
+    this->moderationActionHandlers["delete_blocked_term"] =
+        [this](const auto &data, const auto &roomID) {
+            // This term got deleted
+            AutomodUserAction action(data, roomID);
+
+            getCreatedByUser(data, action.source);
+
+            try
+            {
+                const auto &args = getArgs(data);
+                action.type = 4;
+
+                if (args.Size() < 1)
+                {
+                    return;
+                }
+
+                if (!rj::getSafe(args[0], action.message))
+                {
+                    return;
+                }
+
+                this->signals_.moderation.automodUserMessage.invoke(action);
+            }
+            catch (const std::runtime_error &ex)
+            {
+                log("Error parsing moderation action: {}", ex.what());
+            }
+        };
+
+    this->moderationActionHandlers["modified_automod_properties"] =
+        [this](const auto &data, const auto &roomID) {
+            // The automod settings got modified
+            AutomodUserAction action(data, roomID);
+            getCreatedByUser(data, action.source);
+            action.type = 5;
+            this->signals_.moderation.automodUserMessage.invoke(action);
+        };
+
+    this->moderationActionHandlers["denied_automod_message"] =
+        [this](const auto &data, const auto &roomID) {
+            // This message got denied by a moderator
+            // qDebug() << QString::fromStdString(rj::stringify(data));
         };
 
     this->moderationActionHandlers["approved_automod_message"] =
         [this](const auto &data, const auto &roomID) {
             // This message got approved by a moderator
-            qDebug() << "test5555";
-            qDebug() << QString::fromStdString(rj::stringify(data));
+            // qDebug() << QString::fromStdString(rj::stringify(data));
         };
 
-    this->moderationActionHandlers["add_permitted_term"] =
-        [this](const auto &data, const auto &roomID) {
-            // This term got a pass through automod
-            qDebug() << "test6666";
-            qDebug() << QString::fromStdString(rj::stringify(data));
-        };
-    this->moderationActionHandlers["modified_automod_properties"] =
-        [this](const auto &data, const auto &roomID) {
-            // The automod settings got modified
-            qDebug() << "test4444";
-            qDebug() << QString::fromStdString(rj::stringify(data));
-        };
-    this->moderationActionHandlers["delete_blocked_term"] =
-        [this](const auto &data, const auto &roomID) {
-            // This term got deleted
-            qDebug() << "test7777";
-            qDebug() << QString::fromStdString(rj::stringify(data));
-        };
-    this->moderationActionHandlers["delete_permitted_term"] =
-        [this](const auto &data, const auto &roomID) {
-            // This term got deleted
-            qDebug() << "test8888";
-            qDebug() << QString::fromStdString(rj::stringify(data));
-        };
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
     this->websocketClient.clear_access_channels(
         websocketpp::log::alevel::frame_payload);

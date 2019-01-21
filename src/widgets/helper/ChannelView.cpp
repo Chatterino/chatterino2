@@ -1676,6 +1676,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         {
             getApp()->accounts->twitch.getCurrent()->autoModAllow(link.value);
         }
+        break;
+
         case Link::AutoModDeny:
         {
             getApp()->accounts->twitch.getCurrent()->autoModDeny(link.value);

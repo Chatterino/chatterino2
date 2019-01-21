@@ -10,6 +10,7 @@ namespace chatterino {
 struct BanAction;
 struct UnbanAction;
 struct AutomodAction;
+struct AutomodUserAction;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
@@ -44,6 +45,7 @@ public:
                    bool multipleTimes);
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
+    MessageBuilder(const AutomodUserAction &action);
 
     Message *operator->();
     Message &message();
