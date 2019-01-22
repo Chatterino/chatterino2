@@ -581,7 +581,7 @@ PubSub::PubSub()
             try
             {
                 const auto &args = getArgs(data);
-                action.type = 1;
+                action.type = AutomodUserAction::AddPermitted;
 
                 if (args.Size() < 1)
                 {
@@ -610,7 +610,7 @@ PubSub::PubSub()
             try
             {
                 const auto &args = getArgs(data);
-                action.type = 2;
+                action.type = AutomodUserAction::AddBlocked;
 
                 if (args.Size() < 1)
                 {
@@ -639,7 +639,7 @@ PubSub::PubSub()
             try
             {
                 const auto &args = getArgs(data);
-                action.type = 3;
+                action.type = AutomodUserAction::RemovePermitted;
 
                 if (args.Size() < 1)
                 {
@@ -669,7 +669,7 @@ PubSub::PubSub()
             try
             {
                 const auto &args = getArgs(data);
-                action.type = 4;
+                action.type = AutomodUserAction::RemoveBlocked;
 
                 if (args.Size() < 1)
                 {
@@ -694,7 +694,7 @@ PubSub::PubSub()
             // The automod settings got modified
             AutomodUserAction action(data, roomID);
             getCreatedByUser(data, action.source);
-            action.type = 5;
+            action.type = AutomodUserAction::Properties;
             this->signals_.moderation.automodUserMessage.invoke(action);
         };
 

@@ -244,34 +244,46 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
     this->message().flags.set(MessageFlag::System);
 
     QString text;
-    if (action.type == 1)
+    switch (action.type)
     {
-        text = QString("%1 added %2 as a permitted term on AutoMod.")
-                   .arg(action.source.name)
-                   .arg(action.message);
-    }
-    else if (action.type == 2)
-    {
-        text = QString("%1 added %2 as a blocked term on AutoMod.")
-                   .arg(action.source.name)
-                   .arg(action.message);
-    }
-    else if (action.type == 3)
-    {
-        text = QString("%1 removed %2 as a permitted term term on AutoMod.")
-                   .arg(action.source.name)
-                   .arg(action.message);
-    }
-    else if (action.type == 4)
-    {
-        text = QString("%1 removed %2 as a blocked term on AutoMod.")
-                   .arg(action.source.name)
-                   .arg(action.message);
-    }
-    else if (action.type == 5)
-    {
-        text = QString("%1 modified the AutoMod properties.")
-                   .arg(action.source.name);
+        case action.AddPermitted:
+        {
+            text = QString("%1 added %2 as a permitted term on AutoMod.")
+                       .arg(action.source.name)
+                       .arg(action.message);
+        }
+        break;
+
+        case action.AddBlocked:
+        {
+            text = QString("%1 added %2 as a blocked term on AutoMod.")
+                       .arg(action.source.name)
+                       .arg(action.message);
+        }
+        break;
+
+        case action.RemovePermitted:
+        {
+            text = QString("%1 removed %2 as a permitted term term on AutoMod.")
+                       .arg(action.source.name)
+                       .arg(action.message);
+        }
+        break;
+
+        case action.RemoveBlocked:
+        {
+            text = QString("%1 removed %2 as a blocked term on AutoMod.")
+                       .arg(action.source.name)
+                       .arg(action.message);
+        }
+        break;
+
+        case action.Properties:
+        {
+            text = QString("%1 modified the AutoMod properties.")
+                       .arg(action.source.name);
+        }
+        break;
     }
 
     this->emplace<TextElement>(text, MessageElementFlag::Text,
