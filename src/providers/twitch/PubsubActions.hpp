@@ -122,9 +122,15 @@ struct AutomodUserAction : PubSubAction {
 
     ActionUser target;
 
-    QString message;
+    enum {
+        AddPermitted,
+        RemovePermitted,
+        AddBlocked,
+        RemoveBlocked,
+        Properties,
+    } type;
 
-    qint8 type;
+    QString message;
 };
 
 }  // namespace chatterino
