@@ -174,10 +174,17 @@ MessagePtr TwitchMessageBuilder::build()
     if (iterator != this->tags.end())
     {
         QStringList emoteString = iterator.value().toString().split('/');
-
+        std::vector<int> correctPositions;
+        for (int i = 0; i < this->originalMessage_.size(); ++i)
+        {
+            if (!this->originalMessage_.at(i).isLowSurrogate())
+            {
+                correctPositions.push_back(i);
+            }
+        }
         for (QString emote : emoteString)
         {
-            this->appendTwitchEmote(emote, twitchEmotes);
+            this->appendTwitchEmote(emote, twitchEmotes, correctPositions);
         }
     }
     auto app = getApp();
@@ -452,17 +459,7 @@ void TwitchMessageBuilder::addWords(
                                  variant);
         }
 
-        for (int j = 0; j < word.size(); j++)
-        {
-            i++;
-
-            if (word.at(j).isHighSurrogate())
-            {
-                j++;
-            }
-        }
-
-        i++;
+        i += word.size() + 1;
     }
 }
 
@@ -935,7 +932,8 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 
 void TwitchMessageBuilder::appendTwitchEmote(
     const QString &emote,
-    std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec)
+    std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec,
+    std::vector<int> &correctPositions)
 {
     auto app = getApp();
     if (!emote.contains(':'))
@@ -963,8 +961,8 @@ void TwitchMessageBuilder::appendTwitchEmote(
             return;
         }
 
-        auto start = coords.at(0).toInt();
-        auto end = coords.at(1).toInt();
+        auto start = correctPositions[coords.at(0).toInt()];
+        auto end = correctPositions[coords.at(1).toInt()];
 
         if (start >= end || start < 0 || end > this->originalMessage_.length())
         {
@@ -987,19 +985,24 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
     // Special channels, like /whispers and /channels return here
     // This means they will not render any BTTV or FFZ emotes
-    if (this->twitchChannel == nullptr) {
+    if (this->twitchChannel == nullptr)
+    {
         auto *app = getApp();
         const auto &bttvemotes = app->twitch.server->getBttvEmotes();
         const auto &ffzemotes = app->twitch.server->getFfzEmotes();
         auto flags = MessageElementFlags();
         auto emote = boost::optional<EmotePtr>{};
         {  // bttv/ffz emote
-            if ((emote = bttvemotes.emote(name))) {
+            if ((emote = bttvemotes.emote(name)))
+            {
                 flags = MessageElementFlag::BttvEmote;
-            } else if ((emote = ffzemotes.emote(name))) {
+            }
+            else if ((emote = ffzemotes.emote(name)))
+            {
                 flags = MessageElementFlag::FfzEmote;
             }
-            if (emote) {
+            if (emote)
+            {
                 this->emplace<EmoteElement>(emote.get(), flags);
                 return Success;
             }
