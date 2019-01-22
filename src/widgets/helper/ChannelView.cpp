@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "debug/Benchmark.hpp"
 #include "debug/Log.hpp"
 #include "messages/Emote.hpp"
@@ -1670,6 +1671,17 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             this->channel_->sendMessage(value);
         }
         break;
+
+        case Link::AutoModAllow:
+        {
+            getApp()->accounts->twitch.getCurrent()->autoModAllow(link.value);
+        }
+        break;
+
+        case Link::AutoModDeny:
+        {
+            getApp()->accounts->twitch.getCurrent()->autoModDeny(link.value);
+        }
 
         default:;
     }

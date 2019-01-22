@@ -234,6 +234,38 @@ void Application::initPubsub()
             postToThread([chan, msg] { chan->addMessage(msg); });
         });
 
+    this->twitch.pubsub->signals_.moderation.automodMessage.connect(
+        [&](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            postToThread([chan, action] {
+                auto p = makeAutomodMessage(action);
+                chan->addMessage(p.first);
+                chan->addMessage(p.second);
+            });
+        });
+
+    this->twitch.pubsub->signals_.moderation.automodUserMessage.connect(
+        [&](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            auto msg = MessageBuilder(action).release();
+
+            postToThread([chan, msg] { chan->addMessage(msg); });
+        });
+
     this->twitch.pubsub->start();
 
     auto RequestModerationActions = [=]() {

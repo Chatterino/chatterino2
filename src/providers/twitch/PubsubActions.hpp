@@ -105,4 +105,26 @@ struct ModerationStateAction : PubSubAction {
     bool modded;
 };
 
+struct AutomodAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+
+    ActionUser target;
+
+    QString message;
+
+    QString reason;
+
+    QString msgID;
+};
+
+struct AutomodUserAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+
+    ActionUser target;
+
+    QString message;
+
+    qint8 type;
+};
+
 }  // namespace chatterino

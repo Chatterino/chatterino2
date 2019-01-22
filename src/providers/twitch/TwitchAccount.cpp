@@ -413,6 +413,51 @@ AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
     return this->emotes_.accessConst();
 }
 
+// AutoModActions
+void TwitchAccount::autoModAllow(const QString msgID)
+{
+    QString url("https://api.twitch.tv/kraken/chat/twitchbot/approve");
+
+    NetworkRequest req(url, NetworkRequestType::Post);
+    req.setRawHeader("Content-Type", "application/json");
+
+    auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
+    qDebug() << qba;
+
+    req.setRawHeader("Content-Length", QByteArray::number(qba.size()));
+    req.setPayload(qba);
+    req.setCaller(QThread::currentThread());
+    req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+
+    req.onError([=](int errorCode) {
+        log("[TwitchAccounts::autoModAllow] Error {}", errorCode);
+        return true;
+    });
+
+    req.execute();
+}
+
+void TwitchAccount::autoModDeny(const QString msgID)
+{
+    QString url("https://api.twitch.tv/kraken/chat/twitchbot/deny");
+
+    NetworkRequest req(url, NetworkRequestType::Post);
+    req.setRawHeader("Content-Type", "application/json");
+    auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
+    qDebug() << qba;
+
+    req.setRawHeader("Content-Length", QByteArray::number(qba.size()));
+    req.setPayload(qba);
+    req.setCaller(QThread::currentThread());
+    req.makeAuthorizedV5(this->getOAuthClient(), this->getOAuthToken());
+
+    req.onError([=](int errorCode) {
+        log("[TwitchAccounts::autoModDeny] Error {}", errorCode);
+        return true;
+    });
+    req.execute();
+}
+
 void TwitchAccount::parseEmotes(const rapidjson::Document &root)
 {
     auto emoteData = this->emotes_.access();

@@ -32,6 +32,7 @@ Resources2::Resources2()
     this->split.right = QPixmap(":/split/right.png");
     this->split.up = QPixmap(":/split/up.png");
     this->twitch.admin = QPixmap(":/twitch/admin.png");
+    this->twitch.automod = QPixmap(":/twitch/automod.png");
     this->twitch.broadcaster = QPixmap(":/twitch/broadcaster.png");
     this->twitch.cheer1 = QPixmap(":/twitch/cheer1.png");
     this->twitch.globalmod = QPixmap(":/twitch/globalmod.png");

@@ -4,10 +4,13 @@
 
 #include <QRegularExpression>
 #include <ctime>
+#include <utility>
 
 namespace chatterino {
 struct BanAction;
 struct UnbanAction;
+struct AutomodAction;
+struct AutomodUserAction;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
@@ -19,6 +22,8 @@ const SystemMessageTag systemMessage{};
 const TimeoutMessageTag timeoutMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
+std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
+    const AutomodAction &action);
 
 struct MessageParseArgs {
     bool disablePingSounds = false;
@@ -29,6 +34,7 @@ struct MessageParseArgs {
 };
 
 class MessageBuilder
+
 {
 public:
     MessageBuilder();
@@ -39,6 +45,7 @@ public:
                    bool multipleTimes);
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
+    MessageBuilder(const AutomodUserAction &action);
 
     Message *operator->();
     Message &message();
@@ -63,5 +70,4 @@ public:
 private:
     std::shared_ptr<Message> message_;
 };
-
 }  // namespace chatterino

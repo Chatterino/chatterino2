@@ -28,6 +28,7 @@ enum class MessageFlag : uint16_t {
     PubSub = (1 << 11),
     Subscription = (1 << 12),
     Notification = (1 << 13),
+    AutoMod = (1 << 14),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

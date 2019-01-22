@@ -108,6 +108,10 @@ public:
     void loadEmotes();
     AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
+    // Automod actions
+    void autoModAllow(const QString msgID);
+    void autoModDeny(const QString msgID);
+
 private:
     void parseEmotes(const rapidjson::Document &document);
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);

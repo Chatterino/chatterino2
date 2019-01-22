@@ -17,6 +17,8 @@ public:
         InsertText,
         ShowMessage,
         UserAction,
+        AutoModAllow,
+        AutoModDeny,
     };
 
     Link();

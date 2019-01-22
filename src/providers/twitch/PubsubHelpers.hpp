@@ -12,6 +12,7 @@ class TwitchAccount;
 struct ActionUser;
 
 const rapidjson::Value &getArgs(const rapidjson::Value &data);
+const rapidjson::Value &getMsgID(const rapidjson::Value &data);
 
 bool getCreatedByUser(const rapidjson::Value &data, ActionUser &user);
 
