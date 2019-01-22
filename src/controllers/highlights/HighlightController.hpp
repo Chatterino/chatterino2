@@ -45,6 +45,8 @@ private:
         "/highlighting/highlights"};
     ChatterinoSetting<std::vector<HighlightBlacklistUser>> blacklistSetting_ = {
         "/highlighting/blacklist"};
+    ChatterinoSetting<std::vector<HighlightPhrase>> userSetting_ = {
+        "/highlighting/users"};
 };
 
 }  // namespace chatterino
