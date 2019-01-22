@@ -115,6 +115,9 @@ UserInfoPopup::UserInfoPopup()
             TwitchChannel *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->channel_.get());
 
+            bool visibilityMod = false;
+            bool visibilityUnmod = false;
+
             if (twitchChannel)
             {
                 qDebug() << this->userName_;
@@ -124,11 +127,12 @@ UserInfoPopup::UserInfoPopup()
                         getApp()->accounts->twitch.getCurrent()->getUserName(),
                         this->userName_, Qt::CaseInsensitive) == 0;
 
-                mod->setVisible(twitchChannel->isBroadcaster() && !isMyself);
-                unmod->setVisible(
-                    (twitchChannel->isBroadcaster() && !isMyself) ||
-                    (twitchChannel->isMod() && isMyself));
+                visibilityMod = twitchChannel->isBroadcaster() && !isMyself;
+                visibilityUnmod = visibilityMod ||
+                                  (twitchChannel->isMod() && isMyself);    
             }
+            mod->setVisible(visibilityMod);
+            unmod->setVisible(visibilityUnmod);
         });
     }
 
@@ -143,11 +147,10 @@ UserInfoPopup::UserInfoPopup()
             TwitchChannel *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->channel_.get());
 
-            if (twitchChannel)
-            {
-                lineMod->setVisible(twitchChannel->hasModRights());
-                timeout->setVisible(twitchChannel->hasModRights());
-            }
+            bool hasModRights = twitchChannel ? twitchChannel->hasModRights() 
+                                              : false;
+            lineMod->setVisible(hasModRights);
+            timeout->setVisible(hasModRights);
         });
 
         timeout->buttonClicked.connect([this](auto item) {
