@@ -246,7 +246,7 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
     QString text;
     switch (action.type)
     {
-        case action.AddPermitted:
+        case AutomodUserAction::AddPermitted:
         {
             text = QString("%1 added %2 as a permitted term on AutoMod.")
                        .arg(action.source.name)
@@ -254,7 +254,7 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
         }
         break;
 
-        case action.AddBlocked:
+        case AutomodUserAction::AddBlocked:
         {
             text = QString("%1 added %2 as a blocked term on AutoMod.")
                        .arg(action.source.name)
@@ -262,7 +262,7 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
         }
         break;
 
-        case action.RemovePermitted:
+        case AutomodUserAction::RemovePermitted:
         {
             text = QString("%1 removed %2 as a permitted term term on AutoMod.")
                        .arg(action.source.name)
@@ -270,7 +270,7 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
         }
         break;
 
-        case action.RemoveBlocked:
+        case AutomodUserAction::RemoveBlocked:
         {
             text = QString("%1 removed %2 as a blocked term on AutoMod.")
                        .arg(action.source.name)
@@ -278,7 +278,7 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
         }
         break;
 
-        case action.Properties:
+        case AutomodUserAction::Properties:
         {
             text = QString("%1 modified the AutoMod properties.")
                        .arg(action.source.name);
