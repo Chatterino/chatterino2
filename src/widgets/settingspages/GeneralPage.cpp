@@ -230,7 +230,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.emojiSet);
 
     layout.addTitle("Badges");
-    layout.addCheckbox("Show authority badges (staff, admin, turbo, etc)",
+    layout.addCheckbox("Show authority badges (staff, admin)",
                        getSettings()->showBadgesGlobalAuthority);
     layout.addCheckbox("Show channel badges (broadcaster, moderator)",
                        getSettings()->showBadgesChannelAuthority);

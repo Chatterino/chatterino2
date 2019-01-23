@@ -1123,19 +1123,19 @@ void TwitchMessageBuilder::appendTwitchBadges()
                     MessageElementFlag::BadgeChannelAuthority)
                 ->setTooltip("Twitch Channel Moderator");
         }
-        else if (badge == "turbo/1")
-        {
-            this->emplace<ImageElement>(
-                    Image::fromPixmap(app->resources->twitch.turbo),
-                    MessageElementFlag::BadgeGlobalAuthority)
-                ->setTooltip("Twitch Turbo Subscriber");
-        }
         else if (badge == "broadcaster/1")
         {
             this->emplace<ImageElement>(
                     Image::fromPixmap(app->resources->twitch.broadcaster),
                     MessageElementFlag::BadgeChannelAuthority)
                 ->setTooltip("Twitch Broadcaster");
+        }
+        else if (badge == "turbo/1")
+        {
+            this->emplace<ImageElement>(
+                    Image::fromPixmap(app->resources->twitch.turbo),
+                    MessageElementFlag::BadgeVanity)
+                ->setTooltip("Twitch Turbo Subscriber");
         }
         else if (badge == "premium/1")
         {
