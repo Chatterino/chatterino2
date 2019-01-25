@@ -35,6 +35,9 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
             Image::fromPixmap(getApp()->resources->twitch.automod),
             MessageElementFlag::BadgeChannelAuthority)
         ->setTooltip("AutoMod");
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
+                                 MessageColor(QColor("blue")),
+                                 FontStyle::ChatMediumBold);
     builder.emplace<TextElement>(
         "AutoMod:", MessageElementFlag::NonBoldUsername,
         MessageColor(QColor("blue")));
@@ -63,6 +66,11 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     builder.emplace<TimestampElement>();
     builder.message().flags.set(MessageFlag::PubSub);
 
+    builder
+        .emplace<TextElement>(
+            action.target.name + ":", MessageElementFlag::BoldUsername,
+            MessageColor(QColor("red")), FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.target.name});
     builder
         .emplace<TextElement>(action.target.name + ":",
                               MessageElementFlag::NonBoldUsername,
