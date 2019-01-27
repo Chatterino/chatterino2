@@ -31,8 +31,9 @@ public:
                                      Qt::VerPattern};
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
                                        ""};
-    BoolSetting greyOutHistoricMessages = {
-        "/appearance/messages/greyOutHistoricMessages", true};
+    QStringSetting historicMessagesAppearance = {
+        "/appearance/messages/historicMessagesAppearance",
+        "Crossed and Greyed"};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};

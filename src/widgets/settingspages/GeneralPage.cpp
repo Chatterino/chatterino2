@@ -263,7 +263,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle2("Misc");
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
-    layout.addCheckbox("Grey out historic messages", s.greyOutHistoricMessages);
+    layout.addDropdown("Historic messages appearance",
+                       {"Crossed and Greyed", "Crossed", "Greyed", "No change"},
+                       s.historicMessagesAppearance);
 
     /*
     layout.addTitle2("Cache");
