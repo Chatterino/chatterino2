@@ -65,6 +65,7 @@ public:
     BoolSetting headerUptime = {"/appearance/splitheader/showUptime", false};
     FloatSetting customThemeMultiplier = {"/appearance/customThemeMultiplier",
                                           -0.5f};
+    BoolSetting redDisabledMessages = {"/appearance/redStripes", true};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
 

@@ -200,9 +200,13 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                          app->themes->messages.disabled);
         //        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
         //                         QBrush(QColor(64, 64, 64, 64)));
-        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                         QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
-        //                         app->themes->messages.disabled);
+
+        if (getSettings()->redDisabledMessages)
+        {
+            painter.fillRect(0, y, pixmap->width(), pixmap->height(),
+                             QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
+            //                         app->themes->messages.disabled);
+        }
     }
 
     // draw selection
