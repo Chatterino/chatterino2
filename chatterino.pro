@@ -385,6 +385,7 @@ HEADERS  += \
     src/widgets/splits/ClosedSplits.hpp \
     src/providers/ffz/FfzModBadge.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
+    src/messages/HistoricMessageAppearance.hpp
 
 RESOURCES += \
     resources/resources.qrc \

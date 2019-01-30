@@ -200,31 +200,25 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                          app->themes->messages.disabled);
         //        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
         //                         QBrush(QColor(64, 64, 64, 64)));
-        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                         QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
-        //                         app->themes->messages.disabled);
+
+        if (getSettings()->redDisabledMessages)
+        {
+            painter.fillRect(0, y, pixmap->width(), pixmap->height(),
+                             QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
+            //                         app->themes->messages.disabled);
+        }
     }
 
     if (this->message_->flags.has(MessageFlag::RecentMessage))
     {
-        const auto &setting =
+        const auto &historicMessageAppearance =
             getSettings()->historicMessagesAppearance.getValue();
-        /// hemirt: for options check the options associated with the setting
-        /// historicMessagesAppearance in GeneralPage.cpp (and default in
-        /// Settings.hpp)
-        if (setting == "Crossed and Greyed")
-        {
-            painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                             QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
-            painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                             app->themes->messages.disabled);
-        }
-        else if (setting == "Crossed")
+        if (historicMessageAppearance & HistoricMessageAppearance::Crossed)
         {
             painter.fillRect(0, y, pixmap->width(), pixmap->height(),
                              QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
         }
-        else if (setting == "Greyed")
+        if (historicMessageAppearance & HistoricMessageAppearance::Greyed)
         {
             painter.fillRect(0, y, pixmap->width(), pixmap->height(),
                              app->themes->messages.disabled);

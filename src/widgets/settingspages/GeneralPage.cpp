@@ -263,9 +263,50 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle2("Misc");
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
-    layout.addDropdown("Historic messages appearance",
-                       {"Crossed and Greyed", "Crossed", "Greyed", "No change"},
-                       s.historicMessagesAppearance);
+    layout.addDropdown<int>(
+        "Historic messages appearance",
+        {"Crossed and Greyed", "Crossed", "Greyed", "No change"},
+        s.historicMessagesAppearance,
+        [](auto val) {
+            if (val & HistoricMessageAppearance::Crossed &&
+                val & HistoricMessageAppearance::Greyed)
+            {
+                return QString("Crossed and Greyed");
+            }
+            else if (val & HistoricMessageAppearance::Crossed)
+            {
+                return QString("Crossed");
+            }
+            else if (val & HistoricMessageAppearance::Greyed)
+            {
+                return QString("Greyed");
+            }
+            else
+            {
+                return QString("No Change");
+            }
+        },
+        [](auto args) -> int {
+            switch (args.index)
+            {
+                default:
+                case 0:
+                    return HistoricMessageAppearance::Crossed |
+                           HistoricMessageAppearance::Greyed;
+                    break;
+                case 1:
+                    return HistoricMessageAppearance::Crossed;
+                    break;
+                case 2:
+                    return HistoricMessageAppearance::Greyed;
+                    break;
+                case 3:
+                    return 0;
+                    break;
+            }
+        },
+        false);
+    layout.addCheckbox("Emphasize deleted messages", s.redDisabledMessages);
 
     /*
     layout.addTitle2("Cache");
@@ -299,7 +340,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                                              "Medium", "Low", "Audio only"});
     layout.addDropdown("Command line arguments", {"..."});
     */
-}
+}  // namespace chatterino
 
 void GeneralPage::initExtra()
 {
