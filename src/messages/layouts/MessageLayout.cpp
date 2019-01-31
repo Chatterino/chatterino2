@@ -209,6 +209,22 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
         }
     }
 
+    if (this->message_->flags.has(MessageFlag::RecentMessage))
+    {
+        const auto &historicMessageAppearance =
+            getSettings()->historicMessagesAppearance.getValue();
+        if (historicMessageAppearance & HistoricMessageAppearance::Crossed)
+        {
+            painter.fillRect(0, y, pixmap->width(), pixmap->height(),
+                             QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
+        }
+        if (historicMessageAppearance & HistoricMessageAppearance::Greyed)
+        {
+            painter.fillRect(0, y, pixmap->width(), pixmap->height(),
+                             app->themes->messages.disabled);
+        }
+    }
+
     // draw selection
     if (!selection.isEmpty())
     {
