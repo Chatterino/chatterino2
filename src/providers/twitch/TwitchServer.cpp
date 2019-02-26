@@ -94,7 +94,7 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
     std::shared_ptr<TwitchChannel> channel;
-    if (channelName.left(9).toLower() == "chatrooms")
+    if (channelName.left(10).toLower() == "chatrooms:")
     {
         channel = std::static_pointer_cast<TwitchChannel>(
             std::shared_ptr<ChatroomChannel>(new ChatroomChannel(
