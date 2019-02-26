@@ -6,6 +6,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/ChatroomChannel.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
@@ -92,8 +93,18 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
 
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
-    auto channel = std::shared_ptr<TwitchChannel>(new TwitchChannel(
-        channelName, this->twitchBadges, this->bttv, this->ffz));
+    std::shared_ptr<TwitchChannel> channel;
+    if (channelName.left(9).toLower() == "chatrooms")
+    {
+        channel = std::static_pointer_cast<TwitchChannel>(
+            std::shared_ptr<ChatroomChannel>(new ChatroomChannel(
+                channelName, this->twitchBadges, this->bttv, this->ffz)));
+    }
+    else
+    {
+        channel = std::shared_ptr<TwitchChannel>(new TwitchChannel(
+            channelName, this->twitchBadges, this->bttv, this->ffz));
+    }
     channel->initialize();
 
     channel->sendMessageSignal.connect(

@@ -10,6 +10,8 @@ class TwitchApi
 public:
     static void findUserId(const QString user,
                            std::function<void(QString)> callback);
+    static void findUserName(const QString userid,
+                             std::function<void(QString)> callback);
 
 private:
 };
