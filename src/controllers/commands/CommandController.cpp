@@ -206,11 +206,14 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
             app->twitch.server->sendMessage("jtv", text);
 
+            auto overrideFlags = boost::optional<MessageFlags>(messagexD->flags);
+            overrideFlags->set(MessageFlag::DoNotLog);
+
             if (getSettings()->inlineWhispers)
             {
                 app->twitch.server->forEachChannel(
-                    [&messagexD](ChannelPtr _channel) {
-                        _channel->addMessage(messagexD);
+                    [&messagexD, &overrideFlags](ChannelPtr _channel) {
+                        _channel->addMessage(messagexD, overrideFlags);
                     });
             }
 
