@@ -72,7 +72,7 @@ void Channel::addMessage(MessagePtr message,
     }
 
     // FOURTF: change this when adding more providers
-    if (this->isTwitchChannel())
+    if (this->isTwitchChannel() && !overridingFlags->has(MessageFlag::Whisper))
     {
         app->logging->addMessage(this->name_, message);
     }

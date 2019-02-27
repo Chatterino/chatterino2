@@ -27,7 +27,7 @@ enum class MessageFlag : uint16_t {
     Untimeout = (1 << 10),
     PubSub = (1 << 11),
     Subscription = (1 << 12),
-    Notification = (1 << 13),
+    Whisper = (1 << 13),
     AutoMod = (1 << 14),
     RecentMessage = (1 << 15),
 };
