@@ -212,7 +212,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             if (getSettings()->inlineWhispers)
             {
                 app->twitch.server->forEachChannel(
-                    [&messagexD, &overrideFlags](ChannelPtr _channel) {
+                    [&messagexD, overrideFlags](ChannelPtr _channel) {
                         _channel->addMessage(messagexD, overrideFlags);
                     });
             }
