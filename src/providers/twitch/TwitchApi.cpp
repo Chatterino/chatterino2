@@ -71,9 +71,7 @@ void TwitchApi::findUserName(const QString userid,
         auto name = root.value("name");
         if (!name.isString())
         {
-            log("API Error: while getting user id, first user object `_id` key "
-                "is not a "
-                "string");
+            log("API Error: while getting user name, `name` is not a string");
             successCallback("");
             return Failure;
         }
