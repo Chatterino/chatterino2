@@ -438,7 +438,8 @@ void TwitchChannel::setLive(bool newLiveStatus)
                         getApp()->windows->sendAlert();
                     }
                 }
-                auto live = makeSystemMessage(this->getName() + " is live");
+                auto live =
+                    makeSystemMessage(this->getDisplayName() + " is live");
                 this->addMessage(live);
             }
             else

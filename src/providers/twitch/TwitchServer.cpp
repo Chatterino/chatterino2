@@ -23,6 +23,21 @@ using namespace std::chrono_literals;
 
 namespace chatterino {
 
+namespace {
+    bool isChatroom(const QString &channel)
+    {
+        if (channel.left(10) == "chatrooms:")
+        {
+            auto reflist = channel.splitRef(':');
+            if (reflist.size() == 3)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+}  // namespace
+
 TwitchServer::TwitchServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
@@ -94,7 +109,7 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
 {
     std::shared_ptr<TwitchChannel> channel;
-    if (channelName.left(10).toLower() == "chatrooms:")
+    if (isChatroom(channelName))
     {
         channel = std::static_pointer_cast<TwitchChannel>(
             std::shared_ptr<ChatroomChannel>(new ChatroomChannel(

@@ -14,8 +14,10 @@ protected:
                              TwitchBadges &globalTwitchBadges,
                              BttvEmotes &globalBttv, FfzEmotes &globalFfz);
     virtual void refreshChannelEmotes() override;
+    virtual const QString &getDisplayName() const override;
 
     QString chatroomOwnerId;
+    QString chatroomOwnerName;
 
     friend class TwitchServer;
     friend class TwitchMessageBuilder;
