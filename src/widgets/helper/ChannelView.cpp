@@ -117,9 +117,11 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     this->pauseTimer_.setSingleShot(true);
     QObject::connect(&this->pauseTimer_, &QTimer::timeout, this, [this] {
-        /// remove elements that are finite
+        /// remove expired elements
         for (auto it = this->pauses_.begin(); it != this->pauses_.end();)
-            it = it->second ? this->pauses_.erase(it) : ++it;
+            it = (it->second && it->second <= this->pauseEnd_)
+                     ? this->pauses_.erase(it)
+                     : ++it;
 
         this->updatePauseTimer();
     });
