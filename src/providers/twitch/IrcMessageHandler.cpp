@@ -261,12 +261,13 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
         auto overrideFlags = boost::optional<MessageFlags>(_message->flags);
         overrideFlags->set(MessageFlag::DoNotTriggerNotification);
+        overrideFlags->set(MessageFlag::DoNotLog);
 
         if (getSettings()->inlineWhispers)
         {
             app->twitch.server->forEachChannel(
-                [_message, overrideFlags](ChannelPtr channel) {
-                    channel->addMessage(_message, overrideFlags);  //
+                [&_message, overrideFlags](ChannelPtr channel) {
+                    channel->addMessage(_message, overrideFlags);
                 });
         }
     }
