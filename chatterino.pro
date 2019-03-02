@@ -206,6 +206,7 @@ SOURCES += \
     src/widgets/splits/ClosedSplits.cpp \
     src/providers/ffz/FfzModBadge.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
+    src/providers/twitch/ChatroomChannel.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -385,7 +386,8 @@ HEADERS  += \
     src/widgets/splits/ClosedSplits.hpp \
     src/providers/ffz/FfzModBadge.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
-    src/messages/HistoricMessageAppearance.hpp
+    src/messages/HistoricMessageAppearance.hpp \
+    src/providers/twitch/ChatroomChannel.hpp
 
 RESOURCES += \
     resources/resources.qrc \

@@ -47,6 +47,7 @@ public:
 
     Type getType() const;
     const QString &getName() const;
+    virtual const QString &getDisplayName() const;
     bool isTwitchChannel() const;
     virtual bool isEmpty() const;
     LimitedQueueSnapshot<MessagePtr> getMessageSnapshot();

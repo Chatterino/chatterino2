@@ -57,4 +57,29 @@ void TwitchApi::findUserId(const QString user,
     request.execute();
 }
 
+void TwitchApi::findUserName(const QString userid,
+                             std::function<void(QString)> successCallback)
+{
+    QString requestUrl("https://api.twitch.tv/kraken/users/" + userid);
+
+    NetworkRequest request(requestUrl);
+    request.setCaller(QThread::currentThread());
+    request.makeAuthorizedV5(getDefaultClientID());
+    request.setTimeout(30000);
+    request.onSuccess([successCallback](auto result) mutable -> Outcome {
+        auto root = result.parseJson();
+        auto name = root.value("name");
+        if (!name.isString())
+        {
+            log("API Error: while getting user name, `name` is not a string");
+            successCallback("");
+            return Failure;
+        }
+        successCallback(name.toString());
+        return Success;
+    });
+
+    request.execute();
+}
+
 }  // namespace chatterino

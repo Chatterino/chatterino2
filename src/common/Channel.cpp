@@ -43,6 +43,11 @@ const QString &Channel::getName() const
     return this->name_;
 }
 
+const QString &Channel::getDisplayName() const
+{
+    return this->getName();
+}
+
 bool Channel::isTwitchChannel() const
 {
     return this->type_ >= Type::Twitch && this->type_ < Type::TwitchEnd;

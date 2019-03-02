@@ -32,7 +32,7 @@ class BttvEmotes;
 
 class TwitchServer;
 
-class TwitchChannel final : public Channel, pajlada::Signals::SignalHolder
+class TwitchChannel : public Channel, pajlada::Signals::SignalHolder
 {
 public:
     struct StreamStatus {
@@ -82,7 +82,7 @@ public:
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
 
-    void refreshChannelEmotes();
+    virtual void refreshChannelEmotes();
 
     // Badges
     boost::optional<EmotePtr> ffzCustomModBadge() const;
@@ -104,10 +104,12 @@ private:
         QString localizedName;
     };
 
+protected:
     explicit TwitchChannel(const QString &channelName,
                            TwitchBadges &globalTwitchBadges,
                            BttvEmotes &globalBttv, FfzEmotes &globalFfz);
 
+private:
     // Methods
     void refreshLiveStatus();
     Outcome parseLiveStatus(const rapidjson::Document &document);
@@ -134,11 +136,14 @@ private:
 
     // Emotes
     TwitchBadges &globalTwitchBadges_;
+
+protected:
     BttvEmotes &globalBttv_;
     FfzEmotes &globalFfz_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
 
+private:
     // Badges
     UniqueAccess<std::map<QString, std::map<QString, EmotePtr>>>
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
