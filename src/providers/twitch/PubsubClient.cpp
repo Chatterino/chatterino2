@@ -1,6 +1,6 @@
 #include "providers/twitch/PubsubClient.hpp"
 
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/PubsubHelpers.hpp"
 #include "util/RapidjsonHelpers.hpp"

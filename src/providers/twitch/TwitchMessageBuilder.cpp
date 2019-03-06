@@ -4,7 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/LinkResolver.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"

@@ -5,7 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"

@@ -1,7 +1,7 @@
 #include "providers/twitch/TwitchAccountManager.hpp"
 
 #include "common/Common.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 

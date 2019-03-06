@@ -6,7 +6,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Benchmark.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"

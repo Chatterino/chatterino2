@@ -5,7 +5,7 @@
 #include <QSettings>
 #include <QVariant>
 
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 
 namespace chatterino
 {

@@ -1,6 +1,6 @@
 #include "AboutPage.hpp"
 
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/helper/SignalLabel.hpp"

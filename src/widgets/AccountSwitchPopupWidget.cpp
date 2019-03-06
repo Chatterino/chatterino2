@@ -1,5 +1,5 @@
 #include "widgets/AccountSwitchPopupWidget.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 
 #include <QHBoxLayout>

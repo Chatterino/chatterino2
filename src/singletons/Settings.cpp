@@ -1,7 +1,7 @@
 #include "singletons/Settings.hpp"
 
 #include "Application.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/WindowManager.hpp"
 

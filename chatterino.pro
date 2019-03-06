@@ -391,6 +391,7 @@ HEADERS += \
     src/util/IsBigEndian.hpp \
     src/util/JsonQuery.hpp \
     src/util/LayoutCreator.hpp \
+    src/util/Log.hpp \
     src/util/Outcome.hpp \
     src/util/PostToThread.hpp \
     src/util/QObjectPtr.hpp \

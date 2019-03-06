@@ -5,7 +5,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
 #include "controllers/highlights/UserHighlightModel.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/StandardItemHelper.hpp"

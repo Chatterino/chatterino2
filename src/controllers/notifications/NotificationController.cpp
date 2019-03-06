@@ -4,7 +4,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "providers/twitch/TwitchApi.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Toasts.hpp"

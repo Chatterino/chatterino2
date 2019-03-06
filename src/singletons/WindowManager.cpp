@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "debug/AssertInGuiThread.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Fonts.hpp"

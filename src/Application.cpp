@@ -7,7 +7,7 @@
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"

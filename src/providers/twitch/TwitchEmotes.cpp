@@ -2,7 +2,7 @@
 
 #include "common/NetworkRequest.hpp"
 #include "debug/Benchmark.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "util/RapidjsonHelpers.hpp"

@@ -1,7 +1,7 @@
 #include "providers/emoji/Emojis.hpp"
 
 #include "Application.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "messages/Emote.hpp"
 #include "singletons/Settings.hpp"
 

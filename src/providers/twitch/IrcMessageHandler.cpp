@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/highlights/HighlightController.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/TwitchChannel.hpp"

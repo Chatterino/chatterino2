@@ -1,5 +1,5 @@
 #include "QualityPopup.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "util/StreamLink.hpp"
 
 namespace chatterino

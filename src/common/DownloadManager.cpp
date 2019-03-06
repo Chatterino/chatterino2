@@ -1,6 +1,6 @@
 #include "DownloadManager.hpp"
 
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "singletons/Paths.hpp"
 
 #include <QDesktopServices>

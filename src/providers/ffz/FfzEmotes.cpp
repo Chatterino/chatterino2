@@ -4,7 +4,7 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 

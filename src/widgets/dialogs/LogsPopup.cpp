@@ -3,7 +3,7 @@
 #include "IrcMessage"
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"

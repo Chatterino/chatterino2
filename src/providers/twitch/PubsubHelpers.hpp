@@ -3,7 +3,7 @@
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <memory>
-#include "debug/Log.hpp"
+#include "util/Log.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino
