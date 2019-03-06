@@ -25,7 +25,7 @@ Scrollbar::Scrollbar(ChannelView *parent)
     this->currentValueAnimation_.setEasingCurve(
         QEasingCurve(QEasingCurve::OutCubic));
 
-    setMouseTracking(true);
+    this->setMouseTracking(true);
 }
 
 void Scrollbar::addHighlight(ScrollbarHighlight highlight)

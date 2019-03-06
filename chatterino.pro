@@ -368,6 +368,7 @@ HEADERS += \
     src/util/IsBigEndian.hpp \
     src/util/JsonQuery.hpp \
     src/util/LayoutCreator.hpp \
+    src/util/PostToThread.hpp \
     src/util/QStringHash.hpp \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \

@@ -12,7 +12,7 @@
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
 #ifdef USEWINSDK
-#    include "util/WindowsHelper.hpp"
+#    include "ab/util/WindowsHelper.hpp"
 #endif
 
 #ifdef C_USE_BREAKPAD
@@ -146,7 +146,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
 
 #ifdef USEWINSDK
     // flushing windows clipboard to keep copied messages
-    flushClipboard();
+    ab::flushClipboard();
 #endif
 
     _exit(0);
