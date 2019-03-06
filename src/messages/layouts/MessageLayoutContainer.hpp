@@ -5,10 +5,10 @@
 #include <memory>
 #include <vector>
 
-#include "common/Common.hpp"
-#include "common/FlagsEnum.hpp"
+#include "messages/Common.hpp"
 #include "messages/Selection.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "util/FlagsEnum.hpp"
 
 class QPainter;
 
@@ -72,7 +72,7 @@ namespace chatterino
         void paintElements(QPainter& painter);
         void paintAnimatedElements(QPainter& painter, int yOffset);
         void paintSelection(QPainter& painter, int messageIndex,
-            Selection& selection, int yOffset);
+            const Selection& selection, int yOffset);
 
         // selection
         int getSelectionIndex(QPoint point);
@@ -117,5 +117,4 @@ namespace chatterino
         std::vector<std::unique_ptr<MessageLayoutElement>> elements_;
         std::vector<Line> lines_;
     };
-
 }  // namespace chatterino

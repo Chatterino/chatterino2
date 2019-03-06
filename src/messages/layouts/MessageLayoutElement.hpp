@@ -1,15 +1,16 @@
 #pragma once
 
+#include <QBrush>
 #include <QPoint>
 #include <QRect>
 #include <QString>
 #include <boost/noncopyable.hpp>
 #include <climits>
 
-#include "common/FlagsEnum.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
+#include "util/FlagsEnum.hpp"
 
 class QPainter;
 
@@ -81,9 +82,10 @@ namespace chatterino
     {
     public:
         TextLayoutElement(MessageElement& creator_, QString& text,
-            const QSize& size, QColor color_, FontStyle style_, float scale_);
+            const QSize& size, QBrush color_, FontStyle style_, float scale_);
 
-        void listenToLinkChanges();
+        TextLayoutElement(MessageElement& creator_, QFont font, QString& text,
+            const QSize& size, QBrush color_, FontStyle style_, float scale_);
 
     protected:
         void addCopyTextToString(
@@ -95,11 +97,10 @@ namespace chatterino
         int getXFromIndex(int index) override;
 
     private:
-        QColor color_;
+        QBrush brush_;
         FontStyle style_;
+        QFont font_;
         float scale_;
-
-        std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
     };
 
     // TEXT ICON

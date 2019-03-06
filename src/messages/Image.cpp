@@ -1,24 +1,23 @@
 #include "messages/Image.hpp"
 
 #include "Application.hpp"
-#include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
-#include "debug/AssertInGuiThread.hpp"
-#include "debug/Benchmark.hpp"
-#include "debug/Log.hpp"
-#include "singletons/Emotes.hpp"
-#include "singletons/WindowManager.hpp"
+#include "ab/util/Benchmark.hpp"
+#include "messages/Common.hpp"
+#include "net/NetworkRequest.hpp"
+#include "util/AssertInGuiThread.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QBuffer>
 #include <QImageReader>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
 #include <QTimer>
+#include <QVector>
 #include <functional>
+#include <queue>
 #include <thread>
+#include <unordered_map>
+
+#define GIF_FRAME_LENGTH 33
 
 namespace chatterino
 {
@@ -40,15 +39,15 @@ namespace chatterino
             {
                 DebugCount::increase("animated images");
 
-                this->gifTimerConnection_ =
-                    getApp()->emotes->gifTimer.signal.connect(
-                        [this] { this->advance(); });
+                // this->gifTimerConnection_ =
+                //     getApp()->emotes->gifTimer.signal.connect(
+                //         [this] { this->advance(); });
             }
         }
 
         Frames::~Frames()
         {
-            assertInGuiThread();
+            // assertInGuiThread();
             DebugCount::decrease("images");
 
             if (this->animated())
@@ -56,7 +55,7 @@ namespace chatterino
                 DebugCount::decrease("animated images");
             }
 
-            this->gifTimerConnection_.disconnect();
+            // this->gifTimerConnection_.disconnect();
         }
 
         void Frames::advance()
@@ -94,14 +93,16 @@ namespace chatterino
         {
             if (this->items_.size() == 0)
                 return boost::none;
-            return this->items_[this->index_].image;
+            else
+                return this->items_[this->index_].image;
         }
 
         boost::optional<QPixmap> Frames::first() const
         {
             if (this->items_.size() == 0)
                 return boost::none;
-            return this->items_.front().image;
+            else
+                return this->items_.front().image;
         }
 
         // functions
@@ -111,8 +112,8 @@ namespace chatterino
 
             if (reader.imageCount() == 0)
             {
-                log("Error while reading image {}: '{}'", url.string,
-                    reader.errorString());
+                // log("Error while reading image {}: '{}'", url.string,
+                //    reader.errorString());
                 return frames;
             }
 
@@ -130,8 +131,8 @@ namespace chatterino
 
             if (frames.size() == 0)
             {
-                log("Error while reading image {}: '{}'", url.string,
-                    reader.errorString());
+                // log("Error while reading image {}: '{}'", url.string,
+                //    reader.errorString());
             }
 
             return frames;
@@ -160,7 +161,10 @@ namespace chatterino
                 }
             }
 
-            getApp()->windows->forceLayoutChannelViews();
+            // FOURTF: implement properly
+            // getApp()->windows->forceLayoutChannelViews();
+            imageUpdated().generation++;
+            emit imageUpdated().imageUpdated();
             loadedEventQueued = false;
         }
 
@@ -310,7 +314,7 @@ namespace chatterino
 
     void Image::load()
     {
-        NetworkRequest req(this->url().string);
+        NetworkRequest req(this->url().string.toStdString());
         req.setExecuteConcurrently(true);
         req.setCaller(&this->object_);
         req.setUseQuickLoadCache(true);
@@ -354,12 +358,12 @@ namespace chatterino
     {
         if (this->isEmpty() && other.isEmpty())
             return true;
-        if (!this->url_.string.isEmpty() && this->url_ == other.url_)
+        else if (!this->url_.string.isEmpty() && this->url_ == other.url_)
             return true;
-        if (this->frames_->first() == other.frames_->first())
+        else if (this->frames_->first() == other.frames_->first())
             return true;
-
-        return false;
+        else
+            return false;
     }
 
     bool Image::operator!=(const Image& other) const
@@ -367,4 +371,9 @@ namespace chatterino
         return !this->operator==(other);
     }
 
+    ImageUpdated& imageUpdated()
+    {
+        static ImageUpdated instance;
+        return instance;
+    }
 }  // namespace chatterino

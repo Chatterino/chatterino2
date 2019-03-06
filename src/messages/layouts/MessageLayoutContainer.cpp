@@ -1,20 +1,20 @@
 #include "MessageLayoutContainer.hpp"
 
 #include "Application.hpp"
+#include "messages/Fonts.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/Selection.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
-#include "singletons/Fonts.hpp"
-#include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
+//#include "singletons/Settings.hpp"
+//#include "singletons/Theme.hpp"
 
 #include <QDebug>
 #include <QPainter>
 
 #define COMPACT_EMOTES_OFFSET 6
-#define MAX_UNCOLLAPSED_LINES \
-    (getSettings()->collpseMessagesMinLines.getValue())
+#define MAX_UNCOLLAPSED_LINES 1000
+//    (getSettings()->collpseMessagesMinLines.getValue())
 
 namespace chatterino
 {
@@ -42,7 +42,7 @@ namespace chatterino
         this->scale_ = scale;
         this->flags_ = flags;
         auto mediumFontMetrics =
-            getApp()->fonts->getFontMetrics(FontStyle::ChatMedium, scale);
+            getFonts()->getFontMetrics(FontStyle::ChatMedium, scale);
         this->textLineHeight_ = mediumFontMetrics.height();
         this->spaceWidth_ = mediumFontMetrics.width(' ');
         this->dotdotdotWidth_ = mediumFontMetrics.width("...");
@@ -103,16 +103,16 @@ namespace chatterino
         int newLineHeight = element->getRect().height();
 
         // compact emote offset
-        bool isCompactEmote =
-            getSettings()->compactEmotes &&
-            !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
-            element->getCreator().getFlags().has(
-                MessageElementFlag::EmoteImages);
+        //  bool isCompactEmote =
+        //      getSettings()->compactEmotes &&
+        //      !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
+        //      element->getCreator().getFlags().has(
+        //          MessageElementFlag::EmoteImages);
 
-        if (isCompactEmote)
-        {
-            newLineHeight -= COMPACT_EMOTES_OFFSET * this->scale_;
-        }
+        //  if (isCompactEmote)
+        //  {
+        //      newLineHeight -= COMPACT_EMOTES_OFFSET * this->scale_;
+        //  }
 
         // update line height
         this->lineHeight_ = std::max(this->lineHeight_, newLineHeight);
@@ -152,17 +152,17 @@ namespace chatterino
         {
             MessageLayoutElement* element = this->elements_.at(i).get();
 
-            bool isCompactEmote =
-                getSettings()->compactEmotes &&
-                !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
-                element->getCreator().getFlags().has(
-                    MessageElementFlag::EmoteImages);
+            // bool isCompactEmote =
+            //     getSettings()->compactEmotes &&
+            //     !this->flags_.has(MessageFlag::DisableCompactEmotes) &&
+            //     element->getCreator().getFlags().has(
+            //         MessageElementFlag::EmoteImages);
 
             int yExtra = 0;
-            if (isCompactEmote)
-            {
-                // yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
-            }
+            // if (isCompactEmote)
+            // {
+            //     // yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
+            // }
 
             //        if (element->getCreator().getFlags() &
             //        MessageElementFlag::Badges)
@@ -259,8 +259,10 @@ namespace chatterino
 
     bool MessageLayoutContainer::canCollapse()
     {
-        return getSettings()->collpseMessagesMinLines.getValue() > 0 &&
-               this->flags_.has(MessageFlag::Collapsed);
+        //        return getSettings()->collpseMessagesMinLines.getValue() > 0
+        //        &&
+        //               this->flags_.has(MessageFlag::Collapsed);
+        return false;
     }
 
     bool MessageLayoutContainer::isCollapsed()
@@ -306,22 +308,22 @@ namespace chatterino
         }
     }
 
-    void MessageLayoutContainer::paintSelection(
-        QPainter& painter, int messageIndex, Selection& selection, int yOffset)
+    void MessageLayoutContainer::paintSelection(QPainter& painter,
+        int messageIndex, const Selection& selection, int yOffset)
     {
-        auto app = getApp();
-        QColor selectionColor = app->themes->messages.selection;
+        // QColor selectionColor = app->themes->messages.selection;
+        QColor selectionColor = QColor(127, 127, 127, 127);
 
         // don't draw anything
-        if (selection.selectionMin.messageIndex > messageIndex ||
-            selection.selectionMax.messageIndex < messageIndex)
+        if (selection.start.messageIndex > messageIndex ||
+            selection.end.messageIndex < messageIndex)
         {
             return;
         }
 
         // fully selected
-        if (selection.selectionMin.messageIndex < messageIndex &&
-            selection.selectionMax.messageIndex > messageIndex)
+        if (selection.start.messageIndex < messageIndex &&
+            selection.end.messageIndex > messageIndex)
         {
             for (Line& line : this->lines_)
             {
@@ -344,7 +346,7 @@ namespace chatterino
         int index = 0;
 
         // start in this message
-        if (selection.selectionMin.messageIndex == messageIndex)
+        if (selection.start.messageIndex == messageIndex)
         {
             for (; lineIndex < this->lines_.size(); lineIndex++)
             {
@@ -356,7 +358,7 @@ namespace chatterino
                 int x = this->elements_[line.startIndex]->getRect().left();
                 int r = this->elements_[line.endIndex - 1]->getRect().right();
 
-                if (line.endCharIndex <= selection.selectionMin.charIndex)
+                if (line.endCharIndex <= selection.start.charIndex)
                 {
                     continue;
                 }
@@ -365,16 +367,15 @@ namespace chatterino
                 {
                     int c = this->elements_[i]->getSelectionIndexCount();
 
-                    if (index + c > selection.selectionMin.charIndex)
+                    if (index + c > selection.start.charIndex)
                     {
                         x = this->elements_[i]->getXFromIndex(
-                            selection.selectionMin.charIndex - index);
+                            selection.start.charIndex - index);
 
                         // ends in same line
-                        if (selection.selectionMax.messageIndex ==
-                                messageIndex &&
+                        if (selection.end.messageIndex == messageIndex &&
                             line.endCharIndex >
-                                /*=*/selection.selectionMax.charIndex)  //
+                                /*=*/selection.end.charIndex)  //
                         {
                             returnAfter = true;
                             index = line.startCharIndex;
@@ -384,12 +385,10 @@ namespace chatterino
                                 int c = this->elements_[i]
                                             ->getSelectionIndexCount();
 
-                                if (index + c >
-                                    selection.selectionMax.charIndex)
+                                if (index + c > selection.end.charIndex)
                                 {
                                     r = this->elements_[i]->getXFromIndex(
-                                        selection.selectionMax.charIndex -
-                                        index);
+                                        selection.end.charIndex - index);
                                     break;
                                 }
                                 index += c;
@@ -397,7 +396,7 @@ namespace chatterino
                         }
                         // ends in same line end
 
-                        if (selection.selectionMax.messageIndex != messageIndex)
+                        if (selection.end.messageIndex != messageIndex)
                         {
                             int lineIndex2 = lineIndex + 1;
                             for (; lineIndex2 < this->lines_.size();
@@ -461,7 +460,7 @@ namespace chatterino
             index = line.startCharIndex;
 
             // just draw the garbage
-            if (line.endCharIndex < /*=*/selection.selectionMax.charIndex)
+            if (line.endCharIndex < /*=*/selection.end.charIndex)
             {
                 QRect rect = line.rect;
 
@@ -483,10 +482,10 @@ namespace chatterino
             {
                 int c = this->elements_[i]->getSelectionIndexCount();
 
-                if (index + c > selection.selectionMax.charIndex)
+                if (index + c > selection.end.charIndex)
                 {
                     r = this->elements_[i]->getXFromIndex(
-                        selection.selectionMax.charIndex - index);
+                        selection.end.charIndex - index);
                     break;
                 }
 

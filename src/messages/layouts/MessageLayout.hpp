@@ -1,7 +1,8 @@
 #pragma once
 
-#include "common/Common.hpp"
-#include "common/FlagsEnum.hpp"
+#include "messages/Common.hpp"
+#include "messages/ThemexD.hpp"
+#include "util/FlagsEnum.hpp"
 
 #include <QPixmap>
 #include <boost/noncopyable.hpp>
@@ -33,7 +34,7 @@ namespace chatterino
     class MessageLayout : boost::noncopyable
     {
     public:
-        MessageLayout(MessagePtr message_);
+        MessageLayout(MessagePtr message);
         ~MessageLayout();
 
         const Message* getMessage();
@@ -42,11 +43,13 @@ namespace chatterino
 
         MessageLayoutFlags flags;
 
-        bool layout(int width, float scale_, MessageElementFlags flags);
+        bool layout(
+            ThemexD& theme, int width, float scale_, MessageElementFlags flags);
 
         // Painting
-        void paint(QPainter& painter, int width, int y, int messageIndex,
-            Selection& selection, bool isLastReadMessage, bool isWindowFocused);
+        void paint(ThemexD& theme, QPainter& painter, int width, int y,
+            int messageIndex, const Selection& selection,
+            bool isLastReadMessage, bool isWindowFocused);
         void invalidateBuffer();
         void deleteBuffer();
         void deleteCache();
@@ -73,6 +76,7 @@ namespace chatterino
 
         int currentLayoutWidth_ = -1;
         int layoutState_ = -1;
+        int imageState_ = -1;
         float scale_ = -1;
         unsigned int layoutCount_ = 0;
         unsigned int bufferUpdatedCount_ = 0;
@@ -82,9 +86,10 @@ namespace chatterino
         int collapsedHeight_ = 32;
 
         // methods
-        void actuallyLayout(int width, MessageElementFlags flags);
-        void updateBuffer(
-            QPixmap* pixmap, int messageIndex, Selection& selection);
+        void actuallyLayout(
+            ThemexD& theme, int width, MessageElementFlags flags);
+        void updateBuffer(ThemexD& theme, QPixmap* pixmap, int messageIndex,
+            const Selection& selection);
     };
 
     using MessageLayoutPtr = std::shared_ptr<MessageLayout>;

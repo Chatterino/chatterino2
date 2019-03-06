@@ -11,16 +11,15 @@ namespace chatterino
         int charIndex;
 
         SelectionItem()
+            : messageIndex(0)
+            , charIndex(0)
         {
-            this->messageIndex = 0;
-            this->charIndex = 0;
         }
 
-        SelectionItem(int _messageIndex, int _charIndex)
+        SelectionItem(int messageIndex, int charIndex)
+            : messageIndex(messageIndex)
+            , charIndex(charIndex)
         {
-            this->messageIndex = _messageIndex;
-
-            this->charIndex = _charIndex;
         }
 
         bool operator<(const SelectionItem& b) const
@@ -42,7 +41,7 @@ namespace chatterino
 
         bool operator!=(const SelectionItem& b) const
         {
-            return this->operator==(b);
+            return !this->operator==(b);
         }
     };
 
@@ -50,21 +49,15 @@ namespace chatterino
     {
         SelectionItem start;
         SelectionItem end;
-        SelectionItem selectionMin;
-        SelectionItem selectionMax;
 
         Selection() = default;
 
-        Selection(const SelectionItem& start, const SelectionItem& end)
-            : start(start)
-            , end(end)
-            , selectionMin(start)
-            , selectionMax(end)
+        Selection(const SelectionItem& pos1, const SelectionItem& pos2)
+            : start(pos1)
+            , end(pos2)
         {
-            if (selectionMin > selectionMax)
-            {
-                std::swap(this->selectionMin, this->selectionMax);
-            }
+            if (pos1 > pos2)
+                std::swap(this->start, this->end);
         }
 
         bool isEmpty() const
@@ -74,20 +67,7 @@ namespace chatterino
 
         bool isSingleMessage() const
         {
-            return this->selectionMin.messageIndex ==
-                   this->selectionMax.messageIndex;
+            return this->start.messageIndex == this->end.messageIndex;
         }
     };
-
-    struct DoubleClickSelection
-    {
-        int originalStart = 0;
-        int originalEnd = 0;
-        int origMessageIndex;
-        bool selectingLeft = false;
-        bool selectingRight = false;
-        SelectionItem origStartItem;
-        SelectionItem origEndItem;
-    };
-
 }  // namespace chatterino

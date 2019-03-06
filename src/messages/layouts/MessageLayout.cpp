@@ -1,14 +1,12 @@
 #include "messages/layouts/MessageLayout.hpp"
 
 #include "Application.hpp"
-#include "debug/Benchmark.hpp"
+#include "ab/util/Benchmark.hpp"
+#include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
+#include "messages/ThemexD.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
-#include "singletons/Emotes.hpp"
-#include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 
 #include <QApplication>
@@ -51,11 +49,9 @@ namespace chatterino
     // Layout
     // return true if redraw is required
     bool MessageLayout::layout(
-        int width, float scale, MessageElementFlags flags)
+        ThemexD& theme, int width, float scale, MessageElementFlags flags)
     {
         //    BenchmarkGuard benchmark("MessageLayout::layout()");
-
-        auto app = getApp();
 
         bool layoutRequired = false;
 
@@ -65,11 +61,19 @@ namespace chatterino
         this->currentLayoutWidth_ = width;
 
         // check if layout state changed
-        if (this->layoutState_ != app->windows->getGeneration())
+        // FOURTF: temporarily disabled
+        // if (this->layoutState_ != app->windows->getGeneration())
+        //{
+        //    layoutRequired = true;
+        //    this->flags.set(MessageLayoutFlag::RequiresBufferUpdate);
+        //    this->layoutState_ = app->windows->getGeneration();
+        //}
+
+        if (this->imageState_ != imageUpdated().generation)
         {
             layoutRequired = true;
             this->flags.set(MessageLayoutFlag::RequiresBufferUpdate);
-            this->layoutState_ = app->windows->getGeneration();
+            this->imageState_ = imageUpdated().generation;
         }
 
         // check if work mask changed
@@ -90,7 +94,7 @@ namespace chatterino
         }
 
         int oldHeight = this->container_->getHeight();
-        this->actuallyLayout(width, flags);
+        this->actuallyLayout(theme, width, flags);
         if (widthChanged || this->container_->getHeight() != oldHeight)
         {
             this->deleteBuffer();
@@ -100,7 +104,8 @@ namespace chatterino
         return true;
     }
 
-    void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
+    void MessageLayout::actuallyLayout(
+        ThemexD& theme, int width, MessageElementFlags _flags)
     {
         this->layoutCount_++;
 
@@ -118,26 +123,26 @@ namespace chatterino
 
         this->container_->begin(width, this->scale_, messageFlags);
 
-        if (addTest)
-        {
-            this->container_->addElementNoLineBreak(new TestLayoutElement(
-                EmptyElement::instance(), QSize(width, this->scale_ * 6),
-                getTheme()->messages.backgrounds.regular, false));
-            this->container_->breakLine();
-        }
+        // if (addTest)
+        //{
+        //    this->container_->addElementNoLineBreak(new TestLayoutElement(
+        //        EmptyElement::instance(), QSize(width, this->scale_ * 6),
+        //        getTheme()->messages.backgrounds.regular, false));
+        //    this->container_->breakLine();
+        //}
 
         for (const auto& element : this->message_->elements)
         {
-            element->addToContainer(*this->container_, _flags);
+            element->addToContainer(theme, *this->container_, _flags);
         }
 
-        if (addTest)
-        {
-            this->container_->breakLine();
-            this->container_->addElement(new TestLayoutElement(
-                EmptyElement::instance(), QSize(width, this->scale_ * 6),
-                getTheme()->messages.backgrounds.regular, true));
-        }
+        // if (addTest)
+        //{
+        //    this->container_->breakLine();
+        //    this->container_->addElement(new TestLayoutElement(
+        //        EmptyElement::instance(), QSize(width, this->scale_ * 6),
+        //        getTheme()->messages.backgrounds.regular, true));
+        //}
 
         if (this->height_ != this->container_->getHeight())
         {
@@ -156,11 +161,10 @@ namespace chatterino
     }
 
     // Painting
-    void MessageLayout::paint(QPainter& painter, int width, int y,
-        int messageIndex, Selection& selection, bool isLastReadMessage,
-        bool isWindowFocused)
+    void MessageLayout::paint(ThemexD& theme, QPainter& painter, int width,
+        int y, int messageIndex, const Selection& selection,
+        bool isLastReadMessage, bool isWindowFocused)
     {
-        auto app = getApp();
         QPixmap* pixmap = this->buffer_.get();
 
         // create new buffer if required
@@ -184,7 +188,7 @@ namespace chatterino
 
         if (!this->bufferValid_ || !selection.isEmpty())
         {
-            this->updateBuffer(pixmap, messageIndex, selection);
+            this->updateBuffer(theme, pixmap, messageIndex, selection);
         }
 
         // draw on buffer
@@ -198,33 +202,9 @@ namespace chatterino
         // draw disabled
         if (this->message_->flags.has(MessageFlag::Disabled))
         {
-            painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                app->themes->messages.disabled);
-            //        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-            //                         QBrush(QColor(64, 64, 64, 64)));
-
-            if (getSettings()->redDisabledMessages)
-            {
-                painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                    QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
-                //                         app->themes->messages.disabled);
-            }
-        }
-
-        if (this->message_->flags.has(MessageFlag::RecentMessage))
-        {
-            const auto& historicMessageAppearance =
-                getSettings()->historicMessagesAppearance.getValue();
-            if (historicMessageAppearance & HistoricMessageAppearance::Crossed)
-            {
-                painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                    QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
-            }
-            if (historicMessageAppearance & HistoricMessageAppearance::Greyed)
-            {
-                painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                    app->themes->messages.disabled);
-            }
+            // FOURTF: temporarily disabled
+            // painter.fillRect(0, y, pixmap->width(), pixmap->height(),
+            //    app->themes->messages.disabled);
         }
 
         // draw selection
@@ -235,14 +215,14 @@ namespace chatterino
         }
 
         // draw message seperation line
-        if (getSettings()->separateMessages.getValue())
-        {
-            painter.fillRect(0, y, this->container_->getWidth() + 64, 1,
-                app->themes->splits.messageSeperator);
-        }
+        // if (getSettings()->separateMessages.getValue())
+        //{
+        //    painter.fillRect(0, y, this->container_->getWidth() + 64, 1,
+        //        app->themes->splits.messageSeperator);
+        //}
 
         // draw last read message line
-        if (isLastReadMessage)
+        /*if (isLastReadMessage)
         {
             QColor color;
             if (getSettings()->lastMessageColor != "")
@@ -264,41 +244,26 @@ namespace chatterino
 
             painter.fillRect(0, y + this->container_->getHeight() - 1,
                 pixmap->width(), 1, brush);
-        }
+        }*/
 
         this->bufferValid_ = true;
     }
 
-    void MessageLayout::updateBuffer(
-        QPixmap* buffer, int /*messageIndex*/, Selection& /*selection*/)
+    void MessageLayout::updateBuffer(ThemexD& theme, QPixmap* buffer,
+        int /*messageIndex*/, const Selection& /*selection*/)
     {
-        auto app = getApp();
-
         QPainter painter(buffer);
         painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
         // draw background
-        QColor backgroundColor = app->themes->messages.backgrounds.regular;
-        if (this->message_->flags.has(MessageFlag::Highlighted) &&
-            !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
-        {
-            backgroundColor = app->themes->messages.backgrounds.highlighted;
-        }
-        else if (this->message_->flags.has(MessageFlag::Subscription))
-        {
-            backgroundColor = app->themes->messages.backgrounds.subscription;
-        }
-        else if (getSettings()->alternateMessages.getValue() &&
-                 this->flags.has(MessageLayoutFlag::AlternateBackground))
-        {
-            backgroundColor = app->themes->messages.backgrounds.alternate;
-        }
-        else if (this->message_->flags.has(MessageFlag::AutoMod))
-        {
-            backgroundColor = QColor("#404040");
-        }
+        QStringList properties;
 
-        painter.fillRect(buffer->rect(), backgroundColor);
+        if (this->message_->flags.has(MessageFlag::Highlighted))
+            properties << "highlighted";
+
+        auto background = theme.getMessageBackground(properties);
+
+        painter.fillRect(buffer->rect(), background);
 
         // draw message
         this->container_->paintElements(painter);

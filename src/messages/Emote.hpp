@@ -1,5 +1,6 @@
 #pragma once
 
+#include "messages/Common.hpp"
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 

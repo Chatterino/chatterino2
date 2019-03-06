@@ -115,6 +115,7 @@ SOURCES += \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
     src/main.cpp \
     src/messages/Emote.cpp \
+    src/messages/Fonts.cpp \
     src/messages/Image.cpp \
     src/messages/ImageSet.cpp \
     src/messages/layouts/MessageLayout.cpp \
@@ -294,21 +295,19 @@ HEADERS += \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/messages/Common.hpp \
     src/messages/Emote.hpp \
+    src/messages/Fonts.hpp \
     src/messages/HistoricMessageAppearance.hpp \
     src/messages/Image.hpp \
     src/messages/ImageSet.hpp \
     src/messages/layouts/MessageLayout.hpp \
     src/messages/layouts/MessageLayoutContainer.hpp \
     src/messages/layouts/MessageLayoutElement.hpp \
-    src/messages/LimitedQueue.hpp \
-    src/messages/LimitedQueueSnapshot.hpp \
     src/messages/Link.hpp \
     src/messages/Message.hpp \
     src/messages/MessageBuilder.hpp \
     src/messages/MessageColor.hpp \
     src/messages/MessageContainer.hpp \
     src/messages/MessageElement.hpp \
-    src/messages/MessageParseArgs.hpp \
     src/messages/Selection.hpp \
     src/messages/ThemexD.hpp \
     src/PrecompiledHeader.hpp \

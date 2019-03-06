@@ -4,8 +4,6 @@
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/twitch/TwitchEmotes.hpp"
-#include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 
 #include <QDebug>
@@ -100,7 +98,6 @@ namespace chatterino
         if (emoteElement)
         {
             str += emoteElement->getEmote()->getCopyString();
-            str = TwitchEmotes::cleanUpEmoteCode(EmoteName{str});
             if (this->hasTrailingSpace())
             {
                 str += " ";
@@ -173,25 +170,26 @@ namespace chatterino
     //
 
     TextLayoutElement::TextLayoutElement(MessageElement& _creator,
-        QString& _text, const QSize& _size, QColor _color, FontStyle _style,
+        QString& _text, const QSize& _size, QBrush brush, FontStyle _style,
         float _scale)
         : MessageLayoutElement(_creator, _size)
-        , color_(_color)
+        , brush_(brush)
         , style_(_style)
         , scale_(_scale)
     {
         this->setText(_text);
     }
 
-    void TextLayoutElement::listenToLinkChanges()
+    TextLayoutElement::TextLayoutElement(MessageElement& _creator, QFont font,
+        QString& _text, const QSize& _size, QBrush brush, FontStyle _style,
+        float _scale)
+        : MessageLayoutElement(_creator, _size)
+        , brush_(brush)
+        , style_(_style)
+        , font_(font)
+        , scale_(_scale)
     {
-        this->managedConnections_.emplace_back(
-            static_cast<TextElement&>(this->getCreator())
-                .linkChanged.connect([this]() {
-                    // log("Old link: {}", this->getCreator().getLink().value);
-                    // log("This link: {}", this->getLink().value);
-                    this->setLink(this->getCreator().getLink());  //
-                }));
+        this->setText(_text);
     }
 
     void TextLayoutElement::addCopyTextToString(
@@ -212,11 +210,11 @@ namespace chatterino
 
     void TextLayoutElement::paint(QPainter& painter)
     {
-        auto app = getApp();
+        painter.setPen(QPen(this->brush_, 1));
 
-        painter.setPen(this->color_);
+        painter.setFont(this->font_);
 
-        painter.setFont(app->fonts->getFont(this->style_, this->scale_));
+        // painter.setFont(getFonts()->getFont(this->style_, this->scale_));
 
         painter.drawText(
             QRectF(this->getRect().x(), this->getRect().y(), 10000, 10000),
@@ -234,9 +232,7 @@ namespace chatterino
             return 0;
         }
 
-        auto app = getApp();
-
-        auto metrics = app->fonts->getFontMetrics(this->style_, this->scale_);
+        auto metrics = getFonts()->getFontMetrics(this->style_, this->scale_);
         auto x = this->getRect().left();
 
         for (auto i = 0; i < this->getText().size(); i++)
@@ -269,10 +265,7 @@ namespace chatterino
 
     int TextLayoutElement::getXFromIndex(int index)
     {
-        auto app = getApp();
-
-        QFontMetrics metrics =
-            app->fonts->getFontMetrics(this->style_, this->scale_);
+        auto metrics = getFonts()->getFontMetrics(this->style_, this->scale_);
 
         if (index <= 0)
         {
@@ -316,11 +309,9 @@ namespace chatterino
 
     void TextIconLayoutElement::paint(QPainter& painter)
     {
-        auto app = getApp();
+        QFont font = getFonts()->getFont(FontStyle::Tiny, this->scale);
 
-        QFont font = app->fonts->getFont(FontStyle::Tiny, this->scale);
-
-        painter.setPen(app->themes->messages.textColors.system);
+        // painter.setPen(app->themes->messages.textColors.system);
         painter.setFont(font);
 
         QTextOption option;

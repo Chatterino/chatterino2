@@ -10,10 +10,8 @@
 #include <boost/variant.hpp>
 #include <memory>
 #include <mutex>
-#include <pajlada/signals/signal.hpp>
 
-#include "common/Aliases.hpp"
-#include "common/NullablePtr.hpp"
+#include "messages/Common.hpp"
 
 namespace chatterino
 {
@@ -41,7 +39,6 @@ namespace chatterino
             QVector<Frame<QPixmap>> items_;
             int index_{0};
             int durationOffset_{0};
-            pajlada::Signals::Connection gifTimerConnection_;
         };
     }  // namespace detail
 
@@ -80,4 +77,17 @@ namespace chatterino
         std::unique_ptr<detail::Frames> frames_{};
         QObject object_{};
     };
+
+    // TODO: replace with better solution
+    class ImageUpdated : public QObject
+    {
+        Q_OBJECT
+
+    public:
+        std::atomic_int generation = 0;
+
+    signals:
+        void imageUpdated();
+    };
+    ImageUpdated& imageUpdated();
 }  // namespace chatterino
