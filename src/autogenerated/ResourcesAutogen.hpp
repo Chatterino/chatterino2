@@ -16,6 +16,8 @@ public:
         QPixmap addSplitDark;
         QPixmap ban;
         QPixmap banRed;
+        QPixmap emote2;
+        QPixmap emote3;
         QPixmap menuDark;
         QPixmap menuLight;
         QPixmap mod;
@@ -23,11 +25,13 @@ public:
         QPixmap modModeDisabled2;
         QPixmap modModeEnabled;
         QPixmap modModeEnabled2;
+        QPixmap settings;
         QPixmap timeout;
         QPixmap unban;
         QPixmap unmod;
         QPixmap update;
         QPixmap updateError;
+        QPixmap user;
     } buttons;
     QPixmap error;
     QPixmap icon;
