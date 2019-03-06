@@ -169,6 +169,22 @@ SOURCES += \
     src/singletons/Toasts.cpp \
     src/singletons/Updates.cpp \
     src/singletons/WindowManager.cpp \
+    src/ui/ChannelView.cpp \
+    src/ui/ChannelView.Pauser.cpp \
+    src/ui/ChannelView.Selector.cpp \
+    src/ui/Dropdown.cpp \
+    src/ui/EmotePreview.cpp \
+    src/ui/FlexLayout.cpp \
+    src/ui/FlexLayout.Private.cpp \
+    src/ui/Scrollbar.cpp \
+    src/ui/Split.cpp \
+    src/ui/SplitContainer.cpp \
+    src/ui/SplitHeader.cpp \
+    src/ui/SplitInput.cpp \
+    src/ui/SplitInput.ResizingTextEdit.cpp \
+    src/ui/Tab.cpp \
+    src/ui/Tooltip.cpp \
+    src/ui/Window.cpp \
     src/util/DebugCount.cpp \
     src/util/FormatTime.cpp \
     src/util/IncognitoBrowser.cpp \
@@ -185,24 +201,17 @@ SOURCES += \
     src/widgets/dialogs/LogsPopup.cpp \
     src/widgets/dialogs/NotificationPopup.cpp \
     src/widgets/dialogs/QualityPopup.cpp \
-    src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
     src/widgets/dialogs/TextInputDialog.cpp \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/dialogs/UserInfoPopup.cpp \
     src/widgets/dialogs/WelcomeDialog.cpp \
-    src/widgets/helper/ChannelView.cpp \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/DebugPopup.cpp \
     src/widgets/helper/EditableModelView.cpp \
-    src/widgets/helper/NotebookButton.cpp \
-    src/widgets/helper/NotebookTab.cpp \
-    src/widgets/helper/ResizingTextEdit.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
-    src/widgets/Notebook.cpp \
-    src/widgets/Scrollbar.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/AdvancedPage.cpp \
@@ -222,13 +231,7 @@ SOURCES += \
     src/widgets/settingspages/SettingsPage.cpp \
     src/widgets/settingspages/SpecialChannelsPage.cpp \
     src/widgets/splits/ClosedSplits.cpp \
-    src/widgets/splits/Split.cpp \
-    src/widgets/splits/SplitContainer.cpp \
-    src/widgets/splits/SplitHeader.cpp \
-    src/widgets/splits/SplitInput.cpp \
-    src/widgets/splits/SplitOverlay.cpp \
     src/widgets/StreamView.cpp \
-    src/widgets/Window.cpp \
 
 HEADERS += \
     src/ab/BaseWidget.hpp \
@@ -359,6 +362,23 @@ HEADERS += \
     src/singletons/Toasts.hpp \
     src/singletons/Updates.hpp \
     src/singletons/WindowManager.hpp \
+    src/ui/ChannelView.hpp \
+    src/ui/ChannelView.Pauser.hpp \
+    src/ui/ChannelView.Selector.hpp \
+    src/ui/Dropdown.hpp \
+    src/ui/EmotePreview.hpp \
+    src/ui/FlexLayout.hpp \
+    src/ui/FlexLayout.Private.hpp \
+    src/ui/Scrollbar.hpp \
+    src/ui/Split.hpp \
+    src/ui/SplitContainer.hpp \
+    src/ui/SplitHeader.hpp \
+    src/ui/SplitInput.hpp \
+    src/ui/SplitInput.ResizingTextEdit.hpp \
+    src/ui/Tab.hpp \
+    src/ui/Tooltip.hpp \
+    src/ui/UiFwd.hpp \
+    src/ui/Window.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
     src/util/FormatTime.hpp \
@@ -385,25 +405,17 @@ HEADERS += \
     src/widgets/dialogs/LogsPopup.hpp \
     src/widgets/dialogs/NotificationPopup.hpp \
     src/widgets/dialogs/QualityPopup.hpp \
-    src/widgets/dialogs/SelectChannelDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
     src/widgets/dialogs/TextInputDialog.hpp \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/dialogs/UserInfoPopup.hpp \
     src/widgets/dialogs/WelcomeDialog.hpp \
-    src/widgets/helper/ChannelView.hpp \
     src/widgets/helper/ComboBoxItemDelegate.hpp \
     src/widgets/helper/DebugPopup.hpp \
     src/widgets/helper/EditableModelView.hpp \
-    src/widgets/helper/Line.hpp \
-    src/widgets/helper/NotebookButton.hpp \
-    src/widgets/helper/NotebookTab.hpp \
-    src/widgets/helper/ResizingTextEdit.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
-    src/widgets/Notebook.hpp \
-    src/widgets/Scrollbar.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/AdvancedPage.hpp \
@@ -423,13 +435,7 @@ HEADERS += \
     src/widgets/settingspages/SettingsPage.hpp \
     src/widgets/settingspages/SpecialChannelsPage.hpp \
     src/widgets/splits/ClosedSplits.hpp \
-    src/widgets/splits/Split.hpp \
-    src/widgets/splits/SplitContainer.hpp \
-    src/widgets/splits/SplitHeader.hpp \
-    src/widgets/splits/SplitInput.hpp \
-    src/widgets/splits/SplitOverlay.hpp \
     src/widgets/StreamView.hpp \
-    src/widgets/Window.hpp \
 
 RESOURCES += \
     resources/resources.qrc \
