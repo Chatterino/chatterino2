@@ -8,11 +8,11 @@ resources_footer = \
 
 header_header = \
 '''#include <QPixmap>
-#include "common/Singleton.hpp"
 
 namespace chatterino {
 
-class Resources2 : public Singleton {
+class Resources2
+{
 public:
     Resources2();
 
@@ -26,7 +26,8 @@ header_footer = \
 source_header = \
 '''#include "ResourcesAutogen.hpp"
 
-namespace chatterino {
+namespace chatterino
+{
 
 Resources2::Resources2()
 {

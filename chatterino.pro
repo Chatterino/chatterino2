@@ -397,6 +397,7 @@ HEADERS += \
     src/util/QStringHash.hpp \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
+    src/util/RapidJsonSerializeQString.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
     src/util/Resources.hpp \
     src/util/SharedPtrElementLess.hpp \
