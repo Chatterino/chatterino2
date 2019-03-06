@@ -5,15 +5,15 @@
 
 #include "messages/Link.hpp"
 
-namespace chatterino {
-
-class LinkResolver
+namespace chatterino
 {
-public:
-    static void getLinkInfo(const QString url,
-                            std::function<void(QString, Link)> callback);
+    class LinkResolver
+    {
+    public:
+        static void getLinkInfo(
+            const QString url, std::function<void(QString, Link)> callback);
 
-private:
-};
+    private:
+    };
 
 }  // namespace chatterino

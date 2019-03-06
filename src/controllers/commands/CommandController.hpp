@@ -11,45 +11,46 @@
 #include <memory>
 #include <mutex>
 
-namespace chatterino {
-
-class Settings;
-class Paths;
-class Channel;
-
-class CommandModel;
-
-class CommandController final : public Singleton
+namespace chatterino
 {
-public:
-    UnsortedSignalVector<Command> items_;
+    class Settings;
+    class Paths;
+    class Channel;
 
-    QString execCommand(const QString &text, std::shared_ptr<Channel> channel,
-                        bool dryRun);
-    QStringList getDefaultTwitchCommandList();
+    class CommandModel;
 
-    virtual void initialize(Settings &, Paths &paths) override;
-    virtual void save() override;
+    class CommandController final : public Singleton
+    {
+    public:
+        UnsortedSignalVector<Command> items_;
 
-    CommandModel *createModel(QObject *parent);
+        QString execCommand(
+            const QString& text, std::shared_ptr<Channel> channel, bool dryRun);
+        QStringList getDefaultTwitchCommandList();
 
-private:
-    void load(Paths &paths);
+        virtual void initialize(Settings&, Paths& paths) override;
+        virtual void save() override;
 
-    QMap<QString, Command> commandsMap_;
-    int maxSpaces_ = 0;
+        CommandModel* createModel(QObject* parent);
 
-    std::mutex mutex_;
+    private:
+        void load(Paths& paths);
 
-    std::shared_ptr<pajlada::Settings::SettingManager> sm_;
-    // Because the setting manager is not initialized until the initialize
-    // function is called (and not in the constructor), we have to
-    // late-initialize the setting, which is why we're storing it as a
-    // unique_ptr
-    std::unique_ptr<pajlada::Settings::Setting<std::vector<Command>>>
-        commandsSetting_;
+        QMap<QString, Command> commandsMap_;
+        int maxSpaces_ = 0;
 
-    QString execCustomCommand(const QStringList &words, const Command &command);
-};
+        std::mutex mutex_;
+
+        std::shared_ptr<pajlada::Settings::SettingManager> sm_;
+        // Because the setting manager is not initialized until the initialize
+        // function is called (and not in the constructor), we have to
+        // late-initialize the setting, which is why we're storing it as a
+        // unique_ptr
+        std::unique_ptr<pajlada::Settings::Setting<std::vector<Command>>>
+            commandsSetting_;
+
+        QString execCustomCommand(
+            const QStringList& words, const Command& command);
+    };
 
 }  // namespace chatterino

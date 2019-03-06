@@ -2,12 +2,12 @@
 
 #include <QWidget>
 
-namespace chatterino {
-
-class DebugPopup : public QWidget
+namespace chatterino
 {
-public:
-    DebugPopup();
-};
+    class DebugPopup : public QWidget
+    {
+    public:
+        DebugPopup();
+    };
 
 }  // namespace chatterino

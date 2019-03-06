@@ -14,56 +14,59 @@
 #include <QVBoxLayout>
 #include <algorithm>
 
-namespace chatterino {
-
-AccountsPage::AccountsPage()
-    : SettingsPage("Accounts", ":/settings/accounts.svg")
+namespace chatterino
 {
-    auto *app = getApp();
+    AccountsPage::AccountsPage()
+        : SettingsPage("Accounts", ":/settings/accounts.svg")
+    {
+        auto* app = getApp();
 
-    LayoutCreator<AccountsPage> layoutCreator(this);
-    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
+        LayoutCreator<AccountsPage> layoutCreator(this);
+        auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
-    EditableModelView *view =
-        layout.emplace<EditableModelView>(app->accounts->createModel(nullptr))
-            .getElement();
+        EditableModelView* view =
+            layout
+                .emplace<EditableModelView>(app->accounts->createModel(nullptr))
+                .getElement();
 
-    view->getTableView()->horizontalHeader()->setVisible(false);
-    view->getTableView()->horizontalHeader()->setStretchLastSection(true);
+        view->getTableView()->horizontalHeader()->setVisible(false);
+        view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
-    view->addButtonPressed.connect([] {
-        static auto loginWidget = new LoginWidget();
+        view->addButtonPressed.connect([] {
+            static auto loginWidget = new LoginWidget();
 
-        loginWidget->show();
-        loginWidget->raise();
-    });
+            loginWidget->show();
+            loginWidget->raise();
+        });
 
-    view->getTableView()->setStyleSheet("background: #333");
+        view->getTableView()->setStyleSheet("background: #333");
 
-    //    auto buttons = layout.emplace<QDialogButtonBox>();
-    //    {
-    //        this->addButton = buttons->addButton("Add",
-    //        QDialogButtonBox::YesRole); this->removeButton =
-    //        buttons->addButton("Remove", QDialogButtonBox::NoRole);
-    //    }
+        //    auto buttons = layout.emplace<QDialogButtonBox>();
+        //    {
+        //        this->addButton = buttons->addButton("Add",
+        //        QDialogButtonBox::YesRole); this->removeButton =
+        //        buttons->addButton("Remove", QDialogButtonBox::NoRole);
+        //    }
 
-    //    layout.emplace<AccountSwitchWidget>(this).assign(&this->accSwitchWidget);
+        //    layout.emplace<AccountSwitchWidget>(this).assign(&this->accSwitchWidget);
 
-    // ----
-    //    QObject::connect(this->addButton, &QPushButton::clicked, []() {
-    //        static auto loginWidget = new LoginWidget();
-    //        loginWidget->show();
-    //    });
+        // ----
+        //    QObject::connect(this->addButton, &QPushButton::clicked, []() {
+        //        static auto loginWidget = new LoginWidget();
+        //        loginWidget->show();
+        //    });
 
-    //    QObject::connect(this->removeButton, &QPushButton::clicked, [this] {
-    //        auto selectedUser = this->accSwitchWidget->currentItem()->text();
-    //        if (selectedUser == ANONYMOUS_USERNAME_LABEL) {
-    //            // Do nothing
-    //            return;
-    //        }
+        //    QObject::connect(this->removeButton, &QPushButton::clicked, [this]
+        //    {
+        //        auto selectedUser =
+        //        this->accSwitchWidget->currentItem()->text(); if (selectedUser
+        //        == ANONYMOUS_USERNAME_LABEL) {
+        //            // Do nothing
+        //            return;
+        //        }
 
-    //        getApp()->accounts->Twitch.removeUser(selectedUser);
-    //    });
-}
+        //        getApp()->accounts->Twitch.removeUser(selectedUser);
+        //    });
+    }
 
 }  // namespace chatterino

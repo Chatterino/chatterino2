@@ -8,53 +8,54 @@
 #include <QPushButton>
 #include <QVBoxLayout>
 
-namespace chatterino {
-
-AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget *parent)
-    : QWidget(parent)
+namespace chatterino
 {
-    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget* parent)
+        : QWidget(parent)
+    {
+        this->setWindowFlags(
+            Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 
-    this->setContentsMargins(0, 0, 0, 0);
+        this->setContentsMargins(0, 0, 0, 0);
 
-    this->ui_.accountSwitchWidget = new AccountSwitchWidget(this);
-    QVBoxLayout *vbox = new QVBoxLayout(this);
-    this->ui_.accountSwitchWidget->setFocusPolicy(Qt::NoFocus);
-    vbox->addWidget(this->ui_.accountSwitchWidget);
+        this->ui_.accountSwitchWidget = new AccountSwitchWidget(this);
+        QVBoxLayout* vbox = new QVBoxLayout(this);
+        this->ui_.accountSwitchWidget->setFocusPolicy(Qt::NoFocus);
+        vbox->addWidget(this->ui_.accountSwitchWidget);
 
-    // vbox->setSizeConstraint(QLayout::SetMinimumSize);
+        // vbox->setSizeConstraint(QLayout::SetMinimumSize);
 
-    auto hbox = new QHBoxLayout();
-    auto manageAccountsButton = new QPushButton(this);
-    manageAccountsButton->setText("Manage Accounts");
-    hbox->addWidget(manageAccountsButton);
-    vbox->addLayout(hbox);
+        auto hbox = new QHBoxLayout();
+        auto manageAccountsButton = new QPushButton(this);
+        manageAccountsButton->setText("Manage Accounts");
+        hbox->addWidget(manageAccountsButton);
+        vbox->addLayout(hbox);
 
-    connect(manageAccountsButton, &QPushButton::clicked, []() {
-        SettingsDialog::showDialog(SettingsDialogPreference::Accounts);  //
-    });
+        connect(manageAccountsButton, &QPushButton::clicked, []() {
+            SettingsDialog::showDialog(SettingsDialogPreference::Accounts);  //
+        });
 
-    this->setLayout(vbox);
+        this->setLayout(vbox);
 
-    //    this->setStyleSheet("background: #333");
-}
+        //    this->setStyleSheet("background: #333");
+    }
 
-void AccountSwitchPopupWidget::refresh()
-{
-    this->ui_.accountSwitchWidget->refresh();
-}
+    void AccountSwitchPopupWidget::refresh()
+    {
+        this->ui_.accountSwitchWidget->refresh();
+    }
 
-void AccountSwitchPopupWidget::focusOutEvent(QFocusEvent *)
-{
-    this->hide();
-}
+    void AccountSwitchPopupWidget::focusOutEvent(QFocusEvent*)
+    {
+        this->hide();
+    }
 
-void AccountSwitchPopupWidget::paintEvent(QPaintEvent *)
-{
-    QPainter painter(this);
+    void AccountSwitchPopupWidget::paintEvent(QPaintEvent*)
+    {
+        QPainter painter(this);
 
-    painter.setPen(QColor("#999"));
-    painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
-}
+        painter.setPen(QColor("#999"));
+        painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
+    }
 
 }  // namespace chatterino

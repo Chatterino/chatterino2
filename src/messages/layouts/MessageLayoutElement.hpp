@@ -13,137 +13,137 @@
 
 class QPainter;
 
-namespace chatterino {
-class MessageElement;
-class Image;
-using ImagePtr = std::shared_ptr<Image>;
-enum class FontStyle : uint8_t;
-
-class MessageLayoutElement : boost::noncopyable
+namespace chatterino
 {
-public:
-    MessageLayoutElement(MessageElement &creator_, const QSize &size);
-    virtual ~MessageLayoutElement();
+    class MessageElement;
+    class Image;
+    using ImagePtr = std::shared_ptr<Image>;
+    enum class FontStyle : uint8_t;
 
-    const QRect &getRect() const;
-    MessageElement &getCreator() const;
-    void setPosition(QPoint point);
-    bool hasTrailingSpace() const;
+    class MessageLayoutElement : boost::noncopyable
+    {
+    public:
+        MessageLayoutElement(MessageElement& creator_, const QSize& size);
+        virtual ~MessageLayoutElement();
 
-    MessageLayoutElement *setTrailingSpace(bool value);
-    MessageLayoutElement *setLink(const Link &link_);
-    MessageLayoutElement *setText(const QString &text_);
+        const QRect& getRect() const;
+        MessageElement& getCreator() const;
+        void setPosition(QPoint point);
+        bool hasTrailingSpace() const;
 
-    virtual void addCopyTextToString(QString &str, int from = 0,
-                                     int to = INT_MAX) const = 0;
-    virtual int getSelectionIndexCount() const = 0;
-    virtual void paint(QPainter &painter) = 0;
-    virtual void paintAnimated(QPainter &painter, int yOffset) = 0;
-    virtual int getMouseOverIndex(const QPoint &abs) const = 0;
-    virtual int getXFromIndex(int index) = 0;
-    const Link &getLink() const;
-    const QString &getText() const;
-    FlagsEnum<MessageElementFlag> getFlags() const;
+        MessageLayoutElement* setTrailingSpace(bool value);
+        MessageLayoutElement* setLink(const Link& link_);
+        MessageLayoutElement* setText(const QString& text_);
 
-protected:
-    bool trailingSpace = true;
+        virtual void addCopyTextToString(
+            QString& str, int from = 0, int to = INT_MAX) const = 0;
+        virtual int getSelectionIndexCount() const = 0;
+        virtual void paint(QPainter& painter) = 0;
+        virtual void paintAnimated(QPainter& painter, int yOffset) = 0;
+        virtual int getMouseOverIndex(const QPoint& abs) const = 0;
+        virtual int getXFromIndex(int index) = 0;
+        const Link& getLink() const;
+        const QString& getText() const;
+        FlagsEnum<MessageElementFlag> getFlags() const;
 
-private:
-    QString text_;
-    QRect rect_;
-    Link link_;
-    MessageElement &creator_;
-};
+    protected:
+        bool trailingSpace = true;
 
-// IMAGE
-class ImageLayoutElement : public MessageLayoutElement
-{
-public:
-    ImageLayoutElement(MessageElement &creator, ImagePtr image,
-                       const QSize &size);
+    private:
+        QString text_;
+        QRect rect_;
+        Link link_;
+        MessageElement& creator_;
+    };
 
-protected:
-    void addCopyTextToString(QString &str, int from = 0,
-                             int to = INT_MAX) const override;
-    int getSelectionIndexCount() const override;
-    void paint(QPainter &painter) override;
-    void paintAnimated(QPainter &painter, int yOffset) override;
-    int getMouseOverIndex(const QPoint &abs) const override;
-    int getXFromIndex(int index) override;
+    // IMAGE
+    class ImageLayoutElement : public MessageLayoutElement
+    {
+    public:
+        ImageLayoutElement(
+            MessageElement& creator, ImagePtr image, const QSize& size);
 
-private:
-    ImagePtr image_;
-};
+    protected:
+        void addCopyTextToString(
+            QString& str, int from = 0, int to = INT_MAX) const override;
+        int getSelectionIndexCount() const override;
+        void paint(QPainter& painter) override;
+        void paintAnimated(QPainter& painter, int yOffset) override;
+        int getMouseOverIndex(const QPoint& abs) const override;
+        int getXFromIndex(int index) override;
 
-// TEXT
-class TextLayoutElement : public MessageLayoutElement
-{
-public:
-    TextLayoutElement(MessageElement &creator_, QString &text,
-                      const QSize &size, QColor color_, FontStyle style_,
-                      float scale_);
+    private:
+        ImagePtr image_;
+    };
 
-    void listenToLinkChanges();
+    // TEXT
+    class TextLayoutElement : public MessageLayoutElement
+    {
+    public:
+        TextLayoutElement(MessageElement& creator_, QString& text,
+            const QSize& size, QColor color_, FontStyle style_, float scale_);
 
-protected:
-    void addCopyTextToString(QString &str, int from = 0,
-                             int to = INT_MAX) const override;
-    int getSelectionIndexCount() const override;
-    void paint(QPainter &painter) override;
-    void paintAnimated(QPainter &painter, int yOffset) override;
-    int getMouseOverIndex(const QPoint &abs) const override;
-    int getXFromIndex(int index) override;
+        void listenToLinkChanges();
 
-private:
-    QColor color_;
-    FontStyle style_;
-    float scale_;
+    protected:
+        void addCopyTextToString(
+            QString& str, int from = 0, int to = INT_MAX) const override;
+        int getSelectionIndexCount() const override;
+        void paint(QPainter& painter) override;
+        void paintAnimated(QPainter& painter, int yOffset) override;
+        int getMouseOverIndex(const QPoint& abs) const override;
+        int getXFromIndex(int index) override;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
-};
+    private:
+        QColor color_;
+        FontStyle style_;
+        float scale_;
 
-// TEXT ICON
-// two lines of text (characters) in the size of a normal chat badge
-class TextIconLayoutElement : public MessageLayoutElement
-{
-public:
-    TextIconLayoutElement(MessageElement &creator_, const QString &line1,
-                          const QString &line2, float scale, const QSize &size);
+        std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    };
 
-protected:
-    void addCopyTextToString(QString &str, int from = 0,
-                             int to = INT_MAX) const override;
-    int getSelectionIndexCount() const override;
-    void paint(QPainter &painter) override;
-    void paintAnimated(QPainter &painter, int yOffset) override;
-    int getMouseOverIndex(const QPoint &abs) const override;
-    int getXFromIndex(int index) override;
+    // TEXT ICON
+    // two lines of text (characters) in the size of a normal chat badge
+    class TextIconLayoutElement : public MessageLayoutElement
+    {
+    public:
+        TextIconLayoutElement(MessageElement& creator_, const QString& line1,
+            const QString& line2, float scale, const QSize& size);
 
-private:
-    float scale;
-    QString line1;
-    QString line2;
-};
+    protected:
+        void addCopyTextToString(
+            QString& str, int from = 0, int to = INT_MAX) const override;
+        int getSelectionIndexCount() const override;
+        void paint(QPainter& painter) override;
+        void paintAnimated(QPainter& painter, int yOffset) override;
+        int getMouseOverIndex(const QPoint& abs) const override;
+        int getXFromIndex(int index) override;
 
-class TestLayoutElement : public MessageLayoutElement
-{
-public:
-    TestLayoutElement(MessageElement &creator, const QSize &size,
-                      const QColor &background, bool end);
+    private:
+        float scale;
+        QString line1;
+        QString line2;
+    };
 
-protected:
-    void addCopyTextToString(QString &str, int from = 0,
-                             int to = INT_MAX) const override;
-    int getSelectionIndexCount() const override;
-    void paint(QPainter &painter) override;
-    void paintAnimated(QPainter &painter, int yOffset) override;
-    int getMouseOverIndex(const QPoint &abs) const override;
-    int getXFromIndex(int index) override;
+    class TestLayoutElement : public MessageLayoutElement
+    {
+    public:
+        TestLayoutElement(MessageElement& creator, const QSize& size,
+            const QColor& background, bool end);
 
-private:
-    QSize size_;
-    QColor background_;
-    bool end_;
-};
+    protected:
+        void addCopyTextToString(
+            QString& str, int from = 0, int to = INT_MAX) const override;
+        int getSelectionIndexCount() const override;
+        void paint(QPainter& painter) override;
+        void paintAnimated(QPainter& painter, int yOffset) override;
+        int getMouseOverIndex(const QPoint& abs) const override;
+        int getXFromIndex(int index) override;
+
+    private:
+        QSize size_;
+        QColor background_;
+        bool end_;
+    };
 
 }  // namespace chatterino

@@ -21,59 +21,60 @@
 #include <QVBoxLayout>
 #include <QtConcurrent/QtConcurrent>
 
-namespace chatterino {
-
-AdvancedPage::AdvancedPage()
-    : SettingsPage("Advanced", ":/settings/advanced.svg")
+namespace chatterino
 {
-    auto app = getApp();
-    LayoutCreator<AdvancedPage> layoutCreator(this);
-
-    auto tabs = layoutCreator.emplace<QTabWidget>();
-
+    AdvancedPage::AdvancedPage()
+        : SettingsPage("Advanced", ":/settings/advanced.svg")
     {
-        auto layout = tabs.appendTab(new QVBoxLayout, "Cache");
-        auto folderLabel = layout.emplace<QLabel>();
+        auto app = getApp();
+        LayoutCreator<AdvancedPage> layoutCreator(this);
 
-        folderLabel->setTextFormat(Qt::RichText);
-        folderLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                             Qt::LinksAccessibleByKeyboard |
-                                             Qt::LinksAccessibleByKeyboard);
-        folderLabel->setOpenExternalLinks(true);
+        auto tabs = layoutCreator.emplace<QTabWidget>();
 
-        getSettings()->cachePath.connect([folderLabel](const auto &,
-                                                       auto) mutable {
-            QString newPath = getPaths()->cacheDirectory();
+        {
+            auto layout = tabs.appendTab(new QVBoxLayout, "Cache");
+            auto folderLabel = layout.emplace<QLabel>();
 
-            QString pathShortened = "Cache saved at <a href=\"file:///" +
-                                    newPath +
-                                    "\"><span style=\"color: white;\">" +
-                                    shortenString(newPath, 50) + "</span></a>";
+            folderLabel->setTextFormat(Qt::RichText);
+            folderLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |
+                                                 Qt::LinksAccessibleByKeyboard |
+                                                 Qt::LinksAccessibleByKeyboard);
+            folderLabel->setOpenExternalLinks(true);
 
-            folderLabel->setText(pathShortened);
-            folderLabel->setToolTip(newPath);
-        });
+            getSettings()->cachePath.connect(
+                [folderLabel](const auto&, auto) mutable {
+                    QString newPath = getPaths()->cacheDirectory();
 
-        layout->addStretch(1);
+                    QString pathShortened =
+                        "Cache saved at <a href=\"file:///" + newPath +
+                        "\"><span style=\"color: white;\">" +
+                        shortenString(newPath, 50) + "</span></a>";
 
-        auto selectDir = layout.emplace<QPushButton>("Set custom cache folder");
+                    folderLabel->setText(pathShortened);
+                    folderLabel->setToolTip(newPath);
+                });
 
-        QObject::connect(
-            selectDir.getElement(), &QPushButton::clicked, this, [this] {
-                auto dirName = QFileDialog::getExistingDirectory(this);
+            layout->addStretch(1);
 
-                getSettings()->cachePath = dirName;
-            });
+            auto selectDir =
+                layout.emplace<QPushButton>("Set custom cache folder");
 
-        auto resetDir =
-            layout.emplace<QPushButton>("Reset custom cache folder");
-        QObject::connect(resetDir.getElement(), &QPushButton::clicked, this,
-                         []() mutable {
-                             getSettings()->cachePath = "";  //
-                         });
+            QObject::connect(
+                selectDir.getElement(), &QPushButton::clicked, this, [this] {
+                    auto dirName = QFileDialog::getExistingDirectory(this);
 
-        // Logs end
+                    getSettings()->cachePath = dirName;
+                });
+
+            auto resetDir =
+                layout.emplace<QPushButton>("Reset custom cache folder");
+            QObject::connect(resetDir.getElement(), &QPushButton::clicked, this,
+                []() mutable {
+                    getSettings()->cachePath = "";  //
+                });
+
+            // Logs end
+        }
     }
-}
 
 }  // namespace chatterino

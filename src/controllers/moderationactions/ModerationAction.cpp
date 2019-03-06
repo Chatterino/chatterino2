@@ -5,113 +5,113 @@
 #include "messages/Image.hpp"
 #include "singletons/Resources.hpp"
 
-namespace chatterino {
-
-// ModerationAction::ModerationAction(Image *_image, const QString &_action)
-//    : _isImage(true)
-//    , image(_image)
-//    , action(_action)
-//{
-//}
-
-// ModerationAction::ModerationAction(const QString &_line1, const QString
-// &_line2,
-//                                   const QString &_action)
-//    : _isImage(false)
-//    , image(nullptr)
-//    , line1(_line1)
-//    , line2(_line2)
-//    , action(_action)
-//{
-//}
-
-ModerationAction::ModerationAction(const QString &action)
-    : action_(action)
+namespace chatterino
 {
-    static QRegularExpression replaceRegex("[!/.]");
-    static QRegularExpression timeoutRegex("^[./]timeout.* (\\d+)");
+    // ModerationAction::ModerationAction(Image *_image, const QString &_action)
+    //    : _isImage(true)
+    //    , image(_image)
+    //    , action(_action)
+    //{
+    //}
 
-    auto timeoutMatch = timeoutRegex.match(action);
+    // ModerationAction::ModerationAction(const QString &_line1, const QString
+    // &_line2,
+    //                                   const QString &_action)
+    //    : _isImage(false)
+    //    , image(nullptr)
+    //    , line1(_line1)
+    //    , line2(_line2)
+    //    , action(_action)
+    //{
+    //}
 
-    if (timeoutMatch.hasMatch())
+    ModerationAction::ModerationAction(const QString& action)
+        : action_(action)
     {
-        // if (multipleTimeouts > 1) {
-        // QString line1;
-        // QString line2;
+        static QRegularExpression replaceRegex("[!/.]");
+        static QRegularExpression timeoutRegex("^[./]timeout.* (\\d+)");
 
-        int amount = timeoutMatch.captured(1).toInt();
+        auto timeoutMatch = timeoutRegex.match(action);
 
-        if (amount < 60)
+        if (timeoutMatch.hasMatch())
         {
-            this->line1_ = QString::number(amount);
-            this->line2_ = "s";
+            // if (multipleTimeouts > 1) {
+            // QString line1;
+            // QString line2;
+
+            int amount = timeoutMatch.captured(1).toInt();
+
+            if (amount < 60)
+            {
+                this->line1_ = QString::number(amount);
+                this->line2_ = "s";
+            }
+            else if (amount < 60 * 60)
+            {
+                this->line1_ = QString::number(amount / 60);
+                this->line2_ = "m";
+            }
+            else if (amount < 60 * 60 * 24)
+            {
+                this->line1_ = QString::number(amount / 60 / 60);
+                this->line2_ = "h";
+            }
+            else
+            {
+                this->line1_ = QString::number(amount / 60 / 60 / 24);
+                this->line2_ = "d";
+            }
+
+            // line1 = this->line1_;
+            // line2 = this->line2_;
+            // } else {
+            //     this->_moderationActions.emplace_back(app->resources->buttonTimeout,
+            //     str);
+            // }
         }
-        else if (amount < 60 * 60)
+        else if (action.startsWith("/ban "))
         {
-            this->line1_ = QString::number(amount / 60);
-            this->line2_ = "m";
-        }
-        else if (amount < 60 * 60 * 24)
-        {
-            this->line1_ = QString::number(amount / 60 / 60);
-            this->line2_ = "h";
+            this->image_ = Image::fromPixmap(getApp()->resources->buttons.ban);
         }
         else
         {
-            this->line1_ = QString::number(amount / 60 / 60 / 24);
-            this->line2_ = "d";
+            QString xD = action;
+
+            xD.replace(replaceRegex, "");
+
+            this->line1_ = xD.mid(0, 2);
+            this->line2_ = xD.mid(2, 2);
         }
-
-        // line1 = this->line1_;
-        // line2 = this->line2_;
-        // } else {
-        //     this->_moderationActions.emplace_back(app->resources->buttonTimeout,
-        //     str);
-        // }
     }
-    else if (action.startsWith("/ban "))
+
+    bool ModerationAction::operator==(const ModerationAction& other) const
     {
-        this->image_ = Image::fromPixmap(getApp()->resources->buttons.ban);
+        return this == std::addressof(other);
     }
-    else
+
+    bool ModerationAction::isImage() const
     {
-        QString xD = action;
-
-        xD.replace(replaceRegex, "");
-
-        this->line1_ = xD.mid(0, 2);
-        this->line2_ = xD.mid(2, 2);
+        return bool(this->image_);
     }
-}
 
-bool ModerationAction::operator==(const ModerationAction &other) const
-{
-    return this == std::addressof(other);
-}
+    const boost::optional<ImagePtr>& ModerationAction::getImage() const
+    {
+        return this->image_;
+    }
 
-bool ModerationAction::isImage() const
-{
-    return bool(this->image_);
-}
+    const QString& ModerationAction::getLine1() const
+    {
+        return this->line1_;
+    }
 
-const boost::optional<ImagePtr> &ModerationAction::getImage() const
-{
-    return this->image_;
-}
+    const QString& ModerationAction::getLine2() const
+    {
+        return this->line2_;
+    }
 
-const QString &ModerationAction::getLine1() const
-{
-    return this->line1_;
-}
-
-const QString &ModerationAction::getLine2() const
-{
-    return this->line2_;
-}
-
-const QString &ModerationAction::getAction() const
-{
-    return this->action_;
-}
+    const QString& ModerationAction::getAction() const
+    {
+        return this->action_;
+    }
 
 }  // namespace chatterino

@@ -4,23 +4,24 @@
 
 #include <QString>
 
-namespace chatterino {
-
-class TaggedUser
+namespace chatterino
 {
-public:
-    TaggedUser(ProviderId providerId, const QString &name, const QString &id);
+    class TaggedUser
+    {
+    public:
+        TaggedUser(
+            ProviderId providerId, const QString& name, const QString& id);
 
-    bool operator<(const TaggedUser &other) const;
+        bool operator<(const TaggedUser& other) const;
 
-    ProviderId getProviderId() const;
-    QString getName() const;
-    QString getId() const;
+        ProviderId getProviderId() const;
+        QString getName() const;
+        QString getId() const;
 
-private:
-    ProviderId providerId_;
-    QString name_;
-    QString id_;
-};
+    private:
+        ProviderId providerId_;
+        QString name_;
+        QString id_;
+    };
 
 }  // namespace chatterino

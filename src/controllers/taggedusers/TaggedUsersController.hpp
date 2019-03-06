@@ -5,18 +5,18 @@
 #include "common/SignalVector.hpp"
 #include "controllers/taggedusers/TaggedUser.hpp"
 
-namespace chatterino {
-
-class TaggedUsersModel;
-
-class TaggedUsersController final : public Singleton
+namespace chatterino
 {
-public:
-    TaggedUsersController();
+    class TaggedUsersModel;
 
-    SortedSignalVector<TaggedUser, std::less<TaggedUser>> users;
+    class TaggedUsersController final : public Singleton
+    {
+    public:
+        TaggedUsersController();
 
-    TaggedUsersModel *createModel(QObject *parent = nullptr);
-};
+        SortedSignalVector<TaggedUser, std::less<TaggedUser>> users;
+
+        TaggedUsersModel* createModel(QObject* parent = nullptr);
+    };
 
 }  // namespace chatterino

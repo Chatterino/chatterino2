@@ -3,62 +3,65 @@
 #include <QTimer>
 #include <QWidget>
 
-namespace chatterino {
-
-class Split;
-class Channel;
-using ChannelPtr = std::shared_ptr<Channel>;
-
-class AttachedWindow : public QWidget
+namespace chatterino
 {
-    AttachedWindow(void *_target, int _yOffset);
+    class Split;
+    class Channel;
+    using ChannelPtr = std::shared_ptr<Channel>;
 
-public:
-    struct GetArgs {
-        QString winId;
-        int yOffset = -1;
-        int width = -1;
-        int height = -1;
-    };
+    class AttachedWindow : public QWidget
+    {
+        AttachedWindow(void* _target, int _yOffset);
 
-    virtual ~AttachedWindow() override;
+    public:
+        struct GetArgs
+        {
+            QString winId;
+            int yOffset = -1;
+            int width = -1;
+            int height = -1;
+        };
 
-    static AttachedWindow *get(void *target_, const GetArgs &args);
-    static void detach(const QString &winId);
+        virtual ~AttachedWindow() override;
 
-    void setChannel(ChannelPtr channel);
+        static AttachedWindow* get(void* target_, const GetArgs& args);
+        static void detach(const QString& winId);
 
-protected:
-    virtual void showEvent(QShowEvent *) override;
-    //    virtual void nativeEvent(const QByteArray &eventType, void *message,
-    //    long *result) override;
+        void setChannel(ChannelPtr channel);
 
-private:
-    struct {
-        Split *split;
-    } ui_;
+    protected:
+        virtual void showEvent(QShowEvent*) override;
+        //    virtual void nativeEvent(const QByteArray &eventType, void
+        //    *message, long *result) override;
 
-    struct Item {
-        void *hwnd;
-        AttachedWindow *window;
-        QString winId;
-    };
+    private:
+        struct
+        {
+            Split* split;
+        } ui_;
 
-    static std::vector<Item> items;
+        struct Item
+        {
+            void* hwnd;
+            AttachedWindow* window;
+            QString winId;
+        };
 
-    void attachToHwnd(void *attached);
-    void updateWindowRect(void *attached);
+        static std::vector<Item> items;
 
-    void *target_;
-    int yOffset_;
-    int currentYOffset_;
-    int width_ = 360;
-    int height_ = -1;
+        void attachToHwnd(void* attached);
+        void updateWindowRect(void* attached);
+
+        void* target_;
+        int yOffset_;
+        int currentYOffset_;
+        int width_ = 360;
+        int height_ = -1;
 #ifdef USEWINSDK
-    bool validProcessName_ = false;
-    bool attached_ = false;
+        bool validProcessName_ = false;
+        bool attached_ = false;
 #endif
-    QTimer timer_;
-};
+        QTimer timer_;
+    };
 
 }  // namespace chatterino

@@ -8,27 +8,27 @@
 #include <QLabel>
 #include <QVBoxLayout>
 
-namespace chatterino {
-
-SpecialChannelsPage::SpecialChannelsPage()
-    : SettingsPage("Special channels", "")
+namespace chatterino
 {
-    LayoutCreator<SpecialChannelsPage> layoutCreator(this);
-    auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
-
-    auto mentions = layout.emplace<QGroupBox>("Mentions channel")
-                        .setLayoutType<QVBoxLayout>();
+    SpecialChannelsPage::SpecialChannelsPage()
+        : SettingsPage("Special channels", "")
     {
-        mentions.emplace<QLabel>("Join /mentions to view your mentions.");
-    }
+        LayoutCreator<SpecialChannelsPage> layoutCreator(this);
+        auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    auto whispers =
-        layout.emplace<QGroupBox>("Whispers").setLayoutType<QVBoxLayout>();
-    {
-        whispers.emplace<QLabel>("Join /whispers to view your mentions.");
-    }
+        auto mentions = layout.emplace<QGroupBox>("Mentions channel")
+                            .setLayoutType<QVBoxLayout>();
+        {
+            mentions.emplace<QLabel>("Join /mentions to view your mentions.");
+        }
 
-    layout->addStretch(1);
-}
+        auto whispers =
+            layout.emplace<QGroupBox>("Whispers").setLayoutType<QVBoxLayout>();
+        {
+            whispers.emplace<QLabel>("Join /whispers to view your mentions.");
+        }
+
+        layout->addStretch(1);
+    }
 
 }  // namespace chatterino

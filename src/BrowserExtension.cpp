@@ -14,28 +14,29 @@
 #    include <stdio.h>
 #endif
 
-namespace chatterino {
-
-namespace {
-    void initFileMode()
+namespace chatterino
+{
+    namespace
     {
-#ifdef Q_OS_WIN
-        _setmode(_fileno(stdin), _O_BINARY);
-        _setmode(_fileno(stdout), _O_BINARY);
-#endif
-    }
-
-    void runLoop(NativeMessagingClient &client)
-    {
-        while (true)
+        void initFileMode()
         {
-            char size_c[4];
-            std::cin.read(size_c, 4);
+#ifdef Q_OS_WIN
+            _setmode(_fileno(stdin), _O_BINARY);
+            _setmode(_fileno(stdout), _O_BINARY);
+#endif
+        }
 
-            if (std::cin.eof())
-                break;
+        void runLoop(NativeMessagingClient& client)
+        {
+            while (true)
+            {
+                char size_c[4];
+                std::cin.read(size_c, 4);
 
-            auto size = *reinterpret_cast<uint32_t *>(size_c);
+                if (std::cin.eof())
+                    break;
+
+                auto size = *reinterpret_cast<uint32_t*>(size_c);
 
 #if 0
     bool bigEndian = isBigEndian();
@@ -50,41 +51,41 @@ namespace {
         }
 #endif
 
-            std::unique_ptr<char[]> buffer(new char[size + 1]);
-            std::cin.read(buffer.get(), size);
-            *(buffer.get() + size) = '\0';
+                std::unique_ptr<char[]> buffer(new char[size + 1]);
+                std::cin.read(buffer.get(), size);
+                *(buffer.get() + size) = '\0';
 
-            client.sendMessage(QByteArray::fromRawData(
-                buffer.get(), static_cast<int32_t>(size)));
+                client.sendMessage(QByteArray::fromRawData(
+                    buffer.get(), static_cast<int32_t>(size)));
+            }
         }
+    }  // namespace
+
+    bool shouldRunBrowserExtensionHost(const QStringList& args)
+    {
+        return args.size() > 0 && (args[0].startsWith("chrome-extension://") ||
+                                      args[0].endsWith(".json"));
     }
-}  // namespace
 
-bool shouldRunBrowserExtensionHost(const QStringList &args)
-{
-    return args.size() > 0 && (args[0].startsWith("chrome-extension://") ||
-                               args[0].endsWith(".json"));
-}
+    void runBrowserExtensionHost()
+    {
+        initFileMode();
 
-void runBrowserExtensionHost()
-{
-    initFileMode();
+        std::atomic<bool> ping(false);
 
-    std::atomic<bool> ping(false);
+        QTimer timer;
+        QObject::connect(&timer, &QTimer::timeout, [&ping] {
+            if (!ping.exchange(false))
+            {
+                _Exit(0);
+            }
+        });
+        timer.setInterval(11000);
+        timer.start();
 
-    QTimer timer;
-    QObject::connect(&timer, &QTimer::timeout, [&ping] {
-        if (!ping.exchange(false))
-        {
-            _Exit(0);
-        }
-    });
-    timer.setInterval(11000);
-    timer.start();
+        NativeMessagingClient client;
 
-    NativeMessagingClient client;
-
-    runLoop(client);
-}
+        runLoop(client);
+    }
 
 }  // namespace chatterino

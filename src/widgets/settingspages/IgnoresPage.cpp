@@ -22,94 +22,95 @@
 #define INFO "/ignore <user> in chat ignores a user\n/unignore <user> in chat unignores a user"
 // clang-format on
 
-namespace chatterino {
-
-static void addPhrasesTab(LayoutCreator<QVBoxLayout> box);
-static void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> box,
-                        QStringListModel &model);
-
-IgnoresPage::IgnoresPage()
-    : SettingsPage("Ignores", ":/settings/ignore.svg")
+namespace chatterino
 {
-    LayoutCreator<IgnoresPage> layoutCreator(this);
-    auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
-    auto tabs = layout.emplace<QTabWidget>();
+    static void addPhrasesTab(LayoutCreator<QVBoxLayout> box);
+    static void addUsersTab(IgnoresPage& page, LayoutCreator<QVBoxLayout> box,
+        QStringListModel& model);
 
-    addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Phrases"));
-    addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
-                this->userListModel_);
-
-    auto label = layout.emplace<QLabel>(INFO);
-    label->setWordWrap(true);
-    label->setStyleSheet("color: #BBB");
-}
-
-void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
-{
-    EditableModelView *view =
-        layout
-            .emplace<EditableModelView>(getApp()->ignores->createModel(nullptr))
-            .getElement();
-    view->setTitles(
-        {"Pattern", "Regex", "Case Sensitive", "Block", "Replacement"});
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        QHeaderView::Fixed);
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        0, QHeaderView::Stretch);
-
-    QTimer::singleShot(1, [view] {
-        view->getTableView()->resizeColumnsToContents();
-        view->getTableView()->setColumnWidth(0, 200);
-    });
-
-    view->addButtonPressed.connect([] {
-        getApp()->ignores->phrases.appendItem(
-            IgnorePhrase{"my phrase", false, false,
-                         getSettings()->ignoredPhraseReplace.getValue(), true});
-    });
-}
-
-void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
-                 QStringListModel &userModel)
-{
-    users.append(page.createCheckBox("Enable twitch ignored users",
-                                     getSettings()->enableTwitchIgnoredUsers));
-
-    auto anyways = users.emplace<QHBoxLayout>().withoutMargin();
+    IgnoresPage::IgnoresPage()
+        : SettingsPage("Ignores", ":/settings/ignore.svg")
     {
-        anyways.emplace<QLabel>("Show anyways if:");
-        anyways.emplace<QComboBox>();
-        anyways->addStretch(1);
+        LayoutCreator<IgnoresPage> layoutCreator(this);
+        auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
+        auto tabs = layout.emplace<QTabWidget>();
+
+        addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Phrases"));
+        addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
+            this->userListModel_);
+
+        auto label = layout.emplace<QLabel>(INFO);
+        label->setWordWrap(true);
+        label->setStyleSheet("color: #BBB");
     }
 
-    /*auto addremove = users.emplace<QHBoxLayout>().withoutMargin();
+    void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
     {
-        auto add = addremove.emplace<QPushButton>("Ignore user");
-        auto remove = addremove.emplace<QPushButton>("Unignore User");
-        addremove->addStretch(1);
-    }*/
+        EditableModelView* view =
+            layout
+                .emplace<EditableModelView>(
+                    getApp()->ignores->createModel(nullptr))
+                .getElement();
+        view->setTitles(
+            {"Pattern", "Regex", "Case Sensitive", "Block", "Replacement"});
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            QHeaderView::Fixed);
+        view->getTableView()->horizontalHeader()->setSectionResizeMode(
+            0, QHeaderView::Stretch);
 
-    users.emplace<QListView>()->setModel(&userModel);
-}
+        QTimer::singleShot(1, [view] {
+            view->getTableView()->resizeColumnsToContents();
+            view->getTableView()->setColumnWidth(0, 200);
+        });
 
-void IgnoresPage::onShow()
-{
-    auto app = getApp();
-
-    auto user = app->accounts->twitch.getCurrent();
-
-    if (user->isAnon())
-    {
-        return;
+        view->addButtonPressed.connect([] {
+            getApp()->ignores->phrases.appendItem(
+                IgnorePhrase{"my phrase", false, false,
+                    getSettings()->ignoredPhraseReplace.getValue(), true});
+        });
     }
 
-    QStringList users;
-    for (const auto &ignoredUser : user->getIgnores())
+    void addUsersTab(IgnoresPage& page, LayoutCreator<QVBoxLayout> users,
+        QStringListModel& userModel)
     {
-        users << ignoredUser.name;
+        users.append(page.createCheckBox("Enable twitch ignored users",
+            getSettings()->enableTwitchIgnoredUsers));
+
+        auto anyways = users.emplace<QHBoxLayout>().withoutMargin();
+        {
+            anyways.emplace<QLabel>("Show anyways if:");
+            anyways.emplace<QComboBox>();
+            anyways->addStretch(1);
+        }
+
+        /*auto addremove = users.emplace<QHBoxLayout>().withoutMargin();
+        {
+            auto add = addremove.emplace<QPushButton>("Ignore user");
+            auto remove = addremove.emplace<QPushButton>("Unignore User");
+            addremove->addStretch(1);
+        }*/
+
+        users.emplace<QListView>()->setModel(&userModel);
     }
-    users.sort(Qt::CaseInsensitive);
-    this->userListModel_.setStringList(users);
-}
+
+    void IgnoresPage::onShow()
+    {
+        auto app = getApp();
+
+        auto user = app->accounts->twitch.getCurrent();
+
+        if (user->isAnon())
+        {
+            return;
+        }
+
+        QStringList users;
+        for (const auto& ignoredUser : user->getIgnores())
+        {
+            users << ignoredUser.name;
+        }
+        users.sort(Qt::CaseInsensitive);
+        this->userListModel_.setStringList(users);
+    }
 
 }  // namespace chatterino

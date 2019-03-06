@@ -8,85 +8,85 @@
 #include <cinttypes>
 #include <memory>
 
-namespace chatterino {
-
-struct Message;
-using MessagePtr = std::shared_ptr<const Message>;
-
-struct Selection;
-struct MessageLayoutContainer;
-class MessageLayoutElement;
-
-enum class MessageElementFlag;
-using MessageElementFlags = FlagsEnum<MessageElementFlag>;
-
-enum class MessageLayoutFlag : uint8_t {
-    RequiresBufferUpdate = 1 << 1,
-    RequiresLayout = 1 << 2,
-    AlternateBackground = 1 << 3,
-    Collapsed = 1 << 4,
-    Expanded = 1 << 5,
-    IgnoreHighlights = 1 << 6,
-};
-using MessageLayoutFlags = FlagsEnum<MessageLayoutFlag>;
-
-class MessageLayout : boost::noncopyable
+namespace chatterino
 {
-public:
-    MessageLayout(MessagePtr message_);
-    ~MessageLayout();
+    struct Message;
+    using MessagePtr = std::shared_ptr<const Message>;
 
-    const Message *getMessage();
+    struct Selection;
+    struct MessageLayoutContainer;
+    class MessageLayoutElement;
 
-    int getHeight() const;
+    enum class MessageElementFlag;
+    using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
-    MessageLayoutFlags flags;
+    enum class MessageLayoutFlag : uint8_t {
+        RequiresBufferUpdate = 1 << 1,
+        RequiresLayout = 1 << 2,
+        AlternateBackground = 1 << 3,
+        Collapsed = 1 << 4,
+        Expanded = 1 << 5,
+        IgnoreHighlights = 1 << 6,
+    };
+    using MessageLayoutFlags = FlagsEnum<MessageLayoutFlag>;
 
-    bool layout(int width, float scale_, MessageElementFlags flags);
+    class MessageLayout : boost::noncopyable
+    {
+    public:
+        MessageLayout(MessagePtr message_);
+        ~MessageLayout();
 
-    // Painting
-    void paint(QPainter &painter, int width, int y, int messageIndex,
-               Selection &selection, bool isLastReadMessage,
-               bool isWindowFocused);
-    void invalidateBuffer();
-    void deleteBuffer();
-    void deleteCache();
+        const Message* getMessage();
 
-    // Elements
-    const MessageLayoutElement *getElementAt(QPoint point);
-    int getLastCharacterIndex() const;
-    int getFirstMessageCharacterIndex() const;
-    int getSelectionIndex(QPoint position);
-    void addSelectionText(QString &str, int from = 0, int to = INT_MAX,
-                          CopyMode copymode = CopyMode::Everything);
+        int getHeight() const;
 
-    // Misc
-    bool isDisabled() const;
+        MessageLayoutFlags flags;
 
-private:
-    // variables
-    MessagePtr message_;
-    std::shared_ptr<MessageLayoutContainer> container_;
-    std::shared_ptr<QPixmap> buffer_{};
-    bool bufferValid_ = false;
+        bool layout(int width, float scale_, MessageElementFlags flags);
 
-    int height_ = 0;
+        // Painting
+        void paint(QPainter& painter, int width, int y, int messageIndex,
+            Selection& selection, bool isLastReadMessage, bool isWindowFocused);
+        void invalidateBuffer();
+        void deleteBuffer();
+        void deleteCache();
 
-    int currentLayoutWidth_ = -1;
-    int layoutState_ = -1;
-    float scale_ = -1;
-    unsigned int layoutCount_ = 0;
-    unsigned int bufferUpdatedCount_ = 0;
+        // Elements
+        const MessageLayoutElement* getElementAt(QPoint point);
+        int getLastCharacterIndex() const;
+        int getFirstMessageCharacterIndex() const;
+        int getSelectionIndex(QPoint position);
+        void addSelectionText(QString& str, int from = 0, int to = INT_MAX,
+            CopyMode copymode = CopyMode::Everything);
 
-    MessageElementFlags currentWordFlags_;
+        // Misc
+        bool isDisabled() const;
 
-    int collapsedHeight_ = 32;
+    private:
+        // variables
+        MessagePtr message_;
+        std::shared_ptr<MessageLayoutContainer> container_;
+        std::shared_ptr<QPixmap> buffer_{};
+        bool bufferValid_ = false;
 
-    // methods
-    void actuallyLayout(int width, MessageElementFlags flags);
-    void updateBuffer(QPixmap *pixmap, int messageIndex, Selection &selection);
-};
+        int height_ = 0;
 
-using MessageLayoutPtr = std::shared_ptr<MessageLayout>;
+        int currentLayoutWidth_ = -1;
+        int layoutState_ = -1;
+        float scale_ = -1;
+        unsigned int layoutCount_ = 0;
+        unsigned int bufferUpdatedCount_ = 0;
+
+        MessageElementFlags currentWordFlags_;
+
+        int collapsedHeight_ = 32;
+
+        // methods
+        void actuallyLayout(int width, MessageElementFlags flags);
+        void updateBuffer(
+            QPixmap* pixmap, int messageIndex, Selection& selection);
+    };
+
+    using MessageLayoutPtr = std::shared_ptr<MessageLayout>;
 
 }  // namespace chatterino

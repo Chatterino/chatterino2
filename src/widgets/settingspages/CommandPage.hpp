@@ -5,15 +5,15 @@
 
 #include "widgets/settingspages/SettingsPage.hpp"
 
-namespace chatterino {
-
-class CommandPage : public SettingsPage
+namespace chatterino
 {
-public:
-    CommandPage();
+    class CommandPage : public SettingsPage
+    {
+    public:
+        CommandPage();
 
-private:
-    QTimer commandsEditTimer_;
-};
+    private:
+        QTimer commandsEditTimer_;
+    };
 
 }  // namespace chatterino

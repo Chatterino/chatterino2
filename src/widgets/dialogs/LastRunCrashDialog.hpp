@@ -3,12 +3,12 @@
 #include <QDialog>
 #include <pajlada/signals/signalholder.hpp>
 
-namespace chatterino {
-
-class LastRunCrashDialog : public QDialog, pajlada::Signals::SignalHolder
+namespace chatterino
 {
-public:
-    LastRunCrashDialog();
-};
+    class LastRunCrashDialog : public QDialog, pajlada::Signals::SignalHolder
+    {
+    public:
+        LastRunCrashDialog();
+    };
 
 }  // namespace chatterino

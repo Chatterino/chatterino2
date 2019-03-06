@@ -2,11 +2,12 @@
 
 class QJsonObject;
 
-namespace chatterino {
-class JsonQuery
+namespace chatterino
 {
-public:
-    JsonQuery();
-};
+    class JsonQuery
+    {
+    public:
+        JsonQuery();
+    };
 
 }  // namespace chatterino

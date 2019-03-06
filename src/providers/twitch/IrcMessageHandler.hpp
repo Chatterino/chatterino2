@@ -2,37 +2,38 @@
 
 #include <IrcMessage>
 
-namespace chatterino {
-
-class TwitchServer;
-
-class IrcMessageHandler
+namespace chatterino
 {
-    IrcMessageHandler() = default;
+    class TwitchServer;
 
-public:
-    static IrcMessageHandler &getInstance();
+    class IrcMessageHandler
+    {
+        IrcMessageHandler() = default;
 
-    void handlePrivMessage(Communi::IrcPrivateMessage *message,
-                           TwitchServer &server);
+    public:
+        static IrcMessageHandler& getInstance();
 
-    void handleRoomStateMessage(Communi::IrcMessage *message);
-    void handleClearChatMessage(Communi::IrcMessage *message);
-    void handleUserStateMessage(Communi::IrcMessage *message);
-    void handleWhisperMessage(Communi::IrcMessage *message);
-    void handleUserNoticeMessage(Communi::IrcMessage *message,
-                                 TwitchServer &server);
-    void handleModeMessage(Communi::IrcMessage *message);
-    void handleNoticeMessage(Communi::IrcNoticeMessage *message);
-    void handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message);
+        void handlePrivMessage(
+            Communi::IrcPrivateMessage* message, TwitchServer& server);
 
-    void handleJoinMessage(Communi::IrcMessage *message);
-    void handlePartMessage(Communi::IrcMessage *message);
+        void handleRoomStateMessage(Communi::IrcMessage* message);
+        void handleClearChatMessage(Communi::IrcMessage* message);
+        void handleUserStateMessage(Communi::IrcMessage* message);
+        void handleWhisperMessage(Communi::IrcMessage* message);
+        void handleUserNoticeMessage(
+            Communi::IrcMessage* message, TwitchServer& server);
+        void handleModeMessage(Communi::IrcMessage* message);
+        void handleNoticeMessage(Communi::IrcNoticeMessage* message);
+        void handleWriteConnectionNoticeMessage(
+            Communi::IrcNoticeMessage* message);
 
-private:
-    void addMessage(Communi::IrcMessage *message, const QString &target,
-                    const QString &content, TwitchServer &server, bool isResub,
-                    bool isAction);
-};
+        void handleJoinMessage(Communi::IrcMessage* message);
+        void handlePartMessage(Communi::IrcMessage* message);
+
+    private:
+        void addMessage(Communi::IrcMessage* message, const QString& target,
+            const QString& content, TwitchServer& server, bool isResub,
+            bool isAction);
+    };
 
 }  // namespace chatterino

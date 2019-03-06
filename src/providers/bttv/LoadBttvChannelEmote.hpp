@@ -4,6 +4,6 @@
 
 class QString;
 
-namespace chatterino {
-
+namespace chatterino
+{
 }  // namespace chatterino

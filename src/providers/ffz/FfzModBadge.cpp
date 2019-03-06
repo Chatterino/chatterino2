@@ -10,55 +10,54 @@
 #include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
 
-namespace chatterino {
-
-FfzModBadge::FfzModBadge(const QString &channelName)
-    : channelName_(channelName)
+namespace chatterino
 {
-}
+    FfzModBadge::FfzModBadge(const QString& channelName)
+        : channelName_(channelName)
+    {
+    }
 
-void FfzModBadge::loadCustomModBadge()
-{
-    static QString partialUrl("https://cdn.frankerfacez.com/room-badge/mod/");
+    void FfzModBadge::loadCustomModBadge()
+    {
+        static QString partialUrl(
+            "https://cdn.frankerfacez.com/room-badge/mod/");
 
-    QString url = partialUrl + channelName_ + "/1";
-    NetworkRequest req(url);
-    req.setCaller(QThread::currentThread());
-    req.onSuccess([this, url](auto result) -> Outcome {
-        auto data = result.getData();
+        QString url = partialUrl + channelName_ + "/1";
+        NetworkRequest req(url);
+        req.setCaller(QThread::currentThread());
+        req.onSuccess([this, url](auto result) -> Outcome {
+            auto data = result.getData();
 
-        QBuffer buffer(const_cast<QByteArray *>(&data));
-        buffer.open(QIODevice::ReadOnly);
-        QImageReader reader(&buffer);
-        if (reader.imageCount() == 0)
-            return Failure;
+            QBuffer buffer(const_cast<QByteArray*>(&data));
+            buffer.open(QIODevice::ReadOnly);
+            QImageReader reader(&buffer);
+            if (reader.imageCount() == 0)
+                return Failure;
 
-        QPixmap badgeOverlay = QPixmap::fromImageReader(&reader);
-        QPixmap badgePixmap(18, 18);
+            QPixmap badgeOverlay = QPixmap::fromImageReader(&reader);
+            QPixmap badgePixmap(18, 18);
 
-        // the default mod badge green color
-        badgePixmap.fill(QColor("#34AE0A"));
-        QPainter painter(&badgePixmap);
-        QRectF rect(0, 0, 18, 18);
-        painter.drawPixmap(rect, badgeOverlay, rect);
+            // the default mod badge green color
+            badgePixmap.fill(QColor("#34AE0A"));
+            QPainter painter(&badgePixmap);
+            QRectF rect(0, 0, 18, 18);
+            painter.drawPixmap(rect, badgeOverlay, rect);
 
-        auto emote = Emote{{""},
-                           ImageSet{Image::fromPixmap(badgePixmap)},
-                           Tooltip{"Twitch Channel Moderator"},
-                           Url{url}};
+            auto emote = Emote{{""}, ImageSet{Image::fromPixmap(badgePixmap)},
+                Tooltip{"Twitch Channel Moderator"}, Url{url}};
 
-        this->badge_ = std::make_shared<Emote>(emote);
-        //        getBadge.execute();
+            this->badge_ = std::make_shared<Emote>(emote);
+            //        getBadge.execute();
 
-        return Success;
-    });
+            return Success;
+        });
 
-    req.execute();
-}
+        req.execute();
+    }
 
-EmotePtr FfzModBadge::badge() const
-{
-    return this->badge_;
-}
+    EmotePtr FfzModBadge::badge() const
+    {
+        return this->badge_;
+    }
 
 }  // namespace chatterino

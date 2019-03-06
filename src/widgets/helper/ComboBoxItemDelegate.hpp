@@ -2,24 +2,24 @@
 
 #include <QStyledItemDelegate>
 
-namespace chatterino {
-
-// stolen from https://wiki.qt.io/Combo_Boxes_in_Item_Views
-
-class ComboBoxItemDelegate : public QStyledItemDelegate
+namespace chatterino
 {
-    Q_OBJECT
+    // stolen from https://wiki.qt.io/Combo_Boxes_in_Item_Views
 
-public:
-    ComboBoxItemDelegate(QObject *parent = nullptr);
-    ~ComboBoxItemDelegate();
+    class ComboBoxItemDelegate : public QStyledItemDelegate
+    {
+        Q_OBJECT
 
-    virtual QWidget *createEditor(QWidget *parent,
-                                  const QStyleOptionViewItem &option,
-                                  const QModelIndex &index) const;
-    virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
-    virtual void setModelData(QWidget *editor, QAbstractItemModel *model,
-                              const QModelIndex &index) const;
-};
+    public:
+        ComboBoxItemDelegate(QObject* parent = nullptr);
+        ~ComboBoxItemDelegate();
+
+        virtual QWidget* createEditor(QWidget* parent,
+            const QStyleOptionViewItem& option, const QModelIndex& index) const;
+        virtual void setEditorData(
+            QWidget* editor, const QModelIndex& index) const;
+        virtual void setModelData(QWidget* editor, QAbstractItemModel* model,
+            const QModelIndex& index) const;
+    };
 
 }  // namespace chatterino

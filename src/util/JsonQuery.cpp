@@ -1,9 +1,9 @@
 #include "JsonQuery.hpp"
 
-namespace chatterino {
-
-JsonQuery::JsonQuery()
+namespace chatterino
 {
-}
+    JsonQuery::JsonQuery()
+    {
+    }
 
 }  // namespace chatterino

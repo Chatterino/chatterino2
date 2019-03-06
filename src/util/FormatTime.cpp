@@ -1,53 +1,55 @@
 #include "FormatTime.hpp"
 
-namespace chatterino {
-namespace {
-    void appendDuration(int count, QChar &&order, QString &outString)
-    {
-        outString.append(QString::number(count));
-        outString.append(order);
-    }
-}  // namespace
-
-QString formatTime(int totalSeconds)
+namespace chatterino
 {
-    QString res;
+    namespace
+    {
+        void appendDuration(int count, QChar&& order, QString& outString)
+        {
+            outString.append(QString::number(count));
+            outString.append(order);
+        }
+    }  // namespace
 
-    int seconds = totalSeconds % 60;
-    int timeoutMinutes = totalSeconds / 60;
-    int minutes = timeoutMinutes % 60;
-    int timeoutHours = timeoutMinutes / 60;
-    int hours = timeoutHours % 24;
-    int days = timeoutHours / 24;
-    if (days > 0)
+    QString formatTime(int totalSeconds)
     {
-        appendDuration(days, 'd', res);
-    }
-    if (hours > 0)
-    {
-        if (!res.isEmpty())
+        QString res;
+
+        int seconds = totalSeconds % 60;
+        int timeoutMinutes = totalSeconds / 60;
+        int minutes = timeoutMinutes % 60;
+        int timeoutHours = timeoutMinutes / 60;
+        int hours = timeoutHours % 24;
+        int days = timeoutHours / 24;
+        if (days > 0)
         {
-            res.append(" ");
+            appendDuration(days, 'd', res);
         }
-        appendDuration(hours, 'h', res);
-    }
-    if (minutes > 0)
-    {
-        if (!res.isEmpty())
+        if (hours > 0)
         {
-            res.append(" ");
+            if (!res.isEmpty())
+            {
+                res.append(" ");
+            }
+            appendDuration(hours, 'h', res);
         }
-        appendDuration(minutes, 'm', res);
-    }
-    if (seconds > 0)
-    {
-        if (!res.isEmpty())
+        if (minutes > 0)
         {
-            res.append(" ");
+            if (!res.isEmpty())
+            {
+                res.append(" ");
+            }
+            appendDuration(minutes, 'm', res);
         }
-        appendDuration(seconds, 's', res);
+        if (seconds > 0)
+        {
+            if (!res.isEmpty())
+            {
+                res.append(" ");
+            }
+            appendDuration(seconds, 's', res);
+        }
+        return res;
     }
-    return res;
-}
 
 }  // namespace chatterino

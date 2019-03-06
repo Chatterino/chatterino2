@@ -27,135 +27,142 @@
 #define ALWAYS_PLAY \
     "Always play highlight sound (Even if Chatterino is focused)"
 
-namespace chatterino {
-
-HighlightingPage::HighlightingPage()
-    : SettingsPage("Highlights", ":/settings/notifications.svg")
+namespace chatterino
 {
-    auto app = getApp();
-    LayoutCreator<HighlightingPage> layoutCreator(this);
-
-    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
+    HighlightingPage::HighlightingPage()
+        : SettingsPage("Highlights", ":/settings/notifications.svg")
     {
-        // GENERAL
-        // layout.append(this->createCheckBox(ENABLE_HIGHLIGHTS,
-        // getSettings()->enableHighlights));
+        auto app = getApp();
+        LayoutCreator<HighlightingPage> layoutCreator(this);
 
-        // TABS
-        auto tabs = layout.emplace<QTabWidget>();
+        auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
         {
-            // HIGHLIGHTS
-            auto highlights = tabs.appendTab(new QVBoxLayout, "Phrases");
+            // GENERAL
+            // layout.append(this->createCheckBox(ENABLE_HIGHLIGHTS,
+            // getSettings()->enableHighlights));
+
+            // TABS
+            auto tabs = layout.emplace<QTabWidget>();
             {
-                EditableModelView *view =
-                    highlights
-                        .emplace<EditableModelView>(
-                            app->highlights->createModel(nullptr))
-                        .getElement();
+                // HIGHLIGHTS
+                auto highlights = tabs.appendTab(new QVBoxLayout, "Phrases");
+                {
+                    EditableModelView* view =
+                        highlights
+                            .emplace<EditableModelView>(
+                                app->highlights->createModel(nullptr))
+                            .getElement();
 
-                view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex"});
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    QHeaderView::Fixed);
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    0, QHeaderView::Stretch);
+                    view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
+                        "Enable\nregex"});
+                    view->getTableView()
+                        ->horizontalHeader()
+                        ->setSectionResizeMode(QHeaderView::Fixed);
+                    view->getTableView()
+                        ->horizontalHeader()
+                        ->setSectionResizeMode(0, QHeaderView::Stretch);
 
-                // fourtf: make class extrend BaseWidget and add this to
-                // dpiChanged
-                QTimer::singleShot(1, [view] {
-                    view->getTableView()->resizeColumnsToContents();
-                    view->getTableView()->setColumnWidth(0, 200);
-                });
+                    // fourtf: make class extrend BaseWidget and add this to
+                    // dpiChanged
+                    QTimer::singleShot(1, [view] {
+                        view->getTableView()->resizeColumnsToContents();
+                        view->getTableView()->setColumnWidth(0, 200);
+                    });
 
-                view->addButtonPressed.connect([] {
-                    getApp()->highlights->phrases.appendItem(
-                        HighlightPhrase{"my phrase", true, false, false});
-                });
+                    view->addButtonPressed.connect([] {
+                        getApp()->highlights->phrases.appendItem(
+                            HighlightPhrase{"my phrase", true, false, false});
+                    });
+                }
+
+                auto pingUsers = tabs.appendTab(new QVBoxLayout, "Users");
+                {
+                    EditableModelView* view =
+                        pingUsers
+                            .emplace<EditableModelView>(
+                                app->highlights->createUserModel(nullptr))
+                            .getElement();
+
+                    view->setTitles({"Username", "Flash\ntaskbar",
+                        "Play\nsound", "Enable\nregex"});
+                    view->getTableView()
+                        ->horizontalHeader()
+                        ->setSectionResizeMode(QHeaderView::Fixed);
+                    view->getTableView()
+                        ->horizontalHeader()
+                        ->setSectionResizeMode(0, QHeaderView::Stretch);
+
+                    // fourtf: make class extrend BaseWidget and add this to
+                    // dpiChanged
+                    QTimer::singleShot(1, [view] {
+                        view->getTableView()->resizeColumnsToContents();
+                        view->getTableView()->setColumnWidth(0, 200);
+                    });
+
+                    view->addButtonPressed.connect([] {
+                        getApp()->highlights->highlightedUsers.appendItem(
+                            HighlightPhrase{
+                                "highlighted user", true, false, false});
+                    });
+                }
+
+                auto disabledUsers =
+                    tabs.appendTab(new QVBoxLayout, "Excluded Users");
+                {
+                    EditableModelView* view =
+                        disabledUsers
+                            .emplace<EditableModelView>(
+                                app->highlights->createBlacklistModel(nullptr))
+                            .getElement();
+
+                    view->setTitles({"Pattern", "Enable\nregex"});
+                    view->getTableView()
+                        ->horizontalHeader()
+                        ->setSectionResizeMode(QHeaderView::Fixed);
+                    view->getTableView()
+                        ->horizontalHeader()
+                        ->setSectionResizeMode(0, QHeaderView::Stretch);
+
+                    // fourtf: make class extrend BaseWidget and add this to
+                    // dpiChanged
+                    QTimer::singleShot(1, [view] {
+                        view->getTableView()->resizeColumnsToContents();
+                        view->getTableView()->setColumnWidth(0, 200);
+                    });
+
+                    view->addButtonPressed.connect([] {
+                        getApp()->highlights->blacklistedUsers.appendItem(
+                            HighlightBlacklistUser{"blacklisted user", false});
+                    });
+                }
             }
 
-            auto pingUsers = tabs.appendTab(new QVBoxLayout, "Users");
+            // MISC
+            auto customSound = layout.emplace<QHBoxLayout>().withoutMargin();
             {
-                EditableModelView *view =
-                    pingUsers
-                        .emplace<EditableModelView>(
-                            app->highlights->createUserModel(nullptr))
-                        .getElement();
-
-                view->setTitles({"Username", "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex"});
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    QHeaderView::Fixed);
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    0, QHeaderView::Stretch);
-
-                // fourtf: make class extrend BaseWidget and add this to
-                // dpiChanged
-                QTimer::singleShot(1, [view] {
-                    view->getTableView()->resizeColumnsToContents();
-                    view->getTableView()->setColumnWidth(0, 200);
-                });
-
-                view->addButtonPressed.connect([] {
-                    getApp()->highlights->highlightedUsers.appendItem(
-                        HighlightPhrase{"highlighted user", true, false,
-                                        false});
-                });
+                customSound.append(this->createCheckBox(
+                    "Custom sound", getSettings()->customHighlightSound));
+                auto selectFile = customSound.emplace<QPushButton>(
+                    "Select custom sound file");
+                QObject::connect(selectFile.getElement(), &QPushButton::clicked,
+                    this, [this] {
+                        auto fileName =
+                            QFileDialog::getOpenFileName(this, tr("Open Sound"),
+                                "", tr("Audio Files (*.mp3 *.wav)"));
+                        getSettings()->pathHighlightSound = fileName;
+                    });
             }
 
-            auto disabledUsers =
-                tabs.appendTab(new QVBoxLayout, "Excluded Users");
-            {
-                EditableModelView *view =
-                    disabledUsers
-                        .emplace<EditableModelView>(
-                            app->highlights->createBlacklistModel(nullptr))
-                        .getElement();
-
-                view->setTitles({"Pattern", "Enable\nregex"});
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    QHeaderView::Fixed);
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    0, QHeaderView::Stretch);
-
-                // fourtf: make class extrend BaseWidget and add this to
-                // dpiChanged
-                QTimer::singleShot(1, [view] {
-                    view->getTableView()->resizeColumnsToContents();
-                    view->getTableView()->setColumnWidth(0, 200);
-                });
-
-                view->addButtonPressed.connect([] {
-                    getApp()->highlights->blacklistedUsers.appendItem(
-                        HighlightBlacklistUser{"blacklisted user", false});
-                });
-            }
+            layout.append(createCheckBox(
+                ALWAYS_PLAY, getSettings()->highlightAlwaysPlaySound));
+            layout.append(
+                createCheckBox("Flash taskbar only stops highlighting when "
+                               "chatterino is focused",
+                    getSettings()->longAlerts));
         }
 
-        // MISC
-        auto customSound = layout.emplace<QHBoxLayout>().withoutMargin();
-        {
-            customSound.append(this->createCheckBox(
-                "Custom sound", getSettings()->customHighlightSound));
-            auto selectFile =
-                customSound.emplace<QPushButton>("Select custom sound file");
-            QObject::connect(selectFile.getElement(), &QPushButton::clicked,
-                             this, [this] {
-                                 auto fileName = QFileDialog::getOpenFileName(
-                                     this, tr("Open Sound"), "",
-                                     tr("Audio Files (*.mp3 *.wav)"));
-                                 getSettings()->pathHighlightSound = fileName;
-                             });
-        }
-
-        layout.append(createCheckBox(ALWAYS_PLAY,
-                                     getSettings()->highlightAlwaysPlaySound));
-        layout.append(createCheckBox(
-            "Flash taskbar only stops highlighting when chatterino is focused",
-            getSettings()->longAlerts));
+        // ---- misc
+        this->disabledUsersChangedTimer_.setSingleShot(true);
     }
-
-    // ---- misc
-    this->disabledUsersChangedTimer_.setSingleShot(true);
-}
 
 }  // namespace chatterino

@@ -7,28 +7,29 @@
 #include "providers/twitch/TwitchAccountManager.hpp"
 #include "util/SharedPtrElementLess.hpp"
 
-namespace chatterino {
-
-class Account;
-class Settings;
-class Paths;
-
-class AccountModel;
-
-class AccountController final : public Singleton
+namespace chatterino
 {
-public:
-    AccountController();
+    class Account;
+    class Settings;
+    class Paths;
 
-    AccountModel *createModel(QObject *parent);
+    class AccountModel;
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    class AccountController final : public Singleton
+    {
+    public:
+        AccountController();
 
-    TwitchAccountManager twitch;
+        AccountModel* createModel(QObject* parent);
 
-private:
-    SortedSignalVector<std::shared_ptr<Account>, SharedPtrElementLess<Account>>
-        accounts_;
-};
+        virtual void initialize(Settings& settings, Paths& paths) override;
+
+        TwitchAccountManager twitch;
+
+    private:
+        SortedSignalVector<std::shared_ptr<Account>,
+            SharedPtrElementLess<Account>>
+            accounts_;
+    };
 
 }  // namespace chatterino

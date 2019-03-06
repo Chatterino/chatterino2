@@ -2,15 +2,16 @@
 
 #include <memory>
 
-namespace chatterino {
-
-template <typename T>
-struct SharedPtrElementLess {
-    bool operator()(const std::shared_ptr<T> &a,
-                    const std::shared_ptr<T> &b) const
+namespace chatterino
+{
+    template <typename T>
+    struct SharedPtrElementLess
     {
-        return a->operator<(*b);
-    }
-};
+        bool operator()(
+            const std::shared_ptr<T>& a, const std::shared_ptr<T>& b) const
+        {
+            return a->operator<(*b);
+        }
+    };
 
 }  // namespace chatterino

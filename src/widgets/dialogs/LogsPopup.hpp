@@ -2,39 +2,39 @@
 
 #include "widgets/BaseWindow.hpp"
 
-namespace chatterino {
-
-class Channel;
-class ChannelView;
-
-class Channel;
-using ChannelPtr = std::shared_ptr<Channel>;
-
-struct Message;
-using MessagePtr = std::shared_ptr<const Message>;
-
-class LogsPopup : public BaseWindow
+namespace chatterino
 {
-public:
-    LogsPopup();
+    class Channel;
+    class ChannelView;
 
-    void setChannelName(QString channelName);
-    void setChannel(std::shared_ptr<Channel> channel);
-    void setTargetUserName(QString userName);
+    class Channel;
+    using ChannelPtr = std::shared_ptr<Channel>;
 
-    void getLogs();
+    struct Message;
+    using MessagePtr = std::shared_ptr<const Message>;
 
-private:
-    ChannelView *channelView_ = nullptr;
-    ChannelPtr channel_;
+    class LogsPopup : public BaseWindow
+    {
+    public:
+        LogsPopup();
 
-    QString userName_;
-    QString channelName_;
+        void setChannelName(QString channelName);
+        void setChannel(std::shared_ptr<Channel> channel);
+        void setTargetUserName(QString userName);
 
-    void initLayout();
-    void setMessages(std::vector<MessagePtr> &messages);
-    void getOverrustleLogs();
-    void getLogviewerLogs(const QString &roomID);
-};
+        void getLogs();
+
+    private:
+        ChannelView* channelView_ = nullptr;
+        ChannelPtr channel_;
+
+        QString userName_;
+        QString channelName_;
+
+        void initLayout();
+        void setMessages(std::vector<MessagePtr>& messages);
+        void getOverrustleLogs();
+        void getLogviewerLogs(const QString& roomID);
+    };
 
 }  // namespace chatterino

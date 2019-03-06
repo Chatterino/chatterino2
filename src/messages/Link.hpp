@@ -2,32 +2,33 @@
 
 #include <QString>
 
-namespace chatterino {
+namespace chatterino
+{
+    struct Link
+    {
+    public:
+        enum Type {
+            None,
+            Url,
+            CloseCurrentSplit,
+            UserInfo,
+            UserTimeout,
+            UserBan,
+            UserWhisper,
+            InsertText,
+            ShowMessage,
+            UserAction,
+            AutoModAllow,
+            AutoModDeny,
+        };
 
-struct Link {
-public:
-    enum Type {
-        None,
-        Url,
-        CloseCurrentSplit,
-        UserInfo,
-        UserTimeout,
-        UserBan,
-        UserWhisper,
-        InsertText,
-        ShowMessage,
-        UserAction,
-        AutoModAllow,
-        AutoModDeny,
+        Link();
+        Link(Type getType, const QString& getValue);
+
+        Type type;
+        QString value;
+
+        bool isValid() const;
     };
-
-    Link();
-    Link(Type getType, const QString &getValue);
-
-    Type type;
-    QString value;
-
-    bool isValid() const;
-};
 
 }  // namespace chatterino

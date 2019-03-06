@@ -3,45 +3,45 @@
 #include <boost/noncopyable.hpp>
 #include <mutex>
 
-namespace chatterino {
-
-template <typename T>
-class Atomic : boost::noncopyable
+namespace chatterino
 {
-public:
-    Atomic()
+    template <typename T>
+    class Atomic : boost::noncopyable
     {
-    }
+    public:
+        Atomic()
+        {
+        }
 
-    Atomic(T &&val)
-        : value_(val)
-    {
-    }
+        Atomic(T&& val)
+            : value_(val)
+        {
+        }
 
-    T get() const
-    {
-        std::lock_guard<std::mutex> guard(this->mutex_);
+        T get() const
+        {
+            std::lock_guard<std::mutex> guard(this->mutex_);
 
-        return this->value_;
-    }
+            return this->value_;
+        }
 
-    void set(const T &val)
-    {
-        std::lock_guard<std::mutex> guard(this->mutex_);
+        void set(const T& val)
+        {
+            std::lock_guard<std::mutex> guard(this->mutex_);
 
-        this->value_ = val;
-    }
+            this->value_ = val;
+        }
 
-    void set(T &&val)
-    {
-        std::lock_guard<std::mutex> guard(this->mutex_);
+        void set(T&& val)
+        {
+            std::lock_guard<std::mutex> guard(this->mutex_);
 
-        this->value_ = std::move(val);
-    }
+            this->value_ = std::move(val);
+        }
 
-private:
-    mutable std::mutex mutex_;
-    T value_;
-};
+    private:
+        mutable std::mutex mutex_;
+        T value_;
+    };
 
 }  // namespace chatterino

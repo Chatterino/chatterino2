@@ -6,52 +6,52 @@
 
 #include <QTimer>
 
-namespace chatterino {
-
-class Settings;
-class Paths;
-
-class NotificationModel;
-
-enum class Platform : uint8_t {
-    Twitch,  // 0
-    // Mixer,   // 1
-};
-
-class NotificationController final : public Singleton, private QObject
+namespace chatterino
 {
-public:
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    class Settings;
+    class Paths;
 
-    bool isChannelNotified(const QString &channelName, Platform p);
-    void updateChannelNotification(const QString &channelName, Platform p);
-    void addChannelNotification(const QString &channelName, Platform p);
-    void removeChannelNotification(const QString &channelName, Platform p);
+    class NotificationModel;
 
-    void playSound();
+    enum class Platform : uint8_t {
+        Twitch,  // 0
+        // Mixer,   // 1
+    };
 
-    UnsortedSignalVector<QString> getVector(Platform p);
+    class NotificationController final : public Singleton, private QObject
+    {
+    public:
+        virtual void initialize(Settings& settings, Paths& paths) override;
 
-    std::map<Platform, UnsortedSignalVector<QString>> channelMap;
+        bool isChannelNotified(const QString& channelName, Platform p);
+        void updateChannelNotification(const QString& channelName, Platform p);
+        void addChannelNotification(const QString& channelName, Platform p);
+        void removeChannelNotification(const QString& channelName, Platform p);
 
-    NotificationModel *createModel(QObject *parent, Platform p);
+        void playSound();
 
-private:
-    bool initialized_ = false;
+        UnsortedSignalVector<QString> getVector(Platform p);
 
-    void fetchFakeChannels();
-    void removeFakeChannel(const QString channelName);
-    void getFakeTwitchChannelLiveStatus(const QString &channelName);
+        std::map<Platform, UnsortedSignalVector<QString>> channelMap;
 
-    std::vector<QString> fakeTwitchChannels;
-    QTimer *liveStatusTimer_;
+        NotificationModel* createModel(QObject* parent, Platform p);
 
-    ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
-        "/notifications/twitch"};
-    /*
-    ChatterinoSetting<std::vector<QString>> mixerSetting_ = {
-        "/notifications/mixer"};
-    */
-};
+    private:
+        bool initialized_ = false;
+
+        void fetchFakeChannels();
+        void removeFakeChannel(const QString channelName);
+        void getFakeTwitchChannelLiveStatus(const QString& channelName);
+
+        std::vector<QString> fakeTwitchChannels;
+        QTimer* liveStatusTimer_;
+
+        ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
+            "/notifications/twitch"};
+        /*
+        ChatterinoSetting<std::vector<QString>> mixerSetting_ = {
+            "/notifications/mixer"};
+        */
+    };
 
 }  // namespace chatterino

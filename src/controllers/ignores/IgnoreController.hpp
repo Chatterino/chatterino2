@@ -5,27 +5,27 @@
 #include "common/Singleton.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 
-namespace chatterino {
-
-class Settings;
-class Paths;
-
-class IgnoreModel;
-
-class IgnoreController final : public Singleton
+namespace chatterino
 {
-public:
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    class Settings;
+    class Paths;
 
-    UnsortedSignalVector<IgnorePhrase> phrases;
+    class IgnoreModel;
 
-    IgnoreModel *createModel(QObject *parent);
+    class IgnoreController final : public Singleton
+    {
+    public:
+        virtual void initialize(Settings& settings, Paths& paths) override;
 
-private:
-    bool initialized_ = false;
+        UnsortedSignalVector<IgnorePhrase> phrases;
 
-    ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting_ = {
-        "/ignore/phrases"};
-};
+        IgnoreModel* createModel(QObject* parent);
+
+    private:
+        bool initialized_ = false;
+
+        ChatterinoSetting<std::vector<IgnorePhrase>> ignoresSetting_ = {
+            "/ignore/phrases"};
+    };
 
 }  // namespace chatterino

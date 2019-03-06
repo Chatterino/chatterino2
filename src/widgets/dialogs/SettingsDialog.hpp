@@ -8,57 +8,58 @@
 #include <QWidget>
 #include <pajlada/settings/setting.hpp>
 
-namespace chatterino {
-
-class SettingsPage;
-class SettingsDialogTab;
-class ModerationPage;
-
-enum class SettingsDialogPreference {
-    NoPreference,
-    Accounts,
-    ModerationActions,
-};
-
-class SettingsDialog : public BaseWindow
+namespace chatterino
 {
-public:
-    SettingsDialog();
+    class SettingsPage;
+    class SettingsDialogTab;
+    class ModerationPage;
 
-    static SettingsDialog *getHandle();  // may be NULL
-    static void showDialog(SettingsDialogPreference preferredTab =
-                               SettingsDialogPreference::NoPreference);
+    enum class SettingsDialogPreference {
+        NoPreference,
+        Accounts,
+        ModerationActions,
+    };
 
-protected:
-    virtual void scaleChangedEvent(float newDpi) override;
-    virtual void themeChangedEvent() override;
+    class SettingsDialog : public BaseWindow
+    {
+    public:
+        SettingsDialog();
 
-private:
-    static SettingsDialog *handle;
+        static SettingsDialog* getHandle();  // may be NULL
+        static void showDialog(SettingsDialogPreference preferredTab =
+                                   SettingsDialogPreference::NoPreference);
 
-    void refresh();
+    protected:
+        virtual void scaleChangedEvent(float newDpi) override;
+        virtual void themeChangedEvent() override;
 
-    void initUi();
-    void addTabs();
-    void addTab(SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
-    void selectTab(SettingsDialogTab *tab);
-    void selectPage(SettingsPage *page);
+    private:
+        static SettingsDialog* handle;
 
-    void onOkClicked();
-    void onCancelClicked();
+        void refresh();
 
-    struct {
-        QWidget *tabContainerContainer{};
-        QVBoxLayout *tabContainer{};
-        QStackedLayout *pageStack{};
-        QPushButton *okButton{};
-        QPushButton *cancelButton{};
-        ModerationPage *moderationPage{};
-    } ui_;
-    std::vector<SettingsDialogTab *> tabs_;
-    SettingsDialogTab *selectedTab_{};
+        void initUi();
+        void addTabs();
+        void addTab(SettingsPage* page, Qt::Alignment alignment = Qt::AlignTop);
+        void selectTab(SettingsDialogTab* tab);
+        void selectPage(SettingsPage* page);
 
-    friend class SettingsDialogTab;
-};
+        void onOkClicked();
+        void onCancelClicked();
+
+        struct
+        {
+            QWidget* tabContainerContainer{};
+            QVBoxLayout* tabContainer{};
+            QStackedLayout* pageStack{};
+            QPushButton* okButton{};
+            QPushButton* cancelButton{};
+            ModerationPage* moderationPage{};
+        } ui_;
+        std::vector<SettingsDialogTab*> tabs_;
+        SettingsDialogTab* selectedTab_{};
+
+        friend class SettingsDialogTab;
+    };
 
 }  // namespace chatterino

@@ -7,26 +7,27 @@
 #include <mutex>
 #include <utility>
 
-namespace chatterino {
-
-class ClosedSplits
+namespace chatterino
 {
-public:
-    struct SplitInfo {
-        QString channelName;
-        NotebookTab *tab;  // non owning ptr
+    class ClosedSplits
+    {
+    public:
+        struct SplitInfo
+        {
+            QString channelName;
+            NotebookTab* tab;  // non owning ptr
+        };
+
+        static void invalidateTab(NotebookTab* const tab);
+        static void push(const SplitInfo& si);
+        static void push(SplitInfo&& si);
+        static SplitInfo pop();
+        static bool empty();
+        static std::size_t size();
+
+    private:
+        static std::mutex m_;
+        static std::vector<SplitInfo> closedSplits_;
     };
-
-    static void invalidateTab(NotebookTab *const tab);
-    static void push(const SplitInfo &si);
-    static void push(SplitInfo &&si);
-    static SplitInfo pop();
-    static bool empty();
-    static std::size_t size();
-
-private:
-    static std::mutex m_;
-    static std::vector<SplitInfo> closedSplits_;
-};
 
 }  // namespace chatterino

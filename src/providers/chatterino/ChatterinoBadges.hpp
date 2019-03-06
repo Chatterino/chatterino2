@@ -8,23 +8,23 @@
 #include <map>
 #include <vector>
 
-namespace chatterino {
-
-struct Emote;
-using EmotePtr = std::shared_ptr<const Emote>;
-
-class ChatterinoBadges : public Singleton
+namespace chatterino
 {
-public:
-    virtual void initialize(Settings &settings, Paths &paths) override;
-    ChatterinoBadges();
+    struct Emote;
+    using EmotePtr = std::shared_ptr<const Emote>;
 
-    boost::optional<EmotePtr> getBadge(const UserName &username);
+    class ChatterinoBadges : public Singleton
+    {
+    public:
+        virtual void initialize(Settings& settings, Paths& paths) override;
+        ChatterinoBadges();
 
-private:
-    void loadChatterinoBadges();
-    std::map<QString, int> badgeMap;
-    std::vector<EmotePtr> emotes;
-};
+        boost::optional<EmotePtr> getBadge(const UserName& username);
+
+    private:
+        void loadChatterinoBadges();
+        std::map<QString, int> badgeMap;
+        std::vector<EmotePtr> emotes;
+    };
 
 }  // namespace chatterino

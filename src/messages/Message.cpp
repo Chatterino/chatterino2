@@ -6,35 +6,35 @@
 
 using SBHighlight = chatterino::ScrollbarHighlight;
 
-namespace chatterino {
-
-Message::Message()
-    : parseTime(QTime::currentTime())
+namespace chatterino
 {
-    DebugCount::increase("messages");
-}
-
-Message::~Message()
-{
-    DebugCount::decrease("messages");
-}
-
-SBHighlight Message::getScrollBarHighlight() const
-{
-    if (this->flags.has(MessageFlag::Highlighted))
+    Message::Message()
+        : parseTime(QTime::currentTime())
     {
-        return SBHighlight(SBHighlight::Highlight);
+        DebugCount::increase("messages");
     }
-    else if (this->flags.has(MessageFlag::Subscription))
+
+    Message::~Message()
     {
-        return SBHighlight(SBHighlight::Subscription);
+        DebugCount::decrease("messages");
     }
-    return SBHighlight();
-}
 
-// Static
-namespace {
+    SBHighlight Message::getScrollBarHighlight() const
+    {
+        if (this->flags.has(MessageFlag::Highlighted))
+        {
+            return SBHighlight(SBHighlight::Highlight);
+        }
+        else if (this->flags.has(MessageFlag::Subscription))
+        {
+            return SBHighlight(SBHighlight::Subscription);
+        }
+        return SBHighlight();
+    }
 
-}  // namespace
+    // Static
+    namespace
+    {
+    }  // namespace
 
 }  // namespace chatterino

@@ -24,37 +24,38 @@
     "{{1} => {1}"
 // clang-format on
 
-namespace chatterino {
-
-CommandPage::CommandPage()
-    : SettingsPage("Commands", ":/settings/commands.svg")
+namespace chatterino
 {
-    auto app = getApp();
+    CommandPage::CommandPage()
+        : SettingsPage("Commands", ":/settings/commands.svg")
+    {
+        auto app = getApp();
 
-    LayoutCreator<CommandPage> layoutCreator(this);
-    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
+        LayoutCreator<CommandPage> layoutCreator(this);
+        auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
-    EditableModelView *view =
-        layout.emplace<EditableModelView>(app->commands->createModel(nullptr))
-            .getElement();
+        EditableModelView* view =
+            layout
+                .emplace<EditableModelView>(app->commands->createModel(nullptr))
+                .getElement();
 
-    view->setTitles({"Trigger", "Command"});
-    view->getTableView()->horizontalHeader()->setStretchLastSection(true);
-    view->addButtonPressed.connect([] {
-        getApp()->commands->items_.appendItem(
-            Command{"/command", "I made a new command HeyGuys"});
-    });
+        view->setTitles({"Trigger", "Command"});
+        view->getTableView()->horizontalHeader()->setStretchLastSection(true);
+        view->addButtonPressed.connect([] {
+            getApp()->commands->items_.appendItem(
+                Command{"/command", "I made a new command HeyGuys"});
+        });
 
-    layout.append(
-        this->createCheckBox("Also match the trigger at the end of the message",
-                             getSettings()->allowCommandsAtEnd));
+        layout.append(this->createCheckBox(
+            "Also match the trigger at the end of the message",
+            getSettings()->allowCommandsAtEnd));
 
-    QLabel *text = layout.emplace<QLabel>(TEXT).getElement();
-    text->setWordWrap(true);
-    text->setStyleSheet("color: #bbb");
+        QLabel* text = layout.emplace<QLabel>(TEXT).getElement();
+        text->setWordWrap(true);
+        text->setStyleSheet("color: #bbb");
 
-    // ---- end of layout
-    this->commandsEditTimer_.setSingleShot(true);
-}
+        // ---- end of layout
+        this->commandsEditTimer_.setSingleShot(true);
+    }
 
 }  // namespace chatterino

@@ -6,27 +6,28 @@
 #include "common/SignalVector.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 
-namespace chatterino {
-
-class Settings;
-class Paths;
-
-class ModerationActionModel;
-
-class ModerationActions final : public Singleton
+namespace chatterino
 {
-public:
-    ModerationActions();
+    class Settings;
+    class Paths;
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    class ModerationActionModel;
 
-    UnsortedSignalVector<ModerationAction> items;
+    class ModerationActions final : public Singleton
+    {
+    public:
+        ModerationActions();
 
-    ModerationActionModel *createModel(QObject *parent);
+        virtual void initialize(Settings& settings, Paths& paths) override;
 
-private:
-    std::unique_ptr<ChatterinoSetting<std::vector<ModerationAction>>> setting_;
-    bool initialized_ = false;
-};
+        UnsortedSignalVector<ModerationAction> items;
+
+        ModerationActionModel* createModel(QObject* parent);
+
+    private:
+        std::unique_ptr<ChatterinoSetting<std::vector<ModerationAction>>>
+            setting_;
+        bool initialized_ = false;
+    };
 
 }  // namespace chatterino

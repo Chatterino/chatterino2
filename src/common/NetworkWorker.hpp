@@ -2,14 +2,14 @@
 
 #include <QObject>
 
-namespace chatterino {
-
-class NetworkWorker : public QObject
+namespace chatterino
 {
-    Q_OBJECT
+    class NetworkWorker : public QObject
+    {
+        Q_OBJECT
 
-signals:
-    void doneUrl();
-};
+    signals:
+        void doneUrl();
+    };
 
 }  // namespace chatterino

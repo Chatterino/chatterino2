@@ -3,17 +3,17 @@
 #include <QString>
 #include <functional>
 
-namespace chatterino {
-
-class TwitchApi
+namespace chatterino
 {
-public:
-    static void findUserId(const QString user,
-                           std::function<void(QString)> callback);
-    static void findUserName(const QString userid,
-                             std::function<void(QString)> callback);
+    class TwitchApi
+    {
+    public:
+        static void findUserId(
+            const QString user, std::function<void(QString)> callback);
+        static void findUserName(
+            const QString userid, std::function<void(QString)> callback);
 
-private:
-};
+    private:
+    };
 
 }  // namespace chatterino

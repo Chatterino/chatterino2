@@ -8,75 +8,79 @@
 #include <functional>
 #include <mutex>
 
-namespace chatterino {
-
-class Channel;
-using ChannelPtr = std::shared_ptr<Channel>;
-
-class AbstractIrcServer
+namespace chatterino
 {
-public:
-    virtual ~AbstractIrcServer() = default;
+    class Channel;
+    using ChannelPtr = std::shared_ptr<Channel>;
 
-    // connection
-    void connect();
-    void disconnect();
+    class AbstractIrcServer
+    {
+    public:
+        virtual ~AbstractIrcServer() = default;
 
-    void sendMessage(const QString &channelName, const QString &message);
-    void sendRawMessage(const QString &rawMessage);
+        // connection
+        void connect();
+        void disconnect();
 
-    // channels
-    std::shared_ptr<Channel> getOrAddChannel(const QString &dirtyChannelName);
-    std::shared_ptr<Channel> getChannelOrEmpty(const QString &dirtyChannelName);
+        void sendMessage(const QString& channelName, const QString& message);
+        void sendRawMessage(const QString& rawMessage);
 
-    // signals
-    pajlada::Signals::NoArgSignal connected;
-    pajlada::Signals::NoArgSignal disconnected;
-    //    pajlada::Signals::Signal<Communi::IrcPrivateMessage *>
-    //    onPrivateMessage;
+        // channels
+        std::shared_ptr<Channel> getOrAddChannel(
+            const QString& dirtyChannelName);
+        std::shared_ptr<Channel> getChannelOrEmpty(
+            const QString& dirtyChannelName);
 
-    void addFakeMessage(const QString &data);
+        // signals
+        pajlada::Signals::NoArgSignal connected;
+        pajlada::Signals::NoArgSignal disconnected;
+        //    pajlada::Signals::Signal<Communi::IrcPrivateMessage *>
+        //    onPrivateMessage;
 
-    // iteration
-    void forEachChannel(std::function<void(ChannelPtr)> func);
+        void addFakeMessage(const QString& data);
 
-protected:
-    AbstractIrcServer();
+        // iteration
+        void forEachChannel(std::function<void(ChannelPtr)> func);
 
-    virtual void initializeConnection(IrcConnection *connection, bool isRead,
-                                      bool isWrite) = 0;
-    virtual std::shared_ptr<Channel> createChannel(
-        const QString &channelName) = 0;
+    protected:
+        AbstractIrcServer();
 
-    virtual void privateMessageReceived(Communi::IrcPrivateMessage *message);
-    virtual void messageReceived(Communi::IrcMessage *message);
-    virtual void writeConnectionMessageReceived(Communi::IrcMessage *message);
+        virtual void initializeConnection(
+            IrcConnection* connection, bool isRead, bool isWrite) = 0;
+        virtual std::shared_ptr<Channel> createChannel(
+            const QString& channelName) = 0;
 
-    virtual void onConnected();
-    virtual void onDisconnected();
-    virtual void onSocketError();
+        virtual void privateMessageReceived(
+            Communi::IrcPrivateMessage* message);
+        virtual void messageReceived(Communi::IrcMessage* message);
+        virtual void writeConnectionMessageReceived(
+            Communi::IrcMessage* message);
 
-    virtual std::shared_ptr<Channel> getCustomChannel(
-        const QString &channelName);
+        virtual void onConnected();
+        virtual void onDisconnected();
+        virtual void onSocketError();
 
-    virtual bool hasSeparateWriteConnection() const = 0;
-    virtual QString cleanChannelName(const QString &dirtyChannelName);
+        virtual std::shared_ptr<Channel> getCustomChannel(
+            const QString& channelName);
 
-    QMap<QString, std::weak_ptr<Channel>> channels;
-    std::mutex channelMutex;
+        virtual bool hasSeparateWriteConnection() const = 0;
+        virtual QString cleanChannelName(const QString& dirtyChannelName);
 
-private:
-    void initConnection();
+        QMap<QString, std::weak_ptr<Channel>> channels;
+        std::mutex channelMutex;
 
-    std::unique_ptr<IrcConnection> writeConnection_ = nullptr;
-    std::unique_ptr<IrcConnection> readConnection_ = nullptr;
+    private:
+        void initConnection();
 
-    QTimer reconnectTimer_;
-    int falloffCounter_ = 1;
+        std::unique_ptr<IrcConnection> writeConnection_ = nullptr;
+        std::unique_ptr<IrcConnection> readConnection_ = nullptr;
 
-    std::mutex connectionMutex_;
+        QTimer reconnectTimer_;
+        int falloffCounter_ = 1;
 
-    //    bool autoReconnect_ = false;
-};
+        std::mutex connectionMutex_;
+
+        //    bool autoReconnect_ = false;
+    };
 
 }  // namespace chatterino

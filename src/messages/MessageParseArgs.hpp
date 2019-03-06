@@ -1,5 +1,5 @@
 #pragma once
 
-namespace chatterino {
-
+namespace chatterino
+{
 }  // namespace chatterino

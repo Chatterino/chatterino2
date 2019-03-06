@@ -10,31 +10,31 @@
 
 #include <unordered_map>
 
-namespace chatterino {
-
-void Logging::initialize(Settings &settings, Paths &paths)
+namespace chatterino
 {
-}
-
-void Logging::addMessage(const QString &channelName, MessagePtr message)
-{
-    if (!getSettings()->enableLogging)
+    void Logging::initialize(Settings& settings, Paths& paths)
     {
-        return;
     }
 
-    auto it = this->loggingChannels_.find(channelName);
-    if (it == this->loggingChannels_.end())
+    void Logging::addMessage(const QString& channelName, MessagePtr message)
     {
-        auto channel = new LoggingChannel(channelName);
-        channel->addMessage(message);
-        this->loggingChannels_.emplace(
-            channelName, std::unique_ptr<LoggingChannel>(std::move(channel)));
+        if (!getSettings()->enableLogging)
+        {
+            return;
+        }
+
+        auto it = this->loggingChannels_.find(channelName);
+        if (it == this->loggingChannels_.end())
+        {
+            auto channel = new LoggingChannel(channelName);
+            channel->addMessage(message);
+            this->loggingChannels_.emplace(channelName,
+                std::unique_ptr<LoggingChannel>(std::move(channel)));
+        }
+        else
+        {
+            it->second->addMessage(message);
+        }
     }
-    else
-    {
-        it->second->addMessage(message);
-    }
-}
 
 }  // namespace chatterino

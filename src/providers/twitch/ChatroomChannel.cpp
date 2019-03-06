@@ -8,49 +8,49 @@
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
 #include "singletons/Emotes.hpp"
 
-namespace chatterino {
-
-ChatroomChannel::ChatroomChannel(const QString &channelName,
-                                 TwitchBadges &globalTwitchBadges,
-                                 BttvEmotes &globalBttv, FfzEmotes &globalFfz)
-    : TwitchChannel(channelName, globalTwitchBadges, globalBttv, globalFfz)
+namespace chatterino
 {
-    auto listRef = channelName.splitRef(":");
-    if (listRef.size() > 2)
+    ChatroomChannel::ChatroomChannel(const QString& channelName,
+        TwitchBadges& globalTwitchBadges, BttvEmotes& globalBttv,
+        FfzEmotes& globalFfz)
+        : TwitchChannel(channelName, globalTwitchBadges, globalBttv, globalFfz)
     {
-        this->chatroomOwnerId = listRef[1].toString();
+        auto listRef = channelName.splitRef(":");
+        if (listRef.size() > 2)
+        {
+            this->chatroomOwnerId = listRef[1].toString();
+        }
     }
-}
 
-void ChatroomChannel::refreshChannelEmotes()
-{
-    if (this->chatroomOwnerId.isEmpty())
+    void ChatroomChannel::refreshChannelEmotes()
     {
-        return;
+        if (this->chatroomOwnerId.isEmpty())
+        {
+            return;
+        }
+        TwitchApi::findUserName(this->chatroomOwnerId,
+            [this, weak = weakOf<Channel>(this)](QString username) {
+                BttvEmotes::loadChannel(
+                    username, [this, weak](auto&& emoteMap) {
+                        if (auto shared = weak.lock())
+                            this->bttvEmotes_.set(std::make_shared<EmoteMap>(
+                                std::move(emoteMap)));
+                    });
+                FfzEmotes::loadChannel(username, [this, weak](auto&& emoteMap) {
+                    if (auto shared = weak.lock())
+                        this->ffzEmotes_.set(
+                            std::make_shared<EmoteMap>(std::move(emoteMap)));
+                });
+                if (auto shared = weak.lock())
+                {
+                    this->chatroomOwnerName = username;
+                }
+            });
     }
-    TwitchApi::findUserName(
-        this->chatroomOwnerId,
-        [this, weak = weakOf<Channel>(this)](QString username) {
-            BttvEmotes::loadChannel(username, [this, weak](auto &&emoteMap) {
-                if (auto shared = weak.lock())
-                    this->bttvEmotes_.set(
-                        std::make_shared<EmoteMap>(std::move(emoteMap)));
-            });
-            FfzEmotes::loadChannel(username, [this, weak](auto &&emoteMap) {
-                if (auto shared = weak.lock())
-                    this->ffzEmotes_.set(
-                        std::make_shared<EmoteMap>(std::move(emoteMap)));
-            });
-            if (auto shared = weak.lock())
-            {
-                this->chatroomOwnerName = username;
-            }
-        });
-}
 
-const QString &ChatroomChannel::getDisplayName() const
-{
-    return this->chatroomOwnerName;
-}
+    const QString& ChatroomChannel::getDisplayName() const
+    {
+        return this->chatroomOwnerName;
+    }
 
 }  // namespace chatterino

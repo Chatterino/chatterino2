@@ -27,598 +27,606 @@
 
 #define SETTINGS_FILENAME "/window-layout.json"
 
-namespace chatterino {
-
-using SplitNode = SplitContainer::Node;
-using SplitDirection = SplitContainer::Direction;
-
-void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
+namespace chatterino
 {
-    QTimer::singleShot(
-        80, [preference] { SettingsDialog::showDialog(preference); });
-}
+    using SplitNode = SplitContainer::Node;
+    using SplitDirection = SplitContainer::Direction;
 
-void WindowManager::showAccountSelectPopup(QPoint point)
-{
-    //    static QWidget *lastFocusedWidget = nullptr;
-    static AccountSwitchPopupWidget *w = new AccountSwitchPopupWidget();
-
-    if (w->hasFocus())
+    void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
     {
-        w->hide();
-        //            if (lastFocusedWidget) {
-        //                lastFocusedWidget->setFocus();
-        //            }
-        return;
+        QTimer::singleShot(
+            80, [preference] { SettingsDialog::showDialog(preference); });
     }
 
-    //    lastFocusedWidget = this->focusWidget();
-
-    w->refresh();
-
-    QPoint buttonPos = point;
-    w->move(buttonPos.x(), buttonPos.y());
-
-    w->show();
-    w->setFocus();
-}
-
-WindowManager::WindowManager()
-{
-    qDebug() << "init WindowManager";
-
-    auto settings = getSettings();
-
-    this->wordFlagsListener_.addSetting(settings->showTimestamps);
-    this->wordFlagsListener_.addSetting(settings->showBadgesGlobalAuthority);
-    this->wordFlagsListener_.addSetting(settings->showBadgesChannelAuthority);
-    this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
-    this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
-    this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
-    this->wordFlagsListener_.addSetting(settings->enableBttvEmotes);
-    this->wordFlagsListener_.addSetting(settings->enableEmojis);
-    this->wordFlagsListener_.addSetting(settings->enableFfzEmotes);
-    this->wordFlagsListener_.addSetting(settings->enableTwitchEmotes);
-    this->wordFlagsListener_.addSetting(settings->boldUsernames);
-    this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
-    this->wordFlagsListener_.setCB([this] {
-        this->updateWordTypeMask();  //
-    });
-
-    this->saveTimer = new QTimer;
-
-    this->saveTimer->setSingleShot(true);
-
-    QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getApp()->windows->save();  //
-    });
-}
-
-MessageElementFlags WindowManager::getWordFlags()
-{
-    return this->wordFlags_;
-}
-
-void WindowManager::updateWordTypeMask()
-{
-    using MEF = MessageElementFlag;
-    auto settings = getSettings();
-
-    // text
-    auto flags = MessageElementFlags(MEF::Text);
-
-    // timestamp
-    if (settings->showTimestamps)
+    void WindowManager::showAccountSelectPopup(QPoint point)
     {
-        flags.set(MEF::Timestamp);
+        //    static QWidget *lastFocusedWidget = nullptr;
+        static AccountSwitchPopupWidget* w = new AccountSwitchPopupWidget();
+
+        if (w->hasFocus())
+        {
+            w->hide();
+            //            if (lastFocusedWidget) {
+            //                lastFocusedWidget->setFocus();
+            //            }
+            return;
+        }
+
+        //    lastFocusedWidget = this->focusWidget();
+
+        w->refresh();
+
+        QPoint buttonPos = point;
+        w->move(buttonPos.x(), buttonPos.y());
+
+        w->show();
+        w->setFocus();
     }
 
-    // emotes
-    flags.set(settings->enableTwitchEmotes ? MEF::TwitchEmoteImage
-                                           : MEF::TwitchEmoteText);
-    flags.set(settings->enableFfzEmotes ? MEF::FfzEmoteImage
-                                        : MEF::FfzEmoteText);
-    flags.set(settings->enableBttvEmotes ? MEF::BttvEmoteImage
-                                         : MEF::BttvEmoteText);
-    flags.set(settings->enableEmojis ? MEF::EmojiImage : MEF::EmojiText);
-
-    // bits
-    flags.set(MEF::BitsAmount);
-    flags.set(settings->animateEmotes ? MEF::BitsAnimated : MEF::BitsStatic);
-
-    // badges
-    flags.set(settings->showBadgesGlobalAuthority ? MEF::BadgeGlobalAuthority
-                                                  : MEF::None);
-    flags.set(settings->showBadgesChannelAuthority ? MEF::BadgeChannelAuthority
-                                                   : MEF::None);
-    flags.set(settings->showBadgesSubscription ? MEF::BadgeSubscription
-                                               : MEF::None);
-    flags.set(settings->showBadgesVanity ? MEF::BadgeVanity : MEF::None);
-    flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
-                                             : MEF::None);
-
-    // username
-    flags.set(MEF::Username);
-
-    // misc
-    flags.set(MEF::AlwaysShow);
-    flags.set(MEF::Collapsed);
-    flags.set(settings->boldUsernames ? MEF::BoldUsername
-                                      : MEF::NonBoldUsername);
-    flags.set(settings->lowercaseDomains ? MEF::LowercaseLink
-                                         : MEF::OriginalLink);
-
-    // update flags
-    MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);
-
-    if (newFlags != this->wordFlags_)
+    WindowManager::WindowManager()
     {
-        this->wordFlags_ = newFlags;
+        qDebug() << "init WindowManager";
 
-        this->wordFlagsChanged.invoke();
-    }
-}
+        auto settings = getSettings();
 
-void WindowManager::layoutChannelViews(Channel *channel)
-{
-    this->layoutRequested.invoke(channel);
-}
+        this->wordFlagsListener_.addSetting(settings->showTimestamps);
+        this->wordFlagsListener_.addSetting(
+            settings->showBadgesGlobalAuthority);
+        this->wordFlagsListener_.addSetting(
+            settings->showBadgesChannelAuthority);
+        this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
+        this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
+        this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
+        this->wordFlagsListener_.addSetting(settings->enableBttvEmotes);
+        this->wordFlagsListener_.addSetting(settings->enableEmojis);
+        this->wordFlagsListener_.addSetting(settings->enableFfzEmotes);
+        this->wordFlagsListener_.addSetting(settings->enableTwitchEmotes);
+        this->wordFlagsListener_.addSetting(settings->boldUsernames);
+        this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
+        this->wordFlagsListener_.setCB([this] {
+            this->updateWordTypeMask();  //
+        });
 
-void WindowManager::forceLayoutChannelViews()
-{
-    this->incGeneration();
-    this->layoutChannelViews(nullptr);
-}
+        this->saveTimer = new QTimer;
 
-void WindowManager::repaintVisibleChatWidgets(Channel *channel)
-{
-    this->layoutRequested.invoke(channel);
-}
+        this->saveTimer->setSingleShot(true);
 
-void WindowManager::repaintGifEmotes()
-{
-    this->gifRepaintRequested.invoke();
-}
-
-// void WindowManager::updateAll()
-//{
-//    if (this->mainWindow != nullptr) {
-//        this->mainWindow->update();
-//    }
-//}
-
-Window &WindowManager::getMainWindow()
-{
-    assertInGuiThread();
-
-    return *this->mainWindow_;
-}
-
-Window &WindowManager::getSelectedWindow()
-{
-    assertInGuiThread();
-
-    return *this->selectedWindow_;
-}
-
-Window &WindowManager::createWindow(WindowType type)
-{
-    assertInGuiThread();
-
-    auto *window = new Window(type);
-    this->windows_.push_back(window);
-    window->show();
-
-    if (type != WindowType::Main)
-    {
-        window->setAttribute(Qt::WA_DeleteOnClose);
-
-        QObject::connect(window, &QWidget::destroyed, [this, window] {
-            for (auto it = this->windows_.begin(); it != this->windows_.end();
-                 it++)
-            {
-                if (*it == window)
-                {
-                    this->windows_.erase(it);
-                    break;
-                }
-            }
+        QObject::connect(this->saveTimer, &QTimer::timeout, [] {
+            getApp()->windows->save();  //
         });
     }
 
-    return *window;
-}
-
-int WindowManager::windowCount()
-{
-    return this->windows_.size();
-}
-
-Window *WindowManager::windowAt(int index)
-{
-    assertInGuiThread();
-
-    if (index < 0 || (size_t)index >= this->windows_.size())
+    MessageElementFlags WindowManager::getWordFlags()
     {
-        return nullptr;
+        return this->wordFlags_;
     }
-    log("getting window at bad index {}", index);
 
-    return this->windows_.at(index);
-}
-
-void WindowManager::initialize(Settings &settings, Paths &paths)
-{
-    assertInGuiThread();
-
-    getApp()->themes->repaintVisibleChatWidgets_.connect(
-        [this] { this->repaintVisibleChatWidgets(); });
-
-    assert(!this->initialized_);
-
-    // load file
-    QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QFile file(settingsPath);
-    file.open(QIODevice::ReadOnly);
-    QByteArray data = file.readAll();
-    QJsonDocument document = QJsonDocument::fromJson(data);
-    QJsonArray windows_arr = document.object().value("windows").toArray();
-
-    // "deserialize"
-    for (QJsonValue window_val : windows_arr)
+    void WindowManager::updateWordTypeMask()
     {
-        QJsonObject window_obj = window_val.toObject();
+        using MEF = MessageElementFlag;
+        auto settings = getSettings();
 
-        // get type
-        QString type_val = window_obj.value("type").toString();
-        WindowType type =
-            type_val == "main" ? WindowType::Main : WindowType::Popup;
+        // text
+        auto flags = MessageElementFlags(MEF::Text);
 
-        if (type == WindowType::Main && mainWindow_ != nullptr)
+        // timestamp
+        if (settings->showTimestamps)
         {
-            type = WindowType::Popup;
+            flags.set(MEF::Timestamp);
         }
 
-        Window &window = createWindow(type);
+        // emotes
+        flags.set(settings->enableTwitchEmotes ? MEF::TwitchEmoteImage
+                                               : MEF::TwitchEmoteText);
+        flags.set(
+            settings->enableFfzEmotes ? MEF::FfzEmoteImage : MEF::FfzEmoteText);
+        flags.set(settings->enableBttvEmotes ? MEF::BttvEmoteImage
+                                             : MEF::BttvEmoteText);
+        flags.set(settings->enableEmojis ? MEF::EmojiImage : MEF::EmojiText);
 
-        if (window_obj.value("state") == "maximized")
+        // bits
+        flags.set(MEF::BitsAmount);
+        flags.set(
+            settings->animateEmotes ? MEF::BitsAnimated : MEF::BitsStatic);
+
+        // badges
+        flags.set(settings->showBadgesGlobalAuthority
+                      ? MEF::BadgeGlobalAuthority
+                      : MEF::None);
+        flags.set(settings->showBadgesChannelAuthority
+                      ? MEF::BadgeChannelAuthority
+                      : MEF::None);
+        flags.set(settings->showBadgesSubscription ? MEF::BadgeSubscription
+                                                   : MEF::None);
+        flags.set(settings->showBadgesVanity ? MEF::BadgeVanity : MEF::None);
+        flags.set(
+            settings->showBadgesChatterino ? MEF::BadgeChatterino : MEF::None);
+
+        // username
+        flags.set(MEF::Username);
+
+        // misc
+        flags.set(MEF::AlwaysShow);
+        flags.set(MEF::Collapsed);
+        flags.set(
+            settings->boldUsernames ? MEF::BoldUsername : MEF::NonBoldUsername);
+        flags.set(settings->lowercaseDomains ? MEF::LowercaseLink
+                                             : MEF::OriginalLink);
+
+        // update flags
+        MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);
+
+        if (newFlags != this->wordFlags_)
         {
-            window.setWindowState(Qt::WindowMaximized);
+            this->wordFlags_ = newFlags;
+
+            this->wordFlagsChanged.invoke();
         }
-        else if (window_obj.value("state") == "minimized")
+    }
+
+    void WindowManager::layoutChannelViews(Channel* channel)
+    {
+        this->layoutRequested.invoke(channel);
+    }
+
+    void WindowManager::forceLayoutChannelViews()
+    {
+        this->incGeneration();
+        this->layoutChannelViews(nullptr);
+    }
+
+    void WindowManager::repaintVisibleChatWidgets(Channel* channel)
+    {
+        this->layoutRequested.invoke(channel);
+    }
+
+    void WindowManager::repaintGifEmotes()
+    {
+        this->gifRepaintRequested.invoke();
+    }
+
+    // void WindowManager::updateAll()
+    //{
+    //    if (this->mainWindow != nullptr) {
+    //        this->mainWindow->update();
+    //    }
+    //}
+
+    Window& WindowManager::getMainWindow()
+    {
+        assertInGuiThread();
+
+        return *this->mainWindow_;
+    }
+
+    Window& WindowManager::getSelectedWindow()
+    {
+        assertInGuiThread();
+
+        return *this->selectedWindow_;
+    }
+
+    Window& WindowManager::createWindow(WindowType type)
+    {
+        assertInGuiThread();
+
+        auto* window = new Window(type);
+        this->windows_.push_back(window);
+        window->show();
+
+        if (type != WindowType::Main)
         {
-            window.setWindowState(Qt::WindowMinimized);
-        }
+            window->setAttribute(Qt::WA_DeleteOnClose);
 
-        if (type == WindowType::Main)
-        {
-            mainWindow_ = &window;
-        }
-
-        // get geometry
-        {
-            int x = window_obj.value("x").toInt(-1);
-            int y = window_obj.value("y").toInt(-1);
-            int width = window_obj.value("width").toInt(-1);
-            int height = window_obj.value("height").toInt(-1);
-
-            if (x != -1 && y != -1 && width != -1 && height != -1)
-            {
-                // Have to offset x by one because qt moves the window 1px too
-                // far to the left
-                window.setGeometry(x + 1, y, width, height);
-            }
-        }
-
-        // load tabs
-        QJsonArray tabs = window_obj.value("tabs").toArray();
-        for (QJsonValue tab_val : tabs)
-        {
-            SplitContainer *page = window.getNotebook().addPage(false);
-
-            QJsonObject tab_obj = tab_val.toObject();
-
-            // set custom title
-            QJsonValue title_val = tab_obj.value("title");
-            if (title_val.isString())
-            {
-                page->getTab()->setCustomTitle(title_val.toString());
-            }
-
-            // selected
-            if (tab_obj.value("selected").toBool(false))
-            {
-                window.getNotebook().select(page);
-            }
-
-            // highlighting on new messages
-            bool val = tab_obj.value("highlightsEnabled").toBool(true);
-            page->getTab()->setHighlightsEnabled(val);
-
-            // load splits
-            QJsonObject splitRoot = tab_obj.value("splits2").toObject();
-
-            if (!splitRoot.isEmpty())
-            {
-                page->decodeFromJson(splitRoot);
-
-                continue;
-            }
-
-            // fallback load splits (old)
-            int colNr = 0;
-            for (QJsonValue column_val : tab_obj.value("splits").toArray())
-            {
-                for (QJsonValue split_val : column_val.toArray())
+            QObject::connect(window, &QWidget::destroyed, [this, window] {
+                for (auto it = this->windows_.begin();
+                     it != this->windows_.end(); it++)
                 {
-                    Split *split = new Split(page);
-
-                    QJsonObject split_obj = split_val.toObject();
-                    split->setChannel(decodeChannel(split_obj));
-
-                    page->appendSplit(split);
+                    if (*it == window)
+                    {
+                        this->windows_.erase(it);
+                        break;
+                    }
                 }
-                colNr++;
-            }
+            });
         }
+
+        return *window;
     }
 
-    if (mainWindow_ == nullptr)
+    int WindowManager::windowCount()
     {
-        mainWindow_ = &createWindow(WindowType::Main);
-        mainWindow_->getNotebook().addPage(true);
+        return this->windows_.size();
     }
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->layoutChannelViews(); });
-
-    settings.emoteScale.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.alternateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.separateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.collpseMessagesMinLines.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-
-    this->initialized_ = true;
-}
-
-void WindowManager::save()
-{
-    log("[WindowManager] Saving");
-
-    assertInGuiThread();
-    auto app = getApp();
-
-    QJsonDocument document;
-
-    // "serialize"
-    QJsonArray window_arr;
-    for (Window *window : this->windows_)
+    Window* WindowManager::windowAt(int index)
     {
-        QJsonObject window_obj;
+        assertInGuiThread();
 
-        // window type
-        switch (window->getType())
+        if (index < 0 || (size_t)index >= this->windows_.size())
         {
-            case WindowType::Main:
-                window_obj.insert("type", "main");
-                break;
-
-            case WindowType::Popup:
-                window_obj.insert("type", "popup");
-                break;
-
-            case WindowType::Attached:;
+            return nullptr;
         }
+        log("getting window at bad index {}", index);
 
-        if (window->isMaximized())
-        {
-            window_obj.insert("state", "maximized");
-        }
-        else if (window->isMinimized())
-        {
-            window_obj.insert("state", "minimized");
-        }
-
-        // window geometry
-        window_obj.insert("x", window->x());
-        window_obj.insert("y", window->y());
-        window_obj.insert("width", window->width());
-        window_obj.insert("height", window->height());
-
-        // window tabs
-        QJsonArray tabs_arr;
-
-        for (int tab_i = 0; tab_i < window->getNotebook().getPageCount();
-             tab_i++)
-        {
-            QJsonObject tab_obj;
-            SplitContainer *tab = dynamic_cast<SplitContainer *>(
-                window->getNotebook().getPageAt(tab_i));
-            assert(tab != nullptr);
-
-            // custom tab title
-            if (tab->getTab()->hasCustomTitle())
-            {
-                tab_obj.insert("title", tab->getTab()->getCustomTitle());
-            }
-
-            // selected
-            if (window->getNotebook().getSelectedPage() == tab)
-            {
-                tab_obj.insert("selected", true);
-            }
-
-            // highlighting on new messages
-            tab_obj.insert("highlightsEnabled",
-                           tab->getTab()->hasHighlightsEnabled());
-
-            // splits
-            QJsonObject splits;
-
-            this->encodeNodeRecusively(tab->getBaseNode(), splits);
-
-            tab_obj.insert("splits2", splits);
-            tabs_arr.append(tab_obj);
-        }
-
-        window_obj.insert("tabs", tabs_arr);
-        window_arr.append(window_obj);
+        return this->windows_.at(index);
     }
 
-    QJsonObject obj;
-    obj.insert("windows", window_arr);
-    document.setObject(obj);
+    void WindowManager::initialize(Settings& settings, Paths& paths)
+    {
+        assertInGuiThread();
 
-    // save file
-    QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QFile file(settingsPath);
-    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        getApp()->themes->repaintVisibleChatWidgets_.connect(
+            [this] { this->repaintVisibleChatWidgets(); });
 
-    QJsonDocument::JsonFormat format =
+        assert(!this->initialized_);
+
+        // load file
+        QString settingsPath =
+            getPaths()->settingsDirectory + SETTINGS_FILENAME;
+        QFile file(settingsPath);
+        file.open(QIODevice::ReadOnly);
+        QByteArray data = file.readAll();
+        QJsonDocument document = QJsonDocument::fromJson(data);
+        QJsonArray windows_arr = document.object().value("windows").toArray();
+
+        // "deserialize"
+        for (QJsonValue window_val : windows_arr)
+        {
+            QJsonObject window_obj = window_val.toObject();
+
+            // get type
+            QString type_val = window_obj.value("type").toString();
+            WindowType type =
+                type_val == "main" ? WindowType::Main : WindowType::Popup;
+
+            if (type == WindowType::Main && mainWindow_ != nullptr)
+            {
+                type = WindowType::Popup;
+            }
+
+            Window& window = createWindow(type);
+
+            if (window_obj.value("state") == "maximized")
+            {
+                window.setWindowState(Qt::WindowMaximized);
+            }
+            else if (window_obj.value("state") == "minimized")
+            {
+                window.setWindowState(Qt::WindowMinimized);
+            }
+
+            if (type == WindowType::Main)
+            {
+                mainWindow_ = &window;
+            }
+
+            // get geometry
+            {
+                int x = window_obj.value("x").toInt(-1);
+                int y = window_obj.value("y").toInt(-1);
+                int width = window_obj.value("width").toInt(-1);
+                int height = window_obj.value("height").toInt(-1);
+
+                if (x != -1 && y != -1 && width != -1 && height != -1)
+                {
+                    // Have to offset x by one because qt moves the window 1px
+                    // too far to the left
+                    window.setGeometry(x + 1, y, width, height);
+                }
+            }
+
+            // load tabs
+            QJsonArray tabs = window_obj.value("tabs").toArray();
+            for (QJsonValue tab_val : tabs)
+            {
+                SplitContainer* page = window.getNotebook().addPage(false);
+
+                QJsonObject tab_obj = tab_val.toObject();
+
+                // set custom title
+                QJsonValue title_val = tab_obj.value("title");
+                if (title_val.isString())
+                {
+                    page->getTab()->setCustomTitle(title_val.toString());
+                }
+
+                // selected
+                if (tab_obj.value("selected").toBool(false))
+                {
+                    window.getNotebook().select(page);
+                }
+
+                // highlighting on new messages
+                bool val = tab_obj.value("highlightsEnabled").toBool(true);
+                page->getTab()->setHighlightsEnabled(val);
+
+                // load splits
+                QJsonObject splitRoot = tab_obj.value("splits2").toObject();
+
+                if (!splitRoot.isEmpty())
+                {
+                    page->decodeFromJson(splitRoot);
+
+                    continue;
+                }
+
+                // fallback load splits (old)
+                int colNr = 0;
+                for (QJsonValue column_val : tab_obj.value("splits").toArray())
+                {
+                    for (QJsonValue split_val : column_val.toArray())
+                    {
+                        Split* split = new Split(page);
+
+                        QJsonObject split_obj = split_val.toObject();
+                        split->setChannel(decodeChannel(split_obj));
+
+                        page->appendSplit(split);
+                    }
+                    colNr++;
+                }
+            }
+        }
+
+        if (mainWindow_ == nullptr)
+        {
+            mainWindow_ = &createWindow(WindowType::Main);
+            mainWindow_->getNotebook().addPage(true);
+        }
+
+        settings.timestampFormat.connect(
+            [this](auto, auto) { this->layoutChannelViews(); });
+
+        settings.emoteScale.connect(
+            [this](auto, auto) { this->forceLayoutChannelViews(); });
+
+        settings.timestampFormat.connect(
+            [this](auto, auto) { this->forceLayoutChannelViews(); });
+        settings.alternateMessages.connect(
+            [this](auto, auto) { this->forceLayoutChannelViews(); });
+        settings.separateMessages.connect(
+            [this](auto, auto) { this->forceLayoutChannelViews(); });
+        settings.collpseMessagesMinLines.connect(
+            [this](auto, auto) { this->forceLayoutChannelViews(); });
+
+        this->initialized_ = true;
+    }
+
+    void WindowManager::save()
+    {
+        log("[WindowManager] Saving");
+
+        assertInGuiThread();
+        auto app = getApp();
+
+        QJsonDocument document;
+
+        // "serialize"
+        QJsonArray window_arr;
+        for (Window* window : this->windows_)
+        {
+            QJsonObject window_obj;
+
+            // window type
+            switch (window->getType())
+            {
+                case WindowType::Main:
+                    window_obj.insert("type", "main");
+                    break;
+
+                case WindowType::Popup:
+                    window_obj.insert("type", "popup");
+                    break;
+
+                case WindowType::Attached:;
+            }
+
+            if (window->isMaximized())
+            {
+                window_obj.insert("state", "maximized");
+            }
+            else if (window->isMinimized())
+            {
+                window_obj.insert("state", "minimized");
+            }
+
+            // window geometry
+            window_obj.insert("x", window->x());
+            window_obj.insert("y", window->y());
+            window_obj.insert("width", window->width());
+            window_obj.insert("height", window->height());
+
+            // window tabs
+            QJsonArray tabs_arr;
+
+            for (int tab_i = 0; tab_i < window->getNotebook().getPageCount();
+                 tab_i++)
+            {
+                QJsonObject tab_obj;
+                SplitContainer* tab = dynamic_cast<SplitContainer*>(
+                    window->getNotebook().getPageAt(tab_i));
+                assert(tab != nullptr);
+
+                // custom tab title
+                if (tab->getTab()->hasCustomTitle())
+                {
+                    tab_obj.insert("title", tab->getTab()->getCustomTitle());
+                }
+
+                // selected
+                if (window->getNotebook().getSelectedPage() == tab)
+                {
+                    tab_obj.insert("selected", true);
+                }
+
+                // highlighting on new messages
+                tab_obj.insert(
+                    "highlightsEnabled", tab->getTab()->hasHighlightsEnabled());
+
+                // splits
+                QJsonObject splits;
+
+                this->encodeNodeRecusively(tab->getBaseNode(), splits);
+
+                tab_obj.insert("splits2", splits);
+                tabs_arr.append(tab_obj);
+            }
+
+            window_obj.insert("tabs", tabs_arr);
+            window_arr.append(window_obj);
+        }
+
+        QJsonObject obj;
+        obj.insert("windows", window_arr);
+        document.setObject(obj);
+
+        // save file
+        QString settingsPath =
+            getPaths()->settingsDirectory + SETTINGS_FILENAME;
+        QFile file(settingsPath);
+        file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+
+        QJsonDocument::JsonFormat format =
 #ifdef _DEBUG
-        QJsonDocument::JsonFormat::Compact
+            QJsonDocument::JsonFormat::Compact
 #else
-        (QJsonDocument::JsonFormat)0
+            (QJsonDocument::JsonFormat)0
 #endif
-        ;
+            ;
 
-    file.write(document.toJson(format));
-    file.flush();
-}
-
-void WindowManager::sendAlert()
-{
-    int flashDuration = 2500;
-    if (getSettings()->longAlerts)
-    {
-        flashDuration = 0;
+        file.write(document.toJson(format));
+        file.flush();
     }
-    QApplication::alert(this->getMainWindow().window(), flashDuration);
-}
 
-void WindowManager::queueSave()
-{
-    using namespace std::chrono_literals;
-
-    this->saveTimer->start(10s);
-}
-
-void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
-{
-    switch (node->getType())
+    void WindowManager::sendAlert()
     {
-        case SplitNode::_Split:
+        int flashDuration = 2500;
+        if (getSettings()->longAlerts)
         {
-            obj.insert("type", "split");
-            QJsonObject split;
-            encodeChannel(node->getSplit()->getIndirectChannel(), split);
-            obj.insert("data", split);
-            obj.insert("flexh", node->getHorizontalFlex());
-            obj.insert("flexv", node->getVerticalFlex());
+            flashDuration = 0;
         }
-        break;
-        case SplitNode::HorizontalContainer:
-        case SplitNode::VerticalContainer:
-        {
-            obj.insert("type", node->getType() == SplitNode::HorizontalContainer
-                                   ? "horizontal"
-                                   : "vertical");
+        QApplication::alert(this->getMainWindow().window(), flashDuration);
+    }
 
-            QJsonArray items_arr;
-            for (const std::unique_ptr<SplitNode> &n : node->getChildren())
+    void WindowManager::queueSave()
+    {
+        using namespace std::chrono_literals;
+
+        this->saveTimer->start(10s);
+    }
+
+    void WindowManager::encodeNodeRecusively(SplitNode* node, QJsonObject& obj)
+    {
+        switch (node->getType())
+        {
+            case SplitNode::_Split:
             {
-                QJsonObject subObj;
-                this->encodeNodeRecusively(n.get(), subObj);
-                items_arr.append(subObj);
+                obj.insert("type", "split");
+                QJsonObject split;
+                encodeChannel(node->getSplit()->getIndirectChannel(), split);
+                obj.insert("data", split);
+                obj.insert("flexh", node->getHorizontalFlex());
+                obj.insert("flexv", node->getVerticalFlex());
             }
-            obj.insert("items", items_arr);
+            break;
+            case SplitNode::HorizontalContainer:
+            case SplitNode::VerticalContainer:
+            {
+                obj.insert(
+                    "type", node->getType() == SplitNode::HorizontalContainer
+                                ? "horizontal"
+                                : "vertical");
+
+                QJsonArray items_arr;
+                for (const std::unique_ptr<SplitNode>& n : node->getChildren())
+                {
+                    QJsonObject subObj;
+                    this->encodeNodeRecusively(n.get(), subObj);
+                    items_arr.append(subObj);
+                }
+                obj.insert("items", items_arr);
+            }
+            break;
         }
-        break;
     }
-}
 
-void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
-{
-    assertInGuiThread();
-
-    switch (channel.getType())
+    void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject& obj)
     {
-        case Channel::Type::Twitch:
+        assertInGuiThread();
+
+        switch (channel.getType())
         {
-            obj.insert("type", "twitch");
-            obj.insert("name", channel.get()->getName());
+            case Channel::Type::Twitch:
+            {
+                obj.insert("type", "twitch");
+                obj.insert("name", channel.get()->getName());
+            }
+            break;
+            case Channel::Type::TwitchMentions:
+            {
+                obj.insert("type", "mentions");
+            }
+            break;
+            case Channel::Type::TwitchWatching:
+            {
+                obj.insert("type", "watching");
+            }
+            break;
+            case Channel::Type::TwitchWhispers:
+            {
+                obj.insert("type", "whispers");
+            }
+            break;
         }
-        break;
-        case Channel::Type::TwitchMentions:
+    }
+
+    IndirectChannel WindowManager::decodeChannel(const QJsonObject& obj)
+    {
+        assertInGuiThread();
+
+        auto app = getApp();
+
+        QString type = obj.value("type").toString();
+        if (type == "twitch")
         {
-            obj.insert("type", "mentions");
+            return app->twitch.server->getOrAddChannel(
+                obj.value("name").toString());
         }
-        break;
-        case Channel::Type::TwitchWatching:
+        else if (type == "mentions")
         {
-            obj.insert("type", "watching");
+            return app->twitch.server->mentionsChannel;
         }
-        break;
-        case Channel::Type::TwitchWhispers:
+        else if (type == "watching")
         {
-            obj.insert("type", "whispers");
+            return app->twitch.server->watchingChannel;
         }
-        break;
+        else if (type == "whispers")
+        {
+            return app->twitch.server->whispersChannel;
+        }
+
+        return Channel::getEmpty();
     }
-}
 
-IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
-{
-    assertInGuiThread();
-
-    auto app = getApp();
-
-    QString type = obj.value("type").toString();
-    if (type == "twitch")
+    void WindowManager::closeAll()
     {
-        return app->twitch.server->getOrAddChannel(
-            obj.value("name").toString());
+        assertInGuiThread();
+
+        for (Window* window : windows_)
+        {
+            window->close();
+        }
     }
-    else if (type == "mentions")
+
+    int WindowManager::getGeneration() const
     {
-        return app->twitch.server->mentionsChannel;
+        return this->generation_;
     }
-    else if (type == "watching")
+
+    void WindowManager::incGeneration()
     {
-        return app->twitch.server->watchingChannel;
+        this->generation_++;
     }
-    else if (type == "whispers")
-    {
-        return app->twitch.server->whispersChannel;
-    }
-
-    return Channel::getEmpty();
-}
-
-void WindowManager::closeAll()
-{
-    assertInGuiThread();
-
-    for (Window *window : windows_)
-    {
-        window->close();
-    }
-}
-
-int WindowManager::getGeneration() const
-{
-    return this->generation_;
-}
-
-void WindowManager::incGeneration()
-{
-    this->generation_++;
-}
 
 }  // namespace chatterino

@@ -6,37 +6,37 @@
 
 #include <QRegularExpression>
 
-namespace chatterino {
-
-ModerationActions::ModerationActions()
+namespace chatterino
 {
-}
-
-void ModerationActions::initialize(Settings &settings, Paths &paths)
-{
-    assert(!this->initialized_);
-    this->initialized_ = true;
-
-    this->setting_ =
-        std::make_unique<ChatterinoSetting<std::vector<ModerationAction>>>(
-            "/moderation/actions");
-
-    for (auto &val : this->setting_->getValue())
+    ModerationActions::ModerationActions()
     {
-        this->items.insertItem(val);
     }
 
-    this->items.delayedItemsChanged.connect([this] {  //
-        this->setting_->setValue(this->items.getVector());
-    });
-}
+    void ModerationActions::initialize(Settings& settings, Paths& paths)
+    {
+        assert(!this->initialized_);
+        this->initialized_ = true;
 
-ModerationActionModel *ModerationActions::createModel(QObject *parent)
-{
-    ModerationActionModel *model = new ModerationActionModel(parent);
-    model->init(&this->items);
+        this->setting_ =
+            std::make_unique<ChatterinoSetting<std::vector<ModerationAction>>>(
+                "/moderation/actions");
 
-    return model;
-}
+        for (auto& val : this->setting_->getValue())
+        {
+            this->items.insertItem(val);
+        }
+
+        this->items.delayedItemsChanged.connect([this] {  //
+            this->setting_->setValue(this->items.getVector());
+        });
+    }
+
+    ModerationActionModel* ModerationActions::createModel(QObject* parent)
+    {
+        ModerationActionModel* model = new ModerationActionModel(parent);
+        model->init(&this->items);
+
+        return model;
+    }
 
 }  // namespace chatterino

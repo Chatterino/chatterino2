@@ -2,66 +2,66 @@
 
 #include <QString>
 
-namespace chatterino {
-
-inline QString parseTagString(const QString &input)
+namespace chatterino
 {
-    QString output = input;
-    output.detach();
-
-    auto length = output.length();
-
-    for (int i = 0; i < length - 1; i++)
+    inline QString parseTagString(const QString& input)
     {
-        if (output[i] == '\\')
+        QString output = input;
+        output.detach();
+
+        auto length = output.length();
+
+        for (int i = 0; i < length - 1; i++)
         {
-            QChar c = output[i + 1];
-
-            switch (c.cell())
+            if (output[i] == '\\')
             {
-                case 'n':
-                {
-                    output.replace(i, 2, '\n');
-                }
-                break;
+                QChar c = output[i + 1];
 
-                case 'r':
+                switch (c.cell())
                 {
-                    output.replace(i, 2, '\r');
-                }
-                break;
+                    case 'n':
+                    {
+                        output.replace(i, 2, '\n');
+                    }
+                    break;
 
-                case 's':
-                {
-                    output.replace(i, 2, ' ');
-                }
-                break;
+                    case 'r':
+                    {
+                        output.replace(i, 2, '\r');
+                    }
+                    break;
 
-                case '\\':
-                {
-                    output.replace(i, 2, '\\');
-                }
-                break;
+                    case 's':
+                    {
+                        output.replace(i, 2, ' ');
+                    }
+                    break;
 
-                case ':':
-                {
-                    output.replace(i, 2, ';');
-                }
-                break;
+                    case '\\':
+                    {
+                        output.replace(i, 2, '\\');
+                    }
+                    break;
 
-                default:
-                {
-                    output.remove(i, 1);
+                    case ':':
+                    {
+                        output.replace(i, 2, ';');
+                    }
+                    break;
+
+                    default:
+                    {
+                        output.remove(i, 1);
+                    }
+                    break;
                 }
-                break;
+
+                i++;
+                length--;
             }
-
-            i++;
-            length--;
         }
-    }
 
-    return output;
-}
+        return output;
+    }
 
 }  // namespace chatterino

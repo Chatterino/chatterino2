@@ -6,24 +6,24 @@
 #include "singletons/Resources.hpp"
 #include "singletons/WindowManager.hpp"
 
-namespace chatterino {
-
-Settings *Settings::instance = nullptr;
-
-Settings::Settings(const QString &settingsDirectory)
-    : ABSettings(settingsDirectory)
+namespace chatterino
 {
-    instance = this;
-}
+    Settings* Settings::instance = nullptr;
 
-Settings &Settings::getInstance()
-{
-    return *instance;
-}
+    Settings::Settings(const QString& settingsDirectory)
+        : ABSettings(settingsDirectory)
+    {
+        instance = this;
+    }
 
-Settings *getSettings()
-{
-    return &Settings::getInstance();
-}
+    Settings& Settings::getInstance()
+    {
+        return *instance;
+    }
+
+    Settings* getSettings()
+    {
+        return &Settings::getInstance();
+    }
 
 }  // namespace chatterino

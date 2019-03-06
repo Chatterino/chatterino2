@@ -14,97 +14,96 @@
 
 #define PIXMAP_WIDTH 500
 
-namespace chatterino {
-
-AboutPage::AboutPage()
-    : SettingsPage("About", ":/settings/about.svg")
+namespace chatterino
 {
-    LayoutCreator<AboutPage> layoutCreator(this);
-
-    auto scroll = layoutCreator.emplace<QScrollArea>();
-    auto widget = scroll.emplaceScrollAreaWidget();
-    removeScrollAreaBackground(scroll.getElement(), widget.getElement());
-
-    auto layout = widget.setLayoutType<QVBoxLayout>();
+    AboutPage::AboutPage()
+        : SettingsPage("About", ":/settings/about.svg")
     {
-        QPixmap pixmap;
-        pixmap.load(":/settings/aboutlogo.png");
+        LayoutCreator<AboutPage> layoutCreator(this);
 
-        auto logo = layout.emplace<QLabel>().assign(&this->logo_);
-        logo->setPixmap(pixmap);
-        logo->setFixedSize(PIXMAP_WIDTH,
-                           PIXMAP_WIDTH * pixmap.height() / pixmap.width());
-        logo->setScaledContents(true);
+        auto scroll = layoutCreator.emplace<QScrollArea>();
+        auto widget = scroll.emplaceScrollAreaWidget();
+        removeScrollAreaBackground(scroll.getElement(), widget.getElement());
 
-        // this does nothing
-        //        QPalette palette;
-        //        palette.setColor(QPalette::Text, Qt::white);
-        //        palette.setColor(QPalette::Link, "#a5cdff");
-        //        palette.setColor(QPalette::LinkVisited, "#a5cdff");
-
-        /*auto xd = layout.emplace<QGroupBox>("Created by...");
+        auto layout = widget.setLayoutType<QVBoxLayout>();
         {
-            auto created = xd.emplace<QLabel>();
+            QPixmap pixmap;
+            pixmap.load(":/settings/aboutlogo.png");
+
+            auto logo = layout.emplace<QLabel>().assign(&this->logo_);
+            logo->setPixmap(pixmap);
+            logo->setFixedSize(
+                PIXMAP_WIDTH, PIXMAP_WIDTH * pixmap.height() / pixmap.width());
+            logo->setScaledContents(true);
+
+            // this does nothing
+            //        QPalette palette;
+            //        palette.setColor(QPalette::Text, Qt::white);
+            //        palette.setColor(QPalette::Link, "#a5cdff");
+            //        palette.setColor(QPalette::LinkVisited, "#a5cdff");
+
+            /*auto xd = layout.emplace<QGroupBox>("Created by...");
             {
-                created->setText("Created by <a
-        href=\"https://github.com/fourtf\">fourtf</a><br>" "with big help from
-        pajlada."); created->setTextFormat(Qt::RichText);
-                created->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                                 Qt::LinksAccessibleByKeyboard |
-                                                 Qt::LinksAccessibleByKeyboard);
-                created->setOpenExternalLinks(true);
-                //        created->setPalette(palette);
+                auto created = xd.emplace<QLabel>();
+                {
+                    created->setText("Created by <a
+            href=\"https://github.com/fourtf\">fourtf</a><br>" "with big help
+            from pajlada."); created->setTextFormat(Qt::RichText);
+                    created->setTextInteractionFlags(Qt::TextBrowserInteraction
+            | Qt::LinksAccessibleByKeyboard | Qt::LinksAccessibleByKeyboard);
+                    created->setOpenExternalLinks(true);
+                    //        created->setPalette(palette);
+                }
+
+                //            auto github = xd.emplace<QLabel>();
+                //            {
+                //                github->setText(
+                //                    "<a
+            href=\"https://github.com/fourtf/chatterino2\">Chatterino on
+                //                    Github</a>");
+                //                github->setTextFormat(Qt::RichText);
+                // github->setTextInteractionFlags(Qt::TextBrowserInteraction |
+                // Qt::LinksAccessibleByKeyboard |
+                // Qt::LinksAccessibleByKeyboard);
+                //                github->setOpenExternalLinks(true);
+                //                //        github->setPalette(palette);
+                //            }
+            }*/
+
+            auto licenses =
+                layout.emplace<QGroupBox>("Open source software used...");
+            {
+                auto form = licenses.emplace<QFormLayout>();
+
+                addLicense(form.getElement(), "Qt Framework",
+                    "https://www.qt.io", ":/licenses/qt_lgpl-3.0.txt");
+                addLicense(form.getElement(), "Boost", "https://www.boost.org/",
+                    ":/licenses/boost_boost.txt");
+                addLicense(form.getElement(), "Fmt", "http://fmtlib.net/",
+                    ":/licenses/fmt_bsd2.txt");
+                addLicense(form.getElement(), "LibCommuni",
+                    "https://github.com/communi/libcommuni",
+                    ":/licenses/libcommuni_BSD3.txt");
+                addLicense(form.getElement(), "OpenSSL",
+                    "https://www.openssl.org/", ":/licenses/openssl.txt");
+                addLicense(form.getElement(), "RapidJson",
+                    "http://rapidjson.org/", ":/licenses/rapidjson.txt");
+                addLicense(form.getElement(), "Pajlada/Settings",
+                    "https://github.com/pajlada/settings",
+                    ":/licenses/pajlada_settings.txt");
+                addLicense(form.getElement(), "Pajlada/Signals",
+                    "https://github.com/pajlada/signals",
+                    ":/licenses/pajlada_signals.txt");
+                addLicense(form.getElement(), "Websocketpp",
+                    "https://www.zaphoyd.com/websocketpp/",
+                    ":/licenses/websocketpp.txt");
             }
 
-            //            auto github = xd.emplace<QLabel>();
-            //            {
-            //                github->setText(
-            //                    "<a
-        href=\"https://github.com/fourtf/chatterino2\">Chatterino on
-            //                    Github</a>");
-            //                github->setTextFormat(Qt::RichText);
-            // github->setTextInteractionFlags(Qt::TextBrowserInteraction |
-            // Qt::LinksAccessibleByKeyboard |
-            // Qt::LinksAccessibleByKeyboard);
-            //                github->setOpenExternalLinks(true);
-            //                //        github->setPalette(palette);
-            //            }
-        }*/
+            auto attributions = layout.emplace<QGroupBox>("Attributions...");
+            {
+                auto l = attributions.emplace<QVBoxLayout>();
 
-        auto licenses =
-            layout.emplace<QGroupBox>("Open source software used...");
-        {
-            auto form = licenses.emplace<QFormLayout>();
-
-            addLicense(form.getElement(), "Qt Framework", "https://www.qt.io",
-                       ":/licenses/qt_lgpl-3.0.txt");
-            addLicense(form.getElement(), "Boost", "https://www.boost.org/",
-                       ":/licenses/boost_boost.txt");
-            addLicense(form.getElement(), "Fmt", "http://fmtlib.net/",
-                       ":/licenses/fmt_bsd2.txt");
-            addLicense(form.getElement(), "LibCommuni",
-                       "https://github.com/communi/libcommuni",
-                       ":/licenses/libcommuni_BSD3.txt");
-            addLicense(form.getElement(), "OpenSSL", "https://www.openssl.org/",
-                       ":/licenses/openssl.txt");
-            addLicense(form.getElement(), "RapidJson", "http://rapidjson.org/",
-                       ":/licenses/rapidjson.txt");
-            addLicense(form.getElement(), "Pajlada/Settings",
-                       "https://github.com/pajlada/settings",
-                       ":/licenses/pajlada_settings.txt");
-            addLicense(form.getElement(), "Pajlada/Signals",
-                       "https://github.com/pajlada/signals",
-                       ":/licenses/pajlada_signals.txt");
-            addLicense(form.getElement(), "Websocketpp",
-                       "https://www.zaphoyd.com/websocketpp/",
-                       ":/licenses/websocketpp.txt");
-        }
-
-        auto attributions = layout.emplace<QGroupBox>("Attributions...");
-        {
-            auto l = attributions.emplace<QVBoxLayout>();
-
-            // clang-format off
+                // clang-format off
             l.emplace<QLabel>("EmojiOne 2 and 3 emojis provided by <a href=\"https://www.emojione.com/\">EmojiOne</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Twemoji emojis provided by <a href=\"https://github.com/twitter/twemoji\">Twitter's Twemoji</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Facebook emojis provided by <a href=\"https://facebook.com\">Facebook</a>")->setOpenExternalLinks(true);
@@ -113,111 +112,111 @@ AboutPage::AboutPage()
             l.emplace<QLabel>("Messenger emojis provided by <a href=\"https://facebook.com\">Facebook</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Emoji datasource provided by <a href=\"https://www.iamcal.com/\">Cal Henderson</a>"
                               "(<a href=\"https://github.com/iamcal/emoji-data/blob/master/LICENSE\">show license</a>)")->setOpenExternalLinks(true);
-            // clang-format on
-        }
+                // clang-format on
+            }
 
-        // Contributors
-        auto contributors = layout.emplace<QGroupBox>("Contributors");
-        {
-            auto l = contributors.emplace<QVBoxLayout>();
-
-            QFile contributorsFile(":/contributors.txt");
-            contributorsFile.open(QFile::ReadOnly);
-
-            QTextStream stream(&contributorsFile);
-            stream.setCodec("UTF-8");
-
-            QString line;
-
-            while (stream.readLineInto(&line))
+            // Contributors
+            auto contributors = layout.emplace<QGroupBox>("Contributors");
             {
-                if (line.isEmpty() || line.startsWith('#'))
+                auto l = contributors.emplace<QVBoxLayout>();
+
+                QFile contributorsFile(":/contributors.txt");
+                contributorsFile.open(QFile::ReadOnly);
+
+                QTextStream stream(&contributorsFile);
+                stream.setCodec("UTF-8");
+
+                QString line;
+
+                while (stream.readLineInto(&line))
                 {
-                    continue;
-                }
-
-                QStringList contributorParts = line.split("|");
-
-                if (contributorParts.size() != 4)
-                {
-                    log("Missing parts in line '{}'", line);
-                    continue;
-                }
-
-                QString username = contributorParts[0].trimmed();
-                QString url = contributorParts[1].trimmed();
-                QString avatarUrl = contributorParts[2].trimmed();
-                QString role = contributorParts[3].trimmed();
-
-                auto *usernameLabel =
-                    new QLabel("<a href=\"" + url + "\">" + username + "</a>");
-                usernameLabel->setOpenExternalLinks(true);
-                auto *roleLabel = new QLabel(role);
-
-                auto contributorBox2 = l.emplace<QHBoxLayout>();
-
-                const auto addAvatar = [&avatarUrl, &contributorBox2] {
-                    if (!avatarUrl.isEmpty())
+                    if (line.isEmpty() || line.startsWith('#'))
                     {
-                        QPixmap avatarPixmap;
-                        avatarPixmap.load(avatarUrl);
-
-                        auto avatar = contributorBox2.emplace<QLabel>();
-                        avatar->setPixmap(avatarPixmap);
-                        avatar->setFixedSize(64, 64);
-                        avatar->setScaledContents(true);
+                        continue;
                     }
-                };
 
-                const auto addLabels = [&contributorBox2, &usernameLabel,
-                                        &roleLabel] {
-                    auto labelBox = new QVBoxLayout();
-                    contributorBox2->addLayout(labelBox);
+                    QStringList contributorParts = line.split("|");
 
-                    labelBox->addWidget(usernameLabel);
-                    labelBox->addWidget(roleLabel);
-                };
+                    if (contributorParts.size() != 4)
+                    {
+                        log("Missing parts in line '{}'", line);
+                        continue;
+                    }
 
-                addLabels();
-                addAvatar();
+                    QString username = contributorParts[0].trimmed();
+                    QString url = contributorParts[1].trimmed();
+                    QString avatarUrl = contributorParts[2].trimmed();
+                    QString role = contributorParts[3].trimmed();
+
+                    auto* usernameLabel = new QLabel(
+                        "<a href=\"" + url + "\">" + username + "</a>");
+                    usernameLabel->setOpenExternalLinks(true);
+                    auto* roleLabel = new QLabel(role);
+
+                    auto contributorBox2 = l.emplace<QHBoxLayout>();
+
+                    const auto addAvatar = [&avatarUrl, &contributorBox2] {
+                        if (!avatarUrl.isEmpty())
+                        {
+                            QPixmap avatarPixmap;
+                            avatarPixmap.load(avatarUrl);
+
+                            auto avatar = contributorBox2.emplace<QLabel>();
+                            avatar->setPixmap(avatarPixmap);
+                            avatar->setFixedSize(64, 64);
+                            avatar->setScaledContents(true);
+                        }
+                    };
+
+                    const auto addLabels = [&contributorBox2, &usernameLabel,
+                                               &roleLabel] {
+                        auto labelBox = new QVBoxLayout();
+                        contributorBox2->addLayout(labelBox);
+
+                        labelBox->addWidget(usernameLabel);
+                        labelBox->addWidget(roleLabel);
+                    };
+
+                    addLabels();
+                    addAvatar();
+                }
             }
         }
-    }
 
-    auto buildInfo = QStringList();
-    buildInfo += "Qt " QT_VERSION_STR;
+        auto buildInfo = QStringList();
+        buildInfo += "Qt " QT_VERSION_STR;
 #ifdef USEWINSDK
-    buildInfo += "Windows SDK";
+        buildInfo += "Windows SDK";
 #endif
 #ifdef _MSC_FULL_VER
-    buildInfo += "MSVC " + QString::number(_MSC_FULL_VER, 10);
+        buildInfo += "MSVC " + QString::number(_MSC_FULL_VER, 10);
 #endif
 
-    auto buildText = QString("Built with " + buildInfo.join(", "));
-    layout.emplace<QLabel>(buildText);
+        auto buildText = QString("Built with " + buildInfo.join(", "));
+        layout.emplace<QLabel>(buildText);
 
-    layout->addStretch(1);
-}
+        layout->addStretch(1);
+    }
 
-void AboutPage::addLicense(QFormLayout *form, const QString &name,
-                           const QString &website, const QString &licenseLink)
-{
-    auto *a = new QLabel("<a href=\"" + website + "\">" + name + "</a>");
-    a->setOpenExternalLinks(true);
-    auto *b = new SignalLabel();
-    b->setText("<a href=\"" + licenseLink + "\">show license</a>");
-    b->setCursor(Qt::PointingHandCursor);
-    QObject::connect(b, &SignalLabel::mouseUp, [licenseLink] {
-        auto *edit = new QTextEdit;
+    void AboutPage::addLicense(QFormLayout* form, const QString& name,
+        const QString& website, const QString& licenseLink)
+    {
+        auto* a = new QLabel("<a href=\"" + website + "\">" + name + "</a>");
+        a->setOpenExternalLinks(true);
+        auto* b = new SignalLabel();
+        b->setText("<a href=\"" + licenseLink + "\">show license</a>");
+        b->setCursor(Qt::PointingHandCursor);
+        QObject::connect(b, &SignalLabel::mouseUp, [licenseLink] {
+            auto* edit = new QTextEdit;
 
-        QFile file(licenseLink);
-        file.open(QIODevice::ReadOnly);
-        edit->setText(file.readAll());
-        edit->setReadOnly(true);
-        edit->show();
-    });
+            QFile file(licenseLink);
+            file.open(QIODevice::ReadOnly);
+            edit->setText(file.readAll());
+            edit->setReadOnly(true);
+            edit->show();
+        });
 
-    form->addRow(a, b);
-}
+        form->addRow(a, b);
+    }
 
 }  // namespace chatterino

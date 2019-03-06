@@ -7,26 +7,27 @@
 
 class QPushButton;
 
-namespace chatterino {
-
-class UpdateDialog : public BaseWindow
+namespace chatterino
 {
-public:
-    enum Button { Dismiss, Install };
+    class UpdateDialog : public BaseWindow
+    {
+    public:
+        enum Button { Dismiss, Install };
 
-    UpdateDialog();
+        UpdateDialog();
 
-    pajlada::Signals::Signal<Button> buttonClicked;
+        pajlada::Signals::Signal<Button> buttonClicked;
 
-private:
-    void updateStatusChanged(Updates::Status status);
+    private:
+        void updateStatusChanged(Updates::Status status);
 
-    struct {
-        Label *label = nullptr;
-        QPushButton *installButton = nullptr;
-    } ui_;
+        struct
+        {
+            Label* label = nullptr;
+            QPushButton* installButton = nullptr;
+        } ui_;
 
-    pajlada::Signals::SignalHolder connections_;
-};
+        pajlada::Signals::SignalHolder connections_;
+    };
 
 }  // namespace chatterino

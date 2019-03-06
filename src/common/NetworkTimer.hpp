@@ -4,33 +4,33 @@
 
 class QTimer;
 
-namespace chatterino {
-
-class NetworkWorker;
-
-class NetworkTimer
+namespace chatterino
 {
-    QTimer *timer_ = nullptr;
+    class NetworkWorker;
 
-    bool started_{};
+    class NetworkTimer
+    {
+        QTimer* timer_ = nullptr;
 
-public:
-    int timeoutMS_ = -1;
+        bool started_{};
 
-    NetworkTimer() = default;
-    ~NetworkTimer() = default;
+    public:
+        int timeoutMS_ = -1;
 
-    NetworkTimer(const NetworkTimer &other) = delete;
-    NetworkTimer &operator=(const NetworkTimer &other) = delete;
+        NetworkTimer() = default;
+        ~NetworkTimer() = default;
 
-    NetworkTimer(NetworkTimer &&other) = default;
-    NetworkTimer &operator=(NetworkTimer &&other) = default;
+        NetworkTimer(const NetworkTimer& other) = delete;
+        NetworkTimer& operator=(const NetworkTimer& other) = delete;
 
-    void start();
+        NetworkTimer(NetworkTimer&& other) = default;
+        NetworkTimer& operator=(NetworkTimer&& other) = default;
 
-    void onTimeout(NetworkWorker *worker, std::function<void()> cb) const;
+        void start();
 
-    bool isStarted() const;
-};
+        void onTimeout(NetworkWorker* worker, std::function<void()> cb) const;
+
+        bool isStarted() const;
+    };
 
 }  // namespace chatterino

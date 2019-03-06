@@ -22,4 +22,4 @@ namespace ab
     private:
         TitleBarButtonType type_;
     };
-}  // namespace chatterino
+}  // namespace ab

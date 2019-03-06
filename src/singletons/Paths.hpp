@@ -3,51 +3,51 @@
 #include <QString>
 #include <boost/optional.hpp>
 
-namespace chatterino {
-
-class Paths
+namespace chatterino
 {
-public:
-    static Paths *instance;
+    class Paths
+    {
+    public:
+        static Paths* instance;
 
-    Paths();
+        Paths();
 
-    // Root directory for the configuration files. %APPDATA%/chatterino or
-    // ExecutablePath for portable mode
-    QString rootAppDataDirectory;
+        // Root directory for the configuration files. %APPDATA%/chatterino or
+        // ExecutablePath for portable mode
+        QString rootAppDataDirectory;
 
-    // Directory for settings files. Same as <appDataDirectory>/Settings
-    QString settingsDirectory;
+        // Directory for settings files. Same as <appDataDirectory>/Settings
+        QString settingsDirectory;
 
-    // Directory for message log files. Same as <appDataDirectory>/Misc
-    QString messageLogDirectory;
+        // Directory for message log files. Same as <appDataDirectory>/Misc
+        QString messageLogDirectory;
 
-    // Directory for miscellaneous files. Same as <appDataDirectory>/Misc
-    QString miscDirectory;
+        // Directory for miscellaneous files. Same as <appDataDirectory>/Misc
+        QString miscDirectory;
 
-    // Hash of QCoreApplication::applicationFilePath()
-    QString applicationFilePathHash;
+        // Hash of QCoreApplication::applicationFilePath()
+        QString applicationFilePathHash;
 
-    // Profile avatars for twitch <appDataDirectory>/cache/twitch
-    QString twitchProfileAvatars;
+        // Profile avatars for twitch <appDataDirectory>/cache/twitch
+        QString twitchProfileAvatars;
 
-    bool createFolder(const QString &folderPath);
-    bool isPortable();
+        bool createFolder(const QString& folderPath);
+        bool isPortable();
 
-    QString cacheDirectory();
+        QString cacheDirectory();
 
-private:
-    void initAppFilePathHash();
-    void initCheckPortable();
-    void initAppDataDirectory();
-    void initSubDirectories();
+    private:
+        void initAppFilePathHash();
+        void initCheckPortable();
+        void initAppDataDirectory();
+        void initSubDirectories();
 
-    boost::optional<bool> portable_;
+        boost::optional<bool> portable_;
 
-    // Directory for cache files. Same as <appDataDirectory>/Misc
-    QString cacheDirectory_;
-};
+        // Directory for cache files. Same as <appDataDirectory>/Misc
+        QString cacheDirectory_;
+    };
 
-Paths *getPaths();
+    Paths* getPaths();
 
 }  // namespace chatterino

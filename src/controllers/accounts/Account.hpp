@@ -4,23 +4,23 @@
 
 #include <QString>
 
-namespace chatterino {
-
-class Account
+namespace chatterino
 {
-public:
-    Account(ProviderId providerId);
-    virtual ~Account() = default;
+    class Account
+    {
+    public:
+        Account(ProviderId providerId);
+        virtual ~Account() = default;
 
-    virtual QString toString() const = 0;
-    const QString &getCategory() const;
-    ProviderId getProviderId() const;
+        virtual QString toString() const = 0;
+        const QString& getCategory() const;
+        ProviderId getProviderId() const;
 
-    bool operator<(const Account &other) const;
+        bool operator<(const Account& other) const;
 
-private:
-    ProviderId providerId_;
-    QString category_;
-};
+    private:
+        ProviderId providerId_;
+        QString category_;
+    };
 
 }  // namespace chatterino

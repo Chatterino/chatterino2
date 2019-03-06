@@ -4,25 +4,26 @@
 
 #include <QWidget>
 
-namespace chatterino {
-
-class AccountSwitchPopupWidget : public QWidget
+namespace chatterino
 {
-    Q_OBJECT
+    class AccountSwitchPopupWidget : public QWidget
+    {
+        Q_OBJECT
 
-public:
-    AccountSwitchPopupWidget(QWidget *parent = nullptr);
+    public:
+        AccountSwitchPopupWidget(QWidget* parent = nullptr);
 
-    void refresh();
+        void refresh();
 
-protected:
-    void focusOutEvent(QFocusEvent *event) final;
-    void paintEvent(QPaintEvent *event) override;
+    protected:
+        void focusOutEvent(QFocusEvent* event) final;
+        void paintEvent(QPaintEvent* event) override;
 
-private:
-    struct {
-        AccountSwitchWidget *accountSwitchWidget = nullptr;
-    } ui_;
-};
+    private:
+        struct
+        {
+            AccountSwitchWidget* accountSwitchWidget = nullptr;
+        } ui_;
+    };
 
 }  // namespace chatterino

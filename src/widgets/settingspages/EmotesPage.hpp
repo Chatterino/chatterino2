@@ -2,12 +2,12 @@
 
 #include "widgets/settingspages/SettingsPage.hpp"
 
-namespace chatterino {
-
-class EmotesPage : public SettingsPage
+namespace chatterino
 {
-public:
-    EmotesPage();
-};
+    class EmotesPage : public SettingsPage
+    {
+    public:
+        EmotesPage();
+    };
 
 }  // namespace chatterino

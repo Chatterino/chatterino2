@@ -8,47 +8,49 @@
 #include <QDesktopWidget>
 #include <QScreen>
 
-namespace chatterino {
-
-NotificationPopup::NotificationPopup()
-    : BaseWindow((QWidget *)nullptr, BaseWindow::Frameless)
-    , channel_(std::make_shared<Channel>("notifications", Channel::Type::None))
-
+namespace chatterino
 {
-    this->channelView_ = new ChannelView(this);
+    NotificationPopup::NotificationPopup()
+        : BaseWindow((QWidget*)nullptr, BaseWindow::Frameless)
+        , channel_(
+              std::make_shared<Channel>("notifications", Channel::Type::None))
 
-    auto *layout = new QVBoxLayout(this);
-    this->setLayout(layout);
-
-    layout->addWidget(this->channelView_);
-
-    this->channelView_->setChannel(this->channel_);
-    this->setScaleIndependantSize(300, 150);
-}
-
-void NotificationPopup::updatePosition()
-{
-    Location location = BottomRight;
-
-    QDesktopWidget *desktop = QApplication::desktop();
-    const QRect rect = desktop->availableGeometry();
-
-    switch (location)
     {
-        case BottomRight:
-        {
-            this->move(rect.right() - this->width(),
-                       rect.bottom() - this->height());
-        }
-        break;
+        this->channelView_ = new ChannelView(this);
+
+        auto* layout = new QVBoxLayout(this);
+        this->setLayout(layout);
+
+        layout->addWidget(this->channelView_);
+
+        this->channelView_->setChannel(this->channel_);
+        this->setScaleIndependantSize(300, 150);
     }
-}
 
-void NotificationPopup::addMessage(MessagePtr msg)
-{
-    this->channel_->addMessage(msg);
+    void NotificationPopup::updatePosition()
+    {
+        Location location = BottomRight;
 
-    //    QTimer::singleShot(5000, this, [this, msg] { this->channel->remove });
-}
+        QDesktopWidget* desktop = QApplication::desktop();
+        const QRect rect = desktop->availableGeometry();
+
+        switch (location)
+        {
+            case BottomRight:
+            {
+                this->move(rect.right() - this->width(),
+                    rect.bottom() - this->height());
+            }
+            break;
+        }
+    }
+
+    void NotificationPopup::addMessage(MessagePtr msg)
+    {
+        this->channel_->addMessage(msg);
+
+        //    QTimer::singleShot(5000, this, [this, msg] { this->channel->remove
+        //    });
+    }
 
 }  // namespace chatterino

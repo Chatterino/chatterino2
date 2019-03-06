@@ -3,17 +3,17 @@
 #include <QTimer>
 #include <pajlada/signals/signal.hpp>
 
-namespace chatterino {
-
-class GIFTimer
+namespace chatterino
 {
-public:
-    void initialize();
+    class GIFTimer
+    {
+    public:
+        void initialize();
 
-    pajlada::Signals::NoArgSignal signal;
+        pajlada::Signals::NoArgSignal signal;
 
-private:
-    QTimer timer;
-};
+    private:
+        QTimer timer;
+    };
 
 }  // namespace chatterino

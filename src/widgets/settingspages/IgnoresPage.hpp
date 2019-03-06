@@ -6,17 +6,17 @@
 
 class QVBoxLayout;
 
-namespace chatterino {
-
-class IgnoresPage : public SettingsPage
+namespace chatterino
 {
-public:
-    IgnoresPage();
+    class IgnoresPage : public SettingsPage
+    {
+    public:
+        IgnoresPage();
 
-    void onShow() final;
+        void onShow() final;
 
-private:
-    QStringListModel userListModel_;
-};
+    private:
+        QStringListModel userListModel_;
+    };
 
 }  // namespace chatterino

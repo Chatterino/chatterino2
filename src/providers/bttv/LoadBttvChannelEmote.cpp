@@ -9,6 +9,6 @@
 #include "common/UniqueAccess.hpp"
 #include "messages/Emote.hpp"
 
-namespace chatterino {
-
+namespace chatterino
+{
 }  // namespace chatterino

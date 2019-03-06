@@ -6,68 +6,67 @@
 #include "common/NetworkTimer.hpp"
 #include "common/NetworkWorker.hpp"
 
-namespace chatterino {
-
-struct NetworkData;
-
-class NetworkRequest final
+namespace chatterino
 {
-    // Stores all data about the request that needs to be passed around to each
-    // part of the request
-    std::shared_ptr<NetworkData> data;
+    struct NetworkData;
 
-    // Timer that tracks the timeout
-    // By default, there's no explicit timeout for the request
-    // to enable the timer, the "setTimeout" function needs to be called before
-    // execute is called
-    std::shared_ptr<NetworkTimer> timer;
+    class NetworkRequest final
+    {
+        // Stores all data about the request that needs to be passed around to
+        // each part of the request
+        std::shared_ptr<NetworkData> data;
 
-    // The NetworkRequest destructor will assert if executed_ hasn't been set to
-    // true before dying
-    bool executed_ = false;
+        // Timer that tracks the timeout
+        // By default, there's no explicit timeout for the request
+        // to enable the timer, the "setTimeout" function needs to be called
+        // before execute is called
+        std::shared_ptr<NetworkTimer> timer;
 
-public:
-    explicit NetworkRequest(
-        const std::string &url,
-        NetworkRequestType requestType = NetworkRequestType::Get);
-    explicit NetworkRequest(
-        QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
+        // The NetworkRequest destructor will assert if executed_ hasn't been
+        // set to true before dying
+        bool executed_ = false;
 
-    NetworkRequest(NetworkRequest &&other) = default;
-    NetworkRequest &operator=(NetworkRequest &&other) = default;
+    public:
+        explicit NetworkRequest(const std::string& url,
+            NetworkRequestType requestType = NetworkRequestType::Get);
+        explicit NetworkRequest(
+            QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
 
-    ~NetworkRequest();
+        NetworkRequest(NetworkRequest&& other) = default;
+        NetworkRequest& operator=(NetworkRequest&& other) = default;
 
-    void setRequestType(NetworkRequestType newRequestType);
+        ~NetworkRequest();
 
-    void onReplyCreated(NetworkReplyCreatedCallback cb);
-    void onError(NetworkErrorCallback cb);
-    void onSuccess(NetworkSuccessCallback cb);
+        void setRequestType(NetworkRequestType newRequestType);
 
-    void setPayload(const QByteArray &payload);
-    void setUseQuickLoadCache(bool value);
-    void setCaller(const QObject *caller);
-    void setRawHeader(const char *headerName, const char *value);
-    void setRawHeader(const char *headerName, const QByteArray &value);
-    void setRawHeader(const char *headerName, const QString &value);
-    void setTimeout(int ms);
-    void setExecuteConcurrently(bool value);
-    void makeAuthorizedV5(const QString &clientID,
-                          const QString &oauthToken = QString());
+        void onReplyCreated(NetworkReplyCreatedCallback cb);
+        void onError(NetworkErrorCallback cb);
+        void onSuccess(NetworkSuccessCallback cb);
 
-    void execute();
+        void setPayload(const QByteArray& payload);
+        void setUseQuickLoadCache(bool value);
+        void setCaller(const QObject* caller);
+        void setRawHeader(const char* headerName, const char* value);
+        void setRawHeader(const char* headerName, const QByteArray& value);
+        void setRawHeader(const char* headerName, const QString& value);
+        void setTimeout(int ms);
+        void setExecuteConcurrently(bool value);
+        void makeAuthorizedV5(
+            const QString& clientID, const QString& oauthToken = QString());
 
-    QString urlString() const;
+        void execute();
 
-private:
-    // "invalid" data "invalid" is specified by the onSuccess callback
-    Outcome tryLoadCachedFile();
+        QString urlString() const;
 
-    void doRequest();
+    private:
+        // "invalid" data "invalid" is specified by the onSuccess callback
+        Outcome tryLoadCachedFile();
 
-public:
-    // Helper creator functions
-    static NetworkRequest twitchRequest(QUrl url);
-};
+        void doRequest();
+
+    public:
+        // Helper creator functions
+        static NetworkRequest twitchRequest(QUrl url);
+    };
 
 }  // namespace chatterino

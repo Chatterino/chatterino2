@@ -2,6 +2,6 @@
 
 #include "util/RapidjsonHelpers.hpp"
 
-namespace chatterino {
-
+namespace chatterino
+{
 }  // namespace chatterino

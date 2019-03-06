@@ -29,235 +29,236 @@ namespace ipc = boost::interprocess;
 #define EXTENSION_ID "glknmaideaikkmemifbfkhnomoknepka"
 #define MESSAGE_SIZE 1024
 
-namespace chatterino {
-
-void registerNmManifest(Paths &paths, const QString &manifestFilename,
-                        const QString &registryKeyName,
-                        const QJsonDocument &document);
-
-void registerNmHost(Paths &paths)
+namespace chatterino
 {
-    if (paths.isPortable())
-        return;
+    void registerNmManifest(Paths& paths, const QString& manifestFilename,
+        const QString& registryKeyName, const QJsonDocument& document);
 
-    auto getBaseDocument = [&] {
-        QJsonObject obj;
-        obj.insert("name", "com.chatterino.chatterino");
-        obj.insert("description", "Browser interaction with chatterino.");
-        obj.insert("path", QCoreApplication::applicationFilePath());
-        obj.insert("type", "stdio");
-
-        return obj;
-    };
-
-    // chrome
+    void registerNmHost(Paths& paths)
     {
-        QJsonDocument document;
+        if (paths.isPortable())
+            return;
 
-        auto obj = getBaseDocument();
-        QJsonArray allowed_origins_arr = {"chrome-extension://" EXTENSION_ID
-                                          "/"};
-        obj.insert("allowed_origins", allowed_origins_arr);
-        document.setObject(obj);
+        auto getBaseDocument = [&] {
+            QJsonObject obj;
+            obj.insert("name", "com.chatterino.chatterino");
+            obj.insert("description", "Browser interaction with chatterino.");
+            obj.insert("path", QCoreApplication::applicationFilePath());
+            obj.insert("type", "stdio");
 
-        registerNmManifest(paths, "/native-messaging-manifest-chrome.json",
-                           "HKCU\\Software\\Google\\Chrome\\NativeMessagingHost"
-                           "s\\com.chatterino.chatterino",
-                           document);
+            return obj;
+        };
+
+        // chrome
+        {
+            QJsonDocument document;
+
+            auto obj = getBaseDocument();
+            QJsonArray allowed_origins_arr = {
+                "chrome-extension://" EXTENSION_ID "/"};
+            obj.insert("allowed_origins", allowed_origins_arr);
+            document.setObject(obj);
+
+            registerNmManifest(paths, "/native-messaging-manifest-chrome.json",
+                "HKCU\\Software\\Google\\Chrome\\NativeMessagingHost"
+                "s\\com.chatterino.chatterino",
+                document);
+        }
+
+        // firefox
+        {
+            QJsonDocument document;
+
+            auto obj = getBaseDocument();
+            QJsonArray allowed_extensions = {
+                "chatterino_native@chatterino.com"};
+            obj.insert("allowed_extensions", allowed_extensions);
+            document.setObject(obj);
+
+            registerNmManifest(paths, "/native-messaging-manifest-firefox.json",
+                "HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com."
+                "chatterino.chatterino",
+                document);
+        }
     }
 
-    // firefox
+    void registerNmManifest(Paths& paths, const QString& manifestFilename,
+        const QString& registryKeyName, const QJsonDocument& document)
     {
-        QJsonDocument document;
+        (void)registryKeyName;
 
-        auto obj = getBaseDocument();
-        QJsonArray allowed_extensions = {"chatterino_native@chatterino.com"};
-        obj.insert("allowed_extensions", allowed_extensions);
-        document.setObject(obj);
-
-        registerNmManifest(paths, "/native-messaging-manifest-firefox.json",
-                           "HKCU\\Software\\Mozilla\\NativeMessagingHosts\\com."
-                           "chatterino.chatterino",
-                           document);
-    }
-}
-
-void registerNmManifest(Paths &paths, const QString &manifestFilename,
-                        const QString &registryKeyName,
-                        const QJsonDocument &document)
-{
-    (void)registryKeyName;
-
-    // save the manifest
-    QString manifestPath = paths.miscDirectory + manifestFilename;
-    QFile file(manifestPath);
-    file.open(QIODevice::WriteOnly | QIODevice::Truncate);
-    file.write(document.toJson());
-    file.flush();
+        // save the manifest
+        QString manifestPath = paths.miscDirectory + manifestFilename;
+        QFile file(manifestPath);
+        file.open(QIODevice::WriteOnly | QIODevice::Truncate);
+        file.write(document.toJson());
+        file.flush();
 
 #ifdef Q_OS_WIN
-    // clang-format off
+        // clang-format off
         QProcess::execute("REG ADD \"" + registryKeyName + "\" /ve /t REG_SZ /d \"" + manifestPath + "\" /f");
 // clang-format on
 #endif
-}
-
-std::string &getNmQueueName(Paths &paths)
-{
-    static std::string name =
-        "chatterino_gui" + paths.applicationFilePathHash.toStdString();
-    return name;
-}
-
-// CLIENT
-
-void NativeMessagingClient::sendMessage(const QByteArray &array)
-{
-    try
-    {
-        ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
-
-        messageQueue.try_send(array.data(), array.size(), 1);
     }
-    catch (ipc::interprocess_exception &ex)
+
+    std::string& getNmQueueName(Paths& paths)
     {
-        qDebug() << "send to gui process:" << ex.what();
+        static std::string name =
+            "chatterino_gui" + paths.applicationFilePathHash.toStdString();
+        return name;
     }
-}
 
-void NativeMessagingClient::writeToCout(const QByteArray &array)
-{
-    auto *data = array.data();
-    auto size = uint32_t(array.size());
+    // CLIENT
 
-    std::cout.write(reinterpret_cast<char *>(&size), 4);
-    std::cout.write(data, size);
-    std::cout.flush();
-}
-
-// SERVER
-
-void NativeMessagingServer::start()
-{
-    this->thread.start();
-}
-
-void NativeMessagingServer::ReceiverThread::run()
-{
-    ipc::message_queue::remove("chatterino_gui");
-    ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100,
-                                    MESSAGE_SIZE);
-
-    while (true)
+    void NativeMessagingClient::sendMessage(const QByteArray& array)
     {
         try
         {
-            auto buf = std::make_unique<char[]>(MESSAGE_SIZE);
-            auto retSize = ipc::message_queue::size_type();
-            auto priority = static_cast<unsigned int>(0);
+            ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
 
-            messageQueue.receive(buf.get(), MESSAGE_SIZE, retSize, priority);
-
-            auto document = QJsonDocument::fromJson(
-                QByteArray::fromRawData(buf.get(), retSize));
-
-            this->handleMessage(document.object());
+            messageQueue.try_send(array.data(), array.size(), 1);
         }
-        catch (ipc::interprocess_exception &ex)
+        catch (ipc::interprocess_exception& ex)
         {
-            qDebug() << "received from gui process:" << ex.what();
+            qDebug() << "send to gui process:" << ex.what();
         }
     }
-}
 
-void NativeMessagingServer::ReceiverThread::handleMessage(
-    const QJsonObject &root)
-{
-    auto app = getApp();
-
-    QString action = root.value("action").toString();
-
-    if (action.isNull())
+    void NativeMessagingClient::writeToCout(const QByteArray& array)
     {
-        qDebug() << "NM action was null";
-        return;
+        auto* data = array.data();
+        auto size = uint32_t(array.size());
+
+        std::cout.write(reinterpret_cast<char*>(&size), 4);
+        std::cout.write(data, size);
+        std::cout.flush();
     }
 
-    if (action == "select")
+    // SERVER
+
+    void NativeMessagingServer::start()
     {
-        QString _type = root.value("type").toString();
-        bool attach = root.value("attach").toBool();
-        QString name = root.value("name").toString();
+        this->thread.start();
+    }
 
-        qDebug() << attach;
+    void NativeMessagingServer::ReceiverThread::run()
+    {
+        ipc::message_queue::remove("chatterino_gui");
+        ipc::message_queue messageQueue(
+            ipc::open_or_create, "chatterino_gui", 100, MESSAGE_SIZE);
 
-#ifdef USEWINSDK
-        AttachedWindow::GetArgs args;
-        args.winId = root.value("winId").toString();
-        args.yOffset = root.value("yOffset").toInt(-1);
-        args.width = root.value("size").toObject().value("width").toInt(-1);
-        args.height = root.value("size").toObject().value("height").toInt(-1);
-
-        if (_type.isNull() || args.winId.isNull())
+        while (true)
         {
-            qDebug() << "NM type, name or winId missing";
-            attach = false;
+            try
+            {
+                auto buf = std::make_unique<char[]>(MESSAGE_SIZE);
+                auto retSize = ipc::message_queue::size_type();
+                auto priority = static_cast<unsigned int>(0);
+
+                messageQueue.receive(
+                    buf.get(), MESSAGE_SIZE, retSize, priority);
+
+                auto document = QJsonDocument::fromJson(
+                    QByteArray::fromRawData(buf.get(), retSize));
+
+                this->handleMessage(document.object());
+            }
+            catch (ipc::interprocess_exception& ex)
+            {
+                qDebug() << "received from gui process:" << ex.what();
+            }
+        }
+    }
+
+    void NativeMessagingServer::ReceiverThread::handleMessage(
+        const QJsonObject& root)
+    {
+        auto app = getApp();
+
+        QString action = root.value("action").toString();
+
+        if (action.isNull())
+        {
+            qDebug() << "NM action was null";
             return;
         }
+
+        if (action == "select")
+        {
+            QString _type = root.value("type").toString();
+            bool attach = root.value("attach").toBool();
+            QString name = root.value("name").toString();
+
+            qDebug() << attach;
+
+#ifdef USEWINSDK
+            AttachedWindow::GetArgs args;
+            args.winId = root.value("winId").toString();
+            args.yOffset = root.value("yOffset").toInt(-1);
+            args.width = root.value("size").toObject().value("width").toInt(-1);
+            args.height =
+                root.value("size").toObject().value("height").toInt(-1);
+
+            if (_type.isNull() || args.winId.isNull())
+            {
+                qDebug() << "NM type, name or winId missing";
+                attach = false;
+                return;
+            }
 #endif
 
-        if (_type == "twitch")
-        {
-            postToThread([=] {
-                if (!name.isEmpty())
-                {
-                    app->twitch.server->watchingChannel.reset(
-                        app->twitch.server->getOrAddChannel(name));
-                }
-
-                if (attach)
-                {
-#ifdef USEWINSDK
-                    //                    if (args.height != -1) {
-                    auto *window =
-                        AttachedWindow::get(::GetForegroundWindow(), args);
+            if (_type == "twitch")
+            {
+                postToThread([=] {
                     if (!name.isEmpty())
                     {
-                        window->setChannel(
+                        app->twitch.server->watchingChannel.reset(
                             app->twitch.server->getOrAddChannel(name));
                     }
+
+                    if (attach)
+                    {
+#ifdef USEWINSDK
+                        //                    if (args.height != -1) {
+                        auto* window =
+                            AttachedWindow::get(::GetForegroundWindow(), args);
+                        if (!name.isEmpty())
+                        {
+                            window->setChannel(
+                                app->twitch.server->getOrAddChannel(name));
+                        }
 //                    }
 //                    window->show();
 #endif
-                }
+                    }
+                });
+            }
+            else
+            {
+                qDebug() << "NM unknown channel type";
+            }
+        }
+        else if (action == "detach")
+        {
+            QString winId = root.value("winId").toString();
+
+            if (winId.isNull())
+            {
+                qDebug() << "NM winId missing";
+                return;
+            }
+
+#ifdef USEWINSDK
+            postToThread([winId] {
+                qDebug() << "NW detach";
+                AttachedWindow::detach(winId);
             });
+#endif
         }
         else
         {
-            qDebug() << "NM unknown channel type";
+            qDebug() << "NM unknown action " + action;
         }
     }
-    else if (action == "detach")
-    {
-        QString winId = root.value("winId").toString();
-
-        if (winId.isNull())
-        {
-            qDebug() << "NM winId missing";
-            return;
-        }
-
-#ifdef USEWINSDK
-        postToThread([winId] {
-            qDebug() << "NW detach";
-            AttachedWindow::detach(winId);
-        });
-#endif
-    }
-    else
-    {
-        qDebug() << "NM unknown action " + action;
-    }
-}
 
 }  // namespace chatterino

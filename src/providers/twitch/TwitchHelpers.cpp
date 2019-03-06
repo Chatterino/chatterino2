@@ -1,19 +1,19 @@
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "debug/Log.hpp"
 
-namespace chatterino {
-
-bool trimChannelName(const QString &channelName, QString &outChannelName)
+namespace chatterino
 {
-    if (channelName.length() < 2)
+    bool trimChannelName(const QString& channelName, QString& outChannelName)
     {
-        log("channel name length below 2");
-        return false;
+        if (channelName.length() < 2)
+        {
+            log("channel name length below 2");
+            return false;
+        }
+
+        outChannelName = channelName.mid(1);
+
+        return true;
     }
-
-    outChannelName = channelName.mid(1);
-
-    return true;
-}
 
 }  // namespace chatterino

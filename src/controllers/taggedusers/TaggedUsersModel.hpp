@@ -3,31 +3,31 @@
 #include "common/SignalVectorModel.hpp"
 #include "controllers/taggedusers/TaggedUser.hpp"
 
-namespace chatterino {
-
-class TaggedUsersController;
-
-class TaggedUsersModel : public SignalVectorModel<TaggedUser>
+namespace chatterino
 {
-    explicit TaggedUsersModel(QObject *parent);
+    class TaggedUsersController;
 
-protected:
-    // turn a vector item into a model row
-    virtual TaggedUser getItemFromRow(std::vector<QStandardItem *> &row,
-                                      const TaggedUser &original) override;
+    class TaggedUsersModel : public SignalVectorModel<TaggedUser>
+    {
+        explicit TaggedUsersModel(QObject* parent);
 
-    // turns a row in the model into a vector item
-    virtual void getRowFromItem(const TaggedUser &item,
-                                std::vector<QStandardItem *> &row) override;
+    protected:
+        // turn a vector item into a model row
+        virtual TaggedUser getItemFromRow(std::vector<QStandardItem*>& row,
+            const TaggedUser& original) override;
 
-    virtual void afterInit() override;
+        // turns a row in the model into a vector item
+        virtual void getRowFromItem(
+            const TaggedUser& item, std::vector<QStandardItem*>& row) override;
 
-    //    virtual void customRowSetData(const std::vector<QStandardItem *> &row,
-    //    int column,
-    //                                  const QVariant &value, int role)
-    //                                  override;
+        virtual void afterInit() override;
 
-    friend class TaggedUsersController;
-};
+        //    virtual void customRowSetData(const std::vector<QStandardItem *>
+        //    &row, int column,
+        //                                  const QVariant &value, int role)
+        //                                  override;
+
+        friend class TaggedUsersController;
+    };
 
 }  // namespace chatterino

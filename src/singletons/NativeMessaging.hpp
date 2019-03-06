@@ -2,37 +2,37 @@
 
 #include <QThread>
 
-namespace chatterino {
-
-class Application;
-class Paths;
-
-void registerNmHost(Paths &paths);
-std::string &getNmQueueName(Paths &paths);
-
-class NativeMessagingClient final
+namespace chatterino
 {
-public:
-    void sendMessage(const QByteArray &array);
-    void writeToCout(const QByteArray &array);
-};
+    class Application;
+    class Paths;
 
-class NativeMessagingServer final
-{
-public:
-    void start();
+    void registerNmHost(Paths& paths);
+    std::string& getNmQueueName(Paths& paths);
 
-private:
-    class ReceiverThread : public QThread
+    class NativeMessagingClient final
     {
     public:
-        void run() override;
-
-    private:
-        void handleMessage(const QJsonObject &root);
+        void sendMessage(const QByteArray& array);
+        void writeToCout(const QByteArray& array);
     };
 
-    ReceiverThread thread;
-};
+    class NativeMessagingServer final
+    {
+    public:
+        void start();
+
+    private:
+        class ReceiverThread : public QThread
+        {
+        public:
+            void run() override;
+
+        private:
+            void handleMessage(const QJsonObject& root);
+        };
+
+        ReceiverThread thread;
+    };
 
 }  // namespace chatterino

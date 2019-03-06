@@ -6,47 +6,47 @@
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 
-namespace chatterino {
-
-struct Message;
-using MessagePtr = std::shared_ptr<const Message>;
-
-class Settings;
-class Paths;
-
-class UserHighlightModel;
-class HighlightModel;
-class HighlightBlacklistModel;
-
-class HighlightController final : public Singleton
+namespace chatterino
 {
-public:
-    HighlightController();
+    struct Message;
+    using MessagePtr = std::shared_ptr<const Message>;
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    class Settings;
+    class Paths;
 
-    UnsortedSignalVector<HighlightPhrase> phrases;
-    UnsortedSignalVector<HighlightBlacklistUser> blacklistedUsers;
-    UnsortedSignalVector<HighlightPhrase> highlightedUsers;
+    class UserHighlightModel;
+    class HighlightModel;
+    class HighlightBlacklistModel;
 
-    HighlightModel *createModel(QObject *parent);
-    HighlightBlacklistModel *createBlacklistModel(QObject *parent);
-    UserHighlightModel *createUserModel(QObject *parent);
+    class HighlightController final : public Singleton
+    {
+    public:
+        HighlightController();
 
-    bool isHighlightedUser(const QString &username);
-    bool blacklistContains(const QString &username);
+        virtual void initialize(Settings& settings, Paths& paths) override;
 
-    void addHighlight(const MessagePtr &msg);
+        UnsortedSignalVector<HighlightPhrase> phrases;
+        UnsortedSignalVector<HighlightBlacklistUser> blacklistedUsers;
+        UnsortedSignalVector<HighlightPhrase> highlightedUsers;
 
-private:
-    bool initialized_ = false;
+        HighlightModel* createModel(QObject* parent);
+        HighlightBlacklistModel* createBlacklistModel(QObject* parent);
+        UserHighlightModel* createUserModel(QObject* parent);
 
-    ChatterinoSetting<std::vector<HighlightPhrase>> highlightsSetting_ = {
-        "/highlighting/highlights"};
-    ChatterinoSetting<std::vector<HighlightBlacklistUser>> blacklistSetting_ = {
-        "/highlighting/blacklist"};
-    ChatterinoSetting<std::vector<HighlightPhrase>> userSetting_ = {
-        "/highlighting/users"};
-};
+        bool isHighlightedUser(const QString& username);
+        bool blacklistContains(const QString& username);
+
+        void addHighlight(const MessagePtr& msg);
+
+    private:
+        bool initialized_ = false;
+
+        ChatterinoSetting<std::vector<HighlightPhrase>> highlightsSetting_ = {
+            "/highlighting/highlights"};
+        ChatterinoSetting<std::vector<HighlightBlacklistUser>>
+            blacklistSetting_ = {"/highlighting/blacklist"};
+        ChatterinoSetting<std::vector<HighlightPhrase>> userSetting_ = {
+            "/highlighting/users"};
+    };
 
 }  // namespace chatterino

@@ -6,44 +6,44 @@
 #include <rapidjson/error/en.h>
 #include <QJsonDocument>
 
-namespace chatterino {
-
-NetworkResult::NetworkResult(const QByteArray &data)
-    : data_(data)
+namespace chatterino
 {
-}
-
-QJsonObject NetworkResult::parseJson() const
-{
-    QJsonDocument jsonDoc(QJsonDocument::fromJson(this->data_));
-    if (jsonDoc.isNull())
+    NetworkResult::NetworkResult(const QByteArray& data)
+        : data_(data)
     {
-        return QJsonObject{};
     }
 
-    return jsonDoc.object();
-}
-
-rapidjson::Document NetworkResult::parseRapidJson() const
-{
-    rapidjson::Document ret(rapidjson::kObjectType);
-
-    rapidjson::ParseResult result =
-        ret.Parse(this->data_.data(), this->data_.length());
-
-    if (result.Code() != rapidjson::kParseErrorNone)
+    QJsonObject NetworkResult::parseJson() const
     {
-        log("JSON parse error: {} ({})",
-            rapidjson::GetParseError_En(result.Code()), result.Offset());
+        QJsonDocument jsonDoc(QJsonDocument::fromJson(this->data_));
+        if (jsonDoc.isNull())
+        {
+            return QJsonObject{};
+        }
+
+        return jsonDoc.object();
+    }
+
+    rapidjson::Document NetworkResult::parseRapidJson() const
+    {
+        rapidjson::Document ret(rapidjson::kObjectType);
+
+        rapidjson::ParseResult result =
+            ret.Parse(this->data_.data(), this->data_.length());
+
+        if (result.Code() != rapidjson::kParseErrorNone)
+        {
+            log("JSON parse error: {} ({})",
+                rapidjson::GetParseError_En(result.Code()), result.Offset());
+            return ret;
+        }
+
         return ret;
     }
 
-    return ret;
-}
-
-const QByteArray &NetworkResult::getData() const
-{
-    return this->data_;
-}
+    const QByteArray& NetworkResult::getData() const
+    {
+        return this->data_;
+    }
 
 }  // namespace chatterino

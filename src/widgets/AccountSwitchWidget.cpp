@@ -6,93 +6,94 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 
-namespace chatterino {
-
-AccountSwitchWidget::AccountSwitchWidget(QWidget *parent)
-    : QListWidget(parent)
+namespace chatterino
 {
-    auto app = getApp();
-
-    this->addItem(ANONYMOUS_USERNAME_LABEL);
-
-    for (const auto &userName : app->accounts->twitch.getUsernames())
+    AccountSwitchWidget::AccountSwitchWidget(QWidget* parent)
+        : QListWidget(parent)
     {
-        this->addItem(userName);
-    }
-
-    app->accounts->twitch.userListUpdated.connect([=]() {
-        this->blockSignals(true);
-
-        this->clear();
+        auto app = getApp();
 
         this->addItem(ANONYMOUS_USERNAME_LABEL);
 
-        for (const auto &userName : app->accounts->twitch.getUsernames())
+        for (const auto& userName : app->accounts->twitch.getUsernames())
         {
             this->addItem(userName);
         }
 
+        app->accounts->twitch.userListUpdated.connect([=]() {
+            this->blockSignals(true);
+
+            this->clear();
+
+            this->addItem(ANONYMOUS_USERNAME_LABEL);
+
+            for (const auto& userName : app->accounts->twitch.getUsernames())
+            {
+                this->addItem(userName);
+            }
+
+            this->refreshSelection();
+
+            this->blockSignals(false);
+        });
+
         this->refreshSelection();
 
-        this->blockSignals(false);
-    });
-
-    this->refreshSelection();
-
-    QObject::connect(this, &QListWidget::clicked, [=] {
-        if (!this->selectedItems().isEmpty())
-        {
-            QString newUsername = this->currentItem()->text();
-            if (newUsername.compare(ANONYMOUS_USERNAME_LABEL,
-                                    Qt::CaseInsensitive) == 0)
+        QObject::connect(this, &QListWidget::clicked, [=] {
+            if (!this->selectedItems().isEmpty())
             {
-                app->accounts->twitch.currentUsername = "";
+                QString newUsername = this->currentItem()->text();
+                if (newUsername.compare(
+                        ANONYMOUS_USERNAME_LABEL, Qt::CaseInsensitive) == 0)
+                {
+                    app->accounts->twitch.currentUsername = "";
+                }
+                else
+                {
+                    app->accounts->twitch.currentUsername = newUsername;
+                }
+            }
+        });
+    }
+
+    void AccountSwitchWidget::refresh()
+    {
+        this->refreshSelection();
+    }
+
+    void AccountSwitchWidget::refreshSelection()
+    {
+        this->blockSignals(true);
+
+        // Select the currently logged in user
+        if (this->count() > 0)
+        {
+            auto app = getApp();
+
+            auto currentUser = app->accounts->twitch.getCurrent();
+
+            if (currentUser->isAnon())
+            {
+                this->setCurrentRow(0);
             }
             else
             {
-                app->accounts->twitch.currentUsername = newUsername;
-            }
-        }
-    });
-}
-
-void AccountSwitchWidget::refresh()
-{
-    this->refreshSelection();
-}
-
-void AccountSwitchWidget::refreshSelection()
-{
-    this->blockSignals(true);
-
-    // Select the currently logged in user
-    if (this->count() > 0)
-    {
-        auto app = getApp();
-
-        auto currentUser = app->accounts->twitch.getCurrent();
-
-        if (currentUser->isAnon())
-        {
-            this->setCurrentRow(0);
-        }
-        else
-        {
-            const QString &currentUsername = currentUser->getUserName();
-            for (int i = 0; i < this->count(); ++i)
-            {
-                QString itemText = this->item(i)->text();
-
-                if (itemText.compare(currentUsername, Qt::CaseInsensitive) == 0)
+                const QString& currentUsername = currentUser->getUserName();
+                for (int i = 0; i < this->count(); ++i)
                 {
-                    this->setCurrentRow(i);
-                    break;
+                    QString itemText = this->item(i)->text();
+
+                    if (itemText.compare(
+                            currentUsername, Qt::CaseInsensitive) == 0)
+                    {
+                        this->setCurrentRow(i);
+                        break;
+                    }
                 }
             }
         }
-    }
 
-    this->blockSignals(false);
-}
+        this->blockSignals(false);
+    }
 
 }  // namespace chatterino

@@ -2,12 +2,12 @@
 
 #include "widgets/BaseWindow.hpp"
 
-namespace chatterino {
-
-class WelcomeDialog : public BaseWindow
+namespace chatterino
 {
-public:
-    WelcomeDialog();
-};
+    class WelcomeDialog : public BaseWindow
+    {
+    public:
+        WelcomeDialog();
+    };
 
 }  // namespace chatterino

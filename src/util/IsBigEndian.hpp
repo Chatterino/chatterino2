@@ -1,13 +1,13 @@
 #pragma once
 
-namespace chatterino {
-
-bool isBigEndian()
+namespace chatterino
 {
-    int test = 1;
-    char *p = reinterpret_cast<char *>(&test);
+    bool isBigEndian()
+    {
+        int test = 1;
+        char* p = reinterpret_cast<char*>(&test);
 
-    return p[0] == 0;
-}
+        return p[0] == 0;
+    }
 
 }  // namespace chatterino

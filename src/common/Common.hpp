@@ -11,39 +11,40 @@
 
 #include <string>
 
-namespace chatterino {
-
-enum class HighlightState {
-    None,
-    Highlighted,
-    NewMessage,
-};
-
-inline QString qS(const std::string &string)
+namespace chatterino
 {
-    return QString::fromStdString(string);
-}
+    enum class HighlightState {
+        None,
+        Highlighted,
+        NewMessage,
+    };
 
-const Qt::KeyboardModifiers showSplitOverlayModifiers =
-    Qt::ControlModifier | Qt::AltModifier;
-const Qt::KeyboardModifiers showAddSplitRegions =
-    Qt::ControlModifier | Qt::AltModifier;
-const Qt::KeyboardModifiers showResizeHandlesModifiers = Qt::ControlModifier;
+    inline QString qS(const std::string& string)
+    {
+        return QString::fromStdString(string);
+    }
 
-static const char *ANONYMOUS_USERNAME_LABEL ATTR_UNUSED = " - anonymous - ";
+    const Qt::KeyboardModifiers showSplitOverlayModifiers =
+        Qt::ControlModifier | Qt::AltModifier;
+    const Qt::KeyboardModifiers showAddSplitRegions =
+        Qt::ControlModifier | Qt::AltModifier;
+    const Qt::KeyboardModifiers showResizeHandlesModifiers =
+        Qt::ControlModifier;
 
-template <typename T>
-std::weak_ptr<T> weakOf(T *element)
-{
-    return element->shared_from_this();
-}
+    static const char* ANONYMOUS_USERNAME_LABEL ATTR_UNUSED = " - anonymous - ";
 
-struct Message;
-using MessagePtr = std::shared_ptr<const Message>;
+    template <typename T>
+    std::weak_ptr<T> weakOf(T* element)
+    {
+        return element->shared_from_this();
+    }
 
-enum class CopyMode {
-    Everything,
-    OnlyTextAndEmotes,
-};
+    struct Message;
+    using MessagePtr = std::shared_ptr<const Message>;
+
+    enum class CopyMode {
+        Everything,
+        OnlyTextAndEmotes,
+    };
 
 }  // namespace chatterino

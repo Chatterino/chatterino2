@@ -9,32 +9,32 @@
 
 class QVBoxLayout;
 
-namespace chatterino {
-
-class LookPage : public SettingsPage
+namespace chatterino
 {
-public:
-    LookPage();
+    class LookPage : public SettingsPage
+    {
+    public:
+        LookPage();
 
-private:
-    void initializeUi();
+    private:
+        void initializeUi();
 
-    void addInterfaceTab(LayoutCreator<QVBoxLayout> layout);
-    void addMessageTab(LayoutCreator<QVBoxLayout> layout);
-    void addEmoteTab(LayoutCreator<QVBoxLayout> layout);
-    void addSplitHeaderTab(LayoutCreator<QVBoxLayout> layout);
-    void addBadgesTab(LayoutCreator<QVBoxLayout> layout);
+        void addInterfaceTab(LayoutCreator<QVBoxLayout> layout);
+        void addMessageTab(LayoutCreator<QVBoxLayout> layout);
+        void addEmoteTab(LayoutCreator<QVBoxLayout> layout);
+        void addSplitHeaderTab(LayoutCreator<QVBoxLayout> layout);
+        void addBadgesTab(LayoutCreator<QVBoxLayout> layout);
 
-    void addLastReadMessageIndicatorPatternSelector(
-        LayoutCreator<QVBoxLayout> layout);
+        void addLastReadMessageIndicatorPatternSelector(
+            LayoutCreator<QVBoxLayout> layout);
 
-    QLayout *createThemeColorChanger();
-    QLayout *createFontChanger();
-    QLayout *createBoldScaleSlider();
+        QLayout* createThemeColorChanger();
+        QLayout* createFontChanger();
+        QLayout* createBoldScaleSlider();
 
-    ChannelPtr createPreviewChannel();
+        ChannelPtr createPreviewChannel();
 
-    std::vector<pajlada::Signals::ScopedConnection> connections_;
-};
+        std::vector<pajlada::Signals::ScopedConnection> connections_;
+    };
 
 }  // namespace chatterino

@@ -6,39 +6,40 @@
 #include <QPaintEvent>
 #include <QWidget>
 
-namespace chatterino {
-
-class SettingsPage;
-class SettingsDialog;
-
-class SettingsDialogTab : public BaseWidget
+namespace chatterino
 {
-    Q_OBJECT
+    class SettingsPage;
+    class SettingsDialog;
 
-public:
-    SettingsDialogTab(SettingsDialog *dialog_, SettingsPage *page_,
-                      QString imageFileName);
+    class SettingsDialogTab : public BaseWidget
+    {
+        Q_OBJECT
 
-    void setSelected(bool selected_);
-    SettingsPage *getSettingsPage();
+    public:
+        SettingsDialogTab(SettingsDialog* dialog_, SettingsPage* page_,
+            QString imageFileName);
 
-signals:
-    void selectedChanged(bool);
+        void setSelected(bool selected_);
+        SettingsPage* getSettingsPage();
 
-private:
-    void paintEvent(QPaintEvent *);
-    void mousePressEvent(QMouseEvent *event);
+    signals:
+        void selectedChanged(bool);
 
-    struct {
-        QString labelText;
-        QIcon icon;
-    } ui_;
+    private:
+        void paintEvent(QPaintEvent*);
+        void mousePressEvent(QMouseEvent* event);
 
-    // Parent settings dialog
-    SettingsDialog *dialog_;
-    SettingsPage *page_;
+        struct
+        {
+            QString labelText;
+            QIcon icon;
+        } ui_;
 
-    bool selected_ = false;
-};
+        // Parent settings dialog
+        SettingsDialog* dialog_;
+        SettingsPage* page_;
+
+        bool selected_ = false;
+    };
 
 }  // namespace chatterino

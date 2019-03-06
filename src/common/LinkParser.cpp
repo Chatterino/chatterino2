@@ -32,36 +32,36 @@
 
 #define LINK "^(?:" SPOTIFY_LINK "|" WEB_LINK ")$"
 
-namespace chatterino {
-
-LinkParser::LinkParser(const QString &unparsedString)
+namespace chatterino
 {
-    static QRegularExpression linkRegex = [] {
-        static QRegularExpression newLineRegex("\r?\n");
-        QFile file(":/tlds.txt");
-        file.open(QFile::ReadOnly);
-        QTextStream tlds(&file);
-        tlds.setCodec("UTF-8");
+    LinkParser::LinkParser(const QString& unparsedString)
+    {
+        static QRegularExpression linkRegex = [] {
+            static QRegularExpression newLineRegex("\r?\n");
+            QFile file(":/tlds.txt");
+            file.open(QFile::ReadOnly);
+            QTextStream tlds(&file);
+            tlds.setCodec("UTF-8");
 
-        // tldData gets injected into the LINK macro
-        auto tldData = tlds.readAll().replace(newLineRegex, "|");
-        (void)tldData;
+            // tldData gets injected into the LINK macro
+            auto tldData = tlds.readAll().replace(newLineRegex, "|");
+            (void)tldData;
 
-        return QRegularExpression(LINK,
-                                  QRegularExpression::CaseInsensitiveOption);
-    }();
+            return QRegularExpression(
+                LINK, QRegularExpression::CaseInsensitiveOption);
+        }();
 
-    this->match_ = linkRegex.match(unparsedString);
-}
+        this->match_ = linkRegex.match(unparsedString);
+    }
 
-bool LinkParser::hasMatch() const
-{
-    return this->match_.hasMatch();
-}
+    bool LinkParser::hasMatch() const
+    {
+        return this->match_.hasMatch();
+    }
 
-QString LinkParser::getCaptured() const
-{
-    return this->match_.captured();
-}
+    QString LinkParser::getCaptured() const
+    {
+        return this->match_.captured();
+    }
 
 }  // namespace chatterino

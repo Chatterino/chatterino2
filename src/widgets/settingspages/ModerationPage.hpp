@@ -7,18 +7,18 @@
 class QTabWidget;
 class QPushButton;
 
-namespace chatterino {
-
-class ModerationPage : public SettingsPage
+namespace chatterino
 {
-public:
-    ModerationPage();
+    class ModerationPage : public SettingsPage
+    {
+    public:
+        ModerationPage();
 
-    void selectModerationActions();
+        void selectModerationActions();
 
-private:
-    QTimer itemsChangedTimer_;
-    QTabWidget *tabWidget_{};
-};
+    private:
+        QTimer itemsChangedTimer_;
+        QTabWidget* tabWidget_{};
+    };
 
 }  // namespace chatterino

@@ -2,12 +2,12 @@
 
 #include "widgets/settingspages/SettingsPage.hpp"
 
-namespace chatterino {
-
-class ExternalToolsPage : public SettingsPage
+namespace chatterino
 {
-public:
-    ExternalToolsPage();
-};
+    class ExternalToolsPage : public SettingsPage
+    {
+    public:
+        ExternalToolsPage();
+    };
 
 }  // namespace chatterino

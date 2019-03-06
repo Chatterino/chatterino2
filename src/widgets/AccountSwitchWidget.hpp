@@ -2,19 +2,19 @@
 
 #include <QListWidget>
 
-namespace chatterino {
-
-class AccountSwitchWidget : public QListWidget
+namespace chatterino
 {
-    Q_OBJECT
+    class AccountSwitchWidget : public QListWidget
+    {
+        Q_OBJECT
 
-public:
-    explicit AccountSwitchWidget(QWidget *parent = nullptr);
+    public:
+        explicit AccountSwitchWidget(QWidget* parent = nullptr);
 
-    void refresh();
+        void refresh();
 
-private:
-    void refreshSelection();
-};
+    private:
+        void refreshSelection();
+    };
 
 }  // namespace chatterino

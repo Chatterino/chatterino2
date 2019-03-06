@@ -3,25 +3,25 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 
-namespace chatterino {
-
-Emotes::Emotes()
+namespace chatterino
 {
-}
+    Emotes::Emotes()
+    {
+    }
 
-void Emotes::initialize(Settings &settings, Paths &paths)
-{
-    getApp()->accounts->twitch.currentUserChanged.connect(
-        [] { getApp()->accounts->twitch.getCurrent()->loadEmotes(); });
+    void Emotes::initialize(Settings& settings, Paths& paths)
+    {
+        getApp()->accounts->twitch.currentUserChanged.connect(
+            [] { getApp()->accounts->twitch.getCurrent()->loadEmotes(); });
 
-    this->emojis.load();
+        this->emojis.load();
 
-    this->gifTimer.initialize();
-}
+        this->gifTimer.initialize();
+    }
 
-bool Emotes::isIgnoredEmote(const QString &)
-{
-    return false;
-}
+    bool Emotes::isIgnoredEmote(const QString&)
+    {
+        return false;
+    }
 
 }  // namespace chatterino

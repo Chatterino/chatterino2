@@ -3,18 +3,18 @@
 #include <QRegularExpressionMatch>
 #include <QString>
 
-namespace chatterino {
-
-class LinkParser
+namespace chatterino
 {
-public:
-    explicit LinkParser(const QString &unparsedString);
+    class LinkParser
+    {
+    public:
+        explicit LinkParser(const QString& unparsedString);
 
-    bool hasMatch() const;
-    QString getCaptured() const;
+        bool hasMatch() const;
+        QString getCaptured() const;
 
-private:
-    QRegularExpressionMatch match_;
-};
+    private:
+        QRegularExpressionMatch match_;
+    };
 
 }  // namespace chatterino

@@ -10,24 +10,24 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/helper/GifTimer.hpp"
 
-namespace chatterino {
-
-class Settings;
-class Paths;
-
-class Emotes final : public Singleton
+namespace chatterino
 {
-public:
-    Emotes();
+    class Settings;
+    class Paths;
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    class Emotes final : public Singleton
+    {
+    public:
+        Emotes();
 
-    bool isIgnoredEmote(const QString &emote);
+        virtual void initialize(Settings& settings, Paths& paths) override;
 
-    TwitchEmotes twitch;
-    Emojis emojis;
+        bool isIgnoredEmote(const QString& emote);
 
-    GIFTimer gifTimer;
-};
+        TwitchEmotes twitch;
+        Emojis emojis;
+
+        GIFTimer gifTimer;
+    };
 
 }  // namespace chatterino

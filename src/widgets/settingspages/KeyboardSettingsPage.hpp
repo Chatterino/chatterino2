@@ -2,12 +2,12 @@
 
 #include "widgets/settingspages/SettingsPage.hpp"
 
-namespace chatterino {
-
-class KeyboardSettingsPage : public SettingsPage
+namespace chatterino
 {
-public:
-    KeyboardSettingsPage();
-};
+    class KeyboardSettingsPage : public SettingsPage
+    {
+    public:
+        KeyboardSettingsPage();
+    };
 
 }  // namespace chatterino

@@ -3,23 +3,23 @@
 #include <QString>
 #include <boost/optional.hpp>
 
-namespace chatterino {
-
-struct Emote;
-using EmotePtr = std::shared_ptr<const Emote>;
-
-class FfzModBadge
+namespace chatterino
 {
-public:
-    FfzModBadge(const QString &channelName);
+    struct Emote;
+    using EmotePtr = std::shared_ptr<const Emote>;
 
-    void loadCustomModBadge();
+    class FfzModBadge
+    {
+    public:
+        FfzModBadge(const QString& channelName);
 
-    EmotePtr badge() const;
+        void loadCustomModBadge();
 
-private:
-    const QString channelName_;
-    EmotePtr badge_;
-};
+        EmotePtr badge() const;
+
+    private:
+        const QString channelName_;
+        EmotePtr badge_;
+    };
 
 }  // namespace chatterino

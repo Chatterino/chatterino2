@@ -3,19 +3,19 @@
 #include <rapidjson/document.h>
 #include <QJsonObject>
 
-namespace chatterino {
-
-class NetworkResult
+namespace chatterino
 {
-public:
-    NetworkResult(const QByteArray &data);
+    class NetworkResult
+    {
+    public:
+        NetworkResult(const QByteArray& data);
 
-    QJsonObject parseJson() const;
-    rapidjson::Document parseRapidJson() const;
-    const QByteArray &getData() const;
+        QJsonObject parseJson() const;
+        rapidjson::Document parseRapidJson() const;
+        const QByteArray& getData() const;
 
-private:
-    QByteArray data_;
-};
+    private:
+        QByteArray data_;
+    };
 
 }  // namespace chatterino

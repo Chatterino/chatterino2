@@ -5,17 +5,17 @@
 
 #include <QPushButton>
 
-namespace chatterino {
-
-class AccountsPage : public SettingsPage
+namespace chatterino
 {
-public:
-    AccountsPage();
+    class AccountsPage : public SettingsPage
+    {
+    public:
+        AccountsPage();
 
-private:
-    QPushButton *addButton_;
-    QPushButton *removeButton_;
-    AccountSwitchWidget *accountSwitchWidget_;
-};
+    private:
+        QPushButton* addButton_;
+        QPushButton* removeButton_;
+        AccountSwitchWidget* accountSwitchWidget_;
+    };
 
 }  // namespace chatterino

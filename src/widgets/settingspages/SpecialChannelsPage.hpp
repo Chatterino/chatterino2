@@ -2,12 +2,12 @@
 
 #include "widgets/settingspages/SettingsPage.hpp"
 
-namespace chatterino {
-
-class SpecialChannelsPage : public SettingsPage
+namespace chatterino
 {
-public:
-    SpecialChannelsPage();
-};
+    class SpecialChannelsPage : public SettingsPage
+    {
+    public:
+        SpecialChannelsPage();
+    };
 
 }  // namespace chatterino

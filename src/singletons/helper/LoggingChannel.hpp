@@ -9,39 +9,39 @@
 
 #include <memory>
 
-namespace chatterino {
-
-class Logging;
-
-class LoggingChannel : boost::noncopyable
+namespace chatterino
 {
-    explicit LoggingChannel(const QString &_channelName);
+    class Logging;
 
-public:
-    ~LoggingChannel();
-    void addMessage(MessagePtr message);
+    class LoggingChannel : boost::noncopyable
+    {
+        explicit LoggingChannel(const QString& _channelName);
 
-private:
-    void openLogFile();
+    public:
+        ~LoggingChannel();
+        void addMessage(MessagePtr message);
 
-    QString generateOpeningString(
-        const QDateTime &now = QDateTime::currentDateTime()) const;
-    QString generateClosingString(
-        const QDateTime &now = QDateTime::currentDateTime()) const;
+    private:
+        void openLogFile();
 
-    void appendLine(const QString &line);
+        QString generateOpeningString(
+            const QDateTime& now = QDateTime::currentDateTime()) const;
+        QString generateClosingString(
+            const QDateTime& now = QDateTime::currentDateTime()) const;
 
-    QString generateDateString(const QDateTime &now);
+        void appendLine(const QString& line);
 
-    const QString channelName;
-    QString baseDirectory;
-    QString subDirectory;
+        QString generateDateString(const QDateTime& now);
 
-    QFile fileHandle;
+        const QString channelName;
+        QString baseDirectory;
+        QString subDirectory;
 
-    QString dateString;
+        QFile fileHandle;
 
-    friend class Logging;
-};
+        QString dateString;
+
+        friend class Logging;
+    };
 
 }  // namespace chatterino

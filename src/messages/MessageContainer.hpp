@@ -2,12 +2,12 @@
 
 #include <deque>
 
-namespace chatterino {
-
-class MessageContainer
+namespace chatterino
 {
-public:
-    MessageContainer();
-};
+    class MessageContainer
+    {
+    public:
+        MessageContainer();
+    };
 
 }  // namespace chatterino

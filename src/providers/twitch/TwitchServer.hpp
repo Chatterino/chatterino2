@@ -13,70 +13,73 @@
 #include <memory>
 #include <queue>
 
-namespace chatterino {
-
-class Settings;
-class Paths;
-class PubSub;
-class TwitchChannel;
-
-class TwitchServer final : public AbstractIrcServer, public Singleton
+namespace chatterino
 {
-public:
-    TwitchServer();
-    virtual ~TwitchServer() override = default;
+    class Settings;
+    class Paths;
+    class PubSub;
+    class TwitchChannel;
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
+    class TwitchServer final : public AbstractIrcServer, public Singleton
+    {
+    public:
+        TwitchServer();
+        virtual ~TwitchServer() override = default;
 
-    void forEachChannelAndSpecialChannels(std::function<void(ChannelPtr)> func);
+        virtual void initialize(Settings& settings, Paths& paths) override;
 
-    std::shared_ptr<Channel> getChannelOrEmptyByID(const QString &channelID);
+        void forEachChannelAndSpecialChannels(
+            std::function<void(ChannelPtr)> func);
 
-    Atomic<QString> lastUserThatWhisperedMe;
+        std::shared_ptr<Channel> getChannelOrEmptyByID(
+            const QString& channelID);
 
-    const ChannelPtr whispersChannel;
-    const ChannelPtr mentionsChannel;
-    IndirectChannel watchingChannel;
+        Atomic<QString> lastUserThatWhisperedMe;
 
-    PubSub *pubsub;
+        const ChannelPtr whispersChannel;
+        const ChannelPtr mentionsChannel;
+        IndirectChannel watchingChannel;
 
-    const BttvEmotes &getBttvEmotes() const;
-    const FfzEmotes &getFfzEmotes() const;
+        PubSub* pubsub;
 
-protected:
-    virtual void initializeConnection(IrcConnection *connection, bool isRead,
-                                      bool isWrite) override;
-    virtual std::shared_ptr<Channel> createChannel(
-        const QString &channelName) override;
+        const BttvEmotes& getBttvEmotes() const;
+        const FfzEmotes& getFfzEmotes() const;
 
-    virtual void privateMessageReceived(
-        Communi::IrcPrivateMessage *message) override;
-    virtual void messageReceived(Communi::IrcMessage *message) override;
-    virtual void writeConnectionMessageReceived(
-        Communi::IrcMessage *message) override;
+    protected:
+        virtual void initializeConnection(
+            IrcConnection* connection, bool isRead, bool isWrite) override;
+        virtual std::shared_ptr<Channel> createChannel(
+            const QString& channelName) override;
 
-    virtual std::shared_ptr<Channel> getCustomChannel(
-        const QString &channelname) override;
+        virtual void privateMessageReceived(
+            Communi::IrcPrivateMessage* message) override;
+        virtual void messageReceived(Communi::IrcMessage* message) override;
+        virtual void writeConnectionMessageReceived(
+            Communi::IrcMessage* message) override;
 
-    virtual QString cleanChannelName(const QString &dirtyChannelName) override;
-    virtual bool hasSeparateWriteConnection() const override;
+        virtual std::shared_ptr<Channel> getCustomChannel(
+            const QString& channelname) override;
 
-private:
-    void onMessageSendRequested(TwitchChannel *channel, const QString &message,
-                                bool &sent);
+        virtual QString cleanChannelName(
+            const QString& dirtyChannelName) override;
+        virtual bool hasSeparateWriteConnection() const override;
 
-    std::mutex lastMessageMutex_;
-    std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;
-    std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
-    std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
-    std::chrono::steady_clock::time_point lastErrorTimeAmount_;
+    private:
+        void onMessageSendRequested(
+            TwitchChannel* channel, const QString& message, bool& sent);
 
-    bool singleConnection_ = false;
-    TwitchBadges twitchBadges;
-    BttvEmotes bttv;
-    FfzEmotes ffz;
+        std::mutex lastMessageMutex_;
+        std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;
+        std::queue<std::chrono::steady_clock::time_point> lastMessageMod_;
+        std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
+        std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
-    pajlada::Signals::SignalHolder signalHolder_;
-};
+        bool singleConnection_ = false;
+        TwitchBadges twitchBadges;
+        BttvEmotes bttv;
+        FfzEmotes ffz;
+
+        pajlada::Signals::SignalHolder signalHolder_;
+    };
 
 }  // namespace chatterino

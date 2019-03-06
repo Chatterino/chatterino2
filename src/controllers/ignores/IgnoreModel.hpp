@@ -5,24 +5,24 @@
 #include "common/SignalVectorModel.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 
-namespace chatterino {
-
-class IgnoreController;
-
-class IgnoreModel : public SignalVectorModel<IgnorePhrase>
+namespace chatterino
 {
-    explicit IgnoreModel(QObject *parent);
+    class IgnoreController;
 
-protected:
-    // turn a vector item into a model row
-    virtual IgnorePhrase getItemFromRow(std::vector<QStandardItem *> &row,
-                                        const IgnorePhrase &original) override;
+    class IgnoreModel : public SignalVectorModel<IgnorePhrase>
+    {
+        explicit IgnoreModel(QObject* parent);
 
-    // turns a row in the model into a vector item
-    virtual void getRowFromItem(const IgnorePhrase &item,
-                                std::vector<QStandardItem *> &row) override;
+    protected:
+        // turn a vector item into a model row
+        virtual IgnorePhrase getItemFromRow(std::vector<QStandardItem*>& row,
+            const IgnorePhrase& original) override;
 
-    friend class IgnoreController;
-};
+        // turns a row in the model into a vector item
+        virtual void getRowFromItem(const IgnorePhrase& item,
+            std::vector<QStandardItem*>& row) override;
+
+        friend class IgnoreController;
+    };
 
 }  // namespace chatterino

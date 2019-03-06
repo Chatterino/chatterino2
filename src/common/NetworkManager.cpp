@@ -2,21 +2,22 @@
 
 #include <QNetworkAccessManager>
 
-namespace chatterino {
-
-QThread NetworkManager::workerThread;
-QNetworkAccessManager NetworkManager::accessManager;
-
-void NetworkManager::init()
+namespace chatterino
 {
-    NetworkManager::accessManager.moveToThread(&NetworkManager::workerThread);
-    NetworkManager::workerThread.start();
-}
+    QThread NetworkManager::workerThread;
+    QNetworkAccessManager NetworkManager::accessManager;
 
-void NetworkManager::deinit()
-{
-    NetworkManager::workerThread.quit();
-    NetworkManager::workerThread.wait();
-}
+    void NetworkManager::init()
+    {
+        NetworkManager::accessManager.moveToThread(
+            &NetworkManager::workerThread);
+        NetworkManager::workerThread.start();
+    }
+
+    void NetworkManager::deinit()
+    {
+        NetworkManager::workerThread.quit();
+        NetworkManager::workerThread.wait();
+    }
 
 }  // namespace chatterino

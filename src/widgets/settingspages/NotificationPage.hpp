@@ -7,14 +7,14 @@ class QListWidget;
 
 class QVBoxLayout;
 
-namespace chatterino {
-
-class NotificationPage : public SettingsPage
+namespace chatterino
 {
-public:
-    NotificationPage();
+    class NotificationPage : public SettingsPage
+    {
+    public:
+        NotificationPage();
 
-private:
-};
+    private:
+    };
 
 }  // namespace chatterino

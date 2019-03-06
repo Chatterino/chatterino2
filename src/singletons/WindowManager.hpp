@@ -6,96 +6,96 @@
 #include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-namespace chatterino {
-
-class Settings;
-class Paths;
-class Window;
-class SplitContainer;
-
-enum class MessageElementFlag;
-using MessageElementFlags = FlagsEnum<MessageElementFlag>;
-enum class WindowType;
-
-enum class SettingsDialogPreference;
-
-class WindowManager final : public Singleton
+namespace chatterino
 {
-public:
-    WindowManager();
+    class Settings;
+    class Paths;
+    class Window;
+    class SplitContainer;
 
-    static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
-    static IndirectChannel decodeChannel(const QJsonObject &obj);
+    enum class MessageElementFlag;
+    using MessageElementFlags = FlagsEnum<MessageElementFlag>;
+    enum class WindowType;
 
-    void showSettingsDialog(
-        SettingsDialogPreference preference = SettingsDialogPreference());
+    enum class SettingsDialogPreference;
 
-    // Show the account selector widget at point
-    void showAccountSelectPopup(QPoint point);
+    class WindowManager final : public Singleton
+    {
+    public:
+        WindowManager();
 
-    // Tell a channel (or all channels if channel is nullptr) to redo their
-    // layout
-    void layoutChannelViews(Channel *channel = nullptr);
+        static void encodeChannel(IndirectChannel channel, QJsonObject& obj);
+        static IndirectChannel decodeChannel(const QJsonObject& obj);
 
-    // Force all channel views to redo their layout
-    // This is called, for example, when the emote scale or timestamp format has
-    // changed
-    void forceLayoutChannelViews();
-    void repaintVisibleChatWidgets(Channel *channel = nullptr);
-    void repaintGifEmotes();
+        void showSettingsDialog(
+            SettingsDialogPreference preference = SettingsDialogPreference());
 
-    Window &getMainWindow();
-    Window &getSelectedWindow();
-    Window &createWindow(WindowType type);
+        // Show the account selector widget at point
+        void showAccountSelectPopup(QPoint point);
 
-    int windowCount();
-    Window *windowAt(int index);
+        // Tell a channel (or all channels if channel is nullptr) to redo their
+        // layout
+        void layoutChannelViews(Channel* channel = nullptr);
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
-    virtual void save() override;
-    void closeAll();
+        // Force all channel views to redo their layout
+        // This is called, for example, when the emote scale or timestamp format
+        // has changed
+        void forceLayoutChannelViews();
+        void repaintVisibleChatWidgets(Channel* channel = nullptr);
+        void repaintGifEmotes();
 
-    int getGeneration() const;
-    void incGeneration();
+        Window& getMainWindow();
+        Window& getSelectedWindow();
+        Window& createWindow(WindowType type);
 
-    MessageElementFlags getWordFlags();
-    void updateWordTypeMask();
+        int windowCount();
+        Window* windowAt(int index);
 
-    // Sends an alert to the main window
-    // It reads the `longAlert` setting to decide whether the alert will expire
-    // or not
-    void sendAlert();
+        virtual void initialize(Settings& settings, Paths& paths) override;
+        virtual void save() override;
+        void closeAll();
 
-    // Queue up a save in the next 10 seconds
-    // If a save was already queued up, we reset the to happen in 10 seconds
-    // again
-    void queueSave();
+        int getGeneration() const;
+        void incGeneration();
 
-    /// Signals
-    pajlada::Signals::NoArgSignal gifRepaintRequested;
+        MessageElementFlags getWordFlags();
+        void updateWordTypeMask();
 
-    // This signal fires whenever views rendering a channel, or all views if the
-    // channel is a nullptr, need to redo their layout
-    pajlada::Signals::Signal<Channel *> layoutRequested;
+        // Sends an alert to the main window
+        // It reads the `longAlert` setting to decide whether the alert will
+        // expire or not
+        void sendAlert();
 
-    pajlada::Signals::NoArgSignal wordFlagsChanged;
+        // Queue up a save in the next 10 seconds
+        // If a save was already queued up, we reset the to happen in 10 seconds
+        // again
+        void queueSave();
 
-private:
-    void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
+        /// Signals
+        pajlada::Signals::NoArgSignal gifRepaintRequested;
 
-    bool initialized_ = false;
+        // This signal fires whenever views rendering a channel, or all views if
+        // the channel is a nullptr, need to redo their layout
+        pajlada::Signals::Signal<Channel*> layoutRequested;
 
-    std::atomic<int> generation_{0};
+        pajlada::Signals::NoArgSignal wordFlagsChanged;
 
-    std::vector<Window *> windows_;
+    private:
+        void encodeNodeRecusively(SplitContainer::Node* node, QJsonObject& obj);
 
-    Window *mainWindow_{};
-    Window *selectedWindow_{};
+        bool initialized_ = false;
 
-    MessageElementFlags wordFlags_{};
-    pajlada::SettingListener wordFlagsListener_;
+        std::atomic<int> generation_{0};
 
-    QTimer *saveTimer;
-};
+        std::vector<Window*> windows_;
+
+        Window* mainWindow_{};
+        Window* selectedWindow_{};
+
+        MessageElementFlags wordFlags_{};
+        pajlada::SettingListener wordFlagsListener_;
+
+        QTimer* saveTimer;
+    };
 
 }  // namespace chatterino

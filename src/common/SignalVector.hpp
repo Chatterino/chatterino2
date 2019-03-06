@@ -8,138 +8,140 @@
 
 #include "debug/AssertInGuiThread.hpp"
 
-namespace chatterino {
-
-template <typename TVectorItem>
-struct SignalVectorItemArgs {
-    const TVectorItem &item;
-    int index;
-    void *caller;
-};
-
-template <typename TVectorItem>
-class ReadOnlySignalVector : boost::noncopyable
+namespace chatterino
 {
-public:
-    ReadOnlySignalVector()
+    template <typename TVectorItem>
+    struct SignalVectorItemArgs
     {
-        QObject::connect(&this->itemsChangedTimer_, &QTimer::timeout,
-                         [this] { this->delayedItemsChanged.invoke(); });
-        this->itemsChangedTimer_.setInterval(100);
-        this->itemsChangedTimer_.setSingleShot(true);
-    }
-    virtual ~ReadOnlySignalVector() = default;
+        const TVectorItem& item;
+        int index;
+        void* caller;
+    };
 
-    pajlada::Signals::Signal<SignalVectorItemArgs<TVectorItem>> itemInserted;
-    pajlada::Signals::Signal<SignalVectorItemArgs<TVectorItem>> itemRemoved;
-    pajlada::Signals::NoArgSignal delayedItemsChanged;
-
-    const std::vector<TVectorItem> &getVector() const
+    template <typename TVectorItem>
+    class ReadOnlySignalVector : boost::noncopyable
     {
-        assertInGuiThread();
-
-        return this->vector_;
-    }
-
-    void invokeDelayedItemsChanged()
-    {
-        assertInGuiThread();
-
-        if (!this->itemsChangedTimer_.isActive())
+    public:
+        ReadOnlySignalVector()
         {
-            this->itemsChangedTimer_.start();
+            QObject::connect(&this->itemsChangedTimer_, &QTimer::timeout,
+                [this] { this->delayedItemsChanged.invoke(); });
+            this->itemsChangedTimer_.setInterval(100);
+            this->itemsChangedTimer_.setSingleShot(true);
         }
-    }
+        virtual ~ReadOnlySignalVector() = default;
 
-    virtual bool isSorted() const = 0;
+        pajlada::Signals::Signal<SignalVectorItemArgs<TVectorItem>>
+            itemInserted;
+        pajlada::Signals::Signal<SignalVectorItemArgs<TVectorItem>> itemRemoved;
+        pajlada::Signals::NoArgSignal delayedItemsChanged;
 
-protected:
-    std::vector<TVectorItem> vector_;
-    QTimer itemsChangedTimer_;
-};
-
-template <typename TVectorItem>
-class BaseSignalVector : public ReadOnlySignalVector<TVectorItem>
-{
-public:
-    // returns the actual index of the inserted item
-    virtual int insertItem(const TVectorItem &item, int proposedIndex = -1,
-                           void *caller = nullptr) = 0;
-
-    void removeItem(int index, void *caller = nullptr)
-    {
-        assertInGuiThread();
-        assert(index >= 0 && index < this->vector_.size());
-
-        TVectorItem item = this->vector_[index];
-        this->vector_.erase(this->vector_.begin() + index);
-        SignalVectorItemArgs<TVectorItem> args{item, index, caller};
-        this->itemRemoved.invoke(args);
-
-        this->invokeDelayedItemsChanged();
-    }
-
-    int appendItem(const TVectorItem &item, void *caller = nullptr)
-    {
-        return this->insertItem(item, -1, caller);
-    }
-};
-
-template <typename TVectorItem>
-class UnsortedSignalVector : public BaseSignalVector<TVectorItem>
-{
-public:
-    virtual int insertItem(const TVectorItem &item, int index = -1,
-                           void *caller = nullptr) override
-    {
-        assertInGuiThread();
-        if (index == -1)
+        const std::vector<TVectorItem>& getVector() const
         {
-            index = this->vector_.size();
-        }
-        else
-        {
-            assert(index >= 0 && index <= this->vector_.size());
+            assertInGuiThread();
+
+            return this->vector_;
         }
 
-        this->vector_.insert(this->vector_.begin() + index, item);
+        void invokeDelayedItemsChanged()
+        {
+            assertInGuiThread();
 
-        SignalVectorItemArgs<TVectorItem> args{item, index, caller};
-        this->itemInserted.invoke(args);
-        this->invokeDelayedItemsChanged();
-        return index;
-    }
+            if (!this->itemsChangedTimer_.isActive())
+            {
+                this->itemsChangedTimer_.start();
+            }
+        }
 
-    virtual bool isSorted() const override
+        virtual bool isSorted() const = 0;
+
+    protected:
+        std::vector<TVectorItem> vector_;
+        QTimer itemsChangedTimer_;
+    };
+
+    template <typename TVectorItem>
+    class BaseSignalVector : public ReadOnlySignalVector<TVectorItem>
     {
-        return false;
-    }
-};
+    public:
+        // returns the actual index of the inserted item
+        virtual int insertItem(const TVectorItem& item, int proposedIndex = -1,
+            void* caller = nullptr) = 0;
 
-template <typename TVectorItem, typename Compare>
-class SortedSignalVector : public BaseSignalVector<TVectorItem>
-{
-public:
-    virtual int insertItem(const TVectorItem &item, int = -1,
-                           void *caller = nullptr) override
+        void removeItem(int index, void* caller = nullptr)
+        {
+            assertInGuiThread();
+            assert(index >= 0 && index < this->vector_.size());
+
+            TVectorItem item = this->vector_[index];
+            this->vector_.erase(this->vector_.begin() + index);
+            SignalVectorItemArgs<TVectorItem> args{item, index, caller};
+            this->itemRemoved.invoke(args);
+
+            this->invokeDelayedItemsChanged();
+        }
+
+        int appendItem(const TVectorItem& item, void* caller = nullptr)
+        {
+            return this->insertItem(item, -1, caller);
+        }
+    };
+
+    template <typename TVectorItem>
+    class UnsortedSignalVector : public BaseSignalVector<TVectorItem>
     {
-        assertInGuiThread();
+    public:
+        virtual int insertItem(const TVectorItem& item, int index = -1,
+            void* caller = nullptr) override
+        {
+            assertInGuiThread();
+            if (index == -1)
+            {
+                index = this->vector_.size();
+            }
+            else
+            {
+                assert(index >= 0 && index <= this->vector_.size());
+            }
 
-        auto it = std::lower_bound(this->vector_.begin(), this->vector_.end(),
-                                   item, Compare{});
-        int index = it - this->vector_.begin();
-        this->vector_.insert(it, item);
+            this->vector_.insert(this->vector_.begin() + index, item);
 
-        SignalVectorItemArgs<TVectorItem> args{item, index, caller};
-        this->itemInserted.invoke(args);
-        this->invokeDelayedItemsChanged();
-        return index;
-    }
+            SignalVectorItemArgs<TVectorItem> args{item, index, caller};
+            this->itemInserted.invoke(args);
+            this->invokeDelayedItemsChanged();
+            return index;
+        }
 
-    virtual bool isSorted() const override
+        virtual bool isSorted() const override
+        {
+            return false;
+        }
+    };
+
+    template <typename TVectorItem, typename Compare>
+    class SortedSignalVector : public BaseSignalVector<TVectorItem>
     {
-        return true;
-    }
-};
+    public:
+        virtual int insertItem(
+            const TVectorItem& item, int = -1, void* caller = nullptr) override
+        {
+            assertInGuiThread();
+
+            auto it = std::lower_bound(
+                this->vector_.begin(), this->vector_.end(), item, Compare{});
+            int index = it - this->vector_.begin();
+            this->vector_.insert(it, item);
+
+            SignalVectorItemArgs<TVectorItem> args{item, index, caller};
+            this->itemInserted.invoke(args);
+            this->invokeDelayedItemsChanged();
+            return index;
+        }
+
+        virtual bool isSorted() const override
+        {
+            return true;
+        }
+    };
 
 }  // namespace chatterino

@@ -6,38 +6,36 @@
 
 #include <unordered_map>
 
-namespace chatterino {
-
-class Account;
-class AccountController;
-
-class AccountModel : public SignalVectorModel<std::shared_ptr<Account>>
+namespace chatterino
 {
-public:
-    AccountModel(QObject *parent);
+    class Account;
+    class AccountController;
 
-protected:
-    // turn a vector item into a model row
-    virtual std::shared_ptr<Account> getItemFromRow(
-        std::vector<QStandardItem *> &row,
-        const std::shared_ptr<Account> &original) override;
+    class AccountModel : public SignalVectorModel<std::shared_ptr<Account>>
+    {
+    public:
+        AccountModel(QObject* parent);
 
-    // turns a row in the model into a vector item
-    virtual void getRowFromItem(const std::shared_ptr<Account> &item,
-                                std::vector<QStandardItem *> &row) override;
+    protected:
+        // turn a vector item into a model row
+        virtual std::shared_ptr<Account> getItemFromRow(
+            std::vector<QStandardItem*>& row,
+            const std::shared_ptr<Account>& original) override;
 
-    virtual int beforeInsert(const std::shared_ptr<Account> &item,
-                             std::vector<QStandardItem *> &row,
-                             int proposedIndex) override;
+        // turns a row in the model into a vector item
+        virtual void getRowFromItem(const std::shared_ptr<Account>& item,
+            std::vector<QStandardItem*>& row) override;
 
-    virtual void afterRemoved(const std::shared_ptr<Account> &item,
-                              std::vector<QStandardItem *> &row,
-                              int index) override;
+        virtual int beforeInsert(const std::shared_ptr<Account>& item,
+            std::vector<QStandardItem*>& row, int proposedIndex) override;
 
-    friend class AccountController;
+        virtual void afterRemoved(const std::shared_ptr<Account>& item,
+            std::vector<QStandardItem*>& row, int index) override;
 
-private:
-    std::unordered_map<QString, int> categoryCount_;
-};
+        friend class AccountController;
+
+    private:
+        std::unordered_map<QString, int> categoryCount_;
+    };
 
 }  // namespace chatterino

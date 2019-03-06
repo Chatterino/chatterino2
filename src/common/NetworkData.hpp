@@ -8,33 +8,34 @@
 
 class QNetworkReply;
 
-namespace chatterino {
+namespace chatterino
+{
+    class NetworkResult;
 
-class NetworkResult;
+    struct NetworkData
+    {
+        NetworkData();
+        ~NetworkData();
 
-struct NetworkData {
-    NetworkData();
-    ~NetworkData();
+        QNetworkRequest request_;
+        const QObject* caller_ = nullptr;
+        bool useQuickLoadCache_{};
+        bool executeConcurrently{};
 
-    QNetworkRequest request_;
-    const QObject *caller_ = nullptr;
-    bool useQuickLoadCache_{};
-    bool executeConcurrently{};
+        NetworkReplyCreatedCallback onReplyCreated_;
+        NetworkErrorCallback onError_;
+        NetworkSuccessCallback onSuccess_;
 
-    NetworkReplyCreatedCallback onReplyCreated_;
-    NetworkErrorCallback onError_;
-    NetworkSuccessCallback onSuccess_;
+        NetworkRequestType requestType_ = NetworkRequestType::Get;
 
-    NetworkRequestType requestType_ = NetworkRequestType::Get;
+        QByteArray payload_;
 
-    QByteArray payload_;
+        QString getHash();
 
-    QString getHash();
+        void writeToCache(const QByteArray& bytes);
 
-    void writeToCache(const QByteArray &bytes);
-
-private:
-    QString hash_;
-};
+    private:
+        QString hash_;
+    };
 
 }  // namespace chatterino

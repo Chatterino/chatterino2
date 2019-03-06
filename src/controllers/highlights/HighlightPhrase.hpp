@@ -7,107 +7,111 @@
 #include <QString>
 #include <pajlada/serialize.hpp>
 
-namespace chatterino {
-
-class HighlightPhrase
+namespace chatterino
 {
-public:
-    bool operator==(const HighlightPhrase &other) const
+    class HighlightPhrase
     {
-        return std::tie(this->pattern_, this->sound_, this->alert_,
-                        this->isRegex_) == std::tie(other.pattern_,
-                                                    other.sound_, other.alert_,
-                                                    other.isRegex_);
-    }
-
-    HighlightPhrase(const QString &pattern, bool alert, bool sound,
-                    bool isRegex)
-        : pattern_(pattern)
-        , alert_(alert)
-        , sound_(sound)
-        , isRegex_(isRegex)
-        , regex_(isRegex_ ? pattern
-                          : "\\b" + QRegularExpression::escape(pattern) + "\\b",
-                 QRegularExpression::CaseInsensitiveOption |
-                     QRegularExpression::UseUnicodePropertiesOption)
-    {
-    }
-
-    const QString &getPattern() const
-    {
-        return this->pattern_;
-    }
-    bool getAlert() const
-    {
-        return this->alert_;
-    }
-    bool getSound() const
-    {
-        return this->sound_;
-    }
-    bool isRegex() const
-    {
-        return this->isRegex_;
-    }
-
-    bool isValid() const
-    {
-        return !this->pattern_.isEmpty() && this->regex_.isValid();
-    }
-
-    bool isMatch(const QString &subject) const
-    {
-        return this->isValid() && this->regex_.match(subject).hasMatch();
-    }
-
-private:
-    QString pattern_;
-    bool alert_;
-    bool sound_;
-    bool isRegex_;
-    QRegularExpression regex_;
-};
-}  // namespace chatterino
-
-namespace pajlada {
-
-template <>
-struct Serialize<chatterino::HighlightPhrase> {
-    static rapidjson::Value get(const chatterino::HighlightPhrase &value,
-                                rapidjson::Document::AllocatorType &a)
-    {
-        rapidjson::Value ret(rapidjson::kObjectType);
-
-        chatterino::rj::set(ret, "pattern", value.getPattern(), a);
-        chatterino::rj::set(ret, "alert", value.getAlert(), a);
-        chatterino::rj::set(ret, "sound", value.getSound(), a);
-        chatterino::rj::set(ret, "regex", value.isRegex(), a);
-
-        return ret;
-    }
-};
-
-template <>
-struct Deserialize<chatterino::HighlightPhrase> {
-    static chatterino::HighlightPhrase get(const rapidjson::Value &value)
-    {
-        if (!value.IsObject())
+    public:
+        bool operator==(const HighlightPhrase& other) const
         {
-            return chatterino::HighlightPhrase(QString(), true, false, false);
+            return std::tie(this->pattern_, this->sound_, this->alert_,
+                       this->isRegex_) == std::tie(other.pattern_, other.sound_,
+                                              other.alert_, other.isRegex_);
         }
 
-        QString _pattern;
-        bool _alert = true;
-        bool _sound = false;
-        bool _isRegex = false;
+        HighlightPhrase(
+            const QString& pattern, bool alert, bool sound, bool isRegex)
+            : pattern_(pattern)
+            , alert_(alert)
+            , sound_(sound)
+            , isRegex_(isRegex)
+            , regex_(isRegex_
+                         ? pattern
+                         : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+                  QRegularExpression::CaseInsensitiveOption |
+                      QRegularExpression::UseUnicodePropertiesOption)
+        {
+        }
 
-        chatterino::rj::getSafe(value, "pattern", _pattern);
-        chatterino::rj::getSafe(value, "alert", _alert);
-        chatterino::rj::getSafe(value, "sound", _sound);
-        chatterino::rj::getSafe(value, "regex", _isRegex);
+        const QString& getPattern() const
+        {
+            return this->pattern_;
+        }
+        bool getAlert() const
+        {
+            return this->alert_;
+        }
+        bool getSound() const
+        {
+            return this->sound_;
+        }
+        bool isRegex() const
+        {
+            return this->isRegex_;
+        }
 
-        return chatterino::HighlightPhrase(_pattern, _alert, _sound, _isRegex);
-    }
-};
+        bool isValid() const
+        {
+            return !this->pattern_.isEmpty() && this->regex_.isValid();
+        }
+
+        bool isMatch(const QString& subject) const
+        {
+            return this->isValid() && this->regex_.match(subject).hasMatch();
+        }
+
+    private:
+        QString pattern_;
+        bool alert_;
+        bool sound_;
+        bool isRegex_;
+        QRegularExpression regex_;
+    };
+}  // namespace chatterino
+
+namespace pajlada
+{
+    template <>
+    struct Serialize<chatterino::HighlightPhrase>
+    {
+        static rapidjson::Value get(const chatterino::HighlightPhrase& value,
+            rapidjson::Document::AllocatorType& a)
+        {
+            rapidjson::Value ret(rapidjson::kObjectType);
+
+            chatterino::rj::set(ret, "pattern", value.getPattern(), a);
+            chatterino::rj::set(ret, "alert", value.getAlert(), a);
+            chatterino::rj::set(ret, "sound", value.getSound(), a);
+            chatterino::rj::set(ret, "regex", value.isRegex(), a);
+
+            return ret;
+        }
+    };
+
+    template <>
+    struct Deserialize<chatterino::HighlightPhrase>
+    {
+        static chatterino::HighlightPhrase get(const rapidjson::Value& value)
+        {
+            if (!value.IsObject())
+            {
+                return chatterino::HighlightPhrase(
+                    QString(), true, false, false);
+            }
+
+            QString _pattern;
+            bool _alert = true;
+            bool _sound = false;
+            bool _isRegex = false;
+
+            chatterino::rj::getSafe(value, "pattern", _pattern);
+            chatterino::rj::getSafe(value, "alert", _alert);
+            chatterino::rj::getSafe(value, "sound", _sound);
+            chatterino::rj::getSafe(value, "regex", _isRegex);
+
+            return chatterino::HighlightPhrase(
+                _pattern, _alert, _sound, _isRegex);
+        }
+    };
 
 }  // namespace pajlada

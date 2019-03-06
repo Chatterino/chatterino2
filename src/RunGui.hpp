@@ -2,9 +2,10 @@
 
 class QApplication;
 
-namespace chatterino {
-class Paths;
-class Settings;
+namespace chatterino
+{
+    class Paths;
+    class Settings;
 
-void runGui(QApplication &a, Paths &paths, Settings &settings);
+    void runGui(QApplication& a, Paths& paths, Settings& settings);
 }  // namespace chatterino
