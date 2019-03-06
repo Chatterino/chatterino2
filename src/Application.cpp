@@ -19,7 +19,6 @@
 #include "singletons/Logging.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
@@ -41,9 +40,7 @@ namespace chatterino
     // signals to each other
 
     Application::Application(Settings& _settings, Paths& _paths)
-        : resources(&this->emplace<Resources2>())
-
-        , themes(&this->emplace<Theme>())
+        : themes(&this->emplace<Theme>())
         , fonts(&this->emplace<Fonts>())
         , emotes(&this->emplace<Emotes>())
         , windows(&this->emplace<WindowManager>())

@@ -12,7 +12,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
-#include "singletons/Resources.hpp"
+#include "util/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -1092,21 +1092,21 @@ namespace chatterino
             else if (badge == "staff/1")
             {
                 this->emplace<ImageElement>(
-                        Image::fromPixmap(app->resources->twitch.staff),
+                        Image::fromPixmap(resources().twitch.staff),
                         MessageElementFlag::BadgeGlobalAuthority)
                     ->setTooltip("Twitch Staff");
             }
             else if (badge == "admin/1")
             {
                 this->emplace<ImageElement>(
-                        Image::fromPixmap(app->resources->twitch.admin),
+                        Image::fromPixmap(resources().twitch.admin),
                         MessageElementFlag::BadgeGlobalAuthority)
                     ->setTooltip("Twitch Admin");
             }
             else if (badge == "global_mod/1")
             {
                 this->emplace<ImageElement>(
-                        Image::fromPixmap(app->resources->twitch.globalmod),
+                        Image::fromPixmap(resources().twitch.globalmod),
                         MessageElementFlag::BadgeGlobalAuthority)
                     ->setTooltip("Twitch Global Moderator");
             }
@@ -1121,28 +1121,28 @@ namespace chatterino
                     continue;
                 }
                 this->emplace<ImageElement>(
-                        Image::fromPixmap(app->resources->twitch.moderator),
+                        Image::fromPixmap(resources().twitch.moderator),
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip("Twitch Channel Moderator");
             }
             else if (badge == "broadcaster/1")
             {
                 this->emplace<ImageElement>(
-                        Image::fromPixmap(app->resources->twitch.broadcaster),
+                        Image::fromPixmap(resources().twitch.broadcaster),
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip("Twitch Broadcaster");
             }
             else if (badge == "turbo/1")
             {
                 this->emplace<ImageElement>(
-                        Image::fromPixmap(app->resources->twitch.turbo),
+                        Image::fromPixmap(resources().twitch.turbo),
                         MessageElementFlag::BadgeVanity)
                     ->setTooltip("Twitch Turbo Subscriber");
             }
             else if (badge == "premium/1")
             {
                 this->emplace<ImageElement>(
-                        Image::fromPixmap(app->resources->twitch.prime),
+                        Image::fromPixmap(resources().twitch.prime),
                         MessageElementFlag::BadgeVanity)
                     ->setTooltip("Twitch Prime Subscriber");
             }
@@ -1155,7 +1155,7 @@ namespace chatterino
                     {
                         this->emplace<ImageElement>(
                                 Image::fromPixmap(
-                                    app->resources->twitch.verified, 0.25),
+                                    resources().twitch.verified, 0.25),
                                 MessageElementFlag::BadgeVanity)
                             ->setTooltip("Twitch Verified");
                     }
@@ -1183,7 +1183,7 @@ namespace chatterino
                 // use default subscriber badge if custom one not found
                 this->emplace<ImageElement>(
                         Image::fromPixmap(
-                            app->resources->twitch.subscriber, 0.25),
+                            resources().twitch.subscriber, 0.25),
                         MessageElementFlag::BadgeSubscription)
                     ->setTooltip("Twitch Subscriber");
             }
@@ -1230,7 +1230,7 @@ namespace chatterino
         // auto app = getApp();
         //// Try to parse custom cheermotes
         // const auto &channelResources =
-        // app->resources->channels[this->roomID_]; if (channelResources.loaded)
+        // resources().channels[this->roomID_]; if (channelResources.loaded)
         // {
         //    for (const auto &cheermoteSet : channelResources.cheermoteSets) {
         //        auto match = cheermoteSet.regex.match(string);

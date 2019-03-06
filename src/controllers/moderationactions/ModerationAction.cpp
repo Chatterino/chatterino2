@@ -3,7 +3,7 @@
 #include <QRegularExpression>
 #include "Application.hpp"
 #include "messages/Image.hpp"
-#include "singletons/Resources.hpp"
+#include "util/Resources.hpp"
 
 namespace chatterino
 {
@@ -65,13 +65,13 @@ namespace chatterino
             // line1 = this->line1_;
             // line2 = this->line2_;
             // } else {
-            //     this->_moderationActions.emplace_back(app->resources->buttonTimeout,
+            //     this->_moderationActions.emplace_back(resources().buttonTimeout,
             //     str);
             // }
         }
         else if (action.startsWith("/ban "))
         {
-            this->image_ = Image::fromPixmap(getApp()->resources->buttons.ban);
+            this->image_ = Image::fromPixmap(resources().buttons.ban);
         }
         else
         {

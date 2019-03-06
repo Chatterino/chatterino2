@@ -7,10 +7,10 @@
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "singletons/Emotes.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
 #include "util/FormatTime.hpp"
 #include "util/IrcHelpers.hpp"
+#include "util/Resources.hpp"
 
 #include <QDateTime>
 #include <QImageReader>
@@ -32,7 +32,7 @@ namespace chatterino
 
         builder
             .emplace<ImageElement>(
-                Image::fromPixmap(getApp()->resources->twitch.automod),
+                Image::fromPixmap(resources().twitch.automod),
                 MessageElementFlag::BadgeChannelAuthority)
             ->setTooltip("AutoMod");
         builder.emplace<TextElement>(

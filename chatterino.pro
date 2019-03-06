@@ -163,7 +163,6 @@ SOURCES += \
     src/singletons/Logging.cpp \
     src/singletons/NativeMessaging.cpp \
     src/singletons/Paths.cpp \
-    src/singletons/Resources.cpp \
     src/singletons/Settings.cpp \
     src/singletons/Theme.cpp \
     src/singletons/Toasts.cpp \
@@ -191,6 +190,7 @@ SOURCES += \
     src/util/InitUpdateButton.cpp \
     src/util/JsonQuery.cpp \
     src/util/RapidjsonHelpers.cpp \
+    src/util/Resources.cpp \
     src/util/StreamLink.cpp \
     src/widgets/AccountSwitchPopupWidget.cpp \
     src/widgets/AccountSwitchWidget.cpp \
@@ -356,7 +356,6 @@ HEADERS += \
     src/singletons/Logging.hpp \
     src/singletons/NativeMessaging.hpp \
     src/singletons/Paths.hpp \
-    src/singletons/Resources.hpp \
     src/singletons/Settings.hpp \
     src/singletons/Theme.hpp \
     src/singletons/Toasts.hpp \
@@ -381,6 +380,7 @@ HEADERS += \
     src/ui/Window.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
+    src/util/FlagsEnum.hpp \
     src/util/FormatTime.hpp \
     src/util/IncognitoBrowser.hpp \
     src/util/InitUpdateButton.hpp \
@@ -393,6 +393,7 @@ HEADERS += \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
+    src/util/Resources.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamLink.hpp \

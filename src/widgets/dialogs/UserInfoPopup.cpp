@@ -7,9 +7,9 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
+#include "util/Resources.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/dialogs/LogsPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -87,10 +87,10 @@ namespace chatterino
             viewLogs->getLabel().setText("Online logs");
 
             auto mod = user.emplace<Button>(this);
-            mod->setPixmap(app->resources->buttons.mod);
+            mod->setPixmap(resources().buttons.mod);
             mod->setScaleIndependantSize(30, 30);
             auto unmod = user.emplace<Button>(this);
-            unmod->setPixmap(app->resources->buttons.unmod);
+            unmod->setPixmap(resources().buttons.unmod);
             unmod->setScaleIndependantSize(30, 30);
 
             user->addStretch(1);
@@ -535,7 +535,7 @@ namespace chatterino
                 }
             };
 
-        addButton(Unban, "unban", getApp()->resources->buttons.unban);
+        addButton(Unban, "unban", resources().buttons.unban);
 
         addTimeouts("sec", {{"1", 1}});
         addTimeouts("min", {
@@ -556,7 +556,7 @@ namespace chatterino
                                  {"2", 2 * 60 * 60 * 24 * 7},
                              });
 
-        addButton(Ban, "ban", getApp()->resources->buttons.ban);
+        addButton(Ban, "ban", resources().buttons.ban);
     }
 
     void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent*)

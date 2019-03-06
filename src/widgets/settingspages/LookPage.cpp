@@ -3,11 +3,11 @@
 #include "Application.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
+#include "util/Resources.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/Line.hpp"
 
@@ -459,11 +459,11 @@ namespace chatterino
     {
         MessageBuilder builder;
         builder.emplace<TimestampElement>(QTime(8, 13, 42));
-        builder.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->twitch.moderator), MessageElementFlag::BadgeChannelAuthority);
-        builder.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->twitch.subscriber, 0.25), MessageElementFlag::BadgeSubscription);
+        builder.emplace<ImageElement>(Image::fromPixmap(resources().twitch.moderator), MessageElementFlag::BadgeChannelAuthority);
+        builder.emplace<ImageElement>(Image::fromPixmap(resources().twitch.subscriber, 0.25), MessageElementFlag::BadgeSubscription);
         builder.emplace<TextElement>("username1:", MessageElementFlag::Username, QColor("#0094FF"), FontStyle::ChatMediumBold);
         builder.emplace<TextElement>("This is a preview message", MessageElementFlag::Text);
-        builder.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->pajaDank, 0.25), MessageElementFlag::AlwaysShow);
+        builder.emplace<ImageElement>(Image::fromPixmap(resources().pajaDank, 0.25), MessageElementFlag::AlwaysShow);
         builder.emplace<TextElement>("@fourtf", MessageElementFlag::BoldUsername, MessageColor::Text, FontStyle::ChatMediumBold);
         builder.emplace<TextElement>("@fourtf", MessageElementFlag::NonBoldUsername);
         channel->addMessage(builder.release());
@@ -471,10 +471,10 @@ namespace chatterino
     {
         MessageBuilder message;
         message.emplace<TimestampElement>(QTime(8, 15, 21));
-        message.emplace<ImageElement>(Image::fromPixmap(getApp()->resources->twitch.broadcaster), MessageElementFlag::BadgeChannelAuthority);
+        message.emplace<ImageElement>(Image::fromPixmap(resources().twitch.broadcaster), MessageElementFlag::BadgeChannelAuthority);
         message.emplace<TextElement>("username2:", MessageElementFlag::Username, QColor("#FF6A00"), FontStyle::ChatMediumBold);
         message.emplace<TextElement>("This is another one", MessageElementFlag::Text);
-        // message.emplace<ImageElement>(Image::fromNonOwningPixmap(&getApp()->resources->ppHop), MessageElementFlag::BttvEmote);
+        // message.emplace<ImageElement>(Image::fromNonOwningPixmap(&resources().ppHop), MessageElementFlag::BttvEmote);
         message.emplace<TextElement>("www.fourtf.com", MessageElementFlag::LowercaseLink, MessageColor::Link)->setLink(Link(Link::Url, "https://www.fourtf.com"));
         message.emplace<TextElement>("wWw.FoUrTf.CoM", MessageElementFlag::OriginalLink, MessageColor::Link)->setLink(Link(Link::Url, "https://www.fourtf.com"));
         channel->addMessage(message.release());

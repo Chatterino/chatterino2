@@ -27,7 +27,6 @@ namespace chatterino
     class Emotes;
     class Settings;
     class Fonts;
-    class Resources2;
     class Toasts;
     class ChatterinoBadges;
 
@@ -49,8 +48,6 @@ namespace chatterino
         int run(QApplication& qtApp);
 
         friend void test();
-
-        Resources2* const resources;
 
         Theme* const themes{};
         Fonts* const fonts{};
