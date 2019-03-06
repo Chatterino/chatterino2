@@ -126,6 +126,7 @@ SOURCES += \
     src/messages/MessageColor.cpp \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
+    src/messages/ThemexD.cpp \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/bttv/LoadBttvChannelEmote.cpp \
     src/providers/chatterino/ChatterinoBadges.cpp \
@@ -310,6 +311,7 @@ HEADERS += \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
     src/messages/Selection.hpp \
+    src/messages/ThemexD.hpp \
     src/PrecompiledHeader.hpp \
     src/providers/bttv/BttvEmotes.hpp \
     src/providers/bttv/LoadBttvChannelEmote.hpp \
