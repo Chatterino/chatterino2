@@ -125,7 +125,6 @@ SOURCES += \
     src/messages/MessageElement.cpp \
     src/messages/ScrollbarHighlight.cpp \
     src/messages/ThemexD.cpp \
-    src/net/NetRequest.cpp \
     src/net/NetworkData.cpp \
     src/net/NetworkManager.cpp \
     src/net/NetworkRequest.cpp \
@@ -306,7 +305,6 @@ HEADERS += \
     src/messages/ScrollbarHighlight.hpp \
     src/messages/Selection.hpp \
     src/messages/ThemexD.hpp \
-    src/net/NetRequest.hpp \
     src/net/NetworkCommon.hpp \
     src/net/NetworkData.hpp \
     src/net/NetworkManager.hpp \

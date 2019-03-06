@@ -450,7 +450,7 @@ namespace chatterino
     // TimeoutWidget
     //
     UserInfoPopup::TimeoutWidget::TimeoutWidget()
-        : BaseWidget(nullptr)
+        : ab::BaseWidget(nullptr)
     {
         auto layout = LayoutCreator<TimeoutWidget>(this)
                           .setLayoutType<QHBoxLayout>()

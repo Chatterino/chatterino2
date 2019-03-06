@@ -13,7 +13,7 @@
 namespace chatterino::ui
 {
     Scrollbar::Scrollbar(QWidget* parent)
-        : BaseWidget(parent)
+        : ab::BaseWidget(parent)
         , currentValueAnimation_(this, "currentValue_")
     {
         // set up animation
