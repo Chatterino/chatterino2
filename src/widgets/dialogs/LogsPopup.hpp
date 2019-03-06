@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/BaseWindow.hpp"
+#include "ab/BaseWindow.hpp"
 
 namespace chatterino
 {
@@ -13,7 +13,7 @@ namespace chatterino
     struct Message;
     using MessagePtr = std::shared_ptr<const Message>;
 
-    class LogsPopup : public BaseWindow
+    class LogsPopup : public ab::BaseWindow
     {
     public:
         LogsPopup();

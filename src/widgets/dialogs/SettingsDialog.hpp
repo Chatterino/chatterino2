@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/BaseWindow.hpp"
+#include "ab/BaseWindow.hpp"
 
 #include <QPushButton>
 #include <QStackedLayout>
@@ -20,7 +20,7 @@ namespace chatterino
         ModerationActions,
     };
 
-    class SettingsDialog : public BaseWindow
+    class SettingsDialog : public ab::BaseWindow
     {
     public:
         SettingsDialog();

@@ -11,7 +11,7 @@
 namespace chatterino
 {
     UpdateDialog::UpdateDialog()
-        : BaseWindow(nullptr,
+        : ab::BaseWindow(
               BaseWindow::Flags(BaseWindow::Frameless | BaseWindow::TopMost |
                                 BaseWindow::EnableCustomFrame))
     {

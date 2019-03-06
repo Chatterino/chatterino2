@@ -208,7 +208,7 @@ namespace chatterino
         {
             scale = dpi.get() / 96.f;
 
-            //        for (auto w : this->ui_.split->findChildren<BaseWidget
+            //        for (auto w : this->ui_.split->findChildren<ab::BaseWidget
             //        *>()) {
             //            w->setOverrideScale(scale);
             //        }

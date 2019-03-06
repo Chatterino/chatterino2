@@ -1,7 +1,7 @@
 #pragma once
 
 #include "messages/LimitedQueueSnapshot.hpp"
-#include "widgets/BaseWindow.hpp"
+#include "ab/BaseWindow.hpp"
 
 #include <memory>
 
@@ -15,7 +15,7 @@ namespace chatterino
     struct Message;
     using MessagePtr = std::shared_ptr<const Message>;
 
-    class SearchPopup : public BaseWindow
+    class SearchPopup : public ab::BaseWindow
     {
     public:
         SearchPopup();

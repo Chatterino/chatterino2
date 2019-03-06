@@ -21,7 +21,7 @@ namespace chatterino
     SettingsDialog* SettingsDialog::handle = nullptr;
 
     SettingsDialog::SettingsDialog()
-        : BaseWindow(nullptr, BaseWindow::DisableCustomScaling)
+        : ab::BaseWindow(BaseWindow::DisableCustomScaling)
     {
         this->initUi();
         this->addTabs();

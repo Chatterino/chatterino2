@@ -9,7 +9,7 @@ namespace chatterino
 {
     SettingsDialogTab::SettingsDialogTab(
         SettingsDialog* _dialog, SettingsPage* _page, QString imageFileName)
-        : BaseWidget(_dialog)
+        : ab::BaseWidget(_dialog)
         , dialog_(_dialog)
         , page_(_page)
     {

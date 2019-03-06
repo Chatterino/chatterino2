@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/BaseWidget.hpp"
+#include "ab/BaseWidget.hpp"
 
 #include <QAction>
 #include <QApplication>

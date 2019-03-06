@@ -2,7 +2,7 @@
 
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
-#include "widgets/helper/ChannelView.hpp"
+#include "ui/ChannelView.hpp"
 
 #include <QApplication>
 #include <QDesktopWidget>
@@ -11,7 +11,7 @@
 namespace chatterino
 {
     NotificationPopup::NotificationPopup()
-        : BaseWindow((QWidget*)nullptr, BaseWindow::Frameless)
+        : ab::BaseWindow(ab::BaseWindow::Frameless)
         , channel_(
               std::make_shared<Channel>("notifications", Channel::Type::None))
 
@@ -52,5 +52,4 @@ namespace chatterino
         //    QTimer::singleShot(5000, this, [this, msg] { this->channel->remove
         //    });
     }
-
 }  // namespace chatterino

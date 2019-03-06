@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/BaseWindow.hpp"
+#include "ab/BaseWindow.hpp"
 
 #include <QComboBox>
 #include <QDialogButtonBox>
@@ -9,7 +9,7 @@
 
 namespace chatterino
 {
-    class QualityPopup : public BaseWindow
+    class QualityPopup : public ab::BaseWindow
     {
     public:
         QualityPopup(const QString& _channelName, QStringList options);
@@ -31,5 +31,4 @@ namespace chatterino
 
         QString channelName_;
     };
-
 }  // namespace chatterino

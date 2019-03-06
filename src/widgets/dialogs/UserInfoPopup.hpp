@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/BaseWindow.hpp"
+#include "ab/BaseWindow.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -12,7 +12,7 @@ namespace chatterino
     using ChannelPtr = std::shared_ptr<Channel>;
     class Label;
 
-    class UserInfoPopup final : public BaseWindow
+    class UserInfoPopup final : public ab::BaseWindow
     {
         Q_OBJECT
 
@@ -55,7 +55,7 @@ namespace chatterino
             QCheckBox* ignoreHighlights = nullptr;
         } ui_;
 
-        class TimeoutWidget : public BaseWidget
+        class TimeoutWidget : public ab::BaseWidget
         {
         public:
             enum Action { Ban, Unban, Timeout };

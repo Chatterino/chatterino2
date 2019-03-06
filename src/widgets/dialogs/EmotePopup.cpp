@@ -102,7 +102,7 @@ namespace chatterino
     }  // namespace
 
     EmotePopup::EmotePopup()
-        : BaseWindow(nullptr, BaseWindow::EnableCustomFrame)
+        : ab::BaseWindow(BaseWindow::EnableCustomFrame)
     {
         auto layout = new QVBoxLayout(this);
         this->getLayoutContainer()->setLayout(layout);

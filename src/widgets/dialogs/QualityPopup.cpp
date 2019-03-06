@@ -61,5 +61,4 @@ namespace chatterino
     {
         this->close();
     }
-
 }  // namespace chatterino

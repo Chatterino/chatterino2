@@ -23,7 +23,7 @@
 namespace chatterino::ui
 {
     Window::Window(Application& app, WindowType type)
-        : BaseWindow(Flags(Flags::EnableCustomFrame))
+        : ab::BaseWindow(Flags(Flags::EnableCustomFrame))
         , theme_(this)
         , app_(app)
     {

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "widgets/BaseWindow.hpp"
+#include "ab/BaseWindow.hpp"
 
 namespace chatterino
 {
-    class WelcomeDialog : public BaseWindow
+    class WelcomeDialog : public ab::BaseWindow
     {
     public:
         WelcomeDialog();

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/BaseWidget.hpp"
+#include "ab/BaseWidget.hpp"
 
 #include <QIcon>
 #include <QPaintEvent>
@@ -11,7 +11,7 @@ namespace chatterino
     class SettingsPage;
     class SettingsDialog;
 
-    class SettingsDialogTab : public BaseWidget
+    class SettingsDialogTab : public ab::BaseWidget
     {
         Q_OBJECT
 

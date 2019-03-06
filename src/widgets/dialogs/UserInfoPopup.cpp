@@ -28,8 +28,8 @@
 namespace chatterino
 {
     UserInfoPopup::UserInfoPopup()
-        : BaseWindow(nullptr, BaseWindow::Flags(BaseWindow::Frameless |
-                                                BaseWindow::FramelessDraggable))
+        : ab::BaseWindow(BaseWindow::Flags(
+              BaseWindow::Frameless | BaseWindow::FramelessDraggable))
         , hack_(new bool)
     {
         this->setStayInScreenRect(true);

@@ -115,7 +115,7 @@ namespace chatterino::ui
     }  // namespace
 
     ChannelView::ChannelView(QWidget* parent)
-        : BaseWidget(parent)
+        : ab::BaseWidget(parent)
     {
         this->setMouseTracking(true);
 

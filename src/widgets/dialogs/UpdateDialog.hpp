@@ -2,14 +2,14 @@
 
 #include "pajlada/signals/signalholder.hpp"
 #include "singletons/Updates.hpp"
-#include "widgets/BaseWindow.hpp"
+#include "ab/BaseWindow.hpp"
 #include "widgets/Label.hpp"
 
 class QPushButton;
 
 namespace chatterino
 {
-    class UpdateDialog : public BaseWindow
+    class UpdateDialog : public ab::BaseWindow
     {
     public:
         enum Button { Dismiss, Install };
