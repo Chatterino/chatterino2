@@ -385,6 +385,7 @@ HEADERS += \
     src/util/DistanceBetweenPoints.hpp \
     src/util/FlagsEnum.hpp \
     src/util/FormatTime.hpp \
+    src/util/Helpers.hpp \
     src/util/IncognitoBrowser.hpp \
     src/util/InitUpdateButton.hpp \
     src/util/IrcHelpers.hpp \
