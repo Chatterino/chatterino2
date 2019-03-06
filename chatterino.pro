@@ -155,6 +155,7 @@ SOURCES += \
     src/providers/twitch/TwitchParseCheerEmotes.cpp \
     src/providers/twitch/TwitchServer.cpp \
     src/providers/twitch/TwitchUser.cpp \
+    src/Room.cpp \
     src/RunGui.cpp \
     src/singletons/Badges.cpp \
     src/singletons/Emotes.cpp \
@@ -341,6 +342,7 @@ HEADERS += \
     src/providers/twitch/TwitchParseCheerEmotes.hpp \
     src/providers/twitch/TwitchServer.hpp \
     src/providers/twitch/TwitchUser.hpp \
+    src/Room.hpp \
     src/RunGui.hpp \
     src/singletons/Badges.hpp \
     src/singletons/Emotes.hpp \
