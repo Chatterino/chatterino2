@@ -214,22 +214,15 @@ SOURCES += \
     src/widgets/helper/SettingsDialogTab.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
-    src/widgets/settingspages/AdvancedPage.cpp \
-    src/widgets/settingspages/BrowserExtensionPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
-    src/widgets/settingspages/EmotesPage.cpp \
     src/widgets/settingspages/ExternalToolsPage.cpp \
-    src/widgets/settingspages/FeelPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
     src/widgets/settingspages/HighlightingPage.cpp \
     src/widgets/settingspages/IgnoresPage.cpp \
     src/widgets/settingspages/KeyboardSettingsPage.cpp \
-    src/widgets/settingspages/LogsPage.cpp \
-    src/widgets/settingspages/LookPage.cpp \
     src/widgets/settingspages/ModerationPage.cpp \
     src/widgets/settingspages/NotificationPage.cpp \
     src/widgets/settingspages/SettingsPage.cpp \
-    src/widgets/settingspages/SpecialChannelsPage.cpp \
     src/widgets/splits/ClosedSplits.cpp \
     src/widgets/StreamView.cpp \
 
@@ -419,22 +412,15 @@ HEADERS += \
     src/widgets/helper/SettingsDialogTab.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
-    src/widgets/settingspages/AdvancedPage.hpp \
-    src/widgets/settingspages/BrowserExtensionPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
-    src/widgets/settingspages/EmotesPage.hpp \
     src/widgets/settingspages/ExternalToolsPage.hpp \
-    src/widgets/settingspages/FeelPage.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
     src/widgets/settingspages/HighlightingPage.hpp \
     src/widgets/settingspages/IgnoresPage.hpp \
     src/widgets/settingspages/KeyboardSettingsPage.hpp \
-    src/widgets/settingspages/LogsPage.hpp \
-    src/widgets/settingspages/LookPage.hpp \
     src/widgets/settingspages/ModerationPage.hpp \
     src/widgets/settingspages/NotificationPage.hpp \
     src/widgets/settingspages/SettingsPage.hpp \
-    src/widgets/settingspages/SpecialChannelsPage.hpp \
     src/widgets/splits/ClosedSplits.hpp \
     src/widgets/StreamView.hpp \
 

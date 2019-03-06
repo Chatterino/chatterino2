@@ -5,21 +5,14 @@
 #include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
-#include "widgets/settingspages/AdvancedPage.hpp"
-#include "widgets/settingspages/BrowserExtensionPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
-#include "widgets/settingspages/EmotesPage.hpp"
 #include "widgets/settingspages/ExternalToolsPage.hpp"
-#include "widgets/settingspages/FeelPage.hpp"
 #include "widgets/settingspages/GeneralPage.hpp"
 #include "widgets/settingspages/HighlightingPage.hpp"
 #include "widgets/settingspages/IgnoresPage.hpp"
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
-#include "widgets/settingspages/LogsPage.hpp"
-#include "widgets/settingspages/LookPage.hpp"
 #include "widgets/settingspages/ModerationPage.hpp"
 #include "widgets/settingspages/NotificationPage.hpp"
-#include "widgets/settingspages/SpecialChannelsPage.hpp"
 
 #include <QDialogButtonBox>
 
@@ -105,26 +98,17 @@ namespace chatterino
 
         this->addTab(new AccountsPage);
 
-        //    this->ui_.tabContainer->addSpacing(16);
-
-        //    this->addTab(new LookPage);
-        //    this->addTab(new FeelPage);
-
         this->ui_.tabContainer->addSpacing(16);
 
         this->addTab(new CommandPage);
-        //    this->addTab(new EmotesPage);
         this->addTab(new HighlightingPage);
         this->addTab(new IgnoresPage);
 
         this->ui_.tabContainer->addSpacing(16);
 
         this->addTab(new KeyboardSettingsPage);
-        //    this->addTab(new LogsPage);
         this->addTab(this->ui_.moderationPage = new ModerationPage);
         this->addTab(new NotificationPage);
-        //    this->addTab(new SpecialChannelsPage);
-        //    this->addTab(new BrowserExtensionPage);
         this->addTab(new ExternalToolsPage);
         this->addTab(new AdvancedPage);
 
