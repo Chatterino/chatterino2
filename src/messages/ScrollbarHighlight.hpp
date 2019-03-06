@@ -19,5 +19,4 @@ namespace chatterino
         Color color_;
         Style style_;
     };
-
 }  // namespace chatterino

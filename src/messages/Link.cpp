@@ -18,5 +18,4 @@ namespace chatterino
     {
         return this->type != None;
     }
-
 }  // namespace chatterino

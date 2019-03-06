@@ -1,4 +1,4 @@
-#include "common/NetworkManager.hpp"
+#include "net/NetworkManager.hpp"
 
 #include <QNetworkAccessManager>
 
@@ -19,5 +19,4 @@ namespace chatterino
         NetworkManager::workerThread.quit();
         NetworkManager::workerThread.wait();
     }
-
 }  // namespace chatterino

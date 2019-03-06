@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/Channel.hpp"
-#include "common/FlagsEnum.hpp"
+#include "util/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
 #include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"

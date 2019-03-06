@@ -16,5 +16,4 @@ namespace chatterino
         static void init();
         static void deinit();
     };
-
 }  // namespace chatterino

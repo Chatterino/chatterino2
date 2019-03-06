@@ -1,9 +1,9 @@
 #pragma once
 
-#include "common/FlagsEnum.hpp"
+#include "messages/Fonts.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
-#include "singletons/Fonts.hpp"
+#include "util/FlagsEnum.hpp"
 
 #include <QRect>
 #include <QString>
@@ -11,12 +11,12 @@
 #include <boost/noncopyable.hpp>
 #include <cstdint>
 #include <memory>
-#include <pajlada/signals/signalholder.hpp>
 #include <vector>
 
 namespace chatterino
 {
-    class Channel;
+    class ThemexD;
+
     struct MessageLayoutContainer;
 
     class Image;
@@ -133,10 +133,10 @@ namespace chatterino
         MessageElementFlags getFlags() const;
         MessageElement* updateLink();
 
-        virtual void addToContainer(
+        virtual void addToContainer(ThemexD& theme,
             MessageLayoutContainer& container, MessageElementFlags flags) = 0;
 
-        pajlada::Signals::NoArgSignal linkChanged;
+        // pajlada::Signals::NoArgSignal linkChanged;
 
     protected:
         MessageElement(MessageElementFlags flags);
@@ -155,7 +155,7 @@ namespace chatterino
     public:
         EmptyElement();
 
-        void addToContainer(MessageLayoutContainer& container,
+        void addToContainer(ThemexD& theme, MessageLayoutContainer& container,
             MessageElementFlags flags) override;
 
         static EmptyElement& instance();
@@ -170,7 +170,7 @@ namespace chatterino
     public:
         ImageElement(ImagePtr image, MessageElementFlags flags);
 
-        void addToContainer(MessageLayoutContainer& container,
+        void addToContainer(ThemexD& theme, MessageLayoutContainer& container,
             MessageElementFlags flags) override;
 
     private:
@@ -186,12 +186,13 @@ namespace chatterino
             FontStyle style = FontStyle::ChatMedium);
         ~TextElement() override = default;
 
-        void addToContainer(MessageLayoutContainer& container,
+        void addToContainer(ThemexD& theme, MessageLayoutContainer& container,
             MessageElementFlags flags) override;
 
     private:
         MessageColor color_;
         FontStyle style_;
+        QFont font_;
 
         struct Word
         {
@@ -209,7 +210,7 @@ namespace chatterino
     public:
         EmoteElement(const EmotePtr& data, MessageElementFlags flags_);
 
-        void addToContainer(MessageLayoutContainer& container,
+        void addToContainer(ThemexD& theme, MessageLayoutContainer& container,
             MessageElementFlags flags_) override;
         EmotePtr getEmote() const;
 
@@ -225,7 +226,7 @@ namespace chatterino
         TimestampElement(QTime time_ = QTime::currentTime());
         ~TimestampElement() override = default;
 
-        void addToContainer(MessageLayoutContainer& container,
+        void addToContainer(ThemexD& theme, MessageLayoutContainer& container,
             MessageElementFlags flags) override;
 
         TextElement* formatTime(const QTime& time);
@@ -243,7 +244,7 @@ namespace chatterino
     public:
         TwitchModerationElement();
 
-        void addToContainer(MessageLayoutContainer& container,
+        void addToContainer(ThemexD& theme, MessageLayoutContainer& container,
             MessageElementFlags flags) override;
     };
 

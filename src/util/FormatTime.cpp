@@ -51,5 +51,4 @@ namespace chatterino
         }
         return res;
     }
-
 }  // namespace chatterino

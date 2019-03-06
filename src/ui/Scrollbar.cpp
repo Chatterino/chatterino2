@@ -6,7 +6,6 @@
 #include <QMouseEvent>
 #include <QPainter>
 #include <QTimer>
-
 #include <cmath>
 
 #define MIN_THUMB_HEIGHT 10
@@ -451,5 +450,4 @@ namespace chatterino::ui
 
         this->update();
     }
-
 }  // namespace chatterino::ui

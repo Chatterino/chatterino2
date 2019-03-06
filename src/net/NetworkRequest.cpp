@@ -1,14 +1,12 @@
-#include "common/NetworkRequest.hpp"
+#include "net/NetworkRequest.hpp"
 
-#include "common/NetworkData.hpp"
-#include "common/NetworkManager.hpp"
-#include "common/Outcome.hpp"
-#include "debug/Log.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
-#include "singletons/Paths.hpp"
+#include "messages/Common.hpp"
+#include "net/NetworkData.hpp"
+#include "net/NetworkManager.hpp"
 #include "util/DebugCount.hpp"
 
 #include <QFile>
+#include <QNetworkReply>
 #include <QtConcurrent>
 
 #include <cassert>
@@ -148,15 +146,9 @@ namespace chatterino
             }
             break;
 
-            case NetworkRequestType::Post:
-            {
-                this->doRequest();
-            }
-            break;
-
             default:
             {
-                log("[Execute] Unhandled request type");
+                qDebug() << "[Execute] Unhandled request type";
             }
             break;
         }
@@ -169,32 +161,38 @@ namespace chatterino
 
     Outcome NetworkRequest::tryLoadCachedFile()
     {
-        QFile cachedFile(
-            getPaths()->cacheDirectory() + "/" + this->data->getHash());
+        // TODO: fix
 
-        if (!cachedFile.exists())
-        {
-            // File didn't exist
-            return Failure;
-        }
+        return Failure;
 
-        if (!cachedFile.open(QIODevice::ReadOnly))
-        {
-            // File could not be opened
-            return Failure;
-        }
+        //        QFile cachedFile(
+        //            getPaths()->cacheDirectory() + "/" +
+        //            this->data->getHash());
 
-        QByteArray bytes = cachedFile.readAll();
-        NetworkResult result(bytes);
+        //        if (!cachedFile.exists())
+        //        {
+        //            // File didn't exist
+        //            return Failure;
+        //        }
 
-        auto outcome = this->data->onSuccess_(result);
+        //        if (!cachedFile.open(QIODevice::ReadOnly))
+        //        {
+        //            // File could not be opened
+        //            return Failure;
+        //        }
 
-        cachedFile.close();
+        //        QByteArray bytes = cachedFile.readAll();
+        //        NetworkResult result(bytes);
 
-        // XXX: If success is false, we should invalidate the cache file
-        // somehow/somewhere
+        //        auto outcome = this->data->onSuccess_(result);
 
-        return outcome;
+        //        cachedFile.close();
+
+        //        // XXX: If success is false, we should invalidate the cache
+        //        file
+        //        // somehow/somewhere
+
+        //        return outcome;
     }
 
     void NetworkRequest::doRequest()
@@ -225,10 +223,6 @@ namespace chatterino
                         return NetworkManager::accessManager.deleteResource(
                             data->request_);
 
-                    case NetworkRequestType::Post:
-                        return NetworkManager::accessManager.post(
-                            data->request_, data->payload_);
-
                     default:
                         return nullptr;
                 }
@@ -236,14 +230,13 @@ namespace chatterino
 
             if (reply == nullptr)
             {
-                log("Unhandled request type");
+                qDebug() << "Unhandled request type";
                 return;
             }
 
             if (timer->isStarted())
             {
                 timer->onTimeout(worker, [reply, data]() {
-                    log("Aborted!");
                     reply->abort();
                     if (data->onError_)
                     {
@@ -324,7 +317,9 @@ namespace chatterino
     {
         NetworkRequest request(url);
 
-        request.makeAuthorizedV5(getDefaultClientID());
+        qDebug() << "can't authorize twitch request";
+
+        // request.makeAuthorizedV5(getDefaultClientID());
 
         return request;
     }

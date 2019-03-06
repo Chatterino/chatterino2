@@ -87,11 +87,6 @@ SOURCES += \
     src/common/CompletionModel.cpp \
     src/common/DownloadManager.cpp \
     src/common/LinkParser.cpp \
-    src/common/NetworkData.cpp \
-    src/common/NetworkManager.cpp \
-    src/common/NetworkRequest.cpp \
-    src/common/NetworkResult.cpp \
-    src/common/NetworkTimer.cpp \
     src/common/UsernameSet.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
@@ -113,6 +108,7 @@ SOURCES += \
     src/controllers/taggedusers/TaggedUser.cpp \
     src/controllers/taggedusers/TaggedUsersController.cpp \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
+    src/dialogs/SelectChannelDialog.cpp \
     src/main.cpp \
     src/messages/Emote.cpp \
     src/messages/Fonts.cpp \
@@ -127,7 +123,15 @@ SOURCES += \
     src/messages/MessageColor.cpp \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
+    src/messages/ScrollbarHighlight.cpp \
     src/messages/ThemexD.cpp \
+    src/net/NetRequest.cpp \
+    src/net/NetworkData.cpp \
+    src/net/NetworkManager.cpp \
+    src/net/NetworkRequest.cpp \
+    src/net/NetworkResult.cpp \
+    src/net/NetworkTimer.cpp \
+    src/Provider.cpp \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/bttv/LoadBttvChannelEmote.cpp \
     src/providers/chatterino/ChatterinoBadges.cpp \
@@ -212,7 +216,6 @@ SOURCES += \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/DebugPopup.cpp \
     src/widgets/helper/EditableModelView.cpp \
-    src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
     src/widgets/settingspages/AboutPage.cpp \
@@ -255,21 +258,12 @@ HEADERS += \
     src/common/ConcurrentMap.hpp \
     src/common/DownloadManager.hpp \
     src/common/LinkParser.hpp \
-    src/common/NetworkCommon.hpp \
-    src/common/NetworkData.hpp \
-    src/common/NetworkManager.hpp \
-    src/common/NetworkRequest.hpp \
-    src/common/NetworkRequester.hpp \
-    src/common/NetworkResult.hpp \
-    src/common/NetworkTimer.hpp \
-    src/common/NetworkWorker.hpp \
     src/common/NullablePtr.hpp \
     src/common/ProviderId.hpp \
     src/common/SignalVector.hpp \
     src/common/SignalVectorModel.hpp \
     src/common/UniqueAccess.hpp \
     src/common/UsernameSet.hpp \
-    src/common/Version.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
     src/controllers/accounts/AccountModel.hpp \
@@ -293,6 +287,7 @@ HEADERS += \
     src/controllers/taggedusers/TaggedUser.hpp \
     src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
+    src/dialogs/SelectChannelDialog.hpp \
     src/messages/Common.hpp \
     src/messages/Emote.hpp \
     src/messages/Fonts.hpp \
@@ -308,9 +303,20 @@ HEADERS += \
     src/messages/MessageColor.hpp \
     src/messages/MessageContainer.hpp \
     src/messages/MessageElement.hpp \
+    src/messages/ScrollbarHighlight.hpp \
     src/messages/Selection.hpp \
     src/messages/ThemexD.hpp \
+    src/net/NetRequest.hpp \
+    src/net/NetworkCommon.hpp \
+    src/net/NetworkData.hpp \
+    src/net/NetworkManager.hpp \
+    src/net/NetworkRequest.hpp \
+    src/net/NetworkRequester.hpp \
+    src/net/NetworkResult.hpp \
+    src/net/NetworkTimer.hpp \
+    src/net/NetworkWorker.hpp \
     src/PrecompiledHeader.hpp \
+    src/Provider.hpp \
     src/providers/bttv/BttvEmotes.hpp \
     src/providers/bttv/LoadBttvChannelEmote.hpp \
     src/providers/chatterino/ChatterinoBadges.hpp \
@@ -373,6 +379,7 @@ HEADERS += \
     src/ui/Tooltip.hpp \
     src/ui/UiFwd.hpp \
     src/ui/Window.hpp \
+    src/util/AssertInGuiThread.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
     src/util/DistanceBetweenPoints.hpp \
@@ -386,6 +393,7 @@ HEADERS += \
     src/util/LayoutCreator.hpp \
     src/util/Outcome.hpp \
     src/util/PostToThread.hpp \
+    src/util/QObjectPtr.hpp \
     src/util/QStringHash.hpp \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
@@ -394,6 +402,7 @@ HEADERS += \
     src/util/SharedPtrElementLess.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamLink.hpp \
+    src/Version.hpp \
     src/widgets/AccountSwitchPopupWidget.hpp \
     src/widgets/AccountSwitchWidget.hpp \
     src/widgets/AttachedWindow.hpp \
@@ -411,7 +420,6 @@ HEADERS += \
     src/widgets/helper/ComboBoxItemDelegate.hpp \
     src/widgets/helper/DebugPopup.hpp \
     src/widgets/helper/EditableModelView.hpp \
-    src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
     src/widgets/settingspages/AboutPage.hpp \

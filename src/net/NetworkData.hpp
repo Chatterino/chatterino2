@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/NetworkCommon.hpp"
+#include "net/NetworkCommon.hpp"
 
 #include <QNetworkRequest>
 

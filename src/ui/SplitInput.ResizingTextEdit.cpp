@@ -40,7 +40,8 @@ namespace chatterino::ui
         // calculate height by using the text height + margins
         auto margins = this->contentsMargins();
 
-        return margins.top() + document()->size().height() + margins.bottom();
+        return int(
+            margins.top() + document()->size().height() + margins.bottom());
     }
 
     QString ResizingTextEdit::textUnderCursor(bool* hadSpace) const

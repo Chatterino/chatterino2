@@ -1,10 +1,10 @@
 #pragma once
 
-#include "common/NetworkCommon.hpp"
-#include "common/NetworkRequester.hpp"
-#include "common/NetworkResult.hpp"
-#include "common/NetworkTimer.hpp"
-#include "common/NetworkWorker.hpp"
+#include "net/NetworkCommon.hpp"
+#include "net/NetworkRequester.hpp"
+#include "net/NetworkResult.hpp"
+#include "net/NetworkTimer.hpp"
+#include "net/NetworkWorker.hpp"
 
 namespace chatterino
 {

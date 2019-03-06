@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/FlagsEnum.hpp"
+#include "util/FlagsEnum.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>

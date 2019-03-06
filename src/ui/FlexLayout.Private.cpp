@@ -1,5 +1,3 @@
-#define FLEXLAYOUTPRIVATE public:
-
 #include "FlexLayout.Private.hpp"
 
 #include "FlexLayout.hpp"
@@ -10,24 +8,24 @@ namespace chatterino::ui
 {
     namespace
     {
-        bool isHorizontal(Direction direction)
+        inline bool isHorizontal(Direction direction)
         {
             return direction == Direction::Left ||
                    direction == Direction::Right;
         }
 
-        bool isVertical(Direction direction)
+        inline bool isVertical(Direction direction)
         {
             return !isHorizontal(direction);
         }
 
-        bool isBefore(Direction direction)
+        inline bool isBefore(Direction direction)
         {
             return direction == Direction::Left ||
                    direction == Direction::Above;
         }
 
-        bool isAfter(Direction direction)
+        inline bool isAfter(Direction direction)
         {
             return !isBefore(direction);
         }
@@ -354,16 +352,18 @@ namespace chatterino::ui
 
     void FlexItem::print(int indent)
     {
-        const char* type;
+        const char* type{};
 
         if (this->type_ == Empty)
             type = "empty";
-        if (this->type_ == Item)
+        else if (this->type_ == Item)
             type = "item";
-        if (this->type_ == Column)
+        else if (this->type_ == Column)
             type = "column";
-        if (this->type_ == Row)
+        else if (this->type_ == Row)
             type = "row";
+        else
+            assert(false);
 
         qDebug().noquote() << QString(indent, ' ') << type
                            << (reinterpret_cast<int>(this->item_) % 1000);

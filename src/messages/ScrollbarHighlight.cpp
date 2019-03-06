@@ -1,6 +1,4 @@
-#include "widgets/helper/ScrollbarHighlight.hpp"
-#include "singletons/Theme.hpp"
-#include "widgets/Scrollbar.hpp"
+#include "messages/ScrollbarHighlight.hpp"
 
 namespace chatterino
 {
@@ -30,5 +28,4 @@ namespace chatterino
     {
         return this->style_ == None;
     }
-
 }  // namespace chatterino

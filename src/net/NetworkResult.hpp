@@ -1,6 +1,5 @@
 #pragma once
 
-#include <rapidjson/document.h>
 #include <QJsonObject>
 
 namespace chatterino
@@ -11,7 +10,6 @@ namespace chatterino
         NetworkResult(const QByteArray& data);
 
         QJsonObject parseJson() const;
-        rapidjson::Document parseRapidJson() const;
         const QByteArray& getData() const;
 
     private:

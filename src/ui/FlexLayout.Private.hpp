@@ -3,10 +3,6 @@
 #include <QVector>
 #include <memory>
 
-#ifndef FLEXLAYOUTPRIVATE
-#    define FLEXLAYOUTPRIVATE private:
-#endif
-
 class QObject;
 class QWidget;
 class QLayoutItem;
@@ -15,6 +11,7 @@ class QRect;
 namespace chatterino::ui
 {
     enum class Direction;
+    class FlexLayout;
 
     class FlexItem : public std::enable_shared_from_this<FlexItem>
     {
@@ -22,11 +19,6 @@ namespace chatterino::ui
         enum FlexItemType { Empty, Item, Column, Row };
         FlexItem();
 
-        FLEXLAYOUTPRIVATE
-        explicit FlexItem(QLayoutItem*);
-        explicit FlexItem(FlexItemType type);
-
-    public:
         bool isEmpty();
         bool isItem();
         bool isColumn();
@@ -44,6 +36,9 @@ namespace chatterino::ui
         double flex = 1;
 
     private:
+        explicit FlexItem(QLayoutItem*);
+        explicit FlexItem(FlexItemType type);
+
         void clear();
         void flatten();
         std::shared_ptr<FlexItem> clone();
@@ -55,5 +50,7 @@ namespace chatterino::ui
         FlexItemType type_;
         QLayoutItem* item_;
         QVector<std::shared_ptr<FlexItem>> items_;
+
+        friend class FlexLayout;
     };
 }  // namespace chatterino::ui

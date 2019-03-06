@@ -1,7 +1,7 @@
 #pragma once
 
 #include "common/CompletionModel.hpp"
-#include "common/FlagsEnum.hpp"
+#include "util/FlagsEnum.hpp"
 #include "messages/LimitedQueue.hpp"
 
 #include <QString>

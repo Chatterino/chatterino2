@@ -1,6 +1,6 @@
-#include "common/NetworkTimer.hpp"
+#include "net/NetworkTimer.hpp"
 
-#include "common/NetworkWorker.hpp"
+#include "net/NetworkWorker.hpp"
 
 #include <QTimer>
 

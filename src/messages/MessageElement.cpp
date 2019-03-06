@@ -1,14 +1,16 @@
 #include "messages/MessageElement.hpp"
 
 #include "Application.hpp"
-#include "controllers/moderationactions/ModerationActions.hpp"
-#include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
-#include "singletons/Settings.hpp"
-#include "singletons/Theme.hpp"
+//#include "singletons/Settings.hpp"
+//#include "singletons/Theme.hpp"
+#include "ab/util/Benchmark.hpp"
+#include "messages/ThemexD.hpp"
 #include "util/DebugCount.hpp"
+
+#include <QLocale>
 
 namespace chatterino
 {
@@ -67,19 +69,13 @@ namespace chatterino
         return this->flags_;
     }
 
-    MessageElement* MessageElement::updateLink()
-    {
-        this->linkChanged.invoke();
-        return this;
-    }
-
     // Empty
     EmptyElement::EmptyElement()
         : MessageElement(MessageElementFlag::None)
     {
     }
 
-    void EmptyElement::addToContainer(
+    void EmptyElement::addToContainer(ThemexD& theme,
         MessageLayoutContainer& container, MessageElementFlags flags)
     {
     }
@@ -98,7 +94,7 @@ namespace chatterino
         //    this->setTooltip(image->getTooltip());
     }
 
-    void ImageElement::addToContainer(
+    void ImageElement::addToContainer(ThemexD& theme,
         MessageLayoutContainer& container, MessageElementFlags flags)
     {
         if (flags.hasAny(this->getFlags()))
@@ -128,22 +124,22 @@ namespace chatterino
         return this->emote_;
     }
 
-    void EmoteElement::addToContainer(
+    void EmoteElement::addToContainer(ThemexD& theme,
         MessageLayoutContainer& container, MessageElementFlags flags)
     {
-        if (flags.hasAny(this->getFlags()))
+        // if (flags.hasAny(this->getFlags()))
         {
-            if (flags.has(MessageElementFlag::EmoteImages))
+            // if (flags.has(MessageElementFlag::EmoteImages))
             {
                 auto image =
                     this->emote_->images.getImage(container.getScale());
                 if (image->isEmpty())
                     return;
 
-                auto emoteScale =
-                    this->getFlags().hasAny(MessageElementFlag::Badges)
-                        ? 1
-                        : getSettings()->emoteScale.getValue();
+                auto emoteScale = 1;
+                // this->getFlags().hasAny(MessageElementFlag::Badges)
+                //     ? 1
+                //     : getSettings()->emoteScale.getValue();
 
                 auto size = QSize(
                     int(container.getScale() * image->width() * emoteScale),
@@ -153,14 +149,14 @@ namespace chatterino
                     (new ImageLayoutElement(*this, image, size))
                         ->setLink(this->getLink()));
             }
-            else
-            {
-                if (this->textElement_)
-                {
-                    this->textElement_->addToContainer(
-                        container, MessageElementFlag::Misc);
-                }
-            }
+            // else
+            //{
+            //    if (this->textElement_)
+            //    {
+            //        this->textElement_->addToContainer(
+            //            theme, container, MessageElementFlag::Misc);
+            //    }
+            //}
         }
     }
 
@@ -178,25 +174,28 @@ namespace chatterino
         }
     }
 
-    void TextElement::addToContainer(
+    void TextElement::addToContainer(ThemexD& theme,
         MessageLayoutContainer& container, MessageElementFlags flags)
     {
-        auto app = getApp();
-
-        if (flags.hasAny(this->getFlags()))
+        if (true)  // flags.hasAny(this->getFlags()))
         {
-            QFontMetrics metrics =
-                app->fonts->getFontMetrics(this->style_, container.getScale());
+            QFont font = theme.getFont({});
+            QFontMetrics metrics(font);
+            //                getFonts()->getFontMetrics(this->style_,
+            //                container.getScale());
 
             for (Word& word : this->words_)
             {
                 auto getTextLayoutElement = [&](QString text, int width,
                                                 bool trailingSpace) {
-                    auto color = this->color_.getColor(*app->themes);
-                    app->themes->normalizeColor(color);
+                    // auto color = this->color_.getColor(*app->themes);
+                    // app->themes->normalizeColor(color);
 
-                    auto e = (new TextLayoutElement(*this, text,
-                                  QSize(width, metrics.height()), color,
+                    auto color = theme.getTextColor({});  // QColor(" #fff ");
+                    // auto font = getThemexD()->getFont({});
+
+                    auto e = (new TextLayoutElement(*this, theme.getFont({}),
+                                  text, QSize(width, metrics.height()), color,
                                   this->style_, container.getScale()))
                                  ->setLink(this->getLink());
                     e->setTrailingSpace(trailingSpace);
@@ -204,11 +203,11 @@ namespace chatterino
 
                     // If URL link was changed,
                     // Should update it in MessageLayoutElement too!
-                    if (this->getLink().type == Link::Url)
-                    {
-                        static_cast<TextLayoutElement*>(e)
-                            ->listenToLinkChanges();
-                    }
+                    //   if (this->getLink().type == Link::Url)
+                    //   {
+                    //       static_cast<TextLayoutElement*>(e)
+                    //           ->listenToLinkChanges();
+                    //   }
                     return e;
                 };
 
@@ -291,19 +290,22 @@ namespace chatterino
         assert(this->element_ != nullptr);
     }
 
-    void TimestampElement::addToContainer(
+    void TimestampElement::addToContainer(ThemexD& theme,
         MessageLayoutContainer& container, MessageElementFlags flags)
     {
-        if (flags.hasAny(this->getFlags()))
+        if (true)  // flags.hasAny(this->getFlags()))
         {
-            auto app = getApp();
-            if (getSettings()->timestampFormat != this->format_)
-            {
-                this->format_ = getSettings()->timestampFormat.getValue();
-                this->element_.reset(this->formatTime(this->time_));
-            }
+            //            if (getSettings()->timestampFormat != this->format_)
+            //            {
+            //                this->format_ =
+            //                getSettings()->timestampFormat.getValue();
+            //                this->element_.reset(this->formatTime(this->time_));
+            //            }
 
-            this->element_->addToContainer(container, flags);
+            this->format_ = "hh:mm";
+            this->element_.reset(this->formatTime(this->time_));
+
+            this->element_->addToContainer(theme, container, flags);
         }
     }
 
@@ -311,7 +313,9 @@ namespace chatterino
     {
         static QLocale locale("en_US");
 
-        QString format = locale.toString(time, getSettings()->timestampFormat);
+        //        QString format = locale.toString(time,
+        //        getSettings()->timestampFormat);
+        QString format = locale.toString(time, "HH:mm");
 
         return new TextElement(format, MessageElementFlag::Timestamp,
             MessageColor::System, FontStyle::ChatMedium);
@@ -323,7 +327,7 @@ namespace chatterino
     {
     }
 
-    void TwitchModerationElement::addToContainer(
+    void TwitchModerationElement::addToContainer(ThemexD& theme,
         MessageLayoutContainer& container, MessageElementFlags flags)
     {
         if (flags.has(MessageElementFlag::ModeratorTools))
@@ -331,7 +335,7 @@ namespace chatterino
             QSize size(
                 int(container.getScale() * 16), int(container.getScale() * 16));
 
-            for (const auto& action :
+            /*for (const auto& action :
                 getApp()->moderationActions->items.getVector())
             {
                 if (auto image = action.getImage())
@@ -349,7 +353,7 @@ namespace chatterino
                             ->setLink(
                                 Link(Link::UserAction, action.getAction())));
                 }
-            }
+            }*/
         }
     }
 

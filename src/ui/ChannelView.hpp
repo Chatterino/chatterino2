@@ -191,7 +191,7 @@ namespace chatterino::ui
 
         ThemexD* theme{};
 
-        Pauser pauser;
+        Pauser pauser;  // TODO: rename to pauser_
         Selector selector_;
 
         static constexpr int leftPadding = 8;       // TODO: remove
@@ -200,8 +200,8 @@ namespace chatterino::ui
     private slots:
         void wordFlagsChanged()
         {
-            queueLayout();
-            update();
+            this->queueLayout();
+            this->update();
         }
     };
 }  // namespace chatterino::ui

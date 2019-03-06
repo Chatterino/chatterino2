@@ -1,9 +1,9 @@
-#include "common/NetworkData.hpp"
+#include "net/NetworkData.hpp"
 
-#include "singletons/Paths.hpp"
 #include "util/DebugCount.hpp"
 
 #include <QCryptographicHash>
+#include <QDebug>
 #include <QFile>
 
 namespace chatterino
@@ -44,15 +44,18 @@ namespace chatterino
     {
         if (this->useQuickLoadCache_)
         {
-            QFile cachedFile(
-                getPaths()->cacheDirectory() + "/" + this->getHash());
+            qDebug() << "quickload cache disabled";
 
-            if (cachedFile.open(QIODevice::WriteOnly))
-            {
-                cachedFile.write(bytes);
+            //            QFile cachedFile(
+            //                getPaths()->cacheDirectory() + "/" +
+            //                this->getHash());
 
-                cachedFile.close();
-            }
+            //            if (cachedFile.open(QIODevice::WriteOnly))
+            //            {
+            //                cachedFile.write(bytes);
+
+            //                cachedFile.close();
+            //            }
         }
     }
 

@@ -63,5 +63,4 @@ namespace chatterino
     private:
         static UniqueAccess<QMap<QString, int64_t>> counts_;
     };
-
 }  // namespace chatterino
