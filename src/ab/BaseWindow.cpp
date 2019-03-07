@@ -57,7 +57,7 @@ namespace ab
             this->ui_.titleLabel, &QLabel::setText);
 
         // set theme
-        QFile file("C:\\Users\\daniel\\Desktop\\style.qss");
+        QFile file(":/style.qss");
         file.open(QIODevice::ReadOnly);
         this->setScalableQss(file.readAll());
     }

@@ -51,8 +51,6 @@ namespace chatterino::ui
                 ab::makeWidget<ab::FlatButton>([](ab::FlatButton* w) {
                     w->setPixmap(resources().buttons.user);
                     w->setObjectName("title-bar-avatar");
-                    // w->setPixmap(QPixmap(
-                    //    R"(C:\Users\daniel\Desktop\fourtf-profile_image-abe44d037aef1b2a-70x70.png)"));
                 }));
         }
         else

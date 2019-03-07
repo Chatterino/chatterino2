@@ -1,0 +1,226 @@
+/* chatterino--ui--Label */
+QLabel {
+	color: #eee;
+	font: 12px "Segoe UI";
+}
+
+/* chatterino--ui--RadioButton */
+QRadioButton {
+	color: #eee;
+	font: 12px "Segoe UI";
+}
+
+ab--WindowContent {
+	background: #111;
+}
+
+ab::Dialog {
+	color: #eee;
+}
+
+chatterino--ui--Tooltip {
+	font: 12px "Segoe UI";
+	background: #000;
+	color: #fff;
+	opacity: 0.8;
+}
+
+/*ab--Dialog>ab--WindowContent {
+	background: #222;
+}*/
+
+/*qlineargradient(x1: 0, y1: 0, x2:0, y2: 1, stop: 0 red, stop: 1 blue);*/
+
+ab--TitleBarButton {
+	max-width: 46dip;
+	min-width: 20dip;
+	max-height: 30dip;
+	min-height: 30dip;
+	color: #aaa;
+}
+
+#title-bar-custom {
+	max-width: 30dip;
+	min-width: 30dip;
+	max-height: 30dip;
+	min-height: 30dip;
+	color: #aaa;
+}
+
+
+#title-bar-avatar {
+	max-width: 30dip;
+	min-width: 30dip;
+	max-height: 30dip;
+	min-height: 30dip;
+	background: #4b367c;
+}
+
+ab--TitleBarButton::active {
+	color: #fff;
+}
+
+#title-label {
+	margin-left: 4px;
+	color: #aaa;
+	font: 12px "Segoe UI";
+}
+
+#title-label::active {
+	margin-left: 4px;
+	color: #fff;
+}
+
+#content {
+	/*margin: 8px 8px 8px 8px;*/
+}
+
+ab--BasicTab {
+	background: #252525;
+	border-top: 1px solid #888;
+	color: white;
+	qproperty-ripple: 0;
+	qproperty-hover: 1;
+
+	margin: 1dip 0dip 0dip 1dip;
+	padding: 4px;
+	height: 28px;
+}
+
+chatterino--ui--Tab {
+	qproperty-showX: 0;
+}
+
+ab--NotebookButton {
+	margin-top: 1px;
+	min-width: 11px;
+	min-height: 11px;
+	padding: 8px;
+	color: #ccc;
+}
+
+ab--BasicTab>QLabel {
+	margin: 0 2px;
+}
+
+ab--BasicTab[selected=true] {
+	background: #555;
+	qproperty-hover: 0;
+}
+
+
+
+chatterino--ui--Tab[selected=true] {
+	border-top: 2px solid #00aeef;
+
+	qproperty-showX: 1;
+
+	margin: 0dip 0dip 0dip 1dip;
+}
+
+ab--NotebookContent {
+	border-top: 2px solid #555;
+}
+
+chatterino--ui--TabButton {
+	min-width:  10px;
+	max-width:  10px;
+	min-height: 10px;
+	max-height: 10px;
+	padding: 4px;
+	margin-top: 1px;
+	color: #fff;
+}
+
+ab--BasicTab[selected=true]>chatterino--ui--TabButton {
+}
+
+chatterino--ui--SplitHeader {
+	min-height: 28px;
+	max-height: 28px;
+	background: #2e2e2e;
+	border: 1px solid #383838;
+}
+
+chatterino--ui--SplitHeader>QLabel {
+	margin-left: 4px;
+}
+
+chatterino--ui--SplitHeader>ab--FlatButton {
+	max-width: 28px;
+}
+
+chatterino--ui--Split[selected=true]>chatterino--ui--SplitHeader>QLabel {
+	color: #00aeef;
+}
+
+chatterino--ui--Split {
+	background: #191919;
+	border: 1px solid #222;
+}
+
+chatterino--ui--SplitInput {
+	background: #232323;
+	border: 1px solid #333;
+}
+
+chatterino--ui--SplitInput>QTextEdit {
+	background: #232323;
+	border: none;
+	color: #fff;
+	font: 13px "Segoe UI";
+	padding: 0px;
+}
+
+ab--FlatButton {
+	color: #fff;
+}
+
+#emote-button {
+	min-width: 16px;
+	min-height: 16px;
+}
+
+#input-length {
+	font: 10px "MS SansSerif";
+	color: #ccc;
+	text-align: center;
+}
+
+chatterino--ui--ChannelView {
+	background: #191919;
+}
+
+chatterino--ui--ScrollBar {
+	background: rgba(0,0,0,0);
+	min-width: 16px;
+	max-width: 16px;
+}
+
+/* chatterino--ui--ScrollToBottom */
+#scroll-to-bottom {
+	min-height: 28px;
+}
+
+/*
+	MESSAGES
+*/
+messages--Message {
+	font-family: "Comic Sans MS";
+	background: #191919;
+}
+
+messages--Message[highlighted] {
+	background: #4b282c;
+}
+
+messages--Text {
+	font-family: "Segoe UI";
+	font-size: 12px;
+	color: #fff;
+}
+
+messages--Text[timestamp] {
+	color: #ccc;
+}
+
