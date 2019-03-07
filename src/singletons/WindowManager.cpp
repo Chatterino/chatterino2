@@ -2,14 +2,13 @@
 
 #include "Application.hpp"
 #include "debug/AssertInGuiThread.hpp"
-#include "util/Log.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
-#include "util/Clamp.hpp"
+#include "util/Log.hpp"
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
@@ -22,6 +21,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <algorithm>
 
 #include <chrono>
 

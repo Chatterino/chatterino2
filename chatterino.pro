@@ -244,7 +244,6 @@ HEADERS += \
     src/ab/TitleBarButton.hpp \
     src/ab/util/AnyPtr.hpp \
     src/ab/util/Benchmark.hpp \
-    src/ab/util/Clamp.hpp \
     src/ab/util/ConnectionOwner.hpp \
     src/ab/util/FunctionEventFilter.hpp \
     src/ab/util/MakeWidget.hpp \
