@@ -6,7 +6,7 @@
 #include <pajlada/signals/signal.hpp>
 #include <vector>
 
-#include "debug/AssertInGuiThread.hpp"
+#include "util/AssertInGuiThread.hpp"
 
 namespace chatterino
 {
@@ -143,5 +143,4 @@ namespace chatterino
             return true;
         }
     };
-
 }  // namespace chatterino

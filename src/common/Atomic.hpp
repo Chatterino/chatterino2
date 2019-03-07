@@ -43,5 +43,4 @@ namespace chatterino
         mutable std::mutex mutex_;
         T value_;
     };
-
 }  // namespace chatterino

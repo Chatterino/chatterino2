@@ -6,10 +6,10 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Benchmark.hpp"
-#include "util/Log.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
+#include "util/Log.hpp"
 
 #include <QtAlgorithms>
 #include <utility>
@@ -92,7 +92,8 @@ namespace chatterino
                 this->items_.emplace(str + " ", type);
         };
 
-        if (auto channel = dynamic_cast<TwitchChannel*>(&this->channel_))
+        // TODO: add properly
+        /*if (auto channel = dynamic_cast<TwitchChannel*>(&this->channel_))
         {
             // account emotes
             if (auto account = getApp()->accounts->twitch.getCurrent())
@@ -182,7 +183,6 @@ namespace chatterino
             {
                 addString(command, TaggedString::Command);
             }
-        }
+        }*/
     }
-
 }  // namespace chatterino

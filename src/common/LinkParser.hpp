@@ -16,5 +16,4 @@ namespace chatterino
     private:
         QRegularExpressionMatch match_;
     };
-
 }  // namespace chatterino

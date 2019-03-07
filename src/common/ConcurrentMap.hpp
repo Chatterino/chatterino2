@@ -99,5 +99,4 @@ namespace chatterino
         mutable QMutex mutex;
         QMap<TKey, TValue> data;
     };
-
 }  // namespace chatterino

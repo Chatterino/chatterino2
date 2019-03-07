@@ -99,5 +99,4 @@ namespace chatterino
         mutable T element_;
         mutable std::mutex mutex_;
     };
-
 }  // namespace chatterino

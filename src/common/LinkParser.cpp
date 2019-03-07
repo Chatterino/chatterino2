@@ -63,5 +63,4 @@ namespace chatterino
     {
         return this->match_.captured();
     }
-
 }  // namespace chatterino

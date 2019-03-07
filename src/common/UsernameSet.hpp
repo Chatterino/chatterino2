@@ -73,5 +73,4 @@ namespace chatterino
         std::set<QString> items;
         std::unordered_map<Prefix, QString> firstKeyForPrefix;
     };
-
 }  // namespace chatterino

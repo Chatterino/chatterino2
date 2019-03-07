@@ -352,5 +352,4 @@ namespace chatterino
             return i;
         }
     };
-
 }  // namespace chatterino
