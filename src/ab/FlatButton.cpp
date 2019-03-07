@@ -25,11 +25,6 @@ namespace ab
         this->setMouseTracking(true);
     }
 
-    void FlatButton::setMouseEffectColor(boost::optional<QColor> color)
-    {
-        this->mouseEffectColor_ = color;
-    }
-
     void FlatButton::setPixmap(const QPixmap& _pixmap)
     {
         this->pixmap_ = _pixmap;
@@ -120,6 +115,8 @@ namespace ab
 
     void FlatButton::setChild(QWidget* widget)
     {
+        assert(!this->layout());
+
         this->setLayout(makeLayout<Row>({widget}));
     }
 
@@ -191,12 +188,8 @@ namespace ab
 
         painter.setRenderHint(QPainter::HighQualityAntialiasing);
         painter.setRenderHint(QPainter::Antialiasing);
-        QColor c;
 
-        if (this->mouseEffectColor_)
-            c = this->mouseEffectColor_.get();
-        else
-            c = this->palette().foreground().color();
+        QColor c = this->palette().foreground().color();
 
         if (this->hover_ && this->hoverMultiplier_ > 0)
         {
@@ -244,14 +237,10 @@ namespace ab
     void FlatButton::mousePressEvent(QMouseEvent* event)
     {
         if (!this->enabled_)
-        {
             return;
-        }
 
         if (event->button() != Qt::LeftButton)
-        {
             return;
-        }
 
         this->clickEffects_.push_back(ClickEffect(event->pos()));
 
@@ -379,5 +368,4 @@ namespace ab
         this->menu_->move(point());
         this->menuVisible_ = true;
     }
-
 }  // namespace ab

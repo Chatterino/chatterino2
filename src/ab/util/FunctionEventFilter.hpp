@@ -6,7 +6,7 @@
 
 namespace ab
 {
-    /// Handle `eventFilter` using lambdas.
+    /// Handle QObject's `eventFilter` using lambdas.
     class FunctionEventFilter : public QObject
     {
         Q_OBJECT
@@ -21,5 +21,4 @@ namespace ab
     private:
         std::function<bool(QObject*, QEvent*)> function_;
     };
-
 }  // namespace ab

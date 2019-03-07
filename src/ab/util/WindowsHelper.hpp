@@ -3,11 +3,11 @@
 #ifdef USEWINSDK
 
 #    include <Windows.h>
-#    include <boost/optional.hpp>
+#    include <optional>
 
 namespace ab
 {
-    boost::optional<UINT> getWindowDpi(HWND hwnd);
+    std::optional<UINT> getWindowDpi(HWND hwnd);
     void flushClipboard();
 
     void moveToCursor(HWND hwnd);

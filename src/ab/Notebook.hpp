@@ -37,7 +37,8 @@ namespace ab
         void setOrientation(NotebookOrientation);
         NotebookOrientation orientation() const;
 
-        void setUndockHandler(std::function<void(QWidget*, QWidget*)>);
+        [[deprecated]] void setUndockHandler(
+            std::function<void(QWidget*, QWidget*)>);  // TODO: remove
 
         // opterations below work when passing a tab or a content widget
         void select(QWidget*);

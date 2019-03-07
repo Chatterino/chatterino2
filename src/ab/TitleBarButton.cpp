@@ -27,13 +27,11 @@ namespace ab
         this->paint(painter);
 
         painter.setOpacity(this->getCurrentDimAmount());
-
-        QColor color = this->palette().text().color();
-
-        int xD = this->height() / 3;
-        int centerX = this->width() / 2;
-
         painter.setRenderHint(QPainter::Antialiasing, false);
+
+        const auto color = this->palette().text().color();
+        const auto xD = this->height() / 3;
+        const auto centerX = this->width() / 2;
 
         switch (this->type_)
         {

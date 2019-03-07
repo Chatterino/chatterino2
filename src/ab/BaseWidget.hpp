@@ -23,6 +23,8 @@ namespace ab
             QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
         virtual float scale() const;
+
+        // TODO: move to BaseWindow
         //    boost::optional<float> overrideScale() const;
         //    void setOverrideScale(boost::optional<float>);
 
@@ -42,8 +44,8 @@ namespace ab
 
         void paintEvent(QPaintEvent*) override;
 
-        virtual void scaleChangedEvent(float scale);
-        virtual void themeChangedEvent(Theme& theme);
+        virtual void scaleChangedEvent(float scale);   // TODO: remove
+        virtual void themeChangedEvent(Theme& theme);  // TODO: remove
 
     private:
         // float scale_{1.f};

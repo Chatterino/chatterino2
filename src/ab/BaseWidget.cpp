@@ -169,7 +169,6 @@ namespace ab
     void BaseWidget::showEvent(QShowEvent*)
     {
         //    this->setScale(this->scale());
-        //    this->themeChangedEvent();
     }
 
     void BaseWidget::scaleChangedEvent(float)

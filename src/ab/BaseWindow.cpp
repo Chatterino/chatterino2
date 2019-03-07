@@ -250,33 +250,7 @@ namespace ab
         if (this->hasCustomWindowFrame())
         {
             this->removeBackground();
-
-            //            QPalette palette;
-            //            //        palette.setColor(QPalette::Foreground,
-            //            theme.window.text); this->setPalette(palette);
-
-            //        if (this->ui_.titleLabel)
-            //        {
-            //            QPalette palette_title;
-            //            palette_title.setColor(QPalette::Foreground,
-            //                                   theme.isLightTheme() ? "#333" :
-            //                                   "#ccc");
-            //            this->ui_.titleLabel->setPalette(palette_title);
-            //        }
-
-            //        for (Button* button : this->ui_.buttons)
-            //        {
-            //            button->setMouseEffectColor(this->theme->window.text);
-            //        }
         }
-        //    else
-        //    {
-        //        QPalette palette;
-        //        palette.setColor(QPalette::Background,
-        //        this->theme->window.background);
-        //        palette.setColor(QPalette::Foreground,
-        //        this->theme->window.text); this->setPalette(palette);
-        //    }
     }
 
     void BaseWindow::removeBackground()
@@ -300,6 +274,7 @@ namespace ab
 
     void BaseWindow::wheelEvent(QWheelEvent*)
     {
+        // TODO: reimplement
         //    if (event->orientation() != Qt::Vertical)
         //    {
         //        return;
@@ -325,22 +300,16 @@ namespace ab
         switch (this->getActionOnFocusLoss())
         {
             case Delete:
-            {
                 this->deleteLater();
-            }
-            break;
+                break;
 
             case Close:
-            {
                 this->close();
-            }
-            break;
+                break;
 
             case Hide:
-            {
                 this->hide();
-            }
-            break;
+                break;
 
             default:;
         }
@@ -348,6 +317,7 @@ namespace ab
 
     void BaseWindow::mousePressEvent(QMouseEvent* event)
     {
+        // TODO: check on linux/mac
 #ifndef Q_OS_WIN
         if (this->flags_ & FramelessDraggable)
         {
@@ -417,11 +387,6 @@ namespace ab
 
     void BaseWindow::changeEvent(QEvent*)
     {
-        if (this->isVisible())
-        {
-            //        TooltipWidget::getInstance()->hide();
-        }
-
         if (this->hasCustomWindowFrame())
         {
             if (this->ui_.maxButton)
@@ -440,7 +405,6 @@ namespace ab
 
     void BaseWindow::leaveEvent(QEvent*)
     {
-        //    TooltipWidget::getInstance()->hide();
     }
 
     void BaseWindow::moveTo(QWidget* parent, QPoint point, bool offset)
@@ -829,14 +793,7 @@ namespace ab
                 }
             }
 
-            if (client)
-            {
-                *result = HTCLIENT;
-            }
-            else
-            {
-                *result = HTCAPTION;
-            }
+            *result = client ? HTCLIENT : HTCAPTION;
 
             return true;
         }

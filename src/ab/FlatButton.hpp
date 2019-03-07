@@ -1,7 +1,5 @@
 #pragma once
 
-#include <boost/optional.hpp>
-
 #include "ab/BaseWidget.hpp"
 
 #include <QMenu>
@@ -10,6 +8,7 @@
 #include <QPoint>
 #include <QTimer>
 #include <QWidget>
+#include <optional>
 
 namespace ab
 {
@@ -31,7 +30,6 @@ namespace ab
     public:
         FlatButton(BaseWidget* parent = nullptr);
 
-        void setMouseEffectColor(boost::optional<QColor> color);
         void setPixmap(const QPixmap& pixmap_);
         const QPixmap& getPixmap() const;
 
@@ -93,8 +91,7 @@ namespace ab
         double hoverMultiplier_{0.0};
         QTimer effectTimer_{};
         std::vector<ClickEffect> clickEffects_{};
-        boost::optional<QColor> mouseEffectColor_{};
+        std::optional<QColor> mouseEffectColor_{};
         std::unique_ptr<QMenu> menu_{};
     };
-
 }  // namespace ab

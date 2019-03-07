@@ -14,7 +14,7 @@ namespace ab
     typedef HRESULT(CALLBACK* GetDpiForMonitor_)(
         HMONITOR, MONITOR_DPI_TYPE, UINT*, UINT*);
 
-    boost::optional<UINT> getWindowDpi(HWND hwnd)
+    std::optional<UINT> getWindowDpi(HWND hwnd)
     {
         SetProcessDpiAwarenessContext(
             DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
@@ -36,7 +36,7 @@ namespace ab
             }
         }
 
-        return boost::none;
+        return std::nullopt;
     }
 
     typedef HRESULT(CALLBACK* OleFlushClipboard_)();
