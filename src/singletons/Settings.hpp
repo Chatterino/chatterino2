@@ -11,7 +11,7 @@
 
 namespace chatterino
 {
-    class Settings : public ABSettings
+    class Settings : public BaseSettings
     {
         static Settings* instance;
 
@@ -19,6 +19,12 @@ namespace chatterino
         Settings(const QString& settingsDirectory);
 
         static Settings& getInstance();
+
+        FloatSetting uiScale = {"/appearance/uiScale2", 1};
+        BoolSetting windowTopMost = {"/appearance/windowAlwaysOnTop", false};
+
+        float getClampedUiScale() const;
+        void setClampedUiScale(float value);
 
         /// Appearance
         BoolSetting showTimestamps = {
@@ -208,7 +214,3 @@ namespace chatterino
     };
 
 }  // namespace chatterino
-
-#ifdef CHATTERINO
-#    include "singletons/Settings.hpp"
-#endif

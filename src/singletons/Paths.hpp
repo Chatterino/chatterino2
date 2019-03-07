@@ -49,5 +49,4 @@ namespace chatterino
     };
 
     Paths* getPaths();
-
 }  // namespace chatterino

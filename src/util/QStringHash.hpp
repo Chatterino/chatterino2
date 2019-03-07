@@ -13,5 +13,4 @@ namespace std
             return qHash(s);
         }
     };
-
 }  // namespace std

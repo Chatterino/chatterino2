@@ -3,7 +3,7 @@
 #include "Room.hpp"
 #include "ab/BaseWidget.hpp"
 #include "ab/util/ConnectionOwner.hpp"
-#include "util/QObjectPtr.hpp"
+#include "util/QObjectRef.hpp"
 
 class QLabel;
 class QMenu;

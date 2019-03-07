@@ -6,6 +6,8 @@
 
 namespace ab
 {
+    /// Starts the timer in it's constructor and prints the elapsed time in the
+    /// destructor.
     class BenchmarkGuard
     {
     public:
@@ -17,5 +19,4 @@ namespace ab
         QElapsedTimer timer_;
         QString name_;
     };
-
 }  // namespace ab

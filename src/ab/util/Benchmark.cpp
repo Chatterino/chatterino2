@@ -19,5 +19,4 @@ namespace ab
     {
         return qreal(timer_.nsecsElapsed()) / 1000000.0;
     }
-
 }  // namespace ab

@@ -141,5 +141,4 @@ namespace chatterino
     {
         return Paths::instance;
     }
-
 }  // namespace chatterino
