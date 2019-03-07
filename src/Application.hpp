@@ -1,13 +1,20 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-#include "singletons/NativeMessaging.hpp"
-
-#include <QApplication>
-#include <memory>
+class QApplication;
+template <typename T>
+class QVector;
+namespace chatterino::ui
+{
+    class Window;
+    enum class WindowType;
+}  // namespace chatterino::ui
 
 namespace chatterino
 {
+    class Provider;
+    class PrivateApplication;
+
+    // compatability
     class TwitchServer;
     class PubSub;
 
@@ -32,25 +39,18 @@ namespace chatterino
 
     class Application
     {
-        std::vector<std::unique_ptr<Singleton>> singletons_;
-        int argc_;
-        char** argv_;
-
     public:
-        static Application* instance;
+        Application();
+        ~Application();
 
-        Application(Settings& settings, Paths& paths);
+        // execution
+        void run(QApplication& qtApp);
+        ui::Window* addWindow(const ui::WindowType& type);
 
-        void initialize(Settings& settings, Paths& paths);
-        void load();
-        void save();
+        // providers
+        const QVector<Provider*>& providers();
 
-        int run(QApplication& qtApp);
-
-        friend void test();
-
-        Theme* const themes{};
-        Fonts* const fonts{};
+        // compatability
         Emotes* const emotes{};
         WindowManager* const windows{};
         Toasts* const toasts{};
@@ -62,35 +62,11 @@ namespace chatterino
         IgnoreController* const ignores{};
         TaggedUsersController* const taggedUsers{};
         ModerationActions* const moderationActions{};
-        TwitchServer* const twitch2{};
         ChatterinoBadges* const chatterinoBadges{};
 
-        /*[[deprecated]]*/ Logging* const logging{};
-
-        /// Provider-specific
-        struct
-        {
-            /*[[deprecated("use twitch2 instead")]]*/ TwitchServer* server{};
-            /*[[deprecated("use twitch2->pubsub instead")]]*/ PubSub* pubsub{};
-        } twitch;
+        Logging* const logging{};
 
     private:
-        void addSingleton(Singleton* singleton);
-        void initPubsub();
-        void initNm(Paths& paths);
-
-        template <typename T,
-            typename = std::enable_if_t<std::is_base_of<Singleton, T>::value>>
-        T& emplace()
-        {
-            auto t = new T;
-            this->singletons_.push_back(std::unique_ptr<T>(t));
-            return *t;
-        }
-
-        NativeMessagingServer nmServer{};
+        PrivateApplication* this_{};  // delete this manually
     };
-
-    Application* getApp();
-
 }  // namespace chatterino

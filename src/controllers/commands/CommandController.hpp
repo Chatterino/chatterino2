@@ -1,9 +1,9 @@
 #pragma once
 
-#include "common/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "controllers/commands/Command.hpp"
+#include "util/ChatterinoSetting.hpp"
 
 #include <QMap>
 #include <pajlada/settings.hpp>
@@ -52,5 +52,4 @@ namespace chatterino
         QString execCustomCommand(
             const QStringList& words, const Command& command);
     };
-
 }  // namespace chatterino
