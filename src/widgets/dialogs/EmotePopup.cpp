@@ -1,14 +1,13 @@
 #include "EmotePopup.hpp"
 
 #include "Application.hpp"
+#include "ab/Notebook.hpp"
+#include "ab/util/Benchmark.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "debug/Benchmark.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
-#include "widgets/Notebook.hpp"
-#include "widgets/helper/ChannelView.hpp"
+#include "ui/ChannelView.hpp"
 
 #include <QHBoxLayout>
 #include <QShortcut>
@@ -18,6 +17,7 @@ namespace chatterino
 {
     namespace
     {
+#if 0
         auto makeTitleMessage(const QString& title)
         {
             MessageBuilder builder;
@@ -99,17 +99,15 @@ namespace chatterino
                 }
             }
         }
+#endif
     }  // namespace
 
     EmotePopup::EmotePopup()
         : ab::BaseWindow(BaseWindow::EnableCustomFrame)
     {
-        auto layout = new QVBoxLayout(this);
-        this->getLayoutContainer()->setLayout(layout);
-
-        auto notebook = new Notebook(this);
-        layout->addWidget(notebook);
-        layout->setMargin(0);
+#if 0
+        auto notebook = new ab::Notebook();
+        this->setCenterWidget(new ab::Notebook());
 
         auto clicked = [this](const Link& link) {
             this->linkClicked.invoke(link);
@@ -122,7 +120,7 @@ namespace chatterino
                 MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
                 MessageElementFlag::EmoteImages});
             view->setEnableScrollingToBottom(false);
-            notebook->addPage(view, tabTitle);
+            notebook->addTab(tabTitle, view);
             view->linkClicked.connect(clicked);
 
             return view;
@@ -134,12 +132,13 @@ namespace chatterino
         this->viewEmojis_ = makeView("Emojis");
 
         this->loadEmojis();
+#endif
     }
 
     void EmotePopup::loadChannel(ChannelPtr _channel)
     {
-        BenchmarkGuard guard("loadChannel");
-
+        // ab::BenchmarkGuard guard("loadChannel");
+#if 0
         this->setWindowTitle("Emotes in #" + _channel->getName());
 
         auto twitchChannel = dynamic_cast<TwitchChannel*>(_channel.get());
@@ -185,10 +184,12 @@ namespace chatterino
                 MessageElementFlag::Text, MessageColor::System);
             subChannel->addMessage(builder.release());
         }
+#endif
     }
 
     void EmotePopup::loadEmojis()
     {
+#if 0
         auto& emojis = getApp()->emotes->emojis.emojis;
 
         ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
@@ -208,6 +209,6 @@ namespace chatterino
         emojiChannel->addMessage(builder.release());
 
         this->viewEmojis_->setChannel(emojiChannel);
+#endif
     }
-
 }  // namespace chatterino

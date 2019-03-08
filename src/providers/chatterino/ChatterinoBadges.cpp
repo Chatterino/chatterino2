@@ -4,8 +4,8 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QThread>
-#include "common/NetworkRequest.hpp"
-#include "common/Outcome.hpp"
+#include "net/NetworkRequest.hpp"
+#include "util/Outcome.hpp"
 #include "messages/Emote.hpp"
 
 #include <QUrl>

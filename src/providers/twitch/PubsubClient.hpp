@@ -2,7 +2,7 @@
 
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+//#include "providers/twitch/TwitchServer.hpp"
 
 #include <rapidjson/document.h>
 #include <QString>
@@ -170,5 +170,4 @@ namespace chatterino
 
         void runThread();
     };
-
 }  // namespace chatterino

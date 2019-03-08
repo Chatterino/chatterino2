@@ -1,15 +1,13 @@
 #include "controllers/notifications/NotificationController.hpp"
 
 #include "Application.hpp"
-#include "common/NetworkRequest.hpp"
-#include "common/Outcome.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
-#include "util/Log.hpp"
+#include "net/NetworkRequest.hpp"
 #include "providers/twitch/TwitchApi.hpp"
-#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/Window.hpp"
+#include "util/Log.hpp"
+#include "util/Outcome.hpp"
 
 #ifdef Q_OS_WIN
 #    include <wintoastlib.h>
@@ -133,6 +131,7 @@ namespace chatterino
 
     void NotificationController::fetchFakeChannels()
     {
+#if 0
         for (std::vector<int>::size_type i = 0;
              i != channelMap[Platform::Twitch].getVector().size(); i++)
         {
@@ -144,6 +143,7 @@ namespace chatterino
                     channelMap[Platform::Twitch].getVector()[i]);
             }
         }
+#endif
     }
 
     void NotificationController::getFakeTwitchChannelLiveStatus(
@@ -224,5 +224,4 @@ namespace chatterino
             fakeTwitchChannels.erase(i);
         }
     }
-
 }  // namespace chatterino

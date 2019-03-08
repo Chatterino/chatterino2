@@ -5,13 +5,13 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/Command.hpp"
 #include "controllers/commands/CommandModel.hpp"
-#include "util/Log.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchApi.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "util/Log.hpp"
+//#include "providers/twitch/TwitchChannel.hpp"
+//#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -107,6 +107,7 @@ namespace chatterino
     QString CommandController::execCommand(
         const QString& textNoEmoji, ChannelPtr channel, bool dryRun)
     {
+#if 0
         QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
         QStringList words = text.split(' ', QString::SkipEmptyParts);
 
@@ -440,6 +441,8 @@ namespace chatterino
         }
 
         return text;
+#endif
+        return textNoEmoji;
     }
 
     QString CommandController::execCustomCommand(

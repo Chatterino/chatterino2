@@ -5,7 +5,7 @@
 #include <QJsonValue>
 #include <QThread>
 #include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
+#include "net/NetworkRequest.hpp"
 #include "common/UniqueAccess.hpp"
 #include "messages/Emote.hpp"
 

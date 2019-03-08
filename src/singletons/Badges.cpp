@@ -5,5 +5,4 @@ namespace chatterino
     Badges::Badges()
     {
     }
-
 }  // namespace chatterino

@@ -1,7 +1,7 @@
 #include "providers/LinkResolver.hpp"
 
 #include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
+#include "net/NetworkRequest.hpp"
 #include "messages/Link.hpp"
 #include "singletons/Settings.hpp"
 

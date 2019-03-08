@@ -27,5 +27,4 @@ namespace chatterino
         ChannelView* subEmotesView_{};
         ChannelView* viewEmojis_{};
     };
-
 }  // namespace chatterino

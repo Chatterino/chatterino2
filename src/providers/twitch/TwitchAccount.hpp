@@ -1,9 +1,9 @@
 #pragma once
 
-#include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
+#include "messages/Common.hpp"
 #include "messages/Emote.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 

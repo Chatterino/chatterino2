@@ -22,5 +22,4 @@ namespace chatterino
         ProviderId providerId_;
         QString category_;
     };
-
 }  // namespace chatterino

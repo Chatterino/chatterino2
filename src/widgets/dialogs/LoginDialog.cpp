@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
+#include "net/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "util/Helpers.hpp"

@@ -20,7 +20,7 @@
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+//#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -55,12 +55,10 @@ namespace chatterino
     };
 
     Application::Application(/*QApplication& qtApp*/)
-        : this_(new PrivateApplication(/*qtApp*/))
-
         // leaking (compatability)
-        //, emotes(new Emotes())
+        : toasts(new Toasts())
+        , emotes(new Emotes())
         //, windows(new WindowManager())
-        , toasts(new Toasts())
 
         , accounts(new AccountController())
         , commands(new CommandController())
@@ -71,7 +69,11 @@ namespace chatterino
         , moderationActions(new ModerationActions())
         , chatterinoBadges(new ChatterinoBadges())
         , logging(new Logging())
+
+        , this_(new PrivateApplication(/*qtApp*/))
     {
+        appInst__ = this;
+
         this_->providers.append(new TwitchProvider());
 
         NetworkManager::init();
@@ -115,5 +117,12 @@ namespace chatterino
     const QVector<Provider*>& Application::providers()
     {
         return this_->providers;
+    }
+
+    Application* getApp()
+    {
+        assert(appInst__);
+
+        return appInst__;
     }
 }  // namespace chatterino

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "messages/ScrollbarHighlight.hpp"
 #include "util/FlagsEnum.hpp"
-#include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>
 #include <boost/noncopyable.hpp>

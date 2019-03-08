@@ -6,7 +6,7 @@
 #include <QStyleFactory>
 
 #include "Application.hpp"
-#include "common/NetworkManager.hpp"
+#include "net/NetworkManager.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Updates.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"

@@ -51,9 +51,9 @@ namespace chatterino
         const QVector<Provider*>& providers();
 
         // compatability
-        Emotes* const emotes{};
-        WindowManager* const windows{};
         Toasts* const toasts{};
+        Emotes* const emotes{};
+        // WindowManager* const windows{};
 
         AccountController* const accounts{};
         CommandController* const commands{};
@@ -69,4 +69,7 @@ namespace chatterino
     private:
         PrivateApplication* this_{};  // delete this manually
     };
+
+    [[deprecated]] inline Application* appInst__{};
+    [[deprecated]] Application* getApp();
 }  // namespace chatterino

@@ -586,7 +586,7 @@ namespace ab
         // set initial dpi
         if (auto dpi = getWindowDpi(msg->hwnd))
         {
-            this->nativeScale_ = dpi.get() / 96.f;
+            this->nativeScale_ = dpi.value() / 96.f;
             this->updateScalableQss();
         }
 

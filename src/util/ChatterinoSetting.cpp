@@ -1,4 +1,4 @@
-#include "common/ChatterinoSetting.hpp"
+#include "util/ChatterinoSetting.hpp"
 
 #include "BaseSettings.hpp"
 

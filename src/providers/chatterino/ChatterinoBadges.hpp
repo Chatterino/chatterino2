@@ -3,7 +3,7 @@
 #include <boost/optional.hpp>
 #include <common/Singleton.hpp>
 
-#include "common/Aliases.hpp"
+#include "messages/Common.hpp"
 
 #include <map>
 #include <vector>

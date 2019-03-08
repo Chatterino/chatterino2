@@ -152,13 +152,8 @@ SOURCES += \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
     src/providers/twitch/TwitchApi.cpp \
-    src/providers/twitch/TwitchBadges.cpp \
-    src/providers/twitch/TwitchChannel.cpp \
-    src/providers/twitch/TwitchEmotes.cpp \
     src/providers/twitch/TwitchHelpers.cpp \
-    src/providers/twitch/TwitchMessageBuilder.cpp \
     src/providers/twitch/TwitchParseCheerEmotes.cpp \
-    src/providers/twitch/TwitchServer.cpp \
     src/providers/twitch/TwitchUser.cpp \
     src/Room.cpp \
     src/RunGui.cpp \
@@ -170,10 +165,8 @@ SOURCES += \
     src/singletons/NativeMessaging.cpp \
     src/singletons/Paths.cpp \
     src/singletons/Settings.cpp \
-    src/singletons/Theme.cpp \
     src/singletons/Toasts.cpp \
     src/singletons/Updates.cpp \
-    src/singletons/WindowManager.cpp \
     src/twitch/TwitchBadges.cpp \
     src/twitch/TwitchChannel.cpp \
     src/twitch/TwitchChatConnection.cpp \
@@ -265,6 +258,7 @@ HEADERS += \
     src/common/ConcurrentMap.hpp \
     src/common/DownloadManager.hpp \
     src/common/LinkParser.hpp \
+    src/common/ProviderId.hpp \
     src/common/SignalVector.hpp \
     src/common/SignalVectorModel.hpp \
     src/common/Singleton.hpp \
@@ -344,14 +338,8 @@ HEADERS += \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \
     src/providers/twitch/TwitchApi.hpp \
-    src/providers/twitch/TwitchBadges.hpp \
-    src/providers/twitch/TwitchChannel.hpp \
-    src/providers/twitch/TwitchCommon.hpp \
-    src/providers/twitch/TwitchEmotes.hpp \
     src/providers/twitch/TwitchHelpers.hpp \
-    src/providers/twitch/TwitchMessageBuilder.hpp \
     src/providers/twitch/TwitchParseCheerEmotes.hpp \
-    src/providers/twitch/TwitchServer.hpp \
     src/providers/twitch/TwitchUser.hpp \
     src/Room.hpp \
     src/RunGui.hpp \
@@ -363,10 +351,8 @@ HEADERS += \
     src/singletons/NativeMessaging.hpp \
     src/singletons/Paths.hpp \
     src/singletons/Settings.hpp \
-    src/singletons/Theme.hpp \
     src/singletons/Toasts.hpp \
     src/singletons/Updates.hpp \
-    src/singletons/WindowManager.hpp \
     src/twitch/TwitchBadges.hpp \
     src/twitch/TwitchChannel.hpp \
     src/twitch/TwitchChatConnection.hpp \

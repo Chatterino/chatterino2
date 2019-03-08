@@ -7,7 +7,6 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
-#include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/helper/GifTimer.hpp"
 
 namespace chatterino
@@ -24,10 +23,6 @@ namespace chatterino
 
         bool isIgnoredEmote(const QString& emote);
 
-        TwitchEmotes twitch;
-        Emojis emojis;
-
         GIFTimer gifTimer;
     };
-
 }  // namespace chatterino

@@ -2,7 +2,7 @@
 
 #include "common/Singleton.hpp"
 
-#include "common/ChatterinoSetting.hpp"
+#include "util/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 

@@ -2,7 +2,7 @@
 
 #include "IrcMessage"
 #include "common/Channel.hpp"
-#include "common/NetworkRequest.hpp"
+#include "net/NetworkRequest.hpp"
 #include "util/Log.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"

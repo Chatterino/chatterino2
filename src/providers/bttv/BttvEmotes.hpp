@@ -2,8 +2,8 @@
 
 #include <memory>
 #include "boost/optional.hpp"
-#include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "messages/Common.hpp"
 
 namespace chatterino
 {
@@ -30,5 +30,4 @@ namespace chatterino
     private:
         Atomic<std::shared_ptr<const EmoteMap>> global_;
     };
-
 }  // namespace chatterino

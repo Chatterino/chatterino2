@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "common/DownloadManager.hpp"
-#include "common/NetworkRequest.hpp"
+#include "net/NetworkRequest.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"

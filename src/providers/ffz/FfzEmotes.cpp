@@ -2,8 +2,8 @@
 
 #include <QJsonArray>
 
-#include "common/NetworkRequest.hpp"
-#include "common/Outcome.hpp"
+#include "net/NetworkRequest.hpp"
+#include "util/Outcome.hpp"
 #include "util/Log.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"

@@ -1,13 +1,13 @@
 #include "common/CompletionModel.hpp"
 
 #include "Application.hpp"
-#include "common/Common.hpp"
+//#include "common/Common.hpp"
+#include "ab/util/Benchmark.hpp"
 #include "common/UsernameSet.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
-#include "debug/Benchmark.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+//#include "providers/twitch/TwitchChannel.hpp"
+//#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/Log.hpp"
 
@@ -92,7 +92,7 @@ namespace chatterino
                 this->items_.emplace(str + " ", type);
         };
 
-        // TODO: add properly
+        // TODO: add virtual functions to Room
         /*if (auto channel = dynamic_cast<TwitchChannel*>(&this->channel_))
         {
             // account emotes

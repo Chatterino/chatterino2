@@ -2,8 +2,8 @@
 
 #include <memory>
 #include "boost/optional.hpp"
-#include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "messages/Common.hpp"
 
 namespace chatterino
 {

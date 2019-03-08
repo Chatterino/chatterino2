@@ -1,6 +1,6 @@
 #pragma once
 
-#include "common/ChatterinoSetting.hpp"
+#include "util/ChatterinoSetting.hpp"
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"

@@ -213,4 +213,5 @@ namespace chatterino
         void updateModerationActions();
     };
 
+    Settings* getSettings();
 }  // namespace chatterino

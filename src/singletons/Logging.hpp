@@ -25,5 +25,4 @@ namespace chatterino
     private:
         std::map<QString, std::unique_ptr<LoggingChannel>> loggingChannels_;
     };
-
 }  // namespace chatterino

@@ -1,9 +1,9 @@
 #include "singletons/Logging.hpp"
 
 #include "Application.hpp"
-#include "util/Log.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Log.hpp"
 
 #include <QDir>
 #include <QStandardPaths>
@@ -36,5 +36,4 @@ namespace chatterino
             it->second->addMessage(message);
         }
     }
-
 }  // namespace chatterino

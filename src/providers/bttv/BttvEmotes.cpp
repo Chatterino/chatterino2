@@ -1,12 +1,11 @@
 #include "providers/bttv/BttvEmotes.hpp"
 
-#include "common/Common.hpp"
-#include "common/NetworkRequest.hpp"
-#include "util/Log.hpp"
+#include "messages/Common.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
+#include "net/NetworkRequest.hpp"
+#include "util/Log.hpp"
 
 #include <QJsonArray>
 #include <QThread>
@@ -164,5 +163,4 @@ namespace chatterino
         return {urlTemplate.replace("{{id}}", id.string)
                     .replace("{{image}}", emoteScale)};
     }
-
 }  // namespace chatterino
