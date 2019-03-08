@@ -11,10 +11,9 @@
 namespace chatterino
 {
     template <class T>
-    class LayoutCreator
-    {
+    class [[deprecated("use ab/MakeWidget instead")]] LayoutCreator {
     public:
-        LayoutCreator(T* _item)
+        LayoutCreator(T * _item)
             : item_(_item)
         {
         }
@@ -35,7 +34,7 @@ namespace chatterino
         }
 
         template <typename T2>
-        LayoutCreator<T2> append(T2* _item)
+        LayoutCreator<T2> append(T2 * _item)
         {
             this->addItem(this->getOrCreateLayout(), _item);
 
@@ -43,7 +42,7 @@ namespace chatterino
         }
 
         template <typename T2, typename... Args>
-        LayoutCreator<T2> emplace(Args&&... args)
+        LayoutCreator<T2> emplace(Args && ... args)
         {
             T2* t = new T2(std::forward<Args>(args)...);
 
@@ -76,7 +75,7 @@ namespace chatterino
             return LayoutCreator<T2>(layout);
         }
 
-        LayoutCreator<T> assign(T** ptr)
+        LayoutCreator<T> assign(T * *ptr)
         {
             *ptr = this->item_;
 
@@ -113,7 +112,7 @@ namespace chatterino
         template <typename Q = T, typename T2,
             typename std::enable_if<std::is_same<QTabWidget, Q>::value,
                 int>::type = 0>
-        LayoutCreator<T2> appendTab(T2* item, const QString& title)
+        LayoutCreator<T2> appendTab(T2 * item, const QString& title)
         {
             static_assert(
                 std::is_base_of<QLayout, T2>::value, "needs to be QLayout");
@@ -132,7 +131,7 @@ namespace chatterino
         template <typename T2,
             typename std::enable_if<std::is_base_of<QWidget, T2>::value,
                 int>::type = 0>
-        void addItem(QLayout* layout, T2* item)
+        void addItem(QLayout * layout, T2 * item)
         {
             layout->addWidget(item);
         }
@@ -140,7 +139,7 @@ namespace chatterino
         template <typename T2,
             typename std::enable_if<std::is_base_of<QLayout, T2>::value,
                 int>::type = 0>
-        void addItem(QLayout* layout, T2* item)
+        void addItem(QLayout * layout, T2 * item)
         {
             QWidget* widget = new QWidget();
             widget->setLayout(item);

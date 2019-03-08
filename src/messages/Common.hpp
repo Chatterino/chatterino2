@@ -51,6 +51,7 @@ namespace chatterino
 
     /// OUTCOME
 
+    constexpr const char* ANONYMOUS_USERNAME_LABEL = "anonymous";
 }  // namespace chatterino
 
 /// STRING ALIASES

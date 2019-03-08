@@ -1,9 +1,10 @@
 #pragma once
 
-#include "TwitchChannel.hpp"
+#if 0
+#    include "TwitchChannel.hpp"
 
-#include <QString>
-#include <atomic>
+#    include <QString>
+#    include <atomic>
 
 namespace chatterino
 {
@@ -25,3 +26,4 @@ namespace chatterino
     };
 
 }  // namespace chatterino
+#endif

@@ -1,7 +1,9 @@
 #pragma once
 
-#include "ab/BaseWindow.hpp"
+#if 0
+#    include "ab/BaseWindow.hpp"
 
+// TODO: fix
 namespace chatterino
 {
     class Channel;
@@ -36,5 +38,5 @@ namespace chatterino
         void getOverrustleLogs();
         void getLogviewerLogs(const QString& roomID);
     };
-
 }  // namespace chatterino
+#endif

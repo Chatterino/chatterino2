@@ -1,10 +1,10 @@
 #include "Updates.hpp"
 
+#include "Version.hpp"
 #include "net/NetworkRequest.hpp"
-#include "util/Outcome.hpp"
-#include "common/Version.hpp"
 #include "singletons/Paths.hpp"
 #include "util/CombinePath.hpp"
+#include "util/Outcome.hpp"
 #include "util/PostToThread.hpp"
 
 #include <QDebug>
@@ -101,9 +101,9 @@ namespace chatterino
     void Updates::checkForUpdates()
     {
 #ifdef Q_OS_WIN
-        QString url =
-            "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS
-            "/stable";
+        auto url =
+            QString("https://notitia.chatterino.com/version/chatterino/") +
+            CHATTERINO_OS + "/stable";
 
         NetworkRequest req(url);
         req.setTimeout(30000);

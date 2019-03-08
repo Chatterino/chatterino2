@@ -10,5 +10,4 @@ namespace chatterino
     public:
         LastRunCrashDialog();
     };
-
 }  // namespace chatterino

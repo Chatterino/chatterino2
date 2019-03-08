@@ -1,20 +1,21 @@
-#include "AttachedWindow.hpp"
+#if 0
+#    include "AttachedWindow.hpp"
 
-#include "Application.hpp"
-#include "util/DebugCount.hpp"
-#include "widgets/splits/Split.hpp"
+#    include "Application.hpp"
+#    include "util/DebugCount.hpp"
+#    include "widgets/splits/Split.hpp"
 
-#include <QTimer>
-#include <QVBoxLayout>
+#    include <QTimer>
+#    include <QVBoxLayout>
 
-#ifdef USEWINSDK
-#    include "util/WindowsHelper.hpp"
+#    ifdef USEWINSDK
+#        include "util/WindowsHelper.hpp"
 
-#    include "Windows.h"
+#        include "Windows.h"
 // don't even think about reordering these
-#    include "Psapi.h"
-#    pragma comment(lib, "Dwmapi.lib")
-#endif
+#        include "Psapi.h"
+#        pragma comment(lib, "Dwmapi.lib")
+#    endif
 
 namespace chatterino
 {
@@ -128,7 +129,7 @@ namespace chatterino
 
     void AttachedWindow::attachToHwnd(void* _attachedPtr)
     {
-#ifdef USEWINSDK
+#    ifdef USEWINSDK
         if (this->attached_)
         {
             return;
@@ -172,12 +173,12 @@ namespace chatterino
                 this->updateWindowRect(attached);
             });
         this->timer_.start();
-#endif
+#    endif
     }
 
     void AttachedWindow::updateWindowRect(void* _attachedPtr)
     {
-#ifdef USEWINSDK
+#    ifdef USEWINSDK
         auto hwnd = HWND(this->winId());
         auto attached = HWND(_attachedPtr);
 
@@ -232,7 +233,7 @@ namespace chatterino
 
 //        ::MoveWindow(hwnd, rect.right - 360, rect.top + 82, 360 - 8,
 //        rect.bottom - rect.top - 82 - 8, false);
-#endif
+#    endif
     }
 
     // void AttachedWindow::nativeEvent(const QByteArray &eventType, void
@@ -247,3 +248,4 @@ namespace chatterino
     std::vector<AttachedWindow::Item> AttachedWindow::items;
 
 }  // namespace chatterino
+#endif

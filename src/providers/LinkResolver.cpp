@@ -1,8 +1,8 @@
 #include "providers/LinkResolver.hpp"
 
-#include "common/Common.hpp"
-#include "net/NetworkRequest.hpp"
+#include "messages/Common.hpp"
 #include "messages/Link.hpp"
+#include "net/NetworkRequest.hpp"
 #include "singletons/Settings.hpp"
 
 #include <QString>

@@ -35,10 +35,11 @@ namespace chatterino::ui
 
         double flex = 1;
 
-    private:
+        // private: TODO: make private again
         explicit FlexItem(QLayoutItem*);
         explicit FlexItem(FlexItemType type);
 
+    private:
         void clear();
         void flatten();
         std::shared_ptr<FlexItem> clone();

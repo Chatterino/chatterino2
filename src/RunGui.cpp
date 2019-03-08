@@ -136,10 +136,9 @@ namespace chatterino
             createRunningFile(runningPath);
         }
 
-        Application app(settings, paths);
+        Application app;
         app.initialize(settings, paths);
         app.run(a);
-        app.save();
 
         removeRunningFile(runningPath);
 

@@ -109,6 +109,7 @@ SOURCES += \
     src/controllers/taggedusers/TaggedUsersController.cpp \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
     src/dialogs/SelectChannelDialog.cpp \
+    src/irc/IrcConnection2.cpp \
     src/main.cpp \
     src/messages/Emote.cpp \
     src/messages/Fonts.cpp \
@@ -132,19 +133,13 @@ SOURCES += \
     src/net/NetworkTimer.cpp \
     src/Provider.cpp \
     src/providers/bttv/BttvEmotes.cpp \
-    src/providers/bttv/LoadBttvChannelEmote.cpp \
     src/providers/chatterino/ChatterinoBadges.cpp \
     src/providers/emoji/Emojis.cpp \
     src/providers/ffz/FfzEmotes.cpp \
     src/providers/ffz/FfzModBadge.cpp \
-    src/providers/irc/AbstractIrcServer.cpp \
     src/providers/irc/IrcAccount.cpp \
-    src/providers/irc/IrcChannel2.cpp \
-    src/providers/irc/IrcConnection2.cpp \
-    src/providers/irc/IrcServer.cpp \
     src/providers/LinkResolver.cpp \
     src/providers/twitch/ChatroomChannel.cpp \
-    src/providers/twitch/IrcMessageHandler.cpp \
     src/providers/twitch/PartialTwitchUser.cpp \
     src/providers/twitch/PubsubActions.cpp \
     src/providers/twitch/PubsubClient.cpp \
@@ -195,12 +190,14 @@ SOURCES += \
     src/util/ChatterinoSetting.cpp \
     src/util/DebugCount.cpp \
     src/util/FormatTime.cpp \
+    src/util/FuzzyConvert.cpp \
     src/util/IncognitoBrowser.cpp \
     src/util/InitUpdateButton.cpp \
     src/util/JsonQuery.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/Resources.cpp \
     src/util/StreamLink.cpp \
+    src/util/Strings.cpp \
     src/widgets/AccountSwitchPopupWidget.cpp \
     src/widgets/AccountSwitchWidget.cpp \
     src/widgets/AttachedWindow.cpp \
@@ -215,13 +212,17 @@ SOURCES += \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/dialogs/UserInfoPopup.cpp \
     src/widgets/dialogs/WelcomeDialog.cpp \
+    src/widgets/helper/Button.cpp \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/DebugPopup.cpp \
     src/widgets/helper/EditableModelView.cpp \
     src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
+    src/widgets/helper/SignalLabel.cpp \
+    src/widgets/Label.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
+    src/widgets/settingspages/AdvancedPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
     src/widgets/settingspages/ExternalToolsPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
@@ -262,7 +263,6 @@ HEADERS += \
     src/common/SignalVector.hpp \
     src/common/SignalVectorModel.hpp \
     src/common/Singleton.hpp \
-    src/common/UniqueAccess.hpp \
     src/common/UsernameSet.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
@@ -288,6 +288,8 @@ HEADERS += \
     src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/dialogs/SelectChannelDialog.hpp \
+    src/irc/IrcConnection2.hpp \
+    src/irc/IrcHelpers.hpp \
     src/messages/Common.hpp \
     src/messages/Emote.hpp \
     src/messages/Fonts.hpp \
@@ -317,20 +319,14 @@ HEADERS += \
     src/PrecompiledHeader.hpp \
     src/Provider.hpp \
     src/providers/bttv/BttvEmotes.hpp \
-    src/providers/bttv/LoadBttvChannelEmote.hpp \
     src/providers/chatterino/ChatterinoBadges.hpp \
     src/providers/emoji/Emojis.hpp \
     src/providers/ffz/FfzEmotes.hpp \
     src/providers/ffz/FfzModBadge.hpp \
-    src/providers/irc/AbstractIrcServer.hpp \
     src/providers/irc/IrcAccount.hpp \
-    src/providers/irc/IrcChannel2.hpp \
-    src/providers/irc/IrcConnection2.hpp \
-    src/providers/irc/IrcServer.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/ChatroomChannel.hpp \
     src/providers/twitch/EmoteValue.hpp \
-    src/providers/twitch/IrcMessageHandler.hpp \
     src/providers/twitch/PartialTwitchUser.hpp \
     src/providers/twitch/PubsubActions.hpp \
     src/providers/twitch/PubsubClient.hpp \
@@ -338,6 +334,7 @@ HEADERS += \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \
     src/providers/twitch/TwitchApi.hpp \
+    src/providers/twitch/TwitchCommon.hpp \
     src/providers/twitch/TwitchHelpers.hpp \
     src/providers/twitch/TwitchParseCheerEmotes.hpp \
     src/providers/twitch/TwitchUser.hpp \
@@ -369,6 +366,7 @@ HEADERS += \
     src/ui/EmotePreview.hpp \
     src/ui/FlexLayout.hpp \
     src/ui/FlexLayout.Private.hpp \
+    src/ui/Line.hpp \
     src/ui/Scrollbar.hpp \
     src/ui/Split.hpp \
     src/ui/SplitContainer.hpp \
@@ -387,6 +385,7 @@ HEADERS += \
     src/util/DistanceBetweenPoints.hpp \
     src/util/FlagsEnum.hpp \
     src/util/FormatTime.hpp \
+    src/util/FuzzyConvert.hpp \
     src/util/Helpers.hpp \
     src/util/IncognitoBrowser.hpp \
     src/util/InitUpdateButton.hpp \
@@ -406,6 +405,8 @@ HEADERS += \
     src/util/SharedPtrElementLess.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamLink.hpp \
+    src/util/Strings.hpp \
+    src/util/UniqueAccess.hpp \
     src/Version.hpp \
     src/widgets/AccountSwitchPopupWidget.hpp \
     src/widgets/AccountSwitchWidget.hpp \
@@ -421,13 +422,17 @@ HEADERS += \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/dialogs/UserInfoPopup.hpp \
     src/widgets/dialogs/WelcomeDialog.hpp \
+    src/widgets/helper/Button.hpp \
     src/widgets/helper/ComboBoxItemDelegate.hpp \
     src/widgets/helper/DebugPopup.hpp \
     src/widgets/helper/EditableModelView.hpp \
     src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
+    src/widgets/helper/SignalLabel.hpp \
+    src/widgets/Label.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
+    src/widgets/settingspages/AdvancedPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
     src/widgets/settingspages/ExternalToolsPage.hpp \
     src/widgets/settingspages/GeneralPage.hpp \

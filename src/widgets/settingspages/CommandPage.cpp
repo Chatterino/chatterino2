@@ -29,6 +29,7 @@ namespace chatterino
     CommandPage::CommandPage()
         : SettingsPage("Commands", ":/settings/commands.svg")
     {
+#if 0
         auto app = getApp();
 
         LayoutCreator<CommandPage> layoutCreator(this);
@@ -56,6 +57,6 @@ namespace chatterino
 
         // ---- end of layout
         this->commandsEditTimer_.setSingleShot(true);
+#endif
     }
-
 }  // namespace chatterino

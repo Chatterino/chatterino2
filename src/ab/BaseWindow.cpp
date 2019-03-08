@@ -245,14 +245,6 @@ namespace ab
         assert(false);
     }
 
-    void BaseWindow::themeChangedEvent(Theme&)
-    {
-        if (this->hasCustomWindowFrame())
-        {
-            this->removeBackground();
-        }
-    }
-
     void BaseWindow::removeBackground()
     {
         QPalette palette;

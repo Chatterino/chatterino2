@@ -1,11 +1,11 @@
 #pragma once
 
 #include "common/Atomic.hpp"
-#include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Common.hpp"
 #include "messages/Emote.hpp"
 #include "providers/twitch/TwitchUser.hpp"
+#include "util/UniqueAccess.hpp"
 
 #include <rapidjson/document.h>
 #include <QColor>
@@ -131,5 +131,4 @@ namespace chatterino
         //    std::map<UserId, TwitchAccountEmoteData> emotes;
         UniqueAccess<TwitchAccountEmoteData> emotes_;
     };
-
 }  // namespace chatterino

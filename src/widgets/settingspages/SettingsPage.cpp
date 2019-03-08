@@ -1,7 +1,6 @@
 #include "SettingsPage.hpp"
 
 #include "Application.hpp"
-#include "singletons/WindowManager.hpp"
 
 #include <QDebug>
 #include <QPainter>
@@ -55,7 +54,7 @@ namespace chatterino
         QObject::connect(
             checkbox, &QCheckBox::toggled, this, [&setting](bool state) {
                 setting = state;
-                getApp()->windows->forceLayoutChannelViews();
+                // TODO: fix getApp()->windows->forceLayoutChannelViews();
             });
 
         return checkbox;
@@ -108,5 +107,4 @@ namespace chatterino
 
         return w;
     }
-
 }  // namespace chatterino

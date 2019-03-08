@@ -83,7 +83,6 @@ namespace ab
         virtual void moveEvent(QMoveEvent*) override;
         virtual void closeEvent(QCloseEvent*) override;
 
-        virtual void themeChangedEvent(Theme&) override;
         virtual bool event(QEvent* event) override;
         virtual void wheelEvent(QWheelEvent* event) override;
 

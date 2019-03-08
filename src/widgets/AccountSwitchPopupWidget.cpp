@@ -57,5 +57,4 @@ namespace chatterino
         painter.setPen(QColor("#999"));
         painter.drawRect(0, 0, this->width() - 1, this->height() - 1);
     }
-
 }  // namespace chatterino

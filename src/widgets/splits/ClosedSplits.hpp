@@ -1,11 +1,12 @@
 #pragma once
 
-#include "common/Channel.hpp"
-#include "widgets/helper/NotebookTab.hpp"
+#if 0
+#    include "common/Channel.hpp"
+#    include "widgets/helper/NotebookTab.hpp"
 
-#include <deque>
-#include <mutex>
-#include <utility>
+#    include <deque>
+#    include <mutex>
+#    include <utility>
 
 namespace chatterino
 {
@@ -29,5 +30,5 @@ namespace chatterino
         static std::mutex m_;
         static std::vector<SplitInfo> closedSplits_;
     };
-
 }  // namespace chatterino
+#endif

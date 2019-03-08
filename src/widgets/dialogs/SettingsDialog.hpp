@@ -31,7 +31,6 @@ namespace chatterino
 
     protected:
         virtual void scaleChangedEvent(float newDpi) override;
-        virtual void themeChangedEvent() override;
 
     private:
         static SettingsDialog* handle;

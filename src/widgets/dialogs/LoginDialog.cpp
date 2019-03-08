@@ -1,7 +1,7 @@
 #include "widgets/dialogs/LoginDialog.hpp"
 
 #include "Application.hpp"
-#include "common/Common.hpp"
+#include "messages/Common.hpp"
 #include "net/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"

@@ -34,5 +34,4 @@ namespace chatterino
 
         ReceiverThread thread;
     };
-
 }  // namespace chatterino

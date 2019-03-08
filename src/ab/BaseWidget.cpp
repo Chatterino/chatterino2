@@ -145,10 +145,8 @@ namespace ab
             // add element if it's a basewidget
             if (auto widget = dynamic_cast<BaseWidget*>(event->child()))
             {
-                if (this->theme_)
-                {
-                    widget->themeChangedEvent(*this->theme_);
-                }
+                // if (this->theme_)
+                //    widget->themeChangedEvent(*this->theme_);
                 this->widgets_.push_back(widget);
             }
         }
@@ -173,11 +171,6 @@ namespace ab
 
     void BaseWidget::scaleChangedEvent(float)
     {
-    }
-
-    void BaseWidget::themeChangedEvent(Theme&)
-    {
-        // Do any color scheme updates here
     }
 
     void BaseWidget::paintEvent(QPaintEvent*)

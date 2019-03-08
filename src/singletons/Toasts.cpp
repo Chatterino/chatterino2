@@ -2,11 +2,8 @@
 
 #include "Application.hpp"
 #include "common/DownloadManager.hpp"
-#include "net/NetworkRequest.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "net/NetworkRequest.hpp"
 #include "singletons/Paths.hpp"
 
 #ifdef Q_OS_WIN
@@ -150,6 +147,8 @@ namespace chatterino
     void Toasts::fetchChannelAvatar(
         const QString channelName, std::function<void(QString)> successCallback)
     {
+        // TODO: twitch code may not be here
+#if 0
         QString requestUrl(
             "https://api.twitch.tv/kraken/users?login=" + channelName);
 
@@ -198,5 +197,6 @@ namespace chatterino
         });
 
         request.execute();
+#endif
     }
 }  // namespace chatterino

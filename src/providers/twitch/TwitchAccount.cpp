@@ -4,11 +4,11 @@
 
 #include "Application.hpp"
 #include "net/NetworkRequest.hpp"
-#include "util/Outcome.hpp"
-#include "util/Log.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Emotes.hpp"
+#include "util/Log.hpp"
+#include "util/Outcome.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino
@@ -459,6 +459,7 @@ namespace chatterino
 
     void TwitchAccount::parseEmotes(const rapidjson::Document& root)
     {
+#if 0
         auto emoteData = this->emotes_.access();
 
         emoteData->emoteSets.clear();
@@ -517,6 +518,7 @@ namespace chatterino
 
             emoteData->emoteSets.emplace_back(emoteSet);
         }
+#endif
     };
 
     void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
@@ -582,5 +584,4 @@ namespace chatterino
 
         req.execute();
     }
-
 }  // namespace chatterino

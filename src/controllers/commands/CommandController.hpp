@@ -1,15 +1,17 @@
 #pragma once
 
-#include "common/SignalVector.hpp"
-#include "common/Singleton.hpp"
-#include "controllers/commands/Command.hpp"
-#include "util/ChatterinoSetting.hpp"
+#if 0
 
-#include <QMap>
-#include <pajlada/settings.hpp>
+#    include "common/SignalVector.hpp"
+#    include "common/Singleton.hpp"
+#    include "controllers/commands/Command.hpp"
+#    include "util/ChatterinoSetting.hpp"
 
-#include <memory>
-#include <mutex>
+#    include <QMap>
+#    include <pajlada/settings.hpp>
+
+#    include <memory>
+#    include <mutex>
 
 namespace chatterino
 {
@@ -53,3 +55,4 @@ namespace chatterino
             const QStringList& words, const Command& command);
     };
 }  // namespace chatterino
+#endif

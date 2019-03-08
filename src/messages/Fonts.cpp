@@ -1,5 +1,7 @@
 #include "messages/Fonts.hpp"
 
+#include "singletons/Settings.hpp"
+
 #include <QDebug>
 #include <QtGlobal>
 

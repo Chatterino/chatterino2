@@ -84,5 +84,4 @@ namespace chatterino
             default:;
         }
     }
-
 }  // namespace chatterino

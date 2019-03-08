@@ -26,7 +26,7 @@ namespace chatterino
         QObject::connect(&this->reconnectTimer_, &QTimer::timeout, [this] {
             if (this->isConnected())
             {
-                reconnectRequested.invoke();
+                emit reconnectRequested();
             }
         });
 

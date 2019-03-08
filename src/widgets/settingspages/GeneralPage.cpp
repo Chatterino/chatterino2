@@ -5,13 +5,10 @@
 #include <QScrollArea>
 
 #include "Application.hpp"
-#include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
-#include "singletons/Theme.hpp"
-#include "singletons/WindowManager.hpp"
+#include "ui/Line.hpp"
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
-#include "widgets/helper/Line.hpp"
 
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
@@ -93,7 +90,7 @@ namespace chatterino
         QObject::connect(combo, &QComboBox::currentTextChanged,
             [&setting](const QString& newValue) {
                 setting = newValue;
-                getApp()->windows->forceLayoutChannelViews();
+                // TODO: getApp()->windows->forceLayoutChannelViews();
             });
 
         return combo;
@@ -147,6 +144,7 @@ namespace chatterino
         auto& s = *getSettings();
 
         layout.addTitle("Appearance");
+#if 0
         layout.addDropdown("Theme", {"White", "Light", "Dark", "Black"},
             getApp()->themes->themeName);
         layout.addDropdown<QString>("Font", {"Segoe UI", "Arial", "Choose..."},
@@ -157,6 +155,7 @@ namespace chatterino
             getApp()->fonts->chatFontSize,
             [](auto val) { return QString::number(val) + "pt"; },
             [](auto args) { return fuzzyToInt(args.value, 10); });
+#endif
         layout.addDropdown<float>("UI Scale",
             {"0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "Default", "1.2x", "1.4x",
                 "1.6x", "1.8x", "2x", "2.33x", "2.66x", "3x", "3.5x", "4x"},
@@ -362,6 +361,7 @@ namespace chatterino
         {
             args.combobox->setCurrentIndex(0);
             args.combobox->setEditText("Choosing...");
+#if 0
             QFontDialog dialog(
                 getApp()->fonts->getFont(FontStyle::ChatMedium, 1.));
 
@@ -374,6 +374,7 @@ namespace chatterino
                 return font.family();
             else
                 return args.combobox->itemText(0);
+#endif
         }
         return args.value;
     }

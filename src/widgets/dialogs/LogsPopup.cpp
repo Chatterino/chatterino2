@@ -1,23 +1,23 @@
 #include "LogsPopup.hpp"
 
-#include "IrcMessage"
-#include "common/Channel.hpp"
-#include "net/NetworkRequest.hpp"
-#include "util/Log.hpp"
-#include "providers/twitch/PartialTwitchUser.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
-#include "widgets/helper/ChannelView.hpp"
+#if 0
+#    include "IrcMessage"
+#    include "net/NetworkRequest.hpp"
+#    include "providers/twitch/PartialTwitchUser.hpp"
+#    include "providers/twitch/TwitchChannel.hpp"
+#    include "providers/twitch/TwitchMessageBuilder.hpp"
+#    include "util/Log.hpp"
+#    include "widgets/helper/ChannelView.hpp"
 
-#include <QDateTime>
-#include <QJsonArray>
-#include <QMessageBox>
-#include <QVBoxLayout>
+#    include <QDateTime>
+#    include <QJsonArray>
+#    include <QMessageBox>
+#    include <QVBoxLayout>
 
 namespace chatterino
 {
     LogsPopup::LogsPopup()
-        : channel_(Channel::getEmpty())
+    //: channel_(Channel::getEmpty())
     {
         this->initLayout();
         this->resize(400, 600);
@@ -193,3 +193,5 @@ namespace chatterino
         req.execute();
     }
 }  // namespace chatterino
+
+#endif

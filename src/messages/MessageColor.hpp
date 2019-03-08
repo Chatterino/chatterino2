@@ -13,7 +13,7 @@ namespace chatterino
         MessageColor(const QColor& color);
         MessageColor(Type type_ = Text);
 
-        const QColor& getColor(Theme& themeManager) const;
+        const QColor& getColor(/*Theme& themeManager*/) const;
 
     private:
         Type type_;

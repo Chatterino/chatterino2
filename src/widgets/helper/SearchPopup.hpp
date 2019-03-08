@@ -1,9 +1,9 @@
 #pragma once
 
-#include "messages/LimitedQueueSnapshot.hpp"
-#include "ab/BaseWindow.hpp"
+#if 0
+#    include "ab/BaseWindow.hpp"
 
-#include <memory>
+#    include <memory>
 
 class QLineEdit;
 
@@ -26,9 +26,9 @@ namespace chatterino
         void initLayout();
         void performSearch();
 
-        LimitedQueueSnapshot<MessagePtr> snapshot_;
+        // LimitedQueueSnapshot<MessagePtr> snapshot_;
         QLineEdit* searchInput_;
         ChannelView* channelView_;
     };
-
 }  // namespace chatterino
+#endif

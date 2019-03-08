@@ -21,6 +21,7 @@
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 //#include "providers/twitch/TwitchServer.hpp"
+#include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
@@ -61,7 +62,7 @@ namespace chatterino
         //, windows(new WindowManager())
 
         , accounts(new AccountController())
-        , commands(new CommandController())
+        //, commands(new CommandController())
         , highlights(new HighlightController())
         , notifications(new NotificationController())
         , ignores(new IgnoreController())
@@ -117,6 +118,33 @@ namespace chatterino
     const QVector<Provider*>& Application::providers()
     {
         return this_->providers;
+    }
+
+    void Application::alert()
+    {
+        int duration = getSettings()->longAlerts ? 2500 : 0;
+
+        if (this_->mainWindow)
+            QApplication::alert(this_->mainWindow->window(), duration);
+    }
+
+    void Application::initialize(Settings& settings, Paths& paths)
+    {
+        // compatability
+        this->toasts->initialize(settings, paths);
+        this->emotes->initialize(settings, paths);
+        // WindowManager* const windows{};
+
+        this->accounts->initialize(settings, paths);
+        // this->commands->initialize(settings, paths);
+        this->highlights->initialize(settings, paths);
+        this->notifications->initialize(settings, paths);
+        this->ignores->initialize(settings, paths);
+        this->taggedUsers->initialize(settings, paths);
+        this->moderationActions->initialize(settings, paths);
+        this->chatterinoBadges->initialize(settings, paths);
+
+        this->logging->initialize(settings, paths);
     }
 
     Application* getApp()

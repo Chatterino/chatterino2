@@ -1,4 +1,5 @@
-#include "ClosedSplits.hpp"
+#if 0
+#    include "ClosedSplits.hpp"
 
 namespace chatterino
 {
@@ -51,3 +52,4 @@ namespace chatterino
     }
 
 }  // namespace chatterino
+#endif

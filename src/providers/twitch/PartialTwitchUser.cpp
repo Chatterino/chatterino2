@@ -1,9 +1,9 @@
 #include "providers/twitch/PartialTwitchUser.hpp"
 
-#include "common/Common.hpp"
+#include "messages/Common.hpp"
 #include "net/NetworkRequest.hpp"
-#include "util/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "util/Log.hpp"
 
 #include <QJsonArray>
 #include <cassert>
@@ -79,5 +79,4 @@ namespace chatterino
 
         request.execute();
     }
-
 }  // namespace chatterino

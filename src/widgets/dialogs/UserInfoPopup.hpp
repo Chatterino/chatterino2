@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ab/BaseWindow.hpp"
+#include "widgets/helper/Button.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -20,9 +21,6 @@ namespace chatterino
         UserInfoPopup();
 
         void setData(const QString& name, const ChannelPtr& channel);
-
-    protected:
-        virtual void themeChangedEvent() override;
 
     private:
         void installEvents();
@@ -68,5 +66,4 @@ namespace chatterino
             void paintEvent(QPaintEvent* event) override;
         };
     };
-
 }  // namespace chatterino

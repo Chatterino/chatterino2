@@ -1,7 +1,6 @@
 #include "singletons/NativeMessaging.hpp"
 
 #include "Application.hpp"
-#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Paths.hpp"
 #include "util/PostToThread.hpp"
 
@@ -20,7 +19,6 @@ namespace ipc = boost::interprocess;
 #    include <QProcess>
 
 #    include <Windows.h>
-#    include "singletons/WindowManager.hpp"
 #    include "widgets/AttachedWindow.hpp"
 #endif
 
@@ -192,6 +190,7 @@ namespace chatterino
             qDebug() << attach;
 
 #ifdef USEWINSDK
+#    if 0
             AttachedWindow::GetArgs args;
             args.winId = root.value("winId").toString();
             args.yOffset = root.value("yOffset").toInt(-1);
@@ -205,6 +204,7 @@ namespace chatterino
                 attach = false;
                 return;
             }
+#    endif
 #endif
 
             if (_type == "twitch")
@@ -212,14 +212,18 @@ namespace chatterino
                 postToThread([=] {
                     if (!name.isEmpty())
                     {
+                        // TODO: fix
+#if 0
                         app->twitch.server->watchingChannel.reset(
                             app->twitch.server->getOrAddChannel(name));
+#endif
                     }
 
                     if (attach)
                     {
 #ifdef USEWINSDK
                         //                    if (args.height != -1) {
+#    if 0
                         auto* window =
                             AttachedWindow::get(::GetForegroundWindow(), args);
                         if (!name.isEmpty())
@@ -227,6 +231,7 @@ namespace chatterino
                             window->setChannel(
                                 app->twitch.server->getOrAddChannel(name));
                         }
+#    endif
 //                    }
 //                    window->show();
 #endif
@@ -251,7 +256,9 @@ namespace chatterino
 #ifdef USEWINSDK
             postToThread([winId] {
                 qDebug() << "NW detach";
+#    if 0
                 AttachedWindow::detach(winId);
+#    endif
             });
 #endif
         }
@@ -260,5 +267,4 @@ namespace chatterino
             qDebug() << "NM unknown action " + action;
         }
     }
-
 }  // namespace chatterino

@@ -5,7 +5,6 @@
 #include "net/NetworkRequest.hpp"
 #include "providers/twitch/TwitchApi.hpp"
 #include "singletons/Toasts.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/Log.hpp"
 #include "util/Outcome.hpp"
 
@@ -205,7 +204,7 @@ namespace chatterino
                     }
                     if (getSettings()->notificationFlashTaskbar)
                     {
-                        getApp()->windows->sendAlert();
+                        getApp()->alert();
                     }
                 }
                 return Success;

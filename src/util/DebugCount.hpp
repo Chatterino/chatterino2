@@ -1,6 +1,6 @@
 #pragma once
 
-#include <common/UniqueAccess.hpp>
+#include <util/UniqueAccess.hpp>
 
 #include <mutex>
 #include <typeinfo>

@@ -1,12 +1,13 @@
-#include "ChatroomChannel.hpp"
+#if 0
+#    include "ChatroomChannel.hpp"
 
-#include <QDebug>
-#include "TwitchApi.hpp"
-#include "common/Common.hpp"
-#include "messages/Emote.hpp"
-#include "providers/bttv/BttvEmotes.hpp"
-#include "providers/bttv/LoadBttvChannelEmote.hpp"
-#include "singletons/Emotes.hpp"
+#    include <QDebug>
+#    include "TwitchApi.hpp"
+#    include "messages/Common.hpp"
+#    include "messages/Emote.hpp"
+#    include "providers/bttv/BttvEmotes.hpp"
+#    include "providers/bttv/LoadBttvChannelEmote.hpp"
+#    include "singletons/Emotes.hpp"
 
 namespace chatterino
 {
@@ -54,3 +55,4 @@ namespace chatterino
     }
 
 }  // namespace chatterino
+#endif

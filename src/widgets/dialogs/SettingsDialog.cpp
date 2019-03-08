@@ -5,6 +5,7 @@
 #include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
+#include "widgets/settingspages/AdvancedPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 #include "widgets/settingspages/GeneralPage.hpp"
@@ -27,9 +28,6 @@ namespace chatterino
         this->addTabs();
 
         this->scaleChangedEvent(this->scale());
-
-        this->overrideBackgroundColor_ = QColor("#111111");
-        this->themeChangedEvent();
 
         this->resize(766, 600);
     }
@@ -209,15 +207,6 @@ namespace chatterino
         this->setStyleSheet(styleSheet);
 
         this->ui_.tabContainerContainer->setFixedWidth(int(150 * newDpi));
-    }
-
-    void SettingsDialog::themeChangedEvent()
-    {
-        BaseWindow::themeChangedEvent();
-
-        QPalette palette;
-        palette.setColor(QPalette::Background, QColor("#111"));
-        this->setPalette(palette);
     }
 
     ///// Widget creation helpers

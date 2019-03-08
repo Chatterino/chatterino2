@@ -1,7 +1,7 @@
 #include "common/CompletionModel.hpp"
 
 #include "Application.hpp"
-//#include "common/Common.hpp"
+//#include "messages/Common.hpp"
 #include "ab/util/Benchmark.hpp"
 #include "common/UsernameSet.hpp"
 #include "controllers/accounts/AccountController.hpp"

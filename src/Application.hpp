@@ -15,6 +15,9 @@ namespace chatterino
     class PrivateApplication;
 
     // compatability
+    class Settings;
+    class Paths;
+
     class TwitchServer;
     class PubSub;
 
@@ -50,13 +53,17 @@ namespace chatterino
         // providers
         const QVector<Provider*>& providers();
 
+        // misc
+        void alert();
+
         // compatability
+        void initialize(Settings& settings, Paths& paths);
         Toasts* const toasts{};
         Emotes* const emotes{};
         // WindowManager* const windows{};
 
         AccountController* const accounts{};
-        CommandController* const commands{};
+        // CommandController* const commands{};
         HighlightController* const highlights{};
         NotificationController* const notifications{};
         IgnoreController* const ignores{};
@@ -70,6 +77,8 @@ namespace chatterino
         PrivateApplication* this_{};  // delete this manually
     };
 
-    [[deprecated]] inline Application* appInst__{};
-    [[deprecated]] Application* getApp();
+    [[deprecated("dependency injection should be used instead")]]  //
+        inline Application* appInst__{};
+    [[deprecated("dependency injection should be used instead")]] Application*
+        getApp();
 }  // namespace chatterino

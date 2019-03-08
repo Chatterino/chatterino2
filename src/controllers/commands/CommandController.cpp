@@ -1,35 +1,36 @@
-#include "CommandController.hpp"
+#if 0
+#    include "CommandController.hpp"
 
-#include "Application.hpp"
-#include "common/SignalVector.hpp"
-#include "controllers/accounts/AccountController.hpp"
-#include "controllers/commands/Command.hpp"
-#include "controllers/commands/CommandModel.hpp"
-#include "messages/Message.hpp"
-#include "messages/MessageBuilder.hpp"
-#include "messages/MessageElement.hpp"
-#include "providers/twitch/TwitchApi.hpp"
-#include "util/Log.hpp"
+#    include "Application.hpp"
+#    include "common/SignalVector.hpp"
+#    include "controllers/accounts/AccountController.hpp"
+#    include "controllers/commands/Command.hpp"
+#    include "controllers/commands/CommandModel.hpp"
+#    include "messages/Message.hpp"
+#    include "messages/MessageBuilder.hpp"
+#    include "messages/MessageElement.hpp"
+#    include "providers/twitch/TwitchApi.hpp"
+#    include "util/Log.hpp"
 //#include "providers/twitch/TwitchChannel.hpp"
 //#include "providers/twitch/TwitchServer.hpp"
-#include "singletons/Emotes.hpp"
-#include "singletons/Paths.hpp"
-#include "singletons/Settings.hpp"
-#include "util/CombinePath.hpp"
-#include "widgets/dialogs/LogsPopup.hpp"
+#    include "singletons/Emotes.hpp"
+#    include "singletons/Paths.hpp"
+#    include "singletons/Settings.hpp"
+#    include "util/CombinePath.hpp"
+#    include "widgets/dialogs/LogsPopup.hpp"
 
-#include <QApplication>
-#include <QFile>
-#include <QRegularExpression>
+#    include <QApplication>
+#    include <QFile>
+#    include <QRegularExpression>
 
-#define TWITCH_DEFAULT_COMMANDS                                         \
-    {                                                                   \
-        "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", \
-            "/unban", "/timeout", "/untimeout", "/slow", "/slowoff",    \
-            "/r9kbeta", "/r9kbetaoff", "/emoteonly", "/emoteonlyoff",   \
-            "/clear", "/subscribers", "/subscribersoff", "/followers",  \
-            "/followersoff"                                             \
-    }
+#    define TWITCH_DEFAULT_COMMANDS                                         \
+        {                                                                   \
+            "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", \
+                "/unban", "/timeout", "/untimeout", "/slow", "/slowoff",    \
+                "/r9kbeta", "/r9kbetaoff", "/emoteonly", "/emoteonlyoff",   \
+                "/clear", "/subscribers", "/subscribersoff", "/followers",  \
+                "/followersoff"                                             \
+        }
 
 namespace chatterino
 {
@@ -107,7 +108,7 @@ namespace chatterino
     QString CommandController::execCommand(
         const QString& textNoEmoji, ChannelPtr channel, bool dryRun)
     {
-#if 0
+#    if 0
         QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
         QStringList words = text.split(' ', QString::SkipEmptyParts);
 
@@ -441,7 +442,7 @@ namespace chatterino
         }
 
         return text;
-#endif
+#    endif
         return textNoEmoji;
     }
 
@@ -529,3 +530,4 @@ namespace chatterino
     }
 
 }  // namespace chatterino
+#endif

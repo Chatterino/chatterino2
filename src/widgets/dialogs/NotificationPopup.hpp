@@ -1,6 +1,8 @@
 #pragma once
 
-#include "ab/BaseWindow.hpp"
+#if 0
+
+#    include "ab/BaseWindow.hpp"
 
 namespace chatterino
 {
@@ -26,3 +28,4 @@ namespace chatterino
         ChannelPtr channel_;
     };
 }  // namespace chatterino
+#endif

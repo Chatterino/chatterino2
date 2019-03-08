@@ -7,7 +7,6 @@
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "singletons/Emotes.hpp"
-#include "singletons/Theme.hpp"
 #include "util/FormatTime.hpp"
 #include "util/IrcHelpers.hpp"
 #include "util/Resources.hpp"

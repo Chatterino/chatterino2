@@ -1,8 +1,8 @@
 #include "AccountSwitchWidget.hpp"
 
 #include "Application.hpp"
-#include "common/Common.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "messages/Common.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 
@@ -95,5 +95,4 @@ namespace chatterino
 
         this->blockSignals(false);
     }
-
 }  // namespace chatterino

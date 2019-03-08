@@ -89,5 +89,4 @@ namespace chatterino
         //        });
         //    });
     }
-
 }  // namespace chatterino

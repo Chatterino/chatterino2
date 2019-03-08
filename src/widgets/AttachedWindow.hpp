@@ -1,7 +1,8 @@
 #pragma once
 
-#include <QTimer>
-#include <QWidget>
+#if 0
+#    include <QTimer>
+#    include <QWidget>
 
 namespace chatterino
 {
@@ -57,11 +58,12 @@ namespace chatterino
         int currentYOffset_;
         int width_ = 360;
         int height_ = -1;
-#ifdef USEWINSDK
+#    ifdef USEWINSDK
         bool validProcessName_ = false;
         bool attached_ = false;
-#endif
+#    endif
         QTimer timer_;
     };
 
 }  // namespace chatterino
+#endif

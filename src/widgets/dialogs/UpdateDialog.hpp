@@ -1,8 +1,8 @@
 #pragma once
 
+#include "ab/BaseWindow.hpp"
 #include "pajlada/signals/signalholder.hpp"
 #include "singletons/Updates.hpp"
-#include "ab/BaseWindow.hpp"
 #include "widgets/Label.hpp"
 
 class QPushButton;
@@ -29,5 +29,4 @@ namespace chatterino
 
         pajlada::Signals::SignalHolder connections_;
     };
-
 }  // namespace chatterino

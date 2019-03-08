@@ -22,5 +22,4 @@ namespace chatterino
         void getId(std::function<void(QString)> successCallback,
             const QObject* caller = nullptr);
     };
-
 }  // namespace chatterino

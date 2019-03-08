@@ -13,7 +13,7 @@ namespace chatterino
         // show update prompt when clicking the button
         QObject::connect(&button, &Button::leftClicked, [&button] {
             auto dialog = new UpdateDialog();
-            dialog->setActionOnFocusLoss(BaseWindow::Delete);
+            dialog->setActionOnFocusLoss(ab::BaseWindow::Delete);
             dialog->move(button.mapToGlobal(
                 QPoint(int(-100 * button.scale()), button.height())));
             dialog->show();
@@ -43,6 +43,7 @@ namespace chatterino
         auto updateChange = [&button](auto) {
             button.setVisible(Updates::getInstance().shouldShowUpdateButton());
 
+            // TODO: use resources class
             auto imageUrl = Updates::getInstance().isError()
                                 ? ":/images/download_update_error.png"
                                 : ":/images/download_update.png";
@@ -54,5 +55,4 @@ namespace chatterino
         signalHolder.managedConnect(Updates::getInstance().statusUpdated,
             [updateChange](auto status) { updateChange(status); });
     }
-
 }  // namespace chatterino

@@ -7,5 +7,4 @@ namespace chatterino
     {
         this->setWindowTitle("Chatterino quick setup");
     }
-
 }  // namespace chatterino

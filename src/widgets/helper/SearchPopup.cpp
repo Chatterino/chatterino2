@@ -1,13 +1,14 @@
 #include "SearchPopup.hpp"
 
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QVBoxLayout>
+#if 0
+#    include <QHBoxLayout>
+#    include <QLineEdit>
+#    include <QPushButton>
+#    include <QVBoxLayout>
 
-#include "common/Channel.hpp"
-#include "messages/Message.hpp"
-#include "widgets/helper/ChannelView.hpp"
+#    include "common/Channel.hpp"
+#    include "messages/Message.hpp"
+#    include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino
 {
@@ -92,3 +93,4 @@ namespace chatterino
     }
 
 }  // namespace chatterino
+#endif

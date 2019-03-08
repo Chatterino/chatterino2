@@ -2,13 +2,10 @@
 
 #include <memory>
 
-namespace pajlada
+namespace pajlada::Signals
 {
-    namespace Signals
-    {
-        class SignalHolder;
-    }
-}  // namespace pajlada
+    class SignalHolder;
+}  // namespace pajlada::Signals
 
 namespace chatterino
 {
@@ -17,5 +14,4 @@ namespace chatterino
 
     void initUpdateButton(
         Button& button, pajlada::Signals::SignalHolder& signalHolder);
-
 }  // namespace chatterino

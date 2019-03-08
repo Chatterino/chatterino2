@@ -25,5 +25,4 @@ namespace chatterino
             AccountSwitchWidget* accountSwitchWidget = nullptr;
         } ui_;
     };
-
 }  // namespace chatterino

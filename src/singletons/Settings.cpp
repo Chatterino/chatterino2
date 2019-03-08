@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "singletons/Paths.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/Log.hpp"
 
 #include <algorithm>

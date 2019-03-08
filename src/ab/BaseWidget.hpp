@@ -6,7 +6,6 @@
 
 namespace ab
 {
-    class Theme;
     class BaseWindow;
 
     void setPropertyAndPolish(
@@ -44,8 +43,7 @@ namespace ab
 
         void paintEvent(QPaintEvent*) override;
 
-        virtual void scaleChangedEvent(float scale);   // TODO: remove
-        virtual void themeChangedEvent(Theme& theme);  // TODO: remove
+        virtual void scaleChangedEvent(float scale);  // TODO: remove
 
     private:
         // float scale_{1.f};
@@ -53,8 +51,6 @@ namespace ab
         QSize scaleIndependantSize_;
 
         std::vector<BaseWidget*> widgets_;
-
-        Theme* theme_{};
 
         friend class BaseWindow;
     };

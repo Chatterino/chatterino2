@@ -53,5 +53,4 @@ namespace chatterino
     {
         this->lineEdit_.selectAll();
     }
-
 }  // namespace chatterino

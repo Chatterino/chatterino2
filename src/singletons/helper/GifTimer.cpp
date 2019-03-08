@@ -2,12 +2,12 @@
 
 #include "Application.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/WindowManager.hpp"
 
 namespace chatterino
 {
     void GIFTimer::initialize()
     {
+#if 0
         this->timer.setInterval(30);
 
         getSettings()->animateEmotes.connect([this](bool enabled, auto) {
@@ -25,6 +25,6 @@ namespace chatterino
             this->signal.invoke();
             getApp()->windows->repaintGifEmotes();
         });
+#endif
     }
-
 }  // namespace chatterino

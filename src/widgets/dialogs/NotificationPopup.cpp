@@ -1,12 +1,12 @@
-#include "NotificationPopup.hpp"
+#if 0
+#    include "NotificationPopup.hpp"
 
-#include "common/Channel.hpp"
-#include "messages/Message.hpp"
-#include "ui/ChannelView.hpp"
+#    include "messages/Message.hpp"
+#    include "ui/ChannelView.hpp"
 
-#include <QApplication>
-#include <QDesktopWidget>
-#include <QScreen>
+#    include <QApplication>
+#    include <QDesktopWidget>
+#    include <QScreen>
 
 namespace chatterino
 {
@@ -16,7 +16,7 @@ namespace chatterino
               std::make_shared<Channel>("notifications", Channel::Type::None))
 
     {
-        this->channelView_ = new ChannelView(this);
+        this->channelView_ = new ab::ChannelView(this);
 
         auto* layout = new QVBoxLayout(this);
         this->setLayout(layout);
@@ -53,3 +53,4 @@ namespace chatterino
         //    });
     }
 }  // namespace chatterino
+#endif

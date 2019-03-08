@@ -1,19 +1,15 @@
 #include "UserInfoPopup.hpp"
 
 #include "Application.hpp"
-#include "common/Channel.hpp"
-#include "net/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "net/NetworkRequest.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
-#include "providers/twitch/TwitchChannel.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Resources.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/dialogs/LogsPopup.hpp"
-#include "widgets/helper/EffectLabel.hpp"
-#include "widgets/helper/Line.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -32,11 +28,12 @@ namespace chatterino
               BaseWindow::Frameless | BaseWindow::FramelessDraggable))
         , hack_(new bool)
     {
+#if 0
         this->setStayInScreenRect(true);
 
-#ifdef Q_OS_LINUX
+#    ifdef Q_OS_LINUX
         this->setWindowFlag(Qt::Popup);
-#endif
+#    endif
 
         auto app = getApp();
 
@@ -195,20 +192,15 @@ namespace chatterino
             });
         }
 
-        this->setStyleSheet("font-size: 11pt;");
+        // this->setStyleSheet("font-size: 11pt;");
 
         this->installEvents();
-    }
-
-    void UserInfoPopup::themeChangedEvent()
-    {
-        BaseWindow::themeChangedEvent();
-
-        this->setStyleSheet("background: #333");
+#endif
     }
 
     void UserInfoPopup::installEvents()
     {
+#if 0
         std::weak_ptr<bool> hack = this->hack_;
 
         // follow
@@ -320,10 +312,12 @@ namespace chatterino
                     }
                 }
             });
+#endif
     }
 
     void UserInfoPopup::setData(const QString& name, const ChannelPtr& channel)
     {
+#if 0
         this->userName_ = name;
         this->channel_ = channel;
 
@@ -332,10 +326,13 @@ namespace chatterino
         this->updateUserData();
 
         this->userStateChanged_.invoke();
+#endif
     }
 
     void UserInfoPopup::updateUserData()
+
     {
+#if 0
         std::weak_ptr<bool> hack = this->hack_;
 
         const auto onIdFetched = [this, hack](QString id) {
@@ -421,10 +418,12 @@ namespace chatterino
         this->ui_.follow->setEnabled(false);
         this->ui_.ignore->setEnabled(false);
         this->ui_.ignoreHighlights->setEnabled(false);
+#endif
     }
 
     void UserInfoPopup::loadAvatar(const QUrl& url)
     {
+#if 0
         QNetworkRequest req(url);
         static auto manager = new QNetworkAccessManager();
         auto* reply = manager->get(req);
@@ -444,6 +443,7 @@ namespace chatterino
                 this->ui_.avatarButton->setPixmap(QPixmap());
             }
         });
+#endif
     }
 
     //
@@ -452,6 +452,7 @@ namespace chatterino
     UserInfoPopup::TimeoutWidget::TimeoutWidget()
         : ab::BaseWidget(nullptr)
     {
+#if 0
         auto layout = LayoutCreator<TimeoutWidget>(this)
                           .setLayoutType<QHBoxLayout>()
                           .withoutMargin();
@@ -557,6 +558,7 @@ namespace chatterino
                              });
 
         addButton(Ban, "ban", resources().buttons.ban);
+#endif
     }
 
     void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent*)
@@ -568,5 +570,4 @@ namespace chatterino
         //    painter.drawLine(0, this->height() / 2, this->width(),
         //    this->height() / 2);
     }
-
 }  // namespace chatterino

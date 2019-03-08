@@ -8,7 +8,6 @@
 #include "boost/variant.hpp"
 #include "pajlada/signals/signal.hpp"
 #include "singletons/Settings.hpp"
-#include "singletons/WindowManager.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 class QLabel;
@@ -133,7 +132,7 @@ namespace chatterino
                     const QString& newValue) {
                     setting = setValue(
                         DropdownArgs{newValue, combo->currentIndex(), combo});
-                    getApp()->windows->forceLayoutChannelViews();
+                    // getApp()->windows->forceLayoutChannelViews();
                 });
 
             return combo;

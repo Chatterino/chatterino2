@@ -32,5 +32,4 @@ namespace chatterino
         void okButtonClicked();
         void cancelButtonClicked();
     };
-
 }  // namespace chatterino
