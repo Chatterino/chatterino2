@@ -9,5 +9,4 @@ namespace chatterino
     public:
         DebugPopup();
     };
-
 }  // namespace chatterino

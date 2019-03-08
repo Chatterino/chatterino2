@@ -27,7 +27,7 @@ namespace chatterino::ui
         void setRoom(const RoomPtr&);
         void showSelectDialog();
 
-        RoomPtr room_;         // explicitely delete this
+        RoomPtr room_;
         QWidget* roomView_{};  // delete when switching room
 
         std::unique_ptr<QWidget> selectDialog_;

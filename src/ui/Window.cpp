@@ -17,6 +17,7 @@
 #include "ui/SplitContainer.hpp"
 #include "ui/Tab.hpp"
 #include "util/Resources.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 
 #include "ab/FlatButton.hpp"
 
@@ -41,16 +42,24 @@ namespace chatterino::ui
         // titlebar
         if (this->hasCustomWindowFrame())
         {
+            // settings
             this->addTitleBarButton(
-                ab::makeWidget<ab::FlatButton>([](ab::FlatButton* w) {
+                ab::makeWidget<ab::FlatButton>([&](ab::FlatButton* w) {
                     w->setPixmap(resources().buttons.settings);
                     w->setObjectName("title-bar-custom");
+
+                    QObject::connect(w, &ab::FlatButton::leftClicked, this,
+                        &Window::showSettings);
                 }));
 
+            // accounts
             this->addTitleBarButton(
-                ab::makeWidget<ab::FlatButton>([](ab::FlatButton* w) {
+                ab::makeWidget<ab::FlatButton>([&](ab::FlatButton* w) {
                     w->setPixmap(resources().buttons.user);
                     w->setObjectName("title-bar-avatar");
+
+                    QObject::connect(w, &ab::FlatButton::leftClicked, this,
+                        [=]() { this->showAccounts(w); });
                 }));
         }
         else
@@ -218,5 +227,14 @@ namespace chatterino::ui
 
         this->dragging_ = false;
         this->updateLayout();
+    }
+
+    void Window::showSettings()
+    {
+        SettingsDialog::showDialog();
+    }
+
+    void Window::showAccounts(QWidget* relativeTo)
+    {
     }
 }  // namespace chatterino::ui

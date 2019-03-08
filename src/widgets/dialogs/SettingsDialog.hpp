@@ -29,15 +29,12 @@ namespace chatterino
         static void showDialog(SettingsDialogPreference preferredTab =
                                    SettingsDialogPreference::NoPreference);
 
-    protected:
-        virtual void scaleChangedEvent(float newDpi) override;
-
     private:
-        static SettingsDialog* handle;
+        inline static SettingsDialog* handle{};
 
         void refresh();
 
-        void initUi();
+        void initializeLayout();
         void addTabs();
         void addTab(SettingsPage* page, Qt::Alignment alignment = Qt::AlignTop);
         void selectTab(SettingsDialogTab* tab);

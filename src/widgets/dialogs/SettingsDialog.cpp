@@ -1,7 +1,9 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 
 #include "Application.hpp"
-#include "util/LayoutCreator.hpp"
+#include "ab/Column.hpp"
+#include "ab/Row.hpp"
+#include "ab/util/MakeWidget.hpp"
 #include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
@@ -16,66 +18,57 @@
 #include "widgets/settingspages/NotificationPage.hpp"
 
 #include <QDialogButtonBox>
+#include <QStyle>
 
 namespace chatterino
 {
-    SettingsDialog* SettingsDialog::handle = nullptr;
-
     SettingsDialog::SettingsDialog()
         : ab::BaseWindow(BaseWindow::DisableCustomScaling)
     {
-        this->initUi();
+        this->initializeLayout();
         this->addTabs();
 
-        this->scaleChangedEvent(this->scale());
-
         this->resize(766, 600);
+
+        QFile qss(":/style/settings.qss");
+        qss.open(QIODevice::ReadOnly);
+        this->setScalableQss(qss.readAll());
     }
 
-    void SettingsDialog::initUi()
+    void SettingsDialog::initializeLayout()
     {
-        LayoutCreator<SettingsDialog> layoutCreator(this);
+        this->setCenterLayout(ab::makeLayout<ab::Row>({
+            // left side
+            ab::makeWidget<QWidget>([&](auto w) {
+                this->ui_.tabContainerContainer = w;
+                w->setObjectName("tabWidget");
+                w->setLayout(ab::makeLayout<ab::Column>(
+                    [&](auto w) { this->ui_.tabContainer = w; }, {}));
+            }),
 
-        // tab pages
-        layoutCreator.setLayoutType<QHBoxLayout>()
-            .withoutSpacing()
-            .emplace<QWidget>()
-            .assign(&this->ui_.tabContainerContainer)
-            .emplace<QVBoxLayout>()
-            .withoutMargin()
-            .assign(&this->ui_.tabContainer);
+            // right side
+            ab::makeLayout<ab::Column>({
+                // pages
+                ab::makeWidget<QStackedLayout>([&](auto w) {
+                    this->ui_.pageStack = w;
+                    this->ui_.pageStack->setObjectName("pages");
+                }),
 
-        this->ui_.tabContainerContainer->layout()->setContentsMargins(
-            8, 8, 0, 8);
+                // buttons
+                ab::makeWidget<QDialogButtonBox>([&](auto w) {
+                    this->ui_.okButton =
+                        w->addButton("Ok", QDialogButtonBox::YesRole);
+                    this->ui_.cancelButton =
+                        w->addButton("Cancel", QDialogButtonBox::NoRole);
 
-        this->layout()->setSpacing(0);
-
-        // right side layout
-        auto right = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
-        {
-            right.emplace<QStackedLayout>()
-                .assign(&this->ui_.pageStack)
-                .withoutMargin();
-
-            auto buttons = right.emplace<QDialogButtonBox>(Qt::Horizontal);
-            {
-                this->ui_.okButton =
-                    buttons->addButton("Ok", QDialogButtonBox::YesRole);
-                this->ui_.cancelButton =
-                    buttons->addButton("Cancel", QDialogButtonBox::NoRole);
-            }
-        }
-
-        this->ui_.pageStack->setMargin(0);
-
-        // ---- misc
-        this->ui_.tabContainerContainer->setObjectName("tabWidget");
-        this->ui_.pageStack->setObjectName("pages");
-
-        QObject::connect(this->ui_.okButton, &QPushButton::clicked, this,
-            &SettingsDialog::onOkClicked);
-        QObject::connect(this->ui_.cancelButton, &QPushButton::clicked, this,
-            &SettingsDialog::onCancelClicked);
+                    QObject::connect(this->ui_.okButton, &QPushButton::clicked,
+                        this, &SettingsDialog::onOkClicked);
+                    QObject::connect(this->ui_.cancelButton,
+                        &QPushButton::clicked, this,
+                        &SettingsDialog::onCancelClicked);
+                }),
+            }),
+        }));
     }
 
     SettingsDialog* SettingsDialog::getHandle()
@@ -135,15 +128,17 @@ namespace chatterino
 
         if (this->selectedTab_ != nullptr)
         {
+            this->selectedTab_->setProperty("selected", {});
+            this->selectedTab_->style()->unpolish(this->selectedTab_);
+            this->selectedTab_->style()->polish(this->selectedTab_);
             this->selectedTab_->setSelected(false);
-            this->selectedTab_->setStyleSheet("color: #FFF");
         }
 
+        tab->setProperty("selected", "true");
+        tab->style()->unpolish(tab);
+        tab->style()->polish(tab);
         tab->setSelected(true);
-        tab->setStyleSheet("background: #222; color: #4FC3F7;"
-                           "border-left: 1px solid #444;"
-                           "border-top: 1px solid #444;"
-                           "border-bottom: 1px solid #444;");
+
         this->selectedTab_ = tab;
     }
 
@@ -190,25 +185,6 @@ namespace chatterino
         }
     }
 
-    void SettingsDialog::scaleChangedEvent(float newDpi)
-    {
-        QFile file(":/qss/settings.qss");
-        file.open(QFile::ReadOnly);
-        QString styleSheet = QLatin1String(file.readAll());
-        styleSheet.replace("<font-size>", QString::number(int(14 * newDpi)));
-        styleSheet.replace(
-            "<checkbox-size>", QString::number(int(14 * newDpi)));
-
-        for (SettingsDialogTab* tab : this->tabs_)
-        {
-            tab->setFixedHeight(int(30 * newDpi));
-        }
-
-        this->setStyleSheet(styleSheet);
-
-        this->ui_.tabContainerContainer->setFixedWidth(int(150 * newDpi));
-    }
-
     ///// Widget creation helpers
     void SettingsDialog::onOkClicked()
     {
@@ -227,5 +203,4 @@ namespace chatterino
 
         this->close();
     }
-
 }  // namespace chatterino

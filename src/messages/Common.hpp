@@ -49,9 +49,8 @@ namespace chatterino
     struct Message;
     using MessagePtr = std::shared_ptr<const Message>;
 
-    /// OUTCOME
-
-    constexpr const char* ANONYMOUS_USERNAME_LABEL = "anonymous";
+    /// MISC
+    constexpr const char* ANONYMOUS_USERNAME_LABEL = "anonymous - ";
 }  // namespace chatterino
 
 /// STRING ALIASES

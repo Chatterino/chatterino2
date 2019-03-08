@@ -1,10 +1,10 @@
 * {
-    font-size: <font-size>px;
+    font-size: 14px;
 }
 
 QCheckBox::indicator {
-    width: <checkbox-size>px;
-    height: <checkbox-size>px;
+    width: 14px;
+    height: 14px;
 }
 
 chatterino--ComboBox {
@@ -44,4 +44,23 @@ chatterino--TitleLabel2 {
 
 chatterino--DescriptionLabel {
     color: #999;
+}
+
+chatterino--SettingsDialogTab {
+    min-height: 30px;
+    max-height: 30px;
+    color: #fff;
+}
+
+chatterino--SettingsDialogTab[selected] {
+    min-height: 30px;
+    background: #222;
+    color: #4FC3F7;
+    border-left: 1px solid #444;
+    border-top: 1px solid #444;
+    border-bottom: 1px solid #444;
+}
+
+#tabWidget {
+    min-width: 150px;
 }

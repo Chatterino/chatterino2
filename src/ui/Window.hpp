@@ -33,6 +33,10 @@ namespace chatterino::ui
         void dragEnterEvent(QDragEnterEvent*) override;
         void dragLeaveEvent(QDragLeaveEvent*) override;
 
+    private slots:
+        void showSettings();
+        void showAccounts(QWidget* relativeTo);
+
     private:
         void initLayout();
         void updateLayout();

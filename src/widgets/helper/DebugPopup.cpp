@@ -24,5 +24,4 @@ namespace chatterino
 
         layout->addWidget(text);
     }
-
 }  // namespace chatterino

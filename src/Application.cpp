@@ -20,6 +20,7 @@
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 //#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
