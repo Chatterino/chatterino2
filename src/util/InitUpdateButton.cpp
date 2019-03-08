@@ -1,17 +1,17 @@
 #include "InitUpdateButton.hpp"
 
+#include "ab/FlatButton.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
-#include "widgets/helper/Button.hpp"
 
 namespace chatterino
 {
     void initUpdateButton(
-        Button& button, pajlada::Signals::SignalHolder& signalHolder)
+        ab::FlatButton& button, pajlada::Signals::SignalHolder& signalHolder)
     {
         button.hide();
 
         // show update prompt when clicking the button
-        QObject::connect(&button, &Button::leftClicked, [&button] {
+        QObject::connect(&button, &ab::FlatButton::leftClicked, [&button] {
             auto dialog = new UpdateDialog();
             dialog->setActionOnFocusLoss(ab::BaseWindow::Delete);
             dialog->move(button.mapToGlobal(

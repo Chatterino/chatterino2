@@ -5,13 +5,17 @@
 namespace pajlada::Signals
 {
     class SignalHolder;
-}  // namespace pajlada::Signals
+}
+
+namespace ab
+{
+    class FlatButton;
+}
 
 namespace chatterino
 {
-    class Button;
     class UpdateDialog;
 
     void initUpdateButton(
-        Button& button, pajlada::Signals::SignalHolder& signalHolder);
+        ab::FlatButton& button, pajlada::Signals::SignalHolder& signalHolder);
 }  // namespace chatterino

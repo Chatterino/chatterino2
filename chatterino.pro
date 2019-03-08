@@ -212,7 +212,6 @@ SOURCES += \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/dialogs/UserInfoPopup.cpp \
     src/widgets/dialogs/WelcomeDialog.cpp \
-    src/widgets/helper/Button.cpp \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/DebugPopup.cpp \
     src/widgets/helper/EditableModelView.cpp \
@@ -422,7 +421,6 @@ HEADERS += \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/dialogs/UserInfoPopup.hpp \
     src/widgets/dialogs/WelcomeDialog.hpp \
-    src/widgets/helper/Button.hpp \
     src/widgets/helper/ComboBoxItemDelegate.hpp \
     src/widgets/helper/DebugPopup.hpp \
     src/widgets/helper/EditableModelView.hpp \

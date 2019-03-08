@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ab/BaseWindow.hpp"
-#include "widgets/helper/Button.hpp"
+#include "ab/FlatButton.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -40,7 +40,7 @@ namespace chatterino
 
         struct
         {
-            Button* avatarButton = nullptr;
+            ab::FlatButton* avatarButton = nullptr;
             // RippleEffectLabel2 *viewLogs = nullptr;
 
             Label* nameLabel = nullptr;

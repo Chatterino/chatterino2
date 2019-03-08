@@ -32,7 +32,7 @@ namespace chatterino::ui
 
         // set title
         if (type == WindowType::Main)
-            this->setWindowTitle(QString("Chatterino β ") + version);
+            this->setWindowTitle(QString("Chatterino β ") + CHATTERINO_VERSION);
 
         // update theme when dpi changes
         QObject::connect(this, &ab::BaseWindow::scaleChanged, this,

@@ -2,10 +2,7 @@
 
 namespace chatterino
 {
-    // TODO: rename
-    [[deprecated]] constexpr const char* version = "2.0.4";
-
-    [[maybe_unused]] constexpr const char* CHATTERINO_VERSION = version;
+    [[maybe_unused]] constexpr const char* CHATTERINO_VERSION = "2.0.4";
 
 #if defined(Q_OS_WIN)
     [[maybe_unused]] constexpr const char* CHATTERINO_OS = "win";
