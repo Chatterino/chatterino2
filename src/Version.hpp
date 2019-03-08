@@ -3,7 +3,7 @@
 namespace chatterino
 {
     // TODO: rename
-    [[deprecated]] constexpr const char* version = "2.1.0";
+    [[deprecated]] constexpr const char* version = "2.0.4";
 
     [[maybe_unused]] constexpr const char* CHATTERINO_VERSION = version;
 
