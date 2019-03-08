@@ -4,7 +4,6 @@
 
 #include <QFrame>
 #include <functional>
-//#include <pajlada/signals/signalholder.hpp>
 
 class QHBoxLayout;
 class QLabel;

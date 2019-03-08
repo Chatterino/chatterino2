@@ -6,7 +6,6 @@
 #include <QStackedLayout>
 #include <QVBoxLayout>
 #include <QWidget>
-#include <pajlada/settings/setting.hpp>
 
 namespace chatterino
 {
@@ -30,7 +29,7 @@ namespace chatterino
                                    SettingsDialogPreference::NoPreference);
 
     private:
-        inline static SettingsDialog* handle{};
+        inline static SettingsDialog* instance{};
 
         void refresh();
 
@@ -57,5 +56,4 @@ namespace chatterino
 
         friend class SettingsDialogTab;
     };
-
 }  // namespace chatterino

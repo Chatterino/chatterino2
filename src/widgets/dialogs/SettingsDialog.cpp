@@ -73,36 +73,27 @@ namespace chatterino
 
     SettingsDialog* SettingsDialog::getHandle()
     {
-        return SettingsDialog::handle;
+        return SettingsDialog::instance;
     }
 
     void SettingsDialog::addTabs()
     {
-        this->ui_.tabContainer->setMargin(0);
-        this->ui_.tabContainer->setSpacing(0);
+        // TODO: scale the spacing
 
         this->ui_.tabContainer->addSpacing(16);
-
         this->addTab(new GeneralPage);
-
         this->ui_.tabContainer->addSpacing(16);
-
         this->addTab(new AccountsPage);
-
         this->ui_.tabContainer->addSpacing(16);
-
         this->addTab(new CommandPage);
         this->addTab(new HighlightingPage);
         this->addTab(new IgnoresPage);
-
         this->ui_.tabContainer->addSpacing(16);
-
         this->addTab(new KeyboardSettingsPage);
         this->addTab(this->ui_.moderationPage = new ModerationPage);
         this->addTab(new NotificationPage);
         this->addTab(new ExternalToolsPage);
         this->addTab(new AdvancedPage);
-
         this->ui_.tabContainer->addStretch(1);
         this->addTab(new AboutPage, Qt::AlignBottom);
     }
