@@ -1,9 +1,10 @@
 #include "Room.hpp"
 
+#include <QLabel>
 #include <QTimer>
 #include <memory>
 
-#include <QLabel>
+#include "ui/Dropdown.hpp"
 
 namespace chatterino
 {
@@ -34,8 +35,10 @@ namespace chatterino
         return new QLabel("empty channel", parent);
     }
 
-    void Room::fillDropdown(ui::Dropdown&) const
+    void Room::fillDropdown(ui::Dropdown& dropdown) const
     {
+        dropdown.addItem("Change channel", []() { assert(false); });
+        dropdown.addItem("Close", []() { assert(false); });
     }
 
     QJsonObject Room::serialize() const

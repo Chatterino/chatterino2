@@ -99,6 +99,14 @@ namespace chatterino
 
     void TwitchRoom::fillDropdown(ui::Dropdown& dropdown) const
     {
+        Room::fillDropdown(dropdown);
+
+        // Main menu
+        dropdown.addSeperator();
+        dropdown.addItem("Popup", []() { assert(false); });
+        dropdown.addItem("Search", []() { assert(false); });
+
+        dropdown.addSeperator();
         dropdown.addItem("Open in Browser", [this]() {
             QDesktopServices::openUrl("https://www.twitch.tv/" + this_->name);
         });
@@ -107,6 +115,18 @@ namespace chatterino
                 "https://player.twitch.tv/?channel=" + this_->name);
         });
         dropdown.addItem("Open in Streamlink", []() { assert(false); });
+
+        // Sub menu
+        auto more = dropdown.addSubmenu("More");
+        more.addItem("Show viewer list", []() { assert(false); });
+        more.addItem("Notify when live", []() { assert(false); });
+
+        more.addSeperator();
+        more.addItem("Reconnect", []() { assert(false); });
+        more.addItem("Reload emotes", []() { assert(false); });
+
+        more.addSeperator();
+        more.addItem("Clear messages", []() { assert(false); });
     }
 
     // Mentions

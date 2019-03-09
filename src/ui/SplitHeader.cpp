@@ -25,7 +25,7 @@ namespace chatterino::ui
                 x->setRipple(false);
 
                 QObject::connect(
-                    x, &ab::FlatButton::leftMousePress, this, [this, x]() {
+                    x, &ab::FlatButton::leftMousePress, this, [this]() {
                         // TODO: sometimes deletes menu before this check
                         if (this->menu_)
                             return;
