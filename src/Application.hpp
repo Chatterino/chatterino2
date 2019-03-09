@@ -60,7 +60,6 @@ namespace chatterino
         void initialize(Settings& settings, Paths& paths);
         Toasts* const toasts{};
         Emotes* const emotes{};
-        // WindowManager* const windows{};
 
         AccountController* const accounts{};
         // CommandController* const commands{};

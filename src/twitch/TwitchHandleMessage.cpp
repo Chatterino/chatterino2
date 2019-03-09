@@ -15,17 +15,10 @@ namespace chatterino
         void addMessage(Communi::IrcMessage* _message, const QString& target,
             const QString& content, TwitchRoom& room, bool isSub, bool isAction)
         {
+            // TODO: replace with c++20 designated initializer
             MessageParseArgs args;
-
-            if (isSub)
-            {
-                args.trimSubscriberUsername = true;
-            }
-
-            // if (chan->isBroadcaster())
-            //{
-            //    args.isStaffOrBroadcaster = true;
-            //}
+            args.trimSubscriberUsername = isSub;
+            // TODO: args.isStaffOrBroadcaster = chan->isBroadcaster();
 
             TwitchMessageBuilder builder(
                 &room, _message, args, content, isAction);
@@ -41,13 +34,11 @@ namespace chatterino
                 auto msg = builder.build();
                 auto highlighted = msg->flags.has(MessageFlag::Highlighted);
 
-                if (!isSub)
+                if (!isSub && highlighted)
                 {
-                    if (highlighted)
-                    {
-                        // server.mentionsChannel->addMessage(msg);
-                        // getApp()->highlights->addHighlight(msg);
-                    }
+                    // TODO:
+                    // server.mentionsChannel->addMessage(msg);
+                    // getApp()->highlights->addHighlight(msg);
                 }
 
                 room.messages().append(msg);
@@ -342,8 +333,7 @@ namespace chatterino
 
         const QString& command = message->command();
 
-        // switch through all the commands and set roomFunc or noRoomFunc
-        // accordingly
+        // Set roomFunc or noRoomFunc according to command
         void (*roomFunc)(Communi::IrcMessage*, TwitchRoom&) = nullptr;
         void (*noRoomFunc)(Communi::IrcMessage*) = nullptr;
 
@@ -366,11 +356,11 @@ namespace chatterino
         else if (command == "PART")
             roomFunc = part;
 
-        // execute the function that was selected
+        // No room required.
         if (noRoomFunc)
             noRoomFunc(message);
 
-        // room is required to be a valid object for this function
+        // Room required.
         if (roomFunc && room)
             roomFunc(message, *room);
     }

@@ -27,6 +27,9 @@ namespace chatterino::ui
 
         ThemexD& theme();
 
+        void deserialize(const QJsonObject&);
+        QJsonObject serialize();
+
     protected:
         void closeEvent(QCloseEvent*) override;
         void showEvent(QShowEvent*) override;

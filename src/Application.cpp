@@ -28,22 +28,18 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
-//#include "singletons/WindowManager.hpp"
 //#include "util/IsBigEndian.hpp"
 //#include "util/Log.hpp"
 //#include "util/PostToThread.hpp"
+#include "util/CombinePath.hpp"
 
 namespace chatterino
 {
+    constexpr const char* WINDOW_LAYOUT_FILENAME = "window-layout.json";
+
     class PrivateApplication
     {
     public:
-        PrivateApplication(/*QApplication& qtApp*/)
-        //            : qtApp(qtApp)
-        {
-            // need to pass the reference via the constructor
-        }
-
         // windows
         ui::Window* mainWindow{};
         QVector<ui::Window*> windows;
@@ -56,12 +52,32 @@ namespace chatterino
         // QApplication& qtApp;
     };
 
-    Application::Application(/*QApplication& qtApp*/)
+    inline void deserializeWindows(Application& app, const QJsonObject& root)
+    {
+        // deserialize
+        for (QJsonValue window_val : root.value("windows").toArray())
+        {
+            auto window_obj = window_val.toObject();
+
+            auto type = window_obj.value("type").toString() == "main"
+                            ? ui::WindowType::Main
+                            : ui::WindowType::Popup;
+
+            auto window = app.addWindow(type);
+            window->deserialize(window_obj);
+        }
+    }
+
+    inline QJsonObject serializeWindows([[maybe_unused]] Application& app)
+    {
+        assert(false);
+        return {};
+    }
+
+    Application::Application()
         // leaking (compatability)
         : toasts(new Toasts())
         , emotes(new Emotes())
-        //, windows(new WindowManager())
-
         , accounts(new AccountController())
         //, commands(new CommandController())
         , highlights(new HighlightController())
@@ -72,11 +88,20 @@ namespace chatterino
         , chatterinoBadges(new ChatterinoBadges())
         , logging(new Logging())
 
-        , this_(new PrivateApplication(/*qtApp*/))
+        , this_(new PrivateApplication())
     {
         appInst__ = this;
 
         this_->providers.append(new TwitchProvider());
+
+        // load window layout
+        {
+            QFile file(combinePath(
+                getPaths()->settingsDirectory, WINDOW_LAYOUT_FILENAME));
+            file.open(QIODevice::ReadOnly);
+            deserializeWindows(
+                *this, QJsonDocument::fromJson(file.readAll()).object());
+        }
 
         NetworkManager::init();
     }
@@ -134,7 +159,6 @@ namespace chatterino
         // compatability
         this->toasts->initialize(settings, paths);
         this->emotes->initialize(settings, paths);
-        // WindowManager* const windows{};
 
         this->accounts->initialize(settings, paths);
         // this->commands->initialize(settings, paths);

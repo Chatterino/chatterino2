@@ -73,6 +73,88 @@ namespace chatterino::ui
         return this->theme_;
     }
 
+    void Window::deserialize(const QJsonObject& root)
+    {
+        if (root.value("state") == "maximized")
+            this->setWindowState(Qt::WindowMaximized);
+        else if (root.value("state") == "minimized")
+            this->setWindowState(Qt::WindowMinimized);
+
+        // get geometry
+        {
+            auto x = root.value("x").toInt(-1);
+            auto y = root.value("y").toInt(-1);
+            auto width = root.value("width").toInt(-1);
+            auto height = root.value("height").toInt(-1);
+
+            if (x != -1 && y != -1 && width != -1 && height != -1)
+            {
+                // TODO: replace with "initialGeometry" variable so winapi
+                // functions can be used to set the geometry on windows
+                this->setGeometry(x + 1, y, width, height);
+            }
+        }
+
+#if 0
+            // load tabs
+            QJsonArray tabs = window_obj.value("tabs").toArray();
+            for (QJsonValue tab_val : tabs)
+            {
+                SplitContainer* page = window.getNotebook().addPage(false);
+
+                QJsonObject tab_obj = tab_val.toObject();
+
+                // set custom title
+                QJsonValue title_val = tab_obj.value("title");
+                if (title_val.isString())
+                {
+                    page->getTab()->setCustomTitle(title_val.toString());
+                }
+
+                // selected
+                if (tab_obj.value("selected").toBool(false))
+                {
+                    window.getNotebook().select(page);
+                }
+
+                // highlighting on new messages
+                bool val = tab_obj.value("highlightsEnabled").toBool(true);
+                page->getTab()->setHighlightsEnabled(val);
+
+                // load splits
+                QJsonObject splitRoot = tab_obj.value("splits2").toObject();
+
+                if (!splitRoot.isEmpty())
+                {
+                    page->decodeFromJson(splitRoot);
+
+                    continue;
+                }
+
+                // fallback load splits (old)
+                int colNr = 0;
+                for (QJsonValue column_val : tab_obj.value("splits").toArray())
+                {
+                    for (QJsonValue split_val : column_val.toArray())
+                    {
+                        Split* split = new Split(page);
+
+                        QJsonObject split_obj = split_val.toObject();
+                        split->setChannel(decodeChannel(split_obj));
+
+                        page->appendSplit(split);
+                    }
+                    colNr++;
+                }
+            }
+#endif
+    }
+
+    QJsonObject serialize()
+    {
+        assert(false);
+    }
+
     void Window::initLayout()
     {
         // FOURTF: wip
