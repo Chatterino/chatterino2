@@ -117,19 +117,29 @@ namespace chatterino
     {
         // make sure that there is a main window
         if (!this_->mainWindow)
-            this_->mainWindow = addWindow(ui::WindowType::Main);
+            addWindow(ui::WindowType::Main);
+
+        assert(this_->mainWindow);
 
         // run the main event loop
         qtApp.exec();
     }
 
-    ui::Window* Application::addWindow(const ui::WindowType& type)
+    ui::Window* Application::addWindow(const ui::WindowType& type_)
     {
+        // there can only be one main window
+        auto type = type_ == ui::WindowType::Main && this_->mainWindow
+                        ? ui::WindowType::Popup
+                        : type_;
+
         // make new window
         auto window = new ui::Window(*this, type);
 
         // add to list
         this_->windows.append(window);
+
+        if (type == ui::WindowType::Main)
+            this_->mainWindow = window;
 
         // remove from list when destroyed
         QObject::connect(window, &QWidget::destroyed, &this_->object,
