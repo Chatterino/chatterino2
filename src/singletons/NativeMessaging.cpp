@@ -171,8 +171,6 @@ namespace chatterino
     void NativeMessagingServer::ReceiverThread::handleMessage(
         const QJsonObject& root)
     {
-        auto app = getApp();
-
         QString action = root.value("action").toString();
 
         if (action.isNull())

@@ -153,6 +153,7 @@ namespace chatterino::ui
     QJsonObject serialize()
     {
         assert(false);
+        return {};
     }
 
     void Window::initLayout()

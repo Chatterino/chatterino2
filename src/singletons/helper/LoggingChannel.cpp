@@ -1,17 +1,16 @@
 #include "LoggingChannel.hpp"
 
 #include "Application.hpp"
-#include "util/Log.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Log.hpp"
 
 #include <QDir>
-
 #include <ctime>
 
 namespace chatterino
 {
-    QByteArray endline("\n");
+    inline QByteArray endline("\n");
 
     LoggingChannel::LoggingChannel(const QString& _channelName)
         : channelName(_channelName)
@@ -33,19 +32,11 @@ namespace chatterino
         // FOURTF: change this when adding more providers
         this->subDirectory = "Twitch/" + this->subDirectory;
 
-        auto app = getApp();
-
         getSettings()->logPath.connect([this](const QString& logPath, auto) {
-            auto app = getApp();
-
             if (logPath.isEmpty())
-            {
                 this->baseDirectory = getPaths()->messageLogDirectory;
-            }
             else
-            {
                 this->baseDirectory = logPath;
-            }
 
             this->openLogFile();
         });

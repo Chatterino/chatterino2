@@ -1,9 +1,9 @@
 #include "providers/emoji/Emojis.hpp"
 
 #include "Application.hpp"
-#include "util/Log.hpp"
 #include "messages/Emote.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Log.hpp"
 
 #include <rapidjson/error/en.h>
 #include <rapidjson/error/error.h>
@@ -250,8 +250,6 @@ namespace chatterino
 
     void Emojis::loadEmojiSet()
     {
-        auto app = getApp();
-
         getSettings()->emojiSet.connect([=](const auto& emojiSet) {
             this->emojis.each([=](const auto& name,
                                   std::shared_ptr<EmojiData>& emoji) {

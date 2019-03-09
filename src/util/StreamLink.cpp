@@ -36,16 +36,10 @@ namespace chatterino
 
         QString getStreamlinkProgram()
         {
-            auto app = getApp();
-
             if (getSettings()->streamlinkUseCustomPath)
-            {
                 return getSettings()->streamlinkPath + "/" + getBinaryName();
-            }
             else
-            {
                 return getBinaryName();
-            }
         }
 
         bool checkStreamlinkPath(const QString& path)
@@ -66,7 +60,6 @@ namespace chatterino
         {
             static QErrorMessage* msg = new QErrorMessage;
 
-            auto app = getApp();
             if (getSettings()->streamlinkUseCustomPath)
             {
                 msg->showMessage("Unable to find Streamlink executable\nMake "
@@ -174,8 +167,6 @@ namespace chatterino
     void openStreamlink(const QString& channelURL, const QString& quality,
         QStringList extraArguments)
     {
-        auto app = getApp();
-
         QStringList arguments;
 
         QString additionalOptions = getSettings()->streamlinkOpts.getValue();
@@ -204,8 +195,6 @@ namespace chatterino
 
     void openStreamlinkForChannel(const QString& channel)
     {
-        auto app = getApp();
-
         QString channelURL = "twitch.tv/" + channel;
 
         QString preferredQuality = getSettings()->preferredQuality;
