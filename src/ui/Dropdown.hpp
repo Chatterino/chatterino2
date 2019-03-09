@@ -23,9 +23,9 @@ namespace chatterino::ui
         QWidget* releaseWidget();
 
     private:
-        Dropdown(QMenu* menu, QWidget* parent);
+        Dropdown(QMenu* menu);
 
-        QWidget* parent_{};
-        std::unique_ptr<QMenu> menu_;
+        std::unique_ptr<QMenu> owning_;
+        QMenu* menu_{};
     };
 }  // namespace chatterino::ui

@@ -5,15 +5,15 @@
 namespace chatterino::ui
 {
     Dropdown::Dropdown(QWidget* parent)
-        : Dropdown(new QMenu(parent), parent)
-    {
-    }
-
-    Dropdown::Dropdown(QMenu* menu, QWidget* parent)
-        : parent_(parent)
-        , menu_(menu)
+        : owning_(new QMenu(parent))
+        , menu_(this->owning_.get())
     {
         this->menu_->setAttribute(Qt::WA_DeleteOnClose);
+    }
+
+    Dropdown::Dropdown(QMenu* menu)
+        : menu_(menu)
+    {
     }
 
     void Dropdown::addSeperator()
@@ -39,17 +39,21 @@ namespace chatterino::ui
         action->setCheckable(true);
         action->setChecked(value);
         QObject::connect(action, &QAction::toggled, std::move(onClick));
+
+        this->menu_->addAction(action);
     }
 
     Dropdown Dropdown::addSubmenu(const QString& title)
     {
         assert(this->menu_);
 
-        return {this->menu_->addMenu(title), this->parent_};
+        return {this->menu_->addMenu(title)};
     }
 
     QWidget* Dropdown::releaseWidget()
     {
-        return this->menu_.release();
+        assert(this->owning_);
+
+        return this->owning_.release();
     }
 }  // namespace chatterino::ui
