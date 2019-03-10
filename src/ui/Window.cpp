@@ -95,59 +95,39 @@ namespace chatterino::ui
             }
         }
 
-#if 0
-            // load tabs
-            QJsonArray tabs = window_obj.value("tabs").toArray();
-            for (QJsonValue tab_val : tabs)
+        // load tabs
+        QJsonArray tabs = root.value("tabs").toArray();
+        for (QJsonValue tab_val : tabs)
+        {
+            auto tab = new Tab("asdf");
+            auto page = new SplitContainer(this->app_);
+            this->center_->addTab(tab, page);
+
+            QJsonObject tab_obj = tab_val.toObject();
+
+            // TODO: set custom title
+            // QJsonValue title_val = tab_obj.value("title");
+            // if (title_val.isString())
+            //    page->getTab()->setCustomTitle(title_val.toString());
+
+            // selected
+            if (tab_obj.value("selected").toBool(false))
+                this->center_->select(page);
+
+            // TODO: highlighting on new messages
+            // bool val = tab_obj.value("highlightsEnabled").toBool(true);
+            // page->getTab()->setHighlightsEnabled(val);
+
+            // load splits
+            QJsonObject splitRoot = tab_obj.value("splits2").toObject();
+
+            if (!splitRoot.isEmpty())
             {
-                SplitContainer* page = window.getNotebook().addPage(false);
+                page->deserialize(splitRoot, this->app_);
 
-                QJsonObject tab_obj = tab_val.toObject();
-
-                // set custom title
-                QJsonValue title_val = tab_obj.value("title");
-                if (title_val.isString())
-                {
-                    page->getTab()->setCustomTitle(title_val.toString());
-                }
-
-                // selected
-                if (tab_obj.value("selected").toBool(false))
-                {
-                    window.getNotebook().select(page);
-                }
-
-                // highlighting on new messages
-                bool val = tab_obj.value("highlightsEnabled").toBool(true);
-                page->getTab()->setHighlightsEnabled(val);
-
-                // load splits
-                QJsonObject splitRoot = tab_obj.value("splits2").toObject();
-
-                if (!splitRoot.isEmpty())
-                {
-                    page->decodeFromJson(splitRoot);
-
-                    continue;
-                }
-
-                // fallback load splits (old)
-                int colNr = 0;
-                for (QJsonValue column_val : tab_obj.value("splits").toArray())
-                {
-                    for (QJsonValue split_val : column_val.toArray())
-                    {
-                        Split* split = new Split(page);
-
-                        QJsonObject split_obj = split_val.toObject();
-                        split->setChannel(decodeChannel(split_obj));
-
-                        page->appendSplit(split);
-                    }
-                    colNr++;
-                }
+                continue;
             }
-#endif
+        }
     }
 
     QJsonObject serialize()

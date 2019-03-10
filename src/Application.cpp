@@ -20,18 +20,14 @@
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
-#include "widgets/dialogs/SettingsDialog.hpp"
-//#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
-//#include "util/IsBigEndian.hpp"
-//#include "util/Log.hpp"
-//#include "util/PostToThread.hpp"
 #include "util/CombinePath.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 
 namespace chatterino
 {
@@ -54,7 +50,6 @@ namespace chatterino
 
     inline void deserializeWindows(Application& app, const QJsonObject& root)
     {
-        // deserialize
         for (QJsonValue window_val : root.value("windows").toArray())
         {
             auto window_obj = window_val.toObject();
@@ -154,6 +149,16 @@ namespace chatterino
     const QVector<Provider*>& Application::providers()
     {
         return this_->providers;
+    }
+
+    Provider* Application::provider(const QString& id)
+    {
+        for (auto&& provider : this_->providers)
+        {
+            if (provider->name() == id)
+                return provider;
+        }
+        return nullptr;
     }
 
     void Application::alert()

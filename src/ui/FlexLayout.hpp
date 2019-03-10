@@ -14,6 +14,8 @@ namespace chatterino::ui
     public:
         FlexLayout();
 
+        const FlexItem& root() const;
+
         void addItem(QLayoutItem*) override;
         void addWidgetRelativeTo(
             QWidget* widget, QWidget* relativeTo, Direction);

@@ -30,13 +30,11 @@ namespace chatterino
     class NotificationController;
 
     class Theme;
-    class WindowManager;
     class Logging;
     class Paths;
     class AccountManager;
     class Emotes;
     class Settings;
-    class Fonts;
     class Toasts;
     class ChatterinoBadges;
 
@@ -52,6 +50,7 @@ namespace chatterino
 
         // providers
         const QVector<Provider*>& providers();
+        Provider* provider(const QString& id);
 
         // misc
         void alert();
@@ -76,8 +75,6 @@ namespace chatterino
         PrivateApplication* this_{};  // delete this manually
     };
 
-    [[deprecated("dependency injection should be used instead")]]  //
-        inline Application* appInst__{};
-    [[deprecated("dependency injection should be used instead")]] Application*
-        getApp();
+    [[deprecated("use dependency injection")]] inline Application* appInst__{};
+    [[deprecated("use dependency injection")]] Application* getApp();
 }  // namespace chatterino

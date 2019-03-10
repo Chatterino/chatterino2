@@ -45,28 +45,35 @@ namespace chatterino::ui
         assert(item != nullptr);
     }
 
+    FlexItem::FlexItem(QWidget* item)
+        : type_(FlexItemType::Item)
+        , item_(new QWidgetItem(item))
+    {
+        assert(item != nullptr);
+    }
+
     FlexItem::FlexItem(FlexItemType type)
         : type_(type)
     {
         assert(type != FlexItemType::Item);
     }
 
-    bool FlexItem::isEmpty()
+    bool FlexItem::isEmpty() const
     {
         return this->type_ == Empty;
     }
 
-    bool FlexItem::isItem()
+    bool FlexItem::isItem() const
     {
         return this->type_ == Item;
     }
 
-    bool FlexItem::isColumn()
+    bool FlexItem::isColumn() const
     {
         return this->type_ == Column;
     }
 
-    bool FlexItem::isRow()
+    bool FlexItem::isRow() const
     {
         return this->type_ == Row;
     }
@@ -89,12 +96,12 @@ namespace chatterino::ui
         return nullptr;
     }
 
-    void FlexItem::insert(
+    void FlexItem::root_insert(
         QLayoutItem* item, QLayoutItem* relativeTo, Direction direction)
     {
         // this may only be called on the top level widget
 
-        auto element = std::make_shared<FlexItem>(item);
+        auto element = std::shared_ptr<FlexItem>(new FlexItem(item));
         auto relativeToItem = this->find(relativeTo);
 
         // try to insert next to `relativeTo`
@@ -109,11 +116,11 @@ namespace chatterino::ui
 
                 this->items_.append(child);
                 this->items_.insert(isBefore(direction) ? 0 : 1,
-                    std::make_shared<FlexItem>(item));
+                    std::shared_ptr<FlexItem>(new FlexItem(item)));
             }
             else
             {
-                this->add(item);
+                this->root_add(item);
             }
         }
     }
@@ -201,7 +208,7 @@ namespace chatterino::ui
         }
     }
 
-    void FlexItem::add(QLayoutItem* item)
+    void FlexItem::root_add(QLayoutItem* item)
     {
         if (this->isEmpty())
         {
@@ -210,7 +217,7 @@ namespace chatterino::ui
         }
         else if (this->isRow())
         {
-            this->items_.append(std::make_shared<FlexItem>(item));
+            this->items_.append(std::shared_ptr<FlexItem>(new FlexItem(item)));
         }
         // column or item
         else
@@ -225,7 +232,7 @@ namespace chatterino::ui
         }
     }
 
-    QLayoutItem* FlexItem::take(QLayoutItem* item)
+    QLayoutItem* FlexItem::root_take(QLayoutItem* item)
     {
         // search in children
         return this->takeRec(item, nullptr);
@@ -301,7 +308,7 @@ namespace chatterino::ui
 
     std::shared_ptr<FlexItem> FlexItem::clone()
     {
-        return std::make_shared<FlexItem>(*this);
+        return std::shared_ptr<FlexItem>(new FlexItem(*this));
     }
 
     void FlexItem::performLayout(const QRect& rect)
@@ -352,17 +359,17 @@ namespace chatterino::ui
         }
     }
 
-    void FlexItem::print(int indent)
+    void FlexItem::print(int indent) const
     {
         const char* type{};
 
-        if (this->type_ == Empty)
+        if (this->isEmpty())
             type = "empty";
-        else if (this->type_ == Item)
+        else if (this->isItem())
             type = "item";
-        else if (this->type_ == Column)
+        else if (this->isColumn())
             type = "column";
-        else if (this->type_ == Row)
+        else if (this->isRow())
             type = "row";
         else
             assert(false);

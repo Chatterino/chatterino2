@@ -19,12 +19,13 @@ namespace chatterino::ui
     public:
         Split(Application& app);
 
+        void setRoom(const RoomPtr&);
+
     protected:
         void mousePressEvent(QMouseEvent*) override;
 
     private:
         void initLayout();
-        void setRoom(const RoomPtr&);
         void showSelectDialog();
 
         RoomPtr room_;

@@ -18,28 +18,35 @@ namespace chatterino::ui
     public:
         enum FlexItemType { Empty, Item, Column, Row };
         FlexItem();
-
-        bool isEmpty();
-        bool isItem();
-        bool isColumn();
-        bool isRow();
-
-        std::shared_ptr<FlexItem> find(QLayoutItem*);
-        void insert(
-            QLayoutItem* widget, QLayoutItem* relativeTo, Direction direction);
-        void add(QLayoutItem*);
-        QLayoutItem* take(QLayoutItem* item);
-
-        void performLayout(const QRect& rect);
-        void print(int indent = 0);
-
-        double flex = 1;
-
-        // private: TODO: make private again
         explicit FlexItem(QLayoutItem*);
+        explicit FlexItem(QWidget*);
         explicit FlexItem(FlexItemType type);
 
+        bool isEmpty() const;
+        bool isItem() const;
+        bool isColumn() const;
+        bool isRow() const;
+
+        void addChild(const std::shared_ptr<FlexItem>& widget);
+
+        void print(int indent = 0) const;
+
+        double flexH = 1;
+        double flexV = 1;
+
     private:
+        std::shared_ptr<FlexItem> find(QLayoutItem*);
+        // only call this on the root item
+        void root_insert(
+            QLayoutItem* widget, QLayoutItem* relativeTo, Direction direction);
+        // only call this on the root item
+        void root_add(QLayoutItem*);
+        // only call this on the root item
+        QLayoutItem* root_take(QLayoutItem* item);
+
+        void performLayout(const QRect& rect);
+
+        // asd
         void clear();
         void flatten();
         std::shared_ptr<FlexItem> clone();

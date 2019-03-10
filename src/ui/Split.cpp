@@ -27,9 +27,7 @@ namespace chatterino::ui
     {
         this->initLayout();
 
-        // this->setRoom(emptyRoom());
-        this->setRoom(
-            app.providers().at(0)->addRoom({{"channel", "fourtf_xd"}}));
+        this->setRoom(emptyRoom());
 
         QObject::connect(&this->selectChannel_, &SelectChannel::accepted, this,
             [this](auto&& room) { this->setRoom(room); });

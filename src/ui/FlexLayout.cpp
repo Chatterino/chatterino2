@@ -27,6 +27,11 @@ namespace chatterino::ui
     {
     }
 
+    const FlexItem& FlexLayout::root() const
+    {
+        return *this->root_;
+    }
+
     void FlexLayout::addItem(QLayoutItem* item)
     {
         this->addItemRelativeTo(
@@ -64,7 +69,7 @@ namespace chatterino::ui
         QLayoutItem* item, QLayoutItem* relativeTo, Direction direction)
     {
         // insert into item tree
-        this->root_->insert(item, relativeTo, direction);
+        this->root_->root_insert(item, relativeTo, direction);
 
         // insert into item list
         this->items_.append(item);
@@ -110,7 +115,7 @@ namespace chatterino::ui
             item->layout()->setParent(nullptr);
 
         // take from item tree
-        this->root_->take(item);
+        this->root_->root_take(item);
 
         this->performLayout();
 
