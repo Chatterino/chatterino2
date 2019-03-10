@@ -4,6 +4,7 @@
 #include "Room.hpp"
 #include "ab/BaseWidget.hpp"
 #include "messages/MessageContainer.hpp"
+#include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "ui/ChannelView.Selector.hpp"
 #include "ui/UiFwd.hpp"

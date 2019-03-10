@@ -102,11 +102,13 @@ namespace ab
         void onFocusLost();
         void removeBackground();
 
+#if USEWINSDK
         bool handleDPICHANGED(MSG* msg);
         bool handleSHOWWINDOW(MSG* msg);
         bool handleNCCALCSIZE(MSG* msg, long* result);
         bool handleSIZE(MSG* msg);
         bool handleNCHITTEST(MSG* msg, long* result);
+#endif
 
         bool enableCustomFrame_;
         ActionOnFocusLoss actionOnFocusLoss_ = Nothing;

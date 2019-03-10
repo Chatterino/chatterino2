@@ -1128,7 +1128,8 @@ namespace chatterino
 
         if (auto it = this->tags.find("badges"); it != this->tags.end())
         {
-            for (auto&& badge : it.value().toString().splitRef(','))
+            auto str = it.value().toString();  // extend lifetime
+            for (auto&& badge : str.splitRef(','))
             {
                 auto [set, version] = splitPair(badge, '/');
 

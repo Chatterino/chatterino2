@@ -11,9 +11,11 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-#include <boost/interprocess/ipc/message_queue.hpp>
+#ifdef Q_OS_WIN
+#    include <boost/interprocess/ipc/message_queue.hpp>
 
 namespace ipc = boost::interprocess;
+#endif
 
 #ifdef Q_OS_WIN
 #    include <QProcess>
@@ -110,6 +112,7 @@ namespace chatterino
 
     void NativeMessagingClient::sendMessage(const QByteArray& array)
     {
+#ifdef Q_OS_WIN
         try
         {
             ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
@@ -120,6 +123,7 @@ namespace chatterino
         {
             qDebug() << "send to gui process:" << ex.what();
         }
+#endif
     }
 
     void NativeMessagingClient::writeToCout(const QByteArray& array)
@@ -141,6 +145,7 @@ namespace chatterino
 
     void NativeMessagingServer::ReceiverThread::run()
     {
+#ifdef Q_OS_WIN
         ipc::message_queue::remove("chatterino_gui");
         ipc::message_queue messageQueue(
             ipc::open_or_create, "chatterino_gui", 100, MESSAGE_SIZE);
@@ -166,11 +171,13 @@ namespace chatterino
                 qDebug() << "received from gui process:" << ex.what();
             }
         }
+#endif
     }
 
     void NativeMessagingServer::ReceiverThread::handleMessage(
         const QJsonObject& root)
     {
+#ifdef Q_OS_WIN
         QString action = root.value("action").toString();
 
         if (action.isNull())
@@ -187,8 +194,8 @@ namespace chatterino
 
             qDebug() << attach;
 
-#ifdef USEWINSDK
-#    if 0
+#    ifdef USEWINSDK
+#        if 0
             AttachedWindow::GetArgs args;
             args.winId = root.value("winId").toString();
             args.yOffset = root.value("yOffset").toInt(-1);
@@ -202,8 +209,8 @@ namespace chatterino
                 attach = false;
                 return;
             }
+#        endif
 #    endif
-#endif
 
             if (_type == "twitch")
             {
@@ -211,17 +218,17 @@ namespace chatterino
                     if (!name.isEmpty())
                     {
                         // TODO: fix
-#if 0
+#    if 0
                         app->twitch.server->watchingChannel.reset(
                             app->twitch.server->getOrAddChannel(name));
-#endif
+#    endif
                     }
 
                     if (attach)
                     {
-#ifdef USEWINSDK
+#    ifdef USEWINSDK
                         //                    if (args.height != -1) {
-#    if 0
+#        if 0
                         auto* window =
                             AttachedWindow::get(::GetForegroundWindow(), args);
                         if (!name.isEmpty())
@@ -229,10 +236,10 @@ namespace chatterino
                             window->setChannel(
                                 app->twitch.server->getOrAddChannel(name));
                         }
-#    endif
+#        endif
 //                    }
 //                    window->show();
-#endif
+#    endif
                     }
                 });
             }
@@ -251,18 +258,19 @@ namespace chatterino
                 return;
             }
 
-#ifdef USEWINSDK
+#    ifdef USEWINSDK
             postToThread([winId] {
                 qDebug() << "NW detach";
-#    if 0
+#        if 0
                 AttachedWindow::detach(winId);
-#    endif
+#        endif
             });
-#endif
+#    endif
         }
         else
         {
             qDebug() << "NM unknown action " + action;
         }
+#endif
     }
 }  // namespace chatterino

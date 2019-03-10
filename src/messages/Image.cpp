@@ -360,7 +360,7 @@ namespace chatterino
             return true;
         else if (!this->url_.string.isEmpty() && this->url_ == other.url_)
             return true;
-        else if (this->frames_->first() == other.frames_->first())
+        else if (&this->frames_->first().get() == &other.frames_->first().get())
             return true;
         else
             return false;

@@ -3,6 +3,8 @@
 #include "FlexLayout.hpp"
 
 #include <QWidget>
+#include <cassert>
+#include <cstdint>
 
 namespace chatterino::ui
 {
@@ -366,7 +368,7 @@ namespace chatterino::ui
             assert(false);
 
         qDebug().noquote() << QString(indent, ' ') << type
-                           << (reinterpret_cast<int>(this->item_) % 1000);
+                           << (reinterpret_cast<intptr_t>(this->item_) % 10000);
 
         for (auto&& item : this->items_)
             item->print(indent + 2);

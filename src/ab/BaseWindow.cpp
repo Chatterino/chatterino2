@@ -334,7 +334,7 @@ namespace ab
 
                 if (!recursiveCheckMouseTracking(widget))
                 {
-                    log("Start moving");
+                    // QDebug() << "Start moving";
                     this->moving = true;
                 }
             }
@@ -351,7 +351,7 @@ namespace ab
         {
             if (this->moving)
             {
-                log("Stop moving");
+                // QDebug() << "Stop moving";
                 this->moving = false;
             }
         }
@@ -544,9 +544,9 @@ namespace ab
     // EVENTS
 
     // WINDOWS
+#ifdef USEWINSDK
     bool BaseWindow::handleDPICHANGED(MSG* msg)
     {
-#ifdef USEWINSDK
         int dpi = HIWORD(msg->wParam);
 
         float _scale = dpi / 96.f;
@@ -567,14 +567,10 @@ namespace ab
         this->updateScalableQss();
 
         return true;
-#else
-        return false;
-#endif
     }
 
     bool BaseWindow::handleSHOWWINDOW(MSG* msg)
     {
-#ifdef USEWINSDK
         // set initial dpi
         if (auto dpi = getWindowDpi(msg->hwnd))
         {
@@ -602,14 +598,10 @@ namespace ab
         }
 
         return true;
-#else
-        return false;
-#endif
     }
 
     bool BaseWindow::handleNCCALCSIZE(MSG* msg, long* result)
     {
-#ifdef USEWINSDK
         if (this->hasCustomWindowFrame())
         {
             if (msg->wParam == TRUE)
@@ -629,14 +621,10 @@ namespace ab
             return true;
         }
         return false;
-#else
-        return false;
-#endif
     }
 
     bool BaseWindow::handleSIZE(MSG* msg)
     {
-#ifdef USEWINSDK
         if (this->ui_.windowLayout)
         {
             if (this->frameless_)
@@ -659,14 +647,10 @@ namespace ab
             }
         }
         return false;
-#else
-        return false;
-#endif
     }
 
     bool BaseWindow::handleNCHITTEST(MSG* msg, long* result)
     {
-#ifdef USEWINSDK
         const LONG border_width = 8;  // in pixels
         RECT winrect;
         GetWindowRect(HWND(winId()), &winrect);
@@ -790,10 +774,8 @@ namespace ab
             return true;
         }
         return false;
-#else
-        return false;
-#endif
     }
+#endif
 
     // DIALOG
     Dialog::Dialog()
