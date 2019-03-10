@@ -31,8 +31,7 @@ namespace chatterino::ui
 
         void print(int indent = 0) const;
 
-        double flexH = 1;
-        double flexV = 1;
+        double flex = 1;
 
     private:
         std::shared_ptr<FlexItem> find(QLayoutItem*);
@@ -45,6 +44,7 @@ namespace chatterino::ui
         QLayoutItem* root_take(QLayoutItem* item);
 
         void performLayout(const QRect& rect);
+        void addLayoutItemsRec(std::vector<QLayoutItem*>& items);
 
         // asd
         void clear();

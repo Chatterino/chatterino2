@@ -2,6 +2,9 @@
 
 #include <QLayout>
 #include <QVector>
+#include <memory>
+
+#include "ui/FlexLayout.Private.hpp"
 
 namespace chatterino::ui
 {
@@ -15,6 +18,7 @@ namespace chatterino::ui
         FlexLayout();
 
         const FlexItem& root() const;
+        void setRoot(const std::shared_ptr<FlexItem>& root);
 
         void addItem(QLayoutItem*) override;
         void addWidgetRelativeTo(
@@ -26,6 +30,8 @@ namespace chatterino::ui
         void addItemRelativeTo(
             QLayoutItem* item, QLayoutItem* relativeTo, Direction);
         void addLayout(QLayout*);
+
+        void clear();
 
         // interface
         QSize sizeHint() const override;

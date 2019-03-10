@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ab/BaseWidget.hpp"
+#include "ui/FlexLayout.Private.hpp"
 #include "ui/UiFwd.hpp"
 
 namespace chatterino::ui

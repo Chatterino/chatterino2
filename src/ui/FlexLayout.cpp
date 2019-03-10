@@ -32,6 +32,31 @@ namespace chatterino::ui
         return *this->root_;
     }
 
+    void FlexLayout::setRoot(const std::shared_ptr<FlexItem>& root)
+    {
+        this->clear();
+
+        this->root_ = root;
+
+        std::vector<QLayoutItem*> items;
+        root->addLayoutItemsRec(items);
+
+        for (auto&& item : items)
+        {
+            // insert into item list
+            this->items_.append(item);
+
+            // add child widget/layout
+            if (item->widget())
+                this->addChildWidget(item->widget());
+
+            if (item->layout())
+                this->addChildLayout(item->layout());
+        }
+
+        this->performLayout();
+    }
+
     void FlexLayout::addItem(QLayoutItem* item)
     {
         this->addItemRelativeTo(
@@ -91,6 +116,20 @@ namespace chatterino::ui
         this->addItem(layout);
     }
 
+    void FlexLayout::clear()
+    {
+        for (auto&& item : this->items_)
+        {
+            if (item->widget())
+                item->widget()->deleteLater();
+            else if (item->layout())
+                item->layout()->deleteLater();
+        }
+
+        this->items_.clear();
+        this->root_ = std::shared_ptr<FlexItem>(new FlexItem());
+    }
+
     QSize FlexLayout::sizeHint() const
     {
         return QSize();
@@ -118,9 +157,6 @@ namespace chatterino::ui
         this->root_->root_take(item);
 
         this->performLayout();
-
-        // qDebug() << this->items_.size();
-        // this->root_->print();
 
         return item;
     }

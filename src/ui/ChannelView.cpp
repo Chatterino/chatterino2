@@ -158,6 +158,8 @@ namespace chatterino::ui
 
             this->queueLayout();
         });
+
+        this->theme = &getTheme(*this);
     }
 
     void ChannelView::initializeLayout()

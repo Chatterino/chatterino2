@@ -78,6 +78,13 @@ namespace chatterino::ui
         return this->type_ == Row;
     }
 
+    void FlexItem::addChild(const std::shared_ptr<FlexItem>& item)
+    {
+        assert(this->isRow() || this->isColumn());
+
+        this->items_.append(item);
+    }
+
     std::shared_ptr<FlexItem> FlexItem::find(QLayoutItem* widget)
     {
         if (!widget)
@@ -356,6 +363,19 @@ namespace chatterino::ui
                     pos = newPos;
                 }
             }
+        }
+    }
+
+    void FlexItem::addLayoutItemsRec(std::vector<QLayoutItem*>& items)
+    {
+        if (this->isItem())
+        {
+            items.push_back(this->item_);
+        }
+        else if (this->isRow() || this->isColumn())
+        {
+            for (auto&& item : this->items_)
+                item->addLayoutItemsRec(items);
         }
     }
 

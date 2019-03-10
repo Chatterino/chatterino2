@@ -47,7 +47,9 @@ namespace ab
         void move(QWidget* from, QWidget* to);
         bool moveable(QWidget*);
 
-        int size() const;
+        int count() const;
+        // tabs that aren't left or right
+        int regularCount() const;
         Item itemAt(int index) const;
         QVector<Item>::ConstIterator begin() const;
         QVector<Item>::ConstIterator end() const;

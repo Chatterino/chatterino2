@@ -290,9 +290,17 @@ namespace ab
                !this->items_[index].atStart;
     }
 
-    int Notebook::size() const
+    int Notebook::count() const
     {
         return this->items_.size();
+    }
+
+    int Notebook::regularCount() const
+    {
+        return std::accumulate(this->items_.begin(), this->items_.end(), 0,
+            [](auto val, const Item& element) {
+                return val + (element.atStart || element.atEnd ? 0 : 1);
+            });
     }
 
     Notebook::Item Notebook::itemAt(int index) const

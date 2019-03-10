@@ -87,7 +87,7 @@ namespace chatterino
 
     QJsonObject TwitchRoom::serialize() const
     {
-        return {{"channel", this_->name}};
+        return {{"name", this_->name}};
     }
 
     QWidget* TwitchRoom::createView(QWidget* parent) const

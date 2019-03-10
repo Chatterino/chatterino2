@@ -23,6 +23,55 @@
 
 namespace chatterino::ui
 {
+    inline void deserializeNotebook(
+        const QJsonArray& tabs, ab::Notebook& notebook, Application& app)
+    {
+        for (QJsonValue tab_val : tabs)
+        {
+            qDebug() << tab_val;
+            auto tab = new Tab("asdf");
+            auto page = new SplitContainer(app);
+            notebook.addTab(tab, page);
+
+            QJsonObject tab_obj = tab_val.toObject();
+
+            // TODO: set custom title
+            // QJsonValue title_val = tab_obj.value("title");
+            // if (title_val.isString())
+            //    page->getTab()->setCustomTitle(title_val.toString());
+
+            // selected
+            if (tab_obj.value("selected").toBool(false))
+                notebook.select(page);
+
+            // TODO: highlighting on new messages
+            // bool val = tab_obj.value("highlightsEnabled").toBool(true);
+            // page->getTab()->setHighlightsEnabled(val);
+
+            // load splits
+            QJsonObject splitRoot = tab_obj.value("splits2").toObject();
+
+            if (!splitRoot.isEmpty())
+            {
+                page->deserialize(splitRoot, app);
+
+                continue;
+            }
+        }
+    }
+
+    inline QWidget* makeAddButton(ab::Notebook& notebook, Application& app)
+    {
+        auto addButton = new ab::NotebookButton();
+        QObject::connect(addButton, &ab::FlatButton::leftClicked, &notebook,
+            [app = &app, x = &notebook]() {
+                auto tab = new Tab("lmao");
+                x->addTab(tab, new SplitContainer(*app));
+                x->select(tab);
+            });
+        return addButton;
+    }
+
     Window::Window(Application& app, WindowType type)
         : ab::BaseWindow(Flags(Flags::EnableCustomFrame))
         , theme_(this)
@@ -96,38 +145,14 @@ namespace chatterino::ui
         }
 
         // load tabs
-        QJsonArray tabs = root.value("tabs").toArray();
-        for (QJsonValue tab_val : tabs)
-        {
-            auto tab = new Tab("asdf");
-            auto page = new SplitContainer(this->app_);
-            this->center_->addTab(tab, page);
+        deserializeNotebook(
+            root.value("tabs").toArray(), *this->center_, this->app_);
+        deserializeNotebook(
+            root.value("leftTabs").toArray(), *this->left_, this->app_);
+        deserializeNotebook(
+            root.value("rightTabs").toArray(), *this->right_, this->app_);
 
-            QJsonObject tab_obj = tab_val.toObject();
-
-            // TODO: set custom title
-            // QJsonValue title_val = tab_obj.value("title");
-            // if (title_val.isString())
-            //    page->getTab()->setCustomTitle(title_val.toString());
-
-            // selected
-            if (tab_obj.value("selected").toBool(false))
-                this->center_->select(page);
-
-            // TODO: highlighting on new messages
-            // bool val = tab_obj.value("highlightsEnabled").toBool(true);
-            // page->getTab()->setHighlightsEnabled(val);
-
-            // load splits
-            QJsonObject splitRoot = tab_obj.value("splits2").toObject();
-
-            if (!splitRoot.isEmpty())
-            {
-                page->deserialize(splitRoot, this->app_);
-
-                continue;
-            }
-        }
+        this->updateLayout();
     }
 
     QJsonObject serialize()
@@ -138,52 +163,33 @@ namespace chatterino::ui
 
     void Window::initLayout()
     {
-        // FOURTF: wip
+        // left widget
         this->left_ = std::unique_ptr<ab::Notebook>(
             ab::makeWidget<ab::Notebook>([&](auto x) {
                 x->setObjectName("left");
                 x->setOrientation(ab::NotebookOrientation::Left);
+                x->addTabAtEnd(makeAddButton(*x, this->app_));
             }));
 
-        // FOURTF: wip
+        // right widget
         this->right_ = std::unique_ptr<ab::Notebook>(
             ab::makeWidget<ab::Notebook>([&](auto x) {
                 x->setObjectName("right");
                 x->setOrientation(ab::NotebookOrientation::Right);
-                x->setUndockHandler([](QWidget* tab, QWidget* content) {});
-
-                auto addButton = new ab::NotebookButton();
-                QObject::connect(
-                    addButton, &ab::FlatButton::leftClicked, this, [this, x]() {
-                        auto tab = new Tab("lmao");
-                        x->addTab(tab, new SplitContainer(this->app_));
-                        x->select(tab);
-                    });
-                x->addTabAtEnd(addButton);
+                x->addTabAtEnd(makeAddButton(*x, this->app_));
             }));
 
         // center widget (tabs)
         this->setCenterWidget(ab::makeWidget<QFrame>([&](auto x) {
             x->setObjectName("content");
-            x->setLayout(ab::makeLayout<FlexLayout>(
-                [&](auto x) { this->layout_ = x; },
-                {
-                    ab::makeWidget<ab::Notebook>([&](auto x) {
-                        new Tab("asdf");
-                        this->center_ = x;
-                        x->addTab(
-                            new Tab("Tab1"), new SplitContainer(this->app_));
-
-                        auto addButton = new ab::NotebookButton();
-                        QObject::connect(addButton,
-                            &ab::FlatButton::leftClicked, this, [this, x]() {
-                                auto tab = new Tab("lmao");
-                                x->addTab(tab, new SplitContainer(this->app_));
-                                x->select(tab);
-                            });
-                        x->addTabAtEnd(addButton);
-                    }),
-                }));
+            x->setLayout(
+                ab::makeLayout<FlexLayout>([&](auto x) { this->layout_ = x; },
+                    {
+                        ab::makeWidget<ab::Notebook>([&](auto x) {
+                            this->center_ = x;
+                            x->addTabAtEnd(makeAddButton(*x, this->app_));
+                        }),
+                    }));
         }));
 
         // misc
@@ -200,8 +206,10 @@ namespace chatterino::ui
         //            this->setRightVisible(this->dragging_);
 
         // hide the left and right notebook for now
-        this->setLeftVisible(false);
-        this->setRightVisible(false);
+        auto a = this->left_->regularCount();
+
+        this->setLeftVisible(this->left_->regularCount());
+        this->setRightVisible(this->right_->regularCount());
     }
 
     void Window::setLeftVisible(bool value)
@@ -273,7 +281,9 @@ namespace chatterino::ui
 
     void Window::showEvent(QShowEvent*)
     {
-        // this->themeChangedEvent(this->initialTheme_);
+        if (!this->center_->regularCount())
+            this->center_->addTab(
+                new Tab("Tab1"), new SplitContainer(this->app_));
     }
 
     void Window::dragEnterEvent(QDragEnterEvent* event)

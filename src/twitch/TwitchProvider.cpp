@@ -117,7 +117,7 @@ namespace chatterino
     {
         // parse json values
         auto type = data["type"].toString();
-        auto channel = data["channel"].toString();
+        auto channel = data["name"].toString();
 
         // create widgets
         auto isName = ab::makeWidget<QRadioButton>(
@@ -149,7 +149,7 @@ namespace chatterino
             [=]() -> RoomPtr {
                 return this->addRoom([&]() -> QJsonObject {
                     if (isName->isChecked())
-                        return {{"channel", name->text()}};
+                        return {{"name", name->text()}};
                     else if (isWhispers->isChecked())
                         return {{"type", "whispers"}};
                     else if (isMentions->isChecked())
@@ -167,19 +167,13 @@ namespace chatterino
     RoomPtr TwitchProvider::addRoom(const QJsonObject& data)
     {
         auto type = data["type"].toString();
-        auto channel = data["channel"].toString();
+        auto channel = data["name"].toString();
 
         if (type == "whispers")
-        {
             return this_->whispers;
-        }
-
-        if (type == "mentions")
-        {
+        else if (type == "mentions")
             return this_->mentions;
-        }
-
-        if (!channel.isNull())
+        else if (!channel.isNull())
         {
             auto& weakRoom = this_->rooms[channel];
             auto room = weakRoom.lock();
@@ -200,9 +194,9 @@ namespace chatterino
                     });
             }
 
-            return room;
+            return RoomPtr(room);
         }
-
-        return emptyRoom();
+        else
+            return emptyRoom();
     }
 }  // namespace chatterino
