@@ -17,6 +17,7 @@
 #include "ui/SplitContainer.hpp"
 #include "ui/Tab.hpp"
 #include "util/Resources.hpp"
+#include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 
 #include "ab/FlatButton.hpp"
@@ -281,9 +282,10 @@ namespace chatterino::ui
 
     void Window::showEvent(QShowEvent*)
     {
-        if (!this->center_->regularCount())
-            this->center_->addTab(
-                new Tab("Tab1"), new SplitContainer(this->app_));
+        // TODO:
+        // if (this->center_->regularCount() == 0)
+        //    this->center_->addTab(
+        //        new Tab("Tab1"), new SplitContainer(this->app_));
     }
 
     void Window::dragEnterEvent(QDragEnterEvent* event)
@@ -309,5 +311,6 @@ namespace chatterino::ui
 
     void Window::showAccounts(QWidget* relativeTo)
     {
+        auto popup = new AccountSwitchPopupWidget();
     }
 }  // namespace chatterino::ui

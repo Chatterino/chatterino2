@@ -18,6 +18,11 @@ ab::Dialog {
 	color: #eee;
 }
 
+chatterino--ui--Line {
+	min-height: 7px;
+	max-height: 7px;
+}
+
 chatterino--ui--Tooltip {
 	font: 12px "Segoe UI";
 	background: #000;

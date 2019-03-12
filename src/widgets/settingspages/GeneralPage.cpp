@@ -112,7 +112,7 @@ namespace chatterino
 
     void SettingsLayout::addSeperator()
     {
-        this->addWidget(new Line(false));
+        this->addWidget(new ui::Line());
     }
 
     GeneralPage::GeneralPage()
@@ -300,7 +300,6 @@ namespace chatterino
                 }
             },
             false);
-        layout.addCheckbox("Emphasize deleted messages", s.redDisabledMessages);
 
         /*
         layout.addTitle2("Cache");

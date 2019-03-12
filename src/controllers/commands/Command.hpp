@@ -18,7 +18,6 @@ namespace chatterino
 
         QString toString() const;
     };
-
 }  // namespace chatterino
 
 namespace pajlada

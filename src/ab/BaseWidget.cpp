@@ -1,8 +1,5 @@
 #include "ab/BaseWidget.hpp"
 
-//#include "BaseSettings.hpp"
-//#include "BaseTheme.hpp"
-//#include "util/Log.hpp"
 #include "ab/BaseWindow.hpp"
 
 #include <QChildEvent>

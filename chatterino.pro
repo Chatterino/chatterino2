@@ -178,6 +178,7 @@ SOURCES += \
     src/ui/EmotePreview.cpp \
     src/ui/FlexLayout.cpp \
     src/ui/FlexLayout.Private.cpp \
+    src/ui/Line.cpp \
     src/ui/Scrollbar.cpp \
     src/ui/Split.cpp \
     src/ui/SplitContainer.cpp \

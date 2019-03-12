@@ -27,13 +27,13 @@ namespace ab
         //    boost::optional<float> overrideScale() const;
         //    void setOverrideScale(boost::optional<float>);
 
-        QSize scaleIndependantSize() const;
-        int scaleIndependantWidth() const;
-        int scaleIndependantHeight() const;
-        void setScaleIndependantSize(int width, int height);
-        void setScaleIndependantSize(QSize);
-        void setScaleIndependantWidth(int value);
-        void setScaleIndependantHeight(int value);
+        [[deprecated]] QSize scaleIndependantSize() const;
+        [[deprecated]] int scaleIndependantWidth() const;
+        [[deprecated]] int scaleIndependantHeight() const;
+        [[deprecated]] void setScaleIndependantSize(int width, int height);
+        [[deprecated]] void setScaleIndependantSize(QSize);
+        [[deprecated]] void setScaleIndependantWidth(int value);
+        [[deprecated]] void setScaleIndependantHeight(int value);
 
         float qtFontScale() const;
 

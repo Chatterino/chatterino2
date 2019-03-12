@@ -101,12 +101,13 @@ namespace chatterino
             }
         }
 
-        int rowCount(const QModelIndex& parent) const override
+        int rowCount([[maybe_unused]] const QModelIndex& parent) const override
         {
             return this->rows_.size();
         }
 
-        int columnCount(const QModelIndex& parent) const override
+        int columnCount(
+            [[maybe_unused]] const QModelIndex& parent) const override
         {
             return this->columnCount_;
         }
@@ -205,7 +206,8 @@ namespace chatterino
             this->vector_->removeItem(signalVectorRow);
         }
 
-        bool removeRows(int row, int count, const QModelIndex& parent) override
+        bool removeRows(int row, int count,
+            [[maybe_unused]] const QModelIndex& parent) override
         {
             if (count != 1)
             {
@@ -233,19 +235,23 @@ namespace chatterino
         virtual void getRowFromItem(
             const TVectorItem& item, std::vector<QStandardItem*>& row) = 0;
 
-        virtual int beforeInsert(const TVectorItem& item,
-            std::vector<QStandardItem*>& row, int proposedIndex)
+        virtual int beforeInsert([[maybe_unused]] const TVectorItem& item,
+            [[maybe_unused]] std::vector<QStandardItem*>& row,
+            int proposedIndex)
         {
             return proposedIndex;
         }
 
-        virtual void afterRemoved(const TVectorItem& item,
-            std::vector<QStandardItem*>& row, int index)
+        virtual void afterRemoved([[maybe_unused]] const TVectorItem& item,
+            [[maybe_unused]] std::vector<QStandardItem*>& row,
+            [[maybe_unused]] int index)
         {
         }
 
-        virtual void customRowSetData(const std::vector<QStandardItem*>& row,
-            int column, const QVariant& value, int role, int rowIndex)
+        virtual void customRowSetData(
+            [[maybe_unused]] const std::vector<QStandardItem*>& row,
+            [[maybe_unused]] int column, [[maybe_unused]] const QVariant& value,
+            [[maybe_unused]] int role, [[maybe_unused]] int rowIndex)
         {
         }
 
