@@ -1,6 +1,6 @@
 #pragma once
 
-#include "util/FlagsEnum.hpp"
+#include "ab/util/FlagsEnum.hpp"
 //#include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>
@@ -29,7 +29,7 @@ namespace chatterino
         Subscription = (1 << 12),
         Notification = (1 << 13),
     };
-    using MessageFlags = FlagsEnum<MessageFlag>;
+    using MessageFlags = ab::FlagsEnum<MessageFlag>;
 
     struct Message
     {

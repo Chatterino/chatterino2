@@ -73,6 +73,7 @@ SOURCES += \
     src/ab/Notebook.cpp \
     src/ab/Notebook.Misc.cpp \
     src/ab/Row.cpp \
+    src/ab/Space.cpp \
     src/ab/TitleBarButton.cpp \
     src/ab/util/Benchmark.cpp \
     src/ab/util/ConnectionOwner.cpp \
@@ -171,6 +172,7 @@ SOURCES += \
     src/twitch/TwitchMessageBuilder.cpp \
     src/twitch/TwitchProvider.cpp \
     src/twitch/TwitchRoom.cpp \
+    src/ui/AccountSwitchPopup.cpp \
     src/ui/ChannelView.cpp \
     src/ui/ChannelView.Pauser.cpp \
     src/ui/ChannelView.Selector.cpp \
@@ -199,7 +201,6 @@ SOURCES += \
     src/util/Resources.cpp \
     src/util/StreamLink.cpp \
     src/util/Strings.cpp \
-    src/widgets/AccountSwitchPopupWidget.cpp \
     src/widgets/AccountSwitchWidget.cpp \
     src/widgets/AttachedWindow.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
@@ -242,10 +243,12 @@ HEADERS += \
     src/ab/Notebook.hpp \
     src/ab/Notebook.Misc.hpp \
     src/ab/Row.hpp \
+    src/ab/Space.hpp \
     src/ab/TitleBarButton.hpp \
     src/ab/util/AnyPtr.hpp \
     src/ab/util/Benchmark.hpp \
     src/ab/util/ConnectionOwner.hpp \
+    src/ab/util/FlagsEnum.hpp \
     src/ab/util/FunctionEventFilter.hpp \
     src/ab/util/MakeWidget.hpp \
     src/ab/util/ScaleQss.hpp \
@@ -359,6 +362,7 @@ HEADERS += \
     src/twitch/TwitchMessageBuilder.hpp \
     src/twitch/TwitchProvider.hpp \
     src/twitch/TwitchRoom.hpp \
+    src/ui/AccountSwitchPopup.hpp \
     src/ui/ChannelView.hpp \
     src/ui/ChannelView.Pauser.hpp \
     src/ui/ChannelView.Selector.hpp \
@@ -383,7 +387,6 @@ HEADERS += \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
     src/util/DistanceBetweenPoints.hpp \
-    src/util/FlagsEnum.hpp \
     src/util/FormatTime.hpp \
     src/util/FuzzyConvert.hpp \
     src/util/Helpers.hpp \
@@ -408,7 +411,6 @@ HEADERS += \
     src/util/Strings.hpp \
     src/util/UniqueAccess.hpp \
     src/Version.hpp \
-    src/widgets/AccountSwitchPopupWidget.hpp \
     src/widgets/AccountSwitchWidget.hpp \
     src/widgets/AttachedWindow.hpp \
     src/widgets/dialogs/EmotePopup.hpp \

@@ -73,7 +73,7 @@ namespace chatterino
         return this->text_;
     }
 
-    FlagsEnum<MessageElementFlag> MessageLayoutElement::getFlags() const
+    ab::FlagsEnum<MessageElementFlag> MessageLayoutElement::getFlags() const
     {
         return this->creator_.getFlags();
     }

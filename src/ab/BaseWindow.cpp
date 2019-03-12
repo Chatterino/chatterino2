@@ -35,13 +35,18 @@
 
 namespace ab
 {
-    BaseWindow::BaseWindow(Flags _flags)
-        : BaseWidget(nullptr,
-              Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint
-                                               : Qt::WindowFlags()))
-        , enableCustomFrame_(_flags & EnableCustomFrame)
-        , frameless_(_flags & Frameless)
-        , flags_(_flags)
+    inline Qt::WindowFlags convertFlags(BaseWindow::Flags flags)
+    {
+        return Qt::Window |
+               ((flags.has(BaseWindow::TopMost)) ? Qt::WindowStaysOnTopHint
+                                                 : Qt::WindowFlags());
+    }
+
+    BaseWindow::BaseWindow(Flags flags)
+        : BaseWidget(nullptr, convertFlags(flags))
+        , enableCustomFrame_(flags.has(EnableCustomFrame))
+        , frameless_(flags.has(Frameless))
+        , flags_(flags)
     {
         if (this->frameless_)
         {
@@ -80,7 +85,8 @@ namespace ab
         QWidget::setLayout(makeLayout<Column>(
             [&](auto x) {
                 this->ui_.windowLayout = x;
-                x->setContentsMargins(0, 1, 0, 0);
+                if (!this->frameless_)
+                    x->setContentsMargins(0, 1, 0, 0);
             },
             {
                 makeWidget<WindowContent>([&](auto x) {
@@ -591,7 +597,7 @@ namespace ab
         }
 
         // make topmost
-        if (this->flags_ & Flags::TopMost)
+        if (this->flags_.has(TopMost))
         {
             ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0,
                 SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
@@ -741,7 +747,7 @@ namespace ab
 
             return true;
         }
-        else if (this->flags_ & FramelessDraggable)
+        else if (this->flags_.has(FramelessDraggable))
         {
             *result = 0;
             bool client = false;
@@ -781,5 +787,12 @@ namespace ab
     Dialog::Dialog()
     {
         this->hideMaximize();
+    }
+
+    // POPUP
+    Popup::Popup()
+        : BaseWindow({BaseWindow::Frameless, BaseWindow::TopMost})
+    {
+        this->setActionOnFocusLoss(ab::BaseWindow::ActionOnFocusLoss::Delete);
     }
 }  // namespace ab

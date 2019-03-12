@@ -5,17 +5,17 @@
 #include <memory>
 #include <vector>
 
+#include "ab/util/FlagsEnum.hpp"
 #include "messages/Common.hpp"
 #include "messages/Selection.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
-#include "util/FlagsEnum.hpp"
 
 class QPainter;
 
 namespace chatterino
 {
     enum class MessageFlag : uint16_t;
-    using MessageFlags = FlagsEnum<MessageFlag>;
+    using MessageFlags = ab::FlagsEnum<MessageFlag>;
 
     struct Margin
     {

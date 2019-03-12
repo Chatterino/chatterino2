@@ -1,8 +1,8 @@
 #pragma once
 
+#include "ab/util/FlagsEnum.hpp"
 #include "messages/Common.hpp"
 #include "messages/ThemexD.hpp"
-#include "util/FlagsEnum.hpp"
 
 #include <QPixmap>
 #include <boost/noncopyable.hpp>
@@ -19,7 +19,7 @@ namespace chatterino
     class MessageLayoutElement;
 
     enum class MessageElementFlag;
-    using MessageElementFlags = FlagsEnum<MessageElementFlag>;
+    using MessageElementFlags = ab::FlagsEnum<MessageElementFlag>;
 
     enum class MessageLayoutFlag : uint8_t {
         RequiresBufferUpdate = 1 << 1,
@@ -29,7 +29,7 @@ namespace chatterino
         Expanded = 1 << 5,
         IgnoreHighlights = 1 << 6,
     };
-    using MessageLayoutFlags = FlagsEnum<MessageLayoutFlag>;
+    using MessageLayoutFlags = ab::FlagsEnum<MessageLayoutFlag>;
 
     class MessageLayout : boost::noncopyable
     {

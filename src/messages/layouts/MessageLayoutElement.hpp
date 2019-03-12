@@ -7,10 +7,10 @@
 #include <boost/noncopyable.hpp>
 #include <climits>
 
+#include "ab/util/FlagsEnum.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
-#include "util/FlagsEnum.hpp"
 
 class QPainter;
 
@@ -45,7 +45,7 @@ namespace chatterino
         virtual int getXFromIndex(int index) = 0;
         const Link& getLink() const;
         const QString& getText() const;
-        FlagsEnum<MessageElementFlag> getFlags() const;
+        ab::FlagsEnum<MessageElementFlag> getFlags() const;
 
     protected:
         bool trailingSpace = true;

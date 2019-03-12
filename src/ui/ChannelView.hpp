@@ -3,12 +3,12 @@
 #include "ChannelView.Pauser.hpp"
 #include "Room.hpp"
 #include "ab/BaseWidget.hpp"
+#include "ab/util/FlagsEnum.hpp"
 #include "messages/MessageContainer.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "ui/ChannelView.Selector.hpp"
 #include "ui/UiFwd.hpp"
-#include "util/FlagsEnum.hpp"
 
 #include <QPaintEvent>
 #include <QScroller>
@@ -30,13 +30,13 @@ namespace chatterino
     using MessagePtr = std::shared_ptr<const Message>;
 
     enum class MessageFlag : uint16_t;
-    using MessageFlags = FlagsEnum<MessageFlag>;
+    using MessageFlags = ab::FlagsEnum<MessageFlag>;
 
     class MessageLayout;
     using MessageLayoutPtr = std::shared_ptr<MessageLayout>;  // todo remove
 
     enum class MessageElementFlag;
-    using MessageElementFlags = FlagsEnum<MessageElementFlag>;
+    using MessageElementFlags = ab::FlagsEnum<MessageElementFlag>;
 
     struct Link;
     class MessageLayoutElement;

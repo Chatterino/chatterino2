@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ab/BaseWidget.hpp"
+#include "ab/util/FlagsEnum.hpp"
 
 #include <QFrame>
 #include <functional>
@@ -27,7 +28,7 @@ namespace ab
         Q_OBJECT
 
     public:
-        enum Flags {
+        enum Flag {
             None = 0,
             EnableCustomFrame = 1,
             Frameless = 2,
@@ -35,6 +36,7 @@ namespace ab
             DisableCustomScaling = 8,
             FramelessDraggable = 16,
         };
+        using Flags = FlagsEnum<Flag>;
 
         enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
 
@@ -42,12 +44,6 @@ namespace ab
 
         bool hasCustomWindowFrame();
         void addTitleBarButton(QWidget* widget);
-
-        //    TitleBarButton* addTitleBarButton(const TitleBarButtonStyle&
-        //    style,
-        //                                      std::function<void()>
-        //                                      onClicked);
-        //    EffectLabel* addTitleBarLabel(std::function<void()> onClicked);
 
         void setStayInScreenRect(bool value);
         bool getStayInScreenRect() const;
@@ -139,5 +135,15 @@ namespace ab
 
     public:
         Dialog();
+    };
+
+    /// Deletes itself on focus loss.
+    /// Has no border.
+    class Popup : public BaseWindow
+    {
+        Q_OBJECT
+
+    public:
+        Popup();
     };
 }  // namespace ab

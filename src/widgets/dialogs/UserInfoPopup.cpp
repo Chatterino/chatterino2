@@ -24,8 +24,8 @@
 namespace chatterino
 {
     UserInfoPopup::UserInfoPopup()
-        : ab::BaseWindow(BaseWindow::Flags(
-              BaseWindow::Frameless | BaseWindow::FramelessDraggable))
+        : ab::BaseWindow(
+              {BaseWindow::Frameless, BaseWindow::FramelessDraggable})
         , hack_(new bool)
     {
 #if 0

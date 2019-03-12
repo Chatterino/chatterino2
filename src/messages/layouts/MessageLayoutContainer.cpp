@@ -579,7 +579,7 @@ namespace chatterino
 
     int MessageLayoutContainer::getFirstMessageCharacterIndex() const
     {
-        static FlagsEnum<MessageElementFlag> flags;
+        static ab::FlagsEnum<MessageElementFlag> flags;
         flags.set(MessageElementFlag::Username);
         flags.set(MessageElementFlag::Timestamp);
         flags.set(MessageElementFlag::Badges);

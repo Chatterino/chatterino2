@@ -4,6 +4,8 @@
 #include <QWidget>
 #include <initializer_list>
 
+#include "ab/Space.hpp"
+
 class QBoxLayout;
 
 namespace ab
@@ -13,6 +15,12 @@ namespace ab
     ///
     /// Check ab::addStretch to add support for another layout type.
     QObject* stretch();
+
+    /// You may pass this to an element to ab::makeLayout to insert a space
+    /// item.
+    ///
+    /// Check ab::addStretch to add support for another layout type.
+    QObject* space();
 
     /// This function is used to add support for passing ab::stretch() as a
     /// parameter to ab::makeLayout().
@@ -49,6 +57,8 @@ namespace ab
                 continue;
             else if (widget == stretch())
                 addStretch(t);
+            else if (widget == space())
+                t->addWidget(new Space());
             else if (widget->isWidgetType())
                 t->addWidget(static_cast<QWidget*>(widget));
             else if (auto layout = dynamic_cast<QLayout*>(widget))

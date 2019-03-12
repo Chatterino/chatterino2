@@ -200,6 +200,13 @@ ab--FlatButton {
 	text-align: center;
 }
 
+ab--Space {
+	min-width: 8px;
+	max-width: 8px;
+	min-height: 8px;
+	max-height: 8px;
+}
+
 chatterino--ui--ChannelView {
 	background: #191919;
 }
@@ -208,6 +215,18 @@ chatterino--ui--ScrollBar {
 	background: rgba(0,0,0,0);
 	min-width: 16px;
 	max-width: 16px;
+}
+
+ab--Popup {
+	max-width: 200px;
+	max-width: 200px;
+	max-height: 200px;
+	max-height: 200px;
+}
+
+ab--Popup>ab--WindowContent {
+	border: 1px solid #555;
+	padding: 8px;
 }
 
 /* chatterino--ui--ScrollToBottom */

@@ -13,11 +13,11 @@
 #include "ab/Row.hpp"
 #include "ab/util/MakeWidget.hpp"
 #include "ab/util/WindowsHelper.hpp"
+#include "ui/AccountSwitchPopup.hpp"
 #include "ui/FlexLayout.hpp"
 #include "ui/SplitContainer.hpp"
 #include "ui/Tab.hpp"
 #include "util/Resources.hpp"
-#include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 
 #include "ab/FlatButton.hpp"
@@ -74,7 +74,7 @@ namespace chatterino::ui
     }
 
     Window::Window(Application& app, WindowType type)
-        : ab::BaseWindow(Flags(Flags::EnableCustomFrame))
+        : ab::BaseWindow(BaseWindow::EnableCustomFrame)
         , theme_(this)
         , app_(app)
     {
@@ -311,6 +311,13 @@ namespace chatterino::ui
 
     void Window::showAccounts(QWidget* relativeTo)
     {
-        auto popup = new AccountSwitchPopupWidget();
+        auto popup = new AccountSwitchPopup();
+        popup->setAttribute(Qt::WA_DeleteOnClose);
+        popup->show();
+        QPoint p{
+            relativeTo->rect().center().x() - popup->width() / 2,
+            relativeTo->rect().bottom(),
+        };
+        popup->move(relativeTo->mapToGlobal(p));
     }
 }  // namespace chatterino::ui

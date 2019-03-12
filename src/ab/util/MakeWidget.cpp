@@ -19,4 +19,10 @@ namespace ab
         static QObject obj;
         return &obj;
     }
+
+    QObject* space()
+    {
+        static QObject obj;
+        return &obj;
+    }
 }  // namespace ab

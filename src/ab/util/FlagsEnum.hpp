@@ -2,7 +2,7 @@
 
 #include <type_traits>
 
-namespace chatterino
+namespace ab
 {
     template <typename T, typename Q = typename std::underlying_type<T>::type>
     class FlagsEnum

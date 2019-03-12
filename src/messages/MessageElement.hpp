@@ -1,9 +1,9 @@
 #pragma once
 
+#include "ab/util/FlagsEnum.hpp"
 #include "messages/Fonts.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
-#include "util/FlagsEnum.hpp"
 
 #include <QRect>
 #include <QString>
@@ -109,7 +109,7 @@ namespace chatterino
                   BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
                   AlwaysShow,
     };
-    using MessageElementFlags = FlagsEnum<MessageElementFlag>;
+    using MessageElementFlags = ab::FlagsEnum<MessageElementFlag>;
 
     class MessageElement : boost::noncopyable
     {

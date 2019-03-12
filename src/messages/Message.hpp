@@ -1,7 +1,7 @@
 #pragma once
 
+#include "ab/util/FlagsEnum.hpp"
 #include "messages/ScrollbarHighlight.hpp"
-#include "util/FlagsEnum.hpp"
 
 #include <QTime>
 #include <boost/noncopyable.hpp>
@@ -32,7 +32,7 @@ namespace chatterino
         AutoMod = (1 << 14),
         RecentMessage = (1 << 15),
     };
-    using MessageFlags = FlagsEnum<MessageFlag>;
+    using MessageFlags = ab::FlagsEnum<MessageFlag>;
 
     struct Message : boost::noncopyable
     {
