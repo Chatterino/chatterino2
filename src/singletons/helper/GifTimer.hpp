@@ -15,5 +15,4 @@ namespace chatterino
     private:
         QTimer timer;
     };
-
 }  // namespace chatterino

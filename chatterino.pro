@@ -73,7 +73,6 @@ SOURCES += \
     src/ab/Notebook.cpp \
     src/ab/Notebook.Misc.cpp \
     src/ab/Row.cpp \
-    src/ab/Space.cpp \
     src/ab/TitleBarButton.cpp \
     src/ab/util/Benchmark.cpp \
     src/ab/util/ConnectionOwner.cpp \
@@ -200,7 +199,6 @@ SOURCES += \
     src/util/RapidjsonHelpers.cpp \
     src/util/Resources.cpp \
     src/util/StreamLink.cpp \
-    src/util/Strings.cpp \
     src/widgets/AccountSwitchWidget.cpp \
     src/widgets/AttachedWindow.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
