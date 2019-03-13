@@ -189,8 +189,16 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                             void operator()(const QString &string,
                                             MessageBuilder &b) const
                             {
-                                b.emplace<TextElement>(
-                                    string, MessageElementFlag::Text);
+                                auto linkString = b.matchLink(string);
+                                if (linkString.isEmpty())
+                                {
+                                    b.emplace<TextElement>(
+                                        string, MessageElementFlag::Text);
+                                }
+                                else
+                                {
+                                    b.addLink(string, linkString);
+                                }
                             }
                         } visitor;
                         boost::apply_visitor(

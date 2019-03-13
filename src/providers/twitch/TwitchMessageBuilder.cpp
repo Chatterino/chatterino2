@@ -6,7 +6,6 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
-#include "providers/LinkResolver.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -512,56 +511,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
     }
     else
     {
-        static QRegularExpression domainRegex(
-            R"(^(?:(?:ftp|http)s?:\/\/)?([^\/]+)(?:\/.*)?$)",
-            QRegularExpression::CaseInsensitiveOption);
-
-        QString lowercaseLinkString;
-        auto match = domainRegex.match(string);
-        if (match.isValid())
-        {
-            lowercaseLinkString = string.mid(0, match.capturedStart(1)) +
-                                  match.captured(1).toLower() +
-                                  string.mid(match.capturedEnd(1));
-        }
-        else
-        {
-            lowercaseLinkString = string;
-        }
-        link = Link(Link::Url, linkString);
-
-        textColor = MessageColor(MessageColor::Link);
-        auto linkMELowercase =
-            this->emplace<TextElement>(lowercaseLinkString,
-                                       MessageElementFlag::LowercaseLink,
-                                       textColor)
-                ->setLink(link);
-        auto linkMEOriginal =
-            this->emplace<TextElement>(string, MessageElementFlag::OriginalLink,
-                                       textColor)
-                ->setLink(link);
-
-        LinkResolver::getLinkInfo(
-            linkString,
-            [weakMessage = this->weakOf(), linkMELowercase, linkMEOriginal,
-             linkString](QString tooltipText, Link originalLink) {
-                auto shared = weakMessage.lock();
-                if (!shared)
-                {
-                    return;
-                }
-                if (!tooltipText.isEmpty())
-                {
-                    linkMELowercase->setTooltip(tooltipText);
-                    linkMEOriginal->setTooltip(tooltipText);
-                }
-                if (originalLink.value != linkString &&
-                    !originalLink.value.isEmpty())
-                {
-                    linkMELowercase->setLink(originalLink)->updateLink();
-                    linkMEOriginal->setLink(originalLink)->updateLink();
-                }
-            });
+        this->addLink(string, linkString);
     }
 
     // if (!linkString.isEmpty()) {

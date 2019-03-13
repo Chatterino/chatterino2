@@ -54,6 +54,7 @@ public:
 
     void append(std::unique_ptr<MessageElement> element);
     QString matchLink(const QString &string);
+    void addLink(const QString &origLink, const QString &matchedLink);
 
     template <typename T, typename... Args>
     T *emplace(Args &&... args)

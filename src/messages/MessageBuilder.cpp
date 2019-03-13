@@ -5,6 +5,7 @@
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/LinkResolver.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
@@ -350,6 +351,59 @@ QString MessageBuilder::matchLink(const QString &string)
     }
 
     return captured;
+}
+
+void MessageBuilder::addLink(const QString &origLink,
+                             const QString &matchedLink)
+{
+    static QRegularExpression domainRegex(
+        R"(^(?:(?:ftp|http)s?:\/\/)?([^\/]+)(?:\/.*)?$)",
+        QRegularExpression::CaseInsensitiveOption);
+
+    QString lowercaseLinkString;
+    auto match = domainRegex.match(origLink);
+    if (match.isValid())
+    {
+        lowercaseLinkString = origLink.mid(0, match.capturedStart(1)) +
+                              match.captured(1).toLower() +
+                              origLink.mid(match.capturedEnd(1));
+    }
+    else
+    {
+        lowercaseLinkString = origLink;
+    }
+    auto linkElement = Link(Link::Url, matchedLink);
+
+    auto textColor = MessageColor(MessageColor::Link);
+    auto linkMELowercase =
+        this->emplace<TextElement>(lowercaseLinkString,
+                                   MessageElementFlag::LowercaseLink, textColor)
+            ->setLink(linkElement);
+    auto linkMEOriginal =
+        this->emplace<TextElement>(origLink, MessageElementFlag::OriginalLink,
+                                   textColor)
+            ->setLink(linkElement);
+
+    LinkResolver::getLinkInfo(matchedLink, [weakMessage = this->weakOf(),
+                                            linkMELowercase, linkMEOriginal,
+                                            matchedLink](QString tooltipText,
+                                                         Link originalLink) {
+        auto shared = weakMessage.lock();
+        if (!shared)
+        {
+            return;
+        }
+        if (!tooltipText.isEmpty())
+        {
+            linkMELowercase->setTooltip(tooltipText);
+            linkMEOriginal->setTooltip(tooltipText);
+        }
+        if (originalLink.value != matchedLink && !originalLink.value.isEmpty())
+        {
+            linkMELowercase->setLink(originalLink)->updateLink();
+            linkMEOriginal->setLink(originalLink)->updateLink();
+        }
+    });
 }
 
 }  // namespace chatterino
