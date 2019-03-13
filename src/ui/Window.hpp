@@ -42,6 +42,7 @@ namespace chatterino::ui
 
     private:
         void initLayout();
+        void initTitleButtons();
         void updateLayout();
         void setLeftVisible(bool);
         void setRightVisible(bool);

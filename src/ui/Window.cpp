@@ -29,7 +29,6 @@ namespace chatterino::ui
     {
         for (QJsonValue tab_val : tabs)
         {
-            qDebug() << tab_val;
             auto tab = new Tab("asdf");
             auto page = new SplitContainer(app);
             notebook.addTab(tab, page);
@@ -90,32 +89,7 @@ namespace chatterino::ui
             [this]() { this->theme_.updateStyle(); });
 
         // titlebar
-        if (this->hasCustomWindowFrame())
-        {
-            // settings
-            this->addTitleBarButton(
-                ab::makeWidget<ab::FlatButton>([&](ab::FlatButton* w) {
-                    w->setPixmap(resources().buttons.settings);
-                    w->setObjectName("title-bar-custom");
-
-                    QObject::connect(w, &ab::FlatButton::leftClicked, this,
-                        &Window::showSettings);
-                }));
-
-            // accounts
-            this->addTitleBarButton(
-                ab::makeWidget<ab::FlatButton>([&](ab::FlatButton* w) {
-                    w->setPixmap(resources().buttons.user);
-                    w->setObjectName("title-bar-avatar");
-
-                    QObject::connect(w, &ab::FlatButton::leftClicked, this,
-                        [=]() { this->showAccounts(w); });
-                }));
-        }
-        else
-        {
-            // TODO: add account button
-        }
+        this->initTitleButtons();
     }
 
     ThemexD& Window::theme()
@@ -198,6 +172,39 @@ namespace chatterino::ui
         this->updateLayout();
     }
 
+    void Window::initTitleButtons()
+    {
+        auto account = ab::makeWidget<ab::FlatButton>([&](ab::FlatButton* w) {
+            w->setPixmap(resources().buttons.user);
+            w->setObjectName("title-bar-avatar");
+
+            QObject::connect(w, &ab::FlatButton::leftClicked, this,
+                [=]() { this->showAccounts(w); });
+        });
+        auto settings = ab::makeWidget<ab::FlatButton>([&](ab::FlatButton* w) {
+            w->setPixmap(resources().buttons.settings);
+            w->setObjectName("title-bar-custom");
+
+            QObject::connect(
+                w, &ab::FlatButton::leftClicked, this, &Window::showSettings);
+        });
+
+        if (this->hasCustomWindowFrame())
+        {
+            this->addTitleBarButton(settings);
+            this->addTitleBarButton(account);
+        }
+        else
+        {
+            assert(this->center_);
+            this->center_->addTabAtStart(account);
+            this->center_->addTabAtStart(settings);
+        }
+
+        assert(account->parent());
+        assert(settings->parent());
+    }
+
     void Window::updateLayout()
     {
         //        if (this->left_)
@@ -205,9 +212,6 @@ namespace chatterino::ui
 
         //        if (this->right_)
         //            this->setRightVisible(this->dragging_);
-
-        // hide the left and right notebook for now
-        auto a = this->left_->regularCount();
 
         this->setLeftVisible(this->left_->regularCount());
         this->setRightVisible(this->right_->regularCount());
@@ -315,7 +319,8 @@ namespace chatterino::ui
         popup->setAttribute(Qt::WA_DeleteOnClose);
         popup->show();
         QPoint p{
-            relativeTo->rect().center().x() - popup->width() / 2,
+            // relativeTo->rect().center().x() - popup->width() / 2,
+            0,
             relativeTo->rect().bottom(),
         };
         popup->move(relativeTo->mapToGlobal(p));

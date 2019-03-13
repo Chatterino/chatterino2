@@ -17,6 +17,16 @@ namespace chatterino
         return this->messages_.size();
     }
 
+    std::vector<MessagePtr>::const_iterator MessageContainer::begin() const
+    {
+        return this->messages_.begin();
+    }
+
+    std::vector<MessagePtr>::const_iterator MessageContainer::end() const
+    {
+        return this->messages_.end();
+    }
+
     void MessageContainer::insert(size_t index, const MessagePtr& item)
     {
         this->messages_.insert(this->messages_.begin() + index, item);

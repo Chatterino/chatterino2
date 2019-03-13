@@ -297,7 +297,7 @@ namespace chatterino
         assertInGuiThread();
 
         if (auto pixmap = this->frames_->first())
-            return pixmap->width() * this->scale_;
+            return int(pixmap->width() * this->scale_);
         else
             return 16;
     }
@@ -307,7 +307,7 @@ namespace chatterino
         assertInGuiThread();
 
         if (auto pixmap = this->frames_->first())
-            return pixmap->height() * this->scale_;
+            return int(pixmap->height() * this->scale_);
         else
             return 16;
     }

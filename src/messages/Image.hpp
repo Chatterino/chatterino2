@@ -55,7 +55,7 @@ namespace chatterino
         const Url& url() const;
         boost::optional<QPixmap> pixmap() const;
         qreal scale() const;
-        bool isEmpty() const;
+        [[deprecated]] bool isEmpty() const;
         int width() const;
         int height() const;
         bool animated() const;

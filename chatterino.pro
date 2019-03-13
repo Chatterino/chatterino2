@@ -181,6 +181,7 @@ SOURCES += \
     src/ui/FlexLayout.Private.cpp \
     src/ui/Line.cpp \
     src/ui/Scrollbar.cpp \
+    src/ui/SearchWindow.cpp \
     src/ui/Split.cpp \
     src/ui/SplitContainer.cpp \
     src/ui/SplitHeader.cpp \
@@ -215,7 +216,6 @@ SOURCES += \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/DebugPopup.cpp \
     src/widgets/helper/EditableModelView.cpp \
-    src/widgets/helper/SearchPopup.cpp \
     src/widgets/helper/SettingsDialogTab.cpp \
     src/widgets/helper/SignalLabel.cpp \
     src/widgets/Label.cpp \
@@ -370,6 +370,7 @@ HEADERS += \
     src/ui/FlexLayout.Private.hpp \
     src/ui/Line.hpp \
     src/ui/Scrollbar.hpp \
+    src/ui/SearchWindow.hpp \
     src/ui/Split.hpp \
     src/ui/SplitContainer.hpp \
     src/ui/SplitHeader.hpp \
@@ -425,7 +426,6 @@ HEADERS += \
     src/widgets/helper/ComboBoxItemDelegate.hpp \
     src/widgets/helper/DebugPopup.hpp \
     src/widgets/helper/EditableModelView.hpp \
-    src/widgets/helper/SearchPopup.hpp \
     src/widgets/helper/SettingsDialogTab.hpp \
     src/widgets/helper/SignalLabel.hpp \
     src/widgets/Label.hpp \

@@ -507,7 +507,7 @@ namespace chatterino::ui
     }
 
     void ChannelView::setContainer(
-        const std::shared_ptr<MessageContainer>& newChannel)
+        const std::shared_ptr<MessageContainer>& container)
     {
         // Clear connections from the last channel
         for (auto&& connection : this->channelConnections_)
@@ -519,33 +519,17 @@ namespace chatterino::ui
         this->clearMessages();
 
         // on message inserted
-        this->channelConnections_.push_back(QObject::connect(newChannel.get(),
+        this->channelConnections_.push_back(QObject::connect(container.get(),
             &MessageContainer::inserted, this, &ChannelView::messagesInserted));
 
         // on message erased
-        this->channelConnections_.push_back(QObject::connect(newChannel.get(),
+        this->channelConnections_.push_back(QObject::connect(container.get(),
             &MessageContainer::erased, this, &ChannelView::messagesErased));
 
-        // TODO: add all current messages
-        // auto snapshot = newChannel->getMessageSnapshot();
+        std::vector elements(container->begin(), container->end());
+        this->messagesInserted({0, elements});
 
-        // for (size_t i = 0; i < snapshot.size(); i++)
-        //{
-        //    MessageLayoutPtr deleted;
-
-        //    auto messageRef = new MessageLayout(snapshot[i]);
-
-        //    if (this->lastMessageHasAlternateBackground_)
-        //    {
-        //        messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
-        //    }
-        //    this->lastMessageHasAlternateBackground_ =
-        //        !this->lastMessageHasAlternateBackground_;
-
-        //    this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted);
-        //}
-
-        this->messages_ = newChannel;
+        this->messages_ = container;
 
         this->queueLayout();
         this->queueUpdate();

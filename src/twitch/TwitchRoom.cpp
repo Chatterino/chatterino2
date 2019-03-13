@@ -3,6 +3,7 @@
 #include "TwitchChannel.hpp"
 #include "ui/ChannelView.hpp"
 #include "ui/Dropdown.hpp"
+#include "ui/SearchWindow.hpp"
 
 #include <QDesktopServices>
 
@@ -104,7 +105,12 @@ namespace chatterino
         // Main menu
         dropdown.addSeperator();
         dropdown.addItem("Popup", []() { assert(false); });
-        dropdown.addItem("Search", []() { assert(false); });
+        dropdown.addItem("Search", [=]() {
+            auto w = new ui::SearchWindow();
+            w->setAttribute(Qt::WA_DeleteOnClose);
+            w->setMessages(this_->messages);
+            w->show();
+        });
 
         dropdown.addSeperator();
         dropdown.addItem("Open in Browser", [this]() {

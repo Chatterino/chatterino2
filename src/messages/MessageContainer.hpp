@@ -29,6 +29,8 @@ namespace chatterino
 
         const MessagePtr& operator[](size_t index) const;
         size_t size() const;
+        std::vector<MessagePtr>::const_iterator begin() const;
+        std::vector<MessagePtr>::const_iterator end() const;
 
         void insert(size_t index, const MessagePtr&);
         void insert(size_t index, const std::vector<MessagePtr>&);

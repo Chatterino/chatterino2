@@ -5,9 +5,9 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
 #include "controllers/highlights/UserHighlightModel.hpp"
-#include "util/Log.hpp"
 #include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/Log.hpp"
 #include "util/StandardItemHelper.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -164,5 +164,4 @@ namespace chatterino
         // ---- misc
         this->disabledUsersChangedTimer_.setSingleShot(true);
     }
-
 }  // namespace chatterino

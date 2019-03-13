@@ -18,5 +18,4 @@ namespace chatterino
     private:
         QTimer disabledUsersChangedTimer_;
     };
-
 }  // namespace chatterino
