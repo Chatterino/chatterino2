@@ -186,6 +186,7 @@ namespace chatterino::ui
                     });
                 }),
             }),
+            ab::stretch(),
         }));
 
         // FOURTF: for some reason this doesn't layout properly in a Row
