@@ -7,7 +7,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
-#include "ui/ChannelView.hpp"
+#include "ui/MessageView.hpp"
 
 #include <QHBoxLayout>
 #include <QShortcut>

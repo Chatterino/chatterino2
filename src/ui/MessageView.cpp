@@ -1,4 +1,4 @@
-#include "ChannelView.hpp"
+#include "ui/MessageView.hpp"
 
 #include "Application.hpp"
 #include "Window.hpp"
@@ -98,7 +98,7 @@ namespace chatterino::ui
         }
 
         // TODO: dependency inject
-        ThemexD& getTheme(ChannelView& self)
+        ThemexD& getTheme(MessageView& self)
         {
             if (auto window = dynamic_cast<Window*>(self.window()))
             {
@@ -114,7 +114,7 @@ namespace chatterino::ui
         }
     }  // namespace
 
-    ChannelView::ChannelView(QWidget* parent)
+    MessageView::MessageView(QWidget* parent)
         : ab::BaseWidget(parent)
     {
         this->setMouseTracking(true);
@@ -152,7 +152,7 @@ namespace chatterino::ui
             }));
 
         // unpaused
-        QObject::connect(&this->pauser, &Pauser::unpaused, this, [this]() {
+        QObject::connect(&this->pauser_, &Pauser::unpaused, this, [this]() {
             this->scrollBar_->offset(this->pauseScrollOffset_);
             this->pauseScrollOffset_ = 0;
 
@@ -162,7 +162,7 @@ namespace chatterino::ui
         this->theme = &getTheme(*this);
     }
 
-    void ChannelView::initializeLayout()
+    void MessageView::initializeLayout()
     {
         // set layout
         this->setLayout(ab::makeLayout<ab::Row>({
@@ -210,7 +210,7 @@ namespace chatterino::ui
         this->scrollBar_->setParent(this);
     }
 
-    void ChannelView::initializeSignals()
+    void MessageView::initializeSignals()
     {
         // this->connections_.push_back(
         //    getApp()->windows->wordFlagsChanged.connect([this] {
@@ -240,7 +240,7 @@ namespace chatterino::ui
             [this]() { this->queueLayout(); });
     }
 
-    void ChannelView::messagesInserted(
+    void MessageView::messagesInserted(
         const MessageContainer::Insertion& change)
     {
         assert(this->layouts_.size() <= change.index);
@@ -262,7 +262,7 @@ namespace chatterino::ui
         this->queueLayout();
     }
 
-    void ChannelView::messagesErased(const MessageContainer::Erasure& erasure)
+    void MessageView::messagesErased(const MessageContainer::Erasure& erasure)
     {
         assert(this->layouts_.size() < erasure.index);
 
@@ -282,7 +282,7 @@ namespace chatterino::ui
         this->queueLayout();
     }
 
-    void ChannelView::queueUpdate()
+    void MessageView::queueUpdate()
     {
         //    if (this->updateTimer.isActive()) {
         //        this->updateQueued = true;
@@ -295,7 +295,7 @@ namespace chatterino::ui
         //    this->updateTimer.start();
     }
 
-    void ChannelView::queueLayout()
+    void MessageView::queueLayout()
     {
         //    if (!this->layoutCooldown->isActive()) {
         this->performLayout();
@@ -306,7 +306,7 @@ namespace chatterino::ui
         //    }
     }
 
-    void ChannelView::performLayout(bool causedByScrollbar)
+    void MessageView::performLayout(bool causedByScrollbar)
     {
         // BenchmarkGuard benchmark("layout");
 
@@ -328,7 +328,7 @@ namespace chatterino::ui
                                           !this->scrollBar_->isAtBottom());
     }
 
-    void ChannelView::layoutVisibleMessages(const LayoutContainerType& messages)
+    void MessageView::layoutVisibleMessages(const LayoutContainerType& messages)
     {
         const auto start = size_t(this->scrollBar_->getCurrentValue());
         const auto layoutWidth = this->layoutWidth();
@@ -356,7 +356,7 @@ namespace chatterino::ui
             this->queueUpdate();
     }
 
-    void ChannelView::updateScrollbar(
+    void MessageView::updateScrollbar(
         const LayoutContainerType& messages, bool causedByScrollbar)
     {
         if (messages.size() == 0)
@@ -416,7 +416,7 @@ namespace chatterino::ui
         }
     }
 
-    void ChannelView::clearMessages()
+    void MessageView::clearMessages()
     {
         // TODO: implement
 
@@ -426,12 +426,12 @@ namespace chatterino::ui
         // this->queueLayout();
     }
 
-    Scrollbar& ChannelView::scrollbar()
+    Scrollbar& MessageView::scrollbar()
     {
         return *this->scrollBar_;
     }
 
-    QString ChannelView::selectedText()
+    QString MessageView::selectedText()
     {
         QString result = "";
 
@@ -459,54 +459,54 @@ namespace chatterino::ui
         return result;
     }
 
-    bool ChannelView::hasSelection()
+    bool MessageView::hasSelection()
     {
         return !this->selector_.selection().isEmpty();
     }
 
-    void ChannelView::clearSelection()
+    void MessageView::clearSelection()
     {
         this->selector_.clear();
 
         queueLayout();
     }
 
-    void ChannelView::setEnableScrollingToBottom(bool value)
+    void MessageView::setEnableScrollingToBottom(bool value)
     {
         this->enableScrollingToBottom_ = value;
     }
 
-    bool ChannelView::enableScrollingToBottom() const
+    bool MessageView::enableScrollingToBottom() const
     {
         return this->enableScrollingToBottom_;
     }
 
-    void ChannelView::setOverrideFlags(std::optional<MessageElementFlags> value)
+    void MessageView::setOverrideFlags(std::optional<MessageElementFlags> value)
     {
         this->overrideFlags_ = value;
     }
 
-    const std::optional<MessageElementFlags>& ChannelView::overrideFlags() const
+    const std::optional<MessageElementFlags>& MessageView::overrideFlags() const
     {
         return this->overrideFlags_;
     }
 
-    bool ChannelView::pausable() const
+    bool MessageView::pausable() const
     {
-        return this->pauser.pausable();
+        return this->pauser_.pausable();
     }
 
-    void ChannelView::setPausable(bool val)
+    void MessageView::setPausable(bool val)
     {
-        this->pauser.setPausable(val);
+        this->pauser_.setPausable(val);
     }
 
-    std::shared_ptr<MessageContainer> ChannelView::container()
+    std::shared_ptr<MessageContainer> MessageView::container()
     {
         return this->messages_;
     }
 
-    void ChannelView::setContainer(
+    void MessageView::setContainer(
         const std::shared_ptr<MessageContainer>& container)
     {
         // Clear connections from the last channel
@@ -520,11 +520,11 @@ namespace chatterino::ui
 
         // on message inserted
         this->channelConnections_.push_back(QObject::connect(container.get(),
-            &MessageContainer::inserted, this, &ChannelView::messagesInserted));
+            &MessageContainer::inserted, this, &MessageView::messagesInserted));
 
         // on message erased
         this->channelConnections_.push_back(QObject::connect(container.get(),
-            &MessageContainer::erased, this, &ChannelView::messagesErased));
+            &MessageContainer::erased, this, &MessageView::messagesErased));
 
         std::vector elements(container->begin(), container->end());
         this->messagesInserted({0, elements});
@@ -535,7 +535,7 @@ namespace chatterino::ui
         this->queueUpdate();
     }
 
-    void ChannelView::updateLastReadMessage()
+    void MessageView::updateLastReadMessage()
     {
         const auto& items = this->layouts_;
 
@@ -564,7 +564,7 @@ namespace chatterino::ui
     //        emit this->selectionChanged();
     //    }
 
-    MessageElementFlags ChannelView::flags() const
+    MessageElementFlags MessageView::flags() const
     {
         if (this->overrideFlags_)
         {
@@ -591,7 +591,7 @@ namespace chatterino::ui
         }
     }
 
-    void ChannelView::resizeEvent(QResizeEvent*)
+    void MessageView::resizeEvent(QResizeEvent*)
     {
         this->queueLayout();
 
@@ -600,7 +600,7 @@ namespace chatterino::ui
             0, this->scrollBar_->width(), this->height());
     }
 
-    void ChannelView::paintEvent(QPaintEvent* /*event*/)
+    void MessageView::paintEvent(QPaintEvent* /*event*/)
     {
         //    BenchmarkGuard benchmark("paint");
 
@@ -612,7 +612,7 @@ namespace chatterino::ui
         this->drawMessages(painter);
 
         // draw paused sign
-        if (this->pauser.paused())
+        if (this->pauser_.paused())
         {
             auto a = this->scale() * 16;
             auto brush = QBrush(QColor(127, 127, 127, 63));
@@ -624,7 +624,7 @@ namespace chatterino::ui
 
     // if overlays is false then it draws the message, if true then it draws
     // things such as the grey overlay when a message is disabled
-    void ChannelView::drawMessages(QPainter& painter)
+    void MessageView::drawMessages(QPainter& painter)
     {
         auto&& layouts = this->layouts_;
 
@@ -701,7 +701,7 @@ namespace chatterino::ui
         }
     }
 
-    void ChannelView::wheelEvent(QWheelEvent* event)
+    void MessageView::wheelEvent(QWheelEvent* event)
     {
         if (event->orientation() != Qt::Vertical)
             return;
@@ -796,18 +796,18 @@ namespace chatterino::ui
         }
     }
 
-    void ChannelView::enterEvent(QEvent*)
+    void MessageView::enterEvent(QEvent*)
     {
     }
 
-    void ChannelView::leaveEvent(QEvent*)
+    void MessageView::leaveEvent(QEvent*)
     {
-        this->pauser.unpause(PauseReason::Mouse);
+        this->pauser_.unpause(PauseReason::Mouse);
 
         this->queueLayout();
     }
 
-    void ChannelView::mouseMoveEvent(QMouseEvent* event)
+    void MessageView::mouseMoveEvent(QMouseEvent* event)
     {
         if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier))
         {
@@ -820,7 +820,7 @@ namespace chatterino::ui
         /// Pause on hover
         if (true)  // getSettings()->pauseChatOnHover.getValue())
         {
-            this->pauser.pause(PauseReason::Mouse, 500);
+            this->pauser_.pause(PauseReason::Mouse, 500);
         }
 
         auto tooltipWidget = Tooltip::instance();
@@ -913,7 +913,7 @@ namespace chatterino::ui
             this->setCursor(Qt::ArrowCursor);
     }
 
-    void ChannelView::mousePressEvent(QMouseEvent* event)
+    void MessageView::mousePressEvent(QMouseEvent* event)
     {
         ab::BaseWidget::mousePressEvent(event);
 
@@ -925,7 +925,7 @@ namespace chatterino::ui
             this->pressedBelowMessages(event);
     }
 
-    void ChannelView::messagePressed(MessageAt& msg, QMouseEvent* event)
+    void MessageView::messagePressed(MessageAt& msg, QMouseEvent* event)
     {
         auto& [layout, relativePos, messageIndex] = msg;
 
@@ -971,7 +971,7 @@ namespace chatterino::ui
         this->update();
     }
 
-    void ChannelView::pressedBelowMessages(QMouseEvent* event)
+    void MessageView::pressedBelowMessages(QMouseEvent* event)
     {
         this->setCursor(Qt::ArrowCursor);
 
@@ -992,7 +992,7 @@ namespace chatterino::ui
         }
     }
 
-    void ChannelView::mouseReleaseEvent(QMouseEvent* event)
+    void MessageView::mouseReleaseEvent(QMouseEvent* event)
     {
         ab::BaseWidget::mouseReleaseEvent(event);
 
@@ -1024,7 +1024,7 @@ namespace chatterino::ui
         this->queueLayout();
     }
 
-    void ChannelView::messageClicked(MessageAt& msg, QMouseEvent* event)
+    void MessageView::messageClicked(MessageAt& msg, QMouseEvent* event)
     {
         auto& [layout, relativePos, index] = msg;
 
@@ -1048,7 +1048,7 @@ namespace chatterino::ui
         }
     }
 
-    void ChannelView::handleMouseClick(QMouseEvent* event,
+    void MessageView::handleMouseClick(QMouseEvent* event,
         const MessageLayoutElement* hoveredElement, MessageLayout* layout)
     {
         if (event->button() == Qt::LeftButton)
@@ -1099,7 +1099,7 @@ namespace chatterino::ui
     }
 
     // TODO: move to provider
-    void ChannelView::addContextMenuItems(
+    void MessageView::addContextMenuItems(
         const MessageLayoutElement* hoveredElement, MessageLayout* layout)
     {
         const auto& creator = hoveredElement->getCreator();
@@ -1213,7 +1213,7 @@ namespace chatterino::ui
         return;
     }
 
-    void ChannelView::mouseDoubleClickEvent(QMouseEvent* event)
+    void MessageView::mouseDoubleClickEvent(QMouseEvent* event)
     {
         ab::BaseWidget::mouseDoubleClickEvent(event);
 
@@ -1221,7 +1221,7 @@ namespace chatterino::ui
             messageDoubleClicked(msg.value(), event);
     }
 
-    void ChannelView::messageDoubleClicked(MessageAt& msg, QMouseEvent* event)
+    void MessageView::messageDoubleClicked(MessageAt& msg, QMouseEvent* event)
     {
         auto& [layout, relativePos, index] = msg;
 
@@ -1251,7 +1251,7 @@ namespace chatterino::ui
         }
     }
 
-    void ChannelView::hideEvent(QHideEvent*)
+    void MessageView::hideEvent(QHideEvent*)
     {
         for (auto&& layout : this->messagesOnScreen_)
             layout->deleteBuffer();
@@ -1260,7 +1260,7 @@ namespace chatterino::ui
     }
 
     // TODO: move to provider
-    void ChannelView::showUserInfoPopup(const QString& userName)
+    void MessageView::showUserInfoPopup(const QString& userName)
     {
         // TODO: move to proper place
         // auto* userPopup = new UserInfoPopup;
@@ -1272,7 +1272,7 @@ namespace chatterino::ui
     }
 
     // TODO: move to provider
-    void ChannelView::handleLinkClick(
+    void MessageView::handleLinkClick(
         QMouseEvent* event, const Link& link, MessageLayout* layout)
     {
         if (event->button() != Qt::LeftButton)
@@ -1308,7 +1308,7 @@ namespace chatterino::ui
         }
     }
 
-    std::optional<ChannelView::MessageAt> ChannelView::messageAt(QPoint p)
+    std::optional<MessageView::MessageAt> MessageView::messageAt(QPoint p)
     {
         const auto& items = this->layouts_;
         const auto start = size_t(this->scrollBar_->getCurrentValue());
@@ -1332,7 +1332,7 @@ namespace chatterino::ui
         return {};
     }
 
-    int ChannelView::layoutWidth() const
+    int MessageView::layoutWidth() const
     {
         if (this->scrollBar_->isVisible())
             return int(this->width() - scrollbarPadding * this->scale());
@@ -1340,7 +1340,7 @@ namespace chatterino::ui
             return this->width();
     }
 
-    void ChannelView::selectWholeMessage(
+    void MessageView::selectWholeMessage(
         MessageLayout& layout, int& messageIndex)
     {
         SelectionItem msgStart(
@@ -1351,7 +1351,7 @@ namespace chatterino::ui
         this->selector_.moveRegular(msgEnd);
     }
 
-    std::pair<int, int> ChannelView::wordBounds(MessageLayout* layout,
+    std::pair<int, int> MessageView::wordBounds(MessageLayout* layout,
         const MessageLayoutElement* element, const QPoint& relativePos)
     {
         const int mouseInWordIndex = element->getMouseOverIndex(relativePos);

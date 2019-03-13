@@ -1,4 +1,4 @@
-#include "ui/ChannelView.Selector.hpp"
+#include "ui/MessageView.Selector.hpp"
 
 namespace chatterino::ui
 {

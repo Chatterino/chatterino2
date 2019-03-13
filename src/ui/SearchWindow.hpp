@@ -13,7 +13,7 @@ namespace chatterino
 
 namespace chatterino::ui
 {
-    class ChannelView;
+    class MessageView;
 
     class SearchWindow : public ab::BaseWindow
     {
@@ -27,7 +27,7 @@ namespace chatterino::ui
         void performSearch();
 
         QLineEdit* searchInput_{};
-        ChannelView* messageView_{};
+        MessageView* messageView_{};
         std::shared_ptr<MessageContainer> messages_;
     };
 }  // namespace chatterino::ui

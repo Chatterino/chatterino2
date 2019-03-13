@@ -7,7 +7,7 @@
 #include "ab/Row.hpp"
 #include "ab/util/MakeWidget.hpp"
 #include "messages/Message.hpp"
-#include "ui/ChannelView.hpp"
+#include "ui/MessageView.hpp"
 
 namespace chatterino::ui
 {
@@ -35,7 +35,7 @@ namespace chatterino::ui
                 }),
             }),
             // Messageview
-            ab::makeWidget<ChannelView>(
+            ab::makeWidget<MessageView>(
                 [&](auto w) { this->messageView_ = w; }),
         }));
     }

@@ -1,4 +1,4 @@
-#include "ui/ChannelView.Pauser.hpp"
+#include "ui/MessageView.Pauser.hpp"
 
 namespace chatterino::ui
 {

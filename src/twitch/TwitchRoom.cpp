@@ -1,8 +1,8 @@
 #include "twitch/TwitchRoom.hpp"
 
 #include "TwitchChannel.hpp"
-#include "ui/ChannelView.hpp"
 #include "ui/Dropdown.hpp"
+#include "ui/MessageView.hpp"
 #include "ui/SearchWindow.hpp"
 
 #include <QDesktopServices>
@@ -93,7 +93,7 @@ namespace chatterino
 
     QWidget* TwitchRoom::createView(QWidget* parent) const
     {
-        auto view = new ui::ChannelView(parent);
+        auto view = new ui::MessageView(parent);
         view->setContainer(this_->messages);
         return view;
     }
@@ -149,7 +149,7 @@ namespace chatterino
 
     QWidget* TwitchMentionsRoom::createView(QWidget* parent) const
     {
-        auto view = new ui::ChannelView(parent);
+        auto view = new ui::MessageView(parent);
         view->setContainer(this->messages_);
         return view;
     }
@@ -173,7 +173,7 @@ namespace chatterino
 
     QWidget* TwitchWhispersRoom::createView(QWidget* parent) const
     {
-        auto view = new ui::ChannelView(parent);
+        auto view = new ui::MessageView(parent);
         view->setContainer(this->messages_);
         return view;
     }

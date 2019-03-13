@@ -172,14 +172,14 @@ SOURCES += \
     src/twitch/TwitchProvider.cpp \
     src/twitch/TwitchRoom.cpp \
     src/ui/AccountSwitchPopup.cpp \
-    src/ui/ChannelView.cpp \
-    src/ui/ChannelView.Pauser.cpp \
-    src/ui/ChannelView.Selector.cpp \
     src/ui/Dropdown.cpp \
     src/ui/EmotePreview.cpp \
     src/ui/FlexLayout.cpp \
     src/ui/FlexLayout.Private.cpp \
     src/ui/Line.cpp \
+    src/ui/MessageView.Pauser.cpp \
+    src/ui/MessageView.Selector.cpp \
+    src/ui/MessageView.cpp \
     src/ui/Scrollbar.cpp \
     src/ui/SearchWindow.cpp \
     src/ui/Split.cpp \
@@ -361,14 +361,14 @@ HEADERS += \
     src/twitch/TwitchProvider.hpp \
     src/twitch/TwitchRoom.hpp \
     src/ui/AccountSwitchPopup.hpp \
-    src/ui/ChannelView.hpp \
-    src/ui/ChannelView.Pauser.hpp \
-    src/ui/ChannelView.Selector.hpp \
     src/ui/Dropdown.hpp \
     src/ui/EmotePreview.hpp \
     src/ui/FlexLayout.hpp \
     src/ui/FlexLayout.Private.hpp \
     src/ui/Line.hpp \
+    src/ui/MessageView.Pauser.hpp \
+    src/ui/MessageView.Selector.hpp \
+    src/ui/MessageView.hpp \
     src/ui/Scrollbar.hpp \
     src/ui/SearchWindow.hpp \
     src/ui/Split.hpp \

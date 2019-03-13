@@ -1,13 +1,13 @@
 #pragma once
 
-#include "ChannelView.Pauser.hpp"
+#include "MessageView.Pauser.hpp"
 #include "Room.hpp"
 #include "ab/BaseWidget.hpp"
 #include "ab/util/FlagsEnum.hpp"
 #include "messages/MessageContainer.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
-#include "ui/ChannelView.Selector.hpp"
+#include "ui/MessageView.Selector.hpp"
 #include "ui/UiFwd.hpp"
 
 #include <QPaintEvent>
@@ -47,14 +47,14 @@ namespace chatterino::ui
     class Scrollbar;
     class EffectLabel;
 
-    class ChannelView final : public ab::BaseWidget
+    class MessageView final : public ab::BaseWidget
     {
         Q_OBJECT
 
         using LayoutContainerType = std::deque<std::unique_ptr<MessageLayout>>;
 
     public:
-        explicit ChannelView(QWidget* parent = nullptr);
+        explicit MessageView(QWidget* parent = nullptr);
 
         [[nodiscard]] Scrollbar& scrollbar();
 
@@ -192,7 +192,7 @@ namespace chatterino::ui
 
         ThemexD* theme{};
 
-        Pauser pauser;  // TODO: rename to pauser_
+        Pauser pauser_;
         Selector selector_;
 
         static constexpr int leftPadding = 8;       // TODO: remove

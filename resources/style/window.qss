@@ -207,7 +207,7 @@ ab--Space {
 	max-height: 8px;
 }
 
-chatterino--ui--ChannelView {
+chatterino--ui--MessageView {
 	background: #191919;
 }
 
