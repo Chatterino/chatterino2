@@ -15,6 +15,7 @@
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "singletons/Settings.hpp"
 #include "ui/Scrollbar.hpp"
 #include "ui/Tooltip.hpp"
 #include "util/DistanceBetweenPoints.hpp"
@@ -160,6 +161,10 @@ namespace chatterino::ui
         });
 
         this->theme = &getTheme(*this);
+
+        // Settings
+        // getSettings()->enableSmoothScrolling.connect(
+        //    [=](auto&& val, auto&&) { this->smoothScrolling_ = val; });
     }
 
     void MessageView::initializeLayout()
@@ -176,14 +181,13 @@ namespace chatterino::ui
 
                     this->goToBottom_ = w;
                     w->setChild(label);
-                    QObject::connect(w, &ab::FlatButton::leftClicked, this, [] {
-                        QTimer::singleShot(180, [=] {
-                            // this->scrollBar_->scrollToBottom(
-                            //    getSettings()
-                            // ->enableSmoothScrollingNewMessages
-                            //        .getValue());
+                    QObject::connect(
+                        w, &ab::FlatButton::leftClicked, this, [=] {
+                            QTimer::singleShot(180, [=] {
+                                this->scrollBar_->scrollToBottom(
+                                    this->smoothScrolling_);
+                            });
                         });
-                    });
                 }),
             }),
             ab::stretch(),

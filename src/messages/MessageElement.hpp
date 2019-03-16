@@ -159,9 +159,6 @@ namespace chatterino
             MessageElementFlags flags) override;
 
         static EmptyElement& instance();
-
-    private:
-        ImagePtr image_;
     };
 
     // contains a simple image

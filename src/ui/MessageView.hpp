@@ -190,6 +190,8 @@ namespace chatterino::ui
         std::vector<QMetaObject::Connection> channelConnections_;
         std::unordered_set<MessageLayout*> messagesOnScreen_;
 
+        bool smoothScrolling_{};
+
         ThemexD* theme{};
 
         Pauser pauser_;

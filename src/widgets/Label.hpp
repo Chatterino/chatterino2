@@ -7,12 +7,12 @@
 
 namespace chatterino
 {
-    class Label : public ab::BaseWidget
+    class[[deprecated]] Label : public ab::BaseWidget
     {
     public:
         explicit Label(
             QString text = QString(), FontStyle style = FontStyle::UiMedium);
-        explicit Label(BaseWidget* parent, QString text = QString(),
+        explicit Label(BaseWidget * parent, QString text = QString(),
             FontStyle style = FontStyle::UiMedium);
 
         const QString& getText() const;

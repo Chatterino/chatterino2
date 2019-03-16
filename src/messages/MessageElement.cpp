@@ -75,8 +75,8 @@ namespace chatterino
     {
     }
 
-    void EmptyElement::addToContainer(ThemexD& theme,
-        MessageLayoutContainer& container, MessageElementFlags flags)
+    void EmptyElement::addToContainer(
+        ThemexD&, MessageLayoutContainer&, MessageElementFlags)
     {
     }
 
@@ -94,8 +94,8 @@ namespace chatterino
         //    this->setTooltip(image->getTooltip());
     }
 
-    void ImageElement::addToContainer(ThemexD& theme,
-        MessageLayoutContainer& container, MessageElementFlags flags)
+    void ImageElement::addToContainer(
+        ThemexD&, MessageLayoutContainer& container, MessageElementFlags flags)
     {
         if (flags.hasAny(this->getFlags()))
         {
@@ -124,8 +124,8 @@ namespace chatterino
         return this->emote_;
     }
 
-    void EmoteElement::addToContainer(ThemexD& theme,
-        MessageLayoutContainer& container, MessageElementFlags flags)
+    void EmoteElement::addToContainer(
+        ThemexD&, MessageLayoutContainer& container, MessageElementFlags)
     {
         // if (flags.hasAny(this->getFlags()))
         {

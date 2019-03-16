@@ -16,5 +16,4 @@ namespace chatterino
     private:
         void refreshSelection();
     };
-
 }  // namespace chatterino
