@@ -527,7 +527,7 @@ namespace chatterino::ui
         this->channelConnections_.push_back(QObject::connect(container.get(),
             &MessageContainer::erased, this, &MessageView::messagesErased));
 
-        std::vector elements(container->begin(), container->end());
+        std::vector<MessagePtr> elements(container->begin(), container->end());
         this->messagesInserted({0, elements});
 
         this->messages_ = container;

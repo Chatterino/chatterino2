@@ -317,7 +317,7 @@ namespace ab
     {
         // TODO: check on linux/mac
 #ifndef Q_OS_WIN
-        if (this->flags_ & FramelessDraggable)
+        if (this->flags_.has(FramelessDraggable))
         {
             this->movingRelativePos = event->localPos();
             if (auto widget =
@@ -353,7 +353,7 @@ namespace ab
     void BaseWindow::mouseReleaseEvent(QMouseEvent* event)
     {
 #ifndef Q_OS_WIN
-        if (this->flags_ & FramelessDraggable)
+        if (this->flags_.has(FramelessDraggable))
         {
             if (this->moving)
             {
@@ -369,7 +369,7 @@ namespace ab
     void BaseWindow::mouseMoveEvent(QMouseEvent* event)
     {
 #ifndef Q_OS_WIN
-        if (this->flags_ & FramelessDraggable)
+        if (this->flags_.has(FramelessDraggable))
         {
             if (this->moving)
             {
