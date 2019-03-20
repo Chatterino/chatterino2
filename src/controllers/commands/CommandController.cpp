@@ -200,6 +200,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             }
 
             b->flags.set(MessageFlag::DoNotTriggerNotification);
+            b->flags.set(MessageFlag::Whisper);
             auto messagexD = b.release();
 
             app->twitch.server->whispersChannel->addMessage(messagexD);

@@ -179,7 +179,8 @@ void Channel::disableAllMessages()
     for (int i = 0; i < snapshotLength; i++)
     {
         auto &message = snapshot[i];
-        if (message->flags.hasAny({MessageFlag::System, MessageFlag::Timeout}))
+        if (message->flags.hasAny({MessageFlag::System, MessageFlag::Timeout,
+                                   MessageFlag::Whisper}))
         {
             continue;
         }

@@ -25,7 +25,7 @@ using ChannelPtr = std::shared_ptr<Channel>;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
-enum class MessageFlag : uint16_t;
+enum class MessageFlag : uint32_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 class MessageLayout;

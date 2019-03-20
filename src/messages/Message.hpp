@@ -12,7 +12,7 @@
 namespace chatterino {
 class MessageElement;
 
-enum class MessageFlag : uint16_t {
+enum class MessageFlag : uint32_t {
     None = 0,
     System = (1 << 0),
     Timeout = (1 << 1),
@@ -30,6 +30,7 @@ enum class MessageFlag : uint16_t {
     DoNotLog = (1 << 13),
     AutoMod = (1 << 14),
     RecentMessage = (1 << 15),
+    Whisper = (1 << 16)
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
