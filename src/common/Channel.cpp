@@ -154,8 +154,9 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
     for (int i = 0; i < snapshotLength; i++)
     {
         auto &s = snapshot[i];
-        if (s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout}) &&
-            s->loginName == message->timeoutUser)
+        if (s->loginName == message->timeoutUser &&
+            s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout,
+                              MessageFlag::Whisper}))
         {
             // FOURTF: disabled for now
             // PAJLADA: Shitty solution described in Message.hpp
