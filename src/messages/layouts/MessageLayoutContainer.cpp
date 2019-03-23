@@ -165,7 +165,8 @@ void MessageLayoutContainer::breakLine()
         //        {
         if (element->getRect().height() < this->textLineHeight_)
         {
-            //yExtra -= (this->textLineHeight_ - element->getRect().height()) / 2;
+            // yExtra -= (this->textLineHeight_ - element->getRect().height()) /
+            // 2;
         }
 
         element->setPosition(
