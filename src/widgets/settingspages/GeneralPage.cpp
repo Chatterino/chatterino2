@@ -190,6 +190,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Show input when empty", s.showEmptyInput);
     layout.addCheckbox("Show input message length", s.showMessageLength);
+    layout.addCheckbox("Hide preferences button (ctrl+p to show)", s.hidePreferencesButton);
+    layout.addCheckbox("Hide user button", s.hideUserButton);
 
     layout.addTitle("Messages");
     layout.addCheckbox("Timestamps", s.showTimestamps);
