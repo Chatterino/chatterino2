@@ -58,7 +58,7 @@ namespace {
     }
     std::pair<Outcome, UsernameSet> parseChatters(const QJsonObject &jsonRoot)
     {
-        static QStringList categories = {"moderators", "staff", "admins",
+        static QStringList categories = {"broadcaster", "vips", "moderators", "staff", "admins",
                                          "global_mods", "viewers"};
 
         auto usernames = UsernameSet();
