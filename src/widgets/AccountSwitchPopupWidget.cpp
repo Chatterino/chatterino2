@@ -14,6 +14,9 @@ AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget *parent)
     : QWidget(parent)
 {
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+#ifdef Q_OS_LINUX
+    this->setWindowFlag(Qt::Popup);
+#endif
 
     this->setContentsMargins(0, 0, 0, 0);
 
