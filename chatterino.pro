@@ -206,7 +206,49 @@ SOURCES += \
     src/widgets/splits/ClosedSplits.cpp \
     src/providers/ffz/FfzModBadge.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
-    src/providers/twitch/ChatroomChannel.cpp
+    src/providers/twitch/ChatroomChannel.cpp \
+    src/controllers/accounts/Account.cpp \
+    src/controllers/accounts/AccountController.cpp \
+    src/controllers/accounts/AccountModel.cpp \
+    src/controllers/commands/Command.cpp \
+    src/controllers/commands/CommandController.cpp \
+    src/controllers/commands/CommandModel.cpp \
+    src/controllers/highlights/HighlightBlacklistModel.cpp \
+    src/controllers/highlights/HighlightController.cpp \
+    src/controllers/highlights/HighlightModel.cpp \
+    src/controllers/highlights/UserHighlightModel.cpp \
+    src/controllers/ignores/IgnoreController.cpp \
+    src/controllers/ignores/IgnoreModel.cpp \
+    src/controllers/moderationactions/ModerationAction.cpp \
+    src/controllers/moderationactions/ModerationActionModel.cpp \
+    src/controllers/moderationactions/ModerationActions.cpp \
+    src/controllers/notifications/NotificationController.cpp \
+    src/controllers/notifications/NotificationModel.cpp \
+    src/controllers/taggedusers/TaggedUser.cpp \
+    src/controllers/taggedusers/TaggedUsersController.cpp \
+    src/controllers/taggedusers/TaggedUsersModel.cpp \
+    src/controllers/accounts/Account.cpp \
+    src/controllers/accounts/AccountController.cpp \
+    src/controllers/accounts/AccountModel.cpp \
+    src/controllers/commands/Command.cpp \
+    src/controllers/commands/CommandController.cpp \
+    src/controllers/commands/CommandModel.cpp \
+    src/controllers/highlights/HighlightBlacklistModel.cpp \
+    src/controllers/highlights/HighlightController.cpp \
+    src/controllers/highlights/HighlightModel.cpp \
+    src/controllers/highlights/UserHighlightModel.cpp \
+    src/controllers/ignores/IgnoreController.cpp \
+    src/controllers/ignores/IgnoreModel.cpp \
+    src/controllers/moderationactions/ModerationAction.cpp \
+    src/controllers/moderationactions/ModerationActionModel.cpp \
+    src/controllers/moderationactions/ModerationActions.cpp \
+    src/controllers/notifications/NotificationController.cpp \
+    src/controllers/notifications/NotificationModel.cpp \
+    src/controllers/pings/PingController.cpp \
+    src/controllers/taggedusers/TaggedUser.cpp \
+    src/controllers/taggedusers/TaggedUsersController.cpp \
+    src/controllers/taggedusers/TaggedUsersModel.cpp \
+    src/controllers/pings/PingModel.cpp
 
 HEADERS  += \
     src/Application.hpp \
@@ -387,7 +429,55 @@ HEADERS  += \
     src/providers/ffz/FfzModBadge.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
     src/messages/HistoricMessageAppearance.hpp \
-    src/providers/twitch/ChatroomChannel.hpp
+    src/providers/twitch/ChatroomChannel.hpp \
+    src/controllers/accounts/Account.hpp \
+    src/controllers/accounts/AccountController.hpp \
+    src/controllers/accounts/AccountModel.hpp \
+    src/controllers/commands/Command.hpp \
+    src/controllers/commands/CommandController.hpp \
+    src/controllers/commands/CommandModel.hpp \
+    src/controllers/highlights/HighlightBlacklistModel.hpp \
+    src/controllers/highlights/HighlightBlacklistUser.hpp \
+    src/controllers/highlights/HighlightController.hpp \
+    src/controllers/highlights/HighlightModel.hpp \
+    src/controllers/highlights/HighlightPhrase.hpp \
+    src/controllers/highlights/UserHighlightModel.hpp \
+    src/controllers/ignores/IgnoreController.hpp \
+    src/controllers/ignores/IgnoreModel.hpp \
+    src/controllers/ignores/IgnorePhrase.hpp \
+    src/controllers/moderationactions/ModerationAction.hpp \
+    src/controllers/moderationactions/ModerationActionModel.hpp \
+    src/controllers/moderationactions/ModerationActions.hpp \
+    src/controllers/notifications/NotificationController.hpp \
+    src/controllers/notifications/NotificationModel.hpp \
+    src/controllers/taggedusers/TaggedUser.hpp \
+    src/controllers/taggedusers/TaggedUsersController.hpp \
+    src/controllers/taggedusers/TaggedUsersModel.hpp \
+    src/controllers/accounts/Account.hpp \
+    src/controllers/accounts/AccountController.hpp \
+    src/controllers/accounts/AccountModel.hpp \
+    src/controllers/commands/Command.hpp \
+    src/controllers/commands/CommandController.hpp \
+    src/controllers/commands/CommandModel.hpp \
+    src/controllers/highlights/HighlightBlacklistModel.hpp \
+    src/controllers/highlights/HighlightBlacklistUser.hpp \
+    src/controllers/highlights/HighlightController.hpp \
+    src/controllers/highlights/HighlightModel.hpp \
+    src/controllers/highlights/HighlightPhrase.hpp \
+    src/controllers/highlights/UserHighlightModel.hpp \
+    src/controllers/ignores/IgnoreController.hpp \
+    src/controllers/ignores/IgnoreModel.hpp \
+    src/controllers/ignores/IgnorePhrase.hpp \
+    src/controllers/moderationactions/ModerationAction.hpp \
+    src/controllers/moderationactions/ModerationActionModel.hpp \
+    src/controllers/moderationactions/ModerationActions.hpp \
+    src/controllers/notifications/NotificationController.hpp \
+    src/controllers/notifications/NotificationModel.hpp \
+    src/controllers/pings/PingController.hpp \
+    src/controllers/taggedusers/TaggedUser.hpp \
+    src/controllers/taggedusers/TaggedUsersController.hpp \
+    src/controllers/taggedusers/TaggedUsersModel.hpp \
+    src/controllers/pings/PingModel.hpp
 
 RESOURCES += \
     resources/resources.qrc \

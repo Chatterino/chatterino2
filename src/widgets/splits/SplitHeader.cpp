@@ -4,6 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/pings/PingController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Resources.hpp"
@@ -296,6 +297,23 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     });
 
     moreMenu->addAction(action);
+
+    {
+        auto action = new QAction(this);
+        action->setText("Mute pings");
+        action->setCheckable(true);
+
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
+            action->setChecked(getApp()->pings->isMuted(
+                this->split_->getChannel()->getName()));
+        });
+        action->connect(action, &QAction::triggered, this, [this]() {
+            getApp()->pings->toggleMuteChannel(
+                this->split_->getChannel()->getName());
+        });
+
+        moreMenu->addAction(action);
+    }
 
     moreMenu->addSeparator();
     moreMenu->addAction("Reconnect", this, SLOT(reconnect()));
