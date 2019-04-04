@@ -577,11 +577,9 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 void TwitchChannel::loadRecentMessages()
 {
     static QString genericURL =
-        "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" +
-        getDefaultClientID();
+        "https://recent-messages.robotty.de/v1/recent-messages/%1";
 
-    NetworkRequest request(genericURL.arg(this->roomId()));
-    request.makeAuthorizedV5(getDefaultClientID());
+    NetworkRequest request(genericURL.arg(this->getName()));
     request.setCaller(QThread::currentThread());
     // can't be concurrent right now due to SignalVector
     //    request.setExecuteConcurrently(true);
