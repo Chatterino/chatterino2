@@ -95,7 +95,7 @@ namespace ab
 
     qreal FlatButton::getCurrentDimAmount() const
     {
-        return this->dimPixmap_ && !this->mouseOver_ ? 0.7 : 1;
+        return this->dimPixmap_ && !this->mouseOver_ ? 0.5 : 1;
     }
 
     void FlatButton::setMenu(std::unique_ptr<QMenu> menu)

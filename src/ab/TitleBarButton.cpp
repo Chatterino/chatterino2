@@ -26,7 +26,6 @@ namespace ab
 
         this->paint(painter);
 
-        painter.setOpacity(this->getCurrentDimAmount());
         painter.setRenderHint(QPainter::Antialiasing, false);
 
         const auto color = this->palette().text().color();

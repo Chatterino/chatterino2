@@ -20,6 +20,8 @@ namespace chatterino::ui
                 this->label_->setAlignment(Qt::AlignCenter);
             }),
             ab::makeWidget<ab::FlatButton>([&](ab::FlatButton* x) {
+                x->setDim(true);
+
                 // TODO: add dark version
                 x->setPixmap(resources().buttons.menuLight);
                 x->setRipple(false);

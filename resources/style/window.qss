@@ -89,7 +89,7 @@ ab--TitleBarButton::active {
 }
 
 ab--BasicTab {
-	background: #252525;
+        background: #252525;
 	border-top: 1px solid #888;
 	color: white;
 	qproperty-ripple: 0;
@@ -114,6 +114,11 @@ ab--NotebookButton {
 
 ab--BasicTab>QLabel {
 	margin: 0 2px;
+        color: #aaa;
+}
+
+ab--BasicTab[selected=true]>QLabel {
+        color: #fff;
 }
 
 ab--BasicTab[selected=true] {
