@@ -41,6 +41,8 @@ public:
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
     BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
+    BoolSetting removeModerated = {"/appearance/messages/removeModerated",
+                                   false};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};

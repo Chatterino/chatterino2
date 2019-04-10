@@ -210,6 +210,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Alternate background color", s.alternateMessages);
     // layout.addCheckbox("Mark last message you read");
     // layout.addDropdown("Last read message style", {"Default"});
+    layout.addCheckbox("Remove moderated messages", s.removeModerated);
 
     layout.addTitle("Emotes");
     layout.addDropdown<float>(
