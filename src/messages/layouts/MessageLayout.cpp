@@ -163,6 +163,10 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                           Selection &selection, bool isLastReadMessage,
                           bool isWindowFocused)
 {
+    if (getSettings()->removeModerated &&
+        this->message_->flags.has(MessageFlag::Disabled))
+        return;
+
     auto app = getApp();
     QPixmap *pixmap = this->buffer_.get();
 
