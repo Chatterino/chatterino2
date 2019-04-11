@@ -64,9 +64,12 @@ deploy:
   tag: nightly-win
   release: nightly-win
   description: 'nightly v$(appveyor_build_version) built $(APPVEYOR_REPO_COMMIT_TIMESTAMP)\nLast change: $(APPVEYOR_REPO_COMMIT_MESSAGE) \n$(APPVEYOR_REPO_COMMIT_MESSAGE_EXTENDED)'
+  # GitHub authentication token (auth_token) - OAuth token used for authentication against GitHub API.
+  # You can generate Personal API access token at https://github.com/settings/tokens.
+  # Minimal token scope is repo or public_repo to release on private or public repositories respectively.
+  # Be sure to encrypt your token using “Encrypt configuration data” page in AppVeyor (Settings → Encrypt YAML).
   auth_token:
-    secure: l3FLyTasqAypCxw2HovgsX1rYWxDPi20fz1SxHm4QZ80TUTIKD2K2GW/NcDvWeo6
-  repository: RAnders00/chatterino2
+    secure: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
   artifact: build/chatterino2.zip
   prerelease: true
   force_update: true
