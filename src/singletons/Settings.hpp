@@ -128,6 +128,7 @@ public:
     /// Ingored Users
     BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
                                             true};
+    IntSetting showIgnoredUsersMessages = {"/ignore/showIgnoredUsers", 0};
 
     /// Moderation
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};

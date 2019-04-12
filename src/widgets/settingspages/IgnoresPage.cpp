@@ -77,8 +77,24 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
 
     auto anyways = users.emplace<QHBoxLayout>().withoutMargin();
     {
-        anyways.emplace<QLabel>("Show anyways if:");
-        anyways.emplace<QComboBox>();
+        anyways.emplace<QLabel>("Show messages from ignored users anyways:");
+
+        auto combo = anyways.emplace<QComboBox>().getElement();
+        combo->addItems(
+            {"Never", "If you are Moderator", "If you are Broadcaster"});
+
+        auto &setting = getSettings()->showIgnoredUsersMessages;
+
+        setting.connect(
+            [combo](const int value) { combo->setCurrentIndex(value); });
+
+        QObject::connect(combo,
+                         QOverload<int>::of(&QComboBox::currentIndexChanged),
+                         [&setting](int index) {
+                             if (index != -1)
+                                 setting = index;
+                         });
+
         anyways->addStretch(1);
     }
 

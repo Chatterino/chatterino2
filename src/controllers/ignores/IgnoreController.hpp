@@ -12,6 +12,8 @@ class Paths;
 
 class IgnoreModel;
 
+enum ShowIgnoredUsersMessages { Never, IfModerator, IfBroadcaster };
+
 class IgnoreController final : public Singleton
 {
 public:

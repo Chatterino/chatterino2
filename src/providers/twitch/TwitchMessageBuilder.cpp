@@ -80,6 +80,18 @@ bool TwitchMessageBuilder::isIgnored() const
         {
             if (sourceUserID == user.id)
             {
+                switch (getSettings()->showIgnoredUsersMessages)
+                {
+                    case ShowIgnoredUsersMessages::IfModerator:
+                        if (this->channel->isMod() ||
+                            this->channel->isBroadcaster())
+                            return false;
+                        break;
+                    case ShowIgnoredUsersMessages::IfBroadcaster:
+                        if (this->channel->isBroadcaster())
+                            return false;
+                        break;
+                }
                 log("Blocking message because it's from blocked user {}",
                     user.name);
                 return true;
