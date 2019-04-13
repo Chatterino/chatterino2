@@ -239,6 +239,11 @@ bool Channel::hasModRights() const
     return this->isMod() || this->isBroadcaster();
 }
 
+bool Channel::hasHighRateLimit() const
+{
+    return this->isMod() || this->isBroadcaster();
+}
+
 bool Channel::isLive() const
 {
     return false;

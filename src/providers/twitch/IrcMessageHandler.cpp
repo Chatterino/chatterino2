@@ -20,6 +20,24 @@
 
 namespace chatterino {
 
+static QMap<QString, QString> parseBadges(QString badgesString)
+{
+    QMap<QString, QString> badges;
+
+    for (auto badgeData : badgesString.split(','))
+    {
+        auto parts = badgeData.split('/');
+        if (parts.length() != 2)
+        {
+            continue;
+        }
+
+        badges.insert(parts[0], parts[1]);
+    }
+
+    return badges;
+}
+
 IrcMessageHandler &IrcMessageHandler::getInstance()
 {
     static IrcMessageHandler instance;
@@ -207,24 +225,35 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 {
-    QVariant _mod = message->tag("mod");
+    auto app = getApp();
 
+    QString channelName;
+    if (!trimChannelName(message->parameter(0), channelName))
+    {
+        return;
+    }
+
+    auto c = app->twitch.server->getChannelOrEmpty(channelName);
+    if (c->isEmpty())
+    {
+        return;
+    }
+
+    QVariant _badges = message->tag("badges");
+    if (_badges.isValid())
+    {
+        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
+        if (tc != nullptr)
+        {
+            auto parsedBadges = parseBadges(_badges.toString());
+            tc->setVIP(parsedBadges.contains("vip"));
+            tc->setStaff(parsedBadges.contains("staff"));
+        }
+    }
+
+    QVariant _mod = message->tag("mod");
     if (_mod.isValid())
     {
-        auto app = getApp();
-
-        QString channelName;
-        if (!trimChannelName(message->parameter(0), channelName))
-        {
-            return;
-        }
-
-        auto c = app->twitch.server->getChannelOrEmpty(channelName);
-        if (c->isEmpty())
-        {
-            return;
-        }
-
         TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
         if (tc != nullptr)
         {

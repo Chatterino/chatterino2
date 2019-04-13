@@ -293,10 +293,11 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel,
         std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
 
         //        std::queue<std::chrono::steady_clock::time_point>
-        auto &lastMessage = channel->hasModRights() ? this->lastMessageMod_
-                                                    : this->lastMessagePleb_;
-        size_t maxMessageCount = channel->hasModRights() ? 99 : 19;
-        auto minMessageOffset = (channel->hasModRights() ? 100ms : 1100ms);
+        auto &lastMessage = channel->hasHighRateLimit()
+                                ? this->lastMessageMod_
+                                : this->lastMessagePleb_;
+        size_t maxMessageCount = channel->hasHighRateLimit() ? 99 : 19;
+        auto minMessageOffset = (channel->hasHighRateLimit() ? 100ms : 1100ms);
 
         auto now = std::chrono::steady_clock::now();
 

@@ -70,6 +70,7 @@ public:
     virtual bool isMod() const;
     virtual bool isBroadcaster() const;
     virtual bool hasModRights() const;
+    virtual bool hasHighRateLimit() const;
     virtual bool isLive() const;
     virtual bool shouldIgnoreHighlights() const;
 

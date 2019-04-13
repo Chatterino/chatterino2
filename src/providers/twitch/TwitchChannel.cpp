@@ -200,7 +200,7 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    if (!this->hasModRights())
+    if (!this->hasHighRateLimit())
     {
         if (getSettings()->allowDuplicateMessages)
         {
@@ -226,6 +226,16 @@ bool TwitchChannel::isMod() const
     return this->mod_;
 }
 
+bool TwitchChannel::isVIP() const
+{
+    return this->vip_;
+}
+
+bool TwitchChannel::isStaff() const
+{
+    return this->staff_;
+}
+
 void TwitchChannel::setMod(bool value)
 {
     if (this->mod_ != value)
@@ -236,11 +246,36 @@ void TwitchChannel::setMod(bool value)
     }
 }
 
+void TwitchChannel::setVIP(bool value)
+{
+    if (this->vip_ != value)
+    {
+        this->vip_ = value;
+
+        this->userStateChanged.invoke();
+    }
+}
+
+void TwitchChannel::setStaff(bool value)
+{
+    if (this->staff_ != value)
+    {
+        this->staff_ = value;
+
+        this->userStateChanged.invoke();
+    }
+}
+
 bool TwitchChannel::isBroadcaster() const
 {
     auto app = getApp();
 
     return this->getName() == app->accounts->twitch.getCurrent()->getUserName();
+}
+
+bool TwitchChannel::hasHighRateLimit() const
+{
+    return this->isMod() || this->isBroadcaster() || this->isVIP();
 }
 
 void TwitchChannel::addRecentChatter(const MessagePtr &message)
