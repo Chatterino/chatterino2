@@ -44,6 +44,46 @@ IrcMessageHandler &IrcMessageHandler::getInstance()
     return instance;
 }
 
+std::vector<MessagePtr> IrcMessageHandler::parseMessage(
+    Channel *channel, Communi::IrcMessage *message)
+{
+    std::vector<MessagePtr> builtMessages;
+
+    auto command = message->command();
+
+    if (command == "PRIVMSG")
+    {
+        return this->parsePrivMessage(
+            channel, static_cast<Communi::IrcPrivateMessage *>(message));
+    }
+    else if (command == "USERNOTICE")
+    {
+        return this->parseUserNoticeMessage(channel, message);
+    }
+    else if (command == "NOTICE")
+    {
+        return this->parseNoticeMessage(
+            static_cast<Communi::IrcNoticeMessage *>(message));
+    }
+
+    return builtMessages;
+}
+
+std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
+    Channel *channel, Communi::IrcPrivateMessage *message)
+{
+    log("Parse priv msg");
+    std::vector<MessagePtr> builtMessages;
+    MessageParseArgs args;
+    TwitchMessageBuilder builder(channel, message, args, message->content(),
+                                 message->isAction());
+    if (!builder.isIgnored())
+    {
+        builtMessages.emplace_back(builder.build());
+    }
+    return builtMessages;
+}
+
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
                                           TwitchServer &server)
 {
@@ -302,6 +342,56 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     }
 }
 
+std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
+    Channel *channel, Communi::IrcMessage *message)
+{
+    std::vector<MessagePtr> builtMessages;
+
+    auto data = message->toData();
+
+    auto tags = message->tags();
+    auto parameters = message->parameters();
+
+    auto target = parameters[0];
+    QString msgType = tags.value("msg-id", "").toString();
+    QString content;
+    if (parameters.size() >= 2)
+    {
+        content = parameters[1];
+    }
+
+    if (msgType == "sub" || msgType == "resub" || msgType == "subgift")
+    {
+        // Sub-specific message. I think it's only allowed for "resub" messages
+        // atm
+        if (!content.isEmpty())
+        {
+            MessageParseArgs args;
+            args.trimSubscriberUsername = true;
+
+            TwitchMessageBuilder builder(channel, message, args, content,
+                                         false);
+            builder->flags.set(MessageFlag::Subscription);
+            builder->flags.unset(MessageFlag::Highlighted);
+            builtMessages.emplace_back(builder.build());
+        }
+    }
+
+    auto it = tags.find("system-msg");
+
+    if (it != tags.end())
+    {
+        auto b = MessageBuilder(systemMessage,
+                                parseTagString(it.value().toString()));
+
+        b->flags.set(MessageFlag::Subscription);
+        auto newMessage = b.release();
+        builtMessages.emplace_back(newMessage);
+    }
+
+    return builtMessages;
+}
+
 void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
                                                 TwitchServer &server)
 {
@@ -381,35 +471,49 @@ void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
     }
 }
 
+std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
+    Communi::IrcNoticeMessage *message)
+{
+    std::vector<MessagePtr> builtMessages;
+
+    builtMessages.emplace_back(makeSystemMessage(message->content()));
+
+    return builtMessages;
+}
+
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
     auto app = getApp();
-    MessagePtr msg = makeSystemMessage(message->content());
+    auto builtMessages = this->parseNoticeMessage(message);
 
-    QString channelName;
-    if (!trimChannelName(message->target(), channelName))
+    for (auto msg : builtMessages)
     {
-        // Notice wasn't targeted at a single channel, send to all twitch
-        // channels
-        app->twitch.server->forEachChannelAndSpecialChannels(
-            [msg](const auto &c) {
-                c->addMessage(msg);  //
-            });
+        QString channelName;
+        if (!trimChannelName(message->target(), channelName))
+        {
+            // Notice wasn't targeted at a single channel, send to all twitch
+            // channels
+            app->twitch.server->forEachChannelAndSpecialChannels(
+                [msg](const auto &c) {
+                    c->addMessage(msg);  //
+                });
 
-        return;
+            return;
+        }
+
+        auto channel = app->twitch.server->getChannelOrEmpty(channelName);
+
+        if (channel->isEmpty())
+        {
+            log("[IrcManager:handleNoticeMessage] Channel {} not found in "
+                "channel "
+                "manager ",
+                channelName);
+            return;
+        }
+
+        channel->addMessage(msg);
     }
-
-    auto channel = app->twitch.server->getChannelOrEmpty(channelName);
-
-    if (channel->isEmpty())
-    {
-        log("[IrcManager:handleNoticeMessage] Channel {} not found in channel "
-            "manager ",
-            channelName);
-        return;
-    }
-
-    channel->addMessage(msg);
 }
 
 void IrcMessageHandler::handleWriteConnectionNoticeMessage(

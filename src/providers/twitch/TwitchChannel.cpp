@@ -9,6 +9,7 @@
 #include "messages/Message.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
+#include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -29,10 +30,12 @@
 
 namespace chatterino {
 namespace {
+    // parseRecentMessages takes a json object and returns a vector of
+    // Communi IrcMessages
     auto parseRecentMessages(const QJsonObject &jsonRoot, ChannelPtr channel)
     {
         QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
-        std::vector<MessagePtr> messages;
+        std::vector<Communi::IrcMessage *> messages;
 
         if (jsonMessages.empty())
             return messages;
@@ -40,18 +43,8 @@ namespace {
         for (const auto jsonMessage : jsonMessages)
         {
             auto content = jsonMessage.toString().toUtf8();
-            // passing nullptr as the channel makes the message invalid but we
-            // don't check for that anyways
-            auto message = Communi::IrcMessage::fromData(content, nullptr);
-            auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
-            assert(privMsg);
-
-            MessageParseArgs args;
-            TwitchMessageBuilder builder(channel.get(), privMsg, args);
-            builder.message().flags.set(MessageFlag::RecentMessage);
-
-            if (!builder.isIgnored())
-                messages.push_back(builder.build());
+            messages.emplace_back(
+                Communi::IrcMessage::fromData(content, nullptr));
         }
 
         return messages;
@@ -611,8 +604,8 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 
 void TwitchChannel::loadRecentMessages()
 {
-    static QString genericURL =
-        "https://recent-messages.robotty.de/v1/recent-messages/%1";
+    static QString genericURL = "https://recent-messages.robotty.de/api/v2/"
+                                "recent-messages/%1?clearchatToNotice=true";
 
     NetworkRequest request(genericURL.arg(this->getName()));
     request.setCaller(QThread::currentThread());
@@ -626,7 +619,21 @@ void TwitchChannel::loadRecentMessages()
 
         auto messages = parseRecentMessages(result.parseJson(), shared);
 
-        shared->addMessagesAtStart(messages);
+        auto &handler = IrcMessageHandler::getInstance();
+
+        std::vector<MessagePtr> allBuiltMessages;
+
+        for (auto message : messages)
+        {
+            for (auto builtMessage :
+                 handler.parseMessage(shared.get(), message))
+            {
+                builtMessage->flags.set(MessageFlag::RecentMessage);
+                allBuiltMessages.emplace_back(builtMessage);
+            }
+        }
+
+        shared->addMessagesAtStart(allBuiltMessages);
 
         return Success;
     });

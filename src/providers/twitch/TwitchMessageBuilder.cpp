@@ -109,12 +109,24 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->appendChannelName();
 
+    if (this->tags.contains("rm-deleted"))
+    {
+        this->message().flags.set(MessageFlag::Disabled);
+    }
+
     // timestamp
     bool isPastMsg = this->tags.contains("historical");
     if (isPastMsg)
     {
         // This may be architecture dependent(datatype)
-        qint64 ts = this->tags.value("tmi-sent-ts").toLongLong();
+        bool customReceived = false;
+        qint64 ts =
+            this->tags.value("rm-received-ts").toLongLong(&customReceived);
+        if (!customReceived)
+        {
+            ts = this->tags.value("tmi-sent-ts").toLongLong();
+        }
+
         QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(ts);
         this->emplace<TimestampElement>(dateTime.time());
     }
