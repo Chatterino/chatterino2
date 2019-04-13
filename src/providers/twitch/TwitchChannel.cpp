@@ -604,8 +604,17 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 
 void TwitchChannel::loadRecentMessages()
 {
-    static QString genericURL = "https://recent-messages.robotty.de/api/v2/"
-                                "recent-messages/%1?clearchatToNotice=true";
+    static QString genericURL = [] {
+        QString url("https://recent-messages.robotty.de/api/v2/recent-messages/"
+                    "%1?clearchatToNotice=true");
+        auto envString = std::getenv("CHATTERINO2_RECENT_MESSAGES_URL");
+        if (envString != nullptr)
+        {
+            url = envString;
+        }
+
+        return url;
+    }();
 
     NetworkRequest request(genericURL.arg(this->getName()));
     request.setCaller(QThread::currentThread());
