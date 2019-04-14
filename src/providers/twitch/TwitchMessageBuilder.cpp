@@ -80,7 +80,8 @@ bool TwitchMessageBuilder::isIgnored() const
         {
             if (sourceUserID == user.id)
             {
-                switch (getSettings()->showIgnoredUsersMessages)
+                switch (static_cast<ShowIgnoredUsersMessages>(
+                    getSettings()->showIgnoredUsersMessages.getValue()))
                 {
                     case ShowIgnoredUsersMessages::IfModerator:
                         if (this->channel->isMod() ||
