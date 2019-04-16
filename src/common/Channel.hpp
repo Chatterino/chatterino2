@@ -15,7 +15,7 @@ namespace chatterino {
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
-enum class MessageFlag : uint16_t;
+enum class MessageFlag : uint32_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 class Channel : public std::enable_shared_from_this<Channel>

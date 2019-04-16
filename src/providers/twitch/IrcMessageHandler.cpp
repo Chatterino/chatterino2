@@ -321,6 +321,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     if (!builder.isIgnored())
     {
+        builder->flags.set(MessageFlag::Whisper);
         MessagePtr _message = builder.build();
 
         app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
