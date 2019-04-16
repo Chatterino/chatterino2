@@ -127,6 +127,11 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
 
     for (const auto &element : this->message_->elements)
     {
+        if (getSettings()->hideModerated &&
+            this->message_->flags.has(MessageFlag::Disabled))
+        {
+            continue;
+        }
         element->addToContainer(*this->container_, _flags);
     }
 

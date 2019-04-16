@@ -261,6 +261,10 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     // refresh all
     app->windows->repaintVisibleChatWidgets(chan.get());
+    if (getSettings()->hideModerated)
+    {
+        app->windows->forceLayoutChannelViews();
+    }
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
