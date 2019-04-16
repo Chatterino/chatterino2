@@ -689,6 +689,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
         auto *split = new Split(this);
         split->setChannel(
             WindowManager::decodeChannel(obj.value("data").toObject()));
+        split->setModerationMode(obj.value("moderationMode").toBool(false));
 
         this->appendSplit(split);
     }
@@ -711,6 +712,8 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
                 auto *split = new Split(this);
                 split->setChannel(WindowManager::decodeChannel(
                     _obj.value("data").toObject()));
+                split->setModerationMode(
+                    _obj.value("moderationMode").toBool(false));
 
                 Node *_node = new Node();
                 _node->parent_ = node;
