@@ -201,8 +201,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.timestampFormat, true);
     layout.addDropdown<int>(
         "Collapse messages",
-        {"Never", "Longer than 2 lines", "Longer than 3 lines",
-         "Longer than 4 lines", "Longer than 5 lines"},
+        {"Never", "After 2 lines", "After 3 lines", "After 4 lines",
+         "After 5 lines"},
         s.collpseMessagesMinLines,
         [](auto val) {
             return val ? QString("After ") + QString::number(val) + " lines"
