@@ -203,7 +203,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     // refresh all
     app->windows->repaintVisibleChatWidgets(chan.get());
-    if (getSettings()->removeModerated)
+    if (getSettings()->hideModerated)
     {
         app->windows->forceLayoutChannelViews();
     }
