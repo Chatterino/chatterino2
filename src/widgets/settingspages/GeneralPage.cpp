@@ -190,7 +190,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Show input when empty", s.showEmptyInput);
     layout.addCheckbox("Show input message length", s.showMessageLength);
-    layout.addCheckbox("Hide preferences button (ctrl+p to show)", 
+    layout.addCheckbox("Hide preferences button (ctrl+p to show)",
                        s.hidePreferencesButton);
     layout.addCheckbox("Hide user button", s.hideUserButton);
 
@@ -267,50 +267,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle2("Misc");
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
-    layout.addDropdown<int>(
-        "Historic messages appearance",
-        {"Crossed and Greyed", "Crossed", "Greyed", "No change"},
-        s.historicMessagesAppearance,
-        [](auto val) {
-            if (val & HistoricMessageAppearance::Crossed &&
-                val & HistoricMessageAppearance::Greyed)
-            {
-                return QString("Crossed and Greyed");
-            }
-            else if (val & HistoricMessageAppearance::Crossed)
-            {
-                return QString("Crossed");
-            }
-            else if (val & HistoricMessageAppearance::Greyed)
-            {
-                return QString("Greyed");
-            }
-            else
-            {
-                return QString("No Change");
-            }
-        },
-        [](auto args) -> int {
-            switch (args.index)
-            {
-                default:
-                case 0:
-                    return HistoricMessageAppearance::Crossed |
-                           HistoricMessageAppearance::Greyed;
-                    break;
-                case 1:
-                    return HistoricMessageAppearance::Crossed;
-                    break;
-                case 2:
-                    return HistoricMessageAppearance::Greyed;
-                    break;
-                case 3:
-                    return 0;
-                    break;
-            }
-        },
-        false);
-    layout.addCheckbox("Emphasize deleted messages", s.redDisabledMessages);
 
     /*
     layout.addTitle2("Cache");

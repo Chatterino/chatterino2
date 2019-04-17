@@ -182,12 +182,6 @@ void LookPage::addMessageTab(LayoutCreator<QVBoxLayout> layout)
 
     layout.append(
         this->createCheckBox("Compact emotes", getSettings()->compactEmotes));
-    /// greyOutHistoricMessages setting changed by hemirt from checkbox to
-    /// historicMessagesBehaviour dropdown QString option
-    // layout.append(this->createCheckBox("Grey out historic messages",
-    //                                   getSettings()->greyOutHistoricMessages));
-    ///
-    // --
     layout.emplace<Line>(false);
 
     // bold-slider

@@ -233,7 +233,6 @@ void AbstractIrcServer::onConnected()
 
     auto connected = makeSystemMessage("connected");
     connected->flags.set(MessageFlag::ConnectedMessage);
-    connected->flags.set(MessageFlag::Centered);
     auto reconnected = makeSystemMessage("reconnected");
     reconnected->flags.set(MessageFlag::ConnectedMessage);
 

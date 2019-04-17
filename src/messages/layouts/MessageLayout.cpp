@@ -103,9 +103,6 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
 {
     this->layoutCount_++;
 
-    const auto addTest = this->message_->flags.hasAny(
-        {MessageFlag::DisconnectedMessage, MessageFlag::ConnectedMessage});
-
     auto messageFlags = this->message_->flags;
 
     if (this->flags.has(MessageLayoutFlag::Expanded) ||
@@ -117,14 +114,6 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
 
     this->container_->begin(width, this->scale_, messageFlags);
 
-    if (addTest)
-    {
-        this->container_->addElementNoLineBreak(new TestLayoutElement(
-            EmptyElement::instance(), QSize(width, this->scale_ * 6),
-            getTheme()->messages.backgrounds.regular, false));
-        this->container_->breakLine();
-    }
-
     for (const auto &element : this->message_->elements)
     {
         if (getSettings()->hideModerated &&
@@ -133,14 +122,6 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
             continue;
         }
         element->addToContainer(*this->container_, _flags);
-    }
-
-    if (addTest)
-    {
-        this->container_->breakLine();
-        this->container_->addElement(new TestLayoutElement(
-            EmptyElement::instance(), QSize(width, this->scale_ * 6),
-            getTheme()->messages.backgrounds.regular, true));
     }
 
     if (this->height_ != this->container_->getHeight())
@@ -205,29 +186,12 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                          app->themes->messages.disabled);
         //        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
         //                         QBrush(QColor(64, 64, 64, 64)));
-
-        if (getSettings()->redDisabledMessages)
-        {
-            painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                             QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
-            //                         app->themes->messages.disabled);
-        }
     }
 
     if (this->message_->flags.has(MessageFlag::RecentMessage))
     {
-        const auto &historicMessageAppearance =
-            getSettings()->historicMessagesAppearance.getValue();
-        if (historicMessageAppearance & HistoricMessageAppearance::Crossed)
-        {
-            painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                             QBrush(QColor(255, 0, 0, 63), Qt::BDiagPattern));
-        }
-        if (historicMessageAppearance & HistoricMessageAppearance::Greyed)
-        {
-            painter.fillRect(0, y, pixmap->width(), pixmap->height(),
-                             app->themes->messages.disabled);
-        }
+        painter.fillRect(0, y, pixmap->width(), pixmap->height(),
+                         app->themes->messages.disabled);
     }
 
     // draw selection

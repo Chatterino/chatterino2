@@ -4,7 +4,6 @@
 
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
-#include "messages/HistoricMessageAppearance.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -32,9 +31,6 @@ public:
                                      Qt::VerPattern};
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
                                        ""};
-    IntSetting historicMessagesAppearance = {
-        "/appearance/messages/historicMessagesAppearance",
-        HistoricMessageAppearance::Crossed | HistoricMessageAppearance::Greyed};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
@@ -68,7 +64,6 @@ public:
     BoolSetting headerUptime = {"/appearance/splitheader/showUptime", false};
     FloatSetting customThemeMultiplier = {"/appearance/customThemeMultiplier",
                                           -0.5f};
-    BoolSetting redDisabledMessages = {"/appearance/redStripes", true};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
 
