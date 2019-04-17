@@ -7,7 +7,7 @@
 
 namespace chatterino
 {
-    class[[deprecated]] Label : public ab::BaseWidget
+    class [[deprecated]] Label : public ab::BaseWidget
     {
     public:
         explicit Label(

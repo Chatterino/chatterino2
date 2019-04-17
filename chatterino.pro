@@ -177,9 +177,9 @@ SOURCES += \
     src/ui/FlexLayout.cpp \
     src/ui/FlexLayout.Private.cpp \
     src/ui/Line.cpp \
+    src/ui/MessageView.cpp \
     src/ui/MessageView.Pauser.cpp \
     src/ui/MessageView.Selector.cpp \
-    src/ui/MessageView.cpp \
     src/ui/Scrollbar.cpp \
     src/ui/SearchWindow.cpp \
     src/ui/Split.cpp \
@@ -200,6 +200,7 @@ SOURCES += \
     src/util/RapidjsonHelpers.cpp \
     src/util/Resources.cpp \
     src/util/StreamLink.cpp \
+    src/util/Strings.cpp \
     src/widgets/AccountSwitchWidget.cpp \
     src/widgets/AttachedWindow.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
@@ -366,9 +367,9 @@ HEADERS += \
     src/ui/FlexLayout.hpp \
     src/ui/FlexLayout.Private.hpp \
     src/ui/Line.hpp \
+    src/ui/MessageView.hpp \
     src/ui/MessageView.Pauser.hpp \
     src/ui/MessageView.Selector.hpp \
-    src/ui/MessageView.hpp \
     src/ui/Scrollbar.hpp \
     src/ui/SearchWindow.hpp \
     src/ui/Split.hpp \

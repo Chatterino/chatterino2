@@ -1,5 +1,6 @@
 #pragma once
 
+#include <pajlada/signals/signalholder.hpp>
 #include "ab/FlatButton.hpp"
 #include "ab/Notebook.hpp"
 
@@ -37,5 +38,7 @@ namespace chatterino::ui
     private:
         bool showX_{true};
         TabButton* button_{};
+
+        pajlada::Signals::SignalHolder connections_;
     };
 }  // namespace chatterino::ui

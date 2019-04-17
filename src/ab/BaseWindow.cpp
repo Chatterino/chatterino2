@@ -58,8 +58,11 @@ namespace ab
 
         this->resize(600, 400);
 
-        QObject::connect(this, &QWidget::windowTitleChanged,
-            this->ui_.titleLabel, &QLabel::setText);
+        if (this->ui_.titleLabel)
+        {
+            QObject::connect(this, &QWidget::windowTitleChanged,
+                this->ui_.titleLabel, &QLabel::setText);
+        }
 
         // set theme
         QFile file(":/style/window.qss");

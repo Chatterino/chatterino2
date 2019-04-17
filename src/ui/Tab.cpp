@@ -3,6 +3,7 @@
 #include <QLabel>
 
 #include "ab/Row.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino::ui
 {
@@ -55,6 +56,10 @@ namespace chatterino::ui
                 if (button == Qt::LeftButton)
                     this->close();
             });
+
+        getSettings()->showTabCloseButton.connect(
+            [this](auto&& value, auto) { this->button_->setVisible(value); },
+            this->connections_);
     }
 
     Tab::Tab(const QString& text)

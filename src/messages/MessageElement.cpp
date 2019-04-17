@@ -191,7 +191,9 @@ namespace chatterino
                     // auto color = this->color_.getColor(*app->themes);
                     // app->themes->normalizeColor(color);
 
-                    auto color = theme.getTextColor({});  // QColor(" #fff ");
+                    auto color =
+                        this->color_.getColor();  // theme.getTextColor({});  //
+                                                  // QColor(" #fff ");
                     // auto font = getThemexD()->getFont({});
 
                     auto e = (new TextLayoutElement(*this, theme.getFont({}),

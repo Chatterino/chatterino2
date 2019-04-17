@@ -83,13 +83,6 @@ namespace chatterino
             return result;
         }
 
-        int unicodeLength(const QString& str)
-        {
-            return std::accumulate(
-                str.begin(), str.end(), 0, [](int a, QChar c) {
-                    return a + (c.isHighSurrogate() ? 0 : 1);
-                });
-        }
     }  // namespace
 
     TwitchMessageBuilder::TwitchMessageBuilder(Room* _channel,
@@ -460,15 +453,7 @@ namespace chatterino
 
             this->addTextOrEmoji(word);
 
-            for (int j = 0; j < word.size(); j++)
-            {
-                i++;
-
-                if (word.at(j).isHighSurrogate())
-                {
-                    j++;
-                }
-            }
+            i += unicodeLength(word);
 
             i++;
         }
@@ -862,8 +847,6 @@ namespace chatterino
             // text
             else
             {
-                qDebug() << "word" << word;
-
                 this->emplace<TextElement>(word,
                     MessageElementFlag::BoldUsername, QColor("#fff"),
                     FontStyle::ChatMediumBold);
