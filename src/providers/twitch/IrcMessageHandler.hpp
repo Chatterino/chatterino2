@@ -27,6 +27,7 @@ public:
 
     void handleRoomStateMessage(Communi::IrcMessage *message);
     void handleClearChatMessage(Communi::IrcMessage *message);
+    void handleClearMessageMessage(Communi::IrcMessage *message);
     void handleUserStateMessage(Communi::IrcMessage *message);
     void handleWhisperMessage(Communi::IrcMessage *message);
 

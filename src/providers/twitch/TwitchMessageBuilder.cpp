@@ -582,6 +582,7 @@ void TwitchMessageBuilder::parseMessageID()
     {
         this->messageID = iterator.value().toString();
     }
+    this->message().id = this->messageID;
 }
 
 void TwitchMessageBuilder::parseRoomID()

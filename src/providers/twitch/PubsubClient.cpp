@@ -710,6 +710,9 @@ PubSub::PubSub()
             // qDebug() << QString::fromStdString(rj::stringify(data));
         };
 
+    this->moderationActionHandlers["delete"] =
+        [this](const auto &data, const auto &roomID) { qDebug() << "xd"; };
+
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
     this->websocketClient.clear_access_channels(
         websocketpp::log::alevel::frame_payload);

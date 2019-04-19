@@ -156,6 +156,10 @@ void TwitchServer::messageReceived(Communi::IrcMessage *message)
     {
         handler.handleClearChatMessage(message);
     }
+    else if (command == "CLEARMSG")
+    {
+        handler.handleClearMessageMessage(message);
+    }
     else if (command == "USERSTATE")
     {
         handler.handleUserStateMessage(message);

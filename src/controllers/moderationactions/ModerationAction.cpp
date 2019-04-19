@@ -73,6 +73,10 @@ ModerationAction::ModerationAction(const QString &action)
     {
         this->image_ = Image::fromPixmap(getApp()->resources->buttons.ban);
     }
+    else if (action.startsWith("/delete"))
+    {
+        this->image_ = Image::fromPixmap(getApp()->resources->pajaDank);
+    }
     else
     {
         QString xD = action;
