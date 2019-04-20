@@ -34,7 +34,7 @@ Note: This installation will take about 1.5 GB of disk space.
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
 ### For Qt SSL, we need OpenSSL 1.0
-1. Download OpenSSL for windows, version `1.0.2q`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2q.exe)**
+1. Download OpenSSL for windows, version `1.0.2r`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2r.exe)**
 2. When prompted, install it to any arbitrary empty directory.
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 4. Copy the OpenSSL 1.0 files from its `/bin` folder to `C:/local/bin` (You will need to create the folder)
