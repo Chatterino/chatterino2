@@ -17,11 +17,11 @@ Notes:
 
 1. First, download a boost installer appropriate for your version of Visual Studio.
      -  Visit the downloads list [on Bintray](https://dl.bintray.com/boostorg/release/).
-	 -  Select the latest version from the list and navigate into the `binaries/` directory.
+	 -  Select the latest version from the list and navigate into the `binaries/` directory. (Note: 1.70.0 did not work)
 	 -  Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `x64` for 64-bit systems).
 	    Visual Studio versions map as follows: `14.1` in the filename corresponds to MSVC 2017, `14.0` to 2015, `12.0` to 2013, `11` to 2012, `10` to 2010, `9` to 2008 and `8` to 2005. _Only Visual Studio 2015 and 2017 are supported. Please upgrade should you have an older installation._
 		
-		**Convenience link for Visual Studio 2017: [Boost 1.70.0-MSVC-14.1](https://dl.bintray.com/boostorg/release/1.70.0/binaries/boost_1_70_0-msvc-14.1-64.exe)**
+		**Convenience link for Visual Studio 2017: [Boost 1.69.0-MSVC-14.1](https://dl.bintray.com/boostorg/release/1.69.0/binaries/boost_1_69_0-msvc-14.1-64.exe)**
 2. When prompted where to install Boost, set the location to `C:\local\boost`.
 3. After the installation finishes, rename the `C:\local\boost\lib64-msvc-14.1` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
 
