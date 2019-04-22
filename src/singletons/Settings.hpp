@@ -172,6 +172,7 @@ public:
                                             "qrc:/sounds/ping3.wav"};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
+    QStringSetting openFromToast = {"/notifications/openFromToast", "in browser"};
 
     /// External tools
     // Streamlink
