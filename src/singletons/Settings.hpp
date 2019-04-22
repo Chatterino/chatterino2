@@ -144,7 +144,7 @@ public:
         "/highlighting/whisperHighlight/enableSound", false};
     BoolSetting enableWhisperHighlightTaskbar = {
         "/highlighting/whisperHighlight/enableTaskbarFlashing", false};
-    QStringSetting highlightColor = {"/highlighting/color", "#4B282C"};
+    QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 

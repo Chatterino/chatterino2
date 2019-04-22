@@ -38,6 +38,10 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 
         this->splits.resizeHandle = QColor(0, 148, 255, 0xff);
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x50);
+
+        // Highlighted Messages: theme support quick-fix
+        this->messages.backgrounds.highlighted =
+            QColor("#BD8489");
     }
     else
     {
@@ -46,6 +50,11 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 
         this->splits.resizeHandle = QColor(0, 148, 255, 0x70);
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
+
+        // Highlighted Messages: theme support quick-fix
+        this->messages.backgrounds.highlighted =
+            QColor("#4B282C");
+
     }
 
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
@@ -74,8 +83,13 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
 
     // Highlighted Messages
-    this->messages.backgrounds.highlighted =
-        QColor(getSettings()->highlightColor);
+    // hidden setting from PR #744 - if set it will overwrite theme color (for now!)
+    //TODO: implement full theme support
+    if (getSettings()->highlightColor != "") {
+        this->messages.backgrounds.highlighted =
+            QColor(getSettings()->highlightColor);
+    }
+
 }
 
 void Theme::normalizeColor(QColor &color)
