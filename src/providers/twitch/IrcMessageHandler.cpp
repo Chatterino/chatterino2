@@ -72,7 +72,6 @@ std::vector<MessagePtr> IrcMessageHandler::parseMessage(
 std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
     Channel *channel, Communi::IrcPrivateMessage *message)
 {
-    log("Parse priv msg");
     std::vector<MessagePtr> builtMessages;
     MessageParseArgs args;
     TwitchMessageBuilder builder(channel, message, args, message->content(),
