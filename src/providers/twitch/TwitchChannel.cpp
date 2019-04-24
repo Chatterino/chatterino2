@@ -123,7 +123,10 @@ TwitchChannel::TwitchChannel(const QString &name,
 
     // --
     this->messageSuffix_.append(' ');
-    this->messageSuffix_.append(QChar(0x206D));
+    // twitch "fixed" spamming with spaces like 0x206D in april 2019 
+    // this->messageSuffix_.append(QChar(0x206D));
+    // Braile Pattern Blank (0x2800) still works!
+    this->messageSuffix_.append(QChar(0x2800));
 
     // debugging
 #if 0
