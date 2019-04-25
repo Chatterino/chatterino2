@@ -17,11 +17,11 @@ Notes:
 
 1. First, download a boost installer appropriate for your version of Visual Studio.
      -  Visit the downloads list [on Bintray](https://dl.bintray.com/boostorg/release/).
-	 -  Select the latest version from the list and navigate into the `binaries/` directory.
+	 -  Select the latest version from the list and navigate into the `binaries/` directory. (Note: 1.70.0 did not work)
 	 -  Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `x64` for 64-bit systems).
 	    Visual Studio versions map as follows: `14.1` in the filename corresponds to MSVC 2017, `14.0` to 2015, `12.0` to 2013, `11` to 2012, `10` to 2010, `9` to 2008 and `8` to 2005. _Only Visual Studio 2015 and 2017 are supported. Please upgrade should you have an older installation._
 		
-		**Convenience link for Visual Studio 2017: [Boost 1.67.0-MSVC-14.1](https://dl.bintray.com/boostorg/release/1.67.0/binaries/boost_1_67_0-msvc-14.1-64.exe)**
+		**Convenience link for Visual Studio 2017: [Boost 1.69.0-MSVC-14.1](https://dl.bintray.com/boostorg/release/1.69.0/binaries/boost_1_69_0-msvc-14.1-64.exe)**
 2. When prompted where to install Boost, set the location to `C:\local\boost`.
 3. After the installation finishes, rename the `C:\local\boost\lib64-msvc-14.1` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
 
@@ -34,12 +34,12 @@ Note: This installation will take about 1.5 GB of disk space.
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
 ### For Qt SSL, we need OpenSSL 1.0
-1. Download OpenSSL for windows, version `1.0.2q`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2q.exe)**
+1. Download OpenSSL for windows, version `1.0.2r`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2r.exe)**
 2. When prompted, install it to any arbitrary empty directory.
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
-4. Copy the OpenSSL 1.0 files from its `/bin` folder to `C:/local/bin` (You will need to create the folder)
-5. Then copy the OpenSSL 1.1 files from its `/bin` folder to `C:/local/bin` (Overwrite any duplicate files)
-6. Add `C:/local/bin` to your path folder ([Follow guide here if you don't know how to do it]( https://www.computerhope.com/issues/ch000549.htm#windows8))
+4. Copy the OpenSSL 1.0 files from its `\bin` folder to `C:\local\bin` (You will need to create the folder)
+5. Then copy the OpenSSL 1.1 files from its `\bin` folder to `C:\local\bin` (Overwrite any duplicate files)
+6. Add `C:\local\bin` to your path folder ([Follow guide here if you don't know how to do it]( https://www.computerhope.com/issues/ch000549.htm#windows8))
 
 Note: This installation will take about 200 MB of disk space.
 
