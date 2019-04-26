@@ -17,6 +17,10 @@
 #include <QTableView>
 #include <QTimer>
 
+
+#define TOAST_REACTIONS \
+"in browser", "player in browser", "in streamlink", "don't open"
+
 namespace chatterino {
 
 NotificationPage::NotificationPage()
@@ -39,6 +43,18 @@ NotificationPage::NotificationPage()
                 settings.append(
                     this->createCheckBox("Enable toasts (Windows 8 or later)",
                                          getSettings()->notificationToast));
+                auto openIn =
+                    settings.emplace<QHBoxLayout>().withoutMargin();
+                {
+                openIn.emplace<QLabel>("Open stream from Toast:  ")->setSizePolicy(
+                                                    QSizePolicy::Maximum, QSizePolicy::Preferred);
+                openIn.append(
+                            this->createComboBox({TOAST_REACTIONS},
+                                                 getSettings()->openFromToast))->setSizePolicy(
+                            QSizePolicy::Maximum, QSizePolicy::Preferred);
+                }
+                openIn->setContentsMargins(40,0,0,0);
+                openIn->setSizeConstraint(QLayout::SetMaximumSize);
 #endif
                 auto customSound =
                     layout.emplace<QHBoxLayout>().withoutMargin();

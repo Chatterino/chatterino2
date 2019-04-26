@@ -8,6 +8,7 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Paths.hpp"
+#include "util/StreamLink.hpp"
 
 #ifdef Q_OS_WIN
 
@@ -85,12 +86,30 @@ public:
     }
     void toastActivated() const
     {
+        QString openingMode = getSettings()->openFromToast;
         QString link;
-        if (platform_ == Platform::Twitch)
+        if (openingMode == "in browser")
         {
-            link = "http://www.twitch.tv/" + channelName_;
+            if (platform_ == Platform::Twitch)
+            {
+                link = "http://www.twitch.tv/" + channelName_;
+            }
+            QDesktopServices::openUrl(QUrl(link));
         }
-        QDesktopServices::openUrl(QUrl(link));
+        else if (openingMode == "player in browser")
+        {
+            if (platform_ == Platform::Twitch)
+            {
+                link = "https://player.twitch.tv/?channel=" + channelName_;
+            }
+            QDesktopServices::openUrl(QUrl(link));
+        }
+        else if (openingMode == "in streamlink")
+        {
+           openStreamlinkForChannel(channelName_);
+        }
+        //the fourth and last option is "don't open"
+        //in this case obviously nothing should happen
     }
 
     void toastActivated(int actionIndex) const
@@ -115,8 +134,14 @@ void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
     std::wstring widestr = std::wstring(utf8_text.begin(), utf8_text.end());
 
     templ.setTextField(widestr, WinToastLib::WinToastTemplate::FirstLine);
-    templ.setTextField(L"Click here to open in browser",
-                       WinToastLib::WinToastTemplate::SecondLine);
+
+    if (getSettings()->openFromToast != "don't open") {
+        QString mode = getSettings()->openFromToast ;
+
+        templ.setTextField(L"Click here to open " + mode.toStdWString(),
+                           WinToastLib::WinToastTemplate::SecondLine);
+    }
+
     QString Path;
     if (p == Platform::Twitch)
     {
