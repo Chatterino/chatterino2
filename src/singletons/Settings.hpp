@@ -4,7 +4,7 @@
 
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
-#include "widgets/helper/CommonTexts.hpp"
+#include "singletons/Toasts.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -173,8 +173,9 @@ public:
                                             "qrc:/sounds/ping3.wav"};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
-    QStringSetting openFromToast = {"/notifications/openFromToast",
-                                    OPEN_IN_BROWSER};
+    QStringSetting openFromToast = {
+        "/notifications/openFromToast",
+        Toasts::findStringFromReaction(ToastReactions::openInBrowser)};
 
     /// External tools
     // Streamlink
