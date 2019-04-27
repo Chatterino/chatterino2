@@ -354,6 +354,7 @@ HEADERS += \
     src/widgets/dialogs/WelcomeDialog.hpp \
     src/widgets/helper/ChannelView.hpp \
     src/widgets/helper/ComboBoxItemDelegate.hpp \
+    src/widgets/helper/CommonTexts.hpp \
     src/widgets/helper/DebugPopup.hpp \
     src/widgets/helper/EditableModelView.hpp \
     src/widgets/helper/Line.hpp \
