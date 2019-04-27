@@ -173,9 +173,9 @@ public:
                                             "qrc:/sounds/ping3.wav"};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
-    QStringSetting openFromToast = {
+    IntSetting openFromToast = {
         "/notifications/openFromToast",
-        Toasts::findStringFromReaction(ToastReactions::openInBrowser)};
+        static_cast<int>(ToastReactions::OpenInBrowser)};
 
     /// External tools
     // Streamlink

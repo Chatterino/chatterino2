@@ -28,16 +28,16 @@
 namespace chatterino {
 
 std::map<ToastReactions, QString> Toasts::reactionToString = {
-    {ToastReactions::openInBrowser, OPEN_IN_BROWSER},
-    {ToastReactions::openInPlayer, OPEN_PLAYER_IN_BROWSER},
-    {ToastReactions::openInStreamlink, OPEN_IN_STREAMLINK},
-    {ToastReactions::dontOpen, DONT_OPEN}};
+    {ToastReactions::OpenInBrowser, OPEN_IN_BROWSER},
+    {ToastReactions::OpenInPlayer, OPEN_PLAYER_IN_BROWSER},
+    {ToastReactions::OpenInStreamlink, OPEN_IN_STREAMLINK},
+    {ToastReactions::DontOpen, DONT_OPEN}};
 
 std::map<QString, ToastReactions> Toasts::stringToReaction = {
-    {OPEN_IN_BROWSER, ToastReactions::openInBrowser},
-    {OPEN_PLAYER_IN_BROWSER, ToastReactions::openInPlayer},
-    {OPEN_IN_STREAMLINK, ToastReactions::openInStreamlink},
-    {DONT_OPEN, ToastReactions::dontOpen}};
+    {OPEN_IN_BROWSER, ToastReactions::OpenInBrowser},
+    {OPEN_PLAYER_IN_BROWSER, ToastReactions::OpenInPlayer},
+    {OPEN_IN_STREAMLINK, ToastReactions::OpenInStreamlink},
+    {DONT_OPEN, ToastReactions::DontOpen}};
 
 bool Toasts::isEnabled()
 {
@@ -61,6 +61,13 @@ QString Toasts::findStringFromReaction(const ToastReactions &reaction)
     }
 }
 
+QString Toasts::findStringFromReaction(
+    const pajlada::Settings::Setting<int> &value)
+{
+    int i = static_cast<int>(value);
+    return Toasts::findStringFromReaction(static_cast<ToastReactions>(i));
+}
+
 ToastReactions Toasts::findReactionFromString(const QString &string)
 {
     auto iterator = Toasts::stringToReaction.find(string);
@@ -70,7 +77,7 @@ ToastReactions Toasts::findReactionFromString(const QString &string)
     }
     else
     {
-        return ToastReactions::dontOpen;
+        return ToastReactions::DontOpen;
     }
 }
 void Toasts::sendChannelNotification(const QString &channelName, Platform p)
@@ -125,23 +132,24 @@ public:
     void toastActivated() const
     {
         QString link;
-        switch (Toasts::findReactionFromString(getSettings()->openFromToast))
+        switch (static_cast<ToastReactions>(
+            getSettings()->openFromToast.getValue()))
         {
-            case ToastReactions::openInBrowser:
+            case ToastReactions::OpenInBrowser:
                 if (platform_ == Platform::Twitch)
                 {
                     link = "http://www.twitch.tv/" + channelName_;
                 }
                 QDesktopServices::openUrl(QUrl(link));
                 break;
-            case ToastReactions::openInPlayer:
+            case ToastReactions::OpenInPlayer:
                 if (platform_ == Platform::Twitch)
                 {
                     link = "https://player.twitch.tv/?channel=" + channelName_;
                 }
                 QDesktopServices::openUrl(QUrl(link));
                 break;
-            case ToastReactions::openInStreamlink:
+            case ToastReactions::OpenInStreamlink:
             {
                 openStreamlinkForChannel(channelName_);
                 break;
@@ -173,10 +181,11 @@ void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
     std::wstring widestr = std::wstring(utf8_text.begin(), utf8_text.end());
 
     templ.setTextField(widestr, WinToastLib::WinToastTemplate::FirstLine);
-    if (Toasts::findReactionFromString(getSettings()->openFromToast) !=
-        ToastReactions::dontOpen)
+    if (static_cast<ToastReactions>(getSettings()->openFromToast.getValue()) !=
+        ToastReactions::DontOpen)
     {
-        QString mode = getSettings()->openFromToast;
+        QString mode =
+            Toasts::findStringFromReaction(getSettings()->openFromToast);
         mode = mode.toLower();
 
         templ.setTextField(L"Click here to " + mode.toStdWString(),
