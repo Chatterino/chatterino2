@@ -24,7 +24,6 @@ NotificationPage::NotificationPage()
     : SettingsPage("Notifications", ":/settings/notification2.svg")
 {
     LayoutCreator<NotificationPage> layoutCreator(this);
-
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
         auto tabs = layout.emplace<QTabWidget>();
@@ -46,17 +45,12 @@ NotificationPage::NotificationPage()
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
 
+                    // implementation of custom combobox done
+                    // because addComboBox only can handle strings-settings
+                    // int setting for the ToastReaction is desired
                     openIn
-                        .append(this->createComboBox(
-                            {Toasts::findStringFromReaction(
-                                 ToastReactions::openInBrowser),
-                             Toasts::findStringFromReaction(
-                                 ToastReactions::openInPlayer),
-                             Toasts::findStringFromReaction(
-                                 ToastReactions::openInStreamlink),
-                             Toasts::findStringFromReaction(
-                                 ToastReactions::dontOpen)},
-                            getSettings()->openFromToast))
+                        .append(this->createToastReactionComboBox(
+                            this->managedConnections_))
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
                 }
@@ -139,5 +133,32 @@ NotificationPage::NotificationPage()
             */
         }
     }
+}
+QComboBox *NotificationPage::createToastReactionComboBox(
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections)
+{
+    QComboBox *toastReactionOptions = new QComboBox();
+
+    for (int i = 0; i <= static_cast<int>(ToastReactions::DontOpen); i++)
+    {
+        toastReactionOptions->insertItem(
+            i, Toasts::findStringFromReaction(static_cast<ToastReactions>(i)));
+    }
+
+    // update when setting changes
+    pajlada::Settings::Setting<int> setting = getSettings()->openFromToast;
+    setting.connect(
+        [toastReactionOptions](const int &index, auto) {
+            toastReactionOptions->setCurrentIndex(index);
+        },
+        managedConnections);
+
+    QObject::connect(toastReactionOptions, &QComboBox::currentTextChanged,
+                     [setting](const QString &newValue) {
+                         getSettings()->openFromToast.setValue(static_cast<int>(
+                             Toasts::findReactionFromString(newValue)));
+                     });
+
+    return toastReactionOptions;
 }
 }  // namespace chatterino
