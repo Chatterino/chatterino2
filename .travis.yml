@@ -1,10 +1,36 @@
-before_install:
- - sudo add-apt-repository --yes ppa:ubuntu-sdk-team/ppa
- - sudo apt-get update -qq
- - sudo apt-get install qtbase5-dev qtdeclarative5-dev libqt5webkit5-dev libsqlite3-dev
- - sudo apt-get install qt5-default qttools5-dev-tools
+os: osx
+osx_image: xcode10.2
+
+addons:
+  homebrew:
+    packages:
+    - boost
+    - openssl
+    - rapidjson
+    - qt
+    - p7zip
+    
+compiler: clang
 
 script:
- - qmake -qt=qt5 -v
- - qmake -qt=qt5
- - make 
+  - mkdir build && cd build
+  - /usr/local/opt/qt/bin/qmake .. && make -j8
+  - 7z a chatterino2.zip chatterino.app
+
+before_deploy:
+  - git config --global user.email "builds@travis-ci.com"
+  - git config --global user.name "Travis CI"
+  - export GIT_TAG=nightly-mac-0.$TRAVIS_BUILD_NUMBER
+  - git tag $GIT_TAG -a -m "Nightly last change - $TRAVIS_COMMIT_MESSAGE"
+  - git push -q https://$GITHUB_KEY@github.com/fourtf/chatterino2 --tags
+  - ls -R
+
+deploy:
+  skip_cleanup: true
+  provider: releases
+  api_key: $GITHUB_KEY
+  file: "chatterino2.zip"
+  prerelease: true
+  on:
+    tags: false
+    branch: nightly
