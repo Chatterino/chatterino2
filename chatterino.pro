@@ -339,6 +339,7 @@ HEADERS += \
     src/widgets/AccountSwitchPopupWidget.hpp \
     src/widgets/AccountSwitchWidget.hpp \
     src/widgets/AttachedWindow.hpp \
+    src/widgets/CommonTexts.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
     src/widgets/dialogs/LoginDialog.hpp \

@@ -15,6 +15,7 @@
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/helper/CommonTexts.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -268,13 +269,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     });
 #endif
 
-    menu->addAction("Open in browser", this->split_, &Split::openInBrowser);
+    menu->addAction(OPEN_IN_BROWSER, this->split_, &Split::openInBrowser);
 #ifndef USEWEBENGINE
-    menu->addAction("Open player in browser", this->split_,
+    menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,
                     &Split::openBrowserPlayer);
 #endif
-    menu->addAction("Open in streamlink", this->split_,
-                    &Split::openInStreamlink);
+    menu->addAction(OPEN_IN_STREAMLINK, this->split_, &Split::openInStreamlink);
     menu->addSeparator();
 
     // sub menu
