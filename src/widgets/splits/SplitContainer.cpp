@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "debug/AssertInGuiThread.hpp"
+#include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
@@ -526,6 +527,10 @@ void SplitContainer::paintEvent(QPaintEvent *)
         painter.fillRect(rect(), this->theme->splits.background);
 
         painter.setPen(this->theme->splits.header.text);
+
+        const auto font =
+            getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale());
+        painter.setFont(font);
 
         QString text = "Click to add a split";
 
