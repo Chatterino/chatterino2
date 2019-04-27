@@ -34,7 +34,7 @@ equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
 }
 
 # Icons
-#macx:ICON = resources/images/chatterino2.icns
+macx:ICON = resources/chatterino.icns
 win32:RC_FILE = resources/windows.rc
 
 macx {
