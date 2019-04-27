@@ -294,8 +294,12 @@ void ChannelView::scaleChangedEvent(float scale)
 
     if (this->goToBottom_)
     {
+        auto factor = this->qtFontScale();
+#ifdef Q_OS_MACOS
+        factor = scale * 80.f / this->logicalDpiX() * this->devicePixelRatioF();
+#endif
         this->goToBottom_->getLabel().setFont(
-            getFonts()->getFont(FontStyle::UiMedium, this->qtFontScale()));
+            getFonts()->getFont(FontStyle::UiMedium, factor));
     }
 }
 
