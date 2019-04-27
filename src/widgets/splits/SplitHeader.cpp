@@ -300,7 +300,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     {
         auto action = new QAction(this);
-        action->setText("Mute pings");
+        action->setText("Mute highlight sound");
         action->setCheckable(true);
 
         QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
