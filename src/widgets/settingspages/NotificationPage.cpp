@@ -4,8 +4,8 @@
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Toasts.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/helper/CommonTexts.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QCheckBox>
@@ -45,10 +45,17 @@ NotificationPage::NotificationPage()
                     openIn.emplace<QLabel>("Open stream from Toast:  ")
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
+
                     openIn
                         .append(this->createComboBox(
-                            {OPEN_IN_BROWSER, OPEN_PLAYER_IN_BROWSER,
-                             OPEN_IN_STREAMLINK, DONT_OPEN},
+                            {Toasts::findStringFromReaction(
+                                 ToastReactions::openInBrowser),
+                             Toasts::findStringFromReaction(
+                                 ToastReactions::openInPlayer),
+                             Toasts::findStringFromReaction(
+                                 ToastReactions::openInStreamlink),
+                             Toasts::findStringFromReaction(
+                                 ToastReactions::dontOpen)},
                             getSettings()->openFromToast))
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
