@@ -123,7 +123,7 @@ TwitchChannel::TwitchChannel(const QString &name,
 
     // --
     this->messageSuffix_.append(' ');
-    this->messageSuffix_.append("󠀀"); // E0000
+    this->messageSuffix_.append(QChar(0x034f));
 
     // debugging
 #if 0
