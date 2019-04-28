@@ -33,12 +33,6 @@ std::map<ToastReactions, QString> Toasts::reactionToString = {
     {ToastReactions::OpenInStreamlink, OPEN_IN_STREAMLINK},
     {ToastReactions::DontOpen, DONT_OPEN}};
 
-std::map<QString, ToastReactions> Toasts::stringToReaction = {
-    {OPEN_IN_BROWSER, ToastReactions::OpenInBrowser},
-    {OPEN_PLAYER_IN_BROWSER, ToastReactions::OpenInPlayer},
-    {OPEN_IN_STREAMLINK, ToastReactions::OpenInStreamlink},
-    {DONT_OPEN, ToastReactions::DontOpen}};
-
 bool Toasts::isEnabled()
 {
 #ifdef Q_OS_WIN
@@ -68,18 +62,6 @@ QString Toasts::findStringFromReaction(
     return Toasts::findStringFromReaction(static_cast<ToastReactions>(i));
 }
 
-ToastReactions Toasts::findReactionFromString(const QString &string)
-{
-    auto iterator = Toasts::stringToReaction.find(string);
-    if (iterator != Toasts::stringToReaction.end())
-    {
-        return iterator->second;
-    }
-    else
-    {
-        return ToastReactions::DontOpen;
-    }
-}
 void Toasts::sendChannelNotification(const QString &channelName, Platform p)
 {
 #ifdef Q_OS_WIN
