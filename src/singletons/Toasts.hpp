@@ -21,9 +21,7 @@ public:
     static QString findStringFromReaction(const ToastReactions &reaction);
     static QString findStringFromReaction(
         const pajlada::Settings::Setting<int> &reaction);
-    static ToastReactions findReactionFromString(const QString &string);
     static std::map<ToastReactions, QString> reactionToString;
-    static std::map<QString, ToastReactions> stringToReaction;
 
     static bool isEnabled();
 
