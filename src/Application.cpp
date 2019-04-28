@@ -264,6 +264,7 @@ void Application::initPubsub()
             auto msg = MessageBuilder(action).release();
 
             postToThread([chan, msg] { chan->addMessage(msg); });
+            chan->deleteMessage(msg->id);
         });
 
     this->twitch.pubsub->start();

@@ -266,6 +266,41 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
 }
 
+void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
+{
+    // check parameter count
+    if (message->parameters().length() < 1)
+    {
+        return;
+    }
+
+    QString chanName;
+    if (!trimChannelName(message->parameter(0), chanName))
+    {
+        return;
+    }
+
+    auto app = getApp();
+
+    // get channel
+    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
+
+    if (chan->isEmpty())
+    {
+        log("[IrcMessageHandler:handleClearMessageMessage] Twitch channel {} "
+            "not "
+            "found",
+            chanName);
+        return;
+    }
+
+    auto tags = message->tags();
+
+    QString targetID = tags.value("target-msg-id").toString();
+
+    chan->deleteMessage(targetID);
+}
+
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
@@ -516,7 +551,17 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             return;
         }
 
-        channel->addMessage(msg);
+        QString tags = message->tags().value("msg-id", "").toString();
+        if (tags == "bad_delete_message_error" || tags == "usage_delete")
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: \"/delete <msg-id>\" - can't take more "
+                "than one argument"));
+        }
+        else
+        {
+            channel->addMessage(msg);
+        }
     }
 }
 

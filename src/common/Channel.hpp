@@ -62,6 +62,7 @@ public:
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
+    void deleteMessage(QString messageID);
 
     QStringList modList;
 

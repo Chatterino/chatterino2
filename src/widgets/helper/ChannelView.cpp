@@ -1667,7 +1667,9 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserAction:
         {
             QString value = link.value;
-            value.replace("{user}", layout->getMessage()->loginName).replace("{channel}", this->channel_->getName());
+            value.replace("{user}", layout->getMessage()->loginName)
+                .replace("{channel}", this->channel_->getName())
+                .replace("{msg-id}", layout->getMessage()->id);
             this->channel_->sendMessage(value);
         }
         break;

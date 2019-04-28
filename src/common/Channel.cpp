@@ -212,6 +212,25 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
     }
 }
 
+void Channel::deleteMessage(QString messageID)
+{
+    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
+    int snapshotLength = snapshot.size();
+
+    int end = std::max(0, snapshotLength - 200);
+
+    for (int i = snapshotLength - 1; i >= end; --i)
+    {
+        auto &s = snapshot[i];
+
+        if (s->id == messageID)
+        {
+            s->flags.set(MessageFlag::Disabled);
+            break;
+        }
+    }
+}
+
 void Channel::addRecentChatter(const MessagePtr &message)
 {
 }
