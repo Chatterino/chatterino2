@@ -18,6 +18,7 @@ Resources2::Resources2()
     this->buttons.modModeEnabled = QPixmap(":/buttons/modModeEnabled.png");
     this->buttons.modModeEnabled2 = QPixmap(":/buttons/modModeEnabled2.png");
     this->buttons.timeout = QPixmap(":/buttons/timeout.png");
+    this->buttons.trashCan = QPixmap(":/buttons/trashCan.png");
     this->buttons.unban = QPixmap(":/buttons/unban.png");
     this->buttons.unmod = QPixmap(":/buttons/unmod.png");
     this->buttons.update = QPixmap(":/buttons/update.png");

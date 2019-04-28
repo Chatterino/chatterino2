@@ -580,9 +580,8 @@ void TwitchMessageBuilder::parseMessageID()
 
     if (iterator != this->tags.end())
     {
-        this->messageID = iterator.value().toString();
+        this->message().id = iterator.value().toString();
     }
-    this->message().id = this->messageID;
 }
 
 void TwitchMessageBuilder::parseRoomID()
@@ -608,7 +607,7 @@ void TwitchMessageBuilder::parseRoomID()
 void TwitchMessageBuilder::appendChannelName()
 {
     QString channelName("#" + this->channel->getName());
-    Link link(Link::Url, this->channel->getName() + "\n" + this->messageID);
+    Link link(Link::Url, this->channel->getName() + "\n" + this->message().id);
 
     this->emplace<TextElement>(channelName, MessageElementFlag::ChannelName,
                                MessageColor::System)  //

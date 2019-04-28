@@ -24,6 +24,7 @@ public:
         QPixmap modModeEnabled;
         QPixmap modModeEnabled2;
         QPixmap timeout;
+        QPixmap trashCan;
         QPixmap unban;
         QPixmap unmod;
         QPixmap update;

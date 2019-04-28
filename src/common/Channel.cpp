@@ -217,17 +217,11 @@ void Channel::deleteMessage(QString messageID)
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
     int snapshotLength = snapshot.size();
 
-    int end = std::max(0, snapshotLength - 20);
+    int end = std::max(0, snapshotLength - 200);
 
-    QTime minimumTime = QTime::currentTime().addSecs(-5);
     for (int i = snapshotLength - 1; i >= end; --i)
     {
         auto &s = snapshot[i];
-
-        if (s->parseTime < minimumTime)
-        {
-            break;
-        }
 
         if (s->id == messageID)
         {

@@ -75,7 +75,7 @@ ModerationAction::ModerationAction(const QString &action)
     }
     else if (action.startsWith("/delete"))
     {
-        this->image_ = Image::fromPixmap(getApp()->resources->pajaDank);
+        this->image_ = Image::fromPixmap(getApp()->resources->buttons.trashCan);
     }
     else
     {
