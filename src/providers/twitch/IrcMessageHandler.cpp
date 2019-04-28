@@ -552,7 +552,17 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             return;
         }
 
-        channel->addMessage(msg);
+        QString tags = message->tags().value("msg-id", "").toString();
+        if (tags == "bad_delete_message_error" || tags == "usage_delete")
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: \"/delete <msg-id>\" - can't take more "
+                "than one argument"));
+        }
+        else
+        {
+            channel->addMessage(msg);
+        }
     }
 }
 
