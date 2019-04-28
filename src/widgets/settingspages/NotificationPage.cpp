@@ -153,10 +153,10 @@ QComboBox *NotificationPage::createToastReactionComboBox(
         },
         managedConnections);
 
-    QObject::connect(toastReactionOptions, &QComboBox::currentTextChanged,
-                     [setting](const QString &newValue) {
-                         getSettings()->openFromToast.setValue(static_cast<int>(
-                             Toasts::findReactionFromString(newValue)));
+    QObject::connect(toastReactionOptions,
+                     QOverload<int>::of(&QComboBox::currentIndexChanged),
+                     [](const int &newValue) {
+                         getSettings()->openFromToast.setValue(newValue);
                      });
 
     return toastReactionOptions;
