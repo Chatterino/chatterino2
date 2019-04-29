@@ -26,6 +26,8 @@
 #include <chrono>
 
 #define SETTINGS_FILENAME "/window-layout.json"
+#define BACKUP_FILENAME "/window-layout-backup.json"
+#define TEMP_FILENAME "/window-layout-temp.json"
 
 namespace chatterino {
 
@@ -258,11 +260,25 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
     // load file
     QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QFile file(settingsPath);
-    file.open(QIODevice::ReadOnly);
-    QByteArray data = file.readAll();
-    QJsonDocument document = QJsonDocument::fromJson(data);
-    QJsonArray windows_arr = document.object().value("windows").toArray();
+    QJsonArray windows_arr;
+
+    // if the file was corrupted while saving the windows array will be empty
+    QJsonArray windows_arr_setting = this->buildWindowArray(settingsPath);
+    if (!windows_arr_setting.isEmpty())
+    {
+        // if not empty (=not corrupted), build the window layout from this
+        windows_arr = windows_arr_setting;
+    }
+    else
+    {
+        // if array was empty (=file corrupted), build layout from backup
+        QString backupPath = getPaths()->settingsDirectory + BACKUP_FILENAME;
+        QJsonArray windows_arr_backup = this->buildWindowArray(backupPath);
+        windows_arr = windows_arr_backup;
+        // remove broken file and restore backup
+        QFile::remove(settingsPath);
+        QFile::copy(backupPath, settingsPath);
+    }
 
     // "deserialize"
     for (QJsonValue window_val : windows_arr)
@@ -477,6 +493,18 @@ void WindowManager::save()
 
     // save file
     QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
+    QString backupPath = getPaths()->settingsDirectory + BACKUP_FILENAME;
+    QString tempPath = getPaths()->settingsDirectory + TEMP_FILENAME;
+
+    // create a backup first.
+    // If chatterino exits during saving (e.g. crash, forced shutdown),
+    // layout file might turn out corupted.
+    // need to copy to temp file, because QFile::copy does not allow overwriting
+    QFile::copy(backupPath, tempPath);
+    QFile::remove(backupPath);
+    QFile::copy(settingsPath, backupPath);
+    QFile::remove(tempPath);
+
     QFile file(settingsPath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
@@ -620,6 +648,16 @@ int WindowManager::getGeneration() const
 void WindowManager::incGeneration()
 {
     this->generation_++;
+}
+
+QJsonArray WindowManager::buildWindowArray(QString &settingsPath)
+{
+    QFile file(settingsPath);
+    file.open(QIODevice::ReadOnly);
+    QByteArray data = file.readAll();
+    QJsonDocument document = QJsonDocument::fromJson(data);
+    QJsonArray windows_arr = document.object().value("windows").toArray();
+    return windows_arr;
 }
 
 }  // namespace chatterino
