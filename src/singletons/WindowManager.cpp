@@ -474,12 +474,7 @@ void WindowManager::save()
 
     // save file
     QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-
-    // sometimes chatterino exits/crashes while saving the window layout
-    // this led to corrupted file and users losing their entire layout
-    // QSaveFile used to avoid that
     QSaveFile file(settingsPath);
-
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
     QJsonDocument::JsonFormat format =
@@ -624,7 +619,7 @@ void WindowManager::incGeneration()
     this->generation_++;
 }
 
-QJsonArray WindowManager::buildWindowArray(QString &settingsPath)
+QJsonArray WindowManager::loadWindowArray(const QString &settingsPath)
 {
     QFile file(settingsPath);
     file.open(QIODevice::ReadOnly);

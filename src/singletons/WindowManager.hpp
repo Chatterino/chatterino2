@@ -54,7 +54,7 @@ public:
     virtual void initialize(Settings &settings, Paths &paths) override;
     virtual void save() override;
     void closeAll();
-    QJsonArray buildWindowArray(QString &settingsPath);
+    QJsonArray loadWindowArray(const QString &settingsPath);
 
     int getGeneration() const;
     void incGeneration();
