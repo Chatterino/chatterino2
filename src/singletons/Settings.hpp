@@ -175,7 +175,7 @@ public:
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {
         "/notifications/openFromToast",
-        static_cast<int>(ToastReactions::OpenInBrowser)};
+        static_cast<int>(ToastReaction::OpenInBrowser)};
 
     /// External tools
     // Streamlink

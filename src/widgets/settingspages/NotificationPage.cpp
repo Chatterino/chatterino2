@@ -139,10 +139,10 @@ QComboBox *NotificationPage::createToastReactionComboBox(
 {
     QComboBox *toastReactionOptions = new QComboBox();
 
-    for (int i = 0; i <= static_cast<int>(ToastReactions::DontOpen); i++)
+    for (int i = 0; i <= static_cast<int>(ToastReaction::DontOpen); i++)
     {
         toastReactionOptions->insertItem(
-            i, Toasts::findStringFromReaction(static_cast<ToastReactions>(i)));
+            i, Toasts::findStringFromReaction(static_cast<ToastReaction>(i)));
     }
 
     // update when setting changes
