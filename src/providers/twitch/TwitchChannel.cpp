@@ -30,6 +30,8 @@
 
 namespace chatterino {
 namespace {
+    constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
+
     // parseRecentMessages takes a json object and returns a vector of
     // Communi IrcMessages
     auto parseRecentMessages(const QJsonObject &jsonRoot, ChannelPtr channel)
@@ -121,10 +123,6 @@ TwitchChannel::TwitchChannel(const QString &name,
                      [=] { this->refreshLiveStatus(); });
     this->liveStatusTimer_.start(60 * 1000);
 
-    // --
-    this->messageSuffix_.append(' ');
-    this->messageSuffix_.append("󠀀"); // E0000
-
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
@@ -199,7 +197,7 @@ void TwitchChannel::sendMessage(const QString &message)
         {
             if (parsedMessage == this->lastSentMessage_)
             {
-                parsedMessage.append(this->messageSuffix_);
+                parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
             }
         }
     }

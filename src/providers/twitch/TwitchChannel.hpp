@@ -166,7 +166,6 @@ private:
     bool partedUsersMergeQueued_ = false;
 
     // --
-    QByteArray messageSuffix_;
     QString lastSentMessage_;
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
