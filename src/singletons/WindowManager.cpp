@@ -22,6 +22,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSaveFile>
 
 #include <chrono>
 
@@ -258,11 +259,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
     // load file
     QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QFile file(settingsPath);
-    file.open(QIODevice::ReadOnly);
-    QByteArray data = file.readAll();
-    QJsonDocument document = QJsonDocument::fromJson(data);
-    QJsonArray windows_arr = document.object().value("windows").toArray();
+    QJsonArray windows_arr = this->loadWindowArray(settingsPath);
 
     // "deserialize"
     for (QJsonValue window_val : windows_arr)
@@ -477,7 +474,7 @@ void WindowManager::save()
 
     // save file
     QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QFile file(settingsPath);
+    QSaveFile file(settingsPath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
     QJsonDocument::JsonFormat format =
@@ -489,7 +486,7 @@ void WindowManager::save()
         ;
 
     file.write(document.toJson(format));
-    file.flush();
+    file.commit();
 }
 
 void WindowManager::sendAlert()
@@ -620,6 +617,16 @@ int WindowManager::getGeneration() const
 void WindowManager::incGeneration()
 {
     this->generation_++;
+}
+
+QJsonArray WindowManager::loadWindowArray(const QString &settingsPath)
+{
+    QFile file(settingsPath);
+    file.open(QIODevice::ReadOnly);
+    QByteArray data = file.readAll();
+    QJsonDocument document = QJsonDocument::fromJson(data);
+    QJsonArray windows_arr = document.object().value("windows").toArray();
+    return windows_arr;
 }
 
 }  // namespace chatterino
