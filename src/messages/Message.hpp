@@ -48,6 +48,7 @@ struct Message : boost::noncopyable {
     QTime parseTime;
     QString id;
     QString searchText;
+    QString messageText;
     QString loginName;
     QString displayName;
     QString localizedName;
