@@ -102,13 +102,13 @@ To produce all supplement files for a standalone build, follow these steps (adju
 
         cd C:\Users\example\src\build-chatterino-Desktop_Qt_5_11_2_MSVC2017_64bit-Release\release
         C:\Qt\5.11.2\msvc2017_64\bin\windeployqt.exe chatterino.exe
+
  5. Go to `C:\local\bin\` and copy these dll's into your `release folder`.
- ```	
- libssl-1_1-x64.dll
- libcrypto-1_1-x64.dll
- ssleay32.dll
- libeay32.dll
- ```
+
+	 libssl-1_1-x64.dll
+	 libcrypto-1_1-x64.dll
+	 ssleay32.dll
+	 libeay32.dll
  
  6. The `releases` directory will now be populated with all the required files to make the chatterino build standalone.
 
