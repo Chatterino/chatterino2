@@ -91,16 +91,6 @@ MessageBuilder::MessageBuilder()
 {
 }
 
-MessageBuilder::MessageBuilder(const QString &text)
-    : MessageBuilder()
-{
-    this->emplace<TimestampElement>();
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
-    this->message().messageText = text;
-    this->message().searchText = text;
-}
-
 MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text)
     : MessageBuilder()
 {
