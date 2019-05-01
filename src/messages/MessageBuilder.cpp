@@ -95,8 +95,23 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text)
     : MessageBuilder()
 {
     this->emplace<TimestampElement>();
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
+
+    // check system message for links
+    // (e.g. needed for sub ticket message in sub only mode)
+    QStringList textFragments = text.split(QRegularExpression("\\s"));
+    for (const auto &word : textFragments)
+    {
+        auto linkString = this->matchLink(word);
+        if (linkString.isEmpty())
+        {
+            this->emplace<TextElement>(word, MessageElementFlag::Text,
+                                       MessageColor::System);
+        }
+        else
+        {
+            this->addLink(word, linkString);
+        }
+    }
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
     this->message().messageText = text;
