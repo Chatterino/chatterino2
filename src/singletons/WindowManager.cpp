@@ -259,7 +259,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
     // load file
     QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QJsonArray windows_arr = this->buildWindowArray(settingsPath);
+    QJsonArray windows_arr = this->loadWindowArray(settingsPath);
 
     // "deserialize"
     for (QJsonValue window_val : windows_arr)
