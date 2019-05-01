@@ -1670,17 +1670,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
 
             value.replace("{user}", layout->getMessage()->loginName)
                 .replace("{channel}", this->channel_->getName())
-                .replace("{msg-id}", layout->getMessage()->id);
-
-            QString messageText;
-            if (value.contains("{message}"))
-            {
-                messageText = layout->getMessage()->searchText;
-                // remove name + : + space to only get the actual message text
-                messageText = messageText.remove(
-                    0, (layout->getMessage()->loginName.length() + 2));
-                value.replace("{message}", messageText);
-            }
+                .replace("{msg-id}", layout->getMessage()->id)
+                .replace("{message}", layout->getMessage()->messageText);
 
             this->channel_->sendMessage(value);
         }

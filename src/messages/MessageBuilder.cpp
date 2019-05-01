@@ -97,6 +97,7 @@ MessageBuilder::MessageBuilder(const QString &text)
     this->emplace<TimestampElement>();
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
+    this->message().messageText = text;
     this->message().searchText = text;
 }
 
@@ -108,6 +109,7 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text)
                                MessageColor::System);
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    this->message().messageText = text;
     this->message().searchText = text;
 }
 
@@ -158,6 +160,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     this->emplace<TimestampElement>();
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
+    this->message().messageText = text;
     this->message().searchText = text;
 }
 
@@ -214,6 +217,7 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
 
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
+    this->message().messageText = text;
     this->message().searchText = text;
 }
 
@@ -243,6 +247,7 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
 
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
+    this->message().messageText = text;
     this->message().searchText = text;
 }
 
