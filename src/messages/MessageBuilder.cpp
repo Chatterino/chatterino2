@@ -98,10 +98,10 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text)
 
     // check system message for links
     // (e.g. needed for sub ticket message in sub only mode)
-    QStringList textFragments = text.split(QRegularExpression("\\s"));
+    const QStringList textFragments = text.split(QRegularExpression("\\s"));
     for (const auto &word : textFragments)
     {
-        auto linkString = this->matchLink(word);
+        const auto linkString = this->matchLink(word);
         if (linkString.isEmpty())
         {
             this->emplace<TextElement>(word, MessageElementFlag::Text,
