@@ -55,7 +55,7 @@ void PingController::unmuteChannel(const QString &channelName)
 
 bool PingController::toggleMuteChannel(const QString &channelName)
 {
-    if (isMuted(channelName))
+    if (this->isMuted(channelName))
     {
         unmuteChannel(channelName);
         return false;
