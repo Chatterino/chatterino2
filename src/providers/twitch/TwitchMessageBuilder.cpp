@@ -917,14 +917,16 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 
         if (!isPastMsg)
         {
-            if (playSound &&
-                (!hasFocus || getSettings()->highlightAlwaysPlaySound) &&
-                !getApp()->pings->isMuted(this->channel->getName()))
+            bool notMuted = !getApp()->pings->isMuted(this->channel->getName());
+            bool resolveFocus =
+                !hasFocus || getSettings()->highlightAlwaysPlaySound;
+
+            if (playSound && notMuted && resolveFocus)
             {
                 player->play();
             }
 
-            if (doAlert && !getApp()->pings->isMuted(this->channel->getName()))
+            if (doAlert && notMuted)
             {
                 getApp()->windows->sendAlert();
             }
