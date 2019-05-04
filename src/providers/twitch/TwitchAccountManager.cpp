@@ -172,8 +172,6 @@ bool TwitchAccountManager::isLoggedIn() const
 
 bool TwitchAccountManager::removeUser(TwitchAccount *account)
 {
-    const auto &accs = this->accounts.getVector();
-
     auto userID(account->getUserId());
     if (!userID.isEmpty())
     {

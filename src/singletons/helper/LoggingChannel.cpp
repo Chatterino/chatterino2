@@ -33,20 +33,10 @@ LoggingChannel::LoggingChannel(const QString &_channelName)
     // FOURTF: change this when adding more providers
     this->subDirectory = "Twitch/" + this->subDirectory;
 
-    auto app = getApp();
-
     getSettings()->logPath.connect([this](const QString &logPath, auto) {
-        auto app = getApp();
-
-        if (logPath.isEmpty())
-        {
-            this->baseDirectory = getPaths()->messageLogDirectory;
-        }
-        else
-        {
-            this->baseDirectory = logPath;
-        }
-
+        this->baseDirectory = logPath.isEmpty()
+            ? getPaths()->messageLogDirectory
+            : logPath;
         this->openLogFile();
     });
 }

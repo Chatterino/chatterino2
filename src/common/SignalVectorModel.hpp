@@ -188,7 +188,7 @@ public:
         assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
                column < this->columnCount_);
 
-        return this->rows_[index.row()].items[index.column()]->flags();
+        return this->rows_[row].items[column]->flags();
     }
 
     QStandardItem *getItem(int row, int column)

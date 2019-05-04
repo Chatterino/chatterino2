@@ -387,10 +387,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 void WindowManager::save()
 {
     log("[WindowManager] Saving");
-
     assertInGuiThread();
-    auto app = getApp();
-
     QJsonDocument document;
 
     // "serialize"
