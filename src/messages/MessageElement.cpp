@@ -291,7 +291,6 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
 {
     if (flags.hasAny(this->getFlags()))
     {
-        auto app = getApp();
         if (getSettings()->timestampFormat != this->format_)
         {
             this->format_ = getSettings()->timestampFormat.getValue();
