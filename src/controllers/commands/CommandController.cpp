@@ -15,6 +15,7 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/dialogs/LogsPopup.hpp"
 
@@ -30,6 +31,136 @@
             "/clear", "/subscribers", "/subscribersoff", "/followers",  \
             "/followersoff"                                             \
     }
+
+namespace {
+using namespace chatterino;
+
+void sendWhisperMessage(const QString &text)
+{
+    auto app = getApp();
+    app->twitch.server->sendMessage("jtv", text);
+}
+
+bool appendWhisperMessageLocally(const QStringList &words)
+{
+    auto app = getApp();
+
+    MessageBuilder b;
+
+    b.emplace<TimestampElement>();
+    b.emplace<TextElement>(app->accounts->twitch.getCurrent()->getUserName(),
+                           MessageElementFlag::Text, MessageColor::Text,
+                           FontStyle::ChatMediumBold);
+    b.emplace<TextElement>("->", MessageElementFlag::Text,
+                           getApp()->themes->messages.textColors.system);
+    b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
+                           MessageColor::Text, FontStyle::ChatMediumBold);
+
+    const auto &acc = app->accounts->twitch.getCurrent();
+    const auto &accemotes = *acc->accessEmotes();
+    const auto &bttvemotes = app->twitch.server->getBttvEmotes();
+    const auto &ffzemotes = app->twitch.server->getFfzEmotes();
+    auto flags = MessageElementFlags();
+    auto emote = boost::optional<EmotePtr>{};
+    for (int i = 2; i < words.length(); i++)
+    {
+        {  // twitch emote
+            auto it = accemotes.emotes.find({words[i]});
+            if (it != accemotes.emotes.end())
+            {
+                b.emplace<EmoteElement>(it->second,
+                                        MessageElementFlag::TwitchEmote);
+                continue;
+            }
+        }  // twitch emote
+
+        {  // bttv/ffz emote
+            if ((emote = bttvemotes.emote({words[i]})))
+            {
+                flags = MessageElementFlag::BttvEmote;
+            }
+            else if ((emote = ffzemotes.emote({words[i]})))
+            {
+                flags = MessageElementFlag::FfzEmote;
+            }
+            if (emote)
+            {
+                b.emplace<EmoteElement>(emote.get(), flags);
+                continue;
+            }
+        }  // bttv/ffz emote
+        {  // emoji/text
+            for (auto &variant : app->emotes->emojis.parse(words[i]))
+            {
+                constexpr const static struct {
+                    void operator()(EmotePtr emote, MessageBuilder &b) const
+                    {
+                        b.emplace<EmoteElement>(emote,
+                                                MessageElementFlag::EmojiAll);
+                    }
+                    void operator()(const QString &string,
+                                    MessageBuilder &b) const
+                    {
+                        auto linkString = b.matchLink(string);
+                        if (linkString.isEmpty())
+                        {
+                            b.emplace<TextElement>(string,
+                                                   MessageElementFlag::Text);
+                        }
+                        else
+                        {
+                            b.addLink(string, linkString);
+                        }
+                    }
+                } visitor;
+                boost::apply_visitor([&b](auto &&arg) { visitor(arg, b); },
+                                     variant);
+            }  // emoji/text
+        }
+    }
+
+    b->flags.set(MessageFlag::DoNotTriggerNotification);
+    b->flags.set(MessageFlag::Whisper);
+    auto messagexD = b.release();
+
+    app->twitch.server->whispersChannel->addMessage(messagexD);
+
+    auto overrideFlags = boost::optional<MessageFlags>(messagexD->flags);
+    overrideFlags->set(MessageFlag::DoNotLog);
+
+    if (getSettings()->inlineWhispers)
+    {
+        app->twitch.server->forEachChannel(
+            [&messagexD, overrideFlags](ChannelPtr _channel) {
+                _channel->addMessage(messagexD, overrideFlags);
+            });
+    }
+
+    return true;
+}
+
+bool appendWhisperMessageLocally(const QString &textNoEmoji)
+{
+    QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
+    QStringList words = text.split(' ', QString::SkipEmptyParts);
+
+    if (words.length() == 0)
+    {
+        return false;
+    }
+
+    QString commandName = words[0];
+
+    if (commandName == "/w")
+    {
+        if (words.length() > 2)
+        {
+            return appendWhisperMessageLocally(words);
+        }
+    }
+    return false;
+}
+}  // namespace
 
 namespace chatterino {
 
@@ -124,106 +255,10 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     {
         if (commandName == "/w")
         {
-            if (words.length() <= 2)
+            if (words.length() > 2)
             {
-                return "";
-            }
-
-            auto app = getApp();
-
-            MessageBuilder b;
-
-            b.emplace<TimestampElement>();
-            b.emplace<TextElement>(
-                app->accounts->twitch.getCurrent()->getUserName(),
-                MessageElementFlag::Text, MessageColor::Text,
-                FontStyle::ChatMediumBold);
-            b.emplace<TextElement>("->", MessageElementFlag::Text);
-            b.emplace<TextElement>(words[1] + ":", MessageElementFlag::Text,
-                                   MessageColor::Text,
-                                   FontStyle::ChatMediumBold);
-
-            const auto &acc = app->accounts->twitch.getCurrent();
-            const auto &accemotes = *acc->accessEmotes();
-            const auto &bttvemotes = app->twitch.server->getBttvEmotes();
-            const auto &ffzemotes = app->twitch.server->getFfzEmotes();
-            auto flags = MessageElementFlags();
-            auto emote = boost::optional<EmotePtr>{};
-            for (int i = 2; i < words.length(); i++)
-            {
-                {  // twitch emote
-                    auto it = accemotes.emotes.find({words[i]});
-                    if (it != accemotes.emotes.end())
-                    {
-                        b.emplace<EmoteElement>(
-                            it->second, MessageElementFlag::TwitchEmote);
-                        continue;
-                    }
-                }  // twitch emote
-
-                {  // bttv/ffz emote
-                    if ((emote = bttvemotes.emote({words[i]})))
-                    {
-                        flags = MessageElementFlag::BttvEmote;
-                    }
-                    else if ((emote = ffzemotes.emote({words[i]})))
-                    {
-                        flags = MessageElementFlag::FfzEmote;
-                    }
-                    if (emote)
-                    {
-                        b.emplace<EmoteElement>(emote.get(), flags);
-                        continue;
-                    }
-                }  // bttv/ffz emote
-                {  // emoji/text
-                    for (auto &variant : app->emotes->emojis.parse(words[i]))
-                    {
-                        constexpr const static struct {
-                            void operator()(EmotePtr emote,
-                                            MessageBuilder &b) const
-                            {
-                                b.emplace<EmoteElement>(
-                                    emote, MessageElementFlag::EmojiAll);
-                            }
-                            void operator()(const QString &string,
-                                            MessageBuilder &b) const
-                            {
-                                auto linkString = b.matchLink(string);
-                                if (linkString.isEmpty())
-                                {
-                                    b.emplace<TextElement>(
-                                        string, MessageElementFlag::Text);
-                                }
-                                else
-                                {
-                                    b.addLink(string, linkString);
-                                }
-                            }
-                        } visitor;
-                        boost::apply_visitor(
-                            [&b](auto &&arg) { visitor(arg, b); }, variant);
-                    }  // emoji/text
-                }
-            }
-
-            b->flags.set(MessageFlag::DoNotTriggerNotification);
-            b->flags.set(MessageFlag::Whisper);
-            auto messagexD = b.release();
-
-            app->twitch.server->whispersChannel->addMessage(messagexD);
-
-            app->twitch.server->sendMessage("jtv", text);
-
-            auto overrideFlags = boost::optional<MessageFlags>(messagexD->flags);
-            overrideFlags->set(MessageFlag::DoNotLog);
-
-            if (getSettings()->inlineWhispers)
-            {
-                app->twitch.server->forEachChannel(
-                    [&messagexD, overrideFlags](ChannelPtr _channel) {
-                        _channel->addMessage(messagexD, overrideFlags);
-                    });
+                appendWhisperMessageLocally(words);
+                sendWhisperMessage(text);
             }
 
             return "";
@@ -428,7 +463,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     auto it = this->commandsMap_.find(commandName);
     if (it != this->commandsMap_.end())
     {
-        return this->execCustomCommand(words, it.value());
+        return this->execCustomCommand(words, it.value(), dryRun);
     }
 
     auto maxSpaces = std::min(this->maxSpaces_, words.length() - 1);
@@ -439,7 +474,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         auto it = this->commandsMap_.find(commandName);
         if (it != this->commandsMap_.end())
         {
-            return this->execCustomCommand(words, it.value());
+            return this->execCustomCommand(words, it.value(), dryRun);
         }
     }
 
@@ -447,7 +482,8 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 }
 
 QString CommandController::execCustomCommand(const QStringList &words,
-                                             const Command &command)
+                                             const Command &command,
+                                             bool dryRun)
 {
     QString result;
 
@@ -518,7 +554,15 @@ QString CommandController::execCustomCommand(const QStringList &words,
         result = result.mid(1);
     }
 
-    return result.replace("{{", "{");
+    auto res = result.replace("{{", "{");
+
+    if (dryRun)
+    {
+        return res;
+    }
+
+    return appendWhisperMessageLocally(res) ? (sendWhisperMessage(res), "")
+                                            : res;
 }
 
 QStringList CommandController::getDefaultTwitchCommandList()
