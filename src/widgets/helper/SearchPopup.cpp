@@ -17,6 +17,24 @@ SearchPopup::SearchPopup()
     this->resize(400, 600);
 }
 
+void SearchPopup::setChannel(ChannelPtr channel)
+{
+    this->snapshot_ = channel->getMessageSnapshot();
+    this->performSearch();
+
+    this->setWindowTitle("Searching in " + channel->getName() + "s history");
+}
+
+void SearchPopup::keyPressEvent(QKeyEvent *e)
+{
+    if (e->key() == Qt::Key_Escape) {
+        this->close();
+        return;
+    }
+
+    BaseWidget::keyPressEvent(e);
+}
+
 void SearchPopup::initLayout()
 {
     // VBOX
@@ -58,14 +76,6 @@ void SearchPopup::initLayout()
 
         this->setLayout(layout1);
     }
-}
-
-void SearchPopup::setChannel(ChannelPtr channel)
-{
-    this->snapshot_ = channel->getMessageSnapshot();
-    this->performSearch();
-
-    this->setWindowTitle("Searching in " + channel->getName() + "s history");
 }
 
 void SearchPopup::performSearch()
