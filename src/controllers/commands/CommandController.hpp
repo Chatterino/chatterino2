@@ -49,7 +49,8 @@ private:
     std::unique_ptr<pajlada::Settings::Setting<std::vector<Command>>>
         commandsSetting_;
 
-    QString execCustomCommand(const QStringList &words, const Command &command);
+    QString execCustomCommand(const QStringList &words, const Command &command,
+                              bool dryRun);
 };
 
 }  // namespace chatterino
