@@ -528,7 +528,8 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     for (auto msg : builtMessages)
     {
         QString channelName;
-        if (!trimChannelName(message->target(), channelName))
+        if (!trimChannelName(message->target(), channelName) ||
+            channelName == "jtv")
         {
             // Notice wasn't targeted at a single channel, send to all twitch
             // channels
