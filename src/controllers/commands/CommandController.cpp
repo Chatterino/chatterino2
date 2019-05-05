@@ -38,7 +38,7 @@ using namespace chatterino;
 void sendWhisperMessage(const QString &text)
 {
     auto app = getApp();
-    app->twitch.server->sendMessage("jtv", text);
+    app->twitch.server->sendMessage("jtv", text.simplified());
 }
 
 bool appendWhisperMessageLocally(const QStringList &words)
