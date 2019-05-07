@@ -7,7 +7,6 @@
 #include "controllers/pings/PingController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
-#include "providers/LinkResolver.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -81,6 +80,19 @@ bool TwitchMessageBuilder::isIgnored() const
         {
             if (sourceUserID == user.id)
             {
+                switch (static_cast<ShowIgnoredUsersMessages>(
+                    getSettings()->showIgnoredUsersMessages.getValue()))
+                {
+                    case ShowIgnoredUsersMessages::IfModerator:
+                        if (this->channel->isMod() ||
+                            this->channel->isBroadcaster())
+                            return false;
+                        break;
+                    case ShowIgnoredUsersMessages::IfBroadcaster:
+                        if (this->channel->isBroadcaster())
+                            return false;
+                        break;
+                }
                 log("Blocking message because it's from blocked user {}",
                     user.name);
                 return true;
@@ -110,12 +122,24 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->appendChannelName();
 
+    if (this->tags.contains("rm-deleted"))
+    {
+        this->message().flags.set(MessageFlag::Disabled);
+    }
+
     // timestamp
     bool isPastMsg = this->tags.contains("historical");
     if (isPastMsg)
     {
         // This may be architecture dependent(datatype)
-        qint64 ts = this->tags.value("tmi-sent-ts").toLongLong();
+        bool customReceived = false;
+        qint64 ts =
+            this->tags.value("rm-received-ts").toLongLong(&customReceived);
+        if (!customReceived)
+        {
+            ts = this->tags.value("tmi-sent-ts").toLongLong();
+        }
+
         QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(ts);
         this->emplace<TimestampElement>(dateTime.time());
     }
@@ -415,6 +439,7 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->addWords(splits, twitchEmotes);
 
+    this->message().messageText = this->originalMessage_;
     this->message().searchText = this->userName + ": " + this->originalMessage_;
 
     return this->release();
@@ -513,56 +538,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
     }
     else
     {
-        static QRegularExpression domainRegex(
-            R"(^(?:(?:ftp|http)s?:\/\/)?([^\/]+)(?:\/.*)?$)",
-            QRegularExpression::CaseInsensitiveOption);
-
-        QString lowercaseLinkString;
-        auto match = domainRegex.match(string);
-        if (match.isValid())
-        {
-            lowercaseLinkString = string.mid(0, match.capturedStart(1)) +
-                                  match.captured(1).toLower() +
-                                  string.mid(match.capturedEnd(1));
-        }
-        else
-        {
-            lowercaseLinkString = string;
-        }
-        link = Link(Link::Url, linkString);
-
-        textColor = MessageColor(MessageColor::Link);
-        auto linkMELowercase =
-            this->emplace<TextElement>(lowercaseLinkString,
-                                       MessageElementFlag::LowercaseLink,
-                                       textColor)
-                ->setLink(link);
-        auto linkMEOriginal =
-            this->emplace<TextElement>(string, MessageElementFlag::OriginalLink,
-                                       textColor)
-                ->setLink(link);
-
-        LinkResolver::getLinkInfo(
-            linkString,
-            [weakMessage = this->weakOf(), linkMELowercase, linkMEOriginal,
-             linkString](QString tooltipText, Link originalLink) {
-                auto shared = weakMessage.lock();
-                if (!shared)
-                {
-                    return;
-                }
-                if (!tooltipText.isEmpty())
-                {
-                    linkMELowercase->setTooltip(tooltipText);
-                    linkMEOriginal->setTooltip(tooltipText);
-                }
-                if (originalLink.value != linkString &&
-                    !originalLink.value.isEmpty())
-                {
-                    linkMELowercase->setLink(originalLink)->updateLink();
-                    linkMEOriginal->setLink(originalLink)->updateLink();
-                }
-            });
+        this->addLink(string, linkString);
     }
 
     // if (!linkString.isEmpty()) {
@@ -606,7 +582,7 @@ void TwitchMessageBuilder::parseMessageID()
 
     if (iterator != this->tags.end())
     {
-        this->messageID = iterator.value().toString();
+        this->message().id = iterator.value().toString();
     }
 }
 
@@ -633,7 +609,7 @@ void TwitchMessageBuilder::parseRoomID()
 void TwitchMessageBuilder::appendChannelName()
 {
     QString channelName("#" + this->channel->getName());
-    Link link(Link::Url, this->channel->getName() + "\n" + this->messageID);
+    Link link(Link::Url, this->channel->getName() + "\n" + this->message().id);
 
     this->emplace<TextElement>(channelName, MessageElementFlag::ChannelName,
                                MessageColor::System)  //

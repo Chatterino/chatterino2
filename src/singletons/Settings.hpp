@@ -4,7 +4,7 @@
 
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
-#include "messages/HistoricMessageAppearance.hpp"
+#include "singletons/Toasts.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -32,15 +32,13 @@ public:
                                      Qt::VerPattern};
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
                                        ""};
-    IntSetting historicMessagesAppearance = {
-        "/appearance/messages/historicMessagesAppearance",
-        HistoricMessageAppearance::Crossed | HistoricMessageAppearance::Greyed};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
     BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
+    BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
@@ -67,7 +65,6 @@ public:
     BoolSetting headerUptime = {"/appearance/splitheader/showUptime", false};
     FloatSetting customThemeMultiplier = {"/appearance/customThemeMultiplier",
                                           -0.5f};
-    BoolSetting redDisabledMessages = {"/appearance/redStripes", true};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
 
@@ -128,6 +125,7 @@ public:
     /// Ingored Users
     BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
                                             true};
+    IntSetting showIgnoredUsersMessages = {"/ignore/showIgnoredUsers", 0};
 
     /// Moderation
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};
@@ -147,7 +145,7 @@ public:
         "/highlighting/whisperHighlight/enableSound", false};
     BoolSetting enableWhisperHighlightTaskbar = {
         "/highlighting/whisperHighlight/enableTaskbarFlashing", false};
-    QStringSetting highlightColor = {"/highlighting/color", "#4B282C"};
+    QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 
@@ -175,6 +173,9 @@ public:
                                             "qrc:/sounds/ping3.wav"};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
+    IntSetting openFromToast = {
+        "/notifications/openFromToast",
+        static_cast<int>(ToastReaction::OpenInBrowser)};
 
     /// External tools
     // Streamlink

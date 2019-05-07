@@ -190,6 +190,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Show input when empty", s.showEmptyInput);
     layout.addCheckbox("Show input message length", s.showMessageLength);
+    layout.addCheckbox("Hide preferences button (ctrl+p to show)",
+                       s.hidePreferencesButton);
+    layout.addCheckbox("Hide user button", s.hideUserButton);
 
     layout.addTitle("Messages");
     layout.addCheckbox("Timestamps", s.showTimestamps);
@@ -198,8 +201,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.timestampFormat, true);
     layout.addDropdown<int>(
         "Collapse messages",
-        {"Never", "Longer than 2 lines", "Longer than 3 lines",
-         "Longer than 4 lines", "Longer than 5 lines"},
+        {"Never", "After 2 lines", "After 3 lines", "After 4 lines",
+         "After 5 lines"},
         s.collpseMessagesMinLines,
         [](auto val) {
             return val ? QString("After ") + QString::number(val) + " lines"
@@ -210,6 +213,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Alternate background color", s.alternateMessages);
     // layout.addCheckbox("Mark last message you read");
     // layout.addDropdown("Last read message style", {"Default"});
+    layout.addCheckbox("Hide moderated messages", s.hideModerated);
 
     layout.addTitle("Emotes");
     layout.addDropdown<float>(
@@ -263,50 +267,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle2("Misc");
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
-    layout.addDropdown<int>(
-        "Historic messages appearance",
-        {"Crossed and Greyed", "Crossed", "Greyed", "No change"},
-        s.historicMessagesAppearance,
-        [](auto val) {
-            if (val & HistoricMessageAppearance::Crossed &&
-                val & HistoricMessageAppearance::Greyed)
-            {
-                return QString("Crossed and Greyed");
-            }
-            else if (val & HistoricMessageAppearance::Crossed)
-            {
-                return QString("Crossed");
-            }
-            else if (val & HistoricMessageAppearance::Greyed)
-            {
-                return QString("Greyed");
-            }
-            else
-            {
-                return QString("No Change");
-            }
-        },
-        [](auto args) -> int {
-            switch (args.index)
-            {
-                default:
-                case 0:
-                    return HistoricMessageAppearance::Crossed |
-                           HistoricMessageAppearance::Greyed;
-                    break;
-                case 1:
-                    return HistoricMessageAppearance::Crossed;
-                    break;
-                case 2:
-                    return HistoricMessageAppearance::Greyed;
-                    break;
-                case 3:
-                    return 0;
-                    break;
-            }
-        },
-        false);
-    layout.addCheckbox("Emphasize deleted messages", s.redDisabledMessages);
 
     /*
     layout.addTitle2("Cache");

@@ -41,7 +41,6 @@ public:
     MessageParseArgs args;
     const QVariantMap tags;
 
-    QString messageID;
     QString userName;
 
     bool isIgnored() const;
@@ -55,8 +54,10 @@ private:
     void appendUsername();
     void parseHighlights(bool isPastMsg);
 
-    void appendTwitchEmote(const QString &emote,
-        std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec, std::vector<int> &correctPositions);
+    void appendTwitchEmote(
+        const QString &emote,
+        std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec,
+        std::vector<int> &correctPositions);
     Outcome tryAppendEmote(const EmoteName &name);
 
     void addWords(

@@ -74,9 +74,6 @@ enum class MessageElementFlag {
     // - Chatterino top donator badge
     BadgeChatterino = (1 << 18),
 
-    // Rest of slots: ffz custom badge? bttv custom badge? mywaifu (puke)
-    // custom badge?
-
     Badges = BadgeGlobalAuthority | BadgeChannelAuthority | BadgeSubscription |
              BadgeVanity | BadgeChatterino,
 

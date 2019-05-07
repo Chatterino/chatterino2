@@ -1,5 +1,5 @@
 <RCC>
-  <qresource prefix="/">    <file>chatterino2.icns</file>
+  <qresource prefix="/">    <file>chatterino.icns</file>
     <file>contributors.txt</file>
     <file>emoji.json</file>
     <file>emojidata.txt</file>
@@ -24,6 +24,7 @@
     <file>buttons/modModeEnabled.png</file>
     <file>buttons/modModeEnabled2.png</file>
     <file>buttons/timeout.png</file>
+    <file>buttons/trashCan.png</file>
     <file>buttons/unban.png</file>
     <file>buttons/unmod.png</file>
     <file>buttons/update.png</file>

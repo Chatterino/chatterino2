@@ -38,7 +38,6 @@ class MessageBuilder
 {
 public:
     MessageBuilder();
-    MessageBuilder(const QString &text);
     MessageBuilder(SystemMessageTag, const QString &text);
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, const QString &reason,
@@ -54,6 +53,7 @@ public:
 
     void append(std::unique_ptr<MessageElement> element);
     QString matchLink(const QString &string);
+    void addLink(const QString &origLink, const QString &matchedLink);
 
     template <typename T, typename... Args>
     T *emplace(Args &&... args)

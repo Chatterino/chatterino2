@@ -161,7 +161,8 @@ ModerationPage::ModerationPage()
         // clang-format off
         auto label = modMode.emplace<QLabel>(
             "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
-            "Moderation buttons can be bound to chat commands such as \"/ban {user}\", \"/timeout {user} 1000\" or any other custom text commands.<br>");
+            "Moderation buttons can be bound to chat commands such as \"/ban {user}\", \"/timeout {user} 1000\", \"/w someusername !report {user} was bad in channel {channel}\" or any other custom text commands.<br>"
+            "For deleting messages use /delete {msg-id}.");
         label->setWordWrap(true);
         label->setStyleSheet("color: #bbb");
         // clang-format on
