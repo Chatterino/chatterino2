@@ -1,12 +1,3 @@
-#-------------------------------------------------
-#
-# Project created by QtCreator 2016-12-28T18:23:35
-#
-#-------------------------------------------------
-
-message(----)
-
-# define project shit
 QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util
@@ -404,3 +395,21 @@ FORMS +=
 #win32 {
 #    DEFINES += NOMINMAX
 #}
+
+linux:isEmpty(PREFIX) {
+    message("Using default installation prefix (/usr/local). Change PREFIX in qmake command")
+    PREFIX = /usr/local
+}
+
+linux {
+    desktop.files = resources/chatterino.desktop
+    desktop.path = $$PREFIX/share/applications
+
+    # TODO: fix icon
+    # icon.files = resources/icon.png
+    # icon.path = $$PREFIX/share/icons/hicolor/256x256/chatterino.png
+
+    target.path = $$PREFIX/bin
+
+    INSTALLS += desktop target
+}
