@@ -35,13 +35,17 @@
 namespace {
 using namespace chatterino;
 
+static const QStringList whisperCommands{"/w", ".w"};
+
 void sendWhisperMessage(const QString &text)
 {
+    // (hemirt) pajlada: "we should not be sending whispers through jtv, but
+    // rather to your own username"
     auto app = getApp();
     app->twitch.server->sendMessage("jtv", text.simplified());
 }
 
-bool appendWhisperMessageLocally(const QStringList &words)
+bool appendWhisperMessageWordsLocally(const QStringList &words)
 {
     auto app = getApp();
 
@@ -139,7 +143,7 @@ bool appendWhisperMessageLocally(const QStringList &words)
     return true;
 }
 
-bool appendWhisperMessageLocally(const QString &textNoEmoji)
+bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
     QStringList words = text.split(' ', QString::SkipEmptyParts);
@@ -151,11 +155,11 @@ bool appendWhisperMessageLocally(const QString &textNoEmoji)
 
     QString commandName = words[0];
 
-    if (commandName == "/w")
+    if (whisperCommands.contains(commandName, Qt::CaseInsensitive))
     {
         if (words.length() > 2)
         {
-            return appendWhisperMessageLocally(words);
+            return appendWhisperMessageWordsLocally(words);
         }
     }
     return false;
@@ -253,11 +257,11 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     // works in a valid twitch channel and /whispers, etc...
     if (!dryRun && channel->isTwitchChannel())
     {
-        if (commandName == "/w")
+        if (whisperCommands.contains(commandName, Qt::CaseInsensitive))
         {
             if (words.length() > 2)
             {
-                appendWhisperMessageLocally(words);
+                appendWhisperMessageWordsLocally(words);
                 sendWhisperMessage(text);
             }
 
@@ -556,13 +560,15 @@ QString CommandController::execCustomCommand(const QStringList &words,
 
     auto res = result.replace("{{", "{");
 
-    if (dryRun)
+    if (dryRun || !appendWhisperMessageStringLocally(res))
     {
         return res;
     }
-
-    return appendWhisperMessageLocally(res) ? (sendWhisperMessage(res), "")
-                                            : res;
+    else
+    {
+        sendWhisperMessage(res);
+        return "";
+    }
 }
 
 QStringList CommandController::getDefaultTwitchCommandList()
