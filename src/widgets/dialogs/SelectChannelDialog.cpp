@@ -319,7 +319,6 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
         {
             return false;
         }
-        return true;
     }
     else if (event->type() == QEvent::KeyRelease)
     {

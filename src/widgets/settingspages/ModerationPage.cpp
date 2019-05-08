@@ -61,15 +61,10 @@ QString formatSize(qint64 size)
 
 QString fetchLogDirectorySize()
 {
-    QString logPathDirectory;
-    if (getSettings()->logPath == "")
-    {
-        logPathDirectory = getPaths()->messageLogDirectory;
-    }
-    else
-    {
-        logPathDirectory = getSettings()->logPath;
-    }
+    QString logPathDirectory = getSettings()->logPath.getValue().isEmpty()
+        ? getPaths()->messageLogDirectory
+        : getSettings()->logPath;
+
     qint64 logsSize = dirSize(logPathDirectory);
     QString logsSizeLabel = "Your logs currently take up ";
     logsSizeLabel += formatSize(logsSize);
@@ -98,16 +93,9 @@ ModerationPage::ModerationPage()
         // Logs (copied from LoggingMananger)
         getSettings()->logPath.connect(
             [logsPathLabel](const QString &logPath, auto) mutable {
-                QString pathOriginal;
-
-                if (logPath == "")
-                {
-                    pathOriginal = getPaths()->messageLogDirectory;
-                }
-                else
-                {
-                    pathOriginal = logPath;
-                }
+                QString pathOriginal = logPath.isEmpty()
+                    ? getPaths()->messageLogDirectory
+                    : logPath;
 
                 QString pathShortened =
                     "Logs are saved at <a href=\"file:///" + pathOriginal +
@@ -120,7 +108,6 @@ ModerationPage::ModerationPage()
 
         logsPathLabel->setTextFormat(Qt::RichText);
         logsPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                               Qt::LinksAccessibleByKeyboard |
                                                Qt::LinksAccessibleByKeyboard);
         logsPathLabel->setOpenExternalLinks(true);
         logs.append(this->createCheckBox("Enable logging",

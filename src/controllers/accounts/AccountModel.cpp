@@ -31,12 +31,12 @@ int AccountModel::beforeInsert(const std::shared_ptr<Account> &item,
 {
     if (this->categoryCount_[item->getCategory()]++ == 0)
     {
-        auto row = this->createRow();
+        auto newRow = this->createRow();
 
-        setStringItem(row[0], item->getCategory(), false, false);
-        row[0]->setData(QFont("Segoe UI Light", 16), Qt::FontRole);
+        setStringItem(newRow[0], item->getCategory(), false, false);
+        newRow[0]->setData(QFont("Segoe UI Light", 16), Qt::FontRole);
 
-        this->insertCustomRow(std::move(row), proposedIndex);
+        this->insertCustomRow(std::move(newRow), proposedIndex);
 
         return proposedIndex + 1;
     }

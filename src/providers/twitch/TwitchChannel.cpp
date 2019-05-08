@@ -666,11 +666,11 @@ void TwitchChannel::refreshChatters()
 {
     // setting?
     const auto streamStatus = this->accessStreamStatus();
-
+    const auto viewerCount = static_cast<int>(streamStatus->viewerCount);
     if (getSettings()->onlyFetchChattersForSmallerStreamers)
     {
         if (streamStatus->live &&
-            streamStatus->viewerCount > getSettings()->smallStreamerLimit)
+            viewerCount > getSettings()->smallStreamerLimit)
         {
             return;
         }
@@ -722,8 +722,8 @@ void TwitchChannel::refreshBadges()
         {
             auto &versions = (*badgeSets)[jsonBadgeSet.key()];
 
-            auto _ = jsonBadgeSet->toObject()["versions"].toObject();
-            for (auto jsonVersion_ = _.begin(); jsonVersion_ != _.end();
+            auto _set = jsonBadgeSet->toObject()["versions"].toObject();
+            for (auto jsonVersion_ = _set.begin(); jsonVersion_ != _set.end();
                  jsonVersion_++)
             {
                 auto jsonVersion = jsonVersion_->toObject();
