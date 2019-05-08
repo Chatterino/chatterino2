@@ -254,8 +254,10 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addTitle("Miscellaneous");
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
+    layout.addCheckbox("Lowercase domains", s.lowercaseDomains);
+    layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addDropdown<float>(
-        "Boldness", {"0", "25", "Default", "75", "100"}, s.boldScale,
+        "Username font weight", {"0", "25", "Default", "75", "100"}, s.boldScale,
         [](auto val) {
             if (val == 50)
                 return QString("Default");
@@ -263,8 +265,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val);
         },
         [](auto args) { return fuzzyToFloat(args.value, 50.f); });
-    layout.addCheckbox("Lowercase domains", s.lowercaseDomains);
-    layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
     layout.addCheckbox("Double click links to open", s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
