@@ -36,9 +36,9 @@ namespace {
         else
         {
             const auto &shortCodes = unparsedEmoji["short_names"];
-            for (const auto &shortCode : shortCodes.GetArray())
+            for (const auto &_shortCode : shortCodes.GetArray())
             {
-                emojiData->shortCodes.emplace_back(shortCode.GetString());
+                emojiData->shortCodes.emplace_back(_shortCode.GetString());
             }
         }
 

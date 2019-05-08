@@ -463,11 +463,13 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
     }
 
-    // check if custom command exists
-    auto it = this->commandsMap_.find(commandName);
-    if (it != this->commandsMap_.end())
     {
-        return this->execCustomCommand(words, it.value(), dryRun);
+        // check if custom command exists
+        const auto it = this->commandsMap_.find(commandName);
+        if (it != this->commandsMap_.end())
+        {
+            return this->execCustomCommand(words, it.value(), dryRun);
+        }
     }
 
     auto maxSpaces = std::min(this->maxSpaces_, words.length() - 1);
@@ -475,7 +477,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     {
         commandName += ' ' + words[i + 1];
 
-        auto it = this->commandsMap_.find(commandName);
+        const auto it = this->commandsMap_.find(commandName);
         if (it != this->commandsMap_.end())
         {
             return this->execCustomCommand(words, it.value(), dryRun);

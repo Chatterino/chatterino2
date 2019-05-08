@@ -110,7 +110,7 @@ void Scrollbar::setSmallChange(qreal value)
 
 void Scrollbar::setDesiredValue(qreal value, bool animated)
 {
-    animated &= getSettings()->enableSmoothScrolling.getValue();
+    animated &= getSettings()->enableSmoothScrolling;
     value = std::max(this->minimum_,
                      std::min(this->maximum_ - this->largeChange_, value));
 

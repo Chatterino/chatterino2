@@ -20,9 +20,7 @@ DownloadManager::~DownloadManager()
 
 void DownloadManager::setFile(QString fileURL, const QString &channelName)
 {
-    QString filePath = fileURL;
     QString saveFilePath;
-    QStringList filePathList = filePath.split('/');
     saveFilePath =
         getPaths()->twitchProfileAvatars + "/twitch/" + channelName + ".png";
     QNetworkRequest request;
