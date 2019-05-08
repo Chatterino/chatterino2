@@ -121,6 +121,11 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
         {
             continue;
         }
+        if (getSettings()->hideModerationActions &&
+                this->message_->flags.has(MessageFlag::Timeout))
+        {
+            continue;
+        }
         element->addToContainer(*this->container_, _flags);
     }
 

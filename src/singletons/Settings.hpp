@@ -39,6 +39,7 @@ public:
                                     false};
     BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
+    BoolSetting hideModerationActions = {"/appearance/messages/hideModrationActions", false};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
