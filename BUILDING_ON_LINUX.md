@@ -4,7 +4,7 @@ Note on Qt version compatibility: If you are installing Qt from a package manage
 
 ## Ubuntu 18.04
 *most likely works the same for other Debian-like distros*
-1. Install dependencies (and the C++ IDE Qt Creator) `sudo apt install qtcreator qtmultimedia5-dev libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev`
+1. Install dependencies (and the C++ IDE Qt Creator) `sudo apt install qtcreator qtmultimedia5-dev libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev libboost-filesystem-dev`
 1. Open `chatterino.pro` with QT Creator and build
 
 ## Arch Linux
