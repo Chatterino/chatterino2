@@ -198,6 +198,8 @@ SOURCES += \
     src/widgets/splits/SplitOverlay.cpp \
     src/widgets/StreamView.cpp \
     src/widgets/Window.cpp \
+    src/controllers/pings/PingController.cpp \
+    src/controllers/pings/PingModel.cpp \
 
 HEADERS += \
     src/Application.hpp \
@@ -382,6 +384,8 @@ HEADERS += \
     src/widgets/splits/SplitOverlay.hpp \
     src/widgets/StreamView.hpp \
     src/widgets/Window.hpp \
+    src/controllers/pings/PingController.hpp \
+    src/controllers/pings/PingModel.hpp \
 
 RESOURCES += \
     resources/resources.qrc \

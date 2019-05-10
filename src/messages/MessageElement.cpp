@@ -188,7 +188,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
         for (Word &word : this->words_)
         {
             auto getTextLayoutElement = [&](QString text, int width,
-                                            bool trailingSpace) {
+                                            bool hasTrailingSpace) {
                 auto color = this->color_.getColor(*app->themes);
                 app->themes->normalizeColor(color);
 
@@ -196,7 +196,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                               *this, text, QSize(width, metrics.height()),
                               color, this->style_, container.getScale()))
                              ->setLink(this->getLink());
-                e->setTrailingSpace(trailingSpace);
+                e->setTrailingSpace(hasTrailingSpace);
                 e->setText(text);
 
                 // If URL link was changed,
@@ -291,7 +291,6 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
 {
     if (flags.hasAny(this->getFlags()))
     {
-        auto app = getApp();
         if (getSettings()->timestampFormat != this->format_)
         {
             this->format_ = getSettings()->timestampFormat.getValue();

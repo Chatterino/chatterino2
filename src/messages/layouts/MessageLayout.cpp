@@ -99,14 +99,14 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
     return true;
 }
 
-void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
+void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 {
     this->layoutCount_++;
 
     auto messageFlags = this->message_->flags;
 
     if (this->flags.has(MessageLayoutFlag::Expanded) ||
-        (_flags.has(MessageElementFlag::ModeratorTools) &&
+        (flags.has(MessageElementFlag::ModeratorTools) &&
          !this->message_->flags.has(MessageFlag::Disabled)))  //
     {
         messageFlags.unset(MessageFlag::Collapsed);
@@ -121,12 +121,14 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags _flags)
         {
             continue;
         }
+
         if (getSettings()->hideModerationActions &&
                 this->message_->flags.has(MessageFlag::Timeout))
         {
             continue;
         }
-        element->addToContainer(*this->container_, _flags);
+
+        element->addToContainer(*this->container_, flags);
     }
 
     if (this->height_ != this->container_->getHeight())

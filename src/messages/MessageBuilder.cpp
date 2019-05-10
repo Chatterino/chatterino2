@@ -235,20 +235,12 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
 
     this->message().timeoutUser = action.target.name;
 
-    QString text;
-
-    if (action.wasBan())
-    {
-        text = QString("%1 unbanned %2.")  //
+    QString text = QString("%1 %2 %3.")
                    .arg(action.source.name)
+                   .arg(QString(action.wasBan()
+                        ? "unbanned"
+                        : "untimedout"))
                    .arg(action.target.name);
-    }
-    else
-    {
-        text = QString("%1 untimedout %2.")  //
-                   .arg(action.source.name)
-                   .arg(action.target.name);
-    }
 
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);

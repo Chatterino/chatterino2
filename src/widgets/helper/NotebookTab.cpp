@@ -29,8 +29,6 @@ NotebookTab::NotebookTab(Notebook *notebook)
     , notebook_(notebook)
     , menu_(this)
 {
-    auto app = getApp();
-
     this->setAcceptDrops(true);
 
     this->positionChangedAnimation_.setEasingCurve(
@@ -527,8 +525,6 @@ void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
 
 void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 {
-    auto app = getApp();
-
     if (getSettings()->showTabCloseButton &&
         this->notebook_->getAllowUserTabManagement())  //
     {

@@ -47,7 +47,7 @@ public:
         "/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessages = {
         "/appearance/messages/alternateMessageBackground", false};
-    IntSetting boldScale = {"/appearance/boldScale", 57};
+    FloatSetting boldScale = {"/appearance/boldScale", 50};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", false};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
@@ -174,9 +174,8 @@ public:
                                             "qrc:/sounds/ping3.wav"};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
-    IntSetting openFromToast = {
-        "/notifications/openFromToast",
-        static_cast<int>(ToastReaction::OpenInBrowser)};
+    IntSetting openFromToast = {"/notifications/openFromToast",
+                                static_cast<int>(ToastReaction::OpenInBrowser)};
 
     /// External tools
     // Streamlink

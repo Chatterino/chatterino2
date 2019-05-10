@@ -4,6 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
+#include "controllers/pings/PingController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
@@ -334,13 +335,13 @@ MessagePtr TwitchMessageBuilder::build()
                     QRegularExpression emoteregex(
                         "\\b" + std::get<2>(tup).string + "\\b",
                         QRegularExpression::UseUnicodePropertiesOption);
-                    auto match = emoteregex.match(midExtendedRef);
-                    if (match.hasMatch())
+                    auto _match = emoteregex.match(midExtendedRef);
+                    if (_match.hasMatch())
                     {
-                        int last = match.lastCapturedIndex();
+                        int last = _match.lastCapturedIndex();
                         for (int i = 0; i <= last; ++i)
                         {
-                            std::get<0>(tup) = from + match.capturedStart();
+                            std::get<0>(tup) = from + _match.capturedStart();
                             twitchEmotes.push_back(std::move(tup));
                         }
                     }
@@ -781,16 +782,9 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
     }
 
     // update the media player url if necessary
-    QUrl highlightSoundUrl;
-    if (getSettings()->customHighlightSound)
-    {
-        highlightSoundUrl =
-            QUrl::fromLocalFile(getSettings()->pathHighlightSound.getValue());
-    }
-    else
-    {
-        highlightSoundUrl = QUrl("qrc:/sounds/ping2.wav");
-    }
+    QUrl highlightSoundUrl = getSettings()->customHighlightSound
+        ? QUrl::fromLocalFile(getSettings()->pathHighlightSound.getValue())
+        : QUrl("qrc:/sounds/ping2.wav");
 
     if (currentPlayerUrl != highlightSoundUrl)
     {
@@ -892,13 +886,16 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 
         if (!isPastMsg)
         {
-            if (playSound &&
-                (!hasFocus || getSettings()->highlightAlwaysPlaySound))
+            bool notMuted = !getApp()->pings->isMuted(this->channel->getName());
+            bool resolveFocus =
+                !hasFocus || getSettings()->highlightAlwaysPlaySound;
+
+            if (playSound && notMuted && resolveFocus)
             {
                 player->play();
             }
 
-            if (doAlert)
+            if (doAlert && notMuted)
             {
                 getApp()->windows->sendAlert();
             }
@@ -1040,11 +1037,11 @@ void TwitchMessageBuilder::appendTwitchBadges()
             try
             {
                 if (twitchChannel)
-                    if (const auto &badge = this->twitchChannel->twitchBadge(
+                    if (const auto &_badge = this->twitchChannel->twitchBadge(
                             "bits", cheerAmount))
                     {
                         this->emplace<EmoteElement>(
-                                badge.get(), MessageElementFlag::BadgeVanity)
+                                _badge.get(), MessageElementFlag::BadgeVanity)
                             ->setTooltip(tooltip);
                         continue;
                     }
@@ -1055,10 +1052,10 @@ void TwitchMessageBuilder::appendTwitchBadges()
             }
 
             // Use default bit badge
-            if (auto badge = this->twitchChannel->globalTwitchBadges().badge(
+            if (auto _badge = this->twitchChannel->globalTwitchBadges().badge(
                     "bits", cheerAmount))
             {
-                this->emplace<EmoteElement>(badge.get(),
+                this->emplace<EmoteElement>(_badge.get(),
                                             MessageElementFlag::BadgeVanity)
                     ->setTooltip(tooltip);
             }
@@ -1174,12 +1171,12 @@ void TwitchMessageBuilder::appendTwitchBadges()
                     ->setTooltip((*badgeEmote)->tooltip.string);
                 continue;
             }
-            if (auto badge = this->twitchChannel->globalTwitchBadges().badge(
+            if (auto _badge = this->twitchChannel->globalTwitchBadges().badge(
                     splits[0], splits[1]))
             {
-                this->emplace<EmoteElement>(badge.get(),
+                this->emplace<EmoteElement>(_badge.get(),
                                             MessageElementFlag::BadgeVanity)
-                    ->setTooltip((*badge)->tooltip.string);
+                    ->setTooltip((*_badge)->tooltip.string);
                 continue;
             }
         }
