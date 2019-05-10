@@ -123,7 +123,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         }
 
         if (getSettings()->hideModerationActions &&
-                this->message_->flags.has(MessageFlag::Timeout))
+            this->message_->flags.has(MessageFlag::Timeout))
         {
             continue;
         }

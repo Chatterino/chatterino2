@@ -34,9 +34,8 @@ LoggingChannel::LoggingChannel(const QString &_channelName)
     this->subDirectory = "Twitch/" + this->subDirectory;
 
     getSettings()->logPath.connect([this](const QString &logPath, auto) {
-        this->baseDirectory = logPath.isEmpty()
-            ? getPaths()->messageLogDirectory
-            : logPath;
+        this->baseDirectory =
+            logPath.isEmpty() ? getPaths()->messageLogDirectory : logPath;
         this->openLogFile();
     });
 }

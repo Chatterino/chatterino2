@@ -27,7 +27,8 @@ void SearchPopup::setChannel(ChannelPtr channel)
 
 void SearchPopup::keyPressEvent(QKeyEvent *e)
 {
-    if (e->key() == Qt::Key_Escape) {
+    if (e->key() == Qt::Key_Escape)
+    {
         this->close();
         return;
     }

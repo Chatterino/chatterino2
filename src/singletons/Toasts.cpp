@@ -115,8 +115,10 @@ public:
     void toastActivated() const
     {
         QString link;
-        switch (static_cast<ToastReaction>(
-            getSettings()->openFromToast.getValue()))
+        auto toastReaction =
+            static_cast<ToastReaction>(getSettings()->openFromToast.getValue());
+
+        switch (toastReaction)
         {
             case ToastReaction::OpenInBrowser:
                 if (platform_ == Platform::Twitch)

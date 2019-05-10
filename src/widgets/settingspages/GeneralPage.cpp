@@ -258,7 +258,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Lowercase domains", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addDropdown<float>(
-        "Username font weight", {"0", "25", "Default", "75", "100"}, s.boldScale,
+        "Username font weight", {"0", "25", "Default", "75", "100"},
+        s.boldScale,
         [](auto val) {
             if (val == 50)
                 return QString("Default");

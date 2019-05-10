@@ -12,7 +12,8 @@ namespace chatterino {
 void LinkResolver::getLinkInfo(
     const QString url, std::function<void(QString, Link)> successCallback)
 {
-    if (!getSettings()->linkInfoTooltip) {
+    if (!getSettings()->linkInfoTooltip)
+    {
         successCallback("No link info loaded", Link(Link::Url, url));
         return;
     }

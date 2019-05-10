@@ -782,9 +782,10 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
     }
 
     // update the media player url if necessary
-    QUrl highlightSoundUrl = getSettings()->customHighlightSound
-        ? QUrl::fromLocalFile(getSettings()->pathHighlightSound.getValue())
-        : QUrl("qrc:/sounds/ping2.wav");
+    QUrl highlightSoundUrl =
+        getSettings()->customHighlightSound
+            ? QUrl::fromLocalFile(getSettings()->pathHighlightSound.getValue())
+            : QUrl("qrc:/sounds/ping2.wav");
 
     if (currentPlayerUrl != highlightSoundUrl)
     {

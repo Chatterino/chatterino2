@@ -62,8 +62,8 @@ QString formatSize(qint64 size)
 QString fetchLogDirectorySize()
 {
     QString logPathDirectory = getSettings()->logPath.getValue().isEmpty()
-        ? getPaths()->messageLogDirectory
-        : getSettings()->logPath;
+                                   ? getPaths()->messageLogDirectory
+                                   : getSettings()->logPath;
 
     qint64 logsSize = dirSize(logPathDirectory);
     QString logsSizeLabel = "Your logs currently take up ";
@@ -91,20 +91,19 @@ ModerationPage::ModerationPage()
             QtConcurrent::run([] { return fetchLogDirectorySize(); }));
 
         // Logs (copied from LoggingMananger)
-        getSettings()->logPath.connect(
-            [logsPathLabel](const QString &logPath, auto) mutable {
-                QString pathOriginal = logPath.isEmpty()
-                    ? getPaths()->messageLogDirectory
-                    : logPath;
+        getSettings()->logPath.connect([logsPathLabel](const QString &logPath,
+                                                       auto) mutable {
+            QString pathOriginal =
+                logPath.isEmpty() ? getPaths()->messageLogDirectory : logPath;
 
-                QString pathShortened =
-                    "Logs are saved at <a href=\"file:///" + pathOriginal +
-                    "\"><span style=\"color: white;\">" +
-                    shortenString(pathOriginal, 50) + "</span></a>";
+            QString pathShortened =
+                "Logs are saved at <a href=\"file:///" + pathOriginal +
+                "\"><span style=\"color: white;\">" +
+                shortenString(pathOriginal, 50) + "</span></a>";
 
-                logsPathLabel->setText(pathShortened);
-                logsPathLabel->setToolTip(pathOriginal);
-            });
+            logsPathLabel->setText(pathShortened);
+            logsPathLabel->setToolTip(pathOriginal);
+        });
 
         logsPathLabel->setTextFormat(Qt::RichText);
         logsPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |

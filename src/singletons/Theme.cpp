@@ -40,8 +40,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x50);
 
         // Highlighted Messages: theme support quick-fix
-        this->messages.backgrounds.highlighted =
-            QColor("#BD8489");
+        this->messages.backgrounds.highlighted = QColor("#BD8489");
     }
     else
     {
@@ -52,9 +51,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
 
         // Highlighted Messages: theme support quick-fix
-        this->messages.backgrounds.highlighted =
-            QColor("#4B282C");
-
+        this->messages.backgrounds.highlighted = QColor("#4B282C");
     }
 
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
@@ -72,7 +69,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         ";" + "color:" + this->messages.textColors.regular.name() + ";" +  //
         "selection-background-color:" +
         (isLight ? "#68B1FF"
-                  : this->tabs.selected.backgrounds.regular.color().name());
+                 : this->tabs.selected.backgrounds.regular.color().name());
 
     this->splits.input.focusedLine = this->tabs.highlighted.line.regular;
 
@@ -83,13 +80,13 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
 
     // Highlighted Messages
-    // hidden setting from PR #744 - if set it will overwrite theme color (for now!)
-    //TODO: implement full theme support
-    if (getSettings()->highlightColor != "") {
+    // hidden setting from PR #744 - if set it will overwrite theme color
+    // TODO: implement full theme support
+    if (getSettings()->highlightColor != "")
+    {
         this->messages.backgrounds.highlighted =
             QColor(getSettings()->highlightColor);
     }
-
 }
 
 void Theme::normalizeColor(QColor &color)

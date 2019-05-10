@@ -103,9 +103,11 @@ void NotificationController::playSound()
     static auto player = new QMediaPlayer;
     static QUrl currentPlayerUrl;
 
-    QUrl highlightSoundUrl = getSettings()->notificationCustomSound
-        ? QUrl::fromLocalFile(getSettings()->notificationPathSound.getValue())
-        : QUrl("qrc:/sounds/ping2.wav");
+    QUrl highlightSoundUrl =
+        getSettings()->notificationCustomSound
+            ? QUrl::fromLocalFile(
+                  getSettings()->notificationPathSound.getValue())
+            : QUrl("qrc:/sounds/ping2.wav");
 
     if (currentPlayerUrl != highlightSoundUrl)
     {
