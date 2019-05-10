@@ -37,7 +37,7 @@ bool Paths::isPortable()
 
 QString Paths::cacheDirectory()
 {
-    static const auto path = [] {
+    static const auto pathSetting = [] {
         QStringSetting cachePathSetting("/cache/path");
 
         cachePathSetting.connect([](const auto &newPath, auto) {
@@ -45,7 +45,9 @@ QString Paths::cacheDirectory()
         });
 
         return cachePathSetting;
-    }().getValue();
+    }();
+
+    auto path = pathSetting.getValue();
 
     if (path.isEmpty())
     {
