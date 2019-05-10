@@ -6,6 +6,7 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/pings/PingController.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "debug/Log.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -53,6 +54,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , commands(&this->emplace<CommandController>())
     , highlights(&this->emplace<HighlightController>())
     , notifications(&this->emplace<NotificationController>())
+    , pings(&this->emplace<PingController>())
     , ignores(&this->emplace<IgnoreController>())
     , taggedUsers(&this->emplace<TaggedUsersController>())
     , moderationActions(&this->emplace<ModerationActions>())

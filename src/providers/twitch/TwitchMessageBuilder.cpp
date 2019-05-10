@@ -4,6 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
+#include "controllers/pings/PingController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
@@ -885,13 +886,16 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 
         if (!isPastMsg)
         {
-            if (playSound &&
-                (!hasFocus || getSettings()->highlightAlwaysPlaySound))
+            bool notMuted = !getApp()->pings->isMuted(this->channel->getName());
+            bool resolveFocus =
+                !hasFocus || getSettings()->highlightAlwaysPlaySound;
+
+            if (playSound && notMuted && resolveFocus)
             {
                 player->play();
             }
 
-            if (doAlert)
+            if (doAlert && notMuted)
             {
                 getApp()->windows->sendAlert();
             }
