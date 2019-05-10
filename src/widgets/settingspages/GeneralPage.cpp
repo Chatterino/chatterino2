@@ -214,6 +214,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     // layout.addCheckbox("Mark last message you read");
     // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Hide moderated messages", s.hideModerated);
+    layout.addCheckbox("Hide moderation messages", s.hideModerationActions);
 
     layout.addTitle("Emotes");
     layout.addDropdown<float>(
