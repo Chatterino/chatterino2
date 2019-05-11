@@ -38,6 +38,13 @@ struct hash<chatterino::Prefix> {
 
 namespace chatterino {
 
+struct CaseInsensitiveLess {
+    bool operator()(const QString &lhs, const QString &rhs) const
+    {
+        return lhs.compare(rhs, Qt::CaseInsensitive) < 0;
+    }
+};
+
 class UsernameSet
 {
 public:
@@ -71,7 +78,7 @@ public:
 private:
     void insertPrefix(const QString &string);
 
-    std::set<QString> items;
+    std::set<QString, CaseInsensitiveLess> items;
     std::unordered_map<Prefix, QString> firstKeyForPrefix;
 };
 
