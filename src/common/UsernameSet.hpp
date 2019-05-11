@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 namespace chatterino {
+
 class Prefix
 {
 public:
@@ -19,9 +20,11 @@ private:
 
     friend struct std::hash<Prefix>;
 };
+
 }  // namespace chatterino
 
 namespace std {
+
 template <>
 struct hash<chatterino::Prefix> {
     size_t operator()(const chatterino::Prefix &prefix) const
@@ -30,9 +33,11 @@ struct hash<chatterino::Prefix> {
                size_t(prefix.second.unicode());
     }
 };
+
 }  // namespace std
 
 namespace chatterino {
+
 class UsernameSet
 {
 public:
