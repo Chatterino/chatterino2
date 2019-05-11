@@ -12,6 +12,7 @@ class Prefix
 public:
     Prefix(const QString &string);
     bool operator==(const Prefix &other) const;
+    bool operator!=(const Prefix &other) const;
     bool isStartOf(const QString &string) const;
 
 private:

@@ -99,6 +99,11 @@ bool Prefix::operator==(const Prefix &other) const
            std::tie(other.first, other.second);
 }
 
+bool Prefix::operator!=(const Prefix &other) const
+{
+    return !(*this == other);
+}
+
 bool Prefix::isStartOf(const QString &string) const
 {
     if (string.size() == 0)
