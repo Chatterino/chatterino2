@@ -168,6 +168,11 @@ int ImageLayoutElement::getXFromIndex(int index)
     }
 }
 
+boost::optional<QPixmap> ImageLayoutElement::pixmap() const
+{
+    return this->image_->pixmap();
+}
+
 //
 // TEXT
 //

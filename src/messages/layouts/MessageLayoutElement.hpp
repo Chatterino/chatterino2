@@ -62,6 +62,8 @@ public:
     ImageLayoutElement(MessageElement &creator, ImagePtr image,
                        const QSize &size);
 
+    boost::optional<QPixmap> pixmap() const;
+
 protected:
     void addCopyTextToString(QString &str, int from = 0,
                              int to = INT_MAX) const override;
