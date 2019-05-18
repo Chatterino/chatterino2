@@ -43,3 +43,4 @@ The code is formated using clang format in Qt Creator. [.clang-format](https://g
 7. Under `Clang Format` select `Use predefined style: File` and `Fallback style: None`
 
 Qt creator should now format the documents when saving it.
+
