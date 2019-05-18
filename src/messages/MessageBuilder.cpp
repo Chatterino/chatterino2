@@ -65,6 +65,8 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
 
     builder = MessageBuilder();
     builder.emplace<TimestampElement>();
+    builder.emplace<TwitchModerationElement>();
+    builder.message().loginName = action.target.name;
     builder.message().flags.set(MessageFlag::PubSub);
 
     builder
