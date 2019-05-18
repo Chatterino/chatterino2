@@ -127,7 +127,6 @@ GeneralPage::GeneralPage()
     y->addWidget(scroll);
     auto x = new QHBoxLayout;
     auto layout = new SettingsLayout;
-    x->addStretch(1);
     x->addLayout(layout, 0);
     x->addStretch(1);
     auto z = new QFrame;
