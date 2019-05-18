@@ -188,6 +188,11 @@ public:
         assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
                column < this->columnCount_);
 
+        if (column >= this->rows_[row].items.size())
+        {
+            return Qt::NoItemFlags;
+        }
+
         return this->rows_[row].items[column]->flags();
     }
 
