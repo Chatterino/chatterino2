@@ -32,4 +32,4 @@ deploy:
   file: "chatterino-osx.dmg"
   prerelease: true
   on:
-    branch: osx-ci-test
+    branch: nightly
