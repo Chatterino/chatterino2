@@ -48,8 +48,8 @@ build_script:
 
     7z a chatterino-windows-x86-64.zip Chatterino2/
 artifacts:
-- path: build/chatterino2.zip
-  name: chatterino2
+- path: build/chatterino-windows-x86-64.zip
+  name: chatterino
 deploy:
 - provider: GitHub
   tag: nightly-build
