@@ -1013,9 +1013,9 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
 
-    if ((emote = this->twitchChannel->globalBttv().emote(name)))
+    if ((emote = this->twitchChannel->ffzEmote().emote(name)))
     {
-        flags = MessageElementFlag::BttvEmote;
+        flags = MessageElementFlag::FfzEmote;
     }
     else if ((emote = this->twitchChannel->bttvEmote(name)))
     {
@@ -1025,9 +1025,9 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     {
         flags = MessageElementFlag::FfzEmote;
     }
-    else if ((emote = this->twitchChannel->ffzEmote(name)))
+    else if ((emote = this->twitchChannel->globalBttv(name)))
     {
-        flags = MessageElementFlag::FfzEmote;
+        flags = MessageElementFlag::BttvEmote;
     }
 
     if (emote)
