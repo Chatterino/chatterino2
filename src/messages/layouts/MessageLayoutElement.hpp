@@ -41,6 +41,8 @@ public:
     virtual void paintAnimated(QPainter &painter, int yOffset) = 0;
     virtual int getMouseOverIndex(const QPoint &abs) const = 0;
     virtual int getXFromIndex(int index) = 0;
+    virtual boost::optional<QPixmap> pixmap() const = 0;
+
     const Link &getLink() const;
     const QString &getText() const;
     FlagsEnum<MessageElementFlag> getFlags() const;
@@ -62,8 +64,6 @@ public:
     ImageLayoutElement(MessageElement &creator, ImagePtr image,
                        const QSize &size);
 
-    boost::optional<QPixmap> pixmap() const;
-
 protected:
     void addCopyTextToString(QString &str, int from = 0,
                              int to = INT_MAX) const override;
@@ -72,6 +72,7 @@ protected:
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
+    boost::optional<QPixmap> pixmap() const override;
 
 private:
     ImagePtr image_;
@@ -95,6 +96,7 @@ protected:
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
+    boost::optional<QPixmap> pixmap() const override;
 
 private:
     QColor color_;
@@ -120,6 +122,7 @@ protected:
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
+    boost::optional<QPixmap> pixmap() const override;
 
 private:
     float scale;

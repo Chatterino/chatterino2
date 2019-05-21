@@ -1217,12 +1217,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        auto imageLayoutElement =
-            dynamic_cast<const ImageLayoutElement *>(hoverLayoutElement);
-
-        if (imageLayoutElement && imageLayoutElement->pixmap()) {
+        if (auto pixmap = hoverLayoutElement->pixmap()) {
             QBuffer buffer;
-            imageLayoutElement->pixmap()->save(&buffer, "PNG");
+            pixmap->save(&buffer, "PNG");
 
             // FIXME: Image inside of imageLayoutElement is not always the biggest
             // FIXME: Inject image directly into tooltipWidget without base64 bs
@@ -1232,8 +1229,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             tooltipWidget->setText(
                 QString("<img src='data:image/png;base64,%1' /><br/>%2x%3<br/>%4")
                 .arg(QString(buffer.data().toBase64()))
-                .arg(imageLayoutElement->pixmap()->width())
-                .arg(imageLayoutElement->pixmap()->height())
+                .arg(pixmap->width())
+                .arg(pixmap->height())
                 .arg(tooltip));
         } else {
             tooltipWidget->setText(tooltip);
