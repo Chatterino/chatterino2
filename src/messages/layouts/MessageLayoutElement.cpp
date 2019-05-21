@@ -168,7 +168,7 @@ int ImageLayoutElement::getXFromIndex(int index)
     }
 }
 
-boost::optional<QPixmap> ImageLayoutElement::pixmap() const
+boost::optional<QPixmap> ImageLayoutElement::imagePreview() const
 {
     return this->image_->pixmap();
 }
@@ -296,7 +296,7 @@ int TextLayoutElement::getXFromIndex(int index)
     }
 }
 
-boost::optional<QPixmap> TextLayoutElement::pixmap() const
+boost::optional<QPixmap> TextLayoutElement::imagePreview() const
 {
     return boost::none;
 }
@@ -378,7 +378,7 @@ int TextIconLayoutElement::getXFromIndex(int index)
     }
 }
 
-boost::optional<QPixmap> TextIconLayoutElement::pixmap() const
+boost::optional<QPixmap> TextIconLayoutElement::imagePreview() const
 {
     return boost::none;
 }

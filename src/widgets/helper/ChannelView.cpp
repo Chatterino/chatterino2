@@ -1217,7 +1217,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        if (auto pixmap = hoverLayoutElement->pixmap()) {
+        if (auto pixmap = hoverLayoutElement->imagePreview()) {
             QBuffer buffer;
             pixmap->save(&buffer, "PNG");
 

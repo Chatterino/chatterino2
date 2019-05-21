@@ -41,7 +41,7 @@ public:
     virtual void paintAnimated(QPainter &painter, int yOffset) = 0;
     virtual int getMouseOverIndex(const QPoint &abs) const = 0;
     virtual int getXFromIndex(int index) = 0;
-    virtual boost::optional<QPixmap> pixmap() const = 0;
+    virtual boost::optional<QPixmap> imagePreview() const = 0;
 
     const Link &getLink() const;
     const QString &getText() const;
@@ -72,7 +72,7 @@ protected:
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
-    boost::optional<QPixmap> pixmap() const override;
+    boost::optional<QPixmap> imagePreview() const override;
 
 private:
     ImagePtr image_;
@@ -96,7 +96,7 @@ protected:
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
-    boost::optional<QPixmap> pixmap() const override;
+    boost::optional<QPixmap> imagePreview() const override;
 
 private:
     QColor color_;
@@ -122,7 +122,7 @@ protected:
     void paintAnimated(QPainter &painter, int yOffset) override;
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
-    boost::optional<QPixmap> pixmap() const override;
+    boost::optional<QPixmap> imagePreview() const override;
 
 private:
     float scale;
