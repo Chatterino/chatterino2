@@ -1217,21 +1217,27 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        if (auto pixmap = hoverLayoutElement->imagePreview()) {
-            QBuffer buffer;
-            pixmap->save(&buffer, "PNG");
+        auto emoteElement = dynamic_cast<const EmoteElement*>(&hoverLayoutElement->getCreator());
 
-            // FIXME: Image inside of imageLayoutElement is not always the biggest
-            // FIXME: Inject image directly into tooltipWidget without base64 bs
-            // FIXME: Gifs are not animated
-            // FIXME: No way to opt-out
+        if (emoteElement) {
+            auto pixmap = emoteElement->getEmote()->images.getImage(3.0)->pixmap();
+            if (pixmap) {
+                QBuffer buffer;
+                pixmap->save(&buffer, "PNG");
 
-            tooltipWidget->setText(
-                QString("<img src='data:image/png;base64,%1' /><br/>%2x%3<br/>%4")
-                .arg(QString(buffer.data().toBase64()))
-                .arg(pixmap->width())
-                .arg(pixmap->height())
-                .arg(tooltip));
+                // FIXME: Inject image directly into tooltipWidget without base64 bs
+                // FIXME: Gifs are not animated
+                // FIXME: No way to opt-out
+
+                tooltipWidget->setText(
+                    QString("<img src='data:image/png;base64,%1' /><br/>%2x%3<br/>%4")
+                    .arg(QString(buffer.data().toBase64()))
+                    .arg(pixmap->width())
+                    .arg(pixmap->height())
+                    .arg(tooltip));
+            } else {
+                tooltipWidget->setText(tooltip);
+            }
         } else {
             tooltipWidget->setText(tooltip);
         }
