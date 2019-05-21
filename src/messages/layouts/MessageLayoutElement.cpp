@@ -168,11 +168,6 @@ int ImageLayoutElement::getXFromIndex(int index)
     }
 }
 
-boost::optional<QPixmap> ImageLayoutElement::imagePreview() const
-{
-    return this->image_->pixmap();
-}
-
 //
 // TEXT
 //
@@ -296,11 +291,6 @@ int TextLayoutElement::getXFromIndex(int index)
     }
 }
 
-boost::optional<QPixmap> TextLayoutElement::imagePreview() const
-{
-    return boost::none;
-}
-
 // TEXT ICON
 TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator,
                                              const QString &_line1,
@@ -377,11 +367,5 @@ int TextIconLayoutElement::getXFromIndex(int index)
         return this->getRect().right();
     }
 }
-
-boost::optional<QPixmap> TextIconLayoutElement::imagePreview() const
-{
-    return boost::none;
-}
-
 
 }  // namespace chatterino
