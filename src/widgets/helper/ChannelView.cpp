@@ -1222,8 +1222,6 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
         if (imageLayoutElement && imageLayoutElement->pixmap()) {
             QBuffer buffer;
-            const int width = imageLayoutElement->pixmap()->width();
-            const int height = imageLayoutElement->pixmap()->height();
             imageLayoutElement->pixmap()->save(&buffer, "PNG");
 
             // FIXME: Image inside of imageLayoutElement is not always the biggest
