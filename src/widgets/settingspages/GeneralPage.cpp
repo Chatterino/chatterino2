@@ -274,8 +274,10 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addSpacing(16);
     layout.addSeperator();
 
-    layout.addTitle2("Misc");
+    layout.addTitle2("Miscellaneous (Twitch)");
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
+    layout.addCheckbox("Load message history on connect",
+                       s.loadTwitchMessageHistoryOnConnect);
 
     /*
     layout.addTitle2("Cache");

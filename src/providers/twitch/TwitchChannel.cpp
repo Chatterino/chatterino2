@@ -602,6 +602,11 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 
 void TwitchChannel::loadRecentMessages()
 {
+    if (!getSettings()->loadTwitchMessageHistoryOnConnect)
+    {
+        return;
+    }
+
     static QString genericURL = [] {
         QString url("https://recent-messages.robotty.de/api/v2/recent-messages/"
                     "%1?clearchatToNotice=true");

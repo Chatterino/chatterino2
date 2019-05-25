@@ -39,7 +39,8 @@ public:
                                     false};
     BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
-    BoolSetting hideModerationActions = {"/appearance/messages/hideModerationActions", false};
+    BoolSetting hideModerationActions = {
+        "/appearance/messages/hideModerationActions", false};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
@@ -189,6 +190,8 @@ public:
     /// Misc
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
+    BoolSetting loadTwitchMessageHistoryOnConnect = {
+        "/misc/twitch/loadMessageHistoryOnConnect", true};
 
     QStringSetting cachePath = {"/cache/path", ""};
 
