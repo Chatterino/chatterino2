@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
@@ -607,19 +608,8 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    static QString genericURL = [] {
-        QString url("https://recent-messages.robotty.de/api/v2/recent-messages/"
-                    "%1?clearchatToNotice=true");
-        auto envString = std::getenv("CHATTERINO2_RECENT_MESSAGES_URL");
-        if (envString != nullptr)
-        {
-            url = envString;
-        }
-
-        return url;
-    }();
-
-    NetworkRequest request(genericURL.arg(this->getName()));
+    NetworkRequest request(
+        Env::get().recentMessagesApiUrl.arg(this->getName()));
     request.setCaller(QThread::currentThread());
     // can't be concurrent right now due to SignalVector
     //    request.setExecuteConcurrently(true);

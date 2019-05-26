@@ -55,6 +55,7 @@ SOURCES += \
     src/common/Channel.cpp \
     src/common/CompletionModel.cpp \
     src/common/DownloadManager.cpp \
+    src/common/Env.cpp \
     src/common/LinkParser.cpp \
     src/common/NetworkData.cpp \
     src/common/NetworkManager.cpp \
