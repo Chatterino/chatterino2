@@ -1219,7 +1219,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto emoteElement = dynamic_cast<const EmoteElement*>(&hoverLayoutElement->getCreator());
 
-        if (emoteElement) {
+        if (emoteElement && getSettings()->emotesTooltipPreview.getValue()) {
             auto pixmap = emoteElement->getEmote()->images.getImage(3.0)->pixmap();
             if (pixmap) {
                 QBuffer buffer;
@@ -1227,7 +1227,6 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
                 // FIXME: Inject image directly into tooltipWidget without base64 bs
                 // FIXME: Gifs are not animated
-                // FIXME: No way to opt-out
 
                 tooltipWidget->setText(
                     QString("<img src='data:image/png;base64,%1' /><br/>%2x%3<br/>%4")
