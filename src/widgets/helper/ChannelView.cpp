@@ -1217,33 +1217,21 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        auto emoteElement = dynamic_cast<const EmoteElement*>(&hoverLayoutElement->getCreator());
+        tooltipWidget->clearImage();
 
+        auto emoteElement = dynamic_cast<const EmoteElement*>(&hoverLayoutElement->getCreator());
         if (emoteElement && getSettings()->emotesTooltipPreview.getValue()) {
             auto pixmap = emoteElement->getEmote()->images.getImage(3.0)->pixmap();
             if (pixmap) {
-                QBuffer buffer;
-                pixmap->save(&buffer, "PNG");
-
-                // FIXME: Inject image directly into tooltipWidget without base64 bs
                 // FIXME: Gifs are not animated
-
-                tooltipWidget->setText(
-                    QString("<img src='data:image/png;base64,%1' /><br/>%2x%3<br/>%4")
-                    .arg(QString(buffer.data().toBase64()))
-                    .arg(pixmap->width())
-                    .arg(pixmap->height())
-                    .arg(tooltip));
-            } else {
-                tooltipWidget->setText(tooltip);
+                tooltipWidget->setImage(*pixmap);
             }
-        } else {
-            tooltipWidget->setText(tooltip);
         }
 
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->adjustSize();
+        tooltipWidget->setText(tooltip);
         tooltipWidget->show();
         tooltipWidget->raise();
     }
