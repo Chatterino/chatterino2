@@ -440,9 +440,8 @@ MessagePtr TwitchMessageBuilder::build()
     this->addWords(splits, twitchEmotes);
 
     this->message().messageText = this->originalMessage_;
-    this->message().searchText = this->userName + ": " +
-                                 this->message().localizedName + ": " +
-                                 this->originalMessage_;
+    this->message().searchText = this->message().localizedName + " " +
+                                 this->userName + ": " + this->originalMessage_;
 
     return this->release();
 }
