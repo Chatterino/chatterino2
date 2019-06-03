@@ -29,7 +29,7 @@
             "/unban", "/timeout", "/untimeout", "/slow", "/slowoff",    \
             "/r9kbeta", "/r9kbetaoff", "/emoteonly", "/emoteonlyoff",   \
             "/clear", "/subscribers", "/subscribersoff", "/followers",  \
-            "/followersoff"                                             \
+            "/followersoff", "/user"                                    \
     }
 
 namespace {
@@ -459,6 +459,27 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             logs->getLogs();
             logs->setAttribute(Qt::WA_DeleteOnClose);
             logs->show();
+            return "";
+        }
+        else if (commandName == "/user")
+        {
+            if (words.size() < 2)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage /user [user] (channel)"));
+                return "";
+            }
+            QString channelName = channel->getName();
+            if (words.size() > 2)
+            {
+                channelName = words[2];
+                if (channelName[0] == '#')
+                {
+                    channelName.remove(0, 1);
+                }
+            }
+            QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
+                                      channelName + "/viewercard/" + words[1]);
             return "";
         }
     }
