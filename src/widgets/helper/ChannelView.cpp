@@ -311,6 +311,15 @@ void ChannelView::queueUpdate()
     //    }
 
     //    this->repaint();
+
+    auto tooltipWidget = TooltipWidget::getInstance();
+    if (this->currentPreviewEmote) {
+        auto pixmap = this->currentPreviewEmote->images.getImage(3.0)->pixmap();
+        if (pixmap) {
+            tooltipWidget->setImage(*pixmap);
+        }
+    }
+
     this->update();
 
     //    this->updateTimer.start();
@@ -1217,15 +1226,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        tooltipWidget->clearImage();
-
         auto emoteElement = dynamic_cast<const EmoteElement*>(&hoverLayoutElement->getCreator());
         if (emoteElement && getSettings()->emotesTooltipPreview.getValue()) {
-            auto pixmap = emoteElement->getEmote()->images.getImage(3.0)->pixmap();
-            if (pixmap) {
-                // FIXME: Gifs are not animated
-                tooltipWidget->setImage(*pixmap);
-            }
+            this->currentPreviewEmote = emoteElement->getEmote();
+        } else {
+            this->currentPreviewEmote = nullptr;
+            tooltipWidget->clearImage();
         }
 
         tooltipWidget->moveTo(this, event->globalPos());
