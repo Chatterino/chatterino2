@@ -313,8 +313,8 @@ void ChannelView::queueUpdate()
     //    this->repaint();
 
     auto tooltipWidget = TooltipWidget::getInstance();
-    if (this->currentPreviewEmote) {
-        auto pixmap = this->currentPreviewEmote->images.getImage(3.0)->pixmap();
+    if (this->currentPreviewImage) {
+        auto pixmap = this->currentPreviewImage->pixmap();
         if (pixmap) {
             tooltipWidget->setImage(*pixmap);
         }
@@ -1228,9 +1228,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto emoteElement = dynamic_cast<const EmoteElement*>(&hoverLayoutElement->getCreator());
         if (emoteElement && getSettings()->emotesTooltipPreview.getValue()) {
-            this->currentPreviewEmote = emoteElement->getEmote();
+            this->currentPreviewImage = emoteElement->getEmote()->images.getImage(3.0);
         } else {
-            this->currentPreviewEmote = nullptr;
+            this->currentPreviewImage = nullptr;
             tooltipWidget->clearImage();
         }
 
