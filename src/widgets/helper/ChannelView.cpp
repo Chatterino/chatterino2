@@ -1236,8 +1236,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
-        tooltipWidget->adjustSize();
         tooltipWidget->setText(tooltip);
+        tooltipWidget->adjustSize();
         tooltipWidget->show();
         tooltipWidget->raise();
     }
