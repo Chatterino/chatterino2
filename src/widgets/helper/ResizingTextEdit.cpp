@@ -228,6 +228,27 @@ void ResizingTextEdit::insertCompletion(const QString &completion)
     this->setTextCursor(tc);
 }
 
+bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
+{
+    if (source->hasImage())
+    {
+        return false;
+    }
+    else if (source->hasFormat("text/plain"))
+    {
+        return true;
+    }
+    return false;
+}
+
+void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
+{
+    if (!source->hasImage())
+    {
+        insertPlainText(source->text());
+    }
+}
+
 QCompleter *ResizingTextEdit::getCompleter() const
 {
     return this->completer_;
