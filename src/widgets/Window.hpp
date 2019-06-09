@@ -38,6 +38,7 @@ private:
     void addShortcuts();
     void addLayout();
     void onAccountSelected();
+    void addMenuBar();
 
     WindowType type_;
 
