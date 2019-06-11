@@ -8,6 +8,8 @@ namespace chatterino {
         static TooltipPreviewImage &getInstance();
         void setImage(ImagePtr image);
 
+        TooltipPreviewImage(const TooltipPreviewImage&) = delete;
+
     private:
         TooltipPreviewImage();
 

@@ -1219,7 +1219,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        auto tooltipPreviewImage = TooltipPreviewImage::getInstance();
+        auto &tooltipPreviewImage = TooltipPreviewImage::getInstance();
         auto emoteElement = dynamic_cast<const EmoteElement*>(&hoverLayoutElement->getCreator());
         if (emoteElement && getSettings()->emotesTooltipPreview.getValue()) {
             tooltipPreviewImage.setImage(emoteElement->getEmote()->images.getImage(3.0));
