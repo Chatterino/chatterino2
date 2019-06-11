@@ -105,6 +105,8 @@ namespace {
     }
 }  // namespace
 
+ImagePtr ChannelView::currentPreviewImage = nullptr;
+
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
     , scrollBar_(new Scrollbar(this))
@@ -313,11 +315,13 @@ void ChannelView::queueUpdate()
     //    this->repaint();
 
     auto tooltipWidget = TooltipWidget::getInstance();
-    if (this->currentPreviewImage) {
-        auto pixmap = this->currentPreviewImage->pixmap();
+    if (ChannelView::currentPreviewImage) {
+        auto pixmap = ChannelView::currentPreviewImage->pixmap();
         if (pixmap) {
             tooltipWidget->setImage(*pixmap);
         }
+    } else {
+        tooltipWidget->clearImage();
     }
 
     this->update();
@@ -1228,10 +1232,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto emoteElement = dynamic_cast<const EmoteElement*>(&hoverLayoutElement->getCreator());
         if (emoteElement && getSettings()->emotesTooltipPreview.getValue()) {
-            this->currentPreviewImage = emoteElement->getEmote()->images.getImage(3.0);
+            ChannelView::currentPreviewImage = emoteElement->getEmote()->images.getImage(3.0);
         } else {
-            this->currentPreviewImage = nullptr;
-            tooltipWidget->clearImage();
+            ChannelView::currentPreviewImage = nullptr;
         }
 
         tooltipWidget->moveTo(this, event->globalPos());

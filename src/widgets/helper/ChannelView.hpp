@@ -210,7 +210,7 @@ private:
     static constexpr int leftPadding = 8;
     static constexpr int scrollbarPadding = 8;
 
-    ImagePtr currentPreviewImage = nullptr;
+    static ImagePtr currentPreviewImage;
 
 private slots:
     void wordFlagsChanged()
