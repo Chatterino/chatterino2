@@ -16,6 +16,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "singletons/TooltipPreviewImage.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -23,7 +24,6 @@
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
-#include "TooltipPreviewImage.hpp"
 
 #include <QClipboard>
 #include <QDebug>
@@ -1222,9 +1222,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         auto tooltipPreviewImage = TooltipPreviewImage::getInstance();
         auto emoteElement = dynamic_cast<const EmoteElement*>(&hoverLayoutElement->getCreator());
         if (emoteElement && getSettings()->emotesTooltipPreview.getValue()) {
-            tooltipPreviewImage->setImage(emoteElement->getEmote()->images.getImage(3.0));
+            tooltipPreviewImage.setImage(emoteElement->getEmote()->images.getImage(3.0));
         } else {
-            tooltipPreviewImage->setImage(nullptr);
+            tooltipPreviewImage.setImage(nullptr);
         }
 
         tooltipWidget->moveTo(this, event->globalPos());
