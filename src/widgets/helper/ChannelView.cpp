@@ -23,6 +23,7 @@
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
+#include "TooltipPreviewImage.hpp"
 
 #include <QClipboard>
 #include <QDebug>
@@ -104,8 +105,6 @@ namespace {
         }
     }
 }  // namespace
-
-ImagePtr ChannelView::currentPreviewImage = nullptr;
 
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
@@ -313,16 +312,6 @@ void ChannelView::queueUpdate()
     //    }
 
     //    this->repaint();
-
-    auto tooltipWidget = TooltipWidget::getInstance();
-    if (ChannelView::currentPreviewImage) {
-        auto pixmap = ChannelView::currentPreviewImage->pixmap();
-        if (pixmap) {
-            tooltipWidget->setImage(*pixmap);
-        }
-    } else {
-        tooltipWidget->clearImage();
-    }
 
     this->update();
 
@@ -1230,11 +1219,12 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
+        auto tooltipPreviewImage = TooltipPreviewImage::getInstance();
         auto emoteElement = dynamic_cast<const EmoteElement*>(&hoverLayoutElement->getCreator());
         if (emoteElement && getSettings()->emotesTooltipPreview.getValue()) {
-            ChannelView::currentPreviewImage = emoteElement->getEmote()->images.getImage(3.0);
+            tooltipPreviewImage->setImage(emoteElement->getEmote()->images.getImage(3.0));
         } else {
-            ChannelView::currentPreviewImage = nullptr;
+            tooltipPreviewImage->setImage(nullptr);
         }
 
         tooltipWidget->moveTo(this, event->globalPos());
