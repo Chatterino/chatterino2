@@ -3,18 +3,19 @@
 #include "messages/Image.hpp"
 
 namespace chatterino {
-    class TooltipPreviewImage {
-    public:
-        static TooltipPreviewImage &getInstance();
-        void setImage(ImagePtr image);
+class TooltipPreviewImage
+{
+public:
+    static TooltipPreviewImage &getInstance();
+    void setImage(ImagePtr image);
 
-        TooltipPreviewImage(const TooltipPreviewImage&) = delete;
+    TooltipPreviewImage(const TooltipPreviewImage &) = delete;
 
-    private:
-        TooltipPreviewImage();
+private:
+    TooltipPreviewImage();
 
-    private:
-        ImagePtr image_ = nullptr;
-        std::vector<pajlada::Signals::ScopedConnection> connections_;
-    };
+private:
+    ImagePtr image_ = nullptr;
+    std::vector<pajlada::Signals::ScopedConnection> connections_;
+};
 }  // namespace chatterino
