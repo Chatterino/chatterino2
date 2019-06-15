@@ -41,6 +41,7 @@ public:
     virtual void paintAnimated(QPainter &painter, int yOffset) = 0;
     virtual int getMouseOverIndex(const QPoint &abs) const = 0;
     virtual int getXFromIndex(int index) = 0;
+
     const Link &getLink() const;
     const QString &getText() const;
     FlagsEnum<MessageElementFlag> getFlags() const;

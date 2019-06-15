@@ -15,6 +15,7 @@
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/TooltipPreviewImage.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/IncognitoBrowser.hpp"
@@ -311,6 +312,7 @@ void ChannelView::queueUpdate()
     //    }
 
     //    this->repaint();
+
     this->update();
 
     //    this->updateTimer.start();
@@ -1217,6 +1219,28 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
+        auto &tooltipPreviewImage = TooltipPreviewImage::getInstance();
+        auto emoteElement = dynamic_cast<const EmoteElement *>(
+            &hoverLayoutElement->getCreator());
+
+        if (emoteElement && getSettings()->emotesTooltipPreview.getValue())
+        {
+            if (event->modifiers() == Qt::ShiftModifier ||
+                getSettings()->emotesTooltipPreview.getValue() == 1)
+            {
+                tooltipPreviewImage.setImage(
+                    emoteElement->getEmote()->images.getImage(3.0));
+            }
+            else
+            {
+                tooltipPreviewImage.setImage(nullptr);
+            }
+        }
+        else
+        {
+            tooltipPreviewImage.setImage(nullptr);
+        }
+
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->setText(tooltip);

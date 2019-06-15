@@ -139,6 +139,7 @@ SOURCES += \
     src/singletons/Toasts.cpp \
     src/singletons/Updates.cpp \
     src/singletons/WindowManager.cpp \
+    src/singletons/TooltipPreviewImage.cpp \
     src/util/DebugCount.cpp \
     src/util/FormatTime.cpp \
     src/util/IncognitoBrowser.cpp \
@@ -301,6 +302,7 @@ HEADERS += \
     src/providers/twitch/TwitchServer.hpp \
     src/providers/twitch/TwitchUser.hpp \
     src/RunGui.hpp \
+    src/singletons/TooltipPreviewImage.hpp \
     src/singletons/Badges.hpp \
     src/singletons/Emotes.hpp \
     src/singletons/helper/GifTimer.hpp \

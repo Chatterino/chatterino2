@@ -270,6 +270,11 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Double click links to open", s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
     layout.addCheckbox("Show live indicator in tabs", s.showTabLive);
+    layout.addDropdown<int>(
+        "Show emote preview in tooltip on hover",
+        {"Don't show", "Always show", "Hold shift"}, s.emotesTooltipPreview,
+        [](int index) { return index; }, [](auto args) { return args.index; },
+        false);
 
     layout.addSpacing(16);
     layout.addSeperator();

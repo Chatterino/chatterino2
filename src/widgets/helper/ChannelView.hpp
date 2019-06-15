@@ -4,6 +4,7 @@
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Selection.hpp"
+#include "messages/Image.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QPaintEvent>

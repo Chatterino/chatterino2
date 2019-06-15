@@ -192,6 +192,7 @@ public:
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
     BoolSetting loadTwitchMessageHistoryOnConnect = {
         "/misc/twitch/loadMessageHistoryOnConnect", true};
+    IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 0};
 
     QStringSetting cachePath = {"/cache/path", ""};
 
