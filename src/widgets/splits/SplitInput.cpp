@@ -243,6 +243,10 @@ void SplitInput::installKeyPressedEvent()
                     QTextCursor cursor = this->ui_.textEdit->textCursor();
                     cursor.movePosition(QTextCursor::End);
                     this->ui_.textEdit->setTextCursor(cursor);
+
+                    // Don't let the keyboard event propagate further, we've
+                    // handled it
+                    event->accept();
                 }
             }
         }
