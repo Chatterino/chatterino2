@@ -250,6 +250,22 @@ void SplitInput::installKeyPressedEvent()
                 }
             }
         }
+        else if (event->key() == Qt::Key_Home)
+        {
+            QTextCursor cursor = this->ui_.textEdit->textCursor();
+            cursor.movePosition(QTextCursor::Start);
+            this->ui_.textEdit->setTextCursor(cursor);
+
+            event->accept();
+        }
+        else if (event->key() == Qt::Key_End)
+        {
+            QTextCursor cursor = this->ui_.textEdit->textCursor();
+            cursor.movePosition(QTextCursor::End);
+            this->ui_.textEdit->setTextCursor(cursor);
+
+            event->accept();
+        }
         else if (event->key() == Qt::Key_H &&
                  event->modifiers() == Qt::AltModifier)
         {
