@@ -28,8 +28,8 @@ template <typename T>
 class LimitedQueue
 {
 protected:
-    typedef std::shared_ptr<std::vector<T>> Chunk;
-    typedef std::shared_ptr<std::vector<Chunk>> ChunkVector;
+    using Chunk = std::vector<T>;
+    using ChunkVector = std::vector<std::shared_ptr<Chunk>>;
 
 public:
     LimitedQueue(size_t limit = 1000)
@@ -42,9 +42,8 @@ public:
     {
         std::lock_guard<std::mutex> lock(this->mutex_);
 
-        this->chunks_ =
-            std::make_shared<std::vector<std::shared_ptr<std::vector<T>>>>();
-        Chunk chunk = std::make_shared<std::vector<T>>();
+        this->chunks_ = std::make_shared<ChunkVector>();
+        auto chunk = std::make_shared<Chunk>();
         chunk->resize(this->chunkSize_);
         this->chunks_->push_back(chunk);
         this->firstChunkOffset_ = 0;
@@ -57,23 +56,21 @@ public:
     {
         std::lock_guard<std::mutex> lock(this->mutex_);
 
-        Chunk lastChunk = this->chunks_->back();
+        auto lastChunk = this->chunks_->back();
 
-        // still space in the last chunk
         if (lastChunk->size() <= this->lastChunkEnd_)
         {
-            // create new chunk vector
-            ChunkVector newVector = std::make_shared<
-                std::vector<std::shared_ptr<std::vector<T>>>>();
+            // Last chunk is full, create a new one and rebuild our chunk vector
+            auto newVector = std::make_shared<ChunkVector>();
 
             // copy chunks
-            for (Chunk &chunk : *this->chunks_)
+            for (auto &chunk : *this->chunks_)
             {
                 newVector->push_back(chunk);
             }
 
             // push back new chunk
-            Chunk newChunk = std::make_shared<std::vector<T>>();
+            auto newChunk = std::make_shared<Chunk>();
             newChunk->resize(this->chunkSize_);
             newVector->push_back(newChunk);
 
@@ -98,8 +95,7 @@ public:
             std::lock_guard<std::mutex> lock(this->mutex_);
 
             // create new vector to clone chunks into
-            ChunkVector newChunks = std::make_shared<
-                std::vector<std::shared_ptr<std::vector<T>>>>();
+            auto newChunks = std::make_shared<ChunkVector>();
 
             newChunks->resize(this->chunks_->size());
 
@@ -112,7 +108,7 @@ public:
             // create new chunk for the first one
             size_t offset =
                 std::min(this->space(), static_cast<qsizetype>(items.size()));
-            Chunk newFirstChunk = std::make_shared<std::vector<T>>();
+            auto newFirstChunk = std::make_shared<Chunk>();
             newFirstChunk->resize(this->chunks_->front()->size() + offset);
 
             for (size_t i = 0; i < offset; i++)
@@ -150,7 +146,7 @@ public:
 
         for (size_t i = 0; i < this->chunks_->size(); i++)
         {
-            Chunk &chunk = this->chunks_->at(i);
+            auto &chunk = this->chunks_->at(i);
 
             size_t start = i == 0 ? this->firstChunkOffset_ : 0;
             size_t end =
@@ -160,7 +156,7 @@ public:
             {
                 if (chunk->at(j) == item)
                 {
-                    Chunk newChunk = std::make_shared<std::vector<T>>();
+                    auto newChunk = std::make_shared<Chunk>();
                     newChunk->resize(chunk->size());
 
                     for (size_t k = 0; k < chunk->size(); k++)
@@ -189,7 +185,7 @@ public:
 
         for (size_t i = 0; i < this->chunks_->size(); i++)
         {
-            Chunk &chunk = this->chunks_->at(i);
+            auto &chunk = this->chunks_->at(i);
 
             size_t start = i == 0 ? this->firstChunkOffset_ : 0;
             size_t end =
@@ -199,7 +195,7 @@ public:
             {
                 if (x == index)
                 {
-                    Chunk newChunk = std::make_shared<std::vector<T>>();
+                    auto newChunk = std::make_shared<Chunk>();
                     newChunk->resize(chunk->size());
 
                     for (size_t k = 0; k < chunk->size(); k++)
@@ -233,7 +229,7 @@ private:
     qsizetype space()
     {
         size_t totalSize = 0;
-        for (Chunk &chunk : *this->chunks_)
+        for (auto &chunk : *this->chunks_)
         {
             totalSize += chunk->size();
         }
@@ -263,12 +259,11 @@ private:
         if (this->firstChunkOffset_ == this->chunks_->front()->size() - 1)
         {
             // copy the chunk vector
-            ChunkVector newVector = std::make_shared<
-                std::vector<std::shared_ptr<std::vector<T>>>>();
+            auto newVector = std::make_shared<ChunkVector>();
 
             // delete first chunk
             bool first = true;
-            for (Chunk &chunk : *this->chunks_)
+            for (auto &chunk : *this->chunks_)
             {
                 if (!first)
                 {
@@ -283,12 +278,12 @@ private:
         return true;
     }
 
-    ChunkVector chunks_;
+    std::shared_ptr<ChunkVector> chunks_;
     std::mutex mutex_;
 
     size_t firstChunkOffset_;
     size_t lastChunkEnd_;
-    size_t limit_;
+    const size_t limit_;
 
     const size_t chunkSize_ = 100;
 };
