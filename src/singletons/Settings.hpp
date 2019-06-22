@@ -105,10 +105,7 @@ public:
     /// Emotes
     BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight",
                                            false};
-    BoolSetting enableTwitchEmotes = {"/emotes/enableTwitchEmotes", true};
-    BoolSetting enableBttvEmotes = {"/emotes/enableBTTVEmotes", true};
-    BoolSetting enableFfzEmotes = {"/emotes/enableFFZEmotes", true};
-    BoolSetting enableEmojis = {"/emotes/enableEmojis", true};
+    BoolSetting enableEmoteImages = {"/emotes/enableEmoteImages", true};
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
 

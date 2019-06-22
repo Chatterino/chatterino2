@@ -1026,7 +1026,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
                     if (const auto &_badge = this->twitchChannel->twitchBadge(
                             "bits", cheerAmount))
                     {
-                        this->emplace<EmoteElement>(
+                        this->emplace<BadgeElement>(
                                 _badge.get(), MessageElementFlag::BadgeVanity)
                             ->setTooltip(tooltip);
                         continue;
@@ -1041,7 +1041,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto _badge = this->twitchChannel->globalTwitchBadges().badge(
                     "bits", cheerAmount))
             {
-                this->emplace<EmoteElement>(_badge.get(),
+                this->emplace<BadgeElement>(_badge.get(),
                                             MessageElementFlag::BadgeVanity)
                     ->setTooltip(tooltip);
             }
@@ -1071,7 +1071,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
         {
             if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
             {
-                this->emplace<EmoteElement>(
+                this->emplace<BadgeElement>(
                         customModBadge.get(),
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customModBadge)->tooltip.string);
@@ -1131,7 +1131,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto badgeEmote = this->twitchChannel->twitchBadge(
                     "subscriber", badge.mid(11)))
             {
-                this->emplace<EmoteElement>(
+                this->emplace<BadgeElement>(
                         badgeEmote.get(), MessageElementFlag::BadgeSubscription)
                     ->setTooltip((*badgeEmote)->tooltip.string);
                 continue;
@@ -1152,7 +1152,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto badgeEmote =
                     this->twitchChannel->twitchBadge(splits[0], splits[1]))
             {
-                this->emplace<EmoteElement>(badgeEmote.get(),
+                this->emplace<BadgeElement>(badgeEmote.get(),
                                             MessageElementFlag::BadgeVanity)
                     ->setTooltip((*badgeEmote)->tooltip.string);
                 continue;
@@ -1160,7 +1160,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto _badge = this->twitchChannel->globalTwitchBadges().badge(
                     splits[0], splits[1]))
             {
-                this->emplace<EmoteElement>(_badge.get(),
+                this->emplace<BadgeElement>(_badge.get(),
                                             MessageElementFlag::BadgeVanity)
                     ->setTooltip((*_badge)->tooltip.string);
                 continue;
@@ -1175,7 +1175,7 @@ void TwitchMessageBuilder::appendChatterinoBadges()
         getApp()->chatterinoBadges->getBadge({this->userName});
     if (chatterinoBadgePtr)
     {
-        this->emplace<EmoteElement>(*chatterinoBadgePtr,
+        this->emplace<BadgeElement>(*chatterinoBadgePtr,
                                     MessageElementFlag::BadgeChatterino);
     }
 }

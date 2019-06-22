@@ -228,6 +228,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
     layout.addCheckbox("Gif animations", s.animateEmotes);
     layout.addCheckbox("Animate only when focused", s.animationsWhenFocused);
+    layout.addCheckbox("Emote images", s.enableEmoteImages);
     layout.addDropdown("Emoji set",
                        {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
                         "Apple", "Google", "Messenger"},

@@ -138,10 +138,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
             if (image->isEmpty())
                 return;
 
-            auto emoteScale =
-                this->getFlags().hasAny(MessageElementFlag::Badges)
-                    ? 1
-                    : getSettings()->emoteScale.getValue();
+            auto emoteScale = getSettings()->emoteScale.getValue();
 
             auto size =
                 QSize(int(container.getScale() * image->width() * emoteScale),
@@ -158,6 +155,31 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
                                                    MessageElementFlag::Misc);
             }
         }
+    }
+}
+
+// BADGE
+BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
+    : MessageElement(flags)
+    , emote_(emote)
+{
+    this->setTooltip(emote->tooltip.string);
+}
+
+void BadgeElement::addToContainer(MessageLayoutContainer &container,
+                                  MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
+    {
+        auto image = this->emote_->images.getImage(container.getScale());
+        if (image->isEmpty())
+            return;
+
+        auto size = QSize(int(container.getScale() * image->width()),
+                          int(container.getScale() * image->height()));
+
+        container.addElement((new ImageLayoutElement(*this, image, size))
+                                 ->setLink(this->getLink()));
     }
 }
 

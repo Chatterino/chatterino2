@@ -76,10 +76,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
     this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
-    this->wordFlagsListener_.addSetting(settings->enableBttvEmotes);
-    this->wordFlagsListener_.addSetting(settings->enableEmojis);
-    this->wordFlagsListener_.addSetting(settings->enableFfzEmotes);
-    this->wordFlagsListener_.addSetting(settings->enableTwitchEmotes);
+    this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
     this->wordFlagsListener_.setCB([this] {
@@ -115,13 +112,12 @@ void WindowManager::updateWordTypeMask()
     }
 
     // emotes
-    flags.set(settings->enableTwitchEmotes ? MEF::TwitchEmoteImage
-                                           : MEF::TwitchEmoteText);
-    flags.set(settings->enableFfzEmotes ? MEF::FfzEmoteImage
-                                        : MEF::FfzEmoteText);
-    flags.set(settings->enableBttvEmotes ? MEF::BttvEmoteImage
-                                         : MEF::BttvEmoteText);
-    flags.set(settings->enableEmojis ? MEF::EmojiImage : MEF::EmojiText);
+    if (settings->enableEmoteImages)
+    {
+        flags.set(MEF::EmoteImages);
+    }
+    flags.set(MEF::EmoteText);
+    flags.set(MEF::EmojiText);
 
     // bits
     flags.set(MEF::BitsAmount);

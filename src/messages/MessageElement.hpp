@@ -42,6 +42,7 @@ enum class MessageElementFlag {
     FfzEmoteText = (1 << 11),
     FfzEmote = FfzEmoteImage | FfzEmoteText,
     EmoteImages = TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage,
+    EmoteText = TwitchEmoteText | BttvEmoteText | FfzEmoteText,
 
     BitsStatic = (1 << 12),
     BitsAnimated = (1 << 13),
@@ -210,6 +211,18 @@ public:
 
 private:
     std::unique_ptr<TextElement> textElement_;
+    EmotePtr emote_;
+};
+
+class BadgeElement : public MessageElement
+{
+public:
+    BadgeElement(const EmotePtr &data, MessageElementFlags flags_);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags_) override;
+
+private:
     EmotePtr emote_;
 };
 
