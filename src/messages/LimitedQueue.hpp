@@ -253,8 +253,6 @@ private:
 
         deleted = this->chunks_->front()->at(this->firstChunkOffset_);
 
-        this->firstChunkOffset_++;
-
         // need to delete the first chunk
         if (this->firstChunkOffset_ == this->chunks_->front()->size() - 1)
         {
@@ -275,6 +273,11 @@ private:
             this->chunks_ = newVector;
             this->firstChunkOffset_ = 0;
         }
+        else
+        {
+            this->firstChunkOffset_++;
+        }
+
         return true;
     }
 
