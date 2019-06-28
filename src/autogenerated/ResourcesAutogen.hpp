@@ -55,6 +55,7 @@ public:
         QPixmap subscriber;
         QPixmap turbo;
         QPixmap verified;
+        QPixmap vip;
     } twitch;
 };
 
