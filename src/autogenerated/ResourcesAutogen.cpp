@@ -43,6 +43,7 @@ Resources2::Resources2()
     this->twitch.subscriber = QPixmap(":/twitch/subscriber.png");
     this->twitch.turbo = QPixmap(":/twitch/turbo.png");
     this->twitch.verified = QPixmap(":/twitch/verified.png");
+    this->twitch.vip = QPixmap(":/twitch/vip.png");
 }
 
 }  // namespace chatterino
