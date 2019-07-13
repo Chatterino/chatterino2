@@ -1,7 +1,7 @@
 version: 1.0.{build}
 branches:
   only:
-  - nightly
+  - master
 image: Visual Studio 2017
 platform: Any CPU
 clone_depth: 1
@@ -62,4 +62,4 @@ deploy:
   prerelease: true
   force_update: true
   on:
-    branch: nightly
+    branch: master
