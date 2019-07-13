@@ -1082,6 +1082,13 @@ void TwitchMessageBuilder::appendTwitchBadges()
                     MessageElementFlag::BadgeChannelAuthority)
                 ->setTooltip("Twitch Channel Moderator");
         }
+        else if (badge == "vip/1")
+        {
+            this->emplace<ImageElement>(
+                    Image::fromPixmap(app->resources->twitch.vip),
+                    MessageElementFlag::BadgeChannelAuthority)
+                ->setTooltip("VIP");
+        }
         else if (badge == "broadcaster/1")
         {
             this->emplace<ImageElement>(

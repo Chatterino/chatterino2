@@ -74,5 +74,6 @@
     <file>twitch/subscriber.png</file>
     <file>twitch/turbo.png</file>
     <file>twitch/verified.png</file>
+    <file>twitch/vip.png</file>
   </qresource>
 </RCC>
