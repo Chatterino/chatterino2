@@ -22,6 +22,9 @@ public:
 
     void setChannel(std::shared_ptr<Channel> channel);
 
+protected:
+    void keyPressEvent(QKeyEvent *e) override;
+
 private:
     void initLayout();
     void performSearch();

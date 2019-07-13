@@ -59,7 +59,7 @@ void UsernameSet::insertPrefix(const QString &value)
 {
     auto &string = this->firstKeyForPrefix[Prefix(value)];
 
-    if (string.isNull() || value < string)
+    if (string.isNull() || value.compare(string, Qt::CaseInsensitive) < 0)
         string = value;
 }
 
@@ -97,6 +97,11 @@ bool Prefix::operator==(const Prefix &other) const
 {
     return std::tie(this->first, this->second) ==
            std::tie(other.first, other.second);
+}
+
+bool Prefix::operator!=(const Prefix &other) const
+{
+    return !(*this == other);
 }
 
 bool Prefix::isStartOf(const QString &string) const

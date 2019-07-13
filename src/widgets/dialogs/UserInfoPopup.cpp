@@ -84,6 +84,8 @@ UserInfoPopup::UserInfoPopup()
             .assign(&this->ui_.ignoreHighlights);
         auto viewLogs = user.emplace<EffectLabel2>(this);
         viewLogs->getLabel().setText("Online logs");
+        auto usercard = user.emplace<EffectLabel2>(this);
+        usercard->getLabel().setText("Usercard");
 
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(app->resources->buttons.mod);
@@ -101,6 +103,12 @@ UserInfoPopup::UserInfoPopup()
             logs->getLogs();
             logs->setAttribute(Qt::WA_DeleteOnClose);
             logs->show();
+        });
+
+        QObject::connect(usercard.getElement(), &Button::leftClicked, [this] {
+            QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
+                                      this->channel_->getName() +
+                                      "/viewercard/" + this->userName_);
         });
 
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
@@ -128,8 +136,8 @@ UserInfoPopup::UserInfoPopup()
                         this->userName_, Qt::CaseInsensitive) == 0;
 
                 visibilityMod = twitchChannel->isBroadcaster() && !isMyself;
-                visibilityUnmod = visibilityMod ||
-                                  (twitchChannel->isMod() && isMyself);    
+                visibilityUnmod =
+                    visibilityMod || (twitchChannel->isMod() && isMyself);
             }
             mod->setVisible(visibilityMod);
             unmod->setVisible(visibilityUnmod);
@@ -147,8 +155,8 @@ UserInfoPopup::UserInfoPopup()
             TwitchChannel *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->channel_.get());
 
-            bool hasModRights = twitchChannel ? twitchChannel->hasModRights() 
-                                              : false;
+            bool hasModRights =
+                twitchChannel ? twitchChannel->hasModRights() : false;
             lineMod->setVisible(hasModRights);
             timeout->setVisible(hasModRights);
         });

@@ -157,7 +157,7 @@ void MessageLayoutContainer::breakLine()
         int yExtra = 0;
         if (isCompactEmote)
         {
-            // yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
+            yExtra = (COMPACT_EMOTES_OFFSET / 2) * this->scale_;
         }
 
         //        if (element->getCreator().getFlags() &
@@ -390,17 +390,17 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                         int lineIndex2 = lineIndex + 1;
                         for (; lineIndex2 < this->lines_.size(); lineIndex2++)
                         {
-                            Line &line = this->lines_[lineIndex2];
-                            QRect rect = line.rect;
+                            Line &line2 = this->lines_[lineIndex2];
+                            QRect rect = line2.rect;
 
                             rect.setTop(std::max(0, rect.top()) + yOffset);
                             rect.setBottom(
                                 std::min(this->height_, rect.bottom()) +
                                 yOffset);
-                            rect.setLeft(this->elements_[line.startIndex]
+                            rect.setLeft(this->elements_[line2.startIndex]
                                              ->getRect()
                                              .left());
-                            rect.setRight(this->elements_[line.endIndex - 1]
+                            rect.setRight(this->elements_[line2.endIndex - 1]
                                               ->getRect()
                                               .right());
 

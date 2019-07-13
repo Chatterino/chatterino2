@@ -61,7 +61,10 @@ public:
     virtual bool canSendMessage() const override;
     virtual void sendMessage(const QString &message) override;
     virtual bool isMod() const override;
+    bool isVIP() const;
+    bool isStaff() const;
     virtual bool isBroadcaster() const override;
+    virtual bool hasHighRateLimit() const override;
 
     // Data
     const QString &subscriptionUrl();
@@ -123,6 +126,8 @@ private:
     void addPartedUser(const QString &user);
     void setLive(bool newLiveStatus);
     void setMod(bool value);
+    void setVIP(bool value);
+    void setStaff(bool value);
     void setRoomId(const QString &id);
     void setRoomModes(const RoomModes &roomModes_);
 
@@ -151,6 +156,8 @@ private:
     FfzModBadge ffzCustomModBadge_;
 
     bool mod_ = false;
+    bool vip_ = false;
+    bool staff_ = false;
     UniqueAccess<QString> roomID_;
 
     UniqueAccess<QStringList> joinedUsers_;
@@ -159,7 +166,6 @@ private:
     bool partedUsersMergeQueued_ = false;
 
     // --
-    QByteArray messageSuffix_;
     QString lastSentMessage_;
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;

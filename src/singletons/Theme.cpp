@@ -27,9 +27,9 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         return QColor::fromHslF(h, s, ((l - 0.5) * multiplier) + 0.5, a);
     };
 
-    auto sat = qreal(0);
-    auto isLight_ = this->isLightTheme();
-    auto flat = isLight_;
+    const auto sat = qreal(0);
+    const auto isLight = this->isLightTheme();
+    const auto flat = isLight;
 
     if (this->isLightTheme())
     {
@@ -38,6 +38,9 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 
         this->splits.resizeHandle = QColor(0, 148, 255, 0xff);
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x50);
+
+        // Highlighted Messages: theme support quick-fix
+        this->messages.backgrounds.highlighted = QColor("#BD8489");
     }
     else
     {
@@ -46,13 +49,16 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 
         this->splits.resizeHandle = QColor(0, 148, 255, 0x70);
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
+
+        // Highlighted Messages: theme support quick-fix
+        this->messages.backgrounds.highlighted = QColor("#4B282C");
     }
 
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
     this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
     this->splits.header.text = this->messages.textColors.regular;
     this->splits.header.focusedText =
-        isLight_ ? QColor("#198CFF") : QColor("#84C1FF");
+        isLight ? QColor("#198CFF") : QColor("#84C1FF");
 
     this->splits.input.background = getColor(0, sat, flat ? 0.95 : 0.95);
     this->splits.input.border = getColor(0, sat, flat ? 1 : 1);
@@ -62,20 +68,25 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         "border:" + this->tabs.selected.backgrounds.regular.color().name() +
         ";" + "color:" + this->messages.textColors.regular.name() + ";" +  //
         "selection-background-color:" +
-        (isLight_ ? "#68B1FF"
-                  : this->tabs.selected.backgrounds.regular.color().name());
+        (isLight ? "#68B1FF"
+                 : this->tabs.selected.backgrounds.regular.color().name());
 
     this->splits.input.focusedLine = this->tabs.highlighted.line.regular;
 
     this->splits.messageSeperator =
-        isLight_ ? QColor(127, 127, 127) : QColor(60, 60, 60);
+        isLight ? QColor(127, 127, 127) : QColor(60, 60, 60);
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
 
     // Highlighted Messages
-    this->messages.backgrounds.highlighted =
-        QColor(getSettings()->highlightColor);
+    // hidden setting from PR #744 - if set it will overwrite theme color
+    // TODO: implement full theme support
+    if (getSettings()->highlightColor != "")
+    {
+        this->messages.backgrounds.highlighted =
+            QColor(getSettings()->highlightColor);
+    }
 }
 
 void Theme::normalizeColor(QColor &color)

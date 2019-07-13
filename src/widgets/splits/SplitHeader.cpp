@@ -4,17 +4,20 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "controllers/pings/PingController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/TooltipPreviewImage.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/LayoutHelper.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
+#include "widgets/helper/CommonTexts.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -203,8 +206,11 @@ void SplitHeader::initializeLayout()
                 });
         }),
         // dropdown
-        this->dropdownButton_ = makeWidget<Button>(
-            [&](auto w) { w->setMenu(this->createMainMenu()); }),
+        this->dropdownButton_ = makeWidget<Button>([&](auto w) {
+            auto menu = this->createMainMenu();
+            this->mainMenu_ = menu.get();
+            w->setMenu(std::move(menu));
+        }),
         // add split
         this->addButton_ = makeWidget<Button>([&](auto w) {
             w->setPixmap(getApp()->resources->buttons.addSplitDark);
@@ -268,13 +274,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     });
 #endif
 
-    menu->addAction("Open in browser", this->split_, &Split::openInBrowser);
+    menu->addAction(OPEN_IN_BROWSER, this->split_, &Split::openInBrowser);
 #ifndef USEWEBENGINE
-    menu->addAction("Open player in browser", this->split_,
+    menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,
                     &Split::openBrowserPlayer);
 #endif
-    menu->addAction("Open in streamlink", this->split_,
-                    &Split::openInStreamlink);
+    menu->addAction(OPEN_IN_STREAMLINK, this->split_, &Split::openInStreamlink);
     menu->addSeparator();
 
     // sub menu
@@ -296,6 +301,23 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     });
 
     moreMenu->addAction(action);
+
+    {
+        auto action = new QAction(this);
+        action->setText("Mute highlight sound");
+        action->setCheckable(true);
+
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
+            action->setChecked(getApp()->pings->isMuted(
+                this->split_->getChannel()->getName()));
+        });
+        action->connect(action, &QAction::triggered, this, [this]() {
+            getApp()->pings->toggleMuteChannel(
+                this->split_->getChannel()->getName());
+        });
+
+        moreMenu->addAction(action);
+    }
 
     moreMenu->addSeparator();
     moreMenu->addAction("Reconnect", this, SLOT(reconnect()));
@@ -507,11 +529,21 @@ void SplitHeader::paintEvent(QPaintEvent *)
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
+    switch (event->button())
     {
-        this->dragging_ = true;
+        case Qt::LeftButton:
+        {
+            this->dragging_ = true;
 
-        this->dragStart_ = event->pos();
+            this->dragStart_ = event->pos();
+        }
+        break;
+
+        case Qt::RightButton:
+        {
+            this->mainMenu_->popup(this->mapToGlobal(event->pos()));
+        }
+        break;
     }
 
     this->doubleClicked_ = false;
@@ -581,6 +613,8 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
+        TooltipPreviewImage::getInstance().setImage(nullptr);
+
         auto tooltip = TooltipWidget::getInstance();
         tooltip->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()),
                         false);

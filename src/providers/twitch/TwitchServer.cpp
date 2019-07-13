@@ -156,6 +156,10 @@ void TwitchServer::messageReceived(Communi::IrcMessage *message)
     {
         handler.handleClearChatMessage(message);
     }
+    else if (command == "CLEARMSG")
+    {
+        handler.handleClearMessageMessage(message);
+    }
     else if (command == "USERSTATE")
     {
         handler.handleUserStateMessage(message);
@@ -219,7 +223,7 @@ std::shared_ptr<Channel> TwitchServer::getCustomChannel(
     {
         static auto channel =
             std::make_shared<Channel>("$$$", chatterino::Channel::Type::Misc);
-        static auto timer = [&] {
+        static auto getTimer = [&] {
             for (auto i = 0; i < 1000; i++)
             {
                 channel->addMessage(makeSystemMessage(QString::number(i + 1)));
@@ -264,7 +268,8 @@ std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(
         if (!twitchChannel)
             continue;
 
-        if (twitchChannel->roomId() == channelId)
+        if (twitchChannel->roomId() == channelId &&
+            twitchChannel->getName().splitRef(":").size() < 3)
         {
             return twitchChannel;
         }
@@ -293,10 +298,11 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel,
         std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
 
         //        std::queue<std::chrono::steady_clock::time_point>
-        auto &lastMessage = channel->hasModRights() ? this->lastMessageMod_
-                                                    : this->lastMessagePleb_;
-        size_t maxMessageCount = channel->hasModRights() ? 99 : 19;
-        auto minMessageOffset = (channel->hasModRights() ? 100ms : 1100ms);
+        auto &lastMessage = channel->hasHighRateLimit()
+                                ? this->lastMessageMod_
+                                : this->lastMessagePleb_;
+        size_t maxMessageCount = channel->hasHighRateLimit() ? 99 : 19;
+        auto minMessageOffset = (channel->hasHighRateLimit() ? 100ms : 1100ms);
 
         auto now = std::chrono::steady_clock::now();
 

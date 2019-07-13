@@ -22,6 +22,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QSaveFile>
 
 #include <chrono>
 
@@ -75,10 +76,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
     this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
-    this->wordFlagsListener_.addSetting(settings->enableBttvEmotes);
-    this->wordFlagsListener_.addSetting(settings->enableEmojis);
-    this->wordFlagsListener_.addSetting(settings->enableFfzEmotes);
-    this->wordFlagsListener_.addSetting(settings->enableTwitchEmotes);
+    this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
     this->wordFlagsListener_.setCB([this] {
@@ -114,13 +112,12 @@ void WindowManager::updateWordTypeMask()
     }
 
     // emotes
-    flags.set(settings->enableTwitchEmotes ? MEF::TwitchEmoteImage
-                                           : MEF::TwitchEmoteText);
-    flags.set(settings->enableFfzEmotes ? MEF::FfzEmoteImage
-                                        : MEF::FfzEmoteText);
-    flags.set(settings->enableBttvEmotes ? MEF::BttvEmoteImage
-                                         : MEF::BttvEmoteText);
-    flags.set(settings->enableEmojis ? MEF::EmojiImage : MEF::EmojiText);
+    if (settings->enableEmoteImages)
+    {
+        flags.set(MEF::EmoteImages);
+    }
+    flags.set(MEF::EmoteText);
+    flags.set(MEF::EmojiText);
 
     // bits
     flags.set(MEF::BitsAmount);
@@ -258,11 +255,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
     // load file
     QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QFile file(settingsPath);
-    file.open(QIODevice::ReadOnly);
-    QByteArray data = file.readAll();
-    QJsonDocument document = QJsonDocument::fromJson(data);
-    QJsonArray windows_arr = document.object().value("windows").toArray();
+    QJsonArray windows_arr = this->loadWindowArray(settingsPath);
 
     // "deserialize"
     for (QJsonValue window_val : windows_arr)
@@ -390,10 +383,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 void WindowManager::save()
 {
     log("[WindowManager] Saving");
-
     assertInGuiThread();
-    auto app = getApp();
-
     QJsonDocument document;
 
     // "serialize"
@@ -477,7 +467,7 @@ void WindowManager::save()
 
     // save file
     QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QFile file(settingsPath);
+    QSaveFile file(settingsPath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
     QJsonDocument::JsonFormat format =
@@ -489,7 +479,7 @@ void WindowManager::save()
         ;
 
     file.write(document.toJson(format));
-    file.flush();
+    file.commit();
 }
 
 void WindowManager::sendAlert()
@@ -516,6 +506,7 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
         case SplitNode::_Split:
         {
             obj.insert("type", "split");
+            obj.insert("moderationMode", node->getSplit()->getModerationMode());
             QJsonObject split;
             encodeChannel(node->getSplit()->getIndirectChannel(), split);
             obj.insert("data", split);
@@ -619,6 +610,16 @@ int WindowManager::getGeneration() const
 void WindowManager::incGeneration()
 {
     this->generation_++;
+}
+
+QJsonArray WindowManager::loadWindowArray(const QString &settingsPath)
+{
+    QFile file(settingsPath);
+    file.open(QIODevice::ReadOnly);
+    QByteArray data = file.readAll();
+    QJsonDocument document = QJsonDocument::fromJson(data);
+    QJsonArray windows_arr = document.object().value("windows").toArray();
+    return windows_arr;
 }
 
 }  // namespace chatterino

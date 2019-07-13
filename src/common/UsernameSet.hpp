@@ -6,11 +6,13 @@
 #include <unordered_map>
 
 namespace chatterino {
+
 class Prefix
 {
 public:
     Prefix(const QString &string);
     bool operator==(const Prefix &other) const;
+    bool operator!=(const Prefix &other) const;
     bool isStartOf(const QString &string) const;
 
 private:
@@ -19,9 +21,11 @@ private:
 
     friend struct std::hash<Prefix>;
 };
+
 }  // namespace chatterino
 
 namespace std {
+
 template <>
 struct hash<chatterino::Prefix> {
     size_t operator()(const chatterino::Prefix &prefix) const
@@ -30,9 +34,18 @@ struct hash<chatterino::Prefix> {
                size_t(prefix.second.unicode());
     }
 };
+
 }  // namespace std
 
 namespace chatterino {
+
+struct CaseInsensitiveLess {
+    bool operator()(const QString &lhs, const QString &rhs) const
+    {
+        return lhs.compare(rhs, Qt::CaseInsensitive) < 0;
+    }
+};
+
 class UsernameSet
 {
 public:
@@ -66,7 +79,7 @@ public:
 private:
     void insertPrefix(const QString &string);
 
-    std::set<QString> items;
+    std::set<QString, CaseInsensitiveLess> items;
     std::unordered_map<Prefix, QString> firstKeyForPrefix;
 };
 

@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "debug/AssertInGuiThread.hpp"
+#include "singletons/Fonts.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Helpers.hpp"
@@ -527,6 +528,10 @@ void SplitContainer::paintEvent(QPaintEvent *)
 
         painter.setPen(this->theme->splits.header.text);
 
+        const auto font =
+            getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale());
+        painter.setFont(font);
+
         QString text = "Click to add a split";
 
         Notebook *notebook = dynamic_cast<Notebook *>(this->parentWidget());
@@ -689,6 +694,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
         auto *split = new Split(this);
         split->setChannel(
             WindowManager::decodeChannel(obj.value("data").toObject()));
+        split->setModerationMode(obj.value("moderationMode").toBool(false));
 
         this->appendSplit(split);
     }
@@ -711,6 +717,8 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
                 auto *split = new Split(this);
                 split->setChannel(WindowManager::decodeChannel(
                     _obj.value("data").toObject()));
+                split->setModerationMode(
+                    _obj.value("moderationMode").toBool(false));
 
                 Node *_node = new Node();
                 _node->parent_ = node;

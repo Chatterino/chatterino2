@@ -15,6 +15,7 @@
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/TooltipPreviewImage.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/IncognitoBrowser.hpp"
@@ -294,8 +295,12 @@ void ChannelView::scaleChangedEvent(float scale)
 
     if (this->goToBottom_)
     {
+        auto factor = this->qtFontScale();
+#ifdef Q_OS_MACOS
+        factor = scale * 80.f / this->logicalDpiX() * this->devicePixelRatioF();
+#endif
         this->goToBottom_->getLabel().setFont(
-            getFonts()->getFont(FontStyle::UiMedium, this->qtFontScale()));
+            getFonts()->getFont(FontStyle::UiMedium, factor));
     }
 }
 
@@ -307,6 +312,7 @@ void ChannelView::queueUpdate()
     //    }
 
     //    this->repaint();
+
     this->update();
 
     //    this->updateTimer.start();
@@ -1213,6 +1219,28 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
+        auto &tooltipPreviewImage = TooltipPreviewImage::getInstance();
+        auto emoteElement = dynamic_cast<const EmoteElement *>(
+            &hoverLayoutElement->getCreator());
+
+        if (emoteElement && getSettings()->emotesTooltipPreview.getValue())
+        {
+            if (event->modifiers() == Qt::ShiftModifier ||
+                getSettings()->emotesTooltipPreview.getValue() == 1)
+            {
+                tooltipPreviewImage.setImage(
+                    emoteElement->getEmote()->images.getImage(3.0));
+            }
+            else
+            {
+                tooltipPreviewImage.setImage(nullptr);
+            }
+        }
+        else
+        {
+            tooltipPreviewImage.setImage(nullptr);
+        }
+
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->setText(tooltip);
@@ -1667,7 +1695,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserAction:
         {
             QString value = link.value;
-            value.replace("{user}", layout->getMessage()->loginName);
+
+            value.replace("{user}", layout->getMessage()->loginName)
+                .replace("{channel}", this->channel_->getName())
+                .replace("{msg-id}", layout->getMessage()->id)
+                .replace("{message}", layout->getMessage()->messageText);
+
             this->channel_->sendMessage(value);
         }
         break;

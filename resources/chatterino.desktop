@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Chatterino
+Comment=Chat client for Twitch
+Exec=chatterino
+Icon=chatterino
+Terminal=false
+Categories=Network;InstantMessaging;

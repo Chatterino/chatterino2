@@ -29,6 +29,7 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 
+#include <QMenuBar>
 #include <QStandardItemModel>
 
 namespace chatterino {
@@ -42,6 +43,10 @@ Window::Window(WindowType type)
     this->addDebugStuff();
     this->addShortcuts();
     this->addLayout();
+
+#ifdef Q_OS_MACOS
+    this->addMenuBar();
+#endif
 
     this->signalHolder_.managedConnect(
         getApp()->accounts->twitch.currentUserChanged,
@@ -334,6 +339,18 @@ void Window::addShortcuts()
             getApp()->twitch.server->getOrAddChannel(si.channelName));
         splitContainer->appendSplit(split);
     });
+}
+
+void Window::addMenuBar()
+{
+    QMenuBar *mainMenu = new QMenuBar();
+    mainMenu->setNativeMenuBar(true);
+
+    QMenu *menu = new QMenu(QString());
+    mainMenu->addMenu(menu);
+    QAction *prefs = menu->addAction(QString());
+    prefs->setMenuRole(QAction::PreferencesRole);
+    connect(prefs, &QAction::triggered, this, [] { SettingsDialog::showDialog(); });
 }
 
 #define UGLYMACROHACK1(s) #s

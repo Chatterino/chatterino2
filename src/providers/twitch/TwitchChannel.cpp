@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
@@ -9,6 +10,7 @@
 #include "messages/Message.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
+#include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -29,10 +31,14 @@
 
 namespace chatterino {
 namespace {
+    constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
+
+    // parseRecentMessages takes a json object and returns a vector of
+    // Communi IrcMessages
     auto parseRecentMessages(const QJsonObject &jsonRoot, ChannelPtr channel)
     {
         QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
-        std::vector<MessagePtr> messages;
+        std::vector<Communi::IrcMessage *> messages;
 
         if (jsonMessages.empty())
             return messages;
@@ -40,26 +46,17 @@ namespace {
         for (const auto jsonMessage : jsonMessages)
         {
             auto content = jsonMessage.toString().toUtf8();
-            // passing nullptr as the channel makes the message invalid but we
-            // don't check for that anyways
-            auto message = Communi::IrcMessage::fromData(content, nullptr);
-            auto privMsg = dynamic_cast<Communi::IrcPrivateMessage *>(message);
-            assert(privMsg);
-
-            MessageParseArgs args;
-            TwitchMessageBuilder builder(channel.get(), privMsg, args);
-            builder.message().flags.set(MessageFlag::RecentMessage);
-
-            if (!builder.isIgnored())
-                messages.push_back(builder.build());
+            messages.emplace_back(
+                Communi::IrcMessage::fromData(content, nullptr));
         }
 
         return messages;
     }
     std::pair<Outcome, UsernameSet> parseChatters(const QJsonObject &jsonRoot)
     {
-        static QStringList categories = {"moderators", "staff", "admins",
-                                         "global_mods", "viewers"};
+        static QStringList categories = {"broadcaster", "vips",   "moderators",
+                                         "staff",       "admins", "global_mods",
+                                         "viewers"};
 
         auto usernames = UsernameSet();
 
@@ -126,10 +123,6 @@ TwitchChannel::TwitchChannel(const QString &name,
     QObject::connect(&this->liveStatusTimer_, &QTimer::timeout,
                      [=] { this->refreshLiveStatus(); });
     this->liveStatusTimer_.start(60 * 1000);
-
-    // --
-    this->messageSuffix_.append(' ');
-    this->messageSuffix_.append(QChar(0x206D));
 
     // debugging
 #if 0
@@ -199,13 +192,13 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    if (!this->hasModRights())
+    if (!this->hasHighRateLimit())
     {
         if (getSettings()->allowDuplicateMessages)
         {
             if (parsedMessage == this->lastSentMessage_)
             {
-                parsedMessage.append(this->messageSuffix_);
+                parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
             }
         }
     }
@@ -225,6 +218,16 @@ bool TwitchChannel::isMod() const
     return this->mod_;
 }
 
+bool TwitchChannel::isVIP() const
+{
+    return this->vip_;
+}
+
+bool TwitchChannel::isStaff() const
+{
+    return this->staff_;
+}
+
 void TwitchChannel::setMod(bool value)
 {
     if (this->mod_ != value)
@@ -235,11 +238,36 @@ void TwitchChannel::setMod(bool value)
     }
 }
 
+void TwitchChannel::setVIP(bool value)
+{
+    if (this->vip_ != value)
+    {
+        this->vip_ = value;
+
+        this->userStateChanged.invoke();
+    }
+}
+
+void TwitchChannel::setStaff(bool value)
+{
+    if (this->staff_ != value)
+    {
+        this->staff_ = value;
+
+        this->userStateChanged.invoke();
+    }
+}
+
 bool TwitchChannel::isBroadcaster() const
 {
     auto app = getApp();
 
     return this->getName() == app->accounts->twitch.getCurrent()->getUserName();
+}
+
+bool TwitchChannel::hasHighRateLimit() const
+{
+    return this->isMod() || this->isBroadcaster() || this->isVIP();
 }
 
 void TwitchChannel::addRecentChatter(const MessagePtr &message)
@@ -445,7 +473,7 @@ void TwitchChannel::setLive(bool newLiveStatus)
             else
             {
                 auto offline =
-                    makeSystemMessage(this->getName() + " is offline");
+                    makeSystemMessage(this->getDisplayName() + " is offline");
                 this->addMessage(offline);
             }
             guard->live = newLiveStatus;
@@ -575,12 +603,13 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 
 void TwitchChannel::loadRecentMessages()
 {
-    static QString genericURL =
-        "https://tmi.twitch.tv/api/rooms/%1/recent_messages?client_id=" +
-        getDefaultClientID();
+    if (!getSettings()->loadTwitchMessageHistoryOnConnect)
+    {
+        return;
+    }
 
-    NetworkRequest request(genericURL.arg(this->roomId()));
-    request.makeAuthorizedV5(getDefaultClientID());
+    NetworkRequest request(
+        Env::get().recentMessagesApiUrl.arg(this->getName()));
     request.setCaller(QThread::currentThread());
     // can't be concurrent right now due to SignalVector
     //    request.setExecuteConcurrently(true);
@@ -592,7 +621,21 @@ void TwitchChannel::loadRecentMessages()
 
         auto messages = parseRecentMessages(result.parseJson(), shared);
 
-        shared->addMessagesAtStart(messages);
+        auto &handler = IrcMessageHandler::getInstance();
+
+        std::vector<MessagePtr> allBuiltMessages;
+
+        for (auto message : messages)
+        {
+            for (auto builtMessage :
+                 handler.parseMessage(shared.get(), message))
+            {
+                builtMessage->flags.set(MessageFlag::RecentMessage);
+                allBuiltMessages.emplace_back(builtMessage);
+            }
+        }
+
+        shared->addMessagesAtStart(allBuiltMessages);
 
         return Success;
     });
@@ -618,11 +661,11 @@ void TwitchChannel::refreshChatters()
 {
     // setting?
     const auto streamStatus = this->accessStreamStatus();
-
+    const auto viewerCount = static_cast<int>(streamStatus->viewerCount);
     if (getSettings()->onlyFetchChattersForSmallerStreamers)
     {
         if (streamStatus->live &&
-            streamStatus->viewerCount > getSettings()->smallStreamerLimit)
+            viewerCount > getSettings()->smallStreamerLimit)
         {
             return;
         }
@@ -674,8 +717,8 @@ void TwitchChannel::refreshBadges()
         {
             auto &versions = (*badgeSets)[jsonBadgeSet.key()];
 
-            auto _ = jsonBadgeSet->toObject()["versions"].toObject();
-            for (auto jsonVersion_ = _.begin(); jsonVersion_ != _.end();
+            auto _set = jsonBadgeSet->toObject()["versions"].toObject();
+            for (auto jsonVersion_ = _set.begin(); jsonVersion_ != _set.end();
                  jsonVersion_++)
             {
                 auto jsonVersion = jsonVersion_->toObject();

@@ -17,4 +17,4 @@
 	
 [submodule "lib/appbase"]
 	path = lib/appbase
-	url = https://github.com/fourtf/appbase
+	url = https://github.com/Chatterino/appbase

@@ -61,15 +61,10 @@ QString formatSize(qint64 size)
 
 QString fetchLogDirectorySize()
 {
-    QString logPathDirectory;
-    if (getSettings()->logPath == "")
-    {
-        logPathDirectory = getPaths()->messageLogDirectory;
-    }
-    else
-    {
-        logPathDirectory = getSettings()->logPath;
-    }
+    QString logPathDirectory = getSettings()->logPath.getValue().isEmpty()
+                                   ? getPaths()->messageLogDirectory
+                                   : getSettings()->logPath;
+
     qint64 logsSize = dirSize(logPathDirectory);
     QString logsSizeLabel = "Your logs currently take up ";
     logsSizeLabel += formatSize(logsSize);
@@ -96,31 +91,22 @@ ModerationPage::ModerationPage()
             QtConcurrent::run([] { return fetchLogDirectorySize(); }));
 
         // Logs (copied from LoggingMananger)
-        getSettings()->logPath.connect(
-            [logsPathLabel](const QString &logPath, auto) mutable {
-                QString pathOriginal;
+        getSettings()->logPath.connect([logsPathLabel](const QString &logPath,
+                                                       auto) mutable {
+            QString pathOriginal =
+                logPath.isEmpty() ? getPaths()->messageLogDirectory : logPath;
 
-                if (logPath == "")
-                {
-                    pathOriginal = getPaths()->messageLogDirectory;
-                }
-                else
-                {
-                    pathOriginal = logPath;
-                }
+            QString pathShortened =
+                "Logs are saved at <a href=\"file:///" + pathOriginal +
+                "\"><span style=\"color: white;\">" +
+                shortenString(pathOriginal, 50) + "</span></a>";
 
-                QString pathShortened =
-                    "Logs are saved at <a href=\"file:///" + pathOriginal +
-                    "\"><span style=\"color: white;\">" +
-                    shortenString(pathOriginal, 50) + "</span></a>";
-
-                logsPathLabel->setText(pathShortened);
-                logsPathLabel->setToolTip(pathOriginal);
-            });
+            logsPathLabel->setText(pathShortened);
+            logsPathLabel->setToolTip(pathOriginal);
+        });
 
         logsPathLabel->setTextFormat(Qt::RichText);
         logsPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                               Qt::LinksAccessibleByKeyboard |
                                                Qt::LinksAccessibleByKeyboard);
         logsPathLabel->setOpenExternalLinks(true);
         logs.append(this->createCheckBox("Enable logging",
@@ -161,7 +147,8 @@ ModerationPage::ModerationPage()
         // clang-format off
         auto label = modMode.emplace<QLabel>(
             "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
-            "Moderation buttons can be bound to chat commands such as \"/ban {user}\", \"/timeout {user} 1000\" or any other custom text commands.<br>");
+            "Moderation buttons can be bound to chat commands such as \"/ban {user}\", \"/timeout {user} 1000\", \"/w someusername !report {user} was bad in channel {channel}\" or any other custom text commands.<br>"
+            "For deleting messages use /delete {msg-id}.");
         label->setWordWrap(true);
         label->setStyleSheet("color: #bbb");
         // clang-format on

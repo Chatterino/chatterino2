@@ -3,6 +3,7 @@
 #include <QThread>
 
 #include "Application.hpp"
+#include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "debug/Log.hpp"
@@ -534,9 +535,7 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
         return;
     }
 
-    NetworkRequest req(
-        "https://braize.pajlada.com/chatterino/twitchemotes/set/" +
-        emoteSet->key + "/");
+    NetworkRequest req(Env::get().twitchEmoteSetResolverUrl.arg(emoteSet->key));
     req.setUseQuickLoadCache(true);
 
     req.onError([](int errorCode) -> bool {

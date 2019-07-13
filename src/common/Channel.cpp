@@ -78,7 +78,7 @@ void Channel::addMessage(MessagePtr message,
 
     // FOURTF: change this when adding more providers
     if (this->isTwitchChannel() &&
-            (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog)))
+        (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog)))
     {
         app->logging->addMessage(this->name_, message);
     }
@@ -154,8 +154,9 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
     for (int i = 0; i < snapshotLength; i++)
     {
         auto &s = snapshot[i];
-        if (s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout}) &&
-            s->loginName == message->timeoutUser)
+        if (s->loginName == message->timeoutUser &&
+            s->flags.hasNone({MessageFlag::Timeout, MessageFlag::Untimeout,
+                              MessageFlag::Whisper}))
         {
             // FOURTF: disabled for now
             // PAJLADA: Shitty solution described in Message.hpp
@@ -179,7 +180,8 @@ void Channel::disableAllMessages()
     for (int i = 0; i < snapshotLength; i++)
     {
         auto &message = snapshot[i];
-        if (message->flags.hasAny({MessageFlag::System, MessageFlag::Timeout}))
+        if (message->flags.hasAny({MessageFlag::System, MessageFlag::Timeout,
+                                   MessageFlag::Whisper}))
         {
             continue;
         }
@@ -210,6 +212,25 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
     }
 }
 
+void Channel::deleteMessage(QString messageID)
+{
+    LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
+    int snapshotLength = snapshot.size();
+
+    int end = std::max(0, snapshotLength - 200);
+
+    for (int i = snapshotLength - 1; i >= end; --i)
+    {
+        auto &s = snapshot[i];
+
+        if (s->id == messageID)
+        {
+            s->flags.set(MessageFlag::Disabled);
+            break;
+        }
+    }
+}
+
 void Channel::addRecentChatter(const MessagePtr &message)
 {
 }
@@ -236,6 +257,11 @@ bool Channel::isBroadcaster() const
 bool Channel::hasModRights() const
 {
     // fourtf: check if staff
+    return this->isMod() || this->isBroadcaster();
+}
+
+bool Channel::hasHighRateLimit() const
+{
     return this->isMod() || this->isBroadcaster();
 }
 

@@ -231,9 +231,8 @@ void AbstractIrcServer::onConnected()
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
-    auto connected = makeSystemMessage("connected");
-    connected->flags.set(MessageFlag::ConnectedMessage);
-    connected->flags.set(MessageFlag::Centered);
+    auto connectedMsg = makeSystemMessage("connected");
+    connectedMsg->flags.set(MessageFlag::ConnectedMessage);
     auto reconnected = makeSystemMessage("reconnected");
     reconnected->flags.set(MessageFlag::ConnectedMessage);
 
@@ -257,7 +256,7 @@ void AbstractIrcServer::onConnected()
             continue;
         }
 
-        chan->addMessage(connected);
+        chan->addMessage(connectedMsg);
     }
 
     this->falloffCounter_ = 1;
@@ -269,7 +268,7 @@ void AbstractIrcServer::onDisconnected()
 
     MessageBuilder b(systemMessage, "disconnected");
     b->flags.set(MessageFlag::DisconnectedMessage);
-    auto disconnected = b.release();
+    auto disconnectedMsg = b.release();
 
     for (std::weak_ptr<Channel> &weak : this->channels.values())
     {
@@ -279,7 +278,7 @@ void AbstractIrcServer::onDisconnected()
             continue;
         }
 
-        chan->addMessage(disconnected);
+        chan->addMessage(disconnectedMsg);
     }
 }
 

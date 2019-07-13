@@ -5,6 +5,7 @@
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/LinkResolver.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
@@ -64,6 +65,8 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
 
     builder = MessageBuilder();
     builder.emplace<TimestampElement>();
+    builder.emplace<TwitchModerationElement>();
+    builder.message().loginName = action.target.name;
     builder.message().flags.set(MessageFlag::PubSub);
 
     builder
@@ -90,23 +93,30 @@ MessageBuilder::MessageBuilder()
 {
 }
 
-MessageBuilder::MessageBuilder(const QString &text)
-    : MessageBuilder()
-{
-    this->emplace<TimestampElement>();
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
-    this->message().searchText = text;
-}
-
 MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text)
     : MessageBuilder()
 {
     this->emplace<TimestampElement>();
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
+
+    // check system message for links
+    // (e.g. needed for sub ticket message in sub only mode)
+    const QStringList textFragments = text.split(QRegularExpression("\\s"));
+    for (const auto &word : textFragments)
+    {
+        const auto linkString = this->matchLink(word);
+        if (linkString.isEmpty())
+        {
+            this->emplace<TextElement>(word, MessageElementFlag::Text,
+                                       MessageColor::System);
+        }
+        else
+        {
+            this->addLink(word, linkString);
+        }
+    }
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    this->message().messageText = text;
     this->message().searchText = text;
 }
 
@@ -157,6 +167,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     this->emplace<TimestampElement>();
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
+    this->message().messageText = text;
     this->message().searchText = text;
 }
 
@@ -213,6 +224,7 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
 
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
+    this->message().messageText = text;
     this->message().searchText = text;
 }
 
@@ -225,23 +237,15 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
 
     this->message().timeoutUser = action.target.name;
 
-    QString text;
-
-    if (action.wasBan())
-    {
-        text = QString("%1 unbanned %2.")  //
-                   .arg(action.source.name)
-                   .arg(action.target.name);
-    }
-    else
-    {
-        text = QString("%1 untimedout %2.")  //
-                   .arg(action.source.name)
-                   .arg(action.target.name);
-    }
+    QString text =
+        QString("%1 %2 %3.")
+            .arg(action.source.name)
+            .arg(QString(action.wasBan() ? "unbanned" : "untimedout"))
+            .arg(action.target.name);
 
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
+    this->message().messageText = text;
     this->message().searchText = text;
 }
 
@@ -350,6 +354,59 @@ QString MessageBuilder::matchLink(const QString &string)
     }
 
     return captured;
+}
+
+void MessageBuilder::addLink(const QString &origLink,
+                             const QString &matchedLink)
+{
+    static QRegularExpression domainRegex(
+        R"(^(?:(?:ftp|http)s?:\/\/)?([^\/]+)(?:\/.*)?$)",
+        QRegularExpression::CaseInsensitiveOption);
+
+    QString lowercaseLinkString;
+    auto match = domainRegex.match(origLink);
+    if (match.isValid())
+    {
+        lowercaseLinkString = origLink.mid(0, match.capturedStart(1)) +
+                              match.captured(1).toLower() +
+                              origLink.mid(match.capturedEnd(1));
+    }
+    else
+    {
+        lowercaseLinkString = origLink;
+    }
+    auto linkElement = Link(Link::Url, matchedLink);
+
+    auto textColor = MessageColor(MessageColor::Link);
+    auto linkMELowercase =
+        this->emplace<TextElement>(lowercaseLinkString,
+                                   MessageElementFlag::LowercaseLink, textColor)
+            ->setLink(linkElement);
+    auto linkMEOriginal =
+        this->emplace<TextElement>(origLink, MessageElementFlag::OriginalLink,
+                                   textColor)
+            ->setLink(linkElement);
+
+    LinkResolver::getLinkInfo(matchedLink, [weakMessage = this->weakOf(),
+                                            linkMELowercase, linkMEOriginal,
+                                            matchedLink](QString tooltipText,
+                                                         Link originalLink) {
+        auto shared = weakMessage.lock();
+        if (!shared)
+        {
+            return;
+        }
+        if (!tooltipText.isEmpty())
+        {
+            linkMELowercase->setTooltip(tooltipText);
+            linkMEOriginal->setTooltip(tooltipText);
+        }
+        if (originalLink.value != matchedLink && !originalLink.value.isEmpty())
+        {
+            linkMELowercase->setLink(originalLink)->updateLink();
+            linkMEOriginal->setLink(originalLink)->updateLink();
+        }
+    });
 }
 
 }  // namespace chatterino

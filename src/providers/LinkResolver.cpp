@@ -1,6 +1,7 @@
 #include "providers/LinkResolver.hpp"
 
 #include "common/Common.hpp"
+#include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "messages/Link.hpp"
 #include "singletons/Settings.hpp"
@@ -12,12 +13,15 @@ namespace chatterino {
 void LinkResolver::getLinkInfo(
     const QString url, std::function<void(QString, Link)> successCallback)
 {
-    QString requestUrl("https://braize.pajlada.com/chatterino/link_resolver/" +
-                       QUrl::toPercentEncoding(url, "", "/:"));
-
+    if (!getSettings()->linkInfoTooltip)
+    {
+        successCallback("No link info loaded", Link(Link::Url, url));
+        return;
+    }
     // Uncomment to test crashes
     // QTimer::singleShot(3000, [=]() {
-    NetworkRequest request(requestUrl);
+    NetworkRequest request(Env::get().linkResolverUrl.arg(
+        QString::fromUtf8(QUrl::toPercentEncoding(url, "", "/:"))));
     request.setCaller(QThread::currentThread());
     request.setTimeout(30000);
     request.onSuccess([successCallback, url](auto result) mutable -> Outcome {

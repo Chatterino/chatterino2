@@ -4,7 +4,7 @@
 
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
-#include "messages/HistoricMessageAppearance.hpp"
+#include "singletons/Toasts.hpp"
 
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
@@ -32,15 +32,15 @@ public:
                                      Qt::VerPattern};
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
                                        ""};
-    IntSetting historicMessagesAppearance = {
-        "/appearance/messages/historicMessagesAppearance",
-        HistoricMessageAppearance::Crossed | HistoricMessageAppearance::Greyed};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
     BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
+    BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
+    BoolSetting hideModerationActions = {
+        "/appearance/messages/hideModerationActions", false};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
@@ -48,7 +48,7 @@ public:
         "/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessages = {
         "/appearance/messages/alternateMessageBackground", false};
-    IntSetting boldScale = {"/appearance/boldScale", 57};
+    FloatSetting boldScale = {"/appearance/boldScale", 50};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", false};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
@@ -67,7 +67,6 @@ public:
     BoolSetting headerUptime = {"/appearance/splitheader/showUptime", false};
     FloatSetting customThemeMultiplier = {"/appearance/customThemeMultiplier",
                                           -0.5f};
-    BoolSetting redDisabledMessages = {"/appearance/redStripes", true};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
 
@@ -106,10 +105,7 @@ public:
     /// Emotes
     BoolSetting scaleEmotesByLineHeight = {"/emotes/scaleEmotesByLineHeight",
                                            false};
-    BoolSetting enableTwitchEmotes = {"/emotes/enableTwitchEmotes", true};
-    BoolSetting enableBttvEmotes = {"/emotes/enableBTTVEmotes", true};
-    BoolSetting enableFfzEmotes = {"/emotes/enableFFZEmotes", true};
-    BoolSetting enableEmojis = {"/emotes/enableEmojis", true};
+    BoolSetting enableEmoteImages = {"/emotes/enableEmoteImages", true};
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
 
@@ -128,6 +124,7 @@ public:
     /// Ingored Users
     BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
                                             true};
+    IntSetting showIgnoredUsersMessages = {"/ignore/showIgnoredUsers", 0};
 
     /// Moderation
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};
@@ -147,7 +144,7 @@ public:
         "/highlighting/whisperHighlight/enableSound", false};
     BoolSetting enableWhisperHighlightTaskbar = {
         "/highlighting/whisperHighlight/enableTaskbarFlashing", false};
-    QStringSetting highlightColor = {"/highlighting/color", "#4B282C"};
+    QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 
@@ -175,6 +172,8 @@ public:
                                             "qrc:/sounds/ping3.wav"};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
+    IntSetting openFromToast = {"/notifications/openFromToast",
+                                static_cast<int>(ToastReaction::OpenInBrowser)};
 
     /// External tools
     // Streamlink
@@ -188,6 +187,9 @@ public:
     /// Misc
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
+    BoolSetting loadTwitchMessageHistoryOnConnect = {
+        "/misc/twitch/loadMessageHistoryOnConnect", true};
+    IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 0};
 
     QStringSetting cachePath = {"/cache/path", ""};
 

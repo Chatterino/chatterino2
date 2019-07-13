@@ -15,7 +15,7 @@ namespace chatterino {
 
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
-enum class MessageFlag : uint16_t;
+enum class MessageFlag : uint32_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
 class Channel : public std::enable_shared_from_this<Channel>
@@ -62,6 +62,7 @@ public:
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
+    void deleteMessage(QString messageID);
 
     QStringList modList;
 
@@ -70,6 +71,7 @@ public:
     virtual bool isMod() const;
     virtual bool isBroadcaster() const;
     virtual bool hasModRights() const;
+    virtual bool hasHighRateLimit() const;
     virtual bool isLive() const;
     virtual bool shouldIgnoreHighlights() const;
 

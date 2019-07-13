@@ -243,7 +243,75 @@ void SplitInput::installKeyPressedEvent()
                     QTextCursor cursor = this->ui_.textEdit->textCursor();
                     cursor.movePosition(QTextCursor::End);
                     this->ui_.textEdit->setTextCursor(cursor);
+
+                    // Don't let the keyboard event propagate further, we've
+                    // handled it
+                    event->accept();
                 }
+            }
+        }
+        else if (event->key() == Qt::Key_Home)
+        {
+            QTextCursor cursor = this->ui_.textEdit->textCursor();
+            cursor.movePosition(QTextCursor::Start);
+            this->ui_.textEdit->setTextCursor(cursor);
+
+            event->accept();
+        }
+        else if (event->key() == Qt::Key_End)
+        {
+            QTextCursor cursor = this->ui_.textEdit->textCursor();
+            cursor.movePosition(QTextCursor::End);
+            this->ui_.textEdit->setTextCursor(cursor);
+
+            event->accept();
+        }
+        else if (event->key() == Qt::Key_H &&
+                 event->modifiers() == Qt::AltModifier)
+        {
+            // h: vim binding for left
+            SplitContainer *page = this->split_->getContainer();
+            event->accept();
+
+            if (page != nullptr)
+            {
+                page->selectNextSplit(SplitContainer::Left);
+            }
+        }
+        else if (event->key() == Qt::Key_J &&
+                 event->modifiers() == Qt::AltModifier)
+        {
+            // j: vim binding for down
+            SplitContainer *page = this->split_->getContainer();
+            event->accept();
+
+            if (page != nullptr)
+            {
+                page->selectNextSplit(SplitContainer::Below);
+            }
+        }
+        else if (event->key() == Qt::Key_K &&
+                 event->modifiers() == Qt::AltModifier)
+        {
+            // k: vim binding for up
+            SplitContainer *page = this->split_->getContainer();
+            event->accept();
+
+            if (page != nullptr)
+            {
+                page->selectNextSplit(SplitContainer::Above);
+            }
+        }
+        else if (event->key() == Qt::Key_L &&
+                 event->modifiers() == Qt::AltModifier)
+        {
+            // l: vim binding for right
+            SplitContainer *page = this->split_->getContainer();
+            event->accept();
+
+            if (page != nullptr)
+            {
+                page->selectNextSplit(SplitContainer::Right);
             }
         }
         else if (event->key() == Qt::Key_Down)

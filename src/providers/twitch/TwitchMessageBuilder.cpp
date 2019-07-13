@@ -4,9 +4,9 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
+#include "controllers/pings/PingController.hpp"
 #include "debug/Log.hpp"
 #include "messages/Message.hpp"
-#include "providers/LinkResolver.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -80,6 +80,19 @@ bool TwitchMessageBuilder::isIgnored() const
         {
             if (sourceUserID == user.id)
             {
+                switch (static_cast<ShowIgnoredUsersMessages>(
+                    getSettings()->showIgnoredUsersMessages.getValue()))
+                {
+                    case ShowIgnoredUsersMessages::IfModerator:
+                        if (this->channel->isMod() ||
+                            this->channel->isBroadcaster())
+                            return false;
+                        break;
+                    case ShowIgnoredUsersMessages::IfBroadcaster:
+                        if (this->channel->isBroadcaster())
+                            return false;
+                        break;
+                }
                 log("Blocking message because it's from blocked user {}",
                     user.name);
                 return true;
@@ -109,12 +122,24 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->appendChannelName();
 
+    if (this->tags.contains("rm-deleted"))
+    {
+        this->message().flags.set(MessageFlag::Disabled);
+    }
+
     // timestamp
     bool isPastMsg = this->tags.contains("historical");
     if (isPastMsg)
     {
         // This may be architecture dependent(datatype)
-        qint64 ts = this->tags.value("tmi-sent-ts").toLongLong();
+        bool customReceived = false;
+        qint64 ts =
+            this->tags.value("rm-received-ts").toLongLong(&customReceived);
+        if (!customReceived)
+        {
+            ts = this->tags.value("tmi-sent-ts").toLongLong();
+        }
+
         QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(ts);
         this->emplace<TimestampElement>(dateTime.time());
     }
@@ -310,13 +335,13 @@ MessagePtr TwitchMessageBuilder::build()
                     QRegularExpression emoteregex(
                         "\\b" + std::get<2>(tup).string + "\\b",
                         QRegularExpression::UseUnicodePropertiesOption);
-                    auto match = emoteregex.match(midExtendedRef);
-                    if (match.hasMatch())
+                    auto _match = emoteregex.match(midExtendedRef);
+                    if (_match.hasMatch())
                     {
-                        int last = match.lastCapturedIndex();
+                        int last = _match.lastCapturedIndex();
                         for (int i = 0; i <= last; ++i)
                         {
-                            std::get<0>(tup) = from + match.capturedStart();
+                            std::get<0>(tup) = from + _match.capturedStart();
                             twitchEmotes.push_back(std::move(tup));
                         }
                     }
@@ -414,7 +439,9 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->addWords(splits, twitchEmotes);
 
-    this->message().searchText = this->userName + ": " + this->originalMessage_;
+    this->message().messageText = this->originalMessage_;
+    this->message().searchText = this->message().localizedName + " " +
+                                 this->userName + ": " + this->originalMessage_;
 
     return this->release();
 }
@@ -512,56 +539,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
     }
     else
     {
-        static QRegularExpression domainRegex(
-            R"(^(?:(?:ftp|http)s?:\/\/)?([^\/]+)(?:\/.*)?$)",
-            QRegularExpression::CaseInsensitiveOption);
-
-        QString lowercaseLinkString;
-        auto match = domainRegex.match(string);
-        if (match.isValid())
-        {
-            lowercaseLinkString = string.mid(0, match.capturedStart(1)) +
-                                  match.captured(1).toLower() +
-                                  string.mid(match.capturedEnd(1));
-        }
-        else
-        {
-            lowercaseLinkString = string;
-        }
-        link = Link(Link::Url, linkString);
-
-        textColor = MessageColor(MessageColor::Link);
-        auto linkMELowercase =
-            this->emplace<TextElement>(lowercaseLinkString,
-                                       MessageElementFlag::LowercaseLink,
-                                       textColor)
-                ->setLink(link);
-        auto linkMEOriginal =
-            this->emplace<TextElement>(string, MessageElementFlag::OriginalLink,
-                                       textColor)
-                ->setLink(link);
-
-        LinkResolver::getLinkInfo(
-            linkString,
-            [weakMessage = this->weakOf(), linkMELowercase, linkMEOriginal,
-             linkString](QString tooltipText, Link originalLink) {
-                auto shared = weakMessage.lock();
-                if (!shared)
-                {
-                    return;
-                }
-                if (!tooltipText.isEmpty())
-                {
-                    linkMELowercase->setTooltip(tooltipText);
-                    linkMEOriginal->setTooltip(tooltipText);
-                }
-                if (originalLink.value != linkString &&
-                    !originalLink.value.isEmpty())
-                {
-                    linkMELowercase->setLink(originalLink)->updateLink();
-                    linkMEOriginal->setLink(originalLink)->updateLink();
-                }
-            });
+        this->addLink(string, linkString);
     }
 
     // if (!linkString.isEmpty()) {
@@ -605,7 +583,7 @@ void TwitchMessageBuilder::parseMessageID()
 
     if (iterator != this->tags.end())
     {
-        this->messageID = iterator.value().toString();
+        this->message().id = iterator.value().toString();
     }
 }
 
@@ -632,7 +610,7 @@ void TwitchMessageBuilder::parseRoomID()
 void TwitchMessageBuilder::appendChannelName()
 {
     QString channelName("#" + this->channel->getName());
-    Link link(Link::Url, this->channel->getName() + "\n" + this->messageID);
+    Link link(Link::Url, this->channel->getName() + "\n" + this->message().id);
 
     this->emplace<TextElement>(channelName, MessageElementFlag::ChannelName,
                                MessageColor::System)  //
@@ -805,16 +783,10 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
     }
 
     // update the media player url if necessary
-    QUrl highlightSoundUrl;
-    if (getSettings()->customHighlightSound)
-    {
-        highlightSoundUrl =
-            QUrl::fromLocalFile(getSettings()->pathHighlightSound.getValue());
-    }
-    else
-    {
-        highlightSoundUrl = QUrl("qrc:/sounds/ping2.wav");
-    }
+    QUrl highlightSoundUrl =
+        getSettings()->customHighlightSound
+            ? QUrl::fromLocalFile(getSettings()->pathHighlightSound.getValue())
+            : QUrl("qrc:/sounds/ping2.wav");
 
     if (currentPlayerUrl != highlightSoundUrl)
     {
@@ -916,13 +888,16 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
 
         if (!isPastMsg)
         {
-            if (playSound &&
-                (!hasFocus || getSettings()->highlightAlwaysPlaySound))
+            bool notMuted = !getApp()->pings->isMuted(this->channel->getName());
+            bool resolveFocus =
+                !hasFocus || getSettings()->highlightAlwaysPlaySound;
+
+            if (playSound && notMuted && resolveFocus)
             {
                 player->play();
             }
 
-            if (doAlert)
+            if (doAlert && notMuted)
             {
                 getApp()->windows->sendAlert();
             }
@@ -983,51 +958,35 @@ void TwitchMessageBuilder::appendTwitchEmote(
 
 Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
-    // Special channels, like /whispers and /channels return here
-    // This means they will not render any BTTV or FFZ emotes
-    if (this->twitchChannel == nullptr)
-    {
-        auto *app = getApp();
-        const auto &bttvemotes = app->twitch.server->getBttvEmotes();
-        const auto &ffzemotes = app->twitch.server->getFfzEmotes();
-        auto flags = MessageElementFlags();
-        auto emote = boost::optional<EmotePtr>{};
-        {  // bttv/ffz emote
-            if ((emote = bttvemotes.emote(name)))
-            {
-                flags = MessageElementFlag::BttvEmote;
-            }
-            else if ((emote = ffzemotes.emote(name)))
-            {
-                flags = MessageElementFlag::FfzEmote;
-            }
-            if (emote)
-            {
-                this->emplace<EmoteElement>(emote.get(), flags);
-                return Success;
-            }
-        }  // bttv/ffz emote
-        return Failure;
-    }
+    auto *app = getApp();
+
+    const auto &globalBttvEmotes = app->twitch.server->getBttvEmotes();
+    const auto &globalFfzEmotes = app->twitch.server->getFfzEmotes();
 
     auto flags = MessageElementFlags();
     auto emote = boost::optional<EmotePtr>{};
 
-    if ((emote = this->twitchChannel->globalBttv().emote(name)))
-    {
-        flags = MessageElementFlag::BttvEmote;
-    }
-    else if ((emote = this->twitchChannel->bttvEmote(name)))
-    {
-        flags = MessageElementFlag::BttvEmote;
-    }
-    else if ((emote = this->twitchChannel->globalFfz().emote(name)))
+    // Emote order:
+    //  - FrankerFaceZ Channel
+    //  - BetterTTV Channel
+    //  - FrankerFaceZ Global
+    //  - BetterTTV Global
+    if (this->twitchChannel && (emote = this->twitchChannel->ffzEmote(name)))
     {
         flags = MessageElementFlag::FfzEmote;
     }
-    else if ((emote = this->twitchChannel->ffzEmote(name)))
+    else if (this->twitchChannel &&
+             (emote = this->twitchChannel->bttvEmote(name)))
+    {
+        flags = MessageElementFlag::BttvEmote;
+    }
+    else if ((emote = globalFfzEmotes.emote(name)))
     {
         flags = MessageElementFlag::FfzEmote;
+    }
+    else if ((emote = globalBttvEmotes.emote(name)))
+    {
+        flags = MessageElementFlag::BttvEmote;
     }
 
     if (emote)
@@ -1064,11 +1023,11 @@ void TwitchMessageBuilder::appendTwitchBadges()
             try
             {
                 if (twitchChannel)
-                    if (const auto &badge = this->twitchChannel->twitchBadge(
+                    if (const auto &_badge = this->twitchChannel->twitchBadge(
                             "bits", cheerAmount))
                     {
-                        this->emplace<EmoteElement>(
-                                badge.get(), MessageElementFlag::BadgeVanity)
+                        this->emplace<BadgeElement>(
+                                _badge.get(), MessageElementFlag::BadgeVanity)
                             ->setTooltip(tooltip);
                         continue;
                     }
@@ -1079,10 +1038,10 @@ void TwitchMessageBuilder::appendTwitchBadges()
             }
 
             // Use default bit badge
-            if (auto badge = this->twitchChannel->globalTwitchBadges().badge(
+            if (auto _badge = this->twitchChannel->globalTwitchBadges().badge(
                     "bits", cheerAmount))
             {
-                this->emplace<EmoteElement>(badge.get(),
+                this->emplace<BadgeElement>(_badge.get(),
                                             MessageElementFlag::BadgeVanity)
                     ->setTooltip(tooltip);
             }
@@ -1112,7 +1071,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
         {
             if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
             {
-                this->emplace<EmoteElement>(
+                this->emplace<BadgeElement>(
                         customModBadge.get(),
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customModBadge)->tooltip.string);
@@ -1172,7 +1131,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto badgeEmote = this->twitchChannel->twitchBadge(
                     "subscriber", badge.mid(11)))
             {
-                this->emplace<EmoteElement>(
+                this->emplace<BadgeElement>(
                         badgeEmote.get(), MessageElementFlag::BadgeSubscription)
                     ->setTooltip((*badgeEmote)->tooltip.string);
                 continue;
@@ -1193,17 +1152,17 @@ void TwitchMessageBuilder::appendTwitchBadges()
             if (auto badgeEmote =
                     this->twitchChannel->twitchBadge(splits[0], splits[1]))
             {
-                this->emplace<EmoteElement>(badgeEmote.get(),
+                this->emplace<BadgeElement>(badgeEmote.get(),
                                             MessageElementFlag::BadgeVanity)
                     ->setTooltip((*badgeEmote)->tooltip.string);
                 continue;
             }
-            if (auto badge = this->twitchChannel->globalTwitchBadges().badge(
+            if (auto _badge = this->twitchChannel->globalTwitchBadges().badge(
                     splits[0], splits[1]))
             {
-                this->emplace<EmoteElement>(badge.get(),
+                this->emplace<BadgeElement>(_badge.get(),
                                             MessageElementFlag::BadgeVanity)
-                    ->setTooltip((*badge)->tooltip.string);
+                    ->setTooltip((*_badge)->tooltip.string);
                 continue;
             }
         }
@@ -1216,7 +1175,7 @@ void TwitchMessageBuilder::appendChatterinoBadges()
         getApp()->chatterinoBadges->getBadge({this->userName});
     if (chatterinoBadgePtr)
     {
-        this->emplace<EmoteElement>(*chatterinoBadgePtr,
+        this->emplace<BadgeElement>(*chatterinoBadgePtr,
                                     MessageElementFlag::BadgeChatterino);
     }
 }

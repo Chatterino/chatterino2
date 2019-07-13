@@ -4,6 +4,7 @@
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Toasts.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -23,7 +24,6 @@ NotificationPage::NotificationPage()
     : SettingsPage("Notifications", ":/settings/notification2.svg")
 {
     LayoutCreator<NotificationPage> layoutCreator(this);
-
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
         auto tabs = layout.emplace<QTabWidget>();
@@ -39,6 +39,23 @@ NotificationPage::NotificationPage()
                 settings.append(
                     this->createCheckBox("Enable toasts (Windows 8 or later)",
                                          getSettings()->notificationToast));
+                auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
+                {
+                    openIn.emplace<QLabel>("Open stream from Toast:  ")
+                        ->setSizePolicy(QSizePolicy::Maximum,
+                                        QSizePolicy::Preferred);
+
+                    // implementation of custom combobox done
+                    // because addComboBox only can handle strings-settings
+                    // int setting for the ToastReaction is desired
+                    openIn
+                        .append(this->createToastReactionComboBox(
+                            this->managedConnections_))
+                        ->setSizePolicy(QSizePolicy::Maximum,
+                                        QSizePolicy::Preferred);
+                }
+                openIn->setContentsMargins(40, 0, 0, 0);
+                openIn->setSizeConstraint(QLayout::SetMaximumSize);
 #endif
                 auto customSound =
                     layout.emplace<QHBoxLayout>().withoutMargin();
@@ -116,5 +133,32 @@ NotificationPage::NotificationPage()
             */
         }
     }
+}
+QComboBox *NotificationPage::createToastReactionComboBox(
+    std::vector<pajlada::Signals::ScopedConnection> managedConnections)
+{
+    QComboBox *toastReactionOptions = new QComboBox();
+
+    for (int i = 0; i <= static_cast<int>(ToastReaction::DontOpen); i++)
+    {
+        toastReactionOptions->insertItem(
+            i, Toasts::findStringFromReaction(static_cast<ToastReaction>(i)));
+    }
+
+    // update when setting changes
+    pajlada::Settings::Setting<int> setting = getSettings()->openFromToast;
+    setting.connect(
+        [toastReactionOptions](const int &index, auto) {
+            toastReactionOptions->setCurrentIndex(index);
+        },
+        managedConnections);
+
+    QObject::connect(toastReactionOptions,
+                     QOverload<int>::of(&QComboBox::currentIndexChanged),
+                     [](const int &newValue) {
+                         getSettings()->openFromToast.setValue(newValue);
+                     });
+
+    return toastReactionOptions;
 }
 }  // namespace chatterino

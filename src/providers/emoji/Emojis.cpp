@@ -36,9 +36,9 @@ namespace {
         else
         {
             const auto &shortCodes = unparsedEmoji["short_names"];
-            for (const auto &shortCode : shortCodes.GetArray())
+            for (const auto &_shortCode : shortCodes.GetArray())
             {
-                emojiData->shortCodes.emplace_back(shortCode.GetString());
+                emojiData->shortCodes.emplace_back(_shortCode.GetString());
             }
         }
 
@@ -240,8 +240,6 @@ void Emojis::sortEmojis()
 
 void Emojis::loadEmojiSet()
 {
-    auto app = getApp();
-
     getSettings()->emojiSet.connect([=](const auto &emojiSet) {
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
