@@ -206,8 +206,11 @@ void SplitHeader::initializeLayout()
                 });
         }),
         // dropdown
-        this->dropdownButton_ = makeWidget<Button>(
-            [&](auto w) { w->setMenu(this->createMainMenu()); }),
+        this->dropdownButton_ = makeWidget<Button>([&](auto w) {
+            auto menu = this->createMainMenu();
+            this->mainMenu_ = menu.get();
+            w->setMenu(std::move(menu));
+        }),
         // add split
         this->addButton_ = makeWidget<Button>([&](auto w) {
             w->setPixmap(getApp()->resources->buttons.addSplitDark);
@@ -526,11 +529,21 @@ void SplitHeader::paintEvent(QPaintEvent *)
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::LeftButton)
+    switch (event->button())
     {
-        this->dragging_ = true;
+        case Qt::LeftButton:
+        {
+            this->dragging_ = true;
 
-        this->dragStart_ = event->pos();
+            this->dragStart_ = event->pos();
+        }
+        break;
+
+        case Qt::RightButton:
+        {
+            this->mainMenu_->popup(this->mapToGlobal(event->pos()));
+        }
+        break;
     }
 
     this->doubleClicked_ = false;
