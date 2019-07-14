@@ -180,7 +180,7 @@ void SettingsDialog::showDialog(SettingsDialogPreference preferredTab)
     switch (preferredTab)
     {
         case SettingsDialogPreference::Accounts:
-            instance->selectTab(instance->tabs_.at(0));
+            instance->selectTab(instance->tabs_.at(1));
             break;
 
         case SettingsDialogPreference::ModerationActions:
