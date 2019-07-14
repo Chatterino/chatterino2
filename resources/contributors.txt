@@ -25,12 +25,12 @@ nforro | https://github.com/nforro |  | Contributor
 vanolpfan | https://github.com/vanolpfan |  | Contributor
 23rd | https://github.com/23rd |  | Contributor
 machgo | https://github.com/machgo |  | Contributor
+TranRed | https://github.com/TranRed |  | Contributor
 Defman21 | https://github.com/Defman21 |  | Documentation
 Jarel1337 | https://github.com/Jarel1337 |  | Documentation
 Ian321 | https://github.com/Ian321 |  | Documentation
 Yardanico | https://github.com/Yardanico |  | Documentation
 huti26 | https://github.com/huti26 |  | Documentation
 chrisduerr | https://github.com/chrisduerr |  | Documentation
-TranRed | https://github.com/TranRed |  | Documentation
 
 # Add yourself right above this line

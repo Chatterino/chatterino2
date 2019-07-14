@@ -538,7 +538,7 @@ void Split::showViewerList()
     auto chattersList = new QListWidget();
     auto resultList = new QListWidget();
 
-    static QStringList labels = {"Broadcaster", "Vips",   "Moderators",
+    static QStringList labels = {"Broadcaster", "VIPs",   "Moderators",
                                  "Staff",       "Admins", "Global Moderators",
                                  "Viewers"};
     static QStringList jsonLabels = {"broadcaster", "vips",   "moderators",
@@ -631,7 +631,9 @@ void Split::showViewerList()
     multiWidget->setStyleSheet(this->theme->splits.input.styleSheet);
     multiWidget->setLayout(dockVbox);
     viewerDock->setWidget(multiWidget);
+    viewerDock->setFloating(true);
     viewerDock->show();
+    viewerDock->activateWindow();
 }
 
 void Split::copyToClipboard()
