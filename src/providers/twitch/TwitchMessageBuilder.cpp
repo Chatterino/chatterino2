@@ -184,6 +184,12 @@ MessagePtr TwitchMessageBuilder::build()
     // highlights
     this->parseHighlights(isPastMsg);
 
+    // highlighting incoming whispers if requested per setting
+    if (this->args.isReceivedWhisper && getSettings()->highlightInlineWhispers)
+    {
+        this->message().flags.set(MessageFlag::HighlightedWhisper, true);
+    }
+
     //    QString bits;
     auto iterator = this->tags.find("bits");
     if (iterator != this->tags.end())
