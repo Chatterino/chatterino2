@@ -160,6 +160,8 @@ public:
                                             false};
 
     BoolSetting inlineWhispers = {"/whispers/enableInlineWhispers", true};
+    BoolSetting highlightInlineWhispers = {"/whispers/highlightInlineWhispers",
+                                           false};
 
     /// Notifications
     BoolSetting notificationFlashTaskbar = {"/notifications/enableFlashTaskbar",

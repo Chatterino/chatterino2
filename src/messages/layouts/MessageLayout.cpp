@@ -250,7 +250,8 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
 
     // draw background
     QColor backgroundColor = app->themes->messages.backgrounds.regular;
-    if (this->message_->flags.has(MessageFlag::Highlighted) &&
+    if ((this->message_->flags.has(MessageFlag::Highlighted) ||
+         this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
         !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
         backgroundColor = app->themes->messages.backgrounds.highlighted;
