@@ -284,8 +284,11 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     // sub menu
     auto moreMenu = new QMenu("More", this);
+
     moreMenu->addAction("Show viewer list", this->split_,
                         &Split::showViewerList);
+
+    moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
 
     auto action = new QAction(this);
     action->setText("Notify when live");
