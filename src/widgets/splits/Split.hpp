@@ -129,6 +129,7 @@ public slots:
     void copyToClipboard();
     void showSearch();
     void showViewerList();
+    void openSubPage();
     void reloadChannelAndSubscriberEmotes();
 };
 
