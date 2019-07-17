@@ -8,6 +8,7 @@
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Resources.hpp"
+#include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "widgets/Label.hpp"
@@ -366,6 +367,9 @@ void UserInfoPopup::updateUserData()
 
             this->loadAvatar(QUrl(obj.value("logo").toString()));
 
+            this->loadProfileBanner(
+                QUrl(obj.value("profile_banner").toString()));
+
             return Success;
         });
 
@@ -450,6 +454,31 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
     });
 }
 
+void UserInfoPopup::loadProfileBanner(const QUrl &url)
+{
+    QNetworkRequest req(url);
+    static auto manager = new QNetworkAccessManager();
+    auto *reply = manager->get(req);
+
+    QObject::connect(reply, &QNetworkReply::finished, this, [=] {
+        if (reply->error() == QNetworkReply::NoError)
+        {
+            const auto data = reply->readAll();
+
+            // might want to cache the banner image
+            QPixmap banner;
+            banner.loadFromData(data);
+            this->ui_.profileBanner =
+                banner.scaled(600, 200, Qt::KeepAspectRatio);
+        }
+        else
+        {
+            QPixmap emptyBanner;
+            this->ui_.profileBanner = emptyBanner;
+        }
+    });
+}
+
 //
 // TimeoutWidget
 //
@@ -464,7 +493,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
     QColor color2(255, 255, 255, 0);
 
     int buttonWidth = 24;
-    int buttonWidth2 = 32;
+    int buttonWidth2 = 40;
     int buttonHeight = 32;
 
     layout->setSpacing(16);
@@ -515,14 +544,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 auto a = hbox.emplace<EffectLabel2>();
                 a->getLabel().setText(std::get<0>(item));
 
-                if (std::get<0>(item).length() > 1)
-                {
-                    a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                }
-                else
-                {
-                    a->setScaleIndependantSize(buttonWidth, buttonHeight);
-                }
+                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
                 a->setBorderColor(color1);
 
                 QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
@@ -536,24 +558,38 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     addButton(Unban, "unban", getApp()->resources->buttons.unban);
 
-    addTimeouts("sec", {{"1", 1}});
-    addTimeouts("min", {
-                           {"1", 1 * 60},
-                           {"5", 5 * 60},
-                           {"10", 10 * 60},
-                       });
-    addTimeouts("hour", {
-                            {"1", 1 * 60 * 60},
-                            {"4", 4 * 60 * 60},
-                        });
-    addTimeouts("days", {
-                            {"1", 1 * 60 * 60 * 24},
-                            {"3", 3 * 60 * 60 * 24},
-                        });
-    addTimeouts("weeks", {
-                             {"1", 1 * 60 * 60 * 24 * 7},
-                             {"2", 2 * 60 * 60 * 24 * 7},
-                         });
+    addTimeouts("Timeouts",
+                {{getSettings()->timeoutDurationPerUnit1.getValue() +
+                      getSettings()->timeoutDurationUnit1.getValue(),
+                  getSettings()->timeoutDurationInSec1.getValue()},
+
+                 {getSettings()->timeoutDurationPerUnit2.getValue() +
+                      getSettings()->timeoutDurationUnit2.getValue(),
+                  getSettings()->timeoutDurationInSec2.getValue()},
+
+                 {getSettings()->timeoutDurationPerUnit3.getValue() +
+                      getSettings()->timeoutDurationUnit3.getValue(),
+                  getSettings()->timeoutDurationInSec3.getValue()},
+
+                 {getSettings()->timeoutDurationPerUnit4.getValue() +
+                      getSettings()->timeoutDurationUnit4.getValue(),
+                  getSettings()->timeoutDurationInSec4.getValue()},
+
+                 {getSettings()->timeoutDurationPerUnit5.getValue() +
+                      getSettings()->timeoutDurationUnit5.getValue(),
+                  getSettings()->timeoutDurationInSec5.getValue()},
+
+                 {getSettings()->timeoutDurationPerUnit6.getValue() +
+                      getSettings()->timeoutDurationUnit6.getValue(),
+                  getSettings()->timeoutDurationInSec6.getValue()},
+
+                 {getSettings()->timeoutDurationPerUnit7.getValue() +
+                      getSettings()->timeoutDurationUnit7.getValue(),
+                  getSettings()->timeoutDurationInSec7.getValue()},
+
+                 {getSettings()->timeoutDurationPerUnit8.getValue() +
+                      getSettings()->timeoutDurationUnit8.getValue(),
+                  getSettings()->timeoutDurationInSec8.getValue()}});
 
     addButton(Ban, "ban", getApp()->resources->buttons.ban);
 }

@@ -29,6 +29,7 @@ private:
     void updateUserData();
 
     void loadAvatar(const QUrl &url);
+    void loadProfileBanner(const QUrl &url);
     bool isMod_;
     bool isBroadcaster_;
 
@@ -42,8 +43,9 @@ private:
 
     struct {
         Button *avatarButton = nullptr;
-        // RippleEffectLabel2 *viewLogs = nullptr;
 
+        // RippleEffectLabel2 *viewLogs = nullptr;
+        QPixmap profileBanner;
         Label *nameLabel = nullptr;
         Label *viewCountLabel = nullptr;
         Label *followerCountLabel = nullptr;
