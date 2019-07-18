@@ -206,7 +206,7 @@ public:
         "/timeouts/timeoutDurationPerUnit2", "30"};
     QStringSetting timeoutDurationUnit2 = {"/timeouts/timeoutDurationUnit2",
                                            "s"};
-    IntSetting timeoutDurationInSec2 = {"/timeouts/timeoutDurationInSec1", 30};
+    IntSetting timeoutDurationInSec2 = {"/timeouts/timeoutDurationInSec2", 30};
 
     QStringSetting timeoutDurationPerUnit3 = {
         "/timeouts/timeoutDurationPerUnit3", "1"};
