@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "controllers/taggedusers/TaggedUsersModel.hpp"
-#include "debug/Log.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
 #include "util/Helpers.hpp"
@@ -118,55 +117,46 @@ AdvancedPage::AdvancedPage()
         QStringList::iterator itUnit;
         itUnit = initUnits.begin();
 
-        std::list<int> initDurationsInSec;
-        initDurationsInSec.push_back(int(getSettings()->timeoutDurationInSec1));
-        initDurationsInSec.push_back(int(getSettings()->timeoutDurationInSec2));
-        initDurationsInSec.push_back(int(getSettings()->timeoutDurationInSec3));
-        initDurationsInSec.push_back(int(getSettings()->timeoutDurationInSec4));
-        initDurationsInSec.push_back(int(getSettings()->timeoutDurationInSec5));
-        initDurationsInSec.push_back(int(getSettings()->timeoutDurationInSec6));
-        initDurationsInSec.push_back(int(getSettings()->timeoutDurationInSec7));
-        initDurationsInSec.push_back(int(getSettings()->timeoutDurationInSec8));
-
-        std::list<int>::iterator itDurationInSec;
-        itDurationInSec = initDurationsInSec.begin();
-
         for (int i = 0; i < 8; i++)
         {
             durationInputs.append(new QLineEdit());
             unitInputs.append(new QComboBox());
-            durationsCalculated.append(new QSpinBox());
         }
         itDurationInput = durationInputs.begin();
         itUnitInput = unitInputs.begin();
-        itDurationsCalculated = durationsCalculated.begin();
 
         auto timeoutLayout = tabs.appendTab(new QVBoxLayout, "Timeouts");
-        auto infoLabel = timeoutLayout.emplace<QLabel>();
-        infoLabel->setText("Customize your timeout buttons in seconds (s), "
-                           "minutes (m), hours (h), days (d) or weeks (w).");
-        auto maxLabel = timeoutLayout.emplace<QLabel>();
-        maxLabel->setText("Maximum timeout duration is 2 weeks = 14 days = 336 "
-                          "hours = 20,160 minutes =  1,209,600 seconds.");
-        auto allowedLabel = timeoutLayout.emplace<QLabel>();
-        allowedLabel->setText(
-            "For simplicity only values from 1 to 99 are allowed here. Using "
-            "the units accordingly is highly recommended.");
-        auto commandLabel = timeoutLayout.emplace<QLabel>();
-        commandLabel->setText(
-            "For abitrary timeout durations use the /timeout command.");
+        auto texts = timeoutLayout.emplace<QVBoxLayout>().withoutMargin();
+        {
+            auto infoLabel = texts.emplace<QLabel>();
+            infoLabel->setText(
+                "Customize your timeout buttons in seconds (s), "
+                "minutes (m), hours (h), days (d) or weeks (w).");
+
+            infoLabel->setAlignment(Qt::AlignCenter);
+
+            auto maxLabel = texts.emplace<QLabel>();
+            maxLabel->setText("(maximum timeout duration = 2 w)");
+            maxLabel->setAlignment(Qt::AlignCenter);
+        }
+        texts->setContentsMargins(0, 0, 0, 15);
+        texts->setSizeConstraint(QLayout::SetMaximumSize);
 
         // build one line for each customizable button
         for (int i = 0; i < 8; i++)
         {
             auto timeout = timeoutLayout.emplace<QHBoxLayout>().withoutMargin();
             {
+                auto buttonLabel = timeout.emplace<QLabel>();
+                buttonLabel->setText("Button " + QString::number(i + 1) + ": ");
+
                 QLineEdit *lineEditDurationInput = *itDurationInput;
                 lineEditDurationInput->setObjectName(QString::number(i));
                 lineEditDurationInput->setValidator(
                     new QIntValidator(1, 99, this));
                 lineEditDurationInput->setText(*itDurationPerUnit);
                 lineEditDurationInput->setAlignment(Qt::AlignRight);
+                lineEditDurationInput->setMaximumWidth(30);
                 timeout.append(lineEditDurationInput);
 
                 QComboBox *timeoutDurationUnit = *itUnitInput;
@@ -175,14 +165,6 @@ AdvancedPage::AdvancedPage()
                 timeoutDurationUnit->setCurrentText(*itUnit);
                 timeout.append(timeoutDurationUnit);
 
-                QSpinBox *spinBoxDurationCalculated = *itDurationsCalculated;
-                spinBoxDurationCalculated->setObjectName(QString::number(i));
-                spinBoxDurationCalculated->setRange(1, 1209600);
-                spinBoxDurationCalculated->setValue(*itDurationInSec);
-                spinBoxDurationCalculated->setReadOnly(true);
-                spinBoxDurationCalculated->setAlignment(Qt::AlignRight);
-                timeout.append(spinBoxDurationCalculated);
-
                 QObject::connect(lineEditDurationInput, &QLineEdit::textChanged,
                                  this, &AdvancedPage::timeoutDurationChanged);
 
@@ -190,21 +172,18 @@ AdvancedPage::AdvancedPage()
                                  &QComboBox::currentTextChanged, this,
                                  &AdvancedPage::timeoutUnitChanged);
 
-                QObject::connect(spinBoxDurationCalculated,
-                                 qOverload<int>(&QSpinBox::valueChanged), this,
-                                 &AdvancedPage::calculatedDurationChanged);
-
                 auto secondsLabel = timeout.emplace<QLabel>();
-                secondsLabel->setText("seconds");
+                timeout->addStretch();
             }
+            timeout->setContentsMargins(40, 0, 0, 0);
+            timeout->setSizeConstraint(QLayout::SetMaximumSize);
 
             ++itDurationPerUnit;
             ++itUnit;
-            ++itDurationInSec;
             ++itDurationInput;
             ++itUnitInput;
-            ++itDurationsCalculated;
         }
+        timeoutLayout->addStretch();
     }
     // Timeoutbuttons end
 }
@@ -221,13 +200,9 @@ void AdvancedPage::timeoutDurationChanged(const QString &newDuration)
     QComboBox *cbUnit = *itUnitInput;
     QString unit = cbUnit->currentText();
 
-    itDurationsCalculated = durationsCalculated.begin() + index;
-    QSpinBox *sbDurationInSec = *itDurationsCalculated;
-
     int valueInUnit = newDuration.toInt();
     int valueInSec;
-    log(newDuration);
-    log(unit);
+
     if (unit == "s")
     {
         valueInSec = valueInUnit;
@@ -259,66 +234,39 @@ void AdvancedPage::timeoutDurationChanged(const QString &newDuration)
         valueInSec = valueInUnit * 7 * 24 * 60 * 60;
     }
 
-    sbDurationInSec->setValue(valueInSec);
-
     switch (index)
     {
         case 0:
             getSettings()->timeoutDurationPerUnit1 = newDuration;
+            getSettings()->timeoutDurationInSec1 = valueInSec;
             break;
         case 1:
             getSettings()->timeoutDurationPerUnit2 = newDuration;
+            getSettings()->timeoutDurationInSec2 = valueInSec;
             break;
         case 2:
             getSettings()->timeoutDurationPerUnit3 = newDuration;
+            getSettings()->timeoutDurationInSec3 = valueInSec;
             break;
         case 3:
             getSettings()->timeoutDurationPerUnit4 = newDuration;
+            getSettings()->timeoutDurationInSec4 = valueInSec;
             break;
         case 4:
             getSettings()->timeoutDurationPerUnit5 = newDuration;
+            getSettings()->timeoutDurationInSec5 = valueInSec;
             break;
         case 5:
             getSettings()->timeoutDurationPerUnit6 = newDuration;
+            getSettings()->timeoutDurationInSec6 = valueInSec;
             break;
         case 6:
             getSettings()->timeoutDurationPerUnit7 = newDuration;
+            getSettings()->timeoutDurationInSec7 = valueInSec;
             break;
         case 7:
             getSettings()->timeoutDurationPerUnit8 = newDuration;
-            break;
-    }
-}
-void AdvancedPage::calculatedDurationChanged(const int &newDurationInSec)
-{
-    QObject *sender = QObject::sender();
-    int index = sender->objectName().toInt();
-
-    switch (index)
-    {
-        case 0:
-            getSettings()->timeoutDurationInSec1 = newDurationInSec;
-            break;
-        case 1:
-            getSettings()->timeoutDurationInSec2 = newDurationInSec;
-            break;
-        case 2:
-            getSettings()->timeoutDurationInSec3 = newDurationInSec;
-            break;
-        case 3:
-            getSettings()->timeoutDurationInSec4 = newDurationInSec;
-            break;
-        case 4:
-            getSettings()->timeoutDurationInSec5 = newDurationInSec;
-            break;
-        case 5:
-            getSettings()->timeoutDurationInSec6 = newDurationInSec;
-            break;
-        case 6:
-            getSettings()->timeoutDurationInSec7 = newDurationInSec;
-            break;
-        case 7:
-            getSettings()->timeoutDurationInSec8 = newDurationInSec;
+            getSettings()->timeoutDurationInSec8 = valueInSec;
             break;
     }
 }
