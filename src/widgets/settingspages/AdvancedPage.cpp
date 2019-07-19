@@ -88,9 +88,12 @@ AdvancedPage::AdvancedPage()
         maxLabel->setText("Maximum timeout duration is 2 weeks = 14 days = 336 "
                           "hours = 20,160 minutes =  1,209,600 seconds.");
         auto allowedLabel = timeoutLayout.emplace<QLabel>();
-        allowedLabel->setText("For simplicity only values from 1 to 99 are allowed here."
-                              "Using the units accordingly is highly recommended."
-                              "For abitrary timeout durations use the /timeout command.");
+        allowedLabel->setText(
+            "For simplicity only values from 1 to 99 are allowed here. Using "
+            "the units accordingly is highly recommended.");
+        auto commandLabel = timeoutLayout.emplace<QLabel>();
+        commandLabel->setText(
+            "For abitrary timeout durations use the /timeout command.");
 
         auto timeout1 = timeoutLayout.emplace<QHBoxLayout>().withoutMargin();
         {
@@ -109,7 +112,7 @@ AdvancedPage::AdvancedPage()
             timeout1.append(timeoutDurationUnit1);
 
             QSpinBox *spinBoxDurationCalculated1 = new QSpinBox;
-            spinBoxDurationCalculated1->setRange(1, 99);
+            spinBoxDurationCalculated1->setRange(1, 1209600);
             spinBoxDurationCalculated1->setValue(
                 getSettings()->timeoutDurationInSec1);
             spinBoxDurationCalculated1->setReadOnly(true);
@@ -166,7 +169,7 @@ AdvancedPage::AdvancedPage()
             timeout2.append(timeoutDurationUnit2);
 
             QSpinBox *spinBoxDurationCalculated2 = new QSpinBox;
-            spinBoxDurationCalculated2->setRange(1, 99);
+            spinBoxDurationCalculated2->setRange(1, 1209600);
             spinBoxDurationCalculated2->setValue(
                 getSettings()->timeoutDurationInSec2);
             spinBoxDurationCalculated2->setReadOnly(true);
@@ -223,7 +226,7 @@ AdvancedPage::AdvancedPage()
             timeout3.append(timeoutDurationUnit3);
 
             QSpinBox *spinBoxDurationCalculated3 = new QSpinBox;
-            spinBoxDurationCalculated3->setRange(1, 99);
+            spinBoxDurationCalculated3->setRange(1, 1209600);
             spinBoxDurationCalculated3->setValue(
                 getSettings()->timeoutDurationInSec3);
             spinBoxDurationCalculated3->setReadOnly(true);
@@ -279,7 +282,7 @@ AdvancedPage::AdvancedPage()
             timeout4.append(timeoutDurationUnit4);
 
             QSpinBox *spinBoxDurationCalculated4 = new QSpinBox;
-            spinBoxDurationCalculated4->setRange(1, 99);
+            spinBoxDurationCalculated4->setRange(1, 1209600);
             spinBoxDurationCalculated4->setValue(
                 getSettings()->timeoutDurationInSec4);
             spinBoxDurationCalculated4->setReadOnly(true);
@@ -335,7 +338,7 @@ AdvancedPage::AdvancedPage()
             timeout5.append(timeoutDurationUnit5);
 
             QSpinBox *spinBoxDurationCalculated5 = new QSpinBox;
-            spinBoxDurationCalculated5->setRange(1, 99);
+            spinBoxDurationCalculated5->setRange(1, 1209600);
             spinBoxDurationCalculated5->setValue(
                 getSettings()->timeoutDurationInSec5);
             spinBoxDurationCalculated5->setReadOnly(true);
@@ -391,7 +394,7 @@ AdvancedPage::AdvancedPage()
             timeout6.append(timeoutDurationUnit6);
 
             QSpinBox *spinBoxDurationCalculated6 = new QSpinBox;
-            spinBoxDurationCalculated6->setRange(1, 99);
+            spinBoxDurationCalculated6->setRange(1, 1209600);
             spinBoxDurationCalculated6->setValue(
                 getSettings()->timeoutDurationInSec6);
             spinBoxDurationCalculated6->setReadOnly(true);
@@ -448,7 +451,7 @@ AdvancedPage::AdvancedPage()
             timeout7.append(timeoutDurationUnit7);
 
             QSpinBox *spinBoxDurationCalculated7 = new QSpinBox;
-            spinBoxDurationCalculated7->setRange(1, 99);
+            spinBoxDurationCalculated7->setRange(1, 1209600);
             spinBoxDurationCalculated7->setValue(
                 getSettings()->timeoutDurationInSec7);
             spinBoxDurationCalculated7->setReadOnly(true);
@@ -504,7 +507,7 @@ AdvancedPage::AdvancedPage()
             timeout8.append(timeoutDurationUnit8);
 
             QSpinBox *spinBoxDurationCalculated8 = new QSpinBox;
-            spinBoxDurationCalculated8->setRange(1, 99);
+            spinBoxDurationCalculated8->setRange(1, 1209600);
             spinBoxDurationCalculated8->setValue(
                 getSettings()->timeoutDurationInSec8);
             spinBoxDurationCalculated8->setReadOnly(true);
