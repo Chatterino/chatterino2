@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
+#include "messages/Message.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Resources.hpp"
@@ -15,6 +16,8 @@
 #include "widgets/dialogs/LogsPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/helper/ChannelView.hpp"
+
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -200,6 +203,11 @@ UserInfoPopup::UserInfoPopup()
         });
     }
 
+    // fourth line (last messages)
+    this->lastMessages_ = new ChannelView();
+    this->lastMessages_->setScaleIndependantHeight(150);
+    layout.append(this->lastMessages_);
+
     this->setStyleSheet("font-size: 11pt;");
 
     this->installEvents();
@@ -338,6 +346,19 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     this->updateUserData();
 
     this->userStateChanged_.invoke();
+
+    LimitedQueueSnapshot<MessagePtr> snapshot = this->channel_->getMessageSnapshot();
+    ChannelPtr channelPtr(new Channel("search", Channel::Type::None));
+    for (size_t i = 0; i < snapshot.size(); i++)
+    {
+        MessagePtr message = snapshot[i];
+        if ( message->loginName.compare(this->userName_, Qt::CaseInsensitive) == 0)
+        {
+            channelPtr->addMessage(message);
+        }
+    }
+
+    this->lastMessages_->setChannel(channelPtr);
 }
 
 void UserInfoPopup::updateUserData()
