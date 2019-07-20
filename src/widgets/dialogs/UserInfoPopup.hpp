@@ -28,6 +28,7 @@ protected:
 private:
     void installEvents();
     void updateUserData();
+    void fillLatestMessages();
 
     void loadAvatar(const QUrl &url);
     void loadProfileBanner(const QUrl &url);
@@ -37,7 +38,7 @@ private:
     QString userName_;
     QString userId_;
     ChannelPtr channel_;
-    ChannelView* lastMessages_;
+    ChannelView* latestMessages_;
 
     pajlada::Signals::NoArgSignal userStateChanged_;
 

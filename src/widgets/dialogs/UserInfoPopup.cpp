@@ -204,9 +204,9 @@ UserInfoPopup::UserInfoPopup()
     }
 
     // fourth line (last messages)
-    this->lastMessages_ = new ChannelView();
-    this->lastMessages_->setScaleIndependantHeight(150);
-    layout.append(this->lastMessages_);
+    this->latestMessages_ = new ChannelView();
+    this->latestMessages_->setScaleIndependantHeight(150);
+    layout.append(this->latestMessages_);
 
     this->setStyleSheet("font-size: 11pt;");
 
@@ -347,18 +347,7 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 
     this->userStateChanged_.invoke();
 
-    LimitedQueueSnapshot<MessagePtr> snapshot = this->channel_->getMessageSnapshot();
-    ChannelPtr channelPtr(new Channel("search", Channel::Type::None));
-    for (size_t i = 0; i < snapshot.size(); i++)
-    {
-        MessagePtr message = snapshot[i];
-        if ( message->loginName.compare(this->userName_, Qt::CaseInsensitive) == 0)
-        {
-            channelPtr->addMessage(message);
-        }
-    }
-
-    this->lastMessages_->setChannel(channelPtr);
+    this->fillLatestMessages();
 }
 
 void UserInfoPopup::updateUserData()
@@ -623,6 +612,21 @@ void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent *)
 
     //    painter.drawLine(0, this->height() / 2, this->width(), this->height()
     //    / 2);
+}
+
+void UserInfoPopup::fillLatestMessages(){
+    LimitedQueueSnapshot<MessagePtr> snapshot = this->channel_->getMessageSnapshot();
+    ChannelPtr channelPtr(new Channel("search", Channel::Type::None));
+    for (size_t i = 0; i < snapshot.size(); i++)
+    {
+        MessagePtr message = snapshot[i];
+        if ( message->loginName.compare(this->userName_, Qt::CaseInsensitive) == 0)
+        {
+            channelPtr->addMessage(message);
+        }
+    }
+
+    this->latestMessages_->setChannel(channelPtr);
 }
 
 }  // namespace chatterino
