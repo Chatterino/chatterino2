@@ -252,9 +252,6 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     menu->addAction("Close", this->split_, &Split::deleteFromContainer,
                     QKeySequence("Ctrl+W"));
     menu->addSeparator();
-    menu->addAction("How to move", this->split_, &Split::explainMoving);
-    menu->addAction("How to add/split", this->split_, &Split::explainSplitting);
-    menu->addSeparator();
     menu->addAction("Popup", this->split_, &Split::popup);
     menu->addAction("Search", this->split_, &Split::showSearch,
                     QKeySequence("Ctrl+F"));
@@ -281,6 +278,14 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 #endif
     menu->addAction(OPEN_IN_STREAMLINK, this->split_, &Split::openInStreamlink);
     menu->addSeparator();
+
+    {
+        // "How to..." sub menu
+        auto subMenu = new QMenu("How to...", this);
+        subMenu->addAction("move split", this->split_, &Split::explainMoving);
+        subMenu->addAction("add/split", this->split_, &Split::explainSplitting);
+        menu->addMenu(subMenu);
+    }
 
     // sub menu
     auto moreMenu = new QMenu("More", this);
