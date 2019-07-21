@@ -1,4 +1,4 @@
-version: 1.0.{build}
+version: "{build}"
 branches:
   only:
   - master
@@ -16,31 +16,23 @@ install:
     set PATH=%PATH%;%QTDIR%\bin
 
     call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
+
+    pip install conan -q
 build_script:
 - cmd: >-
-    curl -fsS -o openssl.7z https://pajlada.se/files/openssl.7z
-
-    7z x openssl.7z
-
     dir
 
     mkdir build
 
     cd build
 
-    qmake ../chatterino.pro BOOST_DIRECTORY="C:\Libraries\boost_1_64_0" BOOST_LIB_SUFFIX="lib64-msvc-14.1" OPENSSL_DIRECTORY="%APPVEYOR_BUILD_FOLDER%\openssl"  DEFINES+="CHATTERINO_NIGHTLY_VERSION_STRING=\\\"$$system(git describe --always)-$$system(git rev-list master --count)\\\""
+    conan install ..
+
+    qmake ../chatterino.pro BOOST_DIRECTORY="C:\Libraries\boost_1_64_0" BOOST_LIB_SUFFIX="lib64-msvc-14.1" DEFINES+="CHATTERINO_NIGHTLY_VERSION_STRING=\\\"$$system(git describe --always)-$$system(git rev-list master --count)\\\""
 
     set cl=/MP
 
     nmake /S /NOLOGO
-
-    git clone https://github.com/pajlada/chatterino2-dlls.git
-
-    mkdir Chatterino2
-
-    cp ../openssl/bin/libcrypto*.dll ../openssl/bin/libssl*.dll Chatterino2/
-
-    cp chatterino2-dlls/*.dll Chatterino2/
 
     windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
 

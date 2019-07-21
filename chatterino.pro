@@ -38,8 +38,17 @@ include(lib/humanize.pri)
 DEFINES += IRC_NAMESPACE=Communi
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
-include(lib/openssl.pri)
 include(lib/wintoast.pri)
+
+exists( $$OUT_PWD/conanbuildinfo.pri ) {
+    message("Using conan packages")
+    CONFIG += conan_basic_setup
+    include($$OUT_PWD/conanbuildinfo.pri)
+    LIBS += -lGdi32
+}
+else{
+    include(lib/openssl.pri)
+}
 
 # Optional feature: QtWebEngine
 #exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
