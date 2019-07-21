@@ -620,7 +620,8 @@ void UserInfoPopup::fillLatestMessages(){
     for (size_t i = 0; i < snapshot.size(); i++)
     {
         MessagePtr message = snapshot[i];
-        if ( message->loginName.compare(this->userName_, Qt::CaseInsensitive) == 0)
+        if ( message->loginName.compare(this->userName_, Qt::CaseInsensitive) == 0
+             && !message->flags.has(MessageFlag::Whisper) )
         {
             channelPtr->addMessage(message);
         }
