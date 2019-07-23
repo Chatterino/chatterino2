@@ -14,7 +14,15 @@
 [submodule "lib/WinToast"]
 	path = lib/WinToast
 	url = https://github.com/mohabouje/WinToast.git
-	
-[submodule "lib/appbase"]
-	path = lib/appbase
-	url = https://github.com/Chatterino/appbase
+[submodule "lib/settings"]
+	path = lib/settings
+	url = https://github.com/pajlada/settings
+[submodule "lib/signals"]
+	path = lib/signals
+	url = https://github.com/pajlada/signals
+[submodule "lib/serialize"]
+	path = lib/serialize
+	url = https://github.com/pajlada/serialize
+[submodule "lib/rapidjson"]
+	path = lib/rapidjson
+	url = https://github.com/Tencent/rapidjson

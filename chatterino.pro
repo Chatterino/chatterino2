@@ -19,6 +19,13 @@ useBreakpad {
     DEFINES += C_USE_BREAKPAD
 }
 
+# use C++17
+win32-msvc* {
+    QMAKE_CXXFLAGS += /std:c++17
+} else {
+    QMAKE_CXXFLAGS += -std=c++17
+}
+
 # https://bugreports.qt.io/browse/QTBUG-27018
 equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
     TARGET = bin/chatterino
@@ -33,13 +40,21 @@ macx {
 }
 
 # Submodules
-include(lib/appbase.pri)
-include(lib/humanize.pri)
 DEFINES += IRC_NAMESPACE=Communi
+
+include(lib/appbase.pri)
+include(lib/boost.pri)
+include(lib/fmt.pri)
+include(lib/humanize.pri)
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
 include(lib/openssl.pri)
 include(lib/wintoast.pri)
+include(lib/signals.pri)
+include(lib/settings.pri)
+include(lib/serialize.pri)
+include(lib/winsdk.pri)
+include(lib/rapidjson.pri)
 
 # Optional feature: QtWebEngine
 #exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
