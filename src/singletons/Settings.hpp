@@ -98,6 +98,7 @@ public:
         "/behaviour/autocompletion/smallStreamerLimit", 1000};
 
     BoolSetting pauseChatOnHover = {"/behaviour/pauseChatHover", false};
+    BoolSetting autorun = {"/behaviour/autorun", false};
 
     /// Commands
     BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};

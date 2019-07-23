@@ -170,6 +170,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
     layout.addCheckbox("Always on top", s.windowTopMost);
+#ifdef USEWINSDK
+    layout.addCheckbox("Start with Windows", s.autorun);
+#endif
 
     layout.addTitle("Interface");
     layout.addDropdown<float>(
