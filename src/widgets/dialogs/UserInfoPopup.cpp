@@ -14,10 +14,9 @@
 #include "util/PostToThread.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/dialogs/LogsPopup.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
-#include "widgets/helper/ChannelView.hpp"
-
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -377,9 +376,6 @@ void UserInfoPopup::updateUserData()
 
             this->loadAvatar(QUrl(obj.value("logo").toString()));
 
-            this->loadProfileBanner(
-                QUrl(obj.value("profile_banner").toString()));
-
             return Success;
         });
 
@@ -460,31 +456,6 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
         else
         {
             this->ui_.avatarButton->setPixmap(QPixmap());
-        }
-    });
-}
-
-void UserInfoPopup::loadProfileBanner(const QUrl &url)
-{
-    QNetworkRequest req(url);
-    static auto manager = new QNetworkAccessManager();
-    auto *reply = manager->get(req);
-
-    QObject::connect(reply, &QNetworkReply::finished, this, [=] {
-        if (reply->error() == QNetworkReply::NoError)
-        {
-            const auto data = reply->readAll();
-
-            // might want to cache the banner image
-            QPixmap banner;
-            banner.loadFromData(data);
-            this->ui_.profileBanner =
-                banner.scaled(600, 200, Qt::KeepAspectRatio);
-        }
-        else
-        {
-            QPixmap emptyBanner;
-            this->ui_.profileBanner = emptyBanner;
         }
     });
 }
@@ -614,14 +585,15 @@ void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent *)
     //    / 2);
 }
 
-void UserInfoPopup::fillLatestMessages(){
+void UserInfoPopup::fillLatestMessages()
+{
     LimitedQueueSnapshot<MessagePtr> snapshot = this->channel_->getMessageSnapshot();
     ChannelPtr channelPtr(new Channel("search", Channel::Type::None));
     for (size_t i = 0; i < snapshot.size(); i++)
     {
         MessagePtr message = snapshot[i];
-        if ( message->loginName.compare(this->userName_, Qt::CaseInsensitive) == 0
-             && !message->flags.has(MessageFlag::Whisper) )
+        if (message->loginName.compare(this->userName_, Qt::CaseInsensitive) == 0
+            && !message->flags.has(MessageFlag::Whisper))
         {
             channelPtr->addMessage(message);
         }

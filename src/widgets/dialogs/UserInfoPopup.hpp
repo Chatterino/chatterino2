@@ -31,14 +31,13 @@ private:
     void fillLatestMessages();
 
     void loadAvatar(const QUrl &url);
-    void loadProfileBanner(const QUrl &url);
     bool isMod_;
     bool isBroadcaster_;
 
     QString userName_;
     QString userId_;
     ChannelPtr channel_;
-    ChannelView* latestMessages_;
+    ChannelView *latestMessages_;
 
     pajlada::Signals::NoArgSignal userStateChanged_;
 
@@ -48,7 +47,6 @@ private:
         Button *avatarButton = nullptr;
 
         // RippleEffectLabel2 *viewLogs = nullptr;
-        QPixmap profileBanner;
         Label *nameLabel = nullptr;
         Label *viewCountLabel = nullptr;
         Label *followerCountLabel = nullptr;
