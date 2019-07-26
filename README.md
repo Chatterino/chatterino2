@@ -21,6 +21,7 @@ git clone --recursive https://github.com/fourtf/chatterino2.git
 or
 ```
 git clone https://github.com/fourtf/chatterino2.git
+cd chatterino2
 git submodule update --init --recursive
 ```
 
