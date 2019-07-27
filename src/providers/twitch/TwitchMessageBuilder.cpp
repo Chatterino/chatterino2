@@ -92,6 +92,8 @@ bool TwitchMessageBuilder::isIgnored() const
                         if (this->channel->isBroadcaster())
                             return false;
                         break;
+                    case ShowIgnoredUsersMessages::Never:
+                        break;
                 }
                 log("Blocking message because it's from blocked user {}",
                     user.name);
@@ -942,8 +944,8 @@ void TwitchMessageBuilder::appendTwitchEmote(
             return;
         }
 
-        auto start = correctPositions[coords.at(0).toInt()];
-        auto end = correctPositions[coords.at(1).toInt()];
+        auto start = correctPositions[coords.at(0).toUInt()];
+        auto end = correctPositions[coords.at(1).toUInt()];
 
         if (start >= end || start < 0 || end > this->originalMessage_.length())
         {
@@ -1193,7 +1195,7 @@ void TwitchMessageBuilder::appendChatterinoBadges()
     }
 }
 
-Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
+Outcome TwitchMessageBuilder::tryParseCheermote(const QString & /*string*/)
 {
     // auto app = getApp();
     //// Try to parse custom cheermotes
