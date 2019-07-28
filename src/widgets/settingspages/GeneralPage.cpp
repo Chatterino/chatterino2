@@ -265,15 +265,14 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Lowercase domains", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addDropdown<float>(
-        "Username font weight", {"0", "25", "Default", "75", "100"},
-        s.boldScale,
+        "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
         [](auto val) {
-            if (val == 50)
+            if (val == 63)
                 return QString("Default");
             else
                 return QString::number(val);
         },
-        [](auto args) { return fuzzyToFloat(args.value, 50.f); });
+        [](auto args) { return fuzzyToFloat(args.value, 63.f); });
     layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
     layout.addCheckbox("Double click links to open", s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);

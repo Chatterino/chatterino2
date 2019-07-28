@@ -49,7 +49,7 @@ public:
         "/appearance/messages/collapseMessagesMinLines", 0};
     BoolSetting alternateMessages = {
         "/appearance/messages/alternateMessageBackground", false};
-    FloatSetting boldScale = {"/appearance/boldScale", 50};
+    FloatSetting boldScale = {"/appearance/boldScale", 63};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", false};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
