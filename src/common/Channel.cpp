@@ -146,7 +146,8 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
 
             this->replaceMessage(s, replacement.release());
 
-            return;
+            addMessage = false;
+            break;
         }
     }
 
