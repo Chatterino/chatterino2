@@ -48,13 +48,22 @@ include(lib/fmt.pri)
 include(lib/humanize.pri)
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
-include(lib/openssl.pri)
 include(lib/wintoast.pri)
 include(lib/signals.pri)
 include(lib/settings.pri)
 include(lib/serialize.pri)
 include(lib/winsdk.pri)
 include(lib/rapidjson.pri)
+
+exists( $$OUT_PWD/conanbuildinfo.pri ) {
+    message("Using conan packages")
+    CONFIG += conan_basic_setup
+    include($$OUT_PWD/conanbuildinfo.pri)
+    LIBS += -lGdi32
+}
+else{
+    include(lib/openssl.pri)
+}
 
 # Optional feature: QtWebEngine
 #exists ($(QTDIR)/include/QtWebEngine/QtWebEngine) {
