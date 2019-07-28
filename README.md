@@ -16,11 +16,11 @@ Releases for linux and mac will follow soon™
 ## Building
 To get source code with required submodules run:
 ```
-git clone --recursive https://github.com/fourtf/chatterino2.git
+git clone --recurse-submodules https://github.com/Chatterino/chatterino2.git
 ```
 or
 ```
-git clone https://github.com/fourtf/chatterino2.git
+git clone https://github.com/Chatterino/chatterino2.git
 cd chatterino2
 git submodule update --init --recursive
 ```
@@ -32,7 +32,7 @@ git submodule update --init --recursive
 [Building on Mac](../master/BUILDING_ON_MAC.md)
 
 ## Code style
-The code is formated using clang format in Qt Creator. [.clang-format](https://github.com/fourtf/chatterino2/blob/master/.clang-format) contains the style file for clang format.
+The code is formatted using clang format in Qt Creator. [.clang-format](https://github.com/Chatterino/chatterino2/blob/master/.clang-format) contains the style file for clang format.
 
 ### Get it automated with QT Creator + Beautifier + Clang Format
 1. Download LLVM: http://releases.llvm.org/6.0.1/LLVM-6.0.1-win64.exe
