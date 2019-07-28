@@ -217,6 +217,10 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Hide moderated messages", s.hideModerated);
     layout.addCheckbox("Hide moderation messages", s.hideModerationActions);
+    layout.addDropdown<int>(
+        "Timeout stacking style", {"Stack", "Stack sparingly"},
+        s.timeoutStackStyle, [](int index) { return index; },
+        [](auto args) { return args.index; }, false);
 
     layout.addTitle("Emotes");
     layout.addDropdown<float>(

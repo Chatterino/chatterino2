@@ -2,6 +2,7 @@
 
 #include "BaseSettings.hpp"
 
+#include "common/Channel.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
@@ -129,6 +130,9 @@ public:
 
     /// Moderation
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};
+    IntSetting timeoutStackStyle = {
+        "/moderation/timeoutStackStyle",
+        static_cast<int>(TimeoutStackStyle::Default)};
 
     /// Highlighting
     //    BoolSetting enableHighlights = {"/highlighting/enabled", true};

@@ -18,6 +18,13 @@ using MessagePtr = std::shared_ptr<const Message>;
 enum class MessageFlag : uint32_t;
 using MessageFlags = FlagsEnum<MessageFlag>;
 
+enum class TimeoutStackStyle : int {
+    StackHard = 0,
+    DontStackBeyondUserMessage = 1,
+
+    Default = StackHard,
+};
+
 class Channel : public std::enable_shared_from_this<Channel>
 {
 public:
