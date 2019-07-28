@@ -192,8 +192,8 @@ void SplitInput::installKeyPressedEvent()
 
             QString message = ui_.textEdit->toPlainText();
 
+            message = message.replace('\n', ' ');
             QString sendMessage = app->commands->execCommand(message, c, false);
-            sendMessage = sendMessage.replace('\n', ' ');
 
             c->sendMessage(sendMessage);
             // don't add duplicate messages and empty message to message history
