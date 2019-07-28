@@ -350,7 +350,8 @@ void Window::addMenuBar()
     mainMenu->addMenu(menu);
     QAction *prefs = menu->addAction(QString());
     prefs->setMenuRole(QAction::PreferencesRole);
-    connect(prefs, &QAction::triggered, this, [] { SettingsDialog::showDialog(); });
+    connect(prefs, &QAction::triggered, this,
+            [] { SettingsDialog::showDialog(); });
 }
 
 #define UGLYMACROHACK1(s) #s
