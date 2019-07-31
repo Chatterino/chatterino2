@@ -41,7 +41,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
 
     this->channelMap[Platform::Mixer].delayedItemsChanged.connect([this] {  //
         this->mixerSetting_.setValue(
-            this->channelMap[Platform::Mixer].getVector());
+            this->channelMap[Platform::Mixer]);
     });*/
 
     liveStatusTimer_ = new QTimer();
@@ -69,7 +69,7 @@ void NotificationController::updateChannelNotification(
 bool NotificationController::isChannelNotified(const QString &channelName,
                                                Platform p)
 {
-    for (const auto &channel : this->channelMap[p].getVector())
+    for (const auto &channel : this->channelMap[p])
     {
         if (channelName.toLower() == channel.toLower())
         {

@@ -4,6 +4,7 @@
 #include <QTimer>
 #include <boost/noncopyable.hpp>
 #include <pajlada/signals/signal.hpp>
+#include <shared_mutex>
 #include <vector>
 
 #include "debug/AssertInGuiThread.hpp"
@@ -20,7 +21,57 @@ struct SignalVectorItemArgs {
 template <typename TVectorItem>
 class ReadOnlySignalVector : boost::noncopyable
 {
+    using VecIt = typename std::vector<TVectorItem>::iterator;
+
 public:
+    struct Iterator
+        : public std::iterator<std::input_iterator_tag, TVectorItem> {
+        Iterator(VecIt &&it, std::shared_mutex &mutex)
+            : it_(std::move(it))
+            , lock_(mutex)
+            , mutex_(mutex)
+        {
+        }
+
+        Iterator(const Iterator &other)
+            : it_(other.it_)
+            , lock_(other.mutex_)
+            , mutex_(other.mutex_)
+        {
+        }
+
+        TVectorItem &operator*()
+        {
+            return it_.operator*();
+        }
+
+        Iterator &operator++()
+        {
+            ++this->it_;
+            return *this;
+        }
+
+        bool operator==(const Iterator &other)
+        {
+            return this->it_ == other.it_;
+        }
+
+        bool operator!=(const Iterator &other)
+        {
+            return this->it_ != other.it_;
+        }
+
+        auto operator-(const Iterator &other)
+        {
+            return this->it_ - other.it_;
+        }
+
+    private:
+        VecIt it_;
+        std::shared_lock<std::shared_mutex> lock_;
+        std::shared_mutex &mutex_;
+    };
+
     ReadOnlySignalVector()
     {
         QObject::connect(&this->itemsChangedTimer_, &QTimer::timeout,
@@ -33,6 +84,27 @@ public:
     pajlada::Signals::Signal<SignalVectorItemArgs<TVectorItem>> itemInserted;
     pajlada::Signals::Signal<SignalVectorItemArgs<TVectorItem>> itemRemoved;
     pajlada::Signals::NoArgSignal delayedItemsChanged;
+
+    Iterator begin() const
+    {
+        return Iterator(
+            const_cast<std::vector<TVectorItem> &>(this->vector_).begin(),
+            this->mutex_);
+    }
+
+    Iterator end() const
+    {
+        return Iterator(
+            const_cast<std::vector<TVectorItem> &>(this->vector_).end(),
+            this->mutex_);
+    }
+
+    bool empty() const
+    {
+        std::shared_lock lock(this->mutex_);
+
+        return this->vector_.empty();
+    }
 
     const std::vector<TVectorItem> &getVector() const
     {
@@ -56,6 +128,7 @@ public:
 protected:
     std::vector<TVectorItem> vector_;
     QTimer itemsChangedTimer_;
+    mutable std::shared_mutex mutex_;
 };
 
 template <typename TVectorItem>
@@ -69,10 +142,15 @@ public:
     void removeItem(int index, void *caller = nullptr)
     {
         assertInGuiThread();
-        assert(index >= 0 && index < this->vector_.size());
+        std::unique_lock lock(this->mutex_);
+
+        assert(index >= 0 && index < int(this->vector_.size()));
 
         TVectorItem item = this->vector_[index];
+
         this->vector_.erase(this->vector_.begin() + index);
+        lock.unlock();  // manual unlock
+
         SignalVectorItemArgs<TVectorItem> args{item, index, caller};
         this->itemRemoved.invoke(args);
 
@@ -93,16 +171,20 @@ public:
                            void *caller = nullptr) override
     {
         assertInGuiThread();
-        if (index == -1)
-        {
-            index = this->vector_.size();
-        }
-        else
-        {
-            assert(index >= 0 && index <= this->vector_.size());
-        }
 
-        this->vector_.insert(this->vector_.begin() + index, item);
+        {
+            std::unique_lock lock(this->mutex_);
+            if (index == -1)
+            {
+                index = this->vector_.size();
+            }
+            else
+            {
+                assert(index >= 0 && index <= this->vector_.size());
+            }
+
+            this->vector_.insert(this->vector_.begin() + index, item);
+        }
 
         SignalVectorItemArgs<TVectorItem> args{item, index, caller};
         this->itemInserted.invoke(args);
@@ -124,11 +206,16 @@ public:
                            void *caller = nullptr) override
     {
         assertInGuiThread();
+        int index = -1;
 
-        auto it = std::lower_bound(this->vector_.begin(), this->vector_.end(),
-                                   item, Compare{});
-        int index = it - this->vector_.begin();
-        this->vector_.insert(it, item);
+        {
+            std::unique_lock lock(this->mutex_);
+
+            auto it = std::lower_bound(this->vector_.begin(),
+                                       this->vector_.end(), item, Compare{});
+            index = it - this->vector_.begin();
+            this->vector_.insert(it, item);
+        }
 
         SignalVectorItemArgs<TVectorItem> args{item, index, caller};
         this->itemInserted.invoke(args);

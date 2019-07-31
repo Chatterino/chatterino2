@@ -25,7 +25,7 @@ PingModel *PingController::createModel(QObject *parent)
 
 bool PingController::isMuted(const QString &channelName)
 {
-    for (const auto &channel : this->channelVector.getVector())
+    for (const auto &channel : this->channelVector)
     {
         if (channelName.toLower() == channel.toLower())
         {

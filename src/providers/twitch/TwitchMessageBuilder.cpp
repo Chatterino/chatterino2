@@ -60,7 +60,7 @@ bool TwitchMessageBuilder::isIgnored() const
     auto app = getApp();
 
     // TODO(pajlada): Do we need to check if the phrase is valid first?
-    for (const auto &phrase : app->ignores->phrases.getVector())
+    for (const auto &phrase : app->ignores->phrases)
     {
         if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
         {
@@ -221,7 +221,7 @@ MessagePtr TwitchMessageBuilder::build()
         }
     }
     auto app = getApp();
-    const auto &phrases = app->ignores->phrases.getVector();
+    const auto &phrases = app->ignores->phrases;
     auto removeEmotesInRange =
         [](int pos, int len,
            std::vector<std::tuple<int, EmotePtr, EmoteName>>

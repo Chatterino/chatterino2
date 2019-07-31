@@ -177,7 +177,7 @@ void SplitHeader::initializeLayout()
                     {
                         case Qt::LeftButton:
                             if (getApp()
-                                    ->moderationActions->items.getVector()
+                                    ->moderationActions->items
                                     .empty())
                             {
                                 getApp()->windows->showSettingsDialog(
@@ -224,7 +224,7 @@ void SplitHeader::initializeLayout()
     // update moderation button when items changed
     this->managedConnect(
         getApp()->moderationActions->items.delayedItemsChanged, [this] {
-            if (getApp()->moderationActions->items.getVector().empty())
+            if (getApp()->moderationActions->items.empty())
             {
                 if (this->split_->getModerationMode())
                     this->split_->setModerationMode(true);
@@ -509,7 +509,7 @@ void SplitHeader::updateModerationModeIcon()
 {
     auto moderationMode =
         this->split_->getModerationMode() &&
-        !getApp()->moderationActions->items.getVector().empty();
+        !getApp()->moderationActions->items.empty();
 
     this->moderationButton_->setPixmap(
         moderationMode ? getApp()->resources->buttons.modModeEnabled

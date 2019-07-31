@@ -107,7 +107,7 @@ public:
         if (!this->emotesChecked_)
         {
             const auto &accvec =
-                getApp()->accounts->twitch.accounts.getVector();
+                getApp()->accounts->twitch.accounts;
             for (const auto &acc : accvec)
             {
                 const auto &accemotes = *acc->accessEmotes();

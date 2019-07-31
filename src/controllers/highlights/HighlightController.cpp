@@ -64,7 +64,7 @@ UserHighlightModel *HighlightController::createUserModel(QObject *parent)
 
 bool HighlightController::isHighlightedUser(const QString &username)
 {
-    const auto &userItems = this->highlightedUsers.getVector();
+    const auto &userItems = this->highlightedUsers;
     for (const auto &highlightedUser : userItems)
     {
         if (highlightedUser.isMatch(username))
@@ -87,9 +87,7 @@ HighlightBlacklistModel *HighlightController::createBlacklistModel(
 
 bool HighlightController::blacklistContains(const QString &username)
 {
-    std::vector<HighlightBlacklistUser> blacklistItems =
-        this->blacklistedUsers.getVector();
-    for (const auto &blacklistedUser : blacklistItems)
+    for (const auto &blacklistedUser : this->blacklistedUsers)
     {
         if (blacklistedUser.isMatch(username))
         {

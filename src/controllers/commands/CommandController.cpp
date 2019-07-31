@@ -174,7 +174,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto addFirstMatchToMap = [this](auto args) {
         this->commandsMap_.remove(args.item.name);
 
-        for (const Command &cmd : this->items_.getVector())
+        for (const Command &cmd : this->items_)
         {
             if (cmd.name == args.item.name)
             {
@@ -185,7 +185,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         int maxSpaces = 0;
 
-        for (const Command &cmd : this->items_.getVector())
+        for (const Command &cmd : this->items_)
         {
             auto localMaxSpaces = cmd.name.count(' ');
             if (localMaxSpaces > maxSpaces)
