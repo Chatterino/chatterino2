@@ -612,7 +612,7 @@ void TwitchChannel::loadRecentMessages()
         Env::get().recentMessagesApiUrl.arg(this->getName()));
     request.setCaller(QThread::currentThread());
     // can't be concurrent right now due to SignalVector
-    //    request.setExecuteConcurrently(true);
+    request.setExecuteConcurrently(true);
 
     request.onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
         auto shared = weak.lock();
@@ -635,7 +635,10 @@ void TwitchChannel::loadRecentMessages()
             }
         }
 
-        shared->addMessagesAtStart(allBuiltMessages);
+        postToThread(
+            [shared, messages = std::move(allBuiltMessages)]() mutable {
+                shared->addMessagesAtStart(messages);
+            });
 
         return Success;
     });

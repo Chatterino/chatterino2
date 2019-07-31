@@ -7,6 +7,7 @@
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "util/PostToThread.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QDateTime>
@@ -122,7 +123,7 @@ void LogsPopup::getLogviewerLogs(const QString &roomID)
                 static_cast<Communi::IrcPrivateMessage *>(ircMessage);
             TwitchMessageBuilder builder(this->channel_.get(), privMsg, args);
             messages.push_back(builder.build());
-        };
+        }
         this->setMessages(messages);
 
         return Success;
