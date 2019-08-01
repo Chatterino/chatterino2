@@ -40,6 +40,14 @@ public:
         {
         }
 
+        Iterator &operator=(const Iterator &other)
+        {
+            this->lock_ = std::shared_lock(other.mutex_.get());
+            this->mutex_ = other.mutex_;
+
+            return *this;
+        }
+
         TVectorItem &operator*()
         {
             return it_.operator*();
@@ -69,7 +77,7 @@ public:
     private:
         VecIt it_;
         std::shared_lock<std::shared_mutex> lock_;
-        std::shared_mutex &mutex_;
+        std::reference_wrapper<std::shared_mutex> mutex_;
     };
 
     ReadOnlySignalVector()
@@ -109,6 +117,13 @@ public:
     const std::vector<TVectorItem> &getVector() const
     {
         assertInGuiThread();
+
+        return this->vector_;
+    }
+
+    const std::vector<TVectorItem> cloneVector() const
+    {
+        std::shared_lock lock(this->mutex_);
 
         return this->vector_;
     }

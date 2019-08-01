@@ -221,7 +221,11 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
 
 ImagePtr Image::fromPixmap(const QPixmap &pixmap, qreal scale)
 {
-    return ImagePtr(new Image(pixmap, scale));
+    auto result = ImagePtr(new Image(scale));
+
+    result->setPixmap(pixmap);
+
+    return result;
 }
 
 ImagePtr Image::getEmpty()
@@ -243,11 +247,27 @@ Image::Image(const Url &url, qreal scale)
 {
 }
 
-Image::Image(const QPixmap &pixmap, qreal scale)
+Image::Image(qreal scale)
     : scale_(scale)
-    , frames_(std::make_unique<detail::Frames>(
-          QVector<detail::Frame<QPixmap>>{detail::Frame<QPixmap>{pixmap, 1}}))
+    , frames_(std::make_unique<detail::Frames>())
 {
+}
+
+void Image::setPixmap(const QPixmap &pixmap)
+{
+    auto setFrames = [shared = this->shared_from_this(), pixmap]() {
+        shared->frames_ = std::make_unique<detail::Frames>(
+            QVector<detail::Frame<QPixmap>>{detail::Frame<QPixmap>{pixmap, 1}});
+    };
+
+    if (isGuiThread())
+    {
+        setFrames();
+    }
+    else
+    {
+        postToThread(setFrames);
+    }
 }
 
 const Url &Image::url() const

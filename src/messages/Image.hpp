@@ -66,7 +66,9 @@ public:
 private:
     Image();
     Image(const Url &url, qreal scale);
-    Image(const QPixmap &nonOwning, qreal scale);
+    Image(qreal scale);
+
+    void setPixmap(const QPixmap &pixmap);
 
     void load();
 

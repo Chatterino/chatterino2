@@ -796,19 +796,19 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
             ? QUrl::fromLocalFile(getSettings()->pathHighlightSound.getValue())
             : QUrl("qrc:/sounds/ping2.wav");
 
-    if (currentPlayerUrl != highlightSoundUrl)
-    {
-        player->setMedia(highlightSoundUrl);
+    //    if (currentPlayerUrl != highlightSoundUrl)
+    //    {
+    //        player->setMedia(highlightSoundUrl);
 
-        currentPlayerUrl = highlightSoundUrl;
-    }
+    //        currentPlayerUrl = highlightSoundUrl;
+    //    }
 
     // TODO: This vector should only be rebuilt upon highlights being changed
     // fourtf: should be implemented in the HighlightsController
     std::vector<HighlightPhrase> activeHighlights =
-        app->highlights->phrases.getVector();
+        app->highlights->phrases.cloneVector();
     std::vector<HighlightPhrase> userHighlights =
-        app->highlights->highlightedUsers.getVector();
+        app->highlights->highlightedUsers.cloneVector();
 
     if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
     {
