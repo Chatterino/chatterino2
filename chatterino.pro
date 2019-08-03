@@ -43,7 +43,6 @@ macx {
 DEFINES += IRC_NAMESPACE=Communi
 
 include(lib/appbase.pri)
-include(lib/boost.pri)
 include(lib/fmt.pri)
 include(lib/humanize.pri)
 include(lib/libcommuni.pri)
@@ -62,6 +61,7 @@ exists( $$OUT_PWD/conanbuildinfo.pri ) {
     LIBS += -lGdi32
 }
 else{
+	include(lib/boost.pri)
     include(lib/openssl.pri)
 }
 
