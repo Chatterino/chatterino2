@@ -9,14 +9,21 @@ addons:
     - rapidjson
     - qt
     - p7zip
-    
+    - create-dmg
+
 compiler: clang
 
 script:
   - mkdir build && cd build
   - /usr/local/opt/qt/bin/qmake .. && make -j8
-  - /usr/local/opt/qt/bin/macdeployqt chatterino.app -dmg
-  - mv chatterino.dmg chatterino-osx.dmg
+  - mkdir app
+  - mv chatterino.app app/
+  - "create-dmg \
+    --volname Chatterino2 \
+    --volicon ../resources/chatterino.icns \
+    --icon-size 50 \
+    --app-drop-link 0 0 \
+    chatterino-osx.dmg app/"
 
 before_deploy:
   - git config --global user.email "builds@travis-ci.com"
