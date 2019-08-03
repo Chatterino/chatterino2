@@ -60,6 +60,8 @@ public:
     QString urlString() const;
 
 private:
+    void initializeDefaultValues();
+
     // "invalid" data "invalid" is specified by the onSuccess callback
     Outcome tryLoadCachedFile();
 

@@ -3,6 +3,7 @@
 #include "common/NetworkData.hpp"
 #include "common/NetworkManager.hpp"
 #include "common/Outcome.hpp"
+#include "common/Version.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Paths.hpp"
@@ -22,6 +23,8 @@ NetworkRequest::NetworkRequest(const std::string &url,
 {
     this->data->request_.setUrl(QUrl(QString::fromStdString(url)));
     this->data->requestType_ = requestType;
+
+    this->initializeDefaultValues();
 }
 
 NetworkRequest::NetworkRequest(QUrl url, NetworkRequestType requestType)
@@ -30,6 +33,8 @@ NetworkRequest::NetworkRequest(QUrl url, NetworkRequestType requestType)
 {
     this->data->request_.setUrl(url);
     this->data->requestType_ = requestType;
+
+    this->initializeDefaultValues();
 }
 
 NetworkRequest::~NetworkRequest()
@@ -164,6 +169,15 @@ void NetworkRequest::execute()
 QString NetworkRequest::urlString() const
 {
     return this->data->request_.url().toString();
+}
+
+void NetworkRequest::initializeDefaultValues()
+{
+    const auto userAgent = QString("chatterino/%1 (%2)")
+                               .arg(CHATTERINO_VERSION, CHATTERINO_GIT_HASH)
+                               .toUtf8();
+
+    this->data->request_.setRawHeader("User-Agent", userAgent);
 }
 
 Outcome NetworkRequest::tryLoadCachedFile()

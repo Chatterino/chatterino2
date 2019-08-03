@@ -446,3 +446,20 @@ linux {
 
     INSTALLS += desktop build_icons icon target
 }
+
+git_commit=$$(GIT_COMMIT)
+git_release=$$(GIT_RELEASE)
+# Git data
+isEmpty(git_commit) {
+git_commit=$$system(git rev-parse HEAD)
+}
+isEmpty(git_release) {
+git_release=$$system(git describe)
+}
+git_hash = $$str_member($$git_commit, 0, 8)
+
+# Passing strings as defines requires you to use this weird triple-escape then quotation mark syntax.
+# https://stackoverflow.com/questions/3348711/add-a-define-to-qmake-with-a-value/18343449#18343449
+DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
+DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
+DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
