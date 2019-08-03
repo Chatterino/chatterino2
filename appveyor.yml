@@ -28,7 +28,7 @@ build_script:
 
     conan install ..
 
-    qmake ../chatterino.pro BOOST_DIRECTORY="C:\Libraries\boost_1_64_0" BOOST_LIB_SUFFIX="lib64-msvc-14.1" DEFINES+="CHATTERINO_NIGHTLY_VERSION_STRING=\\\"$$system(git describe --always)-$$system(git rev-list master --count)\\\""
+    qmake ../chatterino.pro DEFINES+="CHATTERINO_NIGHTLY_VERSION_STRING=\\\"$$system(git describe --always)-$$system(git rev-list master --count)\\\""
 
     set cl=/MP
 
