@@ -79,6 +79,7 @@ std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
     if (!builder.isIgnored())
     {
         builtMessages.emplace_back(builder.build());
+        builder.triggerHighlights();
     }
     return builtMessages;
 }
@@ -130,6 +131,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         }
 
         auto msg = builder.build();
+        builder.triggerHighlights();
         auto highlighted = msg->flags.has(MessageFlag::Highlighted);
 
         if (!isSub)
@@ -357,6 +359,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     {
         builder->flags.set(MessageFlag::Whisper);
         MessagePtr _message = builder.build();
+        builder.triggerHighlights();
 
         app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
 

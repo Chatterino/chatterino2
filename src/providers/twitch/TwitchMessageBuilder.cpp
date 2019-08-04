@@ -105,6 +105,51 @@ bool TwitchMessageBuilder::isIgnored() const
     return false;
 }
 
+void TwitchMessageBuilder::triggerHighlights()
+{
+    static auto player = new QMediaPlayer;
+    static QUrl currentPlayerUrl;
+
+    if (this->historicalMessage_)
+    {
+        // Do nothing. Highlights should not be triggered on historical messages.
+        return;
+    }
+
+    if (getApp()->pings->isMuted(this->channel->getName()))
+    {
+        // Do nothing. Pings are muted in this channel.
+        return;
+    }
+
+    bool hasFocus = (QApplication::focusWidget() != nullptr);
+    bool resolveFocus = !hasFocus || getSettings()->highlightAlwaysPlaySound;
+
+    if (this->highlightSound_ && resolveFocus)
+    {
+        // update the media player url if necessary
+        QUrl highlightSoundUrl =
+            getSettings()->customHighlightSound
+                ? QUrl::fromLocalFile(
+                      getSettings()->pathHighlightSound.getValue())
+                : QUrl("qrc:/sounds/ping2.wav");
+
+        if (currentPlayerUrl != highlightSoundUrl)
+        {
+            player->setMedia(highlightSoundUrl);
+
+            currentPlayerUrl = highlightSoundUrl;
+        }
+
+        player->play();
+    }
+
+    if (this->highlightAlert_)
+    {
+        getApp()->windows->sendAlert();
+    }
+}
+
 MessagePtr TwitchMessageBuilder::build()
 {
     // PARSING
@@ -129,9 +174,10 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::Disabled);
     }
 
+    this->historicalMessage_ = this->tags.contains("historical");
+
     // timestamp
-    bool isPastMsg = this->tags.contains("historical");
-    if (isPastMsg)
+    if (this->historicalMessage_)
     {
         // This may be architecture dependent(datatype)
         bool customReceived = false;
@@ -183,15 +229,6 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->appendUsername();
 
-    // highlights
-    this->parseHighlights(isPastMsg);
-
-    // highlighting incoming whispers if requested per setting
-    if (this->args.isReceivedWhisper && getSettings()->highlightInlineWhispers)
-    {
-        this->message().flags.set(MessageFlag::HighlightedWhisper, true);
-    }
-
     //    QString bits;
     auto iterator = this->tags.find("bits");
     if (iterator != this->tags.end())
@@ -220,216 +257,9 @@ MessagePtr TwitchMessageBuilder::build()
             this->appendTwitchEmote(emote, twitchEmotes, correctPositions);
         }
     }
-    auto app = getApp();
-    const auto &phrases = app->ignores->phrases;
-    auto removeEmotesInRange =
-        [](int pos, int len,
-           std::vector<std::tuple<int, EmotePtr, EmoteName>>
-               &twitchEmotes) mutable {
-            auto it =
-                std::partition(twitchEmotes.begin(), twitchEmotes.end(),
-                               [pos, len](const auto &item) {
-                                   return !((std::get<0>(item) >= pos) &&
-                                            std::get<0>(item) < (pos + len));
-                               });
-            for (auto copy = it; copy != twitchEmotes.end(); ++copy)
-            {
-                if (std::get<1>(*copy) == nullptr)
-                {
-                    log("remem nullptr {}", std::get<2>(*copy).string);
-                }
-            }
-            std::vector<std::tuple<int, EmotePtr, EmoteName>> v(
-                it, twitchEmotes.end());
-            twitchEmotes.erase(it, twitchEmotes.end());
-            return v;
-        };
 
-    auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) mutable {
-        for (auto &item : twitchEmotes)
-        {
-            auto &index = std::get<0>(item);
-            if (index >= pos)
-            {
-                index += by;
-            }
-        }
-    };
-
-    auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase,
-                                         const QStringRef &midrepl,
-                                         int startIndex) mutable {
-        if (!phrase.containsEmote())
-        {
-            return;
-        }
-
-        QVector<QStringRef> words = midrepl.split(' ');
-        int pos = 0;
-        for (const auto &word : words)
-        {
-            for (const auto &emote : phrase.getEmotes())
-            {
-                if (word == emote.first.string)
-                {
-                    if (emote.second == nullptr)
-                    {
-                        log("emote null {}", emote.first.string);
-                    }
-                    twitchEmotes.push_back(std::tuple<int, EmotePtr, EmoteName>{
-                        startIndex + pos, emote.second, emote.first});
-                }
-            }
-            pos += word.length() + 1;
-        }
-    };
-
-    for (const auto &phrase : phrases)
-    {
-        if (phrase.isBlock())
-        {
-            continue;
-        }
-        if (phrase.isRegex())
-        {
-            const auto &regex = phrase.getRegex();
-            if (!regex.isValid())
-            {
-                continue;
-            }
-            QRegularExpressionMatch match;
-            int from = 0;
-            while ((from = this->originalMessage_.indexOf(regex, from,
-                                                          &match)) != -1)
-            {
-                int len = match.capturedLength();
-                auto vret = removeEmotesInRange(from, len, twitchEmotes);
-                auto mid = this->originalMessage_.mid(from, len);
-                mid.replace(regex, phrase.getReplace());
-
-                int midsize = mid.size();
-                this->originalMessage_.replace(from, len, mid);
-                int pos1 = from;
-                while (pos1 > 0)
-                {
-                    if (this->originalMessage_[pos1 - 1] == ' ')
-                    {
-                        break;
-                    }
-                    --pos1;
-                }
-                int pos2 = from + midsize;
-                while (pos2 < this->originalMessage_.length())
-                {
-                    if (this->originalMessage_[pos2] == ' ')
-                    {
-                        break;
-                    }
-                    ++pos2;
-                }
-
-                shiftIndicesAfter(from + len, midsize - len);
-
-                auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
-
-                for (auto &tup : vret)
-                {
-                    if (std::get<1>(tup) == nullptr)
-                    {
-                        log("v nullptr {}", std::get<2>(tup).string);
-                        continue;
-                    }
-                    QRegularExpression emoteregex(
-                        "\\b" + std::get<2>(tup).string + "\\b",
-                        QRegularExpression::UseUnicodePropertiesOption);
-                    auto _match = emoteregex.match(midExtendedRef);
-                    if (_match.hasMatch())
-                    {
-                        int last = _match.lastCapturedIndex();
-                        for (int i = 0; i <= last; ++i)
-                        {
-                            std::get<0>(tup) = from + _match.capturedStart();
-                            twitchEmotes.push_back(std::move(tup));
-                        }
-                    }
-                }
-
-                addReplEmotes(phrase, midExtendedRef, pos1);
-
-                from += midsize;
-            }
-        }
-        else
-        {
-            const auto &pattern = phrase.getPattern();
-            if (pattern.isEmpty())
-            {
-                continue;
-            }
-            int from = 0;
-            while ((from = this->originalMessage_.indexOf(
-                        pattern, from, phrase.caseSensitivity())) != -1)
-            {
-                int len = pattern.size();
-                auto vret = removeEmotesInRange(from, len, twitchEmotes);
-                auto replace = phrase.getReplace();
-
-                int replacesize = replace.size();
-                this->originalMessage_.replace(from, len, replace);
-
-                int pos1 = from;
-                while (pos1 > 0)
-                {
-                    if (this->originalMessage_[pos1 - 1] == ' ')
-                    {
-                        break;
-                    }
-                    --pos1;
-                }
-                int pos2 = from + replacesize;
-                while (pos2 < this->originalMessage_.length())
-                {
-                    if (this->originalMessage_[pos2] == ' ')
-                    {
-                        break;
-                    }
-                    ++pos2;
-                }
-
-                shiftIndicesAfter(from + len, replacesize - len);
-
-                auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
-
-                for (auto &tup : vret)
-                {
-                    if (std::get<1>(tup) == nullptr)
-                    {
-                        log("v nullptr {}", std::get<2>(tup).string);
-                        continue;
-                    }
-                    QRegularExpression emoteregex(
-                        "\\b" + std::get<2>(tup).string + "\\b",
-                        QRegularExpression::UseUnicodePropertiesOption);
-                    auto match = emoteregex.match(midExtendedRef);
-                    if (match.hasMatch())
-                    {
-                        int last = match.lastCapturedIndex();
-                        for (int i = 0; i <= last; ++i)
-                        {
-                            std::get<0>(tup) = from + match.capturedStart();
-                            twitchEmotes.push_back(std::move(tup));
-                        }
-                    }
-                }
-
-                addReplEmotes(phrase, midExtendedRef, pos1);
-
-                from += replacesize;
-            }
-        }
-    }
+    // This runs through all ignored phrases and runs its replacements on this->originalMessage_
+    this->runIgnoreReplaces(twitchEmotes);
 
     std::sort(twitchEmotes.begin(), twitchEmotes.end(),
               [](const auto &a, const auto &b) {
@@ -450,6 +280,15 @@ MessagePtr TwitchMessageBuilder::build()
     this->message().messageText = this->originalMessage_;
     this->message().searchText = this->message().localizedName + " " +
                                  this->userName + ": " + this->originalMessage_;
+
+    // highlights
+    this->parseHighlights();
+
+    // highlighting incoming whispers if requested per setting
+    if (this->args.isReceivedWhisper && getSettings()->highlightInlineWhispers)
+    {
+        this->message().flags.set(MessageFlag::HighlightedWhisper, true);
+    }
 
     return this->release();
 }
@@ -772,11 +611,223 @@ void TwitchMessageBuilder::appendUsername()
     }
 }
 
-void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
+void TwitchMessageBuilder::runIgnoreReplaces(
+    std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes)
 {
-    static auto player = new QMediaPlayer;
-    static QUrl currentPlayerUrl;
+    auto app = getApp();
+    const auto &phrases = app->ignores->phrases;
+    auto removeEmotesInRange =
+        [](int pos, int len,
+           std::vector<std::tuple<int, EmotePtr, EmoteName>>
+               &twitchEmotes) mutable {
+            auto it =
+                std::partition(twitchEmotes.begin(), twitchEmotes.end(),
+                               [pos, len](const auto &item) {
+                                   return !((std::get<0>(item) >= pos) &&
+                                            std::get<0>(item) < (pos + len));
+                               });
+            for (auto copy = it; copy != twitchEmotes.end(); ++copy)
+            {
+                if (std::get<1>(*copy) == nullptr)
+                {
+                    log("remem nullptr {}", std::get<2>(*copy).string);
+                }
+            }
+            std::vector<std::tuple<int, EmotePtr, EmoteName>> v(
+                it, twitchEmotes.end());
+            twitchEmotes.erase(it, twitchEmotes.end());
+            return v;
+        };
 
+    auto shiftIndicesAfter = [&twitchEmotes](int pos, int by) mutable {
+        for (auto &item : twitchEmotes)
+        {
+            auto &index = std::get<0>(item);
+            if (index >= pos)
+            {
+                index += by;
+            }
+        }
+    };
+
+    auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase,
+                                         const QStringRef &midrepl,
+                                         int startIndex) mutable {
+        if (!phrase.containsEmote())
+        {
+            return;
+        }
+
+        QVector<QStringRef> words = midrepl.split(' ');
+        int pos = 0;
+        for (const auto &word : words)
+        {
+            for (const auto &emote : phrase.getEmotes())
+            {
+                if (word == emote.first.string)
+                {
+                    if (emote.second == nullptr)
+                    {
+                        log("emote null {}", emote.first.string);
+                    }
+                    twitchEmotes.push_back(std::tuple<int, EmotePtr, EmoteName>{
+                        startIndex + pos, emote.second, emote.first});
+                }
+            }
+            pos += word.length() + 1;
+        }
+    };
+
+    for (const auto &phrase : phrases)
+    {
+        if (phrase.isBlock())
+        {
+            continue;
+        }
+        if (phrase.isRegex())
+        {
+            const auto &regex = phrase.getRegex();
+            if (!regex.isValid())
+            {
+                continue;
+            }
+            QRegularExpressionMatch match;
+            int from = 0;
+            while ((from = this->originalMessage_.indexOf(regex, from,
+                                                          &match)) != -1)
+            {
+                int len = match.capturedLength();
+                auto vret = removeEmotesInRange(from, len, twitchEmotes);
+                auto mid = this->originalMessage_.mid(from, len);
+                mid.replace(regex, phrase.getReplace());
+
+                int midsize = mid.size();
+                this->originalMessage_.replace(from, len, mid);
+                int pos1 = from;
+                while (pos1 > 0)
+                {
+                    if (this->originalMessage_[pos1 - 1] == ' ')
+                    {
+                        break;
+                    }
+                    --pos1;
+                }
+                int pos2 = from + midsize;
+                while (pos2 < this->originalMessage_.length())
+                {
+                    if (this->originalMessage_[pos2] == ' ')
+                    {
+                        break;
+                    }
+                    ++pos2;
+                }
+
+                shiftIndicesAfter(from + len, midsize - len);
+
+                auto midExtendedRef =
+                    this->originalMessage_.midRef(pos1, pos2 - pos1);
+
+                for (auto &tup : vret)
+                {
+                    if (std::get<1>(tup) == nullptr)
+                    {
+                        log("v nullptr {}", std::get<2>(tup).string);
+                        continue;
+                    }
+                    QRegularExpression emoteregex(
+                        "\\b" + std::get<2>(tup).string + "\\b",
+                        QRegularExpression::UseUnicodePropertiesOption);
+                    auto _match = emoteregex.match(midExtendedRef);
+                    if (_match.hasMatch())
+                    {
+                        int last = _match.lastCapturedIndex();
+                        for (int i = 0; i <= last; ++i)
+                        {
+                            std::get<0>(tup) = from + _match.capturedStart();
+                            twitchEmotes.push_back(std::move(tup));
+                        }
+                    }
+                }
+
+                addReplEmotes(phrase, midExtendedRef, pos1);
+
+                from += midsize;
+            }
+        }
+        else
+        {
+            const auto &pattern = phrase.getPattern();
+            if (pattern.isEmpty())
+            {
+                continue;
+            }
+            int from = 0;
+            while ((from = this->originalMessage_.indexOf(
+                        pattern, from, phrase.caseSensitivity())) != -1)
+            {
+                int len = pattern.size();
+                auto vret = removeEmotesInRange(from, len, twitchEmotes);
+                auto replace = phrase.getReplace();
+
+                int replacesize = replace.size();
+                this->originalMessage_.replace(from, len, replace);
+
+                int pos1 = from;
+                while (pos1 > 0)
+                {
+                    if (this->originalMessage_[pos1 - 1] == ' ')
+                    {
+                        break;
+                    }
+                    --pos1;
+                }
+                int pos2 = from + replacesize;
+                while (pos2 < this->originalMessage_.length())
+                {
+                    if (this->originalMessage_[pos2] == ' ')
+                    {
+                        break;
+                    }
+                    ++pos2;
+                }
+
+                shiftIndicesAfter(from + len, replacesize - len);
+
+                auto midExtendedRef =
+                    this->originalMessage_.midRef(pos1, pos2 - pos1);
+
+                for (auto &tup : vret)
+                {
+                    if (std::get<1>(tup) == nullptr)
+                    {
+                        log("v nullptr {}", std::get<2>(tup).string);
+                        continue;
+                    }
+                    QRegularExpression emoteregex(
+                        "\\b" + std::get<2>(tup).string + "\\b",
+                        QRegularExpression::UseUnicodePropertiesOption);
+                    auto match = emoteregex.match(midExtendedRef);
+                    if (match.hasMatch())
+                    {
+                        int last = match.lastCapturedIndex();
+                        for (int i = 0; i <= last; ++i)
+                        {
+                            std::get<0>(tup) = from + match.capturedStart();
+                            twitchEmotes.push_back(std::move(tup));
+                        }
+                    }
+                }
+
+                addReplEmotes(phrase, midExtendedRef, pos1);
+
+                from += replacesize;
+            }
+        }
+    }
+}
+
+void TwitchMessageBuilder::parseHighlights()
+{
     auto app = getApp();
 
     auto currentUser = app->accounts->twitch.getCurrent();
@@ -790,18 +841,11 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
         return;
     }
 
-    // update the media player url if necessary
-    QUrl highlightSoundUrl =
-        getSettings()->customHighlightSound
-            ? QUrl::fromLocalFile(getSettings()->pathHighlightSound.getValue())
-            : QUrl("qrc:/sounds/ping2.wav");
-
-    //    if (currentPlayerUrl != highlightSoundUrl)
-    //    {
-    //        player->setMedia(highlightSoundUrl);
-
-    //        currentPlayerUrl = highlightSoundUrl;
-    //    }
+    if (app->highlights->blacklistContains(this->ircMessage->nick()))
+    {
+        // Do nothing. We ignore highlights from this user.
+        return;
+    }
 
     // TODO: This vector should only be rebuilt upon highlights being changed
     // fourtf: should be implemented in the HighlightsController
@@ -818,99 +862,80 @@ void TwitchMessageBuilder::parseHighlights(bool isPastMsg)
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
-    bool doHighlight = false;
-    bool playSound = false;
-    bool doAlert = false;
-
-    bool hasFocus = (QApplication::focusWidget() != nullptr);
-
-    if (!app->highlights->blacklistContains(this->ircMessage->nick()))
+    // Highlight because of message
+    for (const HighlightPhrase &highlight : activeHighlights)
     {
-        for (const HighlightPhrase &highlight : activeHighlights)
+        if (!highlight.isMatch(this->originalMessage_))
         {
-            if (highlight.isMatch(this->originalMessage_))
-            {
-                log("Highlight because {} matches {}", this->originalMessage_,
-                    highlight.getPattern());
-                doHighlight = true;
-
-                if (highlight.getAlert())
-                {
-                    doAlert = true;
-                }
-
-                if (highlight.getSound())
-                {
-                    playSound = true;
-                }
-
-                if (playSound && doAlert)
-                {
-                    // Break if no further action can be taken from other
-                    // highlights This might change if highlights can have
-                    // custom colors/sounds/actions
-                    break;
-                }
-            }
-        }
-        for (const HighlightPhrase &userHighlight : userHighlights)
-        {
-            if (userHighlight.isMatch(this->ircMessage->nick()))
-            {
-                log("Highlight because user {} sent a message",
-                    this->ircMessage->nick());
-                doHighlight = true;
-
-                if (userHighlight.getAlert())
-                {
-                    doAlert = true;
-                }
-
-                if (userHighlight.getSound())
-                {
-                    playSound = true;
-                }
-
-                if (playSound && doAlert)
-                {
-                    // Break if no further action can be taken from other
-                    // usernames Mostly used for regex stuff
-                    break;
-                }
-            }
-        }
-        if (this->args.isReceivedWhisper &&
-            getSettings()->enableWhisperHighlight)
-        {
-            if (getSettings()->enableWhisperHighlightTaskbar)
-            {
-                doAlert = true;
-            }
-            if (getSettings()->enableWhisperHighlightSound)
-            {
-                playSound = true;
-            }
+            continue;
         }
 
-        this->message().flags.set(MessageFlag::Highlighted, doHighlight);
+        log("Highlight because {} matches {}", this->originalMessage_,
+            highlight.getPattern());
+        this->highlightVisual_ = true;
 
-        if (!isPastMsg)
+        if (highlight.getAlert())
         {
-            bool notMuted = !getApp()->pings->isMuted(this->channel->getName());
-            bool resolveFocus =
-                !hasFocus || getSettings()->highlightAlwaysPlaySound;
+            this->highlightAlert_ = true;
+        }
 
-            if (playSound && notMuted && resolveFocus)
-            {
-                player->play();
-            }
+        if (highlight.getSound())
+        {
+            this->highlightSound_ = true;
+        }
 
-            if (doAlert && notMuted)
-            {
-                getApp()->windows->sendAlert();
-            }
+        if (this->highlightAlert_ && this->highlightSound_)
+        {
+            // Break if no further action can be taken from other
+            // highlights This might change if highlights can have
+            // custom colors/sounds/actions
+            break;
         }
     }
+
+    // Highlight because of sender
+    for (const HighlightPhrase &userHighlight : userHighlights)
+    {
+        if (!userHighlight.isMatch(this->ircMessage->nick()))
+        {
+            continue;
+        }
+        log("Highlight because user {} sent a message",
+            this->ircMessage->nick());
+        this->highlightVisual_ = true;
+
+        if (userHighlight.getAlert())
+        {
+            this->highlightAlert_ = true;
+        }
+
+        if (userHighlight.getSound())
+        {
+            this->highlightSound_ = true;
+        }
+
+        if (this->highlightAlert_ && this->highlightSound_)
+        {
+            // Break if no further action can be taken from other
+            // usernames Mostly used for regex stuff
+            break;
+        }
+    }
+
+    // Highlight because it's a whisper
+    if (this->args.isReceivedWhisper && getSettings()->enableWhisperHighlight)
+    {
+        if (getSettings()->enableWhisperHighlightTaskbar)
+        {
+            this->highlightAlert_ = true;
+        }
+        if (getSettings()->enableWhisperHighlightSound)
+        {
+            this->highlightSound_ = true;
+        }
+    }
+
+    this->message().flags.set(MessageFlag::Highlighted, this->highlightVisual_);
 }
 
 void TwitchMessageBuilder::appendTwitchEmote(

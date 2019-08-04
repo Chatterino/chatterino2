@@ -6,6 +6,8 @@
 #include "common/NetworkTimer.hpp"
 #include "common/NetworkWorker.hpp"
 
+#include <memory>
+
 namespace chatterino {
 
 struct NetworkData;
@@ -57,7 +59,7 @@ public:
 
     void execute();
 
-    QString urlString() const;
+    [[nodiscard]] QString urlString() const;
 
 private:
     void initializeDefaultValues();
