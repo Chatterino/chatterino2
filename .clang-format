@@ -31,3 +31,4 @@ NamespaceIndentation: Inner
 PointerBindsToType: false
 SpacesBeforeTrailingComments: 2
 Standard: Auto
+ReflowComments: false
