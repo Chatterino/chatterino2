@@ -1,42 +1,69 @@
-os: osx
-osx_image: xcode10.2
+matrix:
+  include:
 
-addons:
-  homebrew:
-    packages:
-    - boost
-    - openssl
-    - rapidjson
-    - qt
-    - p7zip
-    - create-dmg
+    # gcc build
+    - os:             linux
+      name:           Linux Build
+      dist:           bionic
+      language:       cpp
 
-compiler: clang
+      install:
+        - sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic -y
+        - sudo apt-get install qt512-meta-minimal qt512multimedia qt512svg libboost-dev libgl1-mesa-dev libboost-system-dev libboost-filesystem-dev -y
 
-script:
-  - mkdir build && cd build
-  - /usr/local/opt/qt/bin/qmake .. && make -j8
-  - mkdir app
-  - mv chatterino.app app/
-  - "create-dmg \
-    --volname Chatterino2 \
-    --volicon ../resources/chatterino.icns \
-    --icon-size 50 \
-    --app-drop-link 0 0 \
-    chatterino-osx.dmg app/"
+      script:
+        - /opt/qt512/bin/qmake chatterino.pro
+        - make -j4
+        - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/qt512/lib/
+        - cp ./resources/icon.png ./chatterino.png
+        - wget -nv https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage && chmod a+x linuxdeployqt-6-x86_64.AppImage
+        - ./linuxdeployqt-6-x86_64.AppImage ./resources/chatterino.desktop -no-translations -unsupported-allow-new-glibc -appimage -qmake=/opt/qt512/bin/qmake
+        - mv Chatterino-*-x86_64.AppImage Chatterino-x86_64.AppImage
 
-before_deploy:
-  - git config --global user.email "builds@travis-ci.com"
-  - git config --global user.name "Travis CI"
-  - export GIT_TAG=nightly-build
-  - git tag $GIT_TAG -f
+      deploy:
+       skip_cleanup:  true
+       provider:      releases
+       api_key:
+           secure:    ZzS55wlwtLAVEBaDDMqiuqZwuTpvLbNnaNw0enfiqpjWT7hgbbp/SBw2rbYIkVqm7tBHCLnEzKto6p4Gz6ROo0gGACARmx7EwIloX18rMCuBWygNHRyVruDSlmEOLWRqYByDbUdCkKhYr9aegnkm7zhzCmSBCTW28/uVlxM2bTHIgqKEpB4k1W8OqKdJDxqZKeF4r7nDNSOx5ylhpiK+WNFK8yfiaF1SQlSwsdv9o1RkbJlew7iigvHvEM2kDMkiMWYlJ2khkUWVCVQDQGe4/ya5pgTIHDLu5sZuclp5zhgfDf1U3STvsbQWvxJfsmCId7IQHJ83OSFeoUf6y849i3GMqlNi3aXrxEx0fi0dILQ76/Sj246FPMA4kC0/W49uaxqD784wFuJDjSWeWwi/NPoJ/gz0mGZy+08BoztOGqqOKjJJdESBYTio71N8VcK09zQ0LjXRmX+g3BbrK6a2F3hiMKeuYwdaN2/KdMMoqFDau6L3fXLdpcHKdJC8K/yzJtyyIe0CRB2nj8sZLHfxDwoRm7gOTDXq1zPL7CP9cCwCnCR6nm3CqUW/CnSWuMKpSoQRlP5EBI7zzYT2/tZc/vat5nob7Xif6yFF9fh/VHx4tC6zsfkA1nPPN3+QpdVInRo7dCVxtTqey5FdVjSiv7n11TrFhZ7+Fr5x6CZqa58=
+       file:          "Chatterino-x86_64.AppImage"
+       prerelease:    true
+       on:
+         branch:      master
 
-deploy:
-  skip_cleanup: true
-  provider: releases
-  api_key:
-      secure: ZzS55wlwtLAVEBaDDMqiuqZwuTpvLbNnaNw0enfiqpjWT7hgbbp/SBw2rbYIkVqm7tBHCLnEzKto6p4Gz6ROo0gGACARmx7EwIloX18rMCuBWygNHRyVruDSlmEOLWRqYByDbUdCkKhYr9aegnkm7zhzCmSBCTW28/uVlxM2bTHIgqKEpB4k1W8OqKdJDxqZKeF4r7nDNSOx5ylhpiK+WNFK8yfiaF1SQlSwsdv9o1RkbJlew7iigvHvEM2kDMkiMWYlJ2khkUWVCVQDQGe4/ya5pgTIHDLu5sZuclp5zhgfDf1U3STvsbQWvxJfsmCId7IQHJ83OSFeoUf6y849i3GMqlNi3aXrxEx0fi0dILQ76/Sj246FPMA4kC0/W49uaxqD784wFuJDjSWeWwi/NPoJ/gz0mGZy+08BoztOGqqOKjJJdESBYTio71N8VcK09zQ0LjXRmX+g3BbrK6a2F3hiMKeuYwdaN2/KdMMoqFDau6L3fXLdpcHKdJC8K/yzJtyyIe0CRB2nj8sZLHfxDwoRm7gOTDXq1zPL7CP9cCwCnCR6nm3CqUW/CnSWuMKpSoQRlP5EBI7zzYT2/tZc/vat5nob7Xif6yFF9fh/VHx4tC6zsfkA1nPPN3+QpdVInRo7dCVxtTqey5FdVjSiv7n11TrFhZ7+Fr5x6CZqa58=
-  file: "chatterino-osx.dmg"
-  prerelease: true
-  on:
-    branch: master
+    - os:             osx
+      osx_image:      xcode10.2
+      name:           xcode Build
+
+      addons:
+        homebrew:
+          packages:
+          - boost
+          - openssl
+          - rapidjson
+          - qt
+          - p7zip
+          - create-dmg
+
+      compiler:       clang
+
+      script:
+        - mkdir build && cd build
+        - /usr/local/opt/qt/bin/qmake .. && make -j8
+        - mkdir app
+        - mv chatterino.app app/
+        - "create-dmg \
+          --volname Chatterino2 \
+          --volicon ../resources/chatterino.icns \
+          --icon-size 50 \
+          --app-drop-link 0 0 \
+          chatterino-osx.dmg app/"
+
+      deploy:
+        skip_cleanup: true
+        provider:     releases
+        api_key:
+            secure:   ZzS55wlwtLAVEBaDDMqiuqZwuTpvLbNnaNw0enfiqpjWT7hgbbp/SBw2rbYIkVqm7tBHCLnEzKto6p4Gz6ROo0gGACARmx7EwIloX18rMCuBWygNHRyVruDSlmEOLWRqYByDbUdCkKhYr9aegnkm7zhzCmSBCTW28/uVlxM2bTHIgqKEpB4k1W8OqKdJDxqZKeF4r7nDNSOx5ylhpiK+WNFK8yfiaF1SQlSwsdv9o1RkbJlew7iigvHvEM2kDMkiMWYlJ2khkUWVCVQDQGe4/ya5pgTIHDLu5sZuclp5zhgfDf1U3STvsbQWvxJfsmCId7IQHJ83OSFeoUf6y849i3GMqlNi3aXrxEx0fi0dILQ76/Sj246FPMA4kC0/W49uaxqD784wFuJDjSWeWwi/NPoJ/gz0mGZy+08BoztOGqqOKjJJdESBYTio71N8VcK09zQ0LjXRmX+g3BbrK6a2F3hiMKeuYwdaN2/KdMMoqFDau6L3fXLdpcHKdJC8K/yzJtyyIe0CRB2nj8sZLHfxDwoRm7gOTDXq1zPL7CP9cCwCnCR6nm3CqUW/CnSWuMKpSoQRlP5EBI7zzYT2/tZc/vat5nob7Xif6yFF9fh/VHx4tC6zsfkA1nPPN3+QpdVInRo7dCVxtTqey5FdVjSiv7n11TrFhZ7+Fr5x6CZqa58=
+        file:         "chatterino-osx.dmg"
+        prerelease:   true
+        on:
+          branch:     master
