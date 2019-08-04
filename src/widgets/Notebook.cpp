@@ -256,6 +256,17 @@ void Notebook::selectPreviousTab()
     this->select(this->items_[index].page);
 }
 
+void Notebook::selectLastTab()
+{
+    const auto size = this->items_.size();
+    if (size <= 1)
+    {
+        return;
+    }
+
+    this->select(this->items_[size - 1].page);
+}
+
 int Notebook::getPageCount() const
 {
     return this->items_.count();

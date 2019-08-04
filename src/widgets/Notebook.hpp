@@ -34,6 +34,7 @@ public:
     void selectIndex(int index);
     void selectNextTab();
     void selectPreviousTab();
+    void selectLastTab();
 
     int getPageCount() const;
     QWidget *getPageAt(int index) const;

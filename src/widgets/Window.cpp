@@ -287,7 +287,7 @@ void Window::addShortcuts()
     createWindowShortcut(this, "CTRL+8",
                          [this] { this->notebook_->selectIndex(7); });
     createWindowShortcut(this, "CTRL+9",
-                         [this] { this->notebook_->selectIndex(8); });
+                         [this] { this->notebook_->selectLastTab(); });
 
     // Zoom in
     {
