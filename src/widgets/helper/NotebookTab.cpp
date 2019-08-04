@@ -559,13 +559,28 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 
 void NotebookTab::wheelEvent(QWheelEvent *event)
 {
-    if (event->delta() > 0)
+    const auto defaultMouseDelta = 120;
+    const auto delta = event->delta();
+    const auto selectTab = [this](int delta) {
+        delta > 0
+            ? this->notebook_->selectPreviousTab()
+            : this->notebook_->selectNextTab();
+    };
+    // If it's true
+    // Then the user uses the trackpad or perhaps the most accurate mouse
+    // Which has small delta.
+    if (std::abs(delta) < defaultMouseDelta)
     {
-        this->notebook_->selectPreviousTab();
+        this->mouseWheelDelta_ += delta;
+        if (std::abs(this->mouseWheelDelta_) >= defaultMouseDelta)
+        {
+            selectTab(this->mouseWheelDelta_);
+            this->mouseWheelDelta_ = 0;
+        }
     }
     else
     {
-        this->notebook_->selectNextTab();
+        selectTab(delta);
     }
 }
 
