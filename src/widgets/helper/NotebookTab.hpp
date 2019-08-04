@@ -90,6 +90,7 @@ private:
     bool mouseOverX_{};
     bool mouseDownX_{};
     bool isInLastRow_{};
+    int mouseWheelDelta_ = 0;
 
     HighlightState highlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;
