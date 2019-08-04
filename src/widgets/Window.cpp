@@ -289,6 +289,11 @@ void Window::addShortcuts()
     createWindowShortcut(this, "CTRL+9",
                          [this] { this->notebook_->selectIndex(8); });
 
+    createWindowShortcut(this, "CTRL+TAB",
+                         [this] { this->notebook_->selectNextTab(); });
+    createWindowShortcut(this, "CTRL+SHIFT+TAB",
+                         [this] { this->notebook_->selectPreviousTab(); });
+
     // Zoom in
     {
         auto s = new QShortcut(QKeySequence::ZoomIn, this);
