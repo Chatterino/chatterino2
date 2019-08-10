@@ -344,12 +344,25 @@ void Window::addMenuBar()
     QMenuBar *mainMenu = new QMenuBar();
     mainMenu->setNativeMenuBar(true);
 
-    QMenu *menu = new QMenu(QString());
-    mainMenu->addMenu(menu);
+    // First menu.
+    QMenu *menu = mainMenu->addMenu(QString());
     QAction *prefs = menu->addAction(QString());
     prefs->setMenuRole(QAction::PreferencesRole);
     connect(prefs, &QAction::triggered, this,
             [] { SettingsDialog::showDialog(); });
+
+    // Window menu.
+    QMenu *windowMenu = mainMenu->addMenu(QString("Window"));
+
+    QAction *nextTab = windowMenu->addAction(QString("Select next tab"));
+    nextTab->setShortcuts({QKeySequence("Meta+Tab")});
+    connect(nextTab, &QAction::triggered, this,
+            [=] { this->notebook_->selectNextTab(); });
+
+    QAction *prevTab = windowMenu->addAction(QString("Select previous tab"));
+    prevTab->setShortcuts({QKeySequence("Meta+Shift+Tab")});
+    connect(prevTab, &QAction::triggered, this,
+            [=] { this->notebook_->selectPreviousTab(); });
 }
 
 #define UGLYMACROHACK1(s) #s
