@@ -1,23 +1,33 @@
+
 matrix:
   include:
-
     # gcc build
     - os:             linux
       name:           Linux Build
       dist:           bionic
       language:       cpp
-
-      install:
-        - sudo add-apt-repository ppa:beineri/opt-qt-5.12.0-bionic -y
-        - sudo apt-get install qt512-meta-minimal qt512multimedia qt512svg libboost-dev libgl1-mesa-dev libboost-system-dev libboost-filesystem-dev -y
+      addons:
+        apt:
+          sources:
+          - sourceline: 'ppa:beineri/opt-qt-5.12.0-bionic'
+          packages:
+          - qt512-meta-full
+          - qt512multimedia
+          - qt512svg
+          - libboost-dev
+          - libgl1-mesa-dev
+          - libboost-system-dev
+          - libboost-filesystem-dev
 
       script:
-        - /opt/qt512/bin/qmake chatterino.pro
-        - make -j4
         - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/qt512/lib/
-        - cp ./resources/icon.png ./chatterino.png
-        - wget -nv https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage && chmod a+x linuxdeployqt-6-x86_64.AppImage
-        - ./linuxdeployqt-6-x86_64.AppImage ./resources/chatterino.desktop -no-translations -unsupported-allow-new-glibc -appimage -qmake=/opt/qt512/bin/qmake
+        - /opt/qt512/bin/qmake CONFIG+=release PREFIX=/usr
+        - make -j$(nproc)
+        - ldd ./bin/chatterino
+        - make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
+        - cp ./resources/icon.png ./appdir/chatterino.png
+        - wget -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage" && chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+        - ./linuxdeployqt-continuous-x86_64.AppImage appdir/usr/share/applications/*.desktop -no-translations -unsupported-allow-new-glibc -appimage -qmake=/opt/qt512/bin/qmake
         - mv Chatterino-*-x86_64.AppImage Chatterino-x86_64.AppImage
 
       before_deploy:
