@@ -1,7 +1,7 @@
 #pragma once
 
 #include <fmt/format.h>
-#include <QUuid>
+#include <QString>
 
 namespace AB_NAMESPACE {
 
@@ -11,37 +11,14 @@ auto fS(Args &&... args)
     return fmt::format(std::forward<Args>(args)...);
 }
 
-static QString CreateUUID()
-{
-    auto uuid = QUuid::createUuid();
-    return uuid.toString();
-}
+QString CreateUUID();
 
-static QString createLink(const QString &url, bool file = false)
-{
-    return QString("<a href=\"") + (file ? "file:///" : "") + url + "\">" +
-           url + "</a>";
-}
+QString createLink(const QString &url, bool file = false);
 
-static QString createNamedLink(const QString &url, const QString &name,
-                               bool file = false)
-{
-    return QString("<a href=\"") + (file ? "file:///" : "") + url + "\">" +
-           name + "</a>";
-}
+QString createNamedLink(const QString &url, const QString &name,
+                        bool file = false);
 
-static QString shortenString(const QString &str, unsigned maxWidth = 50)
-{
-    auto shortened = QString(str);
-
-    if (str.size() > int(maxWidth))
-    {
-        shortened.resize(int(maxWidth));
-        shortened += "...";
-    }
-
-    return shortened;
-}
+QString shortenString(const QString &str, unsigned maxWidth = 50);
 
 }  // namespace AB_NAMESPACE
 

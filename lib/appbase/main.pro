@@ -34,14 +34,7 @@ macx {
     }
 }
 
-include(../warnings.pri)
-include(../lib/winsdk.pri)
-include(../lib/fmt.pri)
-include(../lib/boost.pri)
-include(../lib/rapidjson.pri)
-include(../lib/serialize.pri)
-include(../lib/signals.pri)
-include(../lib/settings.pri)
+include($$PWD/appbase/warnings.pri)
 
 debug {
     DEFINES += QT_DEBUG
@@ -66,6 +59,7 @@ SOURCES += \
     $$PWD/singletons/Fonts.cpp \
     $$PWD/util/FunctionEventFilter.cpp \
     $$PWD/util/FuzzyConvert.cpp \
+    $$PWD/util/Helpers.cpp \
     $$PWD/util/WindowsHelper.cpp \
     $$PWD/widgets/BaseWidget.cpp \
     $$PWD/widgets/BaseWindow.cpp \
