@@ -400,32 +400,6 @@ void SplitInput::installKeyPressedEvent()
                 }
             }
         }
-        else if (event->key() == Qt::Key_Tab)
-        {
-            if (event->modifiers() == Qt::ControlModifier)
-            {
-                SplitContainer *page =
-                    static_cast<SplitContainer *>(this->split_->parentWidget());
-
-                Notebook *notebook =
-                    static_cast<Notebook *>(page->parentWidget());
-
-                notebook->selectNextTab();
-            }
-        }
-        else if (event->key() == Qt::Key_Backtab)
-        {
-            if (event->modifiers() == (Qt::ControlModifier | Qt::ShiftModifier))
-            {
-                SplitContainer *page =
-                    static_cast<SplitContainer *>(this->split_->parentWidget());
-
-                Notebook *notebook =
-                    static_cast<Notebook *>(page->parentWidget());
-
-                notebook->selectPreviousTab();
-            }
-        }
         else if (event->key() == Qt::Key_C &&
                  event->modifiers() == Qt::ControlModifier)
         {
