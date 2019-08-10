@@ -488,6 +488,13 @@ void TwitchMessageBuilder::parseUsername()
     //    }
 
     this->message().loginName = this->userName;
+
+    // Update current user color if this is our message
+    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    if (this->ircMessage->nick() == currentUser->getUserName())
+    {
+        currentUser->setColor(this->usernameColor_);
+    }
 }
 
 void TwitchMessageBuilder::appendUsername()
@@ -834,16 +841,51 @@ void TwitchMessageBuilder::parseHighlights()
 
     QString currentUsername = currentUser->getUserName();
 
-    if (this->ircMessage->nick() == currentUsername)
-    {
-        currentUser->setColor(this->usernameColor_);
-        // Do nothing. Highlights cannot be triggered by yourself
-        return;
-    }
-
     if (app->highlights->blacklistContains(this->ircMessage->nick()))
     {
         // Do nothing. We ignore highlights from this user.
+        return;
+    }
+
+    std::vector<HighlightPhrase> userHighlights =
+        app->highlights->highlightedUsers.cloneVector();
+
+    // Highlight because of sender
+    for (const HighlightPhrase &userHighlight : userHighlights)
+    {
+        if (!userHighlight.isMatch(this->ircMessage->nick()))
+        {
+            continue;
+        }
+        log("Highlight because user {} sent a message",
+            this->ircMessage->nick());
+        if (!this->highlightVisual_)
+        {
+            this->highlightVisual_ = true;
+            this->message().flags.set(MessageFlag::Highlighted);
+        }
+
+        if (userHighlight.getAlert())
+        {
+            this->highlightAlert_ = true;
+        }
+
+        if (userHighlight.getSound())
+        {
+            this->highlightSound_ = true;
+        }
+
+        if (this->highlightAlert_ && this->highlightSound_)
+        {
+            // Break if no further action can be taken from other
+            // usernames Mostly used for regex stuff
+            break;
+        }
+    }
+
+    if (this->ircMessage->nick() == currentUsername)
+    {
+        // Do nothing. Highlights cannot be triggered by yourself
         return;
     }
 
@@ -851,8 +893,6 @@ void TwitchMessageBuilder::parseHighlights()
     // fourtf: should be implemented in the HighlightsController
     std::vector<HighlightPhrase> activeHighlights =
         app->highlights->phrases.cloneVector();
-    std::vector<HighlightPhrase> userHighlights =
-        app->highlights->highlightedUsers.cloneVector();
 
     if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
     {
@@ -872,7 +912,11 @@ void TwitchMessageBuilder::parseHighlights()
 
         log("Highlight because {} matches {}", this->originalMessage_,
             highlight.getPattern());
-        this->highlightVisual_ = true;
+        if (!this->highlightVisual_)
+        {
+            this->highlightVisual_ = true;
+            this->message().flags.set(MessageFlag::Highlighted);
+        }
 
         if (highlight.getAlert())
         {
@@ -893,35 +937,6 @@ void TwitchMessageBuilder::parseHighlights()
         }
     }
 
-    // Highlight because of sender
-    for (const HighlightPhrase &userHighlight : userHighlights)
-    {
-        if (!userHighlight.isMatch(this->ircMessage->nick()))
-        {
-            continue;
-        }
-        log("Highlight because user {} sent a message",
-            this->ircMessage->nick());
-        this->highlightVisual_ = true;
-
-        if (userHighlight.getAlert())
-        {
-            this->highlightAlert_ = true;
-        }
-
-        if (userHighlight.getSound())
-        {
-            this->highlightSound_ = true;
-        }
-
-        if (this->highlightAlert_ && this->highlightSound_)
-        {
-            // Break if no further action can be taken from other
-            // usernames Mostly used for regex stuff
-            break;
-        }
-    }
-
     // Highlight because it's a whisper
     if (this->args.isReceivedWhisper && getSettings()->enableWhisperHighlight)
     {
@@ -934,8 +949,6 @@ void TwitchMessageBuilder::parseHighlights()
             this->highlightSound_ = true;
         }
     }
-
-    this->message().flags.set(MessageFlag::Highlighted, this->highlightVisual_);
 }
 
 void TwitchMessageBuilder::appendTwitchEmote(
