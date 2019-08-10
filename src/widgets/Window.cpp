@@ -270,24 +270,17 @@ void Window::addShortcuts()
         this->notebook_->getOrAddSelectedPage()->appendNewSplit(true);
     });
 
-    createWindowShortcut(this, "CTRL+1",
-                         [this] { this->notebook_->selectIndex(0); });
-    createWindowShortcut(this, "CTRL+2",
-                         [this] { this->notebook_->selectIndex(1); });
-    createWindowShortcut(this, "CTRL+3",
-                         [this] { this->notebook_->selectIndex(2); });
-    createWindowShortcut(this, "CTRL+4",
-                         [this] { this->notebook_->selectIndex(3); });
-    createWindowShortcut(this, "CTRL+5",
-                         [this] { this->notebook_->selectIndex(4); });
-    createWindowShortcut(this, "CTRL+6",
-                         [this] { this->notebook_->selectIndex(5); });
-    createWindowShortcut(this, "CTRL+7",
-                         [this] { this->notebook_->selectIndex(6); });
-    createWindowShortcut(this, "CTRL+8",
-                         [this] { this->notebook_->selectIndex(7); });
+    // CTRL + 1-8 to open corresponding tab.
+    for (auto i = 0; i < 8; i++)
+    {
+        char hotkey[7];
+        std::sprintf(hotkey, "CTRL+%d", i + 1);
+        const auto openTab = [this, i] { this->notebook_->selectIndex(i); };
+        createWindowShortcut(this, hotkey, openTab);
+    }
+
     createWindowShortcut(this, "CTRL+9",
-                         [this] { this->notebook_->selectIndex(8); });
+                         [this] { this->notebook_->selectLastTab(); });
 
     // Zoom in
     {
