@@ -61,7 +61,7 @@ exists( $$OUT_PWD/conanbuildinfo.pri ) {
     LIBS += -lGdi32
 }
 else{
-	include(lib/boost.pri)
+    include(lib/boost.pri)
     include(lib/openssl.pri)
 }
 
