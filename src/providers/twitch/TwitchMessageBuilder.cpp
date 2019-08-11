@@ -20,43 +20,48 @@
 #include "widgets/Window.hpp"
 
 #include <QApplication>
+#include <QColor>
 #include <QDebug>
 #include <QMediaPlayer>
 #include <QStringRef>
-#include <QColor>
 #include <boost/variant.hpp>
 
 namespace {
 
-QColor getRandomColor(QVariant value)
+QColor getRandomColor(const QVariant &userId)
 {
     static const std::vector<QColor> twitchUsernameColors = {
-        QColor(255, 0, 0), // Red
-        QColor(0, 0, 255), // Blue
-        QColor(0, 255, 0), // Green
-        QColor(178, 34, 34), // FireBrick
-        QColor(255, 127, 80), // Coral
-        QColor(154, 205, 50), // YellowGreen
-        QColor(255, 69, 0), // OrangeRed
-        QColor(46, 139, 87), // SeaGreen
-        QColor(218, 165, 32), // GoldenRod
-        QColor(210, 105, 30), // Chocolate
-        QColor(95, 158, 160), // CadetBlue
-        QColor(30, 144, 255), // DodgerBlue
-        QColor(255, 105, 180), // HotPink
-        QColor(138, 43, 226), // BlueViolet
-        QColor(0, 255, 127) // SpringGreen
+        {255, 0, 0},      // Red
+        {0, 0, 255},      // Blue
+        {0, 255, 0},      // Green
+        {178, 34, 34},    // FireBrick
+        {255, 127, 80},   // Coral
+        {154, 205, 50},   // YellowGreen
+        {255, 69, 0},     // OrangeRed
+        {46, 139, 87},    // SeaGreen
+        {218, 165, 32},   // GoldenRod
+        {210, 105, 30},   // Chocolate
+        {95, 158, 160},   // CadetBlue
+        {30, 144, 255},   // DodgerBlue
+        {255, 105, 180},  // HotPink
+        {138, 43, 226},   // BlueViolet
+        {0, 255, 127},    // SpringGreen
     };
 
-    // If someday Twitch will replace all the user-ids with strings
-    // then we just choose a random color.
-    const auto userId = value.toInt();
-    const auto index = (userId ? userId : std::rand())
-        % twitchUsernameColors.size();
-    return twitchUsernameColors[index];
+    bool ok = true;
+    int colorSeed = userId.toInt(&ok);
+    if (!ok)
+    {
+        // We were unable to convert the user ID to an integer, this means Twitch has decided to start using non-integer user IDs
+        // Just randomize the users color
+        colorSeed = std::rand();
+    }
+
+    const auto colorIndex = colorSeed % twitchUsernameColors.size();
+    return twitchUsernameColors[colorIndex];
 }
 
-}
+}  // namespace
 
 namespace chatterino {
 
