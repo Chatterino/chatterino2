@@ -34,8 +34,6 @@ macx {
     }
 }
 
-include($$PWD/appbase/warnings.pri)
-
 debug {
     DEFINES += QT_DEBUG
 }
