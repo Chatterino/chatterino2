@@ -2,10 +2,10 @@
 matrix:
   include:
     # gcc build
-    - os:             linux
-      name:           Linux Build
-      dist:           bionic
-      language:       cpp
+    - os:               linux
+      name:             Linux Build (Bionic)
+      dist:             bionic
+      language:         cpp
       addons:
         apt:
           sources:
@@ -37,18 +37,20 @@ matrix:
         - git tag $GIT_TAG -f
 
       deploy:
-       skip_cleanup:  true
-       provider:      releases
+       skip_cleanup:    true
+       overwrite:       true
+       provider:        releases
        api_key:
-           secure:    ZzS55wlwtLAVEBaDDMqiuqZwuTpvLbNnaNw0enfiqpjWT7hgbbp/SBw2rbYIkVqm7tBHCLnEzKto6p4Gz6ROo0gGACARmx7EwIloX18rMCuBWygNHRyVruDSlmEOLWRqYByDbUdCkKhYr9aegnkm7zhzCmSBCTW28/uVlxM2bTHIgqKEpB4k1W8OqKdJDxqZKeF4r7nDNSOx5ylhpiK+WNFK8yfiaF1SQlSwsdv9o1RkbJlew7iigvHvEM2kDMkiMWYlJ2khkUWVCVQDQGe4/ya5pgTIHDLu5sZuclp5zhgfDf1U3STvsbQWvxJfsmCId7IQHJ83OSFeoUf6y849i3GMqlNi3aXrxEx0fi0dILQ76/Sj246FPMA4kC0/W49uaxqD784wFuJDjSWeWwi/NPoJ/gz0mGZy+08BoztOGqqOKjJJdESBYTio71N8VcK09zQ0LjXRmX+g3BbrK6a2F3hiMKeuYwdaN2/KdMMoqFDau6L3fXLdpcHKdJC8K/yzJtyyIe0CRB2nj8sZLHfxDwoRm7gOTDXq1zPL7CP9cCwCnCR6nm3CqUW/CnSWuMKpSoQRlP5EBI7zzYT2/tZc/vat5nob7Xif6yFF9fh/VHx4tC6zsfkA1nPPN3+QpdVInRo7dCVxtTqey5FdVjSiv7n11TrFhZ7+Fr5x6CZqa58=
-       file:          "Chatterino-x86_64.AppImage"
-       prerelease:    true
+           secure:      ZzS55wlwtLAVEBaDDMqiuqZwuTpvLbNnaNw0enfiqpjWT7hgbbp/SBw2rbYIkVqm7tBHCLnEzKto6p4Gz6ROo0gGACARmx7EwIloX18rMCuBWygNHRyVruDSlmEOLWRqYByDbUdCkKhYr9aegnkm7zhzCmSBCTW28/uVlxM2bTHIgqKEpB4k1W8OqKdJDxqZKeF4r7nDNSOx5ylhpiK+WNFK8yfiaF1SQlSwsdv9o1RkbJlew7iigvHvEM2kDMkiMWYlJ2khkUWVCVQDQGe4/ya5pgTIHDLu5sZuclp5zhgfDf1U3STvsbQWvxJfsmCId7IQHJ83OSFeoUf6y849i3GMqlNi3aXrxEx0fi0dILQ76/Sj246FPMA4kC0/W49uaxqD784wFuJDjSWeWwi/NPoJ/gz0mGZy+08BoztOGqqOKjJJdESBYTio71N8VcK09zQ0LjXRmX+g3BbrK6a2F3hiMKeuYwdaN2/KdMMoqFDau6L3fXLdpcHKdJC8K/yzJtyyIe0CRB2nj8sZLHfxDwoRm7gOTDXq1zPL7CP9cCwCnCR6nm3CqUW/CnSWuMKpSoQRlP5EBI7zzYT2/tZc/vat5nob7Xif6yFF9fh/VHx4tC6zsfkA1nPPN3+QpdVInRo7dCVxtTqey5FdVjSiv7n11TrFhZ7+Fr5x6CZqa58=
+       file:            "Chatterino-x86_64.AppImage"
+       prerelease:      true
        on:
-         branch:      master
+         branch:        master
 
-    - os:             osx
-      osx_image:      xcode10.2
-      name:           xcode Build
+    - os:               osx
+      osx_image:        xcode10.2
+      name:             xcode Build
+      compiler:         clang
 
       addons:
         homebrew:
@@ -59,9 +61,7 @@ matrix:
           - qt
           - p7zip
           - create-dmg
-
-      compiler:       clang
-
+          
       script:
         - mkdir build && cd build
         - /usr/local/opt/qt/bin/qmake .. && make -j8
@@ -81,11 +81,12 @@ matrix:
         - git tag $GIT_TAG -f
 
       deploy:
-        skip_cleanup: true
-        provider:     releases
+        skip_cleanup:   true
+        overwrite:      true
+        provider:       releases
         api_key:
-            secure:   ZzS55wlwtLAVEBaDDMqiuqZwuTpvLbNnaNw0enfiqpjWT7hgbbp/SBw2rbYIkVqm7tBHCLnEzKto6p4Gz6ROo0gGACARmx7EwIloX18rMCuBWygNHRyVruDSlmEOLWRqYByDbUdCkKhYr9aegnkm7zhzCmSBCTW28/uVlxM2bTHIgqKEpB4k1W8OqKdJDxqZKeF4r7nDNSOx5ylhpiK+WNFK8yfiaF1SQlSwsdv9o1RkbJlew7iigvHvEM2kDMkiMWYlJ2khkUWVCVQDQGe4/ya5pgTIHDLu5sZuclp5zhgfDf1U3STvsbQWvxJfsmCId7IQHJ83OSFeoUf6y849i3GMqlNi3aXrxEx0fi0dILQ76/Sj246FPMA4kC0/W49uaxqD784wFuJDjSWeWwi/NPoJ/gz0mGZy+08BoztOGqqOKjJJdESBYTio71N8VcK09zQ0LjXRmX+g3BbrK6a2F3hiMKeuYwdaN2/KdMMoqFDau6L3fXLdpcHKdJC8K/yzJtyyIe0CRB2nj8sZLHfxDwoRm7gOTDXq1zPL7CP9cCwCnCR6nm3CqUW/CnSWuMKpSoQRlP5EBI7zzYT2/tZc/vat5nob7Xif6yFF9fh/VHx4tC6zsfkA1nPPN3+QpdVInRo7dCVxtTqey5FdVjSiv7n11TrFhZ7+Fr5x6CZqa58=
-        file:         "chatterino-osx.dmg"
-        prerelease:   true
+            secure:     ZzS55wlwtLAVEBaDDMqiuqZwuTpvLbNnaNw0enfiqpjWT7hgbbp/SBw2rbYIkVqm7tBHCLnEzKto6p4Gz6ROo0gGACARmx7EwIloX18rMCuBWygNHRyVruDSlmEOLWRqYByDbUdCkKhYr9aegnkm7zhzCmSBCTW28/uVlxM2bTHIgqKEpB4k1W8OqKdJDxqZKeF4r7nDNSOx5ylhpiK+WNFK8yfiaF1SQlSwsdv9o1RkbJlew7iigvHvEM2kDMkiMWYlJ2khkUWVCVQDQGe4/ya5pgTIHDLu5sZuclp5zhgfDf1U3STvsbQWvxJfsmCId7IQHJ83OSFeoUf6y849i3GMqlNi3aXrxEx0fi0dILQ76/Sj246FPMA4kC0/W49uaxqD784wFuJDjSWeWwi/NPoJ/gz0mGZy+08BoztOGqqOKjJJdESBYTio71N8VcK09zQ0LjXRmX+g3BbrK6a2F3hiMKeuYwdaN2/KdMMoqFDau6L3fXLdpcHKdJC8K/yzJtyyIe0CRB2nj8sZLHfxDwoRm7gOTDXq1zPL7CP9cCwCnCR6nm3CqUW/CnSWuMKpSoQRlP5EBI7zzYT2/tZc/vat5nob7Xif6yFF9fh/VHx4tC6zsfkA1nPPN3+QpdVInRo7dCVxtTqey5FdVjSiv7n11TrFhZ7+Fr5x6CZqa58=
+        file:           "chatterino-osx.dmg"
+        prerelease:     true
         on:
-          branch:     master
+          branch:       master
