@@ -23,7 +23,40 @@
 #include <QDebug>
 #include <QMediaPlayer>
 #include <QStringRef>
+#include <QColor>
 #include <boost/variant.hpp>
+
+namespace {
+
+QColor getRandomColor(QVariant value)
+{
+    static const std::vector<QColor> twitchUsernameColors = {
+        QColor(255, 0, 0), // Red
+        QColor(0, 0, 255), // Blue
+        QColor(0, 255, 0), // Green
+        QColor(178, 34, 34), // FireBrick
+        QColor(255, 127, 80), // Coral
+        QColor(154, 205, 50), // YellowGreen
+        QColor(255, 69, 0), // OrangeRed
+        QColor(46, 139, 87), // SeaGreen
+        QColor(218, 165, 32), // GoldenRod
+        QColor(210, 105, 30), // Chocolate
+        QColor(95, 158, 160), // CadetBlue
+        QColor(30, 144, 255), // DodgerBlue
+        QColor(255, 105, 180), // HotPink
+        QColor(138, 43, 226), // BlueViolet
+        QColor(0, 255, 127) // SpringGreen
+    };
+
+    // If someday Twitch will replace all the user-ids with strings
+    // then we just choose a random color.
+    const auto userId = value.toInt();
+    const auto index = (userId ? userId : std::rand())
+        % twitchUsernameColors.size();
+    return twitchUsernameColors[index];
+}
+
+}
 
 namespace chatterino {
 
@@ -466,10 +499,15 @@ void TwitchMessageBuilder::appendChannelName()
 
 void TwitchMessageBuilder::parseUsername()
 {
-    auto iterator = this->tags.find("color");
-    if (iterator != this->tags.end())
+    const auto iterator = this->tags.find("color");
+    if (const auto color = iterator.value().toString(); !color.isEmpty())
     {
-        this->usernameColor_ = QColor(iterator.value().toString());
+        this->usernameColor_ = QColor(color);
+    }
+    else if (getSettings()->colorizeNicknames &&
+        this->tags.contains("user-id"))
+    {
+        this->usernameColor_ = getRandomColor(this->tags.value("user-id"));
     }
 
     // username
