@@ -42,6 +42,8 @@ public:
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
+    BoolSetting colorizeNicknames = {
+        "/appearance/messages/colorizeNicknames", false};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
