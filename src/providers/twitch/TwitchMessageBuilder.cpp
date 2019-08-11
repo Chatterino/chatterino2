@@ -509,8 +509,7 @@ void TwitchMessageBuilder::parseUsername()
     {
         this->usernameColor_ = QColor(color);
     }
-    else if (getSettings()->colorizeNicknames &&
-        this->tags.contains("user-id"))
+    else if (getSettings()->colorizeNicknames && this->tags.contains("user-id"))
     {
         this->usernameColor_ = getRandomColor(this->tags.value("user-id"));
     }

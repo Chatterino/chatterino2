@@ -347,8 +347,7 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
         QSize size(int(container.getScale() * 16),
                    int(container.getScale() * 16));
 
-        for (const auto &action :
-             getApp()->moderationActions->items)
+        for (const auto &action : getApp()->moderationActions->items)
         {
             if (auto image = action.getImage())
             {

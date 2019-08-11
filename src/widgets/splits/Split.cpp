@@ -175,18 +175,19 @@ Split::Split(QWidget *parent)
     this->setSizePolicy(QSizePolicy::MinimumExpanding,
                         QSizePolicy::MinimumExpanding);
 
-    this->managedConnect(modifierStatusChanged,
-                         [this](Qt::KeyboardModifiers status) {
-                             if ((status == showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
+    this->managedConnect(modifierStatusChanged, [this](Qt::KeyboardModifiers
+                                                           status) {
+        if ((status ==
+             showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
             this->isMouseOver_)
-                             {
-                                 this->overlay_->show();
-                             }
-                             else
-                             {
-                                 this->overlay_->hide();
-                             }
-                         });
+        {
+            this->overlay_->show();
+        }
+        else
+        {
+            this->overlay_->hide();
+        }
+    });
 
     this->input_->ui_.textEdit->focused.connect(
         [this] { this->focused.invoke(); });

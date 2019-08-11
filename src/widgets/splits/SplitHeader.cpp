@@ -176,9 +176,7 @@ void SplitHeader::initializeLayout()
                     switch (button)
                     {
                         case Qt::LeftButton:
-                            if (getApp()
-                                    ->moderationActions->items
-                                    .empty())
+                            if (getApp()->moderationActions->items.empty())
                             {
                                 getApp()->windows->showSettingsDialog(
                                     SettingsDialogPreference::
@@ -222,19 +220,19 @@ void SplitHeader::initializeLayout()
     });
 
     // update moderation button when items changed
-    this->managedConnect(
-        getApp()->moderationActions->items.delayedItemsChanged, [this] {
-            if (getApp()->moderationActions->items.empty())
-            {
-                if (this->split_->getModerationMode())
-                    this->split_->setModerationMode(true);
-            }
-            else
-            {
-                if (this->split_->getModerationMode())
-                    this->split_->setModerationMode(true);
-            }
-        });
+    this->managedConnect(getApp()->moderationActions->items.delayedItemsChanged,
+                         [this] {
+                             if (getApp()->moderationActions->items.empty())
+                             {
+                                 if (this->split_->getModerationMode())
+                                     this->split_->setModerationMode(true);
+                             }
+                             else
+                             {
+                                 if (this->split_->getModerationMode())
+                                     this->split_->setModerationMode(true);
+                             }
+                         });
 
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -507,9 +505,8 @@ void SplitHeader::updateChannelText()
 
 void SplitHeader::updateModerationModeIcon()
 {
-    auto moderationMode =
-        this->split_->getModerationMode() &&
-        !getApp()->moderationActions->items.empty();
+    auto moderationMode = this->split_->getModerationMode() &&
+                          !getApp()->moderationActions->items.empty();
 
     this->moderationButton_->setPixmap(
         moderationMode ? getApp()->resources->buttons.modModeEnabled
