@@ -52,6 +52,7 @@ private:
     void parseMessageID();
     void parseRoomID();
     void appendChannelName();
+    void parseUsernameColor();
     void parseUsername();
     void appendUsername();
     void runIgnoreReplaces(

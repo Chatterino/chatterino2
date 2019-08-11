@@ -502,17 +502,27 @@ void TwitchMessageBuilder::appendChannelName()
         ->setLink(link);
 }
 
-void TwitchMessageBuilder::parseUsername()
+void TwitchMessageBuilder::parseUsernameColor()
 {
     const auto iterator = this->tags.find("color");
-    if (const auto color = iterator.value().toString(); !color.isEmpty())
+    if (iterator != this->tags.end())
     {
-        this->usernameColor_ = QColor(color);
+        if (const auto color = iterator.value().toString(); !color.isEmpty())
+        {
+            this->usernameColor_ = QColor(color);
+            return;
+        }
     }
-    else if (getSettings()->colorizeNicknames && this->tags.contains("user-id"))
+
+    if (getSettings()->colorizeNicknames && this->tags.contains("user-id"))
     {
         this->usernameColor_ = getRandomColor(this->tags.value("user-id"));
     }
+}
+
+void TwitchMessageBuilder::parseUsername()
+{
+    this->parseUsernameColor();
 
     // username
     this->userName = this->ircMessage->nick();
