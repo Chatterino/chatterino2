@@ -54,7 +54,7 @@ void SettingsDialog::initUi()
         .withoutMargin()
         .assign(&this->ui_.tabContainer);
 
-    this->ui_.tabContainerContainer->layout()->setContentsMargins(8, 8, 0, 8);
+    this->ui_.tabContainerContainer->layout()->setContentsMargins(8, 8, 0, 39);
 
     this->layout()->setSpacing(0);
 
@@ -129,6 +129,7 @@ void SettingsDialog::addTabs()
 
     this->ui_.tabContainer->addStretch(1);
     this->addTab(new AboutPage, Qt::AlignBottom);
+    this->ui_.tabContainer->addSpacing(16);
 }
 
 void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
