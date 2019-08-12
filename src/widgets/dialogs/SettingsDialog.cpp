@@ -38,7 +38,7 @@ SettingsDialog::SettingsDialog()
     this->overrideBackgroundColor_ = QColor("#111111");
     this->themeChangedEvent();
 
-    this->resize(766, 600);
+    this->resize(815, 600);
 }
 
 void SettingsDialog::initUi()
