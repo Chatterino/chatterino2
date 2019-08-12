@@ -28,7 +28,9 @@ build_script:
 
     conan install ..
 
-    qmake ../chatterino.pro DEFINES+="CHATTERINO_NIGHTLY_VERSION_STRING=\\\"$$system(git describe --always)-$$system(git rev-list master --count)\\\""
+    set dateOfBuild=%date:~7,2%.%date:~4,2%.%date:~10,4%
+
+    qmake ../chatterino.pro DEFINES+="CHATTERINO_NIGHTLY_VERSION_STRING=\\\"'$s%dateOfBuild% '$$system(git describe --always)-$$system(git rev-list master --count)\\\""
 
     set cl=/MP
 

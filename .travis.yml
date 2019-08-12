@@ -24,7 +24,8 @@ matrix:
         - sh ./.CI/InstallQTStylePlugins.sh
 
       script:
-        - /opt/qt512/bin/qmake CONFIG+=release PREFIX=/usr
+        - dateOfBuild="CHATTERINO_NIGHTLY_VERSION_STRING=\"\\\"$(date +%d.%m.%Y)\\\"\""
+        - /opt/qt512/bin/qmake CONFIG+=release PREFIX=/usr DEFINES+=$dateOfBuild
         - make -j$(nproc)
 
       before_deploy:
@@ -62,7 +63,8 @@ matrix:
 
       script:
         - mkdir build && cd build
-        - /usr/local/opt/qt/bin/qmake .. && make -j8
+        - dateOfBuild="CHATTERINO_NIGHTLY_VERSION_STRING=\"\\\"$(date +%d.%m.%Y)\\\"\""
+        - /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild && make -j8
         - mkdir app
         - mv chatterino.app app/
         - "create-dmg \
