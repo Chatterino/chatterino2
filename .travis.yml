@@ -65,13 +65,16 @@ matrix:
         - mkdir build && cd build
         - dateOfBuild="CHATTERINO_NIGHTLY_VERSION_STRING=\"\\\"$(date +%d.%m.%Y)\\\"\""
         - /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild && make -j8
+        - /usr/local/opt/qt/bin/macdeployqt chatterino.app -dmg
         - mkdir app
-        - mv chatterino.app app/
+        - hdiutil attach chatterino.dmg
+        - cp -r /Volumes/chatterino/chatterino.app app/
         - "create-dmg \
           --volname Chatterino2 \
           --volicon ../resources/chatterino.icns \
           --icon-size 50 \
           --app-drop-link 0 0 \
+          --format UDBZ \
           chatterino-osx.dmg app/"
 
       before_deploy:
