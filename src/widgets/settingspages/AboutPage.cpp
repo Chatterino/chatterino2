@@ -205,10 +205,8 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
 {
     auto *a = new QLabel("<a href=\"" + website + "\">" + name + "</a>");
     a->setOpenExternalLinks(true);
-    auto *b = new SignalLabel();
-    b->setText("<a href=\"" + licenseLink + "\">show license</a>");
-    b->setCursor(Qt::PointingHandCursor);
-    QObject::connect(b, &SignalLabel::mouseUp, [licenseLink] {
+    auto *b = new QLabel("<a href=\"" + licenseLink + "\">show license</a>");
+    QObject::connect(b, &QLabel::linkActivated, [licenseLink] {
         auto *edit = new QTextEdit;
 
         QFile file(licenseLink);
