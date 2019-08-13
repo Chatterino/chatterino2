@@ -2,6 +2,7 @@
 
 #include "util/QObjectRef.hpp"
 #include "widgets/BaseWidget.hpp"
+#include "widgets/dialogs/EmotePopup.hpp"
 
 #include <QHBoxLayout>
 #include <QLabel>
