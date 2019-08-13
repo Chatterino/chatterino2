@@ -45,7 +45,7 @@ QString TwitchEmotes::cleanUpEmoteCode(const EmoteName &dirtyEmoteCode)
 EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
                                         const EmoteName &name_)
 {
-    static QMap<QString, QString> replacements{
+    static const QMap<QString, QString> replacements{
         {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},
         {"\\&lt\\;3", "&lt;3"},     {"\\:-?(o|O)", ":O"},
         {"\\:-?(p|P)", ":P"},       {"\\:-?[\\\\/]", ":/"},
@@ -93,11 +93,6 @@ Url TwitchEmotes::getEmoteLink(const EmoteId &id, const QString &emoteScale)
     return {QString(TWITCH_EMOTE_TEMPLATE)
                 .replace("{id}", id.string)
                 .replace("{scale}", emoteScale)};
-}
-
-AccessGuard<std::unordered_map<EmoteName, EmotePtr>> TwitchEmotes::accessAll()
-{
-    return this->twitchEmotes_.access();
 }
 
 }  // namespace chatterino
