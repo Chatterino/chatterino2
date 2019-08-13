@@ -32,8 +32,11 @@ namespace {
         //, code, tooltip
         emoteData.name = name;
         emoteData.images =
-            ImageSet{Image::fromUrl(url1x, 1), Image::fromUrl(url2x, 0.5),
-                     Image::fromUrl(url3x, 0.25)};
+            ImageSet{Image::fromUrl(url1x, 1),
+                     url2x.string.isEmpty() ? Image::getEmpty()
+                                            : Image::fromUrl(url2x, 0.5),
+                     url3x.string.isEmpty() ? Image::getEmpty()
+                                            : Image::fromUrl(url3x, 0.25)};
         emoteData.tooltip = {tooltip};
     }
     EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)

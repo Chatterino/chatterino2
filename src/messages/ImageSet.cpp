@@ -21,8 +21,10 @@ ImageSet::ImageSet(const ImagePtr &image1, const ImagePtr &image2,
 
 ImageSet::ImageSet(const Url &image1, const Url &image2, const Url &image3)
     : imageX1_(Image::fromUrl(image1, 1))
-    , imageX2_(Image::fromUrl(image2, 0.5))
-    , imageX3_(Image::fromUrl(image3, 0.25))
+    , imageX2_(image2.string.isEmpty() ? Image::getEmpty()
+                                       : Image::fromUrl(image2, 0.5))
+    , imageX3_(image3.string.isEmpty() ? Image::getEmpty()
+                                       : Image::fromUrl(image3, 0.25))
 {
 }
 
