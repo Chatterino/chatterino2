@@ -153,7 +153,9 @@ void SplitInput::openEmotePopup()
 {
     if (!this->emotePopup_)
     {
-        this->emotePopup_ = std::make_unique<EmotePopup>();
+        this->emotePopup_ = new EmotePopup(this);
+        this->emotePopup_->setAttribute(Qt::WA_DeleteOnClose);
+
         this->emotePopup_->linkClicked.connect([this](const Link &link) {
             if (link.type == Link::InsertText)
             {

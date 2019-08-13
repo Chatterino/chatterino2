@@ -14,7 +14,7 @@ using ChannelPtr = std::shared_ptr<Channel>;
 class EmotePopup : public BaseWindow
 {
 public:
-    EmotePopup();
+    EmotePopup(QWidget *parent = nullptr);
 
     void loadChannel(ChannelPtr channel);
     void loadEmojis();
