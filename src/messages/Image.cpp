@@ -213,7 +213,7 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
     }
     else
     {
-        qDebug() << "same image loaded multiple times:" << url.string;
+        // qDebug() << "same image created multiple times:" << url.string;
     }
 
     return shared;

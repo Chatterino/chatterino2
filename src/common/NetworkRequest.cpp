@@ -301,26 +301,27 @@ void NetworkRequest::doRequest()
             reply->deleteLater();
         };
 
-        if (data->caller_ != nullptr)
-        {
-            QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_,
-                             handleReply);
-            QObject::connect(reply, &QNetworkReply::finished, worker,
-                             [worker]() mutable {
-                                 emit worker->doneUrl();
+        // FOURTF: Not sure what this does but it doesn't work.
+        // if (data->caller_ != nullptr)
+        // {
+        //     QObject::connect(worker, &NetworkWorker::doneUrl, data->caller_,
+        //                      handleReply);
+        //     QObject::connect(reply, &QNetworkReply::finished, worker,
+        //                      [worker]() mutable {
+        //                          emit worker->doneUrl();
 
-                                 delete worker;
-                             });
-        }
-        else
-        {
-            QObject::connect(reply, &QNetworkReply::finished, worker,
-                             [handleReply, worker]() mutable {
-                                 handleReply();
+        //                          delete worker;
+        //                      });
+        // }
+        // else
+        // {
+        QObject::connect(reply, &QNetworkReply::finished, worker,
+                         [handleReply, worker]() mutable {
+                             handleReply();
 
-                                 delete worker;
-                             });
-        }
+                             delete worker;
+                         });
+        // }
     };
 
     QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
