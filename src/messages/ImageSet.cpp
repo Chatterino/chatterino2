@@ -84,16 +84,16 @@ const ImagePtr &ImageSet::getImage(float scale) const
         return this->imageX1_;
     }();
 
-    // prefere other image if selected image is not loaded yet
-    if (result->pixmap())
+    // prefer other image if selected image is not loaded yet
+    if (result->loaded())
         return result;
-    else if (this->imageX1_->pixmap())
+    else if (this->imageX1_->loaded())
         return this->imageX1_;
     else if (this->imageX2_ && !this->imageX2_->isEmpty() &&
-             this->imageX2_->pixmap())
+             this->imageX2_->loaded())
         return this->imageX2_;
     else if (this->imageX3_ && !this->imageX3_->isEmpty() &&
-             this->imageX3_->pixmap())
+             this->imageX3_->loaded())
         return this->imageX3_;
     else
         return result;

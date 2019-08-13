@@ -275,7 +275,14 @@ const Url &Image::url() const
     return this->url_;
 }
 
-boost::optional<QPixmap> Image::pixmap() const
+bool Image::loaded() const
+{
+    assertInGuiThread();
+
+    return bool(this->frames_->current());
+}
+
+boost::optional<QPixmap> Image::pixmapOrLoad() const
 {
     assertInGuiThread();
 

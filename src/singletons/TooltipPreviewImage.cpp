@@ -17,7 +17,7 @@ TooltipPreviewImage::TooltipPreviewImage()
         auto tooltipWidget = TooltipWidget::getInstance();
         if (this->image_ && !tooltipWidget->isHidden())
         {
-            auto pixmap = this->image_->pixmap();
+            auto pixmap = this->image_->pixmapOrLoad();
             if (pixmap)
             {
                 tooltipWidget->setImage(*pixmap);
