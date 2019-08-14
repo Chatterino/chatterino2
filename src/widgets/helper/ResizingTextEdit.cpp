@@ -198,6 +198,7 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
     this->completer_->setWidget(this);
     this->completer_->setCompletionMode(QCompleter::InlineCompletion);
     this->completer_->setCaseSensitivity(Qt::CaseInsensitive);
+    this->completer_->setFilterMode(Qt::MatchContains);
     QObject::connect(completer_,
                      static_cast<void (QCompleter::*)(const QString &)>(
                          &QCompleter::highlighted),

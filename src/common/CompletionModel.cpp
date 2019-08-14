@@ -85,7 +85,7 @@ void CompletionModel::refresh(const QString &prefix)
         return;
 
     auto addString = [&](const QString &str, TaggedString::Type type) {
-        if (str.startsWith(prefix, Qt::CaseInsensitive))
+        if (str.contains(prefix, Qt::CaseInsensitive))
             this->items_.emplace(str + " ", type);
     };
 
