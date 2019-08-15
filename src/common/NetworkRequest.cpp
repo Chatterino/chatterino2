@@ -4,10 +4,12 @@
 #include "common/NetworkManager.hpp"
 #include "common/Outcome.hpp"
 #include "common/Version.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Paths.hpp"
 #include "util/DebugCount.hpp"
+#include "util/PostToThread.hpp"
 
 #include <QFile>
 #include <QtConcurrent>
@@ -315,13 +317,27 @@ void NetworkRequest::doRequest()
         // }
         // else
         // {
-        QObject::connect(reply, &QNetworkReply::finished, worker,
-                         [handleReply, worker]() mutable {
-                             handleReply();
 
-                             delete worker;
-                         });
-        // }
+        //        auto
+
+        QObject::connect(
+            reply, &QNetworkReply::finished, worker,
+            [data, handleReply, worker]() mutable {
+                if (data->executeConcurrently || isGuiThread())
+                {
+                    handleReply();
+
+                    delete worker;
+                }
+                else
+                {
+                    postToThread(
+                        [worker, cb = std::move(handleReply)]() mutable {
+                            cb();
+                            delete worker;
+                        });
+                }
+            });
     };
 
     QObject::connect(&requester, &NetworkRequester::requestUrl, worker,
