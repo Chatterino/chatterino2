@@ -30,6 +30,7 @@ AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget *parent)
     auto hbox = new QHBoxLayout();
     auto manageAccountsButton = new QPushButton(this);
     manageAccountsButton->setText("Manage Accounts");
+    manageAccountsButton->setFocusPolicy(Qt::NoFocus);
     hbox->addWidget(manageAccountsButton);
     vbox->addLayout(hbox);
 
