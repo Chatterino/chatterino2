@@ -62,7 +62,6 @@ void AB_THEME_CLASS::actuallyUpdate(double hue, double multiplier)
 
     /// WINDOW
     {
-        QColor bg =
 #ifdef Q_OS_LINUX
             this->window.background = lightWin ? "#fff" : QColor(61, 60, 56);
 #else
