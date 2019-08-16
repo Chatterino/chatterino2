@@ -77,20 +77,15 @@ namespace {
     }
     auto formatTooltip(const TwitchChannel::StreamStatus &s)
     {
-        return QStringList{"<style>.center { text-align: center; }</style>",
-                           "<p class=\"center\">",
-                           s.title.toHtmlEscaped(),
-                           "<br><br>",
-                           s.game.toHtmlEscaped(),
-                           "<br>",
-                           s.rerun ? "Vod-casting" : "Live",
-                           " for ",
-                           s.uptime,
-                           " with ",
-                           QString::number(s.viewerCount),
-                           " viewers",
-                           "</p>"}
-            .join("");
+        return QString("<style>.center { text-align: center; }</style> \
+            <p class=\"center\">%1%2%3%4%5 for %6 with %7 viewers</p>")
+            .arg(s.title.toHtmlEscaped())
+            .arg(s.title.isEmpty() ? QString() : "<br><br>")
+            .arg(s.game.toHtmlEscaped())
+            .arg(s.game.isEmpty() ? QString() : "<br>")
+            .arg(s.rerun ? "Vod-casting" : "Live")
+            .arg(s.uptime)
+            .arg(QString::number(s.viewerCount));
     }
     auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
     {
@@ -109,9 +104,9 @@ namespace {
             title += " - " + s.uptime;
         if (settings.headerViewerCount)
             title += " - " + QString::number(s.viewerCount);
-        if (settings.headerGame)
+        if (settings.headerGame && !s.game.isEmpty())
             title += " - " + s.game;
-        if (settings.headerStreamTitle)
+        if (settings.headerStreamTitle && !s.title.isEmpty())
             title += " - " + s.title;
 
         return title;
