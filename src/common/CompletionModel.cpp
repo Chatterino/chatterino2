@@ -10,6 +10,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QtAlgorithms>
 #include <utility>
@@ -78,16 +79,27 @@ int CompletionModel::rowCount(const QModelIndex &) const
 
 void CompletionModel::refresh(const QString &prefix)
 {
+    std::function<void(const QString &, TaggedString::Type)> addString;
+    if (getSettings()->prefixOnlyEmoteCompletion)
+    {
+        addString = [&](const QString &str, TaggedString::Type type) {
+            if (str.startsWith(prefix, Qt::CaseInsensitive))
+                this->items_.emplace(str + " ", type);
+        };
+    }
+    else
+    {
+        addString = [&](const QString &str, TaggedString::Type type) {
+            if (str.contains(prefix, Qt::CaseInsensitive))
+                this->items_.emplace(str + " ", type);
+        };
+    }
+
     std::lock_guard<std::mutex> guard(this->itemsMutex_);
     this->items_.clear();
 
     if (prefix.length() < 2)
         return;
-
-    auto addString = [&](const QString &str, TaggedString::Type type) {
-        if (str.contains(prefix, Qt::CaseInsensitive))
-            this->items_.emplace(str + " ", type);
-    };
 
     if (auto channel = dynamic_cast<TwitchChannel *>(&this->channel_))
     {

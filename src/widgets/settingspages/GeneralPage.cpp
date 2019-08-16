@@ -20,7 +20,6 @@
     "https://addons.mozilla.org/en-US/firefox/addon/chatterino-native-host/"
 
 namespace chatterino {
-
 TitleLabel *SettingsLayout::addTitle(const QString &title)
 {
     auto label = new TitleLabel(title + ":");
@@ -283,6 +282,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         {"Don't show", "Always show", "Hold shift"}, s.emotesTooltipPreview,
         [](int index) { return index; }, [](auto args) { return args.index; },
         false);
+    layout.addCheckbox("Only complete emote prefixes to their full names",
+                       s.prefixOnlyEmoteCompletion);
 
     layout.addSpacing(16);
     layout.addSeperator();
