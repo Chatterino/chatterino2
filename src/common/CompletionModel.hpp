@@ -48,7 +48,6 @@ public:
     virtual int rowCount(const QModelIndex &) const override;
 
     void refresh(const QString &prefix);
-    void updateEmoteCompletionMethod();
 
 private:
     TaggedString createUser(const QString &str);
