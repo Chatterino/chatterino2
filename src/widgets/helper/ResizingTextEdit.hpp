@@ -20,6 +20,8 @@ public:
     pajlada::Signals::NoArgSignal focused;
     pajlada::Signals::NoArgSignal focusLost;
 
+    void resetCompletionInProgress();
+
     void setCompleter(QCompleter *c);
     QCompleter *getCompleter() const;
 

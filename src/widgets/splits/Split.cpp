@@ -669,6 +669,23 @@ void Split::reloadChannelAndSubscriberEmotes()
         twitchChannel->refreshChannelEmotes();
 }
 
+void Split::updateEmoteCompletion()
+{
+    if (getSettings()->prefixOnlyEmoteCompletion)
+    {
+        this->input_->ui_.textEdit->getCompleter()->setFilterMode(
+            Qt::MatchStartsWith);
+    }
+    else
+    {
+        this->input_->ui_.textEdit->getCompleter()->setFilterMode(
+            Qt::MatchContains);
+    }
+
+    // Reset the completion status so a refresh will be triggered on next "Tab"
+    this->input_->ui_.textEdit->resetCompletionInProgress();
+}
+
 template <typename Iter, typename RandomGenerator>
 static Iter select_randomly(Iter start, Iter end, RandomGenerator &g)
 {

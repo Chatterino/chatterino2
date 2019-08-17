@@ -8,10 +8,12 @@
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Theme.hpp"
-#include "singletons/WindowManager.hpp"
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/splits/Split.hpp"
 
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
@@ -283,8 +285,22 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         {"Don't show", "Always show", "Hold shift"}, s.emotesTooltipPreview,
         [](int index) { return index; }, [](auto args) { return args.index; },
         false);
-    layout.addCheckbox("Only search for emote autocompletion at the start of emote names",
-                       s.prefixOnlyEmoteCompletion);
+
+    auto emoteCompletionCheckbox = layout.addCheckbox(
+        "Only search for emote autocompletion at the start of emote names",
+        s.prefixOnlyEmoteCompletion);
+
+    // Get the currently active split
+    // XXX: Is there a better way to do this?
+    auto selectedSplit =
+        static_cast<SplitContainer *>(
+            getApp()->windows->getMainWindow().getNotebook().getSelectedPage())
+            ->getBaseNode()
+            ->getSplit();
+
+    // Update emote completion mode when checkbox state is changed
+    QObject::connect(emoteCompletionCheckbox, &QCheckBox::stateChanged,
+                     selectedSplit, &Split::updateEmoteCompletion);
 
     layout.addSpacing(16);
     layout.addSeperator();

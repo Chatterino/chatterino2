@@ -260,6 +260,11 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
     }
 }
 
+void ResizingTextEdit::resetCompletionInProgress()
+{
+    this->completionInProgress_ = false;
+}
+
 QCompleter *ResizingTextEdit::getCompleter() const
 {
     return this->completer_;
