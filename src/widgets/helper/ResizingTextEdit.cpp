@@ -1,6 +1,7 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 
@@ -198,6 +199,16 @@ void ResizingTextEdit::setCompleter(QCompleter *c)
     this->completer_->setWidget(this);
     this->completer_->setCompletionMode(QCompleter::InlineCompletion);
     this->completer_->setCaseSensitivity(Qt::CaseInsensitive);
+
+    if (getSettings()->prefixOnlyEmoteCompletion)
+    {
+        this->completer_->setFilterMode(Qt::MatchStartsWith);
+    }
+    else
+    {
+        this->completer_->setFilterMode(Qt::MatchContains);
+    }
+
     QObject::connect(completer_,
                      static_cast<void (QCompleter::*)(const QString &)>(
                          &QCompleter::highlighted),

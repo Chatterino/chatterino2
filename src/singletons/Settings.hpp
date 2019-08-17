@@ -99,6 +99,7 @@ public:
         "/behaviour/autocompletion/onlyFetchChattersForSmallerStreamers", true};
     IntSetting smallStreamerLimit = {
         "/behaviour/autocompletion/smallStreamerLimit", 1000};
+    BoolSetting prefixOnlyEmoteCompletion = {"/behaviour/autocompletion/prefixOnlyCompletion", true};
 
     BoolSetting pauseChatOnHover = {"/behaviour/pauseChatHover", false};
     BoolSetting autorun = {"/behaviour/autorun", false};
