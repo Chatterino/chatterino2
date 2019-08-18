@@ -44,8 +44,8 @@ void initUpdateButton(Button &button,
         button.setVisible(Updates::getInstance().shouldShowUpdateButton());
 
         auto imageUrl = Updates::getInstance().isError()
-                            ? ":/images/download_update_error.png"
-                            : ":/images/download_update.png";
+                            ? ":/buttons/updateError.png"
+                            : ":/buttons/update.png";
         button.setPixmap(QPixmap(imageUrl));
     };
 

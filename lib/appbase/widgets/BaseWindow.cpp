@@ -71,7 +71,7 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
 
     //    QTimer::this->scaleChangedEvent(this->getScale());
 
-    this->resize(300, 300);
+    this->resize(300, 150);
 }
 
 float BaseWindow::scale() const

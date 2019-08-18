@@ -115,27 +115,27 @@ void Window::showEvent(QShowEvent *event)
     {
         getSettings()->startUpNotification = 1;
 
-        auto box = new QMessageBox(
-            QMessageBox::Information, "Chatterino 2 Beta",
-            "Please note that this software is not stable yet. Things are "
-            "rough "
-            "around the edges and everything is subject to change.");
-        box->setAttribute(Qt::WA_DeleteOnClose);
-        box->show();
+        // auto box = new QMessageBox(
+        //     QMessageBox::Information, "Chatterino 2 Beta",
+        //     "Please note that this software is not stable yet. Things are "
+        //     "rough "
+        //     "around the edges and everything is subject to change.");
+        // box->setAttribute(Qt::WA_DeleteOnClose);
+        // box->show();
     }
 
     // Show changelog
     if (getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
-        auto box = new QMessageBox(QMessageBox::Information,
-                                   "Chatterino 2 Beta", "Show changelog?",
+        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
+                                   "Show changelog?",
                                    QMessageBox::Yes | QMessageBox::No);
         box->setAttribute(Qt::WA_DeleteOnClose);
         if (box->exec() == QMessageBox::Yes)
         {
             QDesktopServices::openUrl(
-                QUrl("https://fourtf.com/chatterino-changelog/"));
+                QUrl("https://www.chatterino.com/changelog"));
         }
     }
 
@@ -372,13 +372,13 @@ void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
 
-#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
-    auto windowTitleEnd =
-        QString("Chatterino Nightly " CHATTERINO_VERSION
-                " (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
-#else
-    auto windowTitleEnd = QString("Chatterino Beta " CHATTERINO_VERSION);
-#endif
+    //#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
+    //    auto windowTitleEnd =
+    //        QString("Chatterino Nightly " CHATTERINO_VERSION
+    //                " (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
+    //#else
+    auto windowTitleEnd = QString("Chatterino " CHATTERINO_VERSION);
+    //#endif
 
     this->setWindowTitle(windowTitleEnd);
 

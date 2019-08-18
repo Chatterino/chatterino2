@@ -26,8 +26,10 @@ UpdateDialog::UpdateDialog()
     this->ui_.installButton = install;
     auto dismiss = buttons->addButton("Dismiss", QDialogButtonBox::RejectRole);
 
-    QObject::connect(install, &QPushButton::clicked, this,
-                     [this] { this->close(); });
+    QObject::connect(install, &QPushButton::clicked, this, [this] {
+        Updates::getInstance().installUpdates();
+        this->close();
+    });
     QObject::connect(dismiss, &QPushButton::clicked, this, [this] {
         this->buttonClicked.invoke(Dismiss);
         this->close();
@@ -37,6 +39,8 @@ UpdateDialog::UpdateDialog()
     this->connections_.managedConnect(
         Updates::getInstance().statusUpdated,
         [this](auto status) { this->updateStatusChanged(status); });
+
+    this->setScaleIndependantHeight(150);
 }
 
 void UpdateDialog::updateStatusChanged(Updates::Status status)
@@ -51,6 +55,7 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
                 QString("An update (%1) is available.\n\nDo you want to "
                         "download and install it?")
                     .arg(Updates::getInstance().getOnlineVersion()));
+            this->updateGeometry();
         }
         break;
 

@@ -97,7 +97,6 @@ private:
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;
-    std::shared_ptr<UpdateDialog> updateDialogHandle_;
 
     std::vector<pajlada::Signals::ScopedConnection> connections_;
 };

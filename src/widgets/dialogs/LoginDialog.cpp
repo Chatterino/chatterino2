@@ -88,7 +88,7 @@ BasicLoginWidget::BasicLoginWidget()
     this->setLayout(&this->ui_.layout);
 
     this->ui_.loginButton.setText("Log in (Opens in browser)");
-    this->ui_.pasteCodeButton.setText("Paste code");
+    this->ui_.pasteCodeButton.setText("Paste login info");
 
     this->ui_.horizontalLayout.addWidget(&this->ui_.loginButton);
     this->ui_.horizontalLayout.addWidget(&this->ui_.pasteCodeButton);

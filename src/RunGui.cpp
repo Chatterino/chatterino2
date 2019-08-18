@@ -77,21 +77,21 @@ namespace {
 
     void showLastCrashDialog()
     {
-#ifndef C_DISABLE_CRASH_DIALOG
-        LastRunCrashDialog dialog;
+        //#ifndef C_DISABLE_CRASH_DIALOG
+        //        LastRunCrashDialog dialog;
 
-        switch (dialog.exec())
-        {
-            case QDialog::Accepted:
-            {
-            };
-            break;
-            default:
-            {
-                _exit(0);
-            }
-        }
-#endif
+        //        switch (dialog.exec())
+        //        {
+        //            case QDialog::Accepted:
+        //            {
+        //            };
+        //            break;
+        //            default:
+        //            {
+        //                _exit(0);
+        //            }
+        //        }
+        //#endif
     }
 
     void createRunningFile(const QString &path)

@@ -40,7 +40,8 @@ private:
     QString onlineVersion_;
     Status status_ = None;
 
-    QString updateUrl_;
+    QString updateExe_;
+    QString updateGuideLink_;
 
     void setStatus_(Status status);
 };

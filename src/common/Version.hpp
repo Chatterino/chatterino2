@@ -2,7 +2,7 @@
 
 #include <QtGlobal>
 
-#define CHATTERINO_VERSION "2.0.4"
+#define CHATTERINO_VERSION "2.1.0"
 
 #if defined(Q_OS_WIN)
 #    define CHATTERINO_OS "win"
@@ -10,4 +10,6 @@
 #    define CHATTERINO_OS "macos"
 #elif defined(Q_OS_LINUX)
 #    define CHATTERINO_OS "linux"
+#else
+#    define CHATTERINO_OS "unknown"
 #endif
