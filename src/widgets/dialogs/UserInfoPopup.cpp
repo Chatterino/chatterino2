@@ -539,38 +539,35 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     addButton(Unban, "unban", getApp()->resources->buttons.unban);
 
-    addTimeouts("Timeouts",
-                {{getSettings()->timeoutDurationPerUnit1.getValue() +
-                      getSettings()->timeoutDurationUnit1.getValue(),
-                  getSettings()->timeoutDurationInSec1.getValue()},
+    std::vector<QString> durationsPerUnit =
+        getSettings()->timeoutDurationsPerUnit;
 
-                 {getSettings()->timeoutDurationPerUnit2.getValue() +
-                      getSettings()->timeoutDurationUnit2.getValue(),
-                  getSettings()->timeoutDurationInSec2.getValue()},
+    std::vector<QString> durationUnits = getSettings()->timeoutDurationUnits;
 
-                 {getSettings()->timeoutDurationPerUnit3.getValue() +
-                      getSettings()->timeoutDurationUnit3.getValue(),
-                  getSettings()->timeoutDurationInSec3.getValue()},
+    addTimeouts(
+        "Timeouts",
+        {{durationsPerUnit[0] + durationUnits[0],
+          calculateTimeoutDuration(durationsPerUnit[0], durationUnits[0])},
 
-                 {getSettings()->timeoutDurationPerUnit4.getValue() +
-                      getSettings()->timeoutDurationUnit4.getValue(),
-                  getSettings()->timeoutDurationInSec4.getValue()},
+         {durationsPerUnit[1] + durationUnits[1],
+          calculateTimeoutDuration(durationsPerUnit[1], durationUnits[1])},
 
-                 {getSettings()->timeoutDurationPerUnit5.getValue() +
-                      getSettings()->timeoutDurationUnit5.getValue(),
-                  getSettings()->timeoutDurationInSec5.getValue()},
+         {durationsPerUnit[2] + durationUnits[2],
+          calculateTimeoutDuration(durationsPerUnit[2], durationUnits[2])},
 
-                 {getSettings()->timeoutDurationPerUnit6.getValue() +
-                      getSettings()->timeoutDurationUnit6.getValue(),
-                  getSettings()->timeoutDurationInSec6.getValue()},
+         {durationsPerUnit[3] + durationUnits[3],
+          calculateTimeoutDuration(durationsPerUnit[3], durationUnits[3])},
 
-                 {getSettings()->timeoutDurationPerUnit7.getValue() +
-                      getSettings()->timeoutDurationUnit7.getValue(),
-                  getSettings()->timeoutDurationInSec7.getValue()},
+         {durationsPerUnit[4] + durationUnits[4],
+          calculateTimeoutDuration(durationsPerUnit[4], durationUnits[4])},
 
-                 {getSettings()->timeoutDurationPerUnit8.getValue() +
-                      getSettings()->timeoutDurationUnit8.getValue(),
-                  getSettings()->timeoutDurationInSec8.getValue()}});
+         {durationsPerUnit[5] + durationUnits[5],
+          calculateTimeoutDuration(durationsPerUnit[5], durationUnits[5])},
+
+         {durationsPerUnit[6] + durationUnits[6],
+          calculateTimeoutDuration(durationsPerUnit[6], durationUnits[6])},
+         {durationsPerUnit[7] + durationUnits[7],
+          calculateTimeoutDuration(durationsPerUnit[7], durationUnits[7])}});
 
     addButton(Ban, "ban", getApp()->resources->buttons.ban);
 }
@@ -587,19 +584,51 @@ void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent *)
 
 void UserInfoPopup::fillLatestMessages()
 {
-    LimitedQueueSnapshot<MessagePtr> snapshot = this->channel_->getMessageSnapshot();
+    LimitedQueueSnapshot<MessagePtr> snapshot =
+        this->channel_->getMessageSnapshot();
     ChannelPtr channelPtr(new Channel("search", Channel::Type::None));
     for (size_t i = 0; i < snapshot.size(); i++)
     {
         MessagePtr message = snapshot[i];
-        if (message->loginName.compare(this->userName_, Qt::CaseInsensitive) == 0
-            && !message->flags.has(MessageFlag::Whisper))
+        if (message->loginName.compare(this->userName_, Qt::CaseInsensitive) ==
+                0 &&
+            !message->flags.has(MessageFlag::Whisper))
         {
             channelPtr->addMessage(message);
         }
     }
 
     this->latestMessages_->setChannel(channelPtr);
+}
+
+int UserInfoPopup::calculateTimeoutDuration(const QString &durationPerUnit,
+                                            const QString &unit)
+{
+    int valueInUnit = durationPerUnit.toInt();
+    int valueInSec = 0;
+
+    if (unit == "s")
+    {
+        valueInSec = valueInUnit;
+    }
+    else if (unit == "m")
+    {
+        valueInSec = valueInUnit * 60;
+    }
+    else if (unit == "h")
+    {
+        valueInSec = valueInUnit * 60 * 60;
+    }
+    else if (unit == "d")
+    {
+        valueInSec = valueInUnit * 24 * 60 * 60;
+    }
+    else if (unit == "w")
+    {
+        valueInSec = valueInUnit * 7 * 24 * 60 * 60;
+    }
+
+    return valueInSec;
 }
 
 }  // namespace chatterino

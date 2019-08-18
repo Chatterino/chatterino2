@@ -81,41 +81,15 @@ AdvancedPage::AdvancedPage()
         units.append("d");
         units.append("w");
 
-        QStringList initDurationsPerUnit;
-        initDurationsPerUnit = QStringList();
-        initDurationsPerUnit.append(
-            QString(getSettings()->timeoutDurationPerUnit1));
-        initDurationsPerUnit.append(
-            QString(getSettings()->timeoutDurationPerUnit2));
-        initDurationsPerUnit.append(
-            QString(getSettings()->timeoutDurationPerUnit3));
-        initDurationsPerUnit.append(
-            QString(getSettings()->timeoutDurationPerUnit4));
-        initDurationsPerUnit.append(
-            QString(getSettings()->timeoutDurationPerUnit5));
-        initDurationsPerUnit.append(
-            QString(getSettings()->timeoutDurationPerUnit6));
-        initDurationsPerUnit.append(
-            QString(getSettings()->timeoutDurationPerUnit7));
-        initDurationsPerUnit.append(
-            QString(getSettings()->timeoutDurationPerUnit8));
+        std::vector<QString> durationsPerUnit =
+            getSettings()->timeoutDurationsPerUnit;
+        std::vector<QString>::iterator itDurationPerUnit;
+        itDurationPerUnit = durationsPerUnit.begin();
 
-        QStringList::iterator itDurationPerUnit;
-        itDurationPerUnit = initDurationsPerUnit.begin();
-
-        QStringList initUnits;
-        initUnits = QStringList();
-        initUnits.append(QString(getSettings()->timeoutDurationUnit1));
-        initUnits.append(QString(getSettings()->timeoutDurationUnit2));
-        initUnits.append(QString(getSettings()->timeoutDurationUnit3));
-        initUnits.append(QString(getSettings()->timeoutDurationUnit4));
-        initUnits.append(QString(getSettings()->timeoutDurationUnit5));
-        initUnits.append(QString(getSettings()->timeoutDurationUnit6));
-        initUnits.append(QString(getSettings()->timeoutDurationUnit7));
-        initUnits.append(QString(getSettings()->timeoutDurationUnit8));
-
-        QStringList::iterator itUnit;
-        itUnit = initUnits.begin();
+        std::vector<QString> durationUnits =
+            getSettings()->timeoutDurationUnits;
+        std::vector<QString>::iterator itUnit;
+        itUnit = durationUnits.begin();
 
         for (int i = 0; i < 8; i++)
         {
@@ -172,7 +146,6 @@ AdvancedPage::AdvancedPage()
                                  &QComboBox::currentTextChanged, this,
                                  &AdvancedPage::timeoutUnitChanged);
 
-                auto secondsLabel = timeout.emplace<QLabel>();
                 timeout->addStretch();
             }
             timeout->setContentsMargins(40, 0, 0, 0);
@@ -201,28 +174,15 @@ void AdvancedPage::timeoutDurationChanged(const QString &newDuration)
     QString unit = cbUnit->currentText();
 
     int valueInUnit = newDuration.toInt();
-    int valueInSec;
 
-    if (unit == "s")
-    {
-        valueInSec = valueInUnit;
-    }
-    else if (unit == "m")
-    {
-        valueInSec = valueInUnit * 60;
-    }
-    else if (unit == "h")
-    {
-        valueInSec = valueInUnit * 60 * 60;
-    }
-    else if (unit == "d")
+    // safety mechanism for setting days and weeks
+    if (unit == "d")
     {
         if (valueInUnit > 14)
         {
             durationPerUnit->setText("14");
             return;
         }
-        valueInSec = valueInUnit * 24 * 60 * 60;
     }
     else if (unit == "w")
     {
@@ -231,44 +191,12 @@ void AdvancedPage::timeoutDurationChanged(const QString &newDuration)
             durationPerUnit->setText("2");
             return;
         }
-        valueInSec = valueInUnit * 7 * 24 * 60 * 60;
     }
 
-    switch (index)
-    {
-        case 0:
-            getSettings()->timeoutDurationPerUnit1 = newDuration;
-            getSettings()->timeoutDurationInSec1 = valueInSec;
-            break;
-        case 1:
-            getSettings()->timeoutDurationPerUnit2 = newDuration;
-            getSettings()->timeoutDurationInSec2 = valueInSec;
-            break;
-        case 2:
-            getSettings()->timeoutDurationPerUnit3 = newDuration;
-            getSettings()->timeoutDurationInSec3 = valueInSec;
-            break;
-        case 3:
-            getSettings()->timeoutDurationPerUnit4 = newDuration;
-            getSettings()->timeoutDurationInSec4 = valueInSec;
-            break;
-        case 4:
-            getSettings()->timeoutDurationPerUnit5 = newDuration;
-            getSettings()->timeoutDurationInSec5 = valueInSec;
-            break;
-        case 5:
-            getSettings()->timeoutDurationPerUnit6 = newDuration;
-            getSettings()->timeoutDurationInSec6 = valueInSec;
-            break;
-        case 6:
-            getSettings()->timeoutDurationPerUnit7 = newDuration;
-            getSettings()->timeoutDurationInSec7 = valueInSec;
-            break;
-        case 7:
-            getSettings()->timeoutDurationPerUnit8 = newDuration;
-            getSettings()->timeoutDurationInSec8 = valueInSec;
-            break;
-    }
+    std::vector<QString> durationsPerUnit =
+        getSettings()->timeoutDurationsPerUnit;
+    durationsPerUnit[index] = newDuration;
+    getSettings()->timeoutDurationsPerUnit = durationsPerUnit;
 }
 
 void AdvancedPage::timeoutUnitChanged(const QString &newUnit)
@@ -276,38 +204,15 @@ void AdvancedPage::timeoutUnitChanged(const QString &newUnit)
     QObject *sender = QObject::sender();
     int index = sender->objectName().toInt();
 
-    switch (index)
-    {
-        case 0:
-            getSettings()->timeoutDurationUnit1 = newUnit;
-            break;
-        case 1:
-            getSettings()->timeoutDurationUnit2 = newUnit;
-            break;
-        case 2:
-            getSettings()->timeoutDurationUnit3 = newUnit;
-            break;
-        case 3:
-            getSettings()->timeoutDurationUnit4 = newUnit;
-            break;
-        case 4:
-            getSettings()->timeoutDurationUnit5 = newUnit;
-            break;
-        case 5:
-            getSettings()->timeoutDurationUnit6 = newUnit;
-            break;
-        case 6:
-            getSettings()->timeoutDurationUnit7 = newUnit;
-            break;
-        case 7:
-            getSettings()->timeoutDurationUnit8 = newUnit;
-            break;
-    }
-
     itDurationInput = durationInputs.begin() + index;
     QLineEdit *durationPerUnit = *itDurationInput;
 
+    // safety mechanism for changing units (i.e. to days or weeks)
     AdvancedPage::timeoutDurationChanged(durationPerUnit->text());
+
+    std::vector<QString> durationUnits = getSettings()->timeoutDurationUnits;
+    durationUnits[index] = newUnit;
+    getSettings()->timeoutDurationUnits = durationUnits;
 }
 
 }  // namespace chatterino

@@ -196,57 +196,9 @@ public:
     QStringSetting cachePath = {"/cache/path", ""};
 
     /// Timeout buttons
-    QStringSetting timeoutDurationPerUnit1 = {
-        "/timeouts/timeoutDurationPerUnit1", "1"};
-    QStringSetting timeoutDurationUnit1 = {"/timeouts/timeoutDurationUnit1",
-                                           "s"};
-    IntSetting timeoutDurationInSec1 = {"/timeouts/timeoutDurationInSec1", 1};
 
-    QStringSetting timeoutDurationPerUnit2 = {
-        "/timeouts/timeoutDurationPerUnit2", "30"};
-    QStringSetting timeoutDurationUnit2 = {"/timeouts/timeoutDurationUnit2",
-                                           "s"};
-    IntSetting timeoutDurationInSec2 = {"/timeouts/timeoutDurationInSec2", 30};
-
-    QStringSetting timeoutDurationPerUnit3 = {
-        "/timeouts/timeoutDurationPerUnit3", "1"};
-    QStringSetting timeoutDurationUnit3 = {"/timeouts/timeoutDurationUnit3",
-                                           "m"};
-    IntSetting timeoutDurationInSec3 = {"/timeouts/timeoutDurationInSec3", 60};
-
-    QStringSetting timeoutDurationPerUnit4 = {
-        "/timeouts/timeoutDurationPerUnit4", "5"};
-    QStringSetting timeoutDurationUnit4 = {"/timeouts/timeoutDurationUnit4",
-                                           "s"};
-    IntSetting timeoutDurationInSec4 = {"/timeouts/timeoutDurationInSec4", 300};
-
-    QStringSetting timeoutDurationPerUnit5 = {
-        "/timeouts/timeoutDurationPerUnit5", "30"};
-    QStringSetting timeoutDurationUnit5 = {"/timeouts/timeoutDurationUnit5",
-                                           "m"};
-    IntSetting timeoutDurationInSec5 = {"/timeouts/timeoutDurationInSec5",
-                                        1800};
-
-    QStringSetting timeoutDurationPerUnit6 = {
-        "/timeouts/timeoutDurationPerUnit6", "1"};
-    QStringSetting timeoutDurationUnit6 = {"/timeouts/timeoutDurationUnit6",
-                                           "h"};
-    IntSetting timeoutDurationInSec6 = {"/timeouts/timeoutDurationInSec6",
-                                        3600};
-
-    QStringSetting timeoutDurationPerUnit7 = {
-        "/timeouts/timeoutDurationPerUnit7", "1"};
-    QStringSetting timeoutDurationUnit7 = {"/timeouts/timeoutDurationUnit7",
-                                           "d"};
-    IntSetting timeoutDurationInSec7 = {"/timeouts/timeoutDurationInSec7",
-                                        86400};
-
-    QStringSetting timeoutDurationPerUnit8 = {
-        "/timeouts/timeoutDurationPerUnit8", "1"};
-    QStringSetting timeoutDurationUnit8 = {"/timeouts/timeoutDurationUnit8",
-                                           "w"};
-    IntSetting timeoutDurationInSec8 = {"/timeouts/timeoutDurationInSec8",
-                                        604800};
+    ChatterinoSetting<std::vector<QString>> timeoutDurationsPerUnit = { "/timeouts/timeoutDurationsPerUnit", { "1", "30", "1", "5", "30", "1", "1", "1" }};
+    ChatterinoSetting<std::vector<QString>> timeoutDurationUnits = { "/timeouts/timeoutDurationUnits", { "s", "s", "m", "m", "m", "h", "d", "w" }};
 
 private:
     void updateModerationActions();
