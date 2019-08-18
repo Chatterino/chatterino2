@@ -63,72 +63,130 @@ void Updates::installUpdates()
     box->exec();
     QDesktopServices::openUrl(this->updateGuideLink_);
 #elif defined Q_OS_WIN
-    QMessageBox *box =
-        new QMessageBox(QMessageBox::Information, "Chatterino Update",
-                        "Chatterino is downloading the update "
-                        "in the background and will run the "
-                        "updater once it is finished.");
-    box->setAttribute(Qt::WA_DeleteOnClose);
-    box->show();
-
-    NetworkRequest req(this->updateExe_);
-    req.setTimeout(600000);
-    req.onError([this](int) -> bool {
-        this->setStatus_(DownloadFailed);
-
+    if (getPaths()->isPortable())
+    {
         QMessageBox *box =
             new QMessageBox(QMessageBox::Information, "Chatterino Update",
-                            "Failed to download the update. \n\nTry manually "
-                            "downloading the update.");
+                            "Chatterino is downloading the update "
+                            "in the background and will run the "
+                            "updater once it is finished.");
         box->setAttribute(Qt::WA_DeleteOnClose);
-        box->exec();
-        return true;
-    });
+        box->show();
 
-    req.onSuccess([this](auto result) -> Outcome {
-        QByteArray object = result.getData();
-        auto filename = combinePath(getPaths()->miscDirectory, "Update.exe");
+        NetworkRequest req(this->updatePortable_);
+        req.setTimeout(600000);
+        req.onError([this](int) -> bool {
+            this->setStatus_(DownloadFailed);
 
-        QFile file(filename);
-        file.open(QIODevice::Truncate | QIODevice::WriteOnly);
+            postToThread([] {
+                QMessageBox *box = new QMessageBox(
+                    QMessageBox::Information, "Chatterino Update",
+                    "Failed while trying to download the update.");
+                box->setAttribute(Qt::WA_DeleteOnClose);
+                box->show();
+                box->raise();
+            });
 
-        if (file.write(object) == -1)
-        {
-            this->setStatus_(WriteFileFailed);
+            return true;
+        });
+
+        req.onSuccess([this](auto result) -> Outcome {
+            QByteArray object = result.getData();
+            auto filename =
+                combinePath(getPaths()->miscDirectory, "update.zip");
+
+            QFile file(filename);
+            file.open(QIODevice::Truncate | QIODevice::WriteOnly);
+
+            if (file.write(object) == -1)
+            {
+                this->setStatus_(WriteFileFailed);
+                return Failure;
+            }
+
+            QProcess::startDetached(
+                combinePath(QCoreApplication::applicationDirPath(),
+                            "updater.1/ChatterinoUpdater.exe"),
+                {filename, "restart"});
+
+            QApplication::exit(0);
+            return Success;
+        });
+        this->setStatus_(Downloading);
+        req.execute();
+    }
+    else
+    {
+        QMessageBox *box =
+            new QMessageBox(QMessageBox::Information, "Chatterino Update",
+                            "Chatterino is downloading the update "
+                            "in the background and will run the "
+                            "updater once it is finished.");
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        box->show();
+
+        NetworkRequest req(this->updateExe_);
+        req.setTimeout(600000);
+        req.onError([this](int) -> bool {
+            this->setStatus_(DownloadFailed);
+
             QMessageBox *box = new QMessageBox(
                 QMessageBox::Information, "Chatterino Update",
-                "Failed to save the update file. This could be due to "
-                "window settings or antivirus software.\n\nTry manually "
+                "Failed to download the update. \n\nTry manually "
                 "downloading the update.");
             box->setAttribute(Qt::WA_DeleteOnClose);
             box->exec();
+            return true;
+        });
 
-            QDesktopServices::openUrl(this->updateExe_);
-            return Failure;
-        }
-        file.close();
+        req.onSuccess([this](auto result) -> Outcome {
+            QByteArray object = result.getData();
+            auto filename =
+                combinePath(getPaths()->miscDirectory, "Update.exe");
 
-        if (QProcess::startDetached(filename))
-        {
-            QApplication::exit(0);
-        }
-        else
-        {
-            QMessageBox *box = new QMessageBox(
-                QMessageBox::Information, "Chatterino Update",
-                "Failed to execute update binary. This could be due to window "
-                "settings or antivirus software.\n\nTry manually downloading "
-                "the update.");
-            box->setAttribute(Qt::WA_DeleteOnClose);
-            box->exec();
+            QFile file(filename);
+            file.open(QIODevice::Truncate | QIODevice::WriteOnly);
 
-            QDesktopServices::openUrl(this->updateExe_);
-        }
+            if (file.write(object) == -1)
+            {
+                this->setStatus_(WriteFileFailed);
+                QMessageBox *box = new QMessageBox(
+                    QMessageBox::Information, "Chatterino Update",
+                    "Failed to save the update file. This could be due to "
+                    "window settings or antivirus software.\n\nTry manually "
+                    "downloading the update.");
+                box->setAttribute(Qt::WA_DeleteOnClose);
+                box->exec();
 
-        return Success;
-    });
-    this->setStatus_(Downloading);
-    req.execute();
+                QDesktopServices::openUrl(this->updateExe_);
+                return Failure;
+            }
+            file.close();
+
+            if (QProcess::startDetached(filename))
+            {
+                QApplication::exit(0);
+            }
+            else
+            {
+                QMessageBox *box = new QMessageBox(
+                    QMessageBox::Information, "Chatterino Update",
+                    "Failed to execute update binary. This could be due to "
+                    "window "
+                    "settings or antivirus software.\n\nTry manually "
+                    "downloading "
+                    "the update.");
+                box->setAttribute(Qt::WA_DeleteOnClose);
+                box->exec();
+
+                QDesktopServices::openUrl(this->updateExe_);
+            }
+
+            return Success;
+        });
+        this->setStatus_(Downloading);
+        req.execute();
+    }
 #endif
 }
 
@@ -162,6 +220,16 @@ void Updates::checkForUpdates()
             return Failure;
         }
         this->updateExe_ = updateExe_val.toString();
+
+        /// Windows portable
+        QJsonValue portable_val = object.value("portable_download");
+        if (!portable_val.isString())
+        {
+            this->setStatus_(SearchFailed);
+            qDebug() << "error updating";
+            return Failure;
+        }
+        this->updatePortable_ = portable_val.toString();
 
 #elif defined Q_OS_LINUX
         QJsonValue updateGuide_val = object.value("updateguide");

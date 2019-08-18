@@ -41,6 +41,7 @@ private:
     Status status_ = None;
 
     QString updateExe_;
+    QString updatePortable_;
     QString updateGuideLink_;
 
     void setStatus_(Status status);
