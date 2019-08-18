@@ -566,6 +566,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
          {durationsPerUnit[6] + durationUnits[6],
           calculateTimeoutDuration(durationsPerUnit[6], durationUnits[6])},
+
          {durationsPerUnit[7] + durationUnits[7],
           calculateTimeoutDuration(durationsPerUnit[7], durationUnits[7])}});
 
