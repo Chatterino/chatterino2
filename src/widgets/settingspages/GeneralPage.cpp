@@ -283,8 +283,10 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         {"Don't show", "Always show", "Hold shift"}, s.emotesTooltipPreview,
         [](int index) { return index; }, [](auto args) { return args.index; },
         false);
-    layout.addCheckbox("Only search for emote autocompletion at the start of emote names",
-                       s.prefixOnlyEmoteCompletion);
+
+    layout.addCheckbox(
+        "Only search for emote autocompletion at the start of emote names",
+        s.prefixOnlyEmoteCompletion);
 
     layout.addSpacing(16);
     layout.addSeperator();

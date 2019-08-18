@@ -16,6 +16,11 @@ ResizingTextEdit::ResizingTextEdit()
     QObject::connect(this, &QTextEdit::textChanged, this,
                      &QWidget::updateGeometry);
 
+    // Whenever the setting for emote completion changes, force a
+    // refresh on the completion model the next time "Tab" is pressed
+    getSettings()->prefixOnlyEmoteCompletion.connect(
+        [this] { this->completionInProgress_ = false; });
+
     this->setFocusPolicy(Qt::ClickFocus);
 }
 
