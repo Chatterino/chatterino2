@@ -8,6 +8,8 @@
 #include <QFont>
 #include <QShortcut>
 #include <QVBoxLayout>
+#include <QWidget>
+
 namespace chatterino {
 
 class ChannelView;
@@ -129,7 +131,6 @@ public slots:
     void showViewerList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
-    void updateEmoteCompletion();
 };
 
 }  // namespace chatterino
