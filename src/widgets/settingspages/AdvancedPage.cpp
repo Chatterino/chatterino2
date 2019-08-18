@@ -74,13 +74,6 @@ AdvancedPage::AdvancedPage()
         // Logs end
 
         // Timeoutbuttons
-        QStringList units = QStringList();
-        units.append("s");
-        units.append("m");
-        units.append("h");
-        units.append("d");
-        units.append("w");
-
         std::vector<QString> durationsPerUnit =
             getSettings()->timeoutDurationsPerUnit;
         std::vector<QString>::iterator itDurationPerUnit;
