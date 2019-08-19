@@ -27,6 +27,7 @@ vanolpfan | https://github.com/vanolpfan |  | Contributor
 machgo | https://github.com/machgo |  | Contributor
 TranRed | https://github.com/TranRed |  | Contributor
 RAnders00 | https://github.com/RAnders00 | | Contributor
+YungLPR | https://github.com/leon-richardt | | Contributor
 Defman21 | https://github.com/Defman21 |  | Documentation
 Jarel1337 | https://github.com/Jarel1337 |  | Documentation
 Ian321 | https://github.com/Ian321 |  | Documentation
