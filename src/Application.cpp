@@ -113,12 +113,7 @@ void Application::save()
 void Application::initNm(Paths &paths)
 {
 #ifdef Q_OS_WIN
-#    ifdef QT_DEBUG
-#        ifdef C_DEBUG_NM
-    registerNmHost(paths);
-    this->nmServer.start();
-#        endif
-#    else
+#    if defined QT_NO_DEBUG || defined C_DEBUG_NM
     registerNmHost(paths);
     this->nmServer.start();
 #    endif
