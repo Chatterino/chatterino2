@@ -91,45 +91,43 @@ void LogsPopup::getLogviewerLogs(const QString &roomID)
     auto url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
                    .arg(this->channelName_, this->userName_);
 
-    NetworkRequest req(url);
-    req.setCaller(this);
+    NetworkRequest(url)
+        .caller(this)
+        .onError([this](int errorCode) {
+            this->getOverrustleLogs();
+            return true;
+        })
+        .onSuccess([this, roomID](auto result) -> Outcome {
+            auto data = result.parseJson();
+            std::vector<MessagePtr> messages;
 
-    req.onError([this](int errorCode) {
-        this->getOverrustleLogs();
-        return true;
-    });
+            QJsonValue before = data.value("before");
 
-    req.onSuccess([this, roomID](auto result) -> Outcome {
-        auto data = result.parseJson();
-        std::vector<MessagePtr> messages;
+            for (auto i : before.toArray())
+            {
+                auto messageObject = i.toObject();
+                QString message = messageObject.value("text").toString();
 
-        QJsonValue before = data.value("before");
+                // Hacky way to fix the timestamp
+                message.insert(1, "historical=1;");
+                message.insert(1, QString("tmi-sent-ts=%10000;")
+                                      .arg(messageObject["time"].toInt()));
+                message.insert(1, QString("room-id=%1;").arg(roomID));
 
-        for (auto i : before.toArray())
-        {
-            auto messageObject = i.toObject();
-            QString message = messageObject.value("text").toString();
+                MessageParseArgs args;
+                auto ircMessage =
+                    Communi::IrcMessage::fromData(message.toUtf8(), nullptr);
+                auto privMsg =
+                    static_cast<Communi::IrcPrivateMessage *>(ircMessage);
+                TwitchMessageBuilder builder(this->channel_.get(), privMsg,
+                                             args);
+                messages.push_back(builder.build());
+            }
+            this->setMessages(messages);
 
-            // Hacky way to fix the timestamp
-            message.insert(1, "historical=1;");
-            message.insert(1, QString("tmi-sent-ts=%10000;")
-                                  .arg(messageObject["time"].toInt()));
-            message.insert(1, QString("room-id=%1;").arg(roomID));
-
-            MessageParseArgs args;
-            auto ircMessage =
-                Communi::IrcMessage::fromData(message.toUtf8(), nullptr);
-            auto privMsg =
-                static_cast<Communi::IrcPrivateMessage *>(ircMessage);
-            TwitchMessageBuilder builder(this->channel_.get(), privMsg, args);
-            messages.push_back(builder.build());
-        }
-        this->setMessages(messages);
-
-        return Success;
-    });
-
-    req.execute();
+            return Success;
+        })
+        .execute();
 }
 
 void LogsPopup::getOverrustleLogs()
@@ -138,57 +136,56 @@ void LogsPopup::getOverrustleLogs()
         QString("https://overrustlelogs.net/api/v1/stalk/%1/%2.json?limit=500")
             .arg(this->channelName_, this->userName_);
 
-    NetworkRequest req(url);
-    req.setCaller(this);
-    req.onError([this](int errorCode) {
-        auto box = new QMessageBox(
-            QMessageBox::Information, "Error getting logs",
-            "No logs could be found for channel " + this->channelName_);
-        box->setAttribute(Qt::WA_DeleteOnClose);
-        box->show();
-        box->raise();
+    NetworkRequest(url)
+        .caller(this)
+        .onError([this](int errorCode) {
+            auto box = new QMessageBox(
+                QMessageBox::Information, "Error getting logs",
+                "No logs could be found for channel " + this->channelName_);
+            box->setAttribute(Qt::WA_DeleteOnClose);
+            box->show();
+            box->raise();
 
-        static QSet<int> closeButtons{
-            QMessageBox::Ok,
-            QMessageBox::Close,
-        };
-        if (closeButtons.contains(box->exec()))
-        {
-            this->close();
-        }
-
-        return true;
-    });
-
-    req.onSuccess([this](auto result) -> Outcome {
-        auto data = result.parseJson();
-        std::vector<MessagePtr> messages;
-        if (data.contains("lines"))
-        {
-            QJsonArray dataMessages = data.value("lines").toArray();
-            for (auto i : dataMessages)
+            static QSet<int> closeButtons{
+                QMessageBox::Ok,
+                QMessageBox::Close,
+            };
+            if (closeButtons.contains(box->exec()))
             {
-                QJsonObject singleMessage = i.toObject();
-                QTime timeStamp = QDateTime::fromSecsSinceEpoch(
-                                      singleMessage.value("timestamp").toInt())
-                                      .time();
-
-                MessageBuilder builder;
-                builder.emplace<TimestampElement>(timeStamp);
-                builder.emplace<TextElement>(this->userName_,
-                                             MessageElementFlag::Username,
-                                             MessageColor::System);
-                builder.emplace<TextElement>(
-                    singleMessage.value("text").toString(),
-                    MessageElementFlag::Text, MessageColor::Text);
-                messages.push_back(builder.release());
+                this->close();
             }
-        }
-        this->setMessages(messages);
 
-        return Success;
-    });
+            return true;
+        })
+        .onSuccess([this](auto result) -> Outcome {
+            auto data = result.parseJson();
+            std::vector<MessagePtr> messages;
+            if (data.contains("lines"))
+            {
+                QJsonArray dataMessages = data.value("lines").toArray();
+                for (auto i : dataMessages)
+                {
+                    QJsonObject singleMessage = i.toObject();
+                    QTime timeStamp =
+                        QDateTime::fromSecsSinceEpoch(
+                            singleMessage.value("timestamp").toInt())
+                            .time();
 
-    req.execute();
+                    MessageBuilder builder;
+                    builder.emplace<TimestampElement>(timeStamp);
+                    builder.emplace<TextElement>(this->userName_,
+                                                 MessageElementFlag::Username,
+                                                 MessageColor::System);
+                    builder.emplace<TextElement>(
+                        singleMessage.value("text").toString(),
+                        MessageElementFlag::Text, MessageColor::Text);
+                    messages.push_back(builder.release());
+                }
+            }
+            this->setMessages(messages);
+
+            return Success;
+        })
+        .execute();
 }
 }  // namespace chatterino

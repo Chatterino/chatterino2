@@ -112,42 +112,36 @@ boost::optional<EmotePtr> BttvEmotes::emote(const EmoteName &name) const
 
 void BttvEmotes::loadEmotes()
 {
-    auto request = NetworkRequest(QString(globalEmoteApiUrl));
-
-    request.setCaller(QThread::currentThread());
-    request.setTimeout(30000);
-
-    request.onSuccess([this](auto result) -> Outcome {
-        auto emotes = this->global_.get();
-        auto pair = parseGlobalEmotes(result.parseJson(), *emotes);
-        if (pair.first)
-            this->global_.set(
-                std::make_shared<EmoteMap>(std::move(pair.second)));
-        return pair.first;
-    });
-
-    request.execute();
+    NetworkRequest(QString(globalEmoteApiUrl))
+        .caller(QThread::currentThread())
+        .timeout(30000)
+        .onSuccess([this](auto result) -> Outcome {
+            auto emotes = this->global_.get();
+            auto pair = parseGlobalEmotes(result.parseJson(), *emotes);
+            if (pair.first)
+                this->global_.set(
+                    std::make_shared<EmoteMap>(std::move(pair.second)));
+            return pair.first;
+        })
+        .execute();
 }
 
 void BttvEmotes::loadChannel(const QString &channelName,
                              std::function<void(EmoteMap &&)> callback)
 {
-    auto request =
-        NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelName);
-
-    request.setCaller(QThread::currentThread());
-    request.setTimeout(3000);
-
-    request.onSuccess([callback = std::move(callback)](auto result) -> Outcome {
-        auto pair = parseChannelEmotes(result.parseJson());
-        if (pair.first)
-            callback(std::move(pair.second));
-        return pair.first;
-    });
-
-    request.execute();
+    NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelName)
+        .caller(QThread::currentThread())
+        .timeout(3000)
+        .onSuccess([callback = std::move(callback)](auto result) -> Outcome {
+            auto pair = parseChannelEmotes(result.parseJson());
+            if (pair.first)
+                callback(std::move(pair.second));
+            return pair.first;
+        })
+        .execute();
 }
 
+/*
 static Url getEmoteLink(QString urlTemplate, const EmoteId &id,
                         const QString &emoteScale)
 {
@@ -156,5 +150,6 @@ static Url getEmoteLink(QString urlTemplate, const EmoteId &id,
     return {urlTemplate.replace("{{id}}", id.string)
                 .replace("{{image}}", emoteScale)};
 }
+*/
 
 }  // namespace chatterino

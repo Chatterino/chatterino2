@@ -17,45 +17,49 @@ void TwitchBadges::loadTwitchBadges()
     static QString url(
         "https://badges.twitch.tv/v1/badges/global/display?language=en");
 
-    NetworkRequest req(url);
-    req.setCaller(QThread::currentThread());
-    req.onSuccess([this](auto result) -> Outcome {
-        auto root = result.parseJson();
-        auto badgeSets = this->badgeSets_.access();
+    NetworkRequest(url)
+        .caller(QThread::currentThread())
+        .onSuccess([this](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto badgeSets = this->badgeSets_.access();
 
-        auto jsonSets = root.value("badge_sets").toObject();
-        for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt)
-        {
-            auto key = sIt.key();
-            auto versions = sIt.value().toObject().value("versions").toObject();
-
-            for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt)
+            auto jsonSets = root.value("badge_sets").toObject();
+            for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt)
             {
-                auto versionObj = vIt.value().toObject();
+                auto key = sIt.key();
+                auto versions =
+                    sIt.value().toObject().value("versions").toObject();
 
-                auto emote = Emote{
-                    {""},
-                    ImageSet{
-                        Image::fromUrl(
-                            {versionObj.value("image_url_1x").toString()}, 1),
-                        Image::fromUrl(
-                            {versionObj.value("image_url_2x").toString()}, .5),
-                        Image::fromUrl(
-                            {versionObj.value("image_url_4x").toString()}, .25),
-                    },
-                    Tooltip{versionObj.value("description").toString()},
-                    Url{versionObj.value("click_url").toString()}};
-                // "title"
-                // "clickAction"
+                for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt)
+                {
+                    auto versionObj = vIt.value().toObject();
 
-                (*badgeSets)[key][vIt.key()] = std::make_shared<Emote>(emote);
+                    auto emote = Emote{
+                        {""},
+                        ImageSet{
+                            Image::fromUrl(
+                                {versionObj.value("image_url_1x").toString()},
+                                1),
+                            Image::fromUrl(
+                                {versionObj.value("image_url_2x").toString()},
+                                .5),
+                            Image::fromUrl(
+                                {versionObj.value("image_url_4x").toString()},
+                                .25),
+                        },
+                        Tooltip{versionObj.value("description").toString()},
+                        Url{versionObj.value("click_url").toString()}};
+                    // "title"
+                    // "clickAction"
+
+                    (*badgeSets)[key][vIt.key()] =
+                        std::make_shared<Emote>(emote);
+                }
             }
-        }
 
-        return Success;
-    });
-
-    req.execute();
+            return Success;
+        })
+        .execute();
 }
 
 boost::optional<EmotePtr> TwitchBadges::badge(const QString &set,

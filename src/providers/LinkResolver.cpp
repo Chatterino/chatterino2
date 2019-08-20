@@ -20,40 +20,38 @@ void LinkResolver::getLinkInfo(
     }
     // Uncomment to test crashes
     // QTimer::singleShot(3000, [=]() {
-    NetworkRequest request(Env::get().linkResolverUrl.arg(
-        QString::fromUtf8(QUrl::toPercentEncoding(url, "", "/:"))));
-    request.setCaller(QThread::currentThread());
-    request.setTimeout(30000);
-    request.onSuccess([successCallback, url](auto result) mutable -> Outcome {
-        auto root = result.parseJson();
-        auto statusCode = root.value("status").toInt();
-        QString response = QString();
-        QString linkString = url;
-        if (statusCode == 200)
-        {
-            response = root.value("tooltip").toString();
-            if (getSettings()->unshortLinks)
+    NetworkRequest(Env::get().linkResolverUrl.arg(QString::fromUtf8(
+                       QUrl::toPercentEncoding(url, "", "/:"))))
+        .caller(QThread::currentThread())
+        .timeout(30000)
+        .onSuccess([successCallback, url](auto result) mutable -> Outcome {
+            auto root = result.parseJson();
+            auto statusCode = root.value("status").toInt();
+            QString response = QString();
+            QString linkString = url;
+            if (statusCode == 200)
             {
-                linkString = root.value("link").toString();
+                response = root.value("tooltip").toString();
+                if (getSettings()->unshortLinks)
+                {
+                    linkString = root.value("link").toString();
+                }
             }
-        }
-        else
-        {
-            response = root.value("message").toString();
-        }
-        successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
-                        Link(Link::Url, linkString));
+            else
+            {
+                response = root.value("message").toString();
+            }
+            successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
+                            Link(Link::Url, linkString));
 
-        return Success;
-    });
+            return Success;
+        })
+        .onError([successCallback, url](auto /*result*/) {
+            successCallback("No link info found", Link(Link::Url, url));
 
-    request.onError([successCallback, url](auto result) {
-        successCallback("No link info found", Link(Link::Url, url));
-
-        return true;
-    });
-
-    request.execute();
+            return true;
+        })
+        .execute();
     // });
 }
 

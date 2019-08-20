@@ -36,45 +36,46 @@ void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
         caller = QThread::currentThread();
     }
 
-    NetworkRequest request("https://api.twitch.tv/kraken/users?login=" +
-                           this->username_);
-    request.setCaller(caller);
-    request.makeAuthorizedV5(getDefaultClientID());
+    NetworkRequest("https://api.twitch.tv/kraken/users?login=" +
+                   this->username_)
+        .caller(caller)
+        .authorizeTwitchV5(getDefaultClientID())
+        .onSuccess([successCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            if (!root.value("users").isArray())
+            {
+                log("API Error while getting user id, users is not an array");
+                return Failure;
+            }
 
-    request.onSuccess([successCallback](auto result) -> Outcome {
-        auto root = result.parseJson();
-        if (!root.value("users").isArray())
-        {
-            log("API Error while getting user id, users is not an array");
-            return Failure;
-        }
+            auto users = root.value("users").toArray();
+            if (users.size() != 1)
+            {
+                log("API Error while getting user id, users array size is not "
+                    "1");
+                return Failure;
+            }
+            if (!users[0].isObject())
+            {
+                log("API Error while getting user id, first user is not an "
+                    "object");
+                return Failure;
+            }
+            auto firstUser = users[0].toObject();
+            auto id = firstUser.value("_id");
+            if (!id.isString())
+            {
+                log("API Error: while getting user id, first user object `_id` "
+                    "key "
+                    "is not a "
+                    "string");
+                return Failure;
+            }
+            successCallback(id.toString());
 
-        auto users = root.value("users").toArray();
-        if (users.size() != 1)
-        {
-            log("API Error while getting user id, users array size is not 1");
-            return Failure;
-        }
-        if (!users[0].isObject())
-        {
-            log("API Error while getting user id, first user is not an object");
-            return Failure;
-        }
-        auto firstUser = users[0].toObject();
-        auto id = firstUser.value("_id");
-        if (!id.isString())
-        {
-            log("API Error: while getting user id, first user object `_id` key "
-                "is not a "
-                "string");
-            return Failure;
-        }
-        successCallback(id.toString());
-
-        return Success;
-    });
-
-    request.execute();
+            return Success;
+        })
+        .execute();
 }
 
 }  // namespace chatterino

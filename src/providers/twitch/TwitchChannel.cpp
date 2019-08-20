@@ -501,19 +501,17 @@ void TwitchChannel::refreshLiveStatus()
     QString url("https://api.twitch.tv/kraken/streams/" + roomID);
 
     //    auto request = makeGetStreamRequest(roomID, QThread::currentThread());
-    auto request = NetworkRequest::twitchRequest(url);
-    request.setCaller(QThread::currentThread());
+    NetworkRequest::twitchRequest(url)
+        .caller(QThread::currentThread())
+        .onSuccess(
+            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+                ChannelPtr shared = weak.lock();
+                if (!shared)
+                    return Failure;
 
-    request.onSuccess(
-        [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-            ChannelPtr shared = weak.lock();
-            if (!shared)
-                return Failure;
-
-            return this->parseLiveStatus(result.parseRapidJson());
-        });
-
-    request.execute();
+                return this->parseLiveStatus(result.parseRapidJson());
+            })
+        .execute();
 }
 
 Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
@@ -608,42 +606,38 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    NetworkRequest request(
-        Env::get().recentMessagesApiUrl.arg(this->getName()));
-    request.setCaller(QThread::currentThread());
-    // can't be concurrent right now due to SignalVector
-    request.setExecuteConcurrently(true);
+    NetworkRequest(Env::get().recentMessagesApiUrl.arg(this->getName()))
+        .caller(QThread::currentThread())
+        .concurrent()
+        .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
+            auto shared = weak.lock();
+            if (!shared)
+                return Failure;
 
-    request.onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
-        auto shared = weak.lock();
-        if (!shared)
-            return Failure;
+            auto messages = parseRecentMessages(result.parseJson(), shared);
 
-        auto messages = parseRecentMessages(result.parseJson(), shared);
+            auto &handler = IrcMessageHandler::getInstance();
 
-        auto &handler = IrcMessageHandler::getInstance();
+            std::vector<MessagePtr> allBuiltMessages;
 
-        std::vector<MessagePtr> allBuiltMessages;
-
-        for (auto message : messages)
-        {
-            for (auto builtMessage :
-                 handler.parseMessage(shared.get(), message))
+            for (auto message : messages)
             {
-                builtMessage->flags.set(MessageFlag::RecentMessage);
-                allBuiltMessages.emplace_back(builtMessage);
+                for (auto builtMessage :
+                     handler.parseMessage(shared.get(), message))
+                {
+                    builtMessage->flags.set(MessageFlag::RecentMessage);
+                    allBuiltMessages.emplace_back(builtMessage);
+                }
             }
-        }
 
-        postToThread(
-            [shared, messages = std::move(allBuiltMessages)]() mutable {
-                shared->addMessagesAtStart(messages);
-            });
+            postToThread(
+                [shared, messages = std::move(allBuiltMessages)]() mutable {
+                    shared->addMessagesAtStart(messages);
+                });
 
-        return Success;
-    });
-
-    request.execute();
+            return Success;
+        })
+        .execute();
 }
 
 void TwitchChannel::refreshPubsub()
@@ -675,76 +669,73 @@ void TwitchChannel::refreshChatters()
     }
 
     // get viewer list
-    NetworkRequest request("https://tmi.twitch.tv/group/user/" +
-                           this->getName() + "/chatters");
+    NetworkRequest("https://tmi.twitch.tv/group/user/" + this->getName() +
+                   "/chatters")
+        .caller(QThread::currentThread())
+        .onSuccess(
+            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+                // channel still exists?
+                auto shared = weak.lock();
+                if (!shared)
+                    return Failure;
 
-    request.setCaller(QThread::currentThread());
-    request.onSuccess(
-        [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-            // channel still exists?
-            auto shared = weak.lock();
-            if (!shared)
-                return Failure;
+                auto pair = parseChatters(result.parseJson());
+                if (pair.first)
+                {
+                    *this->chatters_.access() = std::move(pair.second);
+                }
 
-            auto pair = parseChatters(result.parseJson());
-            if (pair.first)
-            {
-                *this->chatters_.access() = std::move(pair.second);
-            }
-
-            return pair.first;
-        });
-
-    request.execute();
+                return pair.first;
+            })
+        .execute();
 }
 
 void TwitchChannel::refreshBadges()
 {
     auto url = Url{"https://badges.twitch.tv/v1/badges/channels/" +
                    this->roomId() + "/display?language=en"};
-    NetworkRequest req(url.string);
-    req.setCaller(QThread::currentThread());
+    NetworkRequest(url.string)
+        .caller(QThread::currentThread())
+        .onSuccess([this,
+                    weak = weakOf<Channel>(this)](auto result) -> Outcome {
+            auto shared = weak.lock();
+            if (!shared)
+                return Failure;
 
-    req.onSuccess([this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-        auto shared = weak.lock();
-        if (!shared)
-            return Failure;
+            auto badgeSets = this->badgeSets_.access();
 
-        auto badgeSets = this->badgeSets_.access();
+            auto jsonRoot = result.parseJson();
 
-        auto jsonRoot = result.parseJson();
-
-        auto _ = jsonRoot["badge_sets"].toObject();
-        for (auto jsonBadgeSet = _.begin(); jsonBadgeSet != _.end();
-             jsonBadgeSet++)
-        {
-            auto &versions = (*badgeSets)[jsonBadgeSet.key()];
-
-            auto _set = jsonBadgeSet->toObject()["versions"].toObject();
-            for (auto jsonVersion_ = _set.begin(); jsonVersion_ != _set.end();
-                 jsonVersion_++)
+            auto _ = jsonRoot["badge_sets"].toObject();
+            for (auto jsonBadgeSet = _.begin(); jsonBadgeSet != _.end();
+                 jsonBadgeSet++)
             {
-                auto jsonVersion = jsonVersion_->toObject();
-                auto emote = std::make_shared<Emote>(Emote{
-                    EmoteName{},
-                    ImageSet{
-                        Image::fromUrl({jsonVersion["image_url_1x"].toString()},
-                                       1),
-                        Image::fromUrl({jsonVersion["image_url_2x"].toString()},
-                                       .5),
-                        Image::fromUrl({jsonVersion["image_url_4x"].toString()},
-                                       .25)},
-                    Tooltip{jsonVersion["description"].toString()},
-                    Url{jsonVersion["clickURL"].toString()}});
+                auto &versions = (*badgeSets)[jsonBadgeSet.key()];
 
-                versions.emplace(jsonVersion_.key(), emote);
-            };
-        }
+                auto _set = jsonBadgeSet->toObject()["versions"].toObject();
+                for (auto jsonVersion_ = _set.begin();
+                     jsonVersion_ != _set.end(); jsonVersion_++)
+                {
+                    auto jsonVersion = jsonVersion_->toObject();
+                    auto emote = std::make_shared<Emote>(Emote{
+                        EmoteName{},
+                        ImageSet{
+                            Image::fromUrl(
+                                {jsonVersion["image_url_1x"].toString()}, 1),
+                            Image::fromUrl(
+                                {jsonVersion["image_url_2x"].toString()}, .5),
+                            Image::fromUrl(
+                                {jsonVersion["image_url_4x"].toString()}, .25)},
+                        Tooltip{jsonVersion["description"].toString()},
+                        Url{jsonVersion["clickURL"].toString()}});
 
-        return Success;
-    });
+                    versions.emplace(jsonVersion_.key(), emote);
+                };
+            }
 
-    req.execute();
+            return Success;
+        })
+        .execute();
 }
 
 void TwitchChannel::refreshCheerEmotes()

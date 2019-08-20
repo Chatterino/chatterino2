@@ -36,28 +36,6 @@ public:
 
     ~NetworkRequest();
 
-    // old
-    [[deprecated]] void type(NetworkRequestType newRequestType) &;
-
-    [[deprecated]] void onReplyCreated(NetworkReplyCreatedCallback cb) &;
-    [[deprecated]] void onError(NetworkErrorCallback cb) &;
-    [[deprecated]] void onSuccess(NetworkSuccessCallback cb) &;
-
-    [[deprecated]] void setPayload(const QByteArray &payload) &;
-    [[deprecated]] void setUseQuickLoadCache(bool value) &;
-    [[deprecated]] void setCaller(const QObject *caller) &;
-    [[deprecated]] void setRawHeader(const char *headerName,
-                                     const char *value) &;
-    [[deprecated]] void setRawHeader(const char *headerName,
-                                     const QByteArray &value) &;
-    [[deprecated]] void setRawHeader(const char *headerName,
-                                     const QString &value) &;
-    [[deprecated]] void setTimeout(int ms) &;
-    [[deprecated]] void setExecuteConcurrently(bool value) &;
-    [[deprecated]] void makeAuthorizedV5(
-        const QString &clientID, const QString &oauthToken = QString()) &;
-
-    // new
     NetworkRequest type(NetworkRequestType newRequestType) &&;
 
     NetworkRequest onReplyCreated(NetworkReplyCreatedCallback cb) &&;

@@ -137,20 +137,18 @@ void FfzEmotes::loadEmotes()
 {
     QString url("https://api.frankerfacez.com/v1/set/global");
 
-    NetworkRequest request(url);
-    request.setCaller(QThread::currentThread());
-    request.setTimeout(30000);
-
-    request.onSuccess([this](auto result) -> Outcome {
-        auto emotes = this->emotes();
-        auto pair = parseGlobalEmotes(result.parseJson(), *emotes);
-        if (pair.first)
-            this->global_.set(
-                std::make_shared<EmoteMap>(std::move(pair.second)));
-        return pair.first;
-    });
-
-    request.execute();
+    NetworkRequest(url)
+        .caller(QThread::currentThread())
+        .timeout(30000)
+        .onSuccess([this](auto result) -> Outcome {
+            auto emotes = this->emotes();
+            auto pair = parseGlobalEmotes(result.parseJson(), *emotes);
+            if (pair.first)
+                this->global_.set(
+                    std::make_shared<EmoteMap>(std::move(pair.second)));
+            return pair.first;
+        })
+        .execute();
 }
 
 void FfzEmotes::loadChannel(const QString &channelName,
@@ -158,40 +156,36 @@ void FfzEmotes::loadChannel(const QString &channelName,
 {
     log("[FFZEmotes] Reload FFZ Channel Emotes for channel {}\n", channelName);
 
-    NetworkRequest request("https://api.frankerfacez.com/v1/room/" +
-                           channelName);
-    request.setCaller(QThread::currentThread());
-    request.setTimeout(20000);
+    NetworkRequest("https://api.frankerfacez.com/v1/room/" + channelName)
+        .caller(QThread::currentThread())
+        .timeout(20000)
+        .onSuccess([callback = std::move(callback)](auto result) -> Outcome {
+            auto pair = parseChannelEmotes(result.parseJson());
+            if (pair.first)
+                callback(std::move(pair.second));
+            return pair.first;
+        })
+        .onError([channelName](int result) {
+            if (result == 203)
+            {
+                // User does not have any FFZ emotes
+                return true;
+            }
 
-    request.onSuccess([callback = std::move(callback)](auto result) -> Outcome {
-        auto pair = parseChannelEmotes(result.parseJson());
-        if (pair.first)
-            callback(std::move(pair.second));
-        return pair.first;
-    });
+            if (result == -2)
+            {
+                // TODO: Auto retry in case of a timeout, with a delay
+                log("Fetching FFZ emotes for channel {} failed due to timeout",
+                    channelName);
+                return true;
+            }
 
-    request.onError([channelName](int result) {
-        if (result == 203)
-        {
-            // User does not have any FFZ emotes
+            log("Error fetching FFZ emotes for channel {}, error {}",
+                channelName, result);
+
             return true;
-        }
-
-        if (result == -2)
-        {
-            // TODO: Auto retry in case of a timeout, with a delay
-            log("Fetching FFZ emotes for channel {} failed due to timeout",
-                channelName);
-            return true;
-        }
-
-        log("Error fetching FFZ emotes for channel {}, error {}", channelName,
-            result);
-
-        return true;
-    });
-
-    request.execute();
+        })
+        .execute();
 }
 
 }  // namespace chatterino
