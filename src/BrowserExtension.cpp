@@ -70,18 +70,6 @@ void runBrowserExtensionHost()
 {
     initFileMode();
 
-    std::atomic<bool> ping(false);
-
-    QTimer timer;
-    QObject::connect(&timer, &QTimer::timeout, [&ping] {
-        if (!ping.exchange(false))
-        {
-            _Exit(0);
-        }
-    });
-    timer.setInterval(11000);
-    timer.start();
-
     NativeMessagingClient client;
 
     runLoop(client);

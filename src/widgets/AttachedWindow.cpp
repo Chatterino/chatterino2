@@ -18,6 +18,26 @@
 
 namespace chatterino {
 
+static thread_local std::vector<HWND> taskbarHwnds;
+
+BOOL CALLBACK enumWindows(HWND hwnd, LPARAM)
+{
+    constexpr int length = 16;
+
+    auto className = std::make_unique<WCHAR[]>(length);
+    GetClassName(hwnd, className.get(), length);
+
+    // qDebug() << QString::fromWCharArray(className.get(), length);
+
+    if (lstrcmp(className.get(), L"Shell_TrayWnd") == 0 ||
+        lstrcmp(className.get(), L"Shell_Secondary") == 0)
+    {
+        taskbarHwnds.push_back(hwnd);
+    }
+
+    return true;
+}
+
 AttachedWindow::AttachedWindow(void *_target, int _yOffset)
     : QWidget(nullptr, Qt::FramelessWindowHint | Qt::Window)
     , target_(_target)
@@ -67,6 +87,8 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
 
     bool show = true;
     QSize size = window->size();
+
+    window->fullscreen_ = args.fullscreen;
 
     if (args.height != -1)
     {
@@ -134,12 +156,13 @@ void AttachedWindow::attachToHwnd(void *_attachedPtr)
     }
 
     this->attached_ = true;
-    this->timer_.setInterval(1);
 
-    auto hwnd = HWND(this->winId());
+    //auto hwnd = HWND(this->winId());
     auto attached = HWND(_attachedPtr);
 
-    QObject::connect(&this->timer_, &QTimer::timeout, [this, hwnd, attached] {
+    // FAST TIMER - used to resize/reorder windows
+    this->timer_.setInterval(1);
+    QObject::connect(&this->timer_, &QTimer::timeout, [this, attached] {
         // check process id
         if (!this->validProcessName_)
         {
@@ -153,7 +176,7 @@ void AttachedWindow::attachToHwnd(void *_attachedPtr)
             DWORD filenameLength =
                 ::GetModuleFileNameEx(process, nullptr, filename.get(), 512);
             QString qfilename =
-                QString::fromWCharArray(filename.get(), filenameLength);
+                QString::fromWCharArray(filename.get(), int(filenameLength));
 
             if (!qfilename.endsWith("chrome.exe") &&
                 !qfilename.endsWith("firefox.exe"))
@@ -168,7 +191,26 @@ void AttachedWindow::attachToHwnd(void *_attachedPtr)
 
         this->updateWindowRect(attached);
     });
+
     this->timer_.start();
+
+    // SLOW TIMER - used to hide taskbar behind fullscreen window
+    this->slowTimer_.setInterval(2000);
+    QObject::connect(&this->slowTimer_, &QTimer::timeout, [this, attached] {
+        if (this->fullscreen_)
+        {
+            taskbarHwnds.clear();
+            ::EnumWindows(&enumWindows, 0);
+
+            for (auto taskbarHwnd : taskbarHwnds)
+            {
+                ::SetWindowPos(taskbarHwnd,
+                               GetNextWindow(attached, GW_HWNDNEXT), 0, 0, 0, 0,
+                               SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+            }
+        }
+    });
+    this->slowTimer_.start();
 #endif
 }
 
@@ -195,37 +237,41 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
     }
 
     // set the correct z-order
-    HWND next = ::GetNextWindow(attached, GW_HWNDPREV);
-
-    ::SetWindowPos(hwnd, next ? next : HWND_TOPMOST, 0, 0, 0, 0,
-                   SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    if (HWND next = ::GetNextWindow(attached, GW_HWNDPREV))
+    {
+        ::SetWindowPos(hwnd, next ? next : HWND_TOPMOST, 0, 0, 0, 0,
+                       SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+    }
 
     float scale = 1.f;
     if (auto dpi = getWindowDpi(attached))
     {
         scale = dpi.get() / 96.f;
 
-        //        for (auto w : this->ui_.split->findChildren<BaseWidget *>()) {
-        //            w->setOverrideScale(scale);
-        //        }
-        //        this->ui_.split->setOverrideScale(scale);
+        for (auto w : this->ui_.split->findChildren<BaseWidget *>())
+        {
+            w->setOverrideScale(scale);
+        }
+        this->ui_.split->setOverrideScale(scale);
     }
 
-    if (this->height_ == -1)
+    if (this->height_ != -1)
     {
-        // ::MoveWindow(hwnd, rect.right - this->width_ - 8, rect.top +
-        // this->yOffset_ - 8,
-        //              this->width_, rect.bottom - rect.top - this->yOffset_,
-        //              false);
+        this->ui_.split->setFixedWidth(int(this->width_ * scale));
+
+        // offset
+        int o = this->fullscreen_ ? 0 : 8;
+
+        ::MoveWindow(hwnd, int(rect.right - this->width_ * scale - o),
+                     int(rect.bottom - this->height_ * scale - o) + 4,
+                     int(this->width_ * scale) - 5,
+                     int(this->height_ * scale) - 5, true);
     }
-    else
-    {
-        ::MoveWindow(hwnd,                                          //
-                     int(rect.right - this->width_ * scale - 8),    //
-                     int(rect.bottom - this->height_ * scale - 8),  //
-                     int(this->width_ * scale), int(this->height_ * scale),
-                     true);
-    }
+
+//    if (this->fullscreen_)
+//    {
+//        ::BringWindowToTop(attached);
+//    }
 
 //        ::MoveWindow(hwnd, rect.right - 360, rect.top + 82, 360 - 8,
 //        rect.bottom - rect.top - 82 - 8, false);

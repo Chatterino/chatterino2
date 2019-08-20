@@ -19,6 +19,7 @@ public:
         int yOffset = -1;
         int width = -1;
         int height = -1;
+        bool fullscreen = false;
     };
 
     virtual ~AttachedWindow() override;
@@ -54,11 +55,14 @@ private:
     int currentYOffset_;
     int width_ = 360;
     int height_ = -1;
+    bool fullscreen_ = false;
+
 #ifdef USEWINSDK
     bool validProcessName_ = false;
     bool attached_ = false;
 #endif
     QTimer timer_;
+    QTimer slowTimer_;
 };
 
 }  // namespace chatterino

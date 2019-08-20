@@ -12,6 +12,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
+#include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/interprocess/ipc/message_queue.hpp>
 
 namespace ipc = boost::interprocess;
@@ -117,7 +118,10 @@ void NativeMessagingClient::sendMessage(const QByteArray &array)
     {
         ipc::message_queue messageQueue(ipc::open_only, "chatterino_gui");
 
-        messageQueue.try_send(array.data(), array.size(), 1);
+        messageQueue.try_send(array.data(), size_t(array.size()), 1);
+        //        messageQueue.timed_send(array.data(), size_t(array.size()), 1,
+        //                                boost::posix_time::second_clock::local_time() +
+        //                                    boost::posix_time::seconds(10));
     }
     catch (ipc::interprocess_exception &ex)
     {
@@ -183,13 +187,14 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         return;
     }
 
+    qDebug() << root;
+
     if (action == "select")
     {
         QString _type = root.value("type").toString();
         bool attach = root.value("attach").toBool();
+        bool attachFullscreen = root.value("attach_fullscreen").toBool();
         QString name = root.value("name").toString();
-
-        qDebug() << attach;
 
 #ifdef USEWINSDK
         AttachedWindow::GetArgs args;
@@ -197,11 +202,15 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         args.yOffset = root.value("yOffset").toInt(-1);
         args.width = root.value("size").toObject().value("width").toInt(-1);
         args.height = root.value("size").toObject().value("height").toInt(-1);
+        args.fullscreen = attachFullscreen;
+
+        qDebug() << args.width << args.height << args.winId;
 
         if (_type.isNull() || args.winId.isNull())
         {
             qDebug() << "NM type, name or winId missing";
             attach = false;
+            attachFullscreen = false;
             return;
         }
 #endif
@@ -215,7 +224,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
                         app->twitch.server->getOrAddChannel(name));
                 }
 
-                if (attach)
+                if (attach || attachFullscreen)
                 {
 #ifdef USEWINSDK
                     //                    if (args.height != -1) {
