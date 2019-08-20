@@ -104,6 +104,8 @@ public:
 
     BoolSetting pauseChatOnHover = {"/behaviour/pauseChatHover", false};
     BoolSetting autorun = {"/behaviour/autorun", false};
+    BoolSetting mentionUsersWithComma = {"/behaviour/mentionUsersWithComma",
+                                         true};
 
     /// Commands
     BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};

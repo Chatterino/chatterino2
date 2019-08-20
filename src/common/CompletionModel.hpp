@@ -47,7 +47,7 @@ public:
     virtual QVariant data(const QModelIndex &index, int) const override;
     virtual int rowCount(const QModelIndex &) const override;
 
-    void refresh(const QString &prefix);
+    void refresh(const QString &prefix, bool isFirstWord = false);
 
 private:
     TaggedString createUser(const QString &str);

@@ -262,6 +262,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Show stream title", s.headerStreamTitle);
 
     layout.addTitle("Miscellaneous");
+    layout.addCheckbox("Mention users with a comma (User,)",
+                       s.mentionUsersWithComma);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
     layout.addCheckbox("Lowercase domains", s.lowercaseDomains);

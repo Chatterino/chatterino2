@@ -102,6 +102,17 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         }
 
         QString currentCompletionPrefix = this->textUnderCursor();
+        bool isFirstWord = [&] {
+            QString plainText = this->toPlainText();
+            for (int i = this->textCursor().position(); i >= 0; i--)
+            {
+                if (plainText[i] == ' ')
+                {
+                    return false;
+                }
+            }
+            return true;
+        }();
 
         // check if there is something to complete
         if (currentCompletionPrefix.size() <= 1)
@@ -117,7 +128,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             // First type pressing tab after modifying a message, we refresh our
             // completion model
             this->completer_->setModel(completionModel);
-            completionModel->refresh(currentCompletionPrefix);
+            completionModel->refresh(currentCompletionPrefix, isFirstWord);
             this->completionInProgress_ = true;
             this->completer_->setCompletionPrefix(currentCompletionPrefix);
             this->completer_->complete();

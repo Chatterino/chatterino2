@@ -77,7 +77,7 @@ int CompletionModel::rowCount(const QModelIndex &) const
     return this->items_.size();
 }
 
-void CompletionModel::refresh(const QString &prefix)
+void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 {
     std::function<void(const QString &, TaggedString::Type)> addString;
     if (getSettings()->prefixOnlyEmoteCompletion)
@@ -120,6 +120,9 @@ void CompletionModel::refresh(const QString &prefix)
             auto usernames = channel->accessChatters();
 
             QString usernamePrefix = prefix;
+            QString usernamePostfix =
+                isFirstWord && getSettings()->mentionUsersWithComma ? ","
+                                                                    : QString();
 
             if (usernamePrefix.startsWith("@"))
             {
@@ -127,7 +130,8 @@ void CompletionModel::refresh(const QString &prefix)
                 for (const auto &name :
                      usernames->subrange(Prefix(usernamePrefix)))
                 {
-                    addString("@" + name, TaggedString::Type::Username);
+                    addString("@" + name + usernamePostfix,
+                              TaggedString::Type::Username);
                 }
             }
             else
@@ -135,7 +139,8 @@ void CompletionModel::refresh(const QString &prefix)
                 for (const auto &name :
                      usernames->subrange(Prefix(usernamePrefix)))
                 {
-                    addString(name, TaggedString::Type::Username);
+                    addString(name + usernamePostfix,
+                              TaggedString::Type::Username);
                 }
             }
         }
