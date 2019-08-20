@@ -18,6 +18,7 @@
 
 namespace chatterino {
 
+#ifdef USEWINSDK
 static thread_local std::vector<HWND> taskbarHwnds;
 
 BOOL CALLBACK enumWindows(HWND hwnd, LPARAM)
@@ -37,6 +38,7 @@ BOOL CALLBACK enumWindows(HWND hwnd, LPARAM)
 
     return true;
 }
+#endif
 
 AttachedWindow::AttachedWindow(void *_target, int _yOffset)
     : QWidget(nullptr, Qt::FramelessWindowHint | Qt::Window)
