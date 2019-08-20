@@ -46,22 +46,25 @@ public:
     ~NetworkRequest();
 
     // old
-    void type(NetworkRequestType newRequestType) &;
+    [[deprecated]] void type(NetworkRequestType newRequestType) &;
 
-    void onReplyCreated(NetworkReplyCreatedCallback cb) &;
-    void onError(NetworkErrorCallback cb) &;
-    void onSuccess(NetworkSuccessCallback cb) &;
+    [[deprecated]] void onReplyCreated(NetworkReplyCreatedCallback cb) &;
+    [[deprecated]] void onError(NetworkErrorCallback cb) &;
+    [[deprecated]] void onSuccess(NetworkSuccessCallback cb) &;
 
-    void setPayload(const QByteArray &payload) &;
-    void setUseQuickLoadCache(bool value) &;
-    void setCaller(const QObject *caller) &;
-    void setRawHeader(const char *headerName, const char *value) &;
-    void setRawHeader(const char *headerName, const QByteArray &value) &;
-    void setRawHeader(const char *headerName, const QString &value) &;
-    void setTimeout(int ms) &;
-    void setExecuteConcurrently(bool value) &;
-    void makeAuthorizedV5(const QString &clientID,
-                          const QString &oauthToken = QString()) &;
+    [[deprecated]] void setPayload(const QByteArray &payload) &;
+    [[deprecated]] void setUseQuickLoadCache(bool value) &;
+    [[deprecated]] void setCaller(const QObject *caller) &;
+    [[deprecated]] void setRawHeader(const char *headerName,
+                                     const char *value) &;
+    [[deprecated]] void setRawHeader(const char *headerName,
+                                     const QByteArray &value) &;
+    [[deprecated]] void setRawHeader(const char *headerName,
+                                     const QString &value) &;
+    [[deprecated]] void setTimeout(int ms) &;
+    [[deprecated]] void setExecuteConcurrently(bool value) &;
+    [[deprecated]] void makeAuthorizedV5(
+        const QString &clientID, const QString &oauthToken = QString()) &;
 
     // new
     NetworkRequest type(NetworkRequestType newRequestType) &&;
