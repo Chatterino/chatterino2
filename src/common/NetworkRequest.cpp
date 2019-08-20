@@ -183,17 +183,18 @@ NetworkRequest NetworkRequest::concurrent() &&
     return std::move(*this);
 }
 
-// TODO: rename to "authorizeTwitchV5"?
 NetworkRequest NetworkRequest::authorizeTwitchV5(const QString &clientID,
                                                  const QString &oauthToken) &&
 {
-    this->setRawHeader("Client-ID", clientID);
-    this->setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
+    // TODO: make two overloads, with and without oauth token
+    auto tmp = std::move(*this)
+                   .header("Client-ID", clientID)
+                   .header("Accept", "application/vnd.twitchtv.v5+json");
+
     if (!oauthToken.isEmpty())
-    {
-        this->setRawHeader("Authorization", "OAuth " + oauthToken);
-    }
-    return std::move(*this);
+        return std::move(tmp).header("Authorization", "OAuth " + oauthToken);
+    else
+        return tmp;
 }
 
 NetworkRequest NetworkRequest::payload(const QByteArray &payload) &&
