@@ -47,18 +47,20 @@ QString NetworkData::getHash()
     return this->hash_;
 }
 
-void NetworkData::writeToCache(const QByteArray &bytes)
+void writeToCache(const std::shared_ptr<NetworkData> &data,
+                  const QByteArray &bytes)
 {
-    if (this->useQuickLoadCache_)
+    if (data->useQuickLoadCache_)
     {
-        QFile cachedFile(getPaths()->cacheDirectory() + "/" + this->getHash());
+        QtConcurrent::run([data, bytes] {
+            QFile cachedFile(getPaths()->cacheDirectory() + "/" +
+                             data->getHash());
 
-        if (cachedFile.open(QIODevice::WriteOnly))
-        {
-            cachedFile.write(bytes);
-
-            cachedFile.close();
-        }
+            if (cachedFile.open(QIODevice::WriteOnly))
+            {
+                cachedFile.write(bytes);
+            }
+        });
     }
 }
 
@@ -134,7 +136,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             }
 
             QByteArray bytes = reply->readAll();
-            data->writeToCache(bytes);
+            writeToCache(data, bytes);
 
             NetworkResult result(bytes);
 

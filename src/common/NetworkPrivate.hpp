@@ -53,8 +53,6 @@ struct NetworkData {
 
     QString getHash();
 
-    void writeToCache(const QByteArray &bytes);
-
 private:
     QString hash_;
 };
