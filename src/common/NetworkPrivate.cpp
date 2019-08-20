@@ -180,7 +180,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
     emit requester.requestUrl();
 }
 
-// Tries to load the cached file and loads fro
+// First tried to load cached, then uncached.
 void loadCached(const std::shared_ptr<NetworkData> &data)
 {
     QFile cachedFile(getPaths()->cacheDirectory() + "/" + data->getHash());
