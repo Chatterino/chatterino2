@@ -185,6 +185,11 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+EmotePtr BadgeElement::getEmote() const
+{
+    return this->emote_;
+}
+
 // TEXT
 TextElement::TextElement(const QString &text, MessageElementFlags flags,
                          const MessageColor &color, FontStyle style)

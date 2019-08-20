@@ -222,6 +222,8 @@ public:
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags_) override;
 
+    EmotePtr getEmote() const;
+
 private:
     EmotePtr emote_;
 };

@@ -1222,14 +1222,25 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         auto &tooltipPreviewImage = TooltipPreviewImage::getInstance();
         auto emoteElement = dynamic_cast<const EmoteElement *>(
             &hoverLayoutElement->getCreator());
+        auto badgeElement = dynamic_cast<const BadgeElement *>(
+            &hoverLayoutElement->getCreator());
 
-        if (emoteElement && getSettings()->emotesTooltipPreview.getValue())
+        if ((badgeElement || emoteElement) &&
+            getSettings()->emotesTooltipPreview.getValue())
         {
             if (event->modifiers() == Qt::ShiftModifier ||
                 getSettings()->emotesTooltipPreview.getValue() == 1)
             {
-                tooltipPreviewImage.setImage(
-                    emoteElement->getEmote()->images.getImage(3.0));
+                if (emoteElement)
+                {
+                    tooltipPreviewImage.setImage(
+                        emoteElement->getEmote()->images.getImage(3.0));
+                }
+                else if (badgeElement)
+                {
+                    tooltipPreviewImage.setImage(
+                        badgeElement->getEmote()->images.getImage(3.0));
+                }
             }
             else
             {
