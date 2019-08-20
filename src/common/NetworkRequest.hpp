@@ -1,10 +1,7 @@
 #pragma once
 
 #include "common/NetworkCommon.hpp"
-#include "common/NetworkRequester.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/NetworkTimer.hpp"
-#include "common/NetworkWorker.hpp"
 
 #include <memory>
 
