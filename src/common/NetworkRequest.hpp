@@ -35,27 +35,51 @@ public:
     explicit NetworkRequest(
         QUrl url, NetworkRequestType requestType = NetworkRequestType::Get);
 
+    // Enable move
     NetworkRequest(NetworkRequest &&other) = default;
     NetworkRequest &operator=(NetworkRequest &&other) = default;
 
+    // Disable copy
+    NetworkRequest(const NetworkRequest &other) = delete;
+    NetworkRequest &operator=(const NetworkRequest &other) = delete;
+
     ~NetworkRequest();
 
-    void setRequestType(NetworkRequestType newRequestType);
+    // old
+    void type(NetworkRequestType newRequestType) &;
 
-    void onReplyCreated(NetworkReplyCreatedCallback cb);
-    void onError(NetworkErrorCallback cb);
-    void onSuccess(NetworkSuccessCallback cb);
+    void onReplyCreated(NetworkReplyCreatedCallback cb) &;
+    void onError(NetworkErrorCallback cb) &;
+    void onSuccess(NetworkSuccessCallback cb) &;
 
-    void setPayload(const QByteArray &payload);
-    void setUseQuickLoadCache(bool value);
-    void setCaller(const QObject *caller);
-    void setRawHeader(const char *headerName, const char *value);
-    void setRawHeader(const char *headerName, const QByteArray &value);
-    void setRawHeader(const char *headerName, const QString &value);
-    void setTimeout(int ms);
-    void setExecuteConcurrently(bool value);
+    void setPayload(const QByteArray &payload) &;
+    void setUseQuickLoadCache(bool value) &;
+    void setCaller(const QObject *caller) &;
+    void setRawHeader(const char *headerName, const char *value) &;
+    void setRawHeader(const char *headerName, const QByteArray &value) &;
+    void setRawHeader(const char *headerName, const QString &value) &;
+    void setTimeout(int ms) &;
+    void setExecuteConcurrently(bool value) &;
     void makeAuthorizedV5(const QString &clientID,
-                          const QString &oauthToken = QString());
+                          const QString &oauthToken = QString()) &;
+
+    // new
+    NetworkRequest type(NetworkRequestType newRequestType) &&;
+
+    NetworkRequest onReplyCreated(NetworkReplyCreatedCallback cb) &&;
+    NetworkRequest onError(NetworkErrorCallback cb) &&;
+    NetworkRequest onSuccess(NetworkSuccessCallback cb) &&;
+
+    NetworkRequest payload(const QByteArray &payload) &&;
+    NetworkRequest quickLoad() &&;
+    NetworkRequest caller(const QObject *caller) &&;
+    NetworkRequest header(const char *headerName, const char *value) &&;
+    NetworkRequest header(const char *headerName, const QByteArray &value) &&;
+    NetworkRequest header(const char *headerName, const QString &value) &&;
+    NetworkRequest timeout(int ms) &&;
+    NetworkRequest concurrent() &&;
+    NetworkRequest authorizeTwitchV5(const QString &clientID,
+                                     const QString &oauthToken = QString()) &&;
 
     void execute();
 
