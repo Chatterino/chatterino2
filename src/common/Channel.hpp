@@ -21,8 +21,9 @@ using MessageFlags = FlagsEnum<MessageFlag>;
 enum class TimeoutStackStyle : int {
     StackHard = 0,
     DontStackBeyondUserMessage = 1,
+    DontStack = 2,
 
-    Default = StackHard,
+    Default = DontStackBeyondUserMessage,
 };
 
 class Channel : public std::enable_shared_from_this<Channel>

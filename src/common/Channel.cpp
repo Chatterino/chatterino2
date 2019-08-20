@@ -144,7 +144,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
             if (!message->flags.has(MessageFlag::PubSub) &&
                 s->flags.has(MessageFlag::PubSub))  //
             {
-                addMessage = false;
+                addMessage = timeoutStackStyle == TimeoutStackStyle::DontStack;
                 break;
             }
 

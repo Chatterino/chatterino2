@@ -219,7 +219,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Hide moderation messages", s.hideModerationActions);
     layout.addCheckbox("Colorize gray nicknames", s.colorizeNicknames);
     layout.addDropdown<int>("Timeout stacking style",
-                            {"Stack", "Stack sparingly"}, s.timeoutStackStyle,
+                            {"Stack", "Stack unless timed out", "Don't stack"},
+                            s.timeoutStackStyle,
                             [](int index) { return index; },
                             [](auto args) { return args.index; }, false);
 
