@@ -334,43 +334,40 @@ int Image::height() const
 
 void Image::load()
 {
-    NetworkRequest req(this->url().string);
-    req.setExecuteConcurrently(true);
-    req.setCaller(&this->object_);
-    req.setUseQuickLoadCache(true);
+    NetworkRequest(this->url().string)
+        .concurrent()
+        .caller(&this->object_)
+        .quickLoad()
+        .onSuccess([that = this, weak = weakOf(this)](auto result) -> Outcome {
+            auto shared = weak.lock();
+            if (!shared)
+                return Failure;
 
-    req.onSuccess([that = this, weak = weakOf(this)](auto result) -> Outcome {
-        auto shared = weak.lock();
-        if (!shared)
-            return Failure;
+            auto data = result.getData();
 
-        auto data = result.getData();
+            // const cast since we are only reading from it
+            QBuffer buffer(const_cast<QByteArray *>(&data));
+            buffer.open(QIODevice::ReadOnly);
+            QImageReader reader(&buffer);
+            auto parsed = detail::readFrames(reader, that->url());
 
-        // const cast since we are only reading from it
-        QBuffer buffer(const_cast<QByteArray *>(&data));
-        buffer.open(QIODevice::ReadOnly);
-        QImageReader reader(&buffer);
-        auto parsed = detail::readFrames(reader, that->url());
+            postToThread(makeConvertCallback(parsed, [weak](auto frames) {
+                if (auto shared = weak.lock())
+                    shared->frames_ = std::make_unique<detail::Frames>(frames);
+            }));
 
-        postToThread(makeConvertCallback(parsed, [weak](auto frames) {
-            if (auto shared = weak.lock())
-                shared->frames_ = std::make_unique<detail::Frames>(frames);
-        }));
+            return Success;
+        })
+        .onError([weak = weakOf(this)](auto /*result*/) -> bool {
+            auto shared = weak.lock();
+            if (!shared)
+                return false;
 
-        return Success;
-    });
+            shared->empty_ = true;
 
-    req.onError([weak = weakOf(this)](auto result) -> bool {
-        auto shared = weak.lock();
-        if (!shared)
-            return false;
-
-        shared->empty_ = true;
-
-        return true;
-    });
-
-    req.execute();
+            return true;
+        })
+        .execute();
 }
 
 bool Image::operator==(const Image &other) const

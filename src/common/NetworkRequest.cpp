@@ -44,59 +44,62 @@ NetworkRequest::~NetworkRequest()
     //    assert(this->executed_);
 }
 
-void NetworkRequest::setRequestType(NetworkRequestType newRequestType)
+// old
+void NetworkRequest::type(NetworkRequestType newRequestType) &
 {
     this->data->requestType_ = newRequestType;
 }
 
-void NetworkRequest::setCaller(const QObject *caller)
+void NetworkRequest::setCaller(const QObject *caller) &
 {
     this->data->caller_ = caller;
 }
 
-void NetworkRequest::onReplyCreated(NetworkReplyCreatedCallback cb)
+void NetworkRequest::onReplyCreated(NetworkReplyCreatedCallback cb) &
 {
     this->data->onReplyCreated_ = cb;
 }
 
-void NetworkRequest::onError(NetworkErrorCallback cb)
+void NetworkRequest::onError(NetworkErrorCallback cb) &
 {
     this->data->onError_ = cb;
 }
 
-void NetworkRequest::onSuccess(NetworkSuccessCallback cb)
+void NetworkRequest::onSuccess(NetworkSuccessCallback cb) &
 {
     this->data->onSuccess_ = cb;
 }
 
-void NetworkRequest::setRawHeader(const char *headerName, const char *value)
+void NetworkRequest::setRawHeader(const char *headerName, const char *value) &
 {
     this->data->request_.setRawHeader(headerName, value);
 }
 
 void NetworkRequest::setRawHeader(const char *headerName,
-                                  const QByteArray &value)
+                                  const QByteArray &value) &
 {
     this->data->request_.setRawHeader(headerName, value);
 }
 
-void NetworkRequest::setRawHeader(const char *headerName, const QString &value)
+void NetworkRequest::setRawHeader(const char *headerName,
+                                  const QString &value) &
 {
     this->data->request_.setRawHeader(headerName, value.toUtf8());
 }
 
-void NetworkRequest::setTimeout(int ms)
+void NetworkRequest::setTimeout(int ms) &
 {
     this->timer->timeoutMS_ = ms;
 }
 
-void NetworkRequest::setExecuteConcurrently(bool value)
+void NetworkRequest::setExecuteConcurrently(bool value) &
 {
     this->data->executeConcurrently = value;
 }
 
+// TODO: rename to "authorizeTwitchV5"?
 void NetworkRequest::makeAuthorizedV5(const QString &clientID,
-                                      const QString &oauthToken)
+                                      const QString &oauthToken) &
 {
     this->setRawHeader("Client-ID", clientID);
     this->setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
@@ -106,14 +109,103 @@ void NetworkRequest::makeAuthorizedV5(const QString &clientID,
     }
 }
 
-void NetworkRequest::setPayload(const QByteArray &payload)
+void NetworkRequest::setPayload(const QByteArray &payload) &
 {
     this->data->payload_ = payload;
 }
 
-void NetworkRequest::setUseQuickLoadCache(bool value)
+void NetworkRequest::setUseQuickLoadCache(bool value) &
 {
     this->data->useQuickLoadCache_ = value;
+}
+
+// new
+NetworkRequest NetworkRequest::type(NetworkRequestType newRequestType) &&
+{
+    this->data->requestType_ = newRequestType;
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::caller(const QObject *caller) &&
+{
+    this->data->caller_ = caller;
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::onReplyCreated(NetworkReplyCreatedCallback cb) &&
+{
+    this->data->onReplyCreated_ = cb;
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::onError(NetworkErrorCallback cb) &&
+{
+    this->data->onError_ = cb;
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::onSuccess(NetworkSuccessCallback cb) &&
+{
+    this->data->onSuccess_ = cb;
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::header(const char *headerName,
+                                      const char *value) &&
+{
+    this->data->request_.setRawHeader(headerName, value);
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::header(const char *headerName,
+                                      const QByteArray &value) &&
+{
+    this->data->request_.setRawHeader(headerName, value);
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::header(const char *headerName,
+                                      const QString &value) &&
+{
+    this->data->request_.setRawHeader(headerName, value.toUtf8());
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::timeout(int ms) &&
+{
+    this->timer->timeoutMS_ = ms;
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::concurrent() &&
+{
+    this->data->executeConcurrently = true;
+    return std::move(*this);
+}
+
+// TODO: rename to "authorizeTwitchV5"?
+NetworkRequest NetworkRequest::authorizeTwitchV5(const QString &clientID,
+                                                 const QString &oauthToken) &&
+{
+    this->setRawHeader("Client-ID", clientID);
+    this->setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
+    if (!oauthToken.isEmpty())
+    {
+        this->setRawHeader("Authorization", "OAuth " + oauthToken);
+    }
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::payload(const QByteArray &payload) &&
+{
+    this->data->payload_ = payload;
+    return std::move(*this);
+}
+
+NetworkRequest NetworkRequest::quickLoad() &&
+{
+    this->data->useQuickLoadCache_ = true;
+    return std::move(*this);
 }
 
 void NetworkRequest::execute()
