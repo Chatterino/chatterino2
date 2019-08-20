@@ -32,6 +32,7 @@ private:
     LimitedQueueSnapshot<MessagePtr> snapshot_;
     QLineEdit *searchInput_;
     ChannelView *channelView_;
+    QString channelName_;
 };
 
 }  // namespace chatterino
