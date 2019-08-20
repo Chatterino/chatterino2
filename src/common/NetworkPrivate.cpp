@@ -16,12 +16,17 @@
 namespace chatterino {
 
 NetworkData::NetworkData()
+    : timer_(new QTimer())
 {
+    timer_->setSingleShot(true);
+
     DebugCount::increase("NetworkData");
 }
 
 NetworkData::~NetworkData()
 {
+    this->timer_->deleteLater();
+
     DebugCount::decrease("NetworkData");
 }
 
@@ -75,8 +80,8 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
     if (data->hasTimeout_)
     {
-        data->timer_.setSingleShot(true);
-        data->timer_.start();
+        data->timer_->setSingleShot(true);
+        data->timer_->start();
     }
 
     auto onUrlRequested = [data, worker]() mutable {
@@ -106,9 +111,9 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             return;
         }
 
-        if (data->timer_.isActive())
+        if (data->timer_->isActive())
         {
-            QObject::connect(&data->timer_, &QTimer::timeout, worker,
+            QObject::connect(data->timer_, &QTimer::timeout, worker,
                              [reply, data]() {
                                  log("Aborted!");
                                  reply->abort();
@@ -228,7 +233,7 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
                 });
             }
         }
-    }  // namespace chatterino
+    }
 }
 
 void load(const std::shared_ptr<NetworkData> &data)

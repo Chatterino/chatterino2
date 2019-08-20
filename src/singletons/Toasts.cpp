@@ -214,7 +214,7 @@ void Toasts::fetchChannelAvatar(const QString channelName,
                        channelName);
 
     NetworkRequest(requestUrl)
-        .caller(QThread::currentThread())
+    
         .authorizeTwitchV5(getDefaultClientID())
         .timeout(30000)
         .onSuccess([successCallback](auto result) mutable -> Outcome {

@@ -10,10 +10,8 @@ namespace chatterino {
 class LinkResolver
 {
 public:
-    static void getLinkInfo(const QString url,
+    static void getLinkInfo(const QString url, QObject *caller,
                             std::function<void(QString, Link)> callback);
-
-private:
 };
 
 }  // namespace chatterino

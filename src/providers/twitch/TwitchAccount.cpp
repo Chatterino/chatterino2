@@ -95,7 +95,7 @@ void TwitchAccount::loadIgnores()
                 "/blocks");
 
     NetworkRequest(url)
-        .caller(QThread::currentThread())
+    
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onSuccess([=](auto result) -> Outcome {
             auto document = result.parseRapidJson();
@@ -168,7 +168,7 @@ void TwitchAccount::ignoreByID(
                 "/blocks/" + targetUserID);
 
     NetworkRequest(url, NetworkRequestType::Put)
-        .caller(QThread::currentThread())
+    
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](int errorCode) {
             onFinished(IgnoreResult_Failed,
@@ -245,7 +245,7 @@ void TwitchAccount::unignoreByID(
                 "/blocks/" + targetUserID);
 
     NetworkRequest(url, NetworkRequestType::Delete)
-        .caller(QThread::currentThread())
+    
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](int errorCode) {
             onFinished(
@@ -279,7 +279,7 @@ void TwitchAccount::checkFollow(const QString targetUserID,
                 "/follows/channels/" + targetUserID);
 
     NetworkRequest(url)
-        .caller(QThread::currentThread())
+    
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](int errorCode) {
             if (errorCode == 203)
@@ -308,7 +308,7 @@ void TwitchAccount::followUser(const QString userID,
                     "/follows/channels/" + userID);
 
     NetworkRequest(requestUrl, NetworkRequestType::Put)
-        .caller(QThread::currentThread())
+    
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onSuccess([successCallback](auto result) -> Outcome {
             // TODO: Properly check result of follow request
@@ -326,7 +326,7 @@ void TwitchAccount::unfollowUser(const QString userID,
                     "/follows/channels/" + userID);
 
     NetworkRequest(requestUrl, NetworkRequestType::Delete)
-        .caller(QThread::currentThread())
+    
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([successCallback](int code) {
             if (code >= 200 && code <= 299)
@@ -368,7 +368,7 @@ void TwitchAccount::loadEmotes()
                 "/emotes");
 
     NetworkRequest(url)
-        .caller(QThread::currentThread())
+    
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](int errorCode) {
             log("[TwitchAccount::loadEmotes] Error {}", errorCode);
@@ -409,7 +409,7 @@ void TwitchAccount::autoModAllow(const QString msgID)
         .header("Content-Type", "application/json")
         .header("Content-Length", QByteArray::number(qba.size()))
         .payload(qba)
-        .caller(QThread::currentThread())
+    
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](int errorCode) {
             log("[TwitchAccounts::autoModAllow] Error {}", errorCode);
@@ -429,7 +429,7 @@ void TwitchAccount::autoModDeny(const QString msgID)
         .header("Content-Type", "application/json")
         .header("Content-Length", QByteArray::number(qba.size()))
         .payload(qba)
-        .caller(QThread::currentThread())
+    
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](int errorCode) {
             log("[TwitchAccounts::autoModDeny] Error {}", errorCode);

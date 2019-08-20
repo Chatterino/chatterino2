@@ -156,7 +156,6 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
 
         QString url("https://api.twitch.tv/kraken/streams/" + roomID);
         NetworkRequest::twitchRequest(url)
-            .caller(QThread::currentThread())
             .onSuccess([this, channelName](auto result) -> Outcome {
                 rapidjson::Document document = result.parseRapidJson();
                 if (!document.IsObject())

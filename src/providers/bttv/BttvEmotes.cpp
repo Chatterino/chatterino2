@@ -113,7 +113,6 @@ boost::optional<EmotePtr> BttvEmotes::emote(const EmoteName &name) const
 void BttvEmotes::loadEmotes()
 {
     NetworkRequest(QString(globalEmoteApiUrl))
-        .caller(QThread::currentThread())
         .timeout(30000)
         .onSuccess([this](auto result) -> Outcome {
             auto emotes = this->global_.get();
@@ -130,7 +129,6 @@ void BttvEmotes::loadChannel(const QString &channelName,
                              std::function<void(EmoteMap &&)> callback)
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelName)
-        .caller(QThread::currentThread())
         .timeout(3000)
         .onSuccess([callback = std::move(callback)](auto result) -> Outcome {
             auto pair = parseChannelEmotes(result.parseJson());

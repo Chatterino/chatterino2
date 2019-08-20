@@ -37,7 +37,7 @@ void ChatterinoBadges::loadChatterinoBadges()
     static QUrl url("https://fourtf.com/chatterino/badges.json");
 
     NetworkRequest(url)
-        .caller(QThread::currentThread())
+    
         .onSuccess([this](auto result) -> Outcome {
             auto jsonRoot = result.parseJson();
             int index = 0;

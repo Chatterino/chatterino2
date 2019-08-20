@@ -23,7 +23,7 @@ void FfzModBadge::loadCustomModBadge()
 
     QString url = partialUrl + channelName_ + "/1";
     NetworkRequest(url)
-        .caller(QThread::currentThread())
+    
         .onSuccess([this, url](auto result) -> Outcome {
             auto data = result.getData();
 

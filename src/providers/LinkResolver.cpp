@@ -11,7 +11,8 @@
 namespace chatterino {
 
 void LinkResolver::getLinkInfo(
-    const QString url, std::function<void(QString, Link)> successCallback)
+    const QString url, QObject *caller,
+    std::function<void(QString, Link)> successCallback)
 {
     if (!getSettings()->linkInfoTooltip)
     {
@@ -22,7 +23,7 @@ void LinkResolver::getLinkInfo(
     // QTimer::singleShot(3000, [=]() {
     NetworkRequest(Env::get().linkResolverUrl.arg(QString::fromUtf8(
                        QUrl::toPercentEncoding(url, "", "/:"))))
-        .caller(QThread::currentThread())
+        .caller(caller)
         .timeout(30000)
         .onSuccess([successCallback, url](auto result) mutable -> Outcome {
             auto root = result.parseJson();

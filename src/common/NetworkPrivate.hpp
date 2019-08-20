@@ -51,7 +51,7 @@ struct NetworkData {
     // to enable the timer, the "setTimeout" function needs to be called before
     // execute is called
     bool hasTimeout_{};
-    QTimer timer_;
+    QTimer *timer_;
 
     QString getHash();
 

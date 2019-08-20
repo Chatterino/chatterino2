@@ -50,11 +50,14 @@ NetworkRequest NetworkRequest::type(NetworkRequestType newRequestType) &&
 
 NetworkRequest NetworkRequest::caller(const QObject *caller) &&
 {
-    // Caller must be in gui thread
-    assert(caller->thread() == qApp->thread());
+    if (caller)
+    {
+        // Caller must be in gui thread
+        assert(caller->thread() == qApp->thread());
 
-    this->data->caller_ = const_cast<QObject *>(caller);
-    this->data->hasCaller_ = true;
+        this->data->caller_ = const_cast<QObject *>(caller);
+        this->data->hasCaller_ = true;
+    }
     return std::move(*this);
 }
 
@@ -100,7 +103,7 @@ NetworkRequest NetworkRequest::header(const char *headerName,
 NetworkRequest NetworkRequest::timeout(int ms) &&
 {
     this->data->hasTimeout_ = true;
-    this->data->timer_.setInterval(ms);
+    this->data->timer_->setInterval(ms);
     return std::move(*this);
 }
 

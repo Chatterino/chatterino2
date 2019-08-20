@@ -387,26 +387,27 @@ void MessageBuilder::addLink(const QString &origLink,
                                    textColor)
             ->setLink(linkElement);
 
-    LinkResolver::getLinkInfo(matchedLink, [weakMessage = this->weakOf(),
-                                            linkMELowercase, linkMEOriginal,
-                                            matchedLink](QString tooltipText,
-                                                         Link originalLink) {
-        auto shared = weakMessage.lock();
-        if (!shared)
-        {
-            return;
-        }
-        if (!tooltipText.isEmpty())
-        {
-            linkMELowercase->setTooltip(tooltipText);
-            linkMEOriginal->setTooltip(tooltipText);
-        }
-        if (originalLink.value != matchedLink && !originalLink.value.isEmpty())
-        {
-            linkMELowercase->setLink(originalLink)->updateLink();
-            linkMEOriginal->setLink(originalLink)->updateLink();
-        }
-    });
+    LinkResolver::getLinkInfo(
+        matchedLink, nullptr,
+        [weakMessage = this->weakOf(), linkMELowercase, linkMEOriginal,
+         matchedLink](QString tooltipText, Link originalLink) {
+            auto shared = weakMessage.lock();
+            if (!shared)
+            {
+                return;
+            }
+            if (!tooltipText.isEmpty())
+            {
+                linkMELowercase->setTooltip(tooltipText);
+                linkMEOriginal->setTooltip(tooltipText);
+            }
+            if (originalLink.value != matchedLink &&
+                !originalLink.value.isEmpty())
+            {
+                linkMELowercase->setLink(originalLink)->updateLink();
+                linkMEOriginal->setLink(originalLink)->updateLink();
+            }
+        });
 }
 
 }  // namespace chatterino

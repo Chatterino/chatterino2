@@ -502,7 +502,7 @@ void TwitchChannel::refreshLiveStatus()
 
     //    auto request = makeGetStreamRequest(roomID, QThread::currentThread());
     NetworkRequest::twitchRequest(url)
-        .caller(QThread::currentThread())
+
         .onSuccess(
             [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
                 ChannelPtr shared = weak.lock();
@@ -670,7 +670,7 @@ void TwitchChannel::refreshChatters()
     // get viewer list
     NetworkRequest("https://tmi.twitch.tv/group/user/" + this->getName() +
                    "/chatters")
-        .caller(QThread::currentThread())
+
         .onSuccess(
             [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
                 // channel still exists?
@@ -694,7 +694,7 @@ void TwitchChannel::refreshBadges()
     auto url = Url{"https://badges.twitch.tv/v1/badges/channels/" +
                    this->roomId() + "/display?language=en"};
     NetworkRequest(url.string)
-        .caller(QThread::currentThread())
+
         .onSuccess([this,
                     weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto shared = weak.lock();
