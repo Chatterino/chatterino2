@@ -55,7 +55,7 @@ QString NetworkData::getHash()
 void writeToCache(const std::shared_ptr<NetworkData> &data,
                   const QByteArray &bytes)
 {
-    if (data->useQuickLoadCache_)
+    if (data->cache_)
     {
         QtConcurrent::run([data, bytes] {
             QFile cachedFile(getPaths()->cacheDirectory() + "/" +
@@ -155,7 +155,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             // log("starting {}", data->request_.url().toString());
             if (data->onSuccess_)
             {
-                if (data->executeConcurrently)
+                if (data->executeConcurrently_)
                     QtConcurrent::run(
                         [onSuccess = std::move(data->onSuccess_),
                          result = std::move(result)] { onSuccess(result); });
@@ -170,7 +170,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
         QObject::connect(
             reply, &QNetworkReply::finished, worker,
             [data, handleReply, worker]() mutable {
-                if (data->executeConcurrently || isGuiThread())
+                if (data->executeConcurrently_ || isGuiThread())
                 {
                     handleReply();
                     delete worker;
@@ -211,7 +211,7 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
 
         if (data->onSuccess_)
         {
-            if (data->executeConcurrently || isGuiThread())
+            if (data->executeConcurrently_ || isGuiThread())
             {
                 // XXX: If outcome is Failure, we should invalidate the cache file
                 // somehow/somewhere
@@ -239,7 +239,7 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
 
 void load(const std::shared_ptr<NetworkData> &data)
 {
-    if (data->useQuickLoadCache_)
+    if (data->cache_)
     {
         QtConcurrent::run(loadCached, data);
         loadCached(data);

@@ -643,8 +643,6 @@ void BaseWindow::drawCustomWindowFrame(QPainter &painter)
 #ifdef USEWINSDK
     if (this->hasCustomWindowFrame())
     {
-        QPainter painter(this);
-
         QColor bg = this->overrideBackgroundColor_.value_or(
             this->theme->window.background);
 

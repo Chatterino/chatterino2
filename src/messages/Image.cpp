@@ -337,7 +337,7 @@ void Image::load()
     NetworkRequest(this->url().string)
         .concurrent()
         .cache()
-        .onSuccess([that = this, weak = weakOf(this)](auto result) -> Outcome {
+        .onSuccess([weak = weakOf(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
                 return Failure;
@@ -348,7 +348,7 @@ void Image::load()
             QBuffer buffer(const_cast<QByteArray *>(&data));
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer);
-            auto parsed = detail::readFrames(reader, that->url());
+            auto parsed = detail::readFrames(reader, shared->url());
 
             postToThread(makeConvertCallback(parsed, [weak](auto frames) {
                 if (auto shared = weak.lock())

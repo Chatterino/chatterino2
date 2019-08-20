@@ -109,7 +109,7 @@ NetworkRequest NetworkRequest::timeout(int ms) &&
 
 NetworkRequest NetworkRequest::concurrent() &&
 {
-    this->data->executeConcurrently = true;
+    this->data->executeConcurrently_ = true;
     return std::move(*this);
 }
 
@@ -135,7 +135,7 @@ NetworkRequest NetworkRequest::payload(const QByteArray &payload) &&
 
 NetworkRequest NetworkRequest::cache() &&
 {
-    this->data->useQuickLoadCache_ = true;
+    this->data->cache_ = true;
     return std::move(*this);
 }
 
@@ -144,15 +144,15 @@ void NetworkRequest::execute()
     this->executed_ = true;
 
     // Only allow caching for GET request
-    if (this->data->useQuickLoadCache_ &&
+    if (this->data->cache_ &&
         this->data->requestType_ != NetworkRequestType::Get)
     {
         qDebug() << "Can only cache GET requests!";
-        this->data->useQuickLoadCache_ = false;
+        this->data->cache_ = false;
     }
 
     // Can not have a caller and be concurrent at the same time.
-    assert(!(this->data->caller_ && this->data->executeConcurrently));
+    assert(!(this->data->caller_ && this->data->executeConcurrently_));
 
     load(std::move(this->data));
 }
