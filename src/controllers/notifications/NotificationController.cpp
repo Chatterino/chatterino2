@@ -155,56 +155,56 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
         log("[TwitchChannel:{}] Refreshing live status", channelName);
 
         QString url("https://api.twitch.tv/kraken/streams/" + roomID);
-        auto request = NetworkRequest::twitchRequest(url);
-        request.setCaller(QThread::currentThread());
-
-        request.onSuccess([this, channelName](auto result) -> Outcome {
-            rapidjson::Document document = result.parseRapidJson();
-            if (!document.IsObject())
-            {
-                log("[TwitchChannel:refreshLiveStatus]root is not an object");
-                return Failure;
-            }
-
-            if (!document.HasMember("stream"))
-            {
-                log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
-                return Failure;
-            }
-
-            const auto &stream = document["stream"];
-
-            if (!stream.IsObject())
-            {
-                // Stream is offline (stream is most likely null)
-                // removeFakeChannel(channelName);
-                return Failure;
-            }
-            // Stream is live
-            auto i = std::find(fakeTwitchChannels.begin(),
-                               fakeTwitchChannels.end(), channelName);
-
-            if (!(i != fakeTwitchChannels.end()))
-            {
-                fakeTwitchChannels.push_back(channelName);
-                if (Toasts::isEnabled())
+        NetworkRequest::twitchRequest(url)
+            .caller(QThread::currentThread())
+            .onSuccess([this, channelName](auto result) -> Outcome {
+                rapidjson::Document document = result.parseRapidJson();
+                if (!document.IsObject())
                 {
-                    getApp()->toasts->sendChannelNotification(channelName,
-                                                              Platform::Twitch);
+                    log("[TwitchChannel:refreshLiveStatus]root is not an "
+                        "object");
+                    return Failure;
                 }
-                if (getSettings()->notificationPlaySound)
-                {
-                    getApp()->notifications->playSound();
-                }
-                if (getSettings()->notificationFlashTaskbar)
-                {
-                    getApp()->windows->sendAlert();
-                }
-            }
-            return Success;
-        });
 
-        request.execute();
+                if (!document.HasMember("stream"))
+                {
+                    log("[TwitchChannel:refreshLiveStatus] Missing stream in "
+                        "root");
+                    return Failure;
+                }
+
+                const auto &stream = document["stream"];
+
+                if (!stream.IsObject())
+                {
+                    // Stream is offline (stream is most likely null)
+                    // removeFakeChannel(channelName);
+                    return Failure;
+                }
+                // Stream is live
+                auto i = std::find(fakeTwitchChannels.begin(),
+                                   fakeTwitchChannels.end(), channelName);
+
+                if (!(i != fakeTwitchChannels.end()))
+                {
+                    fakeTwitchChannels.push_back(channelName);
+                    if (Toasts::isEnabled())
+                    {
+                        getApp()->toasts->sendChannelNotification(
+                            channelName, Platform::Twitch);
+                    }
+                    if (getSettings()->notificationPlaySound)
+                    {
+                        getApp()->notifications->playSound();
+                    }
+                    if (getSettings()->notificationFlashTaskbar)
+                    {
+                        getApp()->windows->sendAlert();
+                    }
+                }
+                return Success;
+            })
+            .execute();
     });
 }
 

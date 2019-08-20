@@ -39,85 +39,9 @@ NetworkRequest::NetworkRequest(QUrl url, NetworkRequestType requestType)
 
 NetworkRequest::~NetworkRequest()
 {
-    //assert(this->executed_);
+    //assert(!this->data || this->executed_);
 }
 
-// old
-void NetworkRequest::type(NetworkRequestType newRequestType) &
-{
-    this->data->requestType_ = newRequestType;
-}
-
-void NetworkRequest::setCaller(const QObject *caller) &
-{
-    this->data->caller_ = caller;
-}
-
-void NetworkRequest::onReplyCreated(NetworkReplyCreatedCallback cb) &
-{
-    this->data->onReplyCreated_ = cb;
-}
-
-void NetworkRequest::onError(NetworkErrorCallback cb) &
-{
-    this->data->onError_ = cb;
-}
-
-void NetworkRequest::onSuccess(NetworkSuccessCallback cb) &
-{
-    this->data->onSuccess_ = cb;
-}
-
-void NetworkRequest::setRawHeader(const char *headerName, const char *value) &
-{
-    this->data->request_.setRawHeader(headerName, value);
-}
-
-void NetworkRequest::setRawHeader(const char *headerName,
-                                  const QByteArray &value) &
-{
-    this->data->request_.setRawHeader(headerName, value);
-}
-
-void NetworkRequest::setRawHeader(const char *headerName,
-                                  const QString &value) &
-{
-    this->data->request_.setRawHeader(headerName, value.toUtf8());
-}
-
-void NetworkRequest::setTimeout(int ms) &
-{
-    this->data->hasTimeout_ = true;
-    this->data->timer_.setInterval(ms);
-}
-
-void NetworkRequest::setExecuteConcurrently(bool value) &
-{
-    this->data->executeConcurrently = value;
-}
-
-void NetworkRequest::makeAuthorizedV5(const QString &clientID,
-                                      const QString &oauthToken) &
-{
-    this->setRawHeader("Client-ID", clientID);
-    this->setRawHeader("Accept", "application/vnd.twitchtv.v5+json");
-    if (!oauthToken.isEmpty())
-    {
-        this->setRawHeader("Authorization", "OAuth " + oauthToken);
-    }
-}
-
-void NetworkRequest::setPayload(const QByteArray &payload) &
-{
-    this->data->payload_ = payload;
-}
-
-void NetworkRequest::setUseQuickLoadCache(bool value) &
-{
-    this->data->useQuickLoadCache_ = value;
-}
-
-// new
 NetworkRequest NetworkRequest::type(NetworkRequestType newRequestType) &&
 {
     this->data->requestType_ = newRequestType;

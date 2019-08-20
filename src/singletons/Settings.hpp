@@ -42,8 +42,8 @@ public:
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
-    BoolSetting colorizeNicknames = {
-        "/appearance/messages/colorizeNicknames", false};
+    BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
+                                     false};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
@@ -99,7 +99,8 @@ public:
         "/behaviour/autocompletion/onlyFetchChattersForSmallerStreamers", true};
     IntSetting smallStreamerLimit = {
         "/behaviour/autocompletion/smallStreamerLimit", 1000};
-    BoolSetting prefixOnlyEmoteCompletion = {"/behaviour/autocompletion/prefixOnlyCompletion", true};
+    BoolSetting prefixOnlyEmoteCompletion = {
+        "/behaviour/autocompletion/prefixOnlyCompletion", true};
 
     BoolSetting pauseChatOnHover = {"/behaviour/pauseChatHover", false};
     BoolSetting autorun = {"/behaviour/autorun", false};

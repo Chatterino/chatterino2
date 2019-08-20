@@ -554,34 +554,31 @@ void Split::showViewerList()
     }
     auto loadingLabel = new QLabel("Loading...");
 
-    auto request = NetworkRequest::twitchRequest(
-        "https://tmi.twitch.tv/group/user/" + this->getChannel()->getName() +
-        "/chatters");
+    NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
+                                  this->getChannel()->getName() + "/chatters")
+        .caller(this)
+        .onSuccess([=](auto result) -> Outcome {
+            auto obj = result.parseJson();
+            QJsonObject chattersObj = obj.value("chatters").toObject();
 
-    request.setCaller(this);
-    request.onSuccess([=](auto result) -> Outcome {
-        auto obj = result.parseJson();
-        QJsonObject chattersObj = obj.value("chatters").toObject();
+            loadingLabel->hide();
+            for (int i = 0; i < jsonLabels.size(); i++)
+            {
+                auto currentCategory =
+                    chattersObj.value(jsonLabels.at(i)).toArray();
+                // If current category of chatters is empty, dont show this
+                // category.
+                if (currentCategory.empty())
+                    continue;
 
-        loadingLabel->hide();
-        for (int i = 0; i < jsonLabels.size(); i++)
-        {
-            auto currentCategory =
-                chattersObj.value(jsonLabels.at(i)).toArray();
-            // If current category of chatters is empty, dont show this
-            // category.
-            if (currentCategory.empty())
-                continue;
+                chattersList->addItem(labelList.at(i));
+                foreach (const QJsonValue &v, currentCategory)
+                    chattersList->addItem(v.toString());
+            }
 
-            chattersList->addItem(labelList.at(i));
-            foreach (const QJsonValue &v, currentCategory)
-                chattersList->addItem(v.toString());
-        }
-
-        return Success;
-    });
-
-    request.execute();
+            return Success;
+        })
+        .execute();
 
     searchBar->setPlaceholderText("Search User...");
     QObject::connect(searchBar, &QLineEdit::textEdited, this, [=]() {

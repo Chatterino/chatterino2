@@ -350,26 +350,24 @@ void UserInfoPopup::updateUserData()
 
         QString url("https://api.twitch.tv/kraken/channels/" + id);
 
-        auto request = NetworkRequest::twitchRequest(url);
-        request.setCaller(this);
+        NetworkRequest::twitchRequest(url)
+            .caller(this)
+            .onSuccess([this](auto result) -> Outcome {
+                auto obj = result.parseJson();
+                this->ui_.followerCountLabel->setText(
+                    TEXT_FOLLOWERS +
+                    QString::number(obj.value("followers").toInt()));
+                this->ui_.viewCountLabel->setText(
+                    TEXT_VIEWS + QString::number(obj.value("views").toInt()));
+                this->ui_.createdDateLabel->setText(
+                    TEXT_CREATED +
+                    obj.value("created_at").toString().section("T", 0, 0));
 
-        request.onSuccess([this](auto result) -> Outcome {
-            auto obj = result.parseJson();
-            this->ui_.followerCountLabel->setText(
-                TEXT_FOLLOWERS +
-                QString::number(obj.value("followers").toInt()));
-            this->ui_.viewCountLabel->setText(
-                TEXT_VIEWS + QString::number(obj.value("views").toInt()));
-            this->ui_.createdDateLabel->setText(
-                TEXT_CREATED +
-                obj.value("created_at").toString().section("T", 0, 0));
+                this->loadAvatar(QUrl(obj.value("logo").toString()));
 
-            this->loadAvatar(QUrl(obj.value("logo").toString()));
-
-            return Success;
-        });
-
-        request.execute();
+                return Success;
+            })
+            .execute();
 
         // get follow state
         currentUser->checkFollow(id, [this, hack](auto result) {
