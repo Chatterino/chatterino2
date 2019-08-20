@@ -103,6 +103,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                     return NetworkManager::accessManager.post(data->request_,
                                                               data->payload_);
             }
+            return nullptr;
         }();
 
         if (reply == nullptr)
