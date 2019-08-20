@@ -1,7 +1,6 @@
 #pragma once
 
 #include "common/NetworkCommon.hpp"
-#include "common/NetworkTimer.hpp"
 
 #include <QNetworkRequest>
 #include <functional>
@@ -11,6 +10,22 @@ class QNetworkReply;
 namespace chatterino {
 
 class NetworkResult;
+
+class NetworkRequester : public QObject
+{
+    Q_OBJECT
+
+signals:
+    void requestUrl();
+};
+
+class NetworkWorker : public QObject
+{
+    Q_OBJECT
+
+signals:
+    void doneUrl();
+};
 
 struct NetworkData {
     NetworkData();

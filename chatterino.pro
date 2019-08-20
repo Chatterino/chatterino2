@@ -82,11 +82,10 @@ SOURCES += \
     src/common/DownloadManager.cpp \
     src/common/Env.cpp \
     src/common/LinkParser.cpp \
-    src/common/NetworkData.cpp \
+    src/common/NetworkPrivate.cpp \
     src/common/NetworkManager.cpp \
     src/common/NetworkRequest.cpp \
     src/common/NetworkResult.cpp \
-    src/common/NetworkTimer.cpp \
     src/common/UsernameSet.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
@@ -241,13 +240,10 @@ HEADERS += \
     src/common/DownloadManager.hpp \
     src/common/LinkParser.hpp \
     src/common/NetworkCommon.hpp \
-    src/common/NetworkData.hpp \
+    src/common/NetworkPrivate.hpp \
     src/common/NetworkManager.hpp \
     src/common/NetworkRequest.hpp \
-    src/common/NetworkRequester.hpp \
     src/common/NetworkResult.hpp \
-    src/common/NetworkTimer.hpp \
-    src/common/NetworkWorker.hpp \
     src/common/NullablePtr.hpp \
     src/common/ProviderId.hpp \
     src/common/SignalVector.hpp \

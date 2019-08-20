@@ -1,7 +1,6 @@
 #include "common/NetworkRequest.hpp"
 
-#include "common/NetworkData.hpp"
-//#include "common/NetworkManager.hpp"
+#include "common/NetworkPrivate.hpp"
 #include "common/Outcome.hpp"
 #include "common/Version.hpp"
 #include "debug/AssertInGuiThread.hpp"

@@ -1,9 +1,7 @@
-#include "common/NetworkData.hpp"
+#include "common/NetworkPrivate.hpp"
 
 #include "common/NetworkManager.hpp"
-#include "common/NetworkRequester.hpp"
 #include "common/NetworkResult.hpp"
-#include "common/NetworkWorker.hpp"
 #include "common/Outcome.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Log.hpp"
