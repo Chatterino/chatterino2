@@ -18,12 +18,6 @@ class NetworkRequest final
     // part of the request
     std::shared_ptr<NetworkData> data;
 
-    // Timer that tracks the timeout
-    // By default, there's no explicit timeout for the request
-    // to enable the timer, the "setTimeout" function needs to be called before
-    // execute is called
-    std::shared_ptr<NetworkTimer> timer;
-
     // The NetworkRequest destructor will assert if executed_ hasn't been set to
     // true before dying
     bool executed_ = false;
@@ -74,7 +68,7 @@ public:
     NetworkRequest onSuccess(NetworkSuccessCallback cb) &&;
 
     NetworkRequest payload(const QByteArray &payload) &&;
-    NetworkRequest quickLoad() &&;
+    NetworkRequest cache() &&;
     NetworkRequest caller(const QObject *caller) &&;
     NetworkRequest header(const char *headerName, const char *value) &&;
     NetworkRequest header(const char *headerName, const QByteArray &value) &&;
@@ -86,19 +80,10 @@ public:
 
     void execute();
 
-    [[nodiscard]] QString urlString() const;
+    static NetworkRequest twitchRequest(QUrl url);
 
 private:
     void initializeDefaultValues();
-
-    // "invalid" data "invalid" is specified by the onSuccess callback
-    Outcome tryLoadCachedFile();
-
-    void doRequest();
-
-public:
-    // Helper creator functions
-    static NetworkRequest twitchRequest(QUrl url);
 };
 
 }  // namespace chatterino

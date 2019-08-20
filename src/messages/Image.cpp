@@ -337,7 +337,7 @@ void Image::load()
     NetworkRequest(this->url().string)
         .concurrent()
         .caller(&this->object_)
-        .quickLoad()
+        .cache()
         .onSuccess([that = this, weak = weakOf(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)

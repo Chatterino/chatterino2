@@ -1,9 +1,9 @@
 #pragma once
 
 #include "common/NetworkCommon.hpp"
+#include "common/NetworkTimer.hpp"
 
 #include <QNetworkRequest>
-
 #include <functional>
 
 class QNetworkReply;
@@ -29,6 +29,13 @@ struct NetworkData {
 
     QByteArray payload_;
 
+    // Timer that tracks the timeout
+    // By default, there's no explicit timeout for the request
+    // to enable the timer, the "setTimeout" function needs to be called before
+    // execute is called
+    bool hasTimeout_{};
+    QTimer timer_;
+
     QString getHash();
 
     void writeToCache(const QByteArray &bytes);
@@ -36,5 +43,7 @@ struct NetworkData {
 private:
     QString hash_;
 };
+
+void load(const std::shared_ptr<NetworkData> &data);
 
 }  // namespace chatterino
