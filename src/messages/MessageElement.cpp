@@ -134,7 +134,8 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
     {
         if (flags.has(MessageElementFlag::EmoteImages))
         {
-            auto image = this->emote_->images.getImage(container.getScale());
+            auto image =
+                this->emote_->images.getImageOrLoaded(container.getScale());
             if (image->isEmpty())
                 return;
 
@@ -171,7 +172,8 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
 {
     if (flags.hasAny(this->getFlags()))
     {
-        auto image = this->emote_->images.getImage(container.getScale());
+        auto image =
+            this->emote_->images.getImageOrLoaded(container.getScale());
         if (image->isEmpty())
             return;
 

@@ -286,13 +286,20 @@ boost::optional<QPixmap> Image::pixmapOrLoad() const
 {
     assertInGuiThread();
 
+    this->load();
+
+    return this->frames_->current();
+}
+
+void Image::load() const
+{
+    assertInGuiThread();
+
     if (this->shouldLoad_)
     {
         const_cast<Image *>(this)->shouldLoad_ = false;
-        const_cast<Image *>(this)->load();
+        const_cast<Image *>(this)->actuallyLoad();
     }
-
-    return this->frames_->current();
 }
 
 qreal Image::scale() const
@@ -332,7 +339,7 @@ int Image::height() const
         return 16;
 }
 
-void Image::load()
+void Image::actuallyLoad()
 {
     NetworkRequest(this->url().string)
         .concurrent()

@@ -19,6 +19,9 @@ public:
     const ImagePtr &getImage2() const;
     const ImagePtr &getImage3() const;
 
+    /// Preferes getting an already loaded image, even if it is smaller/bigger.
+    /// However, it starts loading the proper image.
+    const ImagePtr &getImageOrLoaded(float scale) const;
     const ImagePtr &getImage(float scale) const;
 
     bool operator==(const ImageSet &other) const;

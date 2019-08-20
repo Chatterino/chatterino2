@@ -56,6 +56,7 @@ public:
     bool loaded() const;
     // either returns the current pixmap, or triggers loading it (lazy loading)
     boost::optional<QPixmap> pixmapOrLoad() const;
+    void load() const;
     qreal scale() const;
     bool isEmpty() const;
     int width() const;
@@ -72,7 +73,7 @@ private:
 
     void setPixmap(const QPixmap &pixmap);
 
-    void load();
+    void actuallyLoad();
 
     Url url_{};
     qreal scale_{1};
