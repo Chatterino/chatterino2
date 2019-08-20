@@ -69,7 +69,7 @@ private:
         this->t_ = other;
     }
 
-    T *t_{};
+    std::atomic<T *> t_{};
     QMetaObject::Connection conn_;
 };
 }  // namespace chatterino

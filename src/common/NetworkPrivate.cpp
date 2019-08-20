@@ -125,6 +125,11 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
         }
 
         auto handleReply = [data, reply]() mutable {
+            if (data->hasCaller_ && !data->caller_.get())
+            {
+                return;
+            }
+
             // TODO(pajlada): A reply was received, kill the timeout timer
             if (reply->error() != QNetworkReply::NetworkError::NoError)
             {
@@ -162,7 +167,6 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                 if (data->executeConcurrently || isGuiThread())
                 {
                     handleReply();
-
                     delete worker;
                 }
                 else
@@ -206,11 +210,22 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
                 // XXX: If outcome is Failure, we should invalidate the cache file
                 // somehow/somewhere
                 /*auto outcome =*/
+                if (data->hasCaller_ && !data->caller_.get())
+                {
+                    return;
+                }
                 data->onSuccess_(result);
             }
             else
             {
-                postToThread([data, result]() { data->onSuccess_(result); });
+                postToThread([data, result]() {
+                    if (data->hasCaller_ && !data->caller_.get())
+                    {
+                        return;
+                    }
+
+                    data->onSuccess_(result);
+                });
             }
         }
     }  // namespace chatterino

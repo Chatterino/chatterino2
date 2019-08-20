@@ -327,7 +327,7 @@ int Image::height() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
-        return pixmap->height() * this->scale_;
+        return int(pixmap->height() * this->scale_);
     else
         return 16;
 }
@@ -336,7 +336,6 @@ void Image::load()
 {
     NetworkRequest(this->url().string)
         .concurrent()
-        .caller(&this->object_)
         .cache()
         .onSuccess([that = this, weak = weakOf(this)](auto result) -> Outcome {
             auto shared = weak.lock();

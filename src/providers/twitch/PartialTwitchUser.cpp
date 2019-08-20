@@ -31,11 +31,6 @@ void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
 {
     assert(!this->username_.isEmpty());
 
-    if (caller == nullptr)
-    {
-        caller = QThread::currentThread();
-    }
-
     NetworkRequest("https://api.twitch.tv/kraken/users?login=" +
                    this->username_)
         .caller(caller)

@@ -93,7 +93,7 @@ void LogsPopup::getLogviewerLogs(const QString &roomID)
 
     NetworkRequest(url)
         .caller(this)
-        .onError([this](int errorCode) {
+        .onError([this](int /*errorCode*/) {
             this->getOverrustleLogs();
             return true;
         })
@@ -138,7 +138,7 @@ void LogsPopup::getOverrustleLogs()
 
     NetworkRequest(url)
         .caller(this)
-        .onError([this](int errorCode) {
+        .onError([this](int /*errorCode*/) {
             auto box = new QMessageBox(
                 QMessageBox::Information, "Error getting logs",
                 "No logs could be found for channel " + this->channelName_);

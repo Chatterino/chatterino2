@@ -50,7 +50,11 @@ NetworkRequest NetworkRequest::type(NetworkRequestType newRequestType) &&
 
 NetworkRequest NetworkRequest::caller(const QObject *caller) &&
 {
-    this->data->caller_ = caller;
+    // Caller must be in gui thread
+    assert(caller->thread() == qApp->thread());
+
+    this->data->caller_ = const_cast<QObject *>(caller);
+    this->data->hasCaller_ = true;
     return std::move(*this);
 }
 
@@ -143,6 +147,9 @@ void NetworkRequest::execute()
         qDebug() << "Can only cache GET requests!";
         this->data->useQuickLoadCache_ = false;
     }
+
+    // Can not have a caller and be concurrent at the same time.
+    assert(!(this->data->caller_ && this->data->executeConcurrently));
 
     load(std::move(this->data));
 }

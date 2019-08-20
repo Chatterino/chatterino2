@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/NetworkCommon.hpp"
+#include "util/QObjectRef.hpp"
 
 #include <QNetworkRequest>
 #include <functional>
@@ -32,7 +33,8 @@ struct NetworkData {
     ~NetworkData();
 
     QNetworkRequest request_;
-    const QObject *caller_ = nullptr;
+    bool hasCaller_{};
+    QObjectRef<QObject> caller_;
     bool useQuickLoadCache_{};
     bool executeConcurrently{};
 

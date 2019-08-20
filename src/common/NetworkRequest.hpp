@@ -44,6 +44,10 @@ public:
 
     NetworkRequest payload(const QByteArray &payload) &&;
     NetworkRequest cache() &&;
+    /// NetworkRequest makes sure that the `caller` object still exists when the
+    /// callbacks are executed. Cannot be used with concurrent() since we can't
+    /// make sure that the object doesn't get deleted while the callback is
+    /// running.
     NetworkRequest caller(const QObject *caller) &&;
     NetworkRequest header(const char *headerName, const char *value) &&;
     NetworkRequest header(const char *headerName, const QByteArray &value) &&;
