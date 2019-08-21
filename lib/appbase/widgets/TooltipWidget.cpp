@@ -25,8 +25,9 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     , displayImage_(new QLabel())
     , displayText_(new QLabel())
 {
-    this->setStyleSheet("color: #fff; background: #000");
-    this->setWindowOpacity(0.8);
+    this->setStyleSheet("color: #fff; background: rgba(11, 11, 11, 0.8)");
+    this->setAttribute(Qt::WA_TranslucentBackground);
+    //this->setWindowOpacity(0.8);
     this->updateFont();
     this->setStayInScreenRect(true);
 
@@ -37,8 +38,10 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
 
     displayImage_->hide();
     displayImage_->setAlignment(Qt::AlignHCenter);
+    displayImage_->setStyleSheet("background: transparent");
     displayText_->setAlignment(Qt::AlignHCenter);
     displayText_->setText("tooltip text");
+    displayText_->setStyleSheet("background: transparent");
     auto layout = new QVBoxLayout();
     layout->setContentsMargins(10, 5, 10, 5);
     layout->addWidget(displayImage_);
@@ -64,7 +67,14 @@ void TooltipWidget::raise()
 
 void TooltipWidget::themeChangedEvent()
 {
-    this->setStyleSheet("color: #fff; background: #000");
+    //    this->setStyleSheet("color: #fff; background: #000");
+}
+
+void TooltipWidget::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+
+    painter.fillRect(this->rect(), QColor(0, 0, 0, int(0.8 * 255)));
 }
 
 void TooltipWidget::scaleChangedEvent(float)

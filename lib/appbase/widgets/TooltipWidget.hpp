@@ -32,6 +32,7 @@ protected:
     void leaveEvent(QEvent *) override;
     void themeChangedEvent() override;
     void scaleChangedEvent(float) override;
+    void paintEvent(QPaintEvent *) override;
 
 private:
     void updateFont();
