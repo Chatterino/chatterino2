@@ -197,6 +197,8 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
     , color_(color)
     , style_(style)
 {
+    assert(text != "authentication");
+
     for (const auto &word : text.split(' '))
     {
         this->words_.push_back({word, -1});
