@@ -151,15 +151,8 @@ void LogsPopup::getOverrustleLogs()
             box->setAttribute(Qt::WA_DeleteOnClose);
             box->show();
             box->raise();
-
-            static QSet<int> closeButtons{
-                QMessageBox::Ok,
-                QMessageBox::Close,
-            };
-            if (closeButtons.contains(box->exec()))
-            {
-                this->close();
-            }
+            this->close();
+            box->exec();
 
             return true;
         })
