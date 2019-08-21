@@ -123,6 +123,11 @@ void LogsPopup::getLogviewerLogs(const QString &roomID)
                                              args);
                 messages.push_back(builder.build());
             }
+
+            messages.push_back(
+                MessageBuilder(systemMessage,
+                               "Logs provided by https://cbenni.com")
+                    .release());
             this->setMessages(messages);
 
             return Success;
@@ -142,6 +147,7 @@ void LogsPopup::getOverrustleLogs()
             auto box = new QMessageBox(
                 QMessageBox::Information, "Error getting logs",
                 "No logs could be found for channel " + this->channelName_);
+            box->setWindowFlag(Qt::WindowStaysOnTopHint);
             box->setAttribute(Qt::WA_DeleteOnClose);
             box->show();
             box->raise();
@@ -182,6 +188,10 @@ void LogsPopup::getOverrustleLogs()
                     messages.push_back(builder.release());
                 }
             }
+            messages.push_back(
+                MessageBuilder(systemMessage,
+                               "Logs provided by https://overrustlelogs.net")
+                    .release());
             this->setMessages(messages);
 
             return Success;
