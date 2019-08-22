@@ -58,11 +58,26 @@ UserInfoPopup::UserInfoPopup()
         // items on the right
         auto vbox = head.emplace<QVBoxLayout>();
         {
-            auto name = vbox.emplace<Label>().assign(&this->ui_.nameLabel);
+            auto name_box = vbox.emplace<QHBoxLayout>();
+            name_box.withoutMargin();
+
+            auto name = name_box.emplace<Label>().assign(&this->ui_.nameLabel);
+
+            LayoutCreator<EffectLabel2> copy_user_name = name_box.emplace<EffectLabel2>(this);
+            copy_user_name->getLabel().setText("Copy");
+            copy_user_name->getLabel().setCentered(true);
 
             auto font = name->font();
             font.setBold(true);
             name->setFont(font);
+
+            name_box->addStretch(1);
+
+            QObject::connect(copy_user_name.getElement(), &Button::leftClicked, [this] {
+                QClipboard *clipboard = QGuiApplication::clipboard();
+                clipboard->setText(this->userName_);
+            });
+
             vbox.emplace<Label>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
             vbox.emplace<Label>(TEXT_FOLLOWERS)
                 .assign(&this->ui_.followerCountLabel);
