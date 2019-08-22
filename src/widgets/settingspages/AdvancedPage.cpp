@@ -74,6 +74,13 @@ AdvancedPage::AdvancedPage()
         // Logs end
 
         // Timeoutbuttons
+        QStringList unitsForDropdown = QStringList();
+        unitsForDropdown.append("s");
+        unitsForDropdown.append("m");
+        unitsForDropdown.append("h");
+        unitsForDropdown.append("d");
+        unitsForDropdown.append("w");
+
         std::vector<QString> durationsPerUnit =
             getSettings()->timeoutDurationsPerUnit;
         std::vector<QString>::iterator itDurationPerUnit;
@@ -128,7 +135,7 @@ AdvancedPage::AdvancedPage()
 
                 QComboBox *timeoutDurationUnit = *itUnitInput;
                 timeoutDurationUnit->setObjectName(QString::number(i));
-                timeoutDurationUnit->addItems(units);
+                timeoutDurationUnit->addItems(unitsForDropdown);
                 timeoutDurationUnit->setCurrentText(*itUnit);
                 timeout.append(timeoutDurationUnit);
 
