@@ -16,7 +16,7 @@ AccountController::AccountController()
     this->twitch.accounts.itemRemoved.connect([this](const auto &args) {
         if (args.caller != this)
         {
-            auto &accs = this->twitch.accounts;
+            auto &accs = this->twitch.accounts.getVector();
             auto it = std::find(accs.begin(), accs.end(), args.item);
             assert(it != accs.end());
 
