@@ -99,7 +99,7 @@ void BaseWindow::init()
         // CUSTOM WINDOW FRAME
         QVBoxLayout *layout = new QVBoxLayout();
         this->ui_.windowLayout = layout;
-        layout->setContentsMargins(0, 1, 0, 0);
+        layout->setContentsMargins(1, 1, 1, 1);
         layout->setSpacing(0);
         this->setLayout(layout);
         {
@@ -163,6 +163,7 @@ void BaseWindow::init()
             }
         }
         this->ui_.layoutBase = new BaseWidget(this);
+        this->ui_.layoutBase->setContentsMargins(1, 0, 1, 1);
         layout->addWidget(this->ui_.layoutBase);
     }
 
@@ -246,15 +247,15 @@ void BaseWindow::themeChangedEvent()
     if (this->hasCustomWindowFrame())
     {
         QPalette palette;
-        palette.setColor(QPalette::Background, QColor(0, 0, 0, 0));
-        palette.setColor(QPalette::Foreground, this->theme->window.text);
+        palette.setColor(QPalette::Window, QColor(80, 80, 80, 255));
+        palette.setColor(QPalette::WindowText, this->theme->window.text);
         this->setPalette(palette);
 
         if (this->ui_.titleLabel)
         {
             QPalette palette_title;
             palette_title.setColor(
-                QPalette::Foreground,
+                QPalette::WindowText,
                 this->theme->isLightTheme() ? "#333" : "#ccc");
             this->ui_.titleLabel->setPalette(palette_title);
         }
@@ -445,6 +446,16 @@ void BaseWindow::changeEvent(QEvent *)
                 ? TitleBarButtonStyle::Unmaximize
                 : TitleBarButtonStyle::Maximize);
     }
+
+    if (this->isVisible() && this->hasCustomWindowFrame())
+    {
+        auto palette = this->palette();
+        palette.setColor(QPalette::Window,
+                         GetForegroundWindow() == HWND(this->winId())
+                             ? QColor(90, 90, 90)
+                             : QColor(50, 50, 50));
+        this->setPalette(palette);
+    }
 #endif
 
 #ifndef Q_OS_WIN
@@ -543,7 +554,7 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
     switch (msg->message)
     {
         case WM_DPICHANGED:
-            returnValue = handleDPICHANGED(msg);
+            returnValue = this->handleDPICHANGED(msg);
             break;
 
         case WM_SHOWWINDOW:
@@ -645,8 +656,7 @@ void BaseWindow::drawCustomWindowFrame(QPainter &painter)
     {
         QColor bg = this->overrideBackgroundColor_.value_or(
             this->theme->window.background);
-
-        painter.fillRect(QRect(0, 1, this->width() - 0, this->height() - 0),
+        painter.fillRect(QRect(1, 2, this->width() - 2, this->height() - 3),
                          bg);
     }
 #endif
@@ -720,10 +730,7 @@ bool BaseWindow::handleNCCALCSIZE(MSG *msg, long *result)
             ncp->lppos->flags |= SWP_NOREDRAW;
             RECT *clientRect = &ncp->rgrc[0];
 
-            clientRect->left += 1;
-            clientRect->top += 0;
-            clientRect->right -= 1;
-            clientRect->bottom -= 1;
+            clientRect->top -= 1;
         }
 
         *result = 0;
