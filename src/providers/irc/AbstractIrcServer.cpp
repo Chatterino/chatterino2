@@ -36,9 +36,9 @@ AbstractIrcServer::AbstractIrcServer()
     QObject::connect(this->readConnection_.get(),
                      &Communi::IrcConnection::privateMessageReceived,
                      [this](auto msg) { this->privateMessageReceived(msg); });
-    QObject::connect(this->readConnection_.get(),
-                     &Communi::IrcConnection::connected,
-                     [this] { this->onConnected(); });
+    QObject::connect(
+        this->readConnection_.get(), &Communi::IrcConnection::connected,
+        [this] { this->onConnected(this->readConnection_.get()); });
     QObject::connect(this->readConnection_.get(),
                      &Communi::IrcConnection::disconnected,
                      [this] { this->onDisconnected(); });
@@ -227,7 +227,7 @@ std::shared_ptr<Channel> AbstractIrcServer::getChannelOrEmpty(
     return Channel::getEmpty();
 }
 
-void AbstractIrcServer::onConnected()
+void AbstractIrcServer::onConnected(IrcConnection *connection)
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 

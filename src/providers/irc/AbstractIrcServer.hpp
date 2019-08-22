@@ -52,7 +52,7 @@ protected:
     virtual void messageReceived(Communi::IrcMessage *message);
     virtual void writeConnectionMessageReceived(Communi::IrcMessage *message);
 
-    virtual void onConnected();
+    virtual void onConnected(IrcConnection *connection);
     virtual void onDisconnected();
     virtual void onSocketError();
 
