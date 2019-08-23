@@ -18,7 +18,7 @@ void TwitchBadges::loadTwitchBadges()
         "https://badges.twitch.tv/v1/badges/global/display?language=en");
 
     NetworkRequest(url)
-    
+
         .onSuccess([this](auto result) -> Outcome {
             auto root = result.parseJson();
             auto badgeSets = this->badgeSets_.access();

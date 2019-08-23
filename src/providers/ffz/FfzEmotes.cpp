@@ -138,7 +138,7 @@ void FfzEmotes::loadEmotes()
     QString url("https://api.frankerfacez.com/v1/set/global");
 
     NetworkRequest(url)
-    
+
         .timeout(30000)
         .onSuccess([this](auto result) -> Outcome {
             auto emotes = this->emotes();
@@ -157,7 +157,7 @@ void FfzEmotes::loadChannel(const QString &channelName,
     log("[FFZEmotes] Reload FFZ Channel Emotes for channel {}\n", channelName);
 
     NetworkRequest("https://api.frankerfacez.com/v1/room/" + channelName)
-    
+
         .timeout(20000)
         .onSuccess([callback = std::move(callback)](auto result) -> Outcome {
             auto pair = parseChannelEmotes(result.parseJson());
