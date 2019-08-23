@@ -16,6 +16,8 @@ public:
         QPixmap addSplitDark;
         QPixmap ban;
         QPixmap banRed;
+        QPixmap copyDark;
+        QPixmap copyLight;
         QPixmap menuDark;
         QPixmap menuLight;
         QPixmap mod;
