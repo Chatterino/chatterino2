@@ -90,13 +90,6 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
         connection->setPassword(oauthToken);
     }
 
-    connection->sendCommand(
-        Communi::IrcCommand::createCapability("REQ", "twitch.tv/membership"));
-    connection->sendCommand(
-        Communi::IrcCommand::createCapability("REQ", "twitch.tv/commands"));
-    connection->sendCommand(
-        Communi::IrcCommand::createCapability("REQ", "twitch.tv/tags"));
-
     connection->setSecure(true);
 
     // https://dev.twitch.tv/docs/irc/guide/#connecting-to-twitch-irc
@@ -204,6 +197,13 @@ void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
 
         default:;
     }
+}
+
+void TwitchServer::onConnected(IrcConnection *connection)
+{
+    // connection in thise case is the read connection
+    connection->sendRaw(
+        "CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
 }
 
 std::shared_ptr<Channel> TwitchServer::getCustomChannel(
