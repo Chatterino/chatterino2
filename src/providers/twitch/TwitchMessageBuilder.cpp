@@ -191,6 +191,8 @@ void TwitchMessageBuilder::triggerHighlights()
 MessagePtr TwitchMessageBuilder::build()
 {
     // PARSING
+    this->userId_ = this->ircMessage->tag("user-id").toString();
+
     this->parseUsername();
 
     if (this->userName == this->channel->getName())
@@ -1276,11 +1278,9 @@ void TwitchMessageBuilder::appendTwitchBadges()
 
 void TwitchMessageBuilder::appendChatterinoBadges()
 {
-    auto chatterinoBadgePtr =
-        getApp()->chatterinoBadges->getBadge({this->userName});
-    if (chatterinoBadgePtr)
+    if (auto badge = getApp()->chatterinoBadges->getBadge({this->userId_}))
     {
-        this->emplace<BadgeElement>(*chatterinoBadgePtr,
+        this->emplace<BadgeElement>(*badge,
                                     MessageElementFlag::BadgeChatterino);
     }
 }

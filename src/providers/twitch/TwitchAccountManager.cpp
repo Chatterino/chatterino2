@@ -15,8 +15,9 @@ TwitchAccountManager::TwitchAccountManager()
         currentUser->loadIgnores();
     });
 
-    this->accounts.itemRemoved.connect(
-        [this](const auto &acc) { this->removeUser(acc.item.get()); });
+    this->accounts.itemRemoved.connect([this](const auto &acc) {  //
+        this->removeUser(acc.item.get());
+    });
 }
 
 std::shared_ptr<TwitchAccount> TwitchAccountManager::getCurrent()

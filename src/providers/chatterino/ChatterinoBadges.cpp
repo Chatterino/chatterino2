@@ -22,9 +22,9 @@ ChatterinoBadges::ChatterinoBadges()
 {
 }
 
-boost::optional<EmotePtr> ChatterinoBadges::getBadge(const UserName &username)
+boost::optional<EmotePtr> ChatterinoBadges::getBadge(const UserId &id)
 {
-    auto it = badgeMap.find(username.string);
+    auto it = badgeMap.find(id.string);
     if (it != badgeMap.end())
     {
         return emotes[it->second];
@@ -34,10 +34,9 @@ boost::optional<EmotePtr> ChatterinoBadges::getBadge(const UserName &username)
 
 void ChatterinoBadges::loadChatterinoBadges()
 {
-    static QUrl url("https://fourtf.com/chatterino/badges.json");
+    static QUrl url("https://api.chatterino.com/badges");
 
     NetworkRequest(url)
-    
         .onSuccess([this](auto result) -> Outcome {
             auto jsonRoot = result.parseJson();
             int index = 0;
@@ -46,7 +45,9 @@ void ChatterinoBadges::loadChatterinoBadges()
                 auto jsonBadge = jsonBadge_.toObject();
                 auto emote = Emote{
                     EmoteName{},
-                    ImageSet{Url{jsonBadge.value("image").toString()}},
+                    ImageSet{Url{jsonBadge.value("image1").toString()},
+                             Url{jsonBadge.value("image2").toString()},
+                             Url{jsonBadge.value("image3").toString()}},
                     Tooltip{jsonBadge.value("tooltip").toString()}, Url{}};
 
                 emotes.push_back(

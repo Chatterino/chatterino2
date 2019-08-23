@@ -19,7 +19,7 @@ public:
     virtual void initialize(Settings &settings, Paths &paths) override;
     ChatterinoBadges();
 
-    boost::optional<EmotePtr> getBadge(const UserName &username);
+    boost::optional<EmotePtr> getBadge(const UserId &id);
 
 private:
     void loadChatterinoBadges();
