@@ -62,10 +62,11 @@ UserInfoPopup::UserInfoPopup()
             name_box.withoutMargin();
 
             auto name = name_box.emplace<Label>().assign(&this->ui_.nameLabel);
-
             LayoutCreator<EffectLabel2> copy_user_name = name_box.emplace<EffectLabel2>(this);
-            copy_user_name->getLabel().setText("Copy");
-            copy_user_name->getLabel().setCentered(true);
+            copy_user_name->setPixmap(app->resources->buttons.copyDark);
+            // TODO(mm2pl): change this when the card get themed.
+
+            copy_user_name->setScaleIndependantSize(32, 32);
 
             auto font = name->font();
             font.setBold(true);
