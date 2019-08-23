@@ -84,17 +84,42 @@ void SearchPopup::performSearch()
 {
     QString text = searchInput_->text();
 
+    QStringList searchedNames;
+    QStringList searchedContent;
+
     ChannelPtr channel(new Channel(this->channelName_, Channel::Type::None));
+
+    // Parse all usernames that should be searched for
+    for (QString &word : text.split(' ', QString::SkipEmptyParts))
+    {
+        if (word.startsWith('@'))
+        {
+            searchedNames << word.remove('@');
+        }
+        else
+        {
+            searchedContent << word;
+        }
+    }
+
+    // Build the query (this will be searched for in messages by the selected users)
+    QString query = searchedContent.join(' ');
 
     for (size_t i = 0; i < this->snapshot_.size(); i++)
     {
         MessagePtr message = this->snapshot_[i];
 
         if (text.isEmpty() ||
-            message->searchText.indexOf(this->searchInput_->text(), 0,
-                                        Qt::CaseInsensitive) != -1)
+            message->searchText.contains(query, Qt::CaseInsensitive))
         {
-            channel->addMessage(message);
+            // If username-only search is enabled, at least one name must match.
+            // If it is not enabled, we can add the message directly.
+            if (searchedNames.size() == 0 ||
+                searchedNames.contains(message->displayName,
+                                       Qt::CaseInsensitive))
+            {
+                channel->addMessage(message);
+            }
         }
     }
 
