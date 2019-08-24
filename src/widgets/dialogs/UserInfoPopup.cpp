@@ -62,11 +62,11 @@ UserInfoPopup::UserInfoPopup()
             name_box.withoutMargin();
 
             auto name = name_box.emplace<Label>().assign(&this->ui_.nameLabel);
-            LayoutCreator<EffectLabel2> copy_user_name = name_box.emplace<EffectLabel2>(this);
-            copy_user_name->setPixmap(app->resources->buttons.copyDark);
+            LayoutCreator<EffectLabel2> copyUserName = name_box.emplace<EffectLabel2>(this);
+            copyUserName->setPixmap(app->resources->buttons.copyDark);
             // TODO(mm2pl): change this when the card get themed.
 
-            copy_user_name->setScaleIndependantSize(32, 32);
+            copyUserName->setScaleIndependantSize(32, 32);
 
             auto font = name->font();
             font.setBold(true);
@@ -74,7 +74,7 @@ UserInfoPopup::UserInfoPopup()
 
             name_box->addStretch(1);
 
-            QObject::connect(copy_user_name.getElement(), &Button::leftClicked, [this] {
+            QObject::connect(copyUserName.getElement(), &Button::leftClicked, [this] {
                 QClipboard *clipboard = QGuiApplication::clipboard();
                 clipboard->setText(this->userName_);
             });
