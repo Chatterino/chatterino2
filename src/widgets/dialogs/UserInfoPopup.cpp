@@ -24,9 +24,27 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
+#include <algorithm>
+
 #define TEXT_FOLLOWERS "Followers: "
 #define TEXT_VIEWS "Views: "
 #define TEXT_CREATED "Created: "
+
+
+namespace {
+
+const auto kBorderColor = QColor(255, 255, 255, 80);
+
+int calculateTimeoutDuration(const QString &durationPerUnit,
+                             const QString &unit)
+{
+    static const QMap<QString, int> durations{
+        {"s", 1}, {"m", 60}, {"h", 3600}, {"d", 86400}, {"w", 604800},
+    };
+    return durationPerUnit.toInt() * durations[unit];
+}
+
+}  // namespace
 
 namespace chatterino {
 
@@ -90,9 +108,8 @@ UserInfoPopup::UserInfoPopup()
         auto usercard = user.emplace<EffectLabel2>(this);
         usercard->getLabel().setText("Usercard");
 
-        QColor borderColor(255, 255, 255, 80);
-        usercard->setBorderColor(borderColor);
-        viewLogs->setBorderColor(borderColor);
+        usercard->setBorderColor(kBorderColor);
+        viewLogs->setBorderColor(kBorderColor);
 
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(app->resources->buttons.mod);
@@ -474,8 +491,6 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                       .setLayoutType<QHBoxLayout>()
                       .withoutMargin();
 
-    QColor borderColor(255, 255, 255, 80);
-
     int buttonWidth = 40;
     int buttonHeight = 32;
 
@@ -528,7 +543,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 a->getLabel().setText(std::get<0>(item));
 
                 a->setScaleIndependantSize(buttonWidth, buttonHeight);
-                a->setBorderColor(borderColor);
+                a->setBorderColor(kBorderColor);
 
                 QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
                                  [this, timeout = std::get<1>(item)] {
@@ -546,32 +561,14 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     std::vector<QString> durationUnits = getSettings()->timeoutDurationUnits;
 
-    addTimeouts(
-        "Timeouts",
-        {{durationsPerUnit[0] + durationUnits[0],
-          calculateTimeoutDuration(durationsPerUnit[0], durationUnits[0])},
+    std::vector<std::pair<QString, int>> t(8); // Timeouts.
+    auto i = 0;
+    std::generate(t.begin(), t.end(), [&] {
+        return std::make_pair(durationsPerUnit[i] + durationUnits[i],
+          calculateTimeoutDuration(durationsPerUnit[i], durationUnits[i++]));
+    });
 
-         {durationsPerUnit[1] + durationUnits[1],
-          calculateTimeoutDuration(durationsPerUnit[1], durationUnits[1])},
-
-         {durationsPerUnit[2] + durationUnits[2],
-          calculateTimeoutDuration(durationsPerUnit[2], durationUnits[2])},
-
-         {durationsPerUnit[3] + durationUnits[3],
-          calculateTimeoutDuration(durationsPerUnit[3], durationUnits[3])},
-
-         {durationsPerUnit[4] + durationUnits[4],
-          calculateTimeoutDuration(durationsPerUnit[4], durationUnits[4])},
-
-         {durationsPerUnit[5] + durationUnits[5],
-          calculateTimeoutDuration(durationsPerUnit[5], durationUnits[5])},
-
-         {durationsPerUnit[6] + durationUnits[6],
-          calculateTimeoutDuration(durationsPerUnit[6], durationUnits[6])},
-
-         {durationsPerUnit[7] + durationUnits[7],
-          calculateTimeoutDuration(durationsPerUnit[7], durationUnits[7])}});
-
+    addTimeouts("Timeouts", t);
     addButton(Ban, "ban", getApp()->resources->buttons.ban);
 }
 
@@ -602,36 +599,6 @@ void UserInfoPopup::fillLatestMessages()
     }
 
     this->latestMessages_->setChannel(channelPtr);
-}
-
-int UserInfoPopup::calculateTimeoutDuration(const QString &durationPerUnit,
-                                            const QString &unit)
-{
-    int valueInUnit = durationPerUnit.toInt();
-    int valueInSec = 0;
-
-    if (unit == "s")
-    {
-        valueInSec = valueInUnit;
-    }
-    else if (unit == "m")
-    {
-        valueInSec = valueInUnit * 60;
-    }
-    else if (unit == "h")
-    {
-        valueInSec = valueInUnit * 60 * 60;
-    }
-    else if (unit == "d")
-    {
-        valueInSec = valueInUnit * 24 * 60 * 60;
-    }
-    else if (unit == "w")
-    {
-        valueInSec = valueInUnit * 7 * 24 * 60 * 60;
-    }
-
-    return valueInSec;
 }
 
 }  // namespace chatterino

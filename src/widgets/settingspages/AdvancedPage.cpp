@@ -21,6 +21,8 @@
 #include <QVBoxLayout>
 #include <QtConcurrent/QtConcurrent>
 
+#include <algorithm>
+
 namespace chatterino {
 
 AdvancedPage::AdvancedPage()
@@ -74,12 +76,7 @@ AdvancedPage::AdvancedPage()
         // Logs end
 
         // Timeoutbuttons
-        QStringList unitsForDropdown = QStringList();
-        unitsForDropdown.append("s");
-        unitsForDropdown.append("m");
-        unitsForDropdown.append("h");
-        unitsForDropdown.append("d");
-        unitsForDropdown.append("w");
+        const auto unitsForDropdown = QStringList{ "s", "m", "h", "d", "w" };
 
         std::vector<QString> durationsPerUnit =
             getSettings()->timeoutDurationsPerUnit;
@@ -93,11 +90,11 @@ AdvancedPage::AdvancedPage()
 
         for (int i = 0; i < 8; i++)
         {
-            durationInputs.append(new QLineEdit());
-            unitInputs.append(new QComboBox());
+            this->durationInputs_.append(new QLineEdit());
+            this->unitInputs_.append(new QComboBox());
         }
-        itDurationInput = durationInputs.begin();
-        itUnitInput = unitInputs.begin();
+        this->itDurationInput_ = this->durationInputs_.begin();
+        this->itUnitInput_ = this->unitInputs_.begin();
 
         auto timeoutLayout = tabs.appendTab(new QVBoxLayout, "Timeouts");
         auto texts = timeoutLayout.emplace<QVBoxLayout>().withoutMargin();
@@ -124,7 +121,7 @@ AdvancedPage::AdvancedPage()
                 auto buttonLabel = timeout.emplace<QLabel>();
                 buttonLabel->setText("Button " + QString::number(i + 1) + ": ");
 
-                QLineEdit *lineEditDurationInput = *itDurationInput;
+                QLineEdit *lineEditDurationInput = *this->itDurationInput_;
                 lineEditDurationInput->setObjectName(QString::number(i));
                 lineEditDurationInput->setValidator(
                     new QIntValidator(1, 99, this));
@@ -133,7 +130,7 @@ AdvancedPage::AdvancedPage()
                 lineEditDurationInput->setMaximumWidth(30);
                 timeout.append(lineEditDurationInput);
 
-                QComboBox *timeoutDurationUnit = *itUnitInput;
+                QComboBox *timeoutDurationUnit = *this->itUnitInput_;
                 timeoutDurationUnit->setObjectName(QString::number(i));
                 timeoutDurationUnit->addItems(unitsForDropdown);
                 timeoutDurationUnit->setCurrentText(*itUnit);
@@ -153,8 +150,8 @@ AdvancedPage::AdvancedPage()
 
             ++itDurationPerUnit;
             ++itUnit;
-            ++itDurationInput;
-            ++itUnitInput;
+            ++this->itDurationInput_;
+            ++this->itUnitInput_;
         }
         timeoutLayout->addStretch();
     }
@@ -166,31 +163,25 @@ void AdvancedPage::timeoutDurationChanged(const QString &newDuration)
     QObject *sender = QObject::sender();
     int index = sender->objectName().toInt();
 
-    itDurationInput = durationInputs.begin() + index;
-    QLineEdit *durationPerUnit = *itDurationInput;
+    this->itDurationInput_ = this->durationInputs_.begin() + index;
+    QLineEdit *durationPerUnit = *this->itDurationInput_;
 
-    itUnitInput = unitInputs.begin() + index;
-    QComboBox *cbUnit = *itUnitInput;
+    this->itUnitInput_ = this->unitInputs_.begin() + index;
+    QComboBox *cbUnit = *this->itUnitInput_;
     QString unit = cbUnit->currentText();
 
     int valueInUnit = newDuration.toInt();
 
     // safety mechanism for setting days and weeks
-    if (unit == "d")
+    if (unit == "d" && valueInUnit > 14)
     {
-        if (valueInUnit > 14)
-        {
-            durationPerUnit->setText("14");
-            return;
-        }
+        durationPerUnit->setText("14");
+        return;
     }
-    else if (unit == "w")
+    else if (unit == "w" && valueInUnit > 2)
     {
-        if (valueInUnit > 2)
-        {
-            durationPerUnit->setText("2");
-            return;
-        }
+        durationPerUnit->setText("2");
+        return;
     }
 
     std::vector<QString> durationsPerUnit =
@@ -204,8 +195,8 @@ void AdvancedPage::timeoutUnitChanged(const QString &newUnit)
     QObject *sender = QObject::sender();
     int index = sender->objectName().toInt();
 
-    itDurationInput = durationInputs.begin() + index;
-    QLineEdit *durationPerUnit = *itDurationInput;
+    this->itDurationInput_ = this->durationInputs_.begin() + index;
+    QLineEdit *durationPerUnit = *this->itDurationInput_;
 
     // safety mechanism for changing units (i.e. to days or weeks)
     AdvancedPage::timeoutDurationChanged(durationPerUnit->text());

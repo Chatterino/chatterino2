@@ -34,8 +34,6 @@ private:
     bool isMod_;
     bool isBroadcaster_;
 
-    static int calculateTimeoutDuration(const QString &durationPerUnit, const QString &unit);
-
     QString userName_;
     QString userId_;
     ChannelPtr channel_;
