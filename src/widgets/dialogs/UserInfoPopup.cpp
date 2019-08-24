@@ -90,6 +90,10 @@ UserInfoPopup::UserInfoPopup()
         auto usercard = user.emplace<EffectLabel2>(this);
         usercard->getLabel().setText("Usercard");
 
+        QColor borderColor(255, 255, 255, 80);
+        usercard->setBorderColor(borderColor);
+        viewLogs->setBorderColor(borderColor);
+
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(app->resources->buttons.mod);
         mod->setScaleIndependantSize(30, 30);
@@ -470,11 +474,9 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                       .setLayoutType<QHBoxLayout>()
                       .withoutMargin();
 
-    QColor color1(255, 255, 255, 80);
-    QColor color2(255, 255, 255, 0);
+    QColor borderColor(255, 255, 255, 80);
 
-    int buttonWidth = 24;
-    int buttonWidth2 = 40;
+    int buttonWidth = 40;
     int buttonHeight = 32;
 
     layout->setSpacing(16);
@@ -525,8 +527,8 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                 auto a = hbox.emplace<EffectLabel2>();
                 a->getLabel().setText(std::get<0>(item));
 
-                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                a->setBorderColor(color1);
+                a->setScaleIndependantSize(buttonWidth, buttonHeight);
+                a->setBorderColor(borderColor);
 
                 QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
                                  [this, timeout = std::get<1>(item)] {
