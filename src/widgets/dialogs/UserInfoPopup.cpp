@@ -30,7 +30,6 @@
 #define TEXT_VIEWS "Views: "
 #define TEXT_CREATED "Created: "
 
-
 namespace {
 
 const auto kBorderColor = QColor(255, 255, 255, 80);
@@ -561,11 +560,15 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     std::vector<QString> durationUnits = getSettings()->timeoutDurationUnits;
 
-    std::vector<std::pair<QString, int>> t(8); // Timeouts.
+    std::vector<std::pair<QString, int>> t(8);  // Timeouts.
     auto i = 0;
+
     std::generate(t.begin(), t.end(), [&] {
-        return std::make_pair(durationsPerUnit[i] + durationUnits[i],
-          calculateTimeoutDuration(durationsPerUnit[i], durationUnits[i++]));
+        std::pair<QString, int> pair = std::make_pair(
+            durationsPerUnit[i] + durationUnits[i],
+            calculateTimeoutDuration(durationsPerUnit[i], durationUnits[i]));
+        i++;
+        return pair;
     });
 
     addTimeouts("Timeouts", t);
