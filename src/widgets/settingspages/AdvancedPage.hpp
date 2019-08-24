@@ -11,16 +11,9 @@ public:
 
 private:
     // list needed for dynamic timeout settings
-    QList<QLineEdit *> durationInputs_;
-    QList<QComboBox *> unitInputs_;
+    std::vector<QLineEdit *> durationInputs_;
+    std::vector<QComboBox *> unitInputs_;
 
-    // iterators used in dynamic timeout settings
-    QList<QLineEdit *>::iterator itDurationInput_;
-    QList<QComboBox *>::iterator itUnitInput_;
-
-private slots:
-    void timeoutDurationChanged(const QString &newDuration);
-    void timeoutUnitChanged(const QString &newUnit);
 };
 
 }  // namespace chatterino

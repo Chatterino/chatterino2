@@ -9,6 +9,8 @@
 #include <pajlada/settings/setting.hpp>
 #include <pajlada/settings/settinglistener.hpp>
 
+using TimeoutButton = std::pair<QString, int>;
+
 namespace chatterino {
 
 class Settings : public ABSettings
@@ -197,8 +199,10 @@ public:
 
     /// Timeout buttons
 
-    ChatterinoSetting<std::vector<QString>> timeoutDurationsPerUnit = { "/timeouts/timeoutDurationsPerUnit", { "1", "30", "1", "5", "30", "1", "1", "1" }};
-    ChatterinoSetting<std::vector<QString>> timeoutDurationUnits = { "/timeouts/timeoutDurationUnits", { "s", "s", "m", "m", "m", "h", "d", "w" }};
+    ChatterinoSetting<std::vector<TimeoutButton>> timeoutButtons = {
+        "/timeouts/timeoutButtons",
+            { { "s", 1 },  { "s", 30 }, { "m", 1 }, { "m", 5 },
+              { "m", 30 }, { "h", 1 },  { "d", 1 }, { "w", 1 } } };
 
 private:
     void updateModerationActions();

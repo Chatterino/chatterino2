@@ -34,13 +34,12 @@ namespace {
 
 const auto kBorderColor = QColor(255, 255, 255, 80);
 
-int calculateTimeoutDuration(const QString &durationPerUnit,
-                             const QString &unit)
+int calculateTimeoutDuration(int durationPerUnit, const QString &unit)
 {
     static const QMap<QString, int> durations{
         {"s", 1}, {"m", 60}, {"h", 3600}, {"d", 86400}, {"w", 604800},
     };
-    return durationPerUnit.toInt() * durations[unit];
+    return durationPerUnit * durations[unit];
 }
 
 }  // namespace
@@ -555,18 +554,15 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     addButton(Unban, "unban", getApp()->resources->buttons.unban);
 
-    std::vector<QString> durationsPerUnit =
-        getSettings()->timeoutDurationsPerUnit;
 
-    std::vector<QString> durationUnits = getSettings()->timeoutDurationUnits;
-
+    const auto timeoutButtons = getSettings()->timeoutButtons.getValue();
     std::vector<std::pair<QString, int>> t(8);  // Timeouts.
     auto i = 0;
-
     std::generate(t.begin(), t.end(), [&] {
+        const auto tButton = timeoutButtons[i];
         std::pair<QString, int> pair = std::make_pair(
-            durationsPerUnit[i] + durationUnits[i],
-            calculateTimeoutDuration(durationsPerUnit[i], durationUnits[i]));
+            QString::number(tButton.second) + tButton.first,
+            calculateTimeoutDuration(tButton.second, tButton.first));
         i++;
         return pair;
     });
@@ -593,8 +589,7 @@ void UserInfoPopup::fillLatestMessages()
     for (size_t i = 0; i < snapshot.size(); i++)
     {
         MessagePtr message = snapshot[i];
-        if (message->loginName.compare(this->userName_, Qt::CaseInsensitive) ==
-                0 &&
+        if (!message->loginName.compare(this->userName_, Qt::CaseInsensitive) &&
             !message->flags.has(MessageFlag::Whisper))
         {
             channelPtr->addMessage(message);

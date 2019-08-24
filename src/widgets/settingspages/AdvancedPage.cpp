@@ -5,6 +5,7 @@
 #include "controllers/taggedusers/TaggedUsersModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 
@@ -20,8 +21,6 @@
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QtConcurrent/QtConcurrent>
-
-#include <algorithm>
 
 namespace chatterino {
 
@@ -72,30 +71,12 @@ AdvancedPage::AdvancedPage()
                          []() mutable {
                              getSettings()->cachePath = "";  //
                          });
-
+    }
         // Logs end
 
+
         // Timeoutbuttons
-        const auto unitsForDropdown = QStringList{ "s", "m", "h", "d", "w" };
-
-        std::vector<QString> durationsPerUnit =
-            getSettings()->timeoutDurationsPerUnit;
-        std::vector<QString>::iterator itDurationPerUnit;
-        itDurationPerUnit = durationsPerUnit.begin();
-
-        std::vector<QString> durationUnits =
-            getSettings()->timeoutDurationUnits;
-        std::vector<QString>::iterator itUnit;
-        itUnit = durationUnits.begin();
-
-        for (int i = 0; i < 8; i++)
-        {
-            this->durationInputs_.append(new QLineEdit());
-            this->unitInputs_.append(new QComboBox());
-        }
-        this->itDurationInput_ = this->durationInputs_.begin();
-        this->itUnitInput_ = this->unitInputs_.begin();
-
+    {
         auto timeoutLayout = tabs.appendTab(new QVBoxLayout, "Timeouts");
         auto texts = timeoutLayout.emplace<QVBoxLayout>().withoutMargin();
         {
@@ -113,97 +94,75 @@ AdvancedPage::AdvancedPage()
         texts->setContentsMargins(0, 0, 0, 15);
         texts->setSizeConstraint(QLayout::SetMaximumSize);
 
-        // build one line for each customizable button
-        for (int i = 0; i < 8; i++)
-        {
-            auto timeout = timeoutLayout.emplace<QHBoxLayout>().withoutMargin();
+        const auto valueChanged = [=] {
+            const auto index = QObject::sender()->objectName().toInt();
+
+            const auto line = this->durationInputs_[index];
+            const auto duration = line->text().toInt();
+            const auto unit = this->unitInputs_[index]->currentText();
+
+            // safety mechanism for setting days and weeks
+            if (unit == "d" && duration > 14)
             {
-                auto buttonLabel = timeout.emplace<QLabel>();
-                buttonLabel->setText("Button " + QString::number(i + 1) + ": ");
-
-                QLineEdit *lineEditDurationInput = *this->itDurationInput_;
-                lineEditDurationInput->setObjectName(QString::number(i));
-                lineEditDurationInput->setValidator(
-                    new QIntValidator(1, 99, this));
-                lineEditDurationInput->setText(*itDurationPerUnit);
-                lineEditDurationInput->setAlignment(Qt::AlignRight);
-                lineEditDurationInput->setMaximumWidth(30);
-                timeout.append(lineEditDurationInput);
-
-                QComboBox *timeoutDurationUnit = *this->itUnitInput_;
-                timeoutDurationUnit->setObjectName(QString::number(i));
-                timeoutDurationUnit->addItems(unitsForDropdown);
-                timeoutDurationUnit->setCurrentText(*itUnit);
-                timeout.append(timeoutDurationUnit);
-
-                QObject::connect(lineEditDurationInput, &QLineEdit::textChanged,
-                                 this, &AdvancedPage::timeoutDurationChanged);
-
-                QObject::connect(timeoutDurationUnit,
-                                 &QComboBox::currentTextChanged, this,
-                                 &AdvancedPage::timeoutUnitChanged);
-
-                timeout->addStretch();
+                line->setText("14");
+                return;
             }
+            else if (unit == "w" && duration > 2)
+            {
+                line->setText("2");
+                return;
+            }
+
+            auto timeouts = getSettings()->timeoutButtons.getValue();
+            timeouts[index] = TimeoutButton{ unit, duration };
+            getSettings()->timeoutButtons.setValue(timeouts);
+        };
+
+        // build one line for each customizable button
+        auto i = 0;
+        for (const auto tButton : getSettings()->timeoutButtons.getValue())
+        {
+            const auto buttonNumber = QString::number(i);
+            auto timeout = timeoutLayout.emplace<QHBoxLayout>().withoutMargin();
+
+            auto buttonLabel = timeout.emplace<QLabel>();
+            buttonLabel->setText(QString("Button %1: ").arg(++i));
+
+            auto *lineEditDurationInput = new QLineEdit();
+            lineEditDurationInput->setObjectName(buttonNumber);
+            lineEditDurationInput->setValidator(
+                new QIntValidator(1, 99, this));
+            lineEditDurationInput->setText(
+                QString::number(tButton.second));
+            lineEditDurationInput->setAlignment(Qt::AlignRight);
+            lineEditDurationInput->setMaximumWidth(30);
+            timeout.append(lineEditDurationInput);
+
+            auto *timeoutDurationUnit = new QComboBox();
+            timeoutDurationUnit->setObjectName(buttonNumber);
+            timeoutDurationUnit->addItems({ "s", "m", "h", "d", "w" });
+            timeoutDurationUnit->setCurrentText(tButton.first);
+            timeout.append(timeoutDurationUnit);
+
+            QObject::connect(lineEditDurationInput,
+                             &QLineEdit::textChanged, this,
+                             valueChanged);
+
+            QObject::connect(timeoutDurationUnit,
+                             &QComboBox::currentTextChanged, this,
+                             valueChanged);
+
+            timeout->addStretch();
+
+            this->durationInputs_.push_back(lineEditDurationInput);
+            this->unitInputs_.push_back(timeoutDurationUnit);
+
             timeout->setContentsMargins(40, 0, 0, 0);
             timeout->setSizeConstraint(QLayout::SetMaximumSize);
-
-            ++itDurationPerUnit;
-            ++itUnit;
-            ++this->itDurationInput_;
-            ++this->itUnitInput_;
         }
         timeoutLayout->addStretch();
     }
     // Timeoutbuttons end
-}
-
-void AdvancedPage::timeoutDurationChanged(const QString &newDuration)
-{
-    QObject *sender = QObject::sender();
-    int index = sender->objectName().toInt();
-
-    this->itDurationInput_ = this->durationInputs_.begin() + index;
-    QLineEdit *durationPerUnit = *this->itDurationInput_;
-
-    this->itUnitInput_ = this->unitInputs_.begin() + index;
-    QComboBox *cbUnit = *this->itUnitInput_;
-    QString unit = cbUnit->currentText();
-
-    int valueInUnit = newDuration.toInt();
-
-    // safety mechanism for setting days and weeks
-    if (unit == "d" && valueInUnit > 14)
-    {
-        durationPerUnit->setText("14");
-        return;
-    }
-    else if (unit == "w" && valueInUnit > 2)
-    {
-        durationPerUnit->setText("2");
-        return;
-    }
-
-    std::vector<QString> durationsPerUnit =
-        getSettings()->timeoutDurationsPerUnit;
-    durationsPerUnit[index] = newDuration;
-    getSettings()->timeoutDurationsPerUnit = durationsPerUnit;
-}
-
-void AdvancedPage::timeoutUnitChanged(const QString &newUnit)
-{
-    QObject *sender = QObject::sender();
-    int index = sender->objectName().toInt();
-
-    this->itDurationInput_ = this->durationInputs_.begin() + index;
-    QLineEdit *durationPerUnit = *this->itDurationInput_;
-
-    // safety mechanism for changing units (i.e. to days or weeks)
-    AdvancedPage::timeoutDurationChanged(durationPerUnit->text());
-
-    std::vector<QString> durationUnits = getSettings()->timeoutDurationUnits;
-    durationUnits[index] = newUnit;
-    getSettings()->timeoutDurationUnits = durationUnits;
 }
 
 }  // namespace chatterino
