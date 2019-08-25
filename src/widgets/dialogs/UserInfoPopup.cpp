@@ -554,7 +554,6 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     addButton(Unban, "unban", getApp()->resources->buttons.unban);
 
-
     const auto timeoutButtons = getSettings()->timeoutButtons.getValue();
     std::vector<std::pair<QString, int>> t(8);  // Timeouts.
     auto i = 0;
@@ -589,8 +588,11 @@ void UserInfoPopup::fillLatestMessages()
     for (size_t i = 0; i < snapshot.size(); i++)
     {
         MessagePtr message = snapshot[i];
-        if (!message->loginName.compare(this->userName_, Qt::CaseInsensitive) &&
-            !message->flags.has(MessageFlag::Whisper))
+
+        bool isSelectedUser = message->loginName.compare(
+                                  this->userName_, Qt::CaseInsensitive) == 0;
+
+        if (isSelectedUser && !message->flags.has(MessageFlag::Whisper))
         {
             channelPtr->addMessage(message);
         }
