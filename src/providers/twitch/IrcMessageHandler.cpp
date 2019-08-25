@@ -196,6 +196,10 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
             {
                 roomModes.broadcasterLang = it.value().toString();
             }
+            if ((it = tags.find("followers-only")) != tags.end())
+            {
+                roomModes.followerOnly = it.value().toInt();
+            }
             twitchChannel->setRoomModes(roomModes);
         }
 
