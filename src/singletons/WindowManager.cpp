@@ -338,7 +338,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
                         .exec() == QMessageBox::Yes;
             }
 
-            if ((!outOfBounds || !should.value()) && x != -1 && y != -1 &&
+            if ((!outOfBounds || !should.has_value()) && x != -1 && y != -1 &&
                 width != -1 && height != -1)
             {
                 // Have to offset x by one because qt moves the window 1px too
