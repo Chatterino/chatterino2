@@ -26,9 +26,9 @@
 #include <QMessageBox>
 #include <QSaveFile>
 #include <QScreen>
+#include <boost/optional.hpp>
 
 #include <chrono>
-#include <optional>
 
 #define SETTINGS_FILENAME "/window-layout.json"
 
@@ -44,9 +44,9 @@ namespace {
         return windows_arr;
     }
 
-    std::optional<bool> &shouldMoveOutOfBoundsWindow()
+    boost::optional<bool> &shouldMoveOutOfBoundsWindow()
     {
-        static std::optional<bool> x;
+        static boost::optional<bool> x;
         return x;
     }
 }  // namespace
