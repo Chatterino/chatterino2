@@ -102,6 +102,8 @@ void Updates::installUpdates()
                     this->setStatus_(WriteFileFailed);
                     return Failure;
                 }
+                file.flush();
+                file.close();
 
                 QProcess::startDetached(
                     combinePath(QCoreApplication::applicationDirPath(),
@@ -160,6 +162,7 @@ void Updates::installUpdates()
                     QDesktopServices::openUrl(this->updateExe_);
                     return Failure;
                 }
+                file.flush();
                 file.close();
 
                 if (QProcess::startDetached(filename))
