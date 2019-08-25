@@ -54,6 +54,18 @@ namespace {
                 text += "emote, ";
             if (modes->submode)
                 text += "sub, ";
+            if (modes->followerOnly != -1)
+            {
+                if (modes->followerOnly != 0)
+                {
+                    text += QString("follower(%1 minutes), ")
+                                .arg(QString::number(modes->followerOnly));
+                }
+                else
+                {
+                    text += QString("follower, ");
+                }
+            }
         }
 
         if (text.length() > 2)
@@ -344,7 +356,9 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     auto setEmote = new QAction("Emote only", this);
     auto setSlow = new QAction("Slow", this);
     auto setR9k = new QAction("R9K", this);
+    auto setFollowers = new QAction("Followers only", this);
 
+    setFollowers->setCheckable(true);
     setSub->setCheckable(true);
     setEmote->setCheckable(true);
     setSlow->setCheckable(true);
@@ -354,9 +368,10 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     menu->addAction(setSub);
     menu->addAction(setSlow);
     menu->addAction(setR9k);
+    menu->addAction(setFollowers);
 
     this->managedConnections_.push_back(this->modeUpdateRequested_.connect(  //
-        [this, setSub, setEmote, setSlow, setR9k]() {
+        [this, setSub, setEmote, setSlow, setR9k, setFollowers]() {
             auto twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
             if (twitchChannel == nullptr)
@@ -371,6 +386,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
             setSlow->setChecked(roomModes->slowMode);
             setEmote->setChecked(roomModes->emoteOnly);
             setSub->setChecked(roomModes->submode);
+            setFollowers->setChecked(roomModes->followerOnly != -1);
         }));
 
     auto toggle = [this](const QString &command, QAction *action) mutable {
@@ -407,6 +423,30 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
             setSlow->setChecked(false);
         }
     });
+
+    QObject::connect(
+        setFollowers, &QAction::triggered, this, [setFollowers, this]() {
+            if (!setFollowers->isChecked())
+            {
+                this->split_->getChannel().get()->sendMessage("/followersoff");
+                setFollowers->setChecked(false);
+                return;
+            };
+            auto ok = bool();
+            auto time = QInputDialog::getText(
+                this, "", "Time:", QLineEdit::Normal, "15m", &ok,
+                Qt::FramelessWindowHint,
+                Qt::ImhLowercaseOnly | Qt::ImhPreferNumbers);
+            if (ok)
+            {
+                this->split_->getChannel().get()->sendMessage(
+                    QString("/followers %1").arg(time));
+            }
+            else
+            {
+                setFollowers->setChecked(false);
+            }
+        });
 
     QObject::connect(
         setR9k, &QAction::triggered, this,

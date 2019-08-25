@@ -49,7 +49,7 @@ public:
         bool submode = false;
         bool r9k = false;
         bool emoteOnly = false;
-        //        int folowerOnly = 0;
+        int followerOnly = -1;
         int slowMode = 0;
         QString broadcasterLang;
     };
