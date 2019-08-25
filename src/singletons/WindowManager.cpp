@@ -19,16 +19,37 @@
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <QDebug>
+#include <QDesktopWidget>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
+#include <QMessageBox>
 #include <QSaveFile>
+#include <QScreen>
 
 #include <chrono>
+#include <optional>
 
 #define SETTINGS_FILENAME "/window-layout.json"
 
 namespace chatterino {
+namespace {
+    QJsonArray loadWindowArray(const QString &settingsPath)
+    {
+        QFile file(settingsPath);
+        file.open(QIODevice::ReadOnly);
+        QByteArray data = file.readAll();
+        QJsonDocument document = QJsonDocument::fromJson(data);
+        QJsonArray windows_arr = document.object().value("windows").toArray();
+        return windows_arr;
+    }
+
+    std::optional<bool> &shouldMoveOutOfBoundsWindow()
+    {
+        static std::optional<bool> x;
+        return x;
+    }
+}  // namespace
 
 using SplitNode = SplitContainer::Node;
 using SplitDirection = SplitContainer::Direction;
@@ -255,7 +276,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
     // load file
     QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QJsonArray windows_arr = this->loadWindowArray(settingsPath);
+    QJsonArray windows_arr = loadWindowArray(settingsPath);
 
     // "deserialize"
     for (QJsonValue window_val : windows_arr)
@@ -295,10 +316,34 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
             int width = window_obj.value("width").toInt(-1);
             int height = window_obj.value("height").toInt(-1);
 
-            if (x != -1 && y != -1 && width != -1 && height != -1)
+            QRect geometry{x, y, width, height};
+
+            // out of bounds windows
+            auto screens = qApp->screens();
+            bool outOfBounds = std::none_of(
+                screens.begin(), screens.end(), [&](QScreen *screen) {
+                    return screen->geometry().contains(geometry);
+                });
+
+            // ask if move into bounds
+            auto &&should = shouldMoveOutOfBoundsWindow();
+            if (outOfBounds && !should)
+            {
+                should =
+                    QMessageBox(QMessageBox::Icon::Warning,
+                                "Windows out of bounds",
+                                "Some windows were detected out of bounds. "
+                                "Should they be moved into bounds?",
+                                QMessageBox::Yes | QMessageBox::No)
+                        .exec() == QMessageBox::Yes;
+            }
+
+            if ((!outOfBounds || !should.value()) && x != -1 && y != -1 &&
+                width != -1 && height != -1)
             {
                 // Have to offset x by one because qt moves the window 1px too
-                // far to the left
+                // far to the left:w
+
                 window.setGeometry(x + 1, y, width, height);
             }
         }
@@ -610,16 +655,6 @@ int WindowManager::getGeneration() const
 void WindowManager::incGeneration()
 {
     this->generation_++;
-}
-
-QJsonArray WindowManager::loadWindowArray(const QString &settingsPath)
-{
-    QFile file(settingsPath);
-    file.open(QIODevice::ReadOnly);
-    QByteArray data = file.readAll();
-    QJsonDocument document = QJsonDocument::fromJson(data);
-    QJsonArray windows_arr = document.object().value("windows").toArray();
-    return windows_arr;
 }
 
 }  // namespace chatterino
