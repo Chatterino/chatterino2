@@ -555,11 +555,11 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
     addButton(Unban, "unban", getApp()->resources->buttons.unban);
 
     const auto timeoutButtons = getSettings()->timeoutButtons.getValue();
-    std::vector<std::pair<QString, int>> t(8);  // Timeouts.
+    std::vector<TimeoutButton> t(8);  // Timeouts.
     auto i = 0;
     std::generate(t.begin(), t.end(), [&] {
         const auto tButton = timeoutButtons[i];
-        std::pair<QString, int> pair = std::make_pair(
+        const auto pair = std::make_pair(
             QString::number(tButton.second) + tButton.first,
             calculateTimeoutDuration(tButton.second, tButton.first));
         i++;
