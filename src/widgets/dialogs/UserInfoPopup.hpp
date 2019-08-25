@@ -37,7 +37,7 @@ private:
     QString userName_;
     QString userId_;
     ChannelPtr channel_;
-    ChannelView *latestMessages_;
+    ChannelView *latestMessages_{};
 
     pajlada::Signals::NoArgSignal userStateChanged_;
 

@@ -30,14 +30,14 @@
 
 namespace {
 
-const auto kBorderColor = QColor(255, 255, 255, 80);
+const auto borderColor = QColor(255, 255, 255, 80);
 
-int calculateTimeoutDuration(int durationPerUnit, const QString &unit)
+int calculateTimeoutDuration(TimeoutButton timeout)
 {
     static const QMap<QString, int> durations{
         {"s", 1}, {"m", 60}, {"h", 3600}, {"d", 86400}, {"w", 604800},
     };
-    return durationPerUnit * durations[unit];
+    return timeout.second * durations[timeout.first];
 }
 
 }  // namespace
@@ -104,8 +104,8 @@ UserInfoPopup::UserInfoPopup()
         auto usercard = user.emplace<EffectLabel2>(this);
         usercard->getLabel().setText("Usercard");
 
-        usercard->setBorderColor(kBorderColor);
-        viewLogs->setBorderColor(kBorderColor);
+        usercard->setBorderColor(borderColor);
+        viewLogs->setBorderColor(borderColor);
 
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(app->resources->buttons.mod);
@@ -528,16 +528,14 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             a->getLabel().setText(QString::number(item.second) + item.first);
 
             a->setScaleIndependantSize(buttonWidth, buttonHeight);
-            a->setBorderColor(kBorderColor);
+            a->setBorderColor(borderColor);
 
-            const auto pair = std::make_pair(
-                Action::Timeout,
-                calculateTimeoutDuration(item.second, item.first));
+            const auto pair =
+                std::make_pair(Action::Timeout, calculateTimeoutDuration(item));
 
             QObject::connect(
-                a.getElement(), &EffectLabel2::leftClicked, [this, pair] {
-                    this->buttonClicked.invoke(pair);
-                });
+                a.getElement(), &EffectLabel2::leftClicked,
+                [this, pair] { this->buttonClicked.invoke(pair); });
         }
     };
 
@@ -560,7 +558,8 @@ void UserInfoPopup::fillLatestMessages()
 {
     LimitedQueueSnapshot<MessagePtr> snapshot =
         this->channel_->getMessageSnapshot();
-    ChannelPtr channelPtr(new Channel("search", Channel::Type::None));
+    ChannelPtr channelPtr(
+        new Channel(this->channel_->getName(), Channel::Type::None));
     for (size_t i = 0; i < snapshot.size(); i++)
     {
         MessagePtr message = snapshot[i];
