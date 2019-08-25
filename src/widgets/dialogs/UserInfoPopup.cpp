@@ -24,8 +24,6 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#include <algorithm>
-
 #define TEXT_FOLLOWERS "Followers: "
 #define TEXT_VIEWS "Views: "
 #define TEXT_CREATED "Created: "
@@ -494,80 +492,58 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
 
     layout->setSpacing(16);
 
-    auto addButton = [&](Action action, const QString &text,
-                         const QPixmap &pixmap) {
+    const auto addLayout = [&](const QString &text) {
         auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
+        auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
+        title->addStretch(1);
+        auto label = title.emplace<Label>(text);
+        label->setStyleSheet("color: #BBB");
+        label->setHasOffset(false);
+        title->addStretch(1);
+
+        auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
+        hbox->setSpacing(0);
+        return hbox;
+    };
+
+    const auto addButton = [&](Action action, const QString &title,
+                               const QPixmap &pixmap) {
+        auto button = addLayout(title).emplace<Button>(nullptr);
+        button->setPixmap(pixmap);
+        button->setScaleIndependantSize(buttonHeight, buttonHeight);
+        button->setBorderColor(QColor(255, 255, 255, 127));
+
+        QObject::connect(
+            button.getElement(), &Button::leftClicked, [this, action] {
+                this->buttonClicked.invoke(std::make_pair(action, -1));
+            });
+    };
+
+    const auto addTimeouts = [&](const QString &title) {
+        auto hbox = addLayout(title);
+
+        for (const auto &item : getSettings()->timeoutButtons.getValue())
         {
-            auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-            title->addStretch(1);
-            auto label = title.emplace<Label>(text);
-            label->setHasOffset(false);
-            label->setStyleSheet("color: #BBB");
-            title->addStretch(1);
+            auto a = hbox.emplace<EffectLabel2>();
+            a->getLabel().setText(QString::number(item.second) + item.first);
 
-            auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            hbox->setSpacing(0);
-            {
-                auto button = hbox.emplace<Button>(nullptr);
-                button->setPixmap(pixmap);
-                button->setScaleIndependantSize(buttonHeight, buttonHeight);
-                button->setBorderColor(QColor(255, 255, 255, 127));
+            a->setScaleIndependantSize(buttonWidth, buttonHeight);
+            a->setBorderColor(kBorderColor);
 
-                QObject::connect(
-                    button.getElement(), &Button::leftClicked, [this, action] {
-                        this->buttonClicked.invoke(std::make_pair(action, -1));
-                    });
-            }
+            const auto pair = std::make_pair(
+                Action::Timeout,
+                calculateTimeoutDuration(item.second, item.first));
+
+            QObject::connect(
+                a.getElement(), &EffectLabel2::leftClicked, [this, pair] {
+                    this->buttonClicked.invoke(pair);
+                });
         }
     };
 
-    auto addTimeouts = [&](const QString &title_,
-                           const std::vector<std::pair<QString, int>> &items) {
-        auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
-        {
-            auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-            title->addStretch(1);
-            auto label = title.emplace<Label>(title_);
-            label->setStyleSheet("color: #BBB");
-            label->setHasOffset(false);
-            title->addStretch(1);
-
-            auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            hbox->setSpacing(0);
-
-            for (const auto &item : items)
-            {
-                auto a = hbox.emplace<EffectLabel2>();
-                a->getLabel().setText(std::get<0>(item));
-
-                a->setScaleIndependantSize(buttonWidth, buttonHeight);
-                a->setBorderColor(kBorderColor);
-
-                QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
-                                 [this, timeout = std::get<1>(item)] {
-                                     this->buttonClicked.invoke(std::make_pair(
-                                         Action::Timeout, timeout));
-                                 });
-            }
-        }
-    };
-
-    addButton(Unban, "unban", getApp()->resources->buttons.unban);
-
-    const auto timeoutButtons = getSettings()->timeoutButtons.getValue();
-    std::vector<TimeoutButton> t(8);  // Timeouts.
-    auto i = 0;
-    std::generate(t.begin(), t.end(), [&] {
-        const auto tButton = timeoutButtons[i];
-        const auto pair = std::make_pair(
-            QString::number(tButton.second) + tButton.first,
-            calculateTimeoutDuration(tButton.second, tButton.first));
-        i++;
-        return pair;
-    });
-
-    addTimeouts("Timeouts", t);
-    addButton(Ban, "ban", getApp()->resources->buttons.ban);
+    addButton(Unban, "Unban", getApp()->resources->buttons.unban);
+    addTimeouts("Timeouts");
+    addButton(Ban, "Ban", getApp()->resources->buttons.ban);
 }
 
 void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent *)
