@@ -40,6 +40,32 @@ int calculateTimeoutDuration(TimeoutButton timeout)
     return timeout.second * durations[timeout.first];
 }
 
+chatterino::ChannelPtr filterMessages(const QString &userName,
+                                      chatterino::ChannelPtr channel)
+{
+    chatterino::LimitedQueueSnapshot<chatterino::MessagePtr> snapshot =
+        channel->getMessageSnapshot();
+
+    chatterino::ChannelPtr channelPtr(new chatterino::Channel(
+        channel->getName(), chatterino::Channel::Type::None));
+
+    for (size_t i = 0; i < snapshot.size(); i++)
+    {
+        chatterino::MessagePtr message = snapshot[i];
+
+        bool isSelectedUser =
+            message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
+
+        if (isSelectedUser &&
+            !message->flags.has(chatterino::MessageFlag::Whisper))
+        {
+            channelPtr->addMessage(message);
+        }
+    }
+
+    return channelPtr;
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -363,7 +389,8 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 
     this->userStateChanged_.invoke();
 
-    this->fillLatestMessages();
+    this->latestMessages_->setChannel(
+        filterMessages(this->userName_, this->channel_));
 }
 
 void UserInfoPopup::updateUserData()
@@ -552,28 +579,6 @@ void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent *)
 
     //    painter.drawLine(0, this->height() / 2, this->width(), this->height()
     //    / 2);
-}
-
-void UserInfoPopup::fillLatestMessages()
-{
-    LimitedQueueSnapshot<MessagePtr> snapshot =
-        this->channel_->getMessageSnapshot();
-    ChannelPtr channelPtr(
-        new Channel(this->channel_->getName(), Channel::Type::None));
-    for (size_t i = 0; i < snapshot.size(); i++)
-    {
-        MessagePtr message = snapshot[i];
-
-        bool isSelectedUser = message->loginName.compare(
-                                  this->userName_, Qt::CaseInsensitive) == 0;
-
-        if (isSelectedUser && !message->flags.has(MessageFlag::Whisper))
-        {
-            channelPtr->addMessage(message);
-        }
-    }
-
-    this->latestMessages_->setChannel(channelPtr);
 }
 
 }  // namespace chatterino
