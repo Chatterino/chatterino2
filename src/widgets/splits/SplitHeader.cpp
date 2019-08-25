@@ -59,8 +59,10 @@ namespace {
                 if (modes->followerOnly != 0)
                 {
                     text += QString("follower(%1 minutes), ")
-                            .arg(QString::number(modes->followerOnly));
-                }else {
+                                .arg(QString::number(modes->followerOnly));
+                }
+                else
+                {
                     text += QString("follower, ");
                 }
             }
@@ -422,26 +424,29 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
         }
     });
 
-    QObject::connect(setFollowers, &QAction::triggered, this, [setFollowers, this]() {
-        if (!setFollowers->isChecked())
-        {
-            this->split_->getChannel().get()->sendMessage("/followersoff");
-            setFollowers->setChecked(false);
-            return;
-        };
-        auto ok = bool();
-        auto time = QInputDialog::getText(this, "", "Time:", QLineEdit::Normal, "15m", &ok,
-                                          Qt::FramelessWindowHint, Qt::ImhLowercaseOnly|Qt::ImhPreferNumbers);
-        if (ok)
-        {
-            this->split_->getChannel().get()->sendMessage(
-                QString("/followers %1").arg(time));
-        }
-        else
-        {
-            setFollowers->setChecked(false);
-        }
-    });
+    QObject::connect(
+        setFollowers, &QAction::triggered, this, [setFollowers, this]() {
+            if (!setFollowers->isChecked())
+            {
+                this->split_->getChannel().get()->sendMessage("/followersoff");
+                setFollowers->setChecked(false);
+                return;
+            };
+            auto ok = bool();
+            auto time = QInputDialog::getText(
+                this, "", "Time:", QLineEdit::Normal, "15m", &ok,
+                Qt::FramelessWindowHint,
+                Qt::ImhLowercaseOnly | Qt::ImhPreferNumbers);
+            if (ok)
+            {
+                this->split_->getChannel().get()->sendMessage(
+                    QString("/followers %1").arg(time));
+            }
+            else
+            {
+                setFollowers->setChecked(false);
+            }
+        });
 
     QObject::connect(
         setR9k, &QAction::triggered, this,
