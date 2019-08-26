@@ -45,7 +45,7 @@ TitleLabel *SettingsLayout::addTitle(const QString &title)
 
 TitleLabel2 *SettingsLayout::addTitle2(const QString &title)
 {
-    auto label = new TitleLabel2(title);
+    auto label = new TitleLabel2(title + ":");
 
     this->addSpacing(16);
 
@@ -273,7 +273,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                         "Apple", "Google", "Messenger"},
                        s.emojiSet);
 
-    layout.addTitle("Visible badges:");
+    layout.addTitle("Visible badges");
     layout.addCheckbox("Authority (staff, admin)",
                        getSettings()->showBadgesGlobalAuthority);
     layout.addCheckbox("Channel (broadcaster, moderator)",
@@ -283,14 +283,14 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        getSettings()->showBadgesVanity);
     layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
 
-    layout.addTitle("Chat title:");
+    layout.addTitle("Chat title");
     layout.addWidget(new QLabel("In live channels show:"));
     layout.addCheckbox("Uptime", s.headerUptime);
     layout.addCheckbox("Viewer count", s.headerViewerCount);
     layout.addCheckbox("Category", s.headerGame);
     layout.addCheckbox("Title", s.headerStreamTitle);
 
-    layout.addTitle("Miscellaneous:");
+    layout.addTitle("Miscellaneous");
 
     //layout.addWidget(makeOpenSettingDirButton());
     layout.addCheckbox("Mention users with a comma (User,)",
