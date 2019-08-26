@@ -58,12 +58,12 @@ namespace {
             {
                 if (modes->followerOnly != 0)
                 {
-                    text += QString("follower(%1 minutes), ")
+                    text += QString("follow(%1m), ")
                                 .arg(QString::number(modes->followerOnly));
                 }
                 else
                 {
-                    text += QString("follower, ");
+                    text += QString("follow, ");
                 }
             }
         }
