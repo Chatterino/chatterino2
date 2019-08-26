@@ -325,7 +325,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
             auto screens = qApp->screens();
             bool outOfBounds = std::none_of(
                 screens.begin(), screens.end(), [&](QScreen *screen) {
-                    return screen->geometry().contains(geometry);
+                    return screen->availableGeometry().intersects(geometry);
                 });
 
             // ask if move into bounds
