@@ -44,8 +44,11 @@ HighlightingPage::HighlightingPage()
         auto tabs = layout.emplace<QTabWidget>();
         {
             // HIGHLIGHTS
-            auto highlights = tabs.appendTab(new QVBoxLayout, "Phrases");
+            auto highlights = tabs.appendTab(new QVBoxLayout, "Messages");
             {
+                highlights.emplace<QLabel>("Messages can be highlighted if "
+                                           "they match a certain pattern.");
+
                 EditableModelView *view =
                     highlights
                         .emplace<EditableModelView>(
@@ -75,6 +78,8 @@ HighlightingPage::HighlightingPage()
 
             auto pingUsers = tabs.appendTab(new QVBoxLayout, "Users");
             {
+                pingUsers.emplace<QLabel>(
+                    "Messages from a certain user can be highlighted.");
                 EditableModelView *view =
                     pingUsers
                         .emplace<EditableModelView>(
@@ -106,6 +111,9 @@ HighlightingPage::HighlightingPage()
             auto disabledUsers =
                 tabs.appendTab(new QVBoxLayout, "Excluded Users");
             {
+                disabledUsers.emplace<QLabel>(
+                    "This is a list of users (e.g. bots) whose messages should "
+                    "<u>not</u> be highlighted.");
                 EditableModelView *view =
                     disabledUsers
                         .emplace<EditableModelView>(

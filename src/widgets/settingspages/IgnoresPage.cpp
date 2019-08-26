@@ -19,7 +19,7 @@
 #include <QVBoxLayout>
 
 // clang-format off
-#define INFO "/ignore <user> in chat ignores a user\n/unignore <user> in chat unignores a user"
+#define INFO "/ignore <user> in chat ignores a user.\n/unignore <user> in chat unignores a user.\nYou can also click on a user to open the usercard."
 // clang-format on
 
 namespace chatterino {
@@ -35,17 +35,15 @@ IgnoresPage::IgnoresPage()
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
     auto tabs = layout.emplace<QTabWidget>();
 
-    addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Phrases"));
+    addPhrasesTab(tabs.appendTab(new QVBoxLayout, "Messages"));
     addUsersTab(*this, tabs.appendTab(new QVBoxLayout, "Users"),
                 this->userListModel_);
-
-    auto label = layout.emplace<QLabel>(INFO);
-    label->setWordWrap(true);
-    label->setStyleSheet("color: #BBB");
 }
 
 void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 {
+    layout.emplace<QLabel>("Messages can be ignored if "
+                           "they match a certain pattern.");
     EditableModelView *view =
         layout
             .emplace<EditableModelView>(getApp()->ignores->createModel(nullptr))
@@ -65,7 +63,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 
     view->addButtonPressed.connect([] {
         getApp()->ignores->phrases.appendItem(
-            IgnorePhrase{"my phrase", false, false,
+            IgnorePhrase{"my pattern", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
     });
 }
@@ -73,6 +71,8 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
                  QStringListModel &userModel)
 {
+    auto label = users.emplace<QLabel>(INFO);
+    label->setWordWrap(true);
     users.append(page.createCheckBox("Enable twitch ignored users",
                                      getSettings()->enableTwitchIgnoredUsers));
 
@@ -106,6 +106,7 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
         addremove->addStretch(1);
     }*/
 
+    users.emplace<QLabel>("List of ignored users:");
     users.emplace<QListView>()->setModel(&userModel);
 }
 
