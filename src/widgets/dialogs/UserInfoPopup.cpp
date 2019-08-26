@@ -14,6 +14,7 @@
 #include "widgets/dialogs/LogsPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -24,6 +25,7 @@
 #define TEXT_FOLLOWERS "Followers: "
 #define TEXT_VIEWS "Views: "
 #define TEXT_CREATED "Created: "
+#define TEXT_USER_ID "User ID: "
 
 namespace chatterino {
 
@@ -68,6 +70,10 @@ UserInfoPopup::UserInfoPopup()
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED)
                 .assign(&this->ui_.createdDateLabel);
+            if (getSettings()->showUserIDsInUsercards)
+            {
+                            vbox.emplace<Label>(TEXT_USER_ID).assign(&this->ui_.userIDLabel);
+                        }
         }
     }
 
@@ -347,6 +353,10 @@ void UserInfoPopup::updateUserData()
         auto currentUser = getApp()->accounts->twitch.getCurrent();
 
         this->userId_ = id;
+
+        this->ui_.userIDLabel->setText(TEXT_USER_ID + this->userId_);
+        // don't wait for the request to complete, just put the user id in the card
+        // right away
 
         QString url("https://api.twitch.tv/kraken/channels/" + id);
 
