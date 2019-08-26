@@ -222,7 +222,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
-    layout.addCheckbox("Random username color for users who never set a color.",
+    layout.addCheckbox("Random username color for users who never set a color",
                        s.colorizeNicknames);
     layout.addDropdown<QString>(
         "Timestamps", {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a"},
@@ -249,7 +249,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) { return fuzzyToInt(args.value, 0); });
     layout.addDropdown<int>(
-        "Stack timeouts", {"Stack", "Stack unless timed out", "Don't stack"},
+        "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle, [](int index) { return index; },
         [](auto args) { return args.index; }, false);
 
@@ -310,7 +310,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) { return fuzzyToFloat(args.value, 63.f); });
     layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
-    layout.addCheckbox("Double click to open links and other elements in chat.",
+    layout.addCheckbox("Double click to open links and other elements in chat",
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
     layout.addCheckbox("Show live indicator in tabs", s.showTabLive);
@@ -323,8 +323,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
         s.prefixOnlyEmoteCompletion);
-
-    layout.addSpacing(16);
 
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
     layout.addCheckbox("Highlight received inline whispers",
