@@ -298,15 +298,6 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
         Window &window = createWindow(type, false);
 
-        if (window_obj.value("state") == "maximized")
-        {
-            window.setWindowState(Qt::WindowMaximized);
-        }
-        else if (window_obj.value("state") == "minimized")
-        {
-            window.setWindowState(Qt::WindowMinimized);
-        }
-
         if (type == WindowType::Main)
         {
             mainWindow_ = &window;
@@ -403,6 +394,15 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
             }
         }
         window.show();
+
+        if (window_obj.value("state") == "minimized")
+        {
+            window.setWindowState(Qt::WindowMinimized);
+        }
+        else if (window_obj.value("state") == "maximized")
+        {
+            window.setWindowState(Qt::WindowMaximized);
+        }
     }
 
     if (mainWindow_ == nullptr)
