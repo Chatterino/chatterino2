@@ -56,6 +56,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
         QHeaderView::Fixed);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         0, QHeaderView::Stretch);
+    view->addRegexHelpLink();
 
     QTimer::singleShot(1, [view] {
         view->getTableView()->resizeColumnsToContents();

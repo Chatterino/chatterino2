@@ -24,8 +24,7 @@
 #define HIGHLIGHT_MSG "Highlight messages containing your name"
 #define PLAY_SOUND "Play sound when your name is mentioned"
 #define FLASH_TASKBAR "Flash taskbar when your name is mentioned"
-#define ALWAYS_PLAY \
-    "Always play highlight sound (Even if Chatterino is focused)"
+#define ALWAYS_PLAY "Play highlight sound even when Chatterino is focused"
 
 namespace chatterino {
 
@@ -53,6 +52,7 @@ HighlightingPage::HighlightingPage()
                             app->highlights->createModel(nullptr))
                         .getElement();
 
+                view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -81,6 +81,7 @@ HighlightingPage::HighlightingPage()
                             app->highlights->createUserModel(nullptr))
                         .getElement();
 
+                view->addRegexHelpLink();
                 view->setTitles({"Username", "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -111,6 +112,7 @@ HighlightingPage::HighlightingPage()
                             app->highlights->createBlacklistModel(nullptr))
                         .getElement();
 
+                view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Enable\nregex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);

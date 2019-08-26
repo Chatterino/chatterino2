@@ -6,6 +6,7 @@
 
 class QAbstractTableModel;
 class QTableView;
+class QHBoxLayout;
 
 namespace chatterino {
 
@@ -21,9 +22,13 @@ public:
 
     pajlada::Signals::NoArgSignal addButtonPressed;
 
+    void addCustomButton(QWidget *widget);
+    void addRegexHelpLink();
+
 private:
-    QTableView *tableView_;
-    QAbstractTableModel *model_;
+    QTableView *tableView_{};
+    QAbstractTableModel *model_{};
+    QHBoxLayout *buttons_{};
 };
 
 }  // namespace chatterino

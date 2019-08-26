@@ -20,9 +20,7 @@
 #include <QTextEdit>
 
 // clang-format off
-#define TEXT "{1} => first word, {2} => second word, ...\n"\
-    "{1+} => first word and after, {2+} => second word and after, ...\n"\
-    "{{1} => {1}"
+#define TEXT "{1} => first word &nbsp;&nbsp;&nbsp; {1+} => first word and after &nbsp;&nbsp;&nbsp; {{ => { &nbsp;&nbsp;&nbsp; <a href='https://chatterino.com/help/commands'>more info</a>"
 // clang-format on
 
 namespace chatterino {
@@ -55,11 +53,10 @@ CommandPage::CommandPage()
 
     if (QFile(c1settingsPath()).exists())
     {
-        auto box = layout.emplace<QHBoxLayout>().withoutMargin();
-        auto button =
-            box.emplace<QPushButton>("Import commands from Chatterino 1");
+        auto button = new QPushButton("Import commands from Chatterino 1");
+        view->addCustomButton(button);
 
-        QObject::connect(button.getElement(), &QPushButton::clicked, this, [] {
+        QObject::connect(button, &QPushButton::clicked, this, [] {
             QFile c1settings = c1settingsPath();
             c1settings.open(QIODevice::ReadOnly);
             for (auto line : QString(c1settings.readAll())
@@ -73,7 +70,6 @@ CommandPage::CommandPage()
                 }
             }
         });
-        box->addStretch();
     }
 
     layout.append(
@@ -83,6 +79,7 @@ CommandPage::CommandPage()
     QLabel *text = layout.emplace<QLabel>(TEXT).getElement();
     text->setWordWrap(true);
     text->setStyleSheet("color: #bbb");
+    text->setOpenExternalLinks(true);
 
     // ---- end of layout
     this->commandsEditTimer_.setSingleShot(true);
