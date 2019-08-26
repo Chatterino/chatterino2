@@ -11,6 +11,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
+#include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 
 #define CHROME_EXTENSION_LINK                                           \
@@ -20,6 +21,16 @@
     "https://addons.mozilla.org/en-US/firefox/addon/chatterino-native-host/"
 
 namespace chatterino {
+namespace {
+    QPushButton *makeOpenSettingDirButton()
+    {
+        auto button = new QPushButton("Open settings directory");
+        QObject::connect(button, &QPushButton::clicked, [] {
+            QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+        });
+        return button;
+    }
+}  // namespace
 
 TitleLabel *SettingsLayout::addTitle(const QString &title)
 {
@@ -43,18 +54,21 @@ TitleLabel2 *SettingsLayout::addTitle2(const QString &title)
 }
 
 QCheckBox *SettingsLayout::addCheckbox(const QString &text,
-                                       BoolSetting &setting)
+                                       BoolSetting &setting, bool inverse)
 {
     auto check = new QCheckBox(text);
 
     // update when setting changes
     setting.connect(
-        [check](const bool &value, auto) { check->setChecked(value); },
+        [inverse, check](const bool &value, auto) {
+            check->setChecked(inverse ^ value);
+        },
         this->managedConnections_);
 
     // update setting on toggle
-    QObject::connect(check, &QCheckBox::toggled, this,
-                     [&setting](bool state) { setting = state; });
+    QObject::connect(
+        check, &QCheckBox::toggled, this,
+        [&setting, inverse](bool state) { setting = inverse ^ state; });
 
     this->addWidget(check);
     return check;
@@ -145,7 +159,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 {
     auto &s = *getSettings();
 
-    layout.addTitle("Appearance");
+    layout.addTitle("Interface");
     layout.addDropdown("Theme", {"White", "Light", "Dark", "Black"},
                        getApp()->themes->themeName);
     layout.addDropdown<QString>(
@@ -169,12 +183,14 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val) + "x";
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+    layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost);
 #ifdef USEWINSDK
     layout.addCheckbox("Start with Windows", s.autorun);
 #endif
 
-    layout.addTitle("Interface");
+    layout.addTitle("Chat");
+
     layout.addDropdown<float>(
         "Mouse scroll speed", {"0.5x", "0.75x", "Default", "1.5x", "2x"},
         s.mouseScrollMultiplier,
@@ -186,21 +202,42 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
-    layout.addCheckbox("Smooth scrolling on new messages.",
+    layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
-    layout.addCheckbox("Pause chat while hovering", s.pauseChatOnHover);
-    layout.addCheckbox("Show tab close button", s.showTabCloseButton);
-    layout.addCheckbox("Show input when empty", s.showEmptyInput);
-    layout.addCheckbox("Show input message length", s.showMessageLength);
-    layout.addCheckbox("Hide preferences button (ctrl+p to show)",
-                       s.hidePreferencesButton);
-    layout.addCheckbox("Hide user button", s.hideUserButton);
+    layout.addCheckbox("Pause on hover", s.pauseChatOnHover);
+    layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
+    layout.addCheckbox("Show message length while typing", s.showMessageLength);
+    if (!BaseWindow::supportsCustomWindowFrame())
+    {
+        layout.addCheckbox("Show preferences button (ctrl+p to show)",
+                           s.hidePreferencesButton, true);
+        layout.addCheckbox("Show user button", s.hideUserButton, true);
+    }
 
     layout.addTitle("Messages");
-    layout.addCheckbox("Timestamps", s.showTimestamps);
-    layout.addDropdown("Timestamp format",
-                       {"h:mm", "hh:mm", "h:mm a", "hh:mm a"},
-                       s.timestampFormat, true);
+    layout.addCheckbox("Seperate with lines", s.separateMessages);
+    layout.addCheckbox("Alternate background color", s.alternateMessages);
+    // layout.addCheckbox("Mark last message you read");
+    // layout.addDropdown("Last read message style", {"Default"});
+    layout.addCheckbox("Show deleted messages", s.hideModerated, true);
+    layout.addCheckbox("Show moderation messages", s.hideModerationActions,
+                       true);
+    layout.addCheckbox("Random username color for users who never set a color.",
+                       s.colorizeNicknames);
+    layout.addDropdown<QString>(
+        "Timestamps", {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a"},
+        s.timestampFormat,
+        [](auto val) {
+            return getSettings()->showTimestamps.getValue()
+                       ? val
+                       : QString("Disable");
+        },
+        [](auto args) {
+            getSettings()->showTimestamps.setValue(args.index != 0);
+
+            return args.index == 0 ? getSettings()->timestampFormat.getValue()
+                                   : args.value;
+        });
     layout.addDropdown<int>(
         "Collapse messages",
         {"Never", "After 2 lines", "After 3 lines", "After 4 lines",
@@ -211,22 +248,18 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        : QString("Never");
         },
         [](auto args) { return fuzzyToInt(args.value, 0); });
-    layout.addCheckbox("Seperate with lines", s.separateMessages);
-    layout.addCheckbox("Alternate background color", s.alternateMessages);
-    // layout.addCheckbox("Mark last message you read");
-    // layout.addDropdown("Last read message style", {"Default"});
-    layout.addCheckbox("Hide moderated messages", s.hideModerated);
-    layout.addCheckbox("Hide moderation messages", s.hideModerationActions);
-    layout.addCheckbox("Colorize gray nicknames", s.colorizeNicknames);
-    layout.addDropdown<int>("Timeout stacking style",
-                            {"Stack", "Stack unless timed out", "Don't stack"},
-                            s.timeoutStackStyle,
-                            [](int index) { return index; },
-                            [](auto args) { return args.index; }, false);
+    layout.addDropdown<int>(
+        "Stack timeouts", {"Stack", "Stack unless timed out", "Don't stack"},
+        s.timeoutStackStyle, [](int index) { return index; },
+        [](auto args) { return args.index; }, false);
 
     layout.addTitle("Emotes");
+    layout.addCheckbox("Enable", s.enableEmoteImages);
+    layout.addCheckbox("Animate", s.animateEmotes);
+    layout.addCheckbox("Animate only when Chatterino is focused",
+                       s.animationsWhenFocused);
     layout.addDropdown<float>(
-        "Emote size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
+        "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
         s.emoteScale,
         [](auto val) {
             if (val == 1)
@@ -235,38 +268,37 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val) + "x";
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
-    layout.addCheckbox("Gif animations", s.animateEmotes);
-    layout.addCheckbox("Animate only when focused", s.animationsWhenFocused);
-    layout.addCheckbox("Emote images", s.enableEmoteImages);
     layout.addDropdown("Emoji set",
                        {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
                         "Apple", "Google", "Messenger"},
                        s.emojiSet);
 
-    layout.addTitle("Badges");
-    layout.addCheckbox("Show authority badges (staff, admin)",
+    layout.addTitle("Visible badges:");
+    layout.addCheckbox("Authority (staff, admin)",
                        getSettings()->showBadgesGlobalAuthority);
-    layout.addCheckbox("Show channel badges (broadcaster, moderator)",
+    layout.addCheckbox("Channel (broadcaster, moderator)",
                        getSettings()->showBadgesChannelAuthority);
-    layout.addCheckbox("Show subscriber badges ",
-                       getSettings()->showBadgesSubscription);
-    layout.addCheckbox("Show vanity badges (prime, bits, subgifter)",
+    layout.addCheckbox("Subscriber ", getSettings()->showBadgesSubscription);
+    layout.addCheckbox("Vanity (prime, bits, subgifter)",
                        getSettings()->showBadgesVanity);
-    layout.addCheckbox("Show chatterino badges",
-                       getSettings()->showBadgesChatterino);
+    layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
 
-    layout.addTitle("Header");
-    layout.addCheckbox("Show stream uptime", s.headerUptime);
-    layout.addCheckbox("Show stream viewer count", s.headerViewerCount);
-    layout.addCheckbox("Show stream category", s.headerGame);
-    layout.addCheckbox("Show stream title", s.headerStreamTitle);
+    layout.addTitle("Chat title:");
+    layout.addWidget(new QLabel("In live channels show:"));
+    layout.addCheckbox("Uptime", s.headerUptime);
+    layout.addCheckbox("Viewer count", s.headerViewerCount);
+    layout.addCheckbox("Category", s.headerGame);
+    layout.addCheckbox("Title", s.headerStreamTitle);
 
-    layout.addTitle("Miscellaneous");
+    layout.addTitle("Miscellaneous:");
+
+    //layout.addWidget(makeOpenSettingDirButton());
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
-    layout.addCheckbox("Lowercase domains", s.lowercaseDomains);
+    layout.addCheckbox("Lowercase domains (anti-phisching)",
+                       s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addDropdown<float>(
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
@@ -293,24 +325,15 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         s.prefixOnlyEmoteCompletion);
 
     layout.addSpacing(16);
-    layout.addSeperator();
 
-    layout.addTitle2("Miscellaneous (Twitch)");
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
     layout.addCheckbox("Highlight received inline whispers",
                        s.highlightInlineWhispers);
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
 
-    /*
-    layout.addTitle2("Cache");
-    layout.addDescription("Chatterino saves files on disk to speed up loading "
-                          "times and reduce network usage.");
-    this->cachePath = layout.addDescription("%cachePath%");
-    layout.addDropdown("Cache directory", {"Automatic"});
-    */
-
-    layout.addTitle2("Browser Integration");
+#ifdef Q_OS_WIN
+    layout.addTitle("Browser Integration");
     layout.addDescription("The browser extension replaces the default "
                           "Twitch.tv chat with chatterino.");
 
@@ -318,22 +341,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         createNamedLink(CHROME_EXTENSION_LINK, "Download for Google Chrome"));
     layout.addDescription(
         createNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
-
-    /*
-    layout.addTitle2("Streamlink");
-    layout.addDescription("Streamlinks allows you to watch streams with "
-                          "desktop media players like VLC.");
-    layout.addDescription(
-        createNamedLink("https://streamlink.github.io/", "Website") + " " +
-        createNamedLink("https://github.com/streamlink/streamlink/"
-                        "releases/latest",
-                        "Download"));
-
-    layout.addDropdown("Executable path", {"Automatic"});
-    layout.addDropdown("Preferred quality", {"Choose", "Source", "High",
-                                             "Medium", "Low", "Audio only"});
-    layout.addDropdown("Command line arguments", {"..."});
-    */
+#endif
 }  // namespace chatterino
 
 void GeneralPage::initExtra()

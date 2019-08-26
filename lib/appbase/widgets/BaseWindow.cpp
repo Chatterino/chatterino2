@@ -233,10 +233,15 @@ QWidget *BaseWindow::getLayoutContainer()
 
 bool BaseWindow::hasCustomWindowFrame()
 {
+    return BaseWindow::supportsCustomWindowFrame() && this->enableCustomFrame_;
+}
+
+bool BaseWindow::supportsCustomWindowFrame()
+{
 #ifdef USEWINSDK
     static bool isWin8 = IsWindows8OrGreater();
 
-    return isWin8 && this->enableCustomFrame_;
+    return isWin8;
 #else
     return false;
 #endif

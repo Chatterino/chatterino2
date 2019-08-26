@@ -72,7 +72,9 @@ class SettingsLayout : public QVBoxLayout
 public:
     TitleLabel *addTitle(const QString &text);
     TitleLabel2 *addTitle2(const QString &text);
-    QCheckBox *addCheckbox(const QString &text, BoolSetting &setting);
+    /// @param inverse Inverses true to false and vice versa
+    QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
+                           bool inverse = false);
     ComboBox *addDropdown(const QString &text, const QStringList &items);
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           pajlada::Settings::Setting<QString> &setting,

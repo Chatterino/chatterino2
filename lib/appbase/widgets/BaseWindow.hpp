@@ -55,6 +55,8 @@ public:
 
     pajlada::Signals::NoArgSignal closing;
 
+    static bool supportsCustomWindowFrame();
+
 protected:
     virtual bool nativeEvent(const QByteArray &eventType, void *message,
                              long *result) override;
