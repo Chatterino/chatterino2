@@ -219,13 +219,16 @@ Window &WindowManager::getSelectedWindow()
     return *this->selectedWindow_;
 }
 
-Window &WindowManager::createWindow(WindowType type)
+Window &WindowManager::createWindow(WindowType type, bool show)
 {
     assertInGuiThread();
 
     auto *window = new Window(type);
     this->windows_.push_back(window);
-    window->show();
+    if (show)
+    {
+        window->show();
+    }
 
     if (type != WindowType::Main)
     {
@@ -293,7 +296,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
             type = WindowType::Popup;
         }
 
-        Window &window = createWindow(type);
+        Window &window = createWindow(type, false);
 
         if (window_obj.value("state") == "maximized")
         {
@@ -399,6 +402,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
                 colNr++;
             }
         }
+        window.show();
     }
 
     if (mainWindow_ == nullptr)

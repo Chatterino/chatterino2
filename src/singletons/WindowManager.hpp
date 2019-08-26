@@ -46,7 +46,7 @@ public:
 
     Window &getMainWindow();
     Window &getSelectedWindow();
-    Window &createWindow(WindowType type);
+    Window &createWindow(WindowType type, bool show = true);
 
     int windowCount();
     Window *windowAt(int index);
