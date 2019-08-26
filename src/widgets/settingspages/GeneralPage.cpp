@@ -278,7 +278,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) { return fuzzyToFloat(args.value, 63.f); });
     layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
-    layout.addCheckbox("Double click links to open", s.linksDoubleClickOnly);
+    layout.addCheckbox("Double click to open links and other elements in chat.",
+                       s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
     layout.addCheckbox("Show live indicator in tabs", s.showTabLive);
     layout.addDropdown<int>("Show emote preview in tooltip on hover",
