@@ -270,10 +270,10 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     }
 
     // check if default command exists
-    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+    const auto *twitchChannel = TwitchChannel::fromChannel(channel);
 
     // works only in a valid twitch channel
-    if (!dryRun && twitchChannel != nullptr)
+    if (!dryRun && !twitchChannel)
     {
         if (commandName == "/debug-args")
         {

@@ -139,7 +139,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     this->setWindowTitle("Emotes in #" + _channel->getName());
 
-    auto twitchChannel = dynamic_cast<TwitchChannel *>(_channel.get());
+    const auto twitchChannel = TwitchChannel::fromChannel(_channel);
     if (twitchChannel == nullptr)
         return;
 

@@ -582,7 +582,7 @@ void ChannelView::setChannel(ChannelPtr newChannel)
     this->queueUpdate();
 
     // Notifications
-    if (auto tc = dynamic_cast<TwitchChannel *>(newChannel.get()))
+    if (const auto tc = TwitchChannel::fromChannel(newChannel))
     {
         this->connections_.push_back(tc->liveStatusChanged.connect([this]() {
             this->liveStatusChanged.invoke();  //

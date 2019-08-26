@@ -243,7 +243,7 @@ void Split::setChannel(IndirectChannel newChannel)
     this->roomModeChangedConnection_.disconnect();
     this->indirectChannelChangedConnection_.disconnect();
 
-    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(newChannel.get().get());
+    auto *tc = TwitchChannel::fromChannel(newChannel.get());
 
     if (tc != nullptr)
     {
@@ -491,7 +491,7 @@ void Split::openInBrowser()
 {
     auto channel = this->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (const auto twitchChannel = TwitchChannel::fromChannel(channel))
     {
         QDesktopServices::openUrl("https://twitch.tv/" +
                                   twitchChannel->getName());
@@ -501,7 +501,7 @@ void Split::openInBrowser()
 void Split::openBrowserPlayer()
 {
     ChannelPtr channel = this->getChannel();
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (const auto twitchChannel = TwitchChannel::fromChannel(channel))
     {
         QDesktopServices::openUrl("https://player.twitch.tv/?channel=" +
                                   twitchChannel->getName());
@@ -638,7 +638,7 @@ void Split::openSubPage()
 {
     ChannelPtr channel = this->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (const auto twitchChannel = TwitchChannel::fromChannel(channel))
     {
         QDesktopServices::openUrl(twitchChannel->subscriptionUrl());
     }
@@ -662,7 +662,7 @@ void Split::reloadChannelAndSubscriberEmotes()
     getApp()->accounts->twitch.getCurrent()->loadEmotes();
     auto channel = this->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (const auto twitchChannel = TwitchChannel::fromChannel(channel))
     {
         twitchChannel->refreshBTTVChannelEmotes();
         twitchChannel->refreshFFZChannelEmotes();

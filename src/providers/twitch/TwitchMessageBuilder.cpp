@@ -69,7 +69,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
     const MessageParseArgs &_args)
     : channel(_channel)
-    , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
+    , twitchChannel(TwitchChannel::fromChannel(*_channel))
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())
@@ -83,7 +83,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     Channel *_channel, const Communi::IrcMessage *_ircMessage,
     const MessageParseArgs &_args, QString content, bool isAction)
     : channel(_channel)
-    , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
+    , twitchChannel(TwitchChannel::fromChannel(*_channel))
     , ircMessage(_ircMessage)
     , args(_args)
     , tags(this->ircMessage->tags())

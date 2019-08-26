@@ -54,8 +54,7 @@ void LogsPopup::getLogs()
 {
     if (this->channel_ && !this->channel_->isEmpty())
     {
-        if (auto twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->channel_.get()))
+        if (auto twitchChannel = TwitchChannel::fromChannel(this->channel_))
         {
             this->channelName_ = twitchChannel->getName();
             this->getLogviewerLogs(twitchChannel->roomId());

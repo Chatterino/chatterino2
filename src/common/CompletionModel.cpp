@@ -101,7 +101,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     if (prefix.length() < 2)
         return;
 
-    if (auto channel = dynamic_cast<TwitchChannel *>(&this->channel_))
+    if (const auto channel = TwitchChannel::fromChannel(this->channel_))
     {
         // account emotes
         if (auto account = getApp()->accounts->twitch.getCurrent())

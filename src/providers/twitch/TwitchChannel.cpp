@@ -35,7 +35,7 @@ namespace {
 
     // parseRecentMessages takes a json object and returns a vector of
     // Communi IrcMessages
-    auto parseRecentMessages(const QJsonObject &jsonRoot, ChannelPtr channel)
+    auto parseRecentMessages(const QJsonObject &jsonRoot)
     {
         QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
         std::vector<Communi::IrcMessage *> messages;
@@ -618,7 +618,7 @@ void TwitchChannel::loadRecentMessages()
             if (!shared)
                 return Failure;
 
-            auto messages = parseRecentMessages(result.parseJson(), shared);
+            auto messages = parseRecentMessages(result.parseJson());
 
             auto &handler = IrcMessageHandler::getInstance();
 
@@ -828,6 +828,20 @@ boost::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
         return badge;
 
     return boost::none;
+}
+
+TwitchChannel *TwitchChannel::fromChannel(ChannelPtr channel)
+{
+    return channel->isTwitchChannel()
+        ? dynamic_cast<TwitchChannel *>(channel.get())
+        : nullptr;
+}
+
+TwitchChannel *TwitchChannel::fromChannel(Channel &channel)
+{
+    return channel.isTwitchChannel()
+        ? dynamic_cast<TwitchChannel *>(&channel)
+        : nullptr;
 }
 
 }  // namespace chatterino

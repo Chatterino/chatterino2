@@ -160,7 +160,7 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
     }
     auto chan = app->twitch.server->getChannelOrEmpty(chanName);
 
-    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get()))
+    if (auto *twitchChannel = TwitchChannel::fromChannel(chan))
     {
         // room-id
         decltype(tags.find("xD")) it;
@@ -323,27 +323,22 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         return;
     }
 
-    QVariant _badges = message->tag("badges");
-    if (_badges.isValid())
+    if (auto *tc = TwitchChannel::fromChannel(c))
     {
-        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
-        if (tc != nullptr)
+        QVariant _badges = message->tag("badges");
+        if (_badges.isValid())
         {
             auto parsedBadges = parseBadges(_badges.toString());
             tc->setVIP(parsedBadges.contains("vip"));
             tc->setStaff(parsedBadges.contains("staff"));
         }
-    }
-
-    QVariant _mod = message->tag("mod");
-    if (_mod.isValid())
-    {
-        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
-        if (tc != nullptr)
+        QVariant _mod = message->tag("mod");
+        if (_mod.isValid())
         {
-            tc->setMod(_mod == "1");
+                tc->setMod(_mod == "1");
         }
     }
+
 }
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
@@ -631,10 +626,9 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
     auto channel = app->twitch.server->getChannelOrEmpty(
         message->parameter(0).remove(0, 1));
 
-    if (TwitchChannel *twitchChannel =
-            dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *tc = TwitchChannel::fromChannel(channel))
     {
-        twitchChannel->addJoinedUser(message->nick());
+        tc->addJoinedUser(message->nick());
     }
 }
 
@@ -644,10 +638,9 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     auto channel = app->twitch.server->getChannelOrEmpty(
         message->parameter(0).remove(0, 1));
 
-    if (TwitchChannel *twitchChannel =
-            dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto *tc = TwitchChannel::fromChannel(channel))
     {
-        twitchChannel->addPartedUser(message->nick());
+        tc->addPartedUser(message->nick());
     }
 }
 

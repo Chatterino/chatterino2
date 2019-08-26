@@ -56,6 +56,10 @@ public:
 
     void initialize();
 
+    // Static methods
+    static TwitchChannel *fromChannel(ChannelPtr channel);
+    static TwitchChannel *fromChannel(Channel &channel);
+
     // Channel methods
     virtual bool isEmpty() const override;
     virtual bool canSendMessage() const override;

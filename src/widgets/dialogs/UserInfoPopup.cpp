@@ -136,25 +136,26 @@ UserInfoPopup::UserInfoPopup()
 
         // userstate
         this->userStateChanged_.connect([this, mod, unmod]() mutable {
-            TwitchChannel *twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->channel_.get());
+            const auto *twitchChannel =
+                TwitchChannel::fromChannel(this->channel_);
+
+            if (!twitchChannel)
+                return;
 
             bool visibilityMod = false;
             bool visibilityUnmod = false;
 
-            if (twitchChannel)
-            {
-                qDebug() << this->userName_;
+            qDebug() << this->userName_;
 
-                bool isMyself =
-                    QString::compare(
-                        getApp()->accounts->twitch.getCurrent()->getUserName(),
-                        this->userName_, Qt::CaseInsensitive) == 0;
+            bool isMyself =
+                QString::compare(
+                    getApp()->accounts->twitch.getCurrent()->getUserName(),
+                    this->userName_, Qt::CaseInsensitive) == 0;
 
-                visibilityMod = twitchChannel->isBroadcaster() && !isMyself;
-                visibilityUnmod =
-                    visibilityMod || (twitchChannel->isMod() && isMyself);
-            }
+            visibilityMod = twitchChannel->isBroadcaster() && !isMyself;
+            visibilityUnmod =
+                visibilityMod || (twitchChannel->isMod() && isMyself);
+
             mod->setVisible(visibilityMod);
             unmod->setVisible(visibilityUnmod);
         });
@@ -168,8 +169,8 @@ UserInfoPopup::UserInfoPopup()
         auto timeout = moderation.emplace<TimeoutWidget>();
 
         this->userStateChanged_.connect([this, lineMod, timeout]() mutable {
-            TwitchChannel *twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->channel_.get());
+            const auto *twitchChannel =
+                TwitchChannel::fromChannel(this->channel_);
 
             bool hasModRights =
                 twitchChannel ? twitchChannel->hasModRights() : false;

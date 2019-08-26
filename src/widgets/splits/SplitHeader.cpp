@@ -264,15 +264,15 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 #ifdef USEWEBENGINE
     this->dropdownMenu.addAction("Start watching", this, [this] {
         ChannelPtr _channel = this->split->getChannel();
-        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
+        const auto *tc = TwitchChannel::fromChannel(_channel);
 
-        if (tc != nullptr)
-        {
-            StreamView *view = new StreamView(
-                _channel, "https://player.twitch.tv/?channel=" + tc->name);
-            view->setAttribute(Qt::WA_DeleteOnClose, true);
-            view->show();
-        }
+        if (!tc)
+            return;
+
+        StreamView *view = new StreamView(
+            _channel, "https://player.twitch.tv/?channel=" + tc->name);
+        view->setAttribute(Qt::WA_DeleteOnClose, true);
+        view->show();
     });
 #endif
 
@@ -372,9 +372,9 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
 
     this->managedConnections_.push_back(this->modeUpdateRequested_.connect(  //
         [this, setSub, setEmote, setSlow, setR9k, setFollowers]() {
-            auto twitchChannel =
-                dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
-            if (twitchChannel == nullptr)
+            const auto twitchChannel =
+                TwitchChannel::fromChannel(this->split_->getChannel());
+            if (!twitchChannel)
             {
                 this->modeButton_->hide();
                 return;
@@ -463,8 +463,8 @@ void SplitHeader::updateRoomModes()
 void SplitHeader::initializeModeSignals(EffectLabel &label)
 {
     this->modeUpdateRequested_.connect([this, &label] {
-        if (auto twitchChannel = dynamic_cast<TwitchChannel *>(
-                this->split_->getChannel().get()))  //
+        if (const auto twitchChannel = TwitchChannel::fromChannel(
+                this->split_->getChannel()))  //
         {
             label.setEnable(twitchChannel->hasModRights());
 
@@ -488,7 +488,7 @@ void SplitHeader::handleChannelChanged()
     this->channelConnections_.clear();
 
     auto channel = this->split_->getChannel();
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (const auto twitchChannel = TwitchChannel::fromChannel(channel))
     {
         this->channelConnections_.emplace_back(
             twitchChannel->liveStatusChanged.connect(
@@ -523,7 +523,7 @@ void SplitHeader::updateChannelText()
     if (indirectChannel.getType() == Channel::Type::TwitchWatching)
         title = "watching: " + (title.isEmpty() ? "none" : title);
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (const auto twitchChannel = TwitchChannel::fromChannel(channel))
     {
         const auto streamStatus = twitchChannel->accessStreamStatus();
 
@@ -548,9 +548,9 @@ void SplitHeader::updateModerationModeIcon()
                        : getApp()->resources->buttons.modModeDisabled);
 
     auto channel = this->split_->getChannel();
-    auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+    const auto twitchChannel = TwitchChannel::fromChannel(channel);
 
-    if (twitchChannel != nullptr && twitchChannel->hasModRights())
+    if (twitchChannel && twitchChannel->hasModRights())
         this->moderationButton_->show();
     else
         this->moderationButton_->hide();
@@ -712,7 +712,7 @@ void SplitHeader::reloadChannelEmotes()
 {
     auto channel = this->split_->getChannel();
 
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (const auto twitchChannel = TwitchChannel::fromChannel(channel))
     {
         twitchChannel->refreshFFZChannelEmotes();
         twitchChannel->refreshBTTVChannelEmotes();
