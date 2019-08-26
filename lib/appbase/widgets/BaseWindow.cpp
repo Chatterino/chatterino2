@@ -760,7 +760,8 @@ bool BaseWindow::handleSIZE(MSG *msg)
         {
             if (msg->wParam == SIZE_MAXIMIZED)
             {
-                auto offset = int(this->scale() * 8);
+                auto offset = int(
+                    getWindowDpi(HWND(this->winId())).value_or(96) * 8 / 96);
 
                 this->ui_.windowLayout->setContentsMargins(offset, offset,
                                                            offset, offset);
