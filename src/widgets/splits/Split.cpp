@@ -636,16 +636,6 @@ void Split::showViewerList()
     viewerDock->activateWindow();
 }
 
-void Split::openSubPage()
-{
-    ChannelPtr channel = this->getChannel();
-
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
-    {
-        QDesktopServices::openUrl(twitchChannel->subscriptionUrl());
-    }
-}
-
 void Split::copyToClipboard()
 {
     QApplication::clipboard()->setText(this->view_->getSelectedText());
