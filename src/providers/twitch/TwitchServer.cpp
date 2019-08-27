@@ -201,6 +201,7 @@ void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
 
 void TwitchServer::onConnected(IrcConnection *connection)
 {
+    AbstractIrcServer::onConnected(connection);
     // connection in thise case is the read connection
     connection->sendRaw(
         "CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
