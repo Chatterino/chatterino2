@@ -663,7 +663,10 @@ void Split::reloadChannelAndSubscriberEmotes()
     auto channel = this->getChannel();
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
-        twitchChannel->refreshChannelEmotes();
+    {
+        twitchChannel->refreshBTTVChannelEmotes();
+        twitchChannel->refreshFFZChannelEmotes();
+    }
 }
 
 template <typename Iter, typename RandomGenerator>

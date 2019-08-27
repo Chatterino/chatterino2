@@ -113,6 +113,7 @@ TwitchChannel::TwitchChannel(const QString &name,
         this->refreshLiveStatus();
         this->refreshBadges();
         this->refreshCheerEmotes();
+        this->refreshFFZChannelEmotes();
     });
 
     // timers
@@ -135,7 +136,7 @@ TwitchChannel::TwitchChannel(const QString &name,
 void TwitchChannel::initialize()
 {
     this->refreshChatters();
-    this->refreshChannelEmotes();
+    this->refreshBTTVChannelEmotes();
     this->refreshBadges();
     this->ffzCustomModBadge_.loadCustomModBadge();
 }
@@ -150,7 +151,7 @@ bool TwitchChannel::canSendMessage() const
     return !this->isEmpty();
 }
 
-void TwitchChannel::refreshChannelEmotes()
+void TwitchChannel::refreshBTTVChannelEmotes()
 {
     BttvEmotes::loadChannel(
         this->getName(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
@@ -158,8 +159,12 @@ void TwitchChannel::refreshChannelEmotes()
                 this->bttvEmotes_.set(
                     std::make_shared<EmoteMap>(std::move(emoteMap)));
         });
+}
+
+void TwitchChannel::refreshFFZChannelEmotes()
+{
     FfzEmotes::loadChannel(
-        this->getName(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+        this->roomId(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
                 this->ffzEmotes_.set(
                     std::make_shared<EmoteMap>(std::move(emoteMap)));

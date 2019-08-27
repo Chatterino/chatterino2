@@ -138,7 +138,7 @@ void FfzEmotes::loadEmotes()
     QString url("https://api.frankerfacez.com/v1/set/global");
 
     NetworkRequest(url)
-    
+
         .timeout(30000)
         .onSuccess([this](auto result) -> Outcome {
             auto emotes = this->emotes();
@@ -151,13 +151,13 @@ void FfzEmotes::loadEmotes()
         .execute();
 }
 
-void FfzEmotes::loadChannel(const QString &channelName,
+void FfzEmotes::loadChannel(const QString &channelId,
                             std::function<void(EmoteMap &&)> callback)
 {
-    log("[FFZEmotes] Reload FFZ Channel Emotes for channel {}\n", channelName);
+    log("[FFZEmotes] Reload FFZ Channel Emotes for channel {}\n", channelId);
 
-    NetworkRequest("https://api.frankerfacez.com/v1/room/" + channelName)
-    
+    NetworkRequest("https://api.frankerfacez.com/v1/room/id/" + channelId)
+
         .timeout(20000)
         .onSuccess([callback = std::move(callback)](auto result) -> Outcome {
             auto pair = parseChannelEmotes(result.parseJson());
@@ -165,7 +165,7 @@ void FfzEmotes::loadChannel(const QString &channelName,
                 callback(std::move(pair.second));
             return pair.first;
         })
-        .onError([channelName](int result) {
+        .onError([channelId](int result) {
             if (result == 203)
             {
                 // User does not have any FFZ emotes
@@ -176,12 +176,12 @@ void FfzEmotes::loadChannel(const QString &channelName,
             {
                 // TODO: Auto retry in case of a timeout, with a delay
                 log("Fetching FFZ emotes for channel {} failed due to timeout",
-                    channelName);
+                    channelId);
                 return true;
             }
 
-            log("Error fetching FFZ emotes for channel {}, error {}",
-                channelName, result);
+            log("Error fetching FFZ emotes for channel {}, error {}", channelId,
+                result);
 
             return true;
         })
