@@ -34,5 +34,6 @@ Ian321 | https://github.com/Ian321 |  | Documentation
 Yardanico | https://github.com/Yardanico |  | Documentation
 huti26 | https://github.com/huti26 |  | Documentation
 chrisduerr | https://github.com/chrisduerr |  | Documentation
+Mm2PL | https://github.com/mm2pl | | Contributor
 
 # Add yourself right above this line
