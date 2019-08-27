@@ -199,12 +199,18 @@ void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
     }
 }
 
-void TwitchServer::onConnected(IrcConnection *connection)
+void TwitchServer::onReadConnected(IrcConnection *connection)
 {
-    AbstractIrcServer::onConnected(connection);
-    // connection in thise case is the read connection
-    connection->sendRaw(
-        "CAP REQ :twitch.tv/tags twitch.tv/commands twitch.tv/membership");
+    AbstractIrcServer::onReadConnected(connection);
+
+    connection->sendRaw("CAP REQ :twitch.tv/tags twitch.tv/membership");
+}
+
+void TwitchServer::onWriteConnected(IrcConnection *connection)
+{
+    AbstractIrcServer::onWriteConnected(connection);
+
+    connection->sendRaw("CAP REQ :twitch.tv/tags twitch.tv/commands");
 }
 
 std::shared_ptr<Channel> TwitchServer::getCustomChannel(

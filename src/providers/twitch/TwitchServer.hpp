@@ -55,7 +55,8 @@ protected:
     virtual void writeConnectionMessageReceived(
         Communi::IrcMessage *message) override;
 
-    virtual void onConnected(IrcConnection *connection) override;
+    virtual void onReadConnected(IrcConnection *connection) override;
+    virtual void onWriteConnected(IrcConnection *connection) override;
 
     virtual std::shared_ptr<Channel> getCustomChannel(
         const QString &channelname) override;
