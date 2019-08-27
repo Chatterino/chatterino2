@@ -22,7 +22,7 @@ ChatroomChannel::ChatroomChannel(const QString &channelName,
     }
 }
 
-void ChatroomChannel::refreshChannelEmotes()
+void ChatroomChannel::refreshBTTVChannelEmotes()
 {
     if (this->chatroomOwnerId.isEmpty())
     {
@@ -36,16 +36,21 @@ void ChatroomChannel::refreshChannelEmotes()
                     this->bttvEmotes_.set(
                         std::make_shared<EmoteMap>(std::move(emoteMap)));
             });
-            FfzEmotes::loadChannel(username, [this, weak](auto &&emoteMap) {
-                if (auto shared = weak.lock())
-                    this->ffzEmotes_.set(
-                        std::make_shared<EmoteMap>(std::move(emoteMap)));
-            });
             if (auto shared = weak.lock())
             {
                 this->chatroomOwnerName = username;
             }
         });
+}
+void ChatroomChannel::refreshFFZChannelEmotes()
+{
+    if (this->chatroomOwnerId.isEmpty())
+    {
+        return;
+    }
+    FfzEmotes::loadChannel(this->chatroomOwnerId, [this](auto &&emoteMap) {
+        this->ffzEmotes_.set(std::make_shared<EmoteMap>(std::move(emoteMap)));
+    });
 }
 
 const QString &ChatroomChannel::getDisplayName() const
