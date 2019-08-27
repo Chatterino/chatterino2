@@ -28,12 +28,14 @@ machgo | https://github.com/machgo |  | Contributor
 TranRed | https://github.com/TranRed |  | Contributor
 RAnders00 | https://github.com/RAnders00 | | Contributor
 YungLPR | https://github.com/leon-richardt | | Contributor
+Mm2PL | https://github.com/mm2pl | | Contributor
+# If you are a contributor add yourself above this line
+
 Defman21 | https://github.com/Defman21 |  | Documentation
 Jarel1337 | https://github.com/Jarel1337 |  | Documentation
 Ian321 | https://github.com/Ian321 |  | Documentation
 Yardanico | https://github.com/Yardanico |  | Documentation
 huti26 | https://github.com/huti26 |  | Documentation
 chrisduerr | https://github.com/chrisduerr |  | Documentation
-Mm2PL | https://github.com/mm2pl | | Contributor
 
-# Add yourself right above this line
+# Otherwise add yourself right above this one
