@@ -8,13 +8,13 @@
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Resources.hpp"
+#include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/dialogs/LogsPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
-#include "singletons/Settings.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -72,8 +72,9 @@ UserInfoPopup::UserInfoPopup()
                 .assign(&this->ui_.createdDateLabel);
             if (getSettings()->showUserIDsInUsercards)
             {
-                            vbox.emplace<Label>(TEXT_USER_ID).assign(&this->ui_.userIDLabel);
-                        }
+                vbox.emplace<Label>(TEXT_USER_ID)
+                    .assign(&this->ui_.userIDLabel);
+            }
         }
     }
 

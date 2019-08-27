@@ -329,8 +329,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.highlightInlineWhispers);
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
-    layout.addCheckbox("Show user IDs in usercards",
-                       s.showUserIDsInUsercards);
+    layout.addCheckbox("Show user IDs in usercards", s.showUserIDsInUsercards);
 
 #ifdef Q_OS_WIN
     layout.addTitle("Browser Integration");
