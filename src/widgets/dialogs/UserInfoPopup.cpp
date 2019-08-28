@@ -355,9 +355,13 @@ void UserInfoPopup::updateUserData()
 
         this->userId_ = id;
 
-        this->ui_.userIDLabel->setText(TEXT_USER_ID + this->userId_);
-        // don't wait for the request to complete, just put the user id in the card
-        // right away
+        // this can be nullptr if the setting is not enabled.
+        if (this->ui_.userIDLabel)
+        {
+            this->ui_.userIDLabel->setText(TEXT_USER_ID + this->userId_);
+            // don't wait for the request to complete, just put the user id in the card
+            // right away
+        }
 
         QString url("https://api.twitch.tv/kraken/channels/" + id);
 
