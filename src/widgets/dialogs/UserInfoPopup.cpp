@@ -70,11 +70,7 @@ UserInfoPopup::UserInfoPopup()
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED)
                 .assign(&this->ui_.createdDateLabel);
-            if (getSettings()->showUserIDsInUsercards)
-            {
-                vbox.emplace<Label>(TEXT_USER_ID)
-                    .assign(&this->ui_.userIDLabel);
-            }
+            vbox.emplace<Label>(TEXT_USER_ID).assign(&this->ui_.userIDLabel);
         }
     }
 
