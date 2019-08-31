@@ -130,7 +130,6 @@ void TwitchServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
 void TwitchServer::messageReceived(Communi::IrcMessage *message)
 {
-    //    this->readConnection
     if (message->type() == Communi::IrcMessage::Type::Private)
     {
         // We already have a handler for private messages
@@ -141,38 +140,10 @@ void TwitchServer::messageReceived(Communi::IrcMessage *message)
 
     auto &handler = IrcMessageHandler::getInstance();
 
-    if (command == "ROOMSTATE")
-    {
-        handler.handleRoomStateMessage(message);
-    }
-    else if (command == "CLEARCHAT")
-    {
-        handler.handleClearChatMessage(message);
-    }
-    else if (command == "CLEARMSG")
-    {
-        handler.handleClearMessageMessage(message);
-    }
-    else if (command == "USERSTATE")
-    {
-        handler.handleUserStateMessage(message);
-    }
-    else if (command == "WHISPER")
-    {
-        handler.handleWhisperMessage(message);
-    }
-    else if (command == "USERNOTICE")
-    {
-        handler.handleUserNoticeMessage(message, *this);
-    }
-    else if (command == "MODE")
+    // Below commands enabled through the twitch.tv/membership CAP REQ
+    if (command == "MODE")
     {
         handler.handleModeMessage(message);
-    }
-    else if (command == "NOTICE")
-    {
-        handler.handleNoticeMessage(
-            static_cast<Communi::IrcNoticeMessage *>(message));
     }
     else if (command == "JOIN")
     {
@@ -186,16 +157,39 @@ void TwitchServer::messageReceived(Communi::IrcMessage *message)
 
 void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
 {
-    switch (message->type())
-    {
-        case Communi::IrcMessage::Type::Notice:
-        {
-            IrcMessageHandler::getInstance().handleWriteConnectionNoticeMessage(
-                static_cast<Communi::IrcNoticeMessage *>(message));
-        }
-        break;
+    const QString &command = message->command();
 
-        default:;
+    auto &handler = IrcMessageHandler::getInstance();
+
+    // Below commands enabled through the twitch.tv/commands CAP REQ
+    if (command == "USERSTATE")
+    {
+        handler.handleUserStateMessage(message);
+    }
+    else if (command == "WHISPER")
+    {
+        handler.handleWhisperMessage(message);
+    }
+    else if (command == "USERNOTICE")
+    {
+        handler.handleUserNoticeMessage(message, *this);
+    }
+    else if (command == "ROOMSTATE")
+    {
+        handler.handleRoomStateMessage(message);
+    }
+    else if (command == "CLEARCHAT")
+    {
+        handler.handleClearChatMessage(message);
+    }
+    else if (command == "CLEARMSG")
+    {
+        handler.handleClearMessageMessage(message);
+    }
+    else if (command == "NOTICE")
+    {
+        handler.handleNoticeMessage(
+            static_cast<Communi::IrcNoticeMessage *>(message));
     }
 }
 
@@ -203,6 +197,8 @@ void TwitchServer::onReadConnected(IrcConnection *connection)
 {
     AbstractIrcServer::onReadConnected(connection);
 
+    // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags/
+    // twitch.tv/membership enables the JOIN/PART/MODE/NAMES commands. See https://dev.twitch.tv/docs/irc/membership/
     connection->sendRaw("CAP REQ :twitch.tv/tags twitch.tv/membership");
 }
 
@@ -210,6 +206,8 @@ void TwitchServer::onWriteConnected(IrcConnection *connection)
 {
     AbstractIrcServer::onWriteConnected(connection);
 
+    // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags/
+    // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands/
     connection->sendRaw("CAP REQ :twitch.tv/tags twitch.tv/commands");
 }
 
