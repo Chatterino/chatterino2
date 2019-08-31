@@ -8,7 +8,6 @@
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Resources.hpp"
-#include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "widgets/Label.hpp"
@@ -351,13 +350,9 @@ void UserInfoPopup::updateUserData()
 
         this->userId_ = id;
 
-        // this can be nullptr if the setting is not enabled.
-        if (this->ui_.userIDLabel)
-        {
-            this->ui_.userIDLabel->setText(TEXT_USER_ID + this->userId_);
-            // don't wait for the request to complete, just put the user id in the card
-            // right away
-        }
+        this->ui_.userIDLabel->setText(TEXT_USER_ID + this->userId_);
+        // don't wait for the request to complete, just put the user id in the card
+        // right away
 
         QString url("https://api.twitch.tv/kraken/channels/" + id);
 
