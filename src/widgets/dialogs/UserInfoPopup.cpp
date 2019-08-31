@@ -63,7 +63,8 @@ UserInfoPopup::UserInfoPopup()
             name_box.withoutMargin();
 
             auto name = name_box.emplace<Label>().assign(&this->ui_.nameLabel);
-            LayoutCreator<EffectLabel2> copyUserName = name_box.emplace<EffectLabel2>(this);
+            LayoutCreator<EffectLabel2> copyUserName =
+                name_box.emplace<EffectLabel2>(this);
             copyUserName->setPixmap(app->resources->buttons.copyDark);
             // TODO(mm2pl): change this when the card get themed.
 
@@ -75,17 +76,33 @@ UserInfoPopup::UserInfoPopup()
 
             name_box->addStretch(1);
 
-            QObject::connect(copyUserName.getElement(), &Button::leftClicked, [this] {
-                QClipboard *clipboard = QGuiApplication::clipboard();
-                clipboard->setText(this->userName_);
-            });
+            QObject::connect(
+                copyUserName.getElement(), &Button::leftClicked, [this] {
+                    QClipboard *clipboard = QGuiApplication::clipboard();
+                    clipboard->setText(this->userName_);
+                });
 
             vbox.emplace<Label>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
             vbox.emplace<Label>(TEXT_FOLLOWERS)
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED)
                 .assign(&this->ui_.createdDateLabel);
-            vbox.emplace<Label>(TEXT_USER_ID).assign(&this->ui_.userIDLabel);
+
+            auto userIDBox = vbox.emplace<QHBoxLayout>().withoutMargin();
+            userIDBox.emplace<Label>(TEXT_USER_ID)
+                .assign(&this->ui_.userIDLabel);
+            LayoutCreator<EffectLabel2> copyUserID =
+                userIDBox.emplace<EffectLabel2>(this);
+            copyUserID->setPixmap(app->resources->buttons.copyDark);
+            // this will need to be changed too if there will be theming.
+            copyUserID->setScaleIndependantSize(32, 32);
+            userIDBox->addStretch(1);
+
+            QObject::connect(
+                copyUserID.getElement(), &Button::leftClicked, [this] {
+                    QClipboard *clipboard = QGuiApplication::clipboard();
+                    clipboard->setText(this->userId_);
+                });
         }
     }
 
