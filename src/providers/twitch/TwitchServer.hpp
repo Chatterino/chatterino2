@@ -51,7 +51,8 @@ protected:
 
     virtual void privateMessageReceived(
         Communi::IrcPrivateMessage *message) override;
-    virtual void messageReceived(Communi::IrcMessage *message) override;
+    virtual void readConnectionMessageReceived(
+        Communi::IrcMessage *message) override;
     virtual void writeConnectionMessageReceived(
         Communi::IrcMessage *message) override;
 

@@ -30,9 +30,9 @@ AbstractIrcServer::AbstractIrcServer()
     this->readConnection_.reset(new IrcConnection);
     this->readConnection_->moveToThread(QCoreApplication::instance()->thread());
 
-    QObject::connect(this->readConnection_.get(),
-                     &Communi::IrcConnection::messageReceived,
-                     [this](auto msg) { this->messageReceived(msg); });
+    QObject::connect(
+        this->readConnection_.get(), &Communi::IrcConnection::messageReceived,
+        [this](auto msg) { this->readConnectionMessageReceived(msg); });
     QObject::connect(this->readConnection_.get(),
                      &Communi::IrcConnection::privateMessageReceived,
                      [this](auto msg) { this->privateMessageReceived(msg); });
@@ -317,7 +317,7 @@ void AbstractIrcServer::addFakeMessage(const QString &data)
     }
     else
     {
-        this->messageReceived(fakeMessage);
+        this->readConnectionMessageReceived(fakeMessage);
     }
 }
 
@@ -326,7 +326,8 @@ void AbstractIrcServer::privateMessageReceived(
 {
 }
 
-void AbstractIrcServer::messageReceived(Communi::IrcMessage *message)
+void AbstractIrcServer::readConnectionMessageReceived(
+    Communi::IrcMessage *message)
 {
 }
 

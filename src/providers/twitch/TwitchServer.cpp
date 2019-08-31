@@ -128,7 +128,7 @@ void TwitchServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
     IrcMessageHandler::getInstance().handlePrivMessage(message, *this);
 }
 
-void TwitchServer::messageReceived(Communi::IrcMessage *message)
+void TwitchServer::readConnectionMessageReceived(Communi::IrcMessage *message)
 {
     if (message->type() == Communi::IrcMessage::Type::Private)
     {
