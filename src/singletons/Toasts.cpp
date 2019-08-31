@@ -4,18 +4,13 @@
 #include "common/DownloadManager.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "libsnore/snore.h"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/helper/CommonTexts.hpp"
-
-#ifdef Q_OS_WIN
-
-#    include <wintoastlib.h>
-
-#endif
 
 #include <QDesktopServices>
 #include <QFileInfo>
@@ -35,12 +30,12 @@ std::map<ToastReaction, QString> Toasts::reactionToString = {
 
 bool Toasts::isEnabled()
 {
-#ifdef Q_OS_WIN
-    return WinToastLib::WinToast::isCompatible() &&
-           getSettings()->notificationToast;
-#else
+    //#ifdef Q_OS_WIN
+    //    return WinToastLib::WinToast::isCompatible() &&
+    //           getSettings()->notificationToast;
+    //#else
     return false;
-#endif
+    //#endif
 }
 
 QString Toasts::findStringFromReaction(const ToastReaction &reaction)
@@ -65,15 +60,15 @@ QString Toasts::findStringFromReaction(
 
 void Toasts::sendChannelNotification(const QString &channelName, Platform p)
 {
-#ifdef Q_OS_WIN
-    auto sendChannelNotification = [this, channelName, p] {
-        this->sendWindowsNotification(channelName, p);
-    };
-#else
+    //#ifdef Q_OS_WIN
+    //    auto sendChannelNotification = [this, channelName, p] {
+    //        this->sendWindowsNotification(channelName, p);
+    //    };
+    //#else
     auto sendChannelNotification = [] {
         // Unimplemented for OSX and Linux
     };
-#endif
+    //#endif
     // Fetch user profile avatar
     if (p == Platform::Twitch)
     {
@@ -98,8 +93,7 @@ void Toasts::sendChannelNotification(const QString &channelName, Platform p)
     }
 }
 
-#ifdef Q_OS_WIN
-
+/*
 class CustomHandler : public WinToastLib::IWinToastHandler
 {
 private:
@@ -155,7 +149,8 @@ public:
     {
     }
 };
-
+*/
+/*
 void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
 {
     WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
@@ -203,9 +198,9 @@ void Toasts::sendWindowsNotification(const QString &channelName, Platform p)
     WinToastLib::WinToast::instance()->showToast(
         templ, new CustomHandler(channelName, p));
 }
+*/
 
-#endif
-
+/*
 void Toasts::fetchChannelAvatar(const QString channelName,
                                 std::function<void(QString)> successCallback)
 {
@@ -255,4 +250,5 @@ void Toasts::fetchChannelAvatar(const QString channelName,
         })
         .execute();
 }
+*/
 }  // namespace chatterino

@@ -64,6 +64,7 @@ win32:RC_FILE = resources/windows.rc
 macx {
     LIBS += -L/usr/local/lib
 }
+qbsSearchPaths: "lib/snorenitify"
 
 # Set C_DEBUG if it's a debug build
 CONFIG(debug, debug|release) {
@@ -76,7 +77,7 @@ include(lib/warnings.pri)
 include(lib/humanize.pri)
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
-include(lib/wintoast.pri)
+include(lib/snorenotify.pri)
 include(lib/signals.pri)
 include(lib/settings.pri)
 include(lib/serialize.pri)
