@@ -27,13 +27,29 @@ namespace {
 
     void runLoop(NativeMessagingClient &client)
     {
+        auto received_message = std::make_shared<std::atomic_bool>(true);
+
+        auto thread = std::thread([=]() {
+            while (true)
+            {
+                using namespace std::chrono_literals;
+                if (!received_message->exchange(false))
+                {
+                    _Exit(1);
+                }
+                std::this_thread::sleep_for(5s);
+            }
+        });
+
         while (true)
         {
             char size_c[4];
             std::cin.read(size_c, 4);
 
             if (std::cin.eof())
+            {
                 break;
+            }
 
             auto size = *reinterpret_cast<uint32_t *>(size_c);
 
@@ -54,8 +70,18 @@ namespace {
             std::cin.read(buffer.get(), size);
             *(buffer.get() + size) = '\0';
 
-            client.sendMessage(QByteArray::fromRawData(
-                buffer.get(), static_cast<int32_t>(size)));
+            auto data = QByteArray::fromRawData(buffer.get(),
+                                                static_cast<int32_t>(size));
+            auto doc = QJsonDocument();
+
+            if (doc.object().value("type") == "nm_pong")
+            {
+                received_message->store(true);
+            }
+
+            received_message->store(true);
+
+            client.sendMessage(data);
         }
     }
 }  // namespace

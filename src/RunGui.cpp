@@ -9,6 +9,7 @@
 #include "common/NetworkManager.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Updates.hpp"
+#include "util/CombinePath.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
 #ifdef USEWINSDK
@@ -112,6 +113,23 @@ namespace {
 void runGui(QApplication &a, Paths &paths, Settings &settings)
 {
     initQt();
+
+    auto thread = std::thread([dir = paths.miscDirectory] {
+        {
+            auto path = combinePath(dir, "Update.exe");
+            if (QFile::exists(path))
+            {
+                QFile::remove(path);
+            }
+        }
+        {
+            auto path = combinePath(dir, "update.zip");
+            if (QFile::exists(path))
+            {
+                QFile::remove(path);
+            }
+        }
+    });
 
     chatterino::NetworkManager::init();
     chatterino::Updates::getInstance().checkForUpdates();

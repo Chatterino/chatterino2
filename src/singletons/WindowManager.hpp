@@ -46,7 +46,7 @@ public:
 
     Window &getMainWindow();
     Window &getSelectedWindow();
-    Window &createWindow(WindowType type);
+    Window &createWindow(WindowType type, bool show = true);
 
     int windowCount();
     Window *windowAt(int index);
@@ -54,7 +54,6 @@ public:
     virtual void initialize(Settings &settings, Paths &paths) override;
     virtual void save() override;
     void closeAll();
-    QJsonArray loadWindowArray(const QString &settingsPath);
 
     int getGeneration() const;
     void incGeneration();

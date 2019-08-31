@@ -233,10 +233,15 @@ QWidget *BaseWindow::getLayoutContainer()
 
 bool BaseWindow::hasCustomWindowFrame()
 {
+    return BaseWindow::supportsCustomWindowFrame() && this->enableCustomFrame_;
+}
+
+bool BaseWindow::supportsCustomWindowFrame()
+{
 #ifdef USEWINSDK
     static bool isWin8 = IsWindows8OrGreater();
 
-    return isWin8 && this->enableCustomFrame_;
+    return isWin8;
 #else
     return false;
 #endif
@@ -755,7 +760,8 @@ bool BaseWindow::handleSIZE(MSG *msg)
         {
             if (msg->wParam == SIZE_MAXIMIZED)
             {
-                auto offset = int(this->scale() * 8);
+                auto offset = int(
+                    getWindowDpi(HWND(this->winId())).value_or(96) * 8 / 96);
 
                 this->ui_.windowLayout->setContentsMargins(offset, offset,
                                                            offset, offset);

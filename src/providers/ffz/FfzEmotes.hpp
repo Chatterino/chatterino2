@@ -22,7 +22,7 @@ public:
     std::shared_ptr<const EmoteMap> emotes() const;
     boost::optional<EmotePtr> emote(const EmoteName &name) const;
     void loadEmotes();
-    static void loadChannel(const QString &channelName,
+    static void loadChannel(const QString &channelId,
                             std::function<void(EmoteMap &&)> callback);
 
 private:

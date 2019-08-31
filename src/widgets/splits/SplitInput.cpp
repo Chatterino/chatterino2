@@ -255,7 +255,11 @@ void SplitInput::installKeyPressedEvent()
         else if (event->key() == Qt::Key_Home)
         {
             QTextCursor cursor = this->ui_.textEdit->textCursor();
-            cursor.movePosition(QTextCursor::Start);
+            cursor.movePosition(
+                QTextCursor::Start,
+                event->modifiers() & Qt::KeyboardModifier::ShiftModifier
+                    ? QTextCursor::MoveMode::KeepAnchor
+                    : QTextCursor::MoveMode::MoveAnchor);
             this->ui_.textEdit->setTextCursor(cursor);
 
             event->accept();
@@ -263,7 +267,11 @@ void SplitInput::installKeyPressedEvent()
         else if (event->key() == Qt::Key_End)
         {
             QTextCursor cursor = this->ui_.textEdit->textCursor();
-            cursor.movePosition(QTextCursor::End);
+            cursor.movePosition(
+                QTextCursor::End,
+                event->modifiers() & Qt::KeyboardModifier::ShiftModifier
+                    ? QTextCursor::MoveMode::KeepAnchor
+                    : QTextCursor::MoveMode::MoveAnchor);
             this->ui_.textEdit->setTextCursor(cursor);
 
             event->accept();

@@ -24,8 +24,7 @@
 #define HIGHLIGHT_MSG "Highlight messages containing your name"
 #define PLAY_SOUND "Play sound when your name is mentioned"
 #define FLASH_TASKBAR "Flash taskbar when your name is mentioned"
-#define ALWAYS_PLAY \
-    "Always play highlight sound (Even if Chatterino is focused)"
+#define ALWAYS_PLAY "Play highlight sound even when Chatterino is focused"
 
 namespace chatterino {
 
@@ -45,14 +44,18 @@ HighlightingPage::HighlightingPage()
         auto tabs = layout.emplace<QTabWidget>();
         {
             // HIGHLIGHTS
-            auto highlights = tabs.appendTab(new QVBoxLayout, "Phrases");
+            auto highlights = tabs.appendTab(new QVBoxLayout, "Messages");
             {
+                highlights.emplace<QLabel>("Messages can be highlighted if "
+                                           "they match a certain pattern.");
+
                 EditableModelView *view =
                     highlights
                         .emplace<EditableModelView>(
                             app->highlights->createModel(nullptr))
                         .getElement();
 
+                view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -75,12 +78,15 @@ HighlightingPage::HighlightingPage()
 
             auto pingUsers = tabs.appendTab(new QVBoxLayout, "Users");
             {
+                pingUsers.emplace<QLabel>(
+                    "Messages from a certain user can be highlighted.");
                 EditableModelView *view =
                     pingUsers
                         .emplace<EditableModelView>(
                             app->highlights->createUserModel(nullptr))
                         .getElement();
 
+                view->addRegexHelpLink();
                 view->setTitles({"Username", "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -105,12 +111,16 @@ HighlightingPage::HighlightingPage()
             auto disabledUsers =
                 tabs.appendTab(new QVBoxLayout, "Excluded Users");
             {
+                disabledUsers.emplace<QLabel>(
+                    "This is a list of users (e.g. bots) whose messages should "
+                    "<u>not</u> be highlighted.");
                 EditableModelView *view =
                     disabledUsers
                         .emplace<EditableModelView>(
                             app->highlights->createBlacklistModel(nullptr))
                         .getElement();
 
+                view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Enable\nregex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);

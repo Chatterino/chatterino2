@@ -46,8 +46,6 @@ public:
         Communi::IrcNoticeMessage *message);
     void handleNoticeMessage(Communi::IrcNoticeMessage *message);
 
-    void handleWriteConnectionNoticeMessage(Communi::IrcNoticeMessage *message);
-
     void handleJoinMessage(Communi::IrcMessage *message);
     void handlePartMessage(Communi::IrcMessage *message);
 

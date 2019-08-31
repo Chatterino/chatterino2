@@ -699,13 +699,13 @@ PubSub::PubSub()
         };
 
     this->moderationActionHandlers["denied_automod_message"] =
-        [this](const auto &data, const auto &roomID) {
+        [](const auto &data, const auto &roomID) {
             // This message got denied by a moderator
             // qDebug() << QString::fromStdString(rj::stringify(data));
         };
 
     this->moderationActionHandlers["approved_automod_message"] =
-        [this](const auto &data, const auto &roomID) {
+        [](const auto &data, const auto &roomID) {
             // This message got approved by a moderator
             // qDebug() << QString::fromStdString(rj::stringify(data));
         };

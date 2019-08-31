@@ -77,7 +77,8 @@ NotificationPage::NotificationPage()
 
                 settings->addStretch(1);
             }
-            auto twitchChannels = tabs.appendTab(new QVBoxLayout, "Twitch");
+            auto twitchChannels =
+                tabs.appendTab(new QVBoxLayout, "Channel going live");
             {
                 EditableModelView *view =
                     twitchChannels

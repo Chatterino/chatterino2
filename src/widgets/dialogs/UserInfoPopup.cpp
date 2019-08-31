@@ -24,6 +24,7 @@
 #define TEXT_FOLLOWERS "Followers: "
 #define TEXT_VIEWS "Views: "
 #define TEXT_CREATED "Created: "
+#define TEXT_USER_ID "User ID: "
 
 namespace chatterino {
 
@@ -58,16 +59,33 @@ UserInfoPopup::UserInfoPopup()
         // items on the right
         auto vbox = head.emplace<QVBoxLayout>();
         {
-            auto name = vbox.emplace<Label>().assign(&this->ui_.nameLabel);
+            auto name_box = vbox.emplace<QHBoxLayout>();
+            name_box.withoutMargin();
+
+            auto name = name_box.emplace<Label>().assign(&this->ui_.nameLabel);
+            LayoutCreator<EffectLabel2> copyUserName = name_box.emplace<EffectLabel2>(this);
+            copyUserName->setPixmap(app->resources->buttons.copyDark);
+            // TODO(mm2pl): change this when the card get themed.
+
+            copyUserName->setScaleIndependantSize(32, 32);
 
             auto font = name->font();
             font.setBold(true);
             name->setFont(font);
+
+            name_box->addStretch(1);
+
+            QObject::connect(copyUserName.getElement(), &Button::leftClicked, [this] {
+                QClipboard *clipboard = QGuiApplication::clipboard();
+                clipboard->setText(this->userName_);
+            });
+
             vbox.emplace<Label>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
             vbox.emplace<Label>(TEXT_FOLLOWERS)
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED)
                 .assign(&this->ui_.createdDateLabel);
+            vbox.emplace<Label>(TEXT_USER_ID).assign(&this->ui_.userIDLabel);
         }
     }
 
@@ -347,6 +365,10 @@ void UserInfoPopup::updateUserData()
         auto currentUser = getApp()->accounts->twitch.getCurrent();
 
         this->userId_ = id;
+
+        this->ui_.userIDLabel->setText(TEXT_USER_ID + this->userId_);
+        // don't wait for the request to complete, just put the user id in the card
+        // right away
 
         QString url("https://api.twitch.tv/kraken/channels/" + id);
 

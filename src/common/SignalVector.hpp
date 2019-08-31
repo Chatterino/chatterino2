@@ -121,7 +121,7 @@ public:
         return this->vector_;
     }
 
-    const std::vector<TVectorItem> cloneVector() const
+    std::vector<TVectorItem> cloneVector() const
     {
         std::shared_lock lock(this->mutex_);
 
