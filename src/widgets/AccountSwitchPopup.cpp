@@ -1,4 +1,4 @@
-#include "widgets/AccountSwitchPopupWidget.hpp"
+#include "widgets/AccountSwitchPopup.hpp"
 #include "debug/Log.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 
@@ -10,7 +10,7 @@
 
 namespace chatterino {
 
-AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget *parent)
+AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
     : QWidget(parent)
 {
     this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
@@ -43,17 +43,17 @@ AccountSwitchPopupWidget::AccountSwitchPopupWidget(QWidget *parent)
     //    this->setStyleSheet("background: #333");
 }
 
-void AccountSwitchPopupWidget::refresh()
+void AccountSwitchPopup::refresh()
 {
     this->ui_.accountSwitchWidget->refresh();
 }
 
-void AccountSwitchPopupWidget::focusOutEvent(QFocusEvent *)
+void AccountSwitchPopup::focusOutEvent(QFocusEvent *)
 {
     this->hide();
 }
 
-void AccountSwitchPopupWidget::paintEvent(QPaintEvent *)
+void AccountSwitchPopup::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 

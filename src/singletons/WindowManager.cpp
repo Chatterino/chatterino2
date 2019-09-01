@@ -10,7 +10,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
-#include "widgets/AccountSwitchPopupWidget.hpp"
+#include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -63,7 +63,7 @@ void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
 void WindowManager::showAccountSelectPopup(QPoint point)
 {
     //    static QWidget *lastFocusedWidget = nullptr;
-    static AccountSwitchPopupWidget *w = new AccountSwitchPopupWidget();
+    static AccountSwitchPopup *w = new AccountSwitchPopup();
 
     if (w->hasFocus())
     {
