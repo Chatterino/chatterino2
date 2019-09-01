@@ -22,6 +22,7 @@
 #include "widgets/settingspages/SpecialChannelsPage.hpp"
 
 #include <QDialogButtonBox>
+#include <QLineEdit>
 
 namespace chatterino {
 
@@ -61,6 +62,19 @@ void SettingsDialog::initUi()
     // right side layout
     auto right = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
     {
+        auto title = right.emplace<QHBoxLayout>().withoutMargin();
+
+        auto edit = title.emplace<QLineEdit>().assign(&this->ui_.search);
+        QTimer::singleShot(100, edit.getElement(),
+                           [edit = edit.getElement()]() { edit->setFocus(); });
+        QObject::connect(edit.getElement(), &QLineEdit::textChanged, this,
+                         [this](const QString &text) {
+                             for (auto &&page : this->pages_)
+                             {
+                                 page->filterElements(text);
+                             }
+                         });
+
         right.emplace<QStackedLayout>()
             .assign(&this->ui_.pageStack)
             .withoutMargin();
@@ -104,26 +118,17 @@ void SettingsDialog::addTabs()
 
     this->addTab(new AccountsPage);
 
-    //    this->ui_.tabContainer->addSpacing(16);
-
-    //    this->addTab(new LookPage);
-    //    this->addTab(new FeelPage);
-
     this->ui_.tabContainer->addSpacing(16);
 
     this->addTab(new CommandPage);
-    //    this->addTab(new EmotesPage);
     this->addTab(new HighlightingPage);
     this->addTab(new IgnoresPage);
 
     this->ui_.tabContainer->addSpacing(16);
 
     this->addTab(new KeyboardSettingsPage);
-    //    this->addTab(new LogsPage);
     this->addTab(this->ui_.moderationPage = new ModerationPage);
     this->addTab(new NotificationPage);
-    //    this->addTab(new SpecialChannelsPage);
-    //    this->addTab(new BrowserExtensionPage);
     this->addTab(new ExternalToolsPage);
     this->addTab(new AdvancedPage);
 
@@ -140,6 +145,7 @@ void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
     this->ui_.pageStack->addWidget(page);
     this->ui_.tabContainer->addWidget(tab, 0, alignment);
     this->tabs_.push_back(tab);
+    this->pages_.push_back(page);
 
     if (this->tabs_.size() == 1)
     {

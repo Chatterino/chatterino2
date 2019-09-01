@@ -8,6 +8,8 @@
 #include <QWidget>
 #include <pajlada/settings/setting.hpp>
 
+class QLineEdit;
+
 namespace chatterino {
 
 class SettingsPage;
@@ -54,8 +56,10 @@ private:
         QPushButton *okButton{};
         QPushButton *cancelButton{};
         ModerationPage *moderationPage{};
+        QLineEdit *search{};
     } ui_;
     std::vector<SettingsDialogTab *> tabs_;
+    std::vector<SettingsPage *> pages_;
     SettingsDialogTab *selectedTab_{};
 
     friend class SettingsDialogTab;

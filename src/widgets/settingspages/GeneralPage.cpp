@@ -36,20 +36,13 @@ TitleLabel *SettingsLayout::addTitle(const QString &title)
 {
     auto label = new TitleLabel(title + ":");
 
-    if (this->count() != 0)
-        this->addSpacing(16);
-
+    if (this->count() == 0)
+        label->setStyleSheet("margin-top: 0");
     this->addWidget(label);
-    return label;
-}
 
-TitleLabel2 *SettingsLayout::addTitle2(const QString &title)
-{
-    auto label = new TitleLabel2(title + ":");
+    // groups
+    this->groups_.push_back(Group{title, label, {}});
 
-    this->addSpacing(16);
-
-    this->addWidget(label);
     return label;
 }
 
@@ -71,6 +64,10 @@ QCheckBox *SettingsLayout::addCheckbox(const QString &text,
         [&setting, inverse](bool state) { setting = inverse ^ state; });
 
     this->addWidget(check);
+
+    // groups
+    this->groups_.back().widgets.push_back({check, {text}});
+
     return check;
 }
 
@@ -82,11 +79,17 @@ ComboBox *SettingsLayout::addDropdown(const QString &text,
     combo->setFocusPolicy(Qt::StrongFocus);
     combo->addItems(list);
 
-    layout->addWidget(new QLabel(text + ":"));
+    auto label = new QLabel(text + ":");
+    layout->addWidget(label);
     layout->addStretch(1);
     layout->addWidget(combo);
 
     this->addLayout(layout);
+
+    // groups
+    this->groups_.back().widgets.push_back({combo, {text}});
+    this->groups_.back().widgets.push_back({label, {text}});
+
     return combo;
 }
 
@@ -124,12 +127,52 @@ DescriptionLabel *SettingsLayout::addDescription(const QString &text)
 
     this->addWidget(label);
 
+    // groups
+    this->groups_.back().widgets.push_back({label, {text}});
+
     return label;
 }
 
 void SettingsLayout::addSeperator()
 {
     this->addWidget(new Line(false));
+}
+
+void SettingsLayout::filterElements(const QString &query)
+{
+    for (auto &&group : this->groups_)
+    {
+        // if group name matches then all should be visible
+        if (group.name.contains(query, Qt::CaseInsensitive))
+        {
+            for (auto &&widget : group.widgets)
+                widget.element->show();
+            group.title->show();
+        }
+        // check if any match
+        else
+        {
+            auto any = false;
+
+            for (auto &&widget : group.widgets)
+            {
+                for (auto &&keyword : widget.keywords)
+                {
+                    if (keyword.contains(query, Qt::CaseInsensitive))
+                    {
+                        widget.element->show();
+                        any = true;
+                    }
+                    else
+                    {
+                        widget.element->hide();
+                    }
+                }
+            }
+
+            group.title->setVisible(any);
+        }
+    }
 }
 
 GeneralPage::GeneralPage()
@@ -141,6 +184,7 @@ GeneralPage::GeneralPage()
     y->addWidget(scroll);
     auto x = new QHBoxLayout;
     auto layout = new SettingsLayout;
+    this->settingsLayout_ = layout;
     x->addLayout(layout, 0);
     x->addStretch(1);
     auto z = new QFrame;
@@ -153,6 +197,12 @@ GeneralPage::GeneralPage()
     layout->addStretch(1);
 
     this->initExtra();
+}
+
+void GeneralPage::filterElements(const QString &query)
+{
+    if (this->settingsLayout_)
+        this->settingsLayout_->filterElements(query);
 }
 
 void GeneralPage::initLayout(SettingsLayout &layout)
@@ -284,7 +334,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
 
     layout.addTitle("Chat title");
-    layout.addWidget(new QLabel("In live channels show:"));
+    layout.addDescription("In live channels show:");
     layout.addCheckbox("Uptime", s.headerUptime);
     layout.addCheckbox("Viewer count", s.headerViewerCount);
     layout.addCheckbox("Category", s.headerGame);
@@ -345,10 +395,10 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 void GeneralPage::initExtra()
 {
     /// update cache path
-    if (this->cachePath)
+    if (this->cachePath_)
     {
         getSettings()->cachePath.connect(
-            [cachePath = this->cachePath](const auto &, auto) mutable {
+            [cachePath = this->cachePath_](const auto &, auto) mutable {
                 QString newPath = getPaths()->cacheDirectory();
 
                 QString pathShortened = "Current location: <a href=\"file:///" +

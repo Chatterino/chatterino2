@@ -34,12 +34,7 @@ chatterino--TitleLabel {
     font-family: "Segoe UI light";
     font-size: 24px;
     color: #4FC3F7;
-}
-
-chatterino--TitleLabel2 {
-    font-family: "Segoe UI light";
-    font-size: 24px;
-    color: #bbb;
+    margin-top: 16px;
 }
 
 chatterino--DescriptionLabel {

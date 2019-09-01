@@ -5,13 +5,54 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <util/FunctionEventFilter.hpp>
 
 namespace chatterino {
+
+void filterItemsRec(QObject *object, const QString &query)
+{
+    for (auto &&child : object->children())
+    {
+        auto setOpacity = [=](auto *widget, bool condition) {
+            widget->greyedOut = !condition;
+            widget->update();
+        };
+
+        if (auto x = dynamic_cast<SCheckBox *>(child); x)
+        {
+            setOpacity(x, x->text().contains(query, Qt::CaseInsensitive));
+        }
+        else if (auto x = dynamic_cast<SLabel *>(child); x)
+        {
+            setOpacity(x, x->text().contains(query, Qt::CaseInsensitive));
+        }
+        else if (auto x = dynamic_cast<SComboBox *>(child); x)
+        {
+            setOpacity(x, [=]() {
+                for (int i = 0; i < x->count(); i++)
+                {
+                    if (x->itemText(i).contains(query, Qt::CaseInsensitive))
+                        return true;
+                }
+                return false;
+            }());
+        }
+        else
+        {
+            filterItemsRec(child, query);
+        }
+    }
+}
 
 SettingsPage::SettingsPage(const QString &name, const QString &iconResource)
     : name_(name)
     , iconResource_(iconResource)
 {
+}
+
+void SettingsPage::filterElements(const QString &query)
+{
+    filterItemsRec(this, query);
 }
 
 const QString &SettingsPage::getName()
@@ -42,7 +83,7 @@ void SettingsPage::cancel()
 QCheckBox *SettingsPage::createCheckBox(
     const QString &text, pajlada::Settings::Setting<bool> &setting)
 {
-    QCheckBox *checkbox = new QCheckBox(text);
+    QCheckBox *checkbox = new SCheckBox(text);
 
     // update when setting changes
     setting.connect(
@@ -64,7 +105,7 @@ QCheckBox *SettingsPage::createCheckBox(
 QComboBox *SettingsPage::createComboBox(
     const QStringList &items, pajlada::Settings::Setting<QString> &setting)
 {
-    QComboBox *combo = new QComboBox();
+    QComboBox *combo = new SComboBox();
 
     // update setting on toogle
     combo->addItems(items);
