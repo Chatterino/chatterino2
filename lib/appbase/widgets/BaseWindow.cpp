@@ -836,8 +836,8 @@ bool BaseWindow::handleMOVE(MSG *msg)
         this->currentBounds_ = QRect(QPoint(rect.left, rect.top),
                                      QPoint(rect.right - 1, rect.bottom - 1));
     }
-    return false;
 #endif
+    return false;
 }
 
 bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
