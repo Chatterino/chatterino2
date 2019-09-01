@@ -23,6 +23,7 @@ public:
 
 protected:
     virtual void themeChangedEvent() override;
+    virtual void scaleChangedEvent(float scale) override;
 
 private:
     void installEvents();

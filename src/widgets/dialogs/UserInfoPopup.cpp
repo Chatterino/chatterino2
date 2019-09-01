@@ -24,9 +24,23 @@
 #define TEXT_FOLLOWERS "Followers: "
 #define TEXT_VIEWS "Views: "
 #define TEXT_CREATED "Created: "
-#define TEXT_USER_ID "User ID: "
+#define TEXT_USER_ID "ID: "
 
 namespace chatterino {
+namespace {
+    void addCopyableLabel(LayoutCreator<QHBoxLayout> box, Label **assign)
+    {
+        auto label = box.emplace<Label>().assign(assign);
+        auto button = box.emplace<Button>();
+        button->setPixmap(getApp()->resources->buttons.copyDark);
+        button->setScaleIndependantSize(18, 18);
+        button->setDim(Button::Dim::Lots);
+        QObject::connect(button.getElement(), &Button::leftClicked,
+                         [label = label.getElement()] {
+                             qApp->clipboard()->setText(label->getText());
+                         });
+    };
+}  // namespace
 
 UserInfoPopup::UserInfoPopup()
     : BaseWindow(nullptr, BaseWindow::Flags(BaseWindow::Frameless |
@@ -51,6 +65,7 @@ UserInfoPopup::UserInfoPopup()
         auto avatar =
             head.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
         avatar->setScaleIndependantSize(100, 100);
+        avatar->setDim(Button::Dim::None);
         QObject::connect(avatar.getElement(), &Button::leftClicked, [this] {
             QDesktopServices::openUrl(
                 QUrl("https://twitch.tv/" + this->userName_.toLower()));
@@ -59,50 +74,24 @@ UserInfoPopup::UserInfoPopup()
         // items on the right
         auto vbox = head.emplace<QVBoxLayout>();
         {
-            auto name_box = vbox.emplace<QHBoxLayout>();
-            name_box.withoutMargin();
-
-            auto name = name_box.emplace<Label>().assign(&this->ui_.nameLabel);
-            LayoutCreator<EffectLabel2> copyUserName =
-                name_box.emplace<EffectLabel2>(this);
-            copyUserName->setPixmap(app->resources->buttons.copyDark);
-            // TODO(mm2pl): change this when the card get themed.
-
-            copyUserName->setScaleIndependantSize(32, 32);
-
-            auto font = name->font();
-            font.setBold(true);
-            name->setFont(font);
-
-            name_box->addStretch(1);
-
-            QObject::connect(
-                copyUserName.getElement(), &Button::leftClicked, [this] {
-                    QClipboard *clipboard = QGuiApplication::clipboard();
-                    clipboard->setText(this->userName_);
-                });
+            {
+                auto box = vbox.emplace<QHBoxLayout>()
+                               .withoutMargin()
+                               .withoutSpacing();
+                addCopyableLabel(box, &this->ui_.nameLabel);
+                this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
+                box->addStretch(1);
+                addCopyableLabel(box, &this->ui_.userIDLabel);
+                auto palette = QPalette();
+                palette.setColor(QPalette::WindowText, QColor("#aaa"));
+                this->ui_.userIDLabel->setPalette(palette);
+            }
 
             vbox.emplace<Label>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
             vbox.emplace<Label>(TEXT_FOLLOWERS)
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED)
                 .assign(&this->ui_.createdDateLabel);
-
-            auto userIDBox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            userIDBox.emplace<Label>(TEXT_USER_ID)
-                .assign(&this->ui_.userIDLabel);
-            LayoutCreator<EffectLabel2> copyUserID =
-                userIDBox.emplace<EffectLabel2>(this);
-            copyUserID->setPixmap(app->resources->buttons.copyDark);
-            // this will need to be changed too if there will be theming.
-            copyUserID->setScaleIndependantSize(32, 32);
-            userIDBox->addStretch(1);
-
-            QObject::connect(
-                copyUserID.getElement(), &Button::leftClicked, [this] {
-                    QClipboard *clipboard = QGuiApplication::clipboard();
-                    clipboard->setText(this->userId_);
-                });
         }
     }
 
@@ -234,7 +223,7 @@ UserInfoPopup::UserInfoPopup()
         });
     }
 
-    this->setStyleSheet("font-size: 11pt;");
+    //    this->setStyleSheet("font-size: 11pt;");
 
     this->installEvents();
 }
@@ -243,7 +232,17 @@ void UserInfoPopup::themeChangedEvent()
 {
     BaseWindow::themeChangedEvent();
 
-    this->setStyleSheet("background: #333");
+    this->setStyleSheet(
+        "background: #333; font-size: " +
+        QString::number(getFonts()
+                            ->getFont(FontStyle::UiMediumBold, this->scale())
+                            .pixelSize()) +
+        "px;");
+}
+
+void UserInfoPopup::scaleChangedEvent(float /*scale*/)
+{
+    themeChangedEvent();
 }
 
 void UserInfoPopup::installEvents()
