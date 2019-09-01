@@ -34,7 +34,6 @@ NotificationPage::NotificationPage()
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
                 settings.append(this->createCheckBox(
                     "Play sound", getSettings()->notificationPlaySound));
-#ifdef Q_OS_WIN
                 settings.append(
                     this->createCheckBox("Enable toasts (Windows 8 or later)",
                                          getSettings()->notificationToast));
@@ -55,7 +54,6 @@ NotificationPage::NotificationPage()
                 }
                 openIn->setContentsMargins(40, 0, 0, 0);
                 openIn->setSizeConstraint(QLayout::SetMaximumSize);
-#endif
                 auto customSound =
                     layout.emplace<QHBoxLayout>().withoutMargin();
                 {

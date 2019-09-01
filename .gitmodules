@@ -7,9 +7,6 @@
 [submodule "lib/qBreakpad"]
 	path = lib/qBreakpad
 	url = https://github.com/jiakuan/qBreakpad.git
-[submodule "lib/snorenotify"]
-	path = lib/snorenotify
-	url = https://github.com/KDE/snorenotify.git
 [submodule "lib/settings"]
 	path = lib/settings
 	url = https://github.com/pajlada/settings
@@ -28,3 +25,6 @@
 [submodule "lib/websocketpp"]
 	path = lib/websocketpp
 	url = https://github.com/ziocleto/websocketpp
+[submodule "lib/snorenotify"]
+	path = lib/snorenotify
+	url = https://github.com/KDE/snorenotify

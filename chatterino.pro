@@ -64,7 +64,6 @@ win32:RC_FILE = resources/windows.rc
 macx {
     LIBS += -L/usr/local/lib
 }
-qbsSearchPaths: "lib/snorenitify"
 
 # Set C_DEBUG if it's a debug build
 CONFIG(debug, debug|release) {
@@ -115,7 +114,6 @@ SOURCES += \
     src/common/ChatterinoSetting.cpp \
     src/common/CompletionModel.cpp \
     src/common/Credentials.cpp \
-    src/common/DownloadManager.cpp \
     src/common/Env.cpp \
     src/common/LinkParser.cpp \
     src/common/Modes.cpp \
@@ -300,7 +298,6 @@ HEADERS += \
     src/common/CompletionModel.hpp \
     src/common/ConcurrentMap.hpp \
     src/common/Credentials.hpp \
-    src/common/DownloadManager.hpp \
     src/common/Env.hpp \
     src/common/FlagsEnum.hpp \
     src/common/LinkParser.hpp \

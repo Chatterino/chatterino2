@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "common/Singleton.hpp"
 
+#include "libsnore/snore.h"
+
 namespace chatterino {
 
 enum class Platform : uint8_t;
@@ -17,19 +19,18 @@ enum class ToastReaction {
 class Toasts final : public Singleton
 {
 public:
+    Toasts();
+
     void sendChannelNotification(const QString &channelName, Platform p);
     static QString findStringFromReaction(const ToastReaction &reaction);
     static QString findStringFromReaction(
         const pajlada::Settings::Setting<int> &reaction);
     static std::map<ToastReaction, QString> reactionToString;
 
-    static bool isEnabled();
+    void sendToastMessage(const QString &channelName);
 
 private:
-    //void sendWindowsNotification(const QString &channelName, Platform p);
-
-    //    static void fetchChannelAvatar(
-    //       const QString channelName,
-    //      std::function<void(QString)> successCallback);
+    Snore::Application app;
+    void actuallySendToastMessage(const QUrl &url, const QString &channelName);
 };
 }  // namespace chatterino
