@@ -61,7 +61,12 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     this->init();
 
     getSettings()->uiScale.connect(
-        [this]() { postToThread([this] { this->updateScale(); }); },
+        [this]() {
+            postToThread([this] {
+                this->updateScale();
+                this->updateScale();
+            });
+        },
         this->connections_);
 
     this->updateScale();
