@@ -828,6 +828,7 @@ bool BaseWindow::handleSIZE(MSG *msg)
 
 bool BaseWindow::handleMOVE(MSG *msg)
 {
+#ifdef USEWINSDK
     if (this->isNotMinimizedOrMaximized_)
     {
         RECT rect;
@@ -836,6 +837,7 @@ bool BaseWindow::handleMOVE(MSG *msg)
                                      QPoint(rect.right - 1, rect.bottom - 1));
     }
     return false;
+#endif
 }
 
 bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
