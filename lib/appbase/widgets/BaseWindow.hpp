@@ -34,6 +34,9 @@ public:
 
     explicit BaseWindow(QWidget *parent = nullptr, Flags flags_ = None);
 
+    void setInitialBounds(const QRect &bounds);
+    QRect getBounds();
+
     QWidget *getLayoutContainer();
     bool hasCustomWindowFrame();
     TitleBarButton *addTitleBarButton(const TitleBarButtonStyle &style,
@@ -95,6 +98,7 @@ private:
     bool handleSHOWWINDOW(MSG *msg);
     bool handleNCCALCSIZE(MSG *msg, long *result);
     bool handleSIZE(MSG *msg);
+    bool handleMOVE(MSG *msg);
     bool handleNCHITTEST(MSG *msg, long *result);
 
     bool enableCustomFrame_;
@@ -115,6 +119,12 @@ private:
         QWidget *layoutBase = nullptr;
         std::vector<Button *> buttons;
     } ui_;
+
+#ifdef USEWINSDK
+    QRect initalBounds_;
+    QRect currentBounds_;
+    bool isNotMinimizedOrMaximized_{};
+#endif
 
     pajlada::Signals::SignalHolder connections_;
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;

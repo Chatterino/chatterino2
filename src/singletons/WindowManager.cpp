@@ -338,7 +338,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
                 // Have to offset x by one because qt moves the window 1px too
                 // far to the left:w
 
-                window.setGeometry(x + 1, y, width, height);
+                window.setInitialBounds({x, y, width, height});
             }
         }
 
@@ -465,10 +465,12 @@ void WindowManager::save()
         }
 
         // window geometry
-        window_obj.insert("x", window->x());
-        window_obj.insert("y", window->y());
-        window_obj.insert("width", window->width());
-        window_obj.insert("height", window->height());
+        auto rect = window->getBounds();
+
+        window_obj.insert("x", rect.x());
+        window_obj.insert("y", rect.y());
+        window_obj.insert("width", rect.width());
+        window_obj.insert("height", rect.height());
 
         // window tabs
         QJsonArray tabs_arr;
