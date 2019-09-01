@@ -34,9 +34,8 @@ NotificationPage::NotificationPage()
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
                 settings.append(this->createCheckBox(
                     "Play sound", getSettings()->notificationPlaySound));
-                settings.append(
-                    this->createCheckBox("Enable toasts (Windows 8 or later)",
-                                         getSettings()->notificationToast));
+                settings.append(this->createCheckBox(
+                    "Enable toasts", getSettings()->notificationToast));
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
                 {
                     openIn.emplace<QLabel>("Open stream from Toast:  ")

@@ -183,7 +183,10 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
                 if (!(i != fakeTwitchChannels.end()))
                 {
                     fakeTwitchChannels.push_back(channelName);
-                    getApp()->toasts->sendToastMessage(channelName);
+                    if (getSettings()->notificationToast)
+                    {
+                        getApp()->toasts->sendToastMessage(channelName);
+                    }
                     if (getSettings()->notificationPlaySound)
                     {
                         getApp()->notifications->playSound();

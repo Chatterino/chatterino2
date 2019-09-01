@@ -101,11 +101,7 @@ void Toasts::sendToastMessage(const QString &channelName)
 void Toasts::actuallySendToastMessage(const QUrl &url,
                                       const QString &channelName)
 {
-    QNetworkRequest req(url);
-    static auto manager = new QNetworkAccessManager();
-    auto *reply = manager->get(req);
     QString bottomText = "";
-
     if (static_cast<ToastReaction>(getSettings()->openFromToast.getValue()) !=
         ToastReaction::DontOpen)
     {
@@ -116,11 +112,9 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
         bottomText = "Click here to " + mode;
     }
 
-    // Change to NetworkRequest instead
-    QObject::connect(reply, &QNetworkReply::finished, [=] {
-        if (reply->error() == QNetworkReply::NoError)
-        {
-            const auto data = reply->readAll();
+    NetworkRequest::twitchRequest(url)
+        .onSuccess([this, channelName, bottomText](auto result) -> Outcome {
+            const auto data = result.getData();
 
             QPixmap avatar;
             avatar.loadFromData(data);
@@ -129,14 +123,15 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
                 Snore::Notification(app, app.defaultAlert(),
                                     channelName + " just went live!",
                                     bottomText, Snore::Icon(avatar)));
-        }
-        else
-        {
+            return Success;
+        })
+        .onError([this, channelName, bottomText](auto result) -> bool {
             Snore::SnoreCore::instance().broadcastNotification(
                 Snore::Notification(app, app.defaultAlert(),
                                     channelName + " just went live!",
                                     bottomText, app.icon()));
-        }
-    });
+            return false;
+        })
+        .execute();
 }
 }  // namespace chatterino
