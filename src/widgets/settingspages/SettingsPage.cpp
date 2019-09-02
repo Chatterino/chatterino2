@@ -57,7 +57,7 @@ SettingsPage::SettingsPage(const QString &name, const QString &iconResource)
 bool SettingsPage::filterElements(const QString &query)
 {
     return filterItemsRec(this, query) || query.isEmpty() ||
-           this->name_.contains(query);
+           this->name_.contains(query, Qt::CaseInsensitive);
 }
 
 const QString &SettingsPage::getName()

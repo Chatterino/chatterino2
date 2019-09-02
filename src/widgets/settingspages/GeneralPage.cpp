@@ -144,12 +144,28 @@ bool SettingsLayout::filterElements(const QString &query)
 
     for (auto &&group : this->groups_)
     {
+        // if a description in a group matches `query` then show the entire group
+        bool descriptionMatches{};
+        for (auto &&widget : group.widgets)
+        {
+            if (auto x = dynamic_cast<DescriptionLabel *>(widget.element); x)
+            {
+                if (x->text().contains(query, Qt::CaseInsensitive))
+                {
+                    descriptionMatches = true;
+                    break;
+                }
+            }
+        }
+
         // if group name matches then all should be visible
-        if (group.name.contains(query, Qt::CaseInsensitive))
+        if (group.name.contains(query, Qt::CaseInsensitive) ||
+            descriptionMatches)
         {
             for (auto &&widget : group.widgets)
                 widget.element->show();
             group.title->show();
+            any = true;
         }
         // check if any match
         else
@@ -173,6 +189,7 @@ bool SettingsLayout::filterElements(const QString &query)
             }
 
             group.title->setVisible(groupAny);
+            any |= groupAny;
         }
     }
 
@@ -207,7 +224,8 @@ bool GeneralPage::filterElements(const QString &query)
 {
     if (this->settingsLayout_)
         return this->settingsLayout_->filterElements(query) ||
-               this->name_.contains(query) || query.isEmpty();
+               this->name_.contains(query, Qt::CaseInsensitive) ||
+               query.isEmpty();
     else
         return false;
 }
