@@ -18,3 +18,11 @@ Used to change the URL that Chatterino2 uses when trying to get emote set inform
 Default value: `https://braize.pajlada.com/chatterino/twitchemotes/set/%1/`  
 Arguments:  
  - `%1` = Emote set ID
+
+### CHATTERINO2_IMAGE_PASTE_SITE_URL
+Used to change the URL that Chatterino2 uses when uploading an image by pasting it into the input box.
+Default value: `https://i.nuuls.com/upload`
+Arguments:
+ - None
+Notes:
+ - The server that's running the web page MUST be compatible with [Nuuls' filehost](https://github.com/nuuls/filehost)

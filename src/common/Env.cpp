@@ -28,6 +28,8 @@ Env::Env()
     , twitchEmoteSetResolverUrl(readStringEnv(
           "CHATTERINO2_TWITCH_EMOTE_SET_RESOLVER_URL",
           "https://braize.pajlada.com/chatterino/twitchemotes/set/%1/"))
+    , imagePasteSiteUrl(readStringEnv("CHATTERINO2_IMAGE_PASTE_SITE_URL",
+                                      "https://i.nuuls.com/upload"))
 {
 }
 

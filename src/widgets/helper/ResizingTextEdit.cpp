@@ -5,6 +5,7 @@
 #include <string>
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
+#include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "singletons/Settings.hpp"
 
@@ -277,49 +278,7 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
     if (source->hasImage())
     {
-#if 0
-        static QUrl url("http://localhost:7494/upload?password=xd");
-        // default port and password for nuuls' filehost.
-#else
-        static QUrl url("https://i.nuuls.com/upload");
-        // production site
-#endif
-
-        QImage image = qvariant_cast<QImage>(source->imageData());
-
-        const char *boundary = "thisistheboudaryasd";
-        QByteArray dataToSend;
-        dataToSend.insert(0, "--");
-        dataToSend.append(boundary);
-        dataToSend.append(
-            "\r\n"
-            "Content-Disposition: form-data; name=\"attachment\"; "
-            "filename=\"control_v.png\"\r\n"
-            "Content-Type: image/png\r\n"
-            "\r\n");
-
-        QByteArray imageData;
-        QBuffer buf(&imageData);
-        buf.open(QIODevice::WriteOnly);
-        image.save(&buf, "png");
-
-        dataToSend.append(imageData);
-        dataToSend.append("\r\n--");
-        dataToSend.append(boundary);
-        dataToSend.append("\r\n");
-
-        NetworkRequest(url, NetworkRequestType::Post)
-            .header("Content-Type",
-                    (std::string("multipart/form-data; boundary=") +
-                     std::string(boundary))
-                        .c_str())
-
-            .payload(dataToSend)
-            .onSuccess([this](NetworkResult result) -> Outcome {
-                insertPlainText(result.getData());
-                return Success;
-            })
-            .execute();
+        this->pastedImage.invoke(source);
     }
     else
     {
