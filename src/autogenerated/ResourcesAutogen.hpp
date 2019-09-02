@@ -3,8 +3,7 @@
 
 namespace chatterino {
 
-class Resources2 : public Singleton
-{
+class Resources2 : public Singleton {
 public:
     Resources2();
 
@@ -18,6 +17,7 @@ public:
         QPixmap ban;
         QPixmap banRed;
         QPixmap copyDark;
+        QPixmap copyDarkTheme;
         QPixmap copyLight;
         QPixmap menuDark;
         QPixmap menuLight;
