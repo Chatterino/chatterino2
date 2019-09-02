@@ -287,15 +287,16 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
 
     layout.addTitle("Chat title");
-    layout.addWidget(new QLabel("In live channels show:"));
+    layout.addDescription("In live channels show:");
     layout.addCheckbox("Uptime", s.headerUptime);
     layout.addCheckbox("Viewer count", s.headerViewerCount);
     layout.addCheckbox("Category", s.headerGame);
     layout.addCheckbox("Title", s.headerStreamTitle);
 
     layout.addTitle("Beta");
-    layout.addDescription("You can receive updates earlier by ticking the box "
-                          "below. Updates are checked on startup.");
+    layout.addDescription(
+        "You can receive updates earlier by ticking the box below. Report "
+        "issues <a href='https://chatterino.com/link/issues'>here</a>.");
     layout.addCheckbox("Receive beta updates", s.betaUpdates);
 
 #ifdef Q_OS_WIN
