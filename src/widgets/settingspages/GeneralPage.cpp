@@ -20,11 +20,13 @@
 #define FIREFOX_EXTENSION_LINK \
     "https://addons.mozilla.org/en-US/firefox/addon/chatterino-native-host/"
 
+#define addTitle addTitle
+
 namespace chatterino {
 namespace {
     QPushButton *makeOpenSettingDirButton()
     {
-        auto button = new QPushButton("Open settings directory");
+        auto button = new QPushButton("Open AppData directory");
         QObject::connect(button, &QPushButton::clicked, [] {
             QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
         });
@@ -220,10 +222,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     // layout.addCheckbox("Mark last message you read");
     // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
-    layout.addCheckbox("Show moderation messages", s.hideModerationActions,
-                       true);
-    layout.addCheckbox("Random username color for users who never set a color",
-                       s.colorizeNicknames);
     layout.addDropdown<QString>(
         "Timestamps", {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a"},
         s.timestampFormat,
@@ -268,6 +266,11 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val) + "x";
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+
+    layout.addDropdown<int>(
+        "Preview on hover", {"Don't show", "Always show", "Hold shift"},
+        s.emotesTooltipPreview, [](int index) { return index; },
+        [](auto args) { return args.index; }, false);
     layout.addDropdown("Emoji set",
                        {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
                         "Apple", "Google", "Messenger"},
@@ -295,9 +298,23 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                           "below. Updates are checked on startup.");
     layout.addCheckbox("Receive beta updates", s.betaUpdates);
 
+#ifdef Q_OS_WIN
+    layout.addTitle("Browser Integration");
+    layout.addDescription("The browser extension replaces the default "
+                          "Twitch.tv chat with chatterino.");
+
+    layout.addDescription(
+        createNamedLink(CHROME_EXTENSION_LINK, "Download for Google Chrome"));
+    layout.addDescription(
+        createNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
+#endif
+
     layout.addTitle("Miscellaneous");
 
-    //layout.addWidget(makeOpenSettingDirButton());
+    layout.addCheckbox("Show moderation messages", s.hideModerationActions,
+                       true);
+    layout.addCheckbox("Random username color for users who never set a color",
+                       s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
@@ -319,11 +336,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
     layout.addCheckbox("Show live indicator in tabs", s.showTabLive);
-    layout.addDropdown<int>("Show emote preview in tooltip on hover",
-                            {"Don't show", "Always show", "Hold shift"},
-                            s.emotesTooltipPreview,
-                            [](int index) { return index; },
-                            [](auto args) { return args.index; }, false);
 
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
@@ -335,16 +347,11 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
 
-#ifdef Q_OS_WIN
-    layout.addTitle("Browser Integration");
-    layout.addDescription("The browser extension replaces the default "
-                          "Twitch.tv chat with chatterino.");
+    layout.addTitle("AppData");
+    layout.addDescription("All local files like settings and cache files are "
+                          "store in this directory.");
+    layout.addWidget(makeOpenSettingDirButton());
 
-    layout.addDescription(
-        createNamedLink(CHROME_EXTENSION_LINK, "Download for Google Chrome"));
-    layout.addDescription(
-        createNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
-#endif
 }  // namespace chatterino
 
 void GeneralPage::initExtra()
