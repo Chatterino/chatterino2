@@ -43,7 +43,7 @@ private:
     void initUi();
     void addTabs();
     void addTab(SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
-    void selectTab(SettingsDialogTab *tab);
+    void selectTab(SettingsDialogTab *tab, bool byUser = true);
     void selectPage(SettingsPage *page);
 
     void onOkClicked();
@@ -61,6 +61,7 @@ private:
     std::vector<SettingsDialogTab *> tabs_;
     std::vector<SettingsPage *> pages_;
     SettingsDialogTab *selectedTab_{};
+    SettingsDialogTab *lastSelectedByUser_{};
 
     friend class SettingsDialogTab;
 };

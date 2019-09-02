@@ -80,13 +80,18 @@ void SettingsDialog::initUi()
                 // TODO: add originally selected page
 
                 // find next visible page
-                if (!this->selectedTab_->isVisible())
+                if (this->lastSelectedByUser_ &&
+                    this->lastSelectedByUser_->isVisible())
+                {
+                    this->selectTab(this->lastSelectedByUser_, false);
+                }
+                else if (!this->selectedTab_->isVisible())
                 {
                     for (auto &&tab : this->tabs_)
                     {
                         if (tab->isVisible())
                         {
-                            this->selectTab(tab);
+                            this->selectTab(tab, false);
                             break;
                         }
                     }
@@ -189,7 +194,7 @@ void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
     }
 }
 
-void SettingsDialog::selectTab(SettingsDialogTab *tab)
+void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
 {
     this->ui_.pageStack->setCurrentWidget(tab->getSettingsPage());
 
@@ -205,6 +210,10 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab)
                        "border-top: 1px solid #444;"
                        "border-bottom: 1px solid #444;");
     this->selectedTab_ = tab;
+    if (byUser)
+    {
+        this->lastSelectedByUser_ = tab;
+    }
 }
 
 void SettingsDialog::selectPage(SettingsPage *page)
