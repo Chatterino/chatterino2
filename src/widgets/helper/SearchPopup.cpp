@@ -83,40 +83,32 @@ void SearchPopup::initLayout()
 void SearchPopup::performSearch()
 {
     QString text = searchInput_->text();
+    QStringList searchedNames = parseSearchedUsers(text);
 
-    QStringList searchedNames;
-    QStringList searchedContent;
+    // TODO: Implement this properly
+    // Remove all filter tags
+    for (QString &word : text.split(' ', QString::SkipEmptyParts))
+    {
+        if (word.startsWith("from:", Qt::CaseInsensitive))
+            text.remove(word);
+    }
 
     ChannelPtr channel(new Channel(this->channelName_, Channel::Type::None));
 
-    // Parse all usernames that should be searched for
-    for (QString &word : text.split(' ', QString::SkipEmptyParts))
-    {
-        if (word.startsWith('@'))
-        {
-            searchedNames << word.remove('@');
-        }
-        else
-        {
-            searchedContent << word;
-        }
-    }
-
-    // Build the query (this will be searched for in messages by the selected users)
-    QString query = searchedContent.join(' ');
+    // TODO: Remove
+    for (auto name : searchedNames)
+        std::cout << "Parsed user name: " << name.toStdString() << std::endl;
+    
+    // TODO: Remove
+    std::cout << "After Parsing: Searching for " << text.trimmed().toStdString() << std::endl;
 
     for (size_t i = 0; i < this->snapshot_.size(); i++)
     {
         MessagePtr message = this->snapshot_[i];
 
-        if (text.isEmpty() ||
-            message->searchText.contains(query, Qt::CaseInsensitive))
+        if (text.isEmpty() || message->searchText.contains(text.trimmed(), Qt::CaseInsensitive))
         {
-            // If username-only search is enabled, at least one name must match.
-            // If it is not enabled, we can add the message directly.
-            if (searchedNames.size() == 0 ||
-                searchedNames.contains(message->displayName,
-                                       Qt::CaseInsensitive))
+            if (searchedNames.size() == 0 || searchedNames.contains(message->displayName, Qt::CaseInsensitive))
             {
                 channel->addMessage(message);
             }
@@ -124,6 +116,41 @@ void SearchPopup::performSearch()
     }
 
     this->channelView_->setChannel(channel);
+}
+
+QStringList SearchPopup::parseSearchedUsers(const QString& input)
+{
+    QStringList parsedUserNames;
+
+    for (QString &word : input.split(' ', QString::SkipEmptyParts))
+    {
+        // Users can either be searched for by specifying them comma-seperated:
+        // "from:user1,user2,user3"
+        // or by supplying multiple "from" tags:
+        // "from:user1 from:user2 from:user3"
+
+        if (!word.startsWith("from:"))
+            // Ignore this word
+            continue;
+        
+        // Get a working copy so we can manipulate the string
+        QString fromTag = word;
+
+        // Delete the "from:" part so we can parse the user names more easily
+        fromTag.remove(0, 5);
+
+        // Parse comma-seperated user names
+        for (QString &user : fromTag.split(',', QString::SkipEmptyParts))
+        {
+            parsedUserNames << user;
+        }
+
+        // The "from" tag shouldn't be part of the actual search query so we
+        // remove it from "input"
+        // input.remove(word);
+    }
+
+    return parsedUserNames;
 }
 
 }  // namespace chatterino

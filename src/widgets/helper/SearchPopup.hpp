@@ -26,6 +26,7 @@ protected:
     void keyPressEvent(QKeyEvent *e) override;
 
 private:
+    static QStringList parseSearchedUsers(const QString& input);
     void initLayout();
     void performSearch();
 
