@@ -290,6 +290,11 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Category", s.headerGame);
     layout.addCheckbox("Title", s.headerStreamTitle);
 
+    layout.addTitle("Beta");
+    layout.addDescription("You can receive updates earlier by ticking the box "
+                          "below. Updates are checked on startup.");
+    layout.addCheckbox("Receive beta updates", s.betaUpdates);
+
     layout.addTitle("Miscellaneous");
 
     //layout.addWidget(makeOpenSettingDirButton());

@@ -24,6 +24,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Toasts.hpp"
+#include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
@@ -98,6 +99,9 @@ int Application::run(QApplication &qtApp)
     this->twitch.server->connect();
 
     this->windows->getMainWindow().show();
+
+    getSettings()->betaUpdates.connect(
+        [] { Updates::getInstance().checkForUpdates(); }, false);
 
     return qtApp.exec();
 }
