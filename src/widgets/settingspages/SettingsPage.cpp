@@ -9,11 +9,14 @@
 
 namespace chatterino {
 
-void filterItemsRec(QObject *object, const QString &query)
+bool filterItemsRec(QObject *object, const QString &query)
 {
+    bool any{};
+
     for (auto &&child : object->children())
     {
-        auto setOpacity = [=](auto *widget, bool condition) {
+        auto setOpacity = [&](auto *widget, bool condition) {
+            any |= condition;
             widget->greyedOut = !condition;
             widget->update();
         };
@@ -39,9 +42,10 @@ void filterItemsRec(QObject *object, const QString &query)
         }
         else
         {
-            filterItemsRec(child, query);
+            any |= filterItemsRec(child, query);
         }
     }
+    return any;
 }
 
 SettingsPage::SettingsPage(const QString &name, const QString &iconResource)
@@ -50,9 +54,10 @@ SettingsPage::SettingsPage(const QString &name, const QString &iconResource)
 {
 }
 
-void SettingsPage::filterElements(const QString &query)
+bool SettingsPage::filterElements(const QString &query)
 {
-    filterItemsRec(this, query);
+    return filterItemsRec(this, query) || query.isEmpty() ||
+           this->name_.contains(query);
 }
 
 const QString &SettingsPage::getName()

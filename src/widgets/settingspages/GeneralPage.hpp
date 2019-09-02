@@ -131,7 +131,7 @@ public:
     DescriptionLabel *addDescription(const QString &text);
 
     void addSeperator();
-    void filterElements(const QString &query);
+    bool filterElements(const QString &query);
 
 private:
     struct Widget {
@@ -156,7 +156,7 @@ class GeneralPage : public SettingsPage
 public:
     GeneralPage();
 
-    void filterElements(const QString &query);
+    bool filterElements(const QString &query);
 
 private:
     void initLayout(SettingsLayout &layout);

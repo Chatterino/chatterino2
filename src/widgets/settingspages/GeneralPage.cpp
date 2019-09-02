@@ -138,8 +138,10 @@ void SettingsLayout::addSeperator()
     this->addWidget(new Line(false));
 }
 
-void SettingsLayout::filterElements(const QString &query)
+bool SettingsLayout::filterElements(const QString &query)
 {
+    bool any{};
+
     for (auto &&group : this->groups_)
     {
         // if group name matches then all should be visible
@@ -152,7 +154,7 @@ void SettingsLayout::filterElements(const QString &query)
         // check if any match
         else
         {
-            auto any = false;
+            auto groupAny = false;
 
             for (auto &&widget : group.widgets)
             {
@@ -161,7 +163,7 @@ void SettingsLayout::filterElements(const QString &query)
                     if (keyword.contains(query, Qt::CaseInsensitive))
                     {
                         widget.element->show();
-                        any = true;
+                        groupAny = true;
                     }
                     else
                     {
@@ -170,9 +172,11 @@ void SettingsLayout::filterElements(const QString &query)
                 }
             }
 
-            group.title->setVisible(any);
+            group.title->setVisible(groupAny);
         }
     }
+
+    return any;
 }
 
 GeneralPage::GeneralPage()
@@ -199,10 +203,13 @@ GeneralPage::GeneralPage()
     this->initExtra();
 }
 
-void GeneralPage::filterElements(const QString &query)
+bool GeneralPage::filterElements(const QString &query)
 {
     if (this->settingsLayout_)
-        this->settingsLayout_->filterElements(query);
+        return this->settingsLayout_->filterElements(query) ||
+               this->name_.contains(query) || query.isEmpty();
+    else
+        return false;
 }
 
 void GeneralPage::initLayout(SettingsLayout &layout)

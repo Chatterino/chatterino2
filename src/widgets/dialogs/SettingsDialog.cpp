@@ -67,13 +67,31 @@ void SettingsDialog::initUi()
         auto edit = title.emplace<QLineEdit>().assign(&this->ui_.search);
         QTimer::singleShot(100, edit.getElement(),
                            [edit = edit.getElement()]() { edit->setFocus(); });
-        QObject::connect(edit.getElement(), &QLineEdit::textChanged, this,
-                         [this](const QString &text) {
-                             for (auto &&page : this->pages_)
-                             {
-                                 page->filterElements(text);
-                             }
-                         });
+        QObject::connect(
+            edit.getElement(), &QLineEdit::textChanged, this,
+            [this](const QString &text) {
+                // filter elements and hide pages
+                for (auto &&page : this->pages_)
+                {
+                    // filterElements returns true if anything on the page matches the search query
+                    page->tab()->setVisible(page->filterElements(text));
+                }
+
+                // TODO: add originally selected page
+
+                // find next visible page
+                if (!this->selectedTab_->isVisible())
+                {
+                    for (auto &&tab : this->tabs_)
+                    {
+                        if (tab->isVisible())
+                        {
+                            this->selectTab(tab);
+                            break;
+                        }
+                    }
+                }
+            });
 
         right.emplace<QStackedLayout>()
             .assign(&this->ui_.pageStack)

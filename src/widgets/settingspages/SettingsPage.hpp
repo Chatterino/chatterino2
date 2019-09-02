@@ -49,7 +49,7 @@ public:
     const QString &getName();
     const QString &getIconResource();
 
-    virtual void filterElements(const QString &query);
+    virtual bool filterElements(const QString &query);
 
     SettingsDialogTab *tab() const;
     void setTab(SettingsDialogTab *tab);
