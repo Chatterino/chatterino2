@@ -372,7 +372,7 @@ void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
 
-#undef CHATTERINO_NIGHTLY_VERSION_STRING
+    //#undef CHATTERINO_NIGHTLY_VERSION_STRING
 
 #ifdef CHATTERINO_NIGHTLY_VERSION_STRING
     auto windowTitleEnd =
