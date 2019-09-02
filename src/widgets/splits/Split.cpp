@@ -212,6 +212,7 @@ Split::Split(QWidget *parent)
                             "Please wait until the upload finishes.")));
                 return;
             }
+
             is_uploading = true;
             this->getChannel()->addMessage(
                 makeSystemMessage(QString("Started upload...")));
@@ -221,19 +222,27 @@ Split::Split(QWidget *parent)
             QByteArray dataToSend;
             dataToSend.insert(0, "--");
             dataToSend.append(boundary);
+
             dataToSend.append(
                 "\r\n"
                 "Content-Disposition: form-data; name=\"attachment\"; "
                 "filename=\"control_v.png\"\r\n"
                 "Content-Type: image/png\r\n"
                 "\r\n");
+            if (source->hasFormat("image/png"))
+            {
+                dataToSend.append(source->data("image/png"));
+            }
+            else
+            {  // not PNG, try loading it into QImage and save it to a PNG.
+                QByteArray imageData;
+                QBuffer buf(&imageData);
+                buf.open(QIODevice::WriteOnly);
+                image.save(&buf);
 
-            QByteArray imageData;
-            QBuffer buf(&imageData);
-            buf.open(QIODevice::WriteOnly);
-            image.save(&buf, "png");
+                dataToSend.append(imageData);
+            }
 
-            dataToSend.append(imageData);
             dataToSend.append("\r\n--");
             dataToSend.append(boundary);
             dataToSend.append("\r\n");
