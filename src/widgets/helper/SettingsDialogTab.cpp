@@ -68,6 +68,8 @@ void SettingsDialogTab::mousePressEvent(QMouseEvent *event)
     }
 
     this->dialog_->selectTab(this);
+
+    this->setFocus();
 }
 
 }  // namespace chatterino

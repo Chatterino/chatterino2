@@ -1,7 +1,9 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 
 #include "Application.hpp"
+#include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/helper/Button.hpp"
 #include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
@@ -60,11 +62,15 @@ void SettingsDialog::initUi()
     this->layout()->setSpacing(0);
 
     // right side layout
-    auto right = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
+    auto right =
+        layoutCreator.emplace<QVBoxLayout>().withoutMargin().withoutSpacing();
     {
-        auto title = right.emplace<QHBoxLayout>().withoutMargin();
+        auto title = right.emplace<PageHeader>();
+        auto header = LayoutCreator<PageHeader>(title.getElement())
+                          .setLayoutType<QHBoxLayout>();
 
-        auto edit = title.emplace<QLineEdit>().assign(&this->ui_.search);
+        auto edit = header.emplace<QLineEdit>().assign(&this->ui_.search);
+        edit->setPlaceholderText("Find in settings...");
         QTimer::singleShot(100, edit.getElement(),
                            [edit = edit.getElement()]() { edit->setFocus(); });
         QObject::connect(
@@ -115,6 +121,10 @@ void SettingsDialog::initUi()
                     }
                 }
             });
+
+        auto searchButton = header.emplace<Button>();
+        searchButton->setPixmap(getApp()->resources->buttons.search);
+        searchButton->setScaleIndependantSize(30, 30);
 
         right.emplace<QStackedLayout>()
             .assign(&this->ui_.pageStack)

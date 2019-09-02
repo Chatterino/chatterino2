@@ -30,6 +30,13 @@ chatterino--SettingsPage {
     border: 1px solid #555;
 }
 
+chatterino--PageHeader {
+    min-height: 54px;
+    min-width: 64px;
+    border: 1px solid #555;
+    border-bottom: none;
+}
+
 chatterino--TitleLabel {
     font-family: "Segoe UI light";
     font-size: 24px;

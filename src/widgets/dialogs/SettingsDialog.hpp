@@ -16,6 +16,11 @@ class SettingsPage;
 class SettingsDialogTab;
 class ModerationPage;
 
+class PageHeader : public QFrame
+{
+    Q_OBJECT
+};
+
 enum class SettingsDialogPreference {
     NoPreference,
     Accounts,
