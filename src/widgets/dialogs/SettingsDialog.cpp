@@ -91,6 +91,24 @@ void SettingsDialog::initUi()
                         }
                     }
                 }
+
+                // remove duplicate spaces
+                bool shouldShowSpace = true;
+
+                for (int i = 0; i < this->ui_.tabContainer->count(); i++)
+                {
+                    auto item = this->ui_.tabContainer->itemAt(i);
+                    if (auto x = dynamic_cast<QSpacerItem *>(item); x)
+                    {
+                        x->changeSize(
+                            10, shouldShowSpace ? int(16 * this->scale()) : 0);
+                        shouldShowSpace = false;
+                    }
+                    else if (item->widget())
+                    {
+                        shouldShowSpace |= item->widget()->isVisible();
+                    }
+                }
             });
 
         right.emplace<QStackedLayout>()
