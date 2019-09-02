@@ -8,7 +8,7 @@ QCheckBox::indicator {
 }
 
 chatterino--ComboBox {
-    width: 100px;
+    width: 120px;
 }
 
 QScrollArea {

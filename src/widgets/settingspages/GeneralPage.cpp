@@ -390,7 +390,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addDescription(
         createNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
 #endif
-}  // namespace chatterino
+
+    // invisible element for width
+    auto inv = new BaseWidget(this);
+    inv->setScaleIndependantWidth(500);
+    layout.addWidget(inv);
+}
 
 void GeneralPage::initExtra()
 {
