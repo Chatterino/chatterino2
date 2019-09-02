@@ -49,17 +49,16 @@ void SettingsDialog::initUi()
     LayoutCreator<SettingsDialog> layoutCreator(this);
 
     // tab pages
-    layoutCreator.setLayoutType<QHBoxLayout>()
-        .withoutSpacing()
-        .emplace<QWidget>()
+    auto outerBox = layoutCreator.setLayoutType<QHBoxLayout>();
+    outerBox->setSpacing(12);
+
+    outerBox.emplace<QWidget>()
         .assign(&this->ui_.tabContainerContainer)
         .emplace<QVBoxLayout>()
         .withoutMargin()
         .assign(&this->ui_.tabContainer);
 
     this->ui_.tabContainerContainer->layout()->setContentsMargins(8, 8, 0, 39);
-
-    this->layout()->setSpacing(0);
 
     // right side layout
     auto right =
@@ -125,10 +124,15 @@ void SettingsDialog::initUi()
         auto searchButton = header.emplace<Button>();
         searchButton->setPixmap(getApp()->resources->buttons.search);
         searchButton->setScaleIndependantSize(30, 30);
+        QObject::connect(
+            searchButton.getElement(), &Button::clicked, this,
+            []() { QDesktopServices::openUrl({"https://google.com"}); });
 
         right.emplace<QStackedLayout>()
             .assign(&this->ui_.pageStack)
             .withoutMargin();
+
+        right->addSpacing(12);
 
         auto buttons = right.emplace<QDialogButtonBox>(Qt::Horizontal);
         {
@@ -160,8 +164,6 @@ void SettingsDialog::addTabs()
 {
     this->ui_.tabContainer->setMargin(0);
     this->ui_.tabContainer->setSpacing(0);
-
-    this->ui_.tabContainer->addSpacing(16);
 
     this->addTab(new GeneralPage);
 
@@ -216,9 +218,7 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
 
     tab->setSelected(true);
     tab->setStyleSheet("background: #222; color: #4FC3F7;"
-                       "border-left: 1px solid #444;"
-                       "border-top: 1px solid #444;"
-                       "border-bottom: 1px solid #444;");
+                       "border: 1px solid #444;");
     this->selectedTab_ = tab;
     if (byUser)
     {
