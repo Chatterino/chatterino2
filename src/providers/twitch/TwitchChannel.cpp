@@ -114,6 +114,7 @@ TwitchChannel::TwitchChannel(const QString &name,
         this->refreshBadges();
         this->refreshCheerEmotes();
         this->refreshFFZChannelEmotes();
+        this->refreshBTTVChannelEmotes();
     });
 
     // timers
@@ -136,7 +137,6 @@ TwitchChannel::TwitchChannel(const QString &name,
 void TwitchChannel::initialize()
 {
     this->refreshChatters();
-    this->refreshBTTVChannelEmotes();
     this->refreshBadges();
     this->ffzCustomModBadge_.loadCustomModBadge();
 }
@@ -154,7 +154,7 @@ bool TwitchChannel::canSendMessage() const
 void TwitchChannel::refreshBTTVChannelEmotes()
 {
     BttvEmotes::loadChannel(
-        this->getName(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+        this->roomId(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
                 this->bttvEmotes_.set(
                     std::make_shared<EmoteMap>(std::move(emoteMap)));
