@@ -72,9 +72,12 @@ public:
     QPushButton *addButton(const QString &text, OnClick onClick)
     {
         auto button = new QPushButton(text);
+        auto layout = new QHBoxLayout();
+        layout->addWidget(button);
+        layout->addStretch(1);
         this->groups_.back().widgets.push_back({button, {text}});
         QObject::connect(button, &QPushButton::clicked, onClick);
-        this->addWidget(button);
+        this->addLayout(layout);
         return button;
     }
 

@@ -202,7 +202,6 @@ SOURCES += \
     src/widgets/Scrollbar.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
-    src/widgets/settingspages/AdvancedPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
     src/widgets/settingspages/ExternalToolsPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
@@ -382,7 +381,6 @@ HEADERS += \
     src/widgets/Scrollbar.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
-    src/widgets/settingspages/AdvancedPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
     src/widgets/settingspages/ExternalToolsPage.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
@@ -449,4 +447,4 @@ git_hash = $$str_member($$git_commit, 0, 8)
 # https://stackoverflow.com/questions/3348711/add-a-define-to-qmake-with-a-value/18343449#18343449
 DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
 DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
-DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
+DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
