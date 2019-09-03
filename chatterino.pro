@@ -82,8 +82,8 @@ SOURCES += \
     src/common/DownloadManager.cpp \
     src/common/Env.cpp \
     src/common/LinkParser.cpp \
-    src/common/NetworkPrivate.cpp \
     src/common/NetworkManager.cpp \
+    src/common/NetworkPrivate.cpp \
     src/common/NetworkRequest.cpp \
     src/common/NetworkResult.cpp \
     src/common/UsernameSet.cpp \
@@ -104,6 +104,8 @@ SOURCES += \
     src/controllers/moderationactions/ModerationActions.cpp \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
+    src/controllers/pings/PingController.cpp \
+    src/controllers/pings/PingModel.cpp \
     src/controllers/taggedusers/TaggedUser.cpp \
     src/controllers/taggedusers/TaggedUsersController.cpp \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
@@ -161,9 +163,9 @@ SOURCES += \
     src/singletons/Settings.cpp \
     src/singletons/Theme.cpp \
     src/singletons/Toasts.cpp \
+    src/singletons/TooltipPreviewImage.cpp \
     src/singletons/Updates.cpp \
     src/singletons/WindowManager.cpp \
-    src/singletons/TooltipPreviewImage.cpp \
     src/util/DebugCount.cpp \
     src/util/FormatTime.cpp \
     src/util/IncognitoBrowser.cpp \
@@ -201,21 +203,15 @@ SOURCES += \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/AdvancedPage.cpp \
-    src/widgets/settingspages/BrowserExtensionPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
-    src/widgets/settingspages/EmotesPage.cpp \
     src/widgets/settingspages/ExternalToolsPage.cpp \
-    src/widgets/settingspages/FeelPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
     src/widgets/settingspages/HighlightingPage.cpp \
     src/widgets/settingspages/IgnoresPage.cpp \
     src/widgets/settingspages/KeyboardSettingsPage.cpp \
-    src/widgets/settingspages/LogsPage.cpp \
-    src/widgets/settingspages/LookPage.cpp \
     src/widgets/settingspages/ModerationPage.cpp \
     src/widgets/settingspages/NotificationPage.cpp \
     src/widgets/settingspages/SettingsPage.cpp \
-    src/widgets/settingspages/SpecialChannelsPage.cpp \
     src/widgets/splits/ClosedSplits.cpp \
     src/widgets/splits/Split.cpp \
     src/widgets/splits/SplitContainer.cpp \
@@ -224,8 +220,6 @@ SOURCES += \
     src/widgets/splits/SplitOverlay.cpp \
     src/widgets/StreamView.cpp \
     src/widgets/Window.cpp \
-    src/controllers/pings/PingController.cpp \
-    src/controllers/pings/PingModel.cpp \
 
 HEADERS += \
     src/Application.hpp \
@@ -238,10 +232,11 @@ HEADERS += \
     src/common/CompletionModel.hpp \
     src/common/ConcurrentMap.hpp \
     src/common/DownloadManager.hpp \
+    src/common/Env.hpp \
     src/common/LinkParser.hpp \
     src/common/NetworkCommon.hpp \
-    src/common/NetworkPrivate.hpp \
     src/common/NetworkManager.hpp \
+    src/common/NetworkPrivate.hpp \
     src/common/NetworkRequest.hpp \
     src/common/NetworkResult.hpp \
     src/common/NullablePtr.hpp \
@@ -271,6 +266,8 @@ HEADERS += \
     src/controllers/moderationactions/ModerationActions.hpp \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
+    src/controllers/pings/PingController.hpp \
+    src/controllers/pings/PingModel.hpp \
     src/controllers/taggedusers/TaggedUser.hpp \
     src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
@@ -323,7 +320,6 @@ HEADERS += \
     src/providers/twitch/TwitchServer.hpp \
     src/providers/twitch/TwitchUser.hpp \
     src/RunGui.hpp \
-    src/singletons/TooltipPreviewImage.hpp \
     src/singletons/Badges.hpp \
     src/singletons/Emotes.hpp \
     src/singletons/helper/GifTimer.hpp \
@@ -335,6 +331,7 @@ HEADERS += \
     src/singletons/Settings.hpp \
     src/singletons/Theme.hpp \
     src/singletons/Toasts.hpp \
+    src/singletons/TooltipPreviewImage.hpp \
     src/singletons/Updates.hpp \
     src/singletons/WindowManager.hpp \
     src/util/ConcurrentMap.hpp \
@@ -386,21 +383,15 @@ HEADERS += \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/AdvancedPage.hpp \
-    src/widgets/settingspages/BrowserExtensionPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
-    src/widgets/settingspages/EmotesPage.hpp \
     src/widgets/settingspages/ExternalToolsPage.hpp \
-    src/widgets/settingspages/FeelPage.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
     src/widgets/settingspages/HighlightingPage.hpp \
     src/widgets/settingspages/IgnoresPage.hpp \
     src/widgets/settingspages/KeyboardSettingsPage.hpp \
-    src/widgets/settingspages/LogsPage.hpp \
-    src/widgets/settingspages/LookPage.hpp \
     src/widgets/settingspages/ModerationPage.hpp \
     src/widgets/settingspages/NotificationPage.hpp \
     src/widgets/settingspages/SettingsPage.hpp \
-    src/widgets/settingspages/SpecialChannelsPage.hpp \
     src/widgets/splits/ClosedSplits.hpp \
     src/widgets/splits/Split.hpp \
     src/widgets/splits/SplitContainer.hpp \
@@ -409,8 +400,6 @@ HEADERS += \
     src/widgets/splits/SplitOverlay.hpp \
     src/widgets/StreamView.hpp \
     src/widgets/Window.hpp \
-    src/controllers/pings/PingController.hpp \
-    src/controllers/pings/PingModel.hpp \
 
 RESOURCES += \
     resources/resources.qrc \
@@ -460,4 +449,4 @@ git_hash = $$str_member($$git_commit, 0, 8)
 # https://stackoverflow.com/questions/3348711/add-a-define-to-qmake-with-a-value/18343449#18343449
 DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
 DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
-DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
+DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
