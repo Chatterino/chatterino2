@@ -23,16 +23,6 @@
 #define addTitle addTitle
 
 namespace chatterino {
-namespace {
-    QPushButton *makeOpenSettingDirButton()
-    {
-        auto button = new QPushButton("Open AppData directory");
-        QObject::connect(button, &QPushButton::clicked, [] {
-            QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
-        });
-        return button;
-    }
-}  // namespace
 
 TitleLabel *SettingsLayout::addTitle(const QString &title)
 {
@@ -426,7 +416,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addTitle("AppData");
     layout.addDescription("All local files like settings and cache files are "
                           "store in this directory.");
-    layout.addWidget(makeOpenSettingDirButton());
+    layout.addButton("Open AppData directory", [] {
+        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+    });
 
     // invisible element for width
     auto inv = new BaseWidget(this);

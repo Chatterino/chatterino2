@@ -68,6 +68,16 @@ public:
                           pajlada::Settings::Setting<QString> &setting,
                           bool editable = false);
 
+    template <typename OnClick>
+    QPushButton *addButton(const QString &text, OnClick onClick)
+    {
+        auto button = new QPushButton(text);
+        this->groups_.back().widgets.push_back({button, {text}});
+        QObject::connect(button, &QPushButton::clicked, onClick);
+        this->addWidget(button);
+        return button;
+    }
+
     template <typename T>
     ComboBox *addDropdown(
         const QString &text, const QStringList &items,
