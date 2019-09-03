@@ -22,7 +22,7 @@ public:
     {
     }
 
-    std::size_t size()
+    std::size_t size() const
     {
         return this->length_;
     }

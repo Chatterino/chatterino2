@@ -10,6 +10,26 @@
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {
+namespace {
+    ChannelPtr filter(const QString &text, const QString &channelName,
+                      const LimitedQueueSnapshot<MessagePtr> &snapshot)
+    {
+        ChannelPtr channel(new Channel(channelName, Channel::Type::None));
+
+        for (size_t i = 0; i < snapshot.size(); i++)
+        {
+            MessagePtr message = snapshot[i];
+
+            if (text.isEmpty() ||
+                message->searchText.indexOf(text, 0, Qt::CaseInsensitive) != -1)
+            {
+                channel->addMessage(message);
+            }
+        }
+
+        return channel;
+    }
+}  // namespace
 
 SearchPopup::SearchPopup()
 {
@@ -17,13 +37,24 @@ SearchPopup::SearchPopup()
     this->resize(400, 600);
 }
 
-void SearchPopup::setChannel(ChannelPtr channel)
+void SearchPopup::setChannel(const ChannelPtr &channel)
 {
     this->channelName_ = channel->getName();
     this->snapshot_ = channel->getMessageSnapshot();
-    this->performSearch();
+    this->search();
 
-    this->setWindowTitle("Searching in " + channel->getName() + "s history");
+    this->updateWindowTitle();
+}
+
+void SearchPopup::updateWindowTitle()
+{
+    this->setWindowTitle("Searching in " + this->channelName_ + "s history");
+}
+
+void SearchPopup::search()
+{
+    this->channelView_->setChannel(filter(this->searchInput_->text(),
+                                          this->channelName_, this->snapshot_));
 }
 
 void SearchPopup::keyPressEvent(QKeyEvent *e)
@@ -43,18 +74,20 @@ void SearchPopup::initLayout()
     {
         QVBoxLayout *layout1 = new QVBoxLayout(this);
         layout1->setMargin(0);
+        layout1->setSpacing(0);
 
         // HBOX
         {
             QHBoxLayout *layout2 = new QHBoxLayout(this);
-            layout2->setMargin(6);
+            layout2->setMargin(8);
+            layout2->setSpacing(8);
 
             // SEARCH INPUT
             {
                 this->searchInput_ = new QLineEdit(this);
                 layout2->addWidget(this->searchInput_);
                 QObject::connect(this->searchInput_, &QLineEdit::returnPressed,
-                                 [this] { this->performSearch(); });
+                                 [this] { this->search(); });
             }
 
             // SEARCH BUTTON
@@ -63,7 +96,7 @@ void SearchPopup::initLayout()
                 searchButton->setText("Search");
                 layout2->addWidget(searchButton);
                 QObject::connect(searchButton, &QPushButton::clicked,
-                                 [this] { this->performSearch(); });
+                                 [this] { this->search(); });
             }
 
             layout1->addLayout(layout2);
@@ -78,27 +111,6 @@ void SearchPopup::initLayout()
 
         this->setLayout(layout1);
     }
-}
-
-void SearchPopup::performSearch()
-{
-    QString text = searchInput_->text();
-
-    ChannelPtr channel(new Channel(this->channelName_, Channel::Type::None));
-
-    for (size_t i = 0; i < this->snapshot_.size(); i++)
-    {
-        MessagePtr message = this->snapshot_[i];
-
-        if (text.isEmpty() ||
-            message->searchText.indexOf(this->searchInput_->text(), 0,
-                                        Qt::CaseInsensitive) != -1)
-        {
-            channel->addMessage(message);
-        }
-    }
-
-    this->channelView_->setChannel(channel);
 }
 
 }  // namespace chatterino
