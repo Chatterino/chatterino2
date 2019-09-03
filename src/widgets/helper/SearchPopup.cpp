@@ -8,6 +8,7 @@
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
 #include "messages/predicates/AuthorPredicate.hpp"
+#include "messages/predicates/LinkPredicate.hpp"
 #include "messages/predicates/SubstringPredicate.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
@@ -86,34 +87,20 @@ void SearchPopup::performSearch()
 {
     QString text = searchInput_->text();
     ChannelPtr channel(new Channel(this->channelName_, Channel::Type::None));
-    std::vector<MessagePredicatePtr> predicates;
 
-    // TODO: Clean this up
-    QStringList searchedUsers = parseSearchedUsers(text);
-    if (searchedUsers.size() > 0)
-    {
-        predicates.push_back(std::make_shared<AuthorPredicate>(searchedUsers));
-    }
+    // Parse predicates from tags in "text" and add them to "predicates_"
+    parsePredicates(text);
 
-    // TODO: Implement this properly
-    // Remove all filter tags
-    for (QString &word : text.split(' ', QString::SkipEmptyParts))
-    {
-        if (word.startsWith("from:", Qt::CaseInsensitive))
-            text.remove(word);
-    }
-    text = text.trimmed();
-
-    predicates.push_back(std::make_shared<SubstringPredicate>(text));
-
+    // Check for every message whether it fulfills all predicates that have
+    // been registered
     for (size_t i = 0; i < this->snapshot_.size(); ++i)
     {
         MessagePtr message = this->snapshot_[i];
 
         bool accept = true;
-        for (MessagePredicatePtr &pred : predicates)
+        for (MessagePredicatePtr &pred : this->predicates_)
         {
-            // We can discard the message as soon as one predicate fails
+            // Discard the message as soon as one predicate fails
             if (!pred->appliesTo(message))
             {
                 accept = false;
@@ -121,12 +108,54 @@ void SearchPopup::performSearch()
             }
         }
 
-        // If all predicates match, the message can be added to the channel
+        // If all predicates match, add the message to the channel
         if (accept)
             channel->addMessage(message);
     }
 
     this->channelView_->setChannel(channel);
+}
+
+void SearchPopup::parsePredicates(const QString& input)
+{
+    this->predicates_.clear();
+
+    // Get a working copy we can modify
+    QString text = input;
+
+    // Check for "from:" tags
+    QStringList searchedUsers = parseSearchedUsers(text);
+    if (searchedUsers.size() > 0)
+    {
+        this->predicates_.push_back(std::make_shared<AuthorPredicate>(searchedUsers));
+        removeTagFromText("from:", text);
+    }
+
+    // Check for "contains:link" tags
+    if (text.contains("contains:link", Qt::CaseInsensitive))
+    {
+        this->predicates_.push_back(std::make_shared<LinkPredicate>());
+        removeTagFromText("contains:link", text);
+    }
+
+    // The rest of the input is treated as a substring search.
+    // If "text" is empty, every message will be matched.
+    if (text.size() > 0)
+    {
+        this->predicates_.push_back(std::make_shared<SubstringPredicate>(text));
+    }
+}
+
+void SearchPopup::removeTagFromText(const QString& tag, QString& text)
+{
+    for (QString &word : text.split(' ', QString::SkipEmptyParts))
+    {
+        if (word.startsWith(tag, Qt::CaseInsensitive))
+            text.remove(word);
+    }
+
+    // Remove whitespace introduced by spaces between tags
+    text = text.trimmed();
 }
 
 QStringList SearchPopup::parseSearchedUsers(const QString& input)
@@ -135,10 +164,8 @@ QStringList SearchPopup::parseSearchedUsers(const QString& input)
 
     for (QString &word : input.split(' ', QString::SkipEmptyParts))
     {
-        // Users can either be searched for by specifying them comma-seperated:
-        // "from:user1,user2,user3"
-        // or by supplying multiple "from" tags:
-        // "from:user1 from:user2 from:user3"
+        // Users can be searched for by specifying them like so:
+        // "from:user1,user2,user3" or "from:user1 from:user2 from:user3"
 
         if (!word.startsWith("from:"))
             // Ignore this word
