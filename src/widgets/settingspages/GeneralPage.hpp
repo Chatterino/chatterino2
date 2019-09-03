@@ -28,17 +28,6 @@ public:
     }
 };
 
-class TitleLabel2 : public QLabel
-{
-    Q_OBJECT
-
-public:
-    TitleLabel2(const QString &text)
-        : QLabel(text)
-    {
-    }
-};
-
 class DescriptionLabel : public QLabel
 {
     Q_OBJECT
@@ -71,7 +60,6 @@ class SettingsLayout : public QVBoxLayout
 
 public:
     TitleLabel *addTitle(const QString &text);
-    TitleLabel2 *addTitle2(const QString &text);
     /// @param inverse Inverses true to false and vice versa
     QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
                            bool inverse = false);
@@ -141,9 +129,23 @@ public:
         return combo;
     }
     DescriptionLabel *addDescription(const QString &text);
+
     void addSeperator();
+    bool filterElements(const QString &query);
 
 private:
+    struct Widget {
+        QWidget *element;
+        QStringList keywords;
+    };
+
+    struct Group {
+        QString name;
+        QWidget *title{};
+        std::vector<Widget> widgets;
+    };
+
+    std::vector<Group> groups_;
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 };
 
@@ -154,13 +156,16 @@ class GeneralPage : public SettingsPage
 public:
     GeneralPage();
 
+    bool filterElements(const QString &query);
+
 private:
     void initLayout(SettingsLayout &layout);
     void initExtra();
 
     QString getFont(const DropdownArgs &args) const;
 
-    DescriptionLabel *cachePath{};
+    DescriptionLabel *cachePath_{};
+    SettingsLayout *settingsLayout_{};
 };
 
 }  // namespace chatterino

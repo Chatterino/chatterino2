@@ -8,7 +8,7 @@ QCheckBox::indicator {
 }
 
 chatterino--ComboBox {
-    width: 100px;
+    width: 120px;
 }
 
 QScrollArea {
@@ -27,19 +27,19 @@ QComboBox QFrame {
 
 chatterino--SettingsPage {
     background: #222;
-    border: 1px solid #555;
+    /*border: 1px solid #555;
+    border-left: none;*/
+}
+
+chatterino--PageHeader {
+    margin-bottom: 12px;
 }
 
 chatterino--TitleLabel {
     font-family: "Segoe UI light";
     font-size: 24px;
     color: #4FC3F7;
-}
-
-chatterino--TitleLabel2 {
-    font-family: "Segoe UI light";
-    font-size: 24px;
-    color: #bbb;
+    margin-top: 16px;
 }
 
 chatterino--DescriptionLabel {
