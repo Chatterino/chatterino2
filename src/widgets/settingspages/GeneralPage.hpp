@@ -69,14 +69,21 @@ public:
                           bool editable = false);
 
     template <typename OnClick>
-    QPushButton *addButton(const QString &text, OnClick onClick)
+    QPushButton *makeButton(const QString &text, OnClick onClick)
     {
         auto button = new QPushButton(text);
+        this->groups_.back().widgets.push_back({button, {text}});
+        QObject::connect(button, &QPushButton::clicked, onClick);
+        return button;
+    }
+
+    template <typename OnClick>
+    QPushButton *addButton(const QString &text, OnClick onClick)
+    {
+        auto button = makeButton(text, onClick);
         auto layout = new QHBoxLayout();
         layout->addWidget(button);
         layout->addStretch(1);
-        this->groups_.back().widgets.push_back({button, {text}});
-        QObject::connect(button, &QPushButton::clicked, onClick);
         this->addLayout(layout);
         return button;
     }

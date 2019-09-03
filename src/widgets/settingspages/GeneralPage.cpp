@@ -430,11 +430,19 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         cachePathLabel->setToolTip(newPath);
     });
 
-    layout.addButton("Choose", [this]() {
-        getSettings()->cachePath = QFileDialog::getExistingDirectory(this);
-    });
+    // Choose and reset buttons
+    {
+        auto box = new QHBoxLayout;
 
-    layout.addButton("Reset", []() { getSettings()->cachePath = ""; });
+        box->addWidget(layout.makeButton("Choose cache path", [this]() {
+            getSettings()->cachePath = QFileDialog::getExistingDirectory(this);
+        }));
+        box->addWidget(layout.makeButton(
+            "Reset", []() { getSettings()->cachePath = ""; }));
+        box->addStretch(1);
+
+        layout.addLayout(box);
+    }
 
     layout.addTitle("AppData");
     layout.addDescription("All local files like settings and cache files are "

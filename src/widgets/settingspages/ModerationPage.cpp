@@ -83,12 +83,9 @@ ModerationPage::ModerationPage()
 
     auto logs = tabs.appendTab(new QVBoxLayout, "Logs");
     {
+        logs.append(this->createCheckBox("Enable logging",
+                                         getSettings()->enableLogging));
         auto logsPathLabel = logs.emplace<QLabel>();
-
-        // Show how big (size-wise) the logs are
-        auto logsPathSizeLabel = logs.emplace<QLabel>();
-        logsPathSizeLabel->setText(
-            QtConcurrent::run([] { return fetchLogDirectorySize(); }));
 
         // Logs (copied from LoggingMananger)
         getSettings()->logPath.connect([logsPathLabel](const QString &logPath,
@@ -109,13 +106,27 @@ ModerationPage::ModerationPage()
         logsPathLabel->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                                Qt::LinksAccessibleByKeyboard);
         logsPathLabel->setOpenExternalLinks(true);
-        logs.append(this->createCheckBox("Enable logging",
-                                         getSettings()->enableLogging));
 
+        auto buttons = logs.emplace<QHBoxLayout>().withoutMargin();
+
+        // Select and Reset
+        auto selectDir = buttons.emplace<QPushButton>("Select log directory ");
+        auto resetDir = buttons.emplace<QPushButton>("Reset");
+
+        getSettings()->logPath.connect(
+            [element = resetDir.getElement()](const QString &path) {
+                element->setEnabled(!path.isEmpty());
+            });
+
+        buttons->addStretch();
         logs->addStretch(1);
-        auto selectDir = logs.emplace<QPushButton>("Set custom logpath");
 
-        // Setting custom logpath
+        // Show how big (size-wise) the logs are
+        auto logsPathSizeLabel = logs.emplace<QLabel>();
+        logsPathSizeLabel->setText(
+            QtConcurrent::run([] { return fetchLogDirectorySize(); }));
+
+        // Select event
         QObject::connect(
             selectDir.getElement(), &QPushButton::clicked, this,
             [this, logsPathSizeLabel]() mutable {
@@ -128,8 +139,9 @@ ModerationPage::ModerationPage()
                     QtConcurrent::run([] { return fetchLogDirectorySize(); }));
             });
 
+        buttons->addSpacing(16);
+
         // Reset custom logpath
-        auto resetDir = logs.emplace<QPushButton>("Reset logpath");
         QObject::connect(resetDir.getElement(), &QPushButton::clicked, this,
                          [logsPathSizeLabel]() mutable {
                              getSettings()->logPath = "";
@@ -139,8 +151,7 @@ ModerationPage::ModerationPage()
                                  [] { return fetchLogDirectorySize(); }));
                          });
 
-        // Logs end
-    }
+    }  // logs end
 
     auto modMode = tabs.appendTab(new QVBoxLayout, "Moderation buttons");
     {
