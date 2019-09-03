@@ -40,6 +40,22 @@ bool filterItemsRec(QObject *object, const QString &query)
                 return false;
             }());
         }
+        else if (auto x = dynamic_cast<QTabWidget *>(child); x)
+        {
+            for (int i = 0; i < x->count(); i++)
+            {
+                bool tabAny{};
+
+                if (x->tabText(i).contains(query, Qt::CaseInsensitive))
+                {
+                    tabAny = true;
+                }
+                auto widget = x->widget(i);
+                tabAny |= filterItemsRec(widget, query);
+
+                any |= tabAny;
+            }
+        }
         else
         {
             any |= filterItemsRec(child, query);

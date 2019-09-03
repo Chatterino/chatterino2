@@ -46,104 +46,54 @@ SettingsDialog::SettingsDialog()
 
 void SettingsDialog::initUi()
 {
-    LayoutCreator<SettingsDialog> layoutCreator(this);
+    auto outerBox = LayoutCreator<SettingsDialog>(this)
+                        .setLayoutType<QVBoxLayout>()
+                        .withoutSpacing();
 
-    // tab pages
-    auto outerBox = layoutCreator.setLayoutType<QHBoxLayout>();
-    outerBox->setSpacing(12);
+    // TOP
+    auto title = outerBox.emplace<PageHeader>();
+    auto edit = LayoutCreator<PageHeader>(title.getElement())
+                    .setLayoutType<QHBoxLayout>()
+                    .withoutMargin()
+                    .emplace<QLineEdit>()
+                    .assign(&this->ui_.search);
+    edit->setPlaceholderText("Find in settings...");
 
-    outerBox.emplace<QWidget>()
+    QObject::connect(edit.getElement(), &QLineEdit::textChanged, this,
+                     &SettingsDialog::filterElements);
+
+    // CENTER
+    auto centerBox =
+        outerBox.emplace<QHBoxLayout>().withoutMargin().withoutSpacing();
+
+    // left side (tabs)
+    centerBox.emplace<QWidget>()
         .assign(&this->ui_.tabContainerContainer)
-        .emplace<QVBoxLayout>()
+        .setLayoutType<QVBoxLayout>()
         .withoutMargin()
         .assign(&this->ui_.tabContainer);
 
-    this->ui_.tabContainerContainer->layout()->setContentsMargins(8, 8, 0, 39);
-
-    // right side layout
+    // right side (pages)
     auto right =
-        layoutCreator.emplace<QVBoxLayout>().withoutMargin().withoutSpacing();
+        centerBox.emplace<QVBoxLayout>().withoutMargin().withoutSpacing();
     {
-        auto title = right.emplace<PageHeader>();
-        auto header = LayoutCreator<PageHeader>(title.getElement())
-                          .setLayoutType<QHBoxLayout>();
-
-        auto edit = header.emplace<QLineEdit>().assign(&this->ui_.search);
-        edit->setPlaceholderText("Find in settings...");
-        QTimer::singleShot(100, edit.getElement(),
-                           [edit = edit.getElement()]() { edit->setFocus(); });
-        QObject::connect(
-            edit.getElement(), &QLineEdit::textChanged, this,
-            [this](const QString &text) {
-                // filter elements and hide pages
-                for (auto &&page : this->pages_)
-                {
-                    // filterElements returns true if anything on the page matches the search query
-                    page->tab()->setVisible(page->filterElements(text));
-                }
-
-                // TODO: add originally selected page
-
-                // find next visible page
-                if (this->lastSelectedByUser_ &&
-                    this->lastSelectedByUser_->isVisible())
-                {
-                    this->selectTab(this->lastSelectedByUser_, false);
-                }
-                else if (!this->selectedTab_->isVisible())
-                {
-                    for (auto &&tab : this->tabs_)
-                    {
-                        if (tab->isVisible())
-                        {
-                            this->selectTab(tab, false);
-                            break;
-                        }
-                    }
-                }
-
-                // remove duplicate spaces
-                bool shouldShowSpace = true;
-
-                for (int i = 0; i < this->ui_.tabContainer->count(); i++)
-                {
-                    auto item = this->ui_.tabContainer->itemAt(i);
-                    if (auto x = dynamic_cast<QSpacerItem *>(item); x)
-                    {
-                        x->changeSize(
-                            10, shouldShowSpace ? int(16 * this->scale()) : 0);
-                        shouldShowSpace = false;
-                    }
-                    else if (item->widget())
-                    {
-                        shouldShowSpace |= item->widget()->isVisible();
-                    }
-                }
-            });
-
-        auto searchButton = header.emplace<Button>();
-        searchButton->setPixmap(getApp()->resources->buttons.search);
-        searchButton->setScaleIndependantSize(30, 30);
-        QObject::connect(
-            searchButton.getElement(), &Button::clicked, this,
-            []() { QDesktopServices::openUrl({"https://google.com"}); });
-
         right.emplace<QStackedLayout>()
             .assign(&this->ui_.pageStack)
             .withoutMargin();
-
-        right->addSpacing(12);
-
-        auto buttons = right.emplace<QDialogButtonBox>(Qt::Horizontal);
-        {
-            this->ui_.okButton =
-                buttons->addButton("Ok", QDialogButtonBox::YesRole);
-            this->ui_.cancelButton =
-                buttons->addButton("Cancel", QDialogButtonBox::NoRole);
-        }
     }
 
     this->ui_.pageStack->setMargin(0);
+
+    outerBox->addSpacing(12);
+
+    // BOTTOM
+    auto buttons = outerBox.emplace<QDialogButtonBox>(Qt::Horizontal);
+    {
+        this->ui_.okButton =
+            buttons->addButton("Ok", QDialogButtonBox::YesRole);
+        this->ui_.cancelButton =
+            buttons->addButton("Cancel", QDialogButtonBox::NoRole);
+    }
 
     // ---- misc
     this->ui_.tabContainerContainer->setObjectName("tabWidget");
@@ -155,6 +105,50 @@ void SettingsDialog::initUi()
                      &SettingsDialog::onCancelClicked);
 }
 
+void SettingsDialog::filterElements(const QString &text)
+{
+    // filter elements and hide pages
+    for (auto &&page : this->pages_)
+    {
+        // filterElements returns true if anything on the page matches the search query
+        page->tab()->setVisible(page->filterElements(text));
+    }
+
+    // find next visible page
+    if (this->lastSelectedByUser_ && this->lastSelectedByUser_->isVisible())
+    {
+        this->selectTab(this->lastSelectedByUser_, false);
+    }
+    else if (!this->selectedTab_->isVisible())
+    {
+        for (auto &&tab : this->tabs_)
+        {
+            if (tab->isVisible())
+            {
+                this->selectTab(tab, false);
+                break;
+            }
+        }
+    }
+
+    // remove duplicate spaces
+    bool shouldShowSpace = false;
+
+    for (int i = 0; i < this->ui_.tabContainer->count(); i++)
+    {
+        auto item = this->ui_.tabContainer->itemAt(i);
+        if (auto x = dynamic_cast<QSpacerItem *>(item); x)
+        {
+            x->changeSize(10, shouldShowSpace ? int(16 * this->scale()) : 0);
+            shouldShowSpace = false;
+        }
+        else if (item->widget())
+        {
+            shouldShowSpace |= item->widget()->isVisible();
+        }
+    }
+}
+
 SettingsDialog *SettingsDialog::getHandle()
 {
     return SettingsDialog::handle;
@@ -164,6 +158,8 @@ void SettingsDialog::addTabs()
 {
     this->ui_.tabContainer->setMargin(0);
     this->ui_.tabContainer->setSpacing(0);
+
+    this->ui_.tabContainer->setContentsMargins(0, 20, 0, 20);
 
     this->addTab(new GeneralPage);
 
@@ -187,7 +183,6 @@ void SettingsDialog::addTabs()
 
     this->ui_.tabContainer->addStretch(1);
     this->addTab(new AboutPage, Qt::AlignBottom);
-    this->ui_.tabContainer->addSpacing(16);
 }
 
 void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
@@ -218,7 +213,7 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
 
     tab->setSelected(true);
     tab->setStyleSheet("background: #222; color: #4FC3F7;"
-                       "border: 1px solid #444;");
+                       "/*border: 1px solid #555; border-right: none;*/");
     this->selectedTab_ = tab;
     if (byUser)
     {

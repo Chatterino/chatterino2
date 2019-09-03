@@ -50,6 +50,7 @@ private:
     void addTab(SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
     void selectTab(SettingsDialogTab *tab, bool byUser = true);
     void selectPage(SettingsPage *page);
+    void filterElements(const QString &query);
 
     void onOkClicked();
     void onCancelClicked();

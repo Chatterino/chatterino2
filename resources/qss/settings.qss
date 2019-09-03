@@ -27,14 +27,12 @@ QComboBox QFrame {
 
 chatterino--SettingsPage {
     background: #222;
-    border: 1px solid #555;
+    /*border: 1px solid #555;
+    border-left: none;*/
 }
 
 chatterino--PageHeader {
-    min-height: 54px;
-    min-width: 64px;
-    border: 1px solid #555;
-    border-bottom: none;
+    margin-bottom: 12px;
 }
 
 chatterino--TitleLabel {
