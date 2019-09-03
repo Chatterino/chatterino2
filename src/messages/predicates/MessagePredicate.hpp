@@ -28,7 +28,6 @@ public:
      * @param message the message to check for this predicate
      * @return true if this predicate applies, false otherwise
      */
-    // TODO: Should this be protected instead of public?
     virtual bool appliesTo(const MessagePtr message) = 0;
 };
 
