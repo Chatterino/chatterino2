@@ -61,7 +61,12 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     this->init();
 
     getSettings()->uiScale.connect(
-        [this]() { postToThread([this] { this->updateScale(); }); },
+        [this]() {
+            postToThread([this] {
+                this->updateScale();
+                this->updateScale();
+            });
+        },
         this->connections_);
 
     this->updateScale();
@@ -72,6 +77,24 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     //    QTimer::this->scaleChangedEvent(this->getScale());
 
     this->resize(300, 150);
+}
+
+void BaseWindow::setInitialBounds(const QRect &bounds)
+{
+#ifdef USEWINSDK
+    this->initalBounds_ = bounds;
+#else
+    this->setGeometry(bounds);
+#endif
+}
+
+QRect BaseWindow::getBounds()
+{
+#ifdef USEWINSDK
+    return this->currentBounds_;
+#else
+    return this->geometry();
+#endif
 }
 
 float BaseWindow::scale() const
@@ -574,6 +597,11 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
             returnValue = this->handleSIZE(msg);
             break;
 
+        case WM_MOVE:
+            returnValue = this->handleMOVE(msg);
+            *result = 0;
+            break;
+
         case WM_NCHITTEST:
             returnValue = this->handleNCHITTEST(msg, result);
             break;
@@ -704,12 +732,23 @@ bool BaseWindow::handleSHOWWINDOW(MSG *msg)
         this->updateScale();
     }
 
-    if (!this->shown_ && this->isVisible() && this->hasCustomWindowFrame())
+    if (!this->shown_ && this->isVisible())
     {
-        this->shown_ = true;
+        if (this->hasCustomWindowFrame())
+        {
+            this->shown_ = true;
 
-        const MARGINS shadow = {8, 8, 8, 8};
-        DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
+            const MARGINS shadow = {8, 8, 8, 8};
+            DwmExtendFrameIntoClientArea(HWND(this->winId()), &shadow);
+        }
+        if (!this->initalBounds_.isNull())
+        {
+            ::SetWindowPos(msg->hwnd, nullptr, this->initalBounds_.x(),
+                           this->initalBounds_.y(), this->initalBounds_.width(),
+                           this->initalBounds_.height(),
+                           SWP_NOZORDER | SWP_NOACTIVATE);
+            this->currentBounds_ = this->initalBounds_;
+        }
     }
 
     this->calcButtonsSizes();
@@ -770,12 +809,35 @@ bool BaseWindow::handleSIZE(MSG *msg)
             {
                 this->ui_.windowLayout->setContentsMargins(0, 1, 0, 0);
             }
+            if ((this->isNotMinimizedOrMaximized_ =
+                     msg->wParam == SIZE_RESTORED))
+            {
+                RECT rect;
+                ::GetWindowRect(msg->hwnd, &rect);
+                this->currentBounds_ =
+                    QRect(QPoint(rect.left, rect.top),
+                          QPoint(rect.right - 1, rect.bottom - 1));
+            }
         }
     }
     return false;
 #else
     return false;
 #endif
+}
+
+bool BaseWindow::handleMOVE(MSG *msg)
+{
+#ifdef USEWINSDK
+    if (this->isNotMinimizedOrMaximized_)
+    {
+        RECT rect;
+        ::GetWindowRect(msg->hwnd, &rect);
+        this->currentBounds_ = QRect(QPoint(rect.left, rect.top),
+                                     QPoint(rect.right - 1, rect.bottom - 1));
+    }
+#endif
+    return false;
 }
 
 bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)

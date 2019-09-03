@@ -10,7 +10,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
 #include "util/Shortcut.hpp"
-#include "widgets/AccountSwitchPopupWidget.hpp"
+#include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
@@ -371,6 +371,8 @@ void Window::addMenuBar()
 void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
+
+    //#undef CHATTERINO_NIGHTLY_VERSION_STRING
 
 #ifdef CHATTERINO_NIGHTLY_VERSION_STRING
     auto windowTitleEnd =

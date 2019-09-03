@@ -28,6 +28,7 @@ enum class FontStyle : uint8_t {
     ChatVeryLarge,
 
     UiMedium,
+    UiMediumBold,
     UiTabs,
 
     // don't remove this value

@@ -11,6 +11,7 @@ Resources2::Resources2()
     this->buttons.ban = QPixmap(":/buttons/ban.png");
     this->buttons.banRed = QPixmap(":/buttons/banRed.png");
     this->buttons.copyDark = QPixmap(":/buttons/copyDark.png");
+    this->buttons.copyDarkTheme = QPixmap(":/buttons/copyDarkTheme.png");
     this->buttons.copyLight = QPixmap(":/buttons/copyLight.png");
     this->buttons.menuDark = QPixmap(":/buttons/menuDark.png");
     this->buttons.menuLight = QPixmap(":/buttons/menuLight.png");
@@ -19,6 +20,7 @@ Resources2::Resources2()
     this->buttons.modModeDisabled2 = QPixmap(":/buttons/modModeDisabled2.png");
     this->buttons.modModeEnabled = QPixmap(":/buttons/modModeEnabled.png");
     this->buttons.modModeEnabled2 = QPixmap(":/buttons/modModeEnabled2.png");
+    this->buttons.search = QPixmap(":/buttons/search.png");
     this->buttons.timeout = QPixmap(":/buttons/timeout.png");
     this->buttons.trashCan = QPixmap(":/buttons/trashCan.png");
     this->buttons.unban = QPixmap(":/buttons/unban.png");

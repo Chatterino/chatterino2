@@ -161,6 +161,8 @@ Fonts::FontData Fonts::createFontData(FontStyle type, float scale)
             {FontStyle::Tiny, {8, "Monospace", false, QFont::Normal}},
             {FontStyle::UiMedium,
              {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
+            {FontStyle::UiMediumBold,
+             {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Bold}},
             {FontStyle::UiTabs,
              {int(9 * multiplier), DEFAULT_FONT_FAMILY, false, QFont::Normal}},
         };

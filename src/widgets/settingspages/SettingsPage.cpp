@@ -5,13 +5,75 @@
 
 #include <QDebug>
 #include <QPainter>
+#include <util/FunctionEventFilter.hpp>
 
 namespace chatterino {
+
+bool filterItemsRec(QObject *object, const QString &query)
+{
+    bool any{};
+
+    for (auto &&child : object->children())
+    {
+        auto setOpacity = [&](auto *widget, bool condition) {
+            any |= condition;
+            widget->greyedOut = !condition;
+            widget->update();
+        };
+
+        if (auto x = dynamic_cast<SCheckBox *>(child); x)
+        {
+            setOpacity(x, x->text().contains(query, Qt::CaseInsensitive));
+        }
+        else if (auto x = dynamic_cast<SLabel *>(child); x)
+        {
+            setOpacity(x, x->text().contains(query, Qt::CaseInsensitive));
+        }
+        else if (auto x = dynamic_cast<SComboBox *>(child); x)
+        {
+            setOpacity(x, [=]() {
+                for (int i = 0; i < x->count(); i++)
+                {
+                    if (x->itemText(i).contains(query, Qt::CaseInsensitive))
+                        return true;
+                }
+                return false;
+            }());
+        }
+        else if (auto x = dynamic_cast<QTabWidget *>(child); x)
+        {
+            for (int i = 0; i < x->count(); i++)
+            {
+                bool tabAny{};
+
+                if (x->tabText(i).contains(query, Qt::CaseInsensitive))
+                {
+                    tabAny = true;
+                }
+                auto widget = x->widget(i);
+                tabAny |= filterItemsRec(widget, query);
+
+                any |= tabAny;
+            }
+        }
+        else
+        {
+            any |= filterItemsRec(child, query);
+        }
+    }
+    return any;
+}
 
 SettingsPage::SettingsPage(const QString &name, const QString &iconResource)
     : name_(name)
     , iconResource_(iconResource)
 {
+}
+
+bool SettingsPage::filterElements(const QString &query)
+{
+    return filterItemsRec(this, query) || query.isEmpty() ||
+           this->name_.contains(query, Qt::CaseInsensitive);
 }
 
 const QString &SettingsPage::getName()
@@ -42,7 +104,7 @@ void SettingsPage::cancel()
 QCheckBox *SettingsPage::createCheckBox(
     const QString &text, pajlada::Settings::Setting<bool> &setting)
 {
-    QCheckBox *checkbox = new QCheckBox(text);
+    QCheckBox *checkbox = new SCheckBox(text);
 
     // update when setting changes
     setting.connect(
@@ -64,7 +126,7 @@ QCheckBox *SettingsPage::createCheckBox(
 QComboBox *SettingsPage::createComboBox(
     const QStringList &items, pajlada::Settings::Setting<QString> &setting)
 {
-    QComboBox *combo = new QComboBox();
+    QComboBox *combo = new SComboBox();
 
     // update setting on toogle
     combo->addItems(items);

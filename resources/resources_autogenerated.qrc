@@ -1,86 +1,88 @@
 <RCC>
-  <qresource prefix="/">    <file>icon.png</file>
-    <file>emojidata.txt</file>
-    <file>chatterino.desktop</file>
-    <file>error.png</file>
-    <file>.gitignore</file>
-    <file>tlds.txt</file>
-    <file>contributors.txt</file>
-    <file>pajaDank.png</file>
-    <file>chatterino.icns</file>
-    <file>icon.ico</file>
-    <file>emoji.json</file>
-    <file>buttons/mod.png</file>
-    <file>buttons/copyDark.svg</file>
-    <file>buttons/modModeDisabled.png</file>
-    <file>buttons/unmod.png</file>
+  <qresource prefix="/">    <file>.gitignore</file>
+    <file>avatars/fourtf.png</file>
+    <file>avatars/pajlada.png</file>
+    <file>buttons/addSplit.png</file>
     <file>buttons/addSplitDark.png</file>
+    <file>buttons/ban.png</file>
+    <file>buttons/banRed.png</file>
+    <file>buttons/copyDark.png</file>
+    <file>buttons/copyDark.svg</file>
+    <file>buttons/copyDarkTheme.png</file>
+    <file>buttons/copyLight.png</file>
+    <file>buttons/copyLight.svg</file>
+    <file>buttons/emote.svg</file>
+    <file>buttons/emoteDark.svg</file>
+    <file>buttons/menuDark.png</file>
+    <file>buttons/menuLight.png</file>
+    <file>buttons/mod.png</file>
+    <file>buttons/modModeDisabled.png</file>
+    <file>buttons/modModeDisabled2.png</file>
+    <file>buttons/modModeEnabled.png</file>
+    <file>buttons/modModeEnabled2.png</file>
+    <file>buttons/search.png</file>
     <file>buttons/timeout.png</file>
     <file>buttons/trashCan.png</file>
     <file>buttons/trashcan.svg</file>
-    <file>buttons/modModeEnabled.png</file>
-    <file>buttons/copyLight.svg</file>
-    <file>buttons/modModeEnabled2.png</file>
-    <file>buttons/banRed.png</file>
-    <file>buttons/ban.png</file>
-    <file>buttons/emoteDark.svg</file>
-    <file>buttons/menuLight.png</file>
-    <file>buttons/emote.svg</file>
-    <file>buttons/update.png</file>
-    <file>buttons/addSplit.png</file>
-    <file>buttons/menuDark.png</file>
-    <file>buttons/updateError.png</file>
     <file>buttons/unban.png</file>
-    <file>buttons/copyLight.png</file>
-    <file>buttons/modModeDisabled2.png</file>
-    <file>buttons/copyDark.png</file>
+    <file>buttons/unmod.png</file>
+    <file>buttons/update.png</file>
+    <file>buttons/updateError.png</file>
+    <file>chatterino.desktop</file>
+    <file>chatterino.icns</file>
+    <file>contributors.txt</file>
+    <file>emoji.json</file>
+    <file>emojidata.txt</file>
+    <file>error.png</file>
     <file>examples/moving.gif</file>
     <file>examples/splitting.gif</file>
-    <file>twitch/prime.png</file>
-    <file>twitch/vip.png</file>
-    <file>twitch/cheer1.png</file>
-    <file>twitch/admin.png</file>
-    <file>twitch/broadcaster.png</file>
-    <file>twitch/verified.png</file>
-    <file>twitch/moderator.png</file>
-    <file>twitch/globalmod.png</file>
-    <file>twitch/automod.png</file>
-    <file>twitch/subscriber.png</file>
-    <file>twitch/staff.png</file>
-    <file>twitch/turbo.png</file>
-    <file>licenses/qt_lgpl-3.0.txt</file>
-    <file>licenses/emoji-data-source.txt</file>
-    <file>licenses/pajlada_settings.txt</file>
-    <file>licenses/openssl.txt</file>
-    <file>licenses/pajlada_signals.txt</file>
-    <file>licenses/rapidjson.txt</file>
-    <file>licenses/libcommuni_BSD3.txt</file>
+    <file>icon.ico</file>
+    <file>icon.png</file>
     <file>licenses/boost_boost.txt</file>
-    <file>licenses/websocketpp.txt</file>
+    <file>licenses/emoji-data-source.txt</file>
     <file>licenses/fmt_bsd2.txt</file>
-    <file>settings/aboutlogo.png</file>
-    <file>settings/ignore.svg</file>
-    <file>settings/notification2.svg</file>
-    <file>settings/theme.svg</file>
-    <file>settings/externaltools.svg</file>
-    <file>settings/advanced.svg</file>
+    <file>licenses/libcommuni_BSD3.txt</file>
+    <file>licenses/openssl.txt</file>
+    <file>licenses/pajlada_settings.txt</file>
+    <file>licenses/pajlada_signals.txt</file>
+    <file>licenses/qt_lgpl-3.0.txt</file>
+    <file>licenses/rapidjson.txt</file>
+    <file>licenses/websocketpp.txt</file>
+    <file>pajaDank.png</file>
+    <file>qss/settings.qss</file>
     <file>settings/about.svg</file>
-    <file>settings/notifications.svg</file>
-    <file>settings/behave.svg</file>
+    <file>settings/aboutlogo.png</file>
     <file>settings/accounts.svg</file>
-    <file>settings/emote.svg</file>
+    <file>settings/advanced.svg</file>
+    <file>settings/behave.svg</file>
+    <file>settings/browser.svg</file>
     <file>settings/commands.svg</file>
+    <file>settings/emote.svg</file>
+    <file>settings/externaltools.svg</file>
+    <file>settings/ignore.svg</file>
     <file>settings/keybinds.svg</file>
     <file>settings/moderation.svg</file>
-    <file>settings/browser.svg</file>
-    <file>avatars/pajlada.png</file>
-    <file>avatars/fourtf.png</file>
-    <file>qss/settings.qss</file>
+    <file>settings/notification2.svg</file>
+    <file>settings/notifications.svg</file>
+    <file>settings/theme.svg</file>
     <file>sounds/ping2.wav</file>
+    <file>split/down.png</file>
     <file>split/left.png</file>
     <file>split/move.png</file>
     <file>split/right.png</file>
-    <file>split/down.png</file>
     <file>split/up.png</file>
+    <file>tlds.txt</file>
+    <file>twitch/admin.png</file>
+    <file>twitch/automod.png</file>
+    <file>twitch/broadcaster.png</file>
+    <file>twitch/cheer1.png</file>
+    <file>twitch/globalmod.png</file>
+    <file>twitch/moderator.png</file>
+    <file>twitch/prime.png</file>
+    <file>twitch/staff.png</file>
+    <file>twitch/subscriber.png</file>
+    <file>twitch/turbo.png</file>
+    <file>twitch/verified.png</file>
+    <file>twitch/vip.png</file>
   </qresource>
 </RCC>

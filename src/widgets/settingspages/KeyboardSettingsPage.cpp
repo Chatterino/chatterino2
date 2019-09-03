@@ -13,7 +13,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     auto layout =
         LayoutCreator<KeyboardSettingsPage>(this).setLayoutType<QVBoxLayout>();
 
-    auto form = layout.emplace<QFormLayout>();
+    auto form = layout.emplace<QFormLayout>().withoutMargin();
 
     form->addRow(new QLabel("Hold Ctrl"), new QLabel("Show resize handles"));
     form->addRow(new QLabel("Hold Ctrl + Alt"),

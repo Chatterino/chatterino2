@@ -189,7 +189,6 @@ void SplitHeader::initializeLayout()
                                     SettingsDialogPreference::
                                         ModerationActions);
                                 this->split_->setModerationMode(true);
-                                w->setDim(true);
                             }
                             else
                             {
@@ -198,7 +197,7 @@ void SplitHeader::initializeLayout()
 
                                 this->split_->setModerationMode(
                                     !moderationMode);
-                                w->setDim(moderationMode);
+                                w->setDim(Button::Dim(moderationMode));
                             }
                             break;
 

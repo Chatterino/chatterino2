@@ -84,8 +84,6 @@ SOURCES += \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/ChannelView.cpp \
-    src/widgets/settingspages/SpecialChannelsPage.cpp \
-    src/widgets/settingspages/FeelPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
     src/widgets/settingspages/IgnoresPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
@@ -93,15 +91,11 @@ SOURCES += \
     src/widgets/settingspages/ModerationPage.cpp \
     src/widgets/settingspages/HighlightingPage.cpp \
     src/widgets/settingspages/ExternalToolsPage.cpp \
-    src/widgets/settingspages/EmotesPage.cpp \
-    src/widgets/settingspages/BrowserExtensionPage.cpp \
     src/widgets/settingspages/KeyboardSettingsPage.cpp \
-    src/widgets/settingspages/LookPage.cpp \
     src/widgets/settingspages/NotificationPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/SettingsPage.cpp \
     src/widgets/settingspages/AboutPage.cpp \
-    src/widgets/settingspages/LogsPage.cpp \
     src/widgets/Scrollbar.cpp \
     src/widgets/splits/SplitContainer.cpp \
     src/widgets/splits/SplitOverlay.cpp \
@@ -126,7 +120,7 @@ SOURCES += \
     src/widgets/Window.cpp \
     src/widgets/Notebook.cpp \
     src/widgets/AttachedWindow.cpp \
-    src/widgets/AccountSwitchPopupWidget.cpp \
+    src/widgets/AccountSwitchPopup.cpp \
     src/singletons/WindowManager.cpp \
     src/singletons/helper/GifTimer.cpp \
     src/singletons/helper/LoggingChannel.cpp \
@@ -244,23 +238,16 @@ HEADERS += \
     src/widgets/helper/NotebookTab.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/AccountSwitchWidget.hpp \
-    src/widgets/AccountSwitchPopupWidget.hpp \
     src/widgets/settingspages/AdvancedPage.hpp \
     src/widgets/settingspages/NotificationPage.hpp \
     src/widgets/settingspages/AboutPage.hpp \
-    src/widgets/settingspages/LookPage.hpp \
     src/widgets/settingspages/ModerationPage.hpp \
-    src/widgets/settingspages/FeelPage.hpp \
     src/widgets/settingspages/KeyboardSettingsPage.hpp \
     src/widgets/settingspages/IgnoresPage.hpp \
     src/widgets/settingspages/HighlightingPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
-    src/widgets/settingspages/SpecialChannelsPage.hpp \
     src/widgets/settingspages/SettingsPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
-    src/widgets/settingspages/BrowserExtensionPage.hpp \
-    src/widgets/settingspages/EmotesPage.hpp \
-    src/widgets/settingspages/LogsPage.hpp \
     src/widgets/settingspages/ExternalToolsPage.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
     src/widgets/splits/Split.hpp \
@@ -282,6 +269,7 @@ HEADERS += \
     src/widgets/dialogs/WelcomeDialog.hpp \
     src/widgets/dialogs/LogsPopup.hpp \
     src/widgets/Notebook.hpp \
+    src/widgets/AccountSwitchPopup.hpp \
     src/widgets/AttachedWindow.hpp \
     src/widgets/Window.hpp \
     src/widgets/Scrollbar.hpp \
@@ -469,3 +457,5 @@ git_hash = $$str_member($$git_commit, 0, 8)
 DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
 DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
 DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
+
+

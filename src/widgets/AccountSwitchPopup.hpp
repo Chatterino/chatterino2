@@ -6,12 +6,12 @@
 
 namespace chatterino {
 
-class AccountSwitchPopupWidget : public QWidget
+class AccountSwitchPopup : public QWidget
 {
     Q_OBJECT
 
 public:
-    AccountSwitchPopupWidget(QWidget *parent = nullptr);
+    AccountSwitchPopup(QWidget *parent = nullptr);
 
     void refresh();
 

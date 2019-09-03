@@ -38,7 +38,7 @@ CommandPage::CommandPage()
     auto app = getApp();
 
     LayoutCreator<CommandPage> layoutCreator(this);
-    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
+    auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     EditableModelView *view =
         layout.emplace<EditableModelView>(app->commands->createModel(nullptr))
