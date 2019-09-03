@@ -8,20 +8,14 @@
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
 #include "widgets/settingspages/AdvancedPage.hpp"
-#include "widgets/settingspages/BrowserExtensionPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
-#include "widgets/settingspages/EmotesPage.hpp"
 #include "widgets/settingspages/ExternalToolsPage.hpp"
-#include "widgets/settingspages/FeelPage.hpp"
 #include "widgets/settingspages/GeneralPage.hpp"
 #include "widgets/settingspages/HighlightingPage.hpp"
 #include "widgets/settingspages/IgnoresPage.hpp"
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
-#include "widgets/settingspages/LogsPage.hpp"
-#include "widgets/settingspages/LookPage.hpp"
 #include "widgets/settingspages/ModerationPage.hpp"
 #include "widgets/settingspages/NotificationPage.hpp"
-#include "widgets/settingspages/SpecialChannelsPage.hpp"
 
 #include <QDialogButtonBox>
 #include <QLineEdit>
