@@ -21,6 +21,14 @@ namespace {
         return {urlTemplate.replace("{{id}}", id.string)
                     .replace("{{image}}", emoteScale)};
     }
+
+    Url getEmoteLinkV3(const EmoteId &id, const QString &emoteScale)
+    {
+        static const QString urlTemplate(
+            "https://cdn.betterttv.net/emote/%1/%2");
+
+        return {urlTemplate.arg(id.string, emoteScale)};
+    }
     std::pair<Outcome, EmoteMap> parseGlobalEmotes(
         const QJsonObject &jsonRoot, const EmoteMap &currentEmotes)
     {
@@ -60,28 +68,33 @@ namespace {
     std::pair<Outcome, EmoteMap> parseChannelEmotes(const QJsonObject &jsonRoot)
     {
         auto emotes = EmoteMap();
-        auto jsonEmotes = jsonRoot.value("emotes").toArray();
-        auto urlTemplate = "https:" + jsonRoot.value("urlTemplate").toString();
 
-        for (auto jsonEmote_ : jsonEmotes)
-        {
-            auto jsonEmote = jsonEmote_.toObject();
+        auto innerParse = [&jsonRoot, &emotes](const char *key) {
+            auto jsonEmotes = jsonRoot.value(key).toArray();
+            for (auto jsonEmote_ : jsonEmotes)
+            {
+                auto jsonEmote = jsonEmote_.toObject();
 
-            auto id = EmoteId{jsonEmote.value("id").toString()};
-            auto name = EmoteName{jsonEmote.value("code").toString()};
-            // emoteObject.value("imageType").toString();
+                auto id = EmoteId{jsonEmote.value("id").toString()};
+                auto name = EmoteName{jsonEmote.value("code").toString()};
+                // emoteObject.value("imageType").toString();
 
-            auto emote = Emote(
-                {name,
-                 ImageSet{
-                     Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
-                     Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
-                     Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
-                 Tooltip{name.string + "<br />Channel BetterTTV Emote"},
-                 Url{"https://manage.betterttv.net/emotes/" + id.string}});
+                auto emote = Emote(
+                    {name,
+                     ImageSet{
+                         Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
+                         Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
+                         Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
+                     },
+                     Tooltip{name.string + "<br />Channel BetterTTV Emote"},
+                     Url{"https://manage.betterttv.net/emotes/" + id.string}});
 
-            emotes[name] = cachedOrMake(std::move(emote), id);
-        }
+                emotes[name] = cachedOrMake(std::move(emote), id);
+            }
+        };
+
+        innerParse("channelEmotes");
+        innerParse("sharedEmotes");
 
         return {Success, std::move(emotes)};
     }
@@ -125,10 +138,10 @@ void BttvEmotes::loadEmotes()
         .execute();
 }
 
-void BttvEmotes::loadChannel(const QString &channelName,
+void BttvEmotes::loadChannel(const QString &channelId,
                              std::function<void(EmoteMap &&)> callback)
 {
-    NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelName)
+    NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(3000)
         .onSuccess([callback = std::move(callback)](auto result) -> Outcome {
             auto pair = parseChannelEmotes(result.parseJson());

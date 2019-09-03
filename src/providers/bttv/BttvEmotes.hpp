@@ -16,7 +16,7 @@ class BttvEmotes final
     static constexpr const char *globalEmoteApiUrl =
         "https://api.betterttv.net/2/emotes";
     static constexpr const char *bttvChannelEmoteApiUrl =
-        "https://api.betterttv.net/2/channels/";
+        "https://api.betterttv.net/3/cached/users/twitch/";
 
 public:
     BttvEmotes();
@@ -24,7 +24,7 @@ public:
     std::shared_ptr<const EmoteMap> emotes() const;
     boost::optional<EmotePtr> emote(const EmoteName &name) const;
     void loadEmotes();
-    static void loadChannel(const QString &channelName,
+    static void loadChannel(const QString &channelId,
                             std::function<void(EmoteMap &&)> callback);
 
 private:
