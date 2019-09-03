@@ -29,13 +29,17 @@ namespace {
 
         return {urlTemplate.arg(id.string, emoteScale)};
     }
+    EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
+    {
+        static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
+        static std::mutex mutex;
+
+        return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
+    }
     std::pair<Outcome, EmoteMap> parseGlobalEmotes(
-        const QJsonObject &jsonRoot, const EmoteMap &currentEmotes)
+        const QJsonArray &jsonEmotes, const EmoteMap &currentEmotes)
     {
         auto emotes = EmoteMap();
-        auto jsonEmotes = jsonRoot.value("emotes").toArray();
-        auto urlTemplate =
-            qS("https:") + jsonRoot.value("urlTemplate").toString();
 
         for (auto jsonEmote : jsonEmotes)
         {
@@ -45,10 +49,9 @@ namespace {
 
             auto emote = Emote(
                 {name,
-                 ImageSet{
-                     Image::fromUrl(getEmoteLink(urlTemplate, id, "1x"), 1),
-                     Image::fromUrl(getEmoteLink(urlTemplate, id, "2x"), 0.5),
-                     Image::fromUrl(getEmoteLink(urlTemplate, id, "3x"), 0.25)},
+                 ImageSet{Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
+                          Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
+                          Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25)},
                  Tooltip{name.string + "<br />Global BetterTTV Emote"},
                  Url{"https://manage.betterttv.net/emotes/" + id.string}});
 
@@ -57,13 +60,6 @@ namespace {
         }
 
         return {Success, std::move(emotes)};
-    }
-    EmotePtr cachedOrMake(Emote &&emote, const EmoteId &id)
-    {
-        static std::unordered_map<EmoteId, std::weak_ptr<const Emote>> cache;
-        static std::mutex mutex;
-
-        return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
     }
     std::pair<Outcome, EmoteMap> parseChannelEmotes(const QJsonObject &jsonRoot)
     {
@@ -129,7 +125,7 @@ void BttvEmotes::loadEmotes()
         .timeout(30000)
         .onSuccess([this](auto result) -> Outcome {
             auto emotes = this->global_.get();
-            auto pair = parseGlobalEmotes(result.parseJson(), *emotes);
+            auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
             if (pair.first)
                 this->global_.set(
                     std::make_shared<EmoteMap>(std::move(pair.second)));

@@ -14,7 +14,7 @@ class EmoteMap;
 class BttvEmotes final
 {
     static constexpr const char *globalEmoteApiUrl =
-        "https://api.betterttv.net/2/emotes";
+        "https://api.betterttv.net/3/cached/emotes/global";
     static constexpr const char *bttvChannelEmoteApiUrl =
         "https://api.betterttv.net/3/cached/users/twitch/";
 
