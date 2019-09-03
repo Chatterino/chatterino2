@@ -116,7 +116,7 @@ void SearchPopup::performSearch()
     this->channelView_->setChannel(channel);
 }
 
-void SearchPopup::parsePredicates(const QString& input)
+void SearchPopup::parsePredicates(const QString &input)
 {
     this->predicates_.clear();
 
@@ -127,7 +127,8 @@ void SearchPopup::parsePredicates(const QString& input)
     QStringList searchedUsers = parseSearchedUsers(text);
     if (searchedUsers.size() > 0)
     {
-        this->predicates_.push_back(std::make_shared<AuthorPredicate>(searchedUsers));
+        this->predicates_.push_back(
+            std::make_shared<AuthorPredicate>(searchedUsers));
         removeTagFromText("from:", text);
     }
 
@@ -146,7 +147,7 @@ void SearchPopup::parsePredicates(const QString& input)
     }
 }
 
-void SearchPopup::removeTagFromText(const QString& tag, QString& text)
+void SearchPopup::removeTagFromText(const QString &tag, QString &text)
 {
     for (QString &word : text.split(' ', QString::SkipEmptyParts))
     {
@@ -158,7 +159,7 @@ void SearchPopup::removeTagFromText(const QString& tag, QString& text)
     text = text.trimmed();
 }
 
-QStringList SearchPopup::parseSearchedUsers(const QString& input)
+QStringList SearchPopup::parseSearchedUsers(const QString &input)
 {
     QStringList parsedUserNames;
 
@@ -170,7 +171,7 @@ QStringList SearchPopup::parseSearchedUsers(const QString& input)
         if (!word.startsWith("from:"))
             // Ignore this word
             continue;
-        
+
         // Get a working copy so we can manipulate the string
         QString fromTag = word;
 

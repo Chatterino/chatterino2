@@ -1,9 +1,9 @@
 #include "messages/predicates/AuthorPredicate.hpp"
 
-namespace chatterino
-{
+namespace chatterino {
 
-AuthorPredicate::AuthorPredicate(const QStringList& authors) : authors_(authors)
+AuthorPredicate::AuthorPredicate(const QStringList &authors)
+    : authors_(authors)
 {
 }
 
@@ -15,4 +15,4 @@ bool AuthorPredicate::appliesTo(const MessagePtr message)
     return authors_.contains(message->displayName, Qt::CaseInsensitive);
 }
 
-} // namespace chatterino
+}  // namespace chatterino

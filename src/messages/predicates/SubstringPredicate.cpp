@@ -1,9 +1,9 @@
 #include "messages/predicates/SubstringPredicate.hpp"
 
-namespace chatterino
-{
+namespace chatterino {
 
-SubstringPredicate::SubstringPredicate(const QString& search) : search_(search)
+SubstringPredicate::SubstringPredicate(const QString &search)
+    : search_(search)
 {
 }
 
@@ -15,4 +15,4 @@ bool SubstringPredicate::appliesTo(const MessagePtr message)
     return message->messageText.contains(this->search_, Qt::CaseInsensitive);
 }
 
-} // namespace chatterino
+}  // namespace chatterino
