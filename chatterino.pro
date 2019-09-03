@@ -87,7 +87,6 @@ SOURCES += \
     src/widgets/settingspages/CommandPage.cpp \
     src/widgets/settingspages/IgnoresPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
-    src/widgets/settingspages/AdvancedPage.cpp \
     src/widgets/settingspages/ModerationPage.cpp \
     src/widgets/settingspages/HighlightingPage.cpp \
     src/widgets/settingspages/ExternalToolsPage.cpp \
@@ -238,7 +237,6 @@ HEADERS += \
     src/widgets/helper/NotebookTab.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/AccountSwitchWidget.hpp \
-    src/widgets/settingspages/AdvancedPage.hpp \
     src/widgets/settingspages/NotificationPage.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/ModerationPage.hpp \
@@ -457,5 +455,3 @@ git_hash = $$str_member($$git_commit, 0, 8)
 DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
 DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
 DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
-
-

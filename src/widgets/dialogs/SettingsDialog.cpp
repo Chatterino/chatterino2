@@ -7,7 +7,6 @@
 #include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
-#include "widgets/settingspages/AdvancedPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 #include "widgets/settingspages/GeneralPage.hpp"
@@ -27,6 +26,8 @@ SettingsDialog *SettingsDialog::handle = nullptr;
 SettingsDialog::SettingsDialog()
     : BaseWindow(nullptr, BaseWindow::DisableCustomScaling)
 {
+    this->setWindowTitle("Chatterino Settings");
+
     this->initUi();
     this->addTabs();
 
@@ -173,7 +174,6 @@ void SettingsDialog::addTabs()
     this->addTab(this->ui_.moderationPage = new ModerationPage);
     this->addTab(new NotificationPage);
     this->addTab(new ExternalToolsPage);
-    this->addTab(new AdvancedPage);
 
     this->ui_.tabContainer->addStretch(1);
     this->addTab(new AboutPage, Qt::AlignBottom);
