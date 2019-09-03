@@ -225,6 +225,7 @@ SOURCES += \
     src/messages/layouts/MessageLayoutElement.cpp \
     src/messages/predicates/SubstringPredicate.cpp \
     src/messages/predicates/AuthorPredicate.cpp \
+    src/messages/predicates/LinkPredicate.cpp \
     src/messages/Message.cpp \
     src/messages/MessageContainer.cpp \
     src/RunGui.cpp \
@@ -409,6 +410,7 @@ HEADERS += \
     src/messages/layouts/MessageLayout.hpp \
     src/messages/layouts/MessageLayoutElement.hpp \
     src/messages/layouts/MessageLayoutContainer.hpp \
+    src/messages/predicates/LinkPredicate.hpp \
     src/messages/predicates/SubstringPredicate.hpp \
     src/messages/predicates/AuthorPredicate.hpp \
     src/messages/predicates/MessagePredicate.hpp \
