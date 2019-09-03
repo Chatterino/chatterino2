@@ -12,7 +12,6 @@ bool AuthorPredicate::appliesTo(const MessagePtr message)
     if (!message)
         return false;
 
-    // TODO: Should this be a `contains` or an `equals`?
     return authors_.contains(message->displayName, Qt::CaseInsensitive);
 }
 
