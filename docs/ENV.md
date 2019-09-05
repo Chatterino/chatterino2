@@ -24,5 +24,6 @@ Used to change the URL that Chatterino2 uses when uploading an image by pasting 
 Default value: `https://i.nuuls.com/upload`
 Arguments:
  - None
+
 Notes:
  - The server that's running the web page MUST be compatible with [Nuuls' filehost](https://github.com/nuuls/filehost)
