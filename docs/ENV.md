@@ -22,6 +22,7 @@ Arguments:
 ### CHATTERINO2_IMAGE_PASTE_SITE_URL
 Used to change the URL that Chatterino2 uses when uploading an image by pasting it into the input box.
 Default value: `https://i.nuuls.com/upload`
+
 Arguments:
  - None
 
