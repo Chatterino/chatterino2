@@ -13,7 +13,9 @@
 #include <pajlada/signals/signal.hpp>
 
 #include "common/Aliases.hpp"
+#include "common/NetworkResult.hpp"
 #include "common/NullablePtr.hpp"
+#include "common/Outcome.hpp"
 
 namespace chatterino {
 namespace detail {
@@ -66,13 +68,18 @@ public:
     bool operator==(const Image &image) const;
     bool operator!=(const Image &image) const;
 
+    ImagePtr setCustomOnSuccess(
+        std::function<Outcome(ImagePtr, NetworkResult)> onSuccess);
+
 private:
     Image();
     Image(const Url &url, qreal scale);
     Image(qreal scale);
 
+public:
     void setPixmap(const QPixmap &pixmap);
 
+private:
     void actuallyLoad();
 
     Url url_{};
@@ -81,5 +88,6 @@ private:
     bool shouldLoad_{false};
     std::unique_ptr<detail::Frames> frames_{};
     QObject object_{};
+    std::function<Outcome(ImagePtr, NetworkResult)> customOnSuccess_{};
 };
 }  // namespace chatterino
