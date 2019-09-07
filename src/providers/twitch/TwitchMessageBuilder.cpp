@@ -952,7 +952,7 @@ void TwitchMessageBuilder::parseHighlights()
     {
         HighlightPhrase selfHighlight(
             currentUsername, getSettings()->enableSelfHighlightTaskbar,
-            getSettings()->enableSelfHighlightSound, false);
+            getSettings()->enableSelfHighlightSound, false, false);
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
