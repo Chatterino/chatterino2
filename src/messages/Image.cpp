@@ -349,6 +349,9 @@ void Image::actuallyLoad()
             if (!shared)
                 return Failure;
 
+            if (shared->customOnSuccess_)
+                return shared->customOnSuccess_(shared, result);
+
             auto data = result.getData();
 
             // const cast since we are only reading from it
@@ -391,6 +394,13 @@ bool Image::operator==(const Image &other) const
 bool Image::operator!=(const Image &other) const
 {
     return !this->operator==(other);
+}
+
+ImagePtr Image::setCustomOnSuccess(
+    std::function<Outcome(ImagePtr, NetworkResult)> customOnSuccess)
+{
+    this->customOnSuccess_ = customOnSuccess;
+    return shared_from_this();
 }
 
 }  // namespace chatterino
