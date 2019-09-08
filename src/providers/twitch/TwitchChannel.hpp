@@ -92,6 +92,9 @@ public:
     boost::optional<EmotePtr> twitchBadge(const QString &set,
                                           const QString &version) const;
 
+    // Cheers
+    boost::optional<CheerEmote> cheerEmote(const QString &string);
+
     // Signals
     pajlada::Signals::NoArgSignal roomIdChanged;
     pajlada::Signals::NoArgSignal userStateChanged;
