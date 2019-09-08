@@ -274,7 +274,7 @@ MessagePtr TwitchMessageBuilder::build()
     if (iterator != this->tags.end())
     {
         this->hasBits_ = true;
-        //        bits = iterator.value().toString();
+        this->bits = iterator.value().toString();
     }
 
     // twitch emotes
@@ -1285,56 +1285,29 @@ void TwitchMessageBuilder::appendChatterinoBadges()
     }
 }
 
-Outcome TwitchMessageBuilder::tryParseCheermote(const QString & /*string*/)
+Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
 {
-    // auto app = getApp();
-    //// Try to parse custom cheermotes
-    // const auto &channelResources = app->resources->channels[this->roomID_];
-    // if (channelResources.loaded) {
-    //    for (const auto &cheermoteSet : channelResources.cheermoteSets) {
-    //        auto match = cheermoteSet.regex.match(string);
-    //        if (!match.hasMatch()) {
-    //            continue;
-    //        }
-    //        QString amount = match.captured(1);
-    //        bool ok = false;
-    //        int numBits = amount.toInt(&ok);
-    //        if (!ok) {
-    //            Log("Error parsing bit amount in tryParseCheermote");
-    //            return Failure;
-    //        }
-
-    //        auto savedIt = cheermoteSet.cheermotes.end();
-
-    //        // Fetch cheermote that matches our numBits
-    //        for (auto it = cheermoteSet.cheermotes.begin(); it !=
-    //        cheermoteSet.cheermotes.end();
-    //             ++it) {
-    //            if (numBits >= it->minBits) {
-    //                savedIt = it;
-    //            } else {
-    //                break;
-    //            }
-    //        }
-
-    //        if (savedIt == cheermoteSet.cheermotes.end()) {
-    //            Log("Error getting a cheermote from a cheermote set for the
-    //            bit amount {}",
-    //                numBits);
-    //            return Failure;
-    //        }
-
-    //        const auto &cheermote = *savedIt;
-
-    //        this->emplace<EmoteElement>(cheermote.animatedEmote,
-    //        MessageElementFlag::BitsAnimated);
-    //        this->emplace<TextElement>(amount, MessageElementFlag::Text,
-    //        cheermote.color);
-
-    //        return Success;
-    //    }
-    //}
-
-    return Failure;
+    auto cheerOpt = this->twitchChannel->cheerEmote(string);
+    if (!cheerOpt)
+    {
+        return Failure;
+    }
+    auto &cheerPairAndColor = *cheerOpt;
+    if (std::get<0>(cheerPairAndColor))
+    {
+        this->emplace<EmoteElement>(*std::get<0>(cheerPairAndColor),
+                                    MessageElementFlag::BitsStatic);
+    }
+    if (std::get<1>(cheerPairAndColor))
+    {
+        this->emplace<EmoteElement>(*std::get<1>(cheerPairAndColor),
+                                    MessageElementFlag::BitsAnimated);
+    }
+    if (std::get<2>(cheerPairAndColor))
+    {
+        this->emplace<TextElement>(this->bits, MessageElementFlag::BitsAmount,
+                                   *std::get<2>(cheerPairAndColor));
+    }
+    return Success;
 }
 }  // namespace chatterino
