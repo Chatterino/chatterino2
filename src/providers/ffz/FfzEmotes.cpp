@@ -1,11 +1,6 @@
 #include "providers/ffz/FfzEmotes.hpp"
 
-#include <QBuffer>
-#include <QImageReader>
 #include <QJsonArray>
-#include <QJsonObject>
-#include <QPainter>
-#include <QString>
 
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
