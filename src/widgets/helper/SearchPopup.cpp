@@ -15,19 +15,19 @@
 namespace chatterino {
 
 ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
-                  const LimitedQueueSnapshot<MessagePtr> &snapshot)
+                               const LimitedQueueSnapshot<MessagePtr> &snapshot)
 {
     ChannelPtr channel(new Channel(channelName, Channel::Type::None));
-    
+
     // Parse predicates from tags in "text"
     auto predicates = parsePredicates(text);
-    
+
     // Check for every message whether it fulfills all predicates that have
     // been registered
     for (size_t i = 0; i < snapshot.size(); ++i)
     {
         MessagePtr message = snapshot[i];
-    
+
         bool accept = true;
         for (MessagePredicatePtr &pred : predicates)
         {
@@ -38,12 +38,12 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
                 break;
             }
         }
-    
+
         // If all predicates match, add the message to the channel
         if (accept)
             channel->addMessage(message);
     }
-    
+
     return channel;
 }
 
@@ -129,7 +129,8 @@ void SearchPopup::initLayout()
     }
 }
 
-std::vector<MessagePredicatePtr> SearchPopup::parsePredicates(const QString &input)
+std::vector<MessagePredicatePtr> SearchPopup::parsePredicates(
+    const QString &input)
 {
     std::vector<MessagePredicatePtr> predicates;
 
@@ -140,8 +141,7 @@ std::vector<MessagePredicatePtr> SearchPopup::parsePredicates(const QString &inp
     QStringList searchedUsers = parseSearchedUsers(text);
     if (searchedUsers.size() > 0)
     {
-        predicates.push_back(
-            std::make_shared<AuthorPredicate>(searchedUsers));
+        predicates.push_back(std::make_shared<AuthorPredicate>(searchedUsers));
         removeTagFromText("from:", text);
     }
 
