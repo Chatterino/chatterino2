@@ -169,6 +169,33 @@ int ImageLayoutElement::getXFromIndex(int index)
 }
 
 //
+// IMAGE WITH BACKGROUND
+//
+ImageWithBackgroundLayoutElement::ImageWithBackgroundLayoutElement(
+    MessageElement &creator, ImagePtr image, const QSize &size, QColor color)
+    : ImageLayoutElement(creator, image, size)
+    , color_(color)
+{
+}
+
+void ImageWithBackgroundLayoutElement::paint(QPainter &painter)
+{
+    if (this->image_ == nullptr)
+    {
+        return;
+    }
+
+    auto pixmap = this->image_->pixmapOrLoad();
+    if (pixmap && !this->image_->animated())
+    {
+        painter.fillRect(QRectF(this->getRect()), this->color_);
+
+        // fourtf: make it use qreal values
+        painter.drawPixmap(QRectF(this->getRect()), *pixmap, QRectF());
+    }
+}
+
+//
 // TEXT
 //
 
