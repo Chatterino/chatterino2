@@ -12,7 +12,8 @@ header_header = \
 
 namespace chatterino {
 
-class Resources2 : public Singleton {
+class Resources2 : public Singleton
+{
 public:
     Resources2();
 

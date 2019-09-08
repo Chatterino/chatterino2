@@ -38,14 +38,14 @@ const QPixmap &Button::getPixmap() const
     return this->pixmap_;
 }
 
-void Button::setDim(bool value)
+void Button::setDim(Dim value)
 {
     this->dimPixmap_ = value;
 
     this->update();
 }
 
-bool Button::getDim() const
+Button::Dim Button::getDim() const
 {
     return this->dimPixmap_;
 }
@@ -76,7 +76,12 @@ bool Button::getEnableMargin() const
 
 qreal Button::getCurrentDimAmount() const
 {
-    return this->dimPixmap_ && !this->mouseOver_ ? 0.7 : 1;
+    if (this->dimPixmap_ == Dim::None || this->mouseOver_)
+        return 1;
+    else if (this->dimPixmap_ == Dim::Some)
+        return 0.7;
+    else
+        return 0.15;
 }
 
 void Button::setBorderColor(const QColor &color)
@@ -114,13 +119,13 @@ void Button::paintEvent(QPaintEvent *)
 
     if (!this->pixmap_.isNull())
     {
-        if (!this->mouseOver_ && this->dimPixmap_ && this->enabled_)
-        {
-            painter.setOpacity(this->getCurrentDimAmount());
-        }
+        painter.setOpacity(this->getCurrentDimAmount());
 
         QRect rect = this->rect();
-        int s = this->enableMargin_ ? int(6 * this->scale()) : 0;
+
+        int margin = this->height() < 22 * this->scale() ? 3 : 6;
+
+        int s = this->enableMargin_ ? int(margin * this->scale()) : 0;
 
         rect.moveLeft(s);
         rect.setRight(rect.right() - s - s);

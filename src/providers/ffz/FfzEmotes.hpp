@@ -22,8 +22,10 @@ public:
     std::shared_ptr<const EmoteMap> emotes() const;
     boost::optional<EmotePtr> emote(const EmoteName &name) const;
     void loadEmotes();
-    static void loadChannel(const QString &channelName,
-                            std::function<void(EmoteMap &&)> callback);
+    static void loadChannel(
+        const QString &channelId,
+        std::function<void(EmoteMap &&)> emoteCallback,
+        std::function<void(boost::optional<EmotePtr>)> modBadgeCallback);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;

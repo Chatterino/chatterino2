@@ -17,6 +17,9 @@ public:
         QPixmap addSplitDark;
         QPixmap ban;
         QPixmap banRed;
+        QPixmap copyDark;
+        QPixmap copyDarkTheme;
+        QPixmap copyLight;
         QPixmap menuDark;
         QPixmap menuLight;
         QPixmap mod;
@@ -24,6 +27,7 @@ public:
         QPixmap modModeDisabled2;
         QPixmap modModeEnabled;
         QPixmap modModeEnabled2;
+        QPixmap search;
         QPixmap timeout;
         QPixmap trashCan;
         QPixmap unban;

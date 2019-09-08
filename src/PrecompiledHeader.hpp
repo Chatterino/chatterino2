@@ -1,3 +1,5 @@
+#pragma once
+
 #ifdef __cplusplus
 #    include <fmt/format.h>
 #    include <irccommand.h>

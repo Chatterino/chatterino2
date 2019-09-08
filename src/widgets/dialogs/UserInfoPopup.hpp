@@ -23,6 +23,7 @@ public:
 
 protected:
     virtual void themeChangedEvent() override;
+    virtual void scaleChangedEvent(float scale) override;
 
 private:
     void installEvents();
@@ -48,6 +49,7 @@ private:
         Label *viewCountLabel = nullptr;
         Label *followerCountLabel = nullptr;
         Label *createdDateLabel = nullptr;
+        Label *userIDLabel = nullptr;
 
         QCheckBox *follow = nullptr;
         QCheckBox *ignore = nullptr;

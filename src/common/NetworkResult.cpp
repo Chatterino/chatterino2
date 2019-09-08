@@ -24,6 +24,17 @@ QJsonObject NetworkResult::parseJson() const
     return jsonDoc.object();
 }
 
+QJsonArray NetworkResult::parseJsonArray() const
+{
+    QJsonDocument jsonDoc(QJsonDocument::fromJson(this->data_));
+    if (jsonDoc.isNull())
+    {
+        return QJsonArray{};
+    }
+
+    return jsonDoc.array();
+}
+
 rapidjson::Document NetworkResult::parseRapidJson() const
 {
     rapidjson::Document ret(rapidjson::kObjectType);

@@ -15,21 +15,24 @@ public:
     bool operator==(const HighlightPhrase &other) const
     {
         return std::tie(this->pattern_, this->sound_, this->alert_,
-                        this->isRegex_) == std::tie(other.pattern_,
-                                                    other.sound_, other.alert_,
-                                                    other.isRegex_);
+                        this->isRegex_, this->caseSensitive_) ==
+               std::tie(other.pattern_, other.sound_, other.alert_,
+                        other.isRegex_, other.caseSensitive_);
     }
 
     HighlightPhrase(const QString &pattern, bool alert, bool sound,
-                    bool isRegex)
+                    bool isRegex, bool caseSensitive)
         : pattern_(pattern)
         , alert_(alert)
         , sound_(sound)
         , isRegex_(isRegex)
-        , regex_(isRegex_ ? pattern
-                          : "\\b" + QRegularExpression::escape(pattern) + "\\b",
-                 QRegularExpression::CaseInsensitiveOption |
-                     QRegularExpression::UseUnicodePropertiesOption)
+        , caseSensitive_(caseSensitive)
+        , regex_(
+              isRegex_ ? pattern
+                       : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+              QRegularExpression::UseUnicodePropertiesOption |
+                  (caseSensitive_ ? QRegularExpression::NoPatternOption
+                                  : QRegularExpression::CaseInsensitiveOption))
     {
     }
 
@@ -60,11 +63,17 @@ public:
         return this->isValid() && this->regex_.match(subject).hasMatch();
     }
 
+    bool isCaseSensitive() const
+    {
+        return this->caseSensitive_;
+    }
+
 private:
     QString pattern_;
     bool alert_;
     bool sound_;
     bool isRegex_;
+    bool caseSensitive_;
     QRegularExpression regex_;
 };
 }  // namespace chatterino
@@ -82,6 +91,7 @@ struct Serialize<chatterino::HighlightPhrase> {
         chatterino::rj::set(ret, "alert", value.getAlert(), a);
         chatterino::rj::set(ret, "sound", value.getSound(), a);
         chatterino::rj::set(ret, "regex", value.isRegex(), a);
+        chatterino::rj::set(ret, "case", value.isCaseSensitive(), a);
 
         return ret;
     }
@@ -93,20 +103,24 @@ struct Deserialize<chatterino::HighlightPhrase> {
     {
         if (!value.IsObject())
         {
-            return chatterino::HighlightPhrase(QString(), true, false, false);
+            return chatterino::HighlightPhrase(QString(), true, false, false,
+                                               false);
         }
 
         QString _pattern;
         bool _alert = true;
         bool _sound = false;
         bool _isRegex = false;
+        bool _caseSensitive = false;
 
         chatterino::rj::getSafe(value, "pattern", _pattern);
         chatterino::rj::getSafe(value, "alert", _alert);
         chatterino::rj::getSafe(value, "sound", _sound);
         chatterino::rj::getSafe(value, "regex", _isRegex);
+        chatterino::rj::getSafe(value, "case", _caseSensitive);
 
-        return chatterino::HighlightPhrase(_pattern, _alert, _sound, _isRegex);
+            return chatterino::HighlightPhrase(_pattern, _alert, _sound,
+                                               _isRegex, _caseSensitive);
     }
 };
 

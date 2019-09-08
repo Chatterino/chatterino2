@@ -13,7 +13,8 @@ protected:
     explicit ChatroomChannel(const QString &channelName,
                              TwitchBadges &globalTwitchBadges,
                              BttvEmotes &globalBttv, FfzEmotes &globalFfz);
-    virtual void refreshChannelEmotes() override;
+    virtual void refreshBTTVChannelEmotes() override;
+    virtual void refreshFFZChannelEmotes() override;
     virtual const QString &getDisplayName() const override;
 
     QString chatroomOwnerId;

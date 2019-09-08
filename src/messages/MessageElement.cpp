@@ -145,7 +145,7 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
                 QSize(int(container.getScale() * image->width() * emoteScale),
                       int(container.getScale() * image->height() * emoteScale));
 
-            container.addElement((new ImageLayoutElement(*this, image, size))
+            container.addElement(this->makeImageLayoutElement(image, size)
                                      ->setLink(this->getLink()));
         }
         else
@@ -157,6 +157,27 @@ void EmoteElement::addToContainer(MessageLayoutContainer &container,
             }
         }
     }
+}
+
+MessageLayoutElement *EmoteElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    return new ImageLayoutElement(*this, image, size);
+}
+
+// MOD BADGE
+ModBadgeElement::ModBadgeElement(const EmotePtr &data,
+                                 MessageElementFlags flags_)
+    : EmoteElement(data, flags_)
+{
+}
+
+MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    static const QColor modBadgeBackgroundColor("#34AE0A");
+    return new ImageWithBackgroundLayoutElement(*this, image, size,
+                                                modBadgeBackgroundColor);
 }
 
 // BADGE

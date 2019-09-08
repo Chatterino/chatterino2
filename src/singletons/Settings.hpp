@@ -198,11 +198,13 @@ public:
     QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
 
     /// Misc
+    BoolSetting betaUpdates = {"/misc/beta", false};
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
     BoolSetting loadTwitchMessageHistoryOnConnect = {
         "/misc/twitch/loadMessageHistoryOnConnect", true};
     IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 0};
+    BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
     QStringSetting cachePath = {"/cache/path", ""};
 

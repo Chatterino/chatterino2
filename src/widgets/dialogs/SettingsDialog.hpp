@@ -8,11 +8,18 @@
 #include <QWidget>
 #include <pajlada/settings/setting.hpp>
 
+class QLineEdit;
+
 namespace chatterino {
 
 class SettingsPage;
 class SettingsDialogTab;
 class ModerationPage;
+
+class PageHeader : public QFrame
+{
+    Q_OBJECT
+};
 
 enum class SettingsDialogPreference {
     NoPreference,
@@ -41,8 +48,9 @@ private:
     void initUi();
     void addTabs();
     void addTab(SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
-    void selectTab(SettingsDialogTab *tab);
+    void selectTab(SettingsDialogTab *tab, bool byUser = true);
     void selectPage(SettingsPage *page);
+    void filterElements(const QString &query);
 
     void onOkClicked();
     void onCancelClicked();
@@ -54,9 +62,12 @@ private:
         QPushButton *okButton{};
         QPushButton *cancelButton{};
         ModerationPage *moderationPage{};
+        QLineEdit *search{};
     } ui_;
     std::vector<SettingsDialogTab *> tabs_;
+    std::vector<SettingsPage *> pages_;
     SettingsDialogTab *selectedTab_{};
+    SettingsDialogTab *lastSelectedByUser_{};
 
     friend class SettingsDialogTab;
 };

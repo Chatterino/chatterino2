@@ -10,7 +10,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
-#include "widgets/AccountSwitchPopupWidget.hpp"
+#include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -63,7 +63,7 @@ void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
 void WindowManager::showAccountSelectPopup(QPoint point)
 {
     //    static QWidget *lastFocusedWidget = nullptr;
-    static AccountSwitchPopupWidget *w = new AccountSwitchPopupWidget();
+    static AccountSwitchPopup *w = new AccountSwitchPopup();
 
     if (w->hasFocus())
     {
@@ -79,7 +79,7 @@ void WindowManager::showAccountSelectPopup(QPoint point)
     w->refresh();
 
     QPoint buttonPos = point;
-    w->move(buttonPos.x(), buttonPos.y());
+    w->move(buttonPos.x() - 30, buttonPos.y());
 
     w->show();
     w->setFocus();
@@ -338,7 +338,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
                 // Have to offset x by one because qt moves the window 1px too
                 // far to the left:w
 
-                window.setGeometry(x + 1, y, width, height);
+                window.setInitialBounds({x, y, width, height});
             }
         }
 
@@ -465,10 +465,12 @@ void WindowManager::save()
         }
 
         // window geometry
-        window_obj.insert("x", window->x());
-        window_obj.insert("y", window->y());
-        window_obj.insert("width", window->width());
-        window_obj.insert("height", window->height());
+        auto rect = window->getBounds();
+
+        window_obj.insert("x", rect.x());
+        window_obj.insert("y", rect.y());
+        window_obj.insert("width", rect.width());
+        window_obj.insert("height", rect.height());
 
         // window tabs
         QJsonArray tabs_arr;

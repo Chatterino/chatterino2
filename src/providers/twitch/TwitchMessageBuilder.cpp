@@ -952,7 +952,7 @@ void TwitchMessageBuilder::parseHighlights()
     {
         HighlightPhrase selfHighlight(
             currentUsername, getSettings()->enableSelfHighlightTaskbar,
-            getSettings()->enableSelfHighlightSound, false);
+            getSettings()->enableSelfHighlightSound, false, false);
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -1171,7 +1171,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
         {
             if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
             {
-                this->emplace<BadgeElement>(
+                this->emplace<ModBadgeElement>(
                         customModBadge.get(),
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customModBadge)->tooltip.string);

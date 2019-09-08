@@ -11,6 +11,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
+#include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 
@@ -20,36 +21,21 @@
 #define FIREFOX_EXTENSION_LINK \
     "https://addons.mozilla.org/en-US/firefox/addon/chatterino-native-host/"
 
+#define addTitle addTitle
+
 namespace chatterino {
-namespace {
-    QPushButton *makeOpenSettingDirButton()
-    {
-        auto button = new QPushButton("Open settings directory");
-        QObject::connect(button, &QPushButton::clicked, [] {
-            QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
-        });
-        return button;
-    }
-}  // namespace
 
 TitleLabel *SettingsLayout::addTitle(const QString &title)
 {
     auto label = new TitleLabel(title + ":");
 
-    if (this->count() != 0)
-        this->addSpacing(16);
-
+    if (this->count() == 0)
+        label->setStyleSheet("margin-top: 0");
     this->addWidget(label);
-    return label;
-}
 
-TitleLabel2 *SettingsLayout::addTitle2(const QString &title)
-{
-    auto label = new TitleLabel2(title + ":");
+    // groups
+    this->groups_.push_back(Group{title, label, {}});
 
-    this->addSpacing(16);
-
-    this->addWidget(label);
     return label;
 }
 
@@ -71,6 +57,10 @@ QCheckBox *SettingsLayout::addCheckbox(const QString &text,
         [&setting, inverse](bool state) { setting = inverse ^ state; });
 
     this->addWidget(check);
+
+    // groups
+    this->groups_.back().widgets.push_back({check, {text}});
+
     return check;
 }
 
@@ -82,11 +72,17 @@ ComboBox *SettingsLayout::addDropdown(const QString &text,
     combo->setFocusPolicy(Qt::StrongFocus);
     combo->addItems(list);
 
-    layout->addWidget(new QLabel(text + ":"));
+    auto label = new QLabel(text + ":");
+    layout->addWidget(label);
     layout->addStretch(1);
     layout->addWidget(combo);
 
     this->addLayout(layout);
+
+    // groups
+    this->groups_.back().widgets.push_back({combo, {text}});
+    this->groups_.back().widgets.push_back({label, {text}});
+
     return combo;
 }
 
@@ -124,12 +120,73 @@ DescriptionLabel *SettingsLayout::addDescription(const QString &text)
 
     this->addWidget(label);
 
+    // groups
+    this->groups_.back().widgets.push_back({label, {text}});
+
     return label;
 }
 
 void SettingsLayout::addSeperator()
 {
     this->addWidget(new Line(false));
+}
+
+bool SettingsLayout::filterElements(const QString &query)
+{
+    bool any{};
+
+    for (auto &&group : this->groups_)
+    {
+        // if a description in a group matches `query` then show the entire group
+        bool descriptionMatches{};
+        for (auto &&widget : group.widgets)
+        {
+            if (auto x = dynamic_cast<DescriptionLabel *>(widget.element); x)
+            {
+                if (x->text().contains(query, Qt::CaseInsensitive))
+                {
+                    descriptionMatches = true;
+                    break;
+                }
+            }
+        }
+
+        // if group name matches then all should be visible
+        if (group.name.contains(query, Qt::CaseInsensitive) ||
+            descriptionMatches)
+        {
+            for (auto &&widget : group.widgets)
+                widget.element->show();
+            group.title->show();
+            any = true;
+        }
+        // check if any match
+        else
+        {
+            auto groupAny = false;
+
+            for (auto &&widget : group.widgets)
+            {
+                for (auto &&keyword : widget.keywords)
+                {
+                    if (keyword.contains(query, Qt::CaseInsensitive))
+                    {
+                        widget.element->show();
+                        groupAny = true;
+                    }
+                    else
+                    {
+                        widget.element->hide();
+                    }
+                }
+            }
+
+            group.title->setVisible(groupAny);
+            any |= groupAny;
+        }
+    }
+
+    return any;
 }
 
 GeneralPage::GeneralPage()
@@ -141,6 +198,7 @@ GeneralPage::GeneralPage()
     y->addWidget(scroll);
     auto x = new QHBoxLayout;
     auto layout = new SettingsLayout;
+    this->settingsLayout_ = layout;
     x->addLayout(layout, 0);
     x->addStretch(1);
     auto z = new QFrame;
@@ -153,6 +211,16 @@ GeneralPage::GeneralPage()
     layout->addStretch(1);
 
     this->initExtra();
+}
+
+bool GeneralPage::filterElements(const QString &query)
+{
+    if (this->settingsLayout_)
+        return this->settingsLayout_->filterElements(query) ||
+               this->name_.contains(query, Qt::CaseInsensitive) ||
+               query.isEmpty();
+    else
+        return false;
 }
 
 void GeneralPage::initLayout(SettingsLayout &layout)
@@ -220,10 +288,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     // layout.addCheckbox("Mark last message you read");
     // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
-    layout.addCheckbox("Show moderation messages", s.hideModerationActions,
-                       true);
-    layout.addCheckbox("Random username color for users who never set a color",
-                       s.colorizeNicknames);
     layout.addDropdown<QString>(
         "Timestamps", {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a"},
         s.timestampFormat,
@@ -268,6 +332,11 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val) + "x";
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+
+    layout.addDropdown<int>(
+        "Preview on hover", {"Don't show", "Always show", "Hold shift"},
+        s.emotesTooltipPreview, [](int index) { return index; },
+        [](auto args) { return args.index; }, false);
     layout.addDropdown("Emoji set",
                        {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
                         "Apple", "Google", "Messenger"},
@@ -284,15 +353,40 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
 
     layout.addTitle("Chat title");
-    layout.addWidget(new QLabel("In live channels show:"));
+    layout.addDescription("In live channels show:");
     layout.addCheckbox("Uptime", s.headerUptime);
     layout.addCheckbox("Viewer count", s.headerViewerCount);
     layout.addCheckbox("Category", s.headerGame);
     layout.addCheckbox("Title", s.headerStreamTitle);
 
+    layout.addTitle("Beta");
+    layout.addDescription(
+        "You can receive updates earlier by ticking the box below. Report "
+        "issues <a href='https://chatterino.com/link/issues'>here</a>.");
+    layout.addCheckbox("Receive beta updates", s.betaUpdates);
+
+#ifdef Q_OS_WIN
+    layout.addTitle("Browser Integration");
+    layout.addDescription("The browser extension replaces the default "
+                          "Twitch.tv chat with chatterino.");
+
+    layout.addDescription(
+        createNamedLink(CHROME_EXTENSION_LINK, "Download for Google Chrome"));
+    layout.addDescription(
+        createNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
+#endif
+
     layout.addTitle("Miscellaneous");
 
-    //layout.addWidget(makeOpenSettingDirButton());
+    if (supportsIncognitoLinks())
+    {
+        layout.addCheckbox("Open links in incognito/private mode",
+                           s.openLinksIncognito);
+    }
+    layout.addCheckbox("Show moderation messages", s.hideModerationActions,
+                       true);
+    layout.addCheckbox("Random username color for users who never set a color",
+                       s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
@@ -314,11 +408,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
     layout.addCheckbox("Show live indicator in tabs", s.showTabLive);
-    layout.addDropdown<int>("Show emote preview in tooltip on hover",
-                            {"Don't show", "Always show", "Hold shift"},
-                            s.emotesTooltipPreview,
-                            [](int index) { return index; },
-                            [](auto args) { return args.index; }, false);
 
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
@@ -330,25 +419,57 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
 
-#ifdef Q_OS_WIN
-    layout.addTitle("Browser Integration");
-    layout.addDescription("The browser extension replaces the default "
-                          "Twitch.tv chat with chatterino.");
+    layout.addTitle("Cache");
+    layout.addDescription(
+        "Files that are used often (such as emotes) are saved to disk to "
+        "reduce bandwidth usage and tho speed up loading.");
 
-    layout.addDescription(
-        createNamedLink(CHROME_EXTENSION_LINK, "Download for Google Chrome"));
-    layout.addDescription(
-        createNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
-#endif
-}  // namespace chatterino
+    auto cachePathLabel = layout.addDescription("placeholder :D");
+    getSettings()->cachePath.connect([cachePathLabel](const auto &,
+                                                      auto) mutable {
+        QString newPath = getPaths()->cacheDirectory();
+
+        QString pathShortened = "Cache saved at <a href=\"file:///" + newPath +
+                                "\"><span style=\"color: white;\">" +
+                                shortenString(newPath, 50) + "</span></a>";
+        cachePathLabel->setText(pathShortened);
+        cachePathLabel->setToolTip(newPath);
+    });
+
+    // Choose and reset buttons
+    {
+        auto box = new QHBoxLayout;
+
+        box->addWidget(layout.makeButton("Choose cache path", [this]() {
+            getSettings()->cachePath = QFileDialog::getExistingDirectory(this);
+        }));
+        box->addWidget(layout.makeButton(
+            "Reset", []() { getSettings()->cachePath = ""; }));
+        box->addStretch(1);
+
+        layout.addLayout(box);
+    }
+
+    layout.addTitle("AppData");
+    layout.addDescription("All local files like settings and cache files are "
+                          "store in this directory.");
+    layout.addButton("Open AppData directory", [] {
+        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+    });
+
+    // invisible element for width
+    auto inv = new BaseWidget(this);
+    inv->setScaleIndependantWidth(500);
+    layout.addWidget(inv);
+}
 
 void GeneralPage::initExtra()
 {
     /// update cache path
-    if (this->cachePath)
+    if (this->cachePath_)
     {
         getSettings()->cachePath.connect(
-            [cachePath = this->cachePath](const auto &, auto) mutable {
+            [cachePath = this->cachePath_](const auto &, auto) mutable {
                 QString newPath = getPaths()->cacheDirectory();
 
                 QString pathShortened = "Current location: <a href=\"file:///" +

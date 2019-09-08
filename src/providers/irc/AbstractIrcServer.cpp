@@ -30,15 +30,18 @@ AbstractIrcServer::AbstractIrcServer()
     this->readConnection_.reset(new IrcConnection);
     this->readConnection_->moveToThread(QCoreApplication::instance()->thread());
 
-    QObject::connect(this->readConnection_.get(),
-                     &Communi::IrcConnection::messageReceived,
-                     [this](auto msg) { this->messageReceived(msg); });
+    QObject::connect(
+        this->readConnection_.get(), &Communi::IrcConnection::messageReceived,
+        [this](auto msg) { this->readConnectionMessageReceived(msg); });
     QObject::connect(this->readConnection_.get(),
                      &Communi::IrcConnection::privateMessageReceived,
                      [this](auto msg) { this->privateMessageReceived(msg); });
     QObject::connect(
         this->readConnection_.get(), &Communi::IrcConnection::connected,
-        [this] { this->onConnected(this->readConnection_.get()); });
+        [this] { this->onReadConnected(this->readConnection_.get()); });
+    QObject::connect(
+        this->writeConnection_.get(), &Communi::IrcConnection::connected,
+        [this] { this->onWriteConnected(this->writeConnection_.get()); });
     QObject::connect(this->readConnection_.get(),
                      &Communi::IrcConnection::disconnected,
                      [this] { this->onDisconnected(); });
@@ -227,7 +230,7 @@ std::shared_ptr<Channel> AbstractIrcServer::getChannelOrEmpty(
     return Channel::getEmpty();
 }
 
-void AbstractIrcServer::onConnected(IrcConnection *connection)
+void AbstractIrcServer::onReadConnected(IrcConnection *connection)
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 
@@ -260,6 +263,10 @@ void AbstractIrcServer::onConnected(IrcConnection *connection)
     }
 
     this->falloffCounter_ = 1;
+}
+
+void AbstractIrcServer::onWriteConnected(IrcConnection *connection)
+{
 }
 
 void AbstractIrcServer::onDisconnected()
@@ -310,7 +317,7 @@ void AbstractIrcServer::addFakeMessage(const QString &data)
     }
     else
     {
-        this->messageReceived(fakeMessage);
+        this->readConnectionMessageReceived(fakeMessage);
     }
 }
 
@@ -319,7 +326,8 @@ void AbstractIrcServer::privateMessageReceived(
 {
 }
 
-void AbstractIrcServer::messageReceived(Communi::IrcMessage *message)
+void AbstractIrcServer::readConnectionMessageReceived(
+    Communi::IrcMessage *message)
 {
 }
 

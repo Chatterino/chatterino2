@@ -1,5 +1,6 @@
 #include "Updates.hpp"
 
+#include "Settings.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "common/Version.hpp"
@@ -13,6 +14,12 @@
 #include <QProcess>
 
 namespace chatterino {
+namespace {
+    QString currentBranch()
+    {
+        return getSettings()->betaUpdates ? "beta" : "stable";
+    }
+}  // namespace
 
 Updates::Updates()
     : currentVersion_(CHATTERINO_VERSION)
@@ -195,8 +202,8 @@ void Updates::installUpdates()
 void Updates::checkForUpdates()
 {
     QString url =
-        "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS
-        "/stable";
+        "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/" +
+        currentBranch();
 
     NetworkRequest(url)
         .timeout(60000)

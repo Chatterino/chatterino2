@@ -28,14 +28,16 @@ class Button : public BaseWidget
     };
 
 public:
+    enum class Dim { None, Some, Lots };
+
     Button(BaseWidget *parent = nullptr);
 
     void setMouseEffectColor(boost::optional<QColor> color);
     void setPixmap(const QPixmap &pixmap_);
     const QPixmap &getPixmap() const;
 
-    void setDim(bool value);
-    bool getDim() const;
+    void setDim(Dim value);
+    Dim getDim() const;
     qreal getCurrentDimAmount() const;
 
     void setEnable(bool value);
@@ -76,7 +78,7 @@ private:
 
     QColor borderColor_{};
     QPixmap pixmap_{};
-    bool dimPixmap_{true};
+    Dim dimPixmap_{Dim::Some};
     bool enableMargin_{true};
     QPoint mousePos_{};
     double hoverMultiplier_{0.0};

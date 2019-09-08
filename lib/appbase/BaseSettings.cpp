@@ -98,12 +98,12 @@ void AB_SETTINGS_CLASS::restoreSnapshot()
 
 float AB_SETTINGS_CLASS::getClampedUiScale() const
 {
-    return clamp<float>(this->uiScale.getValue(), 0.1, 10);
+    return clamp<float>(this->uiScale.getValue(), 0.2f, 10);
 }
 
 void AB_SETTINGS_CLASS::setClampedUiScale(float value)
 {
-    this->uiScale.setValue(clamp<float>(value, 0.1, 10));
+    this->uiScale.setValue(clamp<float>(value, 0.2f, 10));
 }
 
 #ifndef AB_CUSTOM_SETTINGS

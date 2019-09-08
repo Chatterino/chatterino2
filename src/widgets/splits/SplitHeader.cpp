@@ -189,7 +189,6 @@ void SplitHeader::initializeLayout()
                                     SettingsDialogPreference::
                                         ModerationActions);
                                 this->split_->setModerationMode(true);
-                                w->setDim(true);
                             }
                             else
                             {
@@ -198,7 +197,7 @@ void SplitHeader::initializeLayout()
 
                                 this->split_->setModerationMode(
                                     !moderationMode);
-                                w->setDim(moderationMode);
+                                w->setDim(Button::Dim(moderationMode));
                             }
                             break;
 
@@ -713,7 +712,10 @@ void SplitHeader::reloadChannelEmotes()
     auto channel = this->split_->getChannel();
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
-        twitchChannel->refreshChannelEmotes();
+    {
+        twitchChannel->refreshFFZChannelEmotes();
+        twitchChannel->refreshBTTVChannelEmotes();
+    }
 }
 
 void SplitHeader::reloadSubscriberEmotes()

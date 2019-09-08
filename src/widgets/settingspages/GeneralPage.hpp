@@ -28,17 +28,6 @@ public:
     }
 };
 
-class TitleLabel2 : public QLabel
-{
-    Q_OBJECT
-
-public:
-    TitleLabel2(const QString &text)
-        : QLabel(text)
-    {
-    }
-};
-
 class DescriptionLabel : public QLabel
 {
     Q_OBJECT
@@ -71,7 +60,6 @@ class SettingsLayout : public QVBoxLayout
 
 public:
     TitleLabel *addTitle(const QString &text);
-    TitleLabel2 *addTitle2(const QString &text);
     /// @param inverse Inverses true to false and vice versa
     QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
                            bool inverse = false);
@@ -79,6 +67,26 @@ public:
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           pajlada::Settings::Setting<QString> &setting,
                           bool editable = false);
+
+    template <typename OnClick>
+    QPushButton *makeButton(const QString &text, OnClick onClick)
+    {
+        auto button = new QPushButton(text);
+        this->groups_.back().widgets.push_back({button, {text}});
+        QObject::connect(button, &QPushButton::clicked, onClick);
+        return button;
+    }
+
+    template <typename OnClick>
+    QPushButton *addButton(const QString &text, OnClick onClick)
+    {
+        auto button = makeButton(text, onClick);
+        auto layout = new QHBoxLayout();
+        layout->addWidget(button);
+        layout->addStretch(1);
+        this->addLayout(layout);
+        return button;
+    }
 
     template <typename T>
     ComboBox *addDropdown(
@@ -141,9 +149,23 @@ public:
         return combo;
     }
     DescriptionLabel *addDescription(const QString &text);
+
     void addSeperator();
+    bool filterElements(const QString &query);
 
 private:
+    struct Widget {
+        QWidget *element;
+        QStringList keywords;
+    };
+
+    struct Group {
+        QString name;
+        QWidget *title{};
+        std::vector<Widget> widgets;
+    };
+
+    std::vector<Group> groups_;
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 };
 
@@ -154,13 +176,16 @@ class GeneralPage : public SettingsPage
 public:
     GeneralPage();
 
+    bool filterElements(const QString &query);
+
 private:
     void initLayout(SettingsLayout &layout);
     void initExtra();
 
     QString getFont(const DropdownArgs &args) const;
 
-    DescriptionLabel *cachePath{};
+    DescriptionLabel *cachePath_{};
+    SettingsLayout *settingsLayout_{};
 };
 
 }  // namespace chatterino

@@ -100,6 +100,8 @@ void Label::paintEvent(QPaintEvent *)
                                   ? Qt::AlignLeft | Qt::AlignVCenter
                                   : Qt::AlignCenter;
 
+    painter.setBrush(this->palette().windowText());
+
     QTextOption option(alignment);
     option.setWrapMode(QTextOption::NoWrap);
     painter.drawText(textRect, this->text_, option);

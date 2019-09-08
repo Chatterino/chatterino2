@@ -6,7 +6,6 @@
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
 #include "common/UsernameSet.hpp"
-#include "providers/ffz/FfzModBadge.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 
 #include <rapidjson/document.h>
@@ -85,7 +84,8 @@ public:
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
 
-    virtual void refreshChannelEmotes();
+    virtual void refreshBTTVChannelEmotes();
+    virtual void refreshFFZChannelEmotes();
 
     // Badges
     boost::optional<EmotePtr> ffzCustomModBadge() const;
@@ -150,13 +150,13 @@ protected:
     FfzEmotes &globalFfz_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
+    Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;
 
 private:
     // Badges
     UniqueAccess<std::map<QString, std::map<QString, EmotePtr>>>
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
-    FfzModBadge ffzCustomModBadge_;
 
     bool mod_ = false;
     bool vip_ = false;

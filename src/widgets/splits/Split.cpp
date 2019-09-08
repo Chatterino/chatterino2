@@ -89,6 +89,7 @@ Split::Split(QWidget *parent)
 {
     this->setMouseTracking(true);
     this->view_->setPausable(true);
+    this->view_->setFocusPolicy(Qt::FocusPolicy::NoFocus);
 
     this->vbox_->setSpacing(0);
     this->vbox_->setMargin(1);
@@ -663,7 +664,10 @@ void Split::reloadChannelAndSubscriberEmotes()
     auto channel = this->getChannel();
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
-        twitchChannel->refreshChannelEmotes();
+    {
+        twitchChannel->refreshBTTVChannelEmotes();
+        twitchChannel->refreshFFZChannelEmotes();
+    }
 }
 
 template <typename Iter, typename RandomGenerator>
