@@ -411,6 +411,7 @@ HEADERS += \
     src/widgets/Window.hpp \
     src/controllers/pings/PingController.hpp \
     src/controllers/pings/PingModel.hpp \
+    src/util/SampleCheerMessages.hpp \
 
 RESOURCES += \
     resources/resources.qrc \
