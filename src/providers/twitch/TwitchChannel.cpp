@@ -787,7 +787,7 @@ void TwitchChannel::refreshCheerEmotes()
                 std::sort(cheerEmoteSet.cheerEmotes.begin(),
                           cheerEmoteSet.cheerEmotes.end(),
                           [](const auto &lhs, const auto &rhs) {
-                              return lhs.minBits < rhs.minBits;  //
+                              return lhs.minBits > rhs.minBits;
                           });
 
                 emoteSets.emplace_back(cheerEmoteSet);
@@ -844,7 +844,7 @@ boost::optional<std::tuple<boost::optional<EmotePtr>, boost::optional<EmotePtr>,
         }
         for (const auto &emote : set.cheerEmotes)
         {
-            if (amount >= emote.minBits)
+            if (bitAmount >= emote.minBits)
             {
                 using OPEP = boost::optional<EmotePtr>;
                 std::tuple<OPEP, OPEP, boost::optional<QColor>> retval;
