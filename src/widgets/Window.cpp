@@ -9,7 +9,6 @@
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
-#include "util/SampleCheerMessages.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/AccountSwitchPopupWidget.hpp"
 #include "widgets/Notebook.hpp"
@@ -22,6 +21,10 @@
 #include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+
+#ifdef QT_DEBUG
+#    include "util/SampleCheerMessages.hpp"
+#endif
 
 #include <QApplication>
 #include <QDesktopServices>
