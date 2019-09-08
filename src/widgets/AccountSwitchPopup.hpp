@@ -1,12 +1,13 @@
 #pragma once
 
 #include "widgets/AccountSwitchWidget.hpp"
+#include "widgets/BaseWindow.hpp"
 
 #include <QWidget>
 
 namespace chatterino {
 
-class AccountSwitchPopup : public QWidget
+class AccountSwitchPopup : public BaseWindow
 {
     Q_OBJECT
 

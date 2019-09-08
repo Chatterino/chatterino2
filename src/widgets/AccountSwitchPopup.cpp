@@ -11,9 +11,9 @@
 namespace chatterino {
 
 AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
-    : QWidget(parent)
+    : BaseWindow(parent,
+                 BaseWindow::Flags(BaseWindow::TopMost | BaseWindow::Frameless))
 {
-    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
 #ifdef Q_OS_LINUX
     this->setWindowFlag(Qt::Popup);
 #endif
@@ -38,9 +38,9 @@ AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
         SettingsDialog::showDialog(SettingsDialogPreference::Accounts);  //
     });
 
-    this->setLayout(vbox);
+    this->getLayoutContainer()->setLayout(vbox);
 
-    //    this->setStyleSheet("background: #333");
+    this->setScaleIndependantSize(200, 200);
 }
 
 void AccountSwitchPopup::refresh()
