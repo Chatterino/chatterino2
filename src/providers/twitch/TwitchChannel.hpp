@@ -93,10 +93,7 @@ public:
                                           const QString &version) const;
 
     // Cheers
-    boost::optional<
-        std::tuple<boost::optional<EmotePtr>, boost::optional<EmotePtr>,
-                   boost::optional<QColor>>>
-        cheerEmote(const QString &string);
+    boost::optional<CheerEmote> cheerEmote(const QString &string);
 
     // Signals
     pajlada::Signals::NoArgSignal roomIdChanged;

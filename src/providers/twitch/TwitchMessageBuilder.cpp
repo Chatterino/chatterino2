@@ -1292,21 +1292,21 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     {
         return Failure;
     }
-    auto &cheerPairAndColor = *cheerOpt;
-    if (std::get<0>(cheerPairAndColor))
+    auto &cheerEmote = *cheerOpt;
+    if (cheerEmote.staticEmote)
     {
-        this->emplace<EmoteElement>(*std::get<0>(cheerPairAndColor),
+        this->emplace<EmoteElement>(cheerEmote.staticEmote,
                                     MessageElementFlag::BitsStatic);
     }
-    if (std::get<1>(cheerPairAndColor))
+    if (cheerEmote.animatedEmote)
     {
-        this->emplace<EmoteElement>(*std::get<1>(cheerPairAndColor),
+        this->emplace<EmoteElement>(cheerEmote.animatedEmote,
                                     MessageElementFlag::BitsAnimated);
     }
-    if (std::get<2>(cheerPairAndColor))
+    if (cheerEmote.color != QColor())
     {
         this->emplace<TextElement>(this->bits, MessageElementFlag::BitsAmount,
-                                   *std::get<2>(cheerPairAndColor));
+                                   cheerEmote.color);
     }
     return Success;
 }

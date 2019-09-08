@@ -751,7 +751,8 @@ void TwitchChannel::refreshCheerEmotes()
             {
                 auto cheerEmoteSet = CheerEmoteSet();
                 cheerEmoteSet.regex = QRegularExpression(
-                    "^" + set.prefix.toLower() + "([1-9][0-9]*)$");
+                    "^" + set.prefix + "([1-9][0-9]*)$",
+                    QRegularExpression::CaseInsensitiveOption);
 
                 for (auto &tier : set.tiers)
                 {
@@ -823,14 +824,12 @@ boost::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
     return boost::none;
 }
 
-boost::optional<std::tuple<boost::optional<EmotePtr>, boost::optional<EmotePtr>,
-                           boost::optional<QColor>>>
-    TwitchChannel::cheerEmote(const QString &string)
+boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
 {
     auto sets = this->cheerEmoteSets_.access();
     for (const auto &set : *sets)
     {
-        auto match = set.regex.match(string.toLower());
+        auto match = set.regex.match(string);
         if (!match.hasMatch())
         {
             continue;
@@ -846,21 +845,7 @@ boost::optional<std::tuple<boost::optional<EmotePtr>, boost::optional<EmotePtr>,
         {
             if (bitAmount >= emote.minBits)
             {
-                using OPEP = boost::optional<EmotePtr>;
-                std::tuple<OPEP, OPEP, boost::optional<QColor>> retval;
-                if (emote.staticEmote)
-                {
-                    std::get<0>(retval) = emote.staticEmote;
-                }
-                if (emote.animatedEmote)
-                {
-                    std::get<1>(retval) = emote.animatedEmote;
-                }
-                if (emote.color != QColor())
-                {
-                    std::get<2>(retval) = emote.color;
-                }
-                return retval;
+                return emote;
             }
         }
     }
