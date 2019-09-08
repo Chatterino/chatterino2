@@ -11,8 +11,7 @@
 namespace chatterino {
 
 AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
-    : BaseWindow(parent,
-                 BaseWindow::Flags(BaseWindow::TopMost | BaseWindow::Frameless))
+    : BaseWindow({BaseWindow::TopMost, BaseWindow::Frameless}, parent)
 {
 #ifdef Q_OS_LINUX
     this->setWindowFlag(Qt::Popup);
@@ -24,8 +23,6 @@ AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
     QVBoxLayout *vbox = new QVBoxLayout(this);
     this->ui_.accountSwitchWidget->setFocusPolicy(Qt::NoFocus);
     vbox->addWidget(this->ui_.accountSwitchWidget);
-
-    // vbox->setSizeConstraint(QLayout::SetMinimumSize);
 
     auto hbox = new QHBoxLayout();
     auto manageAccountsButton = new QPushButton(this);

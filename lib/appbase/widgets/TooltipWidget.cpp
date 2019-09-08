@@ -21,7 +21,7 @@ TooltipWidget *TooltipWidget::getInstance()
 }
 
 TooltipWidget::TooltipWidget(BaseWidget *parent)
-    : BaseWindow(parent, BaseWindow::TopMost)
+    : BaseWindow(BaseWindow::TopMost, parent)
     , displayImage_(new QLabel())
     , displayText_(new QLabel())
 {
