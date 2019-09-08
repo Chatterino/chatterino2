@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ForwardDecl.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/predicates/MessagePredicate.hpp"
 #include "widgets/BaseWindow.hpp"
@@ -10,25 +11,23 @@ class QLineEdit;
 
 namespace chatterino {
 
-class Channel;
-class ChannelView;
-
-struct Message;
-using MessagePtr = std::shared_ptr<const Message>;
-
 class SearchPopup : public BaseWindow
 {
 public:
     SearchPopup();
 
-    void setChannel(std::shared_ptr<Channel> channel);
+    virtual void setChannel(const ChannelPtr &channel);
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
 
+    virtual void updateWindowTitle();
+
 private:
     void initLayout();
-    void performSearch();
+    void search();
+
+    static ChannelPtr filter(const QString &text, const QString &channelName, const LimitedQueueSnapshot<MessagePtr> &snapshot);
 
     /**
      * @brief Checks the input for tags and registers their corresponding
@@ -36,7 +35,7 @@ private:
      *
      * @param input the string to check for tags
      */
-    void parsePredicates(const QString& input);
+    static std::vector<MessagePredicatePtr> parsePredicates(const QString& input);
 
     /**
      * @brief Removes every occurence of a tag from the passed string.
@@ -62,7 +61,6 @@ private:
     QLineEdit *searchInput_;
     ChannelView *channelView_;
     QString channelName_;
-    std::vector<MessagePredicatePtr> predicates_;
 };
 
 }  // namespace chatterino

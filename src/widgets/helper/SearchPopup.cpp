@@ -14,19 +14,63 @@
 
 namespace chatterino {
 
+ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
+                  const LimitedQueueSnapshot<MessagePtr> &snapshot)
+{
+    ChannelPtr channel(new Channel(channelName, Channel::Type::None));
+    
+    // Parse predicates from tags in "text"
+    auto predicates = parsePredicates(text);
+    
+    // Check for every message whether it fulfills all predicates that have
+    // been registered
+    for (size_t i = 0; i < snapshot.size(); ++i)
+    {
+        MessagePtr message = snapshot[i];
+    
+        bool accept = true;
+        for (MessagePredicatePtr &pred : predicates)
+        {
+            // Discard the message as soon as one predicate fails
+            if (!pred->appliesTo(message))
+            {
+                accept = false;
+                break;
+            }
+        }
+    
+        // If all predicates match, add the message to the channel
+        if (accept)
+            channel->addMessage(message);
+    }
+    
+    return channel;
+}
+
 SearchPopup::SearchPopup()
 {
     this->initLayout();
     this->resize(400, 600);
 }
 
-void SearchPopup::setChannel(ChannelPtr channel)
+void SearchPopup::setChannel(const ChannelPtr &channel)
 {
     this->channelName_ = channel->getName();
     this->snapshot_ = channel->getMessageSnapshot();
-    this->performSearch();
+    this->search();
 
-    this->setWindowTitle("Searching in " + channel->getName() + "s history");
+    this->updateWindowTitle();
+}
+
+void SearchPopup::updateWindowTitle()
+{
+    this->setWindowTitle("Searching in " + this->channelName_ + "s history");
+}
+
+void SearchPopup::search()
+{
+    this->channelView_->setChannel(filter(this->searchInput_->text(),
+                                          this->channelName_, this->snapshot_));
 }
 
 void SearchPopup::keyPressEvent(QKeyEvent *e)
@@ -46,18 +90,20 @@ void SearchPopup::initLayout()
     {
         QVBoxLayout *layout1 = new QVBoxLayout(this);
         layout1->setMargin(0);
+        layout1->setSpacing(0);
 
         // HBOX
         {
             QHBoxLayout *layout2 = new QHBoxLayout(this);
-            layout2->setMargin(6);
+            layout2->setMargin(8);
+            layout2->setSpacing(8);
 
             // SEARCH INPUT
             {
                 this->searchInput_ = new QLineEdit(this);
                 layout2->addWidget(this->searchInput_);
                 QObject::connect(this->searchInput_, &QLineEdit::returnPressed,
-                                 [this] { this->performSearch(); });
+                                 [this] { this->search(); });
             }
 
             // SEARCH BUTTON
@@ -66,7 +112,7 @@ void SearchPopup::initLayout()
                 searchButton->setText("Search");
                 layout2->addWidget(searchButton);
                 QObject::connect(searchButton, &QPushButton::clicked,
-                                 [this] { this->performSearch(); });
+                                 [this] { this->search(); });
             }
 
             layout1->addLayout(layout2);
@@ -83,42 +129,9 @@ void SearchPopup::initLayout()
     }
 }
 
-void SearchPopup::performSearch()
+std::vector<MessagePredicatePtr> SearchPopup::parsePredicates(const QString &input)
 {
-    QString text = searchInput_->text();
-    ChannelPtr channel(new Channel(this->channelName_, Channel::Type::None));
-
-    // Parse predicates from tags in "text" and add them to "predicates_"
-    parsePredicates(text);
-
-    // Check for every message whether it fulfills all predicates that have
-    // been registered
-    for (size_t i = 0; i < this->snapshot_.size(); ++i)
-    {
-        MessagePtr message = this->snapshot_[i];
-
-        bool accept = true;
-        for (MessagePredicatePtr &pred : this->predicates_)
-        {
-            // Discard the message as soon as one predicate fails
-            if (!pred->appliesTo(message))
-            {
-                accept = false;
-                break;
-            }
-        }
-
-        // If all predicates match, add the message to the channel
-        if (accept)
-            channel->addMessage(message);
-    }
-
-    this->channelView_->setChannel(channel);
-}
-
-void SearchPopup::parsePredicates(const QString &input)
-{
-    this->predicates_.clear();
+    std::vector<MessagePredicatePtr> predicates;
 
     // Get a working copy we can modify
     QString text = input;
@@ -127,7 +140,7 @@ void SearchPopup::parsePredicates(const QString &input)
     QStringList searchedUsers = parseSearchedUsers(text);
     if (searchedUsers.size() > 0)
     {
-        this->predicates_.push_back(
+        predicates.push_back(
             std::make_shared<AuthorPredicate>(searchedUsers));
         removeTagFromText("from:", text);
     }
@@ -135,7 +148,7 @@ void SearchPopup::parsePredicates(const QString &input)
     // Check for "contains:link" tags
     if (text.contains("contains:link", Qt::CaseInsensitive))
     {
-        this->predicates_.push_back(std::make_shared<LinkPredicate>());
+        predicates.push_back(std::make_shared<LinkPredicate>());
         removeTagFromText("contains:link", text);
     }
 
@@ -143,8 +156,10 @@ void SearchPopup::parsePredicates(const QString &input)
     // If "text" is empty, every message will be matched.
     if (text.size() > 0)
     {
-        this->predicates_.push_back(std::make_shared<SubstringPredicate>(text));
+        predicates.push_back(std::make_shared<SubstringPredicate>(text));
     }
+
+    return predicates;
 }
 
 void SearchPopup::removeTagFromText(const QString &tag, QString &text)

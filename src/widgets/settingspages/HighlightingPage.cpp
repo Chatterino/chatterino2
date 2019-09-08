@@ -57,7 +57,7 @@ HighlightingPage::HighlightingPage()
 
                 view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex"});
+                                 "Enable\nregex", "Case-\nsensitive"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -71,8 +71,8 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlights->phrases.appendItem(
-                        HighlightPhrase{"my phrase", true, false, false});
+                    getApp()->highlights->phrases.appendItem(HighlightPhrase{
+                        "my phrase", true, false, false, false});
                 });
             }
 
@@ -87,6 +87,9 @@ HighlightingPage::HighlightingPage()
                         .getElement();
 
                 view->addRegexHelpLink();
+
+                // Case-sensitivity doesn't make sense for user names so it is
+                // set to "false" by default & no checkbox is shown
                 view->setTitles({"Username", "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -103,7 +106,7 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->highlightedUsers.appendItem(
-                        HighlightPhrase{"highlighted user", true, false,
+                        HighlightPhrase{"highlighted user", true, false, false,
                                         false});
                 });
             }

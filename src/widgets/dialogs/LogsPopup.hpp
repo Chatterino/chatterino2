@@ -1,37 +1,29 @@
 #pragma once
 
-#include "widgets/BaseWindow.hpp"
+#include "widgets/helper/SearchPopup.hpp"
 
 namespace chatterino {
 
-class Channel;
-class ChannelView;
-
-class Channel;
-using ChannelPtr = std::shared_ptr<Channel>;
-
-struct Message;
-using MessagePtr = std::shared_ptr<const Message>;
-
-class LogsPopup : public BaseWindow
+class LogsPopup : public SearchPopup
 {
 public:
     LogsPopup();
 
-    void setChannelName(QString channelName);
-    void setChannel(std::shared_ptr<Channel> channel);
-    void setTargetUserName(QString userName);
+    void setChannel(const ChannelPtr &channel) override;
+    void setChannelName(const QString &channelName);
+    void setTargetUserName(const QString &userName);
 
     void getLogs();
 
+protected:
+    void updateWindowTitle() override;
+
 private:
-    ChannelView *channelView_ = nullptr;
     ChannelPtr channel_;
 
     QString userName_;
     QString channelName_;
 
-    void initLayout();
     void setMessages(std::vector<MessagePtr> &messages);
     void getOverrustleLogs();
     void getLogviewerLogs(const QString &roomID);

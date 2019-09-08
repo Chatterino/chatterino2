@@ -372,15 +372,13 @@ void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
 
-    //#undef CHATTERINO_NIGHTLY_VERSION_STRING
-
-#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
-    auto windowTitleEnd =
-        QString("Chatterino Nightly " CHATTERINO_VERSION
-                " (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
-#else
+    //#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
+    //    auto windowTitleEnd =
+    //        QString("Chatterino Nightly " CHATTERINO_VERSION
+    //                " (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
+    //#else
     auto windowTitleEnd = QString("Chatterino " CHATTERINO_VERSION);
-#endif
+    //#endif
 
     this->setWindowTitle(windowTitleEnd);
 
