@@ -28,47 +28,45 @@
 #define TEXT_VIEWS "Views: "
 #define TEXT_CREATED "Created: "
 
+namespace chatterino {
+
 namespace {
 
-const auto borderColor = QColor(255, 255, 255, 80);
+    const auto borderColor = QColor(255, 255, 255, 80);
 
-int calculateTimeoutDuration(TimeoutButton timeout)
-{
-    static const QMap<QString, int> durations{
-        {"s", 1}, {"m", 60}, {"h", 3600}, {"d", 86400}, {"w", 604800},
-    };
-    return timeout.second * durations[timeout.first];
-}
-
-chatterino::ChannelPtr filterMessages(const QString &userName,
-                                      chatterino::ChannelPtr channel)
-{
-    chatterino::LimitedQueueSnapshot<chatterino::MessagePtr> snapshot =
-        channel->getMessageSnapshot();
-
-    chatterino::ChannelPtr channelPtr(new chatterino::Channel(
-        channel->getName(), chatterino::Channel::Type::None));
-
-    for (size_t i = 0; i < snapshot.size(); i++)
+    int calculateTimeoutDuration(TimeoutButton timeout)
     {
-        chatterino::MessagePtr message = snapshot[i];
-
-        bool isSelectedUser =
-            message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
-
-        if (isSelectedUser &&
-            !message->flags.has(chatterino::MessageFlag::Whisper))
-        {
-            channelPtr->addMessage(message);
-        }
+        static const QMap<QString, int> durations{
+            {"s", 1}, {"m", 60}, {"h", 3600}, {"d", 86400}, {"w", 604800},
+        };
+        return timeout.second * durations[timeout.first];
     }
 
-    return channelPtr;
-}
+    ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
+    {
+        LimitedQueueSnapshot<MessagePtr> snapshot =
+            channel->getMessageSnapshot();
+
+        ChannelPtr channelPtr(
+            new Channel(channel->getName(), Channel::Type::None));
+
+        for (size_t i = 0; i < snapshot.size(); i++)
+        {
+            MessagePtr message = snapshot[i];
+
+            bool isSelectedUser =
+                message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
+
+            if (isSelectedUser && !message->flags.has(MessageFlag::Whisper))
+            {
+                channelPtr->addMessage(message);
+            }
+        }
+
+        return channelPtr;
+    }
 
 }  // namespace
-
-namespace chatterino {
 
 UserInfoPopup::UserInfoPopup()
     : BaseWindow(nullptr, BaseWindow::Flags(BaseWindow::Frameless |
