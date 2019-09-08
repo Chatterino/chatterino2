@@ -171,7 +171,7 @@ void TwitchChannel::refreshFFZChannelEmotes()
         [this, weak = weakOf<Channel>(this)](auto &&modBadge) {
             if (auto shared = weak.lock())
             {
-                this->ffzCustomModBadge_ = std::move(modBadge);
+                this->ffzCustomModBadge_.set(std::move(modBadge));
             }
         });
 }
@@ -829,7 +829,7 @@ boost::optional<EmotePtr> TwitchChannel::twitchBadge(
 
 boost::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
 {
-    return this->ffzCustomModBadge_;
+    return this->ffzCustomModBadge_.get();
 }
 
 }  // namespace chatterino
