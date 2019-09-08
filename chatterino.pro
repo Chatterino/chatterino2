@@ -129,6 +129,7 @@ SOURCES += \
     src/providers/ffz/FfzEmotes.cpp \
     src/providers/ffz/FfzModBadge.cpp \
     src/providers/irc/AbstractIrcServer.cpp \
+    src/providers/irc/Irc2.cpp \
     src/providers/irc/IrcAccount.cpp \
     src/providers/irc/IrcChannel2.cpp \
     src/providers/irc/IrcConnection2.cpp \
@@ -177,6 +178,8 @@ SOURCES += \
     src/widgets/AccountSwitchWidget.cpp \
     src/widgets/AttachedWindow.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
+    src/widgets/dialogs/IrcConnectionEditor.cpp \
+    src/widgets/dialogs/IrcConnectionPopup.cpp \
     src/widgets/dialogs/LastRunCrashDialog.cpp \
     src/widgets/dialogs/LoginDialog.cpp \
     src/widgets/dialogs/LogsPopup.cpp \
@@ -294,6 +297,7 @@ HEADERS += \
     src/providers/ffz/FfzEmotes.hpp \
     src/providers/ffz/FfzModBadge.hpp \
     src/providers/irc/AbstractIrcServer.hpp \
+    src/providers/irc/Irc2.hpp \
     src/providers/irc/IrcAccount.hpp \
     src/providers/irc/IrcChannel2.hpp \
     src/providers/irc/IrcConnection2.hpp \
@@ -354,6 +358,8 @@ HEADERS += \
     src/widgets/AccountSwitchWidget.hpp \
     src/widgets/AttachedWindow.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
+    src/widgets/dialogs/IrcConnectionEditor.hpp \
+    src/widgets/dialogs/IrcConnectionPopup.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
     src/widgets/dialogs/LoginDialog.hpp \
     src/widgets/dialogs/LogsPopup.hpp \
@@ -405,7 +411,8 @@ RESOURCES += \
 
 DISTFILES +=
 
-FORMS +=
+FORMS += \
+    src/widgets/dialogs/IrcConnectionEditor.ui
 
 # do not use windows min/max macros
 #win32 {

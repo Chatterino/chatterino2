@@ -5,6 +5,8 @@
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/dialogs/IrcConnectionEditor.hpp"
+#include "widgets/dialogs/IrcConnectionPopup.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 
 #include <QDialogButtonBox>
@@ -13,6 +15,10 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QVBoxLayout>
+
+#include <QTableView>
+#include "providers/irc/Irc2.hpp"
+#include "widgets/helper/EditableModelView.hpp"
 
 #define TAB_TWITCH 0
 
@@ -122,21 +128,72 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     }
 
     // irc
-    /*
+    {
+        LayoutCreator<QWidget> obj(new QWidget());
+        auto outerBox = obj.setLayoutType<QVBoxLayout>();
+        //        outerBox.emplace<QLabel>("Connection:");
+
         {
-            LayoutCreator<QWidget> obj(new QWidget());
-            auto vbox = obj.setLayoutType<QVBoxLayout>();
-            auto form = vbox.emplace<QFormLayout>();
+            auto view = new EditableModelView(
+                Irc::getInstance().newConnectionModel(this));
 
-            form->addRow(new QLabel("User name:"), new QLineEdit());
-            form->addRow(new QLabel("First nick choice:"), new QLineEdit());
-            form->addRow(new QLabel("Second nick choice:"), new QLineEdit());
-            form->addRow(new QLabel("Third nick choice:"), new QLineEdit());
+            view->setTitles(
+                {"host", "port", "ssl", "user", "nick", "password"});
+            view->getTableView()->horizontalHeader()->resizeSection(0, 140);
+            view->getTableView()->horizontalHeader()->resizeSection(1, 30);
+            view->getTableView()->horizontalHeader()->resizeSection(2, 30);
 
-            auto tab = notebook->addPage(obj.getElement());
-            tab->setCustomTitle("Irc");
+            view->addButtonPressed.connect([] {
+                Irc::getInstance().connections.appendItem(
+                    IrcConnection_::unique());
+            });
+
+            outerBox->addWidget(view);
+
+            //            auto box = outerBox.emplace<QHBoxLayout>().withoutMargin();
+
+            //            auto conns = box.emplace<QListView>();
+            //            conns->addActions({new QAction("hackint")});
+
+            //            auto buttons = box.emplace<QVBoxLayout>().withoutMargin();
+
+            //            buttons.emplace<QPushButton>("Add").onClick(this, [this]() {
+            //                (new IrcConnectionPopup(this))
+            //                    ->show();  // XXX: don't show multiple
+            //            });
+
+            //            buttons.emplace<QPushButton>("Edit");
+            //            buttons.emplace<QPushButton>("Remove");
+            //            buttons->addStretch(1);
         }
-    */
+
+        {
+            auto box = outerBox.emplace<QHBoxLayout>().withoutMargin();
+            box.emplace<QLabel>("Channel:");
+            box.emplace<QLineEdit>();
+        }
+
+        //        auto vbox = obj.setLayoutType<QVBoxLayout>();
+        //        auto form = vbox.emplace<QFormLayout>();
+
+        //        auto servers = new QComboBox;
+        //        auto accounts = new QComboBox;
+        //servers->setEditable(true);
+        //servers->addItems(
+        //    {"irc://irc.hackint.org:6697", "irc://irc.somethingelse.com:6667"});
+
+        // form->addRow("Server:", servers);
+        // form->addRow("Account:", accounts);
+        //        form->addRow("Channel:", new QLineEdit());
+
+        // form->addRow("User name:", new QLineEdit());
+        // form->addRow("First nick choice:", new QLineEdit());
+        // form->addRow("Second nick choice:", new QLineEdit());
+        // form->addRow("Third nick choice:", new QLineEdit());
+
+        auto tab = notebook->addPage(obj.getElement());
+        tab->setCustomTitle("Irc");
+    }
 
     layout->setStretchFactor(notebook.getElement(), 1);
 
@@ -151,7 +208,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                          [=](bool) { this->close(); });
     }
 
-    this->setScaleIndependantSize(300, 310);
+    this->setMinimumSize(300, 310);
     this->ui_.notebook->selectIndex(TAB_TWITCH);
     this->ui_.twitch.channel->setFocus();
 
