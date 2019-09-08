@@ -13,9 +13,7 @@
 #include <pajlada/signals/signal.hpp>
 
 #include "common/Aliases.hpp"
-#include "common/NetworkResult.hpp"
 #include "common/NullablePtr.hpp"
-#include "common/Outcome.hpp"
 
 namespace chatterino {
 namespace detail {
