@@ -363,7 +363,7 @@ void BaseWindow::onFocusLost()
 void BaseWindow::mousePressEvent(QMouseEvent *event)
 {
 #ifndef Q_OS_WIN
-    if (this->flags_ & FramelessDraggable)
+    if (this->flags_.has(FramelessDraggable))
     {
         this->movingRelativePos = event->localPos();
         if (auto widget =
@@ -399,7 +399,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 #ifndef Q_OS_WIN
-    if (this->flags_ & FramelessDraggable)
+    if (this->flags_.has(FramelessDraggable))
     {
         if (this->moving)
         {
@@ -415,7 +415,7 @@ void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
 void BaseWindow::mouseMoveEvent(QMouseEvent *event)
 {
 #ifndef Q_OS_WIN
-    if (this->flags_ & FramelessDraggable)
+    if (this->flags_.has(FramelessDraggable))
     {
         if (this->moving)
         {
