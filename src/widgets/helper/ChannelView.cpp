@@ -133,6 +133,8 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->clickTimer_ = new QTimer(this);
     this->clickTimer_->setSingleShot(true);
     this->clickTimer_->setInterval(500);
+
+    this->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 }
 
 void ChannelView::initializeLayout()
