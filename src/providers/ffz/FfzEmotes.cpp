@@ -15,30 +15,6 @@
 
 namespace chatterino {
 namespace {
-    Outcome addModBadgeBackground(ImagePtr image, NetworkResult result)
-    {
-        auto data = result.getData();
-
-        QBuffer buffer(const_cast<QByteArray *>(&data));
-        buffer.open(QIODevice::ReadOnly);
-        QImageReader reader(&buffer);
-        if (reader.imageCount() == 0)
-            return Failure;
-
-        QPixmap badgeOverlay = QPixmap::fromImageReader(&reader);
-        QPixmap badgePixmap(badgeOverlay.width(), badgeOverlay.height());
-
-        // the default mod badge green color
-        badgePixmap.fill(QColor("#34AE0A"));
-        QPainter painter(&badgePixmap);
-        QRectF rect(0, 0, badgeOverlay.width(), badgeOverlay.height());
-        painter.drawPixmap(rect, badgeOverlay, rect);
-
-        image->setPixmap(badgePixmap);
-
-        return Success;
-    }
-
     Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
     {
         auto emote = urls.value(emoteScale);
@@ -123,16 +99,11 @@ namespace {
             auto modBadge3x = getEmoteLink(modUrls, "4");
 
             auto modBadgeImageSet = ImageSet{
-                Image::fromUrl(modBadge1x, 1)
-                    ->setCustomOnSuccess(addModBadgeBackground),
-                modBadge2x.string.isEmpty()
-                    ? Image::getEmpty()
-                    : Image::fromUrl(modBadge2x, 0.5)
-                          ->setCustomOnSuccess(addModBadgeBackground),
-                modBadge3x.string.isEmpty()
-                    ? Image::getEmpty()
-                    : Image::fromUrl(modBadge3x, 0.25)
-                          ->setCustomOnSuccess(addModBadgeBackground),
+                Image::fromUrl(modBadge1x, 1),
+                modBadge2x.string.isEmpty() ? Image::getEmpty()
+                                            : Image::fromUrl(modBadge2x, 0.5),
+                modBadge3x.string.isEmpty() ? Image::getEmpty()
+                                            : Image::fromUrl(modBadge3x, 0.25),
             };
 
             modBadge = std::make_shared<Emote>(Emote{
