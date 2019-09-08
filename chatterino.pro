@@ -123,12 +123,8 @@ SOURCES += \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
     src/messages/predicates/AuthorPredicate.cpp \
-    src/messages/predicates/AuthorPredicate.hpp \
     src/messages/predicates/LinkPredicate.cpp \
-    src/messages/predicates/LinkPredicate.hpp \
-    src/messages/predicates/MessagePredicate.hpp \
     src/messages/predicates/SubstringPredicate.cpp \
-    src/messages/predicates/SubstringPredicate.hpp \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/bttv/LoadBttvChannelEmote.cpp \
     src/providers/chatterino/ChatterinoBadges.cpp \
@@ -293,6 +289,10 @@ HEADERS += \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
     src/messages/Selection.hpp \
+    src/messages/predicates/AuthorPredicate.hpp \
+    src/messages/predicates/LinkPredicate.hpp \
+    src/messages/predicates/MessagePredicate.hpp \
+    src/messages/predicates/SubstringPredicate.hpp \
     src/PrecompiledHeader.hpp \
     src/providers/bttv/BttvEmotes.hpp \
     src/providers/bttv/LoadBttvChannelEmote.hpp \
