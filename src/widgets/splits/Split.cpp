@@ -89,6 +89,7 @@ Split::Split(QWidget *parent)
 {
     this->setMouseTracking(true);
     this->view_->setPausable(true);
+    this->view_->setFocusPolicy(Qt::FocusPolicy::NoFocus);
 
     this->vbox_->setSpacing(0);
     this->vbox_->setMargin(1);

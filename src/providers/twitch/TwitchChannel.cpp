@@ -87,7 +87,6 @@ TwitchChannel::TwitchChannel(const QString &name,
     , globalFfz_(ffz)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
-    , ffzCustomModBadge_(name)
     , mod_(false)
 {
     log("[TwitchChannel:{}] Opened", name);
@@ -138,7 +137,6 @@ void TwitchChannel::initialize()
 {
     this->refreshChatters();
     this->refreshBadges();
-    this->ffzCustomModBadge_.loadCustomModBadge();
 }
 
 bool TwitchChannel::isEmpty() const
@@ -164,10 +162,17 @@ void TwitchChannel::refreshBTTVChannelEmotes()
 void TwitchChannel::refreshFFZChannelEmotes()
 {
     FfzEmotes::loadChannel(
-        this->roomId(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+        this->roomId(),
+        [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
                 this->ffzEmotes_.set(
                     std::make_shared<EmoteMap>(std::move(emoteMap)));
+        },
+        [this, weak = weakOf<Channel>(this)](auto &&modBadge) {
+            if (auto shared = weak.lock())
+            {
+                this->ffzCustomModBadge_.set(std::move(modBadge));
+            }
         });
 }
 
@@ -824,10 +829,7 @@ boost::optional<EmotePtr> TwitchChannel::twitchBadge(
 
 boost::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
 {
-    if (auto badge = this->ffzCustomModBadge_.badge())
-        return badge;
-
-    return boost::none;
+    return this->ffzCustomModBadge_.get();
 }
 
 }  // namespace chatterino

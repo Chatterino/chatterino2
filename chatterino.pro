@@ -134,7 +134,6 @@ SOURCES += \
     src/providers/chatterino/ChatterinoBadges.cpp \
     src/providers/emoji/Emojis.cpp \
     src/providers/ffz/FfzEmotes.cpp \
-    src/providers/ffz/FfzModBadge.cpp \
     src/providers/irc/AbstractIrcServer.cpp \
     src/providers/irc/IrcAccount.cpp \
     src/providers/irc/IrcChannel2.cpp \
@@ -300,7 +299,6 @@ HEADERS += \
     src/providers/chatterino/ChatterinoBadges.hpp \
     src/providers/emoji/Emojis.hpp \
     src/providers/ffz/FfzEmotes.hpp \
-    src/providers/ffz/FfzModBadge.hpp \
     src/providers/irc/AbstractIrcServer.hpp \
     src/providers/irc/IrcAccount.hpp \
     src/providers/irc/IrcChannel2.hpp \

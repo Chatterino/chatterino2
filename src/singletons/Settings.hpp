@@ -204,6 +204,7 @@ public:
     BoolSetting loadTwitchMessageHistoryOnConnect = {
         "/misc/twitch/loadMessageHistoryOnConnect", true};
     IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 0};
+    BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
     QStringSetting cachePath = {"/cache/path", ""};
 

@@ -11,6 +11,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
+#include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 
@@ -377,6 +378,11 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle("Miscellaneous");
 
+    if (supportsIncognitoLinks())
+    {
+        layout.addCheckbox("Open links in incognito/private mode",
+                           s.openLinksIncognito);
+    }
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
     layout.addCheckbox("Random username color for users who never set a color",

@@ -17,6 +17,7 @@
 namespace chatterino {
 class Channel;
 struct MessageLayoutContainer;
+class MessageLayoutElement;
 
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
@@ -209,9 +210,24 @@ public:
                         MessageElementFlags flags_) override;
     EmotePtr getEmote() const;
 
+protected:
+    virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
+                                                         const QSize &size);
+
 private:
     std::unique_ptr<TextElement> textElement_;
     EmotePtr emote_;
+};
+
+// Behaves like an emote element, except it creates a different image layout element that draws the mod badge background
+class ModBadgeElement : public EmoteElement
+{
+public:
+    ModBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
+
+protected:
+    MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
+                                                 const QSize &size) override;
 };
 
 class BadgeElement : public MessageElement

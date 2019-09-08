@@ -1171,7 +1171,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
         {
             if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
             {
-                this->emplace<BadgeElement>(
+                this->emplace<ModBadgeElement>(
                         customModBadge.get(),
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customModBadge)->tooltip.string);

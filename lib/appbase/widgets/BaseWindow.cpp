@@ -77,6 +77,12 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
     //    QTimer::this->scaleChangedEvent(this->getScale());
 
     this->resize(300, 150);
+
+#ifdef USEWINSDK
+    this->useNextBounds_.setSingleShot(true);
+    QObject::connect(&this->useNextBounds_, &QTimer::timeout, this,
+                     [this]() { this->currentBounds_ = this->nextBounds_; });
+#endif
 }
 
 void BaseWindow::setInitialBounds(const QRect &bounds)
@@ -809,8 +815,10 @@ bool BaseWindow::handleSIZE(MSG *msg)
             {
                 this->ui_.windowLayout->setContentsMargins(0, 1, 0, 0);
             }
-            if ((this->isNotMinimizedOrMaximized_ =
-                     msg->wParam == SIZE_RESTORED))
+
+            this->isNotMinimizedOrMaximized_ = msg->wParam == SIZE_RESTORED;
+
+            if (this->isNotMinimizedOrMaximized_)
             {
                 RECT rect;
                 ::GetWindowRect(msg->hwnd, &rect);
@@ -818,6 +826,7 @@ bool BaseWindow::handleSIZE(MSG *msg)
                     QRect(QPoint(rect.left, rect.top),
                           QPoint(rect.right - 1, rect.bottom - 1));
             }
+            this->useNextBounds_.stop();
         }
     }
     return false;
@@ -833,8 +842,10 @@ bool BaseWindow::handleMOVE(MSG *msg)
     {
         RECT rect;
         ::GetWindowRect(msg->hwnd, &rect);
-        this->currentBounds_ = QRect(QPoint(rect.left, rect.top),
-                                     QPoint(rect.right - 1, rect.bottom - 1));
+        this->nextBounds_ = QRect(QPoint(rect.left, rect.top),
+                                  QPoint(rect.right - 1, rect.bottom - 1));
+
+        this->useNextBounds_.start(10);
     }
 #endif
     return false;

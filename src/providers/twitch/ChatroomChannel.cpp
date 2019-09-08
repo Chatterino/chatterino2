@@ -48,9 +48,15 @@ void ChatroomChannel::refreshFFZChannelEmotes()
     {
         return;
     }
-    FfzEmotes::loadChannel(this->chatroomOwnerId, [this](auto &&emoteMap) {
-        this->ffzEmotes_.set(std::make_shared<EmoteMap>(std::move(emoteMap)));
-    });
+    FfzEmotes::loadChannel(
+        this->chatroomOwnerId,
+        [this](auto &&emoteMap) {
+            this->ffzEmotes_.set(
+                std::make_shared<EmoteMap>(std::move(emoteMap)));
+        },
+        [this](auto &&modBadge) {
+            this->ffzCustomModBadge_.set(std::move(modBadge));
+        });
 }
 
 const QString &ChatroomChannel::getDisplayName() const

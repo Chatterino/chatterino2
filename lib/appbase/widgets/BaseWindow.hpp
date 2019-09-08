@@ -123,6 +123,8 @@ private:
 #ifdef USEWINSDK
     QRect initalBounds_;
     QRect currentBounds_;
+    QRect nextBounds_;
+    QTimer useNextBounds_;
     bool isNotMinimizedOrMaximized_{};
 #endif
 
