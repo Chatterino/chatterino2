@@ -521,7 +521,7 @@ void BaseWindow::resizeEvent(QResizeEvent *)
     getApp()->windows->queueSave();
 #endif
 
-    this->moveIntoDesktopRect(this);
+    //this->moveIntoDesktopRect(this);
 
     this->calcButtonsSizes();
 }

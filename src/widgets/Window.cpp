@@ -22,6 +22,10 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
+#ifdef QT_DEBUG
+#    include "util/SampleCheerMessages.hpp"
+#endif
+
 #include <QApplication>
 #include <QDesktopServices>
 #include <QHeaderView>
@@ -204,16 +208,9 @@ void Window::addDebugStuff()
 {
 #ifdef QT_DEBUG
     std::vector<QString> cheerMessages, subMessages, miscMessages;
+
+    cheerMessages = getSampleCheerMessage();
     // clang-format off
-    cheerMessages.emplace_back(R"(@badges=subscriber/12,premium/1;bits=2000;color=#B22222;display-name=arzenhuz;emotes=185989:33-37;id=1ae336ac-8e1a-4d6b-8b00-9fcee26e8337;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515783470139;turbo=0;user-id=111553331;user-type= :arzenhuz!arzenhuz@arzenhuz.tmi.twitch.tv PRIVMSG #pajlada :pajacheer2000 Buy pizza for both pajaH)");
-    cheerMessages.emplace_back(R"(@badges=subscriber/12,premium/1;bits=37;color=#3FBF72;display-name=VADIKUS007;emotes=;id=eedd95fd-2a17-4da1-879c-a1e76ffce582;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515783184352;turbo=0;user-id=72256775;user-type= :vadikus007!vadikus007@vadikus007.tmi.twitch.tv PRIVMSG #pajlada :cheer37)");
-    cheerMessages.emplace_back(R"(@badges=moderator/1,subscriber/24,bits/100;bits=1;color=#DCD3E6;display-name=swiftapples;emotes=80803:7-13;id=1c4647f6-f1a8-4acc-a9b2-b5d23d91258d;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1515538318854;turbo=0;user-id=80526177;user-type=mod :swiftapples!swiftapples@swiftapples.tmi.twitch.tv PRIVMSG #pajlada :cheer1 pajaHey)");
-    cheerMessages.emplace_back(R"(@badges=subscriber/12,turbo/1;bits=1;color=#0A2927;display-name=Binkelderk;emotes=;id=a1d9bdc6-6f6a-4c03-8554-d5b34721a878;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515538899479;turbo=1;user-id=89081828;user-type= :binkelderk!binkelderk@binkelderk.tmi.twitch.tv PRIVMSG #pajlada :pajacheer1)");
-    cheerMessages.emplace_back(R"(@badges=moderator/1,subscriber/24,bits/100;bits=1;color=#DCD3E6;display-name=swiftapples;emotes=80803:6-12;id=e9e21793-0b58-4ac6-8a1e-c19e165dbc9f;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1515539073209;turbo=0;user-id=80526177;user-type=mod :swiftapples!swiftapples@swiftapples.tmi.twitch.tv PRIVMSG #pajlada :bday1 pajaHey)");
-    cheerMessages.emplace_back(R"(@badges=partner/1;bits=1;color=#CC44FF;display-name=pajlada;emotes=;id=ca89214e-4fb5-48ec-853e-d2e6b41355ea;mod=0;room-id=39705480;subscriber=0;tmi-sent-ts=1515546977622;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #leesherwhy :test123 owocheer1 456test)");
-    cheerMessages.emplace_back(R"(@badges=subscriber/12,premium/1;bits=1;color=#3FBF72;display-name=VADIKUS007;emotes=;id=c4c5061b-f5c6-464b-8bff-7f1ac816caa7;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515782817171;turbo=0;user-id=72256775;user-type= :vadikus007!vadikus007@vadikus007.tmi.twitch.tv PRIVMSG #pajlada :trihard1)");
-    cheerMessages.emplace_back(R"(@badges=;bits=1;color=#FF0000;display-name=?????;emotes=;id=979b6b4f-be9a-42fb-a54c-88fcb0aca18d;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1515782819084;turbo=0;user-id=70656218;user-type= :stels_tv!stels_tv@stels_tv.tmi.twitch.tv PRIVMSG #pajlada :trihard1)");
-    cheerMessages.emplace_back(R"(@badges=subscriber/3,premium/1;bits=1;color=#FF0000;display-name=kalvarenga;emotes=;id=4744d6f0-de1d-475d-a3ff-38647113265a;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1515782860740;turbo=0;user-id=108393131;user-type= :kalvarenga!kalvarenga@kalvarenga.tmi.twitch.tv PRIVMSG #pajlada :trihard1)");
 
     subMessages.emplace_back(R"(@badges=staff/1,broadcaster/1,turbo/1;color=#008000;display-name=ronni;emotes=;id=db25007f-7a18-43eb-9379-80131e44d633;login=ronni;mod=0;msg-id=resub;msg-param-months=6;msg-param-sub-plan=Prime;msg-param-sub-plan-name=Prime;room-id=1337;subscriber=1;system-msg=ronni\shas\ssubscribed\sfor\s6\smonths!;tmi-sent-ts=1507246572675;turbo=1;user-id=1337;user-type=staff :tmi.twitch.tv USERNOTICE #pajlada :Great stream -- keep it up!)");
     subMessages.emplace_back(R"(@badges=staff/1,premium/1;color=#0000FF;display-name=TWW2;emotes=;id=e9176cd8-5e22-4684-ad40-ce53c2561c5e;login=tww2;mod=0;msg-id=subgift;msg-param-months=1;msg-param-recipient-display-name=Mr_Woodchuck;msg-param-recipient-id=89614178;msg-param-recipient-name=mr_woodchuck;msg-param-sub-plan-name=House\sof\sNyoro~n;msg-param-sub-plan=1000;room-id=19571752;subscriber=0;system-msg=TWW2\sgifted\sa\sTier\s1\ssub\sto\sMr_Woodchuck!;tmi-sent-ts=1521159445153;turbo=0;user-id=13405587;user-type=staff :tmi.twitch.tv USERNOTICE #pajlada)");
@@ -251,11 +248,19 @@ void Window::addDebugStuff()
         app->twitch.server->addFakeMessage(msg);
     });
 
+    createWindowShortcut(this, "F7", [=] {
+        const auto &messages = cheerMessages;
+        static int index = 0;
+        const auto &msg = messages[index++ % messages.size()];
+        getApp()->twitch.server->addFakeMessage(msg);
+    });
+
     createWindowShortcut(this, "F9", [=] {
         auto *dialog = new WelcomeDialog();
         dialog->setAttribute(Qt::WA_DeleteOnClose);
         dialog->show();
     });
+
 #endif
 }
 
