@@ -4,6 +4,7 @@
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
+#include "messages/Message.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -20,34 +21,30 @@ namespace chatterino {
 LogsPopup::LogsPopup()
     : channel_(Channel::getEmpty())
 {
-    this->initLayout();
     this->resize(400, 600);
 }
 
-void LogsPopup::initLayout()
-{
-    QVBoxLayout *layout = new QVBoxLayout(this);
-    layout->setMargin(0);
-
-    this->channelView_ = new ChannelView(this);
-    layout->addWidget(this->channelView_);
-
-    this->setLayout(layout);
-}
-
-void LogsPopup::setChannelName(QString channelName)
-{
-    this->channelName_ = channelName;
-}
-
-void LogsPopup::setChannel(std::shared_ptr<Channel> channel)
+void LogsPopup::setChannel(const ChannelPtr &channel)
 {
     this->channel_ = channel;
+    this->updateWindowTitle();
 }
 
-void LogsPopup::setTargetUserName(QString userName)
+void LogsPopup::setChannelName(const QString &channelName)
+{
+    this->channelName_ = channelName;
+    this->updateWindowTitle();
+}
+
+void LogsPopup::setTargetUserName(const QString &userName)
 {
     this->userName_ = userName;
+    this->updateWindowTitle();
+}
+
+void LogsPopup::updateWindowTitle()
+{
+    this->setWindowTitle(this->userName_ + "'s logs in #" + this->channelName_);
 }
 
 void LogsPopup::getLogs()
@@ -60,8 +57,6 @@ void LogsPopup::getLogs()
             this->channelName_ = twitchChannel->getName();
             this->getLogviewerLogs(twitchChannel->roomId());
 
-            this->setWindowTitle(this->userName_ + "'s logs in #" +
-                                 this->channelName_);
             return;
         }
     }
@@ -83,7 +78,7 @@ void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
     ChannelPtr logsChannel(new Channel("logs", Channel::Type::Misc));
 
     logsChannel->addMessagesAtStart(messages);
-    this->channelView_->setChannel(logsChannel);
+    SearchPopup::setChannel(logsChannel);
 }
 
 void LogsPopup::getLogviewerLogs(const QString &roomID)
@@ -121,6 +116,8 @@ void LogsPopup::getLogviewerLogs(const QString &roomID)
                     static_cast<Communi::IrcPrivateMessage *>(ircMessage);
                 TwitchMessageBuilder builder(this->channel_.get(), privMsg,
                                              args);
+                builder.message().searchText = message;
+
                 messages.push_back(builder.build());
             }
 
@@ -165,6 +162,7 @@ void LogsPopup::getOverrustleLogs()
                 for (auto i : dataMessages)
                 {
                     QJsonObject singleMessage = i.toObject();
+                    auto text = singleMessage.value("text").toString();
                     QTime timeStamp =
                         QDateTime::fromSecsSinceEpoch(
                             singleMessage.value("timestamp").toInt())
@@ -175,9 +173,9 @@ void LogsPopup::getOverrustleLogs()
                     builder.emplace<TextElement>(this->userName_,
                                                  MessageElementFlag::Username,
                                                  MessageColor::System);
-                    builder.emplace<TextElement>(
-                        singleMessage.value("text").toString(),
-                        MessageElementFlag::Text, MessageColor::Text);
+                    builder.emplace<TextElement>(text, MessageElementFlag::Text,
+                                                 MessageColor::Text);
+                    builder.message().searchText = text;
                     messages.push_back(builder.release());
                 }
             }
@@ -191,4 +189,5 @@ void LogsPopup::getOverrustleLogs()
         })
         .execute();
 }
+
 }  // namespace chatterino

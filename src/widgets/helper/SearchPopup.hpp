@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ForwardDecl.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "widgets/BaseWindow.hpp"
 
@@ -9,30 +10,26 @@ class QLineEdit;
 
 namespace chatterino {
 
-class Channel;
-class ChannelView;
-
-struct Message;
-using MessagePtr = std::shared_ptr<const Message>;
-
 class SearchPopup : public BaseWindow
 {
 public:
     SearchPopup();
 
-    void setChannel(std::shared_ptr<Channel> channel);
+    virtual void setChannel(const ChannelPtr &channel);
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
 
+    virtual void updateWindowTitle();
+
 private:
     void initLayout();
-    void performSearch();
+    void search();
 
     LimitedQueueSnapshot<MessagePtr> snapshot_;
-    QLineEdit *searchInput_;
-    ChannelView *channelView_;
-    QString channelName_;
+    QLineEdit *searchInput_{};
+    ChannelView *channelView_{};
+    QString channelName_{};
 };
 
 }  // namespace chatterino
