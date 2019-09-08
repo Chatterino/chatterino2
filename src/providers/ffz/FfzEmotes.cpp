@@ -79,12 +79,11 @@ namespace {
 
         return {Success, std::move(emotes)};
     }
-    std::tuple<Outcome, EmoteMap, boost::optional<EmotePtr>>
-        parseChannelResponse(const QJsonObject &jsonRoot)
+
+    boost::optional<EmotePtr> parseModBadge(const QJsonObject &jsonRoot)
     {
         boost::optional<EmotePtr> modBadge;
 
-        // Parse mod badge
         auto room = jsonRoot.value("room").toObject();
         auto modUrls = room.value("mod_urls").toObject();
         if (!modUrls.isEmpty())
@@ -108,8 +107,11 @@ namespace {
                 modBadge1x,
             });
         }
+        return modBadge;
+    }
 
-        // Parse emotes
+    EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot)
+    {
         auto jsonSets = jsonRoot.value("sets").toObject();
         auto emotes = EmoteMap();
 
@@ -139,7 +141,7 @@ namespace {
             }
         }
 
-        return {Success, std::move(emotes), modBadge};
+        return emotes;
     }
 }  // namespace
 
@@ -192,17 +194,14 @@ void FfzEmotes::loadChannel(
         .onSuccess([emoteCallback = std::move(emoteCallback),
                     modBadgeCallback =
                         std::move(modBadgeCallback)](auto result) -> Outcome {
-            auto [success, emoteMap, modBadge] =
-                parseChannelResponse(result.parseJson());
-            if (!success)
-            {
-                return success;
-            }
+            auto json = result.parseJson();
+            auto emoteMap = parseChannelEmotes(json);
+            auto modBadge = parseModBadge(json);
 
             emoteCallback(std::move(emoteMap));
             modBadgeCallback(std::move(modBadge));
 
-            return success;
+            return Success;
         })
         .onError([channelId](int result) {
             if (result == 203)
