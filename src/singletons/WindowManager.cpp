@@ -80,7 +80,6 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 
     QPoint buttonPos = point;
     w->move(buttonPos.x() - 30, buttonPos.y());
-
     w->show();
     w->setFocus();
 }
