@@ -147,7 +147,7 @@ protected:
     FfzEmotes &globalFfz_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
-    boost::optional<EmotePtr> ffzCustomModBadge_;
+    Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;
 
 private:
     // Badges

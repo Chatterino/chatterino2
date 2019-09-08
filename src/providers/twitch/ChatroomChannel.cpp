@@ -55,7 +55,7 @@ void ChatroomChannel::refreshFFZChannelEmotes()
                 std::make_shared<EmoteMap>(std::move(emoteMap)));
         },
         [this](auto &&modBadge) {
-            this->ffzCustomModBadge_ = std::move(modBadge);
+            this->ffzCustomModBadge_.set(std::move(modBadge));
         });
 }
 
