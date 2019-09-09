@@ -7,29 +7,45 @@
 
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
+#include "messages/search/AuthorPredicate.hpp"
+#include "messages/search/LinkPredicate.hpp"
+#include "messages/search/SubstringPredicate.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {
-namespace {
-    ChannelPtr filter(const QString &text, const QString &channelName,
-                      const LimitedQueueSnapshot<MessagePtr> &snapshot)
+
+ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
+                               const LimitedQueueSnapshot<MessagePtr> &snapshot)
+{
+    ChannelPtr channel(new Channel(channelName, Channel::Type::None));
+
+    // Parse predicates from tags in "text"
+    auto predicates = parsePredicates(text);
+
+    // Check for every message whether it fulfills all predicates that have
+    // been registered
+    for (size_t i = 0; i < snapshot.size(); ++i)
     {
-        ChannelPtr channel(new Channel(channelName, Channel::Type::None));
+        MessagePtr message = snapshot[i];
 
-        for (size_t i = 0; i < snapshot.size(); i++)
+        bool accept = true;
+        for (const auto &pred : predicates)
         {
-            MessagePtr message = snapshot[i];
-
-            if (text.isEmpty() ||
-                message->searchText.indexOf(text, 0, Qt::CaseInsensitive) != -1)
+            // Discard the message as soon as one predicate fails
+            if (!pred->appliesTo(*message))
             {
-                channel->addMessage(message);
+                accept = false;
+                break;
             }
         }
 
-        return channel;
+        // If all predicates match, add the message to the channel
+        if (accept)
+            channel->addMessage(message);
     }
-}  // namespace
+
+    return channel;
+}
 
 SearchPopup::SearchPopup()
 {
@@ -111,6 +127,57 @@ void SearchPopup::initLayout()
 
         this->setLayout(layout1);
     }
+}
+
+std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
+    const QString &input)
+{
+    static QRegularExpression predicateRegex(R"(^(\w+):([\w,]+)$)");
+
+    auto predicates = std::vector<std::unique_ptr<MessagePredicate>>();
+    auto words = input.split(' ', QString::SkipEmptyParts);
+    auto authors = QStringList();
+
+    for (auto it = words.begin(); it != words.end();)
+    {
+        if (auto match = predicateRegex.match(*it); match.hasMatch())
+        {
+            QString name = match.captured(1);
+            QString value = match.captured(2);
+
+            bool remove = true;
+
+            // match predicates
+            if (name == "from")
+            {
+                authors.append(value);
+            }
+            else if (name == "has" && value == "link")
+            {
+                predicates.push_back(std::make_unique<LinkPredicate>());
+            }
+            else
+            {
+                remove = false;
+            }
+
+            // remove or advance
+            it = remove ? words.erase(it) : ++it;
+        }
+        else
+        {
+            ++it;
+        }
+    }
+
+    if (!authors.empty())
+        predicates.push_back(std::make_unique<AuthorPredicate>(authors));
+
+    if (!words.empty())
+        predicates.push_back(
+            std::make_unique<SubstringPredicate>(words.join(" ")));
+
+    return predicates;
 }
 
 }  // namespace chatterino

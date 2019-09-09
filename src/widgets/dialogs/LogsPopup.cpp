@@ -175,7 +175,8 @@ void LogsPopup::getOverrustleLogs()
                                                  MessageColor::System);
                     builder.emplace<TextElement>(text, MessageElementFlag::Text,
                                                  MessageColor::Text);
-                    builder.message().searchText = text;
+                    builder.message().messageText = text;
+                    builder.message().displayName = this->userName_;
                     messages.push_back(builder.release());
                 }
             }
