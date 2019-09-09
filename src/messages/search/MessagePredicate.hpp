@@ -26,6 +26,6 @@ public:
      * @param message the message to check for this predicate
      * @return true if this predicate applies, false otherwise
      */
-    virtual bool appliesTo(const MessagePtr message) = 0;
+    virtual bool appliesTo(const Message &message) = 0;
 };
 }  // namespace chatterino

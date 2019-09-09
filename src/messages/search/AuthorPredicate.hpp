@@ -28,7 +28,7 @@ public:
      * @return true if the message was authored by one of the specified users,
      *         false otherwise
      */
-    bool appliesTo(const MessagePtr message);
+    bool appliesTo(const Message &message);
 
 private:
     /// Holds the user names that will be searched for

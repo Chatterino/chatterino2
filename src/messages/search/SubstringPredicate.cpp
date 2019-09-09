@@ -7,12 +7,9 @@ SubstringPredicate::SubstringPredicate(const QString &search)
 {
 }
 
-bool SubstringPredicate::appliesTo(const MessagePtr message)
+bool SubstringPredicate::appliesTo(const Message &message)
 {
-    if (!message)
-        return false;
-
-    return message->messageText.contains(this->search_, Qt::CaseInsensitive);
+    return message.messageText.contains(this->search_, Qt::CaseInsensitive);
 }
 
 }  // namespace chatterino
