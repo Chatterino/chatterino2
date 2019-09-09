@@ -12,6 +12,7 @@
 namespace chatterino {
 
 class Notebook;
+class EditableModelView;
 
 class SelectChannelDialog final : public BaseWindow
 {
@@ -47,6 +48,10 @@ private:
             QRadioButton *mentions;
             QRadioButton *watching;
         } twitch;
+        struct {
+            QLineEdit *channel;
+            EditableModelView *servers;
+        } irc;
     } ui_;
 
     EventFilter tabFilter_;

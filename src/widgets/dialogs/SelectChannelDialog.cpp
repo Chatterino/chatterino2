@@ -21,6 +21,7 @@
 #include "widgets/helper/EditableModelView.hpp"
 
 #define TAB_TWITCH 0
+#define TAB_IRC 1
 
 namespace chatterino {
 
@@ -134,7 +135,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         //        outerBox.emplace<QLabel>("Connection:");
 
         {
-            auto view = new EditableModelView(
+            auto view = this->ui_.irc.servers = new EditableModelView(
                 Irc::getInstance().newConnectionModel(this));
 
             view->setTitles(
@@ -170,7 +171,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         {
             auto box = outerBox.emplace<QHBoxLayout>().withoutMargin();
             box.emplace<QLabel>("Channel:");
-            box.emplace<QLineEdit>();
+            this->ui_.irc.channel = box.emplace<QLineEdit>().getElement();
         }
 
         //        auto vbox = obj.setLayoutType<QVBoxLayout>();
@@ -261,6 +262,30 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
             this->ui_.twitch.whispers->setFocus();
         }
         break;
+        case Channel::Type::Irc:
+        {
+            this->ui_.notebook->selectIndex(TAB_IRC);
+            this->ui_.irc.channel->setText(_channel.get()->getName());
+
+            if (auto ircChannel =
+                    dynamic_cast<IrcChannel *>(_channel.get().get()))
+            {
+                if (auto server =
+                        Irc::getInstance().getServerOfChannel(ircChannel))
+                {
+                    int i = 0;
+                    for (auto &&conn : Irc::getInstance().connections)
+                    {
+                        if (conn.id == server->getId())
+                        {
+                            this->ui_.irc.servers->getTableView()->selectRow(i);
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+        break;
         default:
         {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
@@ -302,6 +327,27 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
                 return app->twitch.server->whispersChannel;
             }
         }
+        break;
+        case TAB_IRC:
+        {
+            int row = this->ui_.irc.servers->getTableView()
+                          ->selectionModel()
+                          ->currentIndex()
+                          .row();
+
+            auto &&vector = Irc::getInstance().connections.getVector();
+
+            if (row >= 0 && row < int(vector.size()))
+            {
+                return Irc::getInstance().getOrAddChannel(
+                    vector[row].id, this->ui_.irc.channel->text());
+            }
+            else
+            {
+                return Channel::getEmpty();
+            }
+        }
+        break;
     }
 
     return this->selectedChannel_;
