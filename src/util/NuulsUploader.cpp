@@ -7,7 +7,7 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
 namespace chatterino {
-bool is_uploading = false;
+bool isUploading = false;
 
 std::queue<TypedBytes> uploadQueue;
 void uploadImageToNuuls(QByteArray imageData, ChannelPtr channel,
@@ -68,7 +68,7 @@ void uploadImageToNuuls(QByteArray imageData, ChannelPtr channel,
                 channel->addMessage(makeSystemMessage(
                     QString("Your image has been uploaded.")));
             }
-            is_uploading = false;
+            isUploading = false;
             QTimer::singleShot(2000, [channel, &textEdit]() {
                 if (uploadQueue.size())
                 {
@@ -82,7 +82,7 @@ void uploadImageToNuuls(QByteArray imageData, ChannelPtr channel,
             channel->addMessage(makeSystemMessage(
                 QString("An error happened while uploading your image: %1")
                     .arg(error_code)));
-            is_uploading = false;
+            isUploading = false;
             return true;
         })
         .execute();
@@ -107,7 +107,7 @@ void pasteFromClipboard(const QMimeData *source, ChannelPtr channel,
 static QUrl url("http://localhost:7494/upload?password=xd");
 // default port and password for nuuls' filehost.
 */
-    if (is_uploading)
+    if (isUploading)
     {
         channel->addMessage(makeSystemMessage(
             QString("You are already uploading an image. "
@@ -115,7 +115,7 @@ static QUrl url("http://localhost:7494/upload?password=xd");
         return;
     }
 
-    is_uploading = true;
+    isUploading = true;
     channel->addMessage(makeSystemMessage(QString("Started upload...")));
 
     if (source->hasFormat("image/png"))
