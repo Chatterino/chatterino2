@@ -98,6 +98,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Websocketpp",
                        "https://www.zaphoyd.com/websocketpp/",
                        ":/licenses/websocketpp.txt");
+            addLicense(form.getElement(), "QtKeychain",
+                       "https://github.com/frankosterfeld/qtkeychain",
+                       ":/licenses/qtkeychain.txt");
         }
 
         auto attributions = layout.emplace<QGroupBox>("Attributions...");

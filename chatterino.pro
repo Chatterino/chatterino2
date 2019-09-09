@@ -54,6 +54,7 @@ include(lib/settings.pri)
 include(lib/serialize.pri)
 include(lib/winsdk.pri)
 include(lib/rapidjson.pri)
+include(lib/qtkeychain.pri)
 
 exists( $$OUT_PWD/conanbuildinfo.pri ) {
     message("Using conan packages")
@@ -79,6 +80,7 @@ SOURCES += \
     src/BrowserExtension.cpp \
     src/common/Channel.cpp \
     src/common/CompletionModel.cpp \
+    src/common/Credentials.cpp \
     src/common/DownloadManager.cpp \
     src/common/Env.cpp \
     src/common/LinkParser.cpp \
@@ -233,6 +235,7 @@ HEADERS += \
     src/common/Common.hpp \
     src/common/CompletionModel.hpp \
     src/common/ConcurrentMap.hpp \
+    src/common/Credentials.hpp \
     src/common/DownloadManager.hpp \
     src/common/Env.hpp \
     src/common/LinkParser.hpp \
