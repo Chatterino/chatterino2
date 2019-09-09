@@ -40,8 +40,6 @@ macx {
 }
 
 # Submodules
-DEFINES += IRC_NAMESPACE=Communi
-
 include(lib/warnings.pri)
 include(lib/appbase.pri)
 include(lib/fmt.pri)
