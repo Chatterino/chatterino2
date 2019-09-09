@@ -2,8 +2,7 @@
 
 #include "messages/search/MessagePredicate.hpp"
 
-namespace chatterino
-{
+namespace chatterino {
 
 /**
  * @brief MessagePredicate checking whether a substring exists in the message.
@@ -21,7 +20,7 @@ public:
      *
      * @param search the string to search for in the message
      */
-    SubstringPredicate(const QString& search);
+    SubstringPredicate(const QString &search);
 
     /**
      * @brief Checks whether the message contains the substring passed in the
@@ -39,4 +38,4 @@ private:
     const QString search_;
 };
 
-} // namespace chatterino
+}  // namespace chatterino

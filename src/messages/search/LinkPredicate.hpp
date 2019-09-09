@@ -2,8 +2,7 @@
 
 #include "messages/search/MessagePredicate.hpp"
 
-namespace chatterino
-{
+namespace chatterino {
 
 /**
  * @brief MessagePredicate checking whether a link exists in the message.
@@ -24,4 +23,4 @@ public:
     bool appliesTo(const Message &message);
 };
 
-} // namespace chatterino
+}  // namespace chatterino
