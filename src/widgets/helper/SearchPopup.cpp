@@ -29,7 +29,7 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
         MessagePtr message = snapshot[i];
 
         bool accept = true;
-        for (auto &pred : predicates)
+        for (const auto &pred : predicates)
         {
             // Discard the message as soon as one predicate fails
             if (!pred->appliesTo(message))
@@ -132,75 +132,52 @@ void SearchPopup::initLayout()
 std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     const QString &input)
 {
-    std::vector<std::unique_ptr<MessagePredicate>> predicates;
+    static QRegularExpression predicateRegex(R"(^(\w+):([\w,]+)$)");
 
-    // Get a working copy we can modify
-    QString text = input;
+    auto predicates = std::vector<std::unique_ptr<MessagePredicate>>();
+    auto words = input.split(' ', QString::SkipEmptyParts);
+    auto authors = QStringList();
 
-    // Check for "from:" tags
-    QStringList searchedUsers = parseSearchedUsers(text);
-    if (searchedUsers.size() > 0)
+    for (auto it = words.begin(); it != words.end();)
     {
-        predicates.push_back(std::make_unique<AuthorPredicate>(searchedUsers));
-        removeTagFromText("from:", text);
-    }
-
-    // Check for "contains:link" tags
-    if (text.contains("contains:link", Qt::CaseInsensitive))
-    {
-        predicates.push_back(std::make_unique<LinkPredicate>());
-        removeTagFromText("contains:link", text);
-    }
-
-    // The rest of the input is treated as a substring search.
-    // If "text" is empty, every message will be matched.
-    if (text.size() > 0)
-    {
-        predicates.push_back(std::make_unique<SubstringPredicate>(text));
-    }
-
-    return predicates;
-}
-
-void SearchPopup::removeTagFromText(const QString &tag, QString &text)
-{
-    for (QString &word : text.split(' ', QString::SkipEmptyParts))
-    {
-        if (word.startsWith(tag, Qt::CaseInsensitive))
-            text.remove(word);
-    }
-
-    // Remove whitespace introduced by spaces between tags
-    text = text.trimmed();
-}
-
-QStringList SearchPopup::parseSearchedUsers(const QString &input)
-{
-    QStringList parsedUserNames;
-
-    for (QString &word : input.split(' ', QString::SkipEmptyParts))
-    {
-        // Users can be searched for by specifying them like so:
-        // "from:user1,user2,user3" or "from:user1 from:user2 from:user3"
-
-        if (!word.startsWith("from:"))
-            // Ignore this word
-            continue;
-
-        // Get a working copy so we can manipulate the string
-        QString fromTag = word;
-
-        // Delete the "from:" part so we can parse the user names more easily
-        fromTag.remove(0, 5);
-
-        // Parse comma-seperated user names
-        for (QString &user : fromTag.split(',', QString::SkipEmptyParts))
+        if (auto match = predicateRegex.match(*it); match.hasMatch())
         {
-            parsedUserNames << user;
+            QString name = match.captured(1);
+            QString value = match.captured(2);
+
+            bool remove = true;
+
+            // match predicates
+            if (name == "from")
+            {
+                authors.append(value);
+            }
+            else if (name == "has" && value == "link")
+            {
+                predicates.push_back(std::make_unique<LinkPredicate>());
+            }
+            else
+            {
+                remove = false;
+            }
+
+            // remove or advance
+            it = remove ? words.erase(it) : ++it;
+        }
+        else
+        {
+            ++it;
         }
     }
 
-    return parsedUserNames;
+    if (!authors.empty())
+        predicates.push_back(std::make_unique<AuthorPredicate>(authors));
+
+    if (!words.empty())
+        predicates.push_back(
+            std::make_unique<SubstringPredicate>(words.join(" ")));
+
+    return predicates;
 }
 
 }  // namespace chatterino

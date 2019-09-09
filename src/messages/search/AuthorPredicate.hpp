@@ -2,8 +2,7 @@
 
 #include "messages/search/MessagePredicate.hpp"
 
-namespace chatterino
-{
+namespace chatterino {
 
 /**
  * @brief MessagePredicate checking for the author/sender of a message.
@@ -19,7 +18,7 @@ public:
      *
      * @param authors a list of user names that a message should be sent from
      */
-    AuthorPredicate(const QStringList& authors);
+    AuthorPredicate(const QStringList &authors);
 
     /**
      * @brief Checks whether the message is authored by any of the users passed
@@ -33,7 +32,7 @@ public:
 
 private:
     /// Holds the user names that will be searched for
-    const QStringList authors_;
+    QStringList authors_;
 };
 
-} // namespace chatterino
+}  // namespace chatterino

@@ -27,6 +27,17 @@ private:
     void initLayout();
     void search();
 
+    /**
+     * @brief Only retains those message from a list of messages that satisfy a
+     *        search query.
+     *
+     * @param text          the search query -- will be parsed for MessagePredicates
+     * @param channelName   name of the channel to be returned
+     * @param snapshot      list of messages to filter
+     *
+     * @return a ChannelPtr with "channelName" and the filtered messages from
+     *         "snapshot"
+     */
     static ChannelPtr filter(const QString &text, const QString &channelName,
                              const LimitedQueueSnapshot<MessagePtr> &snapshot);
 
@@ -35,29 +46,10 @@ private:
      *        predicates.
      *
      * @param input the string to check for tags
+     * @return a vector of MessagePredicates requested in the input
      */
     static std::vector<std::unique_ptr<MessagePredicate>> parsePredicates(
         const QString &input);
-
-    /**
-     * @brief Removes every occurence of a tag from the passed string.
-     *
-     * @param tag the tag prefix to search for
-     * @param text the text to remove the tags from
-     */
-    static void removeTagFromText(const QString &tag, QString &text);
-
-    /**
-     * @brief Parses a comma-seperated list of user names given by "from:"
-     *        tags.
-     *
-     * Users can be searched for by specifying them like so:
-     * "from:user1,user2,user3" or "from:user1 from:user2 from:user3".
-     *
-     * @param input the message to search for "from:" tags in
-     * @return a list of user names passed after "from:" tags
-     */
-    static QStringList parseSearchedUsers(const QString &input);
 
     LimitedQueueSnapshot<MessagePtr> snapshot_;
     QLineEdit *searchInput_{};
