@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/Env.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
@@ -90,13 +91,12 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
         connection->setPassword(oauthToken);
     }
 
-    connection->setSecure(true);
-
     // https://dev.twitch.tv/docs/irc/guide/#connecting-to-twitch-irc
     // SSL disabled: irc://irc.chat.twitch.tv:6667
     // SSL enabled: irc://irc.chat.twitch.tv:6697
-    connection->setHost("irc.chat.twitch.tv");
-    connection->setPort(6697);
+    connection->setHost(Env::get().twitchServerHost);
+    connection->setPort(Env::get().twitchServerPort);
+    connection->setSecure(Env::get().twitchServerSecure);
 }
 
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)

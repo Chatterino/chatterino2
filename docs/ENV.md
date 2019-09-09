@@ -18,3 +18,17 @@ Used to change the URL that Chatterino2 uses when trying to get emote set inform
 Default value: `https://braize.pajlada.com/chatterino/twitchemotes/set/%1/`  
 Arguments:  
  - `%1` = Emote set ID
+
+### CHATTERINO2_TWITCH_SERVER_HOST
+String value used to change what Twitch chat server host to connect to.  
+Default value: `irc.chat.twitch.tv`
+
+### CHATTERINO2_TWITCH_SERVER_PORT
+Number value used to change what port to use when connecting to Twitch chat servers.  
+Currently known valid ports for secure usage: 6697, 443.  
+Currently known valid ports for non-secure usage (CHATTERINO2_TWITCH_SERVER_SECURE set to false): 6667, 80.  
+Default value: `6697`
+
+### CHATTERINO2_TWITCH_SERVER_SECURE
+Bool value used to tell Chatterino whether to try to connect securely (secure irc) to the Twitch chat server.  
+Default value: `true`
