@@ -4,8 +4,7 @@
 
 #include <memory>
 
-namespace chatterino
-{
+namespace chatterino {
 
 /**
  * @brief Abstract base class for message predicates.
@@ -18,7 +17,6 @@ namespace chatterino
 class MessagePredicate
 {
 public:
-
     /**
      * @brief Checks whether this predicate applies to the passed message.
      *
@@ -30,7 +28,4 @@ public:
      */
     virtual bool appliesTo(const MessagePtr message) = 0;
 };
-
-using MessagePredicatePtr = std::shared_ptr<MessagePredicate>;
-
-} // namespace chatterino
+}  // namespace chatterino

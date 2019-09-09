@@ -129,10 +129,10 @@ void SearchPopup::initLayout()
     }
 }
 
-std::vector<MessagePredicatePtr> SearchPopup::parsePredicates(
+std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     const QString &input)
 {
-    std::vector<MessagePredicatePtr> predicates;
+    std::vector<std::unique_ptr<MessagePredicate>> predicates;
 
     // Get a working copy we can modify
     QString text = input;
@@ -141,14 +141,14 @@ std::vector<MessagePredicatePtr> SearchPopup::parsePredicates(
     QStringList searchedUsers = parseSearchedUsers(text);
     if (searchedUsers.size() > 0)
     {
-        predicates.push_back(std::make_shared<AuthorPredicate>(searchedUsers));
+        predicates.push_back(std::make_unique<AuthorPredicate>(searchedUsers));
         removeTagFromText("from:", text);
     }
 
     // Check for "contains:link" tags
     if (text.contains("contains:link", Qt::CaseInsensitive))
     {
-        predicates.push_back(std::make_shared<LinkPredicate>());
+        predicates.push_back(std::make_unique<LinkPredicate>());
         removeTagFromText("contains:link", text);
     }
 
@@ -156,7 +156,7 @@ std::vector<MessagePredicatePtr> SearchPopup::parsePredicates(
     // If "text" is empty, every message will be matched.
     if (text.size() > 0)
     {
-        predicates.push_back(std::make_shared<SubstringPredicate>(text));
+        predicates.push_back(std::make_unique<SubstringPredicate>(text));
     }
 
     return predicates;

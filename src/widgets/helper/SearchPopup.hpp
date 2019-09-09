@@ -27,7 +27,8 @@ private:
     void initLayout();
     void search();
 
-    static ChannelPtr filter(const QString &text, const QString &channelName, const LimitedQueueSnapshot<MessagePtr> &snapshot);
+    static ChannelPtr filter(const QString &text, const QString &channelName,
+                             const LimitedQueueSnapshot<MessagePtr> &snapshot);
 
     /**
      * @brief Checks the input for tags and registers their corresponding
@@ -35,7 +36,8 @@ private:
      *
      * @param input the string to check for tags
      */
-    static std::vector<MessagePredicatePtr> parsePredicates(const QString& input);
+    static std::vector<std::unique_ptr<MessagePredicate>> parsePredicates(
+        const QString &input);
 
     /**
      * @brief Removes every occurence of a tag from the passed string.
@@ -43,7 +45,7 @@ private:
      * @param tag the tag prefix to search for
      * @param text the text to remove the tags from
      */
-    static void removeTagFromText(const QString& tag, QString& text);
+    static void removeTagFromText(const QString &tag, QString &text);
 
     /**
      * @brief Parses a comma-seperated list of user names given by "from:"
@@ -55,7 +57,7 @@ private:
      * @param input the message to search for "from:" tags in
      * @return a list of user names passed after "from:" tags
      */
-    static QStringList parseSearchedUsers(const QString& input);
+    static QStringList parseSearchedUsers(const QString &input);
 
     LimitedQueueSnapshot<MessagePtr> snapshot_;
     QLineEdit *searchInput_{};
