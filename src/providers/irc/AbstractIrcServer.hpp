@@ -13,7 +13,7 @@ namespace chatterino {
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 
-class AbstractIrcServer
+class AbstractIrcServer : public QObject
 {
 public:
     virtual ~AbstractIrcServer() = default;
@@ -26,14 +26,12 @@ public:
     void sendRawMessage(const QString &rawMessage);
 
     // channels
-    std::shared_ptr<Channel> getOrAddChannel(const QString &dirtyChannelName);
-    std::shared_ptr<Channel> getChannelOrEmpty(const QString &dirtyChannelName);
+    ChannelPtr getOrAddChannel(const QString &dirtyChannelName);
+    ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName);
 
     // signals
     pajlada::Signals::NoArgSignal connected;
     pajlada::Signals::NoArgSignal disconnected;
-    //    pajlada::Signals::Signal<Communi::IrcPrivateMessage *>
-    //    onPrivateMessage;
 
     void addFakeMessage(const QString &data);
 
@@ -69,8 +67,15 @@ protected:
 private:
     void initConnection();
 
-    std::unique_ptr<IrcConnection> writeConnection_ = nullptr;
-    std::unique_ptr<IrcConnection> readConnection_ = nullptr;
+    struct Deleter {
+        void operator()(IrcConnection *conn)
+        {
+            conn->deleteLater();
+        }
+    };
+
+    std::unique_ptr<IrcConnection, Deleter> writeConnection_ = nullptr;
+    std::unique_ptr<IrcConnection, Deleter> readConnection_ = nullptr;
 
     QTimer reconnectTimer_;
     int falloffCounter_ = 1;

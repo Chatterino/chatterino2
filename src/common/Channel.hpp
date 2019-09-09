@@ -37,6 +37,7 @@ public:
         TwitchWatching,
         TwitchMentions,
         TwitchEnd,
+        Irc,
         Misc
     };
 
