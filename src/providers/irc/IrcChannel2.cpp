@@ -2,8 +2,9 @@
 
 namespace chatterino {
 
-// IrcChannel::IrcChannel()
-//{
-//}
-//
+IrcChannel::IrcChannel(const QString &name)
+    : Channel(name, Channel::Type::Irc)
+{
+}
+
 }  // namespace chatterino

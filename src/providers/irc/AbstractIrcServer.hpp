@@ -28,6 +28,7 @@ public:
     // channels
     ChannelPtr getOrAddChannel(const QString &dirtyChannelName);
     ChannelPtr getChannelOrEmpty(const QString &dirtyChannelName);
+    std::vector<std::weak_ptr<Channel>> getChannels();
 
     // signals
     pajlada::Signals::NoArgSignal connected;
