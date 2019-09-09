@@ -2,7 +2,7 @@
 
 #include "ForwardDecl.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
-#include "messages/predicates/MessagePredicate.hpp"
+#include "messages/search/MessagePredicate.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <memory>

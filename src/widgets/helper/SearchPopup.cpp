@@ -7,9 +7,9 @@
 
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
-#include "messages/predicates/AuthorPredicate.hpp"
-#include "messages/predicates/LinkPredicate.hpp"
-#include "messages/predicates/SubstringPredicate.hpp"
+#include "messages/search/AuthorPredicate.hpp"
+#include "messages/search/LinkPredicate.hpp"
+#include "messages/search/SubstringPredicate.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {

@@ -1,4 +1,4 @@
-#include "messages/predicates/AuthorPredicate.hpp"
+#include "messages/search/AuthorPredicate.hpp"
 
 namespace chatterino {
 

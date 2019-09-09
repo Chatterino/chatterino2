@@ -1,4 +1,4 @@
-#include "messages/predicates/SubstringPredicate.hpp"
+#include "messages/search/SubstringPredicate.hpp"
 
 namespace chatterino {
 

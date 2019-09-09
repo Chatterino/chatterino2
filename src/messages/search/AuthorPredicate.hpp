@@ -1,6 +1,6 @@
 #pragma once
 
-#include "messages/predicates/MessagePredicate.hpp"
+#include "messages/search/MessagePredicate.hpp"
 
 namespace chatterino
 {
