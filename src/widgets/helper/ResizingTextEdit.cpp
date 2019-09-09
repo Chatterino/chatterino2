@@ -1,6 +1,7 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
 #include <QByteArray>
 #include <QDebug>
+#include <QMimeData>
 #include <QNetworkReply>
 #include <string>
 #include "common/Common.hpp"
@@ -277,6 +278,10 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
     if (source->hasImage())
+    {
+        this->pastedImage.invoke(source);
+    }
+    else if (source->hasFormat("text/uri-list"))
     {
         this->pastedImage.invoke(source);
     }

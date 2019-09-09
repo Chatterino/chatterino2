@@ -171,6 +171,7 @@ SOURCES += \
     src/util/JsonQuery.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamLink.cpp \
+    src/util/NuulsUploader.cpp \
     src/widgets/AccountSwitchPopup.cpp \
     src/widgets/AccountSwitchWidget.cpp \
     src/widgets/AttachedWindow.cpp \
@@ -225,7 +226,7 @@ SOURCES += \
     src/widgets/StreamView.cpp \
     src/widgets/Window.cpp \
     src/controllers/pings/PingController.cpp \
-    src/controllers/pings/PingModel.cpp \
+    src/controllers/pings/PingModel.cpp
 
 HEADERS += \
     src/Application.hpp \
@@ -354,6 +355,7 @@ HEADERS += \
     src/util/SharedPtrElementLess.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamLink.hpp \
+    src/util/NuulsUploader.hpp \
     src/widgets/AccountSwitchPopup.hpp \
     src/widgets/AccountSwitchWidget.hpp \
     src/widgets/AttachedWindow.hpp \
@@ -410,7 +412,7 @@ HEADERS += \
     src/widgets/StreamView.hpp \
     src/widgets/Window.hpp \
     src/controllers/pings/PingController.hpp \
-    src/controllers/pings/PingModel.hpp \
+    src/controllers/pings/PingModel.hpp
 
 RESOURCES += \
     resources/resources.qrc \

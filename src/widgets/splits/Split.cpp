@@ -12,6 +12,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/NuulsUploader.hpp"
 #include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Notebook.hpp"
@@ -36,6 +37,7 @@
 #include <QDesktopServices>
 #include <QDockWidget>
 #include <QDrag>
+#include <QImage>
 #include <QJsonArray>
 #include <QLabel>
 #include <QListWidget>
@@ -195,82 +197,10 @@ Split::Split(QWidget *parent)
     this->input_->ui_.textEdit->focusLost.connect(
         [this] { this->focusLost.invoke(); });
 
-    /*QObject::connect(
-        this->input_->ui_.textEdit, this->input_->ui_.textEdit->pasteImage,*/
     this->input_->ui_.textEdit->pastedImage.connect(
         [this](const QMimeData *source) {
-            /*
-        static QUrl url("http://localhost:7494/upload?password=xd");
-        // default port and password for nuuls' filehost.
-        */
-            static QUrl url(Env::get().imagePasteSiteUrl);
-            static bool is_uploading = false;
-            if (is_uploading)
-            {
-                this->getChannel()->addMessage(makeSystemMessage(
-                    QString("You are already uploading an image. "
-                            "Please wait until the upload finishes.")));
-                return;
-            }
-
-            is_uploading = true;
-            this->getChannel()->addMessage(
-                makeSystemMessage(QString("Started upload...")));
-            QImage image = qvariant_cast<QImage>(source->imageData());
-
-            const char *boundary = "thisistheboudaryasd";
-            QByteArray dataToSend;
-            dataToSend.insert(0, "--");
-            dataToSend.append(boundary);
-
-            dataToSend.append(
-                "\r\n"
-                "Content-Disposition: form-data; name=\"attachment\"; "
-                "filename=\"control_v.png\"\r\n"
-                "Content-Type: image/png\r\n"
-                "\r\n");
-            if (source->hasFormat("image/png"))
-            {
-                dataToSend.append(source->data("image/png"));
-            }
-            else
-            {  // not PNG, try loading it into QImage and save it to a PNG.
-                QByteArray imageData;
-                QBuffer buf(&imageData);
-                buf.open(QIODevice::WriteOnly);
-                image.save(&buf);
-
-                dataToSend.append(imageData);
-            }
-
-            dataToSend.append("\r\n--");
-            dataToSend.append(boundary);
-            dataToSend.append("\r\n");
-
-            NetworkRequest(url, NetworkRequestType::Post)
-                .header("Content-Type",
-                        (std::string("multipart/form-data; boundary=") +
-                         std::string(boundary))
-                            .c_str())
-
-                .payload(dataToSend)
-                .onSuccess([this](NetworkResult result) -> Outcome {
-                    this->input_->ui_.textEdit->insertPlainText(
-                        result.getData());
-                    this->getChannel()->addMessage(makeSystemMessage(
-                        QString("Your image has been uploaded.")));
-                    is_uploading = false;
-                    return Success;
-                })
-                .onError([this](int error_code) -> bool {
-                    this->getChannel()->addMessage(makeSystemMessage(
-                        QString(
-                            "An error happened while uploading your image: %1")
-                            .arg(error_code)));
-                    is_uploading = false;
-                    return true;
-                })
-                .execute();
+            pasteFromClipboard(source, this->getChannel(),
+                               *this->input_->ui_.textEdit);
         });
 }
 
