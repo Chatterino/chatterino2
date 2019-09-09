@@ -1,10 +1,10 @@
 #include "NuulsUploader.hpp"
-#include <QMovie>
-#include <boost/algorithm/string/replace.hpp>
-#include <vector>
+
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+
+#include <boost/algorithm/string/replace.hpp>
 
 namespace chatterino {
 bool isUploading = false;

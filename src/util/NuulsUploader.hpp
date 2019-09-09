@@ -1,7 +1,8 @@
-#include <QMimeData>
-#include <QString>
 #include "common/Channel.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
+
+#include <QMimeData>
+#include <QString>
 
 namespace chatterino {
 struct TypedBytes {
