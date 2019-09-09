@@ -11,9 +11,8 @@
 namespace chatterino {
 
 UpdateDialog::UpdateDialog()
-    : BaseWindow(nullptr,
-                 BaseWindow::Flags(BaseWindow::Frameless | BaseWindow::TopMost |
-                                   BaseWindow::EnableCustomFrame))
+    : BaseWindow({BaseWindow::Frameless, BaseWindow::TopMost,
+                  BaseWindow::EnableCustomFrame})
 {
     auto layout =
         LayoutCreator<UpdateDialog>(this).setLayoutType<QVBoxLayout>();

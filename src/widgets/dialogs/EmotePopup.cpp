@@ -101,7 +101,7 @@ namespace {
 }  // namespace
 
 EmotePopup::EmotePopup(QWidget *parent)
-    : BaseWindow(parent, BaseWindow::EnableCustomFrame)
+    : BaseWindow(BaseWindow::EnableCustomFrame, parent)
 {
     auto layout = new QVBoxLayout(this);
     this->getLayoutContainer()->setLayout(layout);

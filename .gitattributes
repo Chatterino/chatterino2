@@ -1,0 +1,2 @@
+# Normalize line endings to LF for files that Git detects as text
+*   text=auto

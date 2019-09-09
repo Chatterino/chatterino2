@@ -29,7 +29,7 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
         MessagePtr message = snapshot[i];
 
         bool accept = true;
-        for (MessagePredicatePtr &pred : predicates)
+        for (auto &pred : predicates)
         {
             // Discard the message as soon as one predicate fails
             if (!pred->appliesTo(message))

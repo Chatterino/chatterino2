@@ -39,7 +39,7 @@
 namespace chatterino {
 
 Window::Window(WindowType type)
-    : BaseWindow(nullptr, BaseWindow::EnableCustomFrame)
+    : BaseWindow(BaseWindow::EnableCustomFrame)
     , type_(type)
     , notebook_(new SplitNotebook(this))
 {

@@ -44,12 +44,12 @@
 
 namespace AB_NAMESPACE {
 
-BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
+BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
     : BaseWidget(parent,
-                 Qt::Window | ((_flags & TopMost) ? Qt::WindowStaysOnTopHint
-                                                  : Qt::WindowFlags()))
-    , enableCustomFrame_(_flags & EnableCustomFrame)
-    , frameless_(_flags & Frameless)
+                 Qt::Window | (_flags.has(TopMost) ? Qt::WindowStaysOnTopHint
+                                                   : Qt::WindowFlags()))
+    , enableCustomFrame_(_flags.has(EnableCustomFrame))
+    , frameless_(_flags.has(Frameless))
     , flags_(_flags)
 {
     if (this->frameless_)
@@ -73,8 +73,6 @@ BaseWindow::BaseWindow(QWidget *parent, Flags _flags)
 
     createWindowShortcut(this, "CTRL+0",
                          [] { getSettings()->uiScale.setValue(1); });
-
-    //    QTimer::this->scaleChangedEvent(this->getScale());
 
     this->resize(300, 150);
 
@@ -111,11 +109,6 @@ float BaseWindow::scale() const
 float BaseWindow::qtFontScale() const
 {
     return this->scale() / this->nativeScale_;
-}
-
-BaseWindow::Flags BaseWindow::getFlags()
-{
-    return this->flags_;
 }
 
 void BaseWindow::init()
@@ -206,7 +199,7 @@ void BaseWindow::init()
 
 #ifdef USEWINSDK
     // fourtf: don't ask me why we need to delay this
-    if (!(this->flags_ & Flags::TopMost))
+    if (!this->flags_.has(TopMost))
     {
         QTimer::singleShot(1, this, [this] {
             getSettings()->windowTopMost.connect(
@@ -370,7 +363,7 @@ void BaseWindow::onFocusLost()
 void BaseWindow::mousePressEvent(QMouseEvent *event)
 {
 #ifndef Q_OS_WIN
-    if (this->flags_ & FramelessDraggable)
+    if (this->flags_.has(FramelessDraggable))
     {
         this->movingRelativePos = event->localPos();
         if (auto widget =
@@ -406,7 +399,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
 {
 #ifndef Q_OS_WIN
-    if (this->flags_ & FramelessDraggable)
+    if (this->flags_.has(FramelessDraggable))
     {
         if (this->moving)
         {
@@ -422,7 +415,7 @@ void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
 void BaseWindow::mouseMoveEvent(QMouseEvent *event)
 {
 #ifndef Q_OS_WIN
-    if (this->flags_ & FramelessDraggable)
+    if (this->flags_.has(FramelessDraggable))
     {
         if (this->moving)
         {
@@ -541,6 +534,18 @@ void BaseWindow::closeEvent(QCloseEvent *)
     this->closing.invoke();
 }
 
+void BaseWindow::showEvent(QShowEvent *)
+{
+    if (this->frameless_)
+    {
+        this->moveIntoDesktopRect(this);
+        qDebug() << "show";
+
+        QTimer::singleShot(30, this,
+                           [this] { this->moveIntoDesktopRect(this); });
+    }
+}
+
 void BaseWindow::moveIntoDesktopRect(QWidget *parent)
 {
     if (!this->stayInScreenRect_)
@@ -649,7 +654,7 @@ void BaseWindow::paintEvent(QPaintEvent *)
 void BaseWindow::updateScale()
 {
     auto scale =
-        this->nativeScale_ * (this->flags_ & DisableCustomScaling
+        this->nativeScale_ * (this->flags_.has(DisableCustomScaling)
                                   ? 1
                                   : getABSettings()->getClampedUiScale());
 
@@ -708,17 +713,11 @@ bool BaseWindow::handleDPICHANGED(MSG *msg)
 
     float _scale = dpi / 96.f;
 
-    static bool firstResize = true;
-
-    if (!firstResize)
-    {
-        auto *prcNewWindow = reinterpret_cast<RECT *>(msg->lParam);
-        SetWindowPos(msg->hwnd, nullptr, prcNewWindow->left, prcNewWindow->top,
-                     prcNewWindow->right - prcNewWindow->left,
-                     prcNewWindow->bottom - prcNewWindow->top,
-                     SWP_NOZORDER | SWP_NOACTIVATE);
-    }
-    firstResize = false;
+    auto *prcNewWindow = reinterpret_cast<RECT *>(msg->lParam);
+    SetWindowPos(msg->hwnd, nullptr, prcNewWindow->left, prcNewWindow->top,
+                 prcNewWindow->right - prcNewWindow->left,
+                 prcNewWindow->bottom - prcNewWindow->top,
+                 SWP_NOZORDER | SWP_NOACTIVATE);
 
     this->nativeScale_ = _scale;
     this->updateScale();
@@ -953,7 +952,7 @@ bool BaseWindow::handleNCHITTEST(MSG *msg, long *result)
 
         return true;
     }
-    else if (this->flags_ & FramelessDraggable)
+    else if (this->flags_.has(FramelessDraggable))
     {
         *result = 0;
         bool client = false;

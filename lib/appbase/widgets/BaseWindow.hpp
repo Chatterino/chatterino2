@@ -4,6 +4,7 @@
 
 #include <functional>
 #include <pajlada/signals/signalholder.hpp>
+#include "common/FlagsEnum.hpp"
 
 class QHBoxLayout;
 struct tagMSG;
@@ -32,7 +33,8 @@ public:
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
 
-    explicit BaseWindow(QWidget *parent = nullptr, Flags flags_ = None);
+    explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
+                        QWidget *parent = nullptr);
 
     void setInitialBounds(const QRect &bounds);
     QRect getBounds();
@@ -54,8 +56,6 @@ public:
     virtual float scale() const override;
     float qtFontScale() const;
 
-    Flags getFlags();
-
     pajlada::Signals::NoArgSignal closing;
 
     static bool supportsCustomWindowFrame();
@@ -72,6 +72,7 @@ protected:
     virtual void resizeEvent(QResizeEvent *) override;
     virtual void moveEvent(QMoveEvent *) override;
     virtual void closeEvent(QCloseEvent *) override;
+    virtual void showEvent(QShowEvent *) override;
 
     virtual void themeChangedEvent() override;
     virtual bool event(QEvent *event) override;
@@ -106,7 +107,7 @@ private:
     bool frameless_;
     bool stayInScreenRect_ = false;
     bool shown_ = false;
-    Flags flags_;
+    FlagsEnum<Flags> flags_;
     float nativeScale_ = 1;
 
     struct {

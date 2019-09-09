@@ -24,7 +24,7 @@ namespace chatterino {
 SettingsDialog *SettingsDialog::handle = nullptr;
 
 SettingsDialog::SettingsDialog()
-    : BaseWindow(nullptr, BaseWindow::DisableCustomScaling)
+    : BaseWindow(BaseWindow::DisableCustomScaling)
 {
     this->setWindowTitle("Chatterino Settings");
 
@@ -41,7 +41,7 @@ SettingsDialog::SettingsDialog()
 
 void SettingsDialog::initUi()
 {
-    auto outerBox = LayoutCreator<SettingsDialog>(this)
+    auto outerBox = LayoutCreator<QWidget>(this->getLayoutContainer())
                         .setLayoutType<QVBoxLayout>()
                         .withoutSpacing();
 

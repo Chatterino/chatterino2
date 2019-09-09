@@ -143,9 +143,21 @@ bool TwitchMessageBuilder::isIgnored() const
     return false;
 }
 
+inline QMediaPlayer *getPlayer()
+{
+    if (isGuiThread())
+    {
+        static auto player = new QMediaPlayer;
+        return player;
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
 void TwitchMessageBuilder::triggerHighlights()
 {
-    static auto player = new QMediaPlayer;
     static QUrl currentPlayerUrl;
 
     if (this->historicalMessage_)
@@ -165,21 +177,24 @@ void TwitchMessageBuilder::triggerHighlights()
 
     if (this->highlightSound_ && resolveFocus)
     {
-        // update the media player url if necessary
-        QUrl highlightSoundUrl =
-            getSettings()->customHighlightSound
-                ? QUrl::fromLocalFile(
-                      getSettings()->pathHighlightSound.getValue())
-                : QUrl("qrc:/sounds/ping2.wav");
-
-        if (currentPlayerUrl != highlightSoundUrl)
+        if (auto player = getPlayer())
         {
-            player->setMedia(highlightSoundUrl);
+            // update the media player url if necessary
+            QUrl highlightSoundUrl =
+                getSettings()->customHighlightSound
+                    ? QUrl::fromLocalFile(
+                          getSettings()->pathHighlightSound.getValue())
+                    : QUrl("qrc:/sounds/ping2.wav");
 
-            currentPlayerUrl = highlightSoundUrl;
+            if (currentPlayerUrl != highlightSoundUrl)
+            {
+                player->setMedia(highlightSoundUrl);
+
+                currentPlayerUrl = highlightSoundUrl;
+            }
+
+            player->play();
         }
-
-        player->play();
     }
 
     if (this->highlightAlert_)
