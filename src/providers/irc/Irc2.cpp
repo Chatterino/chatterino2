@@ -13,7 +13,7 @@ namespace {
     {
     public:
         Model(QObject *parent)
-            : SignalVectorModel<IrcConnection_>(6, parent)
+            : SignalVectorModel<IrcConnection_>(7, parent)
         {
         }
 
@@ -21,14 +21,17 @@ namespace {
         IrcConnection_ getItemFromRow(std::vector<QStandardItem *> &row,
                                       const IrcConnection_ &original)
         {
+            qDebug() << row[2]->data(Qt::CheckStateRole).toBool();
+
             return IrcConnection_{
-                row[0]->data(Qt::EditRole).toString(),  // host
-                row[1]->data(Qt::EditRole).toInt(),     // port
-                row[2]->data(Qt::Checked).toBool(),     // ssl
-                row[3]->data(Qt::EditRole).toString(),  // user
-                row[4]->data(Qt::EditRole).toString(),  // nick
-                row[5]->data(Qt::EditRole).toString(),  // password
-                original.id,                            // id
+                row[0]->data(Qt::EditRole).toString(),      // host
+                row[1]->data(Qt::EditRole).toInt(),         // port
+                row[2]->data(Qt::CheckStateRole).toBool(),  // ssl
+                row[3]->data(Qt::EditRole).toString(),      // user
+                row[4]->data(Qt::EditRole).toString(),      // nick
+                row[5]->data(Qt::EditRole).toString(),      // real
+                row[6]->data(Qt::EditRole).toString(),      // password
+                original.id,                                // id
             };
         }
 
@@ -41,7 +44,8 @@ namespace {
             setBoolItem(row[2], item.ssl);
             setStringItem(row[3], item.user);
             setStringItem(row[4], item.nick);
-            setStringItem(row[5], item.password);
+            setStringItem(row[5], item.real);
+            setStringItem(row[6], item.password);
         }
     };
 }  // namespace
@@ -77,9 +81,17 @@ Irc::Irc()
         if (auto ab = this->abandonedChannels_.find(args.item.id);
             ab != this->abandonedChannels_.end())
         {
+            auto server = std::make_unique<IrcServer>(args.item, ab->second);
+
+            // set server of abandoned channels
+            for (auto weak : ab->second)
+                if (auto shared = weak.lock())
+                    if (auto ircChannel =
+                            dynamic_cast<IrcChannel *>(shared.get()))
+                        ircChannel->setServer(server.get());
+
             // add new server with abandoned channels
-            this->servers_.emplace(args.item.id, std::make_unique<IrcServer>(
-                                                     args.item, ab->second));
+            this->servers_.emplace(args.item.id, std::move(server));
             this->abandonedChannels_.erase(ab);
         }
         else
@@ -95,8 +107,16 @@ Irc::Irc()
         if (auto server = this->servers_.find(args.item.id);
             server != this->servers_.end())
         {
-            this->abandonedChannels_[args.item.id] =
-                server->second->getChannels();
+            auto abandoned = server->second->getChannels();
+
+            // set server of abandoned servers to nullptr
+            for (auto weak : abandoned)
+                if (auto shared = weak.lock())
+                    if (auto ircChannel =
+                            dynamic_cast<IrcChannel *>(shared.get()))
+                        ircChannel->setServer(nullptr);
+
+            this->abandonedChannels_[args.item.id] = abandoned;
             this->servers_.erase(server);
         }
     });
@@ -107,9 +127,11 @@ IrcConnection_ IrcConnection_::unique()
     IrcConnection_ c;
     c.host = "localhost";
     c.id = currentId++;
-    c.port = 6697;
+    c.port = 6667;
+    c.ssl = false;
     c.user = "xD";
     c.nick = "xD";
+    c.real = "xD";
     return c;
 }
 
@@ -118,17 +140,6 @@ QAbstractTableModel *Irc::newConnectionModel(QObject *parent)
     auto model = new Model(parent);
     model->init(&this->connections);
     return model;
-}
-
-IrcServer *Irc::getServerOfChannel(Channel *channel)
-{
-    for (auto &&server : this->servers_)
-        for (auto weak : server.second->getChannels())
-            if (auto shared = weak.lock())
-                if (shared.get() == channel)
-                    return server.second.get();
-
-    return nullptr;
 }
 
 ChannelPtr Irc::getOrAddChannel(int id, QString name)

@@ -15,7 +15,9 @@ public:
               const std::vector<std::weak_ptr<Channel>> &restoreChannels);
     ~IrcServer() override;
 
-    int getId();
+    int id();
+    const QString &user();
+    const QString &nick();
 
     // AbstractIrcServer interface
 protected:
@@ -23,6 +25,8 @@ protected:
                               bool isWrite) override;
     std::shared_ptr<Channel> createChannel(const QString &channelName) override;
     bool hasSeparateWriteConnection() const override;
+    void privateMessageReceived(Communi::IrcPrivateMessage *message) override;
+    void readConnectionMessageReceived(Communi::IrcMessage *message) override;
 
 private:
     // pointer so we don't have to circle include Irc2.hpp

@@ -17,6 +17,8 @@ struct IrcConnection_ {
 
     QString user;
     QString nick;
+    QString real;
+
     QString password;
 
     int id;
@@ -35,7 +37,6 @@ public:
     UnsortedSignalVector<IrcConnection_> connections;
     QAbstractTableModel *newConnectionModel(QObject *parent);
 
-    IrcServer *getServerOfChannel(Channel *channel);
     ChannelPtr getOrAddChannel(int serverId, QString name);
 
 signals:

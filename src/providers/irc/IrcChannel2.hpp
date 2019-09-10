@@ -4,10 +4,24 @@
 
 namespace chatterino {
 
+class Irc;
+class IrcServer;
+
 class IrcChannel : public Channel
 {
 public:
-    explicit IrcChannel(const QString &name);
+    explicit IrcChannel(const QString &name, IrcServer *server);
+
+    void sendMessage(const QString &message) override;
+
+    IrcServer *server();
+
+private:
+    void setServer(IrcServer *server);
+
+    IrcServer *server_;
+
+    friend class Irc;
 };
 
 }  // namespace chatterino

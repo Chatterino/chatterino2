@@ -139,7 +139,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 Irc::getInstance().newConnectionModel(this));
 
             view->setTitles(
-                {"host", "port", "ssl", "user", "nick", "password"});
+                {"real", "port", "ssl", "user", "nick", "real", "password"});
             view->getTableView()->horizontalHeader()->resizeSection(0, 140);
             view->getTableView()->horizontalHeader()->resizeSection(1, 30);
             view->getTableView()->horizontalHeader()->resizeSection(2, 30);
@@ -270,13 +270,12 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
             if (auto ircChannel =
                     dynamic_cast<IrcChannel *>(_channel.get().get()))
             {
-                if (auto server =
-                        Irc::getInstance().getServerOfChannel(ircChannel))
+                if (auto server = ircChannel->server())
                 {
                     int i = 0;
                     for (auto &&conn : Irc::getInstance().connections)
                     {
-                        if (conn.id == server->getId())
+                        if (conn.id == server->id())
                         {
                             this->ui_.irc.servers->getTableView()->selectRow(i);
                             break;
