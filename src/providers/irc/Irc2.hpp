@@ -10,21 +10,21 @@ class QAbstractTableModel;
 
 namespace chatterino {
 
+//enum IrcAuthType { Anonymous, /*Sals,*/ Pass, MsgNickServ, NickServ };
+
 struct IrcConnection_ {
     QString host;
-    int port;
-    bool ssl;
+    int port = 6667;
+    bool ssl = false;
 
     QString user;
     QString nick;
     QString real;
 
+    //    IrcAuthType authType = Anonymous;
     QString password;
 
     int id;
-
-    // makes an IrcConnection with a unique id
-    static IrcConnection_ unique();
 };
 
 class Irc
@@ -39,10 +39,18 @@ public:
 
     ChannelPtr getOrAddChannel(int serverId, QString name);
 
+    void save();
+    void load();
+
+    int uniqueId();
+
 signals:
     void connectionUpdated(int id);
 
 private:
+    int currentId_{};
+    bool loaded_{};
+
     // Servers have a unique id.
     // When a server gets changed it gets removed and then added again.
     // So we store the channels of that server in abandonedChannels_ temporarily.

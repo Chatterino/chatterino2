@@ -3,17 +3,26 @@
 #include <pajlada/serialize.hpp>
 #include "common/Credentials.hpp"
 #include "common/SignalVectorModel.hpp"
+#include "singletons/Paths.hpp"
+#include "util/CombinePath.hpp"
 #include "util/RapidjsonHelpers.hpp"
 #include "util/StandardItemHelper.hpp"
+
+#include <QSaveFile>
 
 namespace chatterino {
 
 namespace {
+    QString configPath()
+    {
+        return combinePath(getPaths()->settingsDirectory, "irc.json");
+    }
+
     class Model : public SignalVectorModel<IrcConnection_>
     {
     public:
         Model(QObject *parent)
-            : SignalVectorModel<IrcConnection_>(7, parent)
+            : SignalVectorModel<IrcConnection_>(8, parent)
         {
         }
 
@@ -39,7 +48,7 @@ namespace {
         void getRowFromItem(const IrcConnection_ &item,
                             std::vector<QStandardItem *> &row)
         {
-            setStringItem(row[0], item.host);
+            setStringItem(row[0], item.host, false);
             setStringItem(row[1], QString::number(item.port));
             setBoolItem(row[2], item.ssl);
             setStringItem(row[3], item.user);
@@ -49,8 +58,6 @@ namespace {
         }
     };
 }  // namespace
-
-static std::atomic_int currentId;
 
 //inline QString escape(QString str)
 //{
@@ -120,19 +127,8 @@ Irc::Irc()
             this->servers_.erase(server);
         }
     });
-}
 
-IrcConnection_ IrcConnection_::unique()
-{
-    IrcConnection_ c;
-    c.host = "localhost";
-    c.id = currentId++;
-    c.port = 6667;
-    c.ssl = false;
-    c.user = "xD";
-    c.nick = "xD";
-    c.real = "xD";
-    return c;
+    this->connections.delayedItemsChanged.connect([this] { this->save(); });
 }
 
 QAbstractTableModel *Irc::newConnectionModel(QObject *parent)
@@ -158,6 +154,86 @@ Irc &Irc::getInstance()
 {
     static Irc irc;
     return irc;
+}
+
+int Irc::uniqueId()
+{
+    /// XXX: also check for channels
+    int i = this->currentId_ + 1;
+    auto it = this->servers_.find(i);
+
+    while (it != this->servers_.end())
+    {
+        i++;
+        it = this->servers_.find(i);
+    }
+
+    return (this->currentId_ = i);
+}
+
+void Irc::save()
+{
+    QJsonDocument doc;
+    QJsonObject root;
+    QJsonArray servers;
+
+    for (auto &&conn : this->connections)
+    {
+        QJsonObject obj;
+        obj.insert("host", conn.host);
+        obj.insert("port", conn.port);
+        obj.insert("ssl", conn.ssl);
+        obj.insert("username", conn.user);
+        obj.insert("nickname", conn.nick);
+        obj.insert("realname", conn.real);
+        //obj.insert("password", conn.password);
+        obj.insert("id", conn.id);
+        servers.append(obj);
+    }
+
+    root.insert("servers", servers);
+    doc.setObject(root);
+
+    QSaveFile file(configPath());
+    file.open(QIODevice::WriteOnly);
+    file.write(doc.toJson());
+    file.commit();
+}
+
+void Irc::load()
+{
+    if (this->loaded_)
+        return;
+    this->loaded_ = true;
+
+    QString config = configPath();
+    QFile file(configPath());
+    file.open(QIODevice::ReadOnly);
+    auto doc = QJsonDocument::fromJson(file.readAll());
+
+    auto object = doc.object();
+    std::unordered_set<int> ids;
+
+    for (auto server : doc.object().value("servers").toArray())
+    {
+        auto obj = server.toObject();
+        IrcConnection_ conn;
+        conn.host = obj.value("host").toString(conn.host);
+        conn.port = obj.value("port").toInt(conn.port);
+        conn.ssl = obj.value("ssl").toBool(conn.ssl);
+        conn.user = obj.value("username").toString(conn.user);
+        conn.nick = obj.value("nickname").toString(conn.nick);
+        conn.real = obj.value("realname").toString(conn.real);
+        // conn.password = obj.value("password").toString(conn.password);
+        conn.id = obj.value("id").toInt(conn.id);
+
+        // duplicate id's are not allowed :(
+        if (ids.find(conn.id) == ids.end())
+        {
+            this->connections.appendItem(conn);
+            ids.insert(conn.id);
+        }
+    }
 }
 
 }  // namespace chatterino

@@ -138,34 +138,52 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
             auto view = this->ui_.irc.servers = new EditableModelView(
                 Irc::getInstance().newConnectionModel(this));
 
-            view->setTitles(
-                {"real", "port", "ssl", "user", "nick", "real", "password"});
+            view->setTitles({"host", "port", "ssl", "user", "nick", "real",
+                             "password", "login command"});
             view->getTableView()->horizontalHeader()->resizeSection(0, 140);
-            view->getTableView()->horizontalHeader()->resizeSection(1, 30);
+            view->getTableView()->horizontalHeader()->resizeSection(1, 40);
             view->getTableView()->horizontalHeader()->resizeSection(2, 30);
+            //view->getTableView()->horizontalHeader()->setVisible(false);
+
+            view->getTableView()->horizontalHeader()->setSectionHidden(1, true);
+            view->getTableView()->horizontalHeader()->setSectionHidden(2, true);
+            view->getTableView()->horizontalHeader()->setSectionHidden(6, true);
+            view->getTableView()->horizontalHeader()->setSectionHidden(7, true);
 
             view->addButtonPressed.connect([] {
-                Irc::getInstance().connections.appendItem(
-                    IrcConnection_::unique());
+                auto unique = IrcConnection_{};
+                unique.id = Irc::getInstance().uniqueId();
+                Irc::getInstance().connections.appendItem(unique);
             });
 
+            QObject::connect(
+                view->getTableView(), &QTableView::clicked,
+                [](const QModelIndex &index) {
+                    auto data =
+                        Irc::getInstance()
+                            .connections.getVector()[size_t(index.row())];
+
+                    auto editor = new IrcConnectionEditor(data);
+                    if (editor->exec() == QDialog::Accepted)
+                    {
+                        auto data = editor->data();
+                        auto &&conns =
+                            Irc::getInstance().connections.getVector();
+                        int i = 0;
+                        for (auto &&conn : conns)
+                        {
+                            if (conn.id == data.id)
+                            {
+                                Irc::getInstance().connections.removeItem(i);
+                                Irc::getInstance().connections.insertItem(data,
+                                                                          i);
+                            }
+                            i++;
+                        }
+                    }
+                });
+
             outerBox->addWidget(view);
-
-            //            auto box = outerBox.emplace<QHBoxLayout>().withoutMargin();
-
-            //            auto conns = box.emplace<QListView>();
-            //            conns->addActions({new QAction("hackint")});
-
-            //            auto buttons = box.emplace<QVBoxLayout>().withoutMargin();
-
-            //            buttons.emplace<QPushButton>("Add").onClick(this, [this]() {
-            //                (new IrcConnectionPopup(this))
-            //                    ->show();  // XXX: don't show multiple
-            //            });
-
-            //            buttons.emplace<QPushButton>("Edit");
-            //            buttons.emplace<QPushButton>("Remove");
-            //            buttons->addStretch(1);
         }
 
         {
@@ -173,24 +191,6 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
             box.emplace<QLabel>("Channel:");
             this->ui_.irc.channel = box.emplace<QLineEdit>().getElement();
         }
-
-        //        auto vbox = obj.setLayoutType<QVBoxLayout>();
-        //        auto form = vbox.emplace<QFormLayout>();
-
-        //        auto servers = new QComboBox;
-        //        auto accounts = new QComboBox;
-        //servers->setEditable(true);
-        //servers->addItems(
-        //    {"irc://irc.hackint.org:6697", "irc://irc.somethingelse.com:6667"});
-
-        // form->addRow("Server:", servers);
-        // form->addRow("Account:", accounts);
-        //        form->addRow("Channel:", new QLineEdit());
-
-        // form->addRow("User name:", new QLineEdit());
-        // form->addRow("First nick choice:", new QLineEdit());
-        // form->addRow("Second nick choice:", new QLineEdit());
-        // form->addRow("Third nick choice:", new QLineEdit());
 
         auto tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Irc");

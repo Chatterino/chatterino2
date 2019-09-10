@@ -185,6 +185,11 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override
     {
         int row = index.row(), column = index.column();
+
+        if (row < 0 || column < 0) {
+            return Qt::NoItemFlags;
+        }
+
         assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
                column < this->columnCount_);
 

@@ -13,6 +13,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/irc/Irc2.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Emotes.hpp"
@@ -68,6 +69,8 @@ Application::Application(Settings &_settings, Paths &_paths)
 
     this->fonts->fontChanged.connect(
         [this]() { this->windows->layoutChannelViews(); });
+
+    Irc::getInstance().load();
 
     this->twitch.server = this->twitch2;
     this->twitch.pubsub = this->twitch2->pubsub;

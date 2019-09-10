@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>IrcConnectionEditor</class>
- <widget class="QDialog" name="IrcConnectionEditor">
+ <widget class="QWidget" name="IrcConnectionEditor">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>264</width>
-    <height>258</height>
+    <height>350</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,12 +19,16 @@
      <item row="0" column="0">
       <widget class="QLabel" name="serverLabel">
        <property name="text">
-        <string>Server:</string>
+        <string>Host:</string>
        </property>
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QLineEdit" name="serverLineEdit"/>
+      <widget class="QLineEdit" name="serverLineEdit">
+       <property name="placeholderText">
+        <string>irc.example.com</string>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="portLabel">
@@ -94,20 +98,77 @@
       <widget class="QLineEdit" name="nickNameLineEdit"/>
      </item>
      <item row="6" column="0">
+      <widget class="QLabel" name="realNameLabel">
+       <property name="text">
+        <string>Real Name:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="realNameLineEdit"/>
+     </item>
+     <item row="8" column="0">
+      <widget class="QLabel" name="loginMethodLabel">
+       <property name="text">
+        <string>Login method:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="9" column="0">
       <widget class="QLabel" name="passwordLabel">
        <property name="text">
         <string>Password:</string>
        </property>
       </widget>
      </item>
-     <item row="6" column="1">
+     <item row="9" column="1">
       <widget class="QLineEdit" name="passwordLineEdit">
        <property name="echoMode">
         <enum>QLineEdit::Password</enum>
        </property>
       </widget>
      </item>
+     <item row="7" column="0">
+      <spacer name="verticalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item row="8" column="1">
+      <widget class="QComboBox" name="comboBox">
+       <item>
+        <property name="text">
+         <string>Anonymous</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>PASS</string>
+        </property>
+       </item>
+      </widget>
+     </item>
     </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -121,6 +182,16 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>serverLineEdit</tabstop>
+  <tabstop>portSpinBox</tabstop>
+  <tabstop>securityCheckBox</tabstop>
+  <tabstop>userNameLineEdit</tabstop>
+  <tabstop>nickNameLineEdit</tabstop>
+  <tabstop>realNameLineEdit</tabstop>
+  <tabstop>comboBox</tabstop>
+  <tabstop>passwordLineEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -130,8 +201,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>254</x>
+     <y>248</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -146,8 +217,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>254</x>
+     <y>248</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
