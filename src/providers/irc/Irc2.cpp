@@ -158,14 +158,15 @@ Irc &Irc::getInstance()
 
 int Irc::uniqueId()
 {
-    /// XXX: also check for channels
     int i = this->currentId_ + 1;
     auto it = this->servers_.find(i);
+    auto it2 = this->abandonedChannels_.find(i);
 
-    while (it != this->servers_.end())
+    while (it != this->servers_.end() || it2 != this->abandonedChannels_.end())
     {
         i++;
         it = this->servers_.find(i);
+        it2 = this->abandonedChannels_.find(i);
     }
 
     return (this->currentId_ = i);
