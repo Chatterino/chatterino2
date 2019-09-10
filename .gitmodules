@@ -26,6 +26,3 @@
 [submodule "lib/rapidjson"]
 	path = lib/rapidjson
 	url = https://github.com/Tencent/rapidjson
-[submodule "lib/qtkeychain"]
-	path = lib/qtkeychain
-	url = https://github.com/frankosterfeld/qtkeychain
