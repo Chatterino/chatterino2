@@ -25,6 +25,8 @@ protected:
                               bool isWrite) override;
     std::shared_ptr<Channel> createChannel(const QString &channelName) override;
     bool hasSeparateWriteConnection() const override;
+
+    void onReadConnected(IrcConnection *connection) override;
     void privateMessageReceived(Communi::IrcPrivateMessage *message) override;
     void readConnectionMessageReceived(Communi::IrcMessage *message) override;
 

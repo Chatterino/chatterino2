@@ -164,26 +164,24 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         return Channel::getEmpty();
     }
 
-    QString clojuresInCppAreShit = channelName;
-
     this->channels.insert(channelName, chan);
-    chan->destroyed.connect([this, clojuresInCppAreShit] {
+    this->connections_.emplace_back(chan->destroyed.connect([this,
+                                                             channelName] {
         // fourtf: issues when the server itself is destroyed
 
-        log("[AbstractIrcServer::addChannel] {} was destroyed",
-            clojuresInCppAreShit);
-        this->channels.remove(clojuresInCppAreShit);
+        log("[AbstractIrcServer::addChannel] {} was destroyed", channelName);
+        this->channels.remove(channelName);
 
         if (this->readConnection_)
         {
-            this->readConnection_->sendRaw("PART #" + clojuresInCppAreShit);
+            this->readConnection_->sendRaw("PART #" + channelName);
         }
 
         if (this->writeConnection_ && this->hasSeparateWriteConnection())
         {
-            this->writeConnection_->sendRaw("PART #" + clojuresInCppAreShit);
+            this->writeConnection_->sendRaw("PART #" + channelName);
         }
-    });
+    }));
 
     // join irc channel
     {
@@ -191,12 +189,18 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
 
         if (this->readConnection_)
         {
-            this->readConnection_->sendRaw("JOIN #" + channelName);
+            if (this->readConnection_->isConnected())
+            {
+                this->readConnection_->sendRaw("JOIN #" + channelName);
+            }
         }
 
         if (this->writeConnection_ && this->hasSeparateWriteConnection())
         {
-            this->writeConnection_->sendRaw("JOIN #" + channelName);
+            if (this->readConnection_->isConnected())
+            {
+                this->writeConnection_->sendRaw("JOIN #" + channelName);
+            }
         }
     }
 

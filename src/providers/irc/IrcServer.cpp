@@ -57,8 +57,10 @@ void IrcServer::initializeConnection(IrcConnection *connection, bool isRead,
     connection->setPort(this->data_->port);
 
     connection->setUserName(this->data_->user);
-    connection->setNickName(this->data_->nick);
-    connection->setRealName(this->data_->real);
+    connection->setNickName(this->data_->nick.isEmpty() ? this->data_->user
+                                                        : this->data_->nick);
+    connection->setRealName(this->data_->real.isEmpty() ? this->data_->user
+                                                        : this->data_->nick);
     connection->setPassword(this->data_->password);
 }
 
@@ -72,6 +74,21 @@ bool IrcServer::hasSeparateWriteConnection() const
     return false;
 }
 
+void IrcServer::onReadConnected(IrcConnection *connection)
+{
+    AbstractIrcServer::onReadConnected(connection);
+
+    std::lock_guard lock(this->channelMutex);
+
+    for (auto &&weak : this->channels)
+    {
+        if (auto channel = weak.lock())
+        {
+            connection->sendRaw("JOIN #" + channel->getName());
+        }
+    }
+}
+
 void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 {
     auto target = message->target();
@@ -81,6 +98,7 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
     {
         MessageBuilder builder;
 
+        builder.emplace<TimestampElement>();
         builder.emplace<TextElement>(message->nick() + ":",
                                      MessageElementFlag::Username);
         builder.emplace<TextElement>(message->content(),

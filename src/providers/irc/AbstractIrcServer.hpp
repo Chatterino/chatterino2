@@ -4,6 +4,7 @@
 
 #include <IrcMessage>
 #include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
 
 #include <functional>
 #include <mutex>
@@ -84,6 +85,7 @@ private:
     std::mutex connectionMutex_;
 
     //    bool autoReconnect_ = false;
+    pajlada::Signals::SignalHolder connections_;
 };
 
 }  // namespace chatterino

@@ -207,6 +207,10 @@ public:
 
     QStringSetting cachePath = {"/cache/path", ""};
 
+    /// UI
+    IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
+    IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
+
 private:
     void updateModerationActions();
 };

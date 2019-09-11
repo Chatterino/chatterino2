@@ -147,23 +147,29 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
             view->getTableView()->horizontalHeader()->setSectionHidden(1, true);
             view->getTableView()->horizontalHeader()->setSectionHidden(2, true);
+            view->getTableView()->horizontalHeader()->setSectionHidden(4, true);
+            view->getTableView()->horizontalHeader()->setSectionHidden(5, true);
             view->getTableView()->horizontalHeader()->setSectionHidden(6, true);
             view->getTableView()->horizontalHeader()->setSectionHidden(7, true);
 
             view->addButtonPressed.connect([] {
                 auto unique = IrcConnection_{};
                 unique.id = Irc::getInstance().uniqueId();
-                Irc::getInstance().connections.appendItem(unique);
+
+                auto editor = new IrcConnectionEditor(unique);
+                if (editor->exec() == QDialog::Accepted)
+                {
+                    Irc::getInstance().connections.appendItem(unique);
+                }
             });
 
             QObject::connect(
-                view->getTableView(), &QTableView::clicked,
+                view->getTableView(), &QTableView::doubleClicked,
                 [](const QModelIndex &index) {
-                    auto data =
+                    auto editor = new IrcConnectionEditor(
                         Irc::getInstance()
-                            .connections.getVector()[size_t(index.row())];
+                            .connections.getVector()[size_t(index.row())]);
 
-                    auto editor = new IrcConnectionEditor(data);
                     if (editor->exec() == QDialog::Accepted)
                     {
                         auto data = editor->data();
@@ -219,10 +225,24 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     auto *shortcut_cancel = new QShortcut(QKeySequence("Esc"), this);
     QObject::connect(shortcut_cancel, &QShortcut::activated,
                      [=] { this->close(); });
+
+    // restore ui state
+    this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
+    this->ui_.irc.servers->getTableView()->selectRow(
+        getSettings()->lastSelectIrcConn);
 }
 
 void SelectChannelDialog::ok()
 {
+    // save ui state
+    getSettings()->lastSelectChannelTab =
+        this->ui_.notebook->getSelectedIndex();
+    getSettings()->lastSelectIrcConn = this->ui_.irc.servers->getTableView()
+                                           ->selectionModel()
+                                           ->currentIndex()
+                                           .row();
+
+    // accept and close
     this->hasSelectedChannel_ = true;
     this->close();
 }
@@ -339,14 +359,14 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
             if (row >= 0 && row < int(vector.size()))
             {
                 return Irc::getInstance().getOrAddChannel(
-                    vector[row].id, this->ui_.irc.channel->text());
+                    vector[size_t(row)].id, this->ui_.irc.channel->text());
             }
             else
             {
                 return Channel::getEmpty();
             }
         }
-        break;
+            //break;
     }
 
     return this->selectedChannel_;
@@ -360,7 +380,7 @@ bool SelectChannelDialog::hasSeletedChannel() const
 bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
                                                    QEvent *event)
 {
-    auto *widget = (QWidget *)watched;
+    auto *widget = static_cast<QWidget *>(watched);
 
     if (event->type() == QEvent::FocusIn)
     {
