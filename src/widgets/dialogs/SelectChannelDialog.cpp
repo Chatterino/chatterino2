@@ -153,7 +153,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
             view->getTableView()->horizontalHeader()->setSectionHidden(7, true);
 
             view->addButtonPressed.connect([] {
-                auto unique = IrcConnection_{};
+                auto unique = IrcServerData{};
                 unique.id = Irc::getInstance().uniqueId();
 
                 auto editor = new IrcConnectionEditor(unique);

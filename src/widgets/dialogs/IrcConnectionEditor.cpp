@@ -3,7 +3,7 @@
 
 namespace chatterino {
 
-IrcConnectionEditor::IrcConnectionEditor(const IrcConnection_ &data, bool isAdd,
+IrcConnectionEditor::IrcConnectionEditor(const IrcServerData &data, bool isAdd,
                                          QWidget *parent)
 
     : QDialog(parent, Qt::WindowStaysOnTopHint)
@@ -34,7 +34,7 @@ IrcConnectionEditor::~IrcConnectionEditor()
     delete ui_;
 }
 
-IrcConnection_ IrcConnectionEditor::data()
+IrcServerData IrcConnectionEditor::data()
 {
     auto data = this->data_;
     data.host = this->ui_->serverLineEdit->text();

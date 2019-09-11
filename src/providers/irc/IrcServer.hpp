@@ -5,13 +5,13 @@
 
 namespace chatterino {
 
-struct IrcConnection_;
+struct IrcServerData;
 
 class IrcServer : public AbstractIrcServer
 {
 public:
-    explicit IrcServer(const IrcConnection_ &data);
-    IrcServer(const IrcConnection_ &data,
+    explicit IrcServer(const IrcServerData &data);
+    IrcServer(const IrcServerData &data,
               const std::vector<std::weak_ptr<Channel>> &restoreChannels);
     ~IrcServer() override;
 
@@ -32,7 +32,7 @@ protected:
 
 private:
     // pointer so we don't have to circle include Irc2.hpp
-    IrcConnection_ *data_;
+    IrcServerData *data_;
 };
 
 }  // namespace chatterino

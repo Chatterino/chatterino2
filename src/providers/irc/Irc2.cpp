@@ -18,21 +18,21 @@ namespace {
         return combinePath(getPaths()->settingsDirectory, "irc.json");
     }
 
-    class Model : public SignalVectorModel<IrcConnection_>
+    class Model : public SignalVectorModel<IrcServerData>
     {
     public:
         Model(QObject *parent)
-            : SignalVectorModel<IrcConnection_>(8, parent)
+            : SignalVectorModel<IrcServerData>(8, parent)
         {
         }
 
         // turn a vector item into a model row
-        IrcConnection_ getItemFromRow(std::vector<QStandardItem *> &row,
-                                      const IrcConnection_ &original)
+        IrcServerData getItemFromRow(std::vector<QStandardItem *> &row,
+                                     const IrcServerData &original)
         {
             qDebug() << row[2]->data(Qt::CheckStateRole).toBool();
 
-            return IrcConnection_{
+            return IrcServerData{
                 row[0]->data(Qt::EditRole).toString(),      // host
                 row[1]->data(Qt::EditRole).toInt(),         // port
                 row[2]->data(Qt::CheckStateRole).toBool(),  // ssl
@@ -45,7 +45,7 @@ namespace {
         }
 
         // turns a row in the model into a vector item
-        void getRowFromItem(const IrcConnection_ &item,
+        void getRowFromItem(const IrcServerData &item,
                             std::vector<QStandardItem *> &row)
         {
             setStringItem(row[0], item.host, false);
@@ -218,7 +218,7 @@ void Irc::load()
     for (auto server : doc.object().value("servers").toArray())
     {
         auto obj = server.toObject();
-        IrcConnection_ conn;
+        IrcServerData conn;
         conn.host = obj.value("host").toString(conn.host);
         conn.port = obj.value("port").toInt(conn.port);
         conn.ssl = obj.value("ssl").toBool(conn.ssl);

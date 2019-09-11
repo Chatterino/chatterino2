@@ -26,7 +26,7 @@ IrcConnectionPopup::IrcConnectionPopup(QWidget *parent)
     this->setScaleIndependantSize(800, 500);
 
     view->addButtonPressed.connect([] {
-        auto unique = IrcConnection_{};
+        auto unique = IrcServerData{};
         unique.id = Irc::getInstance().uniqueId();
         Irc::getInstance().connections.appendItem(unique);
     });

@@ -12,7 +12,7 @@ namespace chatterino {
 
 //enum IrcAuthType { Anonymous, /*Sals,*/ Pass, MsgNickServ, NickServ };
 
-struct IrcConnection_ {
+struct IrcServerData {
     QString host;
     int port = 6667;
     bool ssl = false;
@@ -34,7 +34,7 @@ public:
 
     static Irc &getInstance();
 
-    UnsortedSignalVector<IrcConnection_> connections;
+    UnsortedSignalVector<IrcServerData> connections;
     QAbstractTableModel *newConnectionModel(QObject *parent);
 
     ChannelPtr getOrAddChannel(int serverId, QString name);

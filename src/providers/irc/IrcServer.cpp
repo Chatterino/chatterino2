@@ -8,13 +8,13 @@
 
 namespace chatterino {
 
-IrcServer::IrcServer(const IrcConnection_ &data)
-    : data_(new IrcConnection_(data))
+IrcServer::IrcServer(const IrcServerData &data)
+    : data_(new IrcServerData(data))
 {
     this->connect();
 }
 
-IrcServer::IrcServer(const IrcConnection_ &data,
+IrcServer::IrcServer(const IrcServerData &data,
                      const std::vector<std::weak_ptr<Channel>> &restoreChannels)
     : IrcServer(data)
 {

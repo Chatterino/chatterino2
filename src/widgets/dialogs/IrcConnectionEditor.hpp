@@ -11,22 +11,22 @@ class IrcConnectionEditor;
 
 namespace chatterino {
 
-struct IrcConnection_;
+struct IrcServerData;
 
 class IrcConnectionEditor : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit IrcConnectionEditor(const IrcConnection_ &data, bool isAdd = false,
+    explicit IrcConnectionEditor(const IrcServerData &data, bool isAdd = false,
                                  QWidget *parent = nullptr);
     ~IrcConnectionEditor();
 
-    IrcConnection_ data();
+    IrcServerData data();
 
 private:
     Ui::IrcConnectionEditor *ui_;
-    IrcConnection_ data_;
+    IrcServerData data_;
 };
 
 }  // namespace chatterino
