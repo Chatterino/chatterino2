@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QMimeData>
 #include <QNetworkReply>
+#include <Qt>
 #include <string>
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
@@ -29,6 +30,8 @@ ResizingTextEdit::ResizingTextEdit()
         [this] { this->completionInProgress_ = false; });
 
     this->setFocusPolicy(Qt::ClickFocus);
+
+    setAcceptDrops(true);
 }
 
 QSize ResizingTextEdit::sizeHint() const
@@ -290,7 +293,24 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
         insertPlainText(source->text());
     }
 }
-
+void ResizingTextEdit::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasImage() || event->mimeData()->hasText())
+    {
+        event->acceptProposedAction();
+    }
+}
+void ResizingTextEdit::dropEvent(QDropEvent *event)
+{
+    if (event->mimeData()->hasImage())
+    {
+        this->pastedImage.invoke(event->mimeData());
+    }
+    else
+    {  // can only be text, because of check in dragEnterEvent()
+        insertPlainText(event->mimeData()->text());
+    }
+}
 QCompleter *ResizingTextEdit::getCompleter() const
 {
     return this->completer_;
