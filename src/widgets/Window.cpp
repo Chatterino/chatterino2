@@ -1,6 +1,7 @@
 #include "widgets/Window.hpp"
 
 #include "Application.hpp"
+#include "common/Credentials.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchServer.hpp"
@@ -103,7 +104,7 @@ bool Window::event(QEvent *event)
         break;
 
         default:;
-    };
+    }
 
     return BaseWindow::event(event);
 }

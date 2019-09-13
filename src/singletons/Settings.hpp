@@ -199,6 +199,10 @@ public:
 
     /// Misc
     BoolSetting betaUpdates = {"/misc/beta", false};
+#ifdef Q_OS_LINUX
+    BoolSetting useKeyring = {"/misc/useKeyring", true};
+#endif
+
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
     BoolSetting loadTwitchMessageHistoryOnConnect = {

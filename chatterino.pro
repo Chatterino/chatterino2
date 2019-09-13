@@ -179,7 +179,6 @@ SOURCES += \
     src/widgets/AttachedWindow.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
     src/widgets/dialogs/IrcConnectionEditor.cpp \
-    src/widgets/dialogs/IrcConnectionPopup.cpp \
     src/widgets/dialogs/LastRunCrashDialog.cpp \
     src/widgets/dialogs/LoginDialog.cpp \
     src/widgets/dialogs/LogsPopup.cpp \
@@ -360,7 +359,6 @@ HEADERS += \
     src/widgets/AttachedWindow.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/IrcConnectionEditor.hpp \
-    src/widgets/dialogs/IrcConnectionPopup.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
     src/widgets/dialogs/LoginDialog.hpp \
     src/widgets/dialogs/LogsPopup.hpp \

@@ -377,6 +377,15 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle("Miscellaneous");
 
+#ifdef Q_OS_LINUX
+    if (!getPaths()->isPortable())
+    {
+        layout.addCheckbox(
+            "Use libsecret/KWallet/Gnome keychain to secure passwords",
+            s.useKeyring);
+    }
+#endif
+
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
     layout.addCheckbox("Random username color for users who never set a color",

@@ -6,7 +6,6 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/IrcConnectionEditor.hpp"
-#include "widgets/dialogs/IrcConnectionPopup.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 
 #include <QDialogButtonBox>
