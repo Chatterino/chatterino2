@@ -32,6 +32,10 @@ NetworkData::~NetworkData()
 
 QString NetworkData::getHash()
 {
+    static std::mutex mu;
+
+    std::lock_guard lock(mu);
+
     if (this->hash_.isEmpty())
     {
         QByteArray bytes;
@@ -242,7 +246,6 @@ void load(const std::shared_ptr<NetworkData> &data)
     if (data->cache_)
     {
         QtConcurrent::run(loadCached, data);
-        loadCached(data);
     }
     else
     {
