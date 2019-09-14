@@ -38,7 +38,6 @@ namespace {
                 row[3]->data(Qt::EditRole).toString(),      // user
                 row[4]->data(Qt::EditRole).toString(),      // nick
                 row[5]->data(Qt::EditRole).toString(),      // real
-                original.password,                          // password
                 original.connectCommands,                   // connectCommands
                 original.id,                                // id
             };
@@ -70,6 +69,18 @@ inline QString getCredentialName(const IrcServerData &data)
            escape(data.host);
 }
 
+void IrcServerData::getPassword(
+    QObject *receiver, std::function<void(const QString &)> &&onLoaded) const
+{
+    Credentials::getInstance().get("irc", getCredentialName(*this), receiver,
+                                   std::move(onLoaded));
+}
+
+void IrcServerData::setPassword(const QString &password)
+{
+    Credentials::getInstance().set("irc", getCredentialName(*this), password);
+}
+
 Irc::Irc()
 {
     this->connections.itemInserted.connect([this](auto &&args) {
@@ -99,10 +110,6 @@ Irc::Irc()
             this->servers_.emplace(args.item.id,
                                    std::make_unique<IrcServer>(args.item));
         }
-
-        // store password
-        Credentials::getInstance().set("irc", getCredentialName(args.item),
-                                       args.item.password);
     });
 
     this->connections.itemRemoved.connect([this](auto &&args) {
@@ -217,6 +224,8 @@ void Irc::load()
     file.open(QIODevice::ReadOnly);
     auto object = QJsonDocument::fromJson(file.readAll()).object();
 
+    std::unordered_set<int> ids;
+
     // load servers
     for (auto server : object.value("servers").toArray())
     {
@@ -233,18 +242,11 @@ void Irc::load()
         data.id = obj.value("id").toInt(data.id);
 
         // duplicate id's are not allowed :(
-        if (this->abandonedChannels_.find(data.id) ==
-            this->abandonedChannels_.end())
+        if (ids.find(data.id) == ids.end())
         {
-            // insert element
-            this->abandonedChannels_[data.id];
+            ids.insert(data.id);
 
-            Credentials::getInstance().get(
-                "irc", getCredentialName(data),
-                [=](const QString &password) mutable {
-                    data.password = password;
-                    this->connections.appendItem(data);
-                });
+            this->connections.appendItem(data);
         }
     }
 }

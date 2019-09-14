@@ -21,8 +21,8 @@ public:
 
     // AbstractIrcServer interface
 protected:
-    void initializeConnection(IrcConnection *connection, bool isRead,
-                              bool isWrite) override;
+    void initializeConnection(IrcConnection *connection,
+                              ConnectionType type) override;
     std::shared_ptr<Channel> createChannel(const QString &channelName) override;
     bool hasSeparateWriteConnection() const override;
 

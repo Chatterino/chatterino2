@@ -63,11 +63,9 @@ void TwitchServer::initialize(Settings &settings, Paths &paths)
     this->ffz.loadEmotes();
 }
 
-void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
-                                        bool isWrite)
+void TwitchServer::initializeConnection(IrcConnection *connection,
+                                        ConnectionType type)
 {
-    this->singleConnection_ = isRead == isWrite;
-
     std::shared_ptr<TwitchAccount> account =
         getApp()->accounts->twitch.getCurrent();
 
@@ -97,6 +95,8 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
     // SSL enabled: irc://irc.chat.twitch.tv:6697
     connection->setHost("irc.chat.twitch.tv");
     connection->setPort(6697);
+
+    this->open(type);
 }
 
 std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)

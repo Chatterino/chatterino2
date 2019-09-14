@@ -78,30 +78,32 @@ void AbstractIrcServer::connect()
 
     if (this->hasSeparateWriteConnection())
     {
-        this->initializeConnection(this->writeConnection_.get(), false, true);
-        this->initializeConnection(this->readConnection_.get(), true, false);
+        this->initializeConnection(this->writeConnection_.get(), Write);
+        this->initializeConnection(this->readConnection_.get(), Read);
     }
     else
     {
-        this->initializeConnection(this->readConnection_.get(), true, true);
+        this->initializeConnection(this->readConnection_.get(), Both);
     }
+}
 
-    // fourtf: this should be asynchronous
+void AbstractIrcServer::open(ConnectionType type)
+{
+    std::lock_guard<std::mutex> lock1(this->connectionMutex_);
+    std::lock_guard<std::mutex> lock2(this->channelMutex);
+
+    if (type == Write)
     {
-        std::lock_guard<std::mutex> lock1(this->connectionMutex_);
-        std::lock_guard<std::mutex> lock2(this->channelMutex);
-
+        this->writeConnection_->open();
+    }
+    if (type & Read)
+    {
         for (std::weak_ptr<Channel> &weak : this->channels.values())
         {
             if (auto channel = weak.lock())
             {
                 this->readConnection_->sendRaw("JOIN #" + channel->getName());
             }
-        }
-
-        if (this->hasSeparateWriteConnection())
-        {
-            this->writeConnection_->open();
         }
         this->readConnection_->open();
     }
@@ -254,6 +256,16 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
 
     std::lock_guard lock(this->channelMutex);
 
+    // join channels
+    for (auto &&weak : this->channels)
+    {
+        if (auto channel = weak.lock())
+        {
+            connection->sendRaw("JOIN #" + channel->getName());
+        }
+    }
+
+    // connected/disconnected message
     auto connectedMsg = makeSystemMessage("connected");
     connectedMsg->flags.set(MessageFlag::ConnectedMessage);
     auto reconnected = makeSystemMessage("reconnected");

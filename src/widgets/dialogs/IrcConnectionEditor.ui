@@ -158,7 +158,11 @@
      <item row="10" column="0">
       <widget class="QLabel" name="connectCommandsLabel">
        <property name="text">
-        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Send IRC commands&lt;/p&gt;&lt;p&gt;on connect:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <string>Send IRC commands
+on connect:</string>
+       </property>
+       <property name="textFormat">
+        <enum>Qt::PlainText</enum>
        </property>
       </widget>
      </item>

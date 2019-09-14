@@ -44,8 +44,8 @@ public:
     const FfzEmotes &getFfzEmotes() const;
 
 protected:
-    virtual void initializeConnection(IrcConnection *connection, bool isRead,
-                                      bool isWrite) override;
+    virtual void initializeConnection(IrcConnection *connection,
+                                      ConnectionType type) override;
     virtual std::shared_ptr<Channel> createChannel(
         const QString &channelName) override;
 
@@ -75,7 +75,6 @@ private:
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
-    bool singleConnection_ = false;
     TwitchBadges twitchBadges;
     BttvEmotes bttv;
     FfzEmotes ffz;

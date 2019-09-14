@@ -86,6 +86,7 @@ Credentials::Credentials()
 }
 
 void Credentials::get(const QString &provider, const QString &name_,
+                      QObject *receiver,
                       std::function<void(const QString &)> &&onLoaded)
 {
     assertInGuiThread();
@@ -97,7 +98,7 @@ void Credentials::get(const QString &provider, const QString &name_,
         auto job = new QKeychain::ReadPasswordJob("chatterino");
         job->setAutoDelete(true);
         job->setKey(name);
-        QObject::connect(job, &QKeychain::Job::finished, qApp,
+        QObject::connect(job, &QKeychain::Job::finished, receiver,
                          [job, onLoaded = std::move(onLoaded)](auto) mutable {
                              onLoaded(job->textData());
                          },

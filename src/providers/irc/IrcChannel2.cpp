@@ -20,6 +20,7 @@ void IrcChannel::sendMessage(const QString &message)
         this->server()->sendMessage(this->getName(), message);
 
     MessageBuilder builder;
+    builder.emplace<TimestampElement>();
     builder.emplace<TextElement>(this->server()->nick() + ":",
                                  MessageElementFlag::Username);
     builder.emplace<TextElement>(message, MessageElementFlag::Text);

@@ -5,6 +5,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
+#include "util/QObjectRef.hpp"
 
 namespace chatterino {
 
@@ -44,13 +45,13 @@ const QString &IrcServer::user()
 
 const QString &IrcServer::nick()
 {
-    return this->data_->nick;
+    return this->data_->nick.isEmpty() ? this->data_->user : this->data_->nick;
 }
 
-void IrcServer::initializeConnection(IrcConnection *connection, bool isRead,
-                                     bool isWrite)
+void IrcServer::initializeConnection(IrcConnection *connection,
+                                     ConnectionType type)
 {
-    assert(isRead && isWrite);
+    assert(type == Both);
 
     connection->setSecure(this->data_->ssl);
     connection->setHost(this->data_->host);
@@ -61,7 +62,18 @@ void IrcServer::initializeConnection(IrcConnection *connection, bool isRead,
                                                         : this->data_->nick);
     connection->setRealName(this->data_->real.isEmpty() ? this->data_->user
                                                         : this->data_->nick);
-    connection->setPassword(this->data_->password);
+
+    this->data_->getPassword(
+        this, [conn = new QObjectRef(connection) /* can't copy */,
+               this](const QString &password) mutable {
+            if (*conn)
+            {
+                (*conn)->setPassword(password);
+                this->open(Both);
+            }
+
+            delete conn;
+        });
 }
 
 std::shared_ptr<Channel> IrcServer::createChannel(const QString &channelName)
@@ -76,22 +88,16 @@ bool IrcServer::hasSeparateWriteConnection() const
 
 void IrcServer::onReadConnected(IrcConnection *connection)
 {
-    AbstractIrcServer::onReadConnected(connection);
-
-    std::lock_guard lock(this->channelMutex);
-
-    for (auto &&command : this->data_->connectCommands)
     {
-        connection->sendRaw(command + "\r\n");
-    }
+        std::lock_guard lock(this->channelMutex);
 
-    for (auto &&weak : this->channels)
-    {
-        if (auto channel = weak.lock())
+        for (auto &&command : this->data_->connectCommands)
         {
-            connection->sendRaw("JOIN #" + channel->getName());
+            connection->sendRaw(command + "\r\n");
         }
     }
+
+    AbstractIrcServer::onReadConnected(connection);
 }
 
 void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)

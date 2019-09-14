@@ -17,6 +17,8 @@ using ChannelPtr = std::shared_ptr<Channel>;
 class AbstractIrcServer : public QObject
 {
 public:
+    enum ConnectionType { Read = 1, Write = 2, Both = 3 };
+
     virtual ~AbstractIrcServer() = default;
 
     // connection
@@ -43,8 +45,8 @@ public:
 protected:
     AbstractIrcServer();
 
-    virtual void initializeConnection(IrcConnection *connection, bool isRead,
-                                      bool isWrite) = 0;
+    virtual void initializeConnection(IrcConnection *connection,
+                                      ConnectionType type) = 0;
     virtual std::shared_ptr<Channel> createChannel(
         const QString &channelName) = 0;
 
@@ -62,6 +64,8 @@ protected:
 
     virtual bool hasSeparateWriteConnection() const = 0;
     virtual QString cleanChannelName(const QString &dirtyChannelName);
+
+    void open(ConnectionType type);
 
     QMap<QString, std::weak_ptr<Channel>> channels;
     std::mutex channelMutex;

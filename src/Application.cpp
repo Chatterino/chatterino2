@@ -79,6 +79,8 @@ void Application::initialize(Settings &settings, Paths &paths)
     assert(isAppInitialized == false);
     isAppInitialized = true;
 
+    Irc::getInstance().load();
+
     for (auto &singleton : this->singletons_)
     {
         singleton->initialize(settings, paths);
@@ -98,7 +100,6 @@ int Application::run(QApplication &qtApp)
     assert(isAppInitialized);
 
     this->twitch.server->connect();
-    Irc::getInstance().load();
 
     this->windows->getMainWindow().show();
 

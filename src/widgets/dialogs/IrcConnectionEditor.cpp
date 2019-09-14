@@ -28,7 +28,10 @@ IrcConnectionEditor::IrcConnectionEditor(const IrcServerData &data, bool isAdd,
     this->ui_->realNameLineEdit->setText(data.real);
     this->ui_->connectCommandsEditor->setPlainText(
         data.connectCommands.join('\n'));
-    this->ui_->passwordLineEdit->setText(data.password);
+
+    data.getPassword(this, [this](const QString &password) {
+        this->ui_->passwordLineEdit->setText(password);
+    });
 
     QFont font("Monospace");
     font.setStyleHint(QFont::TypeWriter);
@@ -51,7 +54,7 @@ IrcServerData IrcConnectionEditor::data()
     data.real = this->ui_->realNameLineEdit->text();
     data.connectCommands =
         this->ui_->connectCommandsEditor->toPlainText().split('\n');
-    data.password = this->ui_->passwordLineEdit->text();
+    data.setPassword(this->ui_->passwordLineEdit->text());
     return data;
 }
 
