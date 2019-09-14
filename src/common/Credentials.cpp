@@ -1,5 +1,6 @@
 #include "Credentials.hpp"
 
+#include "debug/AssertInGuiThread.hpp"
 #include "keychain.h"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
