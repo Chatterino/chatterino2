@@ -5,8 +5,10 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
+#include "util/Overloaded.hpp"
 
 #include <QSaveFile>
+#include <variant>
 
 #define FORMAT_NAME                                                  \
     ([&] {                                                           \
@@ -73,6 +75,70 @@ namespace {
             });
         }
     }
+
+    // QKeychain runs jobs asyncronously, so we have to assure that set/erase
+    // jobs gets executed in order.
+    struct SetJob {
+        QString name;
+        QString credential;
+    };
+
+    struct EraseJob {
+        QString name;
+    };
+
+    using Job = std::variant<SetJob, EraseJob>;
+
+    static std::queue<Job> &jobQueue()
+    {
+        static std::queue<Job> jobs;
+        return jobs;
+    }
+
+    static void runNextJob()
+    {
+        auto &&queue = jobQueue();
+
+        if (!queue.empty())
+        {
+            std::visit(
+                Overloaded{
+                    [](const SetJob &set) {
+                        qDebug() << "set";
+                        auto job =
+                            new QKeychain::WritePasswordJob("chatterino");
+                        job->setAutoDelete(true);
+                        job->setKey(set.name);
+                        job->setTextData(set.credential);
+                        QObject::connect(job, &QKeychain::Job::finished, qApp,
+                                         [](auto) { runNextJob(); });
+                        job->start();
+                    },
+                    [](const EraseJob &erase) {
+                        qDebug() << "erase";
+                        auto job =
+                            new QKeychain::DeletePasswordJob("chatterino");
+                        job->setAutoDelete(true);
+                        job->setKey(erase.name);
+                        QObject::connect(job, &QKeychain::Job::finished, qApp,
+                                         [](auto) { runNextJob(); });
+                        job->start();
+                    }},
+                queue.front());
+            queue.pop();
+        }
+    }
+
+    static void queueJob(Job &&job)
+    {
+        auto &&queue = jobQueue();
+
+        queue.push(std::move(job));
+        if (queue.size() == 1)
+        {
+            runNextJob();
+        }
+    }
 }  // namespace
 
 Credentials &Credentials::getInstance()
@@ -125,12 +191,8 @@ void Credentials::set(const QString &provider, const QString &name_,
 
     if (useKeyring())
     {
-        auto job = new QKeychain::WritePasswordJob("chatterino");
-        job->setAutoDelete(true);
-        job->setKey(name);
-        job->setTextData(credential);
-        //QObject::connect(job, &QKeychain::Job::finished, qApp, [](auto) {});
-        job->start();
+        qDebug() << "queue set";
+        queueJob(SetJob{name, credential});
     }
     else
     {
@@ -150,11 +212,8 @@ void Credentials::erase(const QString &provider, const QString &name_)
 
     if (useKeyring())
     {
-        auto job = new QKeychain::DeletePasswordJob("chatterino");
-        job->setAutoDelete(true);
-        job->setKey(name);
-        //QObject::connect(job, &QKeychain::Job::finished, qApp, [](auto) {});
-        job->start();
+        qDebug() << "queue erase";
+        queueJob(EraseJob{name});
     }
     else
     {

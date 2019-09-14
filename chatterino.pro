@@ -346,6 +346,7 @@ HEADERS += \
     src/util/IsBigEndian.hpp \
     src/util/JsonQuery.hpp \
     src/util/LayoutCreator.hpp \
+    src/util/Overloaded.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
     src/util/rangealgorithm.hpp \

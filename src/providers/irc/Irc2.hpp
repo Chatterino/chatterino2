@@ -10,7 +10,7 @@ class QAbstractTableModel;
 
 namespace chatterino {
 
-//enum IrcAuthType { Anonymous, /*Sals,*/ Pass, MsgNickServ, NickServ };
+enum class IrcAuthType { Anonymous, Custom, Pass };
 
 struct IrcServerData {
     QString host;
@@ -37,6 +37,9 @@ public:
     Irc();
 
     static Irc &getInstance();
+
+    static inline void *const noEraseCredentialCaller =
+        reinterpret_cast<void *>(1);
 
     UnsortedSignalVector<IrcServerData> connections;
     QAbstractTableModel *newConnectionModel(QObject *parent);

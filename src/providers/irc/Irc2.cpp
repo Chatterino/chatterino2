@@ -128,8 +128,10 @@ Irc::Irc()
 
             this->abandonedChannels_[args.item.id] = abandoned;
             this->servers_.erase(server);
+        }
 
-            // delete password
+        if (args.caller != Irc::noEraseCredentialCaller)
+        {
             Credentials::getInstance().erase("irc",
                                              getCredentialName(args.item));
         }

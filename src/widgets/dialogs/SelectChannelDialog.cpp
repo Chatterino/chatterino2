@@ -174,7 +174,8 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                         {
                             if (conn.id == data.id)
                             {
-                                Irc::getInstance().connections.removeItem(i);
+                                Irc::getInstance().connections.removeItem(
+                                    i, Irc::noEraseCredentialCaller);
                                 Irc::getInstance().connections.insertItem(data,
                                                                           i);
                             }

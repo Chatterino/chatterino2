@@ -33,10 +33,30 @@ IrcConnectionEditor::IrcConnectionEditor(const IrcServerData &data, bool isAdd,
         this->ui_->passwordLineEdit->setText(password);
     });
 
+    QObject::connect(this->ui_->loginMethodComboBox,
+                     qOverload<int>(&QComboBox::currentIndexChanged), this,
+                     [this](int index) {
+                         IrcAuthType type;
+
+                         switch (index)
+                         {
+                             case 0:  // anonymous
+                                 type = IrcAuthType::Anonymous;
+                                 break;
+                             case 1:  // custom
+                                 this->ui_->connectCommandsEditor->setFocus();
+                                 type = IrcAuthType::Custom;
+                                 break;
+                             case 2:  // PASS
+                                 type = IrcAuthType::Pass;
+                                 break;
+                         }
+                     });
+
     QFont font("Monospace");
     font.setStyleHint(QFont::TypeWriter);
     this->ui_->connectCommandsEditor->setFont(font);
-}  // namespace chatterino
+}
 
 IrcConnectionEditor::~IrcConnectionEditor()
 {

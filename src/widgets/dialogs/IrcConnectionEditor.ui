@@ -142,7 +142,7 @@
       </spacer>
      </item>
      <item row="8" column="1">
-      <widget class="QComboBox" name="comboBox">
+      <widget class="QComboBox" name="loginMethodComboBox">
        <item>
         <property name="text">
          <string>Anonymous</string>
@@ -150,7 +150,12 @@
        </item>
        <item>
         <property name="text">
-         <string>PASS</string>
+         <string>Custom</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>Server Password (/PASS $password)</string>
         </property>
        </item>
       </widget>
@@ -210,7 +215,7 @@ on connect:</string>
   <tabstop>userNameLineEdit</tabstop>
   <tabstop>nickNameLineEdit</tabstop>
   <tabstop>realNameLineEdit</tabstop>
-  <tabstop>comboBox</tabstop>
+  <tabstop>loginMethodComboBox</tabstop>
   <tabstop>passwordLineEdit</tabstop>
  </tabstops>
  <resources/>
