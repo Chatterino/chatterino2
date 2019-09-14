@@ -621,7 +621,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
                     dynamic_cast<IrcChannel *>(channel.get().get()))
             {
                 obj.insert("type", "irc");
-                obj.insert("server", ircChannel->server()->id());
+                if (ircChannel->server())
+                {
+                    obj.insert("server", ircChannel->server()->id());
+                }
                 obj.insert("channel", ircChannel->getName());
             }
         }

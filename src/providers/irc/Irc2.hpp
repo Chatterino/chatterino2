@@ -23,6 +23,7 @@ struct IrcServerData {
 
     //    IrcAuthType authType = Anonymous;
     QString password;
+    QStringList connectCommands;
 
     int id;
 };
@@ -43,9 +44,6 @@ public:
     void load();
 
     int uniqueId();
-
-signals:
-    void connectionUpdated(int id);
 
 private:
     int currentId_{};

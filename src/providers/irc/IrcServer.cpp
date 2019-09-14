@@ -80,6 +80,11 @@ void IrcServer::onReadConnected(IrcConnection *connection)
 
     std::lock_guard lock(this->channelMutex);
 
+    for (auto &&command : this->data_->connectCommands)
+    {
+        connection->sendRaw(command + "\r\n");
+    }
+
     for (auto &&weak : this->channels)
     {
         if (auto channel = weak.lock())

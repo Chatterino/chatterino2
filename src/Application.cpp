@@ -70,8 +70,6 @@ Application::Application(Settings &_settings, Paths &_paths)
     this->fonts->fontChanged.connect(
         [this]() { this->windows->layoutChannelViews(); });
 
-    Irc::getInstance().load();
-
     this->twitch.server = this->twitch2;
     this->twitch.pubsub = this->twitch2->pubsub;
 }
@@ -100,6 +98,7 @@ int Application::run(QApplication &qtApp)
     assert(isAppInitialized);
 
     this->twitch.server->connect();
+    Irc::getInstance().load();
 
     this->windows->getMainWindow().show();
 

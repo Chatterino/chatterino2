@@ -85,8 +85,8 @@ Credentials::Credentials()
 {
 }
 
-QString Credentials::get(const QString &provider, const QString &name_,
-                         std::function<void(QString)> &&onLoaded)
+void Credentials::get(const QString &provider, const QString &name_,
+                      std::function<void(const QString &)> &&onLoaded)
 {
     assertInGuiThread();
 
@@ -100,16 +100,15 @@ QString Credentials::get(const QString &provider, const QString &name_,
         QObject::connect(job, &QKeychain::Job::finished, qApp,
                          [job, onLoaded = std::move(onLoaded)](auto) mutable {
                              onLoaded(job->textData());
-                         });
+                         },
+                         Qt::DirectConnection);
         job->start();
-
-        return job->textData();
     }
     else
     {
         auto &instance = insecureInstance();
 
-        return instance.object().find(name).value().toString();
+        onLoaded(instance.object().find(name).value().toString());
     }
 }
 

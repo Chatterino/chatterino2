@@ -26,7 +26,13 @@ IrcConnectionEditor::IrcConnectionEditor(const IrcServerData &data, bool isAdd,
     this->ui_->userNameLineEdit->setText(data.user);
     this->ui_->nickNameLineEdit->setText(data.nick);
     this->ui_->realNameLineEdit->setText(data.real);
+    this->ui_->connectCommandsEditor->setPlainText(
+        data.connectCommands.join('\n'));
     this->ui_->passwordLineEdit->setText(data.password);
+
+    QFont font("Monospace");
+    font.setStyleHint(QFont::TypeWriter);
+    this->ui_->connectCommandsEditor->setFont(font);
 }  // namespace chatterino
 
 IrcConnectionEditor::~IrcConnectionEditor()
@@ -43,6 +49,8 @@ IrcServerData IrcConnectionEditor::data()
     data.user = this->ui_->userNameLineEdit->text();
     data.nick = this->ui_->nickNameLineEdit->text();
     data.real = this->ui_->realNameLineEdit->text();
+    data.connectCommands =
+        this->ui_->connectCommandsEditor->toPlainText().split('\n');
     data.password = this->ui_->passwordLineEdit->text();
     return data;
 }

@@ -130,7 +130,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     // irc
     {
         LayoutCreator<QWidget> obj(new QWidget());
-        auto outerBox = obj.setLayoutType<QVBoxLayout>();
+        auto outerBox = obj.setLayoutType<QFormLayout>();
         //        outerBox.emplace<QLabel>("Connection:");
 
         {
@@ -140,16 +140,11 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
             view->setTitles({"host", "port", "ssl", "user", "nick", "real",
                              "password", "login command"});
             view->getTableView()->horizontalHeader()->resizeSection(0, 140);
-            view->getTableView()->horizontalHeader()->resizeSection(1, 40);
-            view->getTableView()->horizontalHeader()->resizeSection(2, 30);
-            //view->getTableView()->horizontalHeader()->setVisible(false);
 
             view->getTableView()->horizontalHeader()->setSectionHidden(1, true);
             view->getTableView()->horizontalHeader()->setSectionHidden(2, true);
             view->getTableView()->horizontalHeader()->setSectionHidden(4, true);
             view->getTableView()->horizontalHeader()->setSectionHidden(5, true);
-            view->getTableView()->horizontalHeader()->setSectionHidden(6, true);
-            view->getTableView()->horizontalHeader()->setSectionHidden(7, true);
 
             view->addButtonPressed.connect([] {
                 auto unique = IrcServerData{};
@@ -158,7 +153,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 auto editor = new IrcConnectionEditor(unique);
                 if (editor->exec() == QDialog::Accepted)
                 {
-                    Irc::getInstance().connections.appendItem(unique);
+                    Irc::getInstance().connections.appendItem(editor->data());
                 }
             });
 
@@ -188,14 +183,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                     }
                 });
 
-            outerBox->addWidget(view);
+            outerBox->addRow("Server:", view);
         }
 
-        {
-            auto box = outerBox.emplace<QHBoxLayout>().withoutMargin();
-            box.emplace<QLabel>("Channel:");
-            this->ui_.irc.channel = box.emplace<QLineEdit>().getElement();
-        }
+        outerBox->addRow("Channel:", this->ui_.irc.channel = new QLineEdit);
 
         auto tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Irc");

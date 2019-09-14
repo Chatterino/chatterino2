@@ -10,8 +10,8 @@ class Credentials
 public:
     static Credentials &getInstance();
 
-    QString get(const QString &provider, const QString &name,
-                std::function<void(QString)> &&onLoaded);
+    void get(const QString &provider, const QString &name,
+             std::function<void(const QString &)> &&onLoaded);
     void set(const QString &provider, const QString &name,
              const QString &credential);
     void erase(const QString &provider, const QString &name);

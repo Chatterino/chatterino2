@@ -14,6 +14,7 @@ public:
 
     void sendMessage(const QString &message) override;
 
+    // server may be nullptr
     IrcServer *server();
 
 private:
