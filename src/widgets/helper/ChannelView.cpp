@@ -12,7 +12,7 @@
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/TooltipPreviewImage.hpp"

@@ -5,7 +5,7 @@
 
 namespace chatterino {
 
-class TwitchServer;
+class TwitchIrcServer;
 class Channel;
 
 class IrcMessageHandler
@@ -23,7 +23,7 @@ public:
     std::vector<MessagePtr> parsePrivMessage(
         Channel *channel, Communi::IrcPrivateMessage *message);
     void handlePrivMessage(Communi::IrcPrivateMessage *message,
-                           TwitchServer &server);
+                           TwitchIrcServer &server);
 
     void handleRoomStateMessage(Communi::IrcMessage *message);
     void handleClearChatMessage(Communi::IrcMessage *message);
@@ -36,7 +36,7 @@ public:
     std::vector<MessagePtr> parseUserNoticeMessage(
         Channel *channel, Communi::IrcMessage *message);
     void handleUserNoticeMessage(Communi::IrcMessage *message,
-                                 TwitchServer &server);
+                                 TwitchIrcServer &server);
 
     void handleModeMessage(Communi::IrcMessage *message);
 
@@ -51,7 +51,7 @@ public:
 
 private:
     void addMessage(Communi::IrcMessage *message, const QString &target,
-                    const QString &content, TwitchServer &server, bool isResub,
+                    const QString &content, TwitchIrcServer &server, bool isResub,
                     bool isAction);
 };
 

@@ -20,11 +20,11 @@ class Paths;
 class PubSub;
 class TwitchChannel;
 
-class TwitchServer final : public AbstractIrcServer, public Singleton
+class TwitchIrcServer final : public AbstractIrcServer, public Singleton
 {
 public:
-    TwitchServer();
-    virtual ~TwitchServer() override = default;
+    TwitchIrcServer();
+    virtual ~TwitchIrcServer() override = default;
 
     virtual void initialize(Settings &settings, Paths &paths) override;
 

@@ -1,7 +1,7 @@
 #include "SelectChannelDialog.hpp"
 
 #include "Application.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"

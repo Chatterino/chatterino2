@@ -8,7 +8,7 @@
 #include "debug/Benchmark.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 

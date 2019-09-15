@@ -8,7 +8,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
@@ -85,7 +85,7 @@ std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
 }
 
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
-                                          TwitchServer &server)
+                                          TwitchIrcServer &server)
 {
     this->addMessage(message, message->target(), message->content(), server,
                      false, message->isAction());
@@ -93,7 +93,7 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
 
 void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                                    const QString &target,
-                                   const QString &content, TwitchServer &server,
+                                   const QString &content, TwitchIrcServer &server,
                                    bool isSub, bool isAction)
 {
     QString channelName;
@@ -439,7 +439,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
 }
 
 void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
-                                                TwitchServer &server)
+                                                TwitchIrcServer &server)
 {
     auto data = message->toData();
 

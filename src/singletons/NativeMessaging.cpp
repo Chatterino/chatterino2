@@ -1,7 +1,7 @@
 #include "singletons/NativeMessaging.hpp"
 
 #include "Application.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
 #include "util/PostToThread.hpp"
 

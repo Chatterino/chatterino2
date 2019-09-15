@@ -148,9 +148,9 @@ SOURCES += \
     src/providers/twitch/TwitchChannel.cpp \
     src/providers/twitch/TwitchEmotes.cpp \
     src/providers/twitch/TwitchHelpers.cpp \
+    src/providers/twitch/TwitchIrcServer.cpp \
     src/providers/twitch/TwitchMessageBuilder.cpp \
     src/providers/twitch/TwitchParseCheerEmotes.cpp \
-    src/providers/twitch/TwitchServer.cpp \
     src/providers/twitch/TwitchUser.cpp \
     src/RunGui.cpp \
     src/singletons/Badges.cpp \
@@ -318,9 +318,9 @@ HEADERS += \
     src/providers/twitch/TwitchCommon.hpp \
     src/providers/twitch/TwitchEmotes.hpp \
     src/providers/twitch/TwitchHelpers.hpp \
+    src/providers/twitch/TwitchIrcServer.hpp \
     src/providers/twitch/TwitchMessageBuilder.hpp \
     src/providers/twitch/TwitchParseCheerEmotes.hpp \
-    src/providers/twitch/TwitchServer.hpp \
     src/providers/twitch/TwitchUser.hpp \
     src/RunGui.hpp \
     src/singletons/Badges.hpp \

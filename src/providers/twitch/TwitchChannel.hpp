@@ -30,7 +30,7 @@ class TwitchBadges;
 class FfzEmotes;
 class BttvEmotes;
 
-class TwitchServer;
+class TwitchIrcServer;
 
 class TwitchChannel : public Channel, pajlada::Signals::SignalHolder
 {
@@ -172,7 +172,7 @@ private:
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
 
-    friend class TwitchServer;
+    friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;
     friend class IrcMessageHandler;
 };
