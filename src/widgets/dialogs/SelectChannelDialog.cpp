@@ -131,7 +131,6 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     {
         LayoutCreator<QWidget> obj(new QWidget());
         auto outerBox = obj.setLayoutType<QFormLayout>();
-        //        outerBox.emplace<QLabel>("Connection:");
 
         {
             auto view = this->ui_.irc.servers = new EditableModelView(
@@ -291,6 +290,7 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
                             this->ui_.irc.servers->getTableView()->selectRow(i);
                             break;
                         }
+                        i++;
                     }
                 }
             }
