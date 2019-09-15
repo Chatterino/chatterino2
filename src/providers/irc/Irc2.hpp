@@ -14,8 +14,8 @@ enum class IrcAuthType { Anonymous, Custom, Pass };
 
 struct IrcServerData {
     QString host;
-    int port = 6667;
-    bool ssl = false;
+    int port = 6697;
+    bool ssl = true;
 
     QString user;
     QString nick;
