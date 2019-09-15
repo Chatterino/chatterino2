@@ -374,7 +374,7 @@ void Window::onAccountSelected()
     QString title = "Chatterino ";
     if (Modes::getInstance().isNightly)
     {
-        title += " Nightly";
+        title += "Nightly ";
     }
     title += CHATTERINO_VERSION;
 
