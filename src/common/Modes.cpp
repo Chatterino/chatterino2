@@ -13,7 +13,7 @@ Modes::Modes()
 
     while (!file.atEnd())
     {
-        auto line = QString(file.readLine());
+        auto line = QString(file.readLine()).trimmed();
 
         // we need to know if it is a nightly build to disable updates on windows
         if (line == "nightly")
