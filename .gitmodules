@@ -22,3 +22,6 @@
 [submodule "lib/rapidjson"]
 	path = lib/rapidjson
 	url = https://github.com/Tencent/rapidjson
+[submodule "lib/websocketpp"]
+	path = lib/websocketpp
+	url = https://github.com/ziocleto/websocketpp
