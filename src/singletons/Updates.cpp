@@ -1,6 +1,7 @@
 #include "Updates.hpp"
 
 #include "Settings.hpp"
+#include "common/Modes.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "common/Version.hpp"
@@ -201,6 +202,14 @@ void Updates::installUpdates()
 
 void Updates::checkForUpdates()
 {
+    // Disable updates if on nightly and windows.
+#ifdef Q_OS_WIN
+    if (Modes::getInstance().isNightly)
+    {
+        return;
+    }
+#endif
+
     QString url =
         "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/" +
         currentBranch();

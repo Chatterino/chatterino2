@@ -8,6 +8,7 @@
 #include <QStandardPaths>
 #include <cassert>
 
+#include "common/Modes.hpp"
 #include "util/CombinePath.hpp"
 
 namespace chatterino {
@@ -32,7 +33,7 @@ bool Paths::createFolder(const QString &folderPath)
 
 bool Paths::isPortable()
 {
-    return this->portable_.get();
+    return Modes::getInstance().isPortable;
 }
 
 QString Paths::cacheDirectory()

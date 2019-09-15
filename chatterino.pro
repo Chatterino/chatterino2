@@ -82,6 +82,7 @@ SOURCES += \
     src/common/DownloadManager.cpp \
     src/common/Env.cpp \
     src/common/LinkParser.cpp \
+    src/common/Modes.cpp \
     src/common/NetworkManager.cpp \
     src/common/NetworkPrivate.cpp \
     src/common/NetworkRequest.cpp \
@@ -235,6 +236,7 @@ HEADERS += \
     src/common/DownloadManager.hpp \
     src/common/Env.hpp \
     src/common/LinkParser.hpp \
+    src/common/Modes.hpp \
     src/common/NetworkCommon.hpp \
     src/common/NetworkManager.hpp \
     src/common/NetworkPrivate.hpp \

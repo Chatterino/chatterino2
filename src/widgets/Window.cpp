@@ -1,6 +1,7 @@
 #include "widgets/Window.hpp"
 
 #include "Application.hpp"
+#include "common/Modes.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchServer.hpp"
@@ -115,18 +116,10 @@ bool Window::event(QEvent *event)
 void Window::showEvent(QShowEvent *event)
 {
     // Startup notification
-    if (getSettings()->startUpNotification.getValue() < 1)
+    /*if (getSettings()->startUpNotification.getValue() < 1)
     {
         getSettings()->startUpNotification = 1;
-
-        // auto box = new QMessageBox(
-        //     QMessageBox::Information, "Chatterino 2 Beta",
-        //     "Please note that this software is not stable yet. Things are "
-        //     "rough "
-        //     "around the edges and everything is subject to change.");
-        // box->setAttribute(Qt::WA_DeleteOnClose);
-        // box->show();
-    }
+    }*/
 
     // Show changelog
     if (getSettings()->currentVersion.getValue() != "" &&
@@ -377,16 +370,25 @@ void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
 
-    //#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
-    //    auto windowTitleEnd =
-    //        QString("Chatterino Nightly " CHATTERINO_VERSION
-    //                " (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
-    //#else
-    auto windowTitleEnd = QString("Chatterino " CHATTERINO_VERSION);
-    //#endif
+    // update title
+    QString title = "Chatterino ";
+    if (Modes::getInstance().isNightly)
+    {
+        title += " Nightly";
+    }
+    title += CHATTERINO_VERSION;
 
-    this->setWindowTitle(windowTitleEnd);
+    if (Modes::getInstance().isNightly)
+    {
+#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
+        title +=
+            QString(" (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
+#endif
+    }
 
+    this->setWindowTitle(title);
+
+    // update user
     if (user->isAnon())
     {
         if (this->userLabel_)
@@ -401,6 +403,6 @@ void Window::onAccountSelected()
             this->userLabel_->getLabel().setText(user->getUserName());
         }
     }
-}
+}  // namespace chatterino
 
 }  // namespace chatterino
