@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>264</width>
+    <width>329</width>
     <height>414</height>
    </rect>
   </property>
@@ -156,6 +156,11 @@
        <item>
         <property name="text">
          <string>Server Password (/PASS $password)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SASL</string>
         </property>
        </item>
       </widget>

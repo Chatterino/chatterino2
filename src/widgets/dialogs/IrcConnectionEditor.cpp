@@ -40,6 +40,8 @@ IrcConnectionEditor::IrcConnectionEditor(const IrcServerData &data, bool isAdd,
                 return 1;
             case IrcAuthType::Pass:
                 return 2;
+            case IrcAuthType::Sasl:
+                return 3;
             default:
                 return 0;
         }
@@ -83,6 +85,8 @@ IrcServerData IrcConnectionEditor::data()
                 return IrcAuthType::Custom;
             case 2:
                 return IrcAuthType::Pass;
+            case 3:
+                return IrcAuthType::Sasl;
             default:
                 return IrcAuthType::Anonymous;
         }

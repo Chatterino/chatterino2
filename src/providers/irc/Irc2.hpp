@@ -10,7 +10,7 @@ class QAbstractTableModel;
 
 namespace chatterino {
 
-enum class IrcAuthType { Anonymous, Custom, Pass };
+enum class IrcAuthType { Anonymous, Custom, Pass, Sasl };
 
 struct IrcServerData {
     QString host;
