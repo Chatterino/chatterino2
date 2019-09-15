@@ -21,7 +21,7 @@ struct IrcServerData {
     QString nick;
     QString real;
 
-    //    IrcAuthType authType = Anonymous;
+    IrcAuthType authType = IrcAuthType::Anonymous;
     void getPassword(QObject *receiver,
                      std::function<void(const QString &)> &&onLoaded) const;
     void setPassword(const QString &password);

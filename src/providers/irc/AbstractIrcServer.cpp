@@ -89,8 +89,7 @@ void AbstractIrcServer::connect()
 
 void AbstractIrcServer::open(ConnectionType type)
 {
-    std::lock_guard<std::mutex> lock1(this->connectionMutex_);
-    std::lock_guard<std::mutex> lock2(this->channelMutex);
+    std::lock_guard<std::mutex> lock(this->connectionMutex_);
 
     if (type == Write)
     {
@@ -98,13 +97,6 @@ void AbstractIrcServer::open(ConnectionType type)
     }
     if (type & Read)
     {
-        for (std::weak_ptr<Channel> &weak : this->channels.values())
-        {
-            if (auto channel = weak.lock())
-            {
-                this->readConnection_->sendRaw("JOIN #" + channel->getName());
-            }
-        }
         this->readConnection_->open();
     }
 }

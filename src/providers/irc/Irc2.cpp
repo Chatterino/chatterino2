@@ -38,6 +38,7 @@ namespace {
                 row[3]->data(Qt::EditRole).toString(),      // user
                 row[4]->data(Qt::EditRole).toString(),      // nick
                 row[5]->data(Qt::EditRole).toString(),      // real
+                original.authType,                          // authType
                 original.connectCommands,                   // connectCommands
                 original.id,                                // id
             };
@@ -203,6 +204,8 @@ void Irc::save()
         obj.insert("connectCommands",
                    QJsonArray::fromStringList(conn.connectCommands));
         obj.insert("id", conn.id);
+        obj.insert("authType", int(conn.authType));
+
         servers.append(obj);
     }
 
@@ -242,6 +245,8 @@ void Irc::load()
         data.connectCommands =
             obj.value("connectCommands").toVariant().toStringList();
         data.id = obj.value("id").toInt(data.id);
+        data.authType =
+            IrcAuthType(obj.value("authType").toInt(int(data.authType)));
 
         // duplicate id's are not allowed :(
         if (ids.find(data.id) == ids.end())

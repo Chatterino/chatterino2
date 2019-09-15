@@ -33,23 +33,24 @@ IrcConnectionEditor::IrcConnectionEditor(const IrcServerData &data, bool isAdd,
         this->ui_->passwordLineEdit->setText(password);
     });
 
+    this->ui_->loginMethodComboBox->setCurrentIndex([&] {
+        switch (data.authType)
+        {
+            case IrcAuthType::Custom:
+                return 1;
+            case IrcAuthType::Pass:
+                return 2;
+            default:
+                return 0;
+        }
+    }());
+
     QObject::connect(this->ui_->loginMethodComboBox,
                      qOverload<int>(&QComboBox::currentIndexChanged), this,
                      [this](int index) {
-                         IrcAuthType type;
-
-                         switch (index)
+                         if (index == 1)  // Custom
                          {
-                             case 0:  // anonymous
-                                 type = IrcAuthType::Anonymous;
-                                 break;
-                             case 1:  // custom
-                                 this->ui_->connectCommandsEditor->setFocus();
-                                 type = IrcAuthType::Custom;
-                                 break;
-                             case 2:  // PASS
-                                 type = IrcAuthType::Pass;
-                                 break;
+                             this->ui_->connectCommandsEditor->setFocus();
                          }
                      });
 
@@ -75,6 +76,17 @@ IrcServerData IrcConnectionEditor::data()
     data.connectCommands =
         this->ui_->connectCommandsEditor->toPlainText().split('\n');
     data.setPassword(this->ui_->passwordLineEdit->text());
+    data.authType = [this] {
+        switch (this->ui_->loginMethodComboBox->currentIndex())
+        {
+            case 1:
+                return IrcAuthType::Custom;
+            case 2:
+                return IrcAuthType::Pass;
+            default:
+                return IrcAuthType::Anonymous;
+        }
+    }();
     return data;
 }
 

@@ -63,17 +63,24 @@ void IrcServer::initializeConnection(IrcConnection *connection,
     connection->setRealName(this->data_->real.isEmpty() ? this->data_->user
                                                         : this->data_->nick);
 
-    this->data_->getPassword(
-        this, [conn = new QObjectRef(connection) /* can't copy */,
-               this](const QString &password) mutable {
-            if (*conn)
-            {
-                (*conn)->setPassword(password);
-                this->open(Both);
-            }
+    if (this->data_->authType == IrcAuthType::Pass)
+    {
+        this->data_->getPassword(
+            this, [conn = new QObjectRef(connection) /* can't copy */,
+                   this](const QString &password) mutable {
+                if (*conn)
+                {
+                    (*conn)->setPassword(password);
+                    this->open(Both);
+                }
 
-            delete conn;
-        });
+                delete conn;
+            });
+    }
+    else
+    {
+        this->open(Both);
+    }
 }
 
 std::shared_ptr<Channel> IrcServer::createChannel(const QString &channelName)
