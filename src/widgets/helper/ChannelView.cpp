@@ -1038,9 +1038,14 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     /// Pause on hover
-    if (getSettings()->pauseChatOnHover.getValue())
+    if (float pauseTime = getSettings()->pauseOnHoverDuration;
+        pauseTime > 0.001f)
     {
-        this->pause(PauseReason::Mouse, 500);
+        this->pause(PauseReason::Mouse, uint(pauseTime * 1000.f));
+    }
+    else if (pauseTime < -0.5f)
+    {
+        this->pause(PauseReason::Mouse);
     }
 
     auto tooltipWidget = TooltipWidget::getInstance();

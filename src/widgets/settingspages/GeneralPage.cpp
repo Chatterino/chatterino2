@@ -319,7 +319,26 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
-    layout.addCheckbox("Pause on hover", s.pauseChatOnHover);
+    layout.addDropdown<float>(
+        "Pause on hover", {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
+        s.pauseOnHoverDuration,
+        [](auto val) {
+            if (val < -0.5f)
+                return QString("Indefinite");
+            else if (val < 0.001f)
+                return QString("Disabled");
+            else
+                return QString::number(val) + "s";
+        },
+        [](auto args) {
+            if (args.index == 0)
+                return 0.0f;
+            else if (args.value == "Indefinite")
+                return -1.0f;
+            else
+                return fuzzyToFloat(args.value,
+                                    std::numeric_limits<float>::infinity());
+        });
     addKeyboardModifierSetting(layout, "Pause while holding a key",
                                s.pauseChatModifier);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
