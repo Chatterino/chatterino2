@@ -103,6 +103,8 @@ public:
         "/behaviour/autocompletion/prefixOnlyCompletion", true};
 
     BoolSetting pauseChatOnHover = {"/behaviour/pauseChatHover", false};
+    EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {
+        "/behaviour/pauseChatModifier", Qt::KeyboardModifier::NoModifier};
     BoolSetting autorun = {"/behaviour/autorun", false};
     BoolSetting mentionUsersWithComma = {"/behaviour/mentionUsersWithComma",
                                          true};

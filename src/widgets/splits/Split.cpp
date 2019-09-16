@@ -188,6 +188,16 @@ Split::Split(QWidget *parent)
         {
             this->overlay_->hide();
         }
+
+        if (getSettings()->pauseChatModifier.getEnum() != Qt::NoModifier &&
+            status == getSettings()->pauseChatModifier.getEnum())
+        {
+            this->view_->pause(PauseReason::KeyboardModifier);
+        }
+        else
+        {
+            this->view_->unpause(PauseReason::KeyboardModifier);
+        }
     });
 
     this->input_->ui_.textEdit->focused.connect(

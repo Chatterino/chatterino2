@@ -44,6 +44,7 @@ enum class PauseReason {
     Mouse,
     Selection,
     DoubleClick,
+    KeyboardModifier,
 };
 
 using SteadyClock = std::chrono::steady_clock;
