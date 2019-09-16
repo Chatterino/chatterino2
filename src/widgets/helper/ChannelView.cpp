@@ -241,6 +241,14 @@ void ChannelView::unpause(PauseReason reason)
     this->pauses_.erase(reason);
 
     this->updatePauseTimer();
+
+    /// Move selection
+    this->selection_.selectionMin.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.selectionMax.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.start.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.end.messageIndex -= this->pauseSelectionOffset_;
+
+    this->pauseSelectionOffset_ = 0;
 }
 
 void ChannelView::updatePauseTimer()
@@ -697,10 +705,17 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
 
 void ChannelView::messageRemoveFromStart(MessagePtr &message)
 {
-    this->selection_.selectionMin.messageIndex--;
-    this->selection_.selectionMax.messageIndex--;
-    this->selection_.start.messageIndex--;
-    this->selection_.end.messageIndex--;
+    if (this->paused())
+    {
+        this->pauseSelectionOffset_ += 1;
+    }
+    else
+    {
+        this->selection_.selectionMin.messageIndex--;
+        this->selection_.selectionMax.messageIndex--;
+        this->selection_.start.messageIndex--;
+        this->selection_.end.messageIndex--;
+    }
 
     this->queueLayout();
 }
