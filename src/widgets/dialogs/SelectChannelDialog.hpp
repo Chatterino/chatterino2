@@ -18,9 +18,9 @@ class SelectChannelDialog final : public BaseWindow
 public:
     SelectChannelDialog(QWidget *parent = nullptr);
 
-    void setSelectedChannel(IndirectChannel selectedChannel_);
-    IndirectChannel getSelectedChannel() const;
-    bool hasSeletedChannel() const;
+    void setSelectedChannels(std::vector<IndirectChannel> selectedChannels_);
+    std::vector<IndirectChannel> getSelectedChannels() const;
+    bool hasSelectedChannels() const;
 
     pajlada::Signals::NoArgSignal closed;
 
@@ -41,18 +41,18 @@ private:
     struct {
         Notebook *notebook;
         struct {
-            QRadioButton *channel;
+            QCheckBox *channel;
             QLineEdit *channelName;
-            QRadioButton *whispers;
-            QRadioButton *mentions;
-            QRadioButton *watching;
+            QCheckBox *whispers;
+            QCheckBox *mentions;
+            QCheckBox *watching;
         } twitch;
     } ui_;
 
     EventFilter tabFilter_;
 
-    ChannelPtr selectedChannel_;
-    bool hasSelectedChannel_ = false;
+    std::vector<IndirectChannel> selectedChannels_;
+    bool hasSelectedChannels_ = false;
 
     void ok();
     friend class EventFilter;
