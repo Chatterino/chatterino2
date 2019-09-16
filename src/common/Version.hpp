@@ -13,3 +13,26 @@
 #else
 #    define CHATTERINO_OS "unknown"
 #endif
+
+namespace chatterino {
+
+class Version
+{
+public:
+    static const Version &getInstance();
+
+    const QString &getVersion() const;
+    const QString &getCommitHash() const;
+    const QString &getDateOfBuild() const;
+    const QString &getFullVersion() const;
+
+private:
+    Version();
+
+    QString version_;
+    QString commitHash_;
+    QString dateOfBuild_;
+    QString fullVersion_;
+};
+
+};

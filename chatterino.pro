@@ -89,6 +89,7 @@ SOURCES += \
     src/common/NetworkRequest.cpp \
     src/common/NetworkResult.cpp \
     src/common/UsernameSet.cpp \
+    src/common/Version.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
