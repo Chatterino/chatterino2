@@ -328,7 +328,10 @@ std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(
 
 QString AbstractIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
-    return dirtyChannelName;
+    if (dirtyChannelName.startsWith('#'))
+        return dirtyChannelName.mid(1);
+    else
+        return dirtyChannelName;
 }
 
 void AbstractIrcServer::addFakeMessage(const QString &data)
@@ -356,7 +359,20 @@ void AbstractIrcServer::privateMessageReceived(
 void AbstractIrcServer::readConnectionMessageReceived(
     Communi::IrcMessage *message)
 {
-    (void)message;
+    /* XXX: only print this message once
+    if (message->type() == Communi::IrcMessage::Join)
+    {
+        auto x = static_cast<Communi::IrcJoinMessage *>(message);
+
+        if (auto it = this->channels.find(this->cleanChannelName(x->channel()));
+            it != this->channels.end())
+        {
+            if (auto shared = it->lock())
+                shared->addMessage(
+                    MessageBuilder(systemMessage, "joined").release());
+        }
+    }
+    */
 }
 
 void AbstractIrcServer::forEachChannel(std::function<void(ChannelPtr)> func)

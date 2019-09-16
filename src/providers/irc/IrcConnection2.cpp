@@ -13,7 +13,7 @@ IrcConnection::IrcConnection(QObject *parent)
         {
             if (!this->recentlyReceivedMessage_.load())
             {
-                this->sendRaw("PING");
+                this->sendRaw("PING chatterino/ping");
                 this->reconnectTimer_.start();
             }
             this->recentlyReceivedMessage_ = false;

@@ -131,6 +131,8 @@ void TwitchIrcServer::privateMessageReceived(
 void TwitchIrcServer::readConnectionMessageReceived(
     Communi::IrcMessage *message)
 {
+    AbstractIrcServer::readConnectionMessageReceived(message);
+
     if (message->type() == Communi::IrcMessage::Type::Private)
     {
         // We already have a handler for private messages
@@ -287,7 +289,10 @@ std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
 
 QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
-    return dirtyChannelName.toLower();
+    if (dirtyChannelName.startsWith('#'))
+        return dirtyChannelName.mid(1).toLower();
+    else
+        return dirtyChannelName.toLower();
 }
 
 bool TwitchIrcServer::hasSeparateWriteConnection() const

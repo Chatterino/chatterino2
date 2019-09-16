@@ -131,7 +131,20 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
 void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
 {
-    qDebug() << QString(message->toData());
+    AbstractIrcServer::readConnectionMessageReceived(message);
+
+    MessageBuilder builder;
+
+    builder.emplace<TimestampElement>();
+    builder.emplace<TextElement>(message->toData(), MessageElementFlag::Text);
+
+    auto msg = builder.release();
+
+    for (auto &&weak : this->channels)
+    {
+        if (auto shared = weak.lock())
+            shared->addMessage(msg);
+    }
 }
 
 }  // namespace chatterino
