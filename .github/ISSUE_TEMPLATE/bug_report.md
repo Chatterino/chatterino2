@@ -20,7 +20,7 @@ assignees: ''
 <!-- If applicable, add screenshots to help explain your problem. Use the integrated uploader of the issue form to upload images, or copy an image to the clipboard and paste it in the input box -->
 
 **Chatterino version**
-<!-- Please enter the version info from the program's title bar, e.g. `2.0.4 (15.08.2019 c1afbd5-1)` -->
+<!-- Please copy the version information from the "About" page in the Settings, e.g. `Chatterino 2.1.4 (commit 35c7853c4, 16.09.2019)` -->
 
 **Additional context**
 <!-- Add any other context about the problem here. -->
