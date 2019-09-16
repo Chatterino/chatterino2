@@ -36,7 +36,7 @@ namespace {
                                     const QString &title,
                                     EnumSetting<Qt::KeyboardModifier> &setting)
     {
-        layout.addDropdown<int>(
+        layout.addDropdown<std::underlying_type<Qt::KeyboardModifier>::type>(
             title, {"None", "Shift", "Control", "Alt", META_KEY}, setting,
             [](int index) {
                 switch (index)
