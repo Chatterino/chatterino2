@@ -440,8 +440,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.mentionUsersWithComma);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
-    layout.addCheckbox("Lowercase domains (anti-phisching)",
-                       s.lowercaseDomains);
+    layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addDropdown<float>(
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
