@@ -294,6 +294,10 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     // sub menu
     auto moreMenu = new QMenu("More", this);
 
+    moreMenu->addAction("Toggle moderation mode", this->split_, [this]() {
+        this->split_->setModerationMode(!this->split_->getModerationMode());
+    });
+
     moreMenu->addAction("Show viewer list", this->split_,
                         &Split::showViewerList);
 
