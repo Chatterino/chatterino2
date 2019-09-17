@@ -1,14 +1,16 @@
 #include "IrcMessageHandler.hpp"
 
 #include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "debug/Log.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
+#include "providers/twitch/TwitchAccountManager.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
-#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
@@ -93,8 +95,9 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
 
 void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                                    const QString &target,
-                                   const QString &content, TwitchIrcServer &server,
-                                   bool isSub, bool isAction)
+                                   const QString &content,
+                                   TwitchIrcServer &server, bool isSub,
+                                   bool isAction)
 {
     QString channelName;
     if (!trimChannelName(target, channelName))
@@ -144,6 +147,10 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         }
 
         chan->addMessage(msg);
+        if (auto chatters = dynamic_cast<ChannelChatters *>(chan.get()))
+        {
+            chatters->addRecentChatter(msg->displayName);
+        }
     }
 }
 
@@ -591,7 +598,12 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
     if (TwitchChannel *twitchChannel =
             dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        twitchChannel->addJoinedUser(message->nick());
+        if (message->nick() !=
+                getApp()->accounts->twitch.getCurrent()->getUserName() &&
+            getSettings()->showJoins.getValue())
+        {
+            twitchChannel->addJoinedUser(message->nick());
+        }
     }
 }
 
@@ -604,7 +616,12 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     if (TwitchChannel *twitchChannel =
             dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        twitchChannel->addPartedUser(message->nick());
+        if (message->nick() !=
+                getApp()->accounts->twitch.getCurrent()->getUserName() &&
+            getSettings()->showJoins.getValue())
+        {
+            twitchChannel->addPartedUser(message->nick());
+        }
     }
 }
 

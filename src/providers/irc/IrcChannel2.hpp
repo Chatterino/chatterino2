@@ -1,13 +1,14 @@
 #pragma once
 
 #include "common/Channel.hpp"
+#include "common/ChannelChatters.hpp"
 
 namespace chatterino {
 
 class Irc;
 class IrcServer;
 
-class IrcChannel : public Channel
+class IrcChannel : public Channel, public ChannelChatters
 {
 public:
     explicit IrcChannel(const QString &name, IrcServer *server);

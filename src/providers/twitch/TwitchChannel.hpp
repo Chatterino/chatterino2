@@ -3,9 +3,9 @@
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
+#include "common/ChannelChatters.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
-#include "common/UsernameSet.hpp"
 #include "providers/ffz/FfzModBadge.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 
@@ -32,7 +32,9 @@ class BttvEmotes;
 
 class TwitchIrcServer;
 
-class TwitchChannel : public Channel, pajlada::Signals::SignalHolder
+class TwitchChannel : public Channel,
+                      public ChannelChatters,
+                      pajlada::Signals::SignalHolder
 {
 public:
     struct StreamStatus {
@@ -74,7 +76,6 @@ public:
     QString roomId() const;
     AccessGuard<const RoomModes> accessRoomModes() const;
     AccessGuard<const StreamStatus> accessStreamStatus() const;
-    AccessGuard<const UsernameSet> accessChatters() const;
 
     // Emotes
     const TwitchBadges &globalTwitchBadges() const;
@@ -99,9 +100,6 @@ public:
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::NoArgSignal roomModesChanged;
 
-protected:
-    void addRecentChatter(const MessagePtr &message) override;
-
 private:
     struct NameOptions {
         QString displayName;
@@ -123,8 +121,6 @@ private:
     void refreshCheerEmotes();
     void loadRecentMessages();
 
-    void addJoinedUser(const QString &user);
-    void addPartedUser(const QString &user);
     void setLive(bool newLiveStatus);
     void setMod(bool value);
     void setVIP(bool value);
@@ -138,7 +134,6 @@ private:
     const QString popoutPlayerUrl_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
-    UniqueAccess<UsernameSet> chatters_;  // maps 2 char prefix to set of names
 
     // Emotes
     TwitchBadges &globalTwitchBadges_;
@@ -160,11 +155,6 @@ private:
     bool vip_ = false;
     bool staff_ = false;
     UniqueAccess<QString> roomID_;
-
-    UniqueAccess<QStringList> joinedUsers_;
-    bool joinedUsersMergeQueued_ = false;
-    UniqueAccess<QStringList> partedUsers_;
-    bool partedUsersMergeQueued_ = false;
 
     // --
     QString lastSentMessage_;

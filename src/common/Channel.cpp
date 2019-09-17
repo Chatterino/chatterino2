@@ -70,13 +70,6 @@ void Channel::addMessage(MessagePtr message,
     auto app = getApp();
     MessagePtr deleted;
 
-    const QString &username = message->loginName;
-    if (!username.isEmpty())
-    {
-        // TODO: Add recent chatters display name
-        this->addRecentChatter(message);
-    }
-
     // FOURTF: change this when adding more providers
     if (this->isTwitchChannel() &&
         (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog)))
@@ -244,10 +237,6 @@ void Channel::deleteMessage(QString messageID)
             break;
         }
     }
-}
-
-void Channel::addRecentChatter(const MessagePtr &message)
-{
 }
 
 bool Channel::canSendMessage() const

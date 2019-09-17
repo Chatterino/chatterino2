@@ -359,20 +359,6 @@ void AbstractIrcServer::privateMessageReceived(
 void AbstractIrcServer::readConnectionMessageReceived(
     Communi::IrcMessage *message)
 {
-    /* XXX: only print this message once
-    if (message->type() == Communi::IrcMessage::Join)
-    {
-        auto x = static_cast<Communi::IrcJoinMessage *>(message);
-
-        if (auto it = this->channels.find(this->cleanChannelName(x->channel()));
-            it != this->channels.end())
-        {
-            if (auto shared = it->lock())
-                shared->addMessage(
-                    MessageBuilder(systemMessage, "joined").release());
-        }
-    }
-    */
 }
 
 void AbstractIrcServer::forEachChannel(std::function<void(ChannelPtr)> func)

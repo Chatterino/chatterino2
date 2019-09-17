@@ -8,6 +8,7 @@ namespace chatterino {
 
 IrcChannel::IrcChannel(const QString &name, IrcServer *server)
     : Channel(name, Channel::Type::Irc)
+    , ChannelChatters(*static_cast<Channel *>(this))
     , server_(server)
 {
 }

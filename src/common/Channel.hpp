@@ -90,7 +90,6 @@ public:
 
 protected:
     virtual void onConnected();
-    virtual void addRecentChatter(const MessagePtr &message);
 
 private:
     const QString name_;
