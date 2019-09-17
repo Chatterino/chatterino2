@@ -16,32 +16,19 @@
 
 #define TAB_TWITCH 0
 
-// Anonymous namespace for helper functions
-namespace {
-
-/**
- * @brief Attempts to parse channel names from the given text.
- */
-QStringList parseChannelNames(const QString &text)
-{
-    QStringList channelNames = text.split(',', QString::SkipEmptyParts);
-    for (QString &channelName : channelNames)
-    {
-        channelName = channelName.trimmed();
-    }
-
-    return channelNames;
-}
-
-}  // anonymous namespace
-
 namespace chatterino {
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     : BaseWindow(BaseWindow::EnableCustomFrame, parent)
     , selectedChannels_{Channel::getEmpty()}
 {
-    this->setWindowTitle("Select a channel to join");
+    this->setWindowTitle("Select channels to join");
+    // TODO: Aassghdsödfkh
+    this->setStyleSheet("QCheckBox:focus {"
+                            "border-width: 1px;"
+                            "border-style: solid;"
+                            "border-color: blue;"
+                        "}");
 
     this->tabFilter_.dialog = this;
 
@@ -55,13 +42,13 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         auto vbox = obj.setLayoutType<QVBoxLayout>();
 
         // channel_btn
-        auto channel_btn = vbox.emplace<QCheckBox>("Channel").assign(
-            &this->ui_.twitch.channel);
+        auto channel_btn = vbox.emplace<QCheckBox>("Channels").assign(
+            &this->ui_.twitch.channels);
         auto channel_lbl =
-            vbox.emplace<QLabel>("Join a twitch channel by its name.").hidden();
+            vbox.emplace<QLabel>("Join twitch channels by their names.").hidden();
         channel_lbl->setWordWrap(true);
         auto channel_edit = vbox.emplace<QLineEdit>().hidden().assign(
-            &this->ui_.twitch.channelName);
+            &this->ui_.twitch.channelNames);
 
         QObject::connect(channel_btn.getElement(), &QCheckBox::stateChanged,
                          [=](int enabled) mutable {
@@ -135,6 +122,8 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         QWidget::setTabOrder(mentions_btn.getElement(),
                              watching_btn.getElement());
 
+        channel_btn->setChecked(true);
+
         // tab
         auto tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Twitch");
@@ -172,11 +161,12 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     this->setScaleIndependantSize(300, 310);
     this->ui_.notebook->selectIndex(TAB_TWITCH);
-    this->ui_.twitch.channel->setFocus();
+    this->ui_.twitch.channels->setFocus();
 
+    // TODO: What to do about these?
     // Shortcuts
-    auto *shortcut_ok = new QShortcut(QKeySequence("Return"), this);
-    QObject::connect(shortcut_ok, &QShortcut::activated, [=] { this->ok(); });
+    // auto *shortcut_ok = new QShortcut(QKeySequence("Return"), this);
+    // QObject::connect(shortcut_ok, &QShortcut::activated, [=] { this->ok(); });
     auto *shortcut_cancel = new QShortcut(QKeySequence("Esc"), this);
     QObject::connect(shortcut_cancel, &QShortcut::activated,
                      [=] { this->close(); });
@@ -193,6 +183,7 @@ void SelectChannelDialog::setSelectedChannels(
 {
     this->selectedChannels_ = _channels;
 
+    // TODO: What does this do? / Is this needed?
     for (auto channel : _channels)
     {
         assert(channel.get());
@@ -202,8 +193,8 @@ void SelectChannelDialog::setSelectedChannels(
             case Channel::Type::Twitch:
             {
                 this->ui_.notebook->selectIndex(TAB_TWITCH);
-                this->ui_.twitch.channel->setFocus();
-                this->ui_.twitch.channelName->setText(channel.get()->getName());
+                this->ui_.twitch.channels->setFocus();
+                this->ui_.twitch.channelNames->setText(channel.get()->getName());
             }
             break;
             case Channel::Type::TwitchWatching:
@@ -227,7 +218,7 @@ void SelectChannelDialog::setSelectedChannels(
             default:
             {
                 this->ui_.notebook->selectIndex(TAB_TWITCH);
-                this->ui_.twitch.channel->setFocus();
+                this->ui_.twitch.channels->setFocus();
             }
         }
     }
@@ -249,10 +240,10 @@ std::vector<IndirectChannel> SelectChannelDialog::getSelectedChannels() const
     {
         case TAB_TWITCH:
         {
-            if (this->ui_.twitch.channel->checkState())
+            if (this->ui_.twitch.channels->checkState())
             {
                 QStringList channelNames =
-                    parseChannelNames(this->ui_.twitch.channelName->text());
+                    this->ui_.twitch.channelNames->text().split(' ', QString::SkipEmptyParts);
 
                 for (const QString &channelName : channelNames)
                 {
@@ -298,14 +289,15 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
 
     if (event->type() == QEvent::FocusIn)
     {
-        widget->grabKeyboard();
-
-        auto *radio = dynamic_cast<QRadioButton *>(watched);
-        if (radio)
+        if (widget == this->dialog->ui_.twitch.channels)
         {
-            radio->setChecked(true);
+            this->dialog->ui_.twitch.channelNames->grabKeyboard();
+            this->dialog->ui_.twitch.channelNames->setFocus();
         }
-
+        else
+        {
+            widget->grabKeyboard();
+        }
         return true;
     }
     else if (event->type() == QEvent::FocusOut)
@@ -320,9 +312,14 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
              event_key->key() == Qt::Key_Down) &&
             event_key->modifiers() == Qt::NoModifier)
         {
-            if (widget == this->dialog->ui_.twitch.channelName)
+            if (widget == this->dialog->ui_.twitch.channelNames)
             {
                 this->dialog->ui_.twitch.whispers->setFocus();
+                return true;
+            }
+            else if (widget == this->dialog->ui_.twitch.watching)
+            {
+                this->dialog->ui_.twitch.channels->setFocus();
                 return true;
             }
             else
@@ -337,18 +334,46 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
                  ((event_key->key() == Qt::Key_Up) &&
                   event_key->modifiers() == Qt::NoModifier))
         {
-            if (widget == this->dialog->ui_.twitch.channelName)
+            if (widget == this->dialog->ui_.twitch.channelNames)
             {
                 this->dialog->ui_.twitch.watching->setFocus();
                 return true;
             }
             else if (widget == this->dialog->ui_.twitch.whispers)
             {
-                this->dialog->ui_.twitch.channel->setFocus();
+                this->dialog->ui_.twitch.channels->setFocus();
                 return true;
             }
 
             widget->previousInFocusChain()->setFocus();
+            return true;
+        }
+        else if ((event_key->key() == Qt::Key_Enter || event_key->key() == Qt::Key_Return) && (event_key->modifiers() == Qt::NoModifier))
+        {
+            // When the Enter key is pressed, check boxes are toggled.
+            // If the channelNames QLineEdit has the focus, we check whether
+            // the field is empty.
+            // If it is empty, the corresponding check box is toggled.
+            // If it is not empty (= the user has entered channel names), the
+            // dialog is ok()'d instead.
+
+            if (auto *checkBox = dynamic_cast<QCheckBox *>(watched))
+            {
+                checkBox->toggle();
+            }
+            else if (auto *lineEdit = dynamic_cast<QLineEdit *>(watched))
+            {
+                if (!lineEdit->text().isEmpty())
+                {
+                    this->dialog->ok();
+                }
+                else
+                {
+                    this->dialog->ui_.twitch.channels->toggle();
+                    this->dialog->ui_.twitch.channels->setFocus();
+                }
+            }
+
             return true;
         }
         else
@@ -382,12 +407,12 @@ void SelectChannelDialog::themeChangedEvent()
     if (this->theme->isLightTheme())
     {
         this->setStyleSheet(
-            "QRadioButton { color: #000 } QLabel { color: #000 }");
+            "QCheckBox { color: #000 } QLabel { color: #000 }");
     }
     else
     {
         this->setStyleSheet(
-            "QRadioButton { color: #fff } QLabel { color: #fff }");
+            "QCheckBox { color: #fff } QLabel { color: #fff }");
     }
 }
 

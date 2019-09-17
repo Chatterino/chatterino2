@@ -41,8 +41,8 @@ private:
     struct {
         Notebook *notebook;
         struct {
-            QCheckBox *channel;
-            QLineEdit *channelName;
+            QCheckBox *channels;
+            QLineEdit *channelNames;
             QCheckBox *whispers;
             QCheckBox *mentions;
             QCheckBox *watching;
