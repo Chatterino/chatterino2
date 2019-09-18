@@ -8,7 +8,7 @@ namespace chatterino {
 
 // commandmodel
 HighlightModel::HighlightModel(QObject *parent)
-    : SignalVectorModel<HighlightPhrase>(4, parent)
+    : SignalVectorModel<HighlightPhrase>(5, parent)
 {
 }
 
@@ -16,12 +16,13 @@ HighlightModel::HighlightModel(QObject *parent)
 HighlightPhrase HighlightModel::getItemFromRow(
     std::vector<QStandardItem *> &row, const HighlightPhrase &original)
 {
-    // key, alert, sound, regex
+    // key, alert, sound, regex, case-sensitivity
 
     return HighlightPhrase{row[0]->data(Qt::DisplayRole).toString(),
                            row[1]->data(Qt::CheckStateRole).toBool(),
                            row[2]->data(Qt::CheckStateRole).toBool(),
-                           row[3]->data(Qt::CheckStateRole).toBool()};
+                           row[3]->data(Qt::CheckStateRole).toBool(),
+                           row[4]->data(Qt::CheckStateRole).toBool()};
 }
 
 // turns a row in the model into a vector item
@@ -32,6 +33,7 @@ void HighlightModel::getRowFromItem(const HighlightPhrase &item,
     setBoolItem(row[1], item.getAlert());
     setBoolItem(row[2], item.getSound());
     setBoolItem(row[3], item.isRegex());
+    setBoolItem(row[4], item.isCaseSensitive());
 }
 
 void HighlightModel::afterInit()

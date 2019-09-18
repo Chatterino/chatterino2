@@ -88,7 +88,6 @@ TwitchChannel::TwitchChannel(const QString &name,
     , globalFfz_(ffz)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
-    , ffzCustomModBadge_(name)
     , mod_(false)
 {
     log("[TwitchChannel:{}] Opened", name);
@@ -139,7 +138,6 @@ void TwitchChannel::initialize()
 {
     this->refreshChatters();
     this->refreshBadges();
-    this->ffzCustomModBadge_.loadCustomModBadge();
 }
 
 bool TwitchChannel::isEmpty() const
@@ -165,10 +163,17 @@ void TwitchChannel::refreshBTTVChannelEmotes()
 void TwitchChannel::refreshFFZChannelEmotes()
 {
     FfzEmotes::loadChannel(
-        this->roomId(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+        this->roomId(),
+        [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
                 this->ffzEmotes_.set(
                     std::make_shared<EmoteMap>(std::move(emoteMap)));
+        },
+        [this, weak = weakOf<Channel>(this)](auto &&modBadge) {
+            if (auto shared = weak.lock())
+            {
+                this->ffzCustomModBadge_.set(std::move(modBadge));
+            }
         });
 }
 
@@ -685,22 +690,23 @@ void TwitchChannel::refreshBadges()
 
 void TwitchChannel::refreshCheerEmotes()
 {
-    /*auto url = Url{"https://api.twitch.tv/kraken/bits/actions?channel_id=" +
-                   this->getRoomId()};
-    auto request = NetworkRequest::twitchRequest(url.string);
-    request.setCaller(QThread::currentThread());
-
-    request.onSuccess(
-        [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+    QString url("https://api.twitch.tv/kraken/bits/actions?channel_id=" +
+                this->roomId());
+    NetworkRequest::twitchRequest(url)
+        .onSuccess([this,
+                    weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto cheerEmoteSets = ParseCheermoteSets(result.parseRapidJson());
             std::vector<CheerEmoteSet> emoteSets;
 
-            for (auto &set : cheerEmoteSets) {
+            for (auto &set : cheerEmoteSets)
+            {
                 auto cheerEmoteSet = CheerEmoteSet();
                 cheerEmoteSet.regex = QRegularExpression(
-                    "^" + set.prefix.toLower() + "([1-9][0-9]*)$");
+                    "^" + set.prefix + "([1-9][0-9]*)$",
+                    QRegularExpression::CaseInsensitiveOption);
 
-                for (auto &tier : set.tiers) {
+                for (auto &tier : set.tiers)
+                {
                     CheerEmote cheerEmote;
 
                     cheerEmote.color = QColor(tier.color);
@@ -733,7 +739,7 @@ void TwitchChannel::refreshCheerEmotes()
                 std::sort(cheerEmoteSet.cheerEmotes.begin(),
                           cheerEmoteSet.cheerEmotes.end(),
                           [](const auto &lhs, const auto &rhs) {
-                              return lhs.minBits < rhs.minBits;  //
+                              return lhs.minBits > rhs.minBits;
                           });
 
                 emoteSets.emplace_back(cheerEmoteSet);
@@ -741,10 +747,8 @@ void TwitchChannel::refreshCheerEmotes()
             *this->cheerEmoteSets_.access() = std::move(emoteSets);
 
             return Success;
-        });
-
-    request.execute();
-    */
+        })
+        .execute();
 }
 
 boost::optional<EmotePtr> TwitchChannel::twitchBadge(
@@ -765,9 +769,34 @@ boost::optional<EmotePtr> TwitchChannel::twitchBadge(
 
 boost::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
 {
-    if (auto badge = this->ffzCustomModBadge_.badge())
-        return badge;
+    return this->ffzCustomModBadge_.get();
+}
 
+boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
+{
+    auto sets = this->cheerEmoteSets_.access();
+    for (const auto &set : *sets)
+    {
+        auto match = set.regex.match(string);
+        if (!match.hasMatch())
+        {
+            continue;
+        }
+        QString amount = match.captured(1);
+        bool ok = false;
+        int bitAmount = amount.toInt(&ok);
+        if (!ok)
+        {
+            log("Error parsing bit amount in cheerEmote");
+        }
+        for (const auto &emote : set.cheerEmotes)
+        {
+            if (bitAmount >= emote.minBits)
+            {
+                return emote;
+            }
+        }
+    }
     return boost::none;
 }
 

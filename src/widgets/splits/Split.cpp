@@ -52,7 +52,7 @@ namespace {
                            const QString &title, const QString &description)
     {
         auto window =
-            new BaseWindow(parent, BaseWindow::Flags::EnableCustomFrame);
+            new BaseWindow(BaseWindow::Flags::EnableCustomFrame, parent);
         window->setWindowTitle("Chatterino - " + title);
         window->setAttribute(Qt::WA_DeleteOnClose);
         auto layout = new QVBoxLayout();
@@ -89,6 +89,7 @@ Split::Split(QWidget *parent)
 {
     this->setMouseTracking(true);
     this->view_->setPausable(true);
+    this->view_->setFocusPolicy(Qt::FocusPolicy::NoFocus);
 
     this->vbox_->setSpacing(0);
     this->vbox_->setMargin(1);

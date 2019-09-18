@@ -79,7 +79,38 @@ namespace {
 
         return {Success, std::move(emotes)};
     }
-    std::pair<Outcome, EmoteMap> parseChannelEmotes(const QJsonObject &jsonRoot)
+
+    boost::optional<EmotePtr> parseModBadge(const QJsonObject &jsonRoot)
+    {
+        boost::optional<EmotePtr> modBadge;
+
+        auto room = jsonRoot.value("room").toObject();
+        auto modUrls = room.value("mod_urls").toObject();
+        if (!modUrls.isEmpty())
+        {
+            auto modBadge1x = getEmoteLink(modUrls, "1");
+            auto modBadge2x = getEmoteLink(modUrls, "2");
+            auto modBadge3x = getEmoteLink(modUrls, "4");
+
+            auto modBadgeImageSet = ImageSet{
+                Image::fromUrl(modBadge1x, 1),
+                modBadge2x.string.isEmpty() ? Image::getEmpty()
+                                            : Image::fromUrl(modBadge2x, 0.5),
+                modBadge3x.string.isEmpty() ? Image::getEmpty()
+                                            : Image::fromUrl(modBadge3x, 0.25),
+            };
+
+            modBadge = std::make_shared<Emote>(Emote{
+                {""},
+                modBadgeImageSet,
+                Tooltip{"Twitch Channel Moderator"},
+                modBadge1x,
+            });
+        }
+        return modBadge;
+    }
+
+    EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot)
     {
         auto jsonSets = jsonRoot.value("sets").toObject();
         auto emotes = EmoteMap();
@@ -110,7 +141,7 @@ namespace {
             }
         }
 
-        return {Success, std::move(emotes)};
+        return emotes;
     }
 }  // namespace
 
@@ -151,19 +182,26 @@ void FfzEmotes::loadEmotes()
         .execute();
 }
 
-void FfzEmotes::loadChannel(const QString &channelId,
-                            std::function<void(EmoteMap &&)> callback)
+void FfzEmotes::loadChannel(
+    const QString &channelId, std::function<void(EmoteMap &&)> emoteCallback,
+    std::function<void(boost::optional<EmotePtr>)> modBadgeCallback)
 {
     log("[FFZEmotes] Reload FFZ Channel Emotes for channel {}\n", channelId);
 
     NetworkRequest("https://api.frankerfacez.com/v1/room/id/" + channelId)
 
         .timeout(20000)
-        .onSuccess([callback = std::move(callback)](auto result) -> Outcome {
-            auto pair = parseChannelEmotes(result.parseJson());
-            if (pair.first)
-                callback(std::move(pair.second));
-            return pair.first;
+        .onSuccess([emoteCallback = std::move(emoteCallback),
+                    modBadgeCallback =
+                        std::move(modBadgeCallback)](auto result) -> Outcome {
+            auto json = result.parseJson();
+            auto emoteMap = parseChannelEmotes(json);
+            auto modBadge = parseModBadge(json);
+
+            emoteCallback(std::move(emoteMap));
+            modBadgeCallback(std::move(modBadge));
+
+            return Success;
         })
         .onError([channelId](int result) {
             if (result == 203)

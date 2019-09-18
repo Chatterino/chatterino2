@@ -43,8 +43,7 @@ namespace {
 }  // namespace
 
 UserInfoPopup::UserInfoPopup()
-    : BaseWindow(nullptr, BaseWindow::Flags(BaseWindow::Frameless |
-                                            BaseWindow::FramelessDraggable))
+    : BaseWindow({BaseWindow::Frameless, BaseWindow::FramelessDraggable})
     , hack_(new bool)
 {
     this->setStayInScreenRect(true);
@@ -55,8 +54,8 @@ UserInfoPopup::UserInfoPopup()
 
     auto app = getApp();
 
-    auto layout =
-        LayoutCreator<UserInfoPopup>(this).setLayoutType<QVBoxLayout>();
+    auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
+                      .setLayoutType<QVBoxLayout>();
 
     // first line
     auto head = layout.emplace<QHBoxLayout>().withoutMargin();
@@ -223,26 +222,32 @@ UserInfoPopup::UserInfoPopup()
         });
     }
 
-    //    this->setStyleSheet("font-size: 11pt;");
-
     this->installEvents();
+
+    this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
 }
 
 void UserInfoPopup::themeChangedEvent()
 {
     BaseWindow::themeChangedEvent();
 
-    this->setStyleSheet(
-        "background: #333; font-size: " +
-        QString::number(getFonts()
-                            ->getFont(FontStyle::UiMediumBold, this->scale())
-                            .pixelSize()) +
-        "px;");
+    for (auto &&child : this->findChildren<QCheckBox *>())
+    {
+        child->setFont(getFonts()->getFont(FontStyle::UiMedium, this->scale()));
+    }
 }
 
 void UserInfoPopup::scaleChangedEvent(float /*scale*/)
 {
     themeChangedEvent();
+
+    QTimer::singleShot(20, this, [this] {
+        auto geo = this->geometry();
+        geo.setWidth(10);
+        geo.setHeight(10);
+
+        this->setGeometry(geo);
+    });
 }
 
 void UserInfoPopup::installEvents()

@@ -11,6 +11,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
+#include "util/IncognitoBrowser.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 
@@ -376,6 +377,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 #endif
 
     layout.addTitle("Miscellaneous");
+
+    if (supportsIncognitoLinks())
+    {
+        layout.addCheckbox("Open links in incognito/private mode",
+                           s.openLinksIncognito);
+    }
 
 #ifdef Q_OS_LINUX
     if (!getPaths()->isPortable())

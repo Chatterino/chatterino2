@@ -83,6 +83,7 @@ SOURCES += \
     src/common/DownloadManager.cpp \
     src/common/Env.cpp \
     src/common/LinkParser.cpp \
+    src/common/Modes.cpp \
     src/common/NetworkManager.cpp \
     src/common/NetworkPrivate.cpp \
     src/common/NetworkRequest.cpp \
@@ -123,12 +124,14 @@ SOURCES += \
     src/messages/MessageColor.cpp \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
+    src/messages/search/AuthorPredicate.cpp \
+    src/messages/search/LinkPredicate.cpp \
+    src/messages/search/SubstringPredicate.cpp \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/bttv/LoadBttvChannelEmote.cpp \
     src/providers/chatterino/ChatterinoBadges.cpp \
     src/providers/emoji/Emojis.cpp \
     src/providers/ffz/FfzEmotes.cpp \
-    src/providers/ffz/FfzModBadge.cpp \
     src/providers/irc/AbstractIrcServer.cpp \
     src/providers/irc/Irc2.cpp \
     src/providers/irc/IrcAccount.cpp \
@@ -239,6 +242,7 @@ HEADERS += \
     src/common/DownloadManager.hpp \
     src/common/Env.hpp \
     src/common/LinkParser.hpp \
+    src/common/Modes.hpp \
     src/common/NetworkCommon.hpp \
     src/common/NetworkManager.hpp \
     src/common/NetworkPrivate.hpp \
@@ -276,6 +280,7 @@ HEADERS += \
     src/controllers/taggedusers/TaggedUser.hpp \
     src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
+    src/ForwardDecl.hpp \
     src/messages/Emote.hpp \
     src/messages/Image.hpp \
     src/messages/ImageSet.hpp \
@@ -291,6 +296,10 @@ HEADERS += \
     src/messages/MessageContainer.hpp \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
+    src/messages/search/AuthorPredicate.hpp \
+    src/messages/search/LinkPredicate.hpp \
+    src/messages/search/MessagePredicate.hpp \
+    src/messages/search/SubstringPredicate.hpp \
     src/messages/Selection.hpp \
     src/PrecompiledHeader.hpp \
     src/providers/bttv/BttvEmotes.hpp \
@@ -298,7 +307,6 @@ HEADERS += \
     src/providers/chatterino/ChatterinoBadges.hpp \
     src/providers/emoji/Emojis.hpp \
     src/providers/ffz/FfzEmotes.hpp \
-    src/providers/ffz/FfzModBadge.hpp \
     src/providers/irc/AbstractIrcServer.hpp \
     src/providers/irc/Irc2.hpp \
     src/providers/irc/IrcAccount.hpp \
@@ -356,6 +364,7 @@ HEADERS += \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
+    src/util/SampleCheerMessages.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamLink.hpp \

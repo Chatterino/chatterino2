@@ -72,8 +72,20 @@ protected:
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
 
-private:
     ImagePtr image_;
+};
+
+class ImageWithBackgroundLayoutElement : public ImageLayoutElement
+{
+public:
+    ImageWithBackgroundLayoutElement(MessageElement &creator, ImagePtr image,
+                                     const QSize &size, QColor color);
+
+protected:
+    void paint(QPainter &painter) override;
+
+private:
+    QColor color_;
 };
 
 // TEXT

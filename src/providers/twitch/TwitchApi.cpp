@@ -16,7 +16,7 @@ void TwitchApi::findUserId(const QString user,
     QString requestUrl("https://api.twitch.tv/kraken/users?login=" + user);
 
     NetworkRequest(requestUrl)
-    
+
         .authorizeTwitchV5(getDefaultClientID())
         .timeout(30000)
         .onSuccess([successCallback](auto result) mutable -> Outcome {
@@ -65,7 +65,7 @@ void TwitchApi::findUserName(const QString userid,
     QString requestUrl("https://api.twitch.tv/kraken/users/" + userid);
 
     NetworkRequest(requestUrl)
-    
+
         .authorizeTwitchV5(getDefaultClientID())
         .timeout(30000)
         .onSuccess([successCallback](auto result) mutable -> Outcome {

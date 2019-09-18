@@ -133,6 +133,8 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->clickTimer_ = new QTimer(this);
     this->clickTimer_->setSingleShot(true);
     this->clickTimer_->setInterval(500);
+
+    this->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 }
 
 void ChannelView::initializeLayout()
@@ -1526,14 +1528,8 @@ void ChannelView::addContextMenuItems(
         QString url = hoveredElement->getLink().value;
 
         // open link
-        bool incognitoByDefault = supportsIncognitoLinks() &&
-                                  layout->getMessage()->loginName == "hemirt";
-        menu->addAction("Open link", [url, incognitoByDefault] {
-            if (incognitoByDefault)
-                openLinkIncognito(url);
-            else
-                QDesktopServices::openUrl(QUrl(url));
-        });
+        menu->addAction("Open link",
+                        [url] { QDesktopServices::openUrl(QUrl(url)); });
         // open link default
         if (supportsIncognitoLinks())
         {
@@ -1699,7 +1695,10 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
 
         case Link::Url:
         {
-            QDesktopServices::openUrl(QUrl(link.value));
+            if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
+                openLinkIncognito(link.value);
+            else
+                QDesktopServices::openUrl(QUrl(link.value));
         }
         break;
 

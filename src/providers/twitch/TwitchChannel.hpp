@@ -6,7 +6,7 @@
 #include "common/ChannelChatters.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
-#include "providers/ffz/FfzModBadge.hpp"
+#include "common/UsernameSet.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 
 #include <rapidjson/document.h>
@@ -96,6 +96,9 @@ public:
     boost::optional<EmotePtr> twitchBadge(const QString &set,
                                           const QString &version) const;
 
+    // Cheers
+    boost::optional<CheerEmote> cheerEmote(const QString &string);
+
     // Signals
     pajlada::Signals::NoArgSignal roomIdChanged;
     pajlada::Signals::NoArgSignal userStateChanged;
@@ -145,13 +148,13 @@ protected:
     FfzEmotes &globalFfz_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
+    Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;
 
 private:
     // Badges
     UniqueAccess<std::map<QString, std::map<QString, EmotePtr>>>
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
-    FfzModBadge ffzCustomModBadge_;
 
     bool mod_ = false;
     bool vip_ = false;
