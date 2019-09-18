@@ -422,6 +422,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
 
+    layout.addCheckbox("Show unhandled irc messages",
+                       s.showUnhandledIrcMessages);
+
     layout.addTitle("Cache");
     layout.addDescription(
         "Files that are used often (such as emotes) are saved to disk to "

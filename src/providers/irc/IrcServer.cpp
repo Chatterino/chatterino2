@@ -3,9 +3,11 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
+#include "singletons/Settings.hpp"
 #include "util/QObjectRef.hpp"
 
 namespace chatterino {
@@ -233,23 +235,25 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
         case Communi::IrcMessage::Notice:
             return;
 
-        default:;
+        default:
+            if (getSettings()->showUnhandledIrcMessages)
+            {
+                MessageBuilder builder;
+
+                builder.emplace<TimestampElement>();
+                builder.emplace<TextElement>(message->toData(),
+                                             MessageElementFlag::Text);
+                builder->flags.set(MessageFlag::Debug);
+
+                auto msg = builder.release();
+
+                for (auto &&weak : this->channels)
+                {
+                    if (auto shared = weak.lock())
+                        shared->addMessage(msg);
+                }
+            };
     }
-
-#ifdef QT_DEBUG
-    MessageBuilder builder;
-
-    builder.emplace<TimestampElement>();
-    builder.emplace<TextElement>(message->toData(), MessageElementFlag::Text);
-
-    auto msg = builder.release();
-
-    for (auto &&weak : this->channels)
-    {
-        if (auto shared = weak.lock())
-            shared->addMessage(msg);
-    }
-#endif
 }
 
 }  // namespace chatterino

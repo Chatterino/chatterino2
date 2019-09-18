@@ -211,7 +211,12 @@ public:
 
     QStringSetting cachePath = {"/cache/path", ""};
 
+    /// Debug
+    BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
+                                            false};
+
     /// UI
+    // Purely QOL settings are here (like last item in a list).
     IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
     IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
 

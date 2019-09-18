@@ -32,6 +32,7 @@ enum class MessageFlag : uint32_t {
     RecentMessage = (1 << 15),
     Whisper = (1 << 16),
     HighlightedWhisper = (1 << 17),
+    Debug = (1 << 18),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
