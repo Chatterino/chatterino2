@@ -30,8 +30,8 @@ void HighlightModel::getRowFromItem(const HighlightPhrase &item,
                                     std::vector<QStandardItem *> &row)
 {
     setStringItem(row[0], item.getPattern());
-    setBoolItem(row[1], item.getAlert());
-    setBoolItem(row[2], item.getSound());
+    setBoolItem(row[1], item.hasAlert());
+    setBoolItem(row[2], item.hasSound());
     setBoolItem(row[3], item.isRegex());
     setBoolItem(row[4], item.isCaseSensitive());
 }

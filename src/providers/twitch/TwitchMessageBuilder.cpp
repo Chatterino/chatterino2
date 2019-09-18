@@ -944,12 +944,12 @@ void TwitchMessageBuilder::parseHighlights()
             this->message().flags.set(MessageFlag::Highlighted);
         }
 
-        if (userHighlight.getAlert())
+        if (userHighlight.hasAlert())
         {
             this->highlightAlert_ = true;
         }
 
-        if (userHighlight.getSound())
+        if (userHighlight.hasSound())
         {
             this->highlightSound_ = true;
         }
@@ -997,12 +997,12 @@ void TwitchMessageBuilder::parseHighlights()
             this->message().flags.set(MessageFlag::Highlighted);
         }
 
-        if (highlight.getAlert())
+        if (highlight.hasAlert())
         {
             this->highlightAlert_ = true;
         }
 
-        if (highlight.getSound())
+        if (highlight.hasSound())
         {
             this->highlightSound_ = true;
         }

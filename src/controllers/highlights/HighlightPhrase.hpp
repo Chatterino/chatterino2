@@ -14,24 +14,24 @@ class HighlightPhrase
 public:
     bool operator==(const HighlightPhrase &other) const
     {
-        return std::tie(this->pattern_, this->sound_, this->alert_,
-                        this->isRegex_, this->caseSensitive_) ==
-               std::tie(other.pattern_, other.sound_, other.alert_,
-                        other.isRegex_, other.caseSensitive_);
+        return std::tie(this->pattern_, this->hasSound_, this->hasAlert_,
+                        this->isRegex_, this->isCaseSensitive_) ==
+               std::tie(other.pattern_, other.hasSound_, other.hasAlert_,
+                        other.isRegex_, other.isCaseSensitive_);
     }
 
-    HighlightPhrase(const QString &pattern, bool alert, bool sound,
-                    bool isRegex, bool caseSensitive)
+    HighlightPhrase(const QString &pattern, bool hasAlert, bool hasSound,
+                    bool isRegex, bool isCaseSensitive)
         : pattern_(pattern)
-        , alert_(alert)
-        , sound_(sound)
+        , hasAlert_(hasAlert)
+        , hasSound_(hasSound)
         , isRegex_(isRegex)
-        , caseSensitive_(caseSensitive)
+        , isCaseSensitive_(isCaseSensitive)
         , regex_(
               isRegex_ ? pattern
                        : "\\b" + QRegularExpression::escape(pattern) + "\\b",
               QRegularExpression::UseUnicodePropertiesOption |
-                  (caseSensitive_ ? QRegularExpression::NoPatternOption
+                  (isCaseSensitive_ ? QRegularExpression::NoPatternOption
                                   : QRegularExpression::CaseInsensitiveOption))
     {
     }
@@ -40,13 +40,13 @@ public:
     {
         return this->pattern_;
     }
-    bool getAlert() const
+    bool hasAlert() const
     {
-        return this->alert_;
+        return this->hasAlert_;
     }
-    bool getSound() const
+    bool hasSound() const
     {
-        return this->sound_;
+        return this->hasSound_;
     }
     bool isRegex() const
     {
@@ -65,15 +65,15 @@ public:
 
     bool isCaseSensitive() const
     {
-        return this->caseSensitive_;
+        return this->isCaseSensitive_;
     }
-
+    
 private:
     QString pattern_;
-    bool alert_;
-    bool sound_;
+    bool hasAlert_;
+    bool hasSound_;
     bool isRegex_;
-    bool caseSensitive_;
+    bool isCaseSensitive_;
     QRegularExpression regex_;
 };
 }  // namespace chatterino
@@ -88,8 +88,8 @@ struct Serialize<chatterino::HighlightPhrase> {
         rapidjson::Value ret(rapidjson::kObjectType);
 
         chatterino::rj::set(ret, "pattern", value.getPattern(), a);
-        chatterino::rj::set(ret, "alert", value.getAlert(), a);
-        chatterino::rj::set(ret, "sound", value.getSound(), a);
+        chatterino::rj::set(ret, "alert", value.hasAlert(), a);
+        chatterino::rj::set(ret, "sound", value.hasSound(), a);
         chatterino::rj::set(ret, "regex", value.isRegex(), a);
         chatterino::rj::set(ret, "case", value.isCaseSensitive(), a);
 
@@ -108,19 +108,19 @@ struct Deserialize<chatterino::HighlightPhrase> {
         }
 
         QString _pattern;
-        bool _alert = true;
-        bool _sound = false;
+        bool _hasAlert = true;
+        bool _hasSound = false;
         bool _isRegex = false;
-        bool _caseSensitive = false;
+        bool _isCaseSensitive = false;
 
         chatterino::rj::getSafe(value, "pattern", _pattern);
-        chatterino::rj::getSafe(value, "alert", _alert);
-        chatterino::rj::getSafe(value, "sound", _sound);
+        chatterino::rj::getSafe(value, "alert", _hasAlert);
+        chatterino::rj::getSafe(value, "sound", _hasSound);
         chatterino::rj::getSafe(value, "regex", _isRegex);
-        chatterino::rj::getSafe(value, "case", _caseSensitive);
+        chatterino::rj::getSafe(value, "case", _isCaseSensitive);
 
-            return chatterino::HighlightPhrase(_pattern, _alert, _sound,
-                                               _isRegex, _caseSensitive);
+            return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
+                                               _isRegex, _isCaseSensitive);
     }
 };
 
