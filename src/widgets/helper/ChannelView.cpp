@@ -241,6 +241,14 @@ void ChannelView::unpause(PauseReason reason)
     this->pauses_.erase(reason);
 
     this->updatePauseTimer();
+
+    /// Move selection
+    this->selection_.selectionMin.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.selectionMax.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.start.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.end.messageIndex -= this->pauseSelectionOffset_;
+
+    this->pauseSelectionOffset_ = 0;
 }
 
 void ChannelView::updatePauseTimer()
@@ -527,64 +535,64 @@ ChannelPtr ChannelView::channel()
     return this->channel_;
 }
 
-void ChannelView::setChannel(ChannelPtr newChannel)
+void ChannelView::setChannel(ChannelPtr channel)
 {
     /// Clear connections from the last channel
     this->channelConnections_.clear();
 
     this->clearMessages();
+    this->scrollBar_->clearHighlights();
 
     // on new message
-    this->channelConnections_.push_back(newChannel->messageAppended.connect(
+    this->channelConnections_.push_back(channel->messageAppended.connect(
         [this](MessagePtr &message,
                boost::optional<MessageFlags> overridingFlags) {
             this->messageAppended(message, overridingFlags);
         }));
 
-    this->channelConnections_.push_back(
-        newChannel->messagesAddedAtStart.connect(
-            [this](std::vector<MessagePtr> &messages) {
-                this->messageAddedAtStart(messages);
-            }));
+    this->channelConnections_.push_back(channel->messagesAddedAtStart.connect(
+        [this](std::vector<MessagePtr> &messages) {
+            this->messageAddedAtStart(messages);
+        }));
 
     // on message removed
     this->channelConnections_.push_back(
-        newChannel->messageRemovedFromStart.connect(
-            [this](MessagePtr &message) {
-                this->messageRemoveFromStart(message);
-            }));
+        channel->messageRemovedFromStart.connect([this](MessagePtr &message) {
+            this->messageRemoveFromStart(message);
+        }));
 
     // on message replaced
-    this->channelConnections_.push_back(newChannel->messageReplaced.connect(
+    this->channelConnections_.push_back(channel->messageReplaced.connect(
         [this](size_t index, MessagePtr replacement) {
             this->messageReplaced(index, replacement);
         }));
 
-    auto snapshot = newChannel->getMessageSnapshot();
+    auto snapshot = channel->getMessageSnapshot();
 
     for (size_t i = 0; i < snapshot.size(); i++)
     {
         MessageLayoutPtr deleted;
 
-        auto messageRef = new MessageLayout(snapshot[i]);
+        auto messageLayout = new MessageLayout(snapshot[i]);
 
         if (this->lastMessageHasAlternateBackground_)
         {
-            messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
+            messageLayout->flags.set(MessageLayoutFlag::AlternateBackground);
         }
         this->lastMessageHasAlternateBackground_ =
             !this->lastMessageHasAlternateBackground_;
 
-        this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted);
+        this->messages_.pushBack(MessageLayoutPtr(messageLayout), deleted);
+        this->scrollBar_->addHighlight(snapshot[i]->getScrollBarHighlight());
     }
 
-    this->channel_ = newChannel;
+    this->channel_ = channel;
 
     this->queueLayout();
     this->queueUpdate();
 
     // Notifications
-    if (auto tc = dynamic_cast<TwitchChannel *>(newChannel.get()))
+    if (auto tc = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         this->connections_.push_back(tc->liveStatusChanged.connect([this]() {
             this->liveStatusChanged.invoke();  //
@@ -697,10 +705,17 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
 
 void ChannelView::messageRemoveFromStart(MessagePtr &message)
 {
-    this->selection_.selectionMin.messageIndex--;
-    this->selection_.selectionMax.messageIndex--;
-    this->selection_.start.messageIndex--;
-    this->selection_.end.messageIndex--;
+    if (this->paused())
+    {
+        this->pauseSelectionOffset_ += 1;
+    }
+    else
+    {
+        this->selection_.selectionMin.messageIndex--;
+        this->selection_.selectionMax.messageIndex--;
+        this->selection_.start.messageIndex--;
+        this->selection_.end.messageIndex--;
+    }
 
     this->queueLayout();
 }
@@ -1023,9 +1038,14 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     /// Pause on hover
-    if (getSettings()->pauseChatOnHover.getValue())
+    if (float pauseTime = getSettings()->pauseOnHoverDuration;
+        pauseTime > 0.001f)
     {
-        this->pause(PauseReason::Mouse, 500);
+        this->pause(PauseReason::Mouse, uint(pauseTime * 1000.f));
+    }
+    else if (pauseTime < -0.5f)
+    {
+        this->pause(PauseReason::Mouse);
     }
 
     auto tooltipWidget = TooltipWidget::getInstance();

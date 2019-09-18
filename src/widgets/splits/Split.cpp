@@ -14,6 +14,7 @@
 #include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/TooltipWidget.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
@@ -187,6 +188,16 @@ Split::Split(QWidget *parent)
         else
         {
             this->overlay_->hide();
+        }
+
+        if (getSettings()->pauseChatModifier.getEnum() != Qt::NoModifier &&
+            status == getSettings()->pauseChatModifier.getEnum())
+        {
+            this->view_->pause(PauseReason::KeyboardModifier);
+        }
+        else
+        {
+            this->view_->unpause(PauseReason::KeyboardModifier);
         }
     });
 
@@ -400,6 +411,8 @@ void Split::leaveEvent(QEvent *event)
     this->isMouseOver_ = false;
 
     this->overlay_->hide();
+
+    TooltipWidget::getInstance()->hide();
 
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }

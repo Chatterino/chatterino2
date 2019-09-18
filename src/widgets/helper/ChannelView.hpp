@@ -44,6 +44,7 @@ enum class PauseReason {
     Mouse,
     Selection,
     DoubleClick,
+    KeyboardModifier,
 };
 
 using SteadyClock = std::chrono::steady_clock;
@@ -162,6 +163,7 @@ private:
         pauses_;
     boost::optional<SteadyClock::time_point> pauseEnd_;
     int pauseScrollOffset_ = 0;
+    int pauseSelectionOffset_ = 0;
 
     boost::optional<MessageElementFlags> overrideFlags_;
     MessageLayoutPtr lastReadMessage_;
