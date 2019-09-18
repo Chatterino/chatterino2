@@ -11,12 +11,12 @@ auto fS(Args &&... args)
     return fmt::format(std::forward<Args>(args)...);
 }
 
-QString CreateUUID();
+QString generateUuid();
 
-QString createLink(const QString &url, bool file = false);
+QString formatRichLink(const QString &url, bool file = false);
 
-QString createNamedLink(const QString &url, const QString &name,
-                        bool file = false);
+QString formatRichNamedLink(const QString &url, const QString &name,
+                            bool file = false);
 
 QString shortenString(const QString &str, unsigned maxWidth = 50);
 

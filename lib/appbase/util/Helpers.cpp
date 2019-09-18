@@ -4,19 +4,19 @@
 
 namespace AB_NAMESPACE {
 
-QString CreateUUID()
+QString generateUuid()
 {
     auto uuid = QUuid::createUuid();
     return uuid.toString();
 }
 
-QString createLink(const QString &url, bool file)
+QString formatRichLink(const QString &url, bool file)
 {
     return QString("<a href=\"") + (file ? "file:///" : "") + url + "\">" +
            url + "</a>";
 }
 
-QString createNamedLink(const QString &url, const QString &name, bool file)
+QString formatRichNamedLink(const QString &url, const QString &name, bool file)
 {
     return QString("<a href=\"") + (file ? "file:///" : "") + url + "\">" +
            name + "</a>";

@@ -65,7 +65,7 @@ namespace detail {
                 Listener{topic.GetString(), false, false, false});
         }
 
-        auto uuid = CreateUUID();
+        auto uuid = generateUuid();
 
         rj::set(message, "nonce", uuid);
 
@@ -102,9 +102,9 @@ namespace detail {
 
         auto message = createUnlistenMessage(topics);
 
-        auto uuid = CreateUUID();
+        auto uuid = generateUuid();
 
-        rj::set(message, "nonce", CreateUUID());
+        rj::set(message, "nonce", generateUuid());
 
         std::string payload = rj::stringify(message);
         sentMessages[uuid] = payload;

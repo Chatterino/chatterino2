@@ -438,10 +438,10 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addDescription("The browser extension replaces the default "
                           "Twitch.tv chat with chatterino.");
 
+    layout.addDescription(formatRichNamedLink(CHROME_EXTENSION_LINK,
+                                              "Download for Google Chrome"));
     layout.addDescription(
-        createNamedLink(CHROME_EXTENSION_LINK, "Download for Google Chrome"));
-    layout.addDescription(
-        createNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
+        formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
 #endif
 
     layout.addTitle("Miscellaneous");
