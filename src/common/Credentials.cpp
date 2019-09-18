@@ -125,22 +125,21 @@ namespace {
                                  [](auto) { runNextJob(); });
                 job->start();
             }
+            queue.pop();
         }
-        queue.pop();
+    }
+
+    static void queueJob(Job &&job)
+    {
+        auto &&queue = jobQueue();
+
+        queue.push(std::move(job));
+        if (queue.size() == 1)
+        {
+            runNextJob();
+        }
     }
 }  // namespace
-
-static void queueJob(Job &&job)
-{
-    auto &&queue = jobQueue();
-
-    queue.push(std::move(job));
-    if (queue.size() == 1)
-    {
-        runNextJob();
-    }
-}
-}  // namespace chatterino
 
 Credentials &Credentials::getInstance()
 {
