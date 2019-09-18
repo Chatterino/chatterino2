@@ -2,6 +2,7 @@
 
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/irc/IrcCommands.hpp"
 #include "providers/irc/IrcServer.hpp"
 
 namespace chatterino {
@@ -17,15 +18,26 @@ void IrcChannel::sendMessage(const QString &message)
 {
     assertInGuiThread();
 
-    if (this->server())
-        this->server()->sendMessage(this->getName(), message);
+    if (message.startsWith("/"))
+    {
+        int index = message.indexOf(' ', 1);
+        QString command = message.mid(1, index - 1);
+        QString params = index == -1 ? "" : message.mid(index + 1);
 
-    MessageBuilder builder;
-    builder.emplace<TimestampElement>();
-    builder.emplace<TextElement>(this->server()->nick() + ":",
-                                 MessageElementFlag::Username);
-    builder.emplace<TextElement>(message, MessageElementFlag::Text);
-    this->addMessage(builder.release());
+        invokeIrcCommand(command, params, *this);
+    }
+    else
+    {
+        if (this->server())
+            this->server()->sendMessage(this->getName(), message);
+
+        MessageBuilder builder;
+        builder.emplace<TimestampElement>();
+        builder.emplace<TextElement>(this->server()->nick() + ":",
+                                     MessageElementFlag::Username);
+        builder.emplace<TextElement>(message, MessageElementFlag::Text);
+        this->addMessage(builder.release());
+    }
 }
 
 IrcServer *IrcChannel::server()

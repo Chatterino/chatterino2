@@ -294,6 +294,8 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
                     }
                 }
             }
+
+            this->ui_.irc.channel->setFocus();
         }
         break;
         default:

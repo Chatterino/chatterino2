@@ -133,6 +133,7 @@ SOURCES += \
     src/providers/irc/Irc2.cpp \
     src/providers/irc/IrcAccount.cpp \
     src/providers/irc/IrcChannel2.cpp \
+    src/providers/irc/IrcCommands.cpp \
     src/providers/irc/IrcConnection2.cpp \
     src/providers/irc/IrcServer.cpp \
     src/providers/LinkResolver.cpp \
@@ -302,6 +303,7 @@ HEADERS += \
     src/providers/irc/Irc2.hpp \
     src/providers/irc/IrcAccount.hpp \
     src/providers/irc/IrcChannel2.hpp \
+    src/providers/irc/IrcCommands.hpp \
     src/providers/irc/IrcConnection2.hpp \
     src/providers/irc/IrcServer.hpp \
     src/providers/LinkResolver.hpp \
