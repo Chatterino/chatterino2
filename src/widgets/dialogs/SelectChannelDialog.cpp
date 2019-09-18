@@ -189,7 +189,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         outerBox->addRow("Channel:", this->ui_.irc.channel = new QLineEdit);
 
         auto tab = notebook->addPage(obj.getElement());
-        tab->setCustomTitle("Irc");
+        tab->setCustomTitle("Irc (Beta)");
     }
 
     layout->setStretchFactor(notebook.getElement(), 1);
