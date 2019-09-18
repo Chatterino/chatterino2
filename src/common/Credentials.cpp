@@ -8,7 +8,7 @@
 #include "util/Overloaded.hpp"
 
 #include <QSaveFile>
-#include <variant>
+#include <boost/variant.hpp>
 
 #define FORMAT_NAME                                                  \
     ([&] {                                                           \
@@ -87,7 +87,7 @@ namespace {
         QString name;
     };
 
-    using Job = std::variant<SetJob, EraseJob>;
+    using Job = boost::variant<SetJob, EraseJob>;
 
     static std::queue<Job> &jobQueue()
     {
@@ -104,9 +104,10 @@ namespace {
             // we were gonna use std::visit here but macos is shit
 
             auto &&item = queue.front();
-            if (item.index() == 0)  // set job
+
+            if (item.which() == 0)  // set job
             {
-                auto set = std::get<SetJob>(item);
+                auto set = boost::get<SetJob>(item);
                 auto job = new QKeychain::WritePasswordJob("chatterino");
                 job->setAutoDelete(true);
                 job->setKey(set.name);
@@ -117,7 +118,7 @@ namespace {
             }
             else  // erase job
             {
-                auto erase = std::get<EraseJob>(item);
+                auto erase = boost::get<EraseJob>(item);
                 auto job = new QKeychain::DeletePasswordJob("chatterino");
                 job->setAutoDelete(true);
                 job->setKey(erase.name);
@@ -125,6 +126,7 @@ namespace {
                                  [](auto) { runNextJob(); });
                 job->start();
             }
+
             queue.pop();
         }
     }
@@ -191,7 +193,6 @@ void Credentials::set(const QString &provider, const QString &name_,
 
     if (useKeyring())
     {
-        qDebug() << "queue set";
         queueJob(SetJob{name, credential});
     }
     else
@@ -212,7 +213,6 @@ void Credentials::erase(const QString &provider, const QString &name_)
 
     if (useKeyring())
     {
-        qDebug() << "queue erase";
         queueJob(EraseJob{name});
     }
     else
