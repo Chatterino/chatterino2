@@ -233,6 +233,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
 
         case Communi::IrcMessage::Pong:
         case Communi::IrcMessage::Notice:
+        case Communi::IrcMessage::Private:
             return;
 
         default:
