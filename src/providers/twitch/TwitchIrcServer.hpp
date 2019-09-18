@@ -20,11 +20,11 @@ class Paths;
 class PubSub;
 class TwitchChannel;
 
-class TwitchServer final : public AbstractIrcServer, public Singleton
+class TwitchIrcServer final : public AbstractIrcServer, public Singleton
 {
 public:
-    TwitchServer();
-    virtual ~TwitchServer() override = default;
+    TwitchIrcServer();
+    virtual ~TwitchIrcServer() override = default;
 
     virtual void initialize(Settings &settings, Paths &paths) override;
 
@@ -44,8 +44,8 @@ public:
     const FfzEmotes &getFfzEmotes() const;
 
 protected:
-    virtual void initializeConnection(IrcConnection *connection, bool isRead,
-                                      bool isWrite) override;
+    virtual void initializeConnection(IrcConnection *connection,
+                                      ConnectionType type) override;
     virtual std::shared_ptr<Channel> createChannel(
         const QString &channelName) override;
 
@@ -75,7 +75,6 @@ private:
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
-    bool singleConnection_ = false;
     TwitchBadges twitchBadges;
     BttvEmotes bttv;
     FfzEmotes ffz;

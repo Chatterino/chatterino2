@@ -1,4 +1,4 @@
-#include "TwitchServer.hpp"
+#include "TwitchIrcServer.hpp"
 
 #include "Application.hpp"
 #include "common/Common.hpp"
@@ -38,13 +38,11 @@ namespace {
     }
 }  // namespace
 
-TwitchServer::TwitchServer()
+TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
-    qDebug() << "init TwitchServer";
-
     this->pubsub = new PubSub;
 
     // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
@@ -53,7 +51,7 @@ TwitchServer::TwitchServer()
     //                                                     false);
 }
 
-void TwitchServer::initialize(Settings &settings, Paths &paths)
+void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
 {
     getApp()->accounts->twitch.currentUserChanged.connect(
         [this]() { postToThread([this] { this->connect(); }); });
@@ -63,11 +61,9 @@ void TwitchServer::initialize(Settings &settings, Paths &paths)
     this->ffz.loadEmotes();
 }
 
-void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
-                                        bool isWrite)
+void TwitchIrcServer::initializeConnection(IrcConnection *connection,
+                                           ConnectionType type)
 {
-    this->singleConnection_ = isRead == isWrite;
-
     std::shared_ptr<TwitchAccount> account =
         getApp()->accounts->twitch.getCurrent();
 
@@ -97,9 +93,12 @@ void TwitchServer::initializeConnection(IrcConnection *connection, bool isRead,
     // SSL enabled: irc://irc.chat.twitch.tv:6697
     connection->setHost("irc.chat.twitch.tv");
     connection->setPort(6697);
+
+    this->open(type);
 }
 
-std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
+std::shared_ptr<Channel> TwitchIrcServer::createChannel(
+    const QString &channelName)
 {
     std::shared_ptr<TwitchChannel> channel;
     if (isChatroom(channelName))
@@ -123,13 +122,17 @@ std::shared_ptr<Channel> TwitchServer::createChannel(const QString &channelName)
     return std::shared_ptr<Channel>(channel);
 }
 
-void TwitchServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
+void TwitchIrcServer::privateMessageReceived(
+    Communi::IrcPrivateMessage *message)
 {
     IrcMessageHandler::getInstance().handlePrivMessage(message, *this);
 }
 
-void TwitchServer::readConnectionMessageReceived(Communi::IrcMessage *message)
+void TwitchIrcServer::readConnectionMessageReceived(
+    Communi::IrcMessage *message)
 {
+    AbstractIrcServer::readConnectionMessageReceived(message);
+
     if (message->type() == Communi::IrcMessage::Type::Private)
     {
         // We already have a handler for private messages
@@ -155,7 +158,8 @@ void TwitchServer::readConnectionMessageReceived(Communi::IrcMessage *message)
     }
 }
 
-void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
+void TwitchIrcServer::writeConnectionMessageReceived(
+    Communi::IrcMessage *message)
 {
     const QString &command = message->command();
 
@@ -193,7 +197,7 @@ void TwitchServer::writeConnectionMessageReceived(Communi::IrcMessage *message)
     }
 }
 
-void TwitchServer::onReadConnected(IrcConnection *connection)
+void TwitchIrcServer::onReadConnected(IrcConnection *connection)
 {
     AbstractIrcServer::onReadConnected(connection);
 
@@ -202,7 +206,7 @@ void TwitchServer::onReadConnected(IrcConnection *connection)
     connection->sendRaw("CAP REQ :twitch.tv/tags twitch.tv/membership");
 }
 
-void TwitchServer::onWriteConnected(IrcConnection *connection)
+void TwitchIrcServer::onWriteConnected(IrcConnection *connection)
 {
     AbstractIrcServer::onWriteConnected(connection);
 
@@ -211,7 +215,7 @@ void TwitchServer::onWriteConnected(IrcConnection *connection)
     connection->sendRaw("CAP REQ :twitch.tv/tags twitch.tv/commands");
 }
 
-std::shared_ptr<Channel> TwitchServer::getCustomChannel(
+std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
     const QString &channelName)
 {
     if (channelName == "/whispers")
@@ -249,7 +253,7 @@ std::shared_ptr<Channel> TwitchServer::getCustomChannel(
     return nullptr;
 }
 
-void TwitchServer::forEachChannelAndSpecialChannels(
+void TwitchIrcServer::forEachChannelAndSpecialChannels(
     std::function<void(ChannelPtr)> func)
 {
     this->forEachChannel(func);
@@ -258,7 +262,7 @@ void TwitchServer::forEachChannelAndSpecialChannels(
     func(this->mentionsChannel);
 }
 
-std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(
+std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
     const QString &channelId)
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
@@ -283,19 +287,22 @@ std::shared_ptr<Channel> TwitchServer::getChannelOrEmptyByID(
     return Channel::getEmpty();
 }
 
-QString TwitchServer::cleanChannelName(const QString &dirtyChannelName)
+QString TwitchIrcServer::cleanChannelName(const QString &dirtyChannelName)
 {
-    return dirtyChannelName.toLower();
+    if (dirtyChannelName.startsWith('#'))
+        return dirtyChannelName.mid(1).toLower();
+    else
+        return dirtyChannelName.toLower();
 }
 
-bool TwitchServer::hasSeparateWriteConnection() const
+bool TwitchIrcServer::hasSeparateWriteConnection() const
 {
     return true;
     // return getSettings()->twitchSeperateWriteConnection;
 }
 
-void TwitchServer::onMessageSendRequested(TwitchChannel *channel,
-                                          const QString &message, bool &sent)
+void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
+                                             const QString &message, bool &sent)
 {
     sent = false;
 
@@ -354,11 +361,11 @@ void TwitchServer::onMessageSendRequested(TwitchChannel *channel,
     sent = true;
 }
 
-const BttvEmotes &TwitchServer::getBttvEmotes() const
+const BttvEmotes &TwitchIrcServer::getBttvEmotes() const
 {
     return this->bttv;
 }
-const FfzEmotes &TwitchServer::getFfzEmotes() const
+const FfzEmotes &TwitchIrcServer::getFfzEmotes() const
 {
     return this->ffz;
 }

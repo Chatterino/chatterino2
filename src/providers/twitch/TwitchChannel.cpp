@@ -79,6 +79,7 @@ TwitchChannel::TwitchChannel(const QString &name,
                              TwitchBadges &globalTwitchBadges, BttvEmotes &bttv,
                              FfzEmotes &ffz)
     : Channel(name, Channel::Type::Twitch)
+    , ChannelChatters(*static_cast<Channel *>(this))
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?channel=" + name)
@@ -280,69 +281,14 @@ bool TwitchChannel::hasHighRateLimit() const
     return this->isMod() || this->isBroadcaster() || this->isVIP();
 }
 
-void TwitchChannel::addRecentChatter(const MessagePtr &message)
+bool TwitchChannel::canReconnect() const
 {
-    this->chatters_.access()->insert(message->displayName);
+    return true;
 }
 
-void TwitchChannel::addJoinedUser(const QString &user)
+void TwitchChannel::reconnect()
 {
-    auto app = getApp();
-    if (user == app->accounts->twitch.getCurrent()->getUserName() ||
-        !getSettings()->showJoins.getValue())
-    {
-        return;
-    }
-
-    auto joinedUsers = this->joinedUsers_.access();
-    joinedUsers->append(user);
-
-    if (!this->joinedUsersMergeQueued_)
-    {
-        this->joinedUsersMergeQueued_ = true;
-
-        QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
-            auto joinedUsers = this->joinedUsers_.access();
-
-            MessageBuilder builder(systemMessage,
-                                   "Users joined: " + joinedUsers->join(", "));
-            builder->flags.set(MessageFlag::Collapsed);
-            joinedUsers->clear();
-            this->addMessage(builder.release());
-            this->joinedUsersMergeQueued_ = false;
-        });
-    }
-}
-
-void TwitchChannel::addPartedUser(const QString &user)
-{
-    auto app = getApp();
-
-    if (user == app->accounts->twitch.getCurrent()->getUserName() ||
-        !getSettings()->showJoins.getValue())
-    {
-        return;
-    }
-
-    auto partedUsers = this->partedUsers_.access();
-    partedUsers->append(user);
-
-    if (!this->partedUsersMergeQueued_)
-    {
-        this->partedUsersMergeQueued_ = true;
-
-        QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
-            auto partedUsers = this->partedUsers_.access();
-
-            MessageBuilder builder(systemMessage,
-                                   "Users parted: " + partedUsers->join(", "));
-            builder->flags.set(MessageFlag::Collapsed);
-            this->addMessage(builder.release());
-            partedUsers->clear();
-
-            this->partedUsersMergeQueued_ = false;
-        });
-    }
+    getApp()->twitch.server->connect();
 }
 
 QString TwitchChannel::roomId() const
@@ -382,11 +328,6 @@ AccessGuard<const TwitchChannel::StreamStatus>
     TwitchChannel::accessStreamStatus() const
 {
     return this->streamStatus_.accessConst();
-}
-
-AccessGuard<const UsernameSet> TwitchChannel::accessChatters() const
-{
-    return this->chatters_.accessConst();
 }
 
 const TwitchBadges &TwitchChannel::globalTwitchBadges() const
@@ -691,7 +632,7 @@ void TwitchChannel::refreshChatters()
                 auto pair = parseChatters(result.parseJson());
                 if (pair.first)
                 {
-                    *this->chatters_.access() = std::move(pair.second);
+                    this->setChatters(std::move(pair.second));
                 }
 
                 return pair.first;

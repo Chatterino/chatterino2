@@ -13,8 +13,9 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/irc/Irc2.hpp"
 #include "providers/twitch/PubsubClient.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Logging.hpp"
@@ -59,7 +60,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , ignores(&this->emplace<IgnoreController>())
     , taggedUsers(&this->emplace<TaggedUsersController>())
     , moderationActions(&this->emplace<ModerationActions>())
-    , twitch2(&this->emplace<TwitchServer>())
+    , twitch2(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , logging(&this->emplace<Logging>())
 
@@ -77,6 +78,8 @@ void Application::initialize(Settings &settings, Paths &paths)
 {
     assert(isAppInitialized == false);
     isAppInitialized = true;
+
+    Irc::getInstance().load();
 
     for (auto &singleton : this->singletons_)
     {
@@ -116,6 +119,8 @@ void Application::save()
 
 void Application::initNm(Paths &paths)
 {
+    (void)paths;
+
 #ifdef Q_OS_WIN
 #    if defined QT_NO_DEBUG || defined C_DEBUG_NM
     registerNmHost(paths);
