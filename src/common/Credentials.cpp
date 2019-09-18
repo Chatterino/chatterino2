@@ -101,45 +101,46 @@ namespace {
 
         if (!queue.empty())
         {
-            std::visit(
-                Overloaded{
-                    [](const SetJob &set) {
-                        qDebug() << "set";
-                        auto job =
-                            new QKeychain::WritePasswordJob("chatterino");
-                        job->setAutoDelete(true);
-                        job->setKey(set.name);
-                        job->setTextData(set.credential);
-                        QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                         [](auto) { runNextJob(); });
-                        job->start();
-                    },
-                    [](const EraseJob &erase) {
-                        qDebug() << "erase";
-                        auto job =
-                            new QKeychain::DeletePasswordJob("chatterino");
-                        job->setAutoDelete(true);
-                        job->setKey(erase.name);
-                        QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                         [](auto) { runNextJob(); });
-                        job->start();
-                    }},
-                queue.front());
-            queue.pop();
-        }
-    }
+            // we were gonna use std::visit here but macos is shit
 
-    static void queueJob(Job &&job)
-    {
-        auto &&queue = jobQueue();
-
-        queue.push(std::move(job));
-        if (queue.size() == 1)
-        {
-            runNextJob();
+            auto &&item = queue.front();
+            if (item.index() == 0)  // set job
+            {
+                auto set = std::get<SetJob>(item);
+                auto job = new QKeychain::WritePasswordJob("chatterino");
+                job->setAutoDelete(true);
+                job->setKey(set.name);
+                job->setTextData(set.credential);
+                QObject::connect(job, &QKeychain::Job::finished, qApp,
+                                 [](auto) { runNextJob(); });
+                job->start();
+            }
+            else  // erase job
+            {
+                auto erase = std::get<EraseJob>(item);
+                auto job = new QKeychain::DeletePasswordJob("chatterino");
+                job->setAutoDelete(true);
+                job->setKey(erase.name);
+                QObject::connect(job, &QKeychain::Job::finished, qApp,
+                                 [](auto) { runNextJob(); });
+                job->start();
+            }
         }
+        queue.pop();
     }
 }  // namespace
+
+static void queueJob(Job &&job)
+{
+    auto &&queue = jobQueue();
+
+    queue.push(std::move(job));
+    if (queue.size() == 1)
+    {
+        runNextJob();
+    }
+}
+}  // namespace chatterino
 
 Credentials &Credentials::getInstance()
 {
