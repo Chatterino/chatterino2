@@ -280,6 +280,15 @@ bool Channel::shouldIgnoreHighlights() const
            this->type_ == Type::TwitchWhispers;
 }
 
+bool Channel::canReconnect() const
+{
+    return false;
+}
+
+void Channel::reconnect()
+{
+}
+
 std::shared_ptr<Channel> Channel::getEmpty()
 {
     static std::shared_ptr<Channel> channel(new Channel("", Type::None));

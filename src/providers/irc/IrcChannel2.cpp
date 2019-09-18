@@ -42,4 +42,15 @@ void IrcChannel::setServer(IrcServer *server)
     this->server_ = server;
 }
 
+bool IrcChannel::canReconnect() const
+{
+    return true;
+}
+
+void IrcChannel::reconnect()
+{
+    if (this->server())
+        this->server()->connect();
+}
+
 }  // namespace chatterino

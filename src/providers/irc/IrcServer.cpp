@@ -1,6 +1,7 @@
 #include "IrcServer.hpp"
 
 #include <cassert>
+#include <cstdlib>
 
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/Irc2.hpp"
@@ -84,6 +85,28 @@ void IrcServer::initializeConnection(IrcConnection *connection,
         default:
             this->open(Both);
     }
+
+    QObject::connect(
+        connection, &Communi::IrcConnection::socketError, this,
+        [this](QAbstractSocket::SocketError error) {
+            static int index =
+                QAbstractSocket::staticMetaObject.indexOfEnumerator(
+                    "SocketError");
+
+            std::lock_guard lock(this->channelMutex);
+
+            for (auto &&weak : this->channels)
+                if (auto shared = weak.lock())
+                    shared->addMessage(makeSystemMessage(
+                        QStringLiteral("Socket error: ") +
+                        QAbstractSocket::staticMetaObject.enumerator(index)
+                            .valueToKey(error)));
+        });
+
+    QObject::connect(connection, &Communi::IrcConnection::nickNameRequired,
+                     this, [](const QString &reserved, QString *result) {
+                         *result = reserved + (std::rand() % 100);
+                     });
 }
 
 std::shared_ptr<Channel> IrcServer::createChannel(const QString &channelName)
@@ -133,6 +156,67 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
 {
     AbstractIrcServer::readConnectionMessageReceived(message);
 
+    switch (message->type())
+    {
+        case Communi::IrcMessage::Join:
+        {
+            auto x = static_cast<Communi::IrcJoinMessage *>(message);
+
+            if (auto it =
+                    this->channels.find(this->cleanChannelName(x->channel()));
+                it != this->channels.end())
+            {
+                if (auto shared = it->lock())
+                {
+                    if (message->nick() == this->data_->nick)
+                    {
+                        shared->addMessage(
+                            MessageBuilder(systemMessage, "joined").release());
+                    }
+                    else
+                    {
+                        if (auto c =
+                                dynamic_cast<ChannelChatters *>(shared.get()))
+                            c->addJoinedUser(x->nick());
+                    }
+                }
+            }
+            return;
+        }
+
+        case Communi::IrcMessage::Part:
+        {
+            auto x = static_cast<Communi::IrcPartMessage *>(message);
+
+            if (auto it =
+                    this->channels.find(this->cleanChannelName(x->channel()));
+                it != this->channels.end())
+            {
+                if (auto shared = it->lock())
+                {
+                    if (message->nick() == this->data_->nick)
+                    {
+                        shared->addMessage(
+                            MessageBuilder(systemMessage, "parted").release());
+                    }
+                    else
+                    {
+                        if (auto c =
+                                dynamic_cast<ChannelChatters *>(shared.get()))
+                            c->addPartedUser(x->nick());
+                    }
+                }
+            }
+            return;
+        }
+
+        case Communi::IrcMessage::Pong:
+            return;
+
+        default:;
+    }
+
+#ifdef QT_DEBUG
     MessageBuilder builder;
 
     builder.emplace<TimestampElement>();
@@ -145,6 +229,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
         if (auto shared = weak.lock())
             shared->addMessage(msg);
     }
+#endif
 }
 
 }  // namespace chatterino

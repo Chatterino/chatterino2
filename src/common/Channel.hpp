@@ -44,9 +44,9 @@ public:
     explicit Channel(const QString &name, Type type);
     virtual ~Channel();
 
+    // SIGNALS
     pajlada::Signals::Signal<const QString &, const QString &, bool &>
         sendMessageSignal;
-
     pajlada::Signals::Signal<MessagePtr &> messageRemovedFromStart;
     pajlada::Signals::Signal<MessagePtr &, boost::optional<MessageFlags>>
         messageAppended;
@@ -61,6 +61,7 @@ public:
     virtual bool isEmpty() const;
     LimitedQueueSnapshot<MessagePtr> getMessageSnapshot();
 
+    // MESSAGES
     // overridingFlags can be filled in with flags that should be used instead
     // of the message's flags. This is useful in case a flag is specific to a
     // type of split
@@ -72,9 +73,11 @@ public:
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
     void deleteMessage(QString messageID);
+    void clearMessages();
 
     QStringList modList;
 
+    // CHANNEL INFO
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);
     virtual bool isMod() const;
@@ -83,6 +86,8 @@ public:
     virtual bool hasHighRateLimit() const;
     virtual bool isLive() const;
     virtual bool shouldIgnoreHighlights() const;
+    virtual bool canReconnect() const;
+    virtual void reconnect();
 
     static std::shared_ptr<Channel> getEmpty();
 

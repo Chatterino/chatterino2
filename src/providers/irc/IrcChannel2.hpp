@@ -18,6 +18,10 @@ public:
     // server may be nullptr
     IrcServer *server();
 
+    // Channel methods
+    virtual bool canReconnect() const override;
+    virtual void reconnect() override;
+
 private:
     void setServer(IrcServer *server);
 

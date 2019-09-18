@@ -343,7 +343,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     }
 
     moreMenu->addSeparator();
-    moreMenu->addAction("Reconnect", this, SLOT(reconnect()));
+    if (this->split_->getChannel()->canReconnect())
+        moreMenu->addAction("Reconnect", this, SLOT(reconnect()));
 
     if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
     {
@@ -740,7 +741,7 @@ void SplitHeader::reloadSubscriberEmotes()
 
 void SplitHeader::reconnect()
 {
-    getApp()->twitch.server->connect();
+    this->split_->getChannel()->reconnect();
 }
 
 }  // namespace chatterino

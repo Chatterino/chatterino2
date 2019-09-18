@@ -67,6 +67,8 @@ public:
     bool isStaff() const;
     virtual bool isBroadcaster() const override;
     virtual bool hasHighRateLimit() const override;
+    virtual bool canReconnect() const override;
+    virtual void reconnect() override;
 
     // Data
     const QString &subscriptionUrl();

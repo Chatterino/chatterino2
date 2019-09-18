@@ -276,6 +276,16 @@ bool TwitchChannel::hasHighRateLimit() const
     return this->isMod() || this->isBroadcaster() || this->isVIP();
 }
 
+bool TwitchChannel::canReconnect() const
+{
+    return true;
+}
+
+void TwitchChannel::reconnect()
+{
+    getApp()->twitch.server->connect();
+}
+
 QString TwitchChannel::roomId() const
 {
     return *this->roomID_.access();
