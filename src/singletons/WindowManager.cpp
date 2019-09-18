@@ -4,7 +4,10 @@
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Log.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/irc/Irc2.hpp"
+#include "providers/irc/IrcChannel2.hpp"
+#include "providers/irc/IrcServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -611,6 +614,20 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             obj.insert("type", "whispers");
         }
         break;
+        case Channel::Type::Irc:
+        {
+            if (auto ircChannel =
+                    dynamic_cast<IrcChannel *>(channel.get().get()))
+            {
+                obj.insert("type", "irc");
+                if (ircChannel->server())
+                {
+                    obj.insert("server", ircChannel->server()->id());
+                }
+                obj.insert("channel", ircChannel->getName());
+            }
+        }
+        break;
     }
 }
 
@@ -637,6 +654,11 @@ IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
     else if (type == "whispers")
     {
         return app->twitch.server->whispersChannel;
+    }
+    else if (type == "irc")
+    {
+        return Irc::getInstance().getOrAddChannel(
+            obj.value("server").toInt(-1), obj.value("channel").toString());
     }
 
     return Channel::getEmpty();

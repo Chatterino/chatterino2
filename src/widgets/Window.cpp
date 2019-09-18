@@ -1,10 +1,11 @@
 #include "widgets/Window.hpp"
 
 #include "Application.hpp"
+#include "common/Credentials.hpp"
 #include "common/Modes.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Updates.hpp"
@@ -108,7 +109,7 @@ bool Window::event(QEvent *event)
         break;
 
         default:;
-    };
+    }
 
     return BaseWindow::event(event);
 }

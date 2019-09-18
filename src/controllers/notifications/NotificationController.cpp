@@ -6,7 +6,7 @@
 #include "controllers/notifications/NotificationModel.hpp"
 #include "debug/Log.hpp"
 #include "providers/twitch/TwitchApi.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/Window.hpp"

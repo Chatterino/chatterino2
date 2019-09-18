@@ -6,7 +6,7 @@
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/pings/PingController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -211,9 +211,12 @@ void SplitHeader::initializeLayout()
         }),
         // dropdown
         this->dropdownButton_ = makeWidget<Button>([&](auto w) {
-            auto menu = this->createMainMenu();
-            this->mainMenu_ = menu.get();
-            w->setMenu(std::move(menu));
+            /// XXX: this never gets disconnected
+            this->split_->channelChanged.connect([this] {
+                auto menu = this->createMainMenu();
+                this->mainMenu_ = menu.get();
+                this->dropdownButton_->setMenu(std::move(menu));
+            });
         }),
         // add split
         this->addButton_ = makeWidget<Button>([&](auto w) {
@@ -275,13 +278,17 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     });
 #endif
 
-    menu->addAction(OPEN_IN_BROWSER, this->split_, &Split::openInBrowser);
+    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    {
+        menu->addAction(OPEN_IN_BROWSER, this->split_, &Split::openInBrowser);
 #ifndef USEWEBENGINE
-    menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,
-                    &Split::openBrowserPlayer);
+        menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,
+                        &Split::openBrowserPlayer);
 #endif
-    menu->addAction(OPEN_IN_STREAMLINK, this->split_, &Split::openInStreamlink);
-    menu->addSeparator();
+        menu->addAction(OPEN_IN_STREAMLINK, this->split_,
+                        &Split::openInStreamlink);
+        menu->addSeparator();
+    }
 
     {
         // "How to..." sub menu
@@ -294,30 +301,35 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     // sub menu
     auto moreMenu = new QMenu("More", this);
 
+
     moreMenu->addAction("Toggle moderation mode", this->split_, [this]() {
         this->split_->setModerationMode(!this->split_->getModerationMode());
     });
 
-    moreMenu->addAction("Show viewer list", this->split_,
-                        &Split::showViewerList);
+    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    {
+        moreMenu->addAction("Show viewer list", this->split_,
+                            &Split::showViewerList);
 
-    moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
+        moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
 
-    auto action = new QAction(this);
-    action->setText("Notify when live");
-    action->setCheckable(true);
+        auto action = new QAction(this);
+        action->setText("Notify when live");
+        action->setCheckable(true);
 
-    QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-        action->setChecked(getApp()->notifications->isChannelNotified(
-            this->split_->getChannel()->getName(), Platform::Twitch));
-    });
-    action->connect(action, &QAction::triggered, this, [this]() {
-        getApp()->notifications->updateChannelNotification(
-            this->split_->getChannel()->getName(), Platform::Twitch);
-    });
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
+            action->setChecked(getApp()->notifications->isChannelNotified(
+                this->split_->getChannel()->getName(), Platform::Twitch));
+        });
+        action->connect(action, &QAction::triggered, this, [this]() {
+            getApp()->notifications->updateChannelNotification(
+                this->split_->getChannel()->getName(), Platform::Twitch);
+        });
 
-    moreMenu->addAction(action);
+        moreMenu->addAction(action);
+    }
 
+    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
     {
         auto action = new QAction(this);
         action->setText("Mute highlight sound");
@@ -336,11 +348,16 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     }
 
     moreMenu->addSeparator();
-    moreMenu->addAction("Reconnect", this, SLOT(reconnect()));
-    moreMenu->addAction("Reload channel emotes", this,
-                        SLOT(reloadChannelEmotes()));
-    moreMenu->addAction("Reload subscriber emotes", this,
-                        SLOT(reloadSubscriberEmotes()));
+    if (this->split_->getChannel()->canReconnect())
+        moreMenu->addAction("Reconnect", this, SLOT(reconnect()));
+
+    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    {
+        moreMenu->addAction("Reload channel emotes", this,
+                            SLOT(reloadChannelEmotes()));
+        moreMenu->addAction("Reload subscriber emotes", this,
+                            SLOT(reloadSubscriberEmotes()));
+    }
     moreMenu->addSeparator();
     moreMenu->addAction("Clear messages", this->split_, &Split::clear);
     //    moreMenu->addSeparator();
@@ -729,7 +746,7 @@ void SplitHeader::reloadSubscriberEmotes()
 
 void SplitHeader::reconnect()
 {
-    getApp()->twitch.server->connect();
+    this->split_->getChannel()->reconnect();
 }
 
 }  // namespace chatterino

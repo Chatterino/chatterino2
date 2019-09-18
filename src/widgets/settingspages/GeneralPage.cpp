@@ -451,6 +451,16 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         layout.addCheckbox("Open links in incognito/private mode",
                            s.openLinksIncognito);
     }
+
+#ifdef Q_OS_LINUX
+    if (!getPaths()->isPortable())
+    {
+        layout.addCheckbox(
+            "Use libsecret/KWallet/Gnome keychain to secure passwords",
+            s.useKeyring);
+    }
+#endif
+
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
     layout.addCheckbox("Random username color for users who never set a color",
@@ -485,6 +495,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.highlightInlineWhispers);
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
+
+    layout.addCheckbox("Show unhandled irc messages",
+                       s.showUnhandledIrcMessages);
 
     layout.addTitle("Cache");
     layout.addDescription(

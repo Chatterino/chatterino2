@@ -1,10 +1,11 @@
 #include "SelectChannelDialog.hpp"
 
 #include "Application.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/dialogs/IrcConnectionEditor.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 
 #include <QDialogButtonBox>
@@ -14,7 +15,12 @@
 #include <QLineEdit>
 #include <QVBoxLayout>
 
+#include <QTableView>
+#include "providers/irc/Irc2.hpp"
+#include "widgets/helper/EditableModelView.hpp"
+
 #define TAB_TWITCH 0
+#define TAB_IRC 1
 
 namespace chatterino {
 
@@ -122,21 +128,69 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     }
 
     // irc
-    /*
+    {
+        LayoutCreator<QWidget> obj(new QWidget());
+        auto outerBox = obj.setLayoutType<QFormLayout>();
+
         {
-            LayoutCreator<QWidget> obj(new QWidget());
-            auto vbox = obj.setLayoutType<QVBoxLayout>();
-            auto form = vbox.emplace<QFormLayout>();
+            auto view = this->ui_.irc.servers = new EditableModelView(
+                Irc::getInstance().newConnectionModel(this));
 
-            form->addRow(new QLabel("User name:"), new QLineEdit());
-            form->addRow(new QLabel("First nick choice:"), new QLineEdit());
-            form->addRow(new QLabel("Second nick choice:"), new QLineEdit());
-            form->addRow(new QLabel("Third nick choice:"), new QLineEdit());
+            view->setTitles({"host", "port", "ssl", "user", "nick", "real",
+                             "password", "login command"});
+            view->getTableView()->horizontalHeader()->resizeSection(0, 140);
 
-            auto tab = notebook->addPage(obj.getElement());
-            tab->setCustomTitle("Irc");
+            view->getTableView()->horizontalHeader()->setSectionHidden(1, true);
+            view->getTableView()->horizontalHeader()->setSectionHidden(2, true);
+            view->getTableView()->horizontalHeader()->setSectionHidden(4, true);
+            view->getTableView()->horizontalHeader()->setSectionHidden(5, true);
+
+            view->addButtonPressed.connect([] {
+                auto unique = IrcServerData{};
+                unique.id = Irc::getInstance().uniqueId();
+
+                auto editor = new IrcConnectionEditor(unique);
+                if (editor->exec() == QDialog::Accepted)
+                {
+                    Irc::getInstance().connections.appendItem(editor->data());
+                }
+            });
+
+            QObject::connect(
+                view->getTableView(), &QTableView::doubleClicked,
+                [](const QModelIndex &index) {
+                    auto editor = new IrcConnectionEditor(
+                        Irc::getInstance()
+                            .connections.getVector()[size_t(index.row())]);
+
+                    if (editor->exec() == QDialog::Accepted)
+                    {
+                        auto data = editor->data();
+                        auto &&conns =
+                            Irc::getInstance().connections.getVector();
+                        int i = 0;
+                        for (auto &&conn : conns)
+                        {
+                            if (conn.id == data.id)
+                            {
+                                Irc::getInstance().connections.removeItem(
+                                    i, Irc::noEraseCredentialCaller);
+                                Irc::getInstance().connections.insertItem(data,
+                                                                          i);
+                            }
+                            i++;
+                        }
+                    }
+                });
+
+            outerBox->addRow("Server:", view);
         }
-    */
+
+        outerBox->addRow("Channel:", this->ui_.irc.channel = new QLineEdit);
+
+        auto tab = notebook->addPage(obj.getElement());
+        tab->setCustomTitle("Irc (Beta)");
+    }
 
     layout->setStretchFactor(notebook.getElement(), 1);
 
@@ -151,7 +205,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                          [=](bool) { this->close(); });
     }
 
-    this->setScaleIndependantSize(300, 310);
+    this->setMinimumSize(300, 310);
     this->ui_.notebook->selectIndex(TAB_TWITCH);
     this->ui_.twitch.channel->setFocus();
 
@@ -161,10 +215,24 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     auto *shortcut_cancel = new QShortcut(QKeySequence("Esc"), this);
     QObject::connect(shortcut_cancel, &QShortcut::activated,
                      [=] { this->close(); });
+
+    // restore ui state
+    this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
+    this->ui_.irc.servers->getTableView()->selectRow(
+        getSettings()->lastSelectIrcConn);
 }
 
 void SelectChannelDialog::ok()
 {
+    // save ui state
+    getSettings()->lastSelectChannelTab =
+        this->ui_.notebook->getSelectedIndex();
+    getSettings()->lastSelectIrcConn = this->ui_.irc.servers->getTableView()
+                                           ->selectionModel()
+                                           ->currentIndex()
+                                           .row();
+
+    // accept and close
     this->hasSelectedChannel_ = true;
     this->close();
 }
@@ -202,6 +270,32 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
         {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.whispers->setFocus();
+        }
+        break;
+        case Channel::Type::Irc:
+        {
+            this->ui_.notebook->selectIndex(TAB_IRC);
+            this->ui_.irc.channel->setText(_channel.get()->getName());
+
+            if (auto ircChannel =
+                    dynamic_cast<IrcChannel *>(_channel.get().get()))
+            {
+                if (auto server = ircChannel->server())
+                {
+                    int i = 0;
+                    for (auto &&conn : Irc::getInstance().connections)
+                    {
+                        if (conn.id == server->id())
+                        {
+                            this->ui_.irc.servers->getTableView()->selectRow(i);
+                            break;
+                        }
+                        i++;
+                    }
+                }
+            }
+
+            this->ui_.irc.channel->setFocus();
         }
         break;
         default:
@@ -245,6 +339,27 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
                 return app->twitch.server->whispersChannel;
             }
         }
+        break;
+        case TAB_IRC:
+        {
+            int row = this->ui_.irc.servers->getTableView()
+                          ->selectionModel()
+                          ->currentIndex()
+                          .row();
+
+            auto &&vector = Irc::getInstance().connections.getVector();
+
+            if (row >= 0 && row < int(vector.size()))
+            {
+                return Irc::getInstance().getOrAddChannel(
+                    vector[size_t(row)].id, this->ui_.irc.channel->text());
+            }
+            else
+            {
+                return Channel::getEmpty();
+            }
+        }
+            //break;
     }
 
     return this->selectedChannel_;
@@ -258,7 +373,7 @@ bool SelectChannelDialog::hasSeletedChannel() const
 bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
                                                    QEvent *event)
 {
-    auto *widget = (QWidget *)watched;
+    auto *widget = static_cast<QWidget *>(watched);
 
     if (event->type() == QEvent::FocusIn)
     {
