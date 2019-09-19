@@ -9,8 +9,8 @@
 #include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/StandardItemHelper.hpp"
-#include "widgets/helper/EditableModelView.hpp"
 
+#include <QColorDialog>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QListWidget>
@@ -57,7 +57,8 @@ HighlightingPage::HighlightingPage()
 
                 view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex", "Case-\nsensitive"});
+                                 "Enable\nregex", "Case-\nsensitive",
+                                 "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -72,8 +73,14 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->phrases.appendItem(HighlightPhrase{
-                        "my phrase", true, false, false, false});
+                        "my phrase", true, false, false, false, "",
+                        HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR});
                 });
+
+                QObject::connect(view->getTableView(), &QTableView::clicked,
+                                 [this, view](const QModelIndex &clicked) {
+                                     this->tableCellClicked(clicked, view);
+                                 });
             }
 
             auto pingUsers = tabs.appendTab(new QVBoxLayout, "Users");
@@ -92,7 +99,8 @@ HighlightingPage::HighlightingPage()
                 // Case-sensitivity doesn't make sense for user names so it is
                 // set to "false" by default & no checkbox is shown
                 view->setTitles({"Username", "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex"});
+                                 "Enable\nregex", "Case-\nsensitive",
+                                 "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -107,9 +115,15 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->highlightedUsers.appendItem(
-                        HighlightPhrase{"highlighted user", true, false, false,
-                                        false});
+                        HighlightPhrase{
+                            "highlighted user", true, false, false, false, "",
+                            HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR});
                 });
+
+                QObject::connect(view->getTableView(), &QTableView::clicked,
+                                 [this, view](const QModelIndex &clicked) {
+                                     this->tableCellClicked(clicked, view);
+                                 });
             }
 
             auto disabledUsers =
@@ -170,6 +184,28 @@ HighlightingPage::HighlightingPage()
 
     // ---- misc
     this->disabledUsersChangedTimer_.setSingleShot(true);
+}
+
+void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
+                                        EditableModelView *view)
+{
+    if (clicked.column() == FILE_COLUMN_INDEX)
+    {
+        auto fileUrl = QFileDialog::getOpenFileUrl(
+            this, tr("Open Sound"), QUrl(), tr("Audio Files (*.mp3 *.wav)"));
+        view->getModel()->setData(clicked, fileUrl, Qt::DisplayRole);
+    }
+    else if (clicked.column() == COLOR_COLUMN_INDEX)
+    {
+        auto initial =
+            view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
+        auto selected =
+            QColorDialog::getColor(initial, this, tr("Select Color"));
+
+        // Color is invalid when user clicks "Cancel"
+        if (selected.isValid())
+            view->getModel()->setData(clicked, selected, Qt::DecorationRole);
+    }
 }
 
 }  // namespace chatterino

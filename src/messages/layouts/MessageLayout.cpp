@@ -254,7 +254,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
          this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
         !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
-        backgroundColor = app->themes->messages.backgrounds.highlighted;
+        backgroundColor = this->message_->highlightColor;
     }
     else if (this->message_->flags.has(MessageFlag::Subscription))
     {

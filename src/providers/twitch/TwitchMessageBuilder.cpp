@@ -75,6 +75,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     , tags(this->ircMessage->tags())
     , originalMessage_(_ircMessage->content())
     , action_(_ircMessage->isAction())
+    , highlightSoundUrl_("qrc:/sounds/ping2.wav")
 {
     this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
@@ -89,6 +90,7 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     , tags(this->ircMessage->tags())
     , originalMessage_(content)
     , action_(isAction)
+    , highlightSoundUrl_("qrc:/sounds/ping2.wav")
 {
     this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
@@ -180,17 +182,11 @@ void TwitchMessageBuilder::triggerHighlights()
         if (auto player = getPlayer())
         {
             // update the media player url if necessary
-            QUrl highlightSoundUrl =
-                getSettings()->customHighlightSound
-                    ? QUrl::fromLocalFile(
-                          getSettings()->pathHighlightSound.getValue())
-                    : QUrl("qrc:/sounds/ping2.wav");
-
-            if (currentPlayerUrl != highlightSoundUrl)
+            if (currentPlayerUrl != this->highlightSoundUrl_)
             {
-                player->setMedia(highlightSoundUrl);
+                player->setMedia(this->highlightSoundUrl_);
 
-                currentPlayerUrl = highlightSoundUrl;
+                currentPlayerUrl = this->highlightSoundUrl_;
             }
 
             player->play();
@@ -942,6 +938,7 @@ void TwitchMessageBuilder::parseHighlights()
         {
             this->highlightVisual_ = true;
             this->message().flags.set(MessageFlag::Highlighted);
+            this->message().highlightColor = userHighlight.getColor();
         }
 
         if (userHighlight.hasAlert())
@@ -952,6 +949,9 @@ void TwitchMessageBuilder::parseHighlights()
         if (userHighlight.hasSound())
         {
             this->highlightSound_ = true;
+            // Use default sound when no sound is set on user highlight
+            if (!userHighlight.getSoundUrl().toString().isEmpty())
+                this->highlightSoundUrl_ = userHighlight.getSoundUrl();
         }
 
         if (this->highlightAlert_ && this->highlightSound_)
@@ -975,9 +975,12 @@ void TwitchMessageBuilder::parseHighlights()
 
     if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
     {
+        // TODO(leon): Can this be unified with other highlight phrases somehow?
         HighlightPhrase selfHighlight(
             currentUsername, getSettings()->enableSelfHighlightTaskbar,
-            getSettings()->enableSelfHighlightSound, false, false);
+            getSettings()->enableSelfHighlightSound, false, false,
+            getSettings()->selfHighlightSoundUrl.getValue(),
+            QColor(getSettings()->selfHighlightColor.getValue()));
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -995,6 +998,7 @@ void TwitchMessageBuilder::parseHighlights()
         {
             this->highlightVisual_ = true;
             this->message().flags.set(MessageFlag::Highlighted);
+            this->message().highlightColor = highlight.getColor();
         }
 
         if (highlight.hasAlert())
@@ -1005,6 +1009,9 @@ void TwitchMessageBuilder::parseHighlights()
         if (highlight.hasSound())
         {
             this->highlightSound_ = true;
+            // Use default sound when no sound is set on highlight phrase
+            if (!highlight.getSoundUrl().toString().isEmpty())
+                this->highlightSoundUrl_ = highlight.getSoundUrl();
         }
 
         if (this->highlightAlert_ && this->highlightSound_)
@@ -1026,6 +1033,17 @@ void TwitchMessageBuilder::parseHighlights()
         if (getSettings()->enableWhisperHighlightSound)
         {
             this->highlightSound_ = true;
+
+            if (!getSettings()->whisperHighlightSoundUrl.getValue().isEmpty())
+                this->highlightSoundUrl_ =
+                    QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
+        }
+        if (!this->highlightVisual_)
+        {
+            this->highlightVisual_ = true;
+            this->message().flags.set(MessageFlag::Highlighted);
+            this->message().highlightColor =
+                QColor(getSettings()->whisperHighlightColor.getValue());
         }
     }
 }

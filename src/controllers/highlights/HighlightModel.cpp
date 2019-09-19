@@ -8,7 +8,7 @@ namespace chatterino {
 
 // commandmodel
 HighlightModel::HighlightModel(QObject *parent)
-    : SignalVectorModel<HighlightPhrase>(5, parent)
+    : SignalVectorModel<HighlightPhrase>(7, parent)
 {
 }
 
@@ -22,7 +22,9 @@ HighlightPhrase HighlightModel::getItemFromRow(
                            row[1]->data(Qt::CheckStateRole).toBool(),
                            row[2]->data(Qt::CheckStateRole).toBool(),
                            row[3]->data(Qt::CheckStateRole).toBool(),
-                           row[4]->data(Qt::CheckStateRole).toBool()};
+                           row[4]->data(Qt::CheckStateRole).toBool(),
+                           row[5]->data(Qt::DisplayRole).toString(),
+                           row[6]->data(Qt::DecorationRole).value<QColor>()};
 }
 
 // turns a row in the model into a vector item
@@ -34,10 +36,13 @@ void HighlightModel::getRowFromItem(const HighlightPhrase &item,
     setBoolItem(row[2], item.hasSound());
     setBoolItem(row[3], item.isRegex());
     setBoolItem(row[4], item.isCaseSensitive());
+    setStringItem(row[5], item.getSoundUrl().toString(), false, false);
+    setColorItem(row[6], item.getColor());
 }
 
 void HighlightModel::afterInit()
 {
+    // Highlight settings for own username
     std::vector<QStandardItem *> usernameRow = this->createRow();
     setBoolItem(usernameRow[0], getSettings()->enableSelfHighlight.getValue(),
                 true, false);
@@ -49,7 +54,17 @@ void HighlightModel::afterInit()
                 getSettings()->enableSelfHighlightSound.getValue(), true,
                 false);
     usernameRow[3]->setFlags(0);
+    usernameRow[4]->setFlags(0);
+    setStringItem(usernameRow[5],
+                  getSettings()->selfHighlightSoundUrl.getValue(), false,
+                  false);
+
+    QString selfColor = getSettings()->selfHighlightColor.getValue();
+    setColorItem(usernameRow[6], QColor(selfColor));
+
     this->insertCustomRow(usernameRow, 0);
+
+    // Highlight settings for whispers
     std::vector<QStandardItem *> whisperRow = this->createRow();
     setBoolItem(whisperRow[0], getSettings()->enableWhisperHighlight.getValue(),
                 true, false);
@@ -61,6 +76,14 @@ void HighlightModel::afterInit()
                 getSettings()->enableWhisperHighlightSound.getValue(), true,
                 false);
     whisperRow[3]->setFlags(0);
+    whisperRow[4]->setFlags(0);
+    setStringItem(whisperRow[5],
+                  getSettings()->whisperHighlightSoundUrl.getValue(), false,
+                  false);
+
+    QString whisperColor = getSettings()->whisperHighlightColor.getValue();
+    setColorItem(whisperRow[6], QColor(whisperColor));
+
     this->insertCustomRow(whisperRow, 1);
 }
 
@@ -122,7 +145,48 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
         break;
         case 3:
         {
-            // empty element
+            // Regex --> empty element
+        }
+        break;
+        case 4:
+        {
+            // Case-sensitivity --> empty
+        }
+        break;
+        case 5:
+        {
+            // Custom sound file
+            if (role == Qt::UserRole)
+            {
+                if (rowIndex == 0)
+                {
+                    getSettings()->selfHighlightSoundUrl.setValue(
+                        value.toString());
+                }
+                else if (rowIndex == 1)
+                {
+                    getSettings()->whisperHighlightSoundUrl.setValue(
+                        value.toString());
+                }
+            }
+        }
+        break;
+        case 6:
+        {
+            // Custom color
+            if (role == Qt::DecorationRole)
+            {
+                if (rowIndex == 0)
+                {
+                    getSettings()->selfHighlightColor.setValue(
+                        value.value<QColor>().name());
+                }
+                else if (rowIndex == 1)
+                {
+                    getSettings()->whisperHighlightColor.setValue(
+                        value.value<QColor>().name());
+                }
+            }
         }
         break;
     }

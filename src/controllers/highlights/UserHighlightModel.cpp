@@ -8,7 +8,7 @@ namespace chatterino {
 
 // commandmodel
 UserHighlightModel::UserHighlightModel(QObject *parent)
-    : SignalVectorModel<HighlightPhrase>(5, parent)
+    : SignalVectorModel<HighlightPhrase>(7, parent)
 {
 }
 
@@ -22,7 +22,9 @@ HighlightPhrase UserHighlightModel::getItemFromRow(
                            row[1]->data(Qt::CheckStateRole).toBool(),
                            row[2]->data(Qt::CheckStateRole).toBool(),
                            row[3]->data(Qt::CheckStateRole).toBool(),
-                           row[4]->data(Qt::CheckStateRole).toBool()};
+                           row[4]->data(Qt::CheckStateRole).toBool(),
+                           row[5]->data(Qt::DisplayRole).toString(),
+                           row[6]->data(Qt::DecorationRole).value<QColor>()};
 }
 
 // row into vector item
@@ -34,6 +36,8 @@ void UserHighlightModel::getRowFromItem(const HighlightPhrase &item,
     setBoolItem(row[2], item.hasSound());
     setBoolItem(row[3], item.isRegex());
     setBoolItem(row[4], item.isCaseSensitive());
+    setStringItem(row[5], item.getSoundUrl().toString(), false, false);
+    setColorItem(row[6], item.getColor());
 }
 
 }  // namespace chatterino

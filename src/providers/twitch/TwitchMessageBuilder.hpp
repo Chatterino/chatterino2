@@ -91,6 +91,8 @@ private:
     bool highlightVisual_ = false;
     bool highlightAlert_ = false;
     bool highlightSound_ = false;
+
+    QUrl highlightSoundUrl_;
 };
 
 }  // namespace chatterino

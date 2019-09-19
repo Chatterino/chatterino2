@@ -1,5 +1,6 @@
 #pragma once
 
+#include "widgets/helper/EditableModelView.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 #include <QAbstractTableModel>
@@ -17,6 +18,8 @@ public:
 
 private:
     QTimer disabledUsersChangedTimer_;
+
+    void tableCellClicked(const QModelIndex &clicked, EditableModelView *view);
 };
 
 }  // namespace chatterino

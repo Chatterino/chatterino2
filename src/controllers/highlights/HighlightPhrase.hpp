@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Application.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -12,70 +13,35 @@ namespace chatterino {
 class HighlightPhrase
 {
 public:
-    bool operator==(const HighlightPhrase &other) const
-    {
-        return std::tie(this->pattern_, this->hasSound_, this->hasAlert_,
-                        this->isRegex_, this->isCaseSensitive_) ==
-               std::tie(other.pattern_, other.hasSound_, other.hasAlert_,
-                        other.isRegex_, other.isCaseSensitive_);
-    }
+    static const QColor DEFAULT_HIGHLIGHT_COLOR;
+
+    bool operator==(const HighlightPhrase &other) const;
 
     HighlightPhrase(const QString &pattern, bool hasAlert, bool hasSound,
-                    bool isRegex, bool isCaseSensitive)
-        : pattern_(pattern)
-        , hasAlert_(hasAlert)
-        , hasSound_(hasSound)
-        , isRegex_(isRegex)
-        , isCaseSensitive_(isCaseSensitive)
-        , regex_(
-              isRegex_ ? pattern
-                       : "\\b" + QRegularExpression::escape(pattern) + "\\b",
-              QRegularExpression::UseUnicodePropertiesOption |
-                  (isCaseSensitive_ ? QRegularExpression::NoPatternOption
-                                  : QRegularExpression::CaseInsensitiveOption))
-    {
-    }
+                    bool isRegex, bool isCaseSensitive, const QString &soundUrl,
+                    const QColor &color);
 
-    const QString &getPattern() const
-    {
-        return this->pattern_;
-    }
-    bool hasAlert() const
-    {
-        return this->hasAlert_;
-    }
-    bool hasSound() const
-    {
-        return this->hasSound_;
-    }
-    bool isRegex() const
-    {
-        return this->isRegex_;
-    }
+    const QString &getPattern() const;
+    bool hasAlert() const;
+    bool hasSound() const;
+    bool isRegex() const;
+    bool isValid() const;
+    bool isMatch(const QString &subject) const;
+    bool isCaseSensitive() const;
+    const QUrl &getSoundUrl() const;
+    const QColor &getColor() const;
 
-    bool isValid() const
-    {
-        return !this->pattern_.isEmpty() && this->regex_.isValid();
-    }
-
-    bool isMatch(const QString &subject) const
-    {
-        return this->isValid() && this->regex_.match(subject).hasMatch();
-    }
-
-    bool isCaseSensitive() const
-    {
-        return this->isCaseSensitive_;
-    }
-    
 private:
     QString pattern_;
     bool hasAlert_;
     bool hasSound_;
     bool isRegex_;
     bool isCaseSensitive_;
+    QUrl soundUrl_;
+    QColor color_;
     QRegularExpression regex_;
 };
+
 }  // namespace chatterino
 
 namespace pajlada {
@@ -92,6 +58,8 @@ struct Serialize<chatterino::HighlightPhrase> {
         chatterino::rj::set(ret, "sound", value.hasSound(), a);
         chatterino::rj::set(ret, "regex", value.isRegex(), a);
         chatterino::rj::set(ret, "case", value.isCaseSensitive(), a);
+        chatterino::rj::set(ret, "soundUrl", value.getSoundUrl().toString(), a);
+        chatterino::rj::set(ret, "color", value.getColor().name(), a);
 
         return ret;
     }
@@ -103,8 +71,9 @@ struct Deserialize<chatterino::HighlightPhrase> {
     {
         if (!value.IsObject())
         {
-            return chatterino::HighlightPhrase(QString(), true, false, false,
-                                               false);
+            return chatterino::HighlightPhrase(
+                QString(), true, false, false, false, "",
+                chatterino::HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR);
         }
 
         QString _pattern;
@@ -112,15 +81,25 @@ struct Deserialize<chatterino::HighlightPhrase> {
         bool _hasSound = false;
         bool _isRegex = false;
         bool _isCaseSensitive = false;
+        QString _soundUrl;
+        QString _colorName;
 
         chatterino::rj::getSafe(value, "pattern", _pattern);
         chatterino::rj::getSafe(value, "alert", _hasAlert);
         chatterino::rj::getSafe(value, "sound", _hasSound);
         chatterino::rj::getSafe(value, "regex", _isRegex);
         chatterino::rj::getSafe(value, "case", _isCaseSensitive);
+        chatterino::rj::getSafe(value, "soundUrl", _soundUrl);
+        chatterino::rj::getSafe(value, "color", _colorName);
 
-            return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
-                                               _isRegex, _isCaseSensitive);
+        QColor _color =
+            _colorName.isEmpty()
+                ? chatterino::HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR
+                : QColor(_colorName);
+
+        return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
+                                           _isRegex, _isCaseSensitive,
+                                           _soundUrl, _color);
     }
 };
 

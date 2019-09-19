@@ -22,6 +22,13 @@ static void setStringItem(QStandardItem *item, const QString &value,
                                  (editable ? (Qt::ItemIsEditable) : 0)));
 }
 
+// "Editable" and "Selectable" do not really make sense in the traditional way
+static void setColorItem(QStandardItem *item, const QColor &value)
+{
+    item->setData(value, Qt::DecorationRole);
+    item->setFlags(Qt::ItemIsEnabled);
+}
+
 static QStandardItem *emptyItem()
 {
     auto *item = new QStandardItem();

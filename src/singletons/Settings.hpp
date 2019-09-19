@@ -158,6 +158,11 @@ public:
     BoolSetting enableWhisperHighlightTaskbar = {
         "/highlighting/whisperHighlight/enableTaskbarFlashing", false};
     QStringSetting highlightColor = {"/highlighting/color", ""};
+    
+    QStringSetting selfHighlightSoundUrl = {"/highlighting/selfHighlightSoundUrl", ""};
+    QStringSetting whisperHighlightSoundUrl = {"/highlighting/whisperHighlightSoundUrl", ""};
+    QStringSetting selfHighlightColor = {"/highlighting/selfHighlightColor", HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR.name()};
+    QStringSetting whisperHighlightColor = {"/highlighting/whisperHighlightColor", HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR.name()};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 
