@@ -60,7 +60,7 @@ void uploadImageToNuuls(QByteArray imageData, ChannelPtr channel,
                         .arg(uploadQueue.size())
                         .arg(uploadQueue.size() * 3)));
                 // Argument number 2 is the ETA.
-                // 2 seconds for the timer that's there not spam Nuuls' server
+                // 2 seconds for the timer that's there not to spam Nuuls' server
                 // and 1 second of actual uploading.
             }
             else

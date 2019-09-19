@@ -284,7 +284,7 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
     {
         this->pastedImage.invoke(source);
     }
-    else if (source->hasFormat("text/uri-list"))
+    else if (source->hasUrls())
     {
         this->pastedImage.invoke(source);
     }
@@ -295,7 +295,8 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 }
 void ResizingTextEdit::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (event->mimeData()->hasImage() || event->mimeData()->hasText())
+    if (event->mimeData()->hasImage() || event->mimeData()->hasText() ||
+        event->mimeData()->hasUrls())
     {
         event->acceptProposedAction();
     }
