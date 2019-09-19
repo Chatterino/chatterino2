@@ -127,6 +127,13 @@ NetworkRequest NetworkRequest::authorizeTwitchV5(const QString &clientID,
         return tmp;
 }
 
+NetworkRequest NetworkRequest::multiPart(QHttpMultiPart *payload) &&
+{
+    payload->setParent(this->data->lifetimeManager_);
+    this->data->multiPartPayload_ = payload;
+    return std::move(*this);
+}
+
 NetworkRequest NetworkRequest::payload(const QByteArray &payload) &&
 {
     this->data->payload_ = payload;

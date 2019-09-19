@@ -3,6 +3,7 @@
 #include "common/NetworkCommon.hpp"
 #include "util/QObjectRef.hpp"
 
+#include <QHttpMultiPart>
 #include <QNetworkRequest>
 #include <functional>
 
@@ -45,6 +46,8 @@ struct NetworkData {
     NetworkRequestType requestType_ = NetworkRequestType::Get;
 
     QByteArray payload_;
+    // lifetime secured by lifetimeManager_
+    QHttpMultiPart *multiPartPayload_{};
 
     // Timer that tracks the timeout
     // By default, there's no explicit timeout for the request
@@ -52,6 +55,7 @@ struct NetworkData {
     // execute is called
     bool hasTimeout_{};
     QTimer *timer_;
+    QObject *lifetimeManager_;
 
     QString getHash();
 
