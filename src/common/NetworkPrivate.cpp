@@ -130,15 +130,16 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
         if (data->timer_->isActive())
         {
-            QObject::connect(data->timer_, &QTimer::timeout, worker,
-                             [reply, data]() {
-                                 log("Aborted!");
-                                 reply->abort();
-                                 if (data->onError_)
-                                 {
-                                     data->onError_(-2);
-                                 }
-                             });
+            QObject::connect(
+                data->timer_, &QTimer::timeout, worker, [reply, data]() {
+                    log("Aborted!");
+                    reply->abort();
+                    if (data->onError_)
+                    {
+                        data->onError_(
+                            NetworkResult({}, NetworkResult::timedoutStatus));
+                    }
+                });
         }
 
         if (data->onReplyCreated_)
@@ -157,7 +158,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             {
                 if (data->onError_)
                 {
-                    data->onError_(reply->error());
+                    data->onError_(NetworkResult({}, reply->error()));
                 }
                 return;
             }
@@ -165,7 +166,10 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             QByteArray bytes = reply->readAll();
             writeToCache(data, bytes);
 
-            NetworkResult result(bytes);
+            auto status =
+                reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+            NetworkResult result(bytes, status.toInt());
 
             DebugCount::increase("http request success");
             // log("starting {}", data->request_.url().toString());
@@ -223,7 +227,7 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
     {
         // XXX: check if bytes is empty?
         QByteArray bytes = cachedFile.readAll();
-        NetworkResult result(bytes);
+        NetworkResult result(bytes, 200);
 
         if (data->onSuccess_)
         {

@@ -49,8 +49,6 @@ void LinkResolver::getLinkInfo(
         })
         .onError([successCallback, url](auto /*result*/) {
             successCallback("No link info found", Link(Link::Url, url));
-
-            return true;
         })
         .execute();
     // });

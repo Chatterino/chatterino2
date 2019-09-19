@@ -364,7 +364,7 @@ void Image::actuallyLoad()
 
             return Success;
         })
-        .onError([weak = weakOf(this)](auto /*result*/) -> bool {
+        .onError([weak = weakOf(this)](auto /*result*/) {
             auto shared = weak.lock();
             if (!shared)
                 return false;

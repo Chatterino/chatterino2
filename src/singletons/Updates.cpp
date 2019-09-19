@@ -83,7 +83,7 @@ void Updates::installUpdates()
 
         NetworkRequest(this->updatePortable_)
             .timeout(600000)
-            .onError([this](int) -> bool {
+            .onError([this](NetworkResult) {
                 this->setStatus_(DownloadFailed);
 
                 postToThread([] {
@@ -94,8 +94,6 @@ void Updates::installUpdates()
                     box->show();
                     box->raise();
                 });
-
-                return true;
             })
             .onSuccess([this](auto result) -> Outcome {
                 QByteArray object = result.getData();
@@ -136,7 +134,7 @@ void Updates::installUpdates()
 
         NetworkRequest(this->updateExe_)
             .timeout(600000)
-            .onError([this](int) -> bool {
+            .onError([this](NetworkResult) {
                 this->setStatus_(DownloadFailed);
 
                 QMessageBox *box = new QMessageBox(
@@ -145,7 +143,6 @@ void Updates::installUpdates()
                     "downloading the update.");
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->exec();
-                return true;
             })
             .onSuccess([this](auto result) -> Outcome {
                 QByteArray object = result.getData();
