@@ -19,7 +19,7 @@ public:
     pajlada::Signals::Signal<QKeyEvent *> keyPressed;
     pajlada::Signals::NoArgSignal focused;
     pajlada::Signals::NoArgSignal focusLost;
-
+    pajlada::Signals::Signal<const QMimeData *> pastedImage;
     void setCompleter(QCompleter *c);
     QCompleter *getCompleter() const;
 
@@ -32,6 +32,9 @@ protected:
 
     bool canInsertFromMimeData(const QMimeData *source) const override;
     void insertFromMimeData(const QMimeData *source) override;
+
+    void dragEnterEvent(QDragEnterEvent *event);
+    void dropEvent(QDropEvent *event);
 
 private:
     // hadSpace is set to true in case the "textUnderCursor" word was after a

@@ -1,6 +1,14 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
+#include <QByteArray>
+#include <QDebug>
+#include <QMimeData>
+#include <QNetworkReply>
+#include <Qt>
+#include <string>
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
+#include "common/Env.hpp"
+#include "common/NetworkRequest.hpp"
 #include "singletons/Settings.hpp"
 
 namespace chatterino {
@@ -22,6 +30,8 @@ ResizingTextEdit::ResizingTextEdit()
         [this] { this->completionInProgress_ = false; });
 
     this->setFocusPolicy(Qt::ClickFocus);
+
+    setAcceptDrops(true);
 }
 
 QSize ResizingTextEdit::sizeHint() const
@@ -259,7 +269,7 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 {
     if (source->hasImage())
     {
-        return false;
+        return true;
     }
     else if (source->hasFormat("text/plain"))
     {
@@ -270,12 +280,38 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
-    if (!source->hasImage())
+    if (source->hasImage())
+    {
+        this->pastedImage.invoke(source);
+    }
+    else if (source->hasUrls())
+    {
+        this->pastedImage.invoke(source);
+    }
+    else
     {
         insertPlainText(source->text());
     }
 }
-
+void ResizingTextEdit::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasImage() || event->mimeData()->hasText() ||
+        event->mimeData()->hasUrls())
+    {
+        event->acceptProposedAction();
+    }
+}
+void ResizingTextEdit::dropEvent(QDropEvent *event)
+{
+    if (event->mimeData()->hasImage())
+    {
+        this->pastedImage.invoke(event->mimeData());
+    }
+    else
+    {  // can only be text, because of check in dragEnterEvent()
+        insertPlainText(event->mimeData()->text());
+    }
+}
 QCompleter *ResizingTextEdit::getCompleter() const
 {
     return this->completer_;

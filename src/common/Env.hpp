@@ -14,6 +14,7 @@ public:
     const QString recentMessagesApiUrl;
     const QString linkResolverUrl;
     const QString twitchEmoteSetResolverUrl;
+    const QString imagePasteSiteUrl;
 };
 
 }  // namespace chatterino

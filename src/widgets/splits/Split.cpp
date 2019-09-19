@@ -1,6 +1,7 @@
 #include "widgets/splits/Split.hpp"
 
 #include "common/Common.hpp"
+#include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/Log.hpp"
@@ -11,6 +12,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/NuulsUploader.hpp"
 #include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Notebook.hpp"
@@ -36,6 +38,7 @@
 #include <QDesktopServices>
 #include <QDockWidget>
 #include <QDrag>
+#include <QImage>
 #include <QJsonArray>
 #include <QLabel>
 #include <QListWidget>
@@ -205,6 +208,12 @@ Split::Split(QWidget *parent)
         [this] { this->focused.invoke(); });
     this->input_->ui_.textEdit->focusLost.connect(
         [this] { this->focusLost.invoke(); });
+
+    this->input_->ui_.textEdit->pastedImage.connect(
+        [this](const QMimeData *source) {
+            pasteFromClipboard(source, this->getChannel(),
+                               *this->input_->ui_.textEdit);
+        });
 }
 
 Split::~Split()
