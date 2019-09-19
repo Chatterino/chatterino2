@@ -203,25 +203,22 @@ void FfzEmotes::loadChannel(
 
             return Success;
         })
-        .onError([channelId](int result) {
-            if (result == 203)
+        .onError([channelId](NetworkResult result) {
+            if (result.status() == 203)
             {
                 // User does not have any FFZ emotes
-                return true;
             }
-
-            if (result == -2)
+            else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay
                 log("Fetching FFZ emotes for channel {} failed due to timeout",
                     channelId);
-                return true;
             }
-
-            log("Error fetching FFZ emotes for channel {}, error {}", channelId,
-                result);
-
-            return true;
+            else
+            {
+                log("Error fetching FFZ emotes for channel {}, error {}",
+                    channelId, result.status());
+            }
         })
         .execute();
 }

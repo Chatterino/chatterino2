@@ -8,8 +8,9 @@
 
 namespace chatterino {
 
-NetworkResult::NetworkResult(const QByteArray &data)
+NetworkResult::NetworkResult(const QByteArray &data, int status)
     : data_(data)
+    , status_(status)
 {
 }
 
@@ -55,6 +56,11 @@ rapidjson::Document NetworkResult::parseRapidJson() const
 const QByteArray &NetworkResult::getData() const
 {
     return this->data_;
+}
+
+int NetworkResult::status() const
+{
+    return this->status_;
 }
 
 }  // namespace chatterino
