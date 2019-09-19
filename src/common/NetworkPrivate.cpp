@@ -17,6 +17,7 @@ namespace chatterino {
 
 NetworkData::NetworkData()
     : timer_(new QTimer())
+    , lifetimeManager_(new QObject)
 {
     timer_->setSingleShot(true);
 
@@ -26,6 +27,7 @@ NetworkData::NetworkData()
 NetworkData::~NetworkData()
 {
     this->timer_->deleteLater();
+    this->lifetimeManager_->deleteLater();
 
     DebugCount::decrease("NetworkData");
 }
@@ -104,8 +106,18 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                         data->request_);
 
                 case NetworkRequestType::Post:
-                    return NetworkManager::accessManager.post(data->request_,
-                                                              data->payload_);
+                    if (data->multiPartPayload_)
+                    {
+                        assert(data->payload_.isNull());
+
+                        return NetworkManager::accessManager.post(
+                            data->request_, data->multiPartPayload_);
+                    }
+                    else
+                    {
+                        return NetworkManager::accessManager.post(
+                            data->request_, data->payload_);
+                    }
             }
             return nullptr;
         }();
