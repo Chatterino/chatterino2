@@ -170,6 +170,23 @@ void TwitchIrcServer::readConnectionMessageReceived(
     {
         handler.handleClearChatMessage(message);
     }
+    else if (command == "CLEARMSG")
+    {
+        handler.handleClearMessageMessage(message);
+    }
+    else if (command == "USERNOTICE")
+    {
+        handler.handleUserNoticeMessage(message, *this);
+    }
+    else if (command == "NOTICE")
+    {
+        handler.handleNoticeMessage(
+            static_cast<Communi::IrcNoticeMessage *>(message));
+    }
+    else if (command == "WHISPER")
+    {
+        handler.handleWhisperMessage(message);
+    }
 }
 
 void TwitchIrcServer::writeConnectionMessageReceived(
@@ -184,27 +201,6 @@ void TwitchIrcServer::writeConnectionMessageReceived(
     {
         // Received USERSTATE upon PRIVMSGing
         handler.handleUserStateMessage(message);
-    }
-    else if (command == "WHISPER")
-    {
-        handler.handleWhisperMessage(message);
-    }
-    else if (command == "USERNOTICE")
-    {
-        handler.handleUserNoticeMessage(message, *this);
-    }
-    else if (command == "ROOMSTATE")
-    {
-        handler.handleRoomStateMessage(message);
-    }
-    else if (command == "CLEARMSG")
-    {
-        handler.handleClearMessageMessage(message);
-    }
-    else if (command == "NOTICE")
-    {
-        handler.handleNoticeMessage(
-            static_cast<Communi::IrcNoticeMessage *>(message));
     }
 }
 
