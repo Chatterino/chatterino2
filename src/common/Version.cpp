@@ -16,11 +16,11 @@ Version::Version()
     this->commitHash_ =
         QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_HASH)).remove('"');
 
-    // Date of build
+    // Date of build, this is depended on the format not changing
 #ifdef CHATTERINO_NIGHTLY_VERSION_STRING
     this->dateOfBuild_ =
         QString(FROM_EXTERNAL_DEFINE(CHATTERINO_NIGHTLY_VERSION_STRING))
-            .remove('"');
+            .remove('"').split(' ')[0];
 #endif
 
     // "Full" version string, as displayed in window title
@@ -31,11 +31,6 @@ Version::Version()
     }
 
     this->fullVersion_ += this->version_;
-
-    if (Modes::getInstance().isNightly)
-    {
-        this->fullVersion_ += this->dateOfBuild_;
-    }
 }
 
 const Version &Version::getInstance()
