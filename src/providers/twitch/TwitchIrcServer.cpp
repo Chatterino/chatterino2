@@ -156,6 +156,11 @@ void TwitchIrcServer::readConnectionMessageReceived(
     {
         handler.handlePartMessage(message);
     }
+    else if (command == "USERSTATE")
+    {
+        // Received USERSTATE upon JOINing a channel
+        handler.handleUserStateMessage(message);
+    }
 }
 
 void TwitchIrcServer::writeConnectionMessageReceived(
@@ -168,6 +173,7 @@ void TwitchIrcServer::writeConnectionMessageReceived(
     // Below commands enabled through the twitch.tv/commands CAP REQ
     if (command == "USERSTATE")
     {
+        // Received USERSTATE upon PRIVMSGing
         handler.handleUserStateMessage(message);
     }
     else if (command == "WHISPER")
@@ -199,20 +205,24 @@ void TwitchIrcServer::writeConnectionMessageReceived(
 
 void TwitchIrcServer::onReadConnected(IrcConnection *connection)
 {
-    AbstractIrcServer::onReadConnected(connection);
-
     // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags/
     // twitch.tv/membership enables the JOIN/PART/MODE/NAMES commands. See https://dev.twitch.tv/docs/irc/membership/
-    connection->sendRaw("CAP REQ :twitch.tv/tags twitch.tv/membership");
+    // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands/
+    //                    This is enabled here so we receive USERSTATE messages when joining channels
+    connection->sendRaw(
+        "CAP REQ :twitch.tv/tags twitch.tv/membership twitch.tv/commands");
+
+    AbstractIrcServer::onReadConnected(connection);
 }
 
 void TwitchIrcServer::onWriteConnected(IrcConnection *connection)
 {
-    AbstractIrcServer::onWriteConnected(connection);
-
     // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags/
     // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands/
+    //                    This is enabled here so we receive USERSTATE messages when typing messages, along with the other command capabilities
     connection->sendRaw("CAP REQ :twitch.tv/tags twitch.tv/commands");
+
+    AbstractIrcServer::onWriteConnected(connection);
 }
 
 std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
