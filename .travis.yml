@@ -65,7 +65,7 @@ matrix:
         - mkdir build && cd build
         - dateOfBuild="CHATTERINO_NIGHTLY_VERSION_STRING=\"\\\"$(date +%d.%m.%Y)\\\"\""
         - /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
-        - sed -i 's/-framework\\\ /-framework /g' Makefile
+        - sed -ie 's/-framework\\\ /-framework /g' Makefile
         - make -j8
         - /usr/local/opt/qt/bin/macdeployqt chatterino.app -dmg
         - mkdir app
