@@ -21,9 +21,56 @@
 #define FIREFOX_EXTENSION_LINK \
     "https://addons.mozilla.org/en-US/firefox/addon/chatterino-native-host/"
 
+// define to highlight sections in editor
 #define addTitle addTitle
 
+#ifdef Q_OS_WIN
+#    define META_KEY "Windows"
+#else
+#    define META_KEY "Meta"
+#endif
+
 namespace chatterino {
+namespace {
+    void addKeyboardModifierSetting(SettingsLayout &layout,
+                                    const QString &title,
+                                    EnumSetting<Qt::KeyboardModifier> &setting)
+    {
+        layout.addDropdown<std::underlying_type<Qt::KeyboardModifier>::type>(
+            title, {"None", "Shift", "Control", "Alt", META_KEY}, setting,
+            [](int index) {
+                switch (index)
+                {
+                    case Qt::ShiftModifier:
+                        return 1;
+                    case Qt::ControlModifier:
+                        return 2;
+                    case Qt::AltModifier:
+                        return 3;
+                    case Qt::MetaModifier:
+                        return 4;
+                    default:
+                        return 0;
+                }
+            },
+            [](DropdownArgs args) {
+                switch (args.index)
+                {
+                    case 1:
+                        return Qt::ShiftModifier;
+                    case 2:
+                        return Qt::ControlModifier;
+                    case 3:
+                        return Qt::AltModifier;
+                    case 4:
+                        return Qt::MetaModifier;
+                    default:
+                        return Qt::NoModifier;
+                }
+            },
+            false);
+    }
+}  // namespace
 
 TitleLabel *SettingsLayout::addTitle(const QString &title)
 {
@@ -272,7 +319,28 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
-    layout.addCheckbox("Pause on hover", s.pauseChatOnHover);
+    layout.addDropdown<float>(
+        "Pause on hover", {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
+        s.pauseOnHoverDuration,
+        [](auto val) {
+            if (val < -0.5f)
+                return QString("Indefinite");
+            else if (val < 0.001f)
+                return QString("Disabled");
+            else
+                return QString::number(val) + "s";
+        },
+        [](auto args) {
+            if (args.index == 0)
+                return 0.0f;
+            else if (args.value == "Indefinite")
+                return -1.0f;
+            else
+                return fuzzyToFloat(args.value,
+                                    std::numeric_limits<float>::infinity());
+        });
+    addKeyboardModifierSetting(layout, "Pause while holding a key",
+                               s.pauseChatModifier);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
     if (!BaseWindow::supportsCustomWindowFrame())
@@ -370,10 +438,10 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addDescription("The browser extension replaces the default "
                           "Twitch.tv chat with chatterino.");
 
+    layout.addDescription(formatRichNamedLink(CHROME_EXTENSION_LINK,
+                                              "Download for Google Chrome"));
     layout.addDescription(
-        createNamedLink(CHROME_EXTENSION_LINK, "Download for Google Chrome"));
-    layout.addDescription(
-        createNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
+        formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
 #endif
 
     layout.addTitle("Miscellaneous");
@@ -383,6 +451,16 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         layout.addCheckbox("Open links in incognito/private mode",
                            s.openLinksIncognito);
     }
+
+#ifdef Q_OS_LINUX
+    if (!getPaths()->isPortable())
+    {
+        layout.addCheckbox(
+            "Use libsecret/KWallet/Gnome keychain to secure passwords",
+            s.useKeyring);
+    }
+#endif
+
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
     layout.addCheckbox("Random username color for users who never set a color",
@@ -391,8 +469,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.mentionUsersWithComma);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
-    layout.addCheckbox("Lowercase domains (anti-phisching)",
-                       s.lowercaseDomains);
+    layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addDropdown<float>(
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
@@ -418,6 +495,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.highlightInlineWhispers);
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
+
+    layout.addCheckbox("Show unhandled irc messages",
+                       s.showUnhandledIrcMessages);
 
     layout.addTitle("Cache");
     layout.addDescription(

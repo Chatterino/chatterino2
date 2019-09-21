@@ -20,7 +20,7 @@ protected:
     QString chatroomOwnerId;
     QString chatroomOwnerName;
 
-    friend class TwitchServer;
+    friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;
     friend class IrcMessageHandler;
 };

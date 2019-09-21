@@ -102,7 +102,9 @@ public:
     BoolSetting prefixOnlyEmoteCompletion = {
         "/behaviour/autocompletion/prefixOnlyCompletion", true};
 
-    BoolSetting pauseChatOnHover = {"/behaviour/pauseChatHover", false};
+    FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
+    EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {
+        "/behaviour/pauseChatModifier", Qt::KeyboardModifier::NoModifier};
     BoolSetting autorun = {"/behaviour/autorun", false};
     BoolSetting mentionUsersWithComma = {"/behaviour/mentionUsersWithComma",
                                          true};
@@ -199,6 +201,10 @@ public:
 
     /// Misc
     BoolSetting betaUpdates = {"/misc/beta", false};
+#ifdef Q_OS_LINUX
+    BoolSetting useKeyring = {"/misc/useKeyring", true};
+#endif
+
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
     BoolSetting loadTwitchMessageHistoryOnConnect = {
@@ -207,6 +213,15 @@ public:
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
     QStringSetting cachePath = {"/cache/path", ""};
+
+    /// Debug
+    BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
+                                            false};
+
+    /// UI
+    // Purely QOL settings are here (like last item in a list).
+    IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
+    IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
 
 private:
     void updateModerationActions();

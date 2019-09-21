@@ -1,6 +1,7 @@
 #include "Updates.hpp"
 
 #include "Settings.hpp"
+#include "common/Modes.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "common/Version.hpp"
@@ -82,7 +83,7 @@ void Updates::installUpdates()
 
         NetworkRequest(this->updatePortable_)
             .timeout(600000)
-            .onError([this](int) -> bool {
+            .onError([this](NetworkResult) {
                 this->setStatus_(DownloadFailed);
 
                 postToThread([] {
@@ -93,8 +94,6 @@ void Updates::installUpdates()
                     box->show();
                     box->raise();
                 });
-
-                return true;
             })
             .onSuccess([this](auto result) -> Outcome {
                 QByteArray object = result.getData();
@@ -135,7 +134,7 @@ void Updates::installUpdates()
 
         NetworkRequest(this->updateExe_)
             .timeout(600000)
-            .onError([this](int) -> bool {
+            .onError([this](NetworkResult) {
                 this->setStatus_(DownloadFailed);
 
                 QMessageBox *box = new QMessageBox(
@@ -144,7 +143,6 @@ void Updates::installUpdates()
                     "downloading the update.");
                 box->setAttribute(Qt::WA_DeleteOnClose);
                 box->exec();
-                return true;
             })
             .onSuccess([this](auto result) -> Outcome {
                 QByteArray object = result.getData();
@@ -201,6 +199,14 @@ void Updates::installUpdates()
 
 void Updates::checkForUpdates()
 {
+    // Disable updates if on nightly and windows.
+#ifdef Q_OS_WIN
+    if (Modes::getInstance().isNightly)
+    {
+        return;
+    }
+#endif
+
     QString url =
         "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/" +
         currentBranch();

@@ -1,5 +1,7 @@
 #include "AboutPage.hpp"
 
+#include "common/Modes.hpp"
+#include "common/Version.hpp"
 #include "debug/Log.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
@@ -71,6 +73,24 @@ AboutPage::AboutPage()
             //            }
         }*/
 
+        auto versionInfo = layout.emplace<QGroupBox>("Version");
+        {
+            auto version = Version::getInstance();
+            QString text = QString("%1 (commit %2%3)")
+                               .arg(version.getFullVersion())
+                               .arg("<a "
+                                    "href=\"https://github.com/Chatterino/"
+                                    "chatterino2/commit/" +
+                                    version.getCommitHash() + "\">" +
+                                    version.getCommitHash() + "</a>")
+                               .arg(Modes::getInstance().isNightly ? ", " + version.getDateOfBuild() : "");
+
+            auto versionLabel = versionInfo.emplace<QLabel>(text);
+            versionLabel->setOpenExternalLinks(true);
+            versionLabel->setTextInteractionFlags(Qt::TextSelectableByMouse |
+                                                  Qt::LinksAccessibleByMouse);
+        }
+
         auto licenses =
             layout.emplace<QGroupBox>("Open source software used...");
         {
@@ -98,6 +118,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "Websocketpp",
                        "https://www.zaphoyd.com/websocketpp/",
                        ":/licenses/websocketpp.txt");
+            addLicense(form.getElement(), "QtKeychain",
+                       "https://github.com/frankosterfeld/qtkeychain",
+                       ":/licenses/qtkeychain.txt");
         }
 
         auto attributions = layout.emplace<QGroupBox>("Attributions...");

@@ -10,7 +10,7 @@
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -355,7 +355,7 @@ void TwitchMessageBuilder::addWords(
     auto i = int();
     auto currentTwitchEmote = twitchEmotes.begin();
 
-    for (const auto &word : words)
+    for (auto word : words)
     {
         // check if it's a twitch emote twitch emote
         while (currentTwitchEmote != twitchEmotes.end() &&
@@ -376,9 +376,19 @@ void TwitchMessageBuilder::addWords(
                                         MessageElementFlag::TwitchEmote);
 
             i += word.length() + 1;
+
+            int len = std::get<2>(*currentTwitchEmote).string.length();
             currentTwitchEmote++;
 
-            continue;
+            if (len < word.length())
+            {
+                word = word.mid(len);
+                this->message().elements.back()->setTrailingSpace(false);
+            }
+            else
+            {
+                continue;
+            }
         }
 
         // split words

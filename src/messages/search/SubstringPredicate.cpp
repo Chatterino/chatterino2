@@ -9,7 +9,7 @@ SubstringPredicate::SubstringPredicate(const QString &search)
 
 bool SubstringPredicate::appliesTo(const Message &message)
 {
-    return message.messageText.contains(this->search_, Qt::CaseInsensitive);
+    return message.searchText.contains(this->search_, Qt::CaseInsensitive);
 }
 
 }  // namespace chatterino

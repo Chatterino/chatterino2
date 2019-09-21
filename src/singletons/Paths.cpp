@@ -8,6 +8,7 @@
 #include <QStandardPaths>
 #include <cassert>
 
+#include "common/Modes.hpp"
 #include "util/CombinePath.hpp"
 
 namespace chatterino {
@@ -32,7 +33,7 @@ bool Paths::createFolder(const QString &folderPath)
 
 bool Paths::isPortable()
 {
-    return this->portable_.get();
+    return Modes::getInstance().isPortable;
 }
 
 QString Paths::cacheDirectory()
@@ -135,7 +136,7 @@ void Paths::initSubDirectories()
     this->messageLogDirectory = makePath("Logs");
     this->miscDirectory = makePath("Misc");
     this->twitchProfileAvatars = makePath("ProfileAvatars");
-    QDir().mkdir(this->twitchProfileAvatars + "/twitch");
+    //QDir().mkdir(this->twitchProfileAvatars + "/twitch");
 }
 
 Paths *getPaths()

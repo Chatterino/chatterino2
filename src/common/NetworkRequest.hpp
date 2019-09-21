@@ -56,6 +56,7 @@ public:
     NetworkRequest concurrent() &&;
     NetworkRequest authorizeTwitchV5(const QString &clientID,
                                      const QString &oauthToken = QString()) &&;
+    NetworkRequest multiPart(QHttpMultiPart *payload) &&;
 
     void execute();
 

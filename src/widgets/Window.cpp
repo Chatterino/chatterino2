@@ -1,9 +1,11 @@
 #include "widgets/Window.hpp"
 
 #include "Application.hpp"
+#include "common/Credentials.hpp"
+#include "common/Modes.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "providers/twitch/TwitchServer.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Updates.hpp"
@@ -107,7 +109,7 @@ bool Window::event(QEvent *event)
         break;
 
         default:;
-    };
+    }
 
     return BaseWindow::event(event);
 }
@@ -115,18 +117,10 @@ bool Window::event(QEvent *event)
 void Window::showEvent(QShowEvent *event)
 {
     // Startup notification
-    if (getSettings()->startUpNotification.getValue() < 1)
+    /*if (getSettings()->startUpNotification.getValue() < 1)
     {
         getSettings()->startUpNotification = 1;
-
-        // auto box = new QMessageBox(
-        //     QMessageBox::Information, "Chatterino 2 Beta",
-        //     "Please note that this software is not stable yet. Things are "
-        //     "rough "
-        //     "around the edges and everything is subject to change.");
-        // box->setAttribute(Qt::WA_DeleteOnClose);
-        // box->show();
-    }
+    }*/
 
     // Show changelog
     if (getSettings()->currentVersion.getValue() != "" &&
@@ -370,23 +364,14 @@ void Window::addMenuBar()
             [=] { this->notebook_->selectPreviousTab(); });
 }
 
-#define UGLYMACROHACK1(s) #s
-#define UGLYMACROHACK(s) UGLYMACROHACK1(s)
-
 void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
 
-    //#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
-    //    auto windowTitleEnd =
-    //        QString("Chatterino Nightly " CHATTERINO_VERSION
-    //                " (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
-    //#else
-    auto windowTitleEnd = QString("Chatterino " CHATTERINO_VERSION);
-    //#endif
+    // update title
+    this->setWindowTitle(Version::getInstance().getFullVersion());
 
-    this->setWindowTitle(windowTitleEnd);
-
+    // update user
     if (user->isAnon())
     {
         if (this->userLabel_)
@@ -401,6 +386,6 @@ void Window::onAccountSelected()
             this->userLabel_->getLabel().setText(user->getUserName());
         }
     }
-}
+}  // namespace chatterino
 
 }  // namespace chatterino

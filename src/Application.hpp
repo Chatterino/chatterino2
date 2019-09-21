@@ -8,7 +8,7 @@
 
 namespace chatterino {
 
-class TwitchServer;
+class TwitchIrcServer;
 class PubSub;
 
 class CommandController;
@@ -67,14 +67,14 @@ public:
     IgnoreController *const ignores{};
     TaggedUsersController *const taggedUsers{};
     ModerationActions *const moderationActions{};
-    TwitchServer *const twitch2{};
+    TwitchIrcServer *const twitch2{};
     ChatterinoBadges *const chatterinoBadges{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 
     /// Provider-specific
     struct {
-        /*[[deprecated("use twitch2 instead")]]*/ TwitchServer *server{};
+        /*[[deprecated("use twitch2 instead")]]*/ TwitchIrcServer *server{};
         /*[[deprecated("use twitch2->pubsub instead")]]*/ PubSub *pubsub{};
     } twitch;
 

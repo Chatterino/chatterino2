@@ -2,7 +2,7 @@
 
 #include <QtGlobal>
 
-#define CHATTERINO_VERSION "2.1.4-beta-2"
+#define CHATTERINO_VERSION "2.1.4"
 
 #if defined(Q_OS_WIN)
 #    define CHATTERINO_OS "win"
@@ -13,3 +13,26 @@
 #else
 #    define CHATTERINO_OS "unknown"
 #endif
+
+namespace chatterino {
+
+class Version
+{
+public:
+    static const Version &getInstance();
+
+    const QString &getVersion() const;
+    const QString &getCommitHash() const;
+    const QString &getDateOfBuild() const;
+    const QString &getFullVersion() const;
+
+private:
+    Version();
+
+    QString version_;
+    QString commitHash_;
+    QString dateOfBuild_;
+    QString fullVersion_;
+};
+
+};

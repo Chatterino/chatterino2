@@ -126,6 +126,20 @@ public:
         return LayoutCreator<T2>(item);
     }
 
+    template <typename Slot, typename Func>
+    LayoutCreator<T> connect(Slot slot, QObject *receiver, Func func)
+    {
+        QObject::connect(this->getElement(), slot, receiver, func);
+        return *this;
+    }
+
+    template <typename Func>
+    LayoutCreator<T> onClick(QObject *receiver, Func func)
+    {
+        QObject::connect(this->getElement(), &T::clicked, receiver, func);
+        return *this;
+    }
+
 private:
     T *item_;
 
@@ -168,5 +182,13 @@ private:
         return this->item_->layout();
     }
 };
+
+template <typename T, typename... Args>
+LayoutCreator<T> makeDialog(Args &&... args)
+{
+    T *t = new T(std::forward<Args>(args)...);
+    t->setAttribute(Qt::WA_DeleteOnClose);
+    return LayoutCreator<T>(t);
+}
 
 }  // namespace chatterino

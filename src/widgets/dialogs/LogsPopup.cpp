@@ -88,10 +88,7 @@ void LogsPopup::getLogviewerLogs(const QString &roomID)
 
     NetworkRequest(url)
         .caller(this)
-        .onError([this](int /*errorCode*/) {
-            this->getOverrustleLogs();
-            return true;
-        })
+        .onError([this](NetworkResult) { this->getOverrustleLogs(); })
         .onSuccess([this, roomID](auto result) -> Outcome {
             auto data = result.parseJson();
             std::vector<MessagePtr> messages;
@@ -140,7 +137,7 @@ void LogsPopup::getOverrustleLogs()
 
     NetworkRequest(url)
         .caller(this)
-        .onError([this](int /*errorCode*/) {
+        .onError([this](NetworkResult) {
             auto box = new QMessageBox(
                 QMessageBox::Information, "Error getting logs",
                 "No logs could be found for channel " + this->channelName_);
@@ -150,8 +147,6 @@ void LogsPopup::getOverrustleLogs()
             box->raise();
             this->close();
             box->exec();
-
-            return true;
         })
         .onSuccess([this](auto result) -> Outcome {
             auto data = result.parseJson();

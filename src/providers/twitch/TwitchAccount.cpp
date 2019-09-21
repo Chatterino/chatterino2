@@ -170,13 +170,11 @@ void TwitchAccount::ignoreByID(
     NetworkRequest(url, NetworkRequestType::Put)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](int errorCode) {
+        .onError([=](NetworkResult result) {
             onFinished(IgnoreResult_Failed,
                        "An unknown error occured while trying to ignore user " +
-                           targetName + " (" + QString::number(errorCode) +
-                           ")");
-
-            return true;
+                           targetName + " (" +
+                           QString::number(result.status()) + ")");
         })
         .onSuccess([=](auto result) -> Outcome {
             auto document = result.parseRapidJson();
@@ -247,13 +245,11 @@ void TwitchAccount::unignoreByID(
     NetworkRequest(url, NetworkRequestType::Delete)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](int errorCode) {
+        .onError([=](NetworkResult result) {
             onFinished(
                 UnignoreResult_Failed,
                 "An unknown error occured while trying to unignore user " +
-                    targetName + " (" + QString::number(errorCode) + ")");
-
-            return true;
+                    targetName + " (" + QString::number(result.status()) + ")");
         })
         .onSuccess([=](auto result) -> Outcome {
             auto document = result.parseRapidJson();
@@ -281,8 +277,8 @@ void TwitchAccount::checkFollow(const QString targetUserID,
     NetworkRequest(url)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](int errorCode) {
-            if (errorCode == 203)
+        .onError([=](NetworkResult result) {
+            if (result.status() == 203)
             {
                 onFinished(FollowResult_NotFollowing);
             }
@@ -290,8 +286,6 @@ void TwitchAccount::checkFollow(const QString targetUserID,
             {
                 onFinished(FollowResult_Failed);
             }
-
-            return true;
         })
         .onSuccess([=](auto result) -> Outcome {
             auto document = result.parseRapidJson();
@@ -328,13 +322,11 @@ void TwitchAccount::unfollowUser(const QString userID,
     NetworkRequest(requestUrl, NetworkRequestType::Delete)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([successCallback](int code) {
-            if (code >= 200 && code <= 299)
+        .onError([successCallback](NetworkResult result) {
+            if (result.status() >= 200 && result.status() <= 299)
             {
                 successCallback();
             }
-
-            return true;
         })
         .onSuccess([successCallback](const auto &document) -> Outcome {
             successCallback();
@@ -370,9 +362,9 @@ void TwitchAccount::loadEmotes()
     NetworkRequest(url)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](int errorCode) {
-            log("[TwitchAccount::loadEmotes] Error {}", errorCode);
-            if (errorCode == 203)
+        .onError([=](NetworkResult result) {
+            log("[TwitchAccount::loadEmotes] Error {}", result.status());
+            if (result.status() == 203)
             {
                 // onFinished(FollowResult_NotFollowing);
             }
@@ -380,8 +372,6 @@ void TwitchAccount::loadEmotes()
             {
                 // onFinished(FollowResult_Failed);
             }
-
-            return true;
         })
         .onSuccess([=](auto result) -> Outcome {
             this->parseEmotes(result.parseRapidJson());
@@ -411,9 +401,8 @@ void TwitchAccount::autoModAllow(const QString msgID)
         .payload(qba)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](int errorCode) {
-            log("[TwitchAccounts::autoModAllow] Error {}", errorCode);
-            return true;
+        .onError([=](NetworkResult result) {
+            log("[TwitchAccounts::autoModAllow] Error {}", result.status());
         })
         .execute();
 }
@@ -431,9 +420,8 @@ void TwitchAccount::autoModDeny(const QString msgID)
         .payload(qba)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](int errorCode) {
-            log("[TwitchAccounts::autoModDeny] Error {}", errorCode);
-            return true;
+        .onError([=](NetworkResult result) {
+            log("[TwitchAccounts::autoModDeny] Error {}", result.status());
         })
         .execute();
 }
@@ -516,9 +504,8 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
 
     NetworkRequest(Env::get().twitchEmoteSetResolverUrl.arg(emoteSet->key))
         .cache()
-        .onError([](int errorCode) -> bool {
-            log("Error code {} while loading emote set data", errorCode);
-            return true;
+        .onError([](NetworkResult result) {
+            log("Error code {} while loading emote set data", result.status());
         })
         .onSuccess([emoteSet](auto result) -> Outcome {
             auto root = result.parseRapidJson();

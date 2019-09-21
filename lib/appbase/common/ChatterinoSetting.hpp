@@ -51,4 +51,38 @@ using IntSetting = ChatterinoSetting<int>;
 using StringSetting = ChatterinoSetting<std::string>;
 using QStringSetting = ChatterinoSetting<QString>;
 
+template <typename Enum>
+class EnumSetting
+    : public ChatterinoSetting<typename std::underlying_type<Enum>::type>
+{
+    using Underlying = typename std::underlying_type<Enum>::type;
+
+public:
+    using ChatterinoSetting<Underlying>::ChatterinoSetting;
+
+    EnumSetting(const std::string &path, const Enum &defaultValue)
+        : ChatterinoSetting<Underlying>(path, Underlying(defaultValue))
+    {
+        _registerSetting(this->getData());
+    }
+
+    template <typename T2>
+    EnumSetting<Enum> &operator=(Enum newValue)
+    {
+        this->setValue(Underlying(newValue));
+
+        return *this;
+    }
+
+    operator Enum()
+    {
+        return Enum(this->getValue());
+    }
+
+    Enum getEnum()
+    {
+        return Enum(this->getValue());
+    }
+};
+
 }  // namespace AB_NAMESPACE

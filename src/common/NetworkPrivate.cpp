@@ -17,6 +17,7 @@ namespace chatterino {
 
 NetworkData::NetworkData()
     : timer_(new QTimer())
+    , lifetimeManager_(new QObject)
 {
     timer_->setSingleShot(true);
 
@@ -26,12 +27,17 @@ NetworkData::NetworkData()
 NetworkData::~NetworkData()
 {
     this->timer_->deleteLater();
+    this->lifetimeManager_->deleteLater();
 
     DebugCount::decrease("NetworkData");
 }
 
 QString NetworkData::getHash()
 {
+    static std::mutex mu;
+
+    std::lock_guard lock(mu);
+
     if (this->hash_.isEmpty())
     {
         QByteArray bytes;
@@ -100,8 +106,18 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                         data->request_);
 
                 case NetworkRequestType::Post:
-                    return NetworkManager::accessManager.post(data->request_,
-                                                              data->payload_);
+                    if (data->multiPartPayload_)
+                    {
+                        assert(data->payload_.isNull());
+
+                        return NetworkManager::accessManager.post(
+                            data->request_, data->multiPartPayload_);
+                    }
+                    else
+                    {
+                        return NetworkManager::accessManager.post(
+                            data->request_, data->payload_);
+                    }
             }
             return nullptr;
         }();
@@ -114,15 +130,16 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
         if (data->timer_->isActive())
         {
-            QObject::connect(data->timer_, &QTimer::timeout, worker,
-                             [reply, data]() {
-                                 log("Aborted!");
-                                 reply->abort();
-                                 if (data->onError_)
-                                 {
-                                     data->onError_(-2);
-                                 }
-                             });
+            QObject::connect(
+                data->timer_, &QTimer::timeout, worker, [reply, data]() {
+                    log("Aborted!");
+                    reply->abort();
+                    if (data->onError_)
+                    {
+                        data->onError_(
+                            NetworkResult({}, NetworkResult::timedoutStatus));
+                    }
+                });
         }
 
         if (data->onReplyCreated_)
@@ -141,7 +158,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             {
                 if (data->onError_)
                 {
-                    data->onError_(reply->error());
+                    data->onError_(NetworkResult({}, reply->error()));
                 }
                 return;
             }
@@ -149,7 +166,10 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             QByteArray bytes = reply->readAll();
             writeToCache(data, bytes);
 
-            NetworkResult result(bytes);
+            auto status =
+                reply->attribute(QNetworkRequest::HttpStatusCodeAttribute);
+
+            NetworkResult result(bytes, status.toInt());
 
             DebugCount::increase("http request success");
             // log("starting {}", data->request_.url().toString());
@@ -207,7 +227,7 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
     {
         // XXX: check if bytes is empty?
         QByteArray bytes = cachedFile.readAll();
-        NetworkResult result(bytes);
+        NetworkResult result(bytes, 200);
 
         if (data->onSuccess_)
         {
@@ -242,7 +262,6 @@ void load(const std::shared_ptr<NetworkData> &data)
     if (data->cache_)
     {
         QtConcurrent::run(loadCached, data);
-        loadCached(data);
     }
     else
     {

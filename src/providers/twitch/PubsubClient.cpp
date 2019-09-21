@@ -65,7 +65,7 @@ namespace detail {
                 Listener{topic.GetString(), false, false, false});
         }
 
-        auto uuid = CreateUUID();
+        auto uuid = generateUuid();
 
         rj::set(message, "nonce", uuid);
 
@@ -102,9 +102,9 @@ namespace detail {
 
         auto message = createUnlistenMessage(topics);
 
-        auto uuid = CreateUUID();
+        auto uuid = generateUuid();
 
-        rj::set(message, "nonce", CreateUUID());
+        rj::set(message, "nonce", generateUuid());
 
         std::string payload = rj::stringify(message);
         sentMessages[uuid] = payload;
@@ -729,7 +729,7 @@ PubSub::PubSub()
 
     // Add an initial client
     this->addClient();
-}  // namespace chatterino
+}
 
 void PubSub::addClient()
 {
@@ -817,6 +817,8 @@ void PubSub::listen(rapidjson::Document &&msg)
         log("Successfully listened!");
         return;
     }
+
+    this->addClient();
 
     log("Added to the back of the queue");
     this->requests.emplace_back(
@@ -936,6 +938,19 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
     this->clients.emplace(hdl, client);
 
     this->connected.invoke();
+
+    for (auto it = this->requests.begin(); it != this->requests.end();)
+    {
+        const auto &request = *it;
+        if (client->listen(*request))
+        {
+            it = this->requests.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
 }
 
 void PubSub::onConnectionClose(WebsocketHandle hdl)

@@ -102,19 +102,26 @@ public:
 
     int rowCount(const QModelIndex &parent) const override
     {
+        (void)parent;
+
         return this->rows_.size();
     }
 
     int columnCount(const QModelIndex &parent) const override
     {
+        (void)parent;
+
         return this->columnCount_;
     }
 
     QVariant data(const QModelIndex &index, int role) const override
     {
         int row = index.row(), column = index.column();
-        assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
-               column < this->columnCount_);
+        if (row < 0 || column < 0 || row >= this->rows_.size() ||
+            column >= this->columnCount_)
+        {
+            return QVariant();
+        }
 
         return rows_[row].items[column]->data(role);
     }
@@ -123,8 +130,11 @@ public:
                  int role) override
     {
         int row = index.row(), column = index.column();
-        assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
-               column < this->columnCount_);
+        if (row < 0 || column < 0 || row >= this->rows_.size() ||
+            column >= this->columnCount_)
+        {
+            return false;
+        }
 
         Row &rowItem = this->rows_[row];
 
@@ -185,6 +195,13 @@ public:
     Qt::ItemFlags flags(const QModelIndex &index) const override
     {
         int row = index.row(), column = index.column();
+
+        if (row < 0 || column < 0 || row >= this->rows_.size() ||
+            column >= this->columnCount_)
+        {
+            return Qt::NoItemFlags;
+        }
+
         assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
                column < this->columnCount_);
 
@@ -207,6 +224,8 @@ public:
 
     bool removeRows(int row, int count, const QModelIndex &parent) override
     {
+        (void)parent;
+
         if (count != 1)
         {
             return false;
@@ -237,18 +256,22 @@ protected:
                              std::vector<QStandardItem *> &row,
                              int proposedIndex)
     {
+        (void)item, (void)row;
+
         return proposedIndex;
     }
 
     virtual void afterRemoved(const TVectorItem &item,
                               std::vector<QStandardItem *> &row, int index)
     {
+        (void)item, (void)row, (void)index;
     }
 
     virtual void customRowSetData(const std::vector<QStandardItem *> &row,
                                   int column, const QVariant &value, int role,
                                   int rowIndex)
     {
+        (void)row, (void)column, (void)value, (void)role, (void)rowIndex;
     }
 
     void insertCustomRow(std::vector<QStandardItem *> row, int index)
