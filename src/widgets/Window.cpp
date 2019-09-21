@@ -364,30 +364,12 @@ void Window::addMenuBar()
             [=] { this->notebook_->selectPreviousTab(); });
 }
 
-#define UGLYMACROHACK1(s) #s
-#define UGLYMACROHACK(s) UGLYMACROHACK1(s)
-
 void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
 
     // update title
-    QString title = "Chatterino ";
-    if (Modes::getInstance().isNightly)
-    {
-        title += "Nightly ";
-    }
-    title += CHATTERINO_VERSION;
-
-    if (Modes::getInstance().isNightly)
-    {
-#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
-        title +=
-            QString(" (" UGLYMACROHACK(CHATTERINO_NIGHTLY_VERSION_STRING) ")");
-#endif
-    }
-
-    this->setWindowTitle(title);
+    this->setWindowTitle(Version::getInstance().getFullVersion());
 
     // update user
     if (user->isAnon())
