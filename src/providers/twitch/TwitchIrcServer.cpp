@@ -161,6 +161,11 @@ void TwitchIrcServer::readConnectionMessageReceived(
         // Received USERSTATE upon JOINing a channel
         handler.handleUserStateMessage(message);
     }
+    else if (command == "ROOMSTATE")
+    {
+        // Received ROOMSTATE upon JOINing a channel
+        handler.handleRoomStateMessage(message);
+    }
 }
 
 void TwitchIrcServer::writeConnectionMessageReceived(
