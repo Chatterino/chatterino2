@@ -166,6 +166,10 @@ void TwitchIrcServer::readConnectionMessageReceived(
         // Received ROOMSTATE upon JOINing a channel
         handler.handleRoomStateMessage(message);
     }
+    else if (command == "CLEARCHAT")
+    {
+        handler.handleClearChatMessage(message);
+    }
 }
 
 void TwitchIrcServer::writeConnectionMessageReceived(
@@ -192,10 +196,6 @@ void TwitchIrcServer::writeConnectionMessageReceived(
     else if (command == "ROOMSTATE")
     {
         handler.handleRoomStateMessage(message);
-    }
-    else if (command == "CLEARCHAT")
-    {
-        handler.handleClearChatMessage(message);
     }
     else if (command == "CLEARMSG")
     {
