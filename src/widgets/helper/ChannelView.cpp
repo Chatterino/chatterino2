@@ -582,6 +582,11 @@ void ChannelView::setChannel(ChannelPtr channel)
         this->lastMessageHasAlternateBackground_ =
             !this->lastMessageHasAlternateBackground_;
 
+        if (channel->shouldIgnoreHighlights())
+        {
+                    messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
+        }
+
         this->messages_.pushBack(MessageLayoutPtr(messageLayout), deleted);
         this->scrollBar_->addHighlight(snapshot[i]->getScrollBarHighlight());
     }
