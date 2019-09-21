@@ -5,10 +5,16 @@ branches:
 image: Visual Studio 2017
 platform: Any CPU
 clone_depth: 1
-init:
-- cmd: ''
 install:
 - cmd: >-
+    choco source add -n=AFG -s="https://api.bintray.com/nuget/anotherfoxguy/choco-pkg"
+
+    choco install conan -y
+
+    refreshenv
+
+    conan user
+
     git submodule update --init --recursive
 
     set QTDIR=C:\Qt\5.11\msvc2017_64
@@ -16,8 +22,6 @@ install:
     set PATH=%PATH%;%QTDIR%\bin
 
     call "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build\vcvarsall.bat" x64
-
-    pip install conan -q
 build_script:
 - cmd: >-
     dir
