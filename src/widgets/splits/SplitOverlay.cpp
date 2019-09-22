@@ -30,15 +30,15 @@ SplitOverlay::SplitOverlay(Split *parent)
     layout->setColumnStretch(1, 1);
     layout->setColumnStretch(3, 1);
 
-    auto *move = new QPushButton(getApp()->resources->split.move, QString());
+    auto *move = new QPushButton(getResources().split.move, QString());
     auto *left = this->left_ =
-        new QPushButton(getApp()->resources->split.left, QString());
+        new QPushButton(getResources().split.left, QString());
     auto *right = this->right_ =
-        new QPushButton(getApp()->resources->split.right, QString());
+        new QPushButton(getResources().split.right, QString());
     auto *up = this->up_ =
-        new QPushButton(getApp()->resources->split.up, QString());
+        new QPushButton(getResources().split.up, QString());
     auto *down = this->down_ =
-        new QPushButton(getApp()->resources->split.down, QString());
+        new QPushButton(getResources().split.down, QString());
 
     move->setGraphicsEffect(new QGraphicsOpacityEffect(this));
     left->setGraphicsEffect(new QGraphicsOpacityEffect(this));

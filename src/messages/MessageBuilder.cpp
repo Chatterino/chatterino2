@@ -33,7 +33,7 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
 
     builder
         .emplace<ImageElement>(
-            Image::fromPixmap(getApp()->resources->twitch.automod),
+            Image::fromPixmap(getResources().twitch.automod),
             MessageElementFlag::BadgeChannelAuthority)
         ->setTooltip("AutoMod");
     builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,

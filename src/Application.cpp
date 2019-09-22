@@ -1,5 +1,7 @@
 #include "Application.hpp"
 
+#include <atomic>
+
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
@@ -31,8 +33,6 @@
 #include "util/PostToThread.hpp"
 #include "widgets/Window.hpp"
 
-#include <atomic>
-
 namespace chatterino {
 
 static std::atomic<bool> isAppInitialized{false};
@@ -44,9 +44,7 @@ Application *Application::instance = nullptr;
 // to each other
 
 Application::Application(Settings &_settings, Paths &_paths)
-    : resources(&this->emplace<Resources2>())
-
-    , themes(&this->emplace<Theme>())
+    : themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
     , windows(&this->emplace<WindowManager>())

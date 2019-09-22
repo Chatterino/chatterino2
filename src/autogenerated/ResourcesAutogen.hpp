@@ -1,4 +1,5 @@
 #include <QPixmap>
+
 #include "common/Singleton.hpp"
 
 namespace chatterino {
