@@ -1,15 +1,14 @@
 #pragma once
 
-#include "common/Aliases.hpp"
-#include "common/Outcome.hpp"
-#include "common/ProviderId.hpp"
-
 #include <QString>
 #include <QWidget>
 #include <boost/optional.hpp>
 #include <boost/preprocessor.hpp>
-
 #include <string>
+
+#include "common/Aliases.hpp"
+#include "common/Outcome.hpp"
+#include "common/ProviderId.hpp"
 
 namespace chatterino {
 
@@ -45,5 +44,15 @@ enum class CopyMode {
     Everything,
     OnlyTextAndEmotes,
 };
+
+struct DeleteLater {
+    void operator()(QObject *obj)
+    {
+        obj->deleteLater();
+    }
+};
+
+template <typename T>
+using QObjectPtr = std::unique_ptr<T, DeleteLater>;
 
 }  // namespace chatterino
