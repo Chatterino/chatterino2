@@ -39,6 +39,11 @@ macx {
     LIBS += -L/usr/local/lib
 }
 
+# Set C_DEBUG if it's a debug build
+CONFIG(debug, debug|release) {
+    DEFINES += C_DEBUG
+}
+
 # Submodules
 include(lib/warnings.pri)
 include(lib/appbase.pri)
