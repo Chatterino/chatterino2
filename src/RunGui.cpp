@@ -114,16 +114,14 @@ namespace {
     {
         using namespace std::chrono_literals;
 
-        //        if (std::chrono::steady_clock::now() - signalsInitTime > 30s)
-        //        {
-        QProcess proc;
-        proc.setProgram(QApplication::applicationFilePath());
-        proc.setArguments({"--crash-recovery"});
-        proc.startDetached();
-
-        //            QProcess::startDetached(QApplication::applicationFilePath(),
-        //                                    {"--crash-recovery"});
-        //        }
+        if (restartOnSignal &&
+            std::chrono::steady_clock::now() - signalsInitTime > 30s)
+        {
+            QProcess proc;
+            proc.setProgram(QApplication::applicationFilePath());
+            proc.setArguments({"--crash-recovery"});
+            proc.startDetached();
+        }
 
         _exit(signum);
     }
@@ -132,13 +130,11 @@ namespace {
     // true.
     void initSignalHandler()
     {
-        //#if not defined(DEBUG) && not defined(_DEBUG) && not defined(NDEBUG)
+#ifndef C_DEBUG
         signalsInitTime = std::chrono::steady_clock::now();
 
-        //        signal(SIGINT, handleSignal);
         signal(SIGSEGV, handleSignal);
-        //        signal(SIGABRT_COMPAT, handleSignal);
-        //#endif
+#endif
     }
 }  // namespace
 
