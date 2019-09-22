@@ -1,12 +1,13 @@
-#include "BrowserExtension.hpp"
-#include "RunGui.hpp"
-#include "singletons/Paths.hpp"
-#include "singletons/Settings.hpp"
-#include "util/IncognitoBrowser.hpp"
-
 #include <QApplication>
 #include <QStringList>
 #include <memory>
+
+#include "BrowserExtension.hpp"
+#include "RunGui.hpp"
+#include "common/Args.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
+#include "util/IncognitoBrowser.hpp"
 
 using namespace chatterino;
 
