@@ -584,7 +584,7 @@ void ChannelView::setChannel(ChannelPtr channel)
 
         if (channel->shouldIgnoreHighlights())
         {
-                    messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
+            messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
         }
 
         this->messages_.pushBack(MessageLayoutPtr(messageLayout), deleted);
