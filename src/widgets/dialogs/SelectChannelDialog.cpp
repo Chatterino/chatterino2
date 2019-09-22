@@ -190,8 +190,12 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
         auto tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Irc (Beta)");
-        tab->setEnable(false);
-        tab->setVisible(false);
+
+        if (!getSettings()->enableExperimentalIrc)
+        {
+            tab->setEnable(false);
+            tab->setVisible(false);
+        }
     }
 
     layout->setStretchFactor(notebook.getElement(), 1);
@@ -220,9 +224,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     // restore ui state
     // fourtf: enable when releasing irc
-#if 0
-    this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
-#endif
+    if (getSettings()->enableExperimentalIrc)
+    {
+        this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
+    }
 
     this->ui_.irc.servers->getTableView()->selectRow(
         getSettings()->lastSelectIrcConn);
