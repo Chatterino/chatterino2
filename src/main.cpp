@@ -26,6 +26,7 @@ int main(int argc, char **argv)
     }
     else
     {
+        initArgs(args);
         Paths paths;
         Settings settings(paths.settingsDirectory);
 

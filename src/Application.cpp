@@ -2,6 +2,7 @@
 
 #include <atomic>
 
+#include "common/Args.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
