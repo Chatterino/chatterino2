@@ -8,6 +8,7 @@
 #include "Application.hpp"
 #include "common/NetworkManager.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
@@ -113,6 +114,8 @@ namespace {
 void runGui(QApplication &a, Paths &paths, Settings &settings)
 {
     initQt();
+
+    initResources();
 
     auto thread = std::thread([dir = paths.miscDirectory] {
         {

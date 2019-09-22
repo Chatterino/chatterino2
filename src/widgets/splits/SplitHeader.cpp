@@ -220,7 +220,7 @@ void SplitHeader::initializeLayout()
         }),
         // add split
         this->addButton_ = makeWidget<Button>([&](auto w) {
-            w->setPixmap(getApp()->resources->buttons.addSplitDark);
+            w->setPixmap(getResources().buttons.addSplitDark);
             w->setEnableMargin(false);
 
             QObject::connect(w, &Button::leftClicked, this,
@@ -563,8 +563,8 @@ void SplitHeader::updateModerationModeIcon()
                           !getApp()->moderationActions->items.empty();
 
     this->moderationButton_->setPixmap(
-        moderationMode ? getApp()->resources->buttons.modModeEnabled
-                       : getApp()->resources->buttons.modModeDisabled);
+        moderationMode ? getResources().buttons.modModeEnabled
+                       : getResources().buttons.modModeDisabled);
 
     auto channel = this->split_->getChannel();
     auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
@@ -712,14 +712,14 @@ void SplitHeader::themeChangedEvent()
     // --
     if (this->theme->isLightTheme())
     {
-        this->dropdownButton_->setPixmap(getApp()->resources->buttons.menuDark);
-        this->addButton_->setPixmap(getApp()->resources->buttons.addSplit);
+        this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
+        this->addButton_->setPixmap(getResources().buttons.addSplit);
     }
     else
     {
         this->dropdownButton_->setPixmap(
-            getApp()->resources->buttons.menuLight);
-        this->addButton_->setPixmap(getApp()->resources->buttons.addSplitDark);
+            getResources().buttons.menuLight);
+        this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }
 }
 

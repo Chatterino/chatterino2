@@ -32,7 +32,7 @@ namespace {
     {
         auto label = box.emplace<Label>().assign(assign);
         auto button = box.emplace<Button>();
-        button->setPixmap(getApp()->resources->buttons.copyDark);
+        button->setPixmap(getResources().buttons.copyDark);
         button->setScaleIndependantSize(18, 18);
         button->setDim(Button::Dim::Lots);
         QObject::connect(button.getElement(), &Button::leftClicked,
@@ -111,10 +111,10 @@ UserInfoPopup::UserInfoPopup()
         usercard->getLabel().setText("Usercard");
 
         auto mod = user.emplace<Button>(this);
-        mod->setPixmap(app->resources->buttons.mod);
+        mod->setPixmap(getResources().buttons.mod);
         mod->setScaleIndependantSize(30, 30);
         auto unmod = user.emplace<Button>(this);
-        unmod->setPixmap(app->resources->buttons.unmod);
+        unmod->setPixmap(getResources().buttons.unmod);
         unmod->setScaleIndependantSize(30, 30);
 
         user->addStretch(1);
@@ -575,7 +575,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
         }
     };
 
-    addButton(Unban, "unban", getApp()->resources->buttons.unban);
+    addButton(Unban, "unban", getResources().buttons.unban);
 
     addTimeouts("sec", {{"1", 1}});
     addTimeouts("min", {
@@ -596,7 +596,7 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
                              {"2", 2 * 60 * 60 * 24 * 7},
                          });
 
-    addButton(Ban, "ban", getApp()->resources->buttons.ban);
+    addButton(Ban, "ban", getResources().buttons.ban);
 }
 
 void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent *)
