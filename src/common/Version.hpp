@@ -2,7 +2,7 @@
 
 #include <QtGlobal>
 
-#define CHATTERINO_VERSION "2.1.4"
+#define CHATTERINO_VERSION "2.1.5"
 
 #if defined(Q_OS_WIN)
 #    define CHATTERINO_OS "win"
@@ -35,4 +35,4 @@ private:
     QString fullVersion_;
 };
 
-};
+};  // namespace chatterino

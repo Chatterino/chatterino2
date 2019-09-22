@@ -20,7 +20,8 @@ Version::Version()
 #ifdef CHATTERINO_NIGHTLY_VERSION_STRING
     this->dateOfBuild_ =
         QString(FROM_EXTERNAL_DEFINE(CHATTERINO_NIGHTLY_VERSION_STRING))
-            .remove('"').split(' ')[0];
+            .remove('"')
+            .split(' ')[0];
 #endif
 
     // "Full" version string, as displayed in window title
