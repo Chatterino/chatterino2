@@ -66,6 +66,7 @@ void IrcServer::initializeConnection(IrcConnection *connection,
     connection->setRealName(this->data_->real.isEmpty() ? this->data_->user
                                                         : this->data_->nick);
 
+#if 0
     switch (this->data_->authType)
     {
         case IrcAuthType::Sasl:
@@ -87,6 +88,7 @@ void IrcServer::initializeConnection(IrcConnection *connection,
         default:
             this->open(Both);
     }
+#endif
 
     QObject::connect(
         connection, &Communi::IrcConnection::socketError, this,
