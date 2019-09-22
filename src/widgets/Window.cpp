@@ -24,7 +24,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#ifdef QT_DEBUG
+#ifdef C_DEBUG
 #    include "util/SampleCheerMessages.hpp"
 #endif
 
@@ -199,7 +199,7 @@ void Window::addCustomTitlebarButtons()
 
 void Window::addDebugStuff()
 {
-#ifdef QT_DEBUG
+#ifdef C_DEBUG
     std::vector<QString> cheerMessages, subMessages, miscMessages;
 
     cheerMessages = getSampleCheerMessage();
