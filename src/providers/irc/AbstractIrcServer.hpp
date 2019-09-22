@@ -1,13 +1,13 @@
 #pragma once
 
-#include "providers/irc/IrcConnection2.hpp"
-
 #include <IrcMessage>
+#include <functional>
+#include <mutex>
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
-#include <functional>
-#include <mutex>
+#include "common/Common.hpp"
+#include "providers/irc/IrcConnection2.hpp"
 
 namespace chatterino {
 
@@ -73,15 +73,8 @@ protected:
 private:
     void initConnection();
 
-    struct Deleter {
-        void operator()(IrcConnection *conn)
-        {
-            conn->deleteLater();
-        }
-    };
-
-    std::unique_ptr<IrcConnection, Deleter> writeConnection_ = nullptr;
-    std::unique_ptr<IrcConnection, Deleter> readConnection_ = nullptr;
+    QObjectPtr<IrcConnection> writeConnection_ = nullptr;
+    QObjectPtr<IrcConnection> readConnection_ = nullptr;
 
     QTimer reconnectTimer_;
     int falloffCounter_ = 1;

@@ -1,5 +1,14 @@
 #include "messages/Image.hpp"
 
+#include <QBuffer>
+#include <QImageReader>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QTimer>
+#include <functional>
+#include <thread>
+
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
@@ -10,15 +19,6 @@
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
-
-#include <QBuffer>
-#include <QImageReader>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-#include <QTimer>
-#include <functional>
-#include <thread>
 
 namespace chatterino {
 namespace detail {
@@ -324,7 +324,7 @@ int Image::width() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
-        return pixmap->width() * this->scale_;
+        return int(pixmap->width() * this->scale_);
     else
         return 16;
 }
@@ -369,6 +369,7 @@ void Image::actuallyLoad()
             if (!shared)
                 return false;
 
+            // fourtf: is this the right thing to do?
             shared->empty_ = true;
 
             return true;

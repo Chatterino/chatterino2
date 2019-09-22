@@ -13,7 +13,7 @@
 #include <pajlada/signals/signal.hpp>
 
 #include "common/Aliases.hpp"
-#include "common/NullablePtr.hpp"
+#include "common/Common.hpp"
 
 namespace chatterino {
 namespace detail {
@@ -45,6 +45,7 @@ namespace detail {
 class Image;
 using ImagePtr = std::shared_ptr<Image>;
 
+/// This class is thread safe.
 class Image : public std::enable_shared_from_this<Image>, boost::noncopyable
 {
 public:
@@ -72,14 +73,14 @@ private:
     Image(qreal scale);
 
     void setPixmap(const QPixmap &pixmap);
-
     void actuallyLoad();
 
-    Url url_{};
-    qreal scale_{1};
-    bool empty_{false};
+    const Url url_{};
+    const qreal scale_{1};
+    std::atomic_bool empty_{false};
+
+    // gui thread only
     bool shouldLoad_{false};
     std::unique_ptr<detail::Frames> frames_{};
-    QObject object_{};
 };
 }  // namespace chatterino
