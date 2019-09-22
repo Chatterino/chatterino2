@@ -1,5 +1,8 @@
 #include "providers/bttv/BttvEmotes.hpp"
 
+#include <QJsonArray>
+#include <QThread>
+
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
@@ -7,9 +10,6 @@
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-
-#include <QJsonArray>
-#include <QThread>
 
 namespace chatterino {
 namespace {
