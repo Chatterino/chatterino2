@@ -32,7 +32,9 @@
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/splits/Split.hpp"
 
 namespace chatterino {
 
@@ -78,11 +80,33 @@ void Application::initialize(Settings &settings, Paths &paths)
     assert(isAppInitialized == false);
     isAppInitialized = true;
 
-    Irc::getInstance().load();
+    //Irc::getInstance().load();
 
     for (auto &singleton : this->singletons_)
     {
         singleton->initialize(settings, paths);
+    }
+
+    // add crash message
+    if (getArgs().crashRecovery)
+    {
+        if (auto selected =
+                this->windows->getMainWindow().getNotebook().getSelectedPage())
+        {
+            if (auto container = dynamic_cast<SplitContainer *>(selected))
+            {
+                for (auto &&split : container->getSplits())
+                {
+                    if (auto channel = split->getChannel(); !channel->isEmpty())
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            "Chatterino unexpectedly crashed and restarted. "
+                            "You can disable automatic restarts in the "
+                            "settings."));
+                    }
+                }
+            }
+        }
     }
 
     this->windows->updateWordTypeMask();

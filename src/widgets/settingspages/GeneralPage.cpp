@@ -303,6 +303,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 #ifdef USEWINSDK
     layout.addCheckbox("Start with Windows", s.autorun);
 #endif
+    layout.addCheckbox("Restart on crash", s.restartOnCrash);
 
     layout.addTitle("Chat");
 

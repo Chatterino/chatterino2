@@ -1,14 +1,13 @@
 #pragma once
 
-#include "BaseSettings.hpp"
+#include <pajlada/settings/setting.hpp>
+#include <pajlada/settings/settinglistener.hpp>
 
+#include "BaseSettings.hpp"
 #include "common/Channel.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
-
-#include <pajlada/settings/setting.hpp>
-#include <pajlada/settings/settinglistener.hpp>
 
 namespace chatterino {
 
@@ -213,6 +212,7 @@ public:
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
     QStringSetting cachePath = {"/cache/path", ""};
+    BoolSetting restartOnCrash = {"/misc/restartOnCrash", true};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
