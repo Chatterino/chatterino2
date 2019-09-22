@@ -31,12 +31,11 @@
 #include <QApplication>
 #include <QDesktopServices>
 #include <QHeaderView>
+#include <QMenuBar>
 #include <QPalette>
 #include <QShortcut>
-#include <QVBoxLayout>
-
-#include <QMenuBar>
 #include <QStandardItemModel>
+#include <QVBoxLayout>
 
 namespace chatterino {
 

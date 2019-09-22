@@ -1,5 +1,8 @@
 #include "TwitchIrcServer.hpp"
 
+#include <IrcCommand>
+#include <cassert>
+
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -14,9 +17,6 @@
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "util/PostToThread.hpp"
-
-#include <IrcCommand>
-#include <cassert>
 
 // using namespace Communi;
 using namespace std::chrono_literals;
@@ -195,12 +195,39 @@ void TwitchIrcServer::writeConnectionMessageReceived(
     const QString &command = message->command();
 
     auto &handler = IrcMessageHandler::getInstance();
-
     // Below commands enabled through the twitch.tv/commands CAP REQ
     if (command == "USERSTATE")
     {
         // Received USERSTATE upon PRIVMSGing
         handler.handleUserStateMessage(message);
+    }
+    else if (command == "NOTICE")
+    {
+        static std::unordered_set<std::string> readConnectionOnlyIDs{
+            "host_on",
+            "host_off",
+            "host_target_went_offline",
+            "emote_only_on",
+            "emote_only_off",
+            "slow_on",
+            "slow_off",
+            "subs_on",
+            "subs_off",
+            "r9k_on",
+            "r9k_off",
+
+            // Display for user who times someone out. This implies you're a
+            // moderator, at which point you will be connected to PubSub and receive
+            // a better message from there.
+            "timeout_success",
+            "ban_success",
+
+            // Channel suspended notices
+            "msg_channel_suspended",
+        };
+
+        handler.handleNoticeMessage(
+            static_cast<Communi::IrcNoticeMessage *>(message));
     }
 }
 
