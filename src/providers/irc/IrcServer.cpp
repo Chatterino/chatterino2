@@ -66,29 +66,30 @@ void IrcServer::initializeConnection(IrcConnection *connection,
     connection->setRealName(this->data_->real.isEmpty() ? this->data_->user
                                                         : this->data_->nick);
 
-#if 0
-    switch (this->data_->authType)
+    if (getSettings()->enableExperimentalIrc)
     {
-        case IrcAuthType::Sasl:
-            connection->setSaslMechanism("PLAIN");
-            [[fallthrough]];
-        case IrcAuthType::Pass:
-            this->data_->getPassword(
-                this, [conn = new QObjectRef(connection) /* can't copy */,
-                       this](const QString &password) mutable {
-                    if (*conn)
-                    {
-                        (*conn)->setPassword(password);
-                        this->open(Both);
-                    }
+        switch (this->data_->authType)
+        {
+            case IrcAuthType::Sasl:
+                connection->setSaslMechanism("PLAIN");
+                [[fallthrough]];
+            case IrcAuthType::Pass:
+                this->data_->getPassword(
+                    this, [conn = new QObjectRef(connection) /* can't copy */,
+                           this](const QString &password) mutable {
+                        if (*conn)
+                        {
+                            (*conn)->setPassword(password);
+                            this->open(Both);
+                        }
 
-                    delete conn;
-                });
-            break;
-        default:
-            this->open(Both);
+                        delete conn;
+                    });
+                break;
+            default:
+                this->open(Both);
+        }
     }
-#endif
 
     QObject::connect(
         connection, &Communi::IrcConnection::socketError, this,

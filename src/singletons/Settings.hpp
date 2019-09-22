@@ -203,6 +203,7 @@ public:
 #ifdef Q_OS_LINUX
     BoolSetting useKeyring = {"/misc/useKeyring", true};
 #endif
+    BoolSetting enableExperimentalIrc = {"/misc/experimentalIrc", false};
 
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};

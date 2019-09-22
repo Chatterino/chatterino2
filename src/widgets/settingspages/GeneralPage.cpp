@@ -497,7 +497,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
 
-    layout.addCheckbox("Show unhandled irc messages",
+    layout.addCheckbox("Enable experimental IRC support (requires restart)",
+                       s.enableExperimentalIrc);
+    layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
 
     layout.addTitle("Cache");
