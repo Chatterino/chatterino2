@@ -1,7 +1,9 @@
-#include "widgets/helper/ResizingTextEdit.hpp"
+#include <QMimeData>
+
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
 #include "singletons/Settings.hpp"
+#include "widgets/helper/ResizingTextEdit.hpp"
 
 namespace chatterino {
 
@@ -22,6 +24,7 @@ ResizingTextEdit::ResizingTextEdit()
         [this] { this->completionInProgress_ = false; });
 
     this->setFocusPolicy(Qt::ClickFocus);
+    setAcceptDrops(true);
 }
 
 QSize ResizingTextEdit::sizeHint() const
@@ -257,11 +260,7 @@ void ResizingTextEdit::insertCompletion(const QString &completion)
 
 bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 {
-    if (source->hasImage())
-    {
-        return false;
-    }
-    else if (source->hasFormat("text/plain"))
+    if (source->hasImage() || source->hasFormat("text/plain"))
     {
         return true;
     }
@@ -270,12 +269,35 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
-    if (!source->hasImage())
+    if (source->hasImage() || source->hasUrls())
+    {
+        this->pastedImage.invoke(source);
+    }
+    else
     {
         insertPlainText(source->text());
     }
 }
 
+void ResizingTextEdit::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+    {
+        event->acceptProposedAction();
+    }
+    // QTextEdit doesn't implement dragEnterEvent, so there's nothing to call here.
+}
+void ResizingTextEdit::dropEvent(QDropEvent *event)
+{
+    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+    {
+        this->pastedImage.invoke(event->mimeData());
+    }
+    else  // allow for previous functionality of dropping text.
+    {
+        QTextEdit::dropEvent(event);
+    }
+}
 QCompleter *ResizingTextEdit::getCompleter() const
 {
     return this->completer_;
