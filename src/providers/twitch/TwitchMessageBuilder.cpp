@@ -949,9 +949,16 @@ void TwitchMessageBuilder::parseHighlights()
         if (userHighlight.hasSound())
         {
             this->highlightSound_ = true;
-            // Use default sound when no sound is set on user highlight
-            if (!userHighlight.getSoundUrl().toString().isEmpty())
+            // Use fallback sound when no sound is set on user highlight
+            if (userHighlight.getSoundUrl().toString().isEmpty())
+            {
+                this->highlightSoundUrl_ =
+                    QUrl::fromLocalFile(getSettings()->pathHighlightSound);
+            }
+            else
+            {
                 this->highlightSoundUrl_ = userHighlight.getSoundUrl();
+            }
         }
 
         if (this->highlightAlert_ && this->highlightSound_)
@@ -1009,13 +1016,21 @@ void TwitchMessageBuilder::parseHighlights()
         if (highlight.hasSound())
         {
             this->highlightSound_ = true;
-            // Use default sound when no sound is set on highlight phrase
-            if (!highlight.getSoundUrl().toString().isEmpty())
+            // Use fallback sound when no sound is set on user highlight
+            if (highlight.getSoundUrl().toString().isEmpty())
+            {
+                this->highlightSoundUrl_ =
+                    QUrl::fromLocalFile(getSettings()->pathHighlightSound);
+            }
+            else
+            {
                 this->highlightSoundUrl_ = highlight.getSoundUrl();
+            }
         }
 
         if (this->highlightAlert_ && this->highlightSound_)
         {
+            // TODO(leon): Check if anything needs to be changed here
             // Break if no further action can be taken from other
             // highlights This might change if highlights can have
             // custom colors/sounds/actions
