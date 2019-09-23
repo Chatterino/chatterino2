@@ -1,22 +1,43 @@
 #include "widgets/helper/ScrollbarHighlight.hpp"
+
+#include "Application.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/Scrollbar.hpp"
 
 namespace chatterino {
 
 ScrollbarHighlight::ScrollbarHighlight()
-    : color_(Color::Highlight)
+    : type_(Type::Invalid)
+    , color_(QColor())
     , style_(Style::None)
 {
 }
 
-ScrollbarHighlight::ScrollbarHighlight(Color color, Style style)
-    : color_(color)
+ScrollbarHighlight ScrollbarHighlight::newSubscription(Style style)
+{
+    return ScrollbarHighlight(Subscription, QColor(), style);
+}
+
+ScrollbarHighlight ScrollbarHighlight::newHighlight(const QColor &color,
+                                                    Style style)
+{
+    return ScrollbarHighlight(Highlight, color, style);
+}
+
+ScrollbarHighlight::ScrollbarHighlight(Type type, const QColor &color,
+                                       Style style)
+    : type_(type)
+    , color_(color)
     , style_(style)
 {
 }
 
-ScrollbarHighlight::Color ScrollbarHighlight::getColor() const
+ScrollbarHighlight::Type ScrollbarHighlight::getType() const
+{
+    return this->type_;
+}
+
+const QColor &ScrollbarHighlight::getColor() const
 {
     return this->color_;
 }
