@@ -189,13 +189,16 @@ HighlightingPage::HighlightingPage()
 void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                         EditableModelView *view)
 {
-    if (clicked.column() == FILE_COLUMN_INDEX)
+    using Column = HighlightModel::Column;
+
+    if (clicked.column() == Column::SoundPath)
     {
         auto fileUrl = QFileDialog::getOpenFileUrl(
             this, tr("Open Sound"), QUrl(), tr("Audio Files (*.mp3 *.wav)"));
-        view->getModel()->setData(clicked, fileUrl, Qt::DisplayRole);
+        view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
+        view->getModel()->setData(clicked, fileUrl.fileName(), Qt::DisplayRole);
     }
-    else if (clicked.column() == COLOR_COLUMN_INDEX)
+    else if (clicked.column() == Column::Color)
     {
         auto initial =
             view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
