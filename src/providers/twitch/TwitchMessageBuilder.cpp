@@ -61,6 +61,19 @@ QColor getRandomColor(const QVariant &userId)
     return twitchUsernameColors[colorIndex];
 }
 
+QUrl getFallbackHighlightSound()
+{
+    using namespace chatterino;
+    if (getSettings()->pathHighlightSound.getValue().isEmpty())
+    {
+        return QUrl("qrc:/sounds/ping2.wav");
+    }
+    else
+    {
+        return QUrl::fromLocalFile(getSettings()->pathHighlightSound);
+    }
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -75,9 +88,9 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     , tags(this->ircMessage->tags())
     , originalMessage_(_ircMessage->content())
     , action_(_ircMessage->isAction())
-    , highlightSoundUrl_("qrc:/sounds/ping2.wav")
 {
     this->usernameColor_ = getApp()->themes->messages.textColors.system;
+    this->highlightSoundUrl_ = getFallbackHighlightSound();
 }
 
 TwitchMessageBuilder::TwitchMessageBuilder(
@@ -90,9 +103,9 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     , tags(this->ircMessage->tags())
     , originalMessage_(content)
     , action_(isAction)
-    , highlightSoundUrl_("qrc:/sounds/ping2.wav")
 {
     this->usernameColor_ = getApp()->themes->messages.textColors.system;
+    this->highlightSoundUrl_ = getFallbackHighlightSound();
 }
 
 bool TwitchMessageBuilder::isIgnored() const
@@ -922,6 +935,7 @@ void TwitchMessageBuilder::parseHighlights()
         return;
     }
 
+    // TODO(leon): Can we handle phrases and usernames in one? Code-duplication
     std::vector<HighlightPhrase> userHighlights =
         app->highlights->highlightedUsers.cloneVector();
 
@@ -949,13 +963,8 @@ void TwitchMessageBuilder::parseHighlights()
         if (userHighlight.hasSound())
         {
             this->highlightSound_ = true;
-            // Use fallback sound when no sound is set on user highlight
-            if (userHighlight.getSoundUrl().toString().isEmpty())
-            {
-                this->highlightSoundUrl_ =
-                    QUrl::fromLocalFile(getSettings()->pathHighlightSound);
-            }
-            else
+            // Use custom sound if set
+            if (!userHighlight.getSoundUrl().toString().isEmpty())
             {
                 this->highlightSoundUrl_ = userHighlight.getSoundUrl();
             }
@@ -963,9 +972,9 @@ void TwitchMessageBuilder::parseHighlights()
 
         if (this->highlightAlert_ && this->highlightSound_)
         {
-            // Break if no further action can be taken from other
-            // usernames Mostly used for regex stuff
-            break;
+            // Usernames "beat" highlight phrases: Once a username highlight
+            // has been applied, no further highlight phrases will be checked
+            return;
         }
     }
 
@@ -982,7 +991,6 @@ void TwitchMessageBuilder::parseHighlights()
 
     if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
     {
-        // TODO(leon): Can this be unified with other highlight phrases somehow?
         HighlightPhrase selfHighlight(
             currentUsername, getSettings()->enableSelfHighlightTaskbar,
             getSettings()->enableSelfHighlightSound, false, false,
@@ -1013,16 +1021,13 @@ void TwitchMessageBuilder::parseHighlights()
             this->highlightAlert_ = true;
         }
 
-        if (highlight.hasSound())
+        // Only set highlightSound_ if it hasn't been set by username
+        // highlights already.
+        if (highlight.hasSound() && !this->highlightSound_)
         {
             this->highlightSound_ = true;
-            // Use fallback sound when no sound is set on user highlight
-            if (highlight.getSoundUrl().toString().isEmpty())
-            {
-                this->highlightSoundUrl_ =
-                    QUrl::fromLocalFile(getSettings()->pathHighlightSound);
-            }
-            else
+            // Use custom sound if set
+            if (!highlight.getSoundUrl().toString().isEmpty())
             {
                 this->highlightSoundUrl_ = highlight.getSoundUrl();
             }
@@ -1030,10 +1035,9 @@ void TwitchMessageBuilder::parseHighlights()
 
         if (this->highlightAlert_ && this->highlightSound_)
         {
-            // TODO(leon): Check if anything needs to be changed here
-            // Break if no further action can be taken from other
-            // highlights This might change if highlights can have
-            // custom colors/sounds/actions
+            // Break once the first highlight has been set. If a message would
+            // trigger multiple highlights, only the first one from the list
+            // will be applied.
             break;
         }
     }
