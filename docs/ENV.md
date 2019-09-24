@@ -20,11 +20,12 @@ Arguments:
  - `%1` = Emote set ID
 
 ### CHATTERINO2_IMAGE_PASTE_SITE_URL
-Used to change the URL that Chatterino2 uses when uploading an image by pasting it into the input box.
+Used to change the URL that Chatterino2 uses when trying to paste an image into chat. This can be used for hosting the uploaded images yourself.
 Default value: `https://i.nuuls.com/upload`
 
 Arguments:
  - None
 
 Notes:
- - The server that's running the web page MUST be compatible with [Nuuls' filehost](https://github.com/nuuls/filehost)
+ - If you want to host the images yourself. You need [Nuuls' filehost software](https://github.com/nuuls/fiehost)
+
