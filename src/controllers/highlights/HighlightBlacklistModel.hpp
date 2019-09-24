@@ -14,8 +14,7 @@ class HighlightBlacklistModel : public SignalVectorModel<HighlightBlacklistUser>
     explicit HighlightBlacklistModel(QObject *parent);
 
 public:
-    enum Column
-    {
+    enum Column {
         Pattern = 0,
         UseRegex = 1,
     };

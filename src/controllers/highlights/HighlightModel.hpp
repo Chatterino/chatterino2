@@ -15,8 +15,7 @@ class HighlightModel : public SignalVectorModel<HighlightPhrase>
 
 public:
     // Used here and in UserHighlightModel
-    enum Column
-    {
+    enum Column {
         Pattern = 0,
         FlashTaskbar = 1,
         PlaySound = 2,
