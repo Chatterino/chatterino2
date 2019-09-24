@@ -4,53 +4,39 @@
 #include "common/NetworkRequest.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
-#include <boost/algorithm/string/replace.hpp>
+#include <QHttpMultiPart>
 
 namespace chatterino {
 bool isUploading = false;
 
 std::queue<TypedBytes> uploadQueue;
-void uploadImageToNuuls(QByteArray imageData, ChannelPtr channel,
-                        ResizingTextEdit &textEdit)
-{
-    uploadImageToNuuls(imageData, channel, textEdit, "png");
-}
+
 void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
                         ResizingTextEdit &textEdit)
 {
-    uploadImageToNuuls(imageData.data, channel, textEdit, imageData.type);
-}
-void uploadImageToNuuls(QByteArray imageData, ChannelPtr channel,
-                        ResizingTextEdit &textEdit, std::string format)
-{
-    QByteArray dataToSend;
     const char *boundary = "thisistheboudaryasd";
     static QUrl url(Env::get().imagePasteSiteUrl);
 
-    dataToSend.insert(0, "--");
-    dataToSend.append(boundary);
-    std::string temp = "\r\n"
-                       "Content-Disposition: form-data; name=\"attachment\"; "
-                       "filename=\"control_v.%\"\r\n"
-                       "Content-Type: image/%\r\n"
-                       "\r\n";
-    boost::replace_all(temp, "%", format);
-
-    dataToSend.append(temp.c_str());
-    dataToSend.append(imageData);
-    dataToSend.append("\r\n--");
-    dataToSend.append(boundary);
-    dataToSend.append("\r\n");
-
+    QHttpMultiPart *payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+    QHttpPart part = QHttpPart();
+    part.setBody(imageData.data);
+    part.setHeader(QNetworkRequest::ContentTypeHeader,
+                   QString("image/%1").arg(imageData.type));
+    part.setHeader(QNetworkRequest::ContentLengthHeader,
+                   QVariant(imageData.data.length()));
+    part.setHeader(
+        QNetworkRequest::ContentDispositionHeader,
+        QString("form-data; name=\"attachment\"; filename=\"control_v.%1\""));
+    payload->setBoundary(boundary);
+    payload->append(part);
     NetworkRequest(url, NetworkRequestType::Post)
         .header("Content-Type", (std::string("multipart/form-data; boundary=") +
                                  std::string(boundary))
                                     .c_str())
 
-        .payload(dataToSend)
+        .multiPart(payload)
         .onSuccess([&textEdit, channel](NetworkResult result) -> Outcome {
             textEdit.insertPlainText(result.getData() + QString(" "));
-            //            this->input_->ui_.textEdit->insertPlainText(result.getData());
             if (uploadQueue.size())
             {
                 channel->addMessage(makeSystemMessage(
@@ -104,9 +90,9 @@ void pasteFromClipboard(const QMimeData *source, ChannelPtr channel,
                         ResizingTextEdit &outputTextEdit)
 {
     /*
-static QUrl url("http://localhost:7494/upload?password=xd");
-// default port and password for nuuls' filehost.
-*/
+    http://localhost:7494/upload?password=xd
+    default port and password for nuuls' filehost.
+    */
     if (isUploading)
     {
         channel->addMessage(makeSystemMessage(
@@ -120,7 +106,8 @@ static QUrl url("http://localhost:7494/upload?password=xd");
 
     if (source->hasFormat("image/png"))
     {
-        uploadImageToNuuls(source->data("image/png"), channel, outputTextEdit);
+        uploadImageToNuuls({source->data("image/png"), "png"}, channel,
+                           outputTextEdit);
     }
     else if (source->hasFormat("text/uri-list"))
     {
@@ -199,7 +186,7 @@ static QUrl url("http://localhost:7494/upload?password=xd");
         buf.open(QIODevice::WriteOnly);
         image.save(&buf, "png");
 
-        uploadImageToNuuls(imageData, channel, outputTextEdit);
+        uploadImageToNuuls({imageData, "png"}, channel, outputTextEdit);
     }
 }
 }  // namespace chatterino

@@ -7,7 +7,7 @@
 namespace chatterino {
 struct TypedBytes {
     QByteArray data;
-    std::string type;
+    QString type;
 };
 void uploadImageToNuuls(QByteArray imageData, ChannelPtr channel,
                         ResizingTextEdit &textEdit, std::string format);
