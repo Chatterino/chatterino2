@@ -1,5 +1,17 @@
 #include "ChannelView.hpp"
 
+#include <QClipboard>
+#include <QDebug>
+#include <QDesktopServices>
+#include <QGraphicsBlurEffect>
+#include <QMessageBox>
+#include <QPainter>
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <functional>
+#include <memory>
+
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -24,19 +36,6 @@
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
-
-#include <QClipboard>
-#include <QDebug>
-#include <QDesktopServices>
-#include <QGraphicsBlurEffect>
-#include <QMessageBox>
-#include <QPainter>
-
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <functional>
-#include <memory>
 
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
@@ -122,7 +121,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         for (auto it = this->pauses_.begin(); it != this->pauses_.end();)
             it = it->second ? this->pauses_.erase(it) : ++it;
 
-        this->updatePauseTimer();
+        this->updatePauses();
     });
 
     auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
@@ -232,7 +231,7 @@ void ChannelView::pause(PauseReason reason, boost::optional<uint> msecs)
         this->pauses_[reason] = boost::none;
     }
 
-    this->updatePauseTimer();
+    this->updatePauses();
 }
 
 void ChannelView::unpause(PauseReason reason)
@@ -240,23 +239,17 @@ void ChannelView::unpause(PauseReason reason)
     /// Remove the value from the map
     this->pauses_.erase(reason);
 
-    this->updatePauseTimer();
-
-    /// Move selection
-    this->selection_.selectionMin.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.selectionMax.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.start.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.end.messageIndex -= this->pauseSelectionOffset_;
-
-    this->pauseSelectionOffset_ = 0;
+    this->updatePauses();
 }
 
-void ChannelView::updatePauseTimer()
+void ChannelView::updatePauses()
 {
     using namespace std::chrono;
 
     if (this->pauses_.empty())
     {
+        this->unpaused();
+
         /// No pauses so we can stop the timer
         this->pauseEnd_ = boost::none;
         this->pauseTimer_.stop();
@@ -290,6 +283,17 @@ void ChannelView::updatePauseTimer()
                 duration_cast<milliseconds>(pauseEnd - SteadyClock::now()));
         }
     }
+}
+
+void ChannelView::unpaused()
+{
+    /// Move selection
+    this->selection_.selectionMin.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.selectionMax.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.start.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.end.messageIndex -= this->pauseSelectionOffset_;
+
+    this->pauseSelectionOffset_ = 0;
 }
 
 void ChannelView::themeChangedEvent()
