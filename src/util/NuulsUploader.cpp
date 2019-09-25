@@ -15,7 +15,7 @@ void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
                         ResizingTextEdit &textEdit)
 {
     const char *boundary = "thisistheboudaryasd";
-    static QUrl url(Env::get().imagePasteSiteUrl);
+    static QUrl url(Env::get().imageUploaderUrl);
 
     QHttpMultiPart *payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     QHttpPart part = QHttpPart();
