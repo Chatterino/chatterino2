@@ -617,14 +617,12 @@ void TwitchMessageBuilder::appendUsername()
 
     switch (usernameDisplayMode.getValue())
     {
-        case UsernameDisplayMode::Username:
-        {
+        case UsernameDisplayMode::Username: {
             usernameText = username;
         }
         break;
 
-        case UsernameDisplayMode::LocalizedName:
-        {
+        case UsernameDisplayMode::LocalizedName: {
             if (hasLocalizedName)
             {
                 usernameText = localizedName;
@@ -637,8 +635,7 @@ void TwitchMessageBuilder::appendUsername()
         break;
 
         default:
-        case UsernameDisplayMode::UsernameAndLocalizedName:
-        {
+        case UsernameDisplayMode::UsernameAndLocalizedName: {
             if (hasLocalizedName)
             {
                 usernameText = username + "(" + localizedName + ")";
@@ -1240,8 +1237,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             int index = badge.midRef(8).toInt();
             switch (index)
             {
-                case 1:
-                {
+                case 1: {
                     this->emplace<ImageElement>(
                             Image::fromPixmap(getResources().twitch.verified,
                                               0.25),
@@ -1249,8 +1245,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
                         ->setTooltip("Twitch Verified");
                 }
                 break;
-                default:
-                {
+                default: {
                     printf("[TwitchMessageBuilder] Unhandled partner badge "
                            "index: %d\n",
                            index);

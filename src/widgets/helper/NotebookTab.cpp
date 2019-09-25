@@ -432,8 +432,7 @@ void NotebookTab::mousePressEvent(QMouseEvent *event)
     {
         switch (event->button())
         {
-            case Qt::RightButton:
-            {
+            case Qt::RightButton: {
                 this->menu_.popup(event->globalPos());
             }
             break;

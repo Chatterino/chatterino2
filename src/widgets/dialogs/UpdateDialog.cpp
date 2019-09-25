@@ -48,8 +48,7 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
 
     switch (status)
     {
-        case Updates::UpdateAvailable:
-        {
+        case Updates::UpdateAvailable: {
             this->ui_.label->setText(
                 QString("An update (%1) is available.\n\nDo you want to "
                         "download and install it?")
@@ -58,28 +57,24 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
         }
         break;
 
-        case Updates::SearchFailed:
-        {
+        case Updates::SearchFailed: {
             this->ui_.label->setText("Failed to load version information.");
         }
         break;
 
-        case Updates::Downloading:
-        {
+        case Updates::Downloading: {
             this->ui_.label->setText(
                 "Downloading updates.\n\nChatterino will restart "
                 "automatically when the download is done.");
         }
         break;
 
-        case Updates::DownloadFailed:
-        {
+        case Updates::DownloadFailed: {
             this->ui_.label->setText("Failed to download the update.");
         }
         break;
 
-        case Updates::WriteFileFailed:
-        {
+        case Updates::WriteFileFailed: {
             this->ui_.label->setText("Failed to save the update to disk.");
         }
         break;

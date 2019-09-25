@@ -62,8 +62,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
     switch (icon_)
     {
-        case Plus:
-        {
+        case Plus: {
             painter.setPen([&] {
                 QColor tmp = foreground;
                 if (SplitContainer::isDraggingSplit)
@@ -90,8 +89,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
         }
         break;
 
-        case User:
-        {
+        case User: {
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
@@ -111,8 +109,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
         }
         break;
 
-        case Settings:
-        {
+        case Settings: {
             painter.setRenderHint(QPainter::Antialiasing);
             painter.setRenderHint(QPainter::HighQualityAntialiasing);
 

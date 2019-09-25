@@ -182,8 +182,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
 
     switch (message->type())
     {
-        case Communi::IrcMessage::Join:
-        {
+        case Communi::IrcMessage::Join: {
             auto x = static_cast<Communi::IrcJoinMessage *>(message);
 
             if (auto it =
@@ -208,8 +207,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
             return;
         }
 
-        case Communi::IrcMessage::Part:
-        {
+        case Communi::IrcMessage::Part: {
             auto x = static_cast<Communi::IrcPartMessage *>(message);
 
             if (auto it =

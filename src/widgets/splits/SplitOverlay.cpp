@@ -35,8 +35,7 @@ SplitOverlay::SplitOverlay(Split *parent)
         new QPushButton(getResources().split.left, QString());
     auto *right = this->right_ =
         new QPushButton(getResources().split.right, QString());
-    auto *up = this->up_ =
-        new QPushButton(getResources().split.up, QString());
+    auto *up = this->up_ = new QPushButton(getResources().split.up, QString());
     auto *down = this->down_ =
         new QPushButton(getResources().split.down, QString());
 
@@ -107,27 +106,23 @@ void SplitOverlay::paintEvent(QPaintEvent *)
     QRect rect;
     switch (this->hoveredElement_)
     {
-        case SplitLeft:
-        {
+        case SplitLeft: {
             rect = QRect(0, 0, this->width() / 2, this->height());
         }
         break;
 
-        case SplitRight:
-        {
+        case SplitRight: {
             rect =
                 QRect(this->width() / 2, 0, this->width() / 2, this->height());
         }
         break;
 
-        case SplitUp:
-        {
+        case SplitUp: {
             rect = QRect(0, 0, this->width(), this->height() / 2);
         }
         break;
 
-        case SplitDown:
-        {
+        case SplitDown: {
             rect =
                 QRect(0, this->height() / 2, this->width(), this->height() / 2);
         }
@@ -184,8 +179,7 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched,
 {
     switch (event->type())
     {
-        case QEvent::Enter:
-        {
+        case QEvent::Enter: {
             QGraphicsOpacityEffect *effect =
                 dynamic_cast<QGraphicsOpacityEffect *>(
                     ((QWidget *)watched)->graphicsEffect());
@@ -199,8 +193,7 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched,
             this->parent->update();
         }
         break;
-        case QEvent::Leave:
-        {
+        case QEvent::Leave: {
             QGraphicsOpacityEffect *effect =
                 dynamic_cast<QGraphicsOpacityEffect *>(
                     ((QWidget *)watched)->graphicsEffect());
@@ -214,8 +207,7 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched,
             this->parent->update();
         }
         break;
-        case QEvent::MouseButtonPress:
-        {
+        case QEvent::MouseButtonPress: {
             if (this->hoveredElement == HoveredElement::SplitMove)
             {
                 QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
@@ -227,8 +219,7 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched,
             }
         }
         break;
-        case QEvent::MouseButtonRelease:
-        {
+        case QEvent::MouseButtonRelease: {
             if (this->hoveredElement != HoveredElement::SplitMove)
             {
                 SplitContainer *container =

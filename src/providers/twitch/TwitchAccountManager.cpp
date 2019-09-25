@@ -102,14 +102,12 @@ void TwitchAccountManager::reloadUsers()
 
         switch (this->addUser(userData))
         {
-            case AddUserResponse::UserAlreadyExists:
-            {
+            case AddUserResponse::UserAlreadyExists: {
                 log("User {} already exists", userData.username);
                 // Do nothing
             }
             break;
-            case AddUserResponse::UserValuesUpdated:
-            {
+            case AddUserResponse::UserValuesUpdated: {
                 log("User {} already exists, and values updated!",
                     userData.username);
                 if (userData.username == this->getCurrent()->getUserName())
@@ -120,8 +118,7 @@ void TwitchAccountManager::reloadUsers()
                 }
             }
             break;
-            case AddUserResponse::UserAdded:
-            {
+            case AddUserResponse::UserAdded: {
                 log("Added user {}", userData.username);
                 listUpdated = true;
             }

@@ -61,10 +61,10 @@ private:
         // new
         if (other)
         {
-            this->conn_ =
-                QObject::connect(other, &QObject::destroyed, qApp,
-                                 [this](QObject *) { this->set(nullptr); },
-                                 Qt::DirectConnection);
+            this->conn_ = QObject::connect(
+                other, &QObject::destroyed, qApp,
+                [this](QObject *) { this->set(nullptr); },
+                Qt::DirectConnection);
         }
 
         this->t_ = other;

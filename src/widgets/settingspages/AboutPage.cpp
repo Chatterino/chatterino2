@@ -83,7 +83,9 @@ AboutPage::AboutPage()
                                     "chatterino2/commit/" +
                                     version.getCommitHash() + "\">" +
                                     version.getCommitHash() + "</a>")
-                               .arg(Modes::getInstance().isNightly ? ", " + version.getDateOfBuild() : "");
+                               .arg(Modes::getInstance().isNightly
+                                        ? ", " + version.getDateOfBuild()
+                                        : "");
 
             auto versionLabel = versionInfo.emplace<QLabel>(text);
             versionLabel->setOpenExternalLinks(true);

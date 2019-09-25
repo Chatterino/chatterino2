@@ -339,15 +339,13 @@ void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
 {
     switch (node->type_)
     {
-        case Node::_Split:
-        {
+        case Node::_Split: {
             node->split_->giveFocus(Qt::OtherFocusReason);
         }
         break;
 
         case Node::HorizontalContainer:
-        case Node::VerticalContainer:
-        {
+        case Node::VerticalContainer: {
             auto &children = node->children_;
 
             auto it = std::find_if(
@@ -898,23 +896,19 @@ void SplitContainer::Node::insertSplitRelative(Split *_split,
     {
         switch (this->type_)
         {
-            case Node::EmptyRoot:
-            {
+            case Node::EmptyRoot: {
                 this->setSplit(_split);
             }
             break;
-            case Node::_Split:
-            {
+            case Node::_Split: {
                 this->nestSplitIntoCollection(_split, _direction);
             }
             break;
-            case Node::HorizontalContainer:
-            {
+            case Node::HorizontalContainer: {
                 this->nestSplitIntoCollection(_split, _direction);
             }
             break;
-            case Node::VerticalContainer:
-            {
+            case Node::VerticalContainer: {
                 this->nestSplitIntoCollection(_split, _direction);
             }
             break;
@@ -1110,16 +1104,14 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
 
     switch (this->type_)
     {
-        case Node::_Split:
-        {
+        case Node::_Split: {
             QRect rect = this->geometry_.toRect();
             this->split_->setGeometry(
                 rect.marginsRemoved(QMargins(1, 1, 0, 0)));
         }
         break;
         case Node::VerticalContainer:
-        case Node::HorizontalContainer:
-        {
+        case Node::HorizontalContainer: {
             bool isVertical = this->type_ == Node::VerticalContainer;
 
             // vars

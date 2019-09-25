@@ -35,8 +35,7 @@ void NotificationPopup::updatePosition()
 
     switch (location)
     {
-        case BottomRight:
-        {
+        case BottomRight: {
             this->move(rect.right() - this->width(),
                        rect.bottom() - this->height());
         }

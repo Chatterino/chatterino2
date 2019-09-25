@@ -27,8 +27,7 @@ AccountController::AccountController()
     this->accounts_.itemRemoved.connect([this](const auto &args) {
         switch (args.item->getProviderId())
         {
-            case ProviderId::Twitch:
-            {
+            case ProviderId::Twitch: {
                 if (args.caller != this)
                 {
                     auto accs = this->twitch.accounts.cloneVector();
