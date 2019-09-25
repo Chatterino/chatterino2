@@ -37,7 +37,12 @@ void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
         .multiPart(payload)
         .onSuccess([&textEdit, channel](NetworkResult result) -> Outcome {
             textEdit.insertPlainText(result.getData() + QString(" "));
-            if (uploadQueue.size())
+            if (uploadQueue.empty())
+            {
+                channel->addMessage(makeSystemMessage(
+                    QString("Your image has been uploaded.")));
+            }
+            else
             {
                 channel->addMessage(makeSystemMessage(
                     QString("Your image has been uploaded. %1 left. Please "
@@ -49,19 +54,14 @@ void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
                 // 2 seconds for the timer that's there not to spam Nuuls' server
                 // and 1 second of actual uploading.
             }
-            else
-            {
-                channel->addMessage(makeSystemMessage(
-                    QString("Your image has been uploaded.")));
-            }
             isUploading = false;
-            QTimer::singleShot(2000, [channel, &textEdit]() {
-                if (uploadQueue.size())
-                {
+            if (uploadQueue.size())
+            {
+                QTimer::singleShot(2000, [channel, &textEdit]() {
                     uploadImageToNuuls(uploadQueue.front(), channel, textEdit);
                     uploadQueue.pop();
-                }
-            });
+                });
+            }
             return Success;
         })
         .onError([channel](NetworkResult result) -> bool {
@@ -73,31 +73,14 @@ void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
         })
         .execute();
 }
-QString getImageFileFormat(QString path)
-{
-    static QStringList LIST_OF_IMAGE_FORMATS = {".png", ".jpg", ".jpeg"};
-    for (QString i : LIST_OF_IMAGE_FORMATS)
-    {
-        if (path.endsWith(i))
-        {
-            return i.replace('.', "");
-        }
-    }
-    return QString();
-}
 
-void pasteFromClipboard(const QMimeData *source, ChannelPtr channel,
-                        ResizingTextEdit &outputTextEdit)
+void upload(const QMimeData *source, ChannelPtr channel,
+            ResizingTextEdit &outputTextEdit)
 {
-    /*
-    http://localhost:7494/upload?password=xd
-    default port and password for nuuls' filehost.
-    */
     if (isUploading)
     {
         channel->addMessage(makeSystemMessage(
-            QString("You are already uploading an image. "
-                    "Please wait until the upload finishes.")));
+            QString("Please wait until the upload finishes.")));
         return;
     }
 
@@ -109,62 +92,61 @@ void pasteFromClipboard(const QMimeData *source, ChannelPtr channel,
         uploadImageToNuuls({source->data("image/png"), "png"}, channel,
                            outputTextEdit);
     }
-    else if (source->hasFormat("text/uri-list"))
+    else if (source->hasFormat("image/jpeg"))
     {
-        QStringList potientialPathsToSend =
-            QString(source->data("text/uri-list").toStdString().c_str())
-                .split("\r\n");
-
-        for (QString path : potientialPathsToSend)
+        uploadImageToNuuls({source->data("image/jpeg"), "jpeg"}, channel,
+                           outputTextEdit);
+    }
+    else if (source->hasFormat("image/gif"))
+    {
+        uploadImageToNuuls({source->data("image/gif"), "gif"}, channel,
+                           outputTextEdit);
+    }
+    else if (source->hasUrls())
+    {
+        for (QUrl path : source->urls())
         {
-            if (path.isEmpty())
+            if (getImageFileFormat(path.toLocalFile()) != QString())
             {
-                break;
+                channel->addMessage(makeSystemMessage(
+                    QString("Uploading image: %1").arg(path.toLocalFile())));
+                QImage img = QImage(path.toLocalFile());
+                if (img.isNull())
+                {
+                    channel->addMessage(
+                        makeSystemMessage(QString("Couldn't load image :(")));
+                    return;
+                }
+                QByteArray imageData;
+                QBuffer buf(&imageData);
+                buf.open(QIODevice::WriteOnly);
+                img.save(&buf, "png");
+
+                TypedBytes data = {imageData, "png"};
+                uploadQueue.push(data);
+            }
+            else if (path.toLocalFile().endsWith(".gif"))
+            {
+                channel->addMessage(makeSystemMessage(
+                    QString("Uploading GIF: %1").arg(path.toLocalFile())));
+                QFile file(path.toLocalFile());
+                bool isOkay = file.open(QIODevice::ReadOnly);
+                if (!isOkay)
+                {
+                    channel->addMessage(
+                        makeSystemMessage(QString("Failed to open file. :(")));
+                    return;
+                }
+                TypedBytes data = {file.readAll(), "gif"};
+                uploadQueue.push(data);
+                file.close();
+                // file.readAll() => might be a bit big but it /should/ work
             }
             else
             {
-                if (getImageFileFormat(path) != QString())
-                {
-                    channel->addMessage(makeSystemMessage(
-                        QString("Uploading image: %1").arg(path)));
-                    QImage img = QImage(QUrl(path).toLocalFile());
-                    if (img.isNull())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            QString("Couldn't load image :(")));
-                        return;
-                    }
-                    QByteArray imageData;
-                    QBuffer buf(&imageData);
-                    buf.open(QIODevice::WriteOnly);
-                    img.save(&buf, "png");
-
-                    TypedBytes data = {imageData, "png"};
-                    uploadQueue.push(data);
-                }
-                else if (path.endsWith(".gif"))
-                {
-                    channel->addMessage(makeSystemMessage(
-                        QString("Uploading GIF: %1").arg(path)));
-                    QFile file(QUrl(path).toLocalFile());
-                    bool isOkay = file.open(QIODevice::ReadOnly);
-                    if (!isOkay)
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            QString("Failed to open file. :(")));
-                        return;
-                    }
-                    TypedBytes data = {file.readAll(), "gif"};
-                    uploadQueue.push(data);
-                    file.close();
-                    // file.readAll() => might be a bit big but it /should/ work
-                }
-                else
-                {
-                    channel->addMessage(makeSystemMessage(
-                        QString("Cannot upload file: %1, not an image")
-                            .arg(path)));
-                }
+                channel->addMessage(makeSystemMessage(
+                    QString("Cannot upload file: %1, not an image")
+                        .arg(path.toLocalFile())));
             }
         }
         if (uploadQueue.size())
@@ -172,11 +154,6 @@ void pasteFromClipboard(const QMimeData *source, ChannelPtr channel,
             uploadImageToNuuls(uploadQueue.front(), channel, outputTextEdit);
             uploadQueue.pop();
         }
-    }
-    else if (source->hasFormat("image/gif"))
-    {
-        TypedBytes data = {source->data("image/gif"), "gif"};
-        uploadImageToNuuls(data, channel, outputTextEdit);
     }
     else
     {  // not PNG, try loading it into QImage and save it to a PNG.
@@ -190,3 +167,19 @@ void pasteFromClipboard(const QMimeData *source, ChannelPtr channel,
     }
 }
 }  // namespace chatterino
+
+namespace {
+
+QString getImageFileFormat(QString path)
+{
+    static QStringList listOfImageFormats = {".png", ".jpg", ".jpeg"};
+    for (const QString &format : listOfImageFormats)
+    {
+        if (path.endsWith(format))
+        {
+            return format.mid(1);
+        }
+    }
+    return QString();
+}
+}  // namespace

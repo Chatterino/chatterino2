@@ -9,11 +9,14 @@ struct TypedBytes {
     QByteArray data;
     QString type;
 };
-void uploadImageToNuuls(QByteArray imageData, ChannelPtr channel,
-                        ResizingTextEdit &textEdit, std::string format);
-void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
-                        ResizingTextEdit &textEdit);
-QString getImageFileFormat(QString path);
-void pasteFromClipboard(const QMimeData *source, ChannelPtr channel,
-                        ResizingTextEdit &outputTextEdit);
+void upload(QByteArray imageData, ChannelPtr channel,
+            ResizingTextEdit &textEdit, std::string format);
+void upload(TypedBytes imageData, ChannelPtr channel,
+            ResizingTextEdit &textEdit);
+void upload(const QMimeData *source, ChannelPtr channel,
+            ResizingTextEdit &outputTextEdit);
 }  // namespace chatterino
+
+namespace {
+QString getImageFileFormat(QString path);
+}

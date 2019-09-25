@@ -264,7 +264,10 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
     {
         return true;
     }
-    return false;
+    else
+    {
+        return QTextEdit::canInsertFromMimeData(source);
+    }
 }
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
@@ -285,8 +288,12 @@ void ResizingTextEdit::dragEnterEvent(QDragEnterEvent *event)
     {
         event->acceptProposedAction();
     }
-    // QTextEdit doesn't implement dragEnterEvent, so there's nothing to call here.
+    else
+    {
+        QAbstractScrollArea::dragEnterEvent(event);
+    }
 }
+
 void ResizingTextEdit::dropEvent(QDropEvent *event)
 {
     if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
