@@ -81,6 +81,8 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
     QObject::connect(&this->useNextBounds_, &QTimer::timeout, this,
                      [this]() { this->currentBounds_ = this->nextBounds_; });
 #endif
+
+    this->themeChangedEvent();
 }
 
 void BaseWindow::setInitialBounds(const QRect &bounds)
