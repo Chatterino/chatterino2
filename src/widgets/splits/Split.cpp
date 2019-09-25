@@ -207,7 +207,7 @@ Split::Split(QWidget *parent)
         [this] { this->focused.invoke(); });
     this->input_->ui_.textEdit->focusLost.connect(
         [this] { this->focusLost.invoke(); });
-    this->input_->ui_.textEdit->pastedImage.connect(
+    this->input_->ui_.textEdit->imagePasted.connect(
         [this](const QMimeData *source) {
             upload(source, this->getChannel(), *this->input_->ui_.textEdit);
         });

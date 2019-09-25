@@ -274,7 +274,7 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
     if (source->hasImage() || source->hasUrls())
     {
-        this->pastedImage.invoke(source);
+        this->imagePasted.invoke(source);
     }
     else
     {
@@ -298,7 +298,7 @@ void ResizingTextEdit::dropEvent(QDropEvent *event)
 {
     if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
     {
-        this->pastedImage.invoke(event->mimeData());
+        this->imagePasted.invoke(event->mimeData());
     }
     else  // allow for previous functionality of dropping text.
     {
