@@ -85,8 +85,7 @@ bool Window::event(QEvent *event)
         case QEvent::WindowActivate:
             break;
 
-        case QEvent::WindowDeactivate:
-        {
+        case QEvent::WindowDeactivate: {
             auto page = this->notebook_->getOrAddSelectedPage();
 
             if (page != nullptr)

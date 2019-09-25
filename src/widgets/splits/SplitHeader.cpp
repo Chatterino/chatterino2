@@ -590,16 +590,14 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
 {
     switch (event->button())
     {
-        case Qt::LeftButton:
-        {
+        case Qt::LeftButton: {
             this->dragging_ = true;
 
             this->dragStart_ = event->pos();
         }
         break;
 
-        case Qt::RightButton:
-        {
+        case Qt::RightButton: {
             this->mainMenu_->popup(this->mapToGlobal(event->pos()));
         }
         break;
@@ -717,8 +715,7 @@ void SplitHeader::themeChangedEvent()
     }
     else
     {
-        this->dropdownButton_->setPixmap(
-            getResources().buttons.menuLight);
+        this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
         this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }
 }

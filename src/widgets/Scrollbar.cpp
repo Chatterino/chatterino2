@@ -296,15 +296,13 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
             switch (highlight.getStyle())
             {
-                case ScrollbarHighlight::Default:
-                {
+                case ScrollbarHighlight::Default: {
                     painter.fillRect(w / 8 * 3, int(y), w / 4, highlightHeight,
                                      color);
                 }
                 break;
 
-                case ScrollbarHighlight::Line:
-                {
+                case ScrollbarHighlight::Line: {
                     painter.fillRect(0, int(y), w, 1, color);
                 }
                 break;

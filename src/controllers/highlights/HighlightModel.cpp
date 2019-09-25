@@ -94,8 +94,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
 {
     switch (column)
     {
-        case Column::Pattern:
-        {
+        case Column::Pattern: {
             if (role == Qt::CheckStateRole)
             {
                 if (rowIndex == 0)
@@ -110,8 +109,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             }
         }
         break;
-        case Column::FlashTaskbar:
-        {
+        case Column::FlashTaskbar: {
             if (role == Qt::CheckStateRole)
             {
                 if (rowIndex == 0)
@@ -127,8 +125,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             }
         }
         break;
-        case Column::PlaySound:
-        {
+        case Column::PlaySound: {
             if (role == Qt::CheckStateRole)
             {
                 if (rowIndex == 0)
@@ -144,18 +141,15 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             }
         }
         break;
-        case Column::UseRegex:
-        {
+        case Column::UseRegex: {
             // Regex --> empty
         }
         break;
-        case Column::CaseSensitive:
-        {
+        case Column::CaseSensitive: {
             // Case-sensitivity --> empty
         }
         break;
-        case Column::SoundPath:
-        {
+        case Column::SoundPath: {
             // Custom sound file
             if (role == Qt::UserRole)
             {

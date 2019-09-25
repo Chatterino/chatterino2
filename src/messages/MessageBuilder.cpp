@@ -32,9 +32,8 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     builder.message().flags.set(MessageFlag::PubSub);
 
     builder
-        .emplace<ImageElement>(
-            Image::fromPixmap(getResources().twitch.automod),
-            MessageElementFlag::BadgeChannelAuthority)
+        .emplace<ImageElement>(Image::fromPixmap(getResources().twitch.automod),
+                               MessageElementFlag::BadgeChannelAuthority)
         ->setTooltip("AutoMod");
     builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
                                  MessageColor(QColor("blue")),
@@ -258,40 +257,35 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
     QString text;
     switch (action.type)
     {
-        case AutomodUserAction::AddPermitted:
-        {
+        case AutomodUserAction::AddPermitted: {
             text = QString("%1 added %2 as a permitted term on AutoMod.")
                        .arg(action.source.name)
                        .arg(action.message);
         }
         break;
 
-        case AutomodUserAction::AddBlocked:
-        {
+        case AutomodUserAction::AddBlocked: {
             text = QString("%1 added %2 as a blocked term on AutoMod.")
                        .arg(action.source.name)
                        .arg(action.message);
         }
         break;
 
-        case AutomodUserAction::RemovePermitted:
-        {
+        case AutomodUserAction::RemovePermitted: {
             text = QString("%1 removed %2 as a permitted term term on AutoMod.")
                        .arg(action.source.name)
                        .arg(action.message);
         }
         break;
 
-        case AutomodUserAction::RemoveBlocked:
-        {
+        case AutomodUserAction::RemoveBlocked: {
             text = QString("%1 removed %2 as a blocked term on AutoMod.")
                        .arg(action.source.name)
                        .arg(action.message);
         }
         break;
 
-        case AutomodUserAction::Properties:
-        {
+        case AutomodUserAction::Properties: {
             text = QString("%1 modified the AutoMod properties.")
                        .arg(action.source.name);
         }

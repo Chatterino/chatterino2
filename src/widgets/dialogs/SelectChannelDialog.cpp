@@ -258,33 +258,28 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
 
     switch (_channel.getType())
     {
-        case Channel::Type::Twitch:
-        {
+        case Channel::Type::Twitch: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.channel->setFocus();
             this->ui_.twitch.channelName->setText(channel->getName());
         }
         break;
-        case Channel::Type::TwitchWatching:
-        {
+        case Channel::Type::TwitchWatching: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.watching->setFocus();
         }
         break;
-        case Channel::Type::TwitchMentions:
-        {
+        case Channel::Type::TwitchMentions: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.mentions->setFocus();
         }
         break;
-        case Channel::Type::TwitchWhispers:
-        {
+        case Channel::Type::TwitchWhispers: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.whispers->setFocus();
         }
         break;
-        case Channel::Type::Irc:
-        {
+        case Channel::Type::Irc: {
             this->ui_.notebook->selectIndex(TAB_IRC);
             this->ui_.irc.channel->setText(_channel.get()->getName());
 
@@ -309,8 +304,7 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
             this->ui_.irc.channel->setFocus();
         }
         break;
-        default:
-        {
+        default: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.channel->setFocus();
         }
@@ -330,8 +324,7 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
 
     switch (this->ui_.notebook->getSelectedIndex())
     {
-        case TAB_TWITCH:
-        {
+        case TAB_TWITCH: {
             if (this->ui_.twitch.channel->isChecked())
             {
                 return app->twitch.server->getOrAddChannel(
@@ -351,8 +344,7 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
             }
         }
         break;
-        case TAB_IRC:
-        {
+        case TAB_IRC: {
             int row = this->ui_.irc.servers->getTableView()
                           ->selectionModel()
                           ->currentIndex()

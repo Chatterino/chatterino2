@@ -48,13 +48,11 @@ void DownloadManager::onFinished(QNetworkReply *reply)
 {
     switch (reply->error())
     {
-        case QNetworkReply::NoError:
-        {
+        case QNetworkReply::NoError: {
             qDebug("file is downloaded successfully.");
         }
         break;
-        default:
-        {
+        default: {
             qDebug() << reply->errorString().toLatin1();
         };
     }
