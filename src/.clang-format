@@ -1,6 +1,5 @@
 Language: Cpp
 
-AccessModifierOffset: -1
 AccessModifierOffset: -4
 AlignEscapedNewlinesLeft: true
 AllowShortFunctionsOnASingleLine: false
@@ -10,12 +9,13 @@ AlwaysBreakAfterDefinitionReturnType: false
 AlwaysBreakBeforeMultilineStrings: false
 BasedOnStyle: Google
 BraceWrapping: {
-    AfterNamespace: 'false'
+    AfterCaseLabel: 'false'
     AfterClass: 'true'
-    BeforeElse: 'true'
     AfterControlStatement: 'true'
     AfterFunction: 'true'
+    AfterNamespace: 'false'
     BeforeCatch: 'true'
+    BeforeElse: 'true'
 }
 BreakBeforeBraces: Custom
 BreakConstructorInitializersBeforeComma: true
@@ -27,6 +27,7 @@ IndentCaseLabels: true
 IndentWidth: 4
 IndentWrappedFunctionNames: true
 IndentPPDirectives: AfterHash
+IncludeBlocks: Preserve
 NamespaceIndentation: Inner
 PointerBindsToType: false
 SpacesBeforeTrailingComments: 2
