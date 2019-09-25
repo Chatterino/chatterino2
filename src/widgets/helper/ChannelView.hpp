@@ -1,21 +1,20 @@
 #pragma once
 
-#include "common/FlagsEnum.hpp"
-#include "messages/Image.hpp"
-#include "messages/LimitedQueue.hpp"
-#include "messages/LimitedQueueSnapshot.hpp"
-#include "messages/Selection.hpp"
-#include "widgets/BaseWidget.hpp"
-
 #include <QPaintEvent>
 #include <QScroller>
 #include <QTimer>
 #include <QWheelEvent>
 #include <QWidget>
 #include <pajlada/signals/signal.hpp>
-
 #include <unordered_map>
 #include <unordered_set>
+
+#include "common/FlagsEnum.hpp"
+#include "messages/Image.hpp"
+#include "messages/LimitedQueue.hpp"
+#include "messages/LimitedQueueSnapshot.hpp"
+#include "messages/Selection.hpp"
+#include "widgets/BaseWidget.hpp"
 
 namespace chatterino {
 enum class HighlightState;
@@ -146,7 +145,8 @@ private:
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
                              MessageLayout *layout);
     int getLayoutWidth() const;
-    void updatePauseTimer();
+    void updatePauses();
+    void unpaused();
 
     QTimer *layoutCooldown_;
     bool layoutQueued_;
