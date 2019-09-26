@@ -106,7 +106,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
     {
         for (const QUrl &path : source->urls())
         {
-            if (getImageFileFormat(path.toLocalFile()) != QString())
+            if (!getImageFileFormat(path.toLocalFile()).isEmpty())
             {
                 channel->addMessage(makeSystemMessage(
                     QString("Uploading image: %1").arg(path.toLocalFile())));
@@ -147,6 +147,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 channel->addMessage(makeSystemMessage(
                     QString("Cannot upload file: %1, not an image")
                         .arg(path.toLocalFile())));
+                isUploading = false;
             }
         }
         if (uploadQueue.size())
