@@ -104,7 +104,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
     }
     else if (source->hasUrls())
     {
-        for (QUrl path : source->urls())
+        for (const QUrl &path : source->urls())
         {
             if (getImageFileFormat(path.toLocalFile()) != QString())
             {
