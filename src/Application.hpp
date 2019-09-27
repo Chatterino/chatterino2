@@ -19,6 +19,7 @@ class AccountController;
 class ModerationActions;
 class NotificationController;
 class PingController;
+class TimeoutButtonController;
 
 class Theme;
 class WindowManager;
@@ -58,12 +59,12 @@ public:
     Emotes *const emotes{};
     WindowManager *const windows{};
     Toasts *const toasts{};
-
     AccountController *const accounts{};
     CommandController *const commands{};
     HighlightController *const highlights{};
     NotificationController *const notifications{};
     PingController *const pings{};
+    TimeoutButtonController *const timeoutButtons{};
     IgnoreController *const ignores{};
     TaggedUsersController *const taggedUsers{};
     ModerationActions *const moderationActions{};

@@ -83,6 +83,9 @@ SOURCES += \
     src/controllers/taggedusers/TaggedUser.cpp \
     src/controllers/taggedusers/TaggedUsersController.cpp \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
+    src/controllers/timeoutbuttons/TimeoutButton.cpp \
+    src/controllers/timeoutbuttons/TimeoutButtonController.cpp \
+    src/controllers/timeoutbuttons/TimeoutButtonModel.cpp \
     src/main.cpp \
     src/messages/Emote.cpp \
     src/messages/Image.cpp \
@@ -253,6 +256,9 @@ HEADERS += \
     src/controllers/taggedusers/TaggedUser.hpp \
     src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
+    src/controllers/timeoutbuttons/TimeoutButton.hpp \
+    src/controllers/timeoutbuttons/TimeoutButtonController.hpp \
+    src/controllers/timeoutbuttons/TimeoutButtonModel.hpp \
     src/messages/Emote.hpp \
     src/messages/Image.hpp \
     src/messages/ImageSet.hpp \

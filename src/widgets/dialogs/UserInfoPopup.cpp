@@ -34,14 +34,6 @@ namespace {
 
     const auto borderColor = QColor(255, 255, 255, 80);
 
-    int calculateTimeoutDuration(TimeoutButton timeout)
-    {
-        static const QMap<QString, int> durations{
-            {"s", 1}, {"m", 60}, {"h", 3600}, {"d", 86400}, {"w", 604800},
-        };
-        return timeout.second * durations[timeout.first];
-    }
-
     ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
     {
         LimitedQueueSnapshot<MessagePtr> snapshot =
@@ -544,28 +536,32 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             });
     };
 
-    const auto addTimeouts = [&](const QString &title) {
-        auto hbox = addLayout(title);
+    //        const auto addTimeouts = [&](const QString &title) {
+    //            auto hbox = addLayout(title);
 
-        for (const auto &item : getSettings()->timeoutButtons.getValue())
-        {
-            auto a = hbox.emplace<EffectLabel2>();
-            a->getLabel().setText(QString::number(item.second) + item.first);
+    //            for (const auto &item :
+    //            getSettings()->timeoutButtons.getValue())
+    //            {
+    //                auto a = hbox.emplace<EffectLabel2>();
+    //                a->getLabel().setText(QString::number(item.second) +
+    //                item.first);
 
-            a->setScaleIndependantSize(buttonWidth, buttonHeight);
-            a->setBorderColor(borderColor);
+    //                a->setScaleIndependantSize(buttonWidth, buttonHeight);
+    //                a->setBorderColor(borderColor);
 
-            const auto pair =
-                std::make_pair(Action::Timeout, calculateTimeoutDuration(item));
+    //                const auto pair =
+    //                    std::make_pair(Action::Timeout,
+    //                    calculateTimeoutDuration(item));
 
-            QObject::connect(
-                a.getElement(), &EffectLabel2::leftClicked,
-                [this, pair] { this->buttonClicked.invoke(pair); });
-        }
-    };
+    //                QObject::connect(
+    //                    a.getElement(), &EffectLabel2::leftClicked,
+    //                    [this, pair] { this->buttonClicked.invoke(pair); });
+    //            }
+
+    //        };
 
     addButton(Unban, "Unban", getApp()->resources->buttons.unban);
-    addTimeouts("Timeouts");
+    //    addTimeouts("Timeouts");
     addButton(Ban, "Ban", getApp()->resources->buttons.ban);
 }
 
