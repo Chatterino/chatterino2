@@ -3,14 +3,11 @@
 #include "Application.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "controllers/taggedusers/TaggedUsersModel.hpp"
-#include "controllers/timeoutbuttons/TimeoutButtonController.hpp"
-#include "controllers/timeoutbuttons/TimeoutButtonModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/helper/EditableModelView.hpp"
 
 #include <QFileDialog>
 #include <QFormLayout>
@@ -31,8 +28,6 @@ AdvancedPage::AdvancedPage()
     : SettingsPage("Advanced", ":/settings/advanced.svg")
 {
     LayoutCreator<AdvancedPage> layoutCreator(this);
-
-    auto *app = getApp();
 
     auto tabs = layoutCreator.emplace<QTabWidget>();
 
@@ -77,9 +72,10 @@ AdvancedPage::AdvancedPage()
                              getSettings()->cachePath = "";  //
                          });
     }
-    // Logs end
+        // Logs end
 
-    // Timeoutbuttons
+
+        // Timeoutbuttons
     {
         auto timeoutLayout = tabs.appendTab(new QVBoxLayout, "Timeouts");
         auto texts = timeoutLayout.emplace<QVBoxLayout>().withoutMargin();
@@ -98,29 +94,75 @@ AdvancedPage::AdvancedPage()
         texts->setContentsMargins(0, 0, 0, 15);
         texts->setSizeConstraint(QLayout::SetMaximumSize);
 
-        EditableModelView *view =
-            timeoutLayout
-                .emplace<EditableModelView>(
-                    app->timeoutButtons->createModel(nullptr))
-                .getElement();
+        const auto valueChanged = [=] {
+            const auto index = QObject::sender()->objectName().toInt();
 
-        view->setTitles({"Duration", "Unit"});
-        view->getTableView()->horizontalHeader()->setSectionResizeMode(
-            QHeaderView::Fixed);
-        view->getTableView()->horizontalHeader()->setSectionResizeMode(
-            0, QHeaderView::Stretch);
+            const auto line = this->durationInputs_[index];
+            const auto duration = line->text().toInt();
+            const auto unit = this->unitInputs_[index]->currentText();
 
-        // fourtf: make class extrend BaseWidget and add this to
-        // dpiChanged
-        QTimer::singleShot(1, [view] {
-            view->getTableView()->resizeColumnsToContents();
-            view->getTableView()->setColumnWidth(0, 200);
-        });
+            // safety mechanism for setting days and weeks
+            if (unit == "d" && duration > 14)
+            {
+                line->setText("14");
+                return;
+            }
+            else if (unit == "w" && duration > 2)
+            {
+                line->setText("2");
+                return;
+            }
 
-        view->addButtonPressed.connect([] {
-            getApp()->timeoutButtons->buttons.appendItem(TimeoutButton{1, "s"});
-        });
+            auto timeouts = getSettings()->timeoutButtons.getValue();
+            timeouts[index] = TimeoutButton{ unit, duration };
+            getSettings()->timeoutButtons.setValue(timeouts);
+        };
+
+        // build one line for each customizable button
+        auto i = 0;
+        for (const auto tButton : getSettings()->timeoutButtons.getValue())
+        {
+            const auto buttonNumber = QString::number(i);
+            auto timeout = timeoutLayout.emplace<QHBoxLayout>().withoutMargin();
+
+            auto buttonLabel = timeout.emplace<QLabel>();
+            buttonLabel->setText(QString("Button %1: ").arg(++i));
+
+            auto *lineEditDurationInput = new QLineEdit();
+            lineEditDurationInput->setObjectName(buttonNumber);
+            lineEditDurationInput->setValidator(
+                new QIntValidator(1, 99, this));
+            lineEditDurationInput->setText(
+                QString::number(tButton.second));
+            lineEditDurationInput->setAlignment(Qt::AlignRight);
+            lineEditDurationInput->setMaximumWidth(30);
+            timeout.append(lineEditDurationInput);
+
+            auto *timeoutDurationUnit = new QComboBox();
+            timeoutDurationUnit->setObjectName(buttonNumber);
+            timeoutDurationUnit->addItems({ "s", "m", "h", "d", "w" });
+            timeoutDurationUnit->setCurrentText(tButton.first);
+            timeout.append(timeoutDurationUnit);
+
+            QObject::connect(lineEditDurationInput,
+                             &QLineEdit::textChanged, this,
+                             valueChanged);
+
+            QObject::connect(timeoutDurationUnit,
+                             &QComboBox::currentTextChanged, this,
+                             valueChanged);
+
+            timeout->addStretch();
+
+            this->durationInputs_.push_back(lineEditDurationInput);
+            this->unitInputs_.push_back(timeoutDurationUnit);
+
+            timeout->setContentsMargins(40, 0, 0, 0);
+            timeout->setSizeConstraint(QLayout::SetMaximumSize);
+        }
+        timeoutLayout->addStretch();
     }
     // Timeoutbuttons end
 }
+
 }  // namespace chatterino
