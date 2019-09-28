@@ -168,7 +168,7 @@ HighlightingPage::HighlightingPage()
 
             auto getSelectFileText = [] {
                 const QString value = getSettings()->pathHighlightSound;
-                return value.isEmpty() ? "Select fallback sound file"
+                return value.isEmpty() ? "Select custom fallback sound"
                                        : QUrl::fromLocalFile(value).fileName();
             };
 

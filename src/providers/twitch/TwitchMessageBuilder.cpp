@@ -64,13 +64,19 @@ QColor getRandomColor(const QVariant &userId)
 QUrl getFallbackHighlightSound()
 {
     using namespace chatterino;
-    if (getSettings()->pathHighlightSound.getValue().isEmpty())
+
+    QString path = getSettings()->pathHighlightSound;
+    bool fileExists = QFileInfo::exists(path) && QFileInfo(path).isFile();
+
+    // Use fallback sound when checkbox is not checked
+    // or custom file doesn't exist
+    if (getSettings()->customHighlightSound && fileExists)
     {
-        return QUrl("qrc:/sounds/ping2.wav");
+        return QUrl::fromLocalFile(path);
     }
     else
     {
-        return QUrl::fromLocalFile(getSettings()->pathHighlightSound);
+        return QUrl("qrc:/sounds/ping2.wav");
     }
 }
 
@@ -935,7 +941,6 @@ void TwitchMessageBuilder::parseHighlights()
         return;
     }
 
-    // TODO(leon): Can we handle phrases and usernames in one? Code-duplication
     std::vector<HighlightPhrase> userHighlights =
         app->highlights->highlightedUsers.cloneVector();
 
@@ -963,10 +968,14 @@ void TwitchMessageBuilder::parseHighlights()
         if (userHighlight.hasSound())
         {
             this->highlightSound_ = true;
-            // Use custom sound if set
+            // Use custom sound if set, otherwise use the fallback sound
             if (!userHighlight.getSoundUrl().toString().isEmpty())
             {
                 this->highlightSoundUrl_ = userHighlight.getSoundUrl();
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
             }
         }
 
@@ -1026,10 +1035,15 @@ void TwitchMessageBuilder::parseHighlights()
         if (highlight.hasSound() && !this->highlightSound_)
         {
             this->highlightSound_ = true;
-            // Use custom sound if set
+
+            // Use custom sound if set, otherwise use fallback sound
             if (!highlight.getSoundUrl().toString().isEmpty())
             {
                 this->highlightSoundUrl_ = highlight.getSoundUrl();
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
             }
         }
 
@@ -1053,9 +1067,16 @@ void TwitchMessageBuilder::parseHighlights()
         {
             this->highlightSound_ = true;
 
+            // Use custom sound is set, otherwise use fallback
             if (!getSettings()->whisperHighlightSoundUrl.getValue().isEmpty())
+            {
                 this->highlightSoundUrl_ =
                     QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
         }
         if (!this->highlightVisual_)
         {
