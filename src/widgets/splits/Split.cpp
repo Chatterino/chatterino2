@@ -318,16 +318,35 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
     dialog->closed.connect([=] {
-        if (dialog->hasSeletedChannel())
+        if (dialog->hasSelectedChannels())
         {
-            this->setChannel(dialog->getSelectedChannel());
+            auto channels = dialog->getSelectedChannels();
+            for (auto it = channels.begin(); it != channels.end(); ++it)
+            {
+                if (!it->get())
+                    continue;
+
+                // The first channel will be placed in the current split.
+                // New splits will be appended for all other channels.
+                if (it == channels.begin())
+                {
+                    this->setChannel(*it);
+                }
+                else
+                {
+                    Split *split = new Split(this->container_);
+                    split->setChannel(*it);
+                    this->container_->appendSplit(split);
+                }
+            }
+
             if (this->isInContainer())
             {
                 this->container_->refreshTab();
             }
         }
 
-        callback(dialog->hasSeletedChannel());
+        callback(dialog->hasSelectedChannels());
         this->selectChannelDialog_ = nullptr;
     });
     this->selectChannelDialog_ = dialog;

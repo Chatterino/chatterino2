@@ -26,11 +26,11 @@ namespace chatterino {
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     : BaseWindow(BaseWindow::EnableCustomFrame, parent)
-    , selectedChannel_(Channel::getEmpty())
+    , selectedChannels_{Channel::getEmpty()}
 {
-    this->setWindowTitle("Select a channel to join");
+    this->setWindowTitle("Select channels to join");
 
-    this->tabFilter_.dialog = this;
+    this->keyboardFilter_.dialog = this;
 
     LayoutCreator<QWidget> layoutWidget(this->getLayoutContainer());
     auto layout = layoutWidget.setLayoutType<QVBoxLayout>().withoutMargin();
@@ -42,16 +42,16 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         auto vbox = obj.setLayoutType<QVBoxLayout>();
 
         // channel_btn
-        auto channel_btn = vbox.emplace<QRadioButton>("Channel").assign(
-            &this->ui_.twitch.channel);
+        auto channel_btn = vbox.emplace<QCheckBox>("Channels").assign(
+            &this->ui_.twitch.channels);
         auto channel_lbl =
-            vbox.emplace<QLabel>("Join a twitch channel by its name.").hidden();
+            vbox.emplace<QLabel>("Join twitch channels by their names.").hidden();
         channel_lbl->setWordWrap(true);
         auto channel_edit = vbox.emplace<QLineEdit>().hidden().assign(
-            &this->ui_.twitch.channelName);
+            &this->ui_.twitch.channelNames);
 
-        QObject::connect(channel_btn.getElement(), &QRadioButton::toggled,
-                         [=](bool enabled) mutable {
+        QObject::connect(channel_btn.getElement(), &QCheckBox::stateChanged,
+                         [=](int enabled) mutable {
                              if (enabled)
                              {
                                  channel_edit->setFocus();
@@ -63,11 +63,11 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                              channel_lbl->setVisible(enabled);
                          });
 
-        channel_btn->installEventFilter(&this->tabFilter_);
-        channel_edit->installEventFilter(&this->tabFilter_);
+        channel_btn->installEventFilter(&this->keyboardFilter_);
+        channel_edit->installEventFilter(&this->keyboardFilter_);
 
         // whispers_btn
-        auto whispers_btn = vbox.emplace<QRadioButton>("Whispers")
+        auto whispers_btn = vbox.emplace<QCheckBox>("Whispers")
                                 .assign(&this->ui_.twitch.whispers);
         auto whispers_lbl =
             vbox.emplace<QLabel>("Shows the whispers that you receive while "
@@ -75,14 +75,14 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 .hidden();
 
         whispers_lbl->setWordWrap(true);
-        whispers_btn->installEventFilter(&this->tabFilter_);
+        whispers_btn->installEventFilter(&this->keyboardFilter_);
 
         QObject::connect(
-            whispers_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { whispers_lbl->setVisible(enabled); });
+            whispers_btn.getElement(), &QCheckBox::stateChanged,
+            [=](int enabled) mutable { whispers_lbl->setVisible(enabled); });
 
         // mentions_btn
-        auto mentions_btn = vbox.emplace<QRadioButton>("Mentions")
+        auto mentions_btn = vbox.emplace<QCheckBox>("Mentions")
                                 .assign(&this->ui_.twitch.mentions);
         auto mentions_lbl =
             vbox.emplace<QLabel>("Shows all the messages that highlight you "
@@ -90,25 +90,25 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 .hidden();
 
         mentions_lbl->setWordWrap(true);
-        mentions_btn->installEventFilter(&this->tabFilter_);
+        mentions_btn->installEventFilter(&this->keyboardFilter_);
 
         QObject::connect(
-            mentions_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { mentions_lbl->setVisible(enabled); });
+            mentions_btn.getElement(), &QCheckBox::stateChanged,
+            [=](int enabled) mutable { mentions_lbl->setVisible(enabled); });
 
         // watching_btn
-        auto watching_btn = vbox.emplace<QRadioButton>("Watching")
+        auto watching_btn = vbox.emplace<QCheckBox>("Watching")
                                 .assign(&this->ui_.twitch.watching);
         auto watching_lbl =
             vbox.emplace<QLabel>("Requires the chatterino browser extension.")
                 .hidden();
 
         watching_lbl->setWordWrap(true);
-        watching_btn->installEventFilter(&this->tabFilter_);
+        watching_btn->installEventFilter(&this->keyboardFilter_);
 
         QObject::connect(
-            watching_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { watching_lbl->setVisible(enabled); });
+            watching_btn.getElement(), &QCheckBox::stateChanged,
+            [=](int enabled) mutable { watching_lbl->setVisible(enabled); });
 
         vbox->addStretch(1);
 
@@ -121,6 +121,8 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                              mentions_btn.getElement());
         QWidget::setTabOrder(mentions_btn.getElement(),
                              watching_btn.getElement());
+
+        channel_btn->setChecked(true);
 
         // tab
         auto tab = notebook->addPage(obj.getElement());
@@ -213,11 +215,8 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     this->setMinimumSize(300, 310);
     this->ui_.notebook->selectIndex(TAB_TWITCH);
-    this->ui_.twitch.channel->setFocus();
+    this->ui_.twitch.channels->setFocus();
 
-    // Shortcuts
-    auto *shortcut_ok = new QShortcut(QKeySequence("Return"), this);
-    QObject::connect(shortcut_ok, &QShortcut::activated, [=] { this->ok(); });
     auto *shortcut_cancel = new QShortcut(QKeySequence("Esc"), this);
     QObject::connect(shortcut_cancel, &QShortcut::activated,
                      [=] { this->close(); });
@@ -244,24 +243,25 @@ void SelectChannelDialog::ok()
                                            .row();
 
     // accept and close
-    this->hasSelectedChannel_ = true;
+    this->hasSelectedChannels_ = true;
     this->close();
 }
 
 void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
 {
     auto channel = _channel.get();
-
+    
     assert(channel);
-
-    this->selectedChannel_ = channel;
 
     switch (_channel.getType())
     {
         case Channel::Type::Twitch: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
-            this->ui_.twitch.channel->setFocus();
-            this->ui_.twitch.channelName->setText(channel->getName());
+            this->ui_.twitch.channels->setFocus();
+
+            auto channelsEdit = this->ui_.twitch.channelNames;
+            channelsEdit->setText(channel->getName());
+            channelsEdit->setSelection(0, channelsEdit->text().length());
         }
         break;
         case Channel::Type::TwitchWatching: {
@@ -306,44 +306,58 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
         break;
         default: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
-            this->ui_.twitch.channel->setFocus();
+            this->ui_.twitch.channels->setFocus();
         }
     }
 
-    this->hasSelectedChannel_ = false;
+    this->hasSelectedChannels_ = false;
 }
 
-IndirectChannel SelectChannelDialog::getSelectedChannel() const
+std::vector<IndirectChannel> SelectChannelDialog::getSelectedChannels() const
 {
-    if (!this->hasSelectedChannel_)
+    if (!this->hasSelectedChannels_)
     {
-        return this->selectedChannel_;
+        return this->selectedChannels_;
     }
 
     auto app = getApp();
 
+    std::vector<IndirectChannel> channels;
     switch (this->ui_.notebook->getSelectedIndex())
     {
         case TAB_TWITCH: {
-            if (this->ui_.twitch.channel->isChecked())
+            if (this->ui_.twitch.channels->isChecked())
             {
-                return app->twitch.server->getOrAddChannel(
-                    this->ui_.twitch.channelName->text().trimmed());
+                QStringList channelNames =
+                    this->ui_.twitch.channelNames->text().split(' ', QString::SkipEmptyParts);
+
+                for (const QString &channelName : channelNames)
+                {
+                    channels.emplace_back(
+                        app->twitch.server->getOrAddChannel(channelName),
+                        Channel::Type::Twitch);
+                }
             }
-            else if (this->ui_.twitch.watching->isChecked())
+
+            if (this->ui_.twitch.watching->checkState())
             {
-                return app->twitch.server->watchingChannel;
+                channels.push_back(app->twitch.server->watchingChannel);
             }
-            else if (this->ui_.twitch.mentions->isChecked())
+
+            if (this->ui_.twitch.mentions->checkState())
             {
-                return app->twitch.server->mentionsChannel;
+                channels.emplace_back(app->twitch.server->mentionsChannel,
+                                      Channel::Type::TwitchMentions);
             }
-            else if (this->ui_.twitch.whispers->isChecked())
+
+            if (this->ui_.twitch.whispers->checkState())
             {
-                return app->twitch.server->whispersChannel;
+                channels.emplace_back(app->twitch.server->whispersChannel,
+                                      Channel::Type::TwitchWhispers);
             }
         }
         break;
+
         case TAB_IRC: {
             int row = this->ui_.irc.servers->getTableView()
                           ->selectionModel()
@@ -354,23 +368,23 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
 
             if (row >= 0 && row < int(vector.size()))
             {
-                return Irc::getInstance().getOrAddChannel(
-                    vector[size_t(row)].id, this->ui_.irc.channel->text());
+                channels.push_back(Irc::getInstance().getOrAddChannel(
+                    vector[size_t(row)].id, this->ui_.irc.channel->text()));
             }
             else
             {
-                return Channel::getEmpty();
+                channels.push_back(Channel::getEmpty());
             }
         }
-            //break;
+        break;
     }
 
-    return this->selectedChannel_;
+    return channels;
 }
 
-bool SelectChannelDialog::hasSeletedChannel() const
+bool SelectChannelDialog::hasSelectedChannels() const
 {
-    return this->hasSelectedChannel_;
+    return this->hasSelectedChannels_;
 }
 
 bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
@@ -380,14 +394,15 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
 
     if (event->type() == QEvent::FocusIn)
     {
-        widget->grabKeyboard();
-
-        auto *radio = dynamic_cast<QRadioButton *>(watched);
-        if (radio)
+        if (widget == this->dialog->ui_.twitch.channels)
         {
-            radio->setChecked(true);
+            this->dialog->ui_.twitch.channelNames->grabKeyboard();
+            this->dialog->ui_.twitch.channelNames->setFocus();
         }
-
+        else
+        {
+            widget->grabKeyboard();
+        }
         return true;
     }
     else if (event->type() == QEvent::FocusOut)
@@ -402,9 +417,14 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
              event_key->key() == Qt::Key_Down) &&
             event_key->modifiers() == Qt::NoModifier)
         {
-            if (widget == this->dialog->ui_.twitch.channelName)
+            if (widget == this->dialog->ui_.twitch.channelNames)
             {
                 this->dialog->ui_.twitch.whispers->setFocus();
+                return true;
+            }
+            else if (widget == this->dialog->ui_.twitch.watching)
+            {
+                this->dialog->ui_.twitch.channels->setFocus();
                 return true;
             }
             else
@@ -419,18 +439,46 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
                  ((event_key->key() == Qt::Key_Up) &&
                   event_key->modifiers() == Qt::NoModifier))
         {
-            if (widget == this->dialog->ui_.twitch.channelName)
+            if (widget == this->dialog->ui_.twitch.channelNames)
             {
                 this->dialog->ui_.twitch.watching->setFocus();
                 return true;
             }
             else if (widget == this->dialog->ui_.twitch.whispers)
             {
-                this->dialog->ui_.twitch.channel->setFocus();
+                this->dialog->ui_.twitch.channels->setFocus();
                 return true;
             }
 
             widget->previousInFocusChain()->setFocus();
+            return true;
+        }
+        else if ((event_key->key() == Qt::Key_Enter || event_key->key() == Qt::Key_Return) && (event_key->modifiers() == Qt::NoModifier))
+        {
+            // When the Enter key is pressed, check boxes are toggled.
+            // If the channelNames QLineEdit has the focus, we check whether
+            // the field is empty.
+            // If it is empty, the corresponding check box is toggled.
+            // If it is not empty (= the user has entered channel names), the
+            // dialog is ok()'d instead.
+
+            if (auto *checkBox = dynamic_cast<QCheckBox *>(watched))
+            {
+                checkBox->toggle();
+            }
+            else if (auto *lineEdit = dynamic_cast<QLineEdit *>(watched))
+            {
+                if (!lineEdit->text().isEmpty())
+                {
+                    this->dialog->ok();
+                }
+                else
+                {
+                    this->dialog->ui_.twitch.channels->toggle();
+                    this->dialog->ui_.twitch.channels->setFocus();
+                }
+            }
+
             return true;
         }
         else
@@ -464,12 +512,12 @@ void SelectChannelDialog::themeChangedEvent()
     if (this->theme->isLightTheme())
     {
         this->setStyleSheet(
-            "QRadioButton { color: #000 } QLabel { color: #000 }");
+            "QCheckBox { color: #000 } QLabel { color: #000 }");
     }
     else
     {
         this->setStyleSheet(
-            "QRadioButton { color: #fff } QLabel { color: #fff }");
+            "QCheckBox { color: #fff } QLabel { color: #fff }");
     }
 }
 
