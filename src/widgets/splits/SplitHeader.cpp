@@ -99,6 +99,12 @@ namespace {
             .arg(s.uptime)
             .arg(QString::number(s.viewerCount));
     }
+    auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
+    {
+        return QString("<style>.center { text-align: center; }</style> \
+                       <p class=\"center\">Offline<br>%1</p>")
+                       .arg(s.title.toHtmlEscaped());
+    }
     auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
     {
         auto title = QString();
@@ -543,12 +549,15 @@ void SplitHeader::updateChannelText()
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         const auto streamStatus = twitchChannel->accessStreamStatus();
-
         if (streamStatus->live)
         {
             this->isLive_ = true;
             this->tooltipText_ = formatTooltip(*streamStatus);
             title += formatTitle(*streamStatus, *getSettings());
+        }
+        else
+        {
+            this->tooltipText_ =  formatOfflineTooltip(*streamStatus);
         }
     }
 
