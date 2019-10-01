@@ -472,7 +472,6 @@ void TwitchChannel::refreshTitle(){
                 return Success;
             })
         .execute();
-
 }
 
 void TwitchChannel::refreshLiveStatus()
