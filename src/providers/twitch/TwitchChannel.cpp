@@ -126,6 +126,10 @@ TwitchChannel::TwitchChannel(const QString &name,
                      [=] { this->refreshLiveStatus(); });
     this->liveStatusTimer_.start(60 * 1000);
 
+    QObject::connect(&this->titleChangedTimer_,&QTimer::timeout,
+                     [=] {this->refreshTitle(); });
+    this->titleChangedTimer_.start(15*1000);
+
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
@@ -437,6 +441,40 @@ void TwitchChannel::setLive(bool newLiveStatus)
     }
 }
 
+void TwitchChannel::refreshTitle(){
+    auto roomID= this->roomId();
+    if(roomID.isEmpty()){
+        return;
+    }
+
+    this->streamStatus_.access()->title = "hello";
+
+    QString url("https://api.twitch.tv/kraken/channels/"+roomID);
+    NetworkRequest::twitchRequest(url)
+        .onSuccess(
+            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+                ChannelPtr shared = weak.lock();
+                if (!shared)
+                    return Failure;
+
+                const auto document = result.parseRapidJson();
+
+                if(!document.HasMember("status")){
+                    return Failure;
+                }
+
+                {
+                    auto status = this->streamStatus_.access();
+                    status->title = document["status"].GetString();
+                }
+
+                this->liveStatusChanged.invoke();
+                return Success;
+            })
+        .execute();
+
+}
+
 void TwitchChannel::refreshLiveStatus()
 {
     auto roomID = this->roomId();
@@ -511,7 +549,6 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
         auto status = this->streamStatus_.access();
         status->viewerCount = stream["viewers"].GetUint();
         status->game = stream["game"].GetString();
-        status->title = streamChannel["status"].GetString();
         QDateTime since = QDateTime::fromString(
             stream["created_at"].GetString(), Qt::ISODate);
         auto diff = since.secsTo(QDateTime::currentDateTime());

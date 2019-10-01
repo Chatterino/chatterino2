@@ -124,6 +124,7 @@ private:
     void refreshChatters();
     void refreshBadges();
     void refreshCheerEmotes();
+    void refreshTitle();
     void loadRecentMessages();
 
     void setLive(bool newLiveStatus);
@@ -166,6 +167,7 @@ private:
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
+    QTimer titleChangedTimer_;
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;
