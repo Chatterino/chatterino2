@@ -110,6 +110,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
         this->refreshPubsub();
+        this->refreshTitle();
         this->refreshLiveStatus();
         this->refreshBadges();
         this->refreshCheerEmotes();
