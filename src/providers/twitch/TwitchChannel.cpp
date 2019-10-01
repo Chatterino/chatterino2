@@ -443,8 +443,6 @@ void TwitchChannel::refreshTitle(){
         return;
     }
 
-    this->streamStatus_.access()->title = "hello";
-
     QString url("https://api.twitch.tv/kraken/channels/"+roomID);
     NetworkRequest::twitchRequest(url)
         .onSuccess(
