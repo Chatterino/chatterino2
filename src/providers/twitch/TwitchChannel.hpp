@@ -167,7 +167,6 @@ private:
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
-    QTimer titleChangedTimer_;
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;
