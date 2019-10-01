@@ -69,6 +69,7 @@ public:
     virtual bool hasHighRateLimit() const override;
     virtual bool canReconnect() const override;
     virtual void reconnect() override;
+    void refreshTitle();
 
     // Data
     const QString &subscriptionUrl();
@@ -124,7 +125,6 @@ private:
     void refreshChatters();
     void refreshBadges();
     void refreshCheerEmotes();
-    void refreshTitle();
     void loadRecentMessages();
 
     void setLive(bool newLiveStatus);

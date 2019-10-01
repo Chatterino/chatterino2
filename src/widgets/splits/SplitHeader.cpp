@@ -548,6 +548,7 @@ void SplitHeader::updateChannelText()
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
+        twitchChannel->refreshTitle();
         const auto streamStatus = twitchChannel->accessStreamStatus();
 
         if (streamStatus->live)
