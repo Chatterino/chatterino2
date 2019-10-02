@@ -1038,14 +1038,6 @@ void ChannelView::leaveEvent(QEvent *)
 
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
 {
-    if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier))
-    {
-        this->unsetCursor();
-
-        event->ignore();
-        return;
-    }
-
     /// Pause on hover
     if (float pauseTime = getSettings()->pauseOnHoverDuration;
         pauseTime > 0.001f)
