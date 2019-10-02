@@ -137,7 +137,9 @@ void MessageLayoutContainer::breakLine()
 
     if (this->flags_.has(MessageFlag::Centered) && this->elements_.size() > 0)
     {
-        xOffset = (width_ - this->elements_.at(0)->getRect().left() -
+        const int marginOffset = int(this->margin.left * this->scale_) +
+                                 int(this->margin.right * this->scale_);
+        xOffset = (width_ - marginOffset -
                    this->elements_.at(this->elements_.size() - 1)
                        ->getRect()
                        .right()) /
