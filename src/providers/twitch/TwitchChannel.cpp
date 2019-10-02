@@ -110,6 +110,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
         this->refreshPubsub();
+        this->refreshTitle();
         this->refreshLiveStatus();
         this->refreshBadges();
         this->refreshCheerEmotes();
@@ -488,13 +489,10 @@ void TwitchChannel::refreshLiveStatus()
         .onSuccess(
             [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
                 ChannelPtr shared = weak.lock();
-                if (!shared || !this->parseLiveStatus(result.parseRapidJson()))
-                {
-                    this->refreshTitle();
+                if (!shared)
                     return Failure;
-                }
 
-                return Success;
+                return this->parseLiveStatus(result.parseRapidJson());
             })
         .execute();
 }
@@ -544,8 +542,8 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
     {
         auto status = this->streamStatus_.access();
         status->viewerCount = stream["viewers"].GetUint();
-        status->title = streamChannel["status"].GetString();
         status->game = stream["game"].GetString();
+        status->title = streamChannel["status"].GetString();
         QDateTime since = QDateTime::fromString(
             stream["created_at"].GetString(), Qt::ISODate);
         auto diff = since.secsTo(QDateTime::currentDateTime());
