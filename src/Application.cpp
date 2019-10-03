@@ -80,7 +80,10 @@ void Application::initialize(Settings &settings, Paths &paths)
     assert(isAppInitialized == false);
     isAppInitialized = true;
 
-    //Irc::getInstance().load();
+    if (getSettings()->enableExperimentalIrc)
+    {
+        Irc::getInstance().load();
+    }
 
     for (auto &singleton : this->singletons_)
     {

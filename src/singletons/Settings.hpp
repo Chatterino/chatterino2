@@ -213,7 +213,7 @@ public:
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
     QStringSetting cachePath = {"/cache/path", ""};
-    BoolSetting restartOnCrash = {"/misc/restartOnCrash", true};
+    BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
