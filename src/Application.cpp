@@ -129,8 +129,8 @@ int Application::run(QApplication &qtApp)
 
     this->windows->getMainWindow().show();
 
-    //    getSettings()->betaUpdates.connect(
-    //        [] { Updates::getInstance().checkForUpdates(); }, false);
+    getSettings()->betaUpdates.connect(
+        [] { Updates::getInstance().checkForUpdates(); }, false);
 
     return qtApp.exec();
 }
