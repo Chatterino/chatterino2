@@ -530,7 +530,7 @@ void SplitNotebook::addCustomButtons()
     // updates
     auto updateBtn = this->addCustomButton();
 
-    //initUpdateButton(*updateBtn, this->signalHolder_);
+    initUpdateButton(*updateBtn, this->signalHolder_);
 }
 
 SplitContainer *SplitNotebook::addPage(bool select)

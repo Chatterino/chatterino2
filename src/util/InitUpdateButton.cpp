@@ -47,11 +47,11 @@ void initUpdateButton(Button &button,
         button.setPixmap(QPixmap(imageUrl));
     };
 
-    //    updateChange(Updates::getInstance().getStatus());
+    updateChange(Updates::getInstance().getStatus());
 
-    //    signalHolder.managedConnect(
-    //        Updates::getInstance().statusUpdated,
-    //        [updateChange](auto status) { updateChange(status); });
+    signalHolder.managedConnect(
+        Updates::getInstance().statusUpdated,
+        [updateChange](auto status) { updateChange(status); });
 }
 
 }  // namespace chatterino
