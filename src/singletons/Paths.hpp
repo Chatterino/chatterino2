@@ -39,7 +39,7 @@ public:
 private:
     void initAppFilePathHash();
     void initCheckPortable();
-    void initRootDirectory();
+    void initAppDataDirectory();
     void initSubDirectories();
 
     boost::optional<bool> portable_;
