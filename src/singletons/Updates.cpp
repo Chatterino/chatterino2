@@ -207,6 +207,8 @@ void Updates::checkForUpdates()
     }
 #endif
 
+    return;
+
     QString url =
         "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/" +
         currentBranch();
@@ -314,7 +316,7 @@ void Updates::setStatus_(Status status)
     if (this->status_ != status)
     {
         this->status_ = status;
-        //postToThread([this, status] { this->statusUpdated.invoke(status); });
+        postToThread([this, status] { this->statusUpdated.invoke(status); });
     }
 }
 
