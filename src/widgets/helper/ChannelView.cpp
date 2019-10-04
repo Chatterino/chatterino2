@@ -1506,7 +1506,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (link.type == Link::UserInfo)
             {
-                insertText("@" + link.value + ", ");
+                const bool commaMention = getSettings()->mentionUsersWithComma;
+                insertText("@" + link.value + (commaMention ? ", " : " "));
             }
             else if (link.type == Link::UserWhisper)
             {
