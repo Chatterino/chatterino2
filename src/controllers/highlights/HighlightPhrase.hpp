@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Application.hpp"
+#include "debug/Log.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -20,6 +21,35 @@ public:
     HighlightPhrase(const QString &pattern, bool hasAlert, bool hasSound,
                     bool isRegex, bool isCaseSensitive, const QString &soundUrl,
                     const QColor &color);
+
+    /**
+     * @brief Encode a given color as string.
+     *
+     * The color will be encoded as the color name, and the alpha value as an int,
+     * separated by a ":".
+     *
+     * For example, "#157368:100" is a valid color encoding.
+     *
+     * @param color the color to encode
+     * @return a string encoding the passed color
+     */
+    static QString encodeColor(const QColor &color);
+
+    /**
+     * @brief Decode the color given by `encodedColor`.
+     *
+     * This method attempts to parse the color encoded in the passed string.
+     * A valid encoding is given by the color name, and the alpha value as an int,
+     * separated by a ":".
+     * If the encoding does not follow this format, the default color is returned.
+     *
+     * For example, "#157368:100" is a valid color encoding.
+     *
+     * @param encodedColor the string to decoded
+     * @return the encoded color, or the default color if the format could not be
+     *         parsed
+     */
+    static QColor decodeColor(const QString& encodedColor);
 
     const QString &getPattern() const;
     bool hasAlert() const;
@@ -53,13 +83,15 @@ struct Serialize<chatterino::HighlightPhrase> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
+        QString encodedColor = chatterino::HighlightPhrase::encodeColor(value.getColor());
+
         chatterino::rj::set(ret, "pattern", value.getPattern(), a);
         chatterino::rj::set(ret, "alert", value.hasAlert(), a);
         chatterino::rj::set(ret, "sound", value.hasSound(), a);
         chatterino::rj::set(ret, "regex", value.isRegex(), a);
         chatterino::rj::set(ret, "case", value.isCaseSensitive(), a);
         chatterino::rj::set(ret, "soundUrl", value.getSoundUrl().toString(), a);
-        chatterino::rj::set(ret, "color", value.getColor().name(), a);
+        chatterino::rj::set(ret, "color", encodedColor, a);
 
         return ret;
     }
@@ -82,7 +114,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         bool _isRegex = false;
         bool _isCaseSensitive = false;
         QString _soundUrl;
-        QString _colorName;
+        QString encodedColor;
 
         chatterino::rj::getSafe(value, "pattern", _pattern);
         chatterino::rj::getSafe(value, "alert", _hasAlert);
@@ -90,12 +122,10 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "regex", _isRegex);
         chatterino::rj::getSafe(value, "case", _isCaseSensitive);
         chatterino::rj::getSafe(value, "soundUrl", _soundUrl);
-        chatterino::rj::getSafe(value, "color", _colorName);
+        chatterino::rj::getSafe(value, "color", encodedColor);
 
-        QColor _color =
-            _colorName.isEmpty()
-                ? chatterino::HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR
-                : QColor(_colorName);
+        QColor _color = 
+            chatterino::HighlightPhrase::decodeColor(encodedColor);
 
         return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
                                            _isRegex, _isCaseSensitive,

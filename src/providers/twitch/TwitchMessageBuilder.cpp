@@ -1001,7 +1001,7 @@ void TwitchMessageBuilder::parseHighlights()
             currentUsername, getSettings()->enableSelfHighlightTaskbar,
             getSettings()->enableSelfHighlightSound, false, false,
             getSettings()->selfHighlightSoundUrl.getValue(),
-            QColor(getSettings()->selfHighlightColor.getValue()));
+            HighlightPhrase::decodeColor(getSettings()->selfHighlightColor));
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -1080,7 +1080,7 @@ void TwitchMessageBuilder::parseHighlights()
             this->highlightVisual_ = true;
             this->message().flags.set(MessageFlag::Highlighted);
             this->message().highlightColor =
-                QColor(getSettings()->whisperHighlightColor.getValue());
+                HighlightPhrase::decodeColor(getSettings()->whisperHighlightColor);
         }
     }
 }

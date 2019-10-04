@@ -215,7 +215,8 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
         auto initial =
             view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
         auto selected =
-            QColorDialog::getColor(initial, this, tr("Select Color"));
+            QColorDialog::getColor(initial, this, tr("Select Color"),
+                                   QColorDialog::ShowAlphaChannel);
 
         // Color is invalid when user clicks "Cancel"
         if (selected.isValid())

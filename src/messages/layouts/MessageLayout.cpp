@@ -254,7 +254,26 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
          this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
         !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
-        backgroundColor = this->message_->highlightColor;
+        QColor beforeBlend = [this, &app] {
+            if (getSettings()->alternateMessages.getValue() &&
+                this->flags.has(MessageLayoutFlag::AlternateBackground))
+            {
+                return app->themes->messages.backgrounds.alternate;
+            }
+            else
+            {
+                return app->themes->messages.backgrounds.regular;
+            }
+        }();
+
+        // Blend highlight color with usual background color
+        const QColor &highlight = this->message_->highlightColor;
+        const qreal &alpha = highlight.alphaF();
+
+        backgroundColor.setRgbF(
+            beforeBlend.redF() * (1 - alpha) + highlight.redF() * alpha,
+            beforeBlend.greenF() * (1 - alpha) + highlight.greenF() * alpha,
+            beforeBlend.blueF() * (1 - alpha) + highlight.blueF() * alpha);
     }
     else if (this->message_->flags.has(MessageFlag::Subscription))
     {

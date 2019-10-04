@@ -33,6 +33,33 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool hasAlert,
 {
 }
 
+QString HighlightPhrase::encodeColor(const QColor &color)
+{
+    return color.name() + ":" + QString::number(color.alpha());
+}
+
+QColor HighlightPhrase::decodeColor(const QString &encodedColor)
+{
+    QStringList colorComponents = encodedColor.split(
+                                    ':', QString::SkipEmptyParts);
+
+    if (encodedColor.isEmpty() || colorComponents.size() > 2)
+    {
+        AB_NAMESPACE::log("[HighlightPhrase] {} did not match color encoding "
+                          "format, returning default", encodedColor);
+        return chatterino::HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR;
+    }
+
+    QColor result(colorComponents.at(0));
+
+    if (colorComponents.size() == 2)
+    {
+        result.setAlpha(colorComponents.at(1).toInt());
+    }
+
+    return result;
+}
+
 const QString &HighlightPhrase::getPattern() const
 {
     return this->pattern_;

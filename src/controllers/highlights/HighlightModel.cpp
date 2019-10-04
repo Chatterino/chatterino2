@@ -1,6 +1,7 @@
 #include "HighlightModel.hpp"
 
 #include "Application.hpp"
+#include "controllers/highlights/HighlightPhrase.hpp"
 #include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"
 
@@ -59,8 +60,9 @@ void HighlightModel::afterInit()
     QUrl selfSound = QUrl(getSettings()->selfHighlightSoundUrl.getValue());
     setFilePathItem(usernameRow[Column::SoundPath], selfSound);
 
-    QString selfColor = getSettings()->selfHighlightColor.getValue();
-    setColorItem(usernameRow[Column::Color], QColor(selfColor));
+    auto encodedSelfColor = getSettings()->selfHighlightColor.getValue();
+    QColor selfColor = HighlightPhrase::decodeColor(encodedSelfColor);
+    setColorItem(usernameRow[Column::Color], selfColor);
 
     this->insertCustomRow(usernameRow, 0);
 
@@ -82,8 +84,9 @@ void HighlightModel::afterInit()
         QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
     setFilePathItem(whisperRow[Column::SoundPath], whisperSound);
 
-    QString whisperColor = getSettings()->whisperHighlightColor.getValue();
-    setColorItem(whisperRow[Column::Color], QColor(whisperColor));
+    auto encodedWhisper = getSettings()->whisperHighlightColor.getValue();
+    QColor whisperColor = HighlightPhrase::decodeColor(encodedWhisper);
+    setColorItem(whisperRow[Column::Color], whisperColor);
 
     this->insertCustomRow(whisperRow, 1);
 }
@@ -174,12 +177,12 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 if (rowIndex == 0)
                 {
                     getSettings()->selfHighlightColor.setValue(
-                        value.value<QColor>().name());
+                        HighlightPhrase::encodeColor(value.value<QColor>()));
                 }
                 else if (rowIndex == 1)
                 {
                     getSettings()->whisperHighlightColor.setValue(
-                        value.value<QColor>().name());
+                        HighlightPhrase::encodeColor(value.value<QColor>()));
                 }
             }
         }
