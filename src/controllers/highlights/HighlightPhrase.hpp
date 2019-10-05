@@ -54,6 +54,7 @@ public:
     const QString &getPattern() const;
     bool hasAlert() const;
     bool hasSound() const;
+    bool hasCustomSound() const;
     bool isRegex() const;
     bool isValid() const;
     bool isMatch(const QString &subject) const;

@@ -75,6 +75,11 @@ bool HighlightPhrase::hasSound() const
     return this->hasSound_;
 }
 
+bool HighlightPhrase::hasCustomSound() const
+{
+    return !this->soundUrl_.isEmpty();
+}
+
 bool HighlightPhrase::isRegex() const
 {
     return this->isRegex_;
