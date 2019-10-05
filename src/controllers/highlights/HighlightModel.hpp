@@ -14,7 +14,7 @@ class HighlightModel : public SignalVectorModel<HighlightPhrase>
     explicit HighlightModel(QObject *parent);
 
 public:
-    // Used here and in UserHighlightModel
+    // Used here, in HighlightingPage and in UserHighlightModel
     enum Column {
         Pattern = 0,
         FlashTaskbar = 1,
