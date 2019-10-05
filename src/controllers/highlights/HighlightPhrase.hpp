@@ -25,8 +25,9 @@ public:
     /**
      * @brief Encode a given color as string.
      *
-     * The color will be encoded as the color name, and the alpha value as an int,
-     * separated by a ":".
+     * The color will be encoded as the color name, and the alpha value as an
+     * int, separated by a ":". Unfortunately, we cannot just use
+     * `color.name()` because the alpha value is not saved in that.
      *
      * For example, "#157368:100" is a valid color encoding.
      *
@@ -39,22 +40,53 @@ public:
      * @brief Decode the color given by `encodedColor`.
      *
      * This method attempts to parse the color encoded in the passed string.
-     * A valid encoding is given by the color name, and the alpha value as an int,
-     * separated by a ":".
-     * If the encoding does not follow this format, the default color is returned.
+     * A valid encoding is given by the color name, and optionally the alpha
+     * value as an int, separated by a ":".
+     *
+     * If the alpha value is missing in `encodedColor`, it will be set to 255
+     * (fully opaque) by default.
+     *
+     * If the encoding does not follow this format, the default color is
+     * returned.
      *
      * For example, "#157368:100" is a valid color encoding.
      *
      * @param encodedColor the string to decoded
-     * @return the encoded color, or the default color if the format could not be
-     *         parsed
+     * @return the encoded color, or the default color if the format could not
+     *         be parsed
      */
     static QColor decodeColor(const QString &encodedColor);
 
     const QString &getPattern() const;
     bool hasAlert() const;
+
+    /**
+     * @brief Check if this highlight phrase should play a sound when
+     *        triggered.
+     *
+     * In distinction from `HighlightPhrase::hasCustomSound`, this method only
+     * checks whether or not ANY sound should be played when the phrase is
+     * triggered.
+     * 
+     * To check whether a custom sound is set, use
+     * `HighlightPhrase::hasCustomSound` instead.
+     *
+     * @return true, if this highlight phrase should play a sound when
+     *         triggered, false otherwise
+     */
     bool hasSound() const;
+
+    /**
+     * @brief Check if this highlight phrase has a custom sound set.
+     *
+     * Note that this method only checks whether the path to the custom sound
+     * is not empty. It does not check whether the file still exists, is a
+     * sound file, or anything else.
+     *
+     * @return true, if the custom sound file path is not empty, false otherwise
+     */
     bool hasCustomSound() const;
+
     bool isRegex() const;
     bool isValid() const;
     bool isMatch(const QString &subject) const;
