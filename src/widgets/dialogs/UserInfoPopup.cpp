@@ -58,8 +58,6 @@ UserInfoPopup::UserInfoPopup()
     this->setWindowFlag(Qt::Popup);
 #endif
 
-    auto app = getApp();
-
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
 

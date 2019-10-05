@@ -538,11 +538,9 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
+    this->moveIntoDesktopRect(this);
     if (this->frameless_)
     {
-        this->moveIntoDesktopRect(this);
-        qDebug() << "show";
-
         QTimer::singleShot(30, this,
                            [this] { this->moveIntoDesktopRect(this); });
     }
