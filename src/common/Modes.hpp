@@ -11,6 +11,7 @@ public:
 
     bool isNightly{};
     bool isPortable{};
+    QString test{};
 };
 
 }  // namespace chatterino
