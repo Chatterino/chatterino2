@@ -149,8 +149,6 @@ void Button::paintEvent(QPaintEvent *)
 
 void Button::fancyPaint(QPainter &painter)
 {
-    return;
-
     if (!this->enabled_)
     {
         return;
