@@ -96,7 +96,6 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     , action_(_ircMessage->isAction())
 {
     this->usernameColor_ = getApp()->themes->messages.textColors.system;
-    this->highlightSoundUrl_ = getFallbackHighlightSound();
 }
 
 TwitchMessageBuilder::TwitchMessageBuilder(
@@ -111,7 +110,6 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     , action_(isAction)
 {
     this->usernameColor_ = getApp()->themes->messages.textColors.system;
-    this->highlightSoundUrl_ = getFallbackHighlightSound();
 }
 
 bool TwitchMessageBuilder::isIgnored() const
