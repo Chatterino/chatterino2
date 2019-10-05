@@ -6,7 +6,7 @@ class ScrollbarHighlight
 {
 public:
     enum Style : char { None, Default, Line };
-    enum Type { Highlight, Subscription, Invalid };
+    enum class Type { Highlight, Subscription, Invalid };
 
     /**
      * @brief Constructs an invalid ScrollbarHighlight.
