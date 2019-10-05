@@ -207,6 +207,11 @@ void Updates::checkForUpdates()
     }
 #endif
 
+    if (Modes::getInstance().test == "x")
+    {
+        return;
+    }
+
     QString url =
         "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/" +
         currentBranch();
