@@ -97,7 +97,7 @@ HighlightingPage::HighlightingPage()
                 view->getTableView()->horizontalHeader()->hideSection(4);
 
                 // Case-sensitivity doesn't make sense for user names so it is
-                // set to "false" by default & no checkbox is shown
+                // set to "false" by default & the column is hidden
                 view->setTitles({"Username", "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex", "Case-\nsensitive",
                                  "Custom\nsound", "Color"});
