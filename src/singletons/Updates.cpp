@@ -219,15 +219,6 @@ void Updates::checkForUpdates()
     NetworkRequest(url)
         .timeout(60000)
         .onSuccess([this](auto result) -> Outcome {
-            if (Modes::getInstance().test == "0")
-            {
-                return Success;
-            }
-            if (Modes::getInstance().test == "1")
-            {
-                return Failure;
-            }
-
             auto object = result.parseJson();
             /// Version available on every platform
             QJsonValue version_val = object.value("version");
@@ -236,10 +227,6 @@ void Updates::checkForUpdates()
             {
                 this->setStatus_(SearchFailed);
                 qDebug() << "error updating";
-                return Failure;
-            }
-            if (Modes::getInstance().test == "2")
-            {
                 return Failure;
             }
 
@@ -253,10 +240,6 @@ void Updates::checkForUpdates()
                 return Failure;
             }
             this->updateExe_ = updateExe_val.toString();
-            if (Modes::getInstance().test == "3")
-            {
-                return Failure;
-            }
 
             /// Windows portable
             QJsonValue portable_val = object.value("portable_download");
@@ -278,18 +261,8 @@ void Updates::checkForUpdates()
             return Failure;
 #endif
 
-            if (Modes::getInstance().test == "4")
-            {
-                return Failure;
-            }
-
             /// Current version
             this->onlineVersion_ = version_val.toString();
-
-            if (Modes::getInstance().test == "5")
-            {
-                return Failure;
-            }
 
             /// Update available :)
             if (this->currentVersion_ != this->onlineVersion_)
@@ -313,16 +286,6 @@ Updates::Status Updates::getStatus() const
 
 bool Updates::shouldShowUpdateButton() const
 {
-    if (Modes::getInstance().test == "8")
-    {
-        return false;
-    }
-
-    if (Modes::getInstance().test == "9")
-    {
-        return true;
-    }
-
     switch (this->getStatus())
     {
         case UpdateAvailable:
@@ -356,12 +319,6 @@ void Updates::setStatus_(Status status)
     if (this->status_ != status)
     {
         this->status_ = status;
-
-        if (Modes::getInstance().test == "6")
-        {
-            return;
-        }
-
         postToThread([this, status] { this->statusUpdated.invoke(status); });
     }
 }

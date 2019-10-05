@@ -24,10 +24,6 @@ Modes::Modes()
         {
             this->isPortable = true;
         }
-        else if (line.startsWith("test"))
-        {
-            this->test = line.mid(4);
-        }
     }
 }
 
