@@ -8,6 +8,7 @@
 #include <csignal>
 
 #include "Application.hpp"
+#include "common/Modes.hpp"
 #include "common/NetworkManager.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
