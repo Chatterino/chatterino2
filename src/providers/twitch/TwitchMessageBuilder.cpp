@@ -1077,8 +1077,8 @@ void TwitchMessageBuilder::parseHighlights()
         {
             this->highlightVisual_ = true;
             this->message().flags.set(MessageFlag::Highlighted);
-            this->message().highlightColor =
-                HighlightPhrase::decodeColor(getSettings()->whisperHighlightColor);
+            this->message().highlightColor = HighlightPhrase::decodeColor(
+                getSettings()->whisperHighlightColor);
         }
     }
 }

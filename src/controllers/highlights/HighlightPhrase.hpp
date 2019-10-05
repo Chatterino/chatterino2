@@ -49,7 +49,7 @@ public:
      * @return the encoded color, or the default color if the format could not be
      *         parsed
      */
-    static QColor decodeColor(const QString& encodedColor);
+    static QColor decodeColor(const QString &encodedColor);
 
     const QString &getPattern() const;
     bool hasAlert() const;
@@ -84,7 +84,8 @@ struct Serialize<chatterino::HighlightPhrase> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
-        QString encodedColor = chatterino::HighlightPhrase::encodeColor(value.getColor());
+        QString encodedColor =
+            chatterino::HighlightPhrase::encodeColor(value.getColor());
 
         chatterino::rj::set(ret, "pattern", value.getPattern(), a);
         chatterino::rj::set(ret, "alert", value.hasAlert(), a);
@@ -125,8 +126,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "soundUrl", _soundUrl);
         chatterino::rj::getSafe(value, "color", encodedColor);
 
-        QColor _color = 
-            chatterino::HighlightPhrase::decodeColor(encodedColor);
+        QColor _color = chatterino::HighlightPhrase::decodeColor(encodedColor);
 
         return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
                                            _isRegex, _isCaseSensitive,

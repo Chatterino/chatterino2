@@ -40,13 +40,14 @@ QString HighlightPhrase::encodeColor(const QColor &color)
 
 QColor HighlightPhrase::decodeColor(const QString &encodedColor)
 {
-    QStringList colorComponents = encodedColor.split(
-                                    ':', QString::SkipEmptyParts);
+    QStringList colorComponents =
+        encodedColor.split(':', QString::SkipEmptyParts);
 
     if (encodedColor.isEmpty() || colorComponents.size() > 2)
     {
         AB_NAMESPACE::log("[HighlightPhrase] {} did not match color encoding "
-                          "format, returning default", encodedColor);
+                          "format, returning default",
+                          encodedColor);
         return chatterino::HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR;
     }
 

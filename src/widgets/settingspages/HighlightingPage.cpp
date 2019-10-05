@@ -187,7 +187,7 @@ HighlightingPage::HighlightingPage()
 
                     // Set check box according to updated value
                     fallbackSound->setCheckState(
-                            fileName.isEmpty() ? Qt::Unchecked : Qt::Checked);
+                        fileName.isEmpty() ? Qt::Unchecked : Qt::Checked);
                 });
         }
 
@@ -218,16 +218,16 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
         if (!fileUrl.isEmpty())
         {
             QModelIndex checkBox = clicked.siblingAtColumn(Column::PlaySound);
-            view->getModel()->setData(checkBox, Qt::Checked, Qt::CheckStateRole);
+            view->getModel()->setData(checkBox, Qt::Checked,
+                                      Qt::CheckStateRole);
         }
     }
     else if (clicked.column() == Column::Color)
     {
         auto initial =
             view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
-        auto selected =
-            QColorDialog::getColor(initial, this, tr("Select Color"),
-                                   QColorDialog::ShowAlphaChannel);
+        auto selected = QColorDialog::getColor(
+            initial, this, tr("Select Color"), QColorDialog::ShowAlphaChannel);
 
         // Color is invalid when user clicks "Cancel"
         if (selected.isValid())
