@@ -162,7 +162,7 @@ HighlightingPage::HighlightingPage()
         // MISC
         auto customSound = layout.emplace<QHBoxLayout>().withoutMargin();
         {
-            customSound.append(this->createCheckBox(
+            auto fallbackSound = customSound.append(this->createCheckBox(
                 "Fallback sound (played when no other sound is set)",
                 getSettings()->customHighlightSound));
 
@@ -177,13 +177,17 @@ HighlightingPage::HighlightingPage()
 
             QObject::connect(
                 selectFile.getElement(), &QPushButton::clicked, this,
-                [this, getSelectFileText, selectFile]() mutable {
+                [=]() mutable {
                     auto fileName = QFileDialog::getOpenFileName(
                         this, tr("Open Sound"), "",
                         tr("Audio Files (*.mp3 *.wav)"));
 
                     getSettings()->pathHighlightSound = fileName;
                     selectFile.getElement()->setText(getSelectFileText());
+
+                    // Set check box according to updated value
+                    fallbackSound->setCheckState(
+                            fileName.isEmpty() ? Qt::Unchecked : Qt::Checked);
                 });
         }
 
