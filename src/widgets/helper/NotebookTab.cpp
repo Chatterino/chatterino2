@@ -22,6 +22,16 @@
 #include <boost/bind.hpp>
 
 namespace chatterino {
+namespace {
+    qreal deviceDpi(QWidget *widget)
+    {
+#ifdef Q_OS_WIN
+        return widget->devicePixelRatioF();
+#else
+        return 1.0;
+#endif
+    }
+}  // namespace
 
 NotebookTab::NotebookTab(Notebook *notebook)
     : Button(notebook)
@@ -83,11 +93,10 @@ void NotebookTab::themeChangedEvent()
 void NotebookTab::updateSize()
 {
     float scale = this->scale();
-
     int width;
+
     QFontMetrics metrics = getApp()->fonts->getFontMetrics(
-        FontStyle::UiTabs,
-        float(qreal(this->scale()) * this->devicePixelRatioF()));
+        FontStyle::UiTabs, float(qreal(this->scale()) * deviceDpi(this)));
 
     if (this->hasXButton())
     {
@@ -276,10 +285,10 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     painter.setFont(getApp()->fonts->getFont(
         FontStyle::UiTabs,
-        scale * 96.f / this->logicalDpiX() * this->devicePixelRatioF()));
+        scale * 96.f / this->logicalDpiX() * deviceDpi(this)));
     QFontMetrics metrics = app->fonts->getFontMetrics(
         FontStyle::UiTabs,
-        scale * 96.f / this->logicalDpiX() * this->devicePixelRatioF());
+        scale * 96.f / this->logicalDpiX() * deviceDpi(this));
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 
@@ -299,12 +308,12 @@ void NotebookTab::paintEvent(QPaintEvent *)
     bool windowFocused = this->window() == QApplication::activeWindow();
 
     QBrush tabBackground = /*this->mouseOver_ ? colors.backgrounds.hover
-                                            :*/
+                                 :*/
         (windowFocused ? colors.backgrounds.regular
                        : colors.backgrounds.unfocused);
 
     // fill the tab background
-    auto bgRect = rect();
+    auto bgRect = this->rect();
     bgRect.setTop(ceil((this->selected_ ? 0.f : 1.f) * scale));
 
     painter.fillRect(bgRect, tabBackground);

@@ -83,12 +83,20 @@ QSize Label::minimumSizeHint() const
 void Label::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
+
+    qreal deviceDpi =
+#ifdef Q_OS_WIN
+        this->devicePixelRatioF();
+#else
+        1.0;
+#endif
+
     QFontMetrics metrics = getFonts()->getFontMetrics(
         this->getFontStyle(),
-        this->scale() * 96.f / this->logicalDpiX() * this->devicePixelRatioF());
+        this->scale() * 96.f / this->logicalDpiX() * deviceDpi);
     painter.setFont(getFonts()->getFont(
-        this->getFontStyle(), this->scale() * 96.f / this->logicalDpiX() *
-                                  this->devicePixelRatioF()));
+        this->getFontStyle(),
+        this->scale() * 96.f / this->logicalDpiX() * deviceDpi));
 
     int offset = this->getOffset();
 

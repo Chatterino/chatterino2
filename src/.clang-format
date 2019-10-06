@@ -9,7 +9,6 @@ AlwaysBreakAfterDefinitionReturnType: false
 AlwaysBreakBeforeMultilineStrings: false
 BasedOnStyle: Google
 BraceWrapping: {
-    AfterCaseLabel: 'false'
     AfterClass: 'true'
     AfterControlStatement: 'true'
     AfterFunction: 'true'
