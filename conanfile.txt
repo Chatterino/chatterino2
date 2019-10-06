@@ -1,5 +1,5 @@
 [requires]
-OpenSSL/1.0.2s@conan/stable
+OpenSSL/1.1.1b@conan/stable
 boost/1.69.0@conan/stable
 
 [generators]
