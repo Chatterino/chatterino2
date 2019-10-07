@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QString>
 #include <QtGlobal>
 
 #define CHATTERINO_VERSION "2.1.5"
