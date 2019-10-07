@@ -198,6 +198,15 @@ namespace detail {
 }  // namespace detail
 
 // IMAGE2
+Image::~Image()
+{
+    // run destructor of Frames in gui thread
+    if (!isGuiThread())
+    {
+        postToThread([frames = this->frames_.release()]() { delete frames; });
+    }
+}
+
 ImagePtr Image::fromUrl(const Url &url, qreal scale)
 {
     static std::unordered_map<Url, std::weak_ptr<Image>> cache;
