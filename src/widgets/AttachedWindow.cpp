@@ -180,13 +180,19 @@ void AttachedWindow::attachToHwnd(void *_attachedPtr)
             QString qfilename =
                 QString::fromWCharArray(filename.get(), int(filenameLength));
 
-            if (!qfilename.endsWith("chrome.exe") &&
-                !qfilename.endsWith("firefox.exe"))
+            if (!getSettings()->attachExtensionToAnyProcess)
             {
-                qDebug() << "NM Illegal caller" << qfilename;
-                this->timer_.stop();
-                this->deleteLater();
-                return;
+                // We don't attach to non-browser processes by default.
+                if (!qfilename.endsWith("chrome.exe") &&
+                    !qfilename.endsWith("firefox.exe") &&
+                    !qfilename.endsWith("vivaldi.exe") &&
+                    !qfilename.endsWith("opera.exe"))
+                {
+                    qDebug() << "NM Illegal caller" << qfilename;
+                    this->timer_.stop();
+                    this->deleteLater();
+                    return;
+                }
             }
             this->validProcessName_ = true;
         }

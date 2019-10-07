@@ -439,10 +439,16 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addDescription("The browser extension replaces the default "
                           "Twitch.tv chat with chatterino.");
 
-    layout.addDescription(formatRichNamedLink(CHROME_EXTENSION_LINK,
-                                              "Download for Google Chrome"));
+    layout.addDescription(formatRichNamedLink(
+        CHROME_EXTENSION_LINK,
+        "Download for Google Chrome and similar browsers."));
     layout.addDescription(
         formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
+
+    layout.addDescription("Chatterino only attaches to known browsers to avoid "
+                          "attaching to other windows by accident.");
+    layout.addCheckbox("Attach to any browser (may cause issues).",
+                       s.attachExtensionToAnyProcess);
 #endif
 
     layout.addTitle("Miscellaneous");

@@ -214,6 +214,8 @@ public:
 
     QStringSetting cachePath = {"/cache/path", ""};
     BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
+    BoolSetting attachExtensionToAnyProcess = {
+        "/misc/attachExtensionToAnyProcess", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
