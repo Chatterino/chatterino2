@@ -25,6 +25,17 @@ win32-msvc* {
     QMAKE_CXXFLAGS += -std=c++17
 }
 
+linux {
+    LIBS += -lrt
+    QMAKE_LFLAGS += -lrt
+}
+
+macx {
+    INCLUDEPATH += /usr/local/include
+    INCLUDEPATH += /usr/local/opt/openssl/include
+    LIBS += -L/usr/local/opt/openssl/lib
+}
+
 # https://bugreports.qt.io/browse/QTBUG-27018
 equals(QMAKE_CXX, "clang++")|equals(QMAKE_CXX, "g++") {
     TARGET = bin/chatterino
@@ -41,6 +52,7 @@ macx {
 # Set C_DEBUG if it's a debug build
 CONFIG(debug, debug|release) {
     DEFINES += C_DEBUG
+    DEFINES += QT_DEBUG
 }
 
 # Submodules
