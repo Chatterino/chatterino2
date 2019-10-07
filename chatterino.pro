@@ -19,6 +19,9 @@ useBreakpad {
 }
 
 # use C++17
+CONFIG += c++17
+
+# C++17 backwards compatability
 win32-msvc* {
     QMAKE_CXXFLAGS += /std:c++17
 } else {
