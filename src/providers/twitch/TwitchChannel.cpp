@@ -440,12 +440,13 @@ void TwitchChannel::setLive(bool newLiveStatus)
 }
 
 void TwitchChannel::refreshTitle(){
-    auto roomID= this->roomId();
-    if(roomID.isEmpty()){
+    auto roomID = this->roomId();
+    if(roomID.isEmpty())
+    {
         return;
     }
 
-    if(this->titleRefreshedTime_.elapsed()<10000)
+    if(this->titleRefreshedTime_.elapsed()<10*1000)
     {
         return;
     }
