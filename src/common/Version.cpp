@@ -40,22 +40,22 @@ const Version &Version::getInstance()
     return instance;
 }
 
-const QString &Version::getVersion() const
+const QString &Version::version() const
 {
     return this->version_;
 }
 
-const QString &Version::getFullVersion() const
+const QString &Version::fullVersion() const
 {
     return this->fullVersion_;
 }
 
-const QString &Version::getCommitHash() const
+const QString &Version::commitHash() const
 {
     return this->commitHash_;
 }
 
-const QString &Version::getDateOfBuild() const
+const QString &Version::dateOfBuild() const
 {
     return this->dateOfBuild_;
 }

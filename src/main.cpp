@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     }
     else if (getArgs().printVersion)
     {
-        qInfo().noquote() << Version::getInstance().getFullVersion();
+        qInfo().noquote() << Version::getInstance().fullVersion();
     }
     else
     {
