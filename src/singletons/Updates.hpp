@@ -32,6 +32,7 @@ public:
 
     bool shouldShowUpdateButton() const;
     bool isError() const;
+    bool isDowngrade() const;
 
     pajlada::Signals::Signal<Status> statusUpdated;
 
@@ -39,6 +40,7 @@ private:
     QString currentVersion_;
     QString onlineVersion_;
     Status status_ = None;
+    bool isDowngrade_{};
 
     QString updateExe_;
     QString updatePortable_;

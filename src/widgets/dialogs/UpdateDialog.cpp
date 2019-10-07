@@ -50,9 +50,17 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
     {
         case Updates::UpdateAvailable: {
             this->ui_.label->setText(
-                QString("An update (%1) is available.\n\nDo you want to "
-                        "download and install it?")
-                    .arg(Updates::getInstance().getOnlineVersion()));
+                (Updates::getInstance().isDowngrade()
+                     ? QString(
+                           "The version online (%1) seems to be lower than the "
+                           "current (%2).\nEither a version was reverted or "
+                           "you are running a newer build.\n\nDo you want to "
+                           "download and install it?")
+                           .arg(Updates::getInstance().getOnlineVersion(),
+                                Updates::getInstance().getCurrentVersion())
+                     : QString("An update (%1) is available.\n\nDo you want to "
+                               "download and install it?")
+                           .arg(Updates::getInstance().getOnlineVersion())));
             this->updateGeometry();
         }
         break;
