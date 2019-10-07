@@ -5,6 +5,7 @@
 #include <QPalette>
 #include <QStyleFactory>
 #include <Qt>
+#include <QtConcurrent>
 #include <csignal>
 
 #include "Application.hpp"
@@ -137,6 +138,28 @@ namespace {
         signal(SIGSEGV, handleSignal);
 #endif
     }
+
+    // We delete cache files that haven't been modified in 14 days. This strategy may be
+    // improved in the future.
+    void clearCache(const QDir &dir)
+    {
+        qDebug() << "[Cache] cleared cache";
+
+        QStringList toBeRemoved;
+
+        for (auto &&info : dir.entryInfoList(QDir::Files))
+        {
+            if (info.lastModified().addDays(14) < QDateTime::currentDateTime())
+            {
+                toBeRemoved << info.absoluteFilePath();
+            }
+        }
+
+        for (auto &&path : toBeRemoved)
+        {
+            qDebug() << path << QFile(path).remove();
+        }
+    }
 }  // namespace
 
 void runGui(QApplication &a, Paths &paths, Settings &settings)
@@ -163,6 +186,11 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
                 QFile::remove(path);
             }
         }
+    });
+
+    // Clear the cache 1 minute after start.
+    QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory()] {
+        QtConcurrent::run([cachePath]() { clearCache(cachePath); });
     });
 
     chatterino::NetworkManager::init();
