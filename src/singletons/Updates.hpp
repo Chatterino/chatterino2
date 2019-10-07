@@ -22,7 +22,7 @@ public:
     };
 
     // fourtf: don't add this class to the application class
-    static Updates &getInstance();
+    static Updates &instance();
 
     void checkForUpdates();
     const QString &getCurrentVersion() const;

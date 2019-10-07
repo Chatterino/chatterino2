@@ -82,7 +82,7 @@ void Application::initialize(Settings &settings, Paths &paths)
 
     if (getSettings()->enableExperimentalIrc)
     {
-        Irc::getInstance().load();
+        Irc::instance().load();
     }
 
     for (auto &singleton : this->singletons_)
@@ -130,7 +130,7 @@ int Application::run(QApplication &qtApp)
     this->windows->getMainWindow().show();
 
     getSettings()->betaUpdates.connect(
-        [] { Updates::getInstance().checkForUpdates(); }, false);
+        [] { Updates::instance().checkForUpdates(); }, false);
 
     return qtApp.exec();
 }

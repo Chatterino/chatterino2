@@ -670,9 +670,9 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
-        TooltipPreviewImage::getInstance().setImage(nullptr);
+        TooltipPreviewImage::instance().setImage(nullptr);
 
-        auto tooltip = TooltipWidget::getInstance();
+        auto tooltip = TooltipWidget::instance();
         tooltip->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()),
                         false);
         tooltip->setText(this->tooltipText_);
@@ -687,7 +687,7 @@ void SplitHeader::enterEvent(QEvent *event)
 
 void SplitHeader::leaveEvent(QEvent *event)
 {
-    TooltipWidget::getInstance()->hide();
+    TooltipWidget::instance()->hide();
 
     BaseWidget::leaveEvent(event);
 }

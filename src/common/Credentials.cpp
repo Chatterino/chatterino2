@@ -143,7 +143,7 @@ namespace {
     }
 }  // namespace
 
-Credentials &Credentials::getInstance()
+Credentials &Credentials::instance()
 {
     static Credentials creds;
     return creds;

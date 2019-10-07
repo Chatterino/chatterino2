@@ -367,7 +367,7 @@ void Window::onAccountSelected()
     auto user = getApp()->accounts->twitch.getCurrent();
 
     // update title
-    this->setWindowTitle(Version::getInstance().fullVersion());
+    this->setWindowTitle(Version::instance().fullVersion());
 
     // update user
     if (user->isAnon())

@@ -73,13 +73,13 @@ inline QString getCredentialName(const IrcServerData &data)
 void IrcServerData::getPassword(
     QObject *receiver, std::function<void(const QString &)> &&onLoaded) const
 {
-    Credentials::getInstance().get("irc", getCredentialName(*this), receiver,
+    Credentials::instance().get("irc", getCredentialName(*this), receiver,
                                    std::move(onLoaded));
 }
 
 void IrcServerData::setPassword(const QString &password)
 {
-    Credentials::getInstance().set("irc", getCredentialName(*this), password);
+    Credentials::instance().set("irc", getCredentialName(*this), password);
 }
 
 Irc::Irc()
@@ -133,7 +133,7 @@ Irc::Irc()
 
         if (args.caller != Irc::noEraseCredentialCaller)
         {
-            Credentials::getInstance().erase("irc",
+            Credentials::instance().erase("irc",
                                              getCredentialName(args.item));
         }
     });
@@ -164,7 +164,7 @@ ChannelPtr Irc::getOrAddChannel(int id, QString name)
     }
 }
 
-Irc &Irc::getInstance()
+Irc &Irc::instance()
 {
     static Irc irc;
     return irc;

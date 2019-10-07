@@ -125,7 +125,7 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
 void TwitchIrcServer::privateMessageReceived(
     Communi::IrcPrivateMessage *message)
 {
-    IrcMessageHandler::getInstance().handlePrivMessage(message, *this);
+    IrcMessageHandler::instance().handlePrivMessage(message, *this);
 }
 
 void TwitchIrcServer::readConnectionMessageReceived(
@@ -141,7 +141,7 @@ void TwitchIrcServer::readConnectionMessageReceived(
 
     const QString &command = message->command();
 
-    auto &handler = IrcMessageHandler::getInstance();
+    auto &handler = IrcMessageHandler::instance();
 
     // Below commands enabled through the twitch.tv/membership CAP REQ
     if (command == "MODE")
@@ -194,7 +194,7 @@ void TwitchIrcServer::writeConnectionMessageReceived(
 {
     const QString &command = message->command();
 
-    auto &handler = IrcMessageHandler::getInstance();
+    auto &handler = IrcMessageHandler::instance();
     // Below commands enabled through the twitch.tv/commands CAP REQ
     if (command == "USERSTATE")
     {

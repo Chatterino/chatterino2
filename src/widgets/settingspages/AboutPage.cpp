@@ -75,7 +75,7 @@ AboutPage::AboutPage()
 
         auto versionInfo = layout.emplace<QGroupBox>("Version");
         {
-            auto version = Version::getInstance();
+            auto version = Version::instance();
             QString text = QString("%1 (commit %2%3)")
                                .arg(version.fullVersion())
                                .arg("<a "
@@ -83,7 +83,7 @@ AboutPage::AboutPage()
                                     "chatterino2/commit/" +
                                     version.commitHash() + "\">" +
                                     version.commitHash() + "</a>")
-                               .arg(Modes::getInstance().isNightly
+                               .arg(Modes::instance().isNightly
                                         ? ", " + version.dateOfBuild()
                                         : "");
 

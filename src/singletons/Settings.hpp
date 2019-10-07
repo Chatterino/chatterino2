@@ -13,12 +13,12 @@ namespace chatterino {
 
 class Settings : public ABSettings
 {
-    static Settings *instance;
+    static Settings *instance_;
 
 public:
     Settings(const QString &settingsDirectory);
 
-    static Settings &getInstance();
+    static Settings &instance();
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};

@@ -13,7 +13,7 @@ class IrcMessageHandler
     IrcMessageHandler() = default;
 
 public:
-    static IrcMessageHandler &getInstance();
+    static IrcMessageHandler &instance();
 
     // parseMessage parses a single IRC message into 0+ Chatterino messages
     std::vector<MessagePtr> parseMessage(Channel *channel,

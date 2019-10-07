@@ -566,7 +566,7 @@ void TwitchChannel::loadRecentMessages()
 
             auto messages = parseRecentMessages(result.parseJson(), shared);
 
-            auto &handler = IrcMessageHandler::getInstance();
+            auto &handler = IrcMessageHandler::instance();
 
             std::vector<MessagePtr> allBuiltMessages;
 

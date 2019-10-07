@@ -194,7 +194,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     });
 
     chatterino::NetworkManager::init();
-    chatterino::Updates::getInstance().checkForUpdates();
+    chatterino::Updates::instance().checkForUpdates();
 
 #ifdef C_USE_BREAKPAD
     QBreakpadInstance.setDumpPath(getPaths()->settingsFolderPath + "/Crashes");

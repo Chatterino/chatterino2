@@ -412,7 +412,7 @@ void Split::leaveEvent(QEvent *event)
 
     this->overlay_->hide();
 
-    TooltipWidget::getInstance()->hide();
+    TooltipWidget::instance()->hide();
 
     this->handleModifiers(QGuiApplication::queryKeyboardModifiers());
 }

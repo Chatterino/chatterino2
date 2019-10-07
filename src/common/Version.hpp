@@ -20,7 +20,7 @@ namespace chatterino {
 class Version
 {
 public:
-    static const Version &getInstance();
+    static const Version &instance();
 
     const QString &version() const;
     const QString &commitHash() const;

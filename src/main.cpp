@@ -32,7 +32,7 @@ int main(int argc, char **argv)
     }
     else if (getArgs().printVersion)
     {
-        qInfo().noquote() << Version::getInstance().fullVersion();
+        qInfo().noquote() << Version::instance().fullVersion();
     }
     else
     {
@@ -45,7 +45,7 @@ int main(int argc, char **argv)
         catch (std::runtime_error &error)
         {
             QMessageBox box;
-            if (Modes::getInstance().isPortable)
+            if (Modes::instance().isPortable)
             {
                 box.setText(
                     error.what() +

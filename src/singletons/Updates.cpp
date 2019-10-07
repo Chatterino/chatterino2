@@ -62,7 +62,7 @@ Updates::Updates()
     qDebug() << "init UpdateManager";
 }
 
-Updates &Updates::getInstance()
+Updates &Updates::instance()
 {
     // fourtf: don't add this class to the application class
     static Updates instance;
@@ -234,7 +234,7 @@ void Updates::checkForUpdates()
 {
     // Disable updates if on nightly and windows.
 #ifdef Q_OS_WIN
-    if (Modes::getInstance().isNightly)
+    if (Modes::instance().isNightly)
     {
         return;
     }

@@ -464,7 +464,7 @@ void BaseWindow::changeEvent(QEvent *)
 {
     if (this->isVisible())
     {
-        TooltipWidget::getInstance()->hide();
+        TooltipWidget::instance()->hide();
     }
 
 #ifdef USEWINSDK
@@ -494,7 +494,7 @@ void BaseWindow::changeEvent(QEvent *)
 
 void BaseWindow::leaveEvent(QEvent *)
 {
-    TooltipWidget::getInstance()->hide();
+    TooltipWidget::instance()->hide();
 }
 
 void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)

@@ -13,7 +13,7 @@ class TooltipWidget : public BaseWindow
     Q_OBJECT
 
 public:
-    static TooltipWidget *getInstance();
+    static TooltipWidget *instance();
 
     TooltipWidget(BaseWidget *parent = nullptr);
     ~TooltipWidget() override;

@@ -40,7 +40,7 @@ static QMap<QString, QString> parseBadges(QString badgesString)
     return badges;
 }
 
-IrcMessageHandler &IrcMessageHandler::getInstance()
+IrcMessageHandler &IrcMessageHandler::instance()
 {
     static IrcMessageHandler instance;
     return instance;

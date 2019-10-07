@@ -8,7 +8,7 @@ namespace chatterino {
 class Credentials
 {
 public:
-    static Credentials &getInstance();
+    static Credentials &instance();
 
     void get(const QString &provider, const QString &name, QObject *receiver,
              std::function<void(const QString &)> &&onLoaded);

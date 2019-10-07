@@ -35,7 +35,7 @@ bool Paths::createFolder(const QString &folderPath)
 
 bool Paths::isPortable()
 {
-    return Modes::getInstance().isPortable;
+    return Modes::instance().isPortable;
 }
 
 QString Paths::cacheDirectory()

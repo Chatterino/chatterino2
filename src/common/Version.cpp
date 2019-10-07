@@ -26,7 +26,7 @@ Version::Version()
 
     // "Full" version string, as displayed in window title
     this->fullVersion_ = "Chatterino ";
-    if (Modes::getInstance().isNightly)
+    if (Modes::instance().isNightly)
     {
         this->fullVersion_ += "Nightly ";
     }
@@ -34,7 +34,7 @@ Version::Version()
     this->fullVersion_ += this->version_;
 }
 
-const Version &Version::getInstance()
+const Version &Version::instance()
 {
     static Version instance;
     return instance;

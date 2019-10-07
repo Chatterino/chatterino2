@@ -6,7 +6,7 @@ namespace chatterino {
 class TooltipPreviewImage
 {
 public:
-    static TooltipPreviewImage &getInstance();
+    static TooltipPreviewImage &instance();
     void setImage(ImagePtr image);
 
     TooltipPreviewImage(const TooltipPreviewImage &) = delete;

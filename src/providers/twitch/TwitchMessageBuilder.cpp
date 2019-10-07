@@ -652,7 +652,7 @@ void TwitchMessageBuilder::appendUsername()
     {
         // TODO(pajlada): Re-implement
         // userDisplayString +=
-        // IrcManager::getInstance().getUser().getUserName();
+        // IrcManager::instance().getUser().getUserName();
     }
     else if (this->args.isReceivedWhisper)
     {

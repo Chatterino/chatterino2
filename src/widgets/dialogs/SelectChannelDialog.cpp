@@ -134,7 +134,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
         {
             auto view = this->ui_.irc.servers = new EditableModelView(
-                Irc::getInstance().newConnectionModel(this));
+                Irc::instance().newConnectionModel(this));
 
             view->setTitles({"host", "port", "ssl", "user", "nick", "real",
                              "password", "login command"});
@@ -147,12 +147,12 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
             view->addButtonPressed.connect([] {
                 auto unique = IrcServerData{};
-                unique.id = Irc::getInstance().uniqueId();
+                unique.id = Irc::instance().uniqueId();
 
                 auto editor = new IrcConnectionEditor(unique);
                 if (editor->exec() == QDialog::Accepted)
                 {
-                    Irc::getInstance().connections.appendItem(editor->data());
+                    Irc::instance().connections.appendItem(editor->data());
                 }
             });
 
@@ -160,22 +160,22 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 view->getTableView(), &QTableView::doubleClicked,
                 [](const QModelIndex &index) {
                     auto editor = new IrcConnectionEditor(
-                        Irc::getInstance()
+                        Irc::instance()
                             .connections.getVector()[size_t(index.row())]);
 
                     if (editor->exec() == QDialog::Accepted)
                     {
                         auto data = editor->data();
                         auto &&conns =
-                            Irc::getInstance().connections.getVector();
+                            Irc::instance().connections.getVector();
                         int i = 0;
                         for (auto &&conn : conns)
                         {
                             if (conn.id == data.id)
                             {
-                                Irc::getInstance().connections.removeItem(
+                                Irc::instance().connections.removeItem(
                                     i, Irc::noEraseCredentialCaller);
-                                Irc::getInstance().connections.insertItem(data,
+                                Irc::instance().connections.insertItem(data,
                                                                           i);
                             }
                             i++;
@@ -289,7 +289,7 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
                 if (auto server = ircChannel->server())
                 {
                     int i = 0;
-                    for (auto &&conn : Irc::getInstance().connections)
+                    for (auto &&conn : Irc::instance().connections)
                     {
                         if (conn.id == server->id())
                         {
@@ -350,11 +350,11 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
                           ->currentIndex()
                           .row();
 
-            auto &&vector = Irc::getInstance().connections.getVector();
+            auto &&vector = Irc::instance().connections.getVector();
 
             if (row >= 0 && row < int(vector.size()))
             {
-                return Irc::getInstance().getOrAddChannel(
+                return Irc::instance().getOrAddChannel(
                     vector[size_t(row)].id, this->ui_.irc.channel->text());
             }
             else

@@ -14,7 +14,7 @@
 
 namespace chatterino {
 
-TooltipWidget *TooltipWidget::getInstance()
+TooltipWidget *TooltipWidget::instance()
 {
     static TooltipWidget *tooltipWidget = new TooltipWidget();
     return tooltipWidget;
