@@ -39,6 +39,7 @@ public:
 protected:
     virtual void scaleChangedEvent(float newDpi) override;
     virtual void themeChangedEvent() override;
+    virtual void showEvent(QShowEvent *) override;
 
 private:
     static SettingsDialog *handle;
