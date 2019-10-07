@@ -22,10 +22,10 @@ class Version
 public:
     static const Version &getInstance();
 
-    const QString &getVersion() const;
-    const QString &getCommitHash() const;
-    const QString &getDateOfBuild() const;
-    const QString &getFullVersion() const;
+    const QString &version() const;
+    const QString &commitHash() const;
+    const QString &dateOfBuild() const;
+    const QString &fullVersion() const;
 
 private:
     Version();

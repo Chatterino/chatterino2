@@ -1,6 +1,7 @@
 #include "AttachedWindow.hpp"
 
 #include "Application.hpp"
+#include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "widgets/splits/Split.hpp"
 
