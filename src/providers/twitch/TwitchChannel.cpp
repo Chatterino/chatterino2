@@ -229,7 +229,7 @@ bool TwitchChannel::isMod() const
     return this->mod_;
 }
 
-bool TwitchChannel::isVIP() const
+bool TwitchChannel::isVip() const
 {
     return this->vip_;
 }
@@ -278,7 +278,7 @@ bool TwitchChannel::isBroadcaster() const
 
 bool TwitchChannel::hasHighRateLimit() const
 {
-    return this->isMod() || this->isBroadcaster() || this->isVIP();
+    return this->isMod() || this->isBroadcaster() || this->isVip();
 }
 
 bool TwitchChannel::canReconnect() const

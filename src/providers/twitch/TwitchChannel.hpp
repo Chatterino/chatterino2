@@ -63,7 +63,7 @@ public:
     virtual bool canSendMessage() const override;
     virtual void sendMessage(const QString &message) override;
     virtual bool isMod() const override;
-    bool isVIP() const;
+    bool isVip() const;
     bool isStaff() const;
     virtual bool isBroadcaster() const override;
     virtual bool hasHighRateLimit() const override;
