@@ -291,7 +291,7 @@ void ResizingTextEdit::dragEnterEvent(QDragEnterEvent *event)
     }
     else
     {
-        QAbstractScrollArea::dragEnterEvent(event);
+        QTextEdit::dragEnterEvent(event);
     }
 }
 

@@ -16,7 +16,7 @@ QString getImageFileFormat(QString path)
     static QStringList listOfImageFormats = {".png", ".jpg", ".jpeg"};
     for (const QString &format : listOfImageFormats)
     {
-        if (path.endsWith(format))
+        if (path.endsWith(format, Qt::CaseInsensitive))
         {
             return format.mid(1);
         }
