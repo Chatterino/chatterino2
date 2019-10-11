@@ -16,7 +16,3 @@ void upload(TypedBytes imageData, ChannelPtr channel,
 void upload(const QMimeData *source, ChannelPtr channel,
             ResizingTextEdit &outputTextEdit);
 }  // namespace chatterino
-
-namespace {
-QString getImageFileFormat(QString path);
-}

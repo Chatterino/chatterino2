@@ -6,6 +6,41 @@
 
 #include <QHttpMultiPart>
 
+#define UPLOAD_DELAY 2000
+// Delay between uploads in milliseconds
+
+namespace {
+
+QString getImageFileFormat(QString path)
+{
+    static QStringList listOfImageFormats = {".png", ".jpg", ".jpeg"};
+    for (const QString &format : listOfImageFormats)
+    {
+        if (path.endsWith(format))
+        {
+            return format.mid(1);
+        }
+    }
+    return QString();
+}
+
+boost::optional<QByteArray> convertToPng(QImage image)
+{
+    QByteArray imageData;
+    QBuffer buf(&imageData);
+    buf.open(QIODevice::WriteOnly);
+    bool success = image.save(&buf, "png");
+    if (success)
+    {
+        return boost::optional<QByteArray>(imageData);
+    }
+    else
+    {
+        return boost::optional<QByteArray>(boost::none);
+    }
+}
+}  // namespace
+
 namespace chatterino {
 bool isUploading = false;
 
@@ -15,6 +50,8 @@ void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
                         ResizingTextEdit &textEdit)
 {
     const char *boundary = "thisistheboudaryasd";
+    QString contentType =
+        QString("multipart/form-data; boundary=%1").arg(boundary);
     static QUrl url(Env::get().imageUploaderUrl);
 
     QHttpMultiPart *payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);
@@ -26,17 +63,17 @@ void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
                    QVariant(imageData.data.length()));
     part.setHeader(
         QNetworkRequest::ContentDispositionHeader,
-        QString("form-data; name=\"attachment\"; filename=\"control_v.%1\""));
+        QString("form-data; name=\"attachment\"; filename=\"control_v.%1\"")
+            .arg(imageData.type));
     payload->setBoundary(boundary);
     payload->append(part);
     NetworkRequest(url, NetworkRequestType::Post)
-        .header("Content-Type", (std::string("multipart/form-data; boundary=") +
-                                 std::string(boundary))
-                                    .c_str())
+        .header("Content-Type", contentType)
 
         .multiPart(payload)
         .onSuccess([&textEdit, channel](NetworkResult result) -> Outcome {
             textEdit.insertPlainText(result.getData() + QString(" "));
+            isUploading = false;
             if (uploadQueue.empty())
             {
                 channel->addMessage(makeSystemMessage(
@@ -48,16 +85,16 @@ void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
                     QString("Your image has been uploaded. %1 left. Please "
                             "wait until all of them are uploaded. About %2 "
                             "seconds left.")
-                        .arg(uploadQueue.size())
-                        .arg(uploadQueue.size() * 3)));
+                        .arg(uploadQueue.size(),
+                             uploadQueue.size() *
+                                 (UPLOAD_DELAY / 1000 +
+                                  1)  // convert UPLOAD_DELAY to seconds
+                             )));
                 // Argument number 2 is the ETA.
                 // 2 seconds for the timer that's there not to spam Nuuls' server
                 // and 1 second of actual uploading.
-            }
-            isUploading = false;
-            if (uploadQueue.size())
-            {
-                QTimer::singleShot(2000, [channel, &textEdit]() {
+
+                QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit]() {
                     uploadImageToNuuls(uploadQueue.front(), channel, textEdit);
                     uploadQueue.pop();
                 });
@@ -104,6 +141,8 @@ void upload(const QMimeData *source, ChannelPtr channel,
     }
     else if (source->hasUrls())
     {
+        // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
+        // Each entry in source->urls() is a QUrl pointng to a file that was copied.
         for (const QUrl &path : source->urls())
         {
             if (!getImageFileFormat(path.toLocalFile()).isEmpty())
@@ -117,13 +156,20 @@ void upload(const QMimeData *source, ChannelPtr channel,
                         makeSystemMessage(QString("Couldn't load image :(")));
                     return;
                 }
-                QByteArray imageData;
-                QBuffer buf(&imageData);
-                buf.open(QIODevice::WriteOnly);
-                img.save(&buf, "png");
 
-                TypedBytes data = {imageData, "png"};
-                uploadQueue.push(data);
+                boost::optional<QByteArray> imageData = convertToPng(img);
+                if (imageData)
+                {
+                    TypedBytes data = {imageData.get(), "png"};
+                    uploadQueue.push(data);
+                }
+                else
+                {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Cannot upload file: %1, Couldn't convert "
+                                "image to png.")
+                            .arg(path.toLocalFile())));
+                }
             }
             else if (path.toLocalFile().endsWith(".gif"))
             {
@@ -150,7 +196,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 isUploading = false;
             }
         }
-        if (uploadQueue.size())
+        if (!uploadQueue.empty())
         {
             uploadImageToNuuls(uploadQueue.front(), channel, outputTextEdit);
             uploadQueue.pop();
@@ -159,28 +205,17 @@ void upload(const QMimeData *source, ChannelPtr channel,
     else
     {  // not PNG, try loading it into QImage and save it to a PNG.
         QImage image = qvariant_cast<QImage>(source->imageData());
-        QByteArray imageData;
-        QBuffer buf(&imageData);
-        buf.open(QIODevice::WriteOnly);
-        image.save(&buf, "png");
-
-        uploadImageToNuuls({imageData, "png"}, channel, outputTextEdit);
+        boost::optional<QByteArray> imageData = convertToPng(image);
+        if (imageData)
+        {
+            uploadImageToNuuls({imageData.get(), "png"}, channel,
+                               outputTextEdit);
+        }
+        else
+        {
+            channel->addMessage(makeSystemMessage(
+                QString("Cannot upload file, failed to convert to png.")));
+        }
     }
 }
 }  // namespace chatterino
-
-namespace {
-
-QString getImageFileFormat(QString path)
-{
-    static QStringList listOfImageFormats = {".png", ".jpg", ".jpeg"};
-    for (const QString &format : listOfImageFormats)
-    {
-        if (path.endsWith(format))
-        {
-            return format.mid(1);
-        }
-    }
-    return QString();
-}
-}  // namespace

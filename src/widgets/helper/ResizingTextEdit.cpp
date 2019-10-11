@@ -1,9 +1,10 @@
-#include <QMimeData>
+#include "widgets/helper/ResizingTextEdit.hpp"
 
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
 #include "singletons/Settings.hpp"
-#include "widgets/helper/ResizingTextEdit.hpp"
+
+#include <QMimeData>
 
 namespace chatterino {
 
