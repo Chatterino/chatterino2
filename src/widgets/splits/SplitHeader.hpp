@@ -55,7 +55,6 @@ private:
 
     // ui
     Button *dropdownButton_{};
-    QMenu *mainMenu_{};
     Label *titleLabel_{};
     EffectLabel *modeButton_{};
     Button *moderationButton_{};

@@ -213,9 +213,7 @@ void SplitHeader::initializeLayout()
         this->dropdownButton_ = makeWidget<Button>([&](auto w) {
             /// XXX: this never gets disconnected
             this->split_->channelChanged.connect([this] {
-                auto menu = this->createMainMenu();
-                this->mainMenu_ = menu.get();
-                this->dropdownButton_->setMenu(std::move(menu));
+                this->dropdownButton_->setMenu(this->createMainMenu());
             });
         }),
         // add split
@@ -598,7 +596,9 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
         break;
 
         case Qt::RightButton: {
-            this->mainMenu_->popup(this->mapToGlobal(event->pos()));
+            auto menu = this->createMainMenu().release();
+            menu->setAttribute(Qt::WA_DeleteOnClose);
+            menu->popup(this->mapToGlobal(event->pos() + QPoint(0, 4)));
         }
         break;
     }
