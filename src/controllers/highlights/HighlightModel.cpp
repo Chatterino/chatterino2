@@ -1,7 +1,6 @@
 #include "HighlightModel.hpp"
 
 #include "Application.hpp"
-#include "controllers/highlights/HighlightPhrase.hpp"
 #include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"
 
@@ -61,7 +60,7 @@ void HighlightModel::afterInit()
     setFilePathItem(usernameRow[Column::SoundPath], selfSound);
 
     auto encodedSelfColor = getSettings()->selfHighlightColor.getValue();
-    QColor selfColor = HighlightPhrase::decodeColor(encodedSelfColor);
+    QColor selfColor = QColor(encodedSelfColor);
     setColorItem(usernameRow[Column::Color], selfColor);
 
     this->insertCustomRow(usernameRow, 0);
@@ -84,8 +83,8 @@ void HighlightModel::afterInit()
         QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
     setFilePathItem(whisperRow[Column::SoundPath], whisperSound);
 
-    auto encodedWhisper = getSettings()->whisperHighlightColor.getValue();
-    QColor whisperColor = HighlightPhrase::decodeColor(encodedWhisper);
+    auto encodedWhisperColor = getSettings()->whisperHighlightColor.getValue();
+    QColor whisperColor = QColor(encodedWhisperColor);
     setColorItem(whisperRow[Column::Color], whisperColor);
 
     this->insertCustomRow(whisperRow, 1);
@@ -169,20 +168,19 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             }
         }
         break;
-        case Column::Color:
-        {
+        case Column::Color: {
             // Custom color
             if (role == Qt::DecorationRole)
             {
                 if (rowIndex == 0)
                 {
                     getSettings()->selfHighlightColor.setValue(
-                        HighlightPhrase::encodeColor(value.value<QColor>()));
+                        value.value<QColor>().name(QColor::HexArgb));
                 }
                 else if (rowIndex == 1)
                 {
                     getSettings()->whisperHighlightColor.setValue(
-                        HighlightPhrase::encodeColor(value.value<QColor>()));
+                        value.value<QColor>().name(QColor::HexArgb));
                 }
             }
         }

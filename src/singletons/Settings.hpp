@@ -164,10 +164,10 @@ public:
         "/highlighting/whisperHighlightSoundUrl", ""};
     QStringSetting selfHighlightColor = {
         "/highlighting/selfHighlightColor",
-        HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR.name()};
+        HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR.name(QColor::HexArgb)};
     QStringSetting whisperHighlightColor = {
         "/highlighting/whisperHighlightColor",
-        HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR.name()};
+        HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR.name(QColor::HexArgb)};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 
