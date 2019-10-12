@@ -169,6 +169,8 @@ private:
     QTimer chattersListTimer_;
     QTime titleRefreshedTime_;
 
+    const int titleRefreshPeriod_ = 10;
+
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;
     friend class IrcMessageHandler;

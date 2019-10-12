@@ -680,8 +680,11 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
-        dynamic_cast<TwitchChannel *>(this->split_->getChannel().get())
-            ->refreshTitle();
+        auto channel = this->split_->getChannel().get();
+        if (channel->getType() == Channel::Type::Twitch)
+        {
+            dynamic_cast<TwitchChannel *>(channel)->refreshTitle();
+        }
 
         TooltipPreviewImage::instance().setImage(nullptr);
 

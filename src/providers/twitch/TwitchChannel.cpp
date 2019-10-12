@@ -89,7 +89,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , mod_(false)
-    , titleRefreshedTime_(QTime::currentTime().addSecs(-10))
+    , titleRefreshedTime_(QTime::currentTime().addSecs(-titleRefreshPeriod_))
 {
     log("[TwitchChannel:{}] Opened", name);
 
@@ -447,11 +447,11 @@ void TwitchChannel::refreshTitle()
         return;
     }
 
-    if (this->titleRefreshedTime_.elapsed() < 10 * 1000)
+    if (this->titleRefreshedTime_.elapsed() < this->titleRefreshPeriod_ * 1000)
     {
         return;
     }
-    this->titleRefreshedTime_.start();
+    this->titleRefreshedTime_ = QTime::currentTime();
 
     QString url("https://api.twitch.tv/kraken/channels/" + roomID);
     NetworkRequest::twitchRequest(url)
