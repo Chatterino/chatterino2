@@ -439,20 +439,21 @@ void TwitchChannel::setLive(bool newLiveStatus)
     }
 }
 
-void TwitchChannel::refreshTitle(){
+void TwitchChannel::refreshTitle()
+{
     auto roomID = this->roomId();
-    if(roomID.isEmpty())
+    if (roomID.isEmpty())
     {
         return;
     }
 
-    if(this->titleRefreshedTime_.elapsed()<10*1000)
+    if (this->titleRefreshedTime_.elapsed() < 10 * 1000)
     {
         return;
     }
     this->titleRefreshedTime_.start();
 
-    QString url("https://api.twitch.tv/kraken/channels/"+roomID);
+    QString url("https://api.twitch.tv/kraken/channels/" + roomID);
     NetworkRequest::twitchRequest(url)
         .onSuccess(
             [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
@@ -462,7 +463,8 @@ void TwitchChannel::refreshTitle(){
 
                 const auto document = result.parseRapidJson();
 
-                if(!document.HasMember("status")){
+                if (!document.HasMember("status"))
+                {
                     return Failure;
                 }
 
