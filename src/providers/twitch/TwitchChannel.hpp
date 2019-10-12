@@ -69,6 +69,7 @@ public:
     virtual bool hasHighRateLimit() const override;
     virtual bool canReconnect() const override;
     virtual void reconnect() override;
+    void refreshTitle();
 
     // Data
     const QString &subscriptionUrl();
@@ -166,6 +167,9 @@ private:
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
+    QTime titleRefreshedTime_;
+
+    const int titleRefreshPeriod_ = 10;
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;

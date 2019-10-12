@@ -99,6 +99,12 @@ namespace {
             .arg(s.uptime)
             .arg(QString::number(s.viewerCount));
     }
+    auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
+    {
+        return QString("<style>.center { text-align: center; }</style> \
+                       <p class=\"center\">Offline<br>%1</p>")
+            .arg(s.title.toHtmlEscaped());
+    }
     auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
     {
         auto title = QString();
@@ -550,6 +556,10 @@ void SplitHeader::updateChannelText()
             this->tooltipText_ = formatTooltip(*streamStatus);
             title += formatTitle(*streamStatus, *getSettings());
         }
+        else
+        {
+            this->tooltipText_ = formatOfflineTooltip(*streamStatus);
+        }
     }
 
     this->titleLabel_->setText(title.isEmpty() ? "<empty>" : title);
@@ -670,6 +680,12 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
+        auto channel = this->split_->getChannel().get();
+        if (channel->getType() == Channel::Type::Twitch)
+        {
+            dynamic_cast<TwitchChannel *>(channel)->refreshTitle();
+        }
+
         TooltipPreviewImage::instance().setImage(nullptr);
 
         auto tooltip = TooltipWidget::instance();

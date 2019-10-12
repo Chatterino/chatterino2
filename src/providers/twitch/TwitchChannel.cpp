@@ -89,6 +89,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , mod_(false)
+    , titleRefreshedTime_(QTime::currentTime().addSecs(-titleRefreshPeriod_))
 {
     log("[TwitchChannel:{}] Opened", name);
 
@@ -110,6 +111,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
         this->refreshPubsub();
+        this->refreshTitle();
         this->refreshLiveStatus();
         this->refreshBadges();
         this->refreshCheerEmotes();
@@ -435,6 +437,51 @@ void TwitchChannel::setLive(bool newLiveStatus)
     {
         this->liveStatusChanged.invoke();
     }
+}
+
+void TwitchChannel::refreshTitle()
+{
+    auto roomID = this->roomId();
+    if (roomID.isEmpty())
+    {
+        return;
+    }
+
+    if (this->titleRefreshedTime_.elapsed() < this->titleRefreshPeriod_ * 1000)
+    {
+        return;
+    }
+    this->titleRefreshedTime_ = QTime::currentTime();
+
+    QString url("https://api.twitch.tv/kraken/channels/" + roomID);
+    NetworkRequest::twitchRequest(url)
+        .onSuccess(
+            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+                ChannelPtr shared = weak.lock();
+                if (!shared)
+                    return Failure;
+
+                const auto document = result.parseRapidJson();
+
+                auto statusIt = document.FindMember("status");
+
+                if (statusIt == document.MemberEnd())
+                {
+                    return Failure;
+                }
+
+                {
+                    auto status = this->streamStatus_.access();
+                    if (!rj::getSafe(statusIt->value, status->title))
+                    {
+                        return Failure;
+                    }
+                }
+
+                this->liveStatusChanged.invoke();
+                return Success;
+            })
+        .execute();
 }
 
 void TwitchChannel::refreshLiveStatus()
