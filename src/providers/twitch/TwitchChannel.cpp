@@ -463,14 +463,19 @@ void TwitchChannel::refreshTitle()
 
                 const auto document = result.parseRapidJson();
 
-                if (!document.HasMember("status"))
+                auto statusIt = document.FindMember("status");
+
+                if (statusIt == document.MemberEnd())
                 {
                     return Failure;
                 }
 
                 {
                     auto status = this->streamStatus_.access();
-                    status->title = document["status"].GetString();
+                    if (!rj::getSafe(statusIt->value, status->title))
+                    {
+                        return Failure;
+                    }
                 }
 
                 this->liveStatusChanged.invoke();
