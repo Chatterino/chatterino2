@@ -9,6 +9,41 @@ Formatting
 
 Code is automatically formatted using `clang-format`. It take the burdon off of the programmer and ensures that all contributers use the same style (even if mess something up accidentally). We recommend that you set up automatic formatting on file save in your editor.
 
+# Comments
+
+Comments should only be used to:
+
+- Increase readablility (e.g. grouping member variables).
+- Containing information that can't be expressed in code.
+
+Try to structure your code so that comments are not required.
+
+#### Good example
+
+``` cpp
+/// Result is 0 if a == b, negative if a < b and positive if b > a.
+/// ^^^ You can't know this from the function signature!
+//      Even better: Return a "strong ordering" type.
+//          (but we don't have such a type right now)
+int compare(const QString &a, const QString &b);
+```
+
+#### Bad example
+
+``` cpp
+/*
+ * Matches a link and returns boost::none if it failed and a
+ * QRegularExpressionMatch on success. 
+ * ^^^ This comment just repeats the function signature!!!
+ * 
+ * @param text The text that will be checked if it contains a
+ * link
+ * ^^^ No need to repeat the obvious.
+ */
+boost::optional<QRegularExpressionMatch> matchLink(const QString &text);
+```
+
+
 # Code
 
 Arithmetic Types
