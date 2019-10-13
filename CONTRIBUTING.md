@@ -48,6 +48,7 @@ void setValue(int value) {
 ```
 
 **References** mean that the variable doesn't need to be copied when it is passed to a function.
+
 |type|meaning|
 |-|-|
 |`const Type& name`|*in* Parameter. It is NOT going to be modified and may be copied inside of the function.|
