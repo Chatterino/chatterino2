@@ -1,12 +1,26 @@
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/qt512/lib/
-ldd ./bin/chatterino
-make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
-cp ./resources/icon.png ./appdir/chatterino.png
+#!/bin/sh
 
-wget -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-wget -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-chmod a+x appimagetool-x86_64.AppImage
+script_path=$(readlink -f "$0")
+script_dir=$(dirname "$script_path")
+chatterino_dir=$(dirname "$script_dir")
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/qt512/lib/
+
+ldd ./bin/chatterino
+make INSTALL_ROOT=appdir -j"$(nproc)" install ; find appdir/
+cp "$chatterino_dir"/resources/icon.png ./appdir/chatterino.png
+
+appimage_path="linuxdeployqt-continuous-x86_64.AppImage"
+appimage_url="https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+
+if [ ! -f "$appimage_path" ]; then
+    wget -nv "$appimage_url"
+    chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+fi
+if [ ! -f appimagetool-x86_64.AppImage ]; then
+    wget -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+    chmod a+x appimagetool-x86_64.AppImage
+fi
 ./linuxdeployqt-continuous-x86_64.AppImage \
     appdir/usr/share/applications/*.desktop \
     -no-translations \
