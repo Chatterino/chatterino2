@@ -13,7 +13,7 @@ Code is automatically formatted using `clang-format`. It take the burdon off of 
 
 Comments should only be used to:
 
-- Increase readablility (e.g. grouping member variables).
+- Increase readability (e.g. grouping member variables).
 - Containing information that can't be expressed in code.
 
 Try to structure your code so that comments are not required.
