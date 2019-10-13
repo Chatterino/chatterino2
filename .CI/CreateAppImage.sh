@@ -10,18 +10,18 @@ ldd ./bin/chatterino
 make INSTALL_ROOT=appdir -j"$(nproc)" install ; find appdir/
 cp "$chatterino_dir"/resources/icon.png ./appdir/chatterino.png
 
-appimage_path="linuxdeployqt-continuous-x86_64.AppImage"
-appimage_url="https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
+linuxdeployqt_path="linuxdeployqt-continuous-x86_64.AppImage"
+linuxdeployqt_url="https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
 
-if [ ! -f "$appimage_path" ]; then
-    wget -nv "$appimage_url"
-    chmod a+x linuxdeployqt-continuous-x86_64.AppImage
+if [ ! -f "$linuxdeployqt_path" ]; then
+    wget -nv "$linuxdeployqt_url"
+    chmod a+x "$linuxdeployqt_path"
 fi
 if [ ! -f appimagetool-x86_64.AppImage ]; then
     wget -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
     chmod a+x appimagetool-x86_64.AppImage
 fi
-./linuxdeployqt-continuous-x86_64.AppImage \
+./"$linuxdeployqt_path" \
     appdir/usr/share/applications/*.desktop \
     -no-translations \
     -bundle-non-qt-libs \
