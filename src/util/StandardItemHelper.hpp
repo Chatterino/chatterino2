@@ -26,14 +26,13 @@ static void setFilePathItem(QStandardItem *item, const QUrl &value)
 {
     item->setData(value, Qt::UserRole);
     item->setData(value.fileName(), Qt::DisplayRole);
-    item->setFlags(Qt::ItemIsEnabled);
+    item->setFlags(Qt::ItemFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable));
 }
 
-// "Editable" and "Selectable" do not really make sense in the traditional way
 static void setColorItem(QStandardItem *item, const QColor &value)
 {
     item->setData(value, Qt::DecorationRole);
-    item->setFlags(Qt::ItemIsEnabled);
+    item->setFlags(Qt::ItemFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable));
 }
 
 static QStandardItem *emptyItem()
