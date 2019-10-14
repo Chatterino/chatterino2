@@ -88,6 +88,28 @@ void HighlightModel::afterInit()
     setColorItem(whisperRow[Column::Color], whisperColor);
 
     this->insertCustomRow(whisperRow, 1);
+
+    // Highlight settings for subscription messages
+    std::vector<QStandardItem *> subRow = this->createRow();
+    setBoolItem(subRow[Column::Pattern],
+                getSettings()->enableSubHighlight.getValue(), true, false);
+    subRow[Column::Pattern]->setData("Subscriptions", Qt::DisplayRole);
+    setBoolItem(subRow[Column::FlashTaskbar],
+                getSettings()->enableSubHighlightTaskbar.getValue(), true,
+                false);
+    setBoolItem(subRow[Column::PlaySound],
+                getSettings()->enableSubHighlightSound.getValue(), true, false);
+    subRow[Column::UseRegex]->setFlags(0);
+    subRow[Column::CaseSensitive]->setFlags(0);
+
+    QUrl subSound = QUrl(getSettings()->subHighlightSoundUrl.getValue());
+    setFilePathItem(subRow[Column::SoundPath], subSound);
+
+    auto encodedSubColor = getSettings()->subHighlightColor.getValue();
+    QColor subColor = QColor(encodedSubColor);
+    setColorItem(subRow[Column::Color], subColor);
+
+    this->insertCustomRow(subRow, 2);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,

@@ -144,30 +144,45 @@ public:
     /// Highlighting
     //    BoolSetting enableHighlights = {"/highlighting/enabled", true};
     BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
+
     BoolSetting enableSelfHighlight = {
         "/highlighting/selfHighlight/nameIsHighlightKeyword", true};
     BoolSetting enableSelfHighlightSound = {
         "/highlighting/selfHighlight/enableSound", true};
     BoolSetting enableSelfHighlightTaskbar = {
         "/highlighting/selfHighlight/enableTaskbarFlashing", true};
+    QStringSetting selfHighlightSoundUrl = {
+        "/highlighting/selfHighlightSoundUrl", ""};
+    QStringSetting selfHighlightColor = {
+        "/highlighting/selfHighlightColor",
+        HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR.name(QColor::HexArgb)};
+
     BoolSetting enableWhisperHighlight = {
         "/highlighting/whisperHighlight/whispersHighlighted", true};
     BoolSetting enableWhisperHighlightSound = {
         "/highlighting/whisperHighlight/enableSound", false};
     BoolSetting enableWhisperHighlightTaskbar = {
         "/highlighting/whisperHighlight/enableTaskbarFlashing", false};
-    QStringSetting highlightColor = {"/highlighting/color", ""};
-
-    QStringSetting selfHighlightSoundUrl = {
-        "/highlighting/selfHighlightSoundUrl", ""};
     QStringSetting whisperHighlightSoundUrl = {
         "/highlighting/whisperHighlightSoundUrl", ""};
-    QStringSetting selfHighlightColor = {
-        "/highlighting/selfHighlightColor",
-        HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR.name(QColor::HexArgb)};
     QStringSetting whisperHighlightColor = {
         "/highlighting/whisperHighlightColor",
         HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR.name(QColor::HexArgb)};
+
+    BoolSetting enableSubHighlight = {
+        "/highlighting/subHighlight/subsHighlighted", true};
+    BoolSetting enableSubHighlightSound = {
+        "/highlighting/subHighlight/enableSound", false};
+    BoolSetting enableSubHighlightTaskbar = {
+        "/highlighting/subHighlight/enableTaskbarFlashing", false};
+    QStringSetting subHighlightSoundUrl = {"/highlighting/subHighlightSoundUrl",
+                                           ""};
+    // TODO(leon): Figure out a nice way to set themed default colors
+    QStringSetting subHighlightColor = {
+        "/highlighting/subHighlightColor",
+        HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR.name(QColor::HexArgb)};
+
+    QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 
