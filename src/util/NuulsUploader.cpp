@@ -42,6 +42,7 @@ boost::optional<QByteArray> convertToPng(QImage image)
 }  // namespace
 
 namespace chatterino {
+// These variables are only used from the main thread.
 bool isUploading = false;
 
 std::queue<TypedBytes> uploadQueue;
@@ -114,6 +115,7 @@ void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
 void upload(const QMimeData *source, ChannelPtr channel,
             ResizingTextEdit &outputTextEdit)
 {
+    // There's no need to thread proof this function. It is called only from the main thread.
     if (isUploading)
     {
         channel->addMessage(makeSystemMessage(
@@ -142,7 +144,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
     else if (source->hasUrls())
     {
         // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
-        // Each entry in source->urls() is a QUrl pointng to a file that was copied.
+        // Each entry in source->urls() is a QUrl pointing to a file that was copied.
         for (const QUrl &path : source->urls())
         {
             if (!getImageFileFormat(path.toLocalFile()).isEmpty())
