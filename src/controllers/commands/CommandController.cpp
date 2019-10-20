@@ -498,11 +498,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             userPopup->show();
             return "";
         }
-        else if (commandName == "/test")
-        {
-            channel->addMessage(makeSystemMessage("TEEEST"));
-            return "";
-        }
     }
 
     {
