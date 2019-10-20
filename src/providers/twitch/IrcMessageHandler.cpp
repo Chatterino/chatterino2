@@ -618,7 +618,7 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     {
         if (message->nick() !=
                 getApp()->accounts->twitch.getCurrent()->getUserName() &&
-            getSettings()->showJoins.getValue())
+            getSettings()->showParts.getValue())
         {
             twitchChannel->addPartedUser(message->nick());
         }
