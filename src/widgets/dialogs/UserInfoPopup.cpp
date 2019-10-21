@@ -397,11 +397,12 @@ void UserInfoPopup::updateUserData()
         this->ui_.createdDateLabel->setText(TEXT_CREATED +
                                             QString(TEXT_UNAVAILABLE));
 
-        this->ui_.nameLabel->setText(this->userName_ +
-                                     QString("(account doesn\'t exist)"));
-        this->ui_.userIDLabel->setText(QString("ID is not available."));
+        this->ui_.nameLabel->setText(this->userName_);
+
+        this->ui_.userIDLabel->setText(QString("ID") +
+                                       QString(TEXT_UNAVAILABLE));
         this->ui_.userIDLabel->setProperty("copy-text",
-                                           QString("ID is not available."));
+                                           QString(TEXT_UNAVAILABLE));
     };
     const auto onIdFetched = [this, hack](QString id) {
         auto currentUser = getApp()->accounts->twitch.getCurrent();

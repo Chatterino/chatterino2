@@ -23,7 +23,7 @@ public:
                const QObject *caller = nullptr);
 
     void getId(std::function<void(QString)> successCallback,
-               std::function<void(void)> failureCallback,
+               std::function<void()> failureCallback,
                const QObject *caller = nullptr);
 };
 

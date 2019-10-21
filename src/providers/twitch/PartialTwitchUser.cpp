@@ -33,7 +33,7 @@ void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
         successCallback, [] {}, caller);
 }
 void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
-                              std::function<void(void)> failureCallback,
+                              std::function<void()> failureCallback,
                               const QObject *caller)
 {
     assert(!this->username_.isEmpty());
