@@ -5,13 +5,13 @@
 #include <QString>
 
 namespace chatterino {
-struct TypedBytes {
+struct RawImageData {
     QByteArray data;
-    QString type;
+    QString format;
 };
 void upload(QByteArray imageData, ChannelPtr channel,
             ResizingTextEdit &textEdit, std::string format);
-void upload(TypedBytes imageData, ChannelPtr channel,
+void upload(RawImageData imageData, ChannelPtr channel,
             ResizingTextEdit &textEdit);
 void upload(const QMimeData *source, ChannelPtr channel,
             ResizingTextEdit &outputTextEdit);

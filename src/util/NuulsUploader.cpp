@@ -44,10 +44,9 @@ boost::optional<QByteArray> convertToPng(QImage image)
 namespace chatterino {
 // These variables are only used from the main thread.
 bool isUploading = false;
+std::queue<RawImageData> uploadQueue;
 
-std::queue<TypedBytes> uploadQueue;
-
-void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
+void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                         ResizingTextEdit &textEdit)
 {
     const char *boundary = "thisistheboudaryasd";
@@ -59,13 +58,13 @@ void uploadImageToNuuls(TypedBytes imageData, ChannelPtr channel,
     QHttpPart part = QHttpPart();
     part.setBody(imageData.data);
     part.setHeader(QNetworkRequest::ContentTypeHeader,
-                   QString("image/%1").arg(imageData.type));
+                   QString("image/%1").arg(imageData.format));
     part.setHeader(QNetworkRequest::ContentLengthHeader,
                    QVariant(imageData.data.length()));
     part.setHeader(
         QNetworkRequest::ContentDispositionHeader,
         QString("form-data; name=\"attachment\"; filename=\"control_v.%1\"")
-            .arg(imageData.type));
+            .arg(imageData.format));
     payload->setBoundary(boundary);
     payload->append(part);
     NetworkRequest(url, NetworkRequestType::Post)
@@ -163,7 +162,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 boost::optional<QByteArray> imageData = convertToPng(img);
                 if (imageData)
                 {
-                    TypedBytes data = {imageData.get(), "png"};
+                    RawImageData data = {imageData.get(), "png"};
                     uploadQueue.push(data);
                 }
                 else
@@ -186,7 +185,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                         makeSystemMessage(QString("Failed to open file. :(")));
                     return;
                 }
-                TypedBytes data = {file.readAll(), "gif"};
+                RawImageData data = {file.readAll(), "gif"};
                 uploadQueue.push(data);
                 file.close();
                 // file.readAll() => might be a bit big but it /should/ work
