@@ -147,11 +147,12 @@ void upload(const QMimeData *source, ChannelPtr channel,
         // Each entry in source->urls() is a QUrl pointing to a file that was copied.
         for (const QUrl &path : source->urls())
         {
-            if (!getImageFileFormat(path.toLocalFile()).isEmpty())
+            QString localPath = path.toLocalFile();
+            if (!getImageFileFormat(localPath).isEmpty())
             {
                 channel->addMessage(makeSystemMessage(
-                    QString("Uploading image: %1").arg(path.toLocalFile())));
-                QImage img = QImage(path.toLocalFile());
+                    QString("Uploading image: %1").arg(localPath)));
+                QImage img = QImage(localPath);
                 if (img.isNull())
                 {
                     channel->addMessage(
@@ -170,14 +171,14 @@ void upload(const QMimeData *source, ChannelPtr channel,
                     channel->addMessage(makeSystemMessage(
                         QString("Cannot upload file: %1, Couldn't convert "
                                 "image to png.")
-                            .arg(path.toLocalFile())));
+                            .arg(localPath)));
                 }
             }
-            else if (path.toLocalFile().endsWith(".gif"))
+            else if (localPath.endsWith(".gif"))
             {
                 channel->addMessage(makeSystemMessage(
-                    QString("Uploading GIF: %1").arg(path.toLocalFile())));
-                QFile file(path.toLocalFile());
+                    QString("Uploading GIF: %1").arg(localPath)));
+                QFile file(localPath);
                 bool isOkay = file.open(QIODevice::ReadOnly);
                 if (!isOkay)
                 {
@@ -194,7 +195,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
             {
                 channel->addMessage(makeSystemMessage(
                     QString("Cannot upload file: %1, not an image")
-                        .arg(path.toLocalFile())));
+                        .arg(localPath)));
                 isUploading = false;
             }
         }
