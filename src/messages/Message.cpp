@@ -27,11 +27,13 @@ SBHighlight Message::getScrollBarHighlight() const
     if (this->flags.has(MessageFlag::Highlighted) ||
         this->flags.has(MessageFlag::HighlightedWhisper))
     {
-        return SBHighlight::newHighlight(this->highlightColor);
+        return SBHighlight(this->highlightColor);
     }
-    else if (this->flags.has(MessageFlag::Subscription))
+    else if (this->flags.has(MessageFlag::Subscription) &&
+             getSettings()->enableSubHighlight)
     {
-        return SBHighlight::newSubscription();
+        return SBHighlight(
+            ColorProvider::instance().color(ColorType::Subscription));
     }
     return SBHighlight();
 }

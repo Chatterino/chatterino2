@@ -38,9 +38,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 
         this->splits.resizeHandle = QColor(0, 148, 255, 0xff);
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x50);
-
-        // Highlighted Messages: theme support quick-fix
-        this->messages.backgrounds.highlighted = QColor("#BD8489");
     }
     else
     {
@@ -49,10 +46,9 @@ void Theme::actuallyUpdate(double hue, double multiplier)
 
         this->splits.resizeHandle = QColor(0, 148, 255, 0x70);
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
-
-        // Highlighted Messages: theme support quick-fix
-        this->messages.backgrounds.highlighted = QColor("#4B282C");
     }
+
+    this->messages.backgrounds.highlighted = QColor(140, 84, 89, 127);
 
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
     this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);

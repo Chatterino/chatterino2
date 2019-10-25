@@ -23,7 +23,8 @@ HighlightPhrase HighlightModel::getItemFromRow(
         row[Column::UseRegex]->data(Qt::CheckStateRole).toBool(),
         row[Column::CaseSensitive]->data(Qt::CheckStateRole).toBool(),
         row[Column::SoundPath]->data(Qt::UserRole).toString(),
-        row[Column::Color]->data(Qt::DecorationRole).value<QColor>()};
+        std::make_shared<QColor>(
+            row[Column::Color]->data(Qt::DecorationRole).value<QColor>())};
 }
 
 // turns a row in the model into a vector item
@@ -36,7 +37,7 @@ void HighlightModel::getRowFromItem(const HighlightPhrase &item,
     setBoolItem(row[Column::UseRegex], item.isRegex());
     setBoolItem(row[Column::CaseSensitive], item.isCaseSensitive());
     setFilePathItem(row[Column::SoundPath], item.getSoundUrl());
-    setColorItem(row[Column::Color], item.getColor());
+    setColorItem(row[Column::Color], *item.getColor());
 }
 
 void HighlightModel::afterInit()
@@ -130,6 +131,10 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->enableWhisperHighlight.setValue(
                         value.toBool());
                 }
+                else if (rowIndex == 2)
+                {
+                    getSettings()->enableSubHighlight.setValue(value.toBool());
+                }
             }
         }
         break;
@@ -146,6 +151,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->enableWhisperHighlightTaskbar.setValue(
                         value.toBool());
                 }
+                else if (rowIndex == 2)
+                {
+                    getSettings()->enableSubHighlightTaskbar.setValue(
+                        value.toBool());
+                }
             }
         }
         break;
@@ -160,6 +170,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 1)
                 {
                     getSettings()->enableWhisperHighlightSound.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == 2)
+                {
+                    getSettings()->enableSubHighlightSound.setValue(
                         value.toBool());
                 }
             }
@@ -187,6 +202,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->whisperHighlightSoundUrl.setValue(
                         value.toString());
                 }
+                else if (rowIndex == 2)
+                {
+                    getSettings()->subHighlightSoundUrl.setValue(
+                        value.toString());
+                }
             }
         }
         break;
@@ -202,6 +222,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 1)
                 {
                     getSettings()->whisperHighlightColor.setValue(
+                        value.value<QColor>().name(QColor::HexArgb));
+                }
+                else if (rowIndex == 2)
+                {
+                    getSettings()->subHighlightColor.setValue(
                         value.value<QColor>().name(QColor::HexArgb));
                 }
             }

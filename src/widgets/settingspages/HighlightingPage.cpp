@@ -7,6 +7,7 @@
 #include "controllers/highlights/UserHighlightModel.hpp"
 #include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/StandardItemHelper.hpp"
 
@@ -74,7 +75,8 @@ HighlightingPage::HighlightingPage()
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->phrases.appendItem(HighlightPhrase{
                         "my phrase", true, false, false, false, "",
-                        HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR});
+                        ColorProvider::instance().color(
+                            ColorType::SelfHighlight)});
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
@@ -115,9 +117,10 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->highlightedUsers.appendItem(
-                        HighlightPhrase{
-                            "highlighted user", true, false, false, false, "",
-                            HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR});
+                        HighlightPhrase{"highlighted user", true, false, false,
+                                        false, "",
+                                        ColorProvider::instance().color(
+                                            ColorType::SelfHighlight)});
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
@@ -231,7 +234,24 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
 
         // Color is invalid when user clicks "Cancel"
         if (selected.isValid())
+        {
             view->getModel()->setData(clicked, selected, Qt::DecorationRole);
+
+            // For special highlight we need to manually update the color map
+            auto instance = ColorProvider::instance();
+            switch (clicked.row())
+            {
+                case 0:
+                    instance.updateColor(ColorType::SelfHighlight, selected);
+                    break;
+                case 1:
+                    instance.updateColor(ColorType::Whisper, selected);
+                    break;
+                case 2:
+                    instance.updateColor(ColorType::Subscription, selected);
+                    break;
+            }
+        }
     }
 }
 

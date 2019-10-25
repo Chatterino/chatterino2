@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Application.hpp"
-#include "debug/Log.hpp"
+#include "controllers/highlights/ColorProvider.hpp"
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -14,13 +13,11 @@ namespace chatterino {
 class HighlightPhrase
 {
 public:
-    static const QColor DEFAULT_HIGHLIGHT_COLOR;
-
     bool operator==(const HighlightPhrase &other) const;
 
     HighlightPhrase(const QString &pattern, bool hasAlert, bool hasSound,
                     bool isRegex, bool isCaseSensitive, const QString &soundUrl,
-                    const QColor &color);
+                    std::shared_ptr<QColor> color);
 
     const QString &getPattern() const;
     bool hasAlert() const;
@@ -57,7 +54,7 @@ public:
     bool isMatch(const QString &subject) const;
     bool isCaseSensitive() const;
     const QUrl &getSoundUrl() const;
-    const QColor &getColor() const;
+    const std::shared_ptr<QColor> getColor() const;
 
 private:
     QString pattern_;
@@ -66,7 +63,7 @@ private:
     bool isRegex_;
     bool isCaseSensitive_;
     QUrl soundUrl_;
-    QColor color_;
+    std::shared_ptr<QColor> color_;
     QRegularExpression regex_;
 };
 
@@ -88,7 +85,7 @@ struct Serialize<chatterino::HighlightPhrase> {
         chatterino::rj::set(ret, "case", value.isCaseSensitive(), a);
         chatterino::rj::set(ret, "soundUrl", value.getSoundUrl().toString(), a);
         chatterino::rj::set(ret, "color",
-                            value.getColor().name(QColor::HexArgb), a);
+                            value.getColor()->name(QColor::HexArgb), a);
 
         return ret;
     }
@@ -102,7 +99,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         {
             return chatterino::HighlightPhrase(
                 QString(), true, false, false, false, "",
-                chatterino::HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR);
+                std::make_shared<QColor>(0, 0, 0, 0));
         }
 
         QString _pattern;
@@ -121,7 +118,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "soundUrl", _soundUrl);
         chatterino::rj::getSafe(value, "color", encodedColor);
 
-        QColor _color = QColor(encodedColor);
+        auto _color = std::make_shared<QColor>(encodedColor);
 
         return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
                                            _isRegex, _isCaseSensitive,

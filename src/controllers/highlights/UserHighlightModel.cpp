@@ -26,7 +26,8 @@ HighlightPhrase UserHighlightModel::getItemFromRow(
         row[Column::UseRegex]->data(Qt::CheckStateRole).toBool(),
         row[Column::CaseSensitive]->data(Qt::CheckStateRole).toBool(),
         row[Column::SoundPath]->data(Qt::UserRole).toString(),
-        row[Column::Color]->data(Qt::DecorationRole).value<QColor>()};
+        std::make_shared<QColor>(
+            row[Column::Color]->data(Qt::DecorationRole).value<QColor>())};
 }
 
 // row into vector item
@@ -41,7 +42,7 @@ void UserHighlightModel::getRowFromItem(const HighlightPhrase &item,
     setBoolItem(row[Column::UseRegex], item.isRegex());
     setBoolItem(row[Column::CaseSensitive], item.isCaseSensitive());
     setFilePathItem(row[Column::SoundPath], item.getSoundUrl());
-    setColorItem(row[Column::Color], item.getColor());
+    setColorItem(row[Column::Color], *item.getColor());
 }
 
 }  // namespace chatterino

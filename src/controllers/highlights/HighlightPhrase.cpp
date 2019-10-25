@@ -1,8 +1,8 @@
 #include "controllers/highlights/HighlightPhrase.hpp"
 
-namespace chatterino {
+#include "controllers/highlights/ColorProvider.hpp"
 
-const QColor HighlightPhrase::DEFAULT_HIGHLIGHT_COLOR = QColor("#4B282C");
+namespace chatterino {
 
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const
 {
@@ -17,7 +17,7 @@ bool HighlightPhrase::operator==(const HighlightPhrase &other) const
 HighlightPhrase::HighlightPhrase(const QString &pattern, bool hasAlert,
                                  bool hasSound, bool isRegex,
                                  bool isCaseSensitive, const QString &soundUrl,
-                                 const QColor &color)
+                                 std::shared_ptr<QColor> color)
     : pattern_(pattern)
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
@@ -78,7 +78,7 @@ const QUrl &HighlightPhrase::getSoundUrl() const
     return this->soundUrl_;
 }
 
-const QColor &HighlightPhrase::getColor() const
+const std::shared_ptr<QColor> HighlightPhrase::getColor() const
 {
     return this->color_;
 }

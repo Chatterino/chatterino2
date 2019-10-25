@@ -926,6 +926,43 @@ void TwitchMessageBuilder::parseHighlights()
 {
     auto app = getApp();
 
+    if (this->message().flags.has(MessageFlag::Subscription) &&
+        getSettings()->enableSubHighlight)
+    {
+        if (getSettings()->enableSubHighlightTaskbar)
+        {
+            this->highlightAlert_ = true;
+        }
+
+        if (getSettings()->enableSubHighlightSound)
+        {
+            this->highlightSound_ = true;
+
+            // Use custom sound is set, otherwise use fallback
+            if (!getSettings()->subHighlightSoundUrl.getValue().isEmpty())
+            {
+                this->highlightSoundUrl_ =
+                    QUrl(getSettings()->subHighlightSoundUrl.getValue());
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
+        }
+
+        if (!this->highlightVisual_)
+        {
+            this->highlightVisual_ = true;
+            this->message().flags.set(MessageFlag::Highlighted);
+            this->message().highlightColor =
+                ColorProvider::instance().color(ColorType::Subscription);
+        }
+
+        // This message was a subscription.
+        // Don't check for any other highlight phrases.
+        return;
+    }
+
     auto currentUser = app->accounts->twitch.getCurrent();
 
     QString currentUsername = currentUser->getUserName();
@@ -999,7 +1036,7 @@ void TwitchMessageBuilder::parseHighlights()
             currentUsername, getSettings()->enableSelfHighlightTaskbar,
             getSettings()->enableSelfHighlightSound, false, false,
             getSettings()->selfHighlightSoundUrl.getValue(),
-            QColor(getSettings()->selfHighlightColor));
+            ColorProvider::instance().color(ColorType::SelfHighlight));
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -1078,7 +1115,7 @@ void TwitchMessageBuilder::parseHighlights()
             this->highlightVisual_ = true;
             this->message().flags.set(MessageFlag::Highlighted);
             this->message().highlightColor =
-                QColor(getSettings()->whisperHighlightColor);
+                ColorProvider::instance().color(ColorType::Whisper);
         }
     }
 }

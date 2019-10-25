@@ -55,7 +55,7 @@ struct Message : boost::noncopyable {
     QString displayName;
     QString localizedName;
     QString timeoutUser;
-    QColor highlightColor;
+    std::shared_ptr<QColor> highlightColor;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
 
