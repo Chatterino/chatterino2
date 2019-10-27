@@ -47,7 +47,7 @@ void TwitchBadges::loadTwitchBadges()
                                 {versionObj.value("image_url_4x").toString()},
                                 .25),
                         },
-                        Tooltip{versionObj.value("description").toString()},
+                        Tooltip{versionObj.value("title").toString()},
                         Url{versionObj.value("click_url").toString()}};
                     // "title"
                     // "clickAction"
