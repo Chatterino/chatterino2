@@ -278,9 +278,6 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
          this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
         !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
-        // TODO(leon)
-        qDebug() << "highlight color from phrase:"
-                 << *this->message_->highlightColor;
         // Blend highlight color with usual background color
         backgroundColor =
             blendColors(backgroundColor, *this->message_->highlightColor);

@@ -237,7 +237,7 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
         {
             view->getModel()->setData(clicked, selected, Qt::DecorationRole);
 
-            // For special highlight we need to manually update the color map
+            // For special highlights we need to manually update the color map
             auto instance = ColorProvider::instance();
             switch (clicked.row())
             {

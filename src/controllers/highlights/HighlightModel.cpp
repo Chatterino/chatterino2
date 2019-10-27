@@ -16,6 +16,12 @@ HighlightModel::HighlightModel(QObject *parent)
 HighlightPhrase HighlightModel::getItemFromRow(
     std::vector<QStandardItem *> &row, const HighlightPhrase &original)
 {
+    // In order for old messages to update their highlight color, we need to
+    // update the highlight color here.
+    auto highlightColor = original.getColor();
+    *highlightColor =
+        row[Column::Color]->data(Qt::DecorationRole).value<QColor>();
+
     return HighlightPhrase{
         row[Column::Pattern]->data(Qt::DisplayRole).toString(),
         row[Column::FlashTaskbar]->data(Qt::CheckStateRole).toBool(),
@@ -23,8 +29,7 @@ HighlightPhrase HighlightModel::getItemFromRow(
         row[Column::UseRegex]->data(Qt::CheckStateRole).toBool(),
         row[Column::CaseSensitive]->data(Qt::CheckStateRole).toBool(),
         row[Column::SoundPath]->data(Qt::UserRole).toString(),
-        std::make_shared<QColor>(
-            row[Column::Color]->data(Qt::DecorationRole).value<QColor>())};
+        highlightColor};
 }
 
 // turns a row in the model into a vector item
@@ -214,20 +219,18 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             // Custom color
             if (role == Qt::DecorationRole)
             {
+                auto colorName = value.value<QColor>().name(QColor::HexArgb);
                 if (rowIndex == 0)
                 {
-                    getSettings()->selfHighlightColor.setValue(
-                        value.value<QColor>().name(QColor::HexArgb));
+                    getSettings()->selfHighlightColor.setValue(colorName);
                 }
                 else if (rowIndex == 1)
                 {
-                    getSettings()->whisperHighlightColor.setValue(
-                        value.value<QColor>().name(QColor::HexArgb));
+                    getSettings()->whisperHighlightColor.setValue(colorName);
                 }
                 else if (rowIndex == 2)
                 {
-                    getSettings()->subHighlightColor.setValue(
-                        value.value<QColor>().name(QColor::HexArgb));
+                    getSettings()->subHighlightColor.setValue(colorName);
                 }
             }
         }
