@@ -1173,21 +1173,21 @@ void TwitchMessageBuilder::appendTwitchBadges()
             this->emplace<ImageElement>(
                     Image::fromPixmap(getResources().twitch.staff),
                     MessageElementFlag::BadgeGlobalAuthority)
-                ->setTooltip("Twitch Staff");
+                ->setTooltip("Staff");
         }
         else if (badge == "admin/1")
         {
             this->emplace<ImageElement>(
                     Image::fromPixmap(getResources().twitch.admin),
                     MessageElementFlag::BadgeGlobalAuthority)
-                ->setTooltip("Twitch Admin");
+                ->setTooltip("Admin");
         }
         else if (badge == "global_mod/1")
         {
             this->emplace<ImageElement>(
                     Image::fromPixmap(getResources().twitch.globalmod),
                     MessageElementFlag::BadgeGlobalAuthority)
-                ->setTooltip("Twitch Global Moderator");
+                ->setTooltip("Global Moderator");
         }
         else if (badge == "moderator/1")
         {
@@ -1202,7 +1202,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             this->emplace<ImageElement>(
                     Image::fromPixmap(getResources().twitch.moderator),
                     MessageElementFlag::BadgeChannelAuthority)
-                ->setTooltip("Twitch Channel Moderator");
+                ->setTooltip("Moderator");
         }
         else if (badge == "vip/1")
         {
@@ -1216,21 +1216,21 @@ void TwitchMessageBuilder::appendTwitchBadges()
             this->emplace<ImageElement>(
                     Image::fromPixmap(getResources().twitch.broadcaster),
                     MessageElementFlag::BadgeChannelAuthority)
-                ->setTooltip("Twitch Broadcaster");
+                ->setTooltip("Broadcaster");
         }
         else if (badge == "turbo/1")
         {
             this->emplace<ImageElement>(
                     Image::fromPixmap(getResources().twitch.turbo),
                     MessageElementFlag::BadgeVanity)
-                ->setTooltip("Twitch Turbo Subscriber");
+                ->setTooltip("Twitch Turbo");
         }
         else if (badge == "premium/1")
         {
             this->emplace<ImageElement>(
                     Image::fromPixmap(getResources().twitch.prime),
                     MessageElementFlag::BadgeVanity)
-                ->setTooltip("Twitch Prime Subscriber");
+                ->setTooltip("Twitch Prime");
         }
         else if (badge.startsWith("partner/"))
         {
@@ -1242,7 +1242,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
                             Image::fromPixmap(getResources().twitch.verified,
                                               0.25),
                             MessageElementFlag::BadgeVanity)
-                        ->setTooltip("Twitch Verified");
+                        ->setTooltip("Verified");
                 }
                 break;
                 default: {
