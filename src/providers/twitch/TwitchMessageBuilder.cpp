@@ -1128,8 +1128,6 @@ void TwitchMessageBuilder::appendTwitchBadges()
         return;
     }
 
-    auto app = getApp();
-
     auto iterator = this->tags.find("badges");
     if (iterator == this->tags.end())
         return;
