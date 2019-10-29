@@ -156,7 +156,7 @@ namespace detail {
 
                      if (self->awaitingPong_)
                      {
-                         log("No pong respnose, disconnect!");
+                         log("No pong response, disconnect!");
                          // TODO(pajlada): Label this connection as "disconnect
                          // me"
                      }
