@@ -33,7 +33,7 @@ git submodule update --init --recursive
 [Building on Mac](../master/BUILDING_ON_MAC.md)
 
 ## Code style
-The code is formatted using clang format in Qt Creator. [.clang-format](https://github.com/Chatterino/chatterino2/blob/master/.clang-format) contains the style file for clang format.
+The code is formatted using clang format in Qt Creator. [.clang-format](src/.clang-format) contains the style file for clang format.
 
 ### Get it automated with QT Creator + Beautifier + Clang Format
 1. Download LLVM: http://releases.llvm.org/6.0.1/LLVM-6.0.1-win64.exe
