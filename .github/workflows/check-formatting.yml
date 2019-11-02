@@ -9,6 +9,7 @@ jobs:
       image: ubuntu:19.10
 
     steps:
+    - uses: actions/checkout@v1
     - name: apt-get update
       run: apt-get update
 
