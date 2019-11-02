@@ -3,9 +3,10 @@ name: Check formatting
 on: [push]
 
 jobs:
-
   build:
-    container: ubuntu:19.10
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:19.10
 
     steps:
     - name: apt-get update
