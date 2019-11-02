@@ -649,8 +649,8 @@ IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
     }
     else if (type == "irc")
     {
-        return Irc::instance().getOrAddChannel(
-            obj.value("server").toInt(-1), obj.value("channel").toString());
+        return Irc::instance().getOrAddChannel(obj.value("server").toInt(-1),
+                                               obj.value("channel").toString());
     }
 
     return Channel::getEmpty();

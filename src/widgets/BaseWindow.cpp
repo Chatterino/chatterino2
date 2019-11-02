@@ -340,20 +340,17 @@ void BaseWindow::onFocusLost()
 {
     switch (this->getActionOnFocusLoss())
     {
-        case Delete:
-        {
+        case Delete: {
             this->deleteLater();
         }
         break;
 
-        case Close:
-        {
+        case Close: {
             this->close();
         }
         break;
 
-        case Hide:
-        {
+        case Hide: {
             this->hide();
         }
         break;
