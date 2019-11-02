@@ -13,7 +13,7 @@ jobs:
       run: apt-get update
 
     - name: Install clang-format
-      run: apt-get install clang-format
+      run: apt-get -y install clang-format
 
     - name: Check formatting
       run: ./tools/check-format.sh
