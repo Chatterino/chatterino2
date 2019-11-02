@@ -1,0 +1,10 @@
+FROM ubuntu:19.10
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get -y install clang-format
+
+WORKDIR /build
+
+CMD ["/bin/sh"]
+ENTRYPOINT ["./tools/docker/build.sh"]
