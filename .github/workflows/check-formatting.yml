@@ -5,13 +5,14 @@ on: [push]
 jobs:
 
   build:
-
-    runs-on: ubuntu-latest
+    container: ubuntu:19.10
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Build the Chatterino2 Docker check-format image
-      run: docker build . --file .docker/Dockerfile.check-format --tag chatterino2-check-format
+    - name: apt-get update
+      run: apt-get update
+
+    - name: Install clang-format
+      run: apt-get install clang-format
 
     - name: Check formatting
       run: ./tools/check-format.sh
