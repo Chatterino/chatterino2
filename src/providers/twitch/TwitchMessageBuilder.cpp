@@ -1251,14 +1251,59 @@ void TwitchMessageBuilder::appendTwitchBadges()
                 break;
             }
         }
+        else if (badge.startsWith("founder/"))
+        {
+            if (auto badgeEmote =
+                    this->twitchChannel->globalTwitchBadges().badge("founder",
+                                                                    "0"))
+            {
+                auto badgeInfo = this->tags.find("badge-info");
+                if (badgeInfo != this->tags.end() &&
+                    badgeInfo.value().toString().split(',')[0].startsWith(
+                        "founder/"))
+                {
+                    auto subMonths =
+                        badgeInfo.value().toString().split(',')[0].mid(8);
+                    this->emplace<BadgeElement>(
+                            badgeEmote.get(),
+                            MessageElementFlag::BadgeSubscription)
+                        ->setTooltip(QString((*badgeEmote)->tooltip.string) +
+                                     " (" + subMonths + " months)");
+                }
+                else
+                {
+                    this->emplace<BadgeElement>(
+                            badgeEmote.get(),
+                            MessageElementFlag::BadgeSubscription)
+                        ->setTooltip((*badgeEmote)->tooltip.string);
+                }
+            }
+        }
         else if (badge.startsWith("subscriber/"))
         {
             if (auto badgeEmote = this->twitchChannel->twitchBadge(
                     "subscriber", badge.mid(11)))
             {
-                this->emplace<BadgeElement>(
-                        badgeEmote.get(), MessageElementFlag::BadgeSubscription)
-                    ->setTooltip((*badgeEmote)->tooltip.string);
+                auto badgeInfo = this->tags.find("badge-info");
+                if (badgeInfo != this->tags.end() &&
+                    badgeInfo.value().toString().split(',')[0].startsWith(
+                        "subscriber/"))
+                {
+                    auto subMonths =
+                        badgeInfo.value().toString().split(',')[0].mid(11);
+                    this->emplace<BadgeElement>(
+                            badgeEmote.get(),
+                            MessageElementFlag::BadgeSubscription)
+                        ->setTooltip(QString((*badgeEmote)->tooltip.string) +
+                                     " (" + subMonths + " months)");
+                }
+                else
+                {
+                    this->emplace<BadgeElement>(
+                            badgeEmote.get(),
+                            MessageElementFlag::BadgeSubscription)
+                        ->setTooltip((*badgeEmote)->tooltip.string);
+                }
                 continue;
             }
 
@@ -1292,7 +1337,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             }
         }
     }
-}
+}  // namespace chatterino
 
 void TwitchMessageBuilder::appendChatterinoBadges()
 {
