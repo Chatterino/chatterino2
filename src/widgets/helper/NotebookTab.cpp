@@ -466,7 +466,8 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
         }
     };
 
-    if (event->button() == Qt::MiddleButton)
+    if (event->button() == Qt::MiddleButton &&
+        this->notebook_->getAllowUserTabManagement())
     {
         if (this->rect().contains(event->pos()))
         {
