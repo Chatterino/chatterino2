@@ -173,6 +173,7 @@ SOURCES += \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
     src/providers/twitch/TwitchApi.cpp \
+    src/providers/twitch/TwitchBadge.cpp \
     src/providers/twitch/TwitchBadges.cpp \
     src/providers/twitch/TwitchChannel.cpp \
     src/providers/twitch/TwitchEmotes.cpp \
@@ -372,6 +373,7 @@ HEADERS += \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \
     src/providers/twitch/TwitchApi.hpp \
+    src/providers/twitch/TwitchBadge.hpp \
     src/providers/twitch/TwitchBadges.hpp \
     src/providers/twitch/TwitchChannel.hpp \
     src/providers/twitch/TwitchCommon.hpp \

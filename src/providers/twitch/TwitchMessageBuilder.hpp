@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
 #include <QString>
@@ -60,6 +61,7 @@ private:
     // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
     void parseHighlights();
 
+    boost::optional<EmotePtr> getTwitchBadge(const Badge &badge);
     void appendTwitchEmote(
         const QString &emote,
         std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec,

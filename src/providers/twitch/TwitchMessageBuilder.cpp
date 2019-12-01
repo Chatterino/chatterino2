@@ -65,6 +65,59 @@ QColor getRandomColor(const QVariant &userId)
 
 namespace chatterino {
 
+namespace {
+
+    QStringList parseTagList(const QVariantMap &tags, const QString &key)
+    {
+        auto iterator = tags.find(key);
+        if (iterator == tags.end())
+            return QStringList{};
+
+        return iterator.value().toString().split(
+            ',', QString::SplitBehavior::SkipEmptyParts);
+    }
+
+    std::map<QString, QString> parseBadgeInfos(const QVariantMap &tags)
+    {
+        std::map<QString, QString> badgeInfos;
+
+        for (QString badgeInfo : parseTagList(tags, "badge-info"))
+        {
+            QStringList parts = badgeInfo.split('/');
+            if (parts.size() != 2)
+            {
+                log("Skipping badge-info because it split weird: {}",
+                    badgeInfo);
+                continue;
+            }
+
+            badgeInfos.emplace(parts[0], parts[1]);
+        }
+
+        return badgeInfos;
+    }
+
+    std::vector<Badge> parseBadges(const QVariantMap &tags)
+    {
+        std::vector<Badge> badges;
+
+        for (QString badge : parseTagList(tags, "badges"))
+        {
+            QStringList parts = badge.split('/');
+            if (parts.size() != 2)
+            {
+                log("Skipping badge because it split weird: {}", badge);
+                continue;
+            }
+
+            badges.emplace_back(parts[0], parts[1]);
+        }
+
+        return badges;
+    }
+
+}  // namespace
+
 TwitchMessageBuilder::TwitchMessageBuilder(
     Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
     const MessageParseArgs &_args)
@@ -1120,7 +1173,24 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     return Failure;
 }
 
-// fourtf: this is ugly
+boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
+    const Badge &badge)
+{
+    if (auto channelBadge =
+            this->twitchChannel->twitchBadge(badge.key_, badge.value_))
+    {
+        return channelBadge;
+    }
+
+    if (auto globalBadge = this->twitchChannel->globalTwitchBadges().badge(
+            badge.key_, badge.value_))
+    {
+        return globalBadge;
+    }
+
+    return boost::none;
+}
+
 void TwitchMessageBuilder::appendTwitchBadges()
 {
     if (this->twitchChannel == nullptr)
@@ -1128,66 +1198,25 @@ void TwitchMessageBuilder::appendTwitchBadges()
         return;
     }
 
-    auto iterator = this->tags.find("badges");
-    if (iterator == this->tags.end())
-        return;
+    auto badgeInfos = parseBadgeInfos(this->tags);
+    auto badges = parseBadges(this->tags);
 
-    for (QString badge : iterator.value().toString().split(','))
+    for (const auto &badge : badges)
     {
-        if (badge.startsWith("bits/"))
+        auto badgeEmote = this->getTwitchBadge(badge);
+        if (!badgeEmote)
         {
-            QString cheerAmount = badge.mid(5);
-            QString tooltip = QString("Twitch cheer ") + cheerAmount;
+            log("No channel/global variant found {}", badge.key_);
+            continue;
+        }
+        auto tooltip = (*badgeEmote)->tooltip.string;
 
-            // Try to fetch channel-specific bit badge
-            try
-            {
-                if (twitchChannel)
-                    if (const auto &_badge = this->twitchChannel->twitchBadge(
-                            "bits", cheerAmount))
-                    {
-                        this->emplace<BadgeElement>(
-                                _badge.get(), MessageElementFlag::BadgeVanity)
-                            ->setTooltip(tooltip);
-                        continue;
-                    }
-            }
-            catch (const std::out_of_range &)
-            {
-                // Channel does not contain a special bit badge for this version
-            }
-
-            // Use default bit badge
-            if (auto _badge = this->twitchChannel->globalTwitchBadges().badge(
-                    "bits", cheerAmount))
-            {
-                this->emplace<BadgeElement>(_badge.get(),
-                                            MessageElementFlag::BadgeVanity)
-                    ->setTooltip(tooltip);
-            }
-        }
-        else if (badge == "staff/1")
+        if (badge.key_ == "bits")
         {
-            this->emplace<ImageElement>(
-                    Image::fromPixmap(getResources().twitch.staff),
-                    MessageElementFlag::BadgeGlobalAuthority)
-                ->setTooltip("Staff");
+            const auto &cheerAmount = badge.value_;
+            tooltip = QString("Twitch cheer %0").arg(cheerAmount);
         }
-        else if (badge == "admin/1")
-        {
-            this->emplace<ImageElement>(
-                    Image::fromPixmap(getResources().twitch.admin),
-                    MessageElementFlag::BadgeGlobalAuthority)
-                ->setTooltip("Admin");
-        }
-        else if (badge == "global_mod/1")
-        {
-            this->emplace<ImageElement>(
-                    Image::fromPixmap(getResources().twitch.globalmod),
-                    MessageElementFlag::BadgeGlobalAuthority)
-                ->setTooltip("Global Moderator");
-        }
-        else if (badge == "moderator/1")
+        else if (badge.key_ == "moderator")
         {
             if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
             {
@@ -1195,149 +1224,24 @@ void TwitchMessageBuilder::appendTwitchBadges()
                         customModBadge.get(),
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customModBadge)->tooltip.string);
+                // early out, since we have to add a custom badge element here
                 continue;
             }
-            this->emplace<ImageElement>(
-                    Image::fromPixmap(getResources().twitch.moderator),
-                    MessageElementFlag::BadgeChannelAuthority)
-                ->setTooltip("Moderator");
         }
-        else if (badge == "vip/1")
+        else if (badge.flag_ == MessageElementFlag::BadgeSubscription)
         {
-            this->emplace<ImageElement>(
-                    Image::fromPixmap(getResources().twitch.vip),
-                    MessageElementFlag::BadgeChannelAuthority)
-                ->setTooltip("VIP");
-        }
-        else if (badge == "broadcaster/1")
-        {
-            this->emplace<ImageElement>(
-                    Image::fromPixmap(getResources().twitch.broadcaster),
-                    MessageElementFlag::BadgeChannelAuthority)
-                ->setTooltip("Broadcaster");
-        }
-        else if (badge == "turbo/1")
-        {
-            this->emplace<ImageElement>(
-                    Image::fromPixmap(getResources().twitch.turbo),
-                    MessageElementFlag::BadgeVanity)
-                ->setTooltip("Twitch Turbo");
-        }
-        else if (badge == "premium/1")
-        {
-            this->emplace<ImageElement>(
-                    Image::fromPixmap(getResources().twitch.prime),
-                    MessageElementFlag::BadgeVanity)
-                ->setTooltip("Twitch Prime");
-        }
-        else if (badge.startsWith("partner/"))
-        {
-            int index = badge.midRef(8).toInt();
-            switch (index)
+            auto badgeInfoIt = badgeInfos.find(badge.key_);
+            if (badgeInfoIt != badgeInfos.end())
             {
-                case 1: {
-                    this->emplace<ImageElement>(
-                            Image::fromPixmap(getResources().twitch.verified,
-                                              0.25),
-                            MessageElementFlag::BadgeVanity)
-                        ->setTooltip("Verified");
-                }
-                break;
-                default: {
-                    printf("[TwitchMessageBuilder] Unhandled partner badge "
-                           "index: %d\n",
-                           index);
-                }
-                break;
+                const auto &subMonths = badgeInfoIt->second;
+                tooltip += QString(" (%0 months)").arg(subMonths);
             }
         }
-        else if (badge.startsWith("founder/"))
-        {
-            if (auto badgeEmote =
-                    this->twitchChannel->globalTwitchBadges().badge("founder",
-                                                                    "0"))
-            {
-                auto badgeInfo = this->tags.find("badge-info");
-                if (badgeInfo != this->tags.end() &&
-                    badgeInfo.value().toString().split(',')[0].startsWith(
-                        "founder/"))
-                {
-                    auto subMonths =
-                        badgeInfo.value().toString().split(',')[0].mid(8);
-                    this->emplace<BadgeElement>(
-                            badgeEmote.get(),
-                            MessageElementFlag::BadgeSubscription)
-                        ->setTooltip(QString((*badgeEmote)->tooltip.string) +
-                                     " (" + subMonths + " months)");
-                }
-                else
-                {
-                    this->emplace<BadgeElement>(
-                            badgeEmote.get(),
-                            MessageElementFlag::BadgeSubscription)
-                        ->setTooltip((*badgeEmote)->tooltip.string);
-                }
-            }
-        }
-        else if (badge.startsWith("subscriber/"))
-        {
-            if (auto badgeEmote = this->twitchChannel->twitchBadge(
-                    "subscriber", badge.mid(11)))
-            {
-                auto badgeInfo = this->tags.find("badge-info");
-                if (badgeInfo != this->tags.end() &&
-                    badgeInfo.value().toString().split(',')[0].startsWith(
-                        "subscriber/"))
-                {
-                    auto subMonths =
-                        badgeInfo.value().toString().split(',')[0].mid(11);
-                    this->emplace<BadgeElement>(
-                            badgeEmote.get(),
-                            MessageElementFlag::BadgeSubscription)
-                        ->setTooltip(QString((*badgeEmote)->tooltip.string) +
-                                     " (" + subMonths + " months)");
-                }
-                else
-                {
-                    this->emplace<BadgeElement>(
-                            badgeEmote.get(),
-                            MessageElementFlag::BadgeSubscription)
-                        ->setTooltip((*badgeEmote)->tooltip.string);
-                }
-                continue;
-            }
 
-            // use default subscriber badge if custom one not found
-            this->emplace<ImageElement>(
-                    Image::fromPixmap(getResources().twitch.subscriber, 0.25),
-                    MessageElementFlag::BadgeSubscription)
-                ->setTooltip("Twitch Subscriber");
-        }
-        else
-        {
-            auto splits = badge.split('/');
-            if (splits.size() != 2)
-                continue;
-
-            if (auto badgeEmote =
-                    this->twitchChannel->twitchBadge(splits[0], splits[1]))
-            {
-                this->emplace<BadgeElement>(badgeEmote.get(),
-                                            MessageElementFlag::BadgeVanity)
-                    ->setTooltip((*badgeEmote)->tooltip.string);
-                continue;
-            }
-            if (auto _badge = this->twitchChannel->globalTwitchBadges().badge(
-                    splits[0], splits[1]))
-            {
-                this->emplace<BadgeElement>(_badge.get(),
-                                            MessageElementFlag::BadgeVanity)
-                    ->setTooltip((*_badge)->tooltip.string);
-                continue;
-            }
-        }
+        this->emplace<BadgeElement>(badgeEmote.get(), badge.flag_)
+            ->setTooltip(tooltip);
     }
-}  // namespace chatterino
+}
 
 void TwitchMessageBuilder::appendChatterinoBadges()
 {
@@ -1373,4 +1277,5 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     }
     return Success;
 }
+
 }  // namespace chatterino
