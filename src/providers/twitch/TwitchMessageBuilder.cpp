@@ -28,6 +28,10 @@
 
 namespace {
 
+const QStringList zeroWidthEmotes{
+    "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane",
+};
+
 QColor getRandomColor(const QVariant &userId)
 {
     static const std::vector<QColor> twitchUsernameColors = {
@@ -1162,6 +1166,11 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
     else if ((emote = globalBttvEmotes.emote(name)))
     {
         flags = MessageElementFlag::BttvEmote;
+
+        if (zeroWidthEmotes.contains(name.string))
+        {
+            flags.set(MessageElementFlag::ZeroWidthEmote);
+        }
     }
 
     if (emote)
