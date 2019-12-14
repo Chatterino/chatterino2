@@ -114,6 +114,13 @@ UserInfoPopup::UserInfoPopup()
         auto usercard = user.emplace<EffectLabel2>(this);
         usercard->getLabel().setText("Usercard");
 
+        auto mod = user.emplace<Button>(this);
+        mod->setPixmap(getResources().buttons.mod);
+        mod->setScaleIndependantSize(30, 30);
+        auto unmod = user.emplace<Button>(this);
+        unmod->setPixmap(getResources().buttons.unmod);
+        unmod->setScaleIndependantSize(30, 30);
+
         user->addStretch(1);
 
         QObject::connect(viewLogs.getElement(), &Button::leftClicked, [this] {
@@ -129,6 +136,36 @@ UserInfoPopup::UserInfoPopup()
             QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
                                       this->channel_->getName() +
                                       "/viewercard/" + this->userName_);
+        });
+
+        QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
+            this->channel_->sendMessage("/mod " + this->userName_);
+        });
+        QObject::connect(unmod.getElement(), &Button::leftClicked, [this] {
+            this->channel_->sendMessage("/unmod " + this->userName_);
+        });
+
+        // userstate
+        this->userStateChanged_.connect([this, mod, unmod]() mutable {
+            TwitchChannel *twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->channel_.get());
+
+            bool visibilityModButtons = false;
+
+            if (twitchChannel)
+            {
+                qDebug() << this->userName_;
+
+                bool isMyself =
+                    QString::compare(
+                        getApp()->accounts->twitch.getCurrent()->getUserName(),
+                        this->userName_, Qt::CaseInsensitive) == 0;
+
+                visibilityModButtons =
+                    twitchChannel->isBroadcaster() && !isMyself;
+            }
+            mod->setVisible(visibilityModButtons);
+            unmod->setVisible(visibilityModButtons);
         });
     }
 
