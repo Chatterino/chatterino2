@@ -28,7 +28,7 @@
 
 namespace {
 
-const QStringList zeroWidthEmotes{
+const QSet<QString> zeroWidthEmotes{
     "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane",
 };
 
