@@ -511,7 +511,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addTitle("Cache");
     layout.addDescription(
         "Files that are used often (such as emotes) are saved to disk to "
-        "reduce bandwidth usage and tho speed up loading.");
+        "reduce bandwidth usage and to speed up loading.");
 
     auto cachePathLabel = layout.addDescription("placeholder :D");
     getSettings()->cachePath.connect([cachePathLabel](const auto &,
