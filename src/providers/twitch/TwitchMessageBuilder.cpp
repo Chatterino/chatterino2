@@ -346,6 +346,7 @@ MessagePtr TwitchMessageBuilder::build()
     if (iterator != this->tags.end())
     {
         this->hasBits_ = true;
+        this->bitsLeft = iterator.value().toInt();
         this->bits = iterator.value().toString();
     }
 
@@ -1271,9 +1272,34 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     auto &cheerEmote = *cheerOpt;
     auto match = cheerEmote.regex.match(string);
 
-    if (!match.hasMatch() || !(match.captured(1) <= this->bits))
+    if (!match.hasMatch() || this->bitsLeft == 0)
     {
         return Failure;
+    }
+
+    if (this->bitsLeft >= match.captured(1).toInt())
+    {
+        this->bitsLeft -= match.captured(1).toInt();
+    }
+    else
+    {
+        QString newString = string;
+        int stringCheer = match.captured(1).toInt();
+
+        // Calculate digits in the cheernumber
+        int x = stringCheer;
+        int length = 1;
+        while (x /= 10)
+        {
+            length++;
+        }
+
+        // Remove old number and add the new
+        newString.chop(length);
+        newString +=
+            QString::number(match.captured(1).toInt() - this->bitsLeft);
+
+        return tryParseCheermote(newString);
     }
 
     if (cheerEmote.staticEmote)

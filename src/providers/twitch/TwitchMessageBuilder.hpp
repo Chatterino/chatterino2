@@ -81,6 +81,7 @@ private:
     QString roomID_;
     bool hasBits_ = false;
     QString bits;
+    int bitsLeft;
     bool historicalMessage_ = false;
 
     QString userId_;
