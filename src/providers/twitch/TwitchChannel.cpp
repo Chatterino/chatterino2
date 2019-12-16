@@ -758,6 +758,7 @@ void TwitchChannel::refreshCheerEmotes()
 
                     cheerEmote.color = QColor(tier.color);
                     cheerEmote.minBits = tier.minBits;
+                    cheerEmote.regex = cheerEmoteSet.regex;
 
                     // TODO(pajlada): We currently hardcode dark here :|
                     // We will continue to do so for now since we haven't had to

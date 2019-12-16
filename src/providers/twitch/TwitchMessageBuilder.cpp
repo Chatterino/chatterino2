@@ -1269,6 +1269,13 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
         return Failure;
     }
     auto &cheerEmote = *cheerOpt;
+    auto match = cheerEmote.regex.match(string);
+
+    if (!match.hasMatch() || !(match.captured(1) <= this->bits))
+    {
+        return Failure;
+    }
+
     if (cheerEmote.staticEmote)
     {
         this->emplace<EmoteElement>(cheerEmote.staticEmote,
@@ -1281,9 +1288,11 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     }
     if (cheerEmote.color != QColor())
     {
-        this->emplace<TextElement>(this->bits, MessageElementFlag::BitsAmount,
+        this->emplace<TextElement>(match.captured(1),
+                                   MessageElementFlag::BitsAmount,
                                    cheerEmote.color);
     }
+
     return Success;
 }
 
