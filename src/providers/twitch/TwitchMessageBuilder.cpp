@@ -1277,17 +1277,18 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
         return Failure;
     }
 
-    if (this->bitsLeft >= match.captured(1).toInt())
+    int cheerValue = match.captured(1).toInt();
+
+    if (this->bitsLeft >= cheerValue)
     {
-        this->bitsLeft -= match.captured(1).toInt();
+        this->bitsLeft -= cheerValue;
     }
     else
     {
         QString newString = string;
-        int stringCheer = match.captured(1).toInt();
 
         // Calculate digits in the cheernumber
-        int x = stringCheer;
+        int x = cheerValue;
         int length = 1;
         while (x /= 10)
         {
@@ -1296,8 +1297,7 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
 
         // Remove old number and add the new
         newString.chop(length);
-        newString +=
-            QString::number(match.captured(1).toInt() - this->bitsLeft);
+        newString += QString::number(cheerValue - this->bitsLeft);
 
         return tryParseCheermote(newString);
     }
