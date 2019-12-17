@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2019 Artem Polishchuk <ego.cordatus@gmail.com> -->
+<!-- 2019 Artem Polishchuk <ego.cordatus@gmail.com> -->
 <component type="desktop-application">
-    <id>com.chatterino.chatterino2.desktop</id>
+    <id>com.chatterino.chatterino.desktop</id>
     <metadata_license>CC0-1.0</metadata_license>
     <project_license>MIT</project_license>
     <content_rating type="oars-1.0">
