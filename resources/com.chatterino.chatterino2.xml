@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2019 Artem Polishchuk <ego.cordatus@gmail.com> -->
+<component type="desktop-application">
+    <id>com.chatterino.chatterino2.desktop</id>
+    <metadata_license>CC0-1.0</metadata_license>
+    <project_license>MIT</project_license>
+    <content_rating type="oars-1.0">
+        <content_attribute id="social-chat">intense</content_attribute>
+    </content_rating>
+    <name>Chatterino</name>
+    <summary>
+        Chat client for twitch.tv
+    </summary>
+    <description>
+        <p>
+            Chatterino 2 is the second installment of the Twitch chat client series
+            "Chatterino".
+        </p>
+    </description>
+    <screenshots>
+        <screenshot type="default">
+            <image>https://chatterino.com/img/screenshot-3.png</image>
+        </screenshot>
+    </screenshots>
+    <keywords>
+        <keyword>chat</keyword>
+        <keyword>twitch</keyword>
+    </keywords>
+    <url type="homepage">https://chatterino.com/</url>
+    <url type="bugtracker">https://github.com/Chatterino/chatterino2/issues</url>
+    <url type="donation">https://streamelements.com/fourtf/tip</url>
+    <provides>
+        <binary>chatterino</binary>
+    </provides>
+</component>

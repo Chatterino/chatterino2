@@ -509,7 +509,7 @@ linux:isEmpty(PREFIX) {
 }
 
 linux {
-    desktop.files = resources/chatterino.desktop
+    desktop.files = resources/com.chatterino.chatterino2.desktop
     desktop.path = $$PREFIX/share/applications
 
     build_icons.path = .
