@@ -1264,15 +1264,22 @@ void TwitchMessageBuilder::appendChatterinoBadges()
 
 Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
 {
+    if (this->bitsLeft == 0)
+    {
+        return Failure;
+    }
+
     auto cheerOpt = this->twitchChannel->cheerEmote(string);
+
     if (!cheerOpt)
     {
         return Failure;
     }
+
     auto &cheerEmote = *cheerOpt;
     auto match = cheerEmote.regex.match(string);
 
-    if (!match.hasMatch() || this->bitsLeft == 0)
+    if (!match.hasMatch())
     {
         return Failure;
     }
@@ -1286,17 +1293,7 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     else
     {
         QString newString = string;
-
-        // Calculate digits in the cheernumber
-        int x = cheerValue;
-        int length = 1;
-        while (x /= 10)
-        {
-            length++;
-        }
-
-        // Remove old number and add the new
-        newString.chop(length);
+        newString.chop(QString::number(cheerValue).length());
         newString += QString::number(cheerValue - this->bitsLeft);
 
         return tryParseCheermote(newString);
