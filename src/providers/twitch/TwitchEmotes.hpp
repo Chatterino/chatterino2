@@ -18,6 +18,7 @@ using EmotePtr = std::shared_ptr<const Emote>;
 struct CheerEmote {
     QColor color;
     int minBits;
+    QRegularExpression regex;
 
     EmotePtr animatedEmote;
     EmotePtr staticEmote;
