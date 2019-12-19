@@ -1,3 +1,10 @@
+# Exposed build flags:
+# from lib/fmt.pri
+#  - FMT_PREFIX ($$PWD by default)
+#  - FMT_SYSTEM (1 = true) (unix only)
+# from lib/boost.pri
+#  - BOOST_DIRECTORY (C:\local\boost\ by default) (Windows only)
+
 QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util

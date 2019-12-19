@@ -1,3 +1,7 @@
+# boost
+# Exposed build flags:
+#  - BOOST_DIRECTORY (C:\local\boost\ by default) (Windows only)
+
 pajlada {
     BOOST_DIRECTORY = C:\dev\projects\boost_1_66_0\
 }
