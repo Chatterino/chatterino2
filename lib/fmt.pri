@@ -16,12 +16,10 @@ unix {
         message("Building with FMT submodule (Prefix: $$FMT_PREFIX)")
         SOURCES += $$FMT_PREFIX/fmt/fmt/format.cpp
 
-        INCLUDEPATH += $$PWD/fmt/
+        INCLUDEPATH += $$FMT_PREFIX/fmt/
     }
 } else {
     SOURCES += $$FMT_PREFIX/fmt/fmt/format.cpp
 
     INCLUDEPATH += $$PWD/fmt/
 }
-
-
