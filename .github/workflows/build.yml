@@ -81,8 +81,34 @@ jobs:
           asset_name: chatterino-windows-x86-64.zip
           asset_content_type: application/zip
 
-      - name: Configure (unix)
-        if: (!startsWith(matrix.os, 'windows'))
+      - name: Build (macOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+            mkdir build
+            cd build
+            /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
+            sed -ie 's/-framework\\\ /-framework /g' Makefile
+            make -j8
+            /usr/local/opt/qt/bin/macdeployqt chatterino.app -dmg
+            mkdir app
+            hdiutil attach chatterino.dmg
+            cp -r /Volumes/chatterino/chatterino.app app/
+            create-dmg --volname Chatterino2 --volicon ../resources/chatterino.icns --icon-size 50 --app-drop-link 0 0 --format UDBZ chatterino-osx.dmg app/
+        shell: bash
+
+      - name: Upload release asset (macOS)
+        if: startsWith(matrix.os, 'macos')
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./chatterino-osx.dmg
+          asset_name: chatterino-osx.dmg
+          asset_content_type: application/x-bzip2
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
         run: |
             mkdir build
             cd build
