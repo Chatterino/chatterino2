@@ -49,6 +49,7 @@ jobs:
             cd build
             "C:\Program Files\Conan\conan\conan.exe" install ..
             qmake ..
+            set cl=/MP
             nmake /S /NOLOGO
             windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
             cp release/chatterino.exe Chatterino2/
@@ -76,13 +77,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./
-          tag_name: ${{ github.ref }}
-          release_name: TEST Release ${{ github.ref }}
-          body: |
-              looool
-          draft: true
-          prerelease: true
+          asset_path: ./chatterino-windows-x86-64.zip
+          asset_name: chatterino-windows-x86-64.zip
+          asset_content_type: application/zip
 
       - name: Configure (unix)
         if: (!startsWith(matrix.os, 'windows'))
