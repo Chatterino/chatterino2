@@ -16,11 +16,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v2
-        with:
-          modules: qtwebengine
-
       - name: Install Dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
@@ -36,6 +31,11 @@ jobs:
         run: |
             echo LOL MACOS
         shell: bash
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          modules: qtwebengine
 
       - name: Configure (Windows)
         if: startsWith(matrix.os, 'windows')
