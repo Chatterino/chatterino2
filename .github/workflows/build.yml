@@ -36,14 +36,15 @@ jobs:
             echo xd
         shell: cmd
 
-      - name: Install Dependencies (Linux)
+      - name: Install dependencies 1 (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: |
-            apt-get update
-            apt-get install \
+        run: apt-get update
+
+      - name: Install dependencies 2 (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: apt-get -y install \
                 libssl-dev \
                 libboost-dev libboost-system-dev libboost-filesystem-dev
-        shell: bash
 
       - name: Install Dependencies (MacOS)
         if: startsWith(matrix.os, 'macOS')
