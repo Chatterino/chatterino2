@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
       fail-fast: false
 
     steps:
@@ -16,7 +16,9 @@ jobs:
         with:
           submodules: true
 
-      - name: Install Dependencies (Windows)
+      # INSTALL DEPENDENCIES
+
+      - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
             # We use this source (temporarily?) until choco has updated their version of conan
@@ -30,16 +32,18 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev libpulse-dev
 
-      - name: Install Dependencies (MacOS)
+      - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
             brew install boost openssl rapidjson qt p7zip create-dmg
         shell: bash
 
-      - name: Install Qt
+      - name: Install Qt (All platforms)
         uses: jurplel/install-qt-action@v2
         with:
           modules: qtwebengine
+
+      # BUILD
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -57,8 +61,36 @@ jobs:
             7z a chatterino-windows-x86-64.zip Chatterino2/
         shell: cmd
 
-      - name: Release (Windows)
-        if: startsWith(matrix.os, 'windows')
+      - name: Build (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+            mkdir build
+            cd build
+            /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
+            sed -ie 's/-framework\\\ /-framework /g' Makefile
+            make -j8
+            /usr/local/opt/qt/bin/macdeployqt chatterino.app -dmg
+            echo a
+            mkdir app
+            echo b
+            hdiutil attach chatterino.dmg
+            echo c
+            cp -r /Volumes/chatterino/chatterino.app app/
+            create-dmg --volname Chatterino2 --volicon ../resources/chatterino.icns --icon-size 50 --app-drop-link 0 0 --format UDBZ chatterino-osx.dmg app/
+        shell: bash
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            mkdir build
+            cd build
+            qmake ..
+            make
+        shell: bash
+
+      # CREATE RELEASE
+
+      - name: Create release (All platforms)
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,33 +102,9 @@ jobs:
           draft: true
           prerelease: true
 
-      - name: Upload release asset (Windows)
-        if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./chatterino-windows-x86-64.zip
-          asset_name: chatterino-windows-x86-64.zip
-          asset_content_type: application/zip
+      # UPLOAD RELEASE ASSET
 
-      - name: Build (macOS)
-        if: startsWith(matrix.os, 'macos')
-        run: |
-            mkdir build
-            cd build
-            /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
-            sed -ie 's/-framework\\\ /-framework /g' Makefile
-            make -j8
-            /usr/local/opt/qt/bin/macdeployqt chatterino.app -dmg
-            mkdir app
-            hdiutil attach chatterino.dmg
-            cp -r /Volumes/chatterino/chatterino.app app/
-            create-dmg --volname Chatterino2 --volicon ../resources/chatterino.icns --icon-size 50 --app-drop-link 0 0 --format UDBZ chatterino-osx.dmg app/
-        shell: bash
-
-      - name: Upload release asset (macOS)
+      - name: Upload release asset (MacOS)
         if: startsWith(matrix.os, 'macos')
         uses: actions/upload-release-asset@v1.0.1
         env:
@@ -107,14 +115,14 @@ jobs:
           asset_name: chatterino-osx.dmg
           asset_content_type: application/x-bzip2
 
-      - name: Build (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-            mkdir build
-            cd build
-            qmake ..
-            make
-        shell: bash
 
-      - name: XD
-        run: echo Hello, world!
+      - name: Upload release asset (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./chatterino-windows-x86-64.zip
+          asset_name: chatterino-windows-x86-64.zip
+          asset_content_type: application/zip
