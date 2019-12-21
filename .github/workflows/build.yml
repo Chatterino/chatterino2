@@ -9,6 +9,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, macOS-latest, ubuntu-latest]
+      fail-fast: false
 
     steps:
       - uses: actions/checkout@v1
@@ -28,6 +29,27 @@ jobs:
         uses: jurplel/install-qt-action@v2
         with:
           modules: qtwebengine
+
+      - name: Install Dependencies (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+            echo xd
+        shell: cmd
+
+      - name: Install Dependencies (Linux)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            apt-get update
+            apt-get install \
+                libssl-dev \
+                libboost-dev libboost-system-dev libboost-filesystem-dev
+        shell: shell
+
+      - name: Install Dependencies (MacOS)
+        if: startsWith(matrix.os, 'macOS')
+        run: |
+            echo LOL MACOS
+        shell: shell
 
       - name: Configure (Windows)
         if: startsWith(matrix.os, 'windows')
