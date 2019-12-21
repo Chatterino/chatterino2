@@ -16,9 +16,6 @@ jobs:
         with:
           submodules: true
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v1
-
       - name: Install Dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
