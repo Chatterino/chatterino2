@@ -19,7 +19,8 @@ jobs:
       - name: Install Dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-            choco install conan
+            choco source add -n=AFG -s="https://api.bintray.com/nuget/anotherfoxguy/choco-pkg"
+            choco install conan -y
 
             refreshenv
         shell: cmd
