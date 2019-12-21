@@ -19,6 +19,7 @@ jobs:
       - name: Install Dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
+            # We use this source (temporarily?) until choco has updated their version of conan
             choco source add -n=AFG -s="https://api.bintray.com/nuget/anotherfoxguy/choco-pkg"
             choco install conan -y
 
@@ -40,7 +41,7 @@ jobs:
         with:
           modules: qtwebengine
 
-      - name: Configure (Windows)
+      - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
@@ -50,6 +51,19 @@ jobs:
             qmake ..
             nmake /S /NOLOGO
         shell: cmd
+
+      - name: Release (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: TEST Release ${{ github.ref }}
+          body: |
+              looool
+          draft: true
+          prerelease: true
 
       - name: Configure (unix)
         if: (!startsWith(matrix.os, 'windows'))
