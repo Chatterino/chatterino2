@@ -28,7 +28,7 @@
 
 namespace {
 
-const QStringList zeroWidthEmotes{
+const QSet<QString> zeroWidthEmotes{
     "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane",
 };
 
@@ -1311,38 +1311,38 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
         this->bitsStacked = true;
         return Success;
     }
-}
 
-if (this->bitsLeft >= cheerValue)
-{
-    this->bitsLeft -= cheerValue;
-}
-else
-{
-    QString newString = string;
-    newString.chop(QString::number(cheerValue).length());
-    newString += QString::number(cheerValue - this->bitsLeft);
+    if (this->bitsLeft >= cheerValue)
+    {
+        this->bitsLeft -= cheerValue;
+    }
+    else
+    {
+        QString newString = string;
+        newString.chop(QString::number(cheerValue).length());
+        newString += QString::number(cheerValue - this->bitsLeft);
 
-    return tryParseCheermote(newString);
-}
+        return tryParseCheermote(newString);
+    }
 
-if (cheerEmote.staticEmote)
-{
-    this->emplace<EmoteElement>(cheerEmote.staticEmote,
-                                MessageElementFlag::BitsStatic);
-}
-if (cheerEmote.animatedEmote)
-{
-    this->emplace<EmoteElement>(cheerEmote.animatedEmote,
-                                MessageElementFlag::BitsAnimated);
-}
-if (cheerEmote.color != QColor())
-{
-    this->emplace<TextElement>(
-        match.captured(1), MessageElementFlag::BitsAmount, cheerEmote.color);
-}
+    if (cheerEmote.staticEmote)
+    {
+        this->emplace<EmoteElement>(cheerEmote.staticEmote,
+                                    MessageElementFlag::BitsStatic);
+    }
+    if (cheerEmote.animatedEmote)
+    {
+        this->emplace<EmoteElement>(cheerEmote.animatedEmote,
+                                    MessageElementFlag::BitsAnimated);
+    }
+    if (cheerEmote.color != QColor())
+    {
+        this->emplace<TextElement>(match.captured(1),
+                                   MessageElementFlag::BitsAmount,
+                                   cheerEmote.color);
+    }
 
-return Success;
-}  // namespace chatterino
+    return Success;
+}
 
 }  // namespace chatterino
