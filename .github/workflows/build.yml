@@ -25,6 +25,7 @@ jobs:
           cd build
           qmake ..
           make -j
+      shell: cmd
 
     - name: Configure (unix)
       if: !startsWith(matrix.os, 'windows')
@@ -33,6 +34,7 @@ jobs:
           cd build
           qmake ..
           make -j
+      shell: bash
 
     - name: XD
       run: echo Hello, world!
