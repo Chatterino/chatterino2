@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, macos-latest]
       fail-fast: false
 
     steps:
@@ -31,9 +31,9 @@ jobs:
         run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev libpulse-dev
 
       - name: Install Dependencies (MacOS)
-        if: startsWith(matrix.os, 'macOS')
+        if: startsWith(matrix.os, 'macos')
         run: |
-            echo LOL MACOS
+            brew install boost openssl rapidjson qt p7zip create-dmg
         shell: bash
 
       - name: Install Qt
