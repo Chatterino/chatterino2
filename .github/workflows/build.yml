@@ -38,11 +38,11 @@ jobs:
 
       - name: Install dependencies 1 (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: apt-get update
+        run: sudo apt-get update
 
       - name: Install dependencies 2 (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: apt-get -y install \
+        run: sudo apt-get -y install \
                 libssl-dev \
                 libboost-dev libboost-system-dev libboost-filesystem-dev
 
