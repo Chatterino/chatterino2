@@ -20,10 +20,7 @@ jobs:
       #     git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
       #   shell: bash
 
-      - name: Checkout submodules
-        run: |
-          git submodule update --init --force --recursive --depth=1
-        shell: bash
+      - uses: chris-short/github-action-git-submodules
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
