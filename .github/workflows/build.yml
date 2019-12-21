@@ -11,7 +11,9 @@ jobs:
         os: [windows-latest, macOS-latest, ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
 
       # - name: Checkout submodules
       #   run: |
@@ -20,7 +22,7 @@ jobs:
       #     git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1
       #   shell: bash
 
-      - uses: chris-short/github-action-git-submodules@master
+      # - uses: chris-short/github-action-git-submodules@master
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
