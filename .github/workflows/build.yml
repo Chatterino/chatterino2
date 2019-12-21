@@ -45,7 +45,7 @@ jobs:
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
-            C:\Program Files\Conan\conan.exe install ..
+            C:\Program Files\Conan\conan\conan.exe install ..
             qmake ..
             nmake /S /NOLOGO
         shell: cmd
