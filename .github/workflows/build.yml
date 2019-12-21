@@ -42,13 +42,10 @@ jobs:
       - name: Configure (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-            set
             Update-SessionEnvironment
-            set
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
-            set
             conan install ..
             qmake ..
             nmake /S /NOLOGO
