@@ -1,3 +1,4 @@
+---
 name: Build
 
 on: [push, pull_request]
@@ -10,31 +11,32 @@ jobs:
         os: [windows-latest, macOS-latest, ubuntu-latest]
 
     steps:
-    - uses: actions/checkout@v1
+      - name: checkout
+        uses: actions/checkout@v1
 
-    - name: Install Qt
-      uses: jurplel/install-qt-action@v2
-      with:
-        modules: qtwebengine
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          modules: qtwebengine
 
-    - name: Configure (Windows)
-      if: startsWith(matrix.os, 'windows')
-      run: |
-          call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-          mkdir build
-          cd build
-          qmake ..
-          make -j
-      shell: cmd
+      - name: Configure (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+            call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            mkdir build
+            cd build
+            qmake ..
+            make -j
+        shell: cmd
 
-    - name: Configure (unix)
-      if: !startsWith(matrix.os, 'windows')
-      run: |
-          mkdir build
-          cd build
-          qmake ..
-          make -j
-      shell: bash
+      - name: Configure (unix)
+        if: (!startsWith(matrix.os, 'windows'))
+        run: |
+            mkdir build
+            cd build
+            qmake ..
+            make -j
+        shell: bash
 
-    - name: XD
-      run: echo Hello, world!
+      - name: XD
+        run: echo Hello, world!
