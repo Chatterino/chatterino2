@@ -41,7 +41,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
             # Update-SessionEnvironment
-            call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            Invoke-Environment "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
             conan install ..
