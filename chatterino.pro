@@ -205,6 +205,7 @@ SOURCES += \
     src/widgets/dialogs/UserInfoPopup.cpp \
     src/widgets/dialogs/WelcomeDialog.cpp \
     src/widgets/helper/ChannelView.cpp \
+    src/widgets/helper/ColorButton.cpp \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/DebugPopup.cpp \
     src/widgets/helper/EditableModelView.cpp \
@@ -396,6 +397,7 @@ HEADERS += \
     src/widgets/dialogs/UserInfoPopup.hpp \
     src/widgets/dialogs/WelcomeDialog.hpp \
     src/widgets/helper/ChannelView.hpp \
+    src/widgets/helper/ColorButton.hpp \
     src/widgets/helper/ComboBoxItemDelegate.hpp \
     src/widgets/helper/CommonTexts.hpp \
     src/widgets/helper/DebugPopup.hpp \
