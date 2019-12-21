@@ -47,7 +47,6 @@ jobs:
             conan install ..
             qmake ..
             nmake /S /NOLOGO
-        shell: powershell
 
       - name: Configure (unix)
         if: (!startsWith(matrix.os, 'windows'))
