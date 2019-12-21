@@ -43,11 +43,11 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
             set
+            refreshenv
+            set
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
-            set
-            refreshenv
             set
             conan install ..
             qmake ..
