@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macOS-latest, ubuntu-latest]
+        os: [windows-latest]
       fail-fast: false
 
     steps:
@@ -20,8 +20,6 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
             choco install conan
-
-            refreshenv
         shell: cmd
 
       - name: Install dependencies (Ubuntu)
@@ -42,7 +40,7 @@ jobs:
       - name: Configure (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-            Update-SessionEnvironment
+            # Update-SessionEnvironment
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
