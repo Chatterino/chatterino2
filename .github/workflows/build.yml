@@ -85,7 +85,8 @@ jobs:
             mkdir build
             cd build
             qmake ..
-            make
+            make -j8
+            sh ./../.CI/CreateAppImage.sh
         shell: bash
 
       # CREATE RELEASE
