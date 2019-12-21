@@ -1286,6 +1286,32 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
 
     int cheerValue = match.captured(1).toInt();
 
+    if (getSettings()->stackBits)
+    {
+        if (this->bitsStacked)
+        {
+            return Success;
+        }
+        if (cheerEmote.staticEmote)
+        {
+            this->emplace<EmoteElement>(cheerEmote.staticEmote,
+                                        MessageElementFlag::BitsStatic);
+        }
+        if (cheerEmote.animatedEmote)
+        {
+            this->emplace<EmoteElement>(cheerEmote.animatedEmote,
+                                        MessageElementFlag::BitsAnimated);
+        }
+        if (cheerEmote.color != QColor())
+        {
+            this->emplace<TextElement>(QString::number(this->bitsLeft),
+                                       MessageElementFlag::BitsAmount,
+                                       cheerEmote.color);
+        }
+        this->bitsStacked = true;
+        return Success;
+    }
+
     if (this->bitsLeft >= cheerValue)
     {
         this->bitsLeft -= cheerValue;

@@ -82,6 +82,7 @@ private:
     bool hasBits_ = false;
     QString bits;
     int bitsLeft;
+    bool bitsStacked = false;
     bool historicalMessage_ = false;
 
     QString userId_;
