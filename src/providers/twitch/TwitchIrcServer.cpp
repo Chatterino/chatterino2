@@ -5,6 +5,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/Env.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
@@ -86,13 +87,12 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
         connection->setPassword(oauthToken);
     }
 
-    connection->setSecure(true);
-
     // https://dev.twitch.tv/docs/irc/guide/#connecting-to-twitch-irc
     // SSL disabled: irc://irc.chat.twitch.tv:6667 (or port 80)
     // SSL enabled: irc://irc.chat.twitch.tv:6697 (or port 443)
-    connection->setHost("irc.chat.twitch.tv");
-    connection->setPort(443);
+    connection->setHost(Env::get().twitchServerHost);
+    connection->setPort(Env::get().twitchServerPort);
+    connection->setSecure(Env::get().twitchServerSecure);
 
     this->open(type);
 }

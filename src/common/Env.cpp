@@ -1,5 +1,7 @@
 #include "common/Env.hpp"
 
+#include <QVariant>
+
 namespace chatterino {
 
 namespace {
@@ -10,6 +12,33 @@ namespace {
         if (envString != nullptr)
         {
             return QString(envString);
+        }
+
+        return defaultValue;
+    }
+
+    uint16_t readPortEnv(const char *envName, uint16_t defaultValue)
+    {
+        auto envString = std::getenv(envName);
+        if (envString != nullptr)
+        {
+            bool ok;
+            auto val = QString(envString).toUShort(&ok);
+            if (ok)
+            {
+                return val;
+            }
+        }
+
+        return defaultValue;
+    }
+
+    uint16_t readBoolEnv(const char *envName, bool defaultValue)
+    {
+        auto envString = std::getenv(envName);
+        if (envString != nullptr)
+        {
+            return QVariant(QString(envString)).toBool();
         }
 
         return defaultValue;
@@ -28,6 +57,10 @@ Env::Env()
     , twitchEmoteSetResolverUrl(readStringEnv(
           "CHATTERINO2_TWITCH_EMOTE_SET_RESOLVER_URL",
           "https://braize.pajlada.com/chatterino/twitchemotes/set/%1/"))
+    , twitchServerHost(
+          readStringEnv("CHATTERINO2_TWITCH_SERVER_HOST", "irc.chat.twitch.tv"))
+    , twitchServerPort(readPortEnv("CHATTERINO2_TWITCH_SERVER_PORT", 6697))
+    , twitchServerSecure(readBoolEnv("CHATTERINO2_TWITCH_SERVER_SECURE", true))
 {
 }
 
