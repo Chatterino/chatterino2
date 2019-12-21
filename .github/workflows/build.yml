@@ -43,13 +43,13 @@ jobs:
             apt-get install \
                 libssl-dev \
                 libboost-dev libboost-system-dev libboost-filesystem-dev
-        shell: shell
+        shell: bash
 
       - name: Install Dependencies (MacOS)
         if: startsWith(matrix.os, 'macOS')
         run: |
             echo LOL MACOS
-        shell: shell
+        shell: bash
 
       - name: Configure (Windows)
         if: startsWith(matrix.os, 'windows')
