@@ -24,10 +24,7 @@ jobs:
 
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get update && \
-            sudo apt-get -y install \
-            libssl-dev \
-            libboost-dev libboost-system-dev libboost-filesystem-dev
+        run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev
 
       - name: Install Dependencies (MacOS)
         if: startsWith(matrix.os, 'macOS')
