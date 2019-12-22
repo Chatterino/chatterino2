@@ -22,4 +22,4 @@ void ColorButton::setColor(QColor color)
     this->setStyleSheet("background-color: " + color.name(QColor::HexRgb));
 }
 
-}   // namespace chatterino
+}  // namespace chatterino
