@@ -21,6 +21,18 @@ jobs:
           draft: true
           prerelease: true
 
+      - name: Put release URL in a file
+        env:
+          CI_UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
+        run: |
+            echo "$CI_UPLOAD_URL" > release-upload-url.txt
+
+      - name: Upload release URL artifact
+        uses: actions/upload-artifact@v1
+        with:
+          name: release-upload-url.txt
+          path: release-upload-url.txt
+
   build:
     needs: create-release
     runs-on: ${{ matrix.os }}
@@ -66,10 +78,17 @@ jobs:
             7z a chatterino-windows-x86-64.zip Chatterino2/
         shell: cmd
 
+      - name: Upload artifact (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/upload-artifact@v1
+        with:
+          name: chatterino-windows-x86-64.zip
+          path: build/chatterino-windows-x86-64.zip
+
       # LINUX
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev libpulse-dev libxkbcommon-x11-0
+        run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev libpulse-dev libxkbcommon-x11-0 libgstreamer-plugins-base1.0-0
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -86,6 +105,13 @@ jobs:
             cd build
             sh ./../.CI/CreateAppImage.sh
         shell: bash
+
+      - name: Upload artifact (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v1
+        with:
+          name: Chatterino-x86_64.AppImage
+          path: build/Chatterino-x86_64.AppImage
 
       # MACOS
       - name: Install dependencies (MacOS)
@@ -114,12 +140,26 @@ jobs:
             sh ./../.CI/CreateDMG.sh
         shell: bash
 
-      # CREATE RELEASE
+      - name: Upload artifact (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        uses: actions/upload-artifact@v1
+        with:
+          name: chatterino-osx.dmg
+          path: build/chatterino-osx.dmg
 
+  upload-release:
+    needs: build
+    runs-on: ubuntu-latest
 
-      # UPLOAD RELEASE ASSET
+    steps:
+      - uses: actions/download-artifact@v1
+        with:
+          name: release-upload-url.txt
 
-
+      - name: Read upload URL into output
+        id: upload_url
+        run: |
+          echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
 
       - name: Upload release asset (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -127,7 +167,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.upload_url.outputs.upload_url }}
           asset_path: ./build/chatterino-windows-x86-64.zip
           asset_name: chatterino-windows-x86-64.zip
           asset_content_type: application/zip
@@ -138,7 +178,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.upload_url.outputs.upload_url }}
           asset_path: ./build/Chatterino-x86_64.AppImage
           asset_name: Chatterino-x86_64.AppImage
           asset_content_type: application/x-executable
@@ -149,7 +189,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          upload_url: ${{ steps.upload_url.outputs.upload_url }}
           asset_path: ./build/chatterino-osx.dmg
           asset_name: chatterino-osx.dmg
           asset_content_type: application/x-bzip2
