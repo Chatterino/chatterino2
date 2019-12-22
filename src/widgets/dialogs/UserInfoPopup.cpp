@@ -28,17 +28,23 @@
 
 namespace chatterino {
 namespace {
-    void addCopyableLabel(LayoutCreator<QHBoxLayout> box, Label **assign)
+    Label *addCopyableLabel(LayoutCreator<QHBoxLayout> box)
     {
-        auto label = box.emplace<Label>().assign(assign);
+        auto label = box.emplace<Label>();
         auto button = box.emplace<Button>();
         button->setPixmap(getResources().buttons.copyDark);
         button->setScaleIndependantSize(18, 18);
         button->setDim(Button::Dim::Lots);
-        QObject::connect(button.getElement(), &Button::leftClicked,
-                         [label = label.getElement()] {
-                             qApp->clipboard()->setText(label->getText());
-                         });
+        QObject::connect(
+            button.getElement(), &Button::leftClicked,
+            [label = label.getElement()] {
+                auto copyText = label->property("copy-text").toString();
+
+                qApp->clipboard()->setText(copyText.isEmpty() ? label->getText()
+                                                              : copyText);
+            });
+
+        return label.getElement();
     };
 }  // namespace
 
@@ -51,8 +57,6 @@ UserInfoPopup::UserInfoPopup()
 #ifdef Q_OS_LINUX
     this->setWindowFlag(Qt::Popup);
 #endif
-
-    auto app = getApp();
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
@@ -77,10 +81,10 @@ UserInfoPopup::UserInfoPopup()
                 auto box = vbox.emplace<QHBoxLayout>()
                                .withoutMargin()
                                .withoutSpacing();
-                addCopyableLabel(box, &this->ui_.nameLabel);
+                this->ui_.nameLabel = addCopyableLabel(box);
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
                 box->addStretch(1);
-                addCopyableLabel(box, &this->ui_.userIDLabel);
+                this->ui_.userIDLabel = addCopyableLabel(box);
                 auto palette = QPalette();
                 palette.setColor(QPalette::WindowText, QColor("#aaa"));
                 this->ui_.userIDLabel->setPalette(palette);
@@ -146,8 +150,7 @@ UserInfoPopup::UserInfoPopup()
             TwitchChannel *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->channel_.get());
 
-            bool visibilityMod = false;
-            bool visibilityUnmod = false;
+            bool visibilityModButtons = false;
 
             if (twitchChannel)
             {
@@ -158,12 +161,11 @@ UserInfoPopup::UserInfoPopup()
                         getApp()->accounts->twitch.getCurrent()->getUserName(),
                         this->userName_, Qt::CaseInsensitive) == 0;
 
-                visibilityMod = twitchChannel->isBroadcaster() && !isMyself;
-                visibilityUnmod =
-                    visibilityMod || (twitchChannel->isMod() && isMyself);
+                visibilityModButtons =
+                    twitchChannel->isBroadcaster() && !isMyself;
             }
-            mod->setVisible(visibilityMod);
-            unmod->setVisible(visibilityUnmod);
+            mod->setVisible(visibilityModButtons);
+            unmod->setVisible(visibilityModButtons);
         });
     }
 
@@ -369,6 +371,7 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     this->channel_ = channel;
 
     this->ui_.nameLabel->setText(name);
+    this->ui_.nameLabel->setProperty("copy-text", name);
 
     this->updateUserData();
 
@@ -384,7 +387,8 @@ void UserInfoPopup::updateUserData()
 
         this->userId_ = id;
 
-        this->ui_.userIDLabel->setText(TEXT_USER_ID + this->userId_);
+        this->ui_.userIDLabel->setText(TEXT_USER_ID + id);
+        this->ui_.userIDLabel->setProperty("copy-text", id);
         // don't wait for the request to complete, just put the user id in the card
         // right away
 

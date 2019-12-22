@@ -115,15 +115,27 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     // update line height
     this->lineHeight_ = std::max(this->lineHeight_, newLineHeight);
 
+    auto xOffset = 0;
+
+    if (element->getCreator().getFlags().has(
+            MessageElementFlag::ZeroWidthEmote))
+    {
+        xOffset -= element->getRect().width() + this->spaceWidth_;
+    }
+
     // set move element
-    element->setPosition(
-        QPoint(this->currentX_, this->currentY_ - element->getRect().height()));
+    element->setPosition(QPoint(this->currentX_ + xOffset,
+                                this->currentY_ - element->getRect().height()));
 
     // add element
     this->elements_.push_back(std::unique_ptr<MessageLayoutElement>(element));
 
     // set current x
-    this->currentX_ += element->getRect().width();
+    if (!element->getCreator().getFlags().has(
+            MessageElementFlag::ZeroWidthEmote))
+    {
+        this->currentX_ += element->getRect().width();
+    }
 
     if (element->hasTrailingSpace())
     {
@@ -137,7 +149,9 @@ void MessageLayoutContainer::breakLine()
 
     if (this->flags_.has(MessageFlag::Centered) && this->elements_.size() > 0)
     {
-        xOffset = (width_ - this->elements_.at(0)->getRect().left() -
+        const int marginOffset = int(this->margin.left * this->scale_) +
+                                 int(this->margin.right * this->scale_);
+        xOffset = (width_ - marginOffset -
                    this->elements_.at(this->elements_.size() - 1)
                        ->getRect()
                        .right()) /

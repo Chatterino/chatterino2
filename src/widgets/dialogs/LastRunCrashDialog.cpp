@@ -31,7 +31,7 @@ LastRunCrashDialog::LastRunCrashDialog()
     //    QDialogButtonBox::NoRole); installUpdateButton->setEnabled(false);
     //    QObject::connect(installUpdateButton, &QPushButton::clicked, [this,
     //    update]() mutable {
-    //        auto &updateManager = UpdateManager::getInstance();
+    //        auto &updateManager = UpdateManager::instance();
 
     //        updateManager.installUpdates();
     //        this->setEnabled(false);
@@ -45,7 +45,7 @@ LastRunCrashDialog::LastRunCrashDialog()
 
     // Updates
     //    auto updateUpdateLabel = [update]() mutable {
-    //        auto &updateManager = UpdateManager::getInstance();
+    //        auto &updateManager = UpdateManager::instance();
 
     //        switch (updateManager.getStatus()) {
     //            case UpdateManager::None: {

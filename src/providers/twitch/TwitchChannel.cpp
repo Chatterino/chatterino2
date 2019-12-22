@@ -31,6 +31,7 @@
 
 namespace chatterino {
 namespace {
+    constexpr int TITLE_REFRESH_PERIOD = 10;
     constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
 
     // parseRecentMessages takes a json object and returns a vector of
@@ -89,6 +90,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , mod_(false)
+    , titleRefreshedTime_(QTime::currentTime().addSecs(-TITLE_REFRESH_PERIOD))
 {
     log("[TwitchChannel:{}] Opened", name);
 
@@ -110,6 +112,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
         this->refreshPubsub();
+        this->refreshTitle();
         this->refreshLiveStatus();
         this->refreshBadges();
         this->refreshCheerEmotes();
@@ -229,7 +232,7 @@ bool TwitchChannel::isMod() const
     return this->mod_;
 }
 
-bool TwitchChannel::isVIP() const
+bool TwitchChannel::isVip() const
 {
     return this->vip_;
 }
@@ -278,7 +281,7 @@ bool TwitchChannel::isBroadcaster() const
 
 bool TwitchChannel::hasHighRateLimit() const
 {
-    return this->isMod() || this->isBroadcaster() || this->isVIP();
+    return this->isMod() || this->isBroadcaster() || this->isVip();
 }
 
 bool TwitchChannel::canReconnect() const
@@ -437,6 +440,51 @@ void TwitchChannel::setLive(bool newLiveStatus)
     }
 }
 
+void TwitchChannel::refreshTitle()
+{
+    auto roomID = this->roomId();
+    if (roomID.isEmpty())
+    {
+        return;
+    }
+
+    if (this->titleRefreshedTime_.elapsed() < TITLE_REFRESH_PERIOD * 1000)
+    {
+        return;
+    }
+    this->titleRefreshedTime_ = QTime::currentTime();
+
+    QString url("https://api.twitch.tv/kraken/channels/" + roomID);
+    NetworkRequest::twitchRequest(url)
+        .onSuccess(
+            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+                ChannelPtr shared = weak.lock();
+                if (!shared)
+                    return Failure;
+
+                const auto document = result.parseRapidJson();
+
+                auto statusIt = document.FindMember("status");
+
+                if (statusIt == document.MemberEnd())
+                {
+                    return Failure;
+                }
+
+                {
+                    auto status = this->streamStatus_.access();
+                    if (!rj::getSafe(statusIt->value, status->title))
+                    {
+                        return Failure;
+                    }
+                }
+
+                this->liveStatusChanged.invoke();
+                return Success;
+            })
+        .execute();
+}
+
 void TwitchChannel::refreshLiveStatus()
 {
     auto roomID = this->roomId();
@@ -566,7 +614,7 @@ void TwitchChannel::loadRecentMessages()
 
             auto messages = parseRecentMessages(result.parseJson(), shared);
 
-            auto &handler = IrcMessageHandler::getInstance();
+            auto &handler = IrcMessageHandler::instance();
 
             std::vector<MessagePtr> allBuiltMessages;
 
@@ -711,6 +759,7 @@ void TwitchChannel::refreshCheerEmotes()
 
                     cheerEmote.color = QColor(tier.color);
                     cheerEmote.minBits = tier.minBits;
+                    cheerEmote.regex = cheerEmoteSet.regex;
 
                     // TODO(pajlada): We currently hardcode dark here :|
                     // We will continue to do so for now since we haven't had to

@@ -13,12 +13,12 @@ namespace chatterino {
 
 class Settings : public ABSettings
 {
-    static Settings *instance;
+    static Settings *instance_;
 
 public:
     Settings(const QString &settingsDirectory);
 
-    static Settings &getInstance();
+    static Settings &instance();
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
@@ -119,6 +119,8 @@ public:
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
 
     QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
+
+    BoolSetting stackBits = {"/emotes/stackBits", false};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -234,7 +236,9 @@ public:
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
     QStringSetting cachePath = {"/cache/path", ""};
-    BoolSetting restartOnCrash = {"/misc/restartOnCrash", true};
+    BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
+    BoolSetting attachExtensionToAnyProcess = {
+        "/misc/attachExtensionToAnyProcess", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",

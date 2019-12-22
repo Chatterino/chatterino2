@@ -10,6 +10,10 @@ Args::Args(const QStringList &args)
         {
             this->crashRecovery = true;
         }
+        else if (arg == "--version")
+        {
+            this->printVersion = true;
+        }
     }
 }
 

@@ -26,7 +26,7 @@ Version::Version()
 
     // "Full" version string, as displayed in window title
     this->fullVersion_ = "Chatterino ";
-    if (Modes::getInstance().isNightly)
+    if (Modes::instance().isNightly)
     {
         this->fullVersion_ += "Nightly ";
     }
@@ -34,28 +34,28 @@ Version::Version()
     this->fullVersion_ += this->version_;
 }
 
-const Version &Version::getInstance()
+const Version &Version::instance()
 {
     static Version instance;
     return instance;
 }
 
-const QString &Version::getVersion() const
+const QString &Version::version() const
 {
     return this->version_;
 }
 
-const QString &Version::getFullVersion() const
+const QString &Version::fullVersion() const
 {
     return this->fullVersion_;
 }
 
-const QString &Version::getCommitHash() const
+const QString &Version::commitHash() const
 {
     return this->commitHash_;
 }
 
-const QString &Version::getDateOfBuild() const
+const QString &Version::dateOfBuild() const
 {
     return this->dateOfBuild_;
 }

@@ -99,6 +99,12 @@ namespace {
             .arg(s.uptime)
             .arg(QString::number(s.viewerCount));
     }
+    auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
+    {
+        return QString("<style>.center { text-align: center; }</style> \
+                       <p class=\"center\">Offline<br>%1</p>")
+            .arg(s.title.toHtmlEscaped());
+    }
     auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
     {
         auto title = QString();
@@ -213,9 +219,7 @@ void SplitHeader::initializeLayout()
         this->dropdownButton_ = makeWidget<Button>([&](auto w) {
             /// XXX: this never gets disconnected
             this->split_->channelChanged.connect([this] {
-                auto menu = this->createMainMenu();
-                this->mainMenu_ = menu.get();
-                this->dropdownButton_->setMenu(std::move(menu));
+                this->dropdownButton_->setMenu(this->createMainMenu());
             });
         }),
         // add split
@@ -552,6 +556,10 @@ void SplitHeader::updateChannelText()
             this->tooltipText_ = formatTooltip(*streamStatus);
             title += formatTitle(*streamStatus, *getSettings());
         }
+        else
+        {
+            this->tooltipText_ = formatOfflineTooltip(*streamStatus);
+        }
     }
 
     this->titleLabel_->setText(title.isEmpty() ? "<empty>" : title);
@@ -598,7 +606,9 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
         break;
 
         case Qt::RightButton: {
-            this->mainMenu_->popup(this->mapToGlobal(event->pos()));
+            auto menu = this->createMainMenu().release();
+            menu->setAttribute(Qt::WA_DeleteOnClose);
+            menu->popup(this->mapToGlobal(event->pos() + QPoint(0, 4)));
         }
         break;
     }
@@ -670,9 +680,15 @@ void SplitHeader::enterEvent(QEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
-        TooltipPreviewImage::getInstance().setImage(nullptr);
+        auto channel = this->split_->getChannel().get();
+        if (channel->getType() == Channel::Type::Twitch)
+        {
+            dynamic_cast<TwitchChannel *>(channel)->refreshTitle();
+        }
 
-        auto tooltip = TooltipWidget::getInstance();
+        TooltipPreviewImage::instance().setImage(nullptr);
+
+        auto tooltip = TooltipWidget::instance();
         tooltip->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()),
                         false);
         tooltip->setText(this->tooltipText_);
@@ -687,7 +703,7 @@ void SplitHeader::enterEvent(QEvent *event)
 
 void SplitHeader::leaveEvent(QEvent *event)
 {
-    TooltipWidget::getInstance()->hide();
+    TooltipWidget::instance()->hide();
 
     BaseWidget::leaveEvent(event);
 }

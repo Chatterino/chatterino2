@@ -103,6 +103,10 @@ enum class MessageElementFlag {
     LowercaseLink = (1 << 29),
     OriginalLink = (1 << 30),
 
+    // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
+    // e.g. BTTV's SoSnowy during christmas season
+    ZeroWidthEmote = (1 << 31),
+
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
               AlwaysShow,

@@ -14,10 +14,16 @@ install [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) f
 1. create build folder `mkdir build && cd build`
 1. `qmake .. && make`
 
-## Fedora 28
-*most likely works the same for other Red Hat-like distros*
-1. `sudo yum install qt-creator qt5-qtmultimedia-devel qt5-qtsvg-devel openssl-devel gstreamer-plugins-ugly gstreamer-plugins-good boost-devel rapidjson-devel`
-1. Open `chatterino.pro` with QT Creator and build
+## Fedora 28 and above
+*most likely works the same for other Red Hat-like distros. Substitue `dnf` with `yum`.*
+### Development dependencies
+1. `sudo dnf install qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qtsvg-devel libsecret-devel openssl-devel boost-devel`
+1. go into project directory
+1. create build folder `mkdir build && cd build`
+1. `qmake-qt5 .. && make -j$(nproc)`
+### Optional dependencies
+*`gstreamer-plugins-good` package is retired in Fedora 31, see: [rhbz#1735324](https://bugzilla.redhat.com/show_bug.cgi?id=1735324)*
+1. `sudo dnf install gstreamer-plugins-good` *(optional: for audio output)*
 
 ## NixOS 18.09+
 1. enter the development environment with all of the dependencies: `nix-shell -p openssl boost qt5.full`

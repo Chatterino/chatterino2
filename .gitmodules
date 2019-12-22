@@ -1,6 +1,6 @@
 [submodule "lib/libcommuni"]
 	path = lib/libcommuni
-	url = https://github.com/hemirt/libcommuni
+	url = https://github.com/Chatterino/libcommuni
 [submodule "lib/humanize"]
 	path = lib/humanize
 	url = https://github.com/pajlada/humanize.git

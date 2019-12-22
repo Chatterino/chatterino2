@@ -1,12 +1,12 @@
 [requires]
-OpenSSL/1.0.2o@conan/stable
-boost/1.69.0@conan/stable
+openssl/1.1.1d
+boost/1.71.0
 
 [generators]
 qmake
 
 [options]
-OpenSSL:shared=True
+openssl:shared=True
 
 [imports]
 bin, *.dll -> ./Chatterino2 @ keep_path=False

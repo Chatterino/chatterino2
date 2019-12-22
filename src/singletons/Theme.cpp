@@ -81,7 +81,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     if (getSettings()->highlightColor != "")
     {
         this->messages.backgrounds.highlighted =
-            QColor(getSettings()->highlightColor);
+            QColor(getSettings()->highlightColor.getValue());
     }
 }
 

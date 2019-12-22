@@ -171,7 +171,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     // create new buffer if required
     if (!pixmap)
     {
-#ifdef Q_OS_MACOS
+#if defined(Q_OS_MACOS) || defined(Q_OS_LINUX)
         pixmap = new QPixmap(int(width * painter.device()->devicePixelRatioF()),
                              int(container_->getHeight() *
                                  painter.device()->devicePixelRatioF()));

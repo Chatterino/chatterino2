@@ -285,6 +285,11 @@ void SettingsDialog::themeChangedEvent()
     this->setPalette(palette);
 }
 
+void SettingsDialog::showEvent(QShowEvent *)
+{
+    this->ui_.search->setText("");
+}
+
 ///// Widget creation helpers
 void SettingsDialog::onOkClicked()
 {

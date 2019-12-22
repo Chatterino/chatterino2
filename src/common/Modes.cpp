@@ -27,7 +27,7 @@ Modes::Modes()
     }
 }
 
-const Modes &Modes::getInstance()
+const Modes &Modes::instance()
 {
     static Modes instance;
     return instance;

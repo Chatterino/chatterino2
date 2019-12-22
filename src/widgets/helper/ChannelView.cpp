@@ -1038,14 +1038,6 @@ void ChannelView::leaveEvent(QEvent *)
 
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
 {
-    if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier))
-    {
-        this->unsetCursor();
-
-        event->ignore();
-        return;
-    }
-
     /// Pause on hover
     if (float pauseTime = getSettings()->pauseOnHoverDuration;
         pauseTime > 0.001f)
@@ -1057,7 +1049,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         this->pause(PauseReason::Mouse);
     }
 
-    auto tooltipWidget = TooltipWidget::getInstance();
+    auto tooltipWidget = TooltipWidget::instance();
     std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
@@ -1250,7 +1242,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        auto &tooltipPreviewImage = TooltipPreviewImage::getInstance();
+        auto &tooltipPreviewImage = TooltipPreviewImage::instance();
         auto emoteElement = dynamic_cast<const EmoteElement *>(
             &hoverLayoutElement->getCreator());
         auto badgeElement = dynamic_cast<const BadgeElement *>(
@@ -1506,7 +1498,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (link.type == Link::UserInfo)
             {
-                insertText("@" + link.value + ", ");
+                const bool commaMention = getSettings()->mentionUsersWithComma;
+                insertText("@" + link.value + (commaMention ? ", " : " "));
             }
             else if (link.type == Link::UserWhisper)
             {

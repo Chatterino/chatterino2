@@ -178,7 +178,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
     }
 
     // XXX: Might need the following line
-    // WindowManager::getInstance().repaintVisibleChatWidgets(this);
+    // WindowManager::instance().repaintVisibleChatWidgets(this);
 }
 
 void Channel::disableAllMessages()

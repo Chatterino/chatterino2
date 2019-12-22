@@ -5,6 +5,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/Env.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
@@ -86,13 +87,12 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
         connection->setPassword(oauthToken);
     }
 
-    connection->setSecure(true);
-
     // https://dev.twitch.tv/docs/irc/guide/#connecting-to-twitch-irc
-    // SSL disabled: irc://irc.chat.twitch.tv:6667
-    // SSL enabled: irc://irc.chat.twitch.tv:6697
-    connection->setHost("irc.chat.twitch.tv");
-    connection->setPort(6697);
+    // SSL disabled: irc://irc.chat.twitch.tv:6667 (or port 80)
+    // SSL enabled: irc://irc.chat.twitch.tv:6697 (or port 443)
+    connection->setHost(Env::get().twitchServerHost);
+    connection->setPort(Env::get().twitchServerPort);
+    connection->setSecure(Env::get().twitchServerSecure);
 
     this->open(type);
 }
@@ -125,7 +125,7 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
 void TwitchIrcServer::privateMessageReceived(
     Communi::IrcPrivateMessage *message)
 {
-    IrcMessageHandler::getInstance().handlePrivMessage(message, *this);
+    IrcMessageHandler::instance().handlePrivMessage(message, *this);
 }
 
 void TwitchIrcServer::readConnectionMessageReceived(
@@ -141,7 +141,7 @@ void TwitchIrcServer::readConnectionMessageReceived(
 
     const QString &command = message->command();
 
-    auto &handler = IrcMessageHandler::getInstance();
+    auto &handler = IrcMessageHandler::instance();
 
     // Below commands enabled through the twitch.tv/membership CAP REQ
     if (command == "MODE")
@@ -194,7 +194,7 @@ void TwitchIrcServer::writeConnectionMessageReceived(
 {
     const QString &command = message->command();
 
-    auto &handler = IrcMessageHandler::getInstance();
+    auto &handler = IrcMessageHandler::instance();
     // Below commands enabled through the twitch.tv/commands CAP REQ
     if (command == "USERSTATE")
     {

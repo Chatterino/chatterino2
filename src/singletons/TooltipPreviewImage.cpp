@@ -5,7 +5,7 @@
 #include "widgets/TooltipWidget.hpp"
 
 namespace chatterino {
-TooltipPreviewImage &TooltipPreviewImage::getInstance()
+TooltipPreviewImage &TooltipPreviewImage::instance()
 {
     static TooltipPreviewImage *instance = new TooltipPreviewImage();
     return *instance;
@@ -14,7 +14,7 @@ TooltipPreviewImage &TooltipPreviewImage::getInstance()
 TooltipPreviewImage::TooltipPreviewImage()
 {
     connections_.push_back(getApp()->windows->gifRepaintRequested.connect([&] {
-        auto tooltipWidget = TooltipWidget::getInstance();
+        auto tooltipWidget = TooltipWidget::instance();
         if (this->image_ && !tooltipWidget->isHidden())
         {
             auto pixmap = this->image_->pixmapOrLoad();
