@@ -16,7 +16,7 @@ jobs:
         with:
           submodules: true
 
-      - name: Install Qt (All platforms)
+      - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
           modules: qtwebengine
@@ -122,7 +122,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Create release (All platforms)
+      - name: Create release
         id: create_release
         uses: actions/create-release@v1
         env:
