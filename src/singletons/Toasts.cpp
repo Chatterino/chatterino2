@@ -9,7 +9,6 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/TwitchServer.hpp"
 #include "singletons/Paths.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/helper/CommonTexts.hpp"
@@ -101,6 +100,7 @@ void Toasts::sendToastMessage(const QString &channelName)
 void Toasts::actuallySendToastMessage(const QUrl &url,
                                       const QString &channelName)
 {
+    Snore::SnoreCore &instance = Snore::SnoreCore::instance();
     QString bottomText = "";
     if (static_cast<ToastReaction>(getSettings()->openFromToast.getValue()) !=
         ToastReaction::DontOpen)
@@ -113,25 +113,25 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
     }
 
     NetworkRequest::twitchRequest(url)
-        .onSuccess([this, channelName, bottomText](auto result) -> Outcome {
-            const auto data = result.getData();
+        .onSuccess(
+            [this, channelName, bottomText, &instance](auto result) -> Outcome {
+                const auto data = result.getData();
 
-            QPixmap avatar;
-            avatar.loadFromData(data);
+                QPixmap avatar;
+                avatar.loadFromData(data);
 
-            Snore::SnoreCore::instance().broadcastNotification(
-                Snore::Notification(app, app.defaultAlert(),
-                                    channelName + " just went live!",
-                                    bottomText, Snore::Icon(avatar)));
-            return Success;
-        })
-        .onError([this, channelName, bottomText](auto result) -> bool {
-            Snore::SnoreCore::instance().broadcastNotification(
-                Snore::Notification(app, app.defaultAlert(),
-                                    channelName + " just went live!",
-                                    bottomText, app.icon()));
-            return false;
-        })
+                instance.broadcastNotification(Snore::Notification(
+                    app, app.defaultAlert(), channelName + " just went live!",
+                    bottomText, Snore::Icon(avatar)));
+                return Success;
+            })
+        .onError(
+            [this, channelName, bottomText, &instance](auto result) -> bool {
+                instance.broadcastNotification(Snore::Notification(
+                    app, app.defaultAlert(), channelName + " just went live!",
+                    bottomText, app.icon()));
+                return false;
+            })
         .execute();
 }
 }  // namespace chatterino
