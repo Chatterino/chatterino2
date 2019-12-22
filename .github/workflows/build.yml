@@ -87,14 +87,16 @@ jobs:
             /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
             sed -ie 's/-framework\\\ /-framework /g' Makefile
             make -j8
-            /usr/local/opt/qt/bin/macdeployqt chatterino.app -dmg
-            echo a
-            mkdir app
-            echo b
-            hdiutil attach chatterino.dmg
-            echo c
-            cp -r /Volumes/chatterino/chatterino.app app/
-            create-dmg --volname Chatterino2 --volicon ../resources/chatterino.icns --icon-size 50 --app-drop-link 0 0 --format UDBZ chatterino-osx.dmg app/
+        shell: bash
+
+      - name: Package (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+            ls -la
+            pwd
+            ls -la build || true
+            cd build
+            sh ./../.CI/CreateDMG.sh
         shell: bash
 
       # CREATE RELEASE
