@@ -25,12 +25,11 @@ PartialTwitchUser PartialTwitchUser::byId(const QString &id)
 
     return user;
 }
-// this override exists not to dirupt other code that might rely on PartialTwitchUser::getId.
+
 void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
                               const QObject *caller)
 {
-    getId(
-        successCallback, [] {}, caller);
+    getId(successCallback, [] {}, caller);
 }
 void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
                               std::function<void()> failureCallback,
