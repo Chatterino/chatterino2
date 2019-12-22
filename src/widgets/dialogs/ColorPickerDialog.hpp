@@ -25,7 +25,7 @@ private:
         ColorButton *selectedColor;
     } ui_;
 
-    bool hasSelectedColor_;
+    bool dialogConfirmed_;
 
     void ok();
 };

@@ -10,7 +10,7 @@ namespace chatterino {
 
 ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
     : BaseWindow(BaseWindow::EnableCustomFrame, parent)
-    , hasSelectedColor_(false)
+    , dialogConfirmed_(false)
 {
     LayoutCreator<QWidget> layoutWidget(this->getLayoutContainer());
     auto layout = layoutWidget.setLayoutType<QVBoxLayout>().withoutMargin();
@@ -60,6 +60,7 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         layout.append(obj.getElement());
     }
 
+    // Dialog buttons
     auto buttons =
         layout.emplace<QHBoxLayout>().emplace<QDialogButtonBox>(this);
     {
@@ -70,6 +71,15 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         QObject::connect(button_cancel, &QAbstractButton::clicked,
                          [=](bool) { this->close(); });
     }
+}
+
+QColor ColorPickerDialog::selectedColor() const
+{
+    if (this->dialogConfirmed_)
+        return this->ui_.selectedColor->color();
+
+    // If the Cancel button was clicked, return the invalid color
+    return QColor();
 }
 
 void ColorPickerDialog::closeEvent(QCloseEvent *)
@@ -83,13 +93,10 @@ void ColorPickerDialog::ok()
     this->close();
 }
 
-QColor ColorPickerDialog::selectedColor() const
+void ColorPickerDialog::ok()
 {
-    if (this->hasSelectedColor_)
-        return this->ui_.selectedColor->color();
-
-    // If the Cancel button was clicked, return the invalid color
-    return QColor();
+    this->dialogConfirmed_ = true;
+    this->close();
 }
 
 }  // namespace chatterino
