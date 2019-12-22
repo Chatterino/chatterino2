@@ -260,31 +260,6 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                 }
             }
         });
-
-        // TODO(leon): Remove this later, kept for reference
-        // auto selected = QColorDialog::getColor(
-        //     initial, this, tr("Select Color"), QColorDialog::ShowAlphaChannel);
-
-        // Color is invalid when user clicks "Cancel"
-        // if (selected.isValid())
-        // {
-        //     view->getModel()->setData(clicked, selected, Qt::DecorationRole);
-
-        //     // For special highlights we need to manually update the color map
-        //     auto instance = ColorProvider::instance();
-        //     switch (clicked.row())
-        //     {
-        //         case 0:
-        //             instance.updateColor(ColorType::SelfHighlight, selected);
-        //             break;
-        //         case 1:
-        //             instance.updateColor(ColorType::Whisper, selected);
-        //             break;
-        //         case 2:
-        //             instance.updateColor(ColorType::Subscription, selected);
-        //             break;
-        //     }
-        // }
     }
 }
 
