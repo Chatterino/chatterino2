@@ -12,7 +12,7 @@ const ColorProvider &ColorProvider::instance()
 }
 
 ColorProvider::ColorProvider()
-    : typeColorMap()
+    : typeColorMap_()
 {
     // Read settings for custom highlight colors and save them in map.
     // If no custom values can be found, set up default values instead.
@@ -21,12 +21,12 @@ ColorProvider::ColorProvider()
     QString customColor = getSettings()->selfHighlightColor;
     if (!customColor.isEmpty())
     {
-        typeColorMap.insert(
+        typeColorMap_.insert(
             {ColorType::SelfHighlight, std::make_shared<QColor>(customColor)});
     }
     else
     {
-        typeColorMap.insert(
+        typeColorMap_.insert(
             {ColorType::SelfHighlight,
              std::make_shared<QColor>(backgrounds.highlighted)});
     }
@@ -34,12 +34,12 @@ ColorProvider::ColorProvider()
     customColor = getSettings()->subHighlightColor;
     if (!customColor.isEmpty())
     {
-        typeColorMap.insert(
+        typeColorMap_.insert(
             {ColorType::Subscription, std::make_shared<QColor>(customColor)});
     }
     else
     {
-        typeColorMap.insert(
+        typeColorMap_.insert(
             {ColorType::Subscription,
              std::make_shared<QColor>(backgrounds.subscription)});
     }
@@ -47,24 +47,25 @@ ColorProvider::ColorProvider()
     customColor = getSettings()->whisperHighlightColor;
     if (!customColor.isEmpty())
     {
-        typeColorMap.insert(
+        typeColorMap_.insert(
             {ColorType::Whisper, std::make_shared<QColor>(customColor)});
     }
     else
     {
-        typeColorMap.insert({ColorType::Whisper, std::make_shared<QColor>(
-                                                     backgrounds.highlighted)});
+        typeColorMap_.insert(
+            {ColorType::Whisper,
+             std::make_shared<QColor>(backgrounds.highlighted)});
     }
 }
 
 const std::shared_ptr<QColor> ColorProvider::color(ColorType type) const
 {
-    return typeColorMap.at(type);
+    return typeColorMap_.at(type);
 }
 
 void ColorProvider::updateColor(ColorType type, QColor color)
 {
-    auto colorPtr = typeColorMap.at(type);
+    auto colorPtr = typeColorMap_.at(type);
     *colorPtr = color;
 }
 

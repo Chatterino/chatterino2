@@ -18,7 +18,7 @@ public:
 private:
     ColorProvider();
 
-    std::unordered_map<ColorType, std::shared_ptr<QColor>> typeColorMap;
+    std::unordered_map<ColorType, std::shared_ptr<QColor>> typeColorMap_;
 };
 }  // namespace chatterino
 
