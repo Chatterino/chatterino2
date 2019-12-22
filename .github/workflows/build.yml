@@ -16,8 +16,12 @@ jobs:
         with:
           submodules: true
 
-      # INSTALL DEPENDENCIES
+      - name: Install Qt (All platforms)
+        uses: jurplel/install-qt-action@v2
+        with:
+          modules: qtwebengine
 
+      # WINDOWS
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
@@ -27,23 +31,6 @@ jobs:
 
             refreshenv
         shell: cmd
-
-      - name: Install dependencies (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev libpulse-dev
-
-      - name: Install dependencies (MacOS)
-        if: startsWith(matrix.os, 'macos')
-        run: |
-            brew install boost openssl rapidjson qt p7zip create-dmg
-        shell: bash
-
-      - name: Install Qt (All platforms)
-        uses: jurplel/install-qt-action@v2
-        with:
-          modules: qtwebengine
-
-      # BUILD
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows')
@@ -60,6 +47,37 @@ jobs:
             echo nightly > Chatterino2/modes
             7z a chatterino-windows-x86-64.zip Chatterino2/
         shell: cmd
+
+      # LINUX
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev libpulse-dev
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            mkdir build
+            cd build
+            qmake PREFIX=/usr ..
+            make -j8
+        shell: bash
+
+      - name: Package (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            ls -la
+            pwd
+            ls -la build || true
+            cd build
+            sh ./../.CI/CreateAppImage.sh
+        shell: bash
+
+      # MACOS
+      - name: Install dependencies (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+            brew install boost openssl rapidjson qt p7zip create-dmg
+        shell: bash
 
       - name: Build (MacOS)
         if: startsWith(matrix.os, 'macos')
@@ -79,27 +97,6 @@ jobs:
             create-dmg --volname Chatterino2 --volicon ../resources/chatterino.icns --icon-size 50 --app-drop-link 0 0 --format UDBZ chatterino-osx.dmg app/
         shell: bash
 
-      - name: Build (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-            mkdir build
-            cd build
-            qmake PREFIX=/usr ..
-            make -j8
-        shell: bash
-
-      # PACKAGE
-
-      - name: Package (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-            ls -la
-            pwd
-            ls -la build || true
-            cd build
-            sh ./../.CI/CreateAppImage.sh
-        shell: bash
-
       # CREATE RELEASE
 
       - name: Create release (All platforms)
@@ -117,16 +114,6 @@ jobs:
 
       # UPLOAD RELEASE ASSET
 
-      - name: Upload release asset (MacOS)
-        if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-release-asset@v1.0.1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./chatterino-osx.dmg
-          asset_name: chatterino-osx.dmg
-          asset_content_type: application/x-bzip2
 
 
       - name: Upload release asset (Windows)
@@ -136,6 +123,28 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./chatterino-windows-x86-64.zip
+          asset_path: ./build/chatterino-windows-x86-64.zip
           asset_name: chatterino-windows-x86-64.zip
           asset_content_type: application/zip
+
+      - name: Upload release asset (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/Chatterino-x86_64.AppImage
+          asset_name: Chatterino-x86_64.AppImage
+          asset_content_type: application/x-executable
+
+      - name: Upload release asset (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./build/chatterino-osx.dmg
+          asset_name: chatterino-osx.dmg
+          asset_content_type: application/x-bzip2
