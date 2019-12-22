@@ -49,7 +49,7 @@ namespace {
 }  // namespace
 
 UserInfoPopup::UserInfoPopup()
-    : BaseWindow({BaseWindow::Frameless, BaseWindow::FramelessDraggable})
+    : BasePopup({BaseWindow::Frameless, BaseWindow::FramelessDraggable})
     , hack_(new bool)
 {
     this->setStayInScreenRect(true);

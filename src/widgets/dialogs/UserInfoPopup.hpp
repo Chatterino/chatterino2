@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/BaseWindow.hpp"
+#include "widgets/BasePopup.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -12,7 +12,7 @@ class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 class Label;
 
-class UserInfoPopup final : public BaseWindow
+class UserInfoPopup final : public BasePopup
 {
     Q_OBJECT
 
