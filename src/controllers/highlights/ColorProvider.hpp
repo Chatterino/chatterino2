@@ -20,6 +20,9 @@ public:
 private:
     ColorProvider();
 
+    void initTypeColorMap();
+    void initDefaultColors();
+
     std::unordered_map<ColorType, std::shared_ptr<QColor>> typeColorMap_;
     std::vector<QColor> defaultColors_;
 };
