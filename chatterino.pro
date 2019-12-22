@@ -1,13 +1,13 @@
 # Exposed build flags:
 # from lib/fmt.pri
 #  - FMT_PREFIX ($$PWD by default)
-#  - FMT_SYSTEM (1 = true) (unix only)
+#  - FMT_SYSTEM (1 = true) (Linux only, uses pkg-config)
 # from lib/websocketpp.pri
 #  - WEBSOCKETPP_PREFIX ($$PWD by default)
 #  - WEBSOCKETPP_SYSTEM (1 = true) (unix only)
 # from lib/rapidjson.pri
 #  - RAPIDJSON_PREFIX ($$PWD by default)
-#  - RAPIDJSON_SYSTEM (1 = true) (unix only)
+#  - RAPIDJSON_SYSTEM (1 = true) (Linux only, uses pkg-config)
 # from lib/boost.pri
 #  - BOOST_DIRECTORY (C:\local\boost\ by default) (Windows only)
 
@@ -44,6 +44,9 @@ win32-msvc* {
 linux {
     LIBS += -lrt
     QMAKE_LFLAGS += -lrt
+
+    # Enable linking libraries using PKGCONFIG += libraryname
+    CONFIG += link_pkgconfig
 }
 
 macx {
