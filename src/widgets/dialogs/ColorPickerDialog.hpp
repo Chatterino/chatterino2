@@ -22,6 +22,7 @@ protected:
 private:
     struct {
         std::vector<ColorButton *> recentColors;
+        std::vector<ColorButton *> defaultColors;
         ColorButton *selectedColor;
     } ui_;
 
