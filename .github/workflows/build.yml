@@ -4,35 +4,6 @@ name: Build
 on: [push, pull_request]
 
 jobs:
-  create-release:
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Create release (All platforms)
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: ${{ github.ref }}
-          release_name: TEST Release ${{ github.ref }}
-          body: |
-              looool
-          draft: true
-          prerelease: true
-
-      - name: Put release URL in a file
-        env:
-          CI_UPLOAD_URL: ${{ steps.create_release.outputs.upload_url }}
-        run: |
-            echo "$CI_UPLOAD_URL" > release-upload-url.txt
-
-      - name: Upload release URL artifact
-        uses: actions/upload-artifact@v1
-        with:
-          name: release-upload-url.txt
-          path: release-upload-url.txt
-
   build:
     needs: create-release
     runs-on: ${{ matrix.os }}
@@ -147,49 +118,72 @@ jobs:
           name: chatterino-osx.dmg
           path: build/chatterino-osx.dmg
 
-  upload-release:
+  create-release:
     needs: build
     runs-on: ubuntu-latest
 
     steps:
+      - name: Create release (All platforms)
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: TEST Release ${{ github.ref }}
+          body: |
+              looool
+          draft: true
+          prerelease: true
+
       - uses: actions/download-artifact@v1
         with:
-          name: release-upload-url.txt
+          name: chatterino-windows-x86-64.zip
 
-      - name: Read upload URL into output
-        id: upload_url
+      - uses: actions/download-artifact@v1
+        with:
+          name: Chatterino-x86_64.AppImage
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: chatterino-osx.dmg
+
+      - name: TREE
         run: |
-          echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
+            sudo apt update && sudo apt install tree
+            tree .
+
+      # - name: Read upload URL into output
+      #   id: upload_url
+      #   run: |
+      #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
 
       - name: Upload release asset (Windows)
-        if: startsWith(matrix.os, 'windows')
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.upload_url.outputs.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/chatterino-windows-x86-64.zip
           asset_name: chatterino-windows-x86-64.zip
           asset_content_type: application/zip
 
       - name: Upload release asset (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.upload_url.outputs.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/Chatterino-x86_64.AppImage
           asset_name: Chatterino-x86_64.AppImage
           asset_content_type: application/x-executable
 
       - name: Upload release asset (MacOS)
-        if: startsWith(matrix.os, 'macos')
         uses: actions/upload-release-asset@v1.0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.upload_url.outputs.upload_url }}
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./build/chatterino-osx.dmg
           asset_name: chatterino-osx.dmg
           asset_content_type: application/x-bzip2

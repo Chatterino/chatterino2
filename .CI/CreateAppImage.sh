@@ -18,7 +18,7 @@ qmake_path=$(command -v qmake)
 
 ldd ./bin/chatterino
 make INSTALL_ROOT=appdir -j"$(nproc)" install ; find appdir/
-cp "$chatterino_dir"/resources/icon.png ./appdir/com.chatterino.chatterino.png
+cp "$chatterino_dir"/resources/icon.png ./appdir/chatterino.png
 
 linuxdeployqt_path="linuxdeployqt-6-x86_64.AppImage"
 linuxdeployqt_url="https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage"
