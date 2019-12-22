@@ -1,5 +1,6 @@
 #include "controllers/highlights/ColorProvider.hpp"
 
+#include "controllers/highlights/HighlightController.hpp"
 #include "singletons/Theme.hpp"
 
 namespace chatterino {
@@ -65,6 +66,17 @@ void ColorProvider::updateColor(ColorType type, QColor color)
 {
     auto colorPtr = typeColorMap.at(type);
     *colorPtr = color;
+}
+
+std::vector<QColor> ColorProvider::recentColors() const
+{
+    std::vector<QColor> retVal;
+    for (auto phrase : getApp()->highlights->phrases)
+    {
+        retVal.push_back(phrase.getColor()->name(QColor::HexArgb));
+    }
+
+    return retVal;
 }
 
 }  // namespace chatterino

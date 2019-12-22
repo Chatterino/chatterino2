@@ -13,6 +13,8 @@ public:
 
     void updateColor(ColorType type, QColor color);
 
+    std::vector<QColor> recentColors() const;
+
 private:
     ColorProvider();
 
