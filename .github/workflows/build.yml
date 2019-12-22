@@ -84,8 +84,19 @@ jobs:
         run: |
             mkdir build
             cd build
-            qmake ..
+            qmake PREFIX=/usr ..
             make -j8
+        shell: bash
+
+      # PACKAGE
+
+      - name: Package (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            ls -la
+            pwd
+            ls -la build || true
+            cd build
             sh ./../.CI/CreateAppImage.sh
         shell: bash
 

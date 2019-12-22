@@ -1,5 +1,12 @@
 #!/bin/sh
 
+set -e
+
+if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
+    echo "ERROR: No chatterino binary file found. This script must be run in the build folder, and chatterino must be built first."
+    exit 1
+fi
+
 script_path=$(readlink -f "$0")
 script_dir=$(dirname "$script_path")
 chatterino_dir=$(dirname "$script_dir")
