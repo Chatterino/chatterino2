@@ -513,9 +513,9 @@ linux {
     desktop.path = $$PREFIX/share/applications
 
     build_icons.path = .
-    build_icons.commands = @echo $$PWD  && mkdir -p $$PWD/resources/linuxinstall/icons/hicolor/256x256 && cp $$PWD/resources/icon.png $$PWD/resources/linuxinstall/icons/hicolor/256x256/chatterino.png
+    build_icons.commands = @echo $$PWD  && mkdir -p $$PWD/resources/linuxinstall/icons/hicolor/256x256 && cp $$PWD/resources/icon.png $$PWD/resources/linuxinstall/icons/hicolor/256x256/com.chatterino.chatterino.png
 
-    icon.files = $$PWD/resources/linuxinstall/icons/hicolor/256x256/chatterino.png
+    icon.files = $$PWD/resources/linuxinstall/icons/hicolor/256x256/com.chatterino.chatterino.png
     icon.path = $$PREFIX/share/icons/hicolor/256x256/apps
 
     target.path = $$PREFIX/bin

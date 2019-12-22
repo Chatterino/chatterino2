@@ -7,15 +7,18 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     exit 1
 fi
 
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/qt512/lib/"
+export PATH="/opt/qt512/bin:$PATH"
+
 script_path=$(readlink -f "$0")
 script_dir=$(dirname "$script_path")
 chatterino_dir=$(dirname "$script_dir")
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/qt512/lib/
+qmake_path=$(command -v qmake)
 
 ldd ./bin/chatterino
 make INSTALL_ROOT=appdir -j"$(nproc)" install ; find appdir/
-cp "$chatterino_dir"/resources/icon.png ./appdir/chatterino.png
+cp "$chatterino_dir"/resources/icon.png ./appdir/com.chatterino.chatterino.png
 
 linuxdeployqt_path="linuxdeployqt-6-x86_64.AppImage"
 linuxdeployqt_url="https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage"
@@ -33,10 +36,9 @@ fi
     -no-translations \
     -bundle-non-qt-libs \
     -unsupported-allow-new-glibc \
-    -qmake=/opt/qt512/bin/qmake
+    -qmake="$qmake_path"
 
 rm -rf appdir/home
-rm appdir/AppRun
 
 # shellcheck disable=SC2016
 echo '#!/bin/sh
