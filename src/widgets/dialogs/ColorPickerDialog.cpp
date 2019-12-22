@@ -4,6 +4,8 @@
 // TODO(leon): Move ColorProvider to different directory?
 #include "controllers/highlights/ColorProvider.hpp"
 
+#include <QColorDialog>
+
 namespace chatterino {
 
 // TODO(leon): Replace magic values with constants
@@ -33,9 +35,8 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
             ColorButton *button = this->ui_.recentColors[i];
             hbox.emplace<ColorButton>(recentColors[i]).assign(&button);
 
-            QObject::connect(button, &QPushButton::clicked, [=] {
-                this->ui_.selectedColor->setColor(button->color());
-            });
+            QObject::connect(button, &QPushButton::clicked,
+                             [=] { this->selectColor(button->color()); });
         }
 
         layout.append(obj.getElement());
@@ -46,17 +47,22 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         // TODO(leon): Get default colors (from ColorProvider!?)
     }
 
-    // Color selection
-    {
-        // TODO(leon)
-    }
-
-    // Currently selected color, may want to consolidate this with a different area
+    // Currently selected color
     {
         LayoutCreator<QWidget> obj(new QWidget());
         auto hbox = obj.setLayoutType<QHBoxLayout>();
         hbox.emplace<QLabel>("Selected:");
         hbox.emplace<ColorButton>(initial).assign(&this->ui_.selectedColor);
+
+        QObject::connect(this->ui_.selectedColor, &QPushButton::clicked, [=] {
+            auto customColor = QColorDialog::getColor(
+                this->ui_.selectedColor->color(), this, tr("Select Color"),
+                QColorDialog::ShowAlphaChannel);
+
+            if (customColor.isValid())
+                this->selectColor(customColor);
+        });
+
         layout.append(obj.getElement());
     }
 
@@ -87,10 +93,9 @@ void ColorPickerDialog::closeEvent(QCloseEvent *)
     this->closed.invoke();
 }
 
-void ColorPickerDialog::ok()
+void ColorPickerDialog::selectColor(const QColor &color)
 {
-    this->hasSelectedColor_ = true;
-    this->close();
+    this->ui_.selectedColor->setColor(color);
 }
 
 void ColorPickerDialog::ok()

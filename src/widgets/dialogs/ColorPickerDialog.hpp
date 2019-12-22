@@ -27,6 +27,7 @@ private:
 
     bool dialogConfirmed_;
 
+    void selectColor(const QColor &color);
     void ok();
 };
 }  // namespace chatterino
