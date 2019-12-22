@@ -15,10 +15,13 @@ public:
 
     QSet<QColor> recentColors() const;
 
+    const std::vector<QColor> &defaultColors() const;
+
 private:
     ColorProvider();
 
     std::unordered_map<ColorType, std::shared_ptr<QColor>> typeColorMap_;
+    std::vector<QColor> defaultColors_;
 };
 }  // namespace chatterino
 

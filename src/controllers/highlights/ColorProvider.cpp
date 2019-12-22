@@ -13,6 +13,7 @@ const ColorProvider &ColorProvider::instance()
 
 ColorProvider::ColorProvider()
     : typeColorMap_()
+    , defaultColors_()
 {
     // Read settings for custom highlight colors and save them in map.
     // If no custom values can be found, set up default values instead.
@@ -56,6 +57,13 @@ ColorProvider::ColorProvider()
             {ColorType::Whisper,
              std::make_shared<QColor>(backgrounds.highlighted)});
     }
+
+    // Init default colors
+    defaultColors_.emplace_back(31, 141, 43, 127);   // Green-ish
+    defaultColors_.emplace_back(28, 126, 141, 127);  // Blue-ish
+    defaultColors_.emplace_back(136, 141, 49, 127);  // Golden-ish
+    defaultColors_.emplace_back(143, 48, 24, 127);   // Red-ish
+    defaultColors_.emplace_back(28, 141, 117, 127);  // Cyan-ish
 }
 
 const std::shared_ptr<QColor> ColorProvider::color(ColorType type) const
@@ -79,6 +87,11 @@ QSet<QColor> ColorProvider::recentColors() const
     }
 
     return retVal;
+}
+
+const std::vector<QColor> &ColorProvider::defaultColors() const
+{
+    return this->defaultColors_;
 }
 
 }  // namespace chatterino
