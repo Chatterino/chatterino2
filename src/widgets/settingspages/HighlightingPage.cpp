@@ -48,8 +48,10 @@ HighlightingPage::HighlightingPage()
             // HIGHLIGHTS
             auto highlights = tabs.appendTab(new QVBoxLayout, "Messages");
             {
-                highlights.emplace<QLabel>("Messages can be highlighted if "
-                                           "they match a certain pattern.");
+                highlights.emplace<QLabel>(
+                    "Messages can be highlighted if they match a certain "
+                    "pattern.\n"
+                    "NOTE: User highlights will override phrase highlights.");
 
                 EditableModelView *view =
                     highlights
@@ -89,7 +91,8 @@ HighlightingPage::HighlightingPage()
             auto pingUsers = tabs.appendTab(new QVBoxLayout, "Users");
             {
                 pingUsers.emplace<QLabel>(
-                    "Messages from a certain user can be highlighted.");
+                    "Messages from a certain user can be highlighted.\n"
+                    "NOTE: User highlights will override phrase highlights.");
                 EditableModelView *view =
                     pingUsers
                         .emplace<EditableModelView>(
