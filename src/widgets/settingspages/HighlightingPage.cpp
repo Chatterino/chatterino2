@@ -10,6 +10,7 @@
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/StandardItemHelper.hpp"
+#include "widgets/dialogs/ColorPickerDialog.hpp"
 
 #include <QColorDialog>
 #include <QFileDialog>
@@ -229,29 +230,61 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
     {
         auto initial =
             view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
-        auto selected = QColorDialog::getColor(
-            initial, this, tr("Select Color"), QColorDialog::ShowAlphaChannel);
+
+        auto dialog = new ColorPickerDialog(initial, this);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->show();
+        dialog->closed.connect([=] {
+            QColor selected = dialog->selectedColor();
+            qDebug() << "selected color: " << selected.name(QColor::HexRgb);
+
+            if (selected.isValid())
+            {
+                view->getModel()->setData(clicked, selected,
+                                          Qt::DecorationRole);
+
+                // For special highlights we need to manually update the color map
+                auto instance = ColorProvider::instance();
+                switch (clicked.row())
+                {
+                    case 0:
+                        instance.updateColor(ColorType::SelfHighlight,
+                                             selected);
+                        break;
+                    case 1:
+                        instance.updateColor(ColorType::Whisper, selected);
+                        break;
+                    case 2:
+                        instance.updateColor(ColorType::Subscription, selected);
+                        break;
+                }
+            }
+        });
+
+        // TODO(leon): Remove this later, kept for reference
+        // auto selected = QColorDialog::getColor(
+        //     initial, this, tr("Select Color"), QColorDialog::ShowAlphaChannel);
 
         // Color is invalid when user clicks "Cancel"
-        if (selected.isValid())
-        {
-            view->getModel()->setData(clicked, selected, Qt::DecorationRole);
+        // if (selected.isValid())
+        // {
+        //     view->getModel()->setData(clicked, selected, Qt::DecorationRole);
 
-            // For special highlights we need to manually update the color map
-            auto instance = ColorProvider::instance();
-            switch (clicked.row())
-            {
-                case 0:
-                    instance.updateColor(ColorType::SelfHighlight, selected);
-                    break;
-                case 1:
-                    instance.updateColor(ColorType::Whisper, selected);
-                    break;
-                case 2:
-                    instance.updateColor(ColorType::Subscription, selected);
-                    break;
-            }
-        }
+        //     // For special highlights we need to manually update the color map
+        //     auto instance = ColorProvider::instance();
+        //     switch (clicked.row())
+        //     {
+        //         case 0:
+        //             instance.updateColor(ColorType::SelfHighlight, selected);
+        //             break;
+        //         case 1:
+        //             instance.updateColor(ColorType::Whisper, selected);
+        //             break;
+        //         case 2:
+        //             instance.updateColor(ColorType::Subscription, selected);
+        //             break;
+        //     }
+        // }
     }
 }
 
