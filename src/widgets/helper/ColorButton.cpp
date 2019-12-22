@@ -19,7 +19,7 @@ const QColor &ColorButton::color() const
 void ColorButton::setColor(QColor color)
 {
     this->color_ = color;
-    this->setStyleSheet("background-color: " + color.name(QColor::HexRgb));
+    this->setStyleSheet("background-color: " + color.name(QColor::HexArgb));
 }
 
 }  // namespace chatterino
