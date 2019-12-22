@@ -68,12 +68,13 @@ void ColorProvider::updateColor(ColorType type, QColor color)
     *colorPtr = color;
 }
 
-std::vector<QColor> ColorProvider::recentColors() const
+QSet<QColor> ColorProvider::recentColors() const
 {
-    std::vector<QColor> retVal;
+    QSet<QColor> retVal;
     for (auto phrase : getApp()->highlights->phrases)
     {
-        retVal.push_back(phrase.getColor()->name(QColor::HexArgb));
+        // Ugly copying because HighlightPhrase::getColor returns a shared_ptr
+        retVal.insert(QColor(phrase.getColor()->name(QColor::HexArgb)));
     }
 
     return retVal;

@@ -30,13 +30,17 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         auto recentColors = ColorProvider::instance().recentColors();
         hbox.emplace<QLabel>("Recently used:");
 
-        for (int i = 0; i < 5 && i < recentColors.size(); ++i)
+        auto it = recentColors.begin();
+        int i = 0;
+        while (it != recentColors.end() && i < 5)
         {
             ColorButton *button = this->ui_.recentColors[i];
-            hbox.emplace<ColorButton>(recentColors[i]).assign(&button);
+            hbox.emplace<ColorButton>(*it).assign(&button);
 
             QObject::connect(button, &QPushButton::clicked,
                              [=] { this->selectColor(button->color()); });
+            ++it;
+            ++i;
         }
 
         layout.append(obj.getElement());

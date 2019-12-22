@@ -13,12 +13,17 @@ public:
 
     void updateColor(ColorType type, QColor color);
 
-    std::vector<QColor> recentColors() const;
+    QSet<QColor> recentColors() const;
 
 private:
     ColorProvider();
 
     std::unordered_map<ColorType, std::shared_ptr<QColor>> typeColorMap;
 };
-
 }  // namespace chatterino
+
+// Adapted from Qt example: https://doc.qt.io/qt-5/qhash.html#qhash
+inline uint qHash(const QColor &key)
+{
+    return qHash(key.name(QColor::HexArgb));
+}
