@@ -35,6 +35,8 @@ Toasts::Toasts()
     Snore::SnoreCore &instance = Snore::SnoreCore::instance();
     instance.loadPlugins(Snore::SnorePlugin::Backend);
     Snore::SnoreCore::instance().registerApplication(app);
+    qDebug() << Snore::SnoreCore::instance().pluginNames(
+        Snore::SnorePlugin::Backend);
 
     auto notifyCallback = [this](Snore::Notification notification) {
         switch (
@@ -117,6 +119,7 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
             [this, channelName, bottomText, &instance](auto result) -> Outcome {
                 const auto data = result.getData();
 
+                qDebug() << instance.pluginNames(Snore::SnorePlugin::Backend);
                 QPixmap avatar;
                 avatar.loadFromData(data);
 

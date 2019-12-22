@@ -2,7 +2,7 @@
 !exists($$PWD/snorenotify/bin) {
     linux {
         CMAKE_SNORENOTIFY = $$system("cmake snorenotify/CMakeLists.txt")
-        REMOVE_LINE = $$system("sed -i '/get_git_head_revision(GIT_REFSPEC SNORE_REVISION)/d' snorenotify/src/libsnore/CMakeLists.txt")
+        REMOVE_LINE = $$system("sed -i '/get_git_head_revision(GIT_REFSPEC SNORE_REVISION)/d' ../lib/snorenotify/src/libsnore/CMakeLists.txt")
         MAKE_SNORENOTIFY = $$system("make -C snorenotify/")
     } win-32 {
         # Haven't tested
