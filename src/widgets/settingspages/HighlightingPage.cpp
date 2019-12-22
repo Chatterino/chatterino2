@@ -239,7 +239,6 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
         dialog->show();
         dialog->closed.connect([=] {
             QColor selected = dialog->selectedColor();
-            qDebug() << "selected color: " << selected.name(QColor::HexRgb);
 
             if (selected.isValid())
             {
