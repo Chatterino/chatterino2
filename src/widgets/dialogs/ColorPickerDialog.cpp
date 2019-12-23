@@ -1,8 +1,8 @@
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 
-#include "util/LayoutCreator.hpp"
 // TODO(leon): Move ColorProvider to different directory?
 #include "controllers/highlights/ColorProvider.hpp"
+#include "util/LayoutCreator.hpp"
 
 #include <QColorDialog>
 
@@ -12,6 +12,7 @@ namespace chatterino {
 
 ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
     : BaseWindow(BaseWindow::EnableCustomFrame, parent)
+    , color_()
     , dialogConfirmed_(false)
 {
     // Set up UI element pointers
@@ -28,12 +29,18 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
     LayoutCreator<QWidget> layoutWidget(this->getLayoutContainer());
     auto layout = layoutWidget.setLayoutType<QVBoxLayout>().withoutMargin();
 
+    LayoutCreator<QWidget> contentCreator(new QWidget());
+    auto contents = contentCreator.setLayoutType<QHBoxLayout>();
+
     // Recently used colors
     {
         LayoutCreator<QWidget> obj(new QWidget());
-        auto hbox = obj.setLayoutType<QHBoxLayout>();
+        auto vbox = obj.setLayoutType<QVBoxLayout>();
 
-        hbox.emplace<QLabel>("Recently used:");
+        vbox.emplace<QLabel>("Recently used:");
+
+        LayoutCreator<QWidget> rowCreator(new QWidget());
+        auto row = rowCreator.setLayoutType<QHBoxLayout>();
 
         auto recentColors = ColorProvider::instance().recentColors();
         auto it = recentColors.begin();
@@ -41,7 +48,7 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         while (it != recentColors.end() && i < 5)
         {
             ColorButton *button = this->ui_.recentColors[i];
-            hbox.emplace<ColorButton>(*it).assign(&button);
+            row.emplace<ColorButton>(*it).assign(&button);
 
             QObject::connect(button, &QPushButton::clicked,
                              [=] { this->selectColor(button->color()); });
@@ -49,14 +56,18 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
             ++i;
         }
 
-        layout.append(obj.getElement());
+        vbox.append(rowCreator.getElement());
+        contents.append(obj.getElement());
     }
 
     // Default colors
     {
         LayoutCreator<QWidget> obj(new QWidget());
-        auto hbox = obj.setLayoutType<QHBoxLayout>();
-        hbox.emplace<QLabel>("Default:");
+        auto vbox = obj.setLayoutType<QVBoxLayout>();
+        vbox.emplace<QLabel>("Default:");
+
+        LayoutCreator<QWidget> rowCreator(new QWidget());
+        auto row = rowCreator.setLayoutType<QHBoxLayout>();
 
         auto defaultColors = ColorProvider::instance().defaultColors();
         auto it = defaultColors.begin();
@@ -64,7 +75,7 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         while (it != defaultColors.end() && i < 5)
         {
             ColorButton *button = this->ui_.defaultColors[i];
-            hbox.emplace<ColorButton>(*it).assign(&button);
+            row.emplace<ColorButton>(*it).assign(&button);
 
             QObject::connect(button, &QPushButton::clicked,
                              [=] { this->selectColor(button->color()); });
@@ -72,7 +83,8 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
             ++i;
         }
 
-        layout.append(obj.getElement());
+        vbox.append(row.getElement());
+        contents.append(obj.getElement());
     }
 
     // Currently selected color
@@ -82,17 +94,75 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         hbox.emplace<QLabel>("Selected:");
         hbox.emplace<ColorButton>(initial).assign(&this->ui_.selectedColor);
 
-        QObject::connect(this->ui_.selectedColor, &QPushButton::clicked, [=] {
-            auto customColor = QColorDialog::getColor(
-                this->ui_.selectedColor->color(), this, tr("Select Color"),
-                QColorDialog::ShowAlphaChannel);
-
-            if (customColor.isValid())
-                this->selectColor(customColor);
-        });
-
-        layout.append(obj.getElement());
+        contents.append(obj.getElement());
     }
+
+    // Color picker
+    {
+        LayoutCreator<QWidget> obj(new QWidget());
+        auto vbox = obj.setLayoutType<QVBoxLayout>();
+
+        // The actual color picker
+        {
+            LayoutCreator<QWidget> cpCreator(new QWidget());
+            auto cpPanel = cpCreator.setLayoutType<QHBoxLayout>();
+
+            /*
+             * For some reason, LayoutCreator::emplace didn't work for these.
+             * After trying to debug for 4 hours or so, I gave up and settled
+             * for this solution.
+             */
+            auto *colorPicker = new QColorPicker(this);
+            this->ui_.colorPicker = colorPicker;
+
+            auto *luminancePicker = new QColorLuminancePicker(colorPicker);
+            this->ui_.luminancePicker = luminancePicker;
+
+            cpPanel.append(colorPicker);
+            cpPanel.append(luminancePicker);
+
+            QObject::connect(colorPicker, SIGNAL(newCol(int, int)),
+                             luminancePicker, SLOT(setCol(int, int)));
+
+            QObject::connect(
+                luminancePicker, &QColorLuminancePicker::newHsv,
+                [=](int h, int s, int v) {
+                    int alpha = this->ui_.spinBoxes.alpha->value();
+                    this->selectColor(QColor::fromHsv(h, s, v, alpha));
+                });
+
+            vbox.append(cpPanel.getElement());
+        }
+
+        // Spin boxes
+        {
+            LayoutCreator<QWidget> sbCreator(new QWidget());
+            auto spinBoxes = sbCreator.setLayoutType<QGridLayout>();
+
+            auto *red = this->ui_.spinBoxes.red = new QColSpinBox(this);
+            auto *blue = this->ui_.spinBoxes.blue = new QColSpinBox(this);
+            auto *green = this->ui_.spinBoxes.green = new QColSpinBox(this);
+            auto *alpha = this->ui_.spinBoxes.alpha = new QColSpinBox(this);
+
+            spinBoxes->addWidget(new QLabel("Red:"), 0, 0);
+            spinBoxes->addWidget(red, 0, 1);
+
+            spinBoxes->addWidget(new QLabel("Blue:"), 1, 0);
+            spinBoxes->addWidget(blue, 1, 1);
+
+            spinBoxes->addWidget(new QLabel("Green:"), 2, 0);
+            spinBoxes->addWidget(green, 2, 1);
+
+            spinBoxes->addWidget(new QLabel("Alpha:"), 3, 0);
+            spinBoxes->addWidget(alpha, 3, 1);
+
+            vbox.append(spinBoxes.getElement());
+        }
+
+        contents.append(obj.getElement());
+    }
+
+    layout.append(contents.getElement());
 
     // Dialog buttons
     auto buttons =
@@ -105,15 +175,17 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         QObject::connect(button_cancel, &QAbstractButton::clicked,
                          [=](bool) { this->close(); });
     }
+
+    this->selectColor(initial);
 }
 
 QColor ColorPickerDialog::selectedColor() const
 {
-    if (this->dialogConfirmed_)
-        return this->ui_.selectedColor->color();
+    if (!this->dialogConfirmed_)
+        // If the Cancel button was clicked, return the invalid color
+        return QColor();
 
-    // If the Cancel button was clicked, return the invalid color
-    return QColor();
+    return this->color_;
 }
 
 void ColorPickerDialog::closeEvent(QCloseEvent *)
@@ -123,7 +195,22 @@ void ColorPickerDialog::closeEvent(QCloseEvent *)
 
 void ColorPickerDialog::selectColor(const QColor &color)
 {
-    this->ui_.selectedColor->setColor(color);
+    if (color == this->color_)
+        return;
+
+    this->color_ = color;
+
+    // Update UI elements
+    this->ui_.selectedColor->setColor(this->color_);
+    this->ui_.colorPicker->setCol(this->color_.hslHue(),
+                                  this->color_.hslSaturation());
+    this->ui_.luminancePicker->setCol(this->color_.hsvHue(),
+                                      this->color_.hsvSaturation(),
+                                      this->color_.value());
+    this->ui_.spinBoxes.red->setValue(this->color_.red());
+    this->ui_.spinBoxes.green->setValue(this->color_.green());
+    this->ui_.spinBoxes.blue->setValue(this->color_.blue());
+    this->ui_.spinBoxes.alpha->setValue(this->color_.alpha());
 }
 
 void ColorPickerDialog::ok()

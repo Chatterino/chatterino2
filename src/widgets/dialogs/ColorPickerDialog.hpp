@@ -2,6 +2,7 @@
 
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/ColorButton.hpp"
+#include "widgets/helper/QColorPicker.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -24,7 +25,18 @@ private:
         std::vector<ColorButton *> recentColors;
         std::vector<ColorButton *> defaultColors;
         ColorButton *selectedColor;
+        QColorPicker *colorPicker;
+        QColorLuminancePicker *luminancePicker;
+
+        struct {
+            QColSpinBox *red;
+            QColSpinBox *blue;
+            QColSpinBox *green;
+            QColSpinBox *alpha;
+        } spinBoxes;
     } ui_;
+
+    QColor color_;
 
     bool dialogConfirmed_;
 

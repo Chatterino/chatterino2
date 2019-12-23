@@ -214,10 +214,10 @@ SOURCES += \
     src/widgets/AccountSwitchPopup.cpp \
     src/widgets/AccountSwitchWidget.cpp \
     src/widgets/AttachedWindow.cpp \
-    src/widgets/dialogs/ColorPickerDialog.cpp \
     src/widgets/BasePopup.cpp \
     src/widgets/BaseWidget.cpp \
     src/widgets/BaseWindow.cpp \
+    src/widgets/dialogs/ColorPickerDialog.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
     src/widgets/dialogs/IrcConnectionEditor.cpp \
     src/widgets/dialogs/LastRunCrashDialog.cpp \
@@ -240,6 +240,7 @@ SOURCES += \
     src/widgets/helper/EffectLabel.cpp \
     src/widgets/helper/NotebookButton.cpp \
     src/widgets/helper/NotebookTab.cpp \
+    src/widgets/helper/QColorPicker.cpp \
     src/widgets/helper/ResizingTextEdit.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
@@ -438,10 +439,10 @@ HEADERS += \
     src/widgets/AccountSwitchPopup.hpp \
     src/widgets/AccountSwitchWidget.hpp \
     src/widgets/AttachedWindow.hpp \
-    src/widgets/dialogs/ColorPickerDialog.hpp \
     src/widgets/BasePopup.hpp \
     src/widgets/BaseWidget.hpp \
     src/widgets/BaseWindow.hpp \
+    src/widgets/dialogs/ColorPickerDialog.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/IrcConnectionEditor.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
@@ -466,6 +467,7 @@ HEADERS += \
     src/widgets/helper/Line.hpp \
     src/widgets/helper/NotebookButton.hpp \
     src/widgets/helper/NotebookTab.hpp \
+    src/widgets/helper/QColorPicker.hpp \
     src/widgets/helper/ResizingTextEdit.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \
