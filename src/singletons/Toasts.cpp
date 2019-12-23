@@ -28,10 +28,6 @@ std::map<ToastReaction, QString> Toasts::reactionToString = {
     {ToastReaction::OpenInStreamlink, OPEN_IN_STREAMLINK},
     {ToastReaction::DontOpen, DONT_OPEN}};
 
-Toasts::Toasts()
-{
-}
-
 QString Toasts::findStringFromReaction(const ToastReaction &reaction)
 {
     auto iterator = Toasts::reactionToString.find(reaction);
