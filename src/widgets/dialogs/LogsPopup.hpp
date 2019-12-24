@@ -26,7 +26,6 @@ private:
 
     void setMessages(std::vector<MessagePtr> &messages);
     void getOverrustleLogs();
-    void getLogviewerLogs(const QString &roomID);
 };
 
 }  // namespace chatterino
