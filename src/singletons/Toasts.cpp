@@ -83,7 +83,6 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
 
     auto onMousePressed = [channelName](NotificationPopup *popup) {
         return [channelName, popup](QMouseEvent *event) {
-            // dont know if this is safe
             popup->hide();
             if (event->button() == Qt::LeftButton)
                 switch (static_cast<ToastReaction>(
@@ -114,33 +113,34 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
             avatar.loadFromData(data);
 
             auto *popup = new NotificationPopup();
-            popup->updatePosition();
+            //popup->updatePosition();
             popup->setImageAndText(
-                avatar, QString(channelName + " just went live!"), bottomText);
-            popup->show();
+                avatar, QString("<b>" + channelName + "</b> just went live!"),
+                bottomText);
+            //popup->show();
             popup->mouseDown.connect(onMousePressed(popup));
 
-            QTimer::singleShot(5000, [popup] {
-                popup->hide();
-                popup->deleteLater();
-            });
+            //QTimer::singleShot(5000, [popup] {
+            //    popup->hide();
+            //    popup->deleteLater();
+            //});
 
             return Success;
         })
         .onError([channelName, bottomText,
                   onMousePressed](auto result) -> bool {
             auto *popup = new NotificationPopup();
-            popup->updatePosition();
+            //popup->updatePosition();
             popup->setImageAndText(getResources().icon,
                                    QString(channelName + " just went live!"),
                                    bottomText);
-            popup->show();
+            //popup->show();
             popup->mouseDown.connect(onMousePressed(popup));
 
-            QTimer::singleShot(5000, [popup] {
-                popup->hide();
-                popup->deleteLater();
-            });
+            //QTimer::singleShot(5000, [popup] {
+            //    popup->hide();
+            //    popup->deleteLater();
+            //});
             return false;
         })
         .execute();

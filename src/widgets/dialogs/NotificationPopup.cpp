@@ -2,6 +2,7 @@
 
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
+#include "singletons/Settings.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QApplication>
@@ -12,12 +13,19 @@
 namespace chatterino {
 
 NotificationPopup::NotificationPopup()
-    : BaseWindow({BaseWindow::Frameless, BaseWindow::TopMost})
+    : BaseWindow(BaseWindow::TopMost)
 {
+    this->setWindowFlags(
+        Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint |
+        Qt::BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
+    this->setWindowOpacity(0.95);
     auto *layout = new QVBoxLayout(this);
     this->setLayout(layout);
 
     this->setScaleIndependantSize(360, 120);
+
+    //QTimer::singleShot(getSettings()->notificationDuration * 1000,
+    //                   [this] { this->destroy(); });
 }
 
 void NotificationPopup::updatePosition()

@@ -212,4 +212,19 @@ void NotificationController::removeFakeChannel(const QString channelName)
     }
 }
 
+void NotificationController::addNotification(NotificationPopup &notif)
+{
+    if (queue.size() == 0)
+    {
+        startNotification();
+    }
+    queue.push_back(notif);
+}
+
+void NotificationController::startNotification()
+{
+    queue[0].updatePosition();
+    queue[0].show();
+}
+
 }  // namespace chatterino
