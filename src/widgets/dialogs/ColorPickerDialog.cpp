@@ -2,7 +2,6 @@
 
 // TODO(leon): Move ColorProvider to different directory?
 #include "controllers/highlights/ColorProvider.hpp"
-#include "util/LayoutCreator.hpp"
 
 #include <QColorDialog>
 
@@ -141,26 +140,9 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         // Spin boxes
         {
             LayoutCreator<QWidget> sbCreator(new QWidget());
-            auto spinBoxes = sbCreator.setLayoutType<QGridLayout>();
+            this->initSpinBoxes(sbCreator);
 
-            auto *red = this->ui_.spinBoxes.red = new QColSpinBox(this);
-            auto *blue = this->ui_.spinBoxes.blue = new QColSpinBox(this);
-            auto *green = this->ui_.spinBoxes.green = new QColSpinBox(this);
-            auto *alpha = this->ui_.spinBoxes.alpha = new QColSpinBox(this);
-
-            spinBoxes->addWidget(new QLabel("Red:"), 0, 0);
-            spinBoxes->addWidget(red, 0, 1);
-
-            spinBoxes->addWidget(new QLabel("Blue:"), 1, 0);
-            spinBoxes->addWidget(blue, 1, 1);
-
-            spinBoxes->addWidget(new QLabel("Green:"), 2, 0);
-            spinBoxes->addWidget(green, 2, 1);
-
-            spinBoxes->addWidget(new QLabel("Alpha:"), 3, 0);
-            spinBoxes->addWidget(alpha, 3, 1);
-
-            vbox.append(spinBoxes.getElement());
+            vbox.append(sbCreator.getElement());
         }
 
         contents.append(obj.getElement());
@@ -231,6 +213,57 @@ void ColorPickerDialog::ok()
 {
     this->dialogConfirmed_ = true;
     this->close();
+}
+
+void ColorPickerDialog::initSpinBoxes(LayoutCreator<QWidget> &creator)
+{
+    auto spinBoxes = creator.setLayoutType<QGridLayout>();
+
+    // TODO(leon): Make this less ugly?
+    auto *red = this->ui_.spinBoxes.red = new QColSpinBox(this);
+    auto *blue = this->ui_.spinBoxes.blue = new QColSpinBox(this);
+    auto *green = this->ui_.spinBoxes.green = new QColSpinBox(this);
+    auto *alpha = this->ui_.spinBoxes.alpha = new QColSpinBox(this);
+
+    spinBoxes->addWidget(new QLabel("Red:"), 0, 0);
+    spinBoxes->addWidget(red, 0, 1);
+
+    spinBoxes->addWidget(new QLabel("Green:"), 1, 0);
+    spinBoxes->addWidget(green, 1, 1);
+
+    spinBoxes->addWidget(new QLabel("Blue:"), 2, 0);
+    spinBoxes->addWidget(blue, 2, 1);
+
+    spinBoxes->addWidget(new QLabel("Alpha:"), 3, 0);
+    spinBoxes->addWidget(alpha, 3, 1);
+
+    QObject::connect(
+        red, QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) {
+            this->selectColor(QColor(red->value(), green->value(),
+                                     blue->value(), alpha->value()),
+                              false);
+        });
+
+    QObject::connect(
+        green, QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) {
+            this->selectColor(QColor(red->value(), green->value(),
+                                     blue->value(), alpha->value()),
+                              false);
+        });
+
+    QObject::connect(
+        blue, QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) {
+            this->selectColor(QColor(red->value(), green->value(),
+                                     blue->value(), alpha->value()),
+                              false);
+        });
+
+    QObject::connect(
+        alpha, QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) {
+            this->selectColor(QColor(red->value(), green->value(),
+                                     blue->value(), alpha->value()),
+                              false);
+        });
 }
 
 }  // namespace chatterino

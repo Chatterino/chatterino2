@@ -1,5 +1,6 @@
 #pragma once
 
+#include "util/LayoutCreator.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/QColorPicker.hpp"
@@ -30,8 +31,8 @@ private:
 
         struct {
             QColSpinBox *red;
-            QColSpinBox *blue;
             QColSpinBox *green;
+            QColSpinBox *blue;
             QColSpinBox *alpha;
         } spinBoxes;
     } ui_;
@@ -42,5 +43,7 @@ private:
 
     void selectColor(const QColor &color, bool fromColorPicker);
     void ok();
+
+    void initSpinBoxes(LayoutCreator<QWidget> &creator);
 };
 }  // namespace chatterino
