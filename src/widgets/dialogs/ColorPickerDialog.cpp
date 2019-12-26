@@ -162,7 +162,6 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
                          [=](bool) { this->close(); });
     }
 
-    this->adjustSize();
     this->selectColor(initial, false);
 }
 
