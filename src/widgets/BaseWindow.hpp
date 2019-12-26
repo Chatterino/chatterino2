@@ -109,6 +109,7 @@ private:
     bool shown_ = false;
     FlagsEnum<Flags> flags_;
     float nativeScale_ = 1;
+    bool isResizeFixing_ = false;
 
     struct {
         QLayout *windowLayout = nullptr;
