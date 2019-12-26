@@ -40,7 +40,7 @@ private:
 
     bool dialogConfirmed_;
 
-    void selectColor(const QColor &color);
+    void selectColor(const QColor &color, bool fromColorPicker);
     void ok();
 };
 }  // namespace chatterino

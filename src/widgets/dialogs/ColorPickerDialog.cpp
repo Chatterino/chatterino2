@@ -50,8 +50,9 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
             ColorButton *button = this->ui_.recentColors[i];
             row.emplace<ColorButton>(*it).assign(&button);
 
-            QObject::connect(button, &QPushButton::clicked,
-                             [=] { this->selectColor(button->color()); });
+            QObject::connect(button, &QPushButton::clicked, [=] {
+                this->selectColor(button->color(), false);
+            });
             ++it;
             ++i;
         }
@@ -77,8 +78,9 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
             ColorButton *button = this->ui_.defaultColors[i];
             row.emplace<ColorButton>(*it).assign(&button);
 
-            QObject::connect(button, &QPushButton::clicked,
-                             [=] { this->selectColor(button->color()); });
+            QObject::connect(button, &QPushButton::clicked, [=] {
+                this->selectColor(button->color(), false);
+            });
             ++it;
             ++i;
         }
@@ -106,16 +108,18 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         {
             LayoutCreator<QWidget> cpCreator(new QWidget());
             auto cpPanel = cpCreator.setLayoutType<QHBoxLayout>();
+            cpPanel->setSizeConstraint(QLayout::SetFixedSize);
 
             /*
              * For some reason, LayoutCreator::emplace didn't work for these.
+             * (Or maybe I was too dense to make it work.)
              * After trying to debug for 4 hours or so, I gave up and settled
              * for this solution.
              */
             auto *colorPicker = new QColorPicker(this);
             this->ui_.colorPicker = colorPicker;
 
-            auto *luminancePicker = new QColorLuminancePicker(colorPicker);
+            auto *luminancePicker = new QColorLuminancePicker(this);
             this->ui_.luminancePicker = luminancePicker;
 
             cpPanel.append(colorPicker);
@@ -124,12 +128,12 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
             QObject::connect(colorPicker, SIGNAL(newCol(int, int)),
                              luminancePicker, SLOT(setCol(int, int)));
 
-            QObject::connect(
-                luminancePicker, &QColorLuminancePicker::newHsv,
-                [=](int h, int s, int v) {
-                    int alpha = this->ui_.spinBoxes.alpha->value();
-                    this->selectColor(QColor::fromHsv(h, s, v, alpha));
-                });
+            QObject::connect(luminancePicker, &QColorLuminancePicker::newHsv,
+                             [=](int h, int s, int v) {
+                                 int alpha = this->ui_.spinBoxes.alpha->value();
+                                 this->selectColor(
+                                     QColor::fromHsv(h, s, v, alpha), true);
+                             });
 
             vbox.append(cpPanel.getElement());
         }
@@ -176,7 +180,8 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
                          [=](bool) { this->close(); });
     }
 
-    this->selectColor(initial);
+    this->adjustSize();
+    this->selectColor(initial, false);
 }
 
 QColor ColorPickerDialog::selectedColor() const
@@ -193,7 +198,7 @@ void ColorPickerDialog::closeEvent(QCloseEvent *)
     this->closed.invoke();
 }
 
-void ColorPickerDialog::selectColor(const QColor &color)
+void ColorPickerDialog::selectColor(const QColor &color, bool fromColorPicker)
 {
     if (color == this->color_)
         return;
@@ -202,11 +207,20 @@ void ColorPickerDialog::selectColor(const QColor &color)
 
     // Update UI elements
     this->ui_.selectedColor->setColor(this->color_);
-    this->ui_.colorPicker->setCol(this->color_.hslHue(),
-                                  this->color_.hslSaturation());
-    this->ui_.luminancePicker->setCol(this->color_.hsvHue(),
-                                      this->color_.hsvSaturation(),
-                                      this->color_.value());
+
+    /*
+     * Somewhat "ugly" hack to prevent feedback loop between widgets. Since
+     * this method is private, I'm okay with this being ugly.
+     */
+    if (!fromColorPicker)
+    {
+        this->ui_.colorPicker->setCol(this->color_.hslHue(),
+                                      this->color_.hslSaturation());
+        this->ui_.luminancePicker->setCol(this->color_.hsvHue(),
+                                          this->color_.hsvSaturation(),
+                                          this->color_.value());
+    }
+
     this->ui_.spinBoxes.red->setValue(this->color_.red());
     this->ui_.spinBoxes.green->setValue(this->color_.green());
     this->ui_.spinBoxes.blue->setValue(this->color_.blue());

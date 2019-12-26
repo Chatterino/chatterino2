@@ -23,7 +23,7 @@ QColorLuminancePicker::QColorLuminancePicker(QWidget *parent)
     val = 100;
     sat = 100;
     pix = 0;
-    //    setAttribute(WA_NoErase, true);
+    setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed));
 }
 
 QColorLuminancePicker::~QColorLuminancePicker()
@@ -57,6 +57,11 @@ void QColorLuminancePicker::setCol(int h, int s)
 {
     setCol(h, s, val);
     emit newHsv(h, s, val);
+}
+
+QSize QColorLuminancePicker::sizeHint() const
+{
+    return QSize(LUMINANCE_PICKER_WIDTH, LUMINANCE_PICKER_HEIGHT);
 }
 
 void QColorLuminancePicker::paintEvent(QPaintEvent *)
@@ -153,7 +158,7 @@ void QColorPicker::setCrossVisible(bool visible)
 
 QSize QColorPicker::sizeHint() const
 {
-    return QSize(pWidth + 2 * frameWidth(), pHeight + 2 * frameWidth());
+    return QSize(COLOR_PICKER_WIDTH, COLOR_PICKER_HEIGHT);
 }
 
 void QColorPicker::setCol(int h, int s)

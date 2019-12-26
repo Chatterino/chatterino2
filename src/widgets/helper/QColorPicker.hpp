@@ -37,8 +37,8 @@ private:
     bool crossVisible;
 };
 
-static int pWidth = 220;
-static int pHeight = 200;
+static const int COLOR_PICKER_WIDTH = 220;
+static const int COLOR_PICKER_HEIGHT = 200;
 
 class QColorLuminancePicker : public QWidget
 {
@@ -55,6 +55,7 @@ signals:
     void newHsv(int h, int s, int v);
 
 protected:
+    QSize sizeHint() const override;
     void paintEvent(QPaintEvent *) override;
     void mouseMoveEvent(QMouseEvent *) override;
     void mousePressEvent(QMouseEvent *) override;
@@ -69,6 +70,9 @@ private:
     void setVal(int v);
     QPixmap *pix;
 };
+
+static const int LUMINANCE_PICKER_WIDTH = 25;
+static const int LUMINANCE_PICKER_HEIGHT = COLOR_PICKER_HEIGHT;
 
 class QColSpinBox : public QSpinBox
 {
