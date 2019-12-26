@@ -17,7 +17,7 @@ install:
 
     git submodule update --init --recursive
 
-    set QTDIR=C:\Qt\5.13\msvc2017_64
+    set QTDIR=C:\Qt\5.13.1\msvc2017_64
 
     set PATH=%PATH%;%QTDIR%\bin
 
