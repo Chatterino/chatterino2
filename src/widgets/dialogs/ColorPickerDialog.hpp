@@ -14,6 +14,8 @@ class ColorPickerDialog : public BaseWindow
 public:
     ColorPickerDialog(const QColor &initial, QWidget *parent = nullptr);
 
+    ~ColorPickerDialog();
+
     QColor selectedColor() const;
 
     pajlada::Signals::NoArgSignal closed;
@@ -26,17 +28,18 @@ private:
         std::vector<ColorButton *> recentColors;
         std::vector<ColorButton *> defaultColors;
         ColorButton *selectedColor;
+
         QColorPicker *colorPicker;
         QColorLuminancePicker *luminancePicker;
-
         std::array<QColSpinBox *, 4> spinBoxes;
+        QLineEdit *htmlEdit;
     } ui_;
 
     enum SpinBox : size_t { RED = 0, GREEN = 1, BLUE = 2, ALPHA = 3, END };
 
     QColor color_;
-
     bool dialogConfirmed_;
+    QRegularExpressionValidator *htmlColorValidator_{};
 
     void selectColor(const QColor &color, bool fromColorPicker);
     void ok();

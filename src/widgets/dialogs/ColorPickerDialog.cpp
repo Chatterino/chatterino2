@@ -145,6 +145,34 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
             vbox.append(sbCreator.getElement());
         }
 
+        // HTML color
+        {
+            LayoutCreator<QWidget> htmlCreator(new QWidget());
+            auto html = htmlCreator.setLayoutType<QGridLayout>();
+
+            // Copied from Qt source for QColorShower
+            QRegularExpression regExp(
+                QStringLiteral("#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})"));
+            auto *validator = this->htmlColorValidator_ =
+                new QRegularExpressionValidator(regExp, this);
+
+            auto *htmlEdit = this->ui_.htmlEdit = new QLineEdit(this);
+
+            htmlEdit->setValidator(validator);
+
+            html->addWidget(new QLabel("HTML:"), 0, 0);
+            html->addWidget(htmlEdit, 0, 1);
+
+            QObject::connect(htmlEdit, &QLineEdit::textEdited,
+                             [=](const QString &text) {
+                                 QColor col(text);
+                                 if (col.isValid())
+                                     this->selectColor(col, false);
+                             });
+
+            vbox.append(htmlCreator.getElement());
+        }
+
         contents.append(obj.getElement());
     }
 
@@ -163,6 +191,15 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
     }
 
     this->selectColor(initial, false);
+}
+
+ColorPickerDialog::~ColorPickerDialog()
+{
+    if (this->htmlColorValidator_)
+    {
+        this->htmlColorValidator_->deleteLater();
+        this->htmlColorValidator_ = nullptr;
+    }
 }
 
 QColor ColorPickerDialog::selectedColor() const
@@ -206,6 +243,13 @@ void ColorPickerDialog::selectColor(const QColor &color, bool fromColorPicker)
     this->ui_.spinBoxes[SpinBox::GREEN]->setValue(this->color_.green());
     this->ui_.spinBoxes[SpinBox::BLUE]->setValue(this->color_.blue());
     this->ui_.spinBoxes[SpinBox::ALPHA]->setValue(this->color_.alpha());
+
+    /*
+     * Here, we are intentionally using HexRgb instead of HexArgb. Most online
+     * sites (or other applications) will likely not include the alpha channel
+     * in their output.
+     */
+    this->ui_.htmlEdit->setText(this->color_.name(QColor::HexRgb));
 }
 
 void ColorPickerDialog::ok()
