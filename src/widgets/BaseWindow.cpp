@@ -515,6 +515,25 @@ void BaseWindow::resizeEvent(QResizeEvent *)
 
     //this->moveIntoDesktopRect(this);
 
+#ifdef USEWINSDK
+    if (!this->isResizeFixing_)
+    {
+        this->isResizeFixing_ = true;
+        QTimer::singleShot(50, this, [this] {
+            RECT rect;
+            ::GetWindowRect((HWND)this->winId(), &rect);
+            ::SetWindowPos((HWND)this->winId(), nullptr, 0, 0,
+                           rect.right - rect.left + 1, rect.bottom - rect.top,
+                           SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos((HWND)this->winId(), nullptr, 0, 0,
+                           rect.right - rect.left, rect.bottom - rect.top,
+                           SWP_NOMOVE | SWP_NOZORDER);
+            QTimer::singleShot(10, this,
+                               [this] { this->isResizeFixing_ = false; });
+        });
+    }
+#endif
+
     this->calcButtonsSizes();
 }
 
