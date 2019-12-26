@@ -127,12 +127,12 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
             QObject::connect(colorPicker, SIGNAL(newCol(int, int)),
                              luminancePicker, SLOT(setCol(int, int)));
 
-            QObject::connect(luminancePicker, &QColorLuminancePicker::newHsv,
-                             [=](int h, int s, int v) {
-                                 int alpha = this->ui_.spinBoxes.alpha->value();
-                                 this->selectColor(
-                                     QColor::fromHsv(h, s, v, alpha), true);
-                             });
+            QObject::connect(
+                luminancePicker, &QColorLuminancePicker::newHsv,
+                [=](int h, int s, int v) {
+                    int alpha = this->ui_.spinBoxes[SpinBox::ALPHA]->value();
+                    this->selectColor(QColor::fromHsv(h, s, v, alpha), true);
+                });
 
             vbox.append(cpPanel.getElement());
         }
@@ -203,10 +203,10 @@ void ColorPickerDialog::selectColor(const QColor &color, bool fromColorPicker)
                                           this->color_.value());
     }
 
-    this->ui_.spinBoxes.red->setValue(this->color_.red());
-    this->ui_.spinBoxes.green->setValue(this->color_.green());
-    this->ui_.spinBoxes.blue->setValue(this->color_.blue());
-    this->ui_.spinBoxes.alpha->setValue(this->color_.alpha());
+    this->ui_.spinBoxes[SpinBox::RED]->setValue(this->color_.red());
+    this->ui_.spinBoxes[SpinBox::GREEN]->setValue(this->color_.green());
+    this->ui_.spinBoxes[SpinBox::BLUE]->setValue(this->color_.blue());
+    this->ui_.spinBoxes[SpinBox::ALPHA]->setValue(this->color_.alpha());
 }
 
 void ColorPickerDialog::ok()
@@ -219,11 +219,10 @@ void ColorPickerDialog::initSpinBoxes(LayoutCreator<QWidget> &creator)
 {
     auto spinBoxes = creator.setLayoutType<QGridLayout>();
 
-    // TODO(leon): Make this less ugly?
-    auto *red = this->ui_.spinBoxes.red = new QColSpinBox(this);
-    auto *blue = this->ui_.spinBoxes.blue = new QColSpinBox(this);
-    auto *green = this->ui_.spinBoxes.green = new QColSpinBox(this);
-    auto *alpha = this->ui_.spinBoxes.alpha = new QColSpinBox(this);
+    auto *red = this->ui_.spinBoxes[SpinBox::RED] = new QColSpinBox(this);
+    auto *green = this->ui_.spinBoxes[SpinBox::GREEN] = new QColSpinBox(this);
+    auto *blue = this->ui_.spinBoxes[SpinBox::BLUE] = new QColSpinBox(this);
+    auto *alpha = this->ui_.spinBoxes[SpinBox::ALPHA] = new QColSpinBox(this);
 
     spinBoxes->addWidget(new QLabel("Red:"), 0, 0);
     spinBoxes->addWidget(red, 0, 1);
@@ -237,33 +236,16 @@ void ColorPickerDialog::initSpinBoxes(LayoutCreator<QWidget> &creator)
     spinBoxes->addWidget(new QLabel("Alpha:"), 3, 0);
     spinBoxes->addWidget(alpha, 3, 1);
 
-    QObject::connect(
-        red, QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) {
-            this->selectColor(QColor(red->value(), green->value(),
-                                     blue->value(), alpha->value()),
-                              false);
-        });
-
-    QObject::connect(
-        green, QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) {
-            this->selectColor(QColor(red->value(), green->value(),
-                                     blue->value(), alpha->value()),
-                              false);
-        });
-
-    QObject::connect(
-        blue, QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) {
-            this->selectColor(QColor(red->value(), green->value(),
-                                     blue->value(), alpha->value()),
-                              false);
-        });
-
-    QObject::connect(
-        alpha, QOverload<int>::of(&QSpinBox::valueChanged), [=](int value) {
-            this->selectColor(QColor(red->value(), green->value(),
-                                     blue->value(), alpha->value()),
-                              false);
-        });
+    for (size_t i = 0; i < SpinBox::END; ++i)
+    {
+        QObject::connect(
+            this->ui_.spinBoxes[i], QOverload<int>::of(&QSpinBox::valueChanged),
+            [=](int value) {
+                this->selectColor(QColor(red->value(), green->value(),
+                                         blue->value(), alpha->value()),
+                                  false);
+            });
+    }
 }
 
 }  // namespace chatterino

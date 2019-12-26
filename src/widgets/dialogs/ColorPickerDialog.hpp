@@ -29,13 +29,10 @@ private:
         QColorPicker *colorPicker;
         QColorLuminancePicker *luminancePicker;
 
-        struct {
-            QColSpinBox *red;
-            QColSpinBox *green;
-            QColSpinBox *blue;
-            QColSpinBox *alpha;
-        } spinBoxes;
+        std::array<QColSpinBox *, 4> spinBoxes;
     } ui_;
+
+    enum SpinBox : size_t { RED = 0, GREEN = 1, BLUE = 2, ALPHA = 3, END };
 
     QColor color_;
 
