@@ -47,4 +47,4 @@ The code is formatted using clang format in Qt Creator. [.clang-format](src/.cla
 Qt creator should now format the documents when saving it.
 
 ## Doxygen
-Doxygen is used to generate project information daily and is available [here](https://doxygen.chatterino.com).
+Doxygen is used to generate project information daily and is available [here](https://doxygen.chatterino.com)
