@@ -27,9 +27,12 @@ LinkParser::LinkParser(const QString &unparsedString)
      */
 
     static QRegularExpression linkRegex(
-        "(https?:\\/\\/"
-        "(?:[-;:&=\\+\\$,\\w]+(?:@[-;:&=\\+\\$,\\w]+)?)?(?:[\\w-]+\\.){1,}[\\w-"
-        "]+(?::\\d+)?(?:\\/[^\\/]*)*\\/?)",
+        "(^(https?:\\/\\/(([-;:&=\\+\\$,\\w]+)(@"
+        "([-;:&=\\+\\$,\\w]+))?)?([\\w-]*\\.){1,}"
+        "[\\w-]+(:\\d+)?(\\/[^\\/\\n?]*)*\\/?(\\?"
+        "(([^=\\n&]+)(?:=([^&\\n]*))?&"
+        ")*([^=\\n&]+)(?:=([^&\\n]*))?)?"
+        "(\\#[^\\n]+)?)$)",
         QRegularExpression::CaseInsensitiveOption);
 
     this->match_ = linkRegex.match(unparsedString);
