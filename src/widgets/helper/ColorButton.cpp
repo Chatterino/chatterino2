@@ -6,9 +6,6 @@ ColorButton::ColorButton(const QColor &color, QWidget *parent)
     : QPushButton(parent)
     , color_(color)
 {
-    // TODO(leon): Replace magic numbers with constants
-    this->setMinimumSize(32, 32);
-    this->setMaximumSize(32, 32);
     this->setColor(color_);
 }
 
