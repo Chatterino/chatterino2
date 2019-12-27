@@ -37,6 +37,11 @@ private:
 
     enum SpinBox : size_t { RED = 0, GREEN = 1, BLUE = 2, ALPHA = 3, END };
 
+    static const size_t MAX_RECENT_COLORS = 10;
+
+    static const size_t RECENT_COLORS_PER_ROW = 5;
+    static const size_t DEFAULT_COLORS_PER_ROW = 5;
+
     QColor color_;
     bool dialogConfirmed_;
     QRegularExpressionValidator *htmlColorValidator_{};

@@ -14,89 +14,101 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
     , color_()
     , dialogConfirmed_(false)
 {
-    // Set up UI element pointers
-    for (int i = 0; i < 5; ++i)
-    {
-        this->ui_.recentColors.push_back(nullptr);
-    }
-
-    for (int i = 0; i < 5; ++i)
-    {
-        this->ui_.defaultColors.push_back(nullptr);
-    }
-
+    // This hosts the "business logic" and the dialog button box
     LayoutCreator<QWidget> layoutWidget(this->getLayoutContainer());
     auto layout = layoutWidget.setLayoutType<QVBoxLayout>().withoutMargin();
 
+    // This hosts the business logic: color picker and predefined colors
     LayoutCreator<QWidget> contentCreator(new QWidget());
     auto contents = contentCreator.setLayoutType<QHBoxLayout>();
 
+    // This hosts the predefined colors (and also the currently selected color)
+    LayoutCreator<QWidget> predefCreator(new QWidget());
+    auto predef = predefCreator.setLayoutType<QVBoxLayout>();
+
     // Recently used colors
     {
-        LayoutCreator<QWidget> obj(new QWidget());
-        auto vbox = obj.setLayoutType<QVBoxLayout>();
+        LayoutCreator<QWidget> gridCreator(new QWidget());
+        auto grid = gridCreator.setLayoutType<QGridLayout>();
 
-        vbox.emplace<QLabel>("Recently used:");
+        grid->addWidget(new QLabel("Recently used:"), 0, 0, 1, -1);
 
-        LayoutCreator<QWidget> rowCreator(new QWidget());
-        auto row = rowCreator.setLayoutType<QHBoxLayout>();
-
-        auto recentColors = ColorProvider::instance().recentColors();
+        const auto recentColors = ColorProvider::instance().recentColors();
         auto it = recentColors.begin();
-        int i = 0;
-        while (it != recentColors.end() && i < 5)
+        size_t ind = 0;
+        while (it != recentColors.end() && ind < MAX_RECENT_COLORS)
         {
-            ColorButton *button = this->ui_.recentColors[i];
-            row.emplace<ColorButton>(*it).assign(&button);
+            this->ui_.recentColors.push_back(new ColorButton(*it, this));
+            auto *button = this->ui_.recentColors[ind];
+
+            const int rowInd = (ind / RECENT_COLORS_PER_ROW) + 1;
+            const int columnInd = ind % RECENT_COLORS_PER_ROW;
+
+            grid->addWidget(button, rowInd, columnInd);
 
             QObject::connect(button, &QPushButton::clicked, [=] {
                 this->selectColor(button->color(), false);
             });
+
             ++it;
-            ++i;
+            ++ind;
         }
 
-        vbox.append(rowCreator.getElement());
-        contents.append(obj.getElement());
+        auto spacer = new QSpacerItem(40, 20, QSizePolicy::Minimum,
+                                      QSizePolicy::Expanding);
+        grid->addItem(spacer, (ind / RECENT_COLORS_PER_ROW) + 2, 0, 1, 1,
+                      Qt::AlignTop);
+
+        predef.append(gridCreator.getElement());
     }
 
     // Default colors
     {
-        LayoutCreator<QWidget> obj(new QWidget());
-        auto vbox = obj.setLayoutType<QVBoxLayout>();
-        vbox.emplace<QLabel>("Default:");
+        LayoutCreator<QWidget> gridCreator(new QWidget());
+        auto grid = gridCreator.setLayoutType<QGridLayout>();
 
-        LayoutCreator<QWidget> rowCreator(new QWidget());
-        auto row = rowCreator.setLayoutType<QHBoxLayout>();
+        grid->addWidget(new QLabel("Default colors:"), 0, 0, 1, -1);
 
-        auto defaultColors = ColorProvider::instance().defaultColors();
+        const auto defaultColors = ColorProvider::instance().defaultColors();
         auto it = defaultColors.begin();
-        int i = 0;
-        while (it != defaultColors.end() && i < 5)
+        size_t ind = 0;
+        while (it != defaultColors.end())
         {
-            ColorButton *button = this->ui_.defaultColors[i];
-            row.emplace<ColorButton>(*it).assign(&button);
+            this->ui_.defaultColors.push_back(new ColorButton(*it, this));
+            auto *button = this->ui_.defaultColors[ind];
+
+            const int rowInd = (ind / DEFAULT_COLORS_PER_ROW) + 1;
+            const int columnInd = ind % DEFAULT_COLORS_PER_ROW;
+
+            grid->addWidget(button, rowInd, columnInd);
 
             QObject::connect(button, &QPushButton::clicked, [=] {
                 this->selectColor(button->color(), false);
             });
+
             ++it;
-            ++i;
+            ++ind;
         }
 
-        vbox.append(row.getElement());
-        contents.append(obj.getElement());
+        auto spacer = new QSpacerItem(40, 20, QSizePolicy::Minimum,
+                                      QSizePolicy::Expanding);
+        grid->addItem(spacer, (ind / DEFAULT_COLORS_PER_ROW) + 2, 0, 1, 1,
+                      Qt::AlignTop);
+
+        predef.append(gridCreator.getElement());
     }
 
     // Currently selected color
     {
-        LayoutCreator<QWidget> obj(new QWidget());
-        auto hbox = obj.setLayoutType<QHBoxLayout>();
-        hbox.emplace<QLabel>("Selected:");
-        hbox.emplace<ColorButton>(initial).assign(&this->ui_.selectedColor);
+        LayoutCreator<QWidget> curColorCreator(new QWidget());
+        auto curColor = curColorCreator.setLayoutType<QHBoxLayout>();
+        curColor.emplace<QLabel>("Selected:");
+        curColor.emplace<ColorButton>(initial).assign(&this->ui_.selectedColor);
 
-        contents.append(obj.getElement());
+        predef.append(curColor.getElement());
     }
+
+    contents.append(predef.getElement());
 
     // Color picker
     {
@@ -107,7 +119,6 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         {
             LayoutCreator<QWidget> cpCreator(new QWidget());
             auto cpPanel = cpCreator.setLayoutType<QHBoxLayout>();
-            cpPanel->setSizeConstraint(QLayout::SetFixedSize);
 
             /*
              * For some reason, LayoutCreator::emplace didn't work for these.

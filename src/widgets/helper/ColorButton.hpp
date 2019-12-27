@@ -5,7 +5,7 @@ namespace chatterino {
 class ColorButton : public QPushButton
 {
 public:
-    ColorButton(const QColor &color);
+    ColorButton(const QColor &color, QWidget *parent = nullptr);
 
     const QColor &color() const;
 
