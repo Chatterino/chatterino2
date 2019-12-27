@@ -18,7 +18,7 @@ LinkParser::LinkParser(const QString &unparsedString)
      *              @[-;:&=\\+\\$,\\w]+    <-- If a username is present, match an optional "@passsword"
      *          )?
      *      )?
-     *      (?:[\\w-]+\\.){1,}    <-- Infinite domain capture group "a." (eg: a.b.c. is valid)
+     *      (?:[\\w-]+\\.){1,256}    <-- Infinite domain capture group "a." (eg: a.b.c. is valid)
      *      [\\w-]+        <-- Matches the TLD (.com, .net, etc.). The `.` before the TLD is present from the match above.
      *      (?::\\d+)? <-- Port (optional)
      *      (?:\\/[^\\/]*) <-- Infinite path matching (/a/b/c), no traling slash
