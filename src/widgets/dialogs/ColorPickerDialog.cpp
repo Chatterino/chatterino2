@@ -7,8 +7,6 @@
 
 namespace chatterino {
 
-// TODO(leon): Replace magic values with constants
-
 ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
     : BaseWindow(BaseWindow::EnableCustomFrame, parent)
     , color_()
