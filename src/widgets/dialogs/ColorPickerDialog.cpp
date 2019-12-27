@@ -1,7 +1,6 @@
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 
-// TODO(leon): Move ColorProvider to different directory?
-#include "controllers/highlights/ColorProvider.hpp"
+#include "providers/colors/ColorProvider.hpp"
 
 #include <QColorDialog>
 

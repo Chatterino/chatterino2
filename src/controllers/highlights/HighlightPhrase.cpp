@@ -1,7 +1,5 @@
 #include "controllers/highlights/HighlightPhrase.hpp"
 
-#include "controllers/highlights/ColorProvider.hpp"
-
 namespace chatterino {
 
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const

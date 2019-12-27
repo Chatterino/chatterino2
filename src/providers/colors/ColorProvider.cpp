@@ -1,4 +1,4 @@
-#include "controllers/highlights/ColorProvider.hpp"
+#include "providers/colors/ColorProvider.hpp"
 
 #include "controllers/highlights/HighlightController.hpp"
 #include "singletons/Theme.hpp"
