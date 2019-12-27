@@ -54,7 +54,7 @@ void ColorProvider::initTypeColorMap()
     auto backgrounds = getApp()->themes->messages.backgrounds;
 
     QString customColor = getSettings()->selfHighlightColor;
-    if (!customColor.isEmpty())
+    if (QColor(customColor).isValid())
     {
         typeColorMap_.insert(
             {ColorType::SelfHighlight, std::make_shared<QColor>(customColor)});
@@ -67,7 +67,7 @@ void ColorProvider::initTypeColorMap()
     }
 
     customColor = getSettings()->subHighlightColor;
-    if (!customColor.isEmpty())
+    if (QColor(customColor).isValid())
     {
         typeColorMap_.insert(
             {ColorType::Subscription, std::make_shared<QColor>(customColor)});
@@ -80,7 +80,7 @@ void ColorProvider::initTypeColorMap()
     }
 
     customColor = getSettings()->whisperHighlightColor;
-    if (!customColor.isEmpty())
+    if (QColor(customColor).isValid())
     {
         typeColorMap_.insert(
             {ColorType::Whisper, std::make_shared<QColor>(customColor)});
