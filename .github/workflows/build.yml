@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: chatterino-windows-x86-64.zip
-          path: build/Chatterino2
+          path: build/chatterino-windows-x86-64.zip
 
       # LINUX
       - name: Install dependencies (Ubuntu)
