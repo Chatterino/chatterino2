@@ -4,7 +4,14 @@
 
 namespace chatterino {
 
-// These classes are literally copied from the Qt source
+/*
+ * These classes are literally copied from the Qt source.
+ * Unfortunately, they are private to the QColorDialog class so we cannot use
+ * them directly.
+ * If they become public at any point in the future, it should be possible to
+ * replace every include of this header with the respective includes for the
+ * QColorPicker, QColorLuminancePicker, and QColSpinBox classes.
+ */
 class QColorPicker : public QFrame
 {
     Q_OBJECT
