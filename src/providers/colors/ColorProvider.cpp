@@ -21,12 +21,12 @@ ColorProvider::ColorProvider()
 
 const std::shared_ptr<QColor> ColorProvider::color(ColorType type) const
 {
-    return typeColorMap_.at(type);
+    return this->typeColorMap_.at(type);
 }
 
 void ColorProvider::updateColor(ColorType type, QColor color)
 {
-    auto colorPtr = typeColorMap_.at(type);
+    auto colorPtr = this->typeColorMap_.at(type);
     *colorPtr = color;
 }
 
@@ -70,12 +70,12 @@ void ColorProvider::initTypeColorMap()
     QString customColor = getSettings()->selfHighlightColor;
     if (QColor(customColor).isValid())
     {
-        typeColorMap_.insert(
+        this->typeColorMap_.insert(
             {ColorType::SelfHighlight, std::make_shared<QColor>(customColor)});
     }
     else
     {
-        typeColorMap_.insert(
+        this->typeColorMap_.insert(
             {ColorType::SelfHighlight,
              std::make_shared<QColor>(backgrounds.highlighted)});
     }
@@ -83,12 +83,12 @@ void ColorProvider::initTypeColorMap()
     customColor = getSettings()->subHighlightColor;
     if (QColor(customColor).isValid())
     {
-        typeColorMap_.insert(
+        this->typeColorMap_.insert(
             {ColorType::Subscription, std::make_shared<QColor>(customColor)});
     }
     else
     {
-        typeColorMap_.insert(
+        this->typeColorMap_.insert(
             {ColorType::Subscription,
              std::make_shared<QColor>(backgrounds.subscription)});
     }
@@ -96,12 +96,12 @@ void ColorProvider::initTypeColorMap()
     customColor = getSettings()->whisperHighlightColor;
     if (QColor(customColor).isValid())
     {
-        typeColorMap_.insert(
+        this->typeColorMap_.insert(
             {ColorType::Whisper, std::make_shared<QColor>(customColor)});
     }
     else
     {
-        typeColorMap_.insert(
+        this->typeColorMap_.insert(
             {ColorType::Whisper,
              std::make_shared<QColor>(backgrounds.highlighted)});
     }
@@ -110,15 +110,15 @@ void ColorProvider::initTypeColorMap()
 void ColorProvider::initDefaultColors()
 {
     // Init default colors
-    defaultColors_.emplace_back(31, 141, 43, 127);   // Green-ish
-    defaultColors_.emplace_back(28, 126, 141, 127);  // Blue-ish
-    defaultColors_.emplace_back(136, 141, 49, 127);  // Golden-ish
-    defaultColors_.emplace_back(143, 48, 24, 127);   // Red-ish
-    defaultColors_.emplace_back(28, 141, 117, 127);  // Cyan-ish
+    this->defaultColors_.emplace_back(31, 141, 43, 127);   // Green-ish
+    this->defaultColors_.emplace_back(28, 126, 141, 127);  // Blue-ish
+    this->defaultColors_.emplace_back(136, 141, 49, 127);  // Golden-ish
+    this->defaultColors_.emplace_back(143, 48, 24, 127);   // Red-ish
+    this->defaultColors_.emplace_back(28, 141, 117, 127);  // Cyan-ish
 
     auto backgrounds = getApp()->themes->messages.backgrounds;
-    defaultColors_.push_back(backgrounds.highlighted);
-    defaultColors_.push_back(backgrounds.subscription);
+    this->defaultColors_.push_back(backgrounds.highlighted);
+    this->defaultColors_.push_back(backgrounds.subscription);
 }
 
 }  // namespace chatterino
