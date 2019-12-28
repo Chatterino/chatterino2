@@ -1,10 +1,20 @@
 #!/bin/sh
 
+set -e
+
+if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
+    echo "ERROR: No chatterino binary file found. This script must be run in the build folder, and chatterino must be built first."
+    exit 1
+fi
+
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/qt512/lib/"
+export PATH="/opt/qt512/bin:$PATH"
+
 script_path=$(readlink -f "$0")
 script_dir=$(dirname "$script_path")
 chatterino_dir=$(dirname "$script_dir")
 
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/qt512/lib/
+qmake_path=$(command -v qmake)
 
 ldd ./bin/chatterino
 make INSTALL_ROOT=appdir -j"$(nproc)" install ; find appdir/
@@ -26,10 +36,10 @@ fi
     -no-translations \
     -bundle-non-qt-libs \
     -unsupported-allow-new-glibc \
-    -qmake=/opt/qt512/bin/qmake
+    -qmake="$qmake_path"
 
 rm -rf appdir/home
-rm appdir/AppRun
+rm -f appdir/AppRun
 
 # shellcheck disable=SC2016
 echo '#!/bin/sh
