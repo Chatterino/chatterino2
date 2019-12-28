@@ -33,11 +33,25 @@ void ColorProvider::updateColor(ColorType type, QColor color)
 QSet<QColor> ColorProvider::recentColors() const
 {
     QSet<QColor> retVal;
+
+    /*
+     * Currently, only colors used in highlight phrases are considered. This
+     * may change at any point in the future.
+     */
     for (auto phrase : getApp()->highlights->phrases)
     {
-        // Ugly copying because HighlightPhrase::getColor returns a shared_ptr
-        retVal.insert(QColor(phrase.getColor()->name(QColor::HexArgb)));
+        retVal.insert(*phrase.getColor());
     }
+
+    for (auto userHl : getApp()->highlights->highlightedUsers)
+    {
+        retVal.insert(*userHl.getColor());
+    }
+
+    // Insert preset highlight colors
+    retVal.insert(*this->color(ColorType::SelfHighlight));
+    retVal.insert(*this->color(ColorType::Subscription));
+    retVal.insert(*this->color(ColorType::Whisper));
 
     return retVal;
 }
