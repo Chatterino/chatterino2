@@ -53,7 +53,7 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: chatterino-windows-x86-64.zip
-          path: build/chatterino-windows-x86-64.zip
+          path: build/Chatterino2
 
       # LINUX
       - name: Install dependencies (Ubuntu)
@@ -124,15 +124,20 @@ jobs:
     steps:
       - name: Create release
         id: create_release
-        uses: actions/create-release@v1
+        uses: pajlada/create-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: TEST Release ${{ github.ref }}
+          tag_name: github-actions-nightly
+          backup_tag_name: backup-github-actions-nightly
+          release_name: GitHub Actions Nightly Test
           body: |
-              looool
-          draft: true
+              1 ${{ github.eventName }}
+              2 ${{ github.sha }}
+              3 ${{ github.ref }}
+              4 ${{ github.workflow }}
+              5 ${{ github.action }}
+              6 ${{ github.actor }}
           prerelease: true
 
       - uses: actions/download-artifact@v1
@@ -149,6 +154,8 @@ jobs:
         with:
           name: chatterino-osx.dmg
           path: macos/
+
+      # TODO: Extract dmg and appimage
 
       - name: TREE
         run: |

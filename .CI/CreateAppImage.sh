@@ -39,6 +39,7 @@ fi
     -qmake="$qmake_path"
 
 rm -rf appdir/home
+rm -f appdir/AppRun
 
 # shellcheck disable=SC2016
 echo '#!/bin/sh
