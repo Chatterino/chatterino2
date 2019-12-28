@@ -1,7 +1,15 @@
 ---
 name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
 
 jobs:
   build:
@@ -120,6 +128,7 @@ jobs:
   create-release:
     needs: build
     runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
 
     steps:
       - name: Create release
