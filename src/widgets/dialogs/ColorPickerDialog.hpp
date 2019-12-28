@@ -49,6 +49,12 @@ private:
     void selectColor(const QColor &color, bool fromColorPicker);
     void ok();
 
+    // Helper methods for initializing UI elements
+
+    void initRecentColors(LayoutCreator<QWidget> &creator);
+    void initDefaultColors(LayoutCreator<QWidget> &creator);
+    void initColorPicker(LayoutCreator<QWidget> &creator);
     void initSpinBoxes(LayoutCreator<QWidget> &creator);
+    void initHtmlColor(LayoutCreator<QWidget> &creator);
 };
 }  // namespace chatterino

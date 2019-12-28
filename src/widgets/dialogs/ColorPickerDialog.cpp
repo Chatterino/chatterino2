@@ -26,35 +26,7 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
     // Recently used colors
     {
         LayoutCreator<QWidget> gridCreator(new QWidget());
-        auto grid = gridCreator.setLayoutType<QGridLayout>();
-
-        grid->addWidget(new QLabel("Recently used:"), 0, 0, 1, -1);
-
-        const auto recentColors = ColorProvider::instance().recentColors();
-        auto it = recentColors.begin();
-        size_t ind = 0;
-        while (it != recentColors.end() && ind < MAX_RECENT_COLORS)
-        {
-            this->ui_.recentColors.push_back(new ColorButton(*it, this));
-            auto *button = this->ui_.recentColors[ind];
-
-            const int rowInd = (ind / RECENT_COLORS_PER_ROW) + 1;
-            const int columnInd = ind % RECENT_COLORS_PER_ROW;
-
-            grid->addWidget(button, rowInd, columnInd);
-
-            QObject::connect(button, &QPushButton::clicked, [=] {
-                this->selectColor(button->color(), false);
-            });
-
-            ++it;
-            ++ind;
-        }
-
-        auto spacer = new QSpacerItem(40, 20, QSizePolicy::Minimum,
-                                      QSizePolicy::Expanding);
-        grid->addItem(spacer, (ind / RECENT_COLORS_PER_ROW) + 2, 0, 1, 1,
-                      Qt::AlignTop);
+        this->initRecentColors(gridCreator);
 
         predef.append(gridCreator.getElement());
     }
@@ -62,35 +34,7 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
     // Default colors
     {
         LayoutCreator<QWidget> gridCreator(new QWidget());
-        auto grid = gridCreator.setLayoutType<QGridLayout>();
-
-        grid->addWidget(new QLabel("Default colors:"), 0, 0, 1, -1);
-
-        const auto defaultColors = ColorProvider::instance().defaultColors();
-        auto it = defaultColors.begin();
-        size_t ind = 0;
-        while (it != defaultColors.end())
-        {
-            this->ui_.defaultColors.push_back(new ColorButton(*it, this));
-            auto *button = this->ui_.defaultColors[ind];
-
-            const int rowInd = (ind / DEFAULT_COLORS_PER_ROW) + 1;
-            const int columnInd = ind % DEFAULT_COLORS_PER_ROW;
-
-            grid->addWidget(button, rowInd, columnInd);
-
-            QObject::connect(button, &QPushButton::clicked, [=] {
-                this->selectColor(button->color(), false);
-            });
-
-            ++it;
-            ++ind;
-        }
-
-        auto spacer = new QSpacerItem(40, 20, QSizePolicy::Minimum,
-                                      QSizePolicy::Expanding);
-        grid->addItem(spacer, (ind / DEFAULT_COLORS_PER_ROW) + 2, 0, 1, 1,
-                      Qt::AlignTop);
+        this->initDefaultColors(gridCreator);
 
         predef.append(gridCreator.getElement());
     }
@@ -115,34 +59,9 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         // The actual color picker
         {
             LayoutCreator<QWidget> cpCreator(new QWidget());
-            auto cpPanel = cpCreator.setLayoutType<QHBoxLayout>();
+            this->initColorPicker(cpCreator);
 
-            /*
-             * For some reason, LayoutCreator::emplace didn't work for these.
-             * (Or maybe I was too dense to make it work.)
-             * After trying to debug for 4 hours or so, I gave up and settled
-             * for this solution.
-             */
-            auto *colorPicker = new QColorPicker(this);
-            this->ui_.colorPicker = colorPicker;
-
-            auto *luminancePicker = new QColorLuminancePicker(this);
-            this->ui_.luminancePicker = luminancePicker;
-
-            cpPanel.append(colorPicker);
-            cpPanel.append(luminancePicker);
-
-            QObject::connect(colorPicker, SIGNAL(newCol(int, int)),
-                             luminancePicker, SLOT(setCol(int, int)));
-
-            QObject::connect(
-                luminancePicker, &QColorLuminancePicker::newHsv,
-                [=](int h, int s, int v) {
-                    int alpha = this->ui_.spinBoxes[SpinBox::ALPHA]->value();
-                    this->selectColor(QColor::fromHsv(h, s, v, alpha), true);
-                });
-
-            vbox.append(cpPanel.getElement());
+            vbox.append(cpCreator.getElement());
         }
 
         // Spin boxes
@@ -156,27 +75,7 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
         // HTML color
         {
             LayoutCreator<QWidget> htmlCreator(new QWidget());
-            auto html = htmlCreator.setLayoutType<QGridLayout>();
-
-            // Copied from Qt source for QColorShower
-            QRegularExpression regExp(
-                QStringLiteral("#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})"));
-            auto *validator = this->htmlColorValidator_ =
-                new QRegularExpressionValidator(regExp, this);
-
-            auto *htmlEdit = this->ui_.htmlEdit = new QLineEdit(this);
-
-            htmlEdit->setValidator(validator);
-
-            html->addWidget(new QLabel("HTML:"), 0, 0);
-            html->addWidget(htmlEdit, 0, 1);
-
-            QObject::connect(htmlEdit, &QLineEdit::textEdited,
-                             [=](const QString &text) {
-                                 QColor col(text);
-                                 if (col.isValid())
-                                     this->selectColor(col, false);
-                             });
+            this->initHtmlColor(htmlCreator);
 
             vbox.append(htmlCreator.getElement());
         }
@@ -266,6 +165,100 @@ void ColorPickerDialog::ok()
     this->close();
 }
 
+void ColorPickerDialog::initRecentColors(LayoutCreator<QWidget> &creator)
+{
+    auto grid = creator.setLayoutType<QGridLayout>();
+
+    grid->addWidget(new QLabel("Recently used:"), 0, 0, 1, -1);
+
+    const auto recentColors = ColorProvider::instance().recentColors();
+    auto it = recentColors.begin();
+    size_t ind = 0;
+    while (it != recentColors.end() && ind < MAX_RECENT_COLORS)
+    {
+        this->ui_.recentColors.push_back(new ColorButton(*it, this));
+        auto *button = this->ui_.recentColors[ind];
+
+        const int rowInd = (ind / RECENT_COLORS_PER_ROW) + 1;
+        const int columnInd = ind % RECENT_COLORS_PER_ROW;
+
+        grid->addWidget(button, rowInd, columnInd);
+
+        QObject::connect(button, &QPushButton::clicked,
+                         [=] { this->selectColor(button->color(), false); });
+
+        ++it;
+        ++ind;
+    }
+
+    auto spacer =
+        new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    grid->addItem(spacer, (ind / RECENT_COLORS_PER_ROW) + 2, 0, 1, 1,
+                  Qt::AlignTop);
+}
+
+void ColorPickerDialog::initDefaultColors(LayoutCreator<QWidget> &creator)
+{
+    auto grid = creator.setLayoutType<QGridLayout>();
+
+    grid->addWidget(new QLabel("Default colors:"), 0, 0, 1, -1);
+
+    const auto defaultColors = ColorProvider::instance().defaultColors();
+    auto it = defaultColors.begin();
+    size_t ind = 0;
+    while (it != defaultColors.end())
+    {
+        this->ui_.defaultColors.push_back(new ColorButton(*it, this));
+        auto *button = this->ui_.defaultColors[ind];
+
+        const int rowInd = (ind / DEFAULT_COLORS_PER_ROW) + 1;
+        const int columnInd = ind % DEFAULT_COLORS_PER_ROW;
+
+        grid->addWidget(button, rowInd, columnInd);
+
+        QObject::connect(button, &QPushButton::clicked,
+                         [=] { this->selectColor(button->color(), false); });
+
+        ++it;
+        ++ind;
+    }
+
+    auto spacer =
+        new QSpacerItem(40, 20, QSizePolicy::Minimum, QSizePolicy::Expanding);
+    grid->addItem(spacer, (ind / DEFAULT_COLORS_PER_ROW) + 2, 0, 1, 1,
+                  Qt::AlignTop);
+}
+
+void ColorPickerDialog::initColorPicker(LayoutCreator<QWidget> &creator)
+{
+    auto cpPanel = creator.setLayoutType<QHBoxLayout>();
+
+    /*
+     * For some reason, LayoutCreator::emplace didn't work for these.
+     * (Or maybe I was too dense to make it work.)
+     * After trying to debug for 4 hours or so, I gave up and settled
+     * for this solution.
+     */
+    auto *colorPicker = new QColorPicker(this);
+    this->ui_.colorPicker = colorPicker;
+
+    auto *luminancePicker = new QColorLuminancePicker(this);
+    this->ui_.luminancePicker = luminancePicker;
+
+    cpPanel.append(colorPicker);
+    cpPanel.append(luminancePicker);
+
+    QObject::connect(colorPicker, SIGNAL(newCol(int, int)), luminancePicker,
+                     SLOT(setCol(int, int)));
+
+    QObject::connect(
+        luminancePicker, &QColorLuminancePicker::newHsv,
+        [=](int h, int s, int v) {
+            int alpha = this->ui_.spinBoxes[SpinBox::ALPHA]->value();
+            this->selectColor(QColor::fromHsv(h, s, v, alpha), true);
+        });
+}
+
 void ColorPickerDialog::initSpinBoxes(LayoutCreator<QWidget> &creator)
 {
     auto spinBoxes = creator.setLayoutType<QGridLayout>();
@@ -297,6 +290,31 @@ void ColorPickerDialog::initSpinBoxes(LayoutCreator<QWidget> &creator)
                                   false);
             });
     }
+}
+
+void ColorPickerDialog::initHtmlColor(LayoutCreator<QWidget> &creator)
+{
+    auto html = creator.setLayoutType<QGridLayout>();
+
+    // Copied from Qt source for QColorShower
+    QRegularExpression regExp(
+        QStringLiteral("#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})"));
+    auto *validator = this->htmlColorValidator_ =
+        new QRegularExpressionValidator(regExp, this);
+
+    auto *htmlEdit = this->ui_.htmlEdit = new QLineEdit(this);
+
+    htmlEdit->setValidator(validator);
+
+    html->addWidget(new QLabel("HTML:"), 0, 0);
+    html->addWidget(htmlEdit, 0, 1);
+
+    QObject::connect(htmlEdit, &QLineEdit::textEdited,
+                     [=](const QString &text) {
+                         QColor col(text);
+                         if (col.isValid())
+                             this->selectColor(col, false);
+                     });
 }
 
 }  // namespace chatterino
