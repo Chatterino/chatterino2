@@ -441,6 +441,7 @@ HEADERS += \
     src/util/RapidJsonSerializeQString.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
     src/util/SampleCheerMessages.hpp \
+    src/util/SampleLinks.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/Shortcut.hpp \
     src/util/StandardItemHelper.hpp \
