@@ -516,7 +516,7 @@ void BaseWindow::resizeEvent(QResizeEvent *)
     //this->moveIntoDesktopRect(this);
 
 #ifdef USEWINSDK
-    if (!this->isResizeFixing_)
+    if (this->hasCustomWindowFrame() && !this->isResizeFixing_)
     {
         this->isResizeFixing_ = true;
         QTimer::singleShot(50, this, [this] {
