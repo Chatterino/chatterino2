@@ -52,7 +52,7 @@ namespace {
 #ifdef C_MATCH_IPV6_LINK
     bool isValidIpv6(QStringRef &host)
     {
-        static auto exp = QRegularExpression("^\\[[a-f0-9:%]+\\]$");
+        static auto exp = QRegularExpression("^\\[[a-fA-F0-9:%]+\\]$");
 
         return exp.match(host).hasMatch();
     }
@@ -70,12 +70,12 @@ LinkParser::LinkParser(const QString &unparsedString)
     bool hasHttp = false;
 
     // Protocol `https?://`
-    if (l.startsWith("https://"))
+    if (l.startsWith("https://", Qt::CaseInsensitive))
     {
         hasHttp = true;
         l = l.mid(8);
     }
-    else if (l.startsWith("http://"))
+    else if (l.startsWith("http://", Qt::CaseInsensitive))
     {
         hasHttp = true;
         l = l.mid(7);
