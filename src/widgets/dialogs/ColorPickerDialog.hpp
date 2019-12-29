@@ -44,17 +44,35 @@ public:
 
 protected:
     void closeEvent(QCloseEvent *);
+    void themeChangedEvent();
 
 private:
     struct {
-        std::vector<ColorButton *> recentColors;
-        std::vector<ColorButton *> defaultColors;
-        ColorButton *selectedColor;
+        struct {
+            QLabel *label;
+            std::vector<ColorButton *> colors;
+        } recent;
 
-        QColorPicker *colorPicker;
-        QColorLuminancePicker *luminancePicker;
-        std::array<QColSpinBox *, 4> spinBoxes;
-        QLineEdit *htmlEdit;
+        struct {
+            QLabel *label;
+            std::vector<ColorButton *> colors;
+        } def;
+
+        struct {
+            QLabel *label;
+            ColorButton *color;
+        } selected;
+
+        struct {
+            QColorPicker *colorPicker;
+            QColorLuminancePicker *luminancePicker;
+
+            std::array<QLabel *, 4> spinBoxLabels;
+            std::array<QColSpinBox *, 4> spinBoxes;
+
+            QLabel *htmlLabel;
+            QLineEdit *htmlEdit;
+        } picker;
     } ui_;
 
     enum SpinBox : size_t { RED = 0, GREEN = 1, BLUE = 2, ALPHA = 3, END };
