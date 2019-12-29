@@ -12,6 +12,35 @@ bool HighlightPhrase::operator==(const HighlightPhrase &other) const
                                               other.soundUrl_, other.color_);
 }
 
+/**
+ * @brief Create a new HighlightPhrase.
+ *
+ * Use this constructor when updating an existing HighlightPhrase's color.
+ */
+HighlightPhrase::HighlightPhrase(const QString &pattern, bool hasAlert,
+                                 bool hasSound, bool isRegex,
+                                 bool isCaseSensitive, const QString &soundUrl,
+                                 QColor color)
+    : pattern_(pattern)
+    , hasAlert_(hasAlert)
+    , hasSound_(hasSound)
+    , isRegex_(isRegex)
+    , isCaseSensitive_(isCaseSensitive)
+    , soundUrl_(soundUrl)
+    , regex_(isRegex_ ? pattern
+                      : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+             QRegularExpression::UseUnicodePropertiesOption |
+                 (isCaseSensitive_ ? QRegularExpression::NoPatternOption
+                                   : QRegularExpression::CaseInsensitiveOption))
+{
+    this->color_ = std::make_shared<QColor>(color);
+}
+
+/**
+ * @brief Create a new HighlightPhrase.
+ *
+ * Use this constructor when creating a new HighlightPhrase.
+ */
 HighlightPhrase::HighlightPhrase(const QString &pattern, bool hasAlert,
                                  bool hasSound, bool isRegex,
                                  bool isCaseSensitive, const QString &soundUrl,

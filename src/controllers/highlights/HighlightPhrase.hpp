@@ -17,6 +17,10 @@ public:
 
     HighlightPhrase(const QString &pattern, bool hasAlert, bool hasSound,
                     bool isRegex, bool isCaseSensitive, const QString &soundUrl,
+                    QColor color);
+
+    HighlightPhrase(const QString &pattern, bool hasAlert, bool hasSound,
+                    bool isRegex, bool isCaseSensitive, const QString &soundUrl,
                     std::shared_ptr<QColor> color);
 
     const QString &getPattern() const;
@@ -97,9 +101,8 @@ struct Deserialize<chatterino::HighlightPhrase> {
     {
         if (!value.IsObject())
         {
-            return chatterino::HighlightPhrase(
-                QString(), true, false, false, false, "",
-                std::make_shared<QColor>(0, 0, 0, 0));
+            return chatterino::HighlightPhrase(QString(), true, false, false,
+                                               false, "", QColor());
         }
 
         QString _pattern;
@@ -118,7 +121,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "soundUrl", _soundUrl);
         chatterino::rj::getSafe(value, "color", encodedColor);
 
-        auto _color = std::make_shared<QColor>(encodedColor);
+        auto _color = QColor(encodedColor);
 
         return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
                                            _isRegex, _isCaseSensitive,
