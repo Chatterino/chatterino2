@@ -3,8 +3,6 @@
 #include "providers/colors/ColorProvider.hpp"
 #include "singletons/Theme.hpp"
 
-#include <QColorDialog>
-
 namespace chatterino {
 
 ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
