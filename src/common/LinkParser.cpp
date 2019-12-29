@@ -170,19 +170,16 @@ parseAnchor:
 
 done:
     // check host
-    if (this->hasMatch_)
-    {
-        this->hasMatch_ = isValidHostname(host) || isValidIpv4(host)
+    this->hasMatch_ = isValidHostname(host) || isValidIpv4(host)
 #ifdef C_MATCH_IPV6_LINK
 
-                          || (hasHttp && isValidIpv6(host))
+                      || (hasHttp && isValidIpv6(host))
 #endif
-            ;
+        ;
 
-        if (this->hasMatch_)
-        {
-            this->match_ = unparsedString;
-        }
+    if (this->hasMatch_)
+    {
+        this->match_ = unparsedString;
     }
 
     return;

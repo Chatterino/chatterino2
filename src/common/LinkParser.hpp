@@ -14,7 +14,7 @@ public:
     QString getCaptured() const;
 
 private:
-    bool hasMatch_;
+    bool hasMatch_{false};
     QString match_;
 };
 
