@@ -19,6 +19,12 @@ HighlightPhrase UserHighlightModel::getItemFromRow(
 {
     using Column = HighlightModel::Column;
 
+    // In order for old messages to update their highlight color, we need to
+    // update the highlight color here.
+    auto highlightColor = original.getColor();
+    *highlightColor =
+        row[Column::Color]->data(Qt::DecorationRole).value<QColor>();
+
     return HighlightPhrase{
         row[Column::Pattern]->data(Qt::DisplayRole).toString(),
         row[Column::FlashTaskbar]->data(Qt::CheckStateRole).toBool(),
@@ -26,8 +32,7 @@ HighlightPhrase UserHighlightModel::getItemFromRow(
         row[Column::UseRegex]->data(Qt::CheckStateRole).toBool(),
         row[Column::CaseSensitive]->data(Qt::CheckStateRole).toBool(),
         row[Column::SoundPath]->data(Qt::UserRole).toString(),
-        std::make_shared<QColor>(
-            row[Column::Color]->data(Qt::DecorationRole).value<QColor>())};
+        highlightColor};
 }
 
 // row into vector item

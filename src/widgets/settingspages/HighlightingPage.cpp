@@ -78,8 +78,9 @@ HighlightingPage::HighlightingPage()
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->phrases.appendItem(HighlightPhrase{
                         "my phrase", true, false, false, false, "",
-                        ColorProvider::instance().color(
-                            ColorType::SelfHighlight)});
+                        std::make_shared<QColor>(
+                            *ColorProvider::instance().color(
+                                ColorType::SelfHighlight))});
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
