@@ -14,7 +14,8 @@ public:
     QString getCaptured() const;
 
 private:
-    QRegularExpressionMatch match_;
+    bool hasMatch_;
+    QString match_;
 };
 
 }  // namespace chatterino
