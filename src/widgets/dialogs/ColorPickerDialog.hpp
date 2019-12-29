@@ -1,7 +1,7 @@
 #pragma once
 
 #include "util/LayoutCreator.hpp"
-#include "widgets/BaseWindow.hpp"
+#include "widgets/BasePopup.hpp"
 #include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/QColorPicker.hpp"
 
@@ -16,7 +16,7 @@ namespace chatterino {
  * This dialog provides buttons for recently used and default colors, as well
  * as a color picker widget identical to the one used in QColorPickerDialog.
  */
-class ColorPickerDialog : public BaseWindow
+class ColorPickerDialog : public BasePopup
 {
 public:
     /**
