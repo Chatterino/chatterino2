@@ -1,7 +1,6 @@
 #include "common/Channel.hpp"
 
 #include "Application.hpp"
-#include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "singletons/Emotes.hpp"

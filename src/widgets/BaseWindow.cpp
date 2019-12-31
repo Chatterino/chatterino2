@@ -3,7 +3,6 @@
 #include "BaseSettings.hpp"
 #include "BaseTheme.hpp"
 #include "boost/algorithm/algorithm.hpp"
-#include "debug/Log.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Shortcut.hpp"
 #include "util/WindowsHelper.hpp"
@@ -385,7 +384,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 
             if (!recursiveCheckMouseTracking(widget))
             {
-                log("Start moving");
+                qDebug() << "Start moving";
                 this->moving = true;
             }
         }
@@ -402,7 +401,7 @@ void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
     {
         if (this->moving)
         {
-            log("Stop moving");
+            qDebug() << "Stop moving";
             this->moving = false;
         }
     }

@@ -2,7 +2,6 @@
 
 #include "common/Modes.hpp"
 #include "common/Version.hpp"
-#include "debug/Log.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/helper/SignalLabel.hpp"
@@ -166,7 +165,7 @@ AboutPage::AboutPage()
 
                 if (contributorParts.size() != 4)
                 {
-                    log("Missing parts in line '{}'", line);
+                    qDebug() << "Missing parts in line" << line;
                     continue;
                 }
 

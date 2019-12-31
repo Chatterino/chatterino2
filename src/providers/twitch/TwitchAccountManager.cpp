@@ -1,7 +1,6 @@
 #include "providers/twitch/TwitchAccountManager.hpp"
 
 #include "common/Common.hpp"
-#include "debug/Log.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 
@@ -103,23 +102,23 @@ void TwitchAccountManager::reloadUsers()
         switch (this->addUser(userData))
         {
             case AddUserResponse::UserAlreadyExists: {
-                log("User {} already exists", userData.username);
+                qDebug() << "User" << userData.username << "already exists";
                 // Do nothing
             }
             break;
             case AddUserResponse::UserValuesUpdated: {
-                log("User {} already exists, and values updated!",
-                    userData.username);
+                qDebug() << "User" << userData.username
+                         << "already exists, and values updated!";
                 if (userData.username == this->getCurrent()->getUserName())
                 {
-                    log("It was the current user, so we need to reconnect "
-                        "stuff!");
+                    qDebug() << "It was the current user, so we need to "
+                                "reconnect stuff!";
                     this->currentUserChanged.invoke();
                 }
             }
             break;
             case AddUserResponse::UserAdded: {
-                log("Added user {}", userData.username);
+                qDebug() << "Added user" << userData.username;
                 listUpdated = true;
             }
             break;
@@ -140,15 +139,12 @@ void TwitchAccountManager::load()
         auto user = this->findUserByUsername(newUsername);
         if (user)
         {
-            log("[AccountManager:currentUsernameChanged] User successfully "
-                "updated to {}",
-                newUsername);
+            qDebug() << "Twitch user updated to" << newUsername;
             this->currentUser_ = user;
         }
         else
         {
-            log("[AccountManager:currentUsernameChanged] User successfully "
-                "updated to anonymous");
+            qDebug() << "Twitch user updated to anonymous";
             this->currentUser_ = this->anonymousUser_;
         }
 
@@ -170,11 +166,13 @@ bool TwitchAccountManager::isLoggedIn() const
 
 bool TwitchAccountManager::removeUser(TwitchAccount *account)
 {
+    static const QString accountFormat("/accounts/uid%1");
+
     auto userID(account->getUserId());
     if (!userID.isEmpty())
     {
         pajlada::Settings::SettingManager::removeSetting(
-            fS("/accounts/uid{}", userID));
+            accountFormat.arg(userID).toStdString());
     }
 
     if (account->getUserName() == this->currentUsername)

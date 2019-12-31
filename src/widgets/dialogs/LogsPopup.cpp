@@ -3,7 +3,6 @@
 #include "IrcMessage"
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
-#include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -70,7 +69,7 @@ void LogsPopup::getLogs()
         return;
     }
 
-    log("Unable to get logs, no channel name or something specified");
+    qDebug() << "Unable to get logs, no channel name or something specified";
 }
 
 void LogsPopup::setMessages(std::vector<MessagePtr> &messages)

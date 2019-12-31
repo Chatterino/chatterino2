@@ -3,7 +3,6 @@
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <memory>
-#include "debug/Log.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
@@ -18,11 +17,10 @@ bool getCreatedByUser(const rapidjson::Value &data, ActionUser &user);
 
 bool getTargetUser(const rapidjson::Value &data, ActionUser &user);
 
-rapidjson::Document createListenMessage(
-    const std::vector<std::string> &topicsVec,
-    std::shared_ptr<TwitchAccount> account);
+rapidjson::Document createListenMessage(const std::vector<QString> &topicsVec,
+                                        std::shared_ptr<TwitchAccount> account);
 rapidjson::Document createUnlistenMessage(
-    const std::vector<std::string> &topicsVec);
+    const std::vector<QString> &topicsVec);
 
 // Create timer using given ioService
 template <typename Duration, typename Callback>
@@ -35,7 +33,7 @@ void runAfter(boost::asio::io_service &ioService, Duration duration,
     timer->async_wait([timer, cb](const boost::system::error_code &ec) {
         if (ec)
         {
-            log("Error in runAfter: {}", ec.message());
+            qDebug() << "Error in runAfter:" << ec.message().c_str();
             return;
         }
 
@@ -53,7 +51,7 @@ void runAfter(std::shared_ptr<boost::asio::steady_timer> timer,
     timer->async_wait([timer, cb](const boost::system::error_code &ec) {
         if (ec)
         {
-            log("Error in runAfter: {}", ec.message());
+            qDebug() << "Error in runAfter:" << ec.message().c_str();
             return;
         }
 

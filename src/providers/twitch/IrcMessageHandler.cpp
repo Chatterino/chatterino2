@@ -3,7 +3,6 @@
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
-#include "debug/Log.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
@@ -235,9 +234,8 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        log("[IrcMessageHandler:handleClearChatMessage] Twitch channel {} not "
-            "found",
-            chanName);
+        qDebug() << "[IrcMessageHandler:handleClearChatMessage] Twitch channel"
+                 << chanName << "not found";
         return;
     }
 
@@ -300,10 +298,9 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        log("[IrcMessageHandler:handleClearMessageMessage] Twitch channel {} "
-            "not "
-            "found",
-            chanName);
+        qDebug()
+            << "[IrcMessageHandler:handleClearMessageMessage] Twitch channel"
+            << chanName << "not found";
         return;
     }
 
@@ -356,7 +353,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
-    log("Received whisper!");
+    qDebug() << "Received whisper!";
     MessageParseArgs args;
 
     args.isReceivedWhisper = true;
@@ -568,10 +565,8 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 
         if (channel->isEmpty())
         {
-            log("[IrcManager:handleNoticeMessage] Channel {} not found in "
-                "channel "
-                "manager ",
-                channelName);
+            qDebug() << "[IrcManager:handleNoticeMessage] Channel"
+                     << channelName << "not found in channel manager";
             return;
         }
 

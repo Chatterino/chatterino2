@@ -7,7 +7,6 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
-#include "debug/Log.hpp"
 #include "messages/Emote.hpp"
 
 namespace chatterino {

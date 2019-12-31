@@ -5,7 +5,6 @@
 
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
-#include "debug/Log.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"

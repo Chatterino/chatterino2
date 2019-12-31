@@ -3,7 +3,6 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "debug/Log.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -530,7 +529,7 @@ void Split::openInStreamlink()
     }
     catch (const Exception &ex)
     {
-        log("Error in doOpenStreamlink: {}", ex.what());
+        qDebug() << "Error in doOpenStreamlink:" << ex.what();
     }
 }
 

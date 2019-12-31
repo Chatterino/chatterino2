@@ -344,7 +344,6 @@ HEADERS += \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/debug/AssertInGuiThread.hpp \
     src/debug/Benchmark.hpp \
-    src/debug/Log.hpp \
     src/ForwardDecl.hpp \
     src/messages/Emote.hpp \
     src/messages/Image.hpp \

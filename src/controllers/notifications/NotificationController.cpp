@@ -4,7 +4,6 @@
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
-#include "debug/Log.hpp"
 #include "providers/twitch/TwitchApi.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Toasts.hpp"
@@ -147,12 +146,13 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
     TwitchApi::findUserId(channelName, [channelName, this](QString roomID) {
         if (roomID.isEmpty())
         {
-            log("[TwitchChannel:{}] Refreshing live status (Missing ID)",
-                channelName);
+            qDebug() << "[TwitchChannel" << channelName
+                     << "] Refreshing live status (Missing ID)";
             removeFakeChannel(channelName);
             return;
         }
-        log("[TwitchChannel:{}] Refreshing live status", channelName);
+        qDebug() << "[TwitchChannel" << channelName
+                 << "] Refreshing live status";
 
         QString url("https://api.twitch.tv/kraken/streams/" + roomID);
         NetworkRequest::twitchRequest(url)
@@ -160,15 +160,15 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
                 rapidjson::Document document = result.parseRapidJson();
                 if (!document.IsObject())
                 {
-                    log("[TwitchChannel:refreshLiveStatus]root is not an "
-                        "object");
+                    qDebug() << "[TwitchChannel:refreshLiveStatus] root is not "
+                                "an object";
                     return Failure;
                 }
 
                 if (!document.HasMember("stream"))
                 {
-                    log("[TwitchChannel:refreshLiveStatus] Missing stream in "
-                        "root");
+                    qDebug() << "[TwitchChannel:refreshLiveStatus] Missing "
+                                "stream in root";
                     return Failure;
                 }
 
