@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/IrcMessageHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"
@@ -202,6 +203,20 @@ void Channel::addMessagesAtStart(std::vector<MessagePtr> &_messages)
 {
     std::vector<MessagePtr> addedMessages =
         this->messages_.pushFront(_messages);
+    /*
+    if (getSettings()->similarityEnabled)
+    {
+        for (int i = 0; i < addedMessages.size(); ++i)
+        {
+            if (IrcMessageHandler::similarityRecentMessages(addedMessages, i) >
+                getSettings()->similarityPercent.getValue())
+            {
+                addedMessages[i]->flags.set(MessageFlag::Hidden, true);
+                addedMessages[i]->flags.set(MessageFlag::Disabled, true);
+            }
+        }
+    }
+    */
 
     if (addedMessages.size() != 0)
     {

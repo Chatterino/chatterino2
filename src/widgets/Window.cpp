@@ -86,7 +86,8 @@ bool Window::event(QEvent *event)
         case QEvent::WindowActivate:
             break;
 
-        case QEvent::WindowDeactivate: {
+        case QEvent::WindowDeactivate:
+        {
             auto page = this->notebook_->getOrAddSelectedPage();
 
             if (page != nullptr)
@@ -350,6 +351,11 @@ void Window::addShortcuts()
         split->setChannel(
             getApp()->twitch.server->getOrAddChannel(si.channelName));
         splitContainer->appendSplit(split);
+    });
+
+    createWindowShortcut(this, "CTRL+H", [this] {
+        getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
+        getApp()->windows->forceLayoutChannelViews();
     });
 }
 

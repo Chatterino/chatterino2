@@ -228,6 +228,20 @@ public:
     IntSetting lastSelectChannelTab = {"/ui/lastSelectChannelTab", 0};
     IntSetting lastSelectIrcConn = {"/ui/lastSelectIrcConn", 0};
 
+    // Similarity
+    BoolSetting similarityEnabled = {"/similarity/similarityEnabled", false};
+    BoolSetting colorSimilarDisabled = {"/similarity/colorSimilarDisabled",
+                                        true};
+    BoolSetting hideSimilar = {"/similarity/hideSimilar", false};
+    BoolSetting hideSimilarMyself = {"/similarity/hideSimilarMyself", false};
+    BoolSetting shownSimilarTriggerHighlights = {
+        "/similarity/shownSimilarTriggerHighlights", false};
+    FloatSetting similarityPercentage = {"/similarity/similarityPercentage",
+                                         0.9f};
+    IntSetting hideSimilarMaxDelay = {"/similarity/hideSimilarMaxDelay", 5};
+    IntSetting hideSimilarMaxMessagesToCheck = {
+        "/similarity/hideSimilarMaxMessagesToCheck", 3};
+
 private:
     void updateModerationActions();
 };

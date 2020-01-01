@@ -21,6 +21,101 @@
 
 namespace chatterino {
 
+static float LongestCommonSubstring(QString str1, QString str2)
+{
+    std::vector<std::vector<int>> tree(str1.size(),
+                                       std::vector<int>(str2.size(), 0));
+    int z = 0;
+
+    for (int i = 0; i < str1.size(); ++i)
+    {
+        for (int j = 0; j < str2.size(); ++j)
+        {
+            if (str1[i] == str2[j])
+            {
+                if (i == 0 || j == 0)
+                {
+                    tree[i][j] = 1;
+                }
+                else
+                {
+                    tree[i][j] = tree[i - 1][j - 1] + 1;
+                }
+                if (tree[i][j] > z)
+                {
+                    z = tree[i][j];
+                }
+            }
+            else
+            {
+                tree[i][j] = 0;
+            }
+        }
+    }
+
+    return z == 0 ? 0.f : float(z) / std::max(str1.size(), str2.size());
+};
+
+float IrcMessageHandler::similarity(
+    MessagePtr msg, const LimitedQueueSnapshot<MessagePtr> &messages)
+{
+    float ret = 0.0f;
+    int bysameuser = 0;
+    for (int i = 1; bysameuser < getSettings()->hideSimilarMaxMessagesToCheck;
+         ++i)
+    {
+        if (messages.size() < i)
+        {
+            break;
+        }
+        const auto &prev_msg = messages[messages.size() - i];
+        if (msg->loginName != prev_msg->loginName)
+        {
+            continue;
+        }
+        if (prev_msg->parseTime.secsTo(QTime::currentTime()) >=
+            getSettings()->hideSimilarMaxDelay)
+        {
+            break;
+        }
+        ++bysameuser;
+        ret = std::max(ret, LongestCommonSubstring(msg->messageText,
+                                                   prev_msg->messageText));
+    }
+    return ret;
+}
+
+float IrcMessageHandler::similarityRecentMessages(
+    const std::vector<MessagePtr> &messages, int pos_size)
+{
+    float ret = 0.0f;
+    int bysameuser = 0;
+    for (int i = 1; bysameuser < getSettings()->hideSimilarMaxMessagesToCheck;
+         ++i)
+    {
+        if (pos_size < i)
+        {
+            break;
+        }
+        const auto &prev_msg = messages[pos_size - i];
+        if (messages[pos_size]->loginName != prev_msg->loginName)
+        {
+            continue;
+        }
+        // is not able to time it, since parseTime equals currentTime during recent messages
+        if (prev_msg->parseTime.secsTo(QTime::currentTime()) >=
+            getSettings()->hideSimilarMaxDelay)
+        {
+            break;
+        }
+        ++bysameuser;
+        ret = std::max(ret,
+                       LongestCommonSubstring(messages[pos_size]->messageText,
+                                              prev_msg->messageText));
+    }
+    return ret;
+}
+
 static QMap<QString, QString> parseBadges(QString badgesString)
 {
     QMap<QString, QString> badges;
@@ -133,7 +228,33 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         }
 
         auto msg = builder.build();
-        builder.triggerHighlights();
+
+        if (getSettings()->similarityEnabled)
+        {
+            bool isMyself =
+                msg->loginName ==
+                getApp()->accounts->twitch.getCurrent()->getUserName();
+            bool hideMyself = getSettings()->hideSimilarMyself;
+
+            if ((!isMyself || hideMyself) &&
+                IrcMessageHandler::similarity(msg, chan->getMessageSnapshot()) >
+                    getSettings()->similarityPercentage)
+            {
+                msg->flags.set(MessageFlag::Hidden, true);
+                if (getSettings()->colorSimilarDisabled)
+                {
+                    msg->flags.set(MessageFlag::Disabled, true);
+                }
+            }
+        }
+
+        if (!msg->flags.has(MessageFlag::Hidden) ||
+            (!getSettings()->hideSimilar &&
+             getSettings()->shownSimilarTriggerHighlights))
+        {
+            builder.triggerHighlights();
+        }
+
         auto highlighted = msg->flags.has(MessageFlag::Highlighted);
 
         if (!isSub)

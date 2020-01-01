@@ -547,6 +547,34 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
     });
 
+    layout.addTitle("Similarity");
+    layout.addDescription(
+        "Anti one man spam feature based on the similarity to "
+        "previous messages from the same person.");
+    layout.addCheckbox("Similarity enabled", s.similarityEnabled);
+    layout.addCheckbox("Color similar messages as disabled",
+                       s.colorSimilarDisabled);
+    layout.addCheckbox("Hide similar messages (Ctrl + H)", s.hideSimilar);
+    layout.addCheckbox("Hide my own similar messages", s.hideSimilarMyself);
+    layout.addCheckbox("Shown similar messages trigger highlights",
+                       s.shownSimilarTriggerHighlights);
+    layout.addDropdown<float>(
+        "Similarity percentage", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
+        [](auto val) { return QString::number(val); },
+        [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
+    s.hideSimilar.connect(
+        []() { getApp()->windows->forceLayoutChannelViews(); }, false);
+    layout.addDropdown<int>(
+        "Similar messages max delay in seconds",
+        {"5", "10", "15", "30", "60", "120"}, s.hideSimilarMaxDelay,
+        [](auto val) { return QString::number(val); },
+        [](auto args) { return fuzzyToInt(args.value, 5); });
+    layout.addDropdown<int>(
+        "Similar messages max previous messages to check",
+        {"1", "2", "3", "4", "5"}, s.hideSimilarMaxMessagesToCheck,
+        [](auto val) { return QString::number(val); },
+        [](auto args) { return fuzzyToInt(args.value, 3); });
+
     // invisible element for width
     auto inv = new BaseWidget(this);
     inv->setScaleIndependantWidth(500);
