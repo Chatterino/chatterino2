@@ -1,7 +1,11 @@
 #include "TwitchIrcServer.hpp"
 
+#include <IrcCommand>
+#include <cassert>
+
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/Env.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
@@ -14,9 +18,6 @@
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "util/PostToThread.hpp"
-
-#include <IrcCommand>
-#include <cassert>
 
 // using namespace Communi;
 using namespace std::chrono_literals;
@@ -86,13 +87,12 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
         connection->setPassword(oauthToken);
     }
 
-    connection->setSecure(true);
-
     // https://dev.twitch.tv/docs/irc/guide/#connecting-to-twitch-irc
-    // SSL disabled: irc://irc.chat.twitch.tv:6667
-    // SSL enabled: irc://irc.chat.twitch.tv:6697
-    connection->setHost("irc.chat.twitch.tv");
-    connection->setPort(6697);
+    // SSL disabled: irc://irc.chat.twitch.tv:6667 (or port 80)
+    // SSL enabled: irc://irc.chat.twitch.tv:6697 (or port 443)
+    connection->setHost(Env::get().twitchServerHost);
+    connection->setPort(Env::get().twitchServerPort);
+    connection->setSecure(Env::get().twitchServerSecure);
 
     this->open(type);
 }
@@ -125,7 +125,7 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
 void TwitchIrcServer::privateMessageReceived(
     Communi::IrcPrivateMessage *message)
 {
-    IrcMessageHandler::getInstance().handlePrivMessage(message, *this);
+    IrcMessageHandler::instance().handlePrivMessage(message, *this);
 }
 
 void TwitchIrcServer::readConnectionMessageReceived(
@@ -141,7 +141,7 @@ void TwitchIrcServer::readConnectionMessageReceived(
 
     const QString &command = message->command();
 
-    auto &handler = IrcMessageHandler::getInstance();
+    auto &handler = IrcMessageHandler::instance();
 
     // Below commands enabled through the twitch.tv/membership CAP REQ
     if (command == "MODE")
@@ -194,13 +194,40 @@ void TwitchIrcServer::writeConnectionMessageReceived(
 {
     const QString &command = message->command();
 
-    auto &handler = IrcMessageHandler::getInstance();
-
+    auto &handler = IrcMessageHandler::instance();
     // Below commands enabled through the twitch.tv/commands CAP REQ
     if (command == "USERSTATE")
     {
         // Received USERSTATE upon PRIVMSGing
         handler.handleUserStateMessage(message);
+    }
+    else if (command == "NOTICE")
+    {
+        static std::unordered_set<std::string> readConnectionOnlyIDs{
+            "host_on",
+            "host_off",
+            "host_target_went_offline",
+            "emote_only_on",
+            "emote_only_off",
+            "slow_on",
+            "slow_off",
+            "subs_on",
+            "subs_off",
+            "r9k_on",
+            "r9k_off",
+
+            // Display for user who times someone out. This implies you're a
+            // moderator, at which point you will be connected to PubSub and receive
+            // a better message from there.
+            "timeout_success",
+            "ban_success",
+
+            // Channel suspended notices
+            "msg_channel_suspended",
+        };
+
+        handler.handleNoticeMessage(
+            static_cast<Communi::IrcNoticeMessage *>(message));
     }
 }
 

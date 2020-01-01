@@ -1,21 +1,45 @@
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/opt/qt512/lib/
-ldd ./bin/chatterino
-make INSTALL_ROOT=appdir -j$(nproc) install ; find appdir/
-cp ./resources/icon.png ./appdir/chatterino.png
+#!/bin/sh
 
-wget -nv "https://github.com/probonopd/linuxdeployqt/releases/download/continuous/linuxdeployqt-continuous-x86_64.AppImage"
-chmod a+x linuxdeployqt-continuous-x86_64.AppImage
-wget -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-chmod a+x appimagetool-x86_64.AppImage
-./linuxdeployqt-continuous-x86_64.AppImage \
+set -e
+
+if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
+    echo "ERROR: No chatterino binary file found. This script must be run in the build folder, and chatterino must be built first."
+    exit 1
+fi
+
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/qt512/lib/"
+export PATH="/opt/qt512/bin:$PATH"
+
+script_path=$(readlink -f "$0")
+script_dir=$(dirname "$script_path")
+chatterino_dir=$(dirname "$script_dir")
+
+qmake_path=$(command -v qmake)
+
+ldd ./bin/chatterino
+make INSTALL_ROOT=appdir -j"$(nproc)" install ; find appdir/
+cp "$chatterino_dir"/resources/icon.png ./appdir/chatterino.png
+
+linuxdeployqt_path="linuxdeployqt-6-x86_64.AppImage"
+linuxdeployqt_url="https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage"
+
+if [ ! -f "$linuxdeployqt_path" ]; then
+    wget -nv "$linuxdeployqt_url"
+    chmod a+x "$linuxdeployqt_path"
+fi
+if [ ! -f appimagetool-x86_64.AppImage ]; then
+    wget -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+    chmod a+x appimagetool-x86_64.AppImage
+fi
+./"$linuxdeployqt_path" \
     appdir/usr/share/applications/*.desktop \
     -no-translations \
     -bundle-non-qt-libs \
     -unsupported-allow-new-glibc \
-    -qmake=/opt/qt512/bin/qmake
+    -qmake="$qmake_path"
 
 rm -rf appdir/home
-rm appdir/AppRun
+rm -f appdir/AppRun
 
 # shellcheck disable=SC2016
 echo '#!/bin/sh

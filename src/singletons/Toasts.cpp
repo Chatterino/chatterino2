@@ -134,8 +134,7 @@ public:
                 }
                 QDesktopServices::openUrl(QUrl(link));
                 break;
-            case ToastReaction::OpenInStreamlink:
-            {
+            case ToastReaction::OpenInStreamlink: {
                 openStreamlinkForChannel(channelName_);
                 break;
             }

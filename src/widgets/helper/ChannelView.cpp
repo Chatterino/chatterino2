@@ -1,5 +1,17 @@
 #include "ChannelView.hpp"
 
+#include <QClipboard>
+#include <QDebug>
+#include <QDesktopServices>
+#include <QGraphicsBlurEffect>
+#include <QMessageBox>
+#include <QPainter>
+#include <algorithm>
+#include <chrono>
+#include <cmath>
+#include <functional>
+#include <memory>
+
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -24,19 +36,6 @@
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
-
-#include <QClipboard>
-#include <QDebug>
-#include <QDesktopServices>
-#include <QGraphicsBlurEffect>
-#include <QMessageBox>
-#include <QPainter>
-
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <functional>
-#include <memory>
 
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
@@ -122,7 +121,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         for (auto it = this->pauses_.begin(); it != this->pauses_.end();)
             it = it->second ? this->pauses_.erase(it) : ++it;
 
-        this->updatePauseTimer();
+        this->updatePauses();
     });
 
     auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
@@ -232,7 +231,7 @@ void ChannelView::pause(PauseReason reason, boost::optional<uint> msecs)
         this->pauses_[reason] = boost::none;
     }
 
-    this->updatePauseTimer();
+    this->updatePauses();
 }
 
 void ChannelView::unpause(PauseReason reason)
@@ -240,23 +239,17 @@ void ChannelView::unpause(PauseReason reason)
     /// Remove the value from the map
     this->pauses_.erase(reason);
 
-    this->updatePauseTimer();
-
-    /// Move selection
-    this->selection_.selectionMin.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.selectionMax.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.start.messageIndex -= this->pauseSelectionOffset_;
-    this->selection_.end.messageIndex -= this->pauseSelectionOffset_;
-
-    this->pauseSelectionOffset_ = 0;
+    this->updatePauses();
 }
 
-void ChannelView::updatePauseTimer()
+void ChannelView::updatePauses()
 {
     using namespace std::chrono;
 
     if (this->pauses_.empty())
     {
+        this->unpaused();
+
         /// No pauses so we can stop the timer
         this->pauseEnd_ = boost::none;
         this->pauseTimer_.stop();
@@ -290,6 +283,17 @@ void ChannelView::updatePauseTimer()
                 duration_cast<milliseconds>(pauseEnd - SteadyClock::now()));
         }
     }
+}
+
+void ChannelView::unpaused()
+{
+    /// Move selection
+    this->selection_.selectionMin.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.selectionMax.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.start.messageIndex -= this->pauseSelectionOffset_;
+    this->selection_.end.messageIndex -= this->pauseSelectionOffset_;
+
+    this->pauseSelectionOffset_ = 0;
 }
 
 void ChannelView::themeChangedEvent()
@@ -581,6 +585,11 @@ void ChannelView::setChannel(ChannelPtr channel)
         }
         this->lastMessageHasAlternateBackground_ =
             !this->lastMessageHasAlternateBackground_;
+
+        if (channel->shouldIgnoreHighlights())
+        {
+            messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
+        }
 
         this->messages_.pushBack(MessageLayoutPtr(messageLayout), deleted);
         this->scrollBar_->addHighlight(snapshot[i]->getScrollBarHighlight());
@@ -1029,14 +1038,6 @@ void ChannelView::leaveEvent(QEvent *)
 
 void ChannelView::mouseMoveEvent(QMouseEvent *event)
 {
-    if (event->modifiers() & (Qt::AltModifier | Qt::ControlModifier))
-    {
-        this->unsetCursor();
-
-        event->ignore();
-        return;
-    }
-
     /// Pause on hover
     if (float pauseTime = getSettings()->pauseOnHoverDuration;
         pauseTime > 0.001f)
@@ -1048,7 +1049,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         this->pause(PauseReason::Mouse);
     }
 
-    auto tooltipWidget = TooltipWidget::getInstance();
+    auto tooltipWidget = TooltipWidget::instance();
     std::shared_ptr<MessageLayout> layout;
     QPoint relativePos;
     int messageIndex;
@@ -1241,7 +1242,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
     else
     {
-        auto &tooltipPreviewImage = TooltipPreviewImage::getInstance();
+        auto &tooltipPreviewImage = TooltipPreviewImage::instance();
         auto emoteElement = dynamic_cast<const EmoteElement *>(
             &hoverLayoutElement->getCreator());
         auto badgeElement = dynamic_cast<const BadgeElement *>(
@@ -1326,8 +1327,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     // check if message is collapsed
     switch (event->button())
     {
-        case Qt::LeftButton:
-        {
+        case Qt::LeftButton: {
             this->lastPressPosition_ = event->screenPos();
             this->isMouseDown_ = true;
 
@@ -1345,8 +1345,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         }
         break;
 
-        case Qt::RightButton:
-        {
+        case Qt::RightButton: {
             this->lastRightPressPosition_ = event->screenPos();
             this->isRightMouseDown_ = true;
         }
@@ -1464,8 +1463,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 {
     switch (event->button())
     {
-        case Qt::LeftButton:
-        {
+        case Qt::LeftButton: {
             if (this->selecting_)
             {
                 // this->pausedBySelection = false;
@@ -1489,8 +1487,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             }
         }
         break;
-        case Qt::RightButton:
-        {
+        case Qt::RightButton: {
             auto insertText = [=](QString text) {
                 if (auto split = dynamic_cast<Split *>(this->parentWidget()))
                 {
@@ -1501,7 +1498,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (link.type == Link::UserInfo)
             {
-                insertText("@" + link.value + ", ");
+                const bool commaMention = getSettings()->mentionUsersWithComma;
+                insertText("@" + link.value + (commaMention ? ", " : " "));
             }
             else if (link.type == Link::UserWhisper)
             {
@@ -1705,16 +1703,14 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
     switch (link.type)
     {
         case Link::UserWhisper:
-        case Link::UserInfo:
-        {
+        case Link::UserInfo: {
             auto user = link.value;
             this->showUserInfoPopup(user);
             qDebug() << "Clicked " << user << "s message";
         }
         break;
 
-        case Link::Url:
-        {
+        case Link::Url: {
             if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
                 openLinkIncognito(link.value);
             else
@@ -1722,8 +1718,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
 
-        case Link::UserAction:
-        {
+        case Link::UserAction: {
             QString value = link.value;
 
             value.replace("{user}", layout->getMessage()->loginName)
@@ -1735,14 +1730,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
 
-        case Link::AutoModAllow:
-        {
+        case Link::AutoModAllow: {
             getApp()->accounts->twitch.getCurrent()->autoModAllow(link.value);
         }
         break;
 
-        case Link::AutoModDeny:
-        {
+        case Link::AutoModDeny: {
             getApp()->accounts->twitch.getCurrent()->autoModDeny(link.value);
         }
 

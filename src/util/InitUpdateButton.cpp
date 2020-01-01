@@ -22,14 +22,12 @@ void initUpdateButton(Button &button,
         dialog->buttonClicked.connect([&button](auto buttonType) {
             switch (buttonType)
             {
-                case UpdateDialog::Dismiss:
-                {
+                case UpdateDialog::Dismiss: {
                     button.hide();
                 }
                 break;
-                case UpdateDialog::Install:
-                {
-                    Updates::getInstance().installUpdates();
+                case UpdateDialog::Install: {
+                    Updates::instance().installUpdates();
                 }
                 break;
             }
@@ -41,18 +39,18 @@ void initUpdateButton(Button &button,
 
     // update image when state changes
     auto updateChange = [&button](auto) {
-        button.setVisible(Updates::getInstance().shouldShowUpdateButton());
+        button.setVisible(Updates::instance().shouldShowUpdateButton());
 
-        auto imageUrl = Updates::getInstance().isError()
+        auto imageUrl = Updates::instance().isError()
                             ? ":/buttons/updateError.png"
                             : ":/buttons/update.png";
         button.setPixmap(QPixmap(imageUrl));
     };
 
-    updateChange(Updates::getInstance().getStatus());
+    updateChange(Updates::instance().getStatus());
 
     signalHolder.managedConnect(
-        Updates::getInstance().statusUpdated,
+        Updates::instance().statusUpdated,
         [updateChange](auto status) { updateChange(status); });
 }
 

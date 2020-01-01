@@ -1,5 +1,8 @@
 #include "Application.hpp"
 
+#include <atomic>
+
+#include "common/Args.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/highlights/HighlightController.hpp"
@@ -29,9 +32,9 @@
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
+#include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
-
-#include <atomic>
+#include "widgets/splits/Split.hpp"
 
 namespace chatterino {
 
@@ -44,9 +47,7 @@ Application *Application::instance = nullptr;
 // to each other
 
 Application::Application(Settings &_settings, Paths &_paths)
-    : resources(&this->emplace<Resources2>())
-
-    , themes(&this->emplace<Theme>())
+    : themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
     , windows(&this->emplace<WindowManager>())
@@ -79,11 +80,36 @@ void Application::initialize(Settings &settings, Paths &paths)
     assert(isAppInitialized == false);
     isAppInitialized = true;
 
-    Irc::getInstance().load();
+    if (getSettings()->enableExperimentalIrc)
+    {
+        Irc::instance().load();
+    }
 
     for (auto &singleton : this->singletons_)
     {
         singleton->initialize(settings, paths);
+    }
+
+    // add crash message
+    if (getArgs().crashRecovery)
+    {
+        if (auto selected =
+                this->windows->getMainWindow().getNotebook().getSelectedPage())
+        {
+            if (auto container = dynamic_cast<SplitContainer *>(selected))
+            {
+                for (auto &&split : container->getSplits())
+                {
+                    if (auto channel = split->getChannel(); !channel->isEmpty())
+                    {
+                        channel->addMessage(makeSystemMessage(
+                            "Chatterino unexpectedly crashed and restarted. "
+                            "You can disable automatic restarts in the "
+                            "settings."));
+                    }
+                }
+            }
+        }
     }
 
     this->windows->updateWordTypeMask();
@@ -104,7 +130,7 @@ int Application::run(QApplication &qtApp)
     this->windows->getMainWindow().show();
 
     getSettings()->betaUpdates.connect(
-        [] { Updates::getInstance().checkForUpdates(); }, false);
+        [] { Updates::instance().checkForUpdates(); }, false);
 
     return qtApp.exec();
 }

@@ -119,8 +119,8 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "regex", _isRegex);
         chatterino::rj::getSafe(value, "case", _caseSensitive);
 
-            return chatterino::HighlightPhrase(_pattern, _alert, _sound,
-                                               _isRegex, _caseSensitive);
+        return chatterino::HighlightPhrase(_pattern, _alert, _sound, _isRegex,
+                                           _caseSensitive);
     }
 };
 

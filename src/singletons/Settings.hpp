@@ -1,25 +1,24 @@
 #pragma once
 
-#include "BaseSettings.hpp"
+#include <pajlada/settings/setting.hpp>
+#include <pajlada/settings/settinglistener.hpp>
 
+#include "BaseSettings.hpp"
 #include "common/Channel.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
 
-#include <pajlada/settings/setting.hpp>
-#include <pajlada/settings/settinglistener.hpp>
-
 namespace chatterino {
 
 class Settings : public ABSettings
 {
-    static Settings *instance;
+    static Settings *instance_;
 
 public:
     Settings(const QString &settingsDirectory);
 
-    static Settings &getInstance();
+    static Settings &instance();
 
     /// Appearance
     BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
@@ -121,6 +120,8 @@ public:
 
     QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
 
+    BoolSetting stackBits = {"/emotes/stackBits", false};
+
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};
@@ -204,6 +205,7 @@ public:
 #ifdef Q_OS_LINUX
     BoolSetting useKeyring = {"/misc/useKeyring", true};
 #endif
+    BoolSetting enableExperimentalIrc = {"/misc/experimentalIrc", false};
 
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
@@ -213,6 +215,9 @@ public:
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
     QStringSetting cachePath = {"/cache/path", ""};
+    BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
+    BoolSetting attachExtensionToAnyProcess = {
+        "/misc/attachExtensionToAnyProcess", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",

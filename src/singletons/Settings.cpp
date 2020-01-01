@@ -9,12 +9,12 @@
 
 namespace chatterino {
 
-Settings *Settings::instance = nullptr;
+Settings *Settings::instance_ = nullptr;
 
 Settings::Settings(const QString &settingsDirectory)
     : ABSettings(settingsDirectory)
 {
-    instance = this;
+    instance_ = this;
 
 #ifdef USEWINSDK
     this->autorun = isRegisteredForStartup();
@@ -23,14 +23,14 @@ Settings::Settings(const QString &settingsDirectory)
 #endif
 }
 
-Settings &Settings::getInstance()
+Settings &Settings::instance()
 {
-    return *instance;
+    return *instance_;
 }
 
 Settings *getSettings()
 {
-    return &Settings::getInstance();
+    return &Settings::instance();
 }
 
 }  // namespace chatterino

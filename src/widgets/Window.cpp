@@ -24,19 +24,19 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#ifdef QT_DEBUG
+#ifdef C_DEBUG
 #    include "util/SampleCheerMessages.hpp"
+#    include "util/SampleLinks.hpp"
 #endif
 
 #include <QApplication>
 #include <QDesktopServices>
 #include <QHeaderView>
+#include <QMenuBar>
 #include <QPalette>
 #include <QShortcut>
-#include <QVBoxLayout>
-
-#include <QMenuBar>
 #include <QStandardItemModel>
+#include <QVBoxLayout>
 
 namespace chatterino {
 
@@ -86,8 +86,7 @@ bool Window::event(QEvent *event)
         case QEvent::WindowActivate:
             break;
 
-        case QEvent::WindowDeactivate:
-        {
+        case QEvent::WindowDeactivate: {
             auto page = this->notebook_->getOrAddSelectedPage();
 
             if (page != nullptr)
@@ -200,10 +199,12 @@ void Window::addCustomTitlebarButtons()
 
 void Window::addDebugStuff()
 {
-#ifdef QT_DEBUG
-    std::vector<QString> cheerMessages, subMessages, miscMessages;
+#ifdef C_DEBUG
+    std::vector<QString> cheerMessages, subMessages, miscMessages, linkMessages;
 
     cheerMessages = getSampleCheerMessage();
+    auto validLinks = getValidLinks();
+    auto invalidLinks = getInvalidLinks();
     // clang-format off
 
     subMessages.emplace_back(R"(@badges=staff/1,broadcaster/1,turbo/1;color=#008000;display-name=ronni;emotes=;id=db25007f-7a18-43eb-9379-80131e44d633;login=ronni;mod=0;msg-id=resub;msg-param-months=6;msg-param-sub-plan=Prime;msg-param-sub-plan-name=Prime;room-id=1337;subscriber=1;system-msg=ronni\shas\ssubscribed\sfor\s6\smonths!;tmi-sent-ts=1507246572675;turbo=1;user-id=1337;user-type=staff :tmi.twitch.tv USERNOTICE #pajlada :Great stream -- keep it up!)");
@@ -232,6 +233,12 @@ void Window::addDebugStuff()
 
     // display name renders strangely
     miscMessages.emplace_back(R"(@badges=;color=#00AD2B;display-name=Iamme420\s;emotes=;id=d47a1e4b-a3c6-4b9e-9bf1-51b8f3dbc76e;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1529670347537;turbo=0;user-id=56422869;user-type= :iamme420!iamme420@iamme420.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");
+    miscMessages.emplace_back(R"(@badge-info=founder/47;badges=moderator/1,founder/0,premium/1;color=#00FF80;display-name=gempir;emotes=;flags=;id=d4514490-202e-43cb-b429-ef01a9d9c2fe;mod=1;room-id=11148817;subscriber=0;tmi-sent-ts=1575198233854;turbo=0;user-id=77829817;user-type=mod :gempir!gempir@gempir.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");
+
+    // various link tests
+    linkMessages.emplace_back(R"(@badge-info=subscriber/48;badges=broadcaster/1,subscriber/36,partner/1;color=#CC44FF;display-name=pajlada;emotes=;flags=;id=3c23cf3c-0864-4699-a76b-089350141147;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1577628844607;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada : Links that should pass: )" + getValidLinks().join(' '));
+    linkMessages.emplace_back(R"(@badge-info=subscriber/48;badges=broadcaster/1,subscriber/36,partner/1;color=#CC44FF;display-name=pajlada;emotes=;flags=;id=3c23cf3c-0864-4699-a76b-089350141147;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1577628844607;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada : Links that should NOT pass: )" + getInvalidLinks().join(' '));
+    linkMessages.emplace_back(R"(@badge-info=subscriber/48;badges=broadcaster/1,subscriber/36,partner/1;color=#CC44FF;display-name=pajlada;emotes=;flags=;id=3c23cf3c-0864-4699-a76b-089350141147;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1577628844607;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada : Links that should technically pass but we choose not to parse them: )" + getValidButIgnoredLinks().join(' '));
     // clang-format on
 
     createWindowShortcut(this, "F6", [=] {
@@ -247,6 +254,14 @@ void Window::addDebugStuff()
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
         getApp()->twitch.server->addFakeMessage(msg);
+    });
+
+    createWindowShortcut(this, "F8", [=] {
+        const auto &messages = linkMessages;
+        static int index = 0;
+        auto app = getApp();
+        const auto &msg = messages[index++ % messages.size()];
+        app->twitch.server->addFakeMessage(msg);
     });
 
     createWindowShortcut(this, "F9", [=] {
@@ -369,7 +384,7 @@ void Window::onAccountSelected()
     auto user = getApp()->accounts->twitch.getCurrent();
 
     // update title
-    this->setWindowTitle(Version::getInstance().getFullVersion());
+    this->setWindowTitle(Version::instance().fullVersion());
 
     // update user
     if (user->isAnon())

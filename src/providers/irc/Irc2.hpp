@@ -36,7 +36,7 @@ class Irc
 public:
     Irc();
 
-    static Irc &getInstance();
+    static Irc &instance();
 
     static inline void *const noEraseCredentialCaller =
         reinterpret_cast<void *>(1);

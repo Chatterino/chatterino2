@@ -154,6 +154,7 @@ void SplitInput::openEmotePopup()
     if (!this->emotePopup_)
     {
         this->emotePopup_ = new EmotePopup(this);
+        this->emotePopup_->setStayInScreenRect(true);
         this->emotePopup_->setAttribute(Qt::WA_DeleteOnClose);
 
         this->emotePopup_->linkClicked.connect([this](const Link &link) {

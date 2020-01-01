@@ -1,5 +1,8 @@
 #include "providers/bttv/BttvEmotes.hpp"
 
+#include <QJsonArray>
+#include <QThread>
+
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "debug/Log.hpp"
@@ -8,11 +11,11 @@
 #include "messages/ImageSet.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
-#include <QJsonArray>
-#include <QThread>
-
 namespace chatterino {
 namespace {
+
+    QString emoteLinkFormat("https://betterttv.com/emotes/%1");
+
     Url getEmoteLink(QString urlTemplate, const EmoteId &id,
                      const QString &emoteScale)
     {
@@ -47,13 +50,14 @@ namespace {
             auto name =
                 EmoteName{jsonEmote.toObject().value("code").toString()};
 
-            auto emote = Emote(
-                {name,
-                 ImageSet{Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
-                          Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
-                          Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25)},
-                 Tooltip{name.string + "<br />Global BetterTTV Emote"},
-                 Url{"https://manage.betterttv.net/emotes/" + id.string}});
+            auto emote = Emote({
+                name,
+                ImageSet{Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
+                         Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
+                         Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25)},
+                Tooltip{name.string + "<br />Global BetterTTV Emote"},
+                Url{emoteLinkFormat.arg(id.string)},
+            });
 
             emotes[name] =
                 cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
@@ -75,15 +79,16 @@ namespace {
                 auto name = EmoteName{jsonEmote.value("code").toString()};
                 // emoteObject.value("imageType").toString();
 
-                auto emote = Emote(
-                    {name,
-                     ImageSet{
-                         Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
-                         Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
-                         Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
-                     },
-                     Tooltip{name.string + "<br />Channel BetterTTV Emote"},
-                     Url{"https://manage.betterttv.net/emotes/" + id.string}});
+                auto emote = Emote({
+                    name,
+                    ImageSet{
+                        Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
+                        Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
+                        Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
+                    },
+                    Tooltip{name.string + "<br />Channel BetterTTV Emote"},
+                    Url{emoteLinkFormat.arg(id.string)},
+                });
 
                 emotes[name] = cachedOrMake(std::move(emote), id);
             }

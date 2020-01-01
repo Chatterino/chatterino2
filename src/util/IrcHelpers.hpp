@@ -19,38 +19,32 @@ inline QString parseTagString(const QString &input)
 
             switch (c.cell())
             {
-                case 'n':
-                {
+                case 'n': {
                     output.replace(i, 2, '\n');
                 }
                 break;
 
-                case 'r':
-                {
+                case 'r': {
                     output.replace(i, 2, '\r');
                 }
                 break;
 
-                case 's':
-                {
+                case 's': {
                     output.replace(i, 2, ' ');
                 }
                 break;
 
-                case '\\':
-                {
+                case '\\': {
                     output.replace(i, 2, '\\');
                 }
                 break;
 
-                case ':':
-                {
+                case ':': {
                     output.replace(i, 2, ';');
                 }
                 break;
 
-                default:
-                {
+                default: {
                     output.remove(i, 1);
                 }
                 break;

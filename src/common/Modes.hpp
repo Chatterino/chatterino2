@@ -7,7 +7,7 @@ class Modes
 public:
     Modes();
 
-    static const Modes &getInstance();
+    static const Modes &instance();
 
     bool isNightly{};
     bool isPortable{};

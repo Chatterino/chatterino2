@@ -70,8 +70,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
 {
     switch (column)
     {
-        case 0:
-        {
+        case 0: {
             if (role == Qt::CheckStateRole)
             {
                 if (rowIndex == 0)
@@ -86,8 +85,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             }
         }
         break;
-        case 1:
-        {
+        case 1: {
             if (role == Qt::CheckStateRole)
             {
                 if (rowIndex == 0)
@@ -103,8 +101,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             }
         }
         break;
-        case 2:
-        {
+        case 2: {
             if (role == Qt::CheckStateRole)
             {
                 if (rowIndex == 0)
@@ -120,8 +117,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
             }
         }
         break;
-        case 3:
-        {
+        case 3: {
             // empty element
         }
         break;

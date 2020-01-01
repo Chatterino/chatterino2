@@ -199,7 +199,7 @@ void openStreamlinkForChannel(const QString &channel)
 {
     QString channelURL = "twitch.tv/" + channel;
 
-    QString preferredQuality = getSettings()->preferredQuality;
+    QString preferredQuality = getSettings()->preferredQuality.getValue();
     preferredQuality = preferredQuality.toLower();
 
     if (preferredQuality == "choose")

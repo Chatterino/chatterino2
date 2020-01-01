@@ -4,10 +4,16 @@
 #include <QFile>
 #include <QPalette>
 #include <QStyleFactory>
+#include <Qt>
+#include <QtConcurrent>
+#include <csignal>
 
 #include "Application.hpp"
+#include "common/Modes.hpp"
 #include "common/NetworkManager.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Resources.hpp"
+#include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
@@ -19,12 +25,6 @@
 #ifdef C_USE_BREAKPAD
 #    include <QBreakpadHandler.h>
 #endif
-
-// void initQt();
-// void installCustomPalette();
-// void showLastCrashDialog();
-// void createRunningFile(const QString &path);
-// void removeRunningFile(const QString &path);
 
 namespace chatterino {
 namespace {
@@ -108,11 +108,68 @@ namespace {
     {
         QFile::remove(path);
     }
+
+    std::chrono::steady_clock::time_point signalsInitTime;
+    bool restartOnSignal = false;
+
+    [[noreturn]] void handleSignal(int signum)
+    {
+        using namespace std::chrono_literals;
+
+        if (restartOnSignal &&
+            std::chrono::steady_clock::now() - signalsInitTime > 30s)
+        {
+            QProcess proc;
+            proc.setProgram(QApplication::applicationFilePath());
+            proc.setArguments({"--crash-recovery"});
+            proc.startDetached();
+        }
+
+        _exit(signum);
+    }
+
+    // We want to restart chatterino when it crashes and the setting is set to
+    // true.
+    void initSignalHandler()
+    {
+#ifndef C_DEBUG
+        signalsInitTime = std::chrono::steady_clock::now();
+
+        signal(SIGSEGV, handleSignal);
+#endif
+    }
+
+    // We delete cache files that haven't been modified in 14 days. This strategy may be
+    // improved in the future.
+    void clearCache(const QDir &dir)
+    {
+        qDebug() << "[Cache] cleared cache";
+
+        QStringList toBeRemoved;
+
+        for (auto &&info : dir.entryInfoList(QDir::Files))
+        {
+            if (info.lastModified().addDays(14) < QDateTime::currentDateTime())
+            {
+                toBeRemoved << info.absoluteFilePath();
+            }
+        }
+
+        for (auto &&path : toBeRemoved)
+        {
+            qDebug() << path << QFile(path).remove();
+        }
+    }
 }  // namespace
 
 void runGui(QApplication &a, Paths &paths, Settings &settings)
 {
     initQt();
+    initResources();
+    initSignalHandler();
+
+    settings.restartOnCrash.connect(
+        [](const bool &value) { restartOnSignal = value; });
 
     auto thread = std::thread([dir = paths.miscDirectory] {
         {
@@ -131,8 +188,13 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
         }
     });
 
+    // Clear the cache 1 minute after start.
+    QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory()] {
+        QtConcurrent::run([cachePath]() { clearCache(cachePath); });
+    });
+
     chatterino::NetworkManager::init();
-    chatterino::Updates::getInstance().checkForUpdates();
+    chatterino::Updates::instance().checkForUpdates();
 
 #ifdef C_USE_BREAKPAD
     QBreakpadInstance.setDumpPath(getPaths()->settingsFolderPath + "/Crashes");

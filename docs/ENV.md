@@ -30,3 +30,16 @@ Notes:
  - If you want to host the images yourself. You need [Nuuls' filehost software](https://github.com/nuuls/fiehost)
  - Other image hosting software is currently not supported.
 
+### CHATTERINO2_TWITCH_SERVER_HOST
+String value used to change what Twitch chat server host to connect to.  
+Default value: `irc.chat.twitch.tv`
+
+### CHATTERINO2_TWITCH_SERVER_PORT
+Number value used to change what port to use when connecting to Twitch chat servers.  
+Currently known valid ports for secure usage: 6697, 443.  
+Currently known valid ports for non-secure usage (CHATTERINO2_TWITCH_SERVER_SECURE set to false): 6667, 80.  
+Default value: `443`
+
+### CHATTERINO2_TWITCH_SERVER_SECURE
+Bool value used to tell Chatterino whether to try to connect securely (secure irc) to the Twitch chat server.  
+Default value: `true`

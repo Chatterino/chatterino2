@@ -11,6 +11,8 @@
 #include "common/Modes.hpp"
 #include "util/CombinePath.hpp"
 
+using namespace std::literals;
+
 namespace chatterino {
 
 Paths *Paths::instance = nullptr;
@@ -22,7 +24,7 @@ Paths::Paths()
     this->initAppFilePathHash();
 
     this->initCheckPortable();
-    this->initAppDataDirectory();
+    this->initRootDirectory();
     this->initSubDirectories();
 }
 
@@ -33,7 +35,7 @@ bool Paths::createFolder(const QString &folderPath)
 
 bool Paths::isPortable()
 {
-    return Modes::getInstance().isPortable;
+    return Modes::instance().isPortable;
 }
 
 QString Paths::cacheDirectory()
@@ -76,7 +78,7 @@ void Paths::initCheckPortable()
         combinePath(QCoreApplication::applicationDirPath(), "portable"));
 }
 
-void Paths::initAppDataDirectory()
+void Paths::initRootDirectory()
 {
     assert(this->portable_.is_initialized());
 
@@ -95,8 +97,8 @@ void Paths::initAppDataDirectory()
             QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
         if (path.isEmpty())
         {
-            throw std::runtime_error(
-                "Error finding writable location for settings");
+            throw std::runtime_error("Could not create directory \""s +
+                                     path.toStdString() + "\"");
         }
 
 // create directory Chatterino2 instead of chatterino on windows because the
@@ -123,8 +125,8 @@ void Paths::initSubDirectories()
 
         if (!QDir().mkpath(path))
         {
-            throw std::runtime_error(
-                "Error creating appdata path %appdata%/chatterino/" + name);
+            throw std::runtime_error("Could not create directory \""s +
+                                     path.toStdString() + "\"");
         }
 
         return path;

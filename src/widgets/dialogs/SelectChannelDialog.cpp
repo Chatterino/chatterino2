@@ -133,8 +133,8 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         auto outerBox = obj.setLayoutType<QFormLayout>();
 
         {
-            auto view = this->ui_.irc.servers = new EditableModelView(
-                Irc::getInstance().newConnectionModel(this));
+            auto view = this->ui_.irc.servers =
+                new EditableModelView(Irc::instance().newConnectionModel(this));
 
             view->setTitles({"host", "port", "ssl", "user", "nick", "real",
                              "password", "login command"});
@@ -147,12 +147,12 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
             view->addButtonPressed.connect([] {
                 auto unique = IrcServerData{};
-                unique.id = Irc::getInstance().uniqueId();
+                unique.id = Irc::instance().uniqueId();
 
                 auto editor = new IrcConnectionEditor(unique);
                 if (editor->exec() == QDialog::Accepted)
                 {
-                    Irc::getInstance().connections.appendItem(editor->data());
+                    Irc::instance().connections.appendItem(editor->data());
                 }
             });
 
@@ -160,23 +160,21 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 view->getTableView(), &QTableView::doubleClicked,
                 [](const QModelIndex &index) {
                     auto editor = new IrcConnectionEditor(
-                        Irc::getInstance()
+                        Irc::instance()
                             .connections.getVector()[size_t(index.row())]);
 
                     if (editor->exec() == QDialog::Accepted)
                     {
                         auto data = editor->data();
-                        auto &&conns =
-                            Irc::getInstance().connections.getVector();
+                        auto &&conns = Irc::instance().connections.getVector();
                         int i = 0;
                         for (auto &&conn : conns)
                         {
                             if (conn.id == data.id)
                             {
-                                Irc::getInstance().connections.removeItem(
+                                Irc::instance().connections.removeItem(
                                     i, Irc::noEraseCredentialCaller);
-                                Irc::getInstance().connections.insertItem(data,
-                                                                          i);
+                                Irc::instance().connections.insertItem(data, i);
                             }
                             i++;
                         }
@@ -190,6 +188,12 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
         auto tab = notebook->addPage(obj.getElement());
         tab->setCustomTitle("Irc (Beta)");
+
+        if (!getSettings()->enableExperimentalIrc)
+        {
+            tab->setEnable(false);
+            tab->setVisible(false);
+        }
     }
 
     layout->setStretchFactor(notebook.getElement(), 1);
@@ -217,7 +221,12 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                      [=] { this->close(); });
 
     // restore ui state
-    this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
+    // fourtf: enable when releasing irc
+    if (getSettings()->enableExperimentalIrc)
+    {
+        this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
+    }
+
     this->ui_.irc.servers->getTableView()->selectRow(
         getSettings()->lastSelectIrcConn);
 }
@@ -247,33 +256,28 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
 
     switch (_channel.getType())
     {
-        case Channel::Type::Twitch:
-        {
+        case Channel::Type::Twitch: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.channel->setFocus();
             this->ui_.twitch.channelName->setText(channel->getName());
         }
         break;
-        case Channel::Type::TwitchWatching:
-        {
+        case Channel::Type::TwitchWatching: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.watching->setFocus();
         }
         break;
-        case Channel::Type::TwitchMentions:
-        {
+        case Channel::Type::TwitchMentions: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.mentions->setFocus();
         }
         break;
-        case Channel::Type::TwitchWhispers:
-        {
+        case Channel::Type::TwitchWhispers: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.whispers->setFocus();
         }
         break;
-        case Channel::Type::Irc:
-        {
+        case Channel::Type::Irc: {
             this->ui_.notebook->selectIndex(TAB_IRC);
             this->ui_.irc.channel->setText(_channel.get()->getName());
 
@@ -283,7 +287,7 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
                 if (auto server = ircChannel->server())
                 {
                     int i = 0;
-                    for (auto &&conn : Irc::getInstance().connections)
+                    for (auto &&conn : Irc::instance().connections)
                     {
                         if (conn.id == server->id())
                         {
@@ -298,8 +302,7 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
             this->ui_.irc.channel->setFocus();
         }
         break;
-        default:
-        {
+        default: {
             this->ui_.notebook->selectIndex(TAB_TWITCH);
             this->ui_.twitch.channel->setFocus();
         }
@@ -319,8 +322,7 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
 
     switch (this->ui_.notebook->getSelectedIndex())
     {
-        case TAB_TWITCH:
-        {
+        case TAB_TWITCH: {
             if (this->ui_.twitch.channel->isChecked())
             {
                 return app->twitch.server->getOrAddChannel(
@@ -340,18 +342,17 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
             }
         }
         break;
-        case TAB_IRC:
-        {
+        case TAB_IRC: {
             int row = this->ui_.irc.servers->getTableView()
                           ->selectionModel()
                           ->currentIndex()
                           .row();
 
-            auto &&vector = Irc::getInstance().connections.getVector();
+            auto &&vector = Irc::instance().connections.getVector();
 
             if (row >= 0 && row < int(vector.size()))
             {
-                return Irc::getInstance().getOrAddChannel(
+                return Irc::instance().getOrAddChannel(
                     vector[size_t(row)].id, this->ui_.irc.channel->text());
             }
             else

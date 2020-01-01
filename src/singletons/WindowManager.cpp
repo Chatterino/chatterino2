@@ -1,5 +1,16 @@
 #include "singletons/WindowManager.hpp"
 
+#include <QDebug>
+#include <QDesktopWidget>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QMessageBox>
+#include <QSaveFile>
+#include <QScreen>
+#include <boost/optional.hpp>
+#include <chrono>
+
 #include "Application.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Log.hpp"
@@ -20,18 +31,6 @@
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
-
-#include <QDebug>
-#include <QDesktopWidget>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QMessageBox>
-#include <QSaveFile>
-#include <QScreen>
-#include <boost/optional.hpp>
-
-#include <chrono>
 
 #define SETTINGS_FILENAME "/window-layout.json"
 
@@ -556,8 +555,7 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
 {
     switch (node->getType())
     {
-        case SplitNode::_Split:
-        {
+        case SplitNode::_Split: {
             obj.insert("type", "split");
             obj.insert("moderationMode", node->getSplit()->getModerationMode());
             QJsonObject split;
@@ -568,8 +566,7 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
         }
         break;
         case SplitNode::HorizontalContainer:
-        case SplitNode::VerticalContainer:
-        {
+        case SplitNode::VerticalContainer: {
             obj.insert("type", node->getType() == SplitNode::HorizontalContainer
                                    ? "horizontal"
                                    : "vertical");
@@ -593,29 +590,24 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
 
     switch (channel.getType())
     {
-        case Channel::Type::Twitch:
-        {
+        case Channel::Type::Twitch: {
             obj.insert("type", "twitch");
             obj.insert("name", channel.get()->getName());
         }
         break;
-        case Channel::Type::TwitchMentions:
-        {
+        case Channel::Type::TwitchMentions: {
             obj.insert("type", "mentions");
         }
         break;
-        case Channel::Type::TwitchWatching:
-        {
+        case Channel::Type::TwitchWatching: {
             obj.insert("type", "watching");
         }
         break;
-        case Channel::Type::TwitchWhispers:
-        {
+        case Channel::Type::TwitchWhispers: {
             obj.insert("type", "whispers");
         }
         break;
-        case Channel::Type::Irc:
-        {
+        case Channel::Type::Irc: {
             if (auto ircChannel =
                     dynamic_cast<IrcChannel *>(channel.get().get()))
             {
@@ -657,8 +649,8 @@ IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
     }
     else if (type == "irc")
     {
-        return Irc::getInstance().getOrAddChannel(
-            obj.value("server").toInt(-1), obj.value("channel").toString());
+        return Irc::instance().getOrAddChannel(obj.value("server").toInt(-1),
+                                               obj.value("channel").toString());
     }
 
     return Channel::getEmpty();

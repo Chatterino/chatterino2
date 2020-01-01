@@ -26,7 +26,7 @@ UpdateDialog::UpdateDialog()
     auto dismiss = buttons->addButton("Dismiss", QDialogButtonBox::RejectRole);
 
     QObject::connect(install, &QPushButton::clicked, this, [this] {
-        Updates::getInstance().installUpdates();
+        Updates::instance().installUpdates();
         this->close();
     });
     QObject::connect(dismiss, &QPushButton::clicked, this, [this] {
@@ -34,9 +34,9 @@ UpdateDialog::UpdateDialog()
         this->close();
     });
 
-    this->updateStatusChanged(Updates::getInstance().getStatus());
+    this->updateStatusChanged(Updates::instance().getStatus());
     this->connections_.managedConnect(
-        Updates::getInstance().statusUpdated,
+        Updates::instance().statusUpdated,
         [this](auto status) { this->updateStatusChanged(status); });
 
     this->setScaleIndependantHeight(150);
@@ -48,38 +48,41 @@ void UpdateDialog::updateStatusChanged(Updates::Status status)
 
     switch (status)
     {
-        case Updates::UpdateAvailable:
-        {
+        case Updates::UpdateAvailable: {
             this->ui_.label->setText(
-                QString("An update (%1) is available.\n\nDo you want to "
-                        "download and install it?")
-                    .arg(Updates::getInstance().getOnlineVersion()));
+                (Updates::instance().isDowngrade()
+                     ? QString(
+                           "The version online (%1) seems to be lower than the "
+                           "current (%2).\nEither a version was reverted or "
+                           "you are running a newer build.\n\nDo you want to "
+                           "download and install it?")
+                           .arg(Updates::instance().getOnlineVersion(),
+                                Updates::instance().getCurrentVersion())
+                     : QString("An update (%1) is available.\n\nDo you want to "
+                               "download and install it?")
+                           .arg(Updates::instance().getOnlineVersion())));
             this->updateGeometry();
         }
         break;
 
-        case Updates::SearchFailed:
-        {
+        case Updates::SearchFailed: {
             this->ui_.label->setText("Failed to load version information.");
         }
         break;
 
-        case Updates::Downloading:
-        {
+        case Updates::Downloading: {
             this->ui_.label->setText(
                 "Downloading updates.\n\nChatterino will restart "
                 "automatically when the download is done.");
         }
         break;
 
-        case Updates::DownloadFailed:
-        {
+        case Updates::DownloadFailed: {
             this->ui_.label->setText("Failed to download the update.");
         }
         break;
 
-        case Updates::WriteFileFailed:
-        {
+        case Updates::WriteFileFailed: {
             this->ui_.label->setText("Failed to save the update to disk.");
         }
         break;

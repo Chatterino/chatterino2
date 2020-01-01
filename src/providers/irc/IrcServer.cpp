@@ -66,26 +66,29 @@ void IrcServer::initializeConnection(IrcConnection *connection,
     connection->setRealName(this->data_->real.isEmpty() ? this->data_->user
                                                         : this->data_->nick);
 
-    switch (this->data_->authType)
+    if (getSettings()->enableExperimentalIrc)
     {
-        case IrcAuthType::Sasl:
-            connection->setSaslMechanism("PLAIN");
-            [[fallthrough]];
-        case IrcAuthType::Pass:
-            this->data_->getPassword(
-                this, [conn = new QObjectRef(connection) /* can't copy */,
-                       this](const QString &password) mutable {
-                    if (*conn)
-                    {
-                        (*conn)->setPassword(password);
-                        this->open(Both);
-                    }
+        switch (this->data_->authType)
+        {
+            case IrcAuthType::Sasl:
+                connection->setSaslMechanism("PLAIN");
+                [[fallthrough]];
+            case IrcAuthType::Pass:
+                this->data_->getPassword(
+                    this, [conn = new QObjectRef(connection) /* can't copy */,
+                           this](const QString &password) mutable {
+                        if (*conn)
+                        {
+                            (*conn)->setPassword(password);
+                            this->open(Both);
+                        }
 
-                    delete conn;
-                });
-            break;
-        default:
-            this->open(Both);
+                        delete conn;
+                    });
+                break;
+            default:
+                this->open(Both);
+        }
     }
 
     QObject::connect(
@@ -179,8 +182,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
 
     switch (message->type())
     {
-        case Communi::IrcMessage::Join:
-        {
+        case Communi::IrcMessage::Join: {
             auto x = static_cast<Communi::IrcJoinMessage *>(message);
 
             if (auto it =
@@ -205,8 +207,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
             return;
         }
 
-        case Communi::IrcMessage::Part:
-        {
+        case Communi::IrcMessage::Part: {
             auto x = static_cast<Communi::IrcPartMessage *>(message);
 
             if (auto it =

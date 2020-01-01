@@ -1,8 +1,9 @@
 #pragma once
 
+#include <QString>
 #include <QtGlobal>
 
-#define CHATTERINO_VERSION "2.1.4"
+#define CHATTERINO_VERSION "2.1.7"
 
 #if defined(Q_OS_WIN)
 #    define CHATTERINO_OS "win"
@@ -19,12 +20,12 @@ namespace chatterino {
 class Version
 {
 public:
-    static const Version &getInstance();
+    static const Version &instance();
 
-    const QString &getVersion() const;
-    const QString &getCommitHash() const;
-    const QString &getDateOfBuild() const;
-    const QString &getFullVersion() const;
+    const QString &version() const;
+    const QString &commitHash() const;
+    const QString &dateOfBuild() const;
+    const QString &fullVersion() const;
 
 private:
     Version();
@@ -35,4 +36,4 @@ private:
     QString fullVersion_;
 };
 
-};
+};  // namespace chatterino

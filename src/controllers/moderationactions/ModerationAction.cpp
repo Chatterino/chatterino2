@@ -65,17 +65,17 @@ ModerationAction::ModerationAction(const QString &action)
         // line1 = this->line1_;
         // line2 = this->line2_;
         // } else {
-        //     this->_moderationActions.emplace_back(app->resources->buttonTimeout,
+        //     this->_moderationActions.emplace_back(getResources().buttonTimeout,
         //     str);
         // }
     }
     else if (action.startsWith("/ban "))
     {
-        this->image_ = Image::fromPixmap(getApp()->resources->buttons.ban);
+        this->image_ = Image::fromPixmap(getResources().buttons.ban);
     }
     else if (action.startsWith("/delete "))
     {
-        this->image_ = Image::fromPixmap(getApp()->resources->buttons.trashCan);
+        this->image_ = Image::fromPixmap(getResources().buttons.trashCan);
     }
     else
     {

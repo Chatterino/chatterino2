@@ -1,0 +1,207 @@
+---
+name: Build
+
+on:
+  push:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+  pull_request:
+    paths-ignore:
+      - 'docs/**'
+      - '*.md'
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          modules: qtwebengine
+
+      # WINDOWS
+      - name: Install dependencies (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+            REM We use this source (temporarily?) until choco has updated their version of conan
+            choco source add -n=AFG -s="https://api.bintray.com/nuget/anotherfoxguy/choco-pkg"
+            choco install conan -y
+
+            refreshenv
+        shell: cmd
+
+      - name: Build (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+            call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            mkdir build
+            cd build
+            "C:\Program Files\Conan\conan\conan.exe" install ..
+            qmake ..
+            set cl=/MP
+            nmake /S /NOLOGO
+            windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+            cp release/chatterino.exe Chatterino2/
+            echo nightly > Chatterino2/modes
+            7z a chatterino-windows-x86-64.zip Chatterino2/
+        shell: cmd
+
+      - name: Upload artifact (Windows)
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/upload-artifact@v1
+        with:
+          name: chatterino-windows-x86-64.zip
+          path: build/chatterino-windows-x86-64.zip
+
+      # LINUX
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev libpulse-dev libxkbcommon-x11-0 libgstreamer-plugins-base1.0-0
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            mkdir build
+            cd build
+            qmake PREFIX=/usr ..
+            make -j8
+        shell: bash
+
+      - name: Package (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            cd build
+            sh ./../.CI/CreateAppImage.sh
+        shell: bash
+
+      - name: Upload artifact (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v1
+        with:
+          name: Chatterino-x86_64.AppImage
+          path: build/Chatterino-x86_64.AppImage
+
+      # MACOS
+      - name: Install dependencies (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+            brew install boost openssl rapidjson qt p7zip create-dmg
+        shell: bash
+
+      - name: Build (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+            mkdir build
+            cd build
+            /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
+            sed -ie 's/-framework\\\ /-framework /g' Makefile
+            make -j8
+        shell: bash
+
+      - name: Package (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        run: |
+            ls -la
+            pwd
+            ls -la build || true
+            cd build
+            sh ./../.CI/CreateDMG.sh
+        shell: bash
+
+      - name: Upload artifact (MacOS)
+        if: startsWith(matrix.os, 'macos')
+        uses: actions/upload-artifact@v1
+        with:
+          name: chatterino-osx.dmg
+          path: build/chatterino-osx.dmg
+
+  create-release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Create release
+        id: create_release
+        uses: pajlada/create-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: github-actions-nightly
+          backup_tag_name: backup-github-actions-nightly
+          release_name: GitHub Actions Nightly Test
+          body: |
+              1 ${{ github.eventName }}
+              2 ${{ github.sha }}
+              3 ${{ github.ref }}
+              4 ${{ github.workflow }}
+              5 ${{ github.action }}
+              6 ${{ github.actor }}
+          prerelease: true
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: chatterino-windows-x86-64.zip
+          path: windows/
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: Chatterino-x86_64.AppImage
+          path: linux/
+
+      - uses: actions/download-artifact@v1
+        with:
+          name: chatterino-osx.dmg
+          path: macos/
+
+      # TODO: Extract dmg and appimage
+
+      - name: TREE
+        run: |
+            sudo apt update && sudo apt install tree
+            tree .
+
+      # - name: Read upload URL into output
+      #   id: upload_url
+      #   run: |
+      #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
+
+      - name: Upload release asset (Windows)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./windows/chatterino-windows-x86-64.zip
+          asset_name: chatterino-windows-x86-64.zip
+          asset_content_type: application/zip
+
+      - name: Upload release asset (Ubuntu)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./linux/Chatterino-x86_64.AppImage
+          asset_name: Chatterino-x86_64.AppImage
+          asset_content_type: application/x-executable
+
+      - name: Upload release asset (MacOS)
+        uses: actions/upload-release-asset@v1.0.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./macos/chatterino-osx.dmg
+          asset_name: chatterino-osx.dmg
+          asset_content_type: application/x-bzip2

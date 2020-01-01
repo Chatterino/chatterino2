@@ -303,6 +303,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 #ifdef USEWINSDK
     layout.addCheckbox("Start with Windows", s.autorun);
 #endif
+    layout.addCheckbox("Restart on crash", s.restartOnCrash);
 
     layout.addTitle("Chat");
 
@@ -390,6 +391,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Animate", s.animateEmotes);
     layout.addCheckbox("Animate only when Chatterino is focused",
                        s.animationsWhenFocused);
+    layout.addCheckbox("Stack bits", s.stackBits);
     layout.addDropdown<float>(
         "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
         s.emoteScale,
@@ -438,10 +440,16 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addDescription("The browser extension replaces the default "
                           "Twitch.tv chat with chatterino.");
 
-    layout.addDescription(formatRichNamedLink(CHROME_EXTENSION_LINK,
-                                              "Download for Google Chrome"));
+    layout.addDescription(formatRichNamedLink(
+        CHROME_EXTENSION_LINK,
+        "Download for Google Chrome and similar browsers."));
     layout.addDescription(
         formatRichNamedLink(FIREFOX_EXTENSION_LINK, "Download for Firefox"));
+
+    layout.addDescription("Chatterino only attaches to known browsers to avoid "
+                          "attaching to other windows by accident.");
+    layout.addCheckbox("Attach to any browser (may cause issues).",
+                       s.attachExtensionToAnyProcess);
 #endif
 
     layout.addTitle("Miscellaneous");
@@ -496,13 +504,15 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
 
-    layout.addCheckbox("Show unhandled irc messages",
+    layout.addCheckbox("Enable experimental IRC support (requires restart)",
+                       s.enableExperimentalIrc);
+    layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
 
     layout.addTitle("Cache");
     layout.addDescription(
         "Files that are used often (such as emotes) are saved to disk to "
-        "reduce bandwidth usage and tho speed up loading.");
+        "reduce bandwidth usage and to speed up loading.");
 
     auto cachePathLabel = layout.addDescription("placeholder :D");
     getSettings()->cachePath.connect([cachePathLabel](const auto &,

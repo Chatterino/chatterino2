@@ -75,15 +75,17 @@ AboutPage::AboutPage()
 
         auto versionInfo = layout.emplace<QGroupBox>("Version");
         {
-            auto version = Version::getInstance();
+            auto version = Version::instance();
             QString text = QString("%1 (commit %2%3)")
-                               .arg(version.getFullVersion())
+                               .arg(version.fullVersion())
                                .arg("<a "
                                     "href=\"https://github.com/Chatterino/"
                                     "chatterino2/commit/" +
-                                    version.getCommitHash() + "\">" +
-                                    version.getCommitHash() + "</a>")
-                               .arg(Modes::getInstance().isNightly ? ", " + version.getDateOfBuild() : "");
+                                    version.commitHash() + "\">" +
+                                    version.commitHash() + "</a>")
+                               .arg(Modes::instance().isNightly
+                                        ? ", " + version.dateOfBuild()
+                                        : "");
 
             auto versionLabel = versionInfo.emplace<QLabel>(text);
             versionLabel->setOpenExternalLinks(true);

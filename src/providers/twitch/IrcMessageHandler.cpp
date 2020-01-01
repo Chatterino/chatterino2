@@ -40,7 +40,7 @@ static QMap<QString, QString> parseBadges(QString badgesString)
     return badges;
 }
 
-IrcMessageHandler &IrcMessageHandler::getInstance()
+IrcMessageHandler &IrcMessageHandler::instance()
 {
     static IrcMessageHandler instance;
     return instance;
@@ -618,7 +618,7 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     {
         if (message->nick() !=
                 getApp()->accounts->twitch.getCurrent()->getUserName() &&
-            getSettings()->showJoins.getValue())
+            getSettings()->showParts.getValue())
         {
             twitchChannel->addPartedUser(message->nick());
         }

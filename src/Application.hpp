@@ -1,10 +1,10 @@
 #pragma once
 
-#include "common/Singleton.hpp"
-#include "singletons/NativeMessaging.hpp"
-
 #include <QApplication>
 #include <memory>
+
+#include "common/Singleton.hpp"
+#include "singletons/NativeMessaging.hpp"
 
 namespace chatterino {
 
@@ -28,7 +28,6 @@ class AccountManager;
 class Emotes;
 class Settings;
 class Fonts;
-class Resources2;
 class Toasts;
 class ChatterinoBadges;
 
@@ -50,8 +49,6 @@ public:
     int run(QApplication &qtApp);
 
     friend void test();
-
-    Resources2 *const resources;
 
     Theme *const themes{};
     Fonts *const fonts{};

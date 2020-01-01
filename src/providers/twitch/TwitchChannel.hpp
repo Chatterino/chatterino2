@@ -63,12 +63,13 @@ public:
     virtual bool canSendMessage() const override;
     virtual void sendMessage(const QString &message) override;
     virtual bool isMod() const override;
-    bool isVIP() const;
+    bool isVip() const;
     bool isStaff() const;
     virtual bool isBroadcaster() const override;
     virtual bool hasHighRateLimit() const override;
     virtual bool canReconnect() const override;
     virtual void reconnect() override;
+    void refreshTitle();
 
     // Data
     const QString &subscriptionUrl();
@@ -166,6 +167,7 @@ private:
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
+    QTime titleRefreshedTime_;
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;

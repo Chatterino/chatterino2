@@ -1,5 +1,14 @@
 #include "messages/Image.hpp"
 
+#include <QBuffer>
+#include <QImageReader>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QTimer>
+#include <functional>
+#include <thread>
+
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
@@ -10,15 +19,6 @@
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
-
-#include <QBuffer>
-#include <QImageReader>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
-#include <QNetworkRequest>
-#include <QTimer>
-#include <functional>
-#include <thread>
 
 namespace chatterino {
 namespace detail {
@@ -198,6 +198,15 @@ namespace detail {
 }  // namespace detail
 
 // IMAGE2
+Image::~Image()
+{
+    // run destructor of Frames in gui thread
+    if (!isGuiThread())
+    {
+        postToThread([frames = this->frames_.release()]() { delete frames; });
+    }
+}
+
 ImagePtr Image::fromUrl(const Url &url, qreal scale)
 {
     static std::unordered_map<Url, std::weak_ptr<Image>> cache;
@@ -324,7 +333,7 @@ int Image::width() const
     assertInGuiThread();
 
     if (auto pixmap = this->frames_->first())
-        return pixmap->width() * this->scale_;
+        return int(pixmap->width() * this->scale_);
     else
         return 16;
 }
@@ -369,6 +378,7 @@ void Image::actuallyLoad()
             if (!shared)
                 return false;
 
+            // fourtf: is this the right thing to do?
             shared->empty_ = true;
 
             return true;
