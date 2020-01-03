@@ -301,7 +301,7 @@ void ResizingTextEdit::dropEvent(QDropEvent *event)
     {
         this->imagePasted.invoke(event->mimeData());
     }
-    else  // allow for previous functionality of dropping text.
+    else
     {
         QTextEdit::dropEvent(event);
     }

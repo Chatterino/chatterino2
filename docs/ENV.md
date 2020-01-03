@@ -27,7 +27,7 @@ Arguments:
  - None
 
 Notes:
- - If you want to host the images yourself. You need [Nuuls' filehost software](https://github.com/nuuls/fiehost)
+ - If you want to host the images yourself. You need [Nuuls' filehost software](https://github.com/nuuls/filehost)
  - Other image hosting software is currently not supported.
 
 ### CHATTERINO2_TWITCH_SERVER_HOST
@@ -43,3 +43,4 @@ Default value: `443`
 ### CHATTERINO2_TWITCH_SERVER_SECURE
 Bool value used to tell Chatterino whether to try to connect securely (secure irc) to the Twitch chat server.  
 Default value: `true`
+

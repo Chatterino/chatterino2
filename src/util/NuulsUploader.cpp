@@ -11,7 +11,7 @@
 
 namespace {
 
-QString getImageFileFormat(QString path)
+QString getImageFileFormat(const QString &path)
 {
     static QStringList listOfImageFormats = {".png", ".jpg", ".jpeg"};
     for (const QString &format : listOfImageFormats)
@@ -49,8 +49,8 @@ std::queue<RawImageData> uploadQueue;
 void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                         ResizingTextEdit &textEdit)
 {
-    const char *boundary = "thisistheboudaryasd";
-    QString contentType =
+    const static char *boundary = "thisistheboudaryasd";
+    const static QString contentType =
         QString("multipart/form-data; boundary=%1").arg(boundary);
     static QUrl url(Env::get().imageUploaderUrl);
 
@@ -86,12 +86,8 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                             "wait until all of them are uploaded. About %2 "
                             "seconds left.")
                         .arg(uploadQueue.size(),
-                             uploadQueue.size() *
-                                 (UPLOAD_DELAY / 1000 +
-                                  1)  // convert UPLOAD_DELAY to seconds
-                             )));
-                // Argument number 2 is the ETA.
-                // 2 seconds for the timer that's there not to spam Nuuls' server
+                             uploadQueue.size() * (UPLOAD_DELAY / 1000 + 1))));
+                // 2 seconds for the timer that's there not to spam the remote server
                 // and 1 second of actual uploading.
 
                 QTimer::singleShot(UPLOAD_DELAY, [channel, &textEdit]() {
@@ -156,6 +152,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 {
                     channel->addMessage(
                         makeSystemMessage(QString("Couldn't load image :(")));
+                    isUploading = false;
                     return;
                 }
 
@@ -183,6 +180,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 {
                     channel->addMessage(
                         makeSystemMessage(QString("Failed to open file. :(")));
+                    isUploading = false;
                     return;
                 }
                 RawImageData data = {file.readAll(), "gif"};
@@ -217,6 +215,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
         {
             channel->addMessage(makeSystemMessage(
                 QString("Cannot upload file, failed to convert to png.")));
+            isUploading = false;
         }
     }
 }

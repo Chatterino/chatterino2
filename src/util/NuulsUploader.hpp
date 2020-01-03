@@ -9,6 +9,7 @@ struct RawImageData {
     QByteArray data;
     QString format;
 };
+
 void upload(QByteArray imageData, ChannelPtr channel,
             ResizingTextEdit &textEdit, std::string format);
 void upload(RawImageData imageData, ChannelPtr channel,
