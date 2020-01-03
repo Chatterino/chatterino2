@@ -101,8 +101,6 @@ AboutPage::AboutPage()
                        ":/licenses/qt_lgpl-3.0.txt");
             addLicense(form.getElement(), "Boost", "https://www.boost.org/",
                        ":/licenses/boost_boost.txt");
-            addLicense(form.getElement(), "Fmt", "http://fmtlib.net/",
-                       ":/licenses/fmt_bsd2.txt");
             addLicense(form.getElement(), "LibCommuni",
                        "https://github.com/communi/libcommuni",
                        ":/licenses/libcommuni_BSD3.txt");
