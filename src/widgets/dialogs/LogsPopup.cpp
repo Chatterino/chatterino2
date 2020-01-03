@@ -54,7 +54,7 @@ void LogsPopup::getLogs()
                 dynamic_cast<TwitchChannel *>(this->channel_.get()))
         {
             this->channelName_ = twitchChannel->getName();
-            this->getLogviewerLogs(twitchChannel->roomId());
+            this->getOverrustleLogs();
 
             return;
         }
@@ -62,10 +62,7 @@ void LogsPopup::getLogs()
 
     if (!this->channelName_.isEmpty())
     {
-        PartialTwitchUser::byName(this->channelName_)
-            .getId(
-                [=](const QString &roomID) { this->getLogviewerLogs(roomID); },
-                this);
+        this->getOverrustleLogs();
         return;
     }
 
@@ -80,57 +77,9 @@ void LogsPopup::setMessages(std::vector<MessagePtr> &messages)
     SearchPopup::setChannel(logsChannel);
 }
 
-void LogsPopup::getLogviewerLogs(const QString &roomID)
-{
-    auto url = QString("https://cbenni.com/api/logs/%1/?nick=%2&before=500")
-                   .arg(this->channelName_, this->userName_);
-
-    NetworkRequest(url)
-        .caller(this)
-        .onError([this](NetworkResult) { this->getOverrustleLogs(); })
-        .onSuccess([this, roomID](auto result) -> Outcome {
-            auto data = result.parseJson();
-            std::vector<MessagePtr> messages;
-
-            QJsonValue before = data.value("before");
-
-            for (auto i : before.toArray())
-            {
-                auto messageObject = i.toObject();
-                QString message = messageObject.value("text").toString();
-
-                // Hacky way to fix the timestamp
-                message.insert(1, "historical=1;");
-                message.insert(1, QString("tmi-sent-ts=%10000;")
-                                      .arg(messageObject["time"].toInt()));
-                message.insert(1, QString("room-id=%1;").arg(roomID));
-
-                MessageParseArgs args;
-                auto ircMessage =
-                    Communi::IrcMessage::fromData(message.toUtf8(), nullptr);
-                auto privMsg =
-                    static_cast<Communi::IrcPrivateMessage *>(ircMessage);
-                TwitchMessageBuilder builder(this->channel_.get(), privMsg,
-                                             args);
-                builder.message().searchText = message;
-
-                messages.push_back(builder.build());
-            }
-
-            messages.push_back(
-                MessageBuilder(systemMessage,
-                               "Logs provided by https://cbenni.com")
-                    .release());
-            this->setMessages(messages);
-
-            return Success;
-        })
-        .execute();
-}
-
 void LogsPopup::getOverrustleLogs()
 {
-    QString url =
+    auto url =
         QString("https://overrustlelogs.net/api/v1/stalk/%1/%2.json?limit=500")
             .arg(this->channelName_, this->userName_);
 
