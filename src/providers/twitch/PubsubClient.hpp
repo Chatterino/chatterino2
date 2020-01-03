@@ -15,7 +15,6 @@
 #include <map>
 #include <memory>
 #include <set>
-#include <string>
 #include <thread>
 #include <unordered_map>
 #include <vector>
@@ -33,7 +32,7 @@ using WebsocketErrorCode = websocketpp::lib::error_code;
 namespace detail {
 
     struct Listener {
-        std::string topic;
+        QString topic;
         bool authed;
         bool persistent;
         bool confirmed = false;
@@ -49,11 +48,11 @@ namespace detail {
         void stop();
 
         bool listen(rapidjson::Document &message);
-        void unlistenPrefix(const std::string &prefix);
+        void unlistenPrefix(const QString &prefix);
 
         void handlePong();
 
-        bool isListeningToTopic(const std::string &topic);
+        bool isListeningToTopic(const QString &topic);
 
     private:
         void ping();
@@ -135,13 +134,13 @@ public:
     std::vector<std::unique_ptr<rapidjson::Document>> requests;
 
 private:
-    void listenToTopic(const std::string &topic,
+    void listenToTopic(const QString &topic,
                        std::shared_ptr<TwitchAccount> account);
 
     void listen(rapidjson::Document &&msg);
     bool tryListen(rapidjson::Document &msg);
 
-    bool isListeningToTopic(const std::string &topic);
+    bool isListeningToTopic(const QString &topic);
 
     void addClient();
 

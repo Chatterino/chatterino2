@@ -1,7 +1,4 @@
 # Exposed build flags:
-# from lib/fmt.pri
-#  - FMT_PREFIX ($$PWD by default)
-#  - FMT_SYSTEM (1 = true) (Linux only, uses pkg-config)
 # from lib/websocketpp.pri
 #  - WEBSOCKETPP_PREFIX ($$PWD by default)
 #  - WEBSOCKETPP_SYSTEM (1 = true) (unix only)
@@ -76,7 +73,6 @@ CONFIG(debug, debug|release) {
 
 # Submodules
 include(lib/warnings.pri)
-include(lib/fmt.pri)
 include(lib/humanize.pri)
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
@@ -344,7 +340,6 @@ HEADERS += \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/debug/AssertInGuiThread.hpp \
     src/debug/Benchmark.hpp \
-    src/debug/Log.hpp \
     src/ForwardDecl.hpp \
     src/messages/Emote.hpp \
     src/messages/Image.hpp \

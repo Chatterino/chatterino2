@@ -16,7 +16,6 @@
 #include "common/Common.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/Benchmark.hpp"
-#include "debug/Log.hpp"
 #include "messages/Emote.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
@@ -740,9 +739,8 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     auto snapshot = this->messages_.getSnapshot();
     if (index >= snapshot.size())
     {
-        log("Tried to replace out of bounds message. Index: {}. "
-            "Length: {}",
-            index, snapshot.size());
+        qDebug() << "Tried to replace out of bounds message. Index:" << index
+                 << ". Length:" << snapshot.size();
         return;
     }
 

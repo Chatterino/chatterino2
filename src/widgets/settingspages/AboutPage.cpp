@@ -2,7 +2,6 @@
 
 #include "common/Modes.hpp"
 #include "common/Version.hpp"
-#include "debug/Log.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/helper/SignalLabel.hpp"
@@ -102,8 +101,6 @@ AboutPage::AboutPage()
                        ":/licenses/qt_lgpl-3.0.txt");
             addLicense(form.getElement(), "Boost", "https://www.boost.org/",
                        ":/licenses/boost_boost.txt");
-            addLicense(form.getElement(), "Fmt", "http://fmtlib.net/",
-                       ":/licenses/fmt_bsd2.txt");
             addLicense(form.getElement(), "LibCommuni",
                        "https://github.com/communi/libcommuni",
                        ":/licenses/libcommuni_BSD3.txt");
@@ -166,7 +163,7 @@ AboutPage::AboutPage()
 
                 if (contributorParts.size() != 4)
                 {
-                    log("Missing parts in line '{}'", line);
+                    qDebug() << "Missing parts in line" << line;
                     continue;
                 }
 

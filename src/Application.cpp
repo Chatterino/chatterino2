@@ -11,7 +11,6 @@
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/pings/PingController.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
-#include "debug/Log.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
@@ -158,11 +157,11 @@ void Application::initNm(Paths &paths)
 void Application::initPubsub()
 {
     this->twitch.pubsub->signals_.whisper.sent.connect([](const auto &msg) {
-        log("WHISPER SENT LOL");  //
+        qDebug() << "WHISPER SENT LOL";  //
     });
 
     this->twitch.pubsub->signals_.whisper.received.connect([](const auto &msg) {
-        log("WHISPER RECEIVED LOL");  //
+        qDebug() << "WHISPER RECEIVED LOL";  //
     });
 
     this->twitch.pubsub->signals_.moderation.chatCleared.connect(

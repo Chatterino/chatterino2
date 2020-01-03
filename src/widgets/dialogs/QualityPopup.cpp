@@ -1,5 +1,4 @@
 #include "QualityPopup.hpp"
-#include "debug/Log.hpp"
 #include "util/StreamLink.hpp"
 
 namespace chatterino {
@@ -50,7 +49,7 @@ void QualityPopup::okButtonClicked()
     }
     catch (const Exception &ex)
     {
-        log("Exception caught trying to open streamlink: {}", ex.what());
+        qDebug() << "Exception caught trying to open streamlink:" << ex.what();
     }
 
     this->close();

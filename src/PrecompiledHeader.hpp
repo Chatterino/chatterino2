@@ -1,7 +1,6 @@
 #pragma once
 
 #ifdef __cplusplus
-#    include <fmt/format.h>
 #    include <irccommand.h>
 #    include <ircconnection.h>
 #    include <rapidjson/document.h>

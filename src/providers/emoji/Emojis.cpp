@@ -1,7 +1,6 @@
 #include "providers/emoji/Emojis.hpp"
 
 #include "Application.hpp"
-#include "debug/Log.hpp"
 #include "messages/Emote.hpp"
 #include "singletons/Settings.hpp"
 
@@ -132,8 +131,9 @@ void Emojis::loadEmojis()
 
     if (result.Code() != rapidjson::kParseErrorNone)
     {
-        log("JSON parse error: {} ({})",
-            rapidjson::GetParseError_En(result.Code()), result.Offset());
+        qDebug() << "JSON parse error:"
+                 << rapidjson::GetParseError_En(result.Code()) << "("
+                 << result.Offset() << ")";
         return;
     }
 
@@ -165,8 +165,8 @@ void Emojis::loadEmojis()
                 auto toneNameIt = toneNames.find(tone);
                 if (toneNameIt == toneNames.end())
                 {
-                    log("Tone with key {} does not exist in tone names map",
-                        tone);
+                    qDebug() << "Tone with key" << tone.c_str()
+                             << "does not exist in tone names map";
                     continue;
                 }
 

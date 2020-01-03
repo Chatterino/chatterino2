@@ -5,8 +5,6 @@
 #include <QSettings>
 #include <QVariant>
 
-#include "debug/Log.hpp"
-
 namespace chatterino {
 namespace {
 #ifdef Q_OS_WIN

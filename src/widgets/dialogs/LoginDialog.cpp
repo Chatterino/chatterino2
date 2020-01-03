@@ -65,7 +65,7 @@ namespace {
         //    messageBox.setIcon(QMessageBox::Information);
         //    messageBox.setText("Successfully logged in with user <b>" +
         //    qS(username) + "</b>!");
-        auto basePath = fS("/accounts/uid{}", userID);
+        std::string basePath = "/accounts/uid" + userID.toStdString();
         pajlada::Settings::Setting<QString>::set(basePath + "/username",
                                                  username);
         pajlada::Settings::Setting<QString>::set(basePath + "/userID", userID);

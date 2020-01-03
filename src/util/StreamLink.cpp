@@ -1,7 +1,6 @@
 #include "util/StreamLink.hpp"
 
 #include "Application.hpp"
-#include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
@@ -92,7 +91,7 @@ namespace {
             }
             else
             {
-                log("Error occured {}", err);
+                qDebug() << "Error occured" << err;
             }
 
             p->deleteLater();
@@ -119,7 +118,7 @@ void getStreamQualities(const QString &channelURL,
         [=](int res) {
             if (res != 0)
             {
-                log("Got error code {}", res);
+                qDebug() << "Got error code" << res;
                 // return;
             }
             QString lastLine = QString(p->readAllStandardOutput());
