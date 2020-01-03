@@ -85,8 +85,8 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                     QString("Your image has been uploaded. %1 left. Please "
                             "wait until all of them are uploaded. About %2 "
                             "seconds left.")
-                        .arg(uploadQueue.size(),
-                             uploadQueue.size() * (UPLOAD_DELAY / 1000 + 1))));
+                        .arg(uploadQueue.size())
+                        .arg(uploadQueue.size() * (UPLOAD_DELAY / 1000 + 1))));
                 // 2 seconds for the timer that's there not to spam the remote server
                 // and 1 second of actual uploading.
 
