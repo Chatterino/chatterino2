@@ -7,6 +7,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
@@ -131,6 +132,10 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->viewEmojis_ = makeView("Emojis");
 
     this->loadEmojis();
+
+    createWindowShortcut(this, "CTRL+Tab", [=] { notebook->selectNextTab(); });
+    createWindowShortcut(this, "CTRL+Shift+Tab",
+                         [=] { notebook->selectPreviousTab(); });
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)
