@@ -21,8 +21,9 @@
 
 namespace chatterino {
 
-static float LongestCommonSubstring(QString str1, QString str2)
+static float relativeSimilarity(const QString &str1, const QString &str2)
 {
+    // Longest Common Substring Problem
     std::vector<std::vector<int>> tree(str1.size(),
                                        std::vector<int>(str2.size(), 0));
     int z = 0;
@@ -79,8 +80,8 @@ float IrcMessageHandler::similarity(
             break;
         }
         ++bysameuser;
-        ret = std::max(ret, LongestCommonSubstring(msg->messageText,
-                                                   prev_msg->messageText));
+        ret = std::max(
+            ret, relativeSimilarity(msg->messageText, prev_msg->messageText));
     }
     return ret;
 }
@@ -109,9 +110,8 @@ float IrcMessageHandler::similarityRecentMessages(
             break;
         }
         ++bysameuser;
-        ret = std::max(ret,
-                       LongestCommonSubstring(messages[pos_size]->messageText,
-                                              prev_msg->messageText));
+        ret = std::max(ret, relativeSimilarity(messages[pos_size]->messageText,
+                                               prev_msg->messageText));
     }
     return ret;
 }
