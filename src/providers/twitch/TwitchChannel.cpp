@@ -744,6 +744,12 @@ void TwitchChannel::refreshCheerEmotes()
     NetworkRequest::twitchRequest(url)
         .onSuccess([this,
                     weak = weakOf<Channel>(this)](auto result) -> Outcome {
+            auto shared = weak.lock();
+            if (!shared)
+            {
+                return Failure;
+            }
+
             auto cheerEmoteSets = ParseCheermoteSets(result.parseRapidJson());
             std::vector<CheerEmoteSet> emoteSets;
 
