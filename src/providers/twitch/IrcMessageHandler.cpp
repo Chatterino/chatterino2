@@ -70,14 +70,14 @@ float IrcMessageHandler::similarity(
             break;
         }
         const auto &prev_msg = messages[messages.size() - i];
-        if (msg->loginName != prev_msg->loginName)
-        {
-            continue;
-        }
         if (prev_msg->parseTime.secsTo(QTime::currentTime()) >=
             getSettings()->hideSimilarMaxDelay)
         {
             break;
+        }
+        if (msg->loginName != prev_msg->loginName)
+        {
+            continue;
         }
         ++bysameuser;
         ret = std::max(
@@ -99,15 +99,15 @@ float IrcMessageHandler::similarityRecentMessages(
             break;
         }
         const auto &prev_msg = messages[pos_size - i];
-        if (messages[pos_size]->loginName != prev_msg->loginName)
-        {
-            continue;
-        }
         // is not able to time it, since parseTime equals currentTime during recent messages
         if (prev_msg->parseTime.secsTo(QTime::currentTime()) >=
             getSettings()->hideSimilarMaxDelay)
         {
             break;
+        }
+        if (messages[pos_size]->loginName != prev_msg->loginName)
+        {
+            continue;
         }
         ++bysameuser;
         ret = std::max(ret, relativeSimilarity(messages[pos_size]->messageText,
