@@ -32,7 +32,14 @@ namespace {
 
         if (!map.empty())
         {
-            for (const auto &emote : map)
+            std::vector<std::pair<EmoteName, EmotePtr>> vec(map.begin(),
+                                                            map.end());
+            std::sort(vec.begin(), vec.end(),
+                      [](const std::pair<EmoteName, EmotePtr> &l,
+                         const std::pair<EmoteName, EmotePtr> &r) {
+                          return l.first.string < r.first.string;
+                      });
+            for (const auto &emote : vec)
             {
                 builder
                     .emplace<EmoteElement>(emote.second,

@@ -482,6 +482,10 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
             emoteData->emotes.emplace(code, emote);
         }
 
+        std::sort(emoteSet->emotes.begin(), emoteSet->emotes.end(),
+                  [](const TwitchEmote &l, const TwitchEmote &r) {
+                      return l.name.string < r.name.string;
+                  });
         emoteData->emoteSets.emplace_back(emoteSet);
     }
 };
