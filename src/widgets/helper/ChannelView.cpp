@@ -28,6 +28,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/TooltipPreviewImage.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -65,7 +66,7 @@ namespace {
             {
                 copyMenu->addAction(
                     QString(scale) + "x link", [url = image->url()] {
-                        QApplication::clipboard()->setText(url.string);
+                        crossPlatformCopy(QApplication::clipboard(), url.string);
                     });
                 openMenu->addAction(
                     QString(scale) + "x link", [url = image->url()] {
@@ -85,7 +86,7 @@ namespace {
 
             copyMenu->addAction(
                 "Copy " + name + " emote link", [url = emote.homePage] {
-                    QApplication::clipboard()->setText(url.string);  //
+                    crossPlatformCopy(QApplication::clipboard(), url.string);
                 });
             openMenu->addAction(
                 "Open " + name + " emote link", [url = emote.homePage] {
@@ -125,7 +126,7 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
     QObject::connect(shortcut, &QShortcut::activated, [this] {
-        QGuiApplication::clipboard()->setText(this->getSelectedText());
+        crossPlatformCopy(QGuiApplication::clipboard(), this->getSelectedText());
     });
 
     this->clickTimer_ = new QTimer(this);
@@ -1553,7 +1554,7 @@ void ChannelView::addContextMenuItems(
                             [url] { openLinkIncognito(url); });
         }
         menu->addAction("Copy link",
-                        [url] { QApplication::clipboard()->setText(url); });
+                        [url] { crossPlatformCopy(QApplication::clipboard(), url); });
 
         menu->addSeparator();
     }
@@ -1562,7 +1563,7 @@ void ChannelView::addContextMenuItems(
     if (!this->selection_.isEmpty())
     {
         menu->addAction("Copy selection", [this] {
-            QGuiApplication::clipboard()->setText(this->getSelectedText());
+            crossPlatformCopy(QGuiApplication::clipboard(), this->getSelectedText());
         });
     }
 
@@ -1571,14 +1572,14 @@ void ChannelView::addContextMenuItems(
         layout->addSelectionText(copyString, 0, INT_MAX,
                                  CopyMode::OnlyTextAndEmotes);
 
-        QGuiApplication::clipboard()->setText(copyString);
+        crossPlatformCopy(QGuiApplication::clipboard(), copyString);
     });
 
     menu->addAction("Copy full message", [layout] {
         QString copyString;
         layout->addSelectionText(copyString);
 
-        QGuiApplication::clipboard()->setText(copyString);
+        crossPlatformCopy(QGuiApplication::clipboard(), copyString);
     });
 
     // Open in new split.
