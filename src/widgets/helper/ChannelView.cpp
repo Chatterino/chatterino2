@@ -66,7 +66,8 @@ namespace {
             {
                 copyMenu->addAction(
                     QString(scale) + "x link", [url = image->url()] {
-                        crossPlatformCopy(QApplication::clipboard(), url.string);
+                        crossPlatformCopy(QApplication::clipboard(),
+                                          url.string);
                     });
                 openMenu->addAction(
                     QString(scale) + "x link", [url = image->url()] {
@@ -126,7 +127,8 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
     QObject::connect(shortcut, &QShortcut::activated, [this] {
-        crossPlatformCopy(QGuiApplication::clipboard(), this->getSelectedText());
+        crossPlatformCopy(QGuiApplication::clipboard(),
+                          this->getSelectedText());
     });
 
     this->clickTimer_ = new QTimer(this);
@@ -1326,7 +1328,8 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     // check if message is collapsed
     switch (event->button())
     {
-        case Qt::LeftButton: {
+        case Qt::LeftButton:
+        {
             this->lastPressPosition_ = event->screenPos();
             this->isMouseDown_ = true;
 
@@ -1344,7 +1347,8 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         }
         break;
 
-        case Qt::RightButton: {
+        case Qt::RightButton:
+        {
             this->lastRightPressPosition_ = event->screenPos();
             this->isRightMouseDown_ = true;
         }
@@ -1462,7 +1466,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 {
     switch (event->button())
     {
-        case Qt::LeftButton: {
+        case Qt::LeftButton:
+        {
             if (this->selecting_)
             {
                 // this->pausedBySelection = false;
@@ -1486,7 +1491,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             }
         }
         break;
-        case Qt::RightButton: {
+        case Qt::RightButton:
+        {
             auto insertText = [=](QString text) {
                 if (auto split = dynamic_cast<Split *>(this->parentWidget()))
                 {
@@ -1553,8 +1559,9 @@ void ChannelView::addContextMenuItems(
             menu->addAction("Open link incognito",
                             [url] { openLinkIncognito(url); });
         }
-        menu->addAction("Copy link",
-                        [url] { crossPlatformCopy(QApplication::clipboard(), url); });
+        menu->addAction("Copy link", [url] {
+            crossPlatformCopy(QApplication::clipboard(), url);
+        });
 
         menu->addSeparator();
     }
@@ -1563,7 +1570,8 @@ void ChannelView::addContextMenuItems(
     if (!this->selection_.isEmpty())
     {
         menu->addAction("Copy selection", [this] {
-            crossPlatformCopy(QGuiApplication::clipboard(), this->getSelectedText());
+            crossPlatformCopy(QGuiApplication::clipboard(),
+                              this->getSelectedText());
         });
     }
 
@@ -1702,14 +1710,16 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
     switch (link.type)
     {
         case Link::UserWhisper:
-        case Link::UserInfo: {
+        case Link::UserInfo:
+        {
             auto user = link.value;
             this->showUserInfoPopup(user);
             qDebug() << "Clicked " << user << "s message";
         }
         break;
 
-        case Link::Url: {
+        case Link::Url:
+        {
             if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
                 openLinkIncognito(link.value);
             else
@@ -1717,7 +1727,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
 
-        case Link::UserAction: {
+        case Link::UserAction:
+        {
             QString value = link.value;
 
             value.replace("{user}", layout->getMessage()->loginName)
@@ -1729,12 +1740,14 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
 
-        case Link::AutoModAllow: {
+        case Link::AutoModAllow:
+        {
             getApp()->accounts->twitch.getCurrent()->autoModAllow(link.value);
         }
         break;
 
-        case Link::AutoModDeny: {
+        case Link::AutoModDeny:
+        {
             getApp()->accounts->twitch.getCurrent()->autoModDeny(link.value);
         }
 
