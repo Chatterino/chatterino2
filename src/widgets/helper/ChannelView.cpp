@@ -65,9 +65,8 @@ namespace {
             if (!image->isEmpty())
             {
                 copyMenu->addAction(
-                    QString(scale) + "x link", [url = image->url()] {
-                        crossPlatformCopy(url.string);
-                    });
+                    QString(scale) + "x link",
+                    [url = image->url()] { crossPlatformCopy(url.string); });
                 openMenu->addAction(
                     QString(scale) + "x link", [url = image->url()] {
                         QDesktopServices::openUrl(QUrl(url.string));
@@ -85,9 +84,8 @@ namespace {
             openMenu->addSeparator();
 
             copyMenu->addAction(
-                "Copy " + name + " emote link", [url = emote.homePage] {
-                    crossPlatformCopy(url.string);
-                });
+                "Copy " + name + " emote link",
+                [url = emote.homePage] { crossPlatformCopy(url.string); });
             openMenu->addAction(
                 "Open " + name + " emote link", [url = emote.homePage] {
                     QDesktopServices::openUrl(QUrl(url.string));  //
@@ -125,9 +123,8 @@ ChannelView::ChannelView(BaseWidget *parent)
     });
 
     auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
-    QObject::connect(shortcut, &QShortcut::activated, [this] {
-        crossPlatformCopy(this->getSelectedText());
-    });
+    QObject::connect(shortcut, &QShortcut::activated,
+                     [this] { crossPlatformCopy(this->getSelectedText()); });
 
     this->clickTimer_ = new QTimer(this);
     this->clickTimer_->setSingleShot(true);
@@ -1553,9 +1550,7 @@ void ChannelView::addContextMenuItems(
             menu->addAction("Open link incognito",
                             [url] { openLinkIncognito(url); });
         }
-        menu->addAction("Copy link", [url] {
-            crossPlatformCopy(url);
-        });
+        menu->addAction("Copy link", [url] { crossPlatformCopy(url); });
 
         menu->addSeparator();
     }
@@ -1563,9 +1558,8 @@ void ChannelView::addContextMenuItems(
     // Copy actions
     if (!this->selection_.isEmpty())
     {
-        menu->addAction("Copy selection", [this] {
-            crossPlatformCopy(this->getSelectedText());
-        });
+        menu->addAction("Copy selection",
+                        [this] { crossPlatformCopy(this->getSelectedText()); });
     }
 
     menu->addAction("Copy message", [layout] {
