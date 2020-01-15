@@ -1,10 +1,11 @@
 #include "util/Clipboard.hpp"
-#include <QClipboard>
+#include <QApplication>
 
 namespace chatterino {
 
-void crossPlatformCopy(QClipboard *clipboard, const QString &text)
+void crossPlatformCopy(const QString &text)
 {
+    auto clipboard = QApplication::clipboard();
     clipboard->setText(text);
     if (clipboard->supportsSelection())
     {

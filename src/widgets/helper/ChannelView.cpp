@@ -66,8 +66,7 @@ namespace {
             {
                 copyMenu->addAction(
                     QString(scale) + "x link", [url = image->url()] {
-                        crossPlatformCopy(QApplication::clipboard(),
-                                          url.string);
+                        crossPlatformCopy(url.string);
                     });
                 openMenu->addAction(
                     QString(scale) + "x link", [url = image->url()] {
@@ -87,7 +86,7 @@ namespace {
 
             copyMenu->addAction(
                 "Copy " + name + " emote link", [url = emote.homePage] {
-                    crossPlatformCopy(QApplication::clipboard(), url.string);
+                    crossPlatformCopy(url.string);
                 });
             openMenu->addAction(
                 "Open " + name + " emote link", [url = emote.homePage] {
@@ -127,8 +126,7 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
     QObject::connect(shortcut, &QShortcut::activated, [this] {
-        crossPlatformCopy(QGuiApplication::clipboard(),
-                          this->getSelectedText());
+        crossPlatformCopy(this->getSelectedText());
     });
 
     this->clickTimer_ = new QTimer(this);
@@ -1556,7 +1554,7 @@ void ChannelView::addContextMenuItems(
                             [url] { openLinkIncognito(url); });
         }
         menu->addAction("Copy link", [url] {
-            crossPlatformCopy(QApplication::clipboard(), url);
+            crossPlatformCopy(url);
         });
 
         menu->addSeparator();
@@ -1566,8 +1564,7 @@ void ChannelView::addContextMenuItems(
     if (!this->selection_.isEmpty())
     {
         menu->addAction("Copy selection", [this] {
-            crossPlatformCopy(QGuiApplication::clipboard(),
-                              this->getSelectedText());
+            crossPlatformCopy(this->getSelectedText());
         });
     }
 
@@ -1576,14 +1573,14 @@ void ChannelView::addContextMenuItems(
         layout->addSelectionText(copyString, 0, INT_MAX,
                                  CopyMode::OnlyTextAndEmotes);
 
-        crossPlatformCopy(QGuiApplication::clipboard(), copyString);
+        crossPlatformCopy(copyString);
     });
 
     menu->addAction("Copy full message", [layout] {
         QString copyString;
         layout->addSelectionText(copyString);
 
-        crossPlatformCopy(QGuiApplication::clipboard(), copyString);
+        crossPlatformCopy(copyString);
     });
 
     // Open in new split.

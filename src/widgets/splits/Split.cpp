@@ -660,8 +660,7 @@ void Split::openSubPage()
 
 void Split::copyToClipboard()
 {
-    crossPlatformCopy(QApplication::clipboard(),
-                      this->view_->getSelectedText());
+    crossPlatformCopy(this->view_->getSelectedText());
 }
 
 void Split::showSearch()
