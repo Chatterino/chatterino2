@@ -1328,8 +1328,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     // check if message is collapsed
     switch (event->button())
     {
-        case Qt::LeftButton:
-        {
+        case Qt::LeftButton: {
             this->lastPressPosition_ = event->screenPos();
             this->isMouseDown_ = true;
 
@@ -1347,8 +1346,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         }
         break;
 
-        case Qt::RightButton:
-        {
+        case Qt::RightButton: {
             this->lastRightPressPosition_ = event->screenPos();
             this->isRightMouseDown_ = true;
         }
@@ -1466,8 +1464,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 {
     switch (event->button())
     {
-        case Qt::LeftButton:
-        {
+        case Qt::LeftButton: {
             if (this->selecting_)
             {
                 // this->pausedBySelection = false;
@@ -1491,8 +1488,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             }
         }
         break;
-        case Qt::RightButton:
-        {
+        case Qt::RightButton: {
             auto insertText = [=](QString text) {
                 if (auto split = dynamic_cast<Split *>(this->parentWidget()))
                 {
@@ -1710,16 +1706,14 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
     switch (link.type)
     {
         case Link::UserWhisper:
-        case Link::UserInfo:
-        {
+        case Link::UserInfo: {
             auto user = link.value;
             this->showUserInfoPopup(user);
             qDebug() << "Clicked " << user << "s message";
         }
         break;
 
-        case Link::Url:
-        {
+        case Link::Url: {
             if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
                 openLinkIncognito(link.value);
             else
@@ -1727,8 +1721,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
 
-        case Link::UserAction:
-        {
+        case Link::UserAction: {
             QString value = link.value;
 
             value.replace("{user}", layout->getMessage()->loginName)
@@ -1740,14 +1733,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
 
-        case Link::AutoModAllow:
-        {
+        case Link::AutoModAllow: {
             getApp()->accounts->twitch.getCurrent()->autoModAllow(link.value);
         }
         break;
 
-        case Link::AutoModDeny:
-        {
+        case Link::AutoModDeny: {
             getApp()->accounts->twitch.getCurrent()->autoModDeny(link.value);
         }
 
