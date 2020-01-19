@@ -341,7 +341,7 @@ void ColorPickerDialog::initHtmlColor(LayoutCreator<QWidget> &creator)
     auto html = creator.setLayoutType<QGridLayout>();
 
     // Copied from Qt source for QColorShower
-    QRegularExpression regExp(
+    static QRegularExpression regExp(
         QStringLiteral("#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})"));
     auto *validator = this->htmlColorValidator_ =
         new QRegularExpressionValidator(regExp, this);
