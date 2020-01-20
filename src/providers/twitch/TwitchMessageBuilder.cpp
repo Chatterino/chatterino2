@@ -996,7 +996,7 @@ void TwitchMessageBuilder::parseHighlights()
         {
             this->highlightSound_ = true;
 
-            // Use custom sound is set, otherwise use fallback
+            // Use custom sound if set, otherwise use fallback
             if (!getSettings()->subHighlightSoundUrl.getValue().isEmpty())
             {
                 this->highlightSoundUrl_ =
@@ -1157,7 +1157,7 @@ void TwitchMessageBuilder::parseHighlights()
         {
             this->highlightSound_ = true;
 
-            // Use custom sound is set, otherwise use fallback
+            // Use custom sound if set, otherwise use fallback
             if (!getSettings()->whisperHighlightSoundUrl.getValue().isEmpty())
             {
                 this->highlightSoundUrl_ =
