@@ -113,8 +113,10 @@ ColorPickerDialog::~ColorPickerDialog()
 QColor ColorPickerDialog::selectedColor() const
 {
     if (!this->dialogConfirmed_)
+    {
         // If the Cancel button was clicked, return the invalid color
         return QColor();
+    }
 
     return this->color_;
 }
