@@ -52,8 +52,6 @@ public:
 
     static float similarity(MessagePtr msg,
                             const LimitedQueueSnapshot<MessagePtr> &messages);
-    static float similarityRecentMessages(
-        const std::vector<MessagePtr> &messages, int pos_size);
 
 private:
     void addMessage(Communi::IrcMessage *message, const QString &target,

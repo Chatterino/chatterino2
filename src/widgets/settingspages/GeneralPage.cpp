@@ -549,13 +549,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle("Similarity");
     layout.addDescription(
-        "Anti one man spam feature based on the similarity to "
-        "previous messages from the same person.");
+        "Hides or grays out similar messages from the same user");
     layout.addCheckbox("Similarity enabled", s.similarityEnabled);
-    layout.addCheckbox("Color similar messages as disabled",
-                       s.colorSimilarDisabled);
+    layout.addCheckbox("Gray out similar messages", s.colorSimilarDisabled);
     layout.addCheckbox("Hide similar messages (Ctrl + H)", s.hideSimilar);
-    layout.addCheckbox("Hide my own similar messages", s.hideSimilarMyself);
+    layout.addCheckbox("Hide or gray out my own similar messages",
+                       s.hideSimilarMyself);
     layout.addCheckbox("Shown similar messages trigger highlights",
                        s.shownSimilarTriggerHighlights);
     layout.addDropdown<float>(
