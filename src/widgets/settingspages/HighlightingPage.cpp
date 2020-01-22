@@ -12,7 +12,6 @@
 #include "util/StandardItemHelper.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 
-#include <QColorDialog>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QListWidget>
