@@ -30,12 +30,25 @@ jobs:
           modules: qtwebengine
 
       # WINDOWS
+      - name: Cache conan
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/cache@v1
+        with:
+          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
+          path: ~/.conan
+
+      - name: Cache conan packages
+        if: startsWith(matrix.os, 'windows')
+        uses: actions/cache@v1
+        with:
+          key: ${{ runner.os }}-conan-pkg-${{ hashFiles('**/conanfile.txt') }}
+          path: C:/.conan/
+
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
             REM We use this source (temporarily?) until choco has updated their version of conan
-            choco source add -n=AFG -s="https://api.bintray.com/nuget/anotherfoxguy/choco-pkg"
-            choco install conan -y
+            choco install conan -y -s="https://api.bintray.com/nuget/anotherfoxguy/choco-pkg"
 
             refreshenv
         shell: cmd
