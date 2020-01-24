@@ -194,16 +194,14 @@ UserInfoPopup::UserInfoPopup()
 
             switch (action)
             {
-                case TimeoutWidget::Ban:
-                {
+                case TimeoutWidget::Ban: {
                     if (this->channel_)
                     {
                         this->channel_->sendMessage("/ban " + this->userName_);
                     }
                 }
                 break;
-                case TimeoutWidget::Unban:
-                {
+                case TimeoutWidget::Unban: {
                     if (this->channel_)
                     {
                         this->channel_->sendMessage("/unban " +
@@ -211,8 +209,7 @@ UserInfoPopup::UserInfoPopup()
                     }
                 }
                 break;
-                case TimeoutWidget::Timeout:
-                {
+                case TimeoutWidget::Timeout: {
                     if (this->channel_)
                     {
                         this->channel_->sendMessage("/timeout " +

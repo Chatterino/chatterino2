@@ -28,7 +28,8 @@ PartialTwitchUser PartialTwitchUser::byId(const QString &id)
 void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
                               const QObject *caller)
 {
-    getId(successCallback, [] {}, caller);
+    getId(
+        successCallback, [] {}, caller);
 }
 void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
                               std::function<void()> failureCallback,
