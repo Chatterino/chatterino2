@@ -59,7 +59,7 @@ Env::Env()
           "https://braize.pajlada.com/chatterino/twitchemotes/set/%1/"))
     , twitchServerHost(
           readStringEnv("CHATTERINO2_TWITCH_SERVER_HOST", "irc.chat.twitch.tv"))
-    , twitchServerPort(readPortEnv("CHATTERINO2_TWITCH_SERVER_PORT", 6697))
+    , twitchServerPort(readPortEnv("CHATTERINO2_TWITCH_SERVER_PORT", 443))
     , twitchServerSecure(readBoolEnv("CHATTERINO2_TWITCH_SERVER_SECURE", true))
 {
 }
