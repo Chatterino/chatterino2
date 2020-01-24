@@ -1,3 +1,13 @@
+# Exposed build flags:
+# from lib/websocketpp.pri
+#  - WEBSOCKETPP_PREFIX ($$PWD by default)
+#  - WEBSOCKETPP_SYSTEM (1 = true) (unix only)
+# from lib/rapidjson.pri
+#  - RAPIDJSON_PREFIX ($$PWD by default)
+#  - RAPIDJSON_SYSTEM (1 = true) (Linux only, uses pkg-config)
+# from lib/boost.pri
+#  - BOOST_DIRECTORY (C:\local\boost\ by default) (Windows only)
+
 QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util
@@ -31,6 +41,9 @@ win32-msvc* {
 linux {
     LIBS += -lrt
     QMAKE_LFLAGS += -lrt
+
+    # Enable linking libraries using PKGCONFIG += libraryname
+    CONFIG += link_pkgconfig
 }
 
 macx {
@@ -60,7 +73,6 @@ CONFIG(debug, debug|release) {
 
 # Submodules
 include(lib/warnings.pri)
-include(lib/fmt.pri)
 include(lib/humanize.pri)
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
@@ -173,6 +185,7 @@ SOURCES += \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
     src/providers/twitch/TwitchApi.cpp \
+    src/providers/twitch/TwitchBadge.cpp \
     src/providers/twitch/TwitchBadges.cpp \
     src/providers/twitch/TwitchChannel.cpp \
     src/providers/twitch/TwitchEmotes.cpp \
@@ -197,6 +210,7 @@ SOURCES += \
     src/singletons/TooltipPreviewImage.cpp \
     src/singletons/Updates.cpp \
     src/singletons/WindowManager.cpp \
+    src/util/Clipboard.cpp \
     src/util/DebugCount.cpp \
     src/util/FormatTime.cpp \
     src/util/FunctionEventFilter.cpp \
@@ -211,6 +225,7 @@ SOURCES += \
     src/widgets/AccountSwitchPopup.cpp \
     src/widgets/AccountSwitchWidget.cpp \
     src/widgets/AttachedWindow.cpp \
+    src/widgets/BasePopup.cpp \
     src/widgets/BaseWidget.cpp \
     src/widgets/BaseWindow.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
@@ -326,7 +341,6 @@ HEADERS += \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/debug/AssertInGuiThread.hpp \
     src/debug/Benchmark.hpp \
-    src/debug/Log.hpp \
     src/ForwardDecl.hpp \
     src/messages/Emote.hpp \
     src/messages/Image.hpp \
@@ -372,6 +386,7 @@ HEADERS += \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \
     src/providers/twitch/TwitchApi.hpp \
+    src/providers/twitch/TwitchBadge.hpp \
     src/providers/twitch/TwitchBadges.hpp \
     src/providers/twitch/TwitchChannel.hpp \
     src/providers/twitch/TwitchCommon.hpp \
@@ -398,6 +413,7 @@ HEADERS += \
     src/singletons/Updates.hpp \
     src/singletons/WindowManager.hpp \
     src/util/Clamp.hpp \
+    src/util/Clipboard.hpp \
     src/util/CombinePath.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
@@ -422,6 +438,7 @@ HEADERS += \
     src/util/RapidJsonSerializeQString.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
     src/util/SampleCheerMessages.hpp \
+    src/util/SampleLinks.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/Shortcut.hpp \
     src/util/StandardItemHelper.hpp \
@@ -430,6 +447,7 @@ HEADERS += \
     src/widgets/AccountSwitchPopup.hpp \
     src/widgets/AccountSwitchWidget.hpp \
     src/widgets/AttachedWindow.hpp \
+    src/widgets/BasePopup.hpp \
     src/widgets/BaseWidget.hpp \
     src/widgets/BaseWindow.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
@@ -505,13 +523,13 @@ linux:isEmpty(PREFIX) {
 }
 
 linux {
-    desktop.files = resources/chatterino.desktop
+    desktop.files = resources/com.chatterino.chatterino.desktop
     desktop.path = $$PREFIX/share/applications
 
     build_icons.path = .
-    build_icons.commands = @echo $$PWD  && mkdir -p $$PWD/resources/linuxinstall/icons/hicolor/256x256 && cp $$PWD/resources/icon.png $$PWD/resources/linuxinstall/icons/hicolor/256x256/chatterino.png
+    build_icons.commands = @echo $$PWD  && mkdir -p $$PWD/resources/linuxinstall/icons/hicolor/256x256 && cp $$PWD/resources/icon.png $$PWD/resources/linuxinstall/icons/hicolor/256x256/com.chatterino.chatterino.png
 
-    icon.files = $$PWD/resources/linuxinstall/icons/hicolor/256x256/chatterino.png
+    icon.files = $$PWD/resources/linuxinstall/icons/hicolor/256x256/com.chatterino.chatterino.png
     icon.path = $$PREFIX/share/icons/hicolor/256x256/apps
 
     target.path = $$PREFIX/bin

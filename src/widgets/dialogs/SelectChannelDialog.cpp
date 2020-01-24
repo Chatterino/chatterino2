@@ -133,8 +133,8 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         auto outerBox = obj.setLayoutType<QFormLayout>();
 
         {
-            auto view = this->ui_.irc.servers = new EditableModelView(
-                Irc::instance().newConnectionModel(this));
+            auto view = this->ui_.irc.servers =
+                new EditableModelView(Irc::instance().newConnectionModel(this));
 
             view->setTitles({"host", "port", "ssl", "user", "nick", "real",
                              "password", "login command"});
@@ -166,8 +166,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                     if (editor->exec() == QDialog::Accepted)
                     {
                         auto data = editor->data();
-                        auto &&conns =
-                            Irc::instance().connections.getVector();
+                        auto &&conns = Irc::instance().connections.getVector();
                         int i = 0;
                         for (auto &&conn : conns)
                         {
@@ -175,8 +174,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                             {
                                 Irc::instance().connections.removeItem(
                                     i, Irc::noEraseCredentialCaller);
-                                Irc::instance().connections.insertItem(data,
-                                                                          i);
+                                Irc::instance().connections.insertItem(data, i);
                             }
                             i++;
                         }

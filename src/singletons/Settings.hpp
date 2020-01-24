@@ -120,6 +120,8 @@ public:
 
     QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
 
+    BoolSetting stackBits = {"/emotes/stackBits", false};
+
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};

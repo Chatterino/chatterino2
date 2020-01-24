@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/BaseWindow.hpp"
+#include "widgets/BasePopup.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -11,7 +11,7 @@ class ChannelView;
 class Channel;
 using ChannelPtr = std::shared_ptr<Channel>;
 
-class EmotePopup : public BaseWindow
+class EmotePopup : public BasePopup
 {
 public:
     EmotePopup(QWidget *parent = nullptr);

@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
-#include "debug/Log.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -466,7 +465,8 @@ void NotebookTab::mouseReleaseEvent(QMouseEvent *event)
         }
     };
 
-    if (event->button() == Qt::MiddleButton)
+    if (event->button() == Qt::MiddleButton &&
+        this->notebook_->getAllowUserTabManagement())
     {
         if (this->rect().contains(event->pos()))
         {

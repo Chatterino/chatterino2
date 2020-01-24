@@ -3,7 +3,6 @@
 #include "BaseSettings.hpp"
 #include "BaseTheme.hpp"
 #include "boost/algorithm/algorithm.hpp"
-#include "debug/Log.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Shortcut.hpp"
 #include "util/WindowsHelper.hpp"
@@ -340,20 +339,17 @@ void BaseWindow::onFocusLost()
 {
     switch (this->getActionOnFocusLoss())
     {
-        case Delete:
-        {
+        case Delete: {
             this->deleteLater();
         }
         break;
 
-        case Close:
-        {
+        case Close: {
             this->close();
         }
         break;
 
-        case Hide:
-        {
+        case Hide: {
             this->hide();
         }
         break;
@@ -388,7 +384,7 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 
             if (!recursiveCheckMouseTracking(widget))
             {
-                log("Start moving");
+                qDebug() << "Start moving";
                 this->moving = true;
             }
         }
@@ -405,7 +401,7 @@ void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
     {
         if (this->moving)
         {
-            log("Stop moving");
+            qDebug() << "Stop moving";
             this->moving = false;
         }
     }
@@ -517,6 +513,25 @@ void BaseWindow::resizeEvent(QResizeEvent *)
 #endif
 
     //this->moveIntoDesktopRect(this);
+
+#ifdef USEWINSDK
+    if (this->hasCustomWindowFrame() && !this->isResizeFixing_)
+    {
+        this->isResizeFixing_ = true;
+        QTimer::singleShot(50, this, [this] {
+            RECT rect;
+            ::GetWindowRect((HWND)this->winId(), &rect);
+            ::SetWindowPos((HWND)this->winId(), nullptr, 0, 0,
+                           rect.right - rect.left + 1, rect.bottom - rect.top,
+                           SWP_NOMOVE | SWP_NOZORDER);
+            ::SetWindowPos((HWND)this->winId(), nullptr, 0, 0,
+                           rect.right - rect.left, rect.bottom - rect.top,
+                           SWP_NOMOVE | SWP_NOZORDER);
+            QTimer::singleShot(10, this,
+                               [this] { this->isResizeFixing_ = false; });
+        });
+    }
+#endif
 
     this->calcButtonsSizes();
 }

@@ -3,7 +3,6 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "debug/Log.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -11,6 +10,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Clipboard.hpp"
 #include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Notebook.hpp"
@@ -530,7 +530,7 @@ void Split::openInStreamlink()
     }
     catch (const Exception &ex)
     {
-        log("Error in doOpenStreamlink: {}", ex.what());
+        qDebug() << "Error in doOpenStreamlink:" << ex.what();
     }
 }
 
@@ -660,7 +660,7 @@ void Split::openSubPage()
 
 void Split::copyToClipboard()
 {
-    QApplication::clipboard()->setText(this->view_->getSelectedText());
+    crossPlatformCopy(this->view_->getSelectedText());
 }
 
 void Split::showSearch()

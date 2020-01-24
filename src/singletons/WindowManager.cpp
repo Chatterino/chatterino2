@@ -13,7 +13,6 @@
 
 #include "Application.hpp"
 #include "debug/AssertInGuiThread.hpp"
-#include "debug/Log.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
@@ -264,7 +263,7 @@ Window *WindowManager::windowAt(int index)
     {
         return nullptr;
     }
-    log("getting window at bad index {}", index);
+    qDebug() << "getting window at bad index" << index;
 
     return this->windows_.at(index);
 }
@@ -432,7 +431,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
 void WindowManager::save()
 {
-    log("[WindowManager] Saving");
+    qDebug() << "[WindowManager] Saving";
     assertInGuiThread();
     QJsonDocument document;
 
@@ -649,8 +648,8 @@ IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
     }
     else if (type == "irc")
     {
-        return Irc::instance().getOrAddChannel(
-            obj.value("server").toInt(-1), obj.value("channel").toString());
+        return Irc::instance().getOrAddChannel(obj.value("server").toInt(-1),
+                                               obj.value("channel").toString());
     }
 
     return Channel::getEmpty();

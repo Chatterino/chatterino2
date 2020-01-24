@@ -28,7 +28,7 @@
     <file>buttons/unmod.png</file>
     <file>buttons/update.png</file>
     <file>buttons/updateError.png</file>
-    <file>chatterino.desktop</file>
+    <file>com.chatterino.chatterino.desktop</file>
     <file>chatterino.icns</file>
     <file>contributors.txt</file>
     <file>emoji.json</file>
@@ -40,7 +40,6 @@
     <file>icon.png</file>
     <file>licenses/boost_boost.txt</file>
     <file>licenses/emoji-data-source.txt</file>
-    <file>licenses/fmt_bsd2.txt</file>
     <file>licenses/libcommuni_BSD3.txt</file>
     <file>licenses/openssl.txt</file>
     <file>licenses/pajlada_settings.txt</file>

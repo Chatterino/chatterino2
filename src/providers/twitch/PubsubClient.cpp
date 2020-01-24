@@ -1,8 +1,8 @@
 #include "providers/twitch/PubsubClient.hpp"
 
-#include "debug/Log.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/PubsubHelpers.hpp"
+#include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 #include <rapidjson/error/en.h>
@@ -77,14 +77,14 @@ namespace detail {
         return true;
     }
 
-    void PubSubClient::unlistenPrefix(const std::string &prefix)
+    void PubSubClient::unlistenPrefix(const QString &prefix)
     {
-        std::vector<std::string> topics;
+        std::vector<QString> topics;
 
         for (auto it = this->listeners_.begin(); it != this->listeners_.end();)
         {
             const auto &listener = *it;
-            if (listener.topic.find(prefix) == 0)
+            if (listener.topic.startsWith(prefix))
             {
                 topics.push_back(listener.topic);
                 it = this->listeners_.erase(it);
@@ -116,16 +116,14 @@ namespace detail {
     {
         assert(this->awaitingPong_);
 
-        log("Got pong!");
-
         this->awaitingPong_ = false;
     }
 
-    bool PubSubClient::isListeningToTopic(const std::string &payload)
+    bool PubSubClient::isListeningToTopic(const QString &topic)
     {
         for (const auto &listener : this->listeners_)
         {
-            if (listener.topic == payload)
+            if (listener.topic == topic)
             {
                 return true;
             }
@@ -156,9 +154,8 @@ namespace detail {
 
                      if (self->awaitingPong_)
                      {
-                         log("No pong respnose, disconnect!");
-                         // TODO(pajlada): Label this connection as "disconnect
-                         // me"
+                         qDebug() << "No pong response, disconnect!";
+                         // TODO(pajlada): Label this connection as "disconnect me"
                      }
                  });
 
@@ -181,7 +178,8 @@ namespace detail {
 
         if (ec)
         {
-            log("Error sending message {}: {}", payload, ec.message());
+            qDebug() << "Error sending message" << payload << ":"
+                     << ec.message().c_str();
             // TODO(pajlada): Check which error code happened and maybe
             // gracefully handle it
 
@@ -223,7 +221,7 @@ PubSub::PubSub()
 
         if (!data.HasMember("args"))
         {
-            log("Missing required args member");
+            qDebug() << "Missing required args member";
             return;
         }
 
@@ -231,13 +229,13 @@ PubSub::PubSub()
 
         if (!args.IsArray())
         {
-            log("args member must be an array");
+            qDebug() << "args member must be an array";
             return;
         }
 
         if (args.Size() == 0)
         {
-            log("Missing duration argument in slowmode on");
+            qDebug() << "Missing duration argument in slowmode on";
             return;
         }
 
@@ -245,7 +243,7 @@ PubSub::PubSub()
 
         if (!durationArg.IsString())
         {
-            log("Duration arg must be a string");
+            qDebug() << "Duration arg must be a string";
             return;
         }
 
@@ -338,7 +336,7 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            log("Error parsing moderation action: {}", ex.what());
+            qDebug() << "Error parsing moderation action:" << ex.what();
         }
 
         action.modded = false;
@@ -368,7 +366,7 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            log("Error parsing moderation action: {}", ex.what());
+            qDebug() << "Error parsing moderation action:" << ex.what();
         }
 
         action.modded = true;
@@ -417,7 +415,7 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            log("Error parsing moderation action: {}", ex.what());
+            qDebug() << "Error parsing moderation action:" << ex.what();
         }
     };
 
@@ -454,7 +452,7 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            log("Error parsing moderation action: {}", ex.what());
+            qDebug() << "Error parsing moderation action:" << ex.what();
         }
     };
 
@@ -485,7 +483,7 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            log("Error parsing moderation action: {}", ex.what());
+            qDebug() << "Error parsing moderation action:" << ex.what();
         }
     };
 
@@ -516,7 +514,7 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            log("Error parsing moderation action: {}", ex.what());
+            qDebug() << "Error parsing moderation action:" << ex.what();
         }
     };
 
@@ -568,7 +566,7 @@ PubSub::PubSub()
             }
             catch (const std::runtime_error &ex)
             {
-                log("Error parsing moderation action: {}", ex.what());
+                qDebug() << "Error parsing moderation action:" << ex.what();
             }
         };
 
@@ -597,7 +595,7 @@ PubSub::PubSub()
             }
             catch (const std::runtime_error &ex)
             {
-                log("Error parsing moderation action: {}", ex.what());
+                qDebug() << "Error parsing moderation action:" << ex.what();
             }
         };
 
@@ -626,7 +624,7 @@ PubSub::PubSub()
             }
             catch (const std::runtime_error &ex)
             {
-                log("Error parsing moderation action: {}", ex.what());
+                qDebug() << "Error parsing moderation action:" << ex.what();
             }
         };
 
@@ -655,7 +653,7 @@ PubSub::PubSub()
             }
             catch (const std::runtime_error &ex)
             {
-                log("Error parsing moderation action: {}", ex.what());
+                qDebug() << "Error parsing moderation action:" << ex.what();
             }
         };
 
@@ -685,7 +683,7 @@ PubSub::PubSub()
             }
             catch (const std::runtime_error &ex)
             {
-                log("Error parsing moderation action: {}", ex.what());
+                qDebug() << "Error parsing moderation action:" << ex.what();
             }
         };
 
@@ -738,7 +736,7 @@ void PubSub::addClient()
 
     if (ec)
     {
-        log("Unable to establish connection: {}", ec.message());
+        qDebug() << "Unable to establish connection:" << ec.message().c_str();
         return;
     }
 
@@ -753,20 +751,23 @@ void PubSub::start()
 
 void PubSub::listenToWhispers(std::shared_ptr<TwitchAccount> account)
 {
+    static const QString topicFormat("whispers.%1");
+
     assert(account != nullptr);
 
-    std::string userID = account->getUserId().toStdString();
+    auto userID = account->getUserId();
 
-    log("Connection open!");
+    qDebug() << "Connection open!";
     websocketpp::lib::error_code ec;
 
-    std::vector<std::string> topics({"whispers." + userID});
+    std::vector<QString> topics({topicFormat.arg(userID)});
 
     this->listen(createListenMessage(topics, account));
 
     if (ec)
     {
-        log("Unable to send message to websocket server: {}", ec.message());
+        qDebug() << "Unable to send message to websocket server:"
+                 << ec.message().c_str();
         return;
     }
 }
@@ -783,26 +784,26 @@ void PubSub::unlistenAllModerationActions()
 void PubSub::listenToChannelModerationActions(
     const QString &channelID, std::shared_ptr<TwitchAccount> account)
 {
+    static const QString topicFormat("chat_moderator_actions.%1.%2");
     assert(!channelID.isEmpty());
     assert(account != nullptr);
     QString userID = account->getUserId();
     if (userID.isEmpty())
         return;
 
-    std::string topic(fS("chat_moderator_actions.{}.{}", userID, channelID));
+    auto topic = topicFormat.arg(userID).arg(channelID);
 
     if (this->isListeningToTopic(topic))
     {
-        log("We are already listening to topic {}", topic);
         return;
     }
 
-    log("Listen to topic {}", topic);
+    qDebug() << "Listen to topic" << topic;
 
     this->listenToTopic(topic, account);
 }
 
-void PubSub::listenToTopic(const std::string &topic,
+void PubSub::listenToTopic(const QString &topic,
                            std::shared_ptr<TwitchAccount> account)
 {
     auto message = createListenMessage({topic}, account);
@@ -814,20 +815,19 @@ void PubSub::listen(rapidjson::Document &&msg)
 {
     if (this->tryListen(msg))
     {
-        log("Successfully listened!");
         return;
     }
 
     this->addClient();
 
-    log("Added to the back of the queue");
+    qDebug() << "Added to the back of the queue";
     this->requests.emplace_back(
         std::make_unique<rapidjson::Document>(std::move(msg)));
 }
 
 bool PubSub::tryListen(rapidjson::Document &msg)
 {
-    log("tryListen with {} clients", this->clients.size());
+    qDebug() << "tryListen with" << this->clients.size() << "clients";
     for (const auto &p : this->clients)
     {
         const auto &client = p.second;
@@ -840,7 +840,7 @@ bool PubSub::tryListen(rapidjson::Document &msg)
     return false;
 }
 
-bool PubSub::isListeningToTopic(const std::string &topic)
+bool PubSub::isListeningToTopic(const QString &topic)
 {
     for (const auto &p : this->clients)
     {
@@ -865,24 +865,24 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
     if (!res)
     {
-        log("Error parsing message '{}' from PubSub: {}", payload,
-            rapidjson::GetParseError_En(res.Code()));
+        qDebug() << "Error parsing message '" << payload.c_str()
+                 << "' from PubSub:" << rapidjson::GetParseError_En(res.Code());
         return;
     }
 
     if (!msg.IsObject())
     {
-        log("Error parsing message '{}' from PubSub. Root object is not an "
-            "object",
-            payload);
+        qDebug() << "Error parsing message '" << payload.c_str()
+                 << "' from PubSub. Root object is not an "
+                    "object";
         return;
     }
 
-    std::string type;
+    QString type;
 
     if (!rj::getSafe(msg, "type", type))
     {
-        log("Missing required string member `type` in message root");
+        qDebug() << "Missing required string member `type` in message root";
         return;
     }
 
@@ -894,7 +894,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
     {
         if (!msg.HasMember("data"))
         {
-            log("Missing required object member `data` in message root");
+            qDebug() << "Missing required object member `data` in message root";
             return;
         }
 
@@ -902,7 +902,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
         if (!data.IsObject())
         {
-            log("Member `data` must be an object");
+            qDebug() << "Member `data` must be an object";
             return;
         }
 
@@ -922,7 +922,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
     }
     else
     {
-        log("Unknown message type: {}", type);
+        qDebug() << "Unknown message type:" << type;
     }
 }
 
@@ -983,7 +983,7 @@ PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
     }
     catch (const std::exception &e)
     {
-        log("Exception caught in OnTLSInit: {}", e.what());
+        qDebug() << "Exception caught in OnTLSInit:" << e.what();
     }
 
     return ctx;
@@ -991,21 +991,21 @@ PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
 
 void PubSub::handleListenResponse(const rapidjson::Document &msg)
 {
-    std::string error;
+    QString error;
 
     if (rj::getSafe(msg, "error", error))
     {
-        std::string nonce;
+        QString nonce;
         rj::getSafe(msg, "nonce", nonce);
 
-        if (error.empty())
+        if (error.isEmpty())
         {
-            log("Successfully listened to nonce {}", nonce);
+            qDebug() << "Successfully listened to nonce" << nonce;
             // Nothing went wrong
             return;
         }
 
-        log("PubSub error: {} on nonce {}", error, nonce);
+        qDebug() << "PubSub error:" << error << "on nonce" << nonce;
         return;
     }
 }
@@ -1016,7 +1016,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
     if (!rj::getSafe(outerData, "topic", topic))
     {
-        log("Missing required string member `topic` in outerData");
+        qDebug() << "Missing required string member `topic` in outerData";
         return;
     }
 
@@ -1024,7 +1024,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
     if (!rj::getSafe(outerData, "message", payload))
     {
-        log("Expected string message in outerData");
+        qDebug() << "Expected string message in outerData";
         return;
     }
 
@@ -1034,8 +1034,8 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
     if (!res)
     {
-        log("Error parsing message '{}' from PubSub: {}", payload,
-            rapidjson::GetParseError_En(res.Code()));
+        qDebug() << "Error parsing message '" << payload.c_str()
+                 << "' from PubSub:" << rapidjson::GetParseError_En(res.Code());
         return;
     }
 
@@ -1045,7 +1045,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
         if (!rj::getSafe(msg, "type", whisperType))
         {
-            log("Bad whisper data");
+            qDebug() << "Bad whisper data";
             return;
         }
 
@@ -1063,7 +1063,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         }
         else
         {
-            log("Invalid whisper type: {}", whisperType);
+            qDebug() << "Invalid whisper type:" << whisperType.c_str();
             assert(false);
             return;
         }
@@ -1078,7 +1078,8 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
         if (!rj::getSafe(data, "moderation_action", moderationAction))
         {
-            log("Missing moderation action in data: {}", rj::stringify(data));
+            qDebug() << "Missing moderation action in data:"
+                     << rj::stringify(data).c_str();
             return;
         }
 
@@ -1086,7 +1087,8 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
         if (handlerIt == this->moderationActionHandlers.end())
         {
-            log("No handler found for moderation action {}", moderationAction);
+            qDebug() << "No handler found for moderation action"
+                     << moderationAction.c_str();
             return;
         }
 
@@ -1095,16 +1097,16 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
     }
     else
     {
-        log("Unknown topic: {}", topic);
+        qDebug() << "Unknown topic:" << topic;
         return;
     }
 }
 
 void PubSub::runThread()
 {
-    log("Start pubsub manager thread");
+    qDebug() << "Start pubsub manager thread";
     this->websocketClient.run();
-    log("Done with pubsub manager thread");
+    qDebug() << "Done with pubsub manager thread";
 }
 
 }  // namespace chatterino

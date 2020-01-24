@@ -4,7 +4,6 @@
 #include "common/NetworkResult.hpp"
 #include "common/Outcome.hpp"
 #include "debug/AssertInGuiThread.hpp"
-#include "debug/Log.hpp"
 #include "singletons/Paths.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
@@ -124,7 +123,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
         if (reply == nullptr)
         {
-            log("Unhandled request type");
+            qDebug() << "Unhandled request type";
             return;
         }
 
@@ -132,7 +131,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
         {
             QObject::connect(
                 data->timer_, &QTimer::timeout, worker, [reply, data]() {
-                    log("Aborted!");
+                    qDebug() << "Aborted!";
                     reply->abort();
                     if (data->onError_)
                     {

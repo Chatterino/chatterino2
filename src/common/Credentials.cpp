@@ -200,7 +200,9 @@ void Credentials::set(const QString &provider, const QString &name_,
     {
         auto &instance = insecureInstance();
 
-        instance.object()[name] = credential;
+        auto obj = instance.object();
+        obj[name] = credential;
+        instance.setObject(obj);
 
         queueInsecureSave();
     }

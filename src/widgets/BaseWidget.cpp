@@ -2,7 +2,6 @@
 
 #include "BaseSettings.hpp"
 #include "BaseTheme.hpp"
-#include "debug/Log.hpp"
 #include "widgets/BaseWindow.hpp"
 
 #include <QChildEvent>

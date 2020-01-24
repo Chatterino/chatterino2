@@ -1,13 +1,13 @@
 # Chatterino code guidelines
 
-This is a set of guidelines for contributing to Chatterino. The goal is to teach programmers without C++ background (java/python/etc.), people who haven't used Qt or otherwise have different experience the idioms of the codebase. Thus we will focus on this which are different from those other environments. There are extra guidelines available [here](https://hackmd.io/@fourtf/chatterino-pendantic-guidelines) but they are considered as extras and not as important.
+This is a set of guidelines for contributing to Chatterino. The goal is to teach programmers without C++ background (java/python/etc.), people who haven't used Qt or otherwise have different experience the idioms of the codebase. Thus we will focus on those which are different from those other environments. There are extra guidelines available [here](https://hackmd.io/@fourtf/chatterino-pendantic-guidelines) but they are considered as extras and not as important.
 
 # Tooling
 
 Formatting
 ------
 
-Code is automatically formatted using `clang-format`. It take the burdon off of the programmer and ensures that all contributers use the same style (even if mess something up accidentally). We recommend that you set up automatic formatting on file save in your editor.
+Code is automatically formatted using `clang-format`. It takes the burden off of the programmer and ensures that all contributors use the same style (even if mess something up accidentally). We recommend that you set up automatic formatting on file save in your editor.
 
 # Comments
 
@@ -49,7 +49,7 @@ boost::optional<QRegularExpressionMatch> matchLink(const QString &text);
 Arithmetic Types
 -----
 
-Arithmetic types (like char, short, int, long, float and double), bool, and pointers are NOT inititalized by default in c++. They keep whatever value is already at their position in the memory. This makes debugging harder and is unpredictable so we initialize them to zero by using `{}` after their name when declaring them.
+Arithmetic types (like char, short, int, long, float and double), bool, and pointers are NOT initialized by default in c++. They keep whatever value is already at their position in the memory. This makes debugging harder and is unpredictable, so we initialize them to zero by using `{}` after their name when declaring them.
 
 ``` cpp
 class ArithmeticTypes
@@ -73,7 +73,7 @@ void myFunc() {
 
 Passing parameters
 ------
-The way a parameter is passed signals how it is going to be used inside of the function. C++ doesn't have multiple return values so there is "out parameters" (reference to a variable that is going to assigned inside of the function) to simulate multiple return values.
+The way a parameter is passed signals how it is going to be used inside of the function. C++ doesn't have multiple return values so there is "out parameters" (reference to a variable that is going to be assigned inside of the function) to simulate multiple return values.
 
 **Cheap to copy types** like int/enum/etc. can be passed in per value since copying them is fast.
 ``` cpp

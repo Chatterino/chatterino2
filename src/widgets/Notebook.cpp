@@ -1,7 +1,6 @@
 #include "widgets/Notebook.hpp"
 
 #include "Application.hpp"
-#include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"

@@ -3,7 +3,7 @@
 #include "ForwardDecl.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/search/MessagePredicate.hpp"
-#include "widgets/BaseWindow.hpp"
+#include "widgets/BasePopup.hpp"
 
 #include <memory>
 
@@ -11,7 +11,7 @@ class QLineEdit;
 
 namespace chatterino {
 
-class SearchPopup : public BaseWindow
+class SearchPopup : public BasePopup
 {
 public:
     SearchPopup();
@@ -19,8 +19,6 @@ public:
     virtual void setChannel(const ChannelPtr &channel);
 
 protected:
-    void keyPressEvent(QKeyEvent *e) override;
-
     virtual void updateWindowTitle();
 
 private:

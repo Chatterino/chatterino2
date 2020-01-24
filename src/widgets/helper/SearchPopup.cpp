@@ -73,17 +73,6 @@ void SearchPopup::search()
                                           this->channelName_, this->snapshot_));
 }
 
-void SearchPopup::keyPressEvent(QKeyEvent *e)
-{
-    if (e->key() == Qt::Key_Escape)
-    {
-        this->close();
-        return;
-    }
-
-    BaseWidget::keyPressEvent(e);
-}
-
 void SearchPopup::initLayout()
 {
     // VBOX

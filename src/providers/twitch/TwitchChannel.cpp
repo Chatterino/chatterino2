@@ -6,7 +6,6 @@
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
@@ -31,6 +30,7 @@
 
 namespace chatterino {
 namespace {
+    constexpr int TITLE_REFRESH_PERIOD = 10;
     constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
 
     // parseRecentMessages takes a json object and returns a vector of
@@ -89,9 +89,9 @@ TwitchChannel::TwitchChannel(const QString &name,
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , mod_(false)
-    , titleRefreshedTime_(QTime::currentTime().addSecs(-titleRefreshPeriod_))
+    , titleRefreshedTime_(QTime::currentTime().addSecs(-TITLE_REFRESH_PERIOD))
 {
-    log("[TwitchChannel:{}] Opened", name);
+    qDebug() << "[TwitchChannel" << name << "] Opened";
 
     this->liveStatusChanged.connect([this]() {
         if (this->isLive() == 1)
@@ -193,7 +193,8 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    log("[TwitchChannel:{}] Send message: {}", this->getName(), message);
+    qDebug() << "[TwitchChannel" << this->getName()
+             << "] Send message:" << message;
 
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
@@ -447,7 +448,7 @@ void TwitchChannel::refreshTitle()
         return;
     }
 
-    if (this->titleRefreshedTime_.elapsed() < this->titleRefreshPeriod_ * 1000)
+    if (this->titleRefreshedTime_.elapsed() < TITLE_REFRESH_PERIOD * 1000)
     {
         return;
     }
@@ -490,8 +491,8 @@ void TwitchChannel::refreshLiveStatus()
 
     if (roomID.isEmpty())
     {
-        log("[TwitchChannel:{}] Refreshing live status (Missing ID)",
-            this->getName());
+        qDebug() << "[TwitchChannel" << this->getName()
+                 << "] Refreshing live status (Missing ID)";
         this->setLive(false);
         return;
     }
@@ -516,13 +517,13 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 {
     if (!document.IsObject())
     {
-        log("[TwitchChannel:refreshLiveStatus] root is not an object");
+        qDebug() << "[TwitchChannel:refreshLiveStatus] root is not an object";
         return Failure;
     }
 
     if (!document.HasMember("stream"))
     {
-        log("[TwitchChannel:refreshLiveStatus] Missing stream in root");
+        qDebug() << "[TwitchChannel:refreshLiveStatus] Missing stream in root";
         return Failure;
     }
 
@@ -538,7 +539,8 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
     if (!stream.HasMember("viewers") || !stream.HasMember("game") ||
         !stream.HasMember("channel") || !stream.HasMember("created_at"))
     {
-        log("[TwitchChannel:refreshLiveStatus] Missing members in stream");
+        qDebug()
+            << "[TwitchChannel:refreshLiveStatus] Missing members in stream";
         this->setLive(false);
         return Failure;
     }
@@ -547,8 +549,8 @@ Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
 
     if (!streamChannel.IsObject() || !streamChannel.HasMember("status"))
     {
-        log("[TwitchChannel:refreshLiveStatus] Missing member \"status\" in "
-            "channel");
+        qDebug() << "[TwitchChannel:refreshLiveStatus] Missing member "
+                    "\"status\" in channel";
         return Failure;
     }
 
@@ -742,6 +744,12 @@ void TwitchChannel::refreshCheerEmotes()
     NetworkRequest::twitchRequest(url)
         .onSuccess([this,
                     weak = weakOf<Channel>(this)](auto result) -> Outcome {
+            auto shared = weak.lock();
+            if (!shared)
+            {
+                return Failure;
+            }
+
             auto cheerEmoteSets = ParseCheermoteSets(result.parseRapidJson());
             std::vector<CheerEmoteSet> emoteSets;
 
@@ -758,6 +766,7 @@ void TwitchChannel::refreshCheerEmotes()
 
                     cheerEmote.color = QColor(tier.color);
                     cheerEmote.minBits = tier.minBits;
+                    cheerEmote.regex = cheerEmoteSet.regex;
 
                     // TODO(pajlada): We currently hardcode dark here :|
                     // We will continue to do so for now since we haven't had to
@@ -834,7 +843,7 @@ boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
         int bitAmount = amount.toInt(&ok);
         if (!ok)
         {
-            log("Error parsing bit amount in cheerEmote");
+            qDebug() << "Error parsing bit amount in cheerEmote";
         }
         for (const auto &emote : set.cheerEmotes)
         {

@@ -7,7 +7,6 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
-#include "debug/Log.hpp"
 #include "messages/Emote.hpp"
 
 namespace chatterino {
@@ -47,7 +46,7 @@ void TwitchBadges::loadTwitchBadges()
                                 {versionObj.value("image_url_4x").toString()},
                                 .25),
                         },
-                        Tooltip{versionObj.value("description").toString()},
+                        Tooltip{versionObj.value("title").toString()},
                         Url{versionObj.value("click_url").toString()}};
                     // "title"
                     // "clickAction"

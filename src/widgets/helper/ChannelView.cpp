@@ -16,7 +16,6 @@
 #include "common/Common.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/Benchmark.hpp"
-#include "debug/Log.hpp"
 #include "messages/Emote.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
@@ -29,6 +28,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/TooltipPreviewImage.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -65,9 +65,8 @@ namespace {
             if (!image->isEmpty())
             {
                 copyMenu->addAction(
-                    QString(scale) + "x link", [url = image->url()] {
-                        QApplication::clipboard()->setText(url.string);
-                    });
+                    QString(scale) + "x link",
+                    [url = image->url()] { crossPlatformCopy(url.string); });
                 openMenu->addAction(
                     QString(scale) + "x link", [url = image->url()] {
                         QDesktopServices::openUrl(QUrl(url.string));
@@ -85,9 +84,8 @@ namespace {
             openMenu->addSeparator();
 
             copyMenu->addAction(
-                "Copy " + name + " emote link", [url = emote.homePage] {
-                    QApplication::clipboard()->setText(url.string);  //
-                });
+                "Copy " + name + " emote link",
+                [url = emote.homePage] { crossPlatformCopy(url.string); });
             openMenu->addAction(
                 "Open " + name + " emote link", [url = emote.homePage] {
                     QDesktopServices::openUrl(QUrl(url.string));  //
@@ -125,9 +123,8 @@ ChannelView::ChannelView(BaseWidget *parent)
     });
 
     auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
-    QObject::connect(shortcut, &QShortcut::activated, [this] {
-        QGuiApplication::clipboard()->setText(this->getSelectedText());
-    });
+    QObject::connect(shortcut, &QShortcut::activated,
+                     [this] { crossPlatformCopy(this->getSelectedText()); });
 
     this->clickTimer_ = new QTimer(this);
     this->clickTimer_->setSingleShot(true);
@@ -740,9 +737,8 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     auto snapshot = this->messages_.getSnapshot();
     if (index >= snapshot.size())
     {
-        log("Tried to replace out of bounds message. Index: {}. "
-            "Length: {}",
-            index, snapshot.size());
+        qDebug() << "Tried to replace out of bounds message. Index:" << index
+                 << ". Length:" << snapshot.size();
         return;
     }
 
@@ -1554,8 +1550,7 @@ void ChannelView::addContextMenuItems(
             menu->addAction("Open link incognito",
                             [url] { openLinkIncognito(url); });
         }
-        menu->addAction("Copy link",
-                        [url] { QApplication::clipboard()->setText(url); });
+        menu->addAction("Copy link", [url] { crossPlatformCopy(url); });
 
         menu->addSeparator();
     }
@@ -1563,9 +1558,8 @@ void ChannelView::addContextMenuItems(
     // Copy actions
     if (!this->selection_.isEmpty())
     {
-        menu->addAction("Copy selection", [this] {
-            QGuiApplication::clipboard()->setText(this->getSelectedText());
-        });
+        menu->addAction("Copy selection",
+                        [this] { crossPlatformCopy(this->getSelectedText()); });
     }
 
     menu->addAction("Copy message", [layout] {
@@ -1573,14 +1567,14 @@ void ChannelView::addContextMenuItems(
         layout->addSelectionText(copyString, 0, INT_MAX,
                                  CopyMode::OnlyTextAndEmotes);
 
-        QGuiApplication::clipboard()->setText(copyString);
+        crossPlatformCopy(copyString);
     });
 
     menu->addAction("Copy full message", [layout] {
         QString copyString;
         layout->addSelectionText(copyString);
 
-        QGuiApplication::clipboard()->setText(copyString);
+        crossPlatformCopy(copyString);
     });
 
     // Open in new split.

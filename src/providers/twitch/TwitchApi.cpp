@@ -2,7 +2,6 @@
 
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
-#include "debug/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 
 #include <QString>
@@ -23,22 +22,23 @@ void TwitchApi::findUserId(const QString user,
             auto root = result.parseJson();
             if (!root.value("users").isArray())
             {
-                log("API Error while getting user id, users is not an array");
+                qDebug()
+                    << "API Error while getting user id, users is not an array";
                 successCallback("");
                 return Failure;
             }
             auto users = root.value("users").toArray();
             if (users.size() != 1)
             {
-                log("API Error while getting user id, users array size is not "
-                    "1");
+                qDebug() << "API Error while getting user id, users array size "
+                            "is not 1";
                 successCallback("");
                 return Failure;
             }
             if (!users[0].isObject())
             {
-                log("API Error while getting user id, first user is not an "
-                    "object");
+                qDebug() << "API Error while getting user id, first user is "
+                            "not an object";
                 successCallback("");
                 return Failure;
             }
@@ -46,10 +46,8 @@ void TwitchApi::findUserId(const QString user,
             auto id = firstUser.value("_id");
             if (!id.isString())
             {
-                log("API Error: while getting user id, first user object `_id` "
-                    "key "
-                    "is not a "
-                    "string");
+                qDebug() << "API Error: while getting user id, first user "
+                            "object `_id` key is not a string";
                 successCallback("");
                 return Failure;
             }
@@ -73,8 +71,8 @@ void TwitchApi::findUserName(const QString userid,
             auto name = root.value("name");
             if (!name.isString())
             {
-                log("API Error: while getting user name, `name` is not a "
-                    "string");
+                qDebug() << "API Error: while getting user name, `name` is not "
+                            "a string";
                 successCallback("");
                 return Failure;
             }

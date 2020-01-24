@@ -1,6 +1,15 @@
 #include "IrcConnection2.hpp"
 
+#include "common/Version.hpp"
+
 namespace chatterino {
+
+namespace {
+
+    const auto payload =
+        QString("chatterino/%1").arg(Version::instance().version());
+
+}  // namespace
 
 IrcConnection::IrcConnection(QObject *parent)
     : Communi::IrcConnection(parent)
@@ -11,10 +20,17 @@ IrcConnection::IrcConnection(QObject *parent)
     QObject::connect(&this->pingTimer_, &QTimer::timeout, [this] {
         if (this->isConnected())
         {
+            if (this->waitingForPong_.load())
+            {
+                // Not sending another ping as we haven't received the matching pong yet
+                return;
+            }
+
             if (!this->recentlyReceivedMessage_.load())
             {
-                this->sendRaw("PING chatterino/ping");
+                this->sendRaw("PING " + payload);
                 this->reconnectTimer_.start();
+                this->waitingForPong_ = true;
             }
             this->recentlyReceivedMessage_ = false;
         }
@@ -29,6 +45,17 @@ IrcConnection::IrcConnection(QObject *parent)
             reconnectRequested.invoke();
         }
     });
+
+    QObject::connect(this, &Communi::IrcConnection::connected, this,
+                     [this] { this->waitingForPong_ = false; });
+
+    QObject::connect(this, &Communi::IrcConnection::pongMessageReceived,
+                     [this](Communi::IrcPongMessage *message) {
+                         if (message->argument() == payload)
+                         {
+                             this->waitingForPong_ = false;
+                         }
+                     });
 
     QObject::connect(this, &Communi::IrcConnection::messageReceived,
                      [this](Communi::IrcMessage *) {

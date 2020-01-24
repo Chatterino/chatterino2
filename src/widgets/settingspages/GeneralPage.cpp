@@ -391,6 +391,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Animate", s.animateEmotes);
     layout.addCheckbox("Animate only when Chatterino is focused",
                        s.animationsWhenFocused);
+    layout.addCheckbox("Stack bits", s.stackBits);
     layout.addDropdown<float>(
         "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
         s.emoteScale,
@@ -511,7 +512,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addTitle("Cache");
     layout.addDescription(
         "Files that are used often (such as emotes) are saved to disk to "
-        "reduce bandwidth usage and tho speed up loading.");
+        "reduce bandwidth usage and to speed up loading.");
 
     auto cachePathLabel = layout.addDescription("placeholder :D");
     getSettings()->cachePath.connect([cachePathLabel](const auto &,

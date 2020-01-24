@@ -115,15 +115,27 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     // update line height
     this->lineHeight_ = std::max(this->lineHeight_, newLineHeight);
 
+    auto xOffset = 0;
+
+    if (element->getCreator().getFlags().has(
+            MessageElementFlag::ZeroWidthEmote))
+    {
+        xOffset -= element->getRect().width() + this->spaceWidth_;
+    }
+
     // set move element
-    element->setPosition(
-        QPoint(this->currentX_, this->currentY_ - element->getRect().height()));
+    element->setPosition(QPoint(this->currentX_ + xOffset,
+                                this->currentY_ - element->getRect().height()));
 
     // add element
     this->elements_.push_back(std::unique_ptr<MessageLayoutElement>(element));
 
     // set current x
-    this->currentX_ += element->getRect().width();
+    if (!element->getCreator().getFlags().has(
+            MessageElementFlag::ZeroWidthEmote))
+    {
+        this->currentX_ += element->getRect().width();
+    }
 
     if (element->hasTrailingSpace())
     {

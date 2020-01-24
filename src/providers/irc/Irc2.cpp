@@ -74,7 +74,7 @@ void IrcServerData::getPassword(
     QObject *receiver, std::function<void(const QString &)> &&onLoaded) const
 {
     Credentials::instance().get("irc", getCredentialName(*this), receiver,
-                                   std::move(onLoaded));
+                                std::move(onLoaded));
 }
 
 void IrcServerData::setPassword(const QString &password)
@@ -133,8 +133,7 @@ Irc::Irc()
 
         if (args.caller != Irc::noEraseCredentialCaller)
         {
-            Credentials::instance().erase("irc",
-                                             getCredentialName(args.item));
+            Credentials::instance().erase("irc", getCredentialName(args.item));
         }
     });
 

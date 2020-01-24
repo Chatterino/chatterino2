@@ -1,67 +1,201 @@
 #include "common/LinkParser.hpp"
 
 #include <QFile>
+#include <QMap>
 #include <QRegularExpression>
 #include <QString>
+#include <QStringRef>
 #include <QTextStream>
 
-// ip 0.0.0.0 - 224.0.0.0
-#define IP                                       \
-    "(?:[1-9]\\d?|1\\d\\d|2[01]\\d|22[0-3])"     \
-    "(?:\\.(?:1?\\d{1,2}|2[0-4]\\d|25[0-5])){2}" \
-    "(?:\\.(?:[1-9]\\d?|1\\d\\d|2[0-4]\\d|25[0-4]))"
-#define PORT "(?::\\d{2,5})"
-#define WEB_CHAR1 "[_a-z\\x{00a1}-\\x{ffff}0-9]"
-#define WEB_CHAR2 "[a-z\\x{00a1}-\\x{ffff}0-9]"
-
-#define SPOTIFY_1 "(?:artist|album|track|user:[^:]+:playlist):[a-zA-Z0-9]+"
-#define SPOTIFY_2 "user:[^:]+"
-#define SPOTIFY_3 "search:(?:[-\\w$\\.+!*'(),]+|%[a-fA-F0-9]{2})+"
-#define SPOTIFY_PARAMS "(?:" SPOTIFY_1 "|" SPOTIFY_2 "|" SPOTIFY_3 ")"
-#define SPOTIFY_LINK "(?x-mi:(spotify:" SPOTIFY_PARAMS "))"
-
-#define WEB_PROTOCOL "(?:(?:https?|ftps?)://)?"
-#define WEB_USER "(?:\\S+(?::\\S*)?@)?"
-#define WEB_HOST "(?:(?:" WEB_CHAR1 "-*)*" WEB_CHAR2 "+)"
-#define WEB_DOMAIN "(?:\\.(?:" WEB_CHAR2 "-*)*" WEB_CHAR2 "+)*"
-#define WEB_TLD "(?:" + tldData + ")"
-#define WEB_RESOURCE_PATH "(?:[/?#]\\S*)"
-#define WEB_LINK                                                              \
-    WEB_PROTOCOL WEB_USER "(?:" IP "|" WEB_HOST WEB_DOMAIN "\\." WEB_TLD PORT \
-                          "?" WEB_RESOURCE_PATH "?)"
-
-#define LINK "^(?:" SPOTIFY_LINK "|" WEB_LINK ")$"
-
 namespace chatterino {
+namespace {
+    QSet<QString> &tlds()
+    {
+        static QSet<QString> tlds = [] {
+            QFile file(":/tlds.txt");
+            file.open(QFile::ReadOnly);
+            QTextStream stream(&file);
+            stream.setCodec("UTF-8");
+            int safetyMax = 20000;
+
+            QSet<QString> set;
+
+            while (!stream.atEnd())
+            {
+                auto line = stream.readLine();
+                set.insert(line);
+
+                if (safetyMax-- == 0)
+                    break;
+            }
+
+            return set;
+        }();
+        return tlds;
+    }
+
+    bool isValidHostname(QStringRef &host)
+    {
+        int index = host.lastIndexOf('.');
+
+        return index != -1 &&
+               tlds().contains(host.mid(index + 1).toString().toLower());
+    }
+
+    bool isValidIpv4(QStringRef &host)
+    {
+        static auto exp = QRegularExpression("^\\d{1,3}(?:\\.\\d{1,3}){3}$");
+
+        return exp.match(host).hasMatch();
+    }
+
+#ifdef C_MATCH_IPV6_LINK
+    bool isValidIpv6(QStringRef &host)
+    {
+        static auto exp = QRegularExpression("^\\[[a-fA-F0-9:%]+\\]$");
+
+        return exp.match(host).hasMatch();
+    }
+#endif
+}  // namespace
 
 LinkParser::LinkParser(const QString &unparsedString)
 {
-    static QRegularExpression linkRegex = [] {
-        static QRegularExpression newLineRegex("\r?\n");
-        QFile file(":/tlds.txt");
-        file.open(QFile::ReadOnly);
-        QTextStream tlds(&file);
-        tlds.setCodec("UTF-8");
+    this->match_ = unparsedString;
 
-        // tldData gets injected into the LINK macro
-        auto tldData = tlds.readAll().replace(newLineRegex, "|");
-        (void)tldData;
+    // This is not implemented with a regex to increase performance.
+    // We keep removing parts of the url until there's either nothing left or we fail.
+    QStringRef l(&unparsedString);
 
-        return QRegularExpression(LINK,
-                                  QRegularExpression::CaseInsensitiveOption);
-    }();
+    bool hasHttp = false;
 
-    this->match_ = linkRegex.match(unparsedString);
+    // Protocol `https?://`
+    if (l.startsWith("https://", Qt::CaseInsensitive))
+    {
+        hasHttp = true;
+        l = l.mid(8);
+    }
+    else if (l.startsWith("http://", Qt::CaseInsensitive))
+    {
+        hasHttp = true;
+        l = l.mid(7);
+    }
+
+    // Http basic auth `user:password`.
+    // Not supported for security reasons (misleading links)
+
+    // Host `a.b.c.com`
+    QStringRef host = l;
+    bool lastWasDot = true;
+    bool inIpv6 = false;
+
+    for (int i = 0; i < l.size(); i++)
+    {
+        if (l[i] == '.')
+        {
+            if (lastWasDot == true)  // no double dots ..
+                goto error;
+            lastWasDot = true;
+        }
+        else
+        {
+            lastWasDot = false;
+        }
+
+        if (l[i] == ':' && !inIpv6)
+        {
+            host = l.mid(0, i);
+            l = l.mid(i + 1);
+            goto parsePort;
+        }
+        else if (l[i] == '/')
+        {
+            host = l.mid(0, i);
+            l = l.mid(i + 1);
+            goto parsePath;
+        }
+        else if (l[i] == '?')
+        {
+            host = l.mid(0, i);
+            l = l.mid(i + 1);
+            goto parseQuery;
+        }
+        else if (l[i] == '#')
+        {
+            host = l.mid(0, i);
+            l = l.mid(i + 1);
+            goto parseAnchor;
+        }
+
+        // ipv6
+        if (l[i] == '[')
+        {
+            if (i == 0)
+                inIpv6 = true;
+            else
+                goto error;
+        }
+        else if (l[i] == ']')
+        {
+            inIpv6 = false;
+        }
+    }
+
+    if (lastWasDot)
+        goto error;
+    else
+        goto done;
+
+parsePort:
+    // Port `:12345`
+    for (int i = 0; i < std::min<int>(5, l.size()); i++)
+    {
+        if (l[i] == '/')
+            goto parsePath;
+        else if (l[i] == '?')
+            goto parseQuery;
+        else if (l[i] == '#')
+            goto parseAnchor;
+
+        if (!l[i].isDigit())
+            goto error;
+    }
+
+    goto done;
+
+parsePath:
+parseQuery:
+parseAnchor:
+    // we accept everything in the path/query/anchor
+
+done:
+    // check host
+    this->hasMatch_ = isValidHostname(host) || isValidIpv4(host)
+#ifdef C_MATCH_IPV6_LINK
+
+                      || (hasHttp && isValidIpv6(host))
+#endif
+        ;
+
+    if (this->hasMatch_)
+    {
+        this->match_ = unparsedString;
+    }
+
+    return;
+
+error:
+    hasMatch_ = false;
 }
 
 bool LinkParser::hasMatch() const
 {
-    return this->match_.hasMatch();
+    return this->hasMatch_;
 }
 
 QString LinkParser::getCaptured() const
 {
-    return this->match_.captured();
+    return this->match_;
 }
 
 }  // namespace chatterino

@@ -151,9 +151,6 @@ void AB_THEME_CLASS::actuallyUpdate(double hue, double multiplier)
         this->tabs.bottomLine = this->tabs.selected.backgrounds.regular.color();
     }
 
-    // Split
-    bool flat = isLight_;
-
     // Message
     this->messages.textColors.link =
         isLight_ ? QColor(66, 134, 244) : QColor(66, 134, 244);
