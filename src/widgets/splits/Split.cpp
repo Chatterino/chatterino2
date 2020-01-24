@@ -10,6 +10,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Clipboard.hpp"
 #include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Notebook.hpp"
@@ -659,7 +660,7 @@ void Split::openSubPage()
 
 void Split::copyToClipboard()
 {
-    QApplication::clipboard()->setText(this->view_->getSelectedText());
+    crossPlatformCopy(this->view_->getSelectedText());
 }
 
 void Split::showSearch()

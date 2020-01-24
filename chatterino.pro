@@ -210,6 +210,7 @@ SOURCES += \
     src/singletons/TooltipPreviewImage.cpp \
     src/singletons/Updates.cpp \
     src/singletons/WindowManager.cpp \
+    src/util/Clipboard.cpp \
     src/util/DebugCount.cpp \
     src/util/FormatTime.cpp \
     src/util/FunctionEventFilter.cpp \
@@ -412,6 +413,7 @@ HEADERS += \
     src/singletons/Updates.hpp \
     src/singletons/WindowManager.hpp \
     src/util/Clamp.hpp \
+    src/util/Clipboard.hpp \
     src/util/CombinePath.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
