@@ -6,8 +6,7 @@ namespace chatterino {
 
 namespace {
 
-    const auto payload =
-        QString("chatterino/%1").arg(Version::instance().version());
+    const auto payload = QString("chatterino/" CHATTERINO_VERSION);
 
 }  // namespace
 
