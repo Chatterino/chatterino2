@@ -25,6 +25,19 @@
 
 namespace chatterino {
 
+namespace {
+
+    QColor blendColors(const QColor &base, const QColor &apply)
+    {
+        const qreal &alpha = apply.alphaF();
+        QColor result;
+        result.setRgbF(base.redF() * (1 - alpha) + apply.redF() * alpha,
+                       base.greenF() * (1 - alpha) + apply.greenF() * alpha,
+                       base.blueF() * (1 - alpha) + apply.blueF() * alpha);
+        return result;
+    }
+}  // namespace
+
 MessageLayout::MessageLayout(MessagePtr message)
     : message_(message)
     , container_(std::make_shared<MessageLayoutContainer>())
@@ -249,21 +262,33 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
 
     // draw background
-    QColor backgroundColor = app->themes->messages.backgrounds.regular;
+    QColor backgroundColor = [this, &app] {
+        if (getSettings()->alternateMessages.getValue() &&
+            this->flags.has(MessageLayoutFlag::AlternateBackground))
+        {
+            return app->themes->messages.backgrounds.alternate;
+        }
+        else
+        {
+            return app->themes->messages.backgrounds.regular;
+        }
+    }();
+
     if ((this->message_->flags.has(MessageFlag::Highlighted) ||
          this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
         !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
-        backgroundColor = app->themes->messages.backgrounds.highlighted;
+        // Blend highlight color with usual background color
+        backgroundColor =
+            blendColors(backgroundColor, *this->message_->highlightColor);
     }
-    else if (this->message_->flags.has(MessageFlag::Subscription))
+    else if (this->message_->flags.has(MessageFlag::Subscription) &&
+             getSettings()->enableSubHighlight)
     {
-        backgroundColor = app->themes->messages.backgrounds.subscription;
-    }
-    else if (getSettings()->alternateMessages.getValue() &&
-             this->flags.has(MessageLayoutFlag::AlternateBackground))
-    {
-        backgroundColor = app->themes->messages.backgrounds.alternate;
+        // Blend highlight color with usual background color
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ColorProvider::instance().color(ColorType::Subscription));
     }
     else if (this->message_->flags.has(MessageFlag::AutoMod))
     {

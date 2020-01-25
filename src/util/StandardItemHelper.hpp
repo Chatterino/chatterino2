@@ -22,6 +22,19 @@ static void setStringItem(QStandardItem *item, const QString &value,
                                  (editable ? (Qt::ItemIsEditable) : 0)));
 }
 
+static void setFilePathItem(QStandardItem *item, const QUrl &value)
+{
+    item->setData(value, Qt::UserRole);
+    item->setData(value.fileName(), Qt::DisplayRole);
+    item->setFlags(Qt::ItemFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable));
+}
+
+static void setColorItem(QStandardItem *item, const QColor &value)
+{
+    item->setData(value, Qt::DecorationRole);
+    item->setFlags(Qt::ItemFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable));
+}
+
 static QStandardItem *emptyItem()
 {
     auto *item = new QStandardItem();

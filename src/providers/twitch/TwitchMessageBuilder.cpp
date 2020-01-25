@@ -64,6 +64,25 @@ QColor getRandomColor(const QVariant &userId)
     return twitchUsernameColors[colorIndex];
 }
 
+QUrl getFallbackHighlightSound()
+{
+    using namespace chatterino;
+
+    QString path = getSettings()->pathHighlightSound;
+    bool fileExists = QFileInfo::exists(path) && QFileInfo(path).isFile();
+
+    // Use fallback sound when checkbox is not checked
+    // or custom file doesn't exist
+    if (getSettings()->customHighlightSound && fileExists)
+    {
+        return QUrl::fromLocalFile(path);
+    }
+    else
+    {
+        return QUrl("qrc:/sounds/ping2.wav");
+    }
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -233,17 +252,11 @@ void TwitchMessageBuilder::triggerHighlights()
         if (auto player = getPlayer())
         {
             // update the media player url if necessary
-            QUrl highlightSoundUrl =
-                getSettings()->customHighlightSound
-                    ? QUrl::fromLocalFile(
-                          getSettings()->pathHighlightSound.getValue())
-                    : QUrl("qrc:/sounds/ping2.wav");
-
-            if (currentPlayerUrl != highlightSoundUrl)
+            if (currentPlayerUrl != this->highlightSoundUrl_)
             {
-                player->setMedia(highlightSoundUrl);
+                player->setMedia(this->highlightSoundUrl_);
 
-                currentPlayerUrl = highlightSoundUrl;
+                currentPlayerUrl = this->highlightSoundUrl_;
             }
 
             player->play();
@@ -967,6 +980,43 @@ void TwitchMessageBuilder::parseHighlights()
 {
     auto app = getApp();
 
+    if (this->message().flags.has(MessageFlag::Subscription) &&
+        getSettings()->enableSubHighlight)
+    {
+        if (getSettings()->enableSubHighlightTaskbar)
+        {
+            this->highlightAlert_ = true;
+        }
+
+        if (getSettings()->enableSubHighlightSound)
+        {
+            this->highlightSound_ = true;
+
+            // Use custom sound if set, otherwise use fallback
+            if (!getSettings()->subHighlightSoundUrl.getValue().isEmpty())
+            {
+                this->highlightSoundUrl_ =
+                    QUrl(getSettings()->subHighlightSoundUrl.getValue());
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
+        }
+
+        if (!this->highlightVisual_)
+        {
+            this->highlightVisual_ = true;
+            this->message().flags.set(MessageFlag::Highlighted);
+            this->message().highlightColor =
+                ColorProvider::instance().color(ColorType::Subscription);
+        }
+
+        // This message was a subscription.
+        // Don't check for any other highlight phrases.
+        return;
+    }
+
     auto currentUser = app->accounts->twitch.getCurrent();
 
     QString currentUsername = currentUser->getUserName();
@@ -993,23 +1043,33 @@ void TwitchMessageBuilder::parseHighlights()
         {
             this->highlightVisual_ = true;
             this->message().flags.set(MessageFlag::Highlighted);
+            this->message().highlightColor = userHighlight.getColor();
         }
 
-        if (userHighlight.getAlert())
+        if (userHighlight.hasAlert())
         {
             this->highlightAlert_ = true;
         }
 
-        if (userHighlight.getSound())
+        if (userHighlight.hasSound())
         {
             this->highlightSound_ = true;
+            // Use custom sound if set, otherwise use the fallback sound
+            if (userHighlight.hasCustomSound())
+            {
+                this->highlightSoundUrl_ = userHighlight.getSoundUrl();
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
         }
 
         if (this->highlightAlert_ && this->highlightSound_)
         {
-            // Break if no further action can be taken from other
-            // usernames Mostly used for regex stuff
-            break;
+            // Usernames "beat" highlight phrases: Once a username highlight
+            // has been applied, no further highlight phrases will be checked
+            return;
         }
     }
 
@@ -1028,7 +1088,9 @@ void TwitchMessageBuilder::parseHighlights()
     {
         HighlightPhrase selfHighlight(
             currentUsername, getSettings()->enableSelfHighlightTaskbar,
-            getSettings()->enableSelfHighlightSound, false, false);
+            getSettings()->enableSelfHighlightSound, false, false,
+            getSettings()->selfHighlightSoundUrl.getValue(),
+            ColorProvider::instance().color(ColorType::SelfHighlight));
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -1046,23 +1108,36 @@ void TwitchMessageBuilder::parseHighlights()
         {
             this->highlightVisual_ = true;
             this->message().flags.set(MessageFlag::Highlighted);
+            this->message().highlightColor = highlight.getColor();
         }
 
-        if (highlight.getAlert())
+        if (highlight.hasAlert())
         {
             this->highlightAlert_ = true;
         }
 
-        if (highlight.getSound())
+        // Only set highlightSound_ if it hasn't been set by username
+        // highlights already.
+        if (highlight.hasSound() && !this->highlightSound_)
         {
             this->highlightSound_ = true;
+
+            // Use custom sound if set, otherwise use fallback sound
+            if (highlight.hasCustomSound())
+            {
+                this->highlightSoundUrl_ = highlight.getSoundUrl();
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
         }
 
         if (this->highlightAlert_ && this->highlightSound_)
         {
-            // Break if no further action can be taken from other
-            // highlights This might change if highlights can have
-            // custom colors/sounds/actions
+            // Break once the first highlight has been set. If a message would
+            // trigger multiple highlights, only the first one from the list
+            // will be applied.
             break;
         }
     }
@@ -1077,6 +1152,24 @@ void TwitchMessageBuilder::parseHighlights()
         if (getSettings()->enableWhisperHighlightSound)
         {
             this->highlightSound_ = true;
+
+            // Use custom sound if set, otherwise use fallback
+            if (!getSettings()->whisperHighlightSoundUrl.getValue().isEmpty())
+            {
+                this->highlightSoundUrl_ =
+                    QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
+        }
+        if (!this->highlightVisual_)
+        {
+            this->highlightVisual_ = true;
+            this->message().flags.set(MessageFlag::Highlighted);
+            this->message().highlightColor =
+                ColorProvider::instance().color(ColorType::Whisper);
         }
     }
 }

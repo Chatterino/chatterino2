@@ -146,18 +146,39 @@ public:
     /// Highlighting
     //    BoolSetting enableHighlights = {"/highlighting/enabled", true};
     BoolSetting customHighlightSound = {"/highlighting/useCustomSound", false};
+
     BoolSetting enableSelfHighlight = {
         "/highlighting/selfHighlight/nameIsHighlightKeyword", true};
     BoolSetting enableSelfHighlightSound = {
         "/highlighting/selfHighlight/enableSound", true};
     BoolSetting enableSelfHighlightTaskbar = {
         "/highlighting/selfHighlight/enableTaskbarFlashing", true};
+    QStringSetting selfHighlightSoundUrl = {
+        "/highlighting/selfHighlightSoundUrl", ""};
+    QStringSetting selfHighlightColor = {"/highlighting/selfHighlightColor",
+                                         ""};
+
     BoolSetting enableWhisperHighlight = {
         "/highlighting/whisperHighlight/whispersHighlighted", true};
     BoolSetting enableWhisperHighlightSound = {
         "/highlighting/whisperHighlight/enableSound", false};
     BoolSetting enableWhisperHighlightTaskbar = {
         "/highlighting/whisperHighlight/enableTaskbarFlashing", false};
+    QStringSetting whisperHighlightSoundUrl = {
+        "/highlighting/whisperHighlightSoundUrl", ""};
+    QStringSetting whisperHighlightColor = {
+        "/highlighting/whisperHighlightColor", ""};
+
+    BoolSetting enableSubHighlight = {
+        "/highlighting/subHighlight/subsHighlighted", true};
+    BoolSetting enableSubHighlightSound = {
+        "/highlighting/subHighlight/enableSound", false};
+    BoolSetting enableSubHighlightTaskbar = {
+        "/highlighting/subHighlight/enableTaskbarFlashing", false};
+    QStringSetting subHighlightSoundUrl = {"/highlighting/subHighlightSoundUrl",
+                                           ""};
+    QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
+
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
@@ -168,7 +189,7 @@ public:
     QStringSetting logPath = {"/logging/path", ""};
 
     QStringSetting pathHighlightSound = {"/highlighting/highlightSoundPath",
-                                         "qrc:/sounds/ping2.wav"};
+                                         ""};
 
     BoolSetting highlightAlwaysPlaySound = {"/highlighting/alwaysPlaySound",
                                             false};

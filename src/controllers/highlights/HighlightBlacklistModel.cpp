@@ -18,16 +18,17 @@ HighlightBlacklistUser HighlightBlacklistModel::getItemFromRow(
 {
     // key, regex
 
-    return HighlightBlacklistUser{row[0]->data(Qt::DisplayRole).toString(),
-                                  row[1]->data(Qt::CheckStateRole).toBool()};
+    return HighlightBlacklistUser{
+        row[Column::Pattern]->data(Qt::DisplayRole).toString(),
+        row[Column::UseRegex]->data(Qt::CheckStateRole).toBool()};
 }
 
 // turns a row in the model into a vector item
 void HighlightBlacklistModel::getRowFromItem(const HighlightBlacklistUser &item,
                                              std::vector<QStandardItem *> &row)
 {
-    setStringItem(row[0], item.getPattern());
-    setBoolItem(row[1], item.isRegex());
+    setStringItem(row[Column::Pattern], item.getPattern());
+    setBoolItem(row[Column::UseRegex], item.isRegex());
 }
 
 }  // namespace chatterino

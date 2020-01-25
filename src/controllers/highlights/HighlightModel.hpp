@@ -13,6 +13,18 @@ class HighlightModel : public SignalVectorModel<HighlightPhrase>
 {
     explicit HighlightModel(QObject *parent);
 
+public:
+    // Used here, in HighlightingPage and in UserHighlightModel
+    enum Column {
+        Pattern = 0,
+        FlashTaskbar = 1,
+        PlaySound = 2,
+        UseRegex = 3,
+        CaseSensitive = 4,
+        SoundPath = 5,
+        Color = 6
+    };
+
 protected:
     // turn a vector item into a model row
     virtual HighlightPhrase getItemFromRow(
