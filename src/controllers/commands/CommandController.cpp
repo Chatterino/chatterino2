@@ -17,6 +17,7 @@
 #include "singletons/Theme.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/dialogs/LogsPopup.hpp"
+#include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include <QApplication>
 #include <QFile>
@@ -479,6 +480,21 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             }
             QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
                                       channelName + "/viewercard/" + words[1]);
+            return "";
+        }
+        else if (commandName == "/usercard")
+        {
+            if (words.size() < 2)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage /usercard [user]"));
+                return "";
+            }
+            auto *userPopup = new UserInfoPopup;
+            userPopup->setData(words[1], channel);
+            userPopup->setActionOnFocusLoss(BaseWindow::Delete);
+            userPopup->move(QCursor::pos());
+            userPopup->show();
             return "";
         }
     }

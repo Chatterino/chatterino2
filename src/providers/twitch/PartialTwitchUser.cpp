@@ -28,18 +28,26 @@ PartialTwitchUser PartialTwitchUser::byId(const QString &id)
 void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
                               const QObject *caller)
 {
+    getId(
+        successCallback, [] {}, caller);
+}
+void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
+                              std::function<void()> failureCallback,
+                              const QObject *caller)
+{
     assert(!this->username_.isEmpty());
 
     NetworkRequest("https://api.twitch.tv/kraken/users?login=" +
                    this->username_)
         .caller(caller)
         .authorizeTwitchV5(getDefaultClientID())
-        .onSuccess([successCallback](auto result) -> Outcome {
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto root = result.parseJson();
             if (!root.value("users").isArray())
             {
                 qDebug()
                     << "API Error while getting user id, users is not an array";
+                failureCallback();
                 return Failure;
             }
 
@@ -48,12 +56,14 @@ void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
             {
                 qDebug() << "API Error while getting user id, users array size "
                             "is not 1";
+                failureCallback();
                 return Failure;
             }
             if (!users[0].isObject())
             {
                 qDebug() << "API Error while getting user id, first user is "
                             "not an object";
+                failureCallback();
                 return Failure;
             }
             auto firstUser = users[0].toObject();
@@ -62,6 +72,7 @@ void PartialTwitchUser::getId(std::function<void(QString)> successCallback,
             {
                 qDebug() << "API Error: while getting user id, first user "
                             "object `_id` key is not a string";
+                failureCallback();
                 return Failure;
             }
             successCallback(id.toString());

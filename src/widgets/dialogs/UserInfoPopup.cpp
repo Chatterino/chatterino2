@@ -25,6 +25,7 @@
 #define TEXT_VIEWS "Views: "
 #define TEXT_CREATED "Created: "
 #define TEXT_USER_ID "ID: "
+#define TEXT_UNAVAILABLE "(not available)"
 
 namespace chatterino {
 namespace {
@@ -382,6 +383,22 @@ void UserInfoPopup::updateUserData()
 {
     std::weak_ptr<bool> hack = this->hack_;
 
+    const auto onIdFetchFailed = [this]() {
+        // this can occur when the account doesn't exist.
+        this->ui_.followerCountLabel->setText(TEXT_FOLLOWERS +
+                                              QString(TEXT_UNAVAILABLE));
+        this->ui_.viewCountLabel->setText(TEXT_VIEWS +
+                                          QString(TEXT_UNAVAILABLE));
+        this->ui_.createdDateLabel->setText(TEXT_CREATED +
+                                            QString(TEXT_UNAVAILABLE));
+
+        this->ui_.nameLabel->setText(this->userName_);
+
+        this->ui_.userIDLabel->setText(QString("ID") +
+                                       QString(TEXT_UNAVAILABLE));
+        this->ui_.userIDLabel->setProperty("copy-text",
+                                           QString(TEXT_UNAVAILABLE));
+    };
     const auto onIdFetched = [this, hack](QString id) {
         auto currentUser = getApp()->accounts->twitch.getCurrent();
 
@@ -462,7 +479,8 @@ void UserInfoPopup::updateUserData()
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
     };
 
-    PartialTwitchUser::byName(this->userName_).getId(onIdFetched, this);
+    PartialTwitchUser::byName(this->userName_)
+        .getId(onIdFetched, onIdFetchFailed, this);
 
     this->ui_.follow->setEnabled(false);
     this->ui_.ignore->setEnabled(false);
