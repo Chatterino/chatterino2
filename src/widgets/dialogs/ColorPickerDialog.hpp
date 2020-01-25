@@ -7,6 +7,8 @@
 
 #include <pajlada/signals/signal.hpp>
 
+#include <array>
+
 namespace chatterino {
 
 /**
