@@ -15,10 +15,20 @@ class HighlightPhrase
 public:
     bool operator==(const HighlightPhrase &other) const;
 
+    /**
+     * @brief Create a new HighlightPhrase.
+     *
+     * Use this constructor when creating a new HighlightPhrase.
+     */
     HighlightPhrase(const QString &pattern, bool hasAlert, bool hasSound,
                     bool isRegex, bool isCaseSensitive, const QString &soundUrl,
                     QColor color);
 
+    /**
+     * @brief Create a new HighlightPhrase.
+     *
+     * Use this constructor when updating an existing HighlightPhrase's color.
+     */
     HighlightPhrase(const QString &pattern, bool hasAlert, bool hasSound,
                     bool isRegex, bool isCaseSensitive, const QString &soundUrl,
                     std::shared_ptr<QColor> color);
