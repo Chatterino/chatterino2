@@ -121,7 +121,7 @@ HighlightingPage::HighlightingPage()
                     getApp()->highlights->highlightedUsers.appendItem(
                         HighlightPhrase{"highlighted user", true, false, false,
                                         false, "",
-                                        ColorProvider::instance().color(
+                                        *ColorProvider::instance().color(
                                             ColorType::SelfHighlight)});
                 });
 
