@@ -577,10 +577,15 @@ void SplitHeader::updateModerationModeIcon()
     auto channel = this->split_->getChannel();
     auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
-    if (twitchChannel != nullptr && twitchChannel->hasModRights())
+    if (twitchChannel != nullptr &&
+        (twitchChannel->hasModRights() || moderationMode))
+    {
         this->moderationButton_->show();
+    }
     else
+    {
         this->moderationButton_->hide();
+    }
 }
 
 void SplitHeader::paintEvent(QPaintEvent *)
