@@ -129,7 +129,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
         }
 
         if (getSettings()->hideSimilar &&
-            this->message_->flags.has(MessageFlag::Hidden))
+            this->message_->flags.has(MessageFlag::Similar))
         {
             continue;
         }

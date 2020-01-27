@@ -87,6 +87,31 @@ float IrcMessageHandler::similarity(
     return similarityPercent;
 }
 
+void IrcMessageHandler::setSimilarityFlags(MessagePtr msg, ChannelPtr chan)
+{
+    if (getSettings()->similarityEnabled)
+    {
+        bool isMyself = msg->loginName ==
+                        getApp()->accounts->twitch.getCurrent()->getUserName();
+        bool hideMyself = getSettings()->hideSimilarMyself;
+
+        if (isMyself && !hideMyself)
+        {
+            return;
+        }
+
+        if (IrcMessageHandler::similarity(msg, chan->getMessageSnapshot()) >
+            getSettings()->similarityPercentage)
+        {
+            msg->flags.set(MessageFlag::Similar, true);
+            if (getSettings()->colorSimilarDisabled)
+            {
+                msg->flags.set(MessageFlag::Disabled, true);
+            }
+        }
+    }
+}
+
 static QMap<QString, QString> parseBadges(QString badgesString)
 {
     QMap<QString, QString> badges;
@@ -200,26 +225,9 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
 
         auto msg = builder.build();
 
-        if (getSettings()->similarityEnabled)
-        {
-            bool isMyself =
-                msg->loginName ==
-                getApp()->accounts->twitch.getCurrent()->getUserName();
-            bool hideMyself = getSettings()->hideSimilarMyself;
+        IrcMessageHandler::setSimilarityFlags(msg, chan);
 
-            if ((!isMyself || hideMyself) &&
-                IrcMessageHandler::similarity(msg, chan->getMessageSnapshot()) >
-                    getSettings()->similarityPercentage)
-            {
-                msg->flags.set(MessageFlag::Hidden, true);
-                if (getSettings()->colorSimilarDisabled)
-                {
-                    msg->flags.set(MessageFlag::Disabled, true);
-                }
-            }
-        }
-
-        if (!msg->flags.has(MessageFlag::Hidden) ||
+        if (!msg->flags.has(MessageFlag::Similar) ||
             (!getSettings()->hideSimilar &&
              getSettings()->shownSimilarTriggerHighlights))
         {

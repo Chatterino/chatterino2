@@ -52,6 +52,7 @@ public:
 
     static float similarity(MessagePtr msg,
                             const LimitedQueueSnapshot<MessagePtr> &messages);
+    static void setSimilarityFlags(MessagePtr message, ChannelPtr channel);
 
 private:
     void addMessage(Communi::IrcMessage *message, const QString &target,
