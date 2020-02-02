@@ -1004,13 +1004,9 @@ void TwitchMessageBuilder::parseHighlights()
             }
         }
 
-        if (!this->highlightVisual_)
-        {
-            this->highlightVisual_ = true;
-            this->message().flags.set(MessageFlag::Highlighted);
-            this->message().highlightColor =
-                ColorProvider::instance().color(ColorType::Subscription);
-        }
+        this->message().flags.set(MessageFlag::Highlighted);
+        this->message().highlightColor =
+            ColorProvider::instance().color(ColorType::Subscription);
 
         // This message was a subscription.
         // Don't check for any other highlight phrases.
@@ -1027,6 +1023,39 @@ void TwitchMessageBuilder::parseHighlights()
         return;
     }
 
+    // Highlight because it's a whisper
+    if (this->args.isReceivedWhisper && getSettings()->enableWhisperHighlight)
+    {
+        if (getSettings()->enableWhisperHighlightTaskbar)
+        {
+            this->highlightAlert_ = true;
+        }
+
+        if (getSettings()->enableWhisperHighlightSound)
+        {
+            this->highlightSound_ = true;
+
+            // Use custom sound if set, otherwise use fallback
+            if (!getSettings()->whisperHighlightSoundUrl.getValue().isEmpty())
+            {
+                this->highlightSoundUrl_ =
+                    QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
+        }
+
+        this->message().highlightColor =
+            ColorProvider::instance().color(ColorType::Whisper);
+
+        /*
+         * Do _NOT_ return yet, we might want to apply phrase/user name
+         * highlights (which override whisper color/sound).
+         */
+    }
+
     std::vector<HighlightPhrase> userHighlights =
         app->highlights->highlightedUsers.cloneVector();
 
@@ -1039,12 +1068,9 @@ void TwitchMessageBuilder::parseHighlights()
         }
         qDebug() << "Highlight because user" << this->ircMessage->nick()
                  << "sent a message";
-        if (!this->highlightVisual_)
-        {
-            this->highlightVisual_ = true;
-            this->message().flags.set(MessageFlag::Highlighted);
-            this->message().highlightColor = userHighlight.getColor();
-        }
+
+        this->message().flags.set(MessageFlag::Highlighted);
+        this->message().highlightColor = userHighlight.getColor();
 
         if (userHighlight.hasAlert())
         {
@@ -1067,8 +1093,11 @@ void TwitchMessageBuilder::parseHighlights()
 
         if (this->highlightAlert_ && this->highlightSound_)
         {
-            // Usernames "beat" highlight phrases: Once a username highlight
-            // has been applied, no further highlight phrases will be checked
+            /*
+             * User name highlights "beat" highlight phrases: If a message has
+             * all attributes (color, taskbar flashing, sound) set, highlight
+             * phrases will not be checked.
+             */
             return;
         }
     }
@@ -1104,12 +1133,9 @@ void TwitchMessageBuilder::parseHighlights()
 
         qDebug() << "Highlight because" << this->originalMessage_ << "matches"
                  << highlight.getPattern();
-        if (!this->highlightVisual_)
-        {
-            this->highlightVisual_ = true;
-            this->message().flags.set(MessageFlag::Highlighted);
-            this->message().highlightColor = highlight.getColor();
-        }
+
+        this->message().flags.set(MessageFlag::Highlighted);
+        this->message().highlightColor = highlight.getColor();
 
         if (highlight.hasAlert())
         {
@@ -1135,41 +1161,11 @@ void TwitchMessageBuilder::parseHighlights()
 
         if (this->highlightAlert_ && this->highlightSound_)
         {
-            // Break once the first highlight has been set. If a message would
-            // trigger multiple highlights, only the first one from the list
-            // will be applied.
+            /*
+             * Break once no further attributes (taskbar, sound) can be
+             * applied.
+             */
             break;
-        }
-    }
-
-    // Highlight because it's a whisper
-    if (this->args.isReceivedWhisper && getSettings()->enableWhisperHighlight)
-    {
-        if (getSettings()->enableWhisperHighlightTaskbar)
-        {
-            this->highlightAlert_ = true;
-        }
-        if (getSettings()->enableWhisperHighlightSound)
-        {
-            this->highlightSound_ = true;
-
-            // Use custom sound if set, otherwise use fallback
-            if (!getSettings()->whisperHighlightSoundUrl.getValue().isEmpty())
-            {
-                this->highlightSoundUrl_ =
-                    QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-        if (!this->highlightVisual_)
-        {
-            this->highlightVisual_ = true;
-            this->message().flags.set(MessageFlag::Highlighted);
-            this->message().highlightColor =
-                ColorProvider::instance().color(ColorType::Whisper);
         }
     }
 }

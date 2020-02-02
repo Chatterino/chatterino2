@@ -92,7 +92,6 @@ private:
 
     const bool action_ = false;
 
-    bool highlightVisual_ = false;
     bool highlightAlert_ = false;
     bool highlightSound_ = false;
 
