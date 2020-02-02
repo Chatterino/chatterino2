@@ -141,6 +141,12 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
             continue;
         }
 
+        if (getSettings()->hideSimilar &&
+            this->message_->flags.has(MessageFlag::Similar))
+        {
+            continue;
+        }
+
         element->addToContainer(*this->container_, flags);
     }
 

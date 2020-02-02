@@ -21,6 +21,97 @@
 
 namespace chatterino {
 
+static float relativeSimilarity(const QString &str1, const QString &str2)
+{
+    // Longest Common Substring Problem
+    std::vector<std::vector<int>> tree(str1.size(),
+                                       std::vector<int>(str2.size(), 0));
+    int z = 0;
+
+    for (int i = 0; i < str1.size(); ++i)
+    {
+        for (int j = 0; j < str2.size(); ++j)
+        {
+            if (str1[i] == str2[j])
+            {
+                if (i == 0 || j == 0)
+                {
+                    tree[i][j] = 1;
+                }
+                else
+                {
+                    tree[i][j] = tree[i - 1][j - 1] + 1;
+                }
+                if (tree[i][j] > z)
+                {
+                    z = tree[i][j];
+                }
+            }
+            else
+            {
+                tree[i][j] = 0;
+            }
+        }
+    }
+
+    return z == 0 ? 0.f : float(z) / std::max(str1.size(), str2.size());
+};
+
+float IrcMessageHandler::similarity(
+    MessagePtr msg, const LimitedQueueSnapshot<MessagePtr> &messages)
+{
+    float similarityPercent = 0.0f;
+    int bySameUser = 0;
+    for (int i = 1; bySameUser < getSettings()->hideSimilarMaxMessagesToCheck;
+         ++i)
+    {
+        if (messages.size() < i)
+        {
+            break;
+        }
+        const auto &prevMsg = messages[messages.size() - i];
+        if (prevMsg->parseTime.secsTo(QTime::currentTime()) >=
+            getSettings()->hideSimilarMaxDelay)
+        {
+            break;
+        }
+        if (msg->loginName != prevMsg->loginName)
+        {
+            continue;
+        }
+        ++bySameUser;
+        similarityPercent = std::max(
+            similarityPercent,
+            relativeSimilarity(msg->messageText, prevMsg->messageText));
+    }
+    return similarityPercent;
+}
+
+void IrcMessageHandler::setSimilarityFlags(MessagePtr msg, ChannelPtr chan)
+{
+    if (getSettings()->similarityEnabled)
+    {
+        bool isMyself = msg->loginName ==
+                        getApp()->accounts->twitch.getCurrent()->getUserName();
+        bool hideMyself = getSettings()->hideSimilarMyself;
+
+        if (isMyself && !hideMyself)
+        {
+            return;
+        }
+
+        if (IrcMessageHandler::similarity(msg, chan->getMessageSnapshot()) >
+            getSettings()->similarityPercentage)
+        {
+            msg->flags.set(MessageFlag::Similar, true);
+            if (getSettings()->colorSimilarDisabled)
+            {
+                msg->flags.set(MessageFlag::Disabled, true);
+            }
+        }
+    }
+}
+
 static QMap<QString, QString> parseBadges(QString badgesString)
 {
     QMap<QString, QString> badges;
@@ -133,7 +224,16 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         }
 
         auto msg = builder.build();
-        builder.triggerHighlights();
+
+        IrcMessageHandler::setSimilarityFlags(msg, chan);
+
+        if (!msg->flags.has(MessageFlag::Similar) ||
+            (!getSettings()->hideSimilar &&
+             getSettings()->shownSimilarTriggerHighlights))
+        {
+            builder.triggerHighlights();
+        }
+
         auto highlighted = msg->flags.has(MessageFlag::Highlighted);
 
         if (!isSub)
