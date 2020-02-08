@@ -211,6 +211,7 @@ Split::Split(QWidget *parent)
         [this](const QMimeData *source) {
             upload(source, this->getChannel(), *this->input_->ui_.textEdit);
         });
+    setAcceptDrops(true);
 }
 
 Split::~Split()
@@ -689,6 +690,29 @@ void Split::reloadChannelAndSubscriberEmotes()
     }
 }
 
+void Split::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+    {
+        event->acceptProposedAction();
+    }
+    else
+    {
+        BaseWidget::dragEnterEvent(event);
+    }
+}
+
+void Split::dropEvent(QDropEvent *event)
+{
+    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+    {
+        this->input_->ui_.textEdit->imagePasted.invoke(event->mimeData());
+    }
+    else
+    {
+        BaseWidget::dropEvent(event);
+    }
+}
 template <typename Iter, typename RandomGenerator>
 static Iter select_randomly(Iter start, Iter end, RandomGenerator &g)
 {

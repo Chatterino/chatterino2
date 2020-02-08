@@ -25,7 +25,6 @@ ResizingTextEdit::ResizingTextEdit()
         [this] { this->completionInProgress_ = false; });
 
     this->setFocusPolicy(Qt::ClickFocus);
-    setAcceptDrops(true);
 }
 
 QSize ResizingTextEdit::sizeHint() const
@@ -280,29 +279,6 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
     }
 }
 
-void ResizingTextEdit::dragEnterEvent(QDragEnterEvent *event)
-{
-    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
-    {
-        event->acceptProposedAction();
-    }
-    else
-    {
-        QTextEdit::dragEnterEvent(event);
-    }
-}
-
-void ResizingTextEdit::dropEvent(QDropEvent *event)
-{
-    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
-    {
-        this->imagePasted.invoke(event->mimeData());
-    }
-    else
-    {
-        QTextEdit::dropEvent(event);
-    }
-}
 QCompleter *ResizingTextEdit::getCompleter() const
 {
     return this->completer_;

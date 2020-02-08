@@ -34,9 +34,6 @@ protected:
     bool canInsertFromMimeData(const QMimeData *source) const override;
     void insertFromMimeData(const QMimeData *source) override;
 
-    void dragEnterEvent(QDragEnterEvent *event) override;
-    void dropEvent(QDropEvent *event) override;
-
 private:
     // hadSpace is set to true in case the "textUnderCursor" word was after a
     // space
