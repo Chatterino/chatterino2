@@ -1,9 +1,9 @@
 #include "common/Channel.hpp"
 
 #include "Application.hpp"
-#include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/IrcMessageHandler.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Settings.hpp"

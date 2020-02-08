@@ -2,7 +2,6 @@
 
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
-#include "debug/Log.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -66,7 +65,7 @@ AbstractIrcServer::AbstractIrcServer()
 
         if (!this->readConnection_->isConnected())
         {
-            log("Trying to reconnect... {}", this->falloffCounter_);
+            qDebug() << "Trying to reconnect..." << this->falloffCounter_;
             this->connect();
         }
     });
@@ -159,23 +158,24 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
     }
 
     this->channels.insert(channelName, chan);
-    this->connections_.emplace_back(chan->destroyed.connect([this,
-                                                             channelName] {
-        // fourtf: issues when the server itself is destroyed
+    this->connections_.emplace_back(
+        chan->destroyed.connect([this, channelName] {
+            // fourtf: issues when the server itself is destroyed
 
-        log("[AbstractIrcServer::addChannel] {} was destroyed", channelName);
-        this->channels.remove(channelName);
+            qDebug() << "[AbstractIrcServer::addChannel]" << channelName
+                     << "was destroyed";
+            this->channels.remove(channelName);
 
-        if (this->readConnection_)
-        {
-            this->readConnection_->sendRaw("PART #" + channelName);
-        }
+            if (this->readConnection_)
+            {
+                this->readConnection_->sendRaw("PART #" + channelName);
+            }
 
-        if (this->writeConnection_ && this->hasSeparateWriteConnection())
-        {
-            this->writeConnection_->sendRaw("PART #" + channelName);
-        }
-    }));
+            if (this->writeConnection_ && this->hasSeparateWriteConnection())
+            {
+                this->writeConnection_->sendRaw("PART #" + channelName);
+            }
+        }));
 
     // join irc channel
     {

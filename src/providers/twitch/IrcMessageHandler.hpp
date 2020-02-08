@@ -1,6 +1,7 @@
 #pragma once
 
 #include <IrcMessage>
+#include "common/Channel.hpp"
 #include "messages/Message.hpp"
 
 namespace chatterino {
@@ -48,6 +49,10 @@ public:
 
     void handleJoinMessage(Communi::IrcMessage *message);
     void handlePartMessage(Communi::IrcMessage *message);
+
+    static float similarity(MessagePtr msg,
+                            const LimitedQueueSnapshot<MessagePtr> &messages);
+    static void setSimilarityFlags(MessagePtr message, ChannelPtr channel);
 
 private:
     void addMessage(Communi::IrcMessage *message, const QString &target,

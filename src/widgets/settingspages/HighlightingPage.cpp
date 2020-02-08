@@ -5,11 +5,11 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
 #include "controllers/highlights/UserHighlightModel.hpp"
-#include "debug/Log.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/StandardItemHelper.hpp"
-#include "widgets/helper/EditableModelView.hpp"
+#include "widgets/dialogs/ColorPickerDialog.hpp"
 
 #include <QFileDialog>
 #include <QHeaderView>
@@ -46,8 +46,10 @@ HighlightingPage::HighlightingPage()
             // HIGHLIGHTS
             auto highlights = tabs.appendTab(new QVBoxLayout, "Messages");
             {
-                highlights.emplace<QLabel>("Messages can be highlighted if "
-                                           "they match a certain pattern.");
+                highlights.emplace<QLabel>(
+                    "Messages can be highlighted if they match a certain "
+                    "pattern.\n"
+                    "NOTE: User highlights will override phrase highlights.");
 
                 EditableModelView *view =
                     highlights
@@ -57,7 +59,8 @@ HighlightingPage::HighlightingPage()
 
                 view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex", "Case-\nsensitive"});
+                                 "Enable\nregex", "Case-\nsensitive",
+                                 "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -72,14 +75,22 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->phrases.appendItem(HighlightPhrase{
-                        "my phrase", true, false, false, false});
+                        "my phrase", true, false, false, false, "",
+                        *ColorProvider::instance().color(
+                            ColorType::SelfHighlight)});
                 });
+
+                QObject::connect(view->getTableView(), &QTableView::clicked,
+                                 [this, view](const QModelIndex &clicked) {
+                                     this->tableCellClicked(clicked, view);
+                                 });
             }
 
             auto pingUsers = tabs.appendTab(new QVBoxLayout, "Users");
             {
                 pingUsers.emplace<QLabel>(
-                    "Messages from a certain user can be highlighted.");
+                    "Messages from a certain user can be highlighted.\n"
+                    "NOTE: User highlights will override phrase highlights.");
                 EditableModelView *view =
                     pingUsers
                         .emplace<EditableModelView>(
@@ -90,9 +101,10 @@ HighlightingPage::HighlightingPage()
                 view->getTableView()->horizontalHeader()->hideSection(4);
 
                 // Case-sensitivity doesn't make sense for user names so it is
-                // set to "false" by default & no checkbox is shown
+                // set to "false" by default & the column is hidden
                 view->setTitles({"Username", "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex"});
+                                 "Enable\nregex", "Case-\nsensitive",
+                                 "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -108,8 +120,15 @@ HighlightingPage::HighlightingPage()
                 view->addButtonPressed.connect([] {
                     getApp()->highlights->highlightedUsers.appendItem(
                         HighlightPhrase{"highlighted user", true, false, false,
-                                        false});
+                                        false, "",
+                                        *ColorProvider::instance().color(
+                                            ColorType::SelfHighlight)});
                 });
+
+                QObject::connect(view->getTableView(), &QTableView::clicked,
+                                 [this, view](const QModelIndex &clicked) {
+                                     this->tableCellClicked(clicked, view);
+                                 });
             }
 
             auto disabledUsers =
@@ -148,17 +167,33 @@ HighlightingPage::HighlightingPage()
         // MISC
         auto customSound = layout.emplace<QHBoxLayout>().withoutMargin();
         {
-            customSound.append(this->createCheckBox(
-                "Custom sound", getSettings()->customHighlightSound));
+            auto fallbackSound = customSound.append(this->createCheckBox(
+                "Fallback sound (played when no other sound is set)",
+                getSettings()->customHighlightSound));
+
+            auto getSelectFileText = [] {
+                const QString value = getSettings()->pathHighlightSound;
+                return value.isEmpty() ? "Select custom fallback sound"
+                                       : QUrl::fromLocalFile(value).fileName();
+            };
+
             auto selectFile =
-                customSound.emplace<QPushButton>("Select custom sound file");
-            QObject::connect(selectFile.getElement(), &QPushButton::clicked,
-                             this, [this] {
-                                 auto fileName = QFileDialog::getOpenFileName(
-                                     this, tr("Open Sound"), "",
-                                     tr("Audio Files (*.mp3 *.wav)"));
-                                 getSettings()->pathHighlightSound = fileName;
-                             });
+                customSound.emplace<QPushButton>(getSelectFileText());
+
+            QObject::connect(
+                selectFile.getElement(), &QPushButton::clicked, this,
+                [=]() mutable {
+                    auto fileName = QFileDialog::getOpenFileName(
+                        this, tr("Open Sound"), "",
+                        tr("Audio Files (*.mp3 *.wav)"));
+
+                    getSettings()->pathHighlightSound = fileName;
+                    selectFile.getElement()->setText(getSelectFileText());
+
+                    // Set check box according to updated value
+                    fallbackSound->setCheckState(
+                        fileName.isEmpty() ? Qt::Unchecked : Qt::Checked);
+                });
         }
 
         layout.append(createCheckBox(ALWAYS_PLAY,
@@ -170,6 +205,73 @@ HighlightingPage::HighlightingPage()
 
     // ---- misc
     this->disabledUsersChangedTimer_.setSingleShot(true);
+}
+
+void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
+                                        EditableModelView *view)
+{
+    using Column = HighlightModel::Column;
+
+    if (clicked.column() == Column::SoundPath)
+    {
+        auto fileUrl = QFileDialog::getOpenFileUrl(
+            this, tr("Open Sound"), QUrl(), tr("Audio Files (*.mp3 *.wav)"));
+        view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
+        view->getModel()->setData(clicked, fileUrl.fileName(), Qt::DisplayRole);
+
+        // Enable custom sound check box if user set a sound
+        if (!fileUrl.isEmpty())
+        {
+            QModelIndex checkBox = clicked.siblingAtColumn(Column::PlaySound);
+            view->getModel()->setData(checkBox, Qt::Checked,
+                                      Qt::CheckStateRole);
+        }
+    }
+    else if (clicked.column() == Column::Color)
+    {
+        auto initial =
+            view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
+
+        auto dialog = new ColorPickerDialog(initial, this);
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->show();
+        dialog->closed.connect([=] {
+            QColor selected = dialog->selectedColor();
+
+            if (selected.isValid())
+            {
+                view->getModel()->setData(clicked, selected,
+                                          Qt::DecorationRole);
+
+                // Hacky (?) way to figure out what tab the cell was clicked in
+                const bool fromMessages = (dynamic_cast<HighlightModel *>(
+                                               view->getModel()) != nullptr);
+
+                if (fromMessages)
+                {
+                    /*
+                     * For preset highlights in the "Messages" tab, we need to
+                     * manually update the color map.
+                     */
+                    auto instance = ColorProvider::instance();
+                    switch (clicked.row())
+                    {
+                        case 0:
+                            instance.updateColor(ColorType::SelfHighlight,
+                                                 selected);
+                            break;
+                        case 1:
+                            instance.updateColor(ColorType::Whisper, selected);
+                            break;
+                        case 2:
+                            instance.updateColor(ColorType::Subscription,
+                                                 selected);
+                            break;
+                    }
+                }
+            }
+        });
+    }
 }
 
 }  // namespace chatterino

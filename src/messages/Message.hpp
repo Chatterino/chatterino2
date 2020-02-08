@@ -33,6 +33,7 @@ enum class MessageFlag : uint32_t {
     Whisper = (1 << 16),
     HighlightedWhisper = (1 << 17),
     Debug = (1 << 18),
+    Similar = (1 << 19),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
@@ -55,6 +56,7 @@ struct Message : boost::noncopyable {
     QString displayName;
     QString localizedName;
     QString timeoutUser;
+    std::shared_ptr<QColor> highlightColor;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;
 

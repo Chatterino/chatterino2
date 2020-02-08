@@ -5,7 +5,6 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/pings/PingController.hpp"
-#include "debug/Log.hpp"
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
@@ -65,6 +64,25 @@ QColor getRandomColor(const QVariant &userId)
     return twitchUsernameColors[colorIndex];
 }
 
+QUrl getFallbackHighlightSound()
+{
+    using namespace chatterino;
+
+    QString path = getSettings()->pathHighlightSound;
+    bool fileExists = QFileInfo::exists(path) && QFileInfo(path).isFile();
+
+    // Use fallback sound when checkbox is not checked
+    // or custom file doesn't exist
+    if (getSettings()->customHighlightSound && fileExists)
+    {
+        return QUrl::fromLocalFile(path);
+    }
+    else
+    {
+        return QUrl("qrc:/sounds/ping2.wav");
+    }
+}
+
 }  // namespace
 
 namespace chatterino {
@@ -90,8 +108,6 @@ namespace {
             QStringList parts = badgeInfo.split('/');
             if (parts.size() != 2)
             {
-                log("Skipping badge-info because it split weird: {}",
-                    badgeInfo);
                 continue;
             }
 
@@ -110,7 +126,6 @@ namespace {
             QStringList parts = badge.split('/');
             if (parts.size() != 2)
             {
-                log("Skipping badge because it split weird: {}", badge);
                 continue;
             }
 
@@ -159,8 +174,8 @@ bool TwitchMessageBuilder::isIgnored() const
     {
         if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
         {
-            log("Blocking message because it contains ignored phrase {}",
-                phrase.getPattern());
+            qDebug() << "Blocking message because it contains ignored phrase"
+                     << phrase.getPattern();
             return true;
         }
     }
@@ -190,8 +205,8 @@ bool TwitchMessageBuilder::isIgnored() const
                     case ShowIgnoredUsersMessages::Never:
                         break;
                 }
-                log("Blocking message because it's from blocked user {}",
-                    user.name);
+                qDebug() << "Blocking message because it's from blocked user"
+                         << user.name;
                 return true;
             }
         }
@@ -237,17 +252,11 @@ void TwitchMessageBuilder::triggerHighlights()
         if (auto player = getPlayer())
         {
             // update the media player url if necessary
-            QUrl highlightSoundUrl =
-                getSettings()->customHighlightSound
-                    ? QUrl::fromLocalFile(
-                          getSettings()->pathHighlightSound.getValue())
-                    : QUrl("qrc:/sounds/ping2.wav");
-
-            if (currentPlayerUrl != highlightSoundUrl)
+            if (currentPlayerUrl != this->highlightSoundUrl_)
             {
-                player->setMedia(highlightSoundUrl);
+                player->setMedia(this->highlightSoundUrl_);
 
-                currentPlayerUrl = highlightSoundUrl;
+                currentPlayerUrl = this->highlightSoundUrl_;
             }
 
             player->play();
@@ -427,8 +436,8 @@ void TwitchMessageBuilder::addWords(
             auto emoteImage = std::get<1>(*currentTwitchEmote);
             if (emoteImage == nullptr)
             {
-                log("emoteImage nullptr {}",
-                    std::get<2>(*currentTwitchEmote).string);
+                qDebug() << "emoteImage nullptr"
+                         << std::get<2>(*currentTwitchEmote).string;
             }
             this->emplace<EmoteElement>(emoteImage,
                                         MessageElementFlag::TwitchEmote);
@@ -771,7 +780,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             {
                 if (std::get<1>(*copy) == nullptr)
                 {
-                    log("remem nullptr {}", std::get<2>(*copy).string);
+                    qDebug() << "remem nullptr" << std::get<2>(*copy).string;
                 }
             }
             std::vector<std::tuple<int, EmotePtr, EmoteName>> v(
@@ -809,7 +818,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 {
                     if (emote.second == nullptr)
                     {
-                        log("emote null {}", emote.first.string);
+                        qDebug() << "emote null" << emote.first.string;
                     }
                     twitchEmotes.push_back(std::tuple<int, EmotePtr, EmoteName>{
                         startIndex + pos, emote.second, emote.first});
@@ -872,7 +881,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 {
                     if (std::get<1>(tup) == nullptr)
                     {
-                        log("v nullptr {}", std::get<2>(tup).string);
+                        qDebug() << "v nullptr" << std::get<2>(tup).string;
                         continue;
                     }
                     QRegularExpression emoteregex(
@@ -941,7 +950,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 {
                     if (std::get<1>(tup) == nullptr)
                     {
-                        log("v nullptr {}", std::get<2>(tup).string);
+                        qDebug() << "v nullptr" << std::get<2>(tup).string;
                         continue;
                     }
                     QRegularExpression emoteregex(
@@ -971,6 +980,39 @@ void TwitchMessageBuilder::parseHighlights()
 {
     auto app = getApp();
 
+    if (this->message().flags.has(MessageFlag::Subscription) &&
+        getSettings()->enableSubHighlight)
+    {
+        if (getSettings()->enableSubHighlightTaskbar)
+        {
+            this->highlightAlert_ = true;
+        }
+
+        if (getSettings()->enableSubHighlightSound)
+        {
+            this->highlightSound_ = true;
+
+            // Use custom sound if set, otherwise use fallback
+            if (!getSettings()->subHighlightSoundUrl.getValue().isEmpty())
+            {
+                this->highlightSoundUrl_ =
+                    QUrl(getSettings()->subHighlightSoundUrl.getValue());
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
+        }
+
+        this->message().flags.set(MessageFlag::Highlighted);
+        this->message().highlightColor =
+            ColorProvider::instance().color(ColorType::Subscription);
+
+        // This message was a subscription.
+        // Don't check for any other highlight phrases.
+        return;
+    }
+
     auto currentUser = app->accounts->twitch.getCurrent();
 
     QString currentUsername = currentUser->getUserName();
@@ -979,6 +1021,39 @@ void TwitchMessageBuilder::parseHighlights()
     {
         // Do nothing. We ignore highlights from this user.
         return;
+    }
+
+    // Highlight because it's a whisper
+    if (this->args.isReceivedWhisper && getSettings()->enableWhisperHighlight)
+    {
+        if (getSettings()->enableWhisperHighlightTaskbar)
+        {
+            this->highlightAlert_ = true;
+        }
+
+        if (getSettings()->enableWhisperHighlightSound)
+        {
+            this->highlightSound_ = true;
+
+            // Use custom sound if set, otherwise use fallback
+            if (!getSettings()->whisperHighlightSoundUrl.getValue().isEmpty())
+            {
+                this->highlightSoundUrl_ =
+                    QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
+        }
+
+        this->message().highlightColor =
+            ColorProvider::instance().color(ColorType::Whisper);
+
+        /*
+         * Do _NOT_ return yet, we might want to apply phrase/user name
+         * highlights (which override whisper color/sound).
+         */
     }
 
     std::vector<HighlightPhrase> userHighlights =
@@ -991,29 +1066,39 @@ void TwitchMessageBuilder::parseHighlights()
         {
             continue;
         }
-        log("Highlight because user {} sent a message",
-            this->ircMessage->nick());
-        if (!this->highlightVisual_)
-        {
-            this->highlightVisual_ = true;
-            this->message().flags.set(MessageFlag::Highlighted);
-        }
+        qDebug() << "Highlight because user" << this->ircMessage->nick()
+                 << "sent a message";
 
-        if (userHighlight.getAlert())
+        this->message().flags.set(MessageFlag::Highlighted);
+        this->message().highlightColor = userHighlight.getColor();
+
+        if (userHighlight.hasAlert())
         {
             this->highlightAlert_ = true;
         }
 
-        if (userHighlight.getSound())
+        if (userHighlight.hasSound())
         {
             this->highlightSound_ = true;
+            // Use custom sound if set, otherwise use the fallback sound
+            if (userHighlight.hasCustomSound())
+            {
+                this->highlightSoundUrl_ = userHighlight.getSoundUrl();
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
         }
 
         if (this->highlightAlert_ && this->highlightSound_)
         {
-            // Break if no further action can be taken from other
-            // usernames Mostly used for regex stuff
-            break;
+            /*
+             * User name highlights "beat" highlight phrases: If a message has
+             * all attributes (color, taskbar flashing, sound) set, highlight
+             * phrases will not be checked.
+             */
+            return;
         }
     }
 
@@ -1032,7 +1117,9 @@ void TwitchMessageBuilder::parseHighlights()
     {
         HighlightPhrase selfHighlight(
             currentUsername, getSettings()->enableSelfHighlightTaskbar,
-            getSettings()->enableSelfHighlightSound, false, false);
+            getSettings()->enableSelfHighlightSound, false, false,
+            getSettings()->selfHighlightSoundUrl.getValue(),
+            ColorProvider::instance().color(ColorType::SelfHighlight));
         activeHighlights.emplace_back(std::move(selfHighlight));
     }
 
@@ -1044,43 +1131,41 @@ void TwitchMessageBuilder::parseHighlights()
             continue;
         }
 
-        log("Highlight because {} matches {}", this->originalMessage_,
-            highlight.getPattern());
-        if (!this->highlightVisual_)
-        {
-            this->highlightVisual_ = true;
-            this->message().flags.set(MessageFlag::Highlighted);
-        }
+        qDebug() << "Highlight because" << this->originalMessage_ << "matches"
+                 << highlight.getPattern();
 
-        if (highlight.getAlert())
+        this->message().flags.set(MessageFlag::Highlighted);
+        this->message().highlightColor = highlight.getColor();
+
+        if (highlight.hasAlert())
         {
             this->highlightAlert_ = true;
         }
 
-        if (highlight.getSound())
+        // Only set highlightSound_ if it hasn't been set by username
+        // highlights already.
+        if (highlight.hasSound() && !this->highlightSound_)
         {
             this->highlightSound_ = true;
+
+            // Use custom sound if set, otherwise use fallback sound
+            if (highlight.hasCustomSound())
+            {
+                this->highlightSoundUrl_ = highlight.getSoundUrl();
+            }
+            else
+            {
+                this->highlightSoundUrl_ = getFallbackHighlightSound();
+            }
         }
 
         if (this->highlightAlert_ && this->highlightSound_)
         {
-            // Break if no further action can be taken from other
-            // highlights This might change if highlights can have
-            // custom colors/sounds/actions
+            /*
+             * Break once no further attributes (taskbar, sound) can be
+             * applied.
+             */
             break;
-        }
-    }
-
-    // Highlight because it's a whisper
-    if (this->args.isReceivedWhisper && getSettings()->enableWhisperHighlight)
-    {
-        if (getSettings()->enableWhisperHighlightTaskbar)
-        {
-            this->highlightAlert_ = true;
-        }
-        if (getSettings()->enableWhisperHighlightSound)
-        {
-            this->highlightSound_ = true;
         }
     }
 }
@@ -1130,7 +1215,7 @@ void TwitchMessageBuilder::appendTwitchEmote(
             start, app->emotes->twitch.getOrCreateEmote(id, name), name};
         if (std::get<1>(tup) == nullptr)
         {
-            log("nullptr {}", std::get<2>(tup).string);
+            qDebug() << "nullptr" << std::get<2>(tup).string;
         }
         vec.push_back(std::move(tup));
     }
@@ -1216,7 +1301,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
         auto badgeEmote = this->getTwitchBadge(badge);
         if (!badgeEmote)
         {
-            log("No channel/global variant found {}", badge.key_);
+            qDebug() << "No channel/global variant found" << badge.key_;
             continue;
         }
         auto tooltip = (*badgeEmote)->tooltip.string;

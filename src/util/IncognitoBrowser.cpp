@@ -5,8 +5,6 @@
 #include <QSettings>
 #include <QVariant>
 
-#include "debug/Log.hpp"
-
 namespace chatterino {
 namespace {
 #ifdef Q_OS_WIN
@@ -63,7 +61,7 @@ namespace {
         if (command.isNull())
             return QString();
 
-        log(command);
+        qDebug() << command;
 
         // inject switch to enable private browsing
         command = injectPrivateSwitch(command);

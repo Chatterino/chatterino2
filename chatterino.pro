@@ -1,7 +1,4 @@
 # Exposed build flags:
-# from lib/fmt.pri
-#  - FMT_PREFIX ($$PWD by default)
-#  - FMT_SYSTEM (1 = true) (Linux only, uses pkg-config)
 # from lib/websocketpp.pri
 #  - WEBSOCKETPP_PREFIX ($$PWD by default)
 #  - WEBSOCKETPP_SYSTEM (1 = true) (unix only)
@@ -76,7 +73,6 @@ CONFIG(debug, debug|release) {
 
 # Submodules
 include(lib/warnings.pri)
-include(lib/fmt.pri)
 include(lib/humanize.pri)
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
@@ -137,6 +133,7 @@ SOURCES += \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
     src/controllers/highlights/HighlightController.cpp \
     src/controllers/highlights/HighlightModel.cpp \
+    src/controllers/highlights/HighlightPhrase.cpp \
     src/controllers/highlights/UserHighlightModel.cpp \
     src/controllers/ignores/IgnoreController.cpp \
     src/controllers/ignores/IgnoreModel.cpp \
@@ -170,6 +167,7 @@ SOURCES += \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/bttv/LoadBttvChannelEmote.cpp \
     src/providers/chatterino/ChatterinoBadges.cpp \
+    src/providers/colors/ColorProvider.cpp \
     src/providers/emoji/Emojis.cpp \
     src/providers/ffz/FfzEmotes.cpp \
     src/providers/irc/AbstractIrcServer.cpp \
@@ -214,6 +212,7 @@ SOURCES += \
     src/singletons/TooltipPreviewImage.cpp \
     src/singletons/Updates.cpp \
     src/singletons/WindowManager.cpp \
+    src/util/Clipboard.cpp \
     src/util/DebugCount.cpp \
     src/util/FormatTime.cpp \
     src/util/FunctionEventFilter.cpp \
@@ -232,6 +231,7 @@ SOURCES += \
     src/widgets/BasePopup.cpp \
     src/widgets/BaseWidget.cpp \
     src/widgets/BaseWindow.cpp \
+    src/widgets/dialogs/ColorPickerDialog.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
     src/widgets/dialogs/IrcConnectionEditor.cpp \
     src/widgets/dialogs/LastRunCrashDialog.cpp \
@@ -247,12 +247,14 @@ SOURCES += \
     src/widgets/dialogs/WelcomeDialog.cpp \
     src/widgets/helper/Button.cpp \
     src/widgets/helper/ChannelView.cpp \
+    src/widgets/helper/ColorButton.cpp \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/DebugPopup.cpp \
     src/widgets/helper/EditableModelView.cpp \
     src/widgets/helper/EffectLabel.cpp \
     src/widgets/helper/NotebookButton.cpp \
     src/widgets/helper/NotebookTab.cpp \
+    src/widgets/helper/QColorPicker.cpp \
     src/widgets/helper/ResizingTextEdit.cpp \
     src/widgets/helper/ScrollbarHighlight.cpp \
     src/widgets/helper/SearchPopup.cpp \
@@ -345,7 +347,6 @@ HEADERS += \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/debug/AssertInGuiThread.hpp \
     src/debug/Benchmark.hpp \
-    src/debug/Log.hpp \
     src/ForwardDecl.hpp \
     src/messages/Emote.hpp \
     src/messages/Image.hpp \
@@ -371,6 +372,7 @@ HEADERS += \
     src/providers/bttv/BttvEmotes.hpp \
     src/providers/bttv/LoadBttvChannelEmote.hpp \
     src/providers/chatterino/ChatterinoBadges.hpp \
+    src/providers/colors/ColorProvider.hpp \
     src/providers/emoji/Emojis.hpp \
     src/providers/ffz/FfzEmotes.hpp \
     src/providers/irc/AbstractIrcServer.hpp \
@@ -418,6 +420,7 @@ HEADERS += \
     src/singletons/Updates.hpp \
     src/singletons/WindowManager.hpp \
     src/util/Clamp.hpp \
+    src/util/Clipboard.hpp \
     src/util/CombinePath.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
@@ -455,6 +458,7 @@ HEADERS += \
     src/widgets/BasePopup.hpp \
     src/widgets/BaseWidget.hpp \
     src/widgets/BaseWindow.hpp \
+    src/widgets/dialogs/ColorPickerDialog.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/IrcConnectionEditor.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
@@ -470,6 +474,7 @@ HEADERS += \
     src/widgets/dialogs/WelcomeDialog.hpp \
     src/widgets/helper/Button.hpp \
     src/widgets/helper/ChannelView.hpp \
+    src/widgets/helper/ColorButton.hpp \
     src/widgets/helper/ComboBoxItemDelegate.hpp \
     src/widgets/helper/CommonTexts.hpp \
     src/widgets/helper/DebugPopup.hpp \
@@ -478,6 +483,7 @@ HEADERS += \
     src/widgets/helper/Line.hpp \
     src/widgets/helper/NotebookButton.hpp \
     src/widgets/helper/NotebookTab.hpp \
+    src/widgets/helper/QColorPicker.hpp \
     src/widgets/helper/ResizingTextEdit.hpp \
     src/widgets/helper/ScrollbarHighlight.hpp \
     src/widgets/helper/SearchPopup.hpp \

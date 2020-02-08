@@ -10,7 +10,8 @@ BenchmarkGuard::BenchmarkGuard(const QString &_name)
 
 BenchmarkGuard::~BenchmarkGuard()
 {
-    log("{} {} ms", this->name_, float(timer_.nsecsElapsed()) / 1000000.0f);
+    qDebug() << this->name_ << float(timer_.nsecsElapsed()) / 1000000.0f
+             << "ms";
 }
 
 qreal BenchmarkGuard::getElapsedMs()

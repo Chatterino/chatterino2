@@ -4,7 +4,6 @@
 #include "common/Outcome.hpp"
 #include "common/Version.hpp"
 #include "debug/AssertInGuiThread.hpp"
-#include "debug/Log.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Paths.hpp"
 #include "util/DebugCount.hpp"

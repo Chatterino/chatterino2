@@ -32,6 +32,7 @@ matrix:
         - git config --global user.email "builds@travis-ci.com"
         - git config --global user.name "Travis CI"
         - export GIT_TAG=nightly-build
+        - export TRAVIS_TAG=nightly-build
         - git tag $GIT_TAG -f
         - sh ./.CI/CreateAppImage.sh
 
@@ -83,6 +84,7 @@ matrix:
         - git config --global user.email "builds@travis-ci.com"
         - git config --global user.name "Travis CI"
         - export GIT_TAG=nightly-build
+        - export TRAVIS_TAG=nightly-build
         - git tag $GIT_TAG -f
 
       deploy:

@@ -351,6 +351,11 @@ void Window::addShortcuts()
             getApp()->twitch.server->getOrAddChannel(si.channelName));
         splitContainer->appendSplit(split);
     });
+
+    createWindowShortcut(this, "CTRL+H", [this] {
+        getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
+        getApp()->windows->forceLayoutChannelViews();
+    });
 }
 
 void Window::addMenuBar()

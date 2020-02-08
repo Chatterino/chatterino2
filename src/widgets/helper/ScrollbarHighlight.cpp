@@ -1,24 +1,27 @@
 #include "widgets/helper/ScrollbarHighlight.hpp"
+
+#include "Application.hpp"
 #include "singletons/Theme.hpp"
 #include "widgets/Scrollbar.hpp"
 
 namespace chatterino {
 
 ScrollbarHighlight::ScrollbarHighlight()
-    : color_(Color::Highlight)
+    : color_(std::make_shared<QColor>())
     , style_(Style::None)
 {
 }
 
-ScrollbarHighlight::ScrollbarHighlight(Color color, Style style)
+ScrollbarHighlight::ScrollbarHighlight(const std::shared_ptr<QColor> color,
+                                       Style style)
     : color_(color)
     , style_(style)
 {
 }
 
-ScrollbarHighlight::Color ScrollbarHighlight::getColor() const
+QColor ScrollbarHighlight::getColor() const
 {
-    return this->color_;
+    return *this->color_;
 }
 
 ScrollbarHighlight::Style ScrollbarHighlight::getStyle() const

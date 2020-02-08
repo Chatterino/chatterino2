@@ -4,7 +4,6 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
-#include "debug/Log.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 
@@ -186,7 +185,8 @@ void FfzEmotes::loadChannel(
     const QString &channelId, std::function<void(EmoteMap &&)> emoteCallback,
     std::function<void(boost::optional<EmotePtr>)> modBadgeCallback)
 {
-    log("[FFZEmotes] Reload FFZ Channel Emotes for channel {}\n", channelId);
+    qDebug() << "[FFZEmotes] Reload FFZ Channel Emotes for channel"
+             << channelId;
 
     NetworkRequest("https://api.frankerfacez.com/v1/room/id/" + channelId)
 
@@ -211,13 +211,13 @@ void FfzEmotes::loadChannel(
             else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay
-                log("Fetching FFZ emotes for channel {} failed due to timeout",
-                    channelId);
+                qDebug() << "Fetching FFZ emotes for channel" << channelId
+                         << "failed due to timeout";
             }
             else
             {
-                log("Error fetching FFZ emotes for channel {}, error {}",
-                    channelId, result.status());
+                qDebug() << "Error fetching FFZ emotes for channel" << channelId
+                         << ", error" << result.status();
             }
         })
         .execute();

@@ -1,7 +1,5 @@
 #include "common/NetworkResult.hpp"
 
-#include "debug/Log.hpp"
-
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <QJsonDocument>
@@ -45,8 +43,9 @@ rapidjson::Document NetworkResult::parseRapidJson() const
 
     if (result.Code() != rapidjson::kParseErrorNone)
     {
-        log("JSON parse error: {} ({})",
-            rapidjson::GetParseError_En(result.Code()), result.Offset());
+        qDebug() << "JSON parse error:"
+                 << rapidjson::GetParseError_En(result.Code()) << "("
+                 << result.Offset() << ")";
         return ret;
     }
 

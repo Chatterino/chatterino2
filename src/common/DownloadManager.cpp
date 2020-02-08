@@ -1,6 +1,5 @@
 #include "DownloadManager.hpp"
 
-#include "debug/Log.hpp"
 #include "singletons/Paths.hpp"
 
 #include <QDesktopServices>
@@ -41,7 +40,7 @@ void DownloadManager::setFile(QString fileURL, const QString &channelName)
 
 void DownloadManager::onDownloadProgress(qint64 bytesRead, qint64 bytesTotal)
 {
-    log("Download progress: {}/{}", bytesRead, bytesTotal);
+    qDebug() << "Download progress: " << bytesRead << "/" << bytesTotal;
 }
 
 void DownloadManager::onFinished(QNetworkReply *reply)

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "debug/Log.hpp"
-
+#include <QDebug>
 #include <QElapsedTimer>
 #include <boost/noncopyable.hpp>
 

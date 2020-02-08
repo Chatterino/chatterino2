@@ -26,6 +26,10 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     form->addRow(new QLabel("Ctrl + Shift + T"), new QLabel("Create new tab"));
     form->addRow(new QLabel("Ctrl + Shift + W"),
                  new QLabel("Close current tab"));
+    form->addRow(
+        new QLabel("Ctrl + H"),
+        new QLabel(
+            "Hide/Show similar messages (Enable in General under Similarity)"));
 
     form->addItem(new QSpacerItem(16, 16));
     form->addRow(new QLabel("Ctrl + 1/2/3/..."),

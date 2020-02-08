@@ -7,6 +7,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
@@ -31,7 +32,14 @@ namespace {
 
         if (!map.empty())
         {
-            for (const auto &emote : map)
+            std::vector<std::pair<EmoteName, EmotePtr>> vec(map.begin(),
+                                                            map.end());
+            std::sort(vec.begin(), vec.end(),
+                      [](const std::pair<EmoteName, EmotePtr> &l,
+                         const std::pair<EmoteName, EmotePtr> &r) {
+                          return l.first.string < r.first.string;
+                      });
+            for (const auto &emote : vec)
             {
                 builder
                     .emplace<EmoteElement>(emote.second,
@@ -131,6 +139,10 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->viewEmojis_ = makeView("Emojis");
 
     this->loadEmojis();
+
+    createWindowShortcut(this, "CTRL+Tab", [=] { notebook->selectNextTab(); });
+    createWindowShortcut(this, "CTRL+Shift+Tab",
+                         [=] { notebook->selectPreviousTab(); });
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)
