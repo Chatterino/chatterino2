@@ -19,7 +19,7 @@ Default value: `https://braize.pajlada.com/chatterino/twitchemotes/set/%1/`
 Arguments:  
  - `%1` = Emote set ID
 
-### CHATTERINO2_IMAGE_PASTE_SITE_URL
+### CHATTERINO2_IMAGE_UPLOADER_URL
 Used to change the URL that Chatterino2 uses when trying to paste an image into chat. This can be used for hosting the uploaded images yourself.
 Default value: `https://i.nuuls.com/upload`
 
@@ -43,4 +43,3 @@ Default value: `443`
 ### CHATTERINO2_TWITCH_SERVER_SECURE
 Bool value used to tell Chatterino whether to try to connect securely (secure irc) to the Twitch chat server.  
 Default value: `true`
-
