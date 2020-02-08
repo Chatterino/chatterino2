@@ -265,10 +265,7 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
     {
         return true;
     }
-    else
-    {
-        return QTextEdit::canInsertFromMimeData(source);
-    }
+    return QTextEdit::canInsertFromMimeData(source);
 }
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
