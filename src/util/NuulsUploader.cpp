@@ -4,25 +4,15 @@
 #include "common/NetworkRequest.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
+#include <QBuffer>
 #include <QHttpMultiPart>
+#include <QMimeDatabase>
+#include <QMutex>
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
 
 namespace {
-
-QString getImageFileFormat(const QString &path)
-{
-    static QStringList listOfImageFormats = {".png", ".jpg", ".jpeg"};
-    for (const QString &format : listOfImageFormats)
-    {
-        if (path.endsWith(format, Qt::CaseInsensitive))
-        {
-            return format.mid(1);
-        }
-    }
-    return QString();
-}
 
 boost::optional<QByteArray> convertToPng(QImage image)
 {
@@ -43,7 +33,7 @@ boost::optional<QByteArray> convertToPng(QImage image)
 
 namespace chatterino {
 // These variables are only used from the main thread.
-bool isUploading = false;
+auto uploadMutex = QMutex();
 std::queue<RawImageData> uploadQueue;
 
 void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
@@ -73,11 +63,11 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
         .multiPart(payload)
         .onSuccess([&textEdit, channel](NetworkResult result) -> Outcome {
             textEdit.insertPlainText(result.getData() + QString(" "));
-            isUploading = false;
             if (uploadQueue.empty())
             {
                 channel->addMessage(makeSystemMessage(
                     QString("Your image has been uploaded.")));
+                uploadMutex.unlock();
             }
             else
             {
@@ -101,7 +91,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
             channel->addMessage(makeSystemMessage(
                 QString("An error happened while uploading your image: %1")
                     .arg(result.status())));
-            isUploading = false;
+            uploadMutex.unlock();
             return true;
         })
         .execute();
@@ -110,15 +100,13 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
 void upload(const QMimeData *source, ChannelPtr channel,
             ResizingTextEdit &outputTextEdit)
 {
-    // There's no need to thread proof this function. It is called only from the main thread.
-    if (isUploading)
+    if (!uploadMutex.tryLock())
     {
         channel->addMessage(makeSystemMessage(
             QString("Please wait until the upload finishes.")));
         return;
     }
 
-    isUploading = true;
     channel->addMessage(makeSystemMessage(QString("Started upload...")));
 
     if (source->hasFormat("image/png"))
@@ -138,12 +126,15 @@ void upload(const QMimeData *source, ChannelPtr channel,
     }
     else if (source->hasUrls())
     {
+        auto mimeDb = QMimeDatabase();
         // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
         // Each entry in source->urls() is a QUrl pointing to a file that was copied.
         for (const QUrl &path : source->urls())
         {
             QString localPath = path.toLocalFile();
-            if (!getImageFileFormat(localPath).isEmpty())
+            QMimeType mime = mimeDb.mimeTypeForUrl(path);
+            qDebug() << mime.name();
+            if (mime.name().startsWith("image") && !mime.inherits("image/gif"))
             {
                 channel->addMessage(makeSystemMessage(
                     QString("Uploading image: %1").arg(localPath)));
@@ -152,7 +143,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 {
                     channel->addMessage(
                         makeSystemMessage(QString("Couldn't load image :(")));
-                    isUploading = false;
+                    uploadMutex.unlock();
                     return;
                 }
 
@@ -170,7 +161,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                             .arg(localPath)));
                 }
             }
-            else if (localPath.endsWith(".gif"))
+            else if (mime.inherits("image/gif"))
             {
                 channel->addMessage(makeSystemMessage(
                     QString("Uploading GIF: %1").arg(localPath)));
@@ -180,7 +171,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 {
                     channel->addMessage(
                         makeSystemMessage(QString("Failed to open file. :(")));
-                    isUploading = false;
+                    uploadMutex.unlock();
                     return;
                 }
                 RawImageData data = {file.readAll(), "gif"};
@@ -193,7 +184,8 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 channel->addMessage(makeSystemMessage(
                     QString("Cannot upload file: %1, not an image")
                         .arg(localPath)));
-                isUploading = false;
+                uploadMutex.unlock();
+                return;
             }
         }
         if (!uploadQueue.empty())
@@ -215,7 +207,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
         {
             channel->addMessage(makeSystemMessage(
                 QString("Cannot upload file, failed to convert to png.")));
-            isUploading = false;
+            uploadMutex.unlock();
         }
     }
 }
