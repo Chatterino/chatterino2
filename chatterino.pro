@@ -178,6 +178,7 @@ SOURCES += \
     src/providers/irc/IrcConnection2.cpp \
     src/providers/irc/IrcServer.cpp \
     src/providers/LinkResolver.cpp \
+    src/providers/twitch/api/Helix.cpp \
     src/providers/twitch/ChatroomChannel.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
     src/providers/twitch/PartialTwitchUser.cpp \

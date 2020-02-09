@@ -8,9 +8,9 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/twitch/TwitchApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -366,18 +366,17 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                 return "";
             }
 
-            TwitchApi::findUserId(
-                target, [user, channel, target](QString userId) {
-                    if (userId.isEmpty())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "User " + target + " could not be followed!"));
-                        return;
-                    }
-                    user->followUser(userId, [channel, target]() {
+            getHelix()->getUserByName(
+                target,
+                [user, channel, target](const auto &targetUser) {
+                    user->followUser(targetUser.id, [channel, target]() {
                         channel->addMessage(makeSystemMessage(
                             "You successfully followed " + target));
                     });
+                },
+                [channel, target] {
+                    channel->addMessage(makeSystemMessage(
+                        "User " + target + " could not be followed!"));
                 });
 
             return "";
@@ -402,18 +401,17 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                 return "";
             }
 
-            TwitchApi::findUserId(
-                target, [user, channel, target](QString userId) {
-                    if (userId.isEmpty())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "User " + target + " could not be followed!"));
-                        return;
-                    }
-                    user->unfollowUser(userId, [channel, target]() {
+            getHelix()->getUserByName(
+                target,
+                [user, channel, target](const auto &targetUser) {
+                    user->unfollowUser(targetUser.id, [channel, target]() {
                         channel->addMessage(makeSystemMessage(
                             "You successfully unfollowed " + target));
                     });
+                },
+                [channel, target] {
+                    channel->addMessage(makeSystemMessage(
+                        "User " + target + " could not be followed!"));
                 });
 
             return "";

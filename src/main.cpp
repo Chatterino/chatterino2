@@ -9,6 +9,7 @@
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
 #include "common/Version.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/IncognitoBrowser.hpp"
@@ -36,6 +37,8 @@ int main(int argc, char **argv)
     }
     else
     {
+        Helix::initialize();
+
         Paths *paths{};
 
         try

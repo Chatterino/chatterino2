@@ -38,8 +38,6 @@ URL: https://dev.twitch.tv/docs/v5/reference/streams#get-stream-by-user
 URL: https://dev.twitch.tv/docs/v5/reference/users#get-user  
 
  * We use this API in `singletons/Toasts.cpp fetchChannelAvatar` to resolve a users avatar by their login name
- * We implement this API in `providers/twitch/TwitchApi.cpp findUserId`
- * We implement this API in `providers/twitch/TwitchApi.cpp findUserName`
  * We implement this API in `providers/twitch/PartialTwitchUser.cpp getId`
 
 ### Get Cheermotes
@@ -78,7 +76,13 @@ URL: XD
  * We use this in `providers/twitch/TwitchAccount.cpp autoModDeny` to deny an automod deny/allow question
 
 ## Helix
-We don't currently use Helix in Chatterino2.
+
+
+### GET USERS
+
+ * We implement this in `providers/twitch/api/Helix.cpp getUsers`.
+
+   It is used in NotificationController and CommandController
 
 ## TMI
 The TMI api is undocumented.
