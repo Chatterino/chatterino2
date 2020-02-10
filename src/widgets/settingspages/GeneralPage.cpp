@@ -304,6 +304,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Start with Windows", s.autorun);
 #endif
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
+    if (!BaseWindow::supportsCustomWindowFrame())
+    {
+        layout.addCheckbox("Show preferences button (ctrl+p to show)",
+                           s.hidePreferencesButton, true);
+        layout.addCheckbox("Show user button", s.hideUserButton, true);
+    }
 
     layout.addTitle("Chat");
 
@@ -344,12 +350,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                                s.pauseChatModifier);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
-    if (!BaseWindow::supportsCustomWindowFrame())
-    {
-        layout.addCheckbox("Show preferences button (ctrl+p to show)",
-                           s.hidePreferencesButton, true);
-        layout.addCheckbox("Show user button", s.hideUserButton, true);
-    }
 
     layout.addTitle("Messages");
     layout.addCheckbox("Seperate with lines", s.separateMessages);
