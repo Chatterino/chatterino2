@@ -159,6 +159,8 @@ void upload(const QMimeData *source, ChannelPtr channel,
                         QString("Cannot upload file: %1, Couldn't convert "
                                 "image to png.")
                             .arg(localPath)));
+                    uploadMutex.unlock();
+                    return;
                 }
             }
             else if (mime.inherits("image/gif"))
