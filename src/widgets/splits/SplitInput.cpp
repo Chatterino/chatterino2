@@ -9,6 +9,7 @@
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/dialogs/EmotePopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -267,14 +268,21 @@ void SplitInput::installKeyPressedEvent()
         }
         else if (event->key() == Qt::Key_End)
         {
-            QTextCursor cursor = this->ui_.textEdit->textCursor();
-            cursor.movePosition(
-                QTextCursor::End,
-                event->modifiers() & Qt::KeyboardModifier::ShiftModifier
-                    ? QTextCursor::MoveMode::KeepAnchor
-                    : QTextCursor::MoveMode::MoveAnchor);
-            this->ui_.textEdit->setTextCursor(cursor);
-
+            if (event->modifiers() == Qt::ControlModifier)
+            {
+                this->split_->getChannelView().getScrollBar().scrollToBottom(
+                    getSettings()->enableSmoothScrollingNewMessages.getValue());
+            }
+            else
+            {
+                QTextCursor cursor = this->ui_.textEdit->textCursor();
+                cursor.movePosition(
+                    QTextCursor::End,
+                    event->modifiers() & Qt::KeyboardModifier::ShiftModifier
+                        ? QTextCursor::MoveMode::KeepAnchor
+                        : QTextCursor::MoveMode::MoveAnchor);
+                this->ui_.textEdit->setTextCursor(cursor);
+            }
             event->accept();
         }
         else if (event->key() == Qt::Key_H &&
