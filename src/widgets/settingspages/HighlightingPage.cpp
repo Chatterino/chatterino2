@@ -47,9 +47,8 @@ HighlightingPage::HighlightingPage()
             auto highlights = tabs.appendTab(new QVBoxLayout, "Messages");
             {
                 highlights.emplace<QLabel>(
-                    "Messages can be highlighted if they match a certain "
-                    "pattern.\n"
-                    "NOTE: User highlights will override phrase highlights.");
+                    "Play notification sounds and highlight messages based on "
+                    "certain patterns.");
 
                 EditableModelView *view =
                     highlights
@@ -89,8 +88,10 @@ HighlightingPage::HighlightingPage()
             auto pingUsers = tabs.appendTab(new QVBoxLayout, "Users");
             {
                 pingUsers.emplace<QLabel>(
-                    "Messages from a certain user can be highlighted.\n"
-                    "NOTE: User highlights will override phrase highlights.");
+                    "Play notification sounds and highlight messages from "
+                    "certain users.\n"
+                    "User highlights are prioritized over message "
+                    "highlights.");
                 EditableModelView *view =
                     pingUsers
                         .emplace<EditableModelView>(
@@ -132,11 +133,11 @@ HighlightingPage::HighlightingPage()
             }
 
             auto disabledUsers =
-                tabs.appendTab(new QVBoxLayout, "Excluded Users");
+                tabs.appendTab(new QVBoxLayout, "Blacklisted Users");
             {
                 disabledUsers.emplace<QLabel>(
-                    "This is a list of users (e.g. bots) whose messages should "
-                    "<u>not</u> be highlighted.");
+                    "Disable notification sounds and highlights from certain "
+                    "users (e.g. bots).");
                 EditableModelView *view =
                     disabledUsers
                         .emplace<EditableModelView>(
@@ -144,7 +145,7 @@ HighlightingPage::HighlightingPage()
                         .getElement();
 
                 view->addRegexHelpLink();
-                view->setTitles({"Pattern", "Enable\nregex"});
+                view->setTitles({"Username", "Enable\nregex"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(

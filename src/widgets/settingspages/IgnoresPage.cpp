@@ -42,8 +42,7 @@ IgnoresPage::IgnoresPage()
 
 void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 {
-    layout.emplace<QLabel>("Messages can be ignored if "
-                           "they match a certain pattern.");
+    layout.emplace<QLabel>("Ignore messages based certain patterns.");
     EditableModelView *view =
         layout
             .emplace<EditableModelView>(getApp()->ignores->createModel(nullptr))
