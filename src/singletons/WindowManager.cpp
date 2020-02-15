@@ -111,6 +111,12 @@ WindowManager::WindowManager()
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
         getApp()->windows->save();  //
     });
+
+    this->miscUpdateTimer_.start(100);
+
+    QObject::connect(&this->miscUpdateTimer_, &QTimer::timeout, [this] {
+        this->miscUpdate.invoke();  //
+    });
 }
 
 MessageElementFlags WindowManager::getWordFlags()
