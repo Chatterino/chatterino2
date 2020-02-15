@@ -49,6 +49,8 @@ public:
 
     void refresh(const QString &prefix, bool isFirstWord = false);
 
+    static bool compareStrings(const QString &a, const QString &b);
+
 private:
     TaggedString createUser(const QString &str);
 
