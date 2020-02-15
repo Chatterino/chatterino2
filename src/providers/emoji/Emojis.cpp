@@ -249,19 +249,29 @@ void Emojis::loadEmojiSet()
             // clang-format off
             static std::map<QString, QString> emojiSets = {
                 {"EmojiOne 2", "https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.6/assets/png/"},
-                // {"EmojiOne 3", "https://cdn.jsdelivr.net/npm/emoji-datasource-emojione@4.0.4/img/emojione/64/"},
+
+                // JSDELIVR
+                // {"EmojiOne 3", "https://cdn.jsdelivr.net/npm/emoji-datasource-emojione@5.0.1/img/emojione/64/"},
                 // {"Twitter", "https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@4.0.4/img/twitter/64/"},
                 // {"Facebook", "https://cdn.jsdelivr.net/npm/emoji-datasource-facebook@4.0.4/img/facebook/64/"},
-                // {"Apple", "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@4.0.4/img/apple/64/"},
+                // {"Apple", "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@5.0.1/img/apple/64/"},
                 // {"Google", "https://cdn.jsdelivr.net/npm/emoji-datasource-google@4.0.4/img/google/64/"},
                 // {"Messenger", "https://cdn.jsdelivr.net/npm/emoji-datasource-messenger@4.0.4/img/messenger/64/"},
 
-                {"EmojiOne 3", "https://pajbot.com/static/emoji/img/emojione/64/"},
-                {"Twitter", "https://pajbot.com/static/emoji/img/twitter/64/"},
-                {"Facebook", "https://pajbot.com/static/emoji/img/facebook/64/"},
-                {"Apple", "https://pajbot.com/static/emoji/img/apple/64/"},
-                {"Google", "https://pajbot.com/static/emoji/img/google/64/"},
+                // OBRODAI
+                // {"EmojiOne 3", "https://pajbot.com/static/emoji/img/emojione/64/"},
+                // {"Twitter", "https://pajbot.com/static/emoji/img/twitter/64/"},
+                // {"Facebook", "https://pajbot.com/static/emoji/img/facebook/64/"},
+                // {"Apple", "https://pajbot.com/static/emoji/img/apple/64/"},
+                // {"Google", "https://pajbot.com/static/emoji/img/google/64/"},
                 {"Messenger", "https://pajbot.com/static/emoji/img/messenger/64/"},
+
+                // BRAIZE
+                {"EmojiOne 3", "https://test.pajlada.se/emoji/emojione/64/"},
+                {"Twitter", "https://test.pajlada.se/emoji/twitter/64/"},
+                {"Facebook", "https://test.pajlada.se/emoji/facebook/64/"},
+                {"Apple", "https://test.pajlada.se/emoji/apple/64/"},
+                {"Google", "https://test.pajlada.se/emoji/google/64/"},
             };
             // clang-format on
 
