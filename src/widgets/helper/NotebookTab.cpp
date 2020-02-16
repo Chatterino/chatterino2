@@ -332,9 +332,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
     {
         auto col = *this->highlightColor_.get();
         col.setAlpha(255);
-        colors.line.regular = col;
-        colors.line.hover = col;
-        colors.line.unfocused = col;
+        colors.line = {col, col, col};
     }
 
     // top line
