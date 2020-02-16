@@ -220,8 +220,7 @@ void NotebookTab::setHighlightState(HighlightState newHighlightStyle)
     {
         return;
     }
-    if (this->highlightState_ != HighlightState::Highlighted &&
-        this->highlightColor_ == nullptr)
+    if (this->highlightState_ != HighlightState::Highlighted)
     {
         this->highlightState_ = newHighlightStyle;
 
