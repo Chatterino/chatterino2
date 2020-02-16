@@ -14,6 +14,12 @@
 
 namespace chatterino {
 namespace {
+
+    auto toneNames = std::map<QString, QString>{
+        {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
+        {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
+    };
+
     void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
                     const rapidjson::Value &unparsedEmoji,
                     QString shortCode = QString())
@@ -103,6 +109,32 @@ namespace {
 
         emojiData->value = QString::fromUcs4(unicodeBytes, numUnicodeBytes);
     }
+
+    // getToneNames takes a tones and returns their names in the same order
+    // The format of the tones is: "1F3FB-1F3FB" or "1F3FB"
+    // The output of the tone names is: "tone1-tone1" or "tone1"
+    QString getToneNames(const QString &tones)
+    {
+        auto toneParts = tones.split('-');
+        QStringList toneNameResults;
+        for (const auto &tonePart : toneParts)
+        {
+            auto toneNameIt = toneNames.find(tonePart);
+            if (toneNameIt == toneNames.end())
+            {
+                qDebug() << "Tone with key" << tonePart
+                         << "does not exist in tone names map";
+                continue;
+            }
+
+            toneNameResults.append(toneNameIt->second);
+        }
+
+        assert(!toneNameResults.isEmpty());
+
+        return toneNameResults.join('-');
+    }
+
 }  // namespace
 
 void Emojis::load()
@@ -118,11 +150,6 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
-    auto toneNames = std::map<std::string, QString>{
-        {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
-        {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
-    };
-
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
     QTextStream s1(&file);
@@ -158,22 +185,13 @@ void Emojis::loadEmojis()
             for (const auto &skinVariation :
                  unparsedEmoji["skin_variations"].GetObject())
             {
-                std::string tone = skinVariation.name.GetString();
+                auto toneName = getToneNames(skinVariation.name.GetString());
                 const auto &variation = skinVariation.value;
 
                 auto variationEmojiData = std::make_shared<EmojiData>();
 
-                auto toneNameIt = toneNames.find(tone);
-                if (toneNameIt == toneNames.end())
-                {
-                    qCDebug(chatterinoEmoji)
-                        << "Tone with key" << tone.c_str()
-                        << "does not exist in tone names map";
-                    continue;
-                }
-
                 parseEmoji(variationEmojiData, variation,
-                           emojiData->shortCodes[0] + "_" + toneNameIt->second);
+                           emojiData->shortCodes[0] + "_" + toneName);
 
                 this->emojiShortCodeToEmoji_.insert(
                     variationEmojiData->shortCodes[0], variationEmojiData);
