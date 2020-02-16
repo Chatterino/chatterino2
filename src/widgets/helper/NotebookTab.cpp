@@ -328,7 +328,8 @@ void NotebookTab::paintEvent(QPaintEvent *)
 
     painter.fillRect(bgRect, tabBackground);
 
-    if (this->highlightColor_ != nullptr)
+    if (this->highlightState_ == HighlightState::Highlighted &&
+        this->highlightColor_ != nullptr)
     {
         auto col = *this->highlightColor_.get();
         col.setAlpha(255);
