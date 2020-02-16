@@ -652,10 +652,12 @@ void ChannelView::messageAppended(MessagePtr &message,
             !messageFlags->has(MessageFlag::Subscription))
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
+            this->tabHighlightColorRequested.invoke(message->highlightColor);
         }
         else
         {
             this->tabHighlightRequested.invoke(HighlightState::NewMessage);
+            this->tabHighlightColorRequested.invoke(nullptr);
         }
     }
 

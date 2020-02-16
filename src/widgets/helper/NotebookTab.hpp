@@ -4,6 +4,7 @@
 #include "widgets/BaseWidget.hpp"
 #include "widgets/helper/Button.hpp"
 
+#include <QColor>
 #include <QMenu>
 #include <QPropertyAnimation>
 #include <pajlada/settings/setting.hpp>
@@ -45,6 +46,7 @@ public:
     void setHighlightState(HighlightState style);
     void setHighlightsEnabled(const bool &newVal);
     bool hasHighlightsEnabled() const;
+    void setHighlightColor(std::shared_ptr<QColor> color);
 
     void moveAnimated(QPoint pos, bool animated = true);
 
@@ -95,6 +97,7 @@ private:
     HighlightState highlightState_ = HighlightState::None;
     bool highlightEnabled_ = true;
     QAction *highlightNewMessagesAction_;
+    std::shared_ptr<QColor> highlightColor_;
 
     bool isLive_{};
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QColor>
 #include <QPaintEvent>
 #include <QScroller>
 #include <QTimer>
@@ -85,6 +86,8 @@ public:
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
+    pajlada::Signals::Signal<std::shared_ptr<QColor>>
+        tabHighlightColorRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::Signal<const Link &> linkClicked;
     pajlada::Signals::Signal<QString> joinToChannel;
