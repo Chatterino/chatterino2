@@ -28,13 +28,15 @@ SettingsDialog::SettingsDialog()
 {
     this->setWindowTitle("Chatterino Settings");
 
+    this->themeChangedEvent();
+    this->scaleChangedEvent(this->scale());
+
     this->initUi();
     this->addTabs();
 
-    this->scaleChangedEvent(this->scale());
-
     this->overrideBackgroundColor_ = QColor("#111111");
-    this->themeChangedEvent();
+    this->scaleChangedEvent(
+        this->scale());  // execute twice to fix performance + width of item
 
     this->resize(815, 600);
 }
@@ -273,7 +275,8 @@ void SettingsDialog::scaleChangedEvent(float newDpi)
 
     this->setStyleSheet(styleSheet);
 
-    this->ui_.tabContainerContainer->setFixedWidth(int(150 * newDpi));
+    if (this->ui_.tabContainerContainer)
+        this->ui_.tabContainerContainer->setFixedWidth(int(150 * newDpi));
 }
 
 void SettingsDialog::themeChangedEvent()
