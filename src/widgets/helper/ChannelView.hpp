@@ -183,11 +183,11 @@ private:
     bool onlyUpdateEmotes_ = false;
 
     // Mouse event variables
-    bool isMouseDown_ = false;
+    bool isLeftMouseDown_ = false;
     bool isRightMouseDown_ = false;
     bool isDoubleClick_ = false;
     DoubleClickSelection doubleClickSelection_;
-    QPointF lastPressPosition_;
+    QPointF lastLeftPressPosition_;
     QPointF lastRightPressPosition_;
     QPointF lastDClickPosition_;
     QTimer *clickTimer_;

@@ -1060,7 +1060,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     }
 
     // is selecting
-    if (this->isMouseDown_)
+    if (this->isLeftMouseDown_)
     {
         // this->pause(PauseReason::Selecting, 300);
         int index = layout->getSelectionIndex(relativePos);
@@ -1325,8 +1325,8 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     switch (event->button())
     {
         case Qt::LeftButton: {
-            this->lastPressPosition_ = event->screenPos();
-            this->isMouseDown_ = true;
+            this->lastLeftPressPosition_ = event->screenPos();
+            this->isLeftMouseDown_ = true;
 
             if (layout->flags.has(MessageLayoutFlag::Collapsed))
                 return;
@@ -1372,11 +1372,11 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
                 return;
             }
         }
-        else if (this->isMouseDown_)
+        else if (this->isLeftMouseDown_)
         {
-            this->isMouseDown_ = false;
+            this->isLeftMouseDown_ = false;
 
-            if (fabsf(distanceBetweenPoints(this->lastPressPosition_,
+            if (fabsf(distanceBetweenPoints(this->lastLeftPressPosition_,
                                             event->screenPos())) > 15.f)
             {
                 return;
@@ -1637,7 +1637,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         return;
     }
 
-    if (!this->isMouseDown_)
+    if (!this->isLeftMouseDown_)
     {
         this->isDoubleClick_ = true;
 
