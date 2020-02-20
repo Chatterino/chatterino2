@@ -205,9 +205,7 @@ public:
         assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
                column < this->columnCount_);
 
-        return this->rows_[row].items[column]->flags() |
-               Qt::ItemFlag::ItemIsDragEnabled |
-               Qt::ItemFlag::ItemIsDropEnabled;
+        return this->rows_[row].items[column]->flags();
     }
 
     QStandardItem *getItem(int row, int column)

@@ -51,6 +51,7 @@ CommandPage::CommandPage()
             Command{"/command", "I made a new command HeyGuys"});
     });
 
+    // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
     {
         auto button = new QPushButton("Import commands from Chatterino 1");
