@@ -205,7 +205,9 @@ public:
         assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
                column < this->columnCount_);
 
-        return this->rows_[row].items[column]->flags();
+        return this->rows_[row].items[column]->flags() |
+               Qt::ItemFlag::ItemIsDragEnabled |
+               Qt::ItemFlag::ItemIsDropEnabled;
     }
 
     QStandardItem *getItem(int row, int column)
@@ -237,6 +239,66 @@ public:
         this->vector_->removeItem(signalVectorRow);
 
         return true;
+    }
+
+    QStringList mimeTypes() const override
+    {
+        return {"chatterino_row_id"};
+    }
+
+    QMimeData *mimeData(const QModelIndexList &list) const
+    {
+        if (list.length() == 1)
+        {
+            return nullptr;
+        }
+
+        // Check if all indices are in the same row -> single row selected
+        for (auto &&x : list)
+        {
+            if (x.row() != list.first().row())
+                return nullptr;
+        }
+
+        auto data = new QMimeData;
+        data->setData("chatterino_row_id", QByteArray::number(list[0].row()));
+        return data;
+    }
+
+    bool dropMimeData(const QMimeData *data, Qt::DropAction action, int /*row*/,
+                      int /*column*/, const QModelIndex &parent) override
+    {
+        if (data->hasFormat("chatterino_row_id") &&
+            action & (Qt::DropAction::MoveAction | Qt::DropAction::CopyAction))
+        {
+            int from = data->data("chatterino_row_id").toInt();
+            int to = parent.row();
+
+            if (from < 0 || from > this->vector_->getVector().size() ||
+                to < 0 || to > this->vector_->getVector().size())
+            {
+                return false;
+            }
+
+            if (from != to)
+            {
+                auto item = this->vector_->getVector()[from];
+                this->vector_->removeItem(from);
+                this->vector_->insertItem(item, to);
+            }
+
+            // We return false since we remove items ourselves.
+            return false;
+        }
+
+        return false;
+    }
+
+    Qt::DropActions supportedDropActions() const override
+    {
+        return this->vector_->isSorted()
+                   ? Qt::DropActions()
+                   : Qt::DropAction::CopyAction | Qt::DropAction::MoveAction;
     }
 
 protected:
