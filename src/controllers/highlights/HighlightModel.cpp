@@ -63,10 +63,10 @@ void HighlightModel::afterInit()
     usernameRow[Column::CaseSensitive]->setFlags(0);
 
     QUrl selfSound = QUrl(getSettings()->selfHighlightSoundUrl.getValue());
-    setFilePathItem(usernameRow[Column::SoundPath], selfSound);
+    setFilePathItem(usernameRow[Column::SoundPath], selfSound, false);
 
     auto selfColor = ColorProvider::instance().color(ColorType::SelfHighlight);
-    setColorItem(usernameRow[Column::Color], *selfColor);
+    setColorItem(usernameRow[Column::Color], *selfColor, false);
 
     this->insertCustomRow(usernameRow, 0);
 
@@ -86,10 +86,10 @@ void HighlightModel::afterInit()
 
     QUrl whisperSound =
         QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
-    setFilePathItem(whisperRow[Column::SoundPath], whisperSound);
+    setFilePathItem(whisperRow[Column::SoundPath], whisperSound, false);
 
     auto whisperColor = ColorProvider::instance().color(ColorType::Whisper);
-    setColorItem(whisperRow[Column::Color], *whisperColor);
+    setColorItem(whisperRow[Column::Color], *whisperColor, false);
 
     this->insertCustomRow(whisperRow, 1);
 
@@ -107,10 +107,10 @@ void HighlightModel::afterInit()
     subRow[Column::CaseSensitive]->setFlags(0);
 
     QUrl subSound = QUrl(getSettings()->subHighlightSoundUrl.getValue());
-    setFilePathItem(subRow[Column::SoundPath], subSound);
+    setFilePathItem(subRow[Column::SoundPath], subSound, false);
 
     auto subColor = ColorProvider::instance().color(ColorType::Subscription);
-    setColorItem(subRow[Column::Color], *subColor);
+    setColorItem(subRow[Column::Color], *subColor, false);
 
     this->insertCustomRow(subRow, 2);
 }
