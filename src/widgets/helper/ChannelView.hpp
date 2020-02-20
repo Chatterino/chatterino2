@@ -192,6 +192,11 @@ private:
     QPointF lastDClickPosition_;
     QTimer *clickTimer_;
 
+    bool isScrolling_ = false;
+    QPointF lastMiddlePressPosition_;
+    QPointF currentMousePosition_;
+    QTimer scrollTimer_;
+
     Selection selection_;
     bool selecting_ = false;
 

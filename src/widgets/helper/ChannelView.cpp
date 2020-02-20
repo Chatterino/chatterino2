@@ -130,6 +130,26 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->clickTimer_->setSingleShot(true);
     this->clickTimer_->setInterval(500);
 
+    this->scrollTimer_.setInterval(20);
+    QObject::connect(&this->scrollTimer_, &QTimer::timeout, this, [this] {
+        const qreal delta = this->currentMousePosition_.y() -
+                            this->lastMiddlePressPosition_.y();
+
+        // TODO(leon): How large should the "grace area" be?
+        if (fabs(delta) < 10)
+        {
+            /*
+             * If within an area close to the initial position, don't do any
+             * scrolling at all.
+             */
+            return;
+        }
+
+        // "Good" feeling multiplier found by trial-and-error
+        const qreal multiplier = qreal(0.02);
+        this->scrollBar_->offset(multiplier * delta);
+    });
+
     this->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 }
 
@@ -1059,6 +1079,11 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
+    if (this->isScrolling_)
+    {
+        this->currentMousePosition_ = event->screenPos();
+    }
+
     // is selecting
     if (this->isLeftMouseDown_)
     {
@@ -1345,6 +1370,27 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         case Qt::RightButton: {
             this->lastRightPressPosition_ = event->screenPos();
             this->isRightMouseDown_ = true;
+        }
+        break;
+
+        case Qt::MiddleButton: {
+            if (this->isScrolling_)
+            {
+                this->isScrolling_ = false;
+                this->scrollTimer_.stop();
+                // TODO(leon): cursor
+                QGuiApplication::restoreOverrideCursor();
+            }
+            else
+            {
+                this->isScrolling_ = true;
+                this->lastMiddlePressPosition_ = event->screenPos();
+                // The line below prevents a sudden jerk at the beginning
+                this->currentMousePosition_ = event->screenPos();
+                this->scrollTimer_.start();
+                // TODO(leon): cursor
+                QGuiApplication::setOverrideCursor(Qt::SizeVerCursor);
+            }
         }
         break;
 
