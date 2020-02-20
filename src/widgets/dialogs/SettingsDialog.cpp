@@ -199,7 +199,7 @@ void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
 
 void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
 {
-    this->ui_.pageStack->setCurrentWidget(tab->getSettingsPage());
+    this->ui_.pageStack->setCurrentWidget(tab->page());
 
     if (this->selectedTab_ != nullptr)
     {
@@ -256,7 +256,7 @@ void SettingsDialog::refresh()
 
     for (auto *tab : this->tabs_)
     {
-        tab->getSettingsPage()->onShow();
+        tab->page()->onShow();
     }
 }
 
@@ -304,7 +304,7 @@ void SettingsDialog::onCancelClicked()
 {
     for (auto &tab : this->tabs_)
     {
-        tab->getSettingsPage()->cancel();
+        tab->page()->cancel();
     }
 
     getSettings()->restoreSnapshot();

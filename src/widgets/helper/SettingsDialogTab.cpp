@@ -34,7 +34,7 @@ void SettingsDialogTab::setSelected(bool _selected)
     emit selectedChanged(selected_);
 }
 
-SettingsPage *SettingsDialogTab::getSettingsPage()
+SettingsPage *SettingsDialogTab::page()
 {
     return this->page_;
 }

@@ -20,7 +20,7 @@ public:
                       QString imageFileName);
 
     void setSelected(bool selected_);
-    SettingsPage *getSettingsPage();
+    SettingsPage *page();
 
 signals:
     void selectedChanged(bool);
