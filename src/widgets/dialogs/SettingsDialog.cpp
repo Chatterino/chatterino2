@@ -4,7 +4,6 @@
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/Button.hpp"
-#include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
@@ -21,7 +20,7 @@
 
 namespace chatterino {
 
-SettingsDialog *SettingsDialog::handle = nullptr;
+SettingsDialog *SettingsDialog::instance_ = nullptr;
 
 SettingsDialog::SettingsDialog()
     : BaseWindow(BaseWindow::DisableCustomScaling)
@@ -105,10 +104,10 @@ void SettingsDialog::initUi()
 void SettingsDialog::filterElements(const QString &text)
 {
     // filter elements and hide pages
-    for (auto &&page : this->pages_)
+    for (auto &&tab : this->tabs_)
     {
         // filterElements returns true if anything on the page matches the search query
-        page->tab()->setVisible(page->filterElements(text));
+        tab->setVisible(tab->page()->filterElements(text));
     }
 
     // find next visible page
@@ -146,9 +145,9 @@ void SettingsDialog::filterElements(const QString &text)
     }
 }
 
-SettingsDialog *SettingsDialog::getHandle()
+SettingsDialog *SettingsDialog::instance()
 {
-    return SettingsDialog::handle;
+    return SettingsDialog::instance_;
 }
 
 void SettingsDialog::addTabs()
@@ -173,7 +172,7 @@ void SettingsDialog::addTabs()
     this->ui_.tabContainer->addSpacing(16);
 
     this->addTab(new KeyboardSettingsPage);
-    this->addTab(this->ui_.moderationPage = new ModerationPage);
+    this->addTab(new ModerationPage);
     this->addTab(new NotificationPage);
     this->addTab(new ExternalToolsPage);
 
@@ -189,7 +188,6 @@ void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
     this->ui_.pageStack->addWidget(page);
     this->ui_.tabContainer->addWidget(tab, 0, alignment);
     this->tabs_.push_back(tab);
-    this->pages_.push_back(page);
 
     if (this->tabs_.size() == 1)
     {
@@ -217,6 +215,21 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
     }
 }
 
+void SettingsDialog::selectTab(SettingsTabId id)
+{
+    this->selectTab(this->tab(id));
+}
+
+SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
+{
+    for (auto &&tab : this->tabs_)
+        if (tab->id() == id)
+            return tab;
+
+    assert(false);
+    return nullptr;
+}
+
 void SettingsDialog::selectPage(SettingsPage *page)
 {
     assert(page);
@@ -233,12 +246,18 @@ void SettingsDialog::showDialog(SettingsDialogPreference preferredTab)
     switch (preferredTab)
     {
         case SettingsDialogPreference::Accounts:
-            instance->selectTab(instance->tabs_.at(1));
+            instance->selectTab(SettingsTabId::Accounts);
             break;
 
         case SettingsDialogPreference::ModerationActions:
-            instance->selectPage(instance->ui_.moderationPage);
-            instance->ui_.moderationPage->selectModerationActions();
+            if (auto tab = instance->tab(SettingsTabId::Moderation))
+            {
+                instance->selectTab(tab);
+                if (auto page = dynamic_cast<ModerationPage *>(tab->page()))
+                {
+                    page->selectModerationActions();
+                }
+            }
             break;
 
         default:;

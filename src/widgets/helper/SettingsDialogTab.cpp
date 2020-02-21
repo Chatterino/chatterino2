@@ -8,10 +8,12 @@
 namespace chatterino {
 
 SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog,
-                                     SettingsPage *_page, QString imageFileName)
+                                     SettingsPage *_page, QString imageFileName,
+                                     SettingsTabId id)
     : BaseWidget(_dialog)
     , dialog_(_dialog)
     , page_(_page)
+    , id_(id)
 {
     this->ui_.labelText = page_->getName();
     this->ui_.icon.addFile(imageFileName);
@@ -70,6 +72,11 @@ void SettingsDialogTab::mousePressEvent(QMouseEvent *event)
     this->dialog_->selectTab(this);
 
     this->setFocus();
+}
+
+SettingsTabId SettingsDialogTab::id() const
+{
+    return id_;
 }
 
 }  // namespace chatterino
