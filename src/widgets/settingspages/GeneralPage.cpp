@@ -74,14 +74,16 @@ namespace {
 
 TitleLabel *SettingsLayout::addTitle(const QString &title)
 {
-    auto label = new TitleLabel(title + ":");
+    // space
+    if (!this->groups_.empty())
+        this->addWidget(this->groups_.back().space = new Space);
 
-    if (this->count() == 0)
-        label->setStyleSheet("margin-top: 0");
+    // title
+    auto label = new TitleLabel(title + ":");
     this->addWidget(label);
 
     // groups
-    this->groups_.push_back(Group{title, label, {}});
+    this->groups_.push_back(Group{title, label, nullptr, {}});
 
     return label;
 }
@@ -228,6 +230,8 @@ bool SettingsLayout::filterElements(const QString &query)
                 }
             }
 
+            if (group.space)
+                group.space->setVisible(groupAny);
             group.title->setVisible(groupAny);
             any |= groupAny;
         }

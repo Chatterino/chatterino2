@@ -33,8 +33,7 @@ SettingsDialog::SettingsDialog()
     this->initUi();
     this->addTabs();
     this->overrideBackgroundColor_ = QColor("#111111");
-    this->scaleChangedEvent(
-        this->scale());  // execute twice to fix performance + width of item
+    this->scaleChangedEvent(this->scale());  // execute twice to width of item
 }
 
 void SettingsDialog::initUi()
@@ -67,13 +66,9 @@ void SettingsDialog::initUi()
         .assign(&this->ui_.tabContainer);
 
     // right side (pages)
-    auto right =
-        centerBox.emplace<QVBoxLayout>().withoutMargin().withoutSpacing();
-    {
-        right.emplace<QStackedLayout>()
-            .assign(&this->ui_.pageStack)
-            .withoutMargin();
-    }
+    centerBox.emplace<QStackedLayout>()
+        .assign(&this->ui_.pageStack)
+        .withoutMargin();
 
     this->ui_.pageStack->setMargin(0);
 
@@ -154,6 +149,8 @@ void SettingsDialog::addTabs()
     this->ui_.tabContainer->setSpacing(0);
 
     this->ui_.tabContainer->setContentsMargins(0, 20, 0, 20);
+
+    // Constructors are wrapped in std::function to remove some strain from first time loading.
 
     // clang-format off
     this->addTab([]{return new GeneralPage;},          "General",        ":/settings/about.svg");
@@ -268,8 +265,10 @@ void SettingsDialog::showDialog(SettingsDialogPreference preferredTab)
 
 void SettingsDialog::refresh()
 {
+    // Resets the cancel button.
     getSettings()->saveSnapshot();
 
+    // Updates tabs.
     for (auto *tab : this->tabs_)
     {
         tab->page()->onShow();
@@ -300,7 +299,7 @@ void SettingsDialog::themeChangedEvent()
     BaseWindow::themeChangedEvent();
 
     QPalette palette;
-    palette.setColor(QPalette::Background, QColor("#111"));
+    palette.setColor(QPalette::Window, QColor("#111"));
     this->setPalette(palette);
 }
 
