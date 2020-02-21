@@ -104,8 +104,8 @@ void SettingsDialog::filterElements(const QString &text)
     for (auto &&tab : this->tabs_)
     {
         // filterElements returns true if anything on the page matches the search query
-        tab->setVisible(tab->name().contains(text, Qt::CaseInsensitive) ||
-                        tab->page()->filterElements(text));
+        tab->setVisible(tab->page()->filterElements(text) ||
+                        tab->name().contains(text, Qt::CaseInsensitive));
     }
 
     // find next visible page
