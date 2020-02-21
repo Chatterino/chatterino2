@@ -136,34 +136,8 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->clickTimer_->setInterval(500);
 
     this->scrollTimer_.setInterval(20);
-    QObject::connect(&this->scrollTimer_, &QTimer::timeout, this, [this] {
-        // TODO(leon): Make this respect screen scale
-        const qreal delta = this->currentMousePosition_.y() -
-                            this->lastMiddlePressPosition_.y();
-
-        if (fabs(delta) < this->cursors_.neutral.pixmap().height())
-        {
-            /*
-             * If within an area close to the initial position, don't do any
-             * scrolling at all.
-             */
-            QGuiApplication::changeOverrideCursor(this->cursors_.neutral);
-            return;
-        }
-
-        if (delta > 0)
-        {
-            QGuiApplication::changeOverrideCursor(this->cursors_.down);
-        }
-        else
-        {
-            QGuiApplication::changeOverrideCursor(this->cursors_.up);
-        }
-
-        // "Good" feeling multiplier found by trial-and-error
-        const qreal multiplier = qreal(0.02);
-        this->scrollBar_->offset(multiplier * delta);
-    });
+    QObject::connect(&this->scrollTimer_, &QTimer::timeout, this,
+                     &ChannelView::scrollUpdateRequested);
 
     this->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 }
@@ -1390,21 +1364,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
         case Qt::MiddleButton: {
             if (this->isScrolling_)
-            {
-                this->isScrolling_ = false;
-                this->scrollTimer_.stop();
-                QGuiApplication::restoreOverrideCursor();
-            }
+                this->disableScrolling();
             else
-            {
-                this->isScrolling_ = true;
-                this->lastMiddlePressPosition_ = event->screenPos();
-                // The line below prevents a sudden jerk at the beginning
-                this->currentMousePosition_ = event->screenPos();
-
-                this->scrollTimer_.start();
-                QGuiApplication::setOverrideCursor(this->cursors_.neutral);
-            }
+                this->enableScrolling(event);
         }
         break;
 
@@ -1859,6 +1821,54 @@ void ChannelView::getWordBounds(MessageLayout *layout,
     const int length =
         element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
     wordEnd = wordStart + length;
+}
+
+void ChannelView::enableScrolling(QMouseEvent *event)
+{
+    this->isScrolling_ = true;
+    this->lastMiddlePressPosition_ = event->screenPos();
+    // The line below prevents a sudden jerk at the beginning
+    this->currentMousePosition_ = event->screenPos();
+
+    this->scrollTimer_.start();
+    QGuiApplication::setOverrideCursor(this->cursors_.neutral);
+}
+
+void ChannelView::disableScrolling()
+{
+    this->isScrolling_ = false;
+    this->scrollTimer_.stop();
+    QGuiApplication::restoreOverrideCursor();
+}
+
+void ChannelView::scrollUpdateRequested()
+{
+    // TODO(leon): Make this respect screen scale
+    const qreal delta =
+        this->currentMousePosition_.y() - this->lastMiddlePressPosition_.y();
+
+    if (fabs(delta) < this->cursors_.neutral.pixmap().height())
+    {
+        /*
+             * If within an area close to the initial position, don't do any
+             * scrolling at all.
+             */
+        QGuiApplication::changeOverrideCursor(this->cursors_.neutral);
+        return;
+    }
+
+    if (delta > 0)
+    {
+        QGuiApplication::changeOverrideCursor(this->cursors_.down);
+    }
+    else
+    {
+        QGuiApplication::changeOverrideCursor(this->cursors_.up);
+    }
+
+    // "Good" feeling multiplier found by trial-and-error
+    const qreal multiplier = qreal(0.02);
+    this->scrollBar_->offset(multiplier * delta);
 }
 
 }  // namespace chatterino

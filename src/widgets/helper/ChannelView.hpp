@@ -148,6 +148,9 @@ private:
     void updatePauses();
     void unpaused();
 
+    void enableScrolling(QMouseEvent *event);
+    void disableScrolling();
+
     QTimer *layoutCooldown_;
     bool layoutQueued_;
 
@@ -229,6 +232,8 @@ private slots:
         queueLayout();
         update();
     }
+
+    void scrollUpdateRequested();
 };
 
 }  // namespace chatterino
