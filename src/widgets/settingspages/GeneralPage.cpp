@@ -237,7 +237,6 @@ bool SettingsLayout::filterElements(const QString &query)
 }
 
 GeneralPage::GeneralPage()
-    : SettingsPage("General")
 {
     auto y = new QVBoxLayout;
     auto scroll = new QScrollArea;
@@ -263,9 +262,7 @@ GeneralPage::GeneralPage()
 bool GeneralPage::filterElements(const QString &query)
 {
     if (this->settingsLayout_)
-        return this->settingsLayout_->filterElements(query) ||
-               this->name_.contains(query, Qt::CaseInsensitive) ||
-               query.isEmpty();
+        return this->settingsLayout_->filterElements(query) || query.isEmpty();
     else
         return false;
 }

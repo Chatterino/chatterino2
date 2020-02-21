@@ -6,6 +6,7 @@
 #include <QStackedLayout>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <functional>
 #include <pajlada/settings/setting.hpp>
 #include "widgets/helper/SettingsDialogTab.hpp"
 
@@ -49,10 +50,10 @@ private:
 
     void initUi();
     void addTabs();
-    void addTab(SettingsPage *page, const QString &iconPath,
+    void addTab(std::function<SettingsPage *()> page, const QString &name,
+                const QString &iconPath,
                 Qt::Alignment alignment = Qt::AlignTop);
     void selectTab(SettingsDialogTab *tab, const bool byUser = true);
-    void selectPage(SettingsPage *page);
     void selectTab(SettingsTabId id);
     SettingsDialogTab *tab(SettingsTabId id);
     void filterElements(const QString &query);

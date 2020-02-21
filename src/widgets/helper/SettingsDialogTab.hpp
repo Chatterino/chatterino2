@@ -5,6 +5,7 @@
 #include <QIcon>
 #include <QPaintEvent>
 #include <QWidget>
+#include <functional>
 
 namespace chatterino {
 
@@ -22,12 +23,16 @@ class SettingsDialogTab : public BaseWidget
     Q_OBJECT
 
 public:
-    SettingsDialogTab(SettingsDialog *dialog_, SettingsPage *page_,
-                      QString imageFileName, SettingsTabId id = {});
+    SettingsDialogTab(SettingsDialog *dialog_,
+                      std::function<SettingsPage *()> page_,
+                      const QString &name, QString imageFileName,
+                      SettingsTabId id = {});
 
     void setSelected(bool selected_);
     SettingsPage *page();
     SettingsTabId id() const;
+
+    const QString &name() const;
 
 signals:
     void selectedChanged(bool);
@@ -42,9 +47,11 @@ private:
     } ui_;
 
     // Parent settings dialog
-    SettingsDialog *dialog_;
-    SettingsPage *page_;
+    SettingsDialog *dialog_{};
+    SettingsPage *page_{};
+    std::function<SettingsPage *()> lazyPage_;
     SettingsTabId id_;
+    QString name_;
 
     bool selected_ = false;
 };

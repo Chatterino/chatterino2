@@ -33,7 +33,6 @@ namespace {
 }  // namespace
 
 CommandPage::CommandPage()
-    : SettingsPage("Commands")
 {
     auto app = getApp();
 

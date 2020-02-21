@@ -73,7 +73,6 @@ QString fetchLogDirectorySize()
 }
 
 ModerationPage::ModerationPage()
-    : SettingsPage("Moderation")
 {
     auto app = getApp();
     LayoutCreator<ModerationPage> layoutCreator(this);

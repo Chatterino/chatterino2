@@ -21,7 +21,6 @@
 namespace chatterino {
 
 NotificationPage::NotificationPage()
-    : SettingsPage("Notifications")
 {
     LayoutCreator<NotificationPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();

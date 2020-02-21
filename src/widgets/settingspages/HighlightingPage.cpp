@@ -29,7 +29,6 @@
 namespace chatterino {
 
 HighlightingPage::HighlightingPage()
-    : SettingsPage("Highlights")
 {
     auto app = getApp();
     LayoutCreator<HighlightingPage> layoutCreator(this);

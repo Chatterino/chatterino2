@@ -64,20 +64,13 @@ bool filterItemsRec(QObject *object, const QString &query)
     return any;
 }
 
-SettingsPage::SettingsPage(const QString &name)
-    : name_(name)
+SettingsPage::SettingsPage()
 {
 }
 
 bool SettingsPage::filterElements(const QString &query)
 {
-    return filterItemsRec(this, query) || query.isEmpty() ||
-           this->name_.contains(query, Qt::CaseInsensitive);
-}
-
-const QString &SettingsPage::getName()
-{
-    return this->name_;
+    return filterItemsRec(this, query) || query.isEmpty();
 }
 
 SettingsDialogTab *SettingsPage::tab() const

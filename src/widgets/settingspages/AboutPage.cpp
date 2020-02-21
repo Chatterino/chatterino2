@@ -18,7 +18,6 @@
 namespace chatterino {
 
 AboutPage::AboutPage()
-    : SettingsPage("About")
 {
     LayoutCreator<AboutPage> layoutCreator(this);
 

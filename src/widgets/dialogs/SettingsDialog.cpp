@@ -107,7 +107,8 @@ void SettingsDialog::filterElements(const QString &text)
     for (auto &&tab : this->tabs_)
     {
         // filterElements returns true if anything on the page matches the search query
-        tab->setVisible(tab->page()->filterElements(text));
+        tab->setVisible(tab->name().contains(text, Qt::CaseInsensitive) ||
+                        tab->page()->filterElements(text));
     }
 
     // find next visible page
@@ -157,36 +158,30 @@ void SettingsDialog::addTabs()
 
     this->ui_.tabContainer->setContentsMargins(0, 20, 0, 20);
 
-    this->addTab(new GeneralPage, ":/settings/about.svg");
-
+    // clang-format off
+    this->addTab([]{return new GeneralPage;},          "General",        ":/settings/about.svg");
     this->ui_.tabContainer->addSpacing(16);
-
-    this->addTab(new AccountsPage, ":/settings/accounts.svg");
-
+    this->addTab([]{return new AccountsPage;},         "Accounts",       ":/settings/accounts.svg");
     this->ui_.tabContainer->addSpacing(16);
-
-    this->addTab(new CommandPage, ":/settings/commands.svg");
-    this->addTab(new HighlightingPage, ":/settings/notifications.svg");
-    this->addTab(new IgnoresPage, ":/settings/ignore.svg");
-
+    this->addTab([]{return new CommandPage;},          "Commands",       ":/settings/commands.svg");
+    this->addTab([]{return new HighlightingPage;},     "Highlights",     ":/settings/notifications.svg");
+    this->addTab([]{return new IgnoresPage;},          "Ignores",        ":/settings/ignore.svg");
     this->ui_.tabContainer->addSpacing(16);
-
-    this->addTab(new KeyboardSettingsPage, ":/settings/keybinds.svg");
-    this->addTab(new ModerationPage, ":/settings/moderation.svg");
-    this->addTab(new NotificationPage, ":/settings/notification2.svg");
-    this->addTab(new ExternalToolsPage, ":/settings/externaltools.svg");
-
+    this->addTab([]{return new KeyboardSettingsPage;}, "Keybindings",    ":/settings/keybinds.svg");
+    this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg");
+    this->addTab([]{return new NotificationPage;},     "Notifications",  ":/settings/notification2.svg");
+    this->addTab([]{return new ExternalToolsPage;},    "External tools", ":/settings/externaltools.svg");
     this->ui_.tabContainer->addStretch(1);
-    this->addTab(new AboutPage, ":/settings/about.svg", Qt::AlignBottom);
+    this->addTab([]{return new AboutPage;},            "About",          ":/settings/about.svg", Qt::AlignBottom);
+    // clang-format on
 }
 
-void SettingsDialog::addTab(SettingsPage *page, const QString &iconPath,
+void SettingsDialog::addTab(std::function<SettingsPage *()> page,
+                            const QString &name, const QString &iconPath,
                             Qt::Alignment alignment)
 {
-    auto tab = new SettingsDialogTab(this, page, iconPath);
-    page->setTab(tab);
+    auto tab = new SettingsDialogTab(this, std::move(page), name, iconPath);
 
-    this->ui_.pageStack->addWidget(page);
     this->ui_.tabContainer->addWidget(tab, 0, alignment);
     this->tabs_.push_back(tab);
 
@@ -198,6 +193,15 @@ void SettingsDialog::addTab(SettingsPage *page, const QString &iconPath,
 
 void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
 {
+    // add page if it's not been added yet
+    [&] {
+        for (int i = 0; i < this->ui_.pageStack->count(); i++)
+            if (this->ui_.pageStack->itemAt(i)->widget() == tab->page())
+                return;
+
+        this->ui_.pageStack->addWidget(tab->page());
+    }();
+
     this->ui_.pageStack->setCurrentWidget(tab->page());
 
     if (this->selectedTab_ != nullptr)
@@ -231,18 +235,13 @@ SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
     return nullptr;
 }
 
-void SettingsDialog::selectPage(SettingsPage *page)
-{
-    assert(page);
-    assert(page->tab());
-
-    this->selectTab(page->tab());
-}
-
 void SettingsDialog::showDialog(SettingsDialogPreference preferredTab)
 {
     static SettingsDialog *instance = new SettingsDialog();
-    instance->refresh();
+    static bool hasShownBefore = false;
+    if (hasShownBefore)
+        instance->refresh();
+    hasShownBefore = true;
 
     switch (preferredTab)
     {
