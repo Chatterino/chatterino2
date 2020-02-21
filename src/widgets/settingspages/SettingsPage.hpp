@@ -47,10 +47,9 @@ class SettingsPage : public QFrame
     Q_OBJECT
 
 public:
-    SettingsPage(const QString &name, const QString &iconResource);
+    SettingsPage(const QString &name);
 
     const QString &getName();
-    const QString &getIconResource();
 
     virtual bool filterElements(const QString &query);
 
@@ -73,10 +72,7 @@ public:
 
 protected:
     QString name_;
-    QString iconResource_;
-
     SettingsDialogTab *tab_;
-
     pajlada::Signals::NoArgSignal onCancel_;
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 };

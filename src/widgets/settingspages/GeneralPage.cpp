@@ -237,7 +237,7 @@ bool SettingsLayout::filterElements(const QString &query)
 }
 
 GeneralPage::GeneralPage()
-    : SettingsPage("General", ":/settings/about.svg")
+    : SettingsPage("General")
 {
     auto y = new QVBoxLayout;
     auto scroll = new QScrollArea;

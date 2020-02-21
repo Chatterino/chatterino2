@@ -73,7 +73,7 @@ QString fetchLogDirectorySize()
 }
 
 ModerationPage::ModerationPage()
-    : SettingsPage("Moderation", ":/settings/moderation.svg")
+    : SettingsPage("Moderation")
 {
     auto app = getApp();
     LayoutCreator<ModerationPage> layoutCreator(this);

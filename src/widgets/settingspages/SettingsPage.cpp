@@ -64,9 +64,8 @@ bool filterItemsRec(QObject *object, const QString &query)
     return any;
 }
 
-SettingsPage::SettingsPage(const QString &name, const QString &iconResource)
+SettingsPage::SettingsPage(const QString &name)
     : name_(name)
-    , iconResource_(iconResource)
 {
 }
 
@@ -79,11 +78,6 @@ bool SettingsPage::filterElements(const QString &query)
 const QString &SettingsPage::getName()
 {
     return this->name_;
-}
-
-const QString &SettingsPage::getIconResource()
-{
-    return this->iconResource_;
 }
 
 SettingsDialogTab *SettingsPage::tab() const

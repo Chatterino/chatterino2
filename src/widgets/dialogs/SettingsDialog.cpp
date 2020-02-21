@@ -157,32 +157,33 @@ void SettingsDialog::addTabs()
 
     this->ui_.tabContainer->setContentsMargins(0, 20, 0, 20);
 
-    this->addTab(new GeneralPage);
+    this->addTab(new GeneralPage, ":/settings/about.svg");
 
     this->ui_.tabContainer->addSpacing(16);
 
-    this->addTab(new AccountsPage);
+    this->addTab(new AccountsPage, ":/settings/accounts.svg");
 
     this->ui_.tabContainer->addSpacing(16);
 
-    this->addTab(new CommandPage);
-    this->addTab(new HighlightingPage);
-    this->addTab(new IgnoresPage);
+    this->addTab(new CommandPage, ":/settings/commands.svg");
+    this->addTab(new HighlightingPage, ":/settings/notifications.svg");
+    this->addTab(new IgnoresPage, ":/settings/ignore.svg");
 
     this->ui_.tabContainer->addSpacing(16);
 
-    this->addTab(new KeyboardSettingsPage);
-    this->addTab(new ModerationPage);
-    this->addTab(new NotificationPage);
-    this->addTab(new ExternalToolsPage);
+    this->addTab(new KeyboardSettingsPage, ":/settings/keybinds.svg");
+    this->addTab(new ModerationPage, ":/settings/moderation.svg");
+    this->addTab(new NotificationPage, ":/settings/notification2.svg");
+    this->addTab(new ExternalToolsPage, ":/settings/externaltools.svg");
 
     this->ui_.tabContainer->addStretch(1);
-    this->addTab(new AboutPage, Qt::AlignBottom);
+    this->addTab(new AboutPage, ":/settings/about.svg", Qt::AlignBottom);
 }
 
-void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
+void SettingsDialog::addTab(SettingsPage *page, const QString &iconPath,
+                            Qt::Alignment alignment)
 {
-    auto tab = new SettingsDialogTab(this, page, page->getIconResource());
+    auto tab = new SettingsDialogTab(this, page, iconPath);
     page->setTab(tab);
 
     this->ui_.pageStack->addWidget(page);

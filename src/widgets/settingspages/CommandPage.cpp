@@ -33,7 +33,7 @@ namespace {
 }  // namespace
 
 CommandPage::CommandPage()
-    : SettingsPage("Commands", ":/settings/commands.svg")
+    : SettingsPage("Commands")
 {
     auto app = getApp();
 

@@ -17,7 +17,7 @@
 namespace chatterino {
 
 AccountsPage::AccountsPage()
-    : SettingsPage("Accounts", ":/settings/accounts.svg")
+    : SettingsPage("Accounts")
 {
     auto *app = getApp();
 

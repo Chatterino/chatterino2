@@ -29,7 +29,7 @@
 namespace chatterino {
 
 HighlightingPage::HighlightingPage()
-    : SettingsPage("Highlights", ":/settings/notifications.svg")
+    : SettingsPage("Highlights")
 {
     auto app = getApp();
     LayoutCreator<HighlightingPage> layoutCreator(this);
