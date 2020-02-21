@@ -28,8 +28,9 @@
     <file>buttons/unmod.png</file>
     <file>buttons/update.png</file>
     <file>buttons/updateError.png</file>
-    <file>com.chatterino.chatterino.desktop</file>
     <file>chatterino.icns</file>
+    <file>com.chatterino.chatterino.appdata.xml</file>
+    <file>com.chatterino.chatterino.desktop</file>
     <file>contributors.txt</file>
     <file>emoji.json</file>
     <file>emojidata.txt</file>
@@ -50,6 +51,12 @@
     <file>licenses/websocketpp.txt</file>
     <file>pajaDank.png</file>
     <file>qss/settings.qss</file>
+    <file>scrolling/downScroll.png</file>
+    <file>scrolling/downScroll.svg</file>
+    <file>scrolling/neutralScroll.png</file>
+    <file>scrolling/neutralScroll.svg</file>
+    <file>scrolling/upScroll.png</file>
+    <file>scrolling/upScroll.svg</file>
     <file>settings/about.svg</file>
     <file>settings/aboutlogo.png</file>
     <file>settings/accounts.svg</file>
