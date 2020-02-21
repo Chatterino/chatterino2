@@ -26,18 +26,15 @@ SettingsDialog::SettingsDialog()
     : BaseWindow(BaseWindow::DisableCustomScaling)
 {
     this->setWindowTitle("Chatterino Settings");
-
+    this->resize(815, 600);
     this->themeChangedEvent();
     this->scaleChangedEvent(this->scale());
 
     this->initUi();
     this->addTabs();
-
     this->overrideBackgroundColor_ = QColor("#111111");
     this->scaleChangedEvent(
         this->scale());  // execute twice to fix performance + width of item
-
-    this->resize(815, 600);
 }
 
 void SettingsDialog::initUi()
