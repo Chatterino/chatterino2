@@ -24,6 +24,7 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/TooltipPreviewImage.hpp"
@@ -113,6 +114,10 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->initializeScrollbar();
     this->initializeSignals();
 
+    this->cursors_.neutral = QCursor(getResources().scrolling.neutralScroll);
+    this->cursors_.up = QCursor(getResources().scrolling.upScroll);
+    this->cursors_.down = QCursor(getResources().scrolling.downScroll);
+
     this->pauseTimer_.setSingleShot(true);
     QObject::connect(&this->pauseTimer_, &QTimer::timeout, this, [this] {
         /// remove elements that are finite
@@ -132,17 +137,27 @@ ChannelView::ChannelView(BaseWidget *parent)
 
     this->scrollTimer_.setInterval(20);
     QObject::connect(&this->scrollTimer_, &QTimer::timeout, this, [this] {
+        // TODO(leon): Make this respect screen scale
         const qreal delta = this->currentMousePosition_.y() -
                             this->lastMiddlePressPosition_.y();
 
-        // TODO(leon): How large should the "grace area" be?
-        if (fabs(delta) < 10)
+        if (fabs(delta) < this->cursors_.neutral.pixmap().height())
         {
             /*
              * If within an area close to the initial position, don't do any
              * scrolling at all.
              */
+            QGuiApplication::changeOverrideCursor(this->cursors_.neutral);
             return;
+        }
+
+        if (delta > 0)
+        {
+            QGuiApplication::changeOverrideCursor(this->cursors_.down);
+        }
+        else
+        {
+            QGuiApplication::changeOverrideCursor(this->cursors_.up);
         }
 
         // "Good" feeling multiplier found by trial-and-error
@@ -1378,7 +1393,6 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             {
                 this->isScrolling_ = false;
                 this->scrollTimer_.stop();
-                // TODO(leon): cursor
                 QGuiApplication::restoreOverrideCursor();
             }
             else
@@ -1387,9 +1401,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
                 this->lastMiddlePressPosition_ = event->screenPos();
                 // The line below prevents a sudden jerk at the beginning
                 this->currentMousePosition_ = event->screenPos();
+
                 this->scrollTimer_.start();
-                // TODO(leon): cursor
-                QGuiApplication::setOverrideCursor(Qt::SizeVerCursor);
+                QGuiApplication::setOverrideCursor(this->cursors_.neutral);
             }
         }
         break;

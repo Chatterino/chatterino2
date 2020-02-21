@@ -197,6 +197,12 @@ private:
     QPointF currentMousePosition_;
     QTimer scrollTimer_;
 
+    struct {
+        QCursor neutral;
+        QCursor up;
+        QCursor down;
+    } cursors_;
+
     Selection selection_;
     bool selecting_ = false;
 
