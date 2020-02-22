@@ -18,13 +18,13 @@ URL: https://dev.twitch.tv/docs/v5/reference/users#check-user-follows-by-channel
 
 ### Follow Channel
 URL: https://dev.twitch.tv/docs/v5/reference/users#follow-channel  
-Requires `user_follows_edit` scope  
+Requires `user_follows_edit` scope
 
  * We implement this API in `providers/twitch/TwitchAccount.cpp followUser`
 
 ### Unfollow Channel
 URL: https://dev.twitch.tv/docs/v5/reference/users#unfollow-channel  
-Requires `user_follows_edit` scope  
+Requires `user_follows_edit` scope
 
  * We implement this API in `providers/twitch/TwitchAccount.cpp unfollowUser`
 
@@ -50,28 +50,31 @@ URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-block-list
 
  * We use this in `providers/twitch/TwitchAccount.cpp loadIgnores`
 
-### BLOCK USER
-URL: XD
+### Block User
+URL: https://dev.twitch.tv/docs/v5/reference/users#block-user  
+Requires `user_blocks_edit` scope
 
  * We use this in `providers/twitch/TwitchAccount.cpp ignoreByID`
 
-### UNBLOCK USER
-URL: XD
+### Unblock User
+URL: https://dev.twitch.tv/docs/v5/reference/users#unblock-user  
+Requires `user_blocks_edit` scope
 
  * We use this in `providers/twitch/TwitchAccount.cpp unignoreByID`
 
-### LOAD USER EMOTES
-URL: XD
+### Get User Emotes
+URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-emotes  
+Requires `user_subscriptions` scope
 
  * We use this in `providers/twitch/TwitchAccount.cpp loadEmotes` to figure out which emotes a user is allowed to use!
 
 ### AUTOMOD APPROVE
-URL: XD
+**Unofficial** documentation: https://discuss.dev.twitch.tv/t/allowing-others-aka-bots-to-use-twitchbot-reject/8508/2
 
  * We use this in `providers/twitch/TwitchAccount.cpp autoModAllow` to approve an automod deny/allow question
 
 ### AUTOMOD DENY
-URL: XD
+**Unofficial** documentation: https://discuss.dev.twitch.tv/t/allowing-others-aka-bots-to-use-twitchbot-reject/8508/2
 
  * We use this in `providers/twitch/TwitchAccount.cpp autoModDeny` to deny an automod deny/allow question
 
@@ -88,7 +91,7 @@ URL: XD
 The TMI api is undocumented.
 
 ### Get Chatters
-This endpoint is *undocumented*.
+**Undocumented**
 
  * We use this in `widgets/splits/Split.cpp showViewerList`
  * We use this in `providers/twitch/TwitchChannel.cpp refreshChatters`
