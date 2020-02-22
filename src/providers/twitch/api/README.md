@@ -78,13 +78,22 @@ Requires `user_subscriptions` scope
  * We use this in `providers/twitch/TwitchAccount.cpp autoModDeny` to deny an automod deny/allow question
 
 ## Helix
+Full Helix API reference: https://dev.twitch.tv/docs/api/reference
 
+### Get Users
+URL: https://dev.twitch.tv/docs/api/reference#get-users
 
-### GET USERS
+ * We implement this in `providers/twitch/api/Helix.cpp fetchUsers`.
+   Used in:
+     * NotificationController
+     * CommandController
 
- * We implement this in `providers/twitch/api/Helix.cpp getUsers`.
+### Get Users Follows
+URL: https://dev.twitch.tv/docs/api/reference#get-users-follows
 
-   It is used in NotificationController and CommandController
+ * We implement this in `providers/twitch/api/Helix.cpp fetchUsersFollows`
+   Used in:
+     * UserInfoPopup
 
 ## TMI
 The TMI api is undocumented.
