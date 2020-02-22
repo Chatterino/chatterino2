@@ -37,7 +37,6 @@ URL: https://dev.twitch.tv/docs/v5/reference/streams#get-stream-by-user
 ### Get User
 URL: https://dev.twitch.tv/docs/v5/reference/users#get-user  
 
- * We use this API in `singletons/Toasts.cpp fetchChannelAvatar` to resolve a users avatar by their login name
  * We implement this API in `providers/twitch/PartialTwitchUser.cpp getId`
 
 ### Get Cheermotes
