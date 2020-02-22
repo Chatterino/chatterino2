@@ -7,7 +7,6 @@ We use a bunch of Kraken (V5) in Chatterino2.
 ### Get Channel
 URL: https://dev.twitch.tv/docs/v5/reference/channels#get-channel  
 
- * We use this API in `widgets/dialogs/UserInfoPopup.cpp updateUserData` to show the user ID of the user you clicked
  * We use this API in `providers/twitch/TwitchChannel.cpp refreshTitle` to check the current stream title/game
 
 ### Check user follows by Channel

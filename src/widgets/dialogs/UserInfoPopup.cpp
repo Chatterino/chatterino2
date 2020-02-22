@@ -7,6 +7,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
@@ -21,8 +22,8 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#define TEXT_FOLLOWERS "Followers: "
-#define TEXT_VIEWS "Views: "
+const QString TEXT_VIEWS("Views: %1");
+const QString TEXT_FOLLOWERS("Followers: %1");
 #define TEXT_CREATED "Created: "
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
@@ -91,8 +92,9 @@ UserInfoPopup::UserInfoPopup()
                 this->ui_.userIDLabel->setPalette(palette);
             }
 
-            vbox.emplace<Label>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
-            vbox.emplace<Label>(TEXT_FOLLOWERS)
+            vbox.emplace<Label>(TEXT_VIEWS.arg(""))
+                .assign(&this->ui_.viewCountLabel);
+            vbox.emplace<Label>(TEXT_FOLLOWERS.arg(""))
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED)
                 .assign(&this->ui_.createdDateLabel);
@@ -383,12 +385,11 @@ void UserInfoPopup::updateUserData()
 {
     std::weak_ptr<bool> hack = this->hack_;
 
-    const auto onIdFetchFailed = [this]() {
+    const auto onUserFetchFailed = [this] {
         // this can occur when the account doesn't exist.
-        this->ui_.followerCountLabel->setText(TEXT_FOLLOWERS +
-                                              QString(TEXT_UNAVAILABLE));
-        this->ui_.viewCountLabel->setText(TEXT_VIEWS +
-                                          QString(TEXT_UNAVAILABLE));
+        this->ui_.followerCountLabel->setText(
+            TEXT_FOLLOWERS.arg(TEXT_UNAVAILABLE));
+        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(TEXT_UNAVAILABLE));
         this->ui_.createdDateLabel->setText(TEXT_CREATED +
                                             QString(TEXT_UNAVAILABLE));
 
@@ -399,39 +400,44 @@ void UserInfoPopup::updateUserData()
         this->ui_.userIDLabel->setProperty("copy-text",
                                            QString(TEXT_UNAVAILABLE));
     };
-    const auto onIdFetched = [this, hack](QString id) {
+    const auto onUserFetched = [this, hack](const auto &user) {
         auto currentUser = getApp()->accounts->twitch.getCurrent();
 
-        this->userId_ = id;
+        this->userId_ = user.id;
 
-        this->ui_.userIDLabel->setText(TEXT_USER_ID + id);
-        this->ui_.userIDLabel->setProperty("copy-text", id);
+        this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);
+        this->ui_.userIDLabel->setProperty("copy-text", user.id);
         // don't wait for the request to complete, just put the user id in the card
         // right away
-
-        QString url("https://api.twitch.tv/kraken/channels/" + id);
-
-        NetworkRequest::twitchRequest(url)
-            .caller(this)
-            .onSuccess([this](auto result) -> Outcome {
-                auto obj = result.parseJson();
-                this->ui_.followerCountLabel->setText(
-                    TEXT_FOLLOWERS +
-                    QString::number(obj.value("followers").toInt()));
+        //
+        getHelix()->getUserById(
+            this->userId_,
+            [this](const auto &user) {
                 this->ui_.viewCountLabel->setText(
-                    TEXT_VIEWS + QString::number(obj.value("views").toInt()));
+                    TEXT_VIEWS.arg(user.viewCount));
+                // this->ui_.createdDateLabel->setText(TEXT_CREATED +
+                //                                     "NOT AVAILABLE IN HELIX");
                 this->ui_.createdDateLabel->setText(
-                    TEXT_CREATED +
-                    obj.value("created_at").toString().section("T", 0, 0));
+                    QString("%1 NOT AVAILABLE IN HELIX").arg(TEXT_CREATED));
 
-                this->loadAvatar(QUrl(obj.value("logo").toString()));
+                this->loadAvatar(user.profileImageUrl);
+            },
+            [] {
+                // on failure
+            });
 
-                return Success;
-            })
-            .execute();
+        getHelix()->getUserFollowers(
+            this->userId_,
+            [this](const auto &followers) {
+                this->ui_.followerCountLabel->setText(
+                    TEXT_FOLLOWERS.arg(followers.total));
+            },
+            [] {
+                // on failure
+            });
 
         // get follow state
-        currentUser->checkFollow(id, [this, hack](auto result) {
+        currentUser->checkFollow(user.id, [this, hack](auto result) {
             if (hack.lock())
             {
                 if (result != FollowResult_Failed)
@@ -447,7 +453,7 @@ void UserInfoPopup::updateUserData()
         bool isIgnoring = false;
         for (const auto &ignoredUser : currentUser->getIgnores())
         {
-            if (id == ignoredUser.id)
+            if (user.id == ignoredUser.id)
             {
                 isIgnoring = true;
                 break;
@@ -479,8 +485,8 @@ void UserInfoPopup::updateUserData()
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
     };
 
-    PartialTwitchUser::byName(this->userName_)
-        .getId(onIdFetched, onIdFetchFailed, this);
+    getHelix()->getUserByName(this->userName_, onUserFetched,
+                              onUserFetchFailed);
 
     this->ui_.follow->setEnabled(false);
     this->ui_.ignore->setEnabled(false);
