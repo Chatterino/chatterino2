@@ -10,6 +10,7 @@
 #include <boost/optional.hpp>
 
 #include <functional>
+#include <vector>
 
 namespace chatterino {
 
@@ -36,6 +37,36 @@ struct HelixUser {
     }
 };
 
+struct HelixUsersFollowsRecord {
+    const QString fromId;
+    const QString fromName;
+    const QString toId;
+    const QString toName;
+    const QString followedAt;  // date time object
+
+    HelixUsersFollowsRecord(QJsonObject jsonObject)
+        : fromId(jsonObject.value("from_id").toString())
+        , fromName(jsonObject.value("from_name").toString())
+        , toId(jsonObject.value("to_id").toString())
+        , toName(jsonObject.value("to_name").toString())
+        , followedAt(jsonObject.value("followed_at").toString())
+    {
+    }
+};
+
+struct HelixUsersFollowsResponse {
+    const int total;
+    std::vector<HelixUsersFollowsRecord> data;
+    HelixUsersFollowsResponse(QJsonObject jsonObject)
+        : total(jsonObject.value("total").toInt())
+    {
+        const auto &jsonData = jsonObject.value("data").toArray();
+        std::transform(jsonData.begin(), jsonData.end(),
+                       std::back_inserter(this->data),
+                       [](const QJsonValue &asd) { return asd.toObject(); });
+    }
+};
+
 class Helix final : boost::noncopyable
 {
 public:
@@ -47,6 +78,17 @@ public:
                        HelixFailureCallback failureCallback);
     void getUserById(QString userId, ResultCallback<HelixUser> successCallback,
                      HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#get-users-follows
+    void fetchUsersFollows(
+        QString fromId, QString toId,
+        ResultCallback<HelixUsersFollowsResponse> successCallback,
+        HelixFailureCallback failureCallback);
+
+    void getUserFollowers(
+        QString userId,
+        ResultCallback<HelixUsersFollowsResponse> successCallback,
+        HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

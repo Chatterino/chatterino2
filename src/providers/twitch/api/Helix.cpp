@@ -93,6 +93,51 @@ void Helix::getUserById(QString userId,
         failureCallback);
 }
 
+void Helix::fetchUsersFollows(
+    QString fromId, QString toId,
+    ResultCallback<HelixUsersFollowsResponse> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    assert(!fromId.isEmpty() || !toId.isEmpty());
+
+    QUrlQuery urlQuery;
+
+    if (!fromId.isEmpty())
+    {
+        urlQuery.addQueryItem("from_id", fromId);
+    }
+
+    if (!toId.isEmpty())
+    {
+        urlQuery.addQueryItem("to_id", toId);
+    }
+
+    // TODO: set on success and on error
+    this->makeRequest("users/follows", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            if (root.empty())
+            {
+                failureCallback();
+                return Failure;
+            }
+            successCallback(root);
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::getUserFollowers(
+    QString userId, ResultCallback<HelixUsersFollowsResponse> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    this->fetchUsersFollows("", userId, successCallback, failureCallback);
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
