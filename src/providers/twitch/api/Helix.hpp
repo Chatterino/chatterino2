@@ -32,7 +32,7 @@ struct HelixUser {
         , displayName(jsonObject.value("display_name").toString())
         , description(jsonObject.value("description").toString())
         , profileImageUrl(jsonObject.value("profile_image_url").toString())
-        , viewCount(jsonObject.value("viewCount").toInt())
+        , viewCount(jsonObject.value("view_count").toInt())
     {
     }
 };
@@ -70,6 +70,7 @@ struct HelixUsersFollowsResponse {
 class Helix final : boost::noncopyable
 {
 public:
+    // https://dev.twitch.tv/docs/api/reference#get-users
     void fetchUsers(QStringList userIds, QStringList userLogins,
                     ResultCallback<std::vector<HelixUser>> successCallback,
                     HelixFailureCallback failureCallback);
