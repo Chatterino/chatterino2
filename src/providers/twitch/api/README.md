@@ -83,6 +83,7 @@ Full Helix API reference: https://dev.twitch.tv/docs/api/reference
 URL: https://dev.twitch.tv/docs/api/reference#get-users
 
  * We implement this in `providers/twitch/api/Helix.cpp fetchUsers`.
+
    Used in:
      * NotificationController
      * CommandController
@@ -91,6 +92,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-users
 URL: https://dev.twitch.tv/docs/api/reference#get-users-follows
 
  * We implement this in `providers/twitch/api/Helix.cpp fetchUsersFollows`
+
    Used in:
      * UserInfoPopup
 
