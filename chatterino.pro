@@ -178,7 +178,6 @@ SOURCES += \
     src/providers/irc/IrcConnection2.cpp \
     src/providers/irc/IrcServer.cpp \
     src/providers/LinkResolver.cpp \
-    src/providers/twitch/ChatroomChannel.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
     src/providers/twitch/PartialTwitchUser.cpp \
     src/providers/twitch/PubsubActions.cpp \
@@ -382,7 +381,6 @@ HEADERS += \
     src/providers/irc/IrcConnection2.hpp \
     src/providers/irc/IrcServer.hpp \
     src/providers/LinkResolver.hpp \
-    src/providers/twitch/ChatroomChannel.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
     src/providers/twitch/PartialTwitchUser.hpp \
