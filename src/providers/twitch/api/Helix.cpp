@@ -95,6 +95,8 @@ void Helix::getUserById(QString userId,
 
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
+    assert(!url.startsWith("/"));
+
     if (this->clientId.isEmpty())
     {
         qDebug()
