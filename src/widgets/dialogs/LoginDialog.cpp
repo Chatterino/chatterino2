@@ -220,6 +220,7 @@ AdvancedLoginWidget::AdvancedLoginWidget()
                 const auto onIdFetched = [=](const QString &userID) {
                     this->ui_.userIDInput.setText(userID);  //
                 };
+                // XXX(PAJLADA): Migration path: either use an external api backed by an app access token, or link to some service that can resolve username to userid
                 PartialTwitchUser::byName(this->ui_.usernameInput.text())
                     .getId(onIdFetched, this);
             });
