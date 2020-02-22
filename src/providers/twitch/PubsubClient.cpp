@@ -1064,7 +1064,6 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         else
         {
             qDebug() << "Invalid whisper type:" << whisperType.c_str();
-            assert(false);
             return;
         }
     }

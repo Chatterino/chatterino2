@@ -563,3 +563,11 @@ git_hash = $$str_member($$git_commit, 0, 8)
 DEFINES += CHATTERINO_GIT_COMMIT=\\\"$$git_commit\\\"
 DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
 DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
+
+CONFIG(debug, debug|release) {
+    message("Building Chatterino2 DEBUG")
+} else {
+    message("Building Chatterino2 RELEASE")
+}
+
+message("Injected git values: $$git_commit ($$git_release) $$git_hash")

@@ -80,6 +80,10 @@ public:
 
     pajlada::Signals::NoArgSignal wordFlagsChanged;
 
+    // This signal fires every 100ms and can be used to trigger random things that require a recheck.
+    // It is currently being used by the "Tooltip Preview Image" system to recheck if an image is ready to be rendered.
+    pajlada::Signals::NoArgSignal miscUpdate;
+
 private:
     void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
 
@@ -96,6 +100,7 @@ private:
     pajlada::SettingListener wordFlagsListener_;
 
     QTimer *saveTimer;
+    QTimer miscUpdateTimer_;
 };
 
 }  // namespace chatterino

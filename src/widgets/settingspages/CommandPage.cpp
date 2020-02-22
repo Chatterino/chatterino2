@@ -33,7 +33,6 @@ namespace {
 }  // namespace
 
 CommandPage::CommandPage()
-    : SettingsPage("Commands", ":/settings/commands.svg")
 {
     auto app = getApp();
 
@@ -51,6 +50,7 @@ CommandPage::CommandPage()
             Command{"/command", "I made a new command HeyGuys"});
     });
 
+    // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
     {
         auto button = new QPushButton("Import commands from Chatterino 1");

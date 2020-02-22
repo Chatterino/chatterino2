@@ -35,6 +35,7 @@ namespace detail {
         boost::optional<QPixmap> first() const;
 
     private:
+        void processOffset();
         QVector<Frame<QPixmap>> items_;
         int index_{0};
         int durationOffset_{0};

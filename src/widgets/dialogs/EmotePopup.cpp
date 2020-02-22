@@ -1,6 +1,7 @@
 #include "EmotePopup.hpp"
 
 #include "Application.hpp"
+#include "common/CompletionModel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Message.hpp"
@@ -37,7 +38,8 @@ namespace {
             std::sort(vec.begin(), vec.end(),
                       [](const std::pair<EmoteName, EmotePtr> &l,
                          const std::pair<EmoteName, EmotePtr> &r) {
-                          return l.first.string < r.first.string;
+                          return CompletionModel::compareStrings(
+                              l.first.string, r.first.string);
                       });
             for (const auto &emote : vec)
             {

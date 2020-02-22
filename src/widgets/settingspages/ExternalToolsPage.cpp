@@ -12,7 +12,6 @@
 namespace chatterino {
 
 ExternalToolsPage::ExternalToolsPage()
-    : SettingsPage("External tools", ":/settings/externaltools.svg")
 {
     LayoutCreator<ExternalToolsPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();

@@ -4,7 +4,6 @@
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/Button.hpp"
-#include "widgets/helper/SettingsDialogTab.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
@@ -21,22 +20,20 @@
 
 namespace chatterino {
 
-SettingsDialog *SettingsDialog::handle = nullptr;
+SettingsDialog *SettingsDialog::instance_ = nullptr;
 
 SettingsDialog::SettingsDialog()
     : BaseWindow(BaseWindow::DisableCustomScaling)
 {
     this->setWindowTitle("Chatterino Settings");
+    this->resize(815, 600);
+    this->themeChangedEvent();
+    this->scaleChangedEvent(this->scale());
 
     this->initUi();
     this->addTabs();
-
-    this->scaleChangedEvent(this->scale());
-
     this->overrideBackgroundColor_ = QColor("#111111");
-    this->themeChangedEvent();
-
-    this->resize(815, 600);
+    this->scaleChangedEvent(this->scale());  // execute twice to width of item
 }
 
 void SettingsDialog::initUi()
@@ -69,13 +66,9 @@ void SettingsDialog::initUi()
         .assign(&this->ui_.tabContainer);
 
     // right side (pages)
-    auto right =
-        centerBox.emplace<QVBoxLayout>().withoutMargin().withoutSpacing();
-    {
-        right.emplace<QStackedLayout>()
-            .assign(&this->ui_.pageStack)
-            .withoutMargin();
-    }
+    centerBox.emplace<QStackedLayout>()
+        .assign(&this->ui_.pageStack)
+        .withoutMargin();
 
     this->ui_.pageStack->setMargin(0);
 
@@ -103,10 +96,11 @@ void SettingsDialog::initUi()
 void SettingsDialog::filterElements(const QString &text)
 {
     // filter elements and hide pages
-    for (auto &&page : this->pages_)
+    for (auto &&tab : this->tabs_)
     {
         // filterElements returns true if anything on the page matches the search query
-        page->tab()->setVisible(page->filterElements(text));
+        tab->setVisible(tab->page()->filterElements(text) ||
+                        tab->name().contains(text, Qt::CaseInsensitive));
     }
 
     // find next visible page
@@ -144,9 +138,9 @@ void SettingsDialog::filterElements(const QString &text)
     }
 }
 
-SettingsDialog *SettingsDialog::getHandle()
+SettingsDialog *SettingsDialog::instance()
 {
-    return SettingsDialog::handle;
+    return SettingsDialog::instance_;
 }
 
 void SettingsDialog::addTabs()
@@ -156,38 +150,34 @@ void SettingsDialog::addTabs()
 
     this->ui_.tabContainer->setContentsMargins(0, 20, 0, 20);
 
-    this->addTab(new GeneralPage);
+    // Constructors are wrapped in std::function to remove some strain from first time loading.
 
+    // clang-format off
+    this->addTab([]{return new GeneralPage;},          "General",        ":/settings/about.svg");
     this->ui_.tabContainer->addSpacing(16);
-
-    this->addTab(new AccountsPage);
-
+    this->addTab([]{return new AccountsPage;},         "Accounts",       ":/settings/accounts.svg");
     this->ui_.tabContainer->addSpacing(16);
-
-    this->addTab(new CommandPage);
-    this->addTab(new HighlightingPage);
-    this->addTab(new IgnoresPage);
-
+    this->addTab([]{return new CommandPage;},          "Commands",       ":/settings/commands.svg");
+    this->addTab([]{return new HighlightingPage;},     "Highlights",     ":/settings/notifications.svg");
+    this->addTab([]{return new IgnoresPage;},          "Ignores",        ":/settings/ignore.svg");
     this->ui_.tabContainer->addSpacing(16);
-
-    this->addTab(new KeyboardSettingsPage);
-    this->addTab(this->ui_.moderationPage = new ModerationPage);
-    this->addTab(new NotificationPage);
-    this->addTab(new ExternalToolsPage);
-
+    this->addTab([]{return new KeyboardSettingsPage;}, "Keybindings",    ":/settings/keybinds.svg");
+    this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg");
+    this->addTab([]{return new NotificationPage;},     "Notifications",  ":/settings/notification2.svg");
+    this->addTab([]{return new ExternalToolsPage;},    "External tools", ":/settings/externaltools.svg");
     this->ui_.tabContainer->addStretch(1);
-    this->addTab(new AboutPage, Qt::AlignBottom);
+    this->addTab([]{return new AboutPage;},            "About",          ":/settings/about.svg", Qt::AlignBottom);
+    // clang-format on
 }
 
-void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
+void SettingsDialog::addTab(std::function<SettingsPage *()> page,
+                            const QString &name, const QString &iconPath,
+                            Qt::Alignment alignment)
 {
-    auto tab = new SettingsDialogTab(this, page, page->getIconResource());
-    page->setTab(tab);
+    auto tab = new SettingsDialogTab(this, std::move(page), name, iconPath);
 
-    this->ui_.pageStack->addWidget(page);
     this->ui_.tabContainer->addWidget(tab, 0, alignment);
     this->tabs_.push_back(tab);
-    this->pages_.push_back(page);
 
     if (this->tabs_.size() == 1)
     {
@@ -197,7 +187,16 @@ void SettingsDialog::addTab(SettingsPage *page, Qt::Alignment alignment)
 
 void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
 {
-    this->ui_.pageStack->setCurrentWidget(tab->getSettingsPage());
+    // add page if it's not been added yet
+    [&] {
+        for (int i = 0; i < this->ui_.pageStack->count(); i++)
+            if (this->ui_.pageStack->itemAt(i)->widget() == tab->page())
+                return;
+
+        this->ui_.pageStack->addWidget(tab->page());
+    }();
+
+    this->ui_.pageStack->setCurrentWidget(tab->page());
 
     if (this->selectedTab_ != nullptr)
     {
@@ -215,28 +214,44 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
     }
 }
 
-void SettingsDialog::selectPage(SettingsPage *page)
+void SettingsDialog::selectTab(SettingsTabId id)
 {
-    assert(page);
-    assert(page->tab());
+    this->selectTab(this->tab(id));
+}
 
-    this->selectTab(page->tab());
+SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
+{
+    for (auto &&tab : this->tabs_)
+        if (tab->id() == id)
+            return tab;
+
+    assert(false);
+    return nullptr;
 }
 
 void SettingsDialog::showDialog(SettingsDialogPreference preferredTab)
 {
     static SettingsDialog *instance = new SettingsDialog();
-    instance->refresh();
+    static bool hasShownBefore = false;
+    if (hasShownBefore)
+        instance->refresh();
+    hasShownBefore = true;
 
     switch (preferredTab)
     {
         case SettingsDialogPreference::Accounts:
-            instance->selectTab(instance->tabs_.at(1));
+            instance->selectTab(SettingsTabId::Accounts);
             break;
 
         case SettingsDialogPreference::ModerationActions:
-            instance->selectPage(instance->ui_.moderationPage);
-            instance->ui_.moderationPage->selectModerationActions();
+            if (auto tab = instance->tab(SettingsTabId::Moderation))
+            {
+                instance->selectTab(tab);
+                if (auto page = dynamic_cast<ModerationPage *>(tab->page()))
+                {
+                    page->selectModerationActions();
+                }
+            }
             break;
 
         default:;
@@ -250,11 +265,13 @@ void SettingsDialog::showDialog(SettingsDialogPreference preferredTab)
 
 void SettingsDialog::refresh()
 {
+    // Resets the cancel button.
     getSettings()->saveSnapshot();
 
+    // Updates tabs.
     for (auto *tab : this->tabs_)
     {
-        tab->getSettingsPage()->onShow();
+        tab->page()->onShow();
     }
 }
 
@@ -273,7 +290,8 @@ void SettingsDialog::scaleChangedEvent(float newDpi)
 
     this->setStyleSheet(styleSheet);
 
-    this->ui_.tabContainerContainer->setFixedWidth(int(150 * newDpi));
+    if (this->ui_.tabContainerContainer)
+        this->ui_.tabContainerContainer->setFixedWidth(int(150 * newDpi));
 }
 
 void SettingsDialog::themeChangedEvent()
@@ -281,7 +299,7 @@ void SettingsDialog::themeChangedEvent()
     BaseWindow::themeChangedEvent();
 
     QPalette palette;
-    palette.setColor(QPalette::Background, QColor("#111"));
+    palette.setColor(QPalette::Window, QColor("#111"));
     this->setPalette(palette);
 }
 
@@ -301,7 +319,7 @@ void SettingsDialog::onCancelClicked()
 {
     for (auto &tab : this->tabs_)
     {
-        tab->getSettingsPage()->cancel();
+        tab->page()->cancel();
     }
 
     getSettings()->restoreSnapshot();
