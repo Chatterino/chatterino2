@@ -234,7 +234,7 @@ void CommandController::save()
 CommandModel *CommandController::createModel(QObject *parent)
 {
     CommandModel *model = new CommandModel(parent);
-    model->init(&this->items_);
+    model->initialize(&this->items_);
 
     return model;
 }
@@ -244,8 +244,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
     QStringList words = text.split(' ', QString::SkipEmptyParts);
-
-    std::lock_guard<std::mutex> lock(this->mutex_);
 
     if (words.length() == 0)
     {

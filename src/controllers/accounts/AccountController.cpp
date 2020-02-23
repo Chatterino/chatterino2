@@ -50,7 +50,7 @@ AccountModel *AccountController::createModel(QObject *parent)
 {
     AccountModel *model = new AccountModel(parent);
 
-    model->init(&this->accounts_);
+    model->initialize(&this->accounts_);
     return model;
 }
 

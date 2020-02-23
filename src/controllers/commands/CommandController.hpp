@@ -39,8 +39,6 @@ private:
     QMap<QString, Command> commandsMap_;
     int maxSpaces_ = 0;
 
-    std::mutex mutex_;
-
     std::shared_ptr<pajlada::Settings::SettingManager> sm_;
     // Because the setting manager is not initialized until the initialize
     // function is called (and not in the constructor), we have to

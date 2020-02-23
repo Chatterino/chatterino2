@@ -7,13 +7,11 @@
 
 namespace chatterino {
 
-class HighlightController;
-
 class HighlightModel : public SignalVectorModel<HighlightPhrase>
 {
+public:
     explicit HighlightModel(QObject *parent);
 
-public:
     // Used here, in HighlightingPage and in UserHighlightModel
     enum Column {
         Pattern = 0,
@@ -40,8 +38,6 @@ protected:
     virtual void customRowSetData(const std::vector<QStandardItem *> &row,
                                   int column, const QVariant &value, int role,
                                   int rowIndex) override;
-
-    friend class HighlightController;
 };
 
 }  // namespace chatterino

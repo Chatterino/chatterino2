@@ -19,7 +19,7 @@ void PingController::initialize(Settings &settings, Paths &paths)
 PingModel *PingController::createModel(QObject *parent)
 {
     PingModel *model = new PingModel(parent);
-    model->init(&this->channelVector);
+    model->initialize(&this->channelVector);
     return model;
 }
 

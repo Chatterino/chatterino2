@@ -34,7 +34,7 @@ void ModerationActions::initialize(Settings &settings, Paths &paths)
 ModerationActionModel *ModerationActions::createModel(QObject *parent)
 {
     ModerationActionModel *model = new ModerationActionModel(parent);
-    model->init(&this->items);
+    model->initialize(&this->items);
 
     return model;
 }

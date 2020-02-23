@@ -25,7 +25,7 @@ public:
         }
     }
 
-    void init(BaseSignalVector<TVectorItem> *vec)
+    void initialize(BaseSignalVector<TVectorItem> *vec)
     {
         this->vector_ = vec;
 
@@ -87,6 +87,13 @@ public:
         });
 
         this->afterInit();
+    }
+
+    SignalVectorModel<TVectorItem> *initialized(
+        BaseSignalVector<TVectorItem> *vec)
+    {
+        this->initialize(vec);
+        return this;
     }
 
     virtual ~SignalVectorModel()
@@ -272,8 +279,8 @@ public:
             int from = data->data("chatterino_row_id").toInt();
             int to = parent.row();
 
-            if (from < 0 || from > this->vector_->raw().size() ||
-                to < 0 || to > this->vector_->raw().size())
+            if (from < 0 || from > this->vector_->raw().size() || to < 0 ||
+                to > this->vector_->raw().size())
             {
                 return false;
             }

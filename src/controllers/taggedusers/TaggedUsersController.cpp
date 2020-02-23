@@ -11,7 +11,7 @@ TaggedUsersController::TaggedUsersController()
 TaggedUsersModel *TaggedUsersController::createModel(QObject *parent)
 {
     TaggedUsersModel *model = new TaggedUsersModel(parent);
-    model->init(&this->users);
+    model->initialize(&this->users);
 
     return model;
 }

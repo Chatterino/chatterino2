@@ -25,7 +25,7 @@ void IgnoreController::initialize(Settings &, Paths &)
 IgnoreModel *IgnoreController::createModel(QObject *parent)
 {
     IgnoreModel *model = new IgnoreModel(parent);
-    model->init(&this->phrases);
+    model->initialize(&this->phrases);
 
     return model;
 }

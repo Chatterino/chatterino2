@@ -49,12 +49,12 @@ HighlightingPage::HighlightingPage()
                     "Play notification sounds and highlight messages based on "
                     "certain patterns.");
 
-                EditableModelView *view =
+                auto view =
                     highlights
                         .emplace<EditableModelView>(
-                            app->highlights->createModel(nullptr))
+                            (new HighlightModel(nullptr))
+                                ->initialized(&app->highlights->phrases))
                         .getElement();
-
                 view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex", "Case-\nsensitive",
@@ -94,7 +94,9 @@ HighlightingPage::HighlightingPage()
                 EditableModelView *view =
                     pingUsers
                         .emplace<EditableModelView>(
-                            app->highlights->createUserModel(nullptr))
+                            (new UserHighlightModel(nullptr))
+                                ->initialized(
+                                    &app->highlights->highlightedUsers))
                         .getElement();
 
                 view->addRegexHelpLink();
@@ -140,7 +142,9 @@ HighlightingPage::HighlightingPage()
                 EditableModelView *view =
                     disabledUsers
                         .emplace<EditableModelView>(
-                            app->highlights->createBlacklistModel(nullptr))
+                            (new HighlightBlacklistModel(nullptr))
+                                ->initialized(
+                                    &app->highlights->blacklistedUsers))
                         .getElement();
 
                 view->addRegexHelpLink();
@@ -205,7 +209,7 @@ HighlightingPage::HighlightingPage()
 
     // ---- misc
     this->disabledUsersChangedTimer_.setSingleShot(true);
-}
+}  // namespace chatterino
 
 void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                         EditableModelView *view)

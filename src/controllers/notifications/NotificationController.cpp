@@ -121,7 +121,7 @@ NotificationModel *NotificationController::createModel(QObject *parent,
                                                        Platform p)
 {
     NotificationModel *model = new NotificationModel(parent);
-    model->init(&this->channelMap[p]);
+    model->initialize(&this->channelMap[p]);
     return model;
 }
 

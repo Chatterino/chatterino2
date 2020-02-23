@@ -241,7 +241,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             if (highlighted)
             {
                 server.mentionsChannel->addMessage(msg);
-                getApp()->highlights->addHighlight(msg);
             }
         }
 
