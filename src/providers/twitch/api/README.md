@@ -4,6 +4,15 @@ this folder describes what sort of API requests we do, what permissions are requ
 ## Kraken (V5)
 We use a bunch of Kraken (V5) in Chatterino2.
 
+### Get User
+URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-by-id
+
+Migration path: **Unknown**
+
+ * We implement this in `providers/twitch/api/Kraken.cpp getUser`  
+   Used in:
+     * `UserInfoPopup` to get the "created at" date of a user
+
 ### Get Channel
 URL: https://dev.twitch.tv/docs/v5/reference/channels#get-channel
 
