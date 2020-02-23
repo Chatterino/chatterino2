@@ -13,13 +13,8 @@ class TwitchIrcServer;
 class PubSub;
 
 class CommandController;
-class HighlightController;
-class IgnoreController;
-class TaggedUsersController;
 class AccountController;
-class ModerationActions;
 class NotificationController;
-class MutedChannelController;
 
 class Theme;
 class WindowManager;
@@ -60,9 +55,6 @@ public:
     AccountController *const accounts{};
     CommandController *const commands{};
     NotificationController *const notifications{};
-    MutedChannelController *const pings{};
-    TaggedUsersController *const taggedUsers{};
-    ModerationActions *const moderationActions{};
     TwitchIrcServer *const twitch2{};
     ChatterinoBadges *const chatterinoBadges{};
 

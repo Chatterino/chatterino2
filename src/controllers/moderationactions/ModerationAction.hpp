@@ -25,10 +25,11 @@ public:
     const QString &getAction() const;
 
 private:
-    boost::optional<ImagePtr> image_;
+    mutable boost::optional<ImagePtr> image_;
     QString line1_;
     QString line2_;
     QString action_;
+    int imageToLoad_{};
 };
 
 }  // namespace chatterino

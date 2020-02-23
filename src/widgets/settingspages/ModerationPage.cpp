@@ -2,8 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/moderationactions/ModerationActionModel.hpp"
-#include "controllers/moderationactions/ModerationActions.hpp"
-#include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "controllers/taggedusers/TaggedUsersModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
@@ -175,7 +173,7 @@ ModerationPage::ModerationPage()
             modMode
                 .emplace<EditableModelView>(
                     (new ModerationActionModel(nullptr))
-                        ->initialized(&app->moderationActions->items))
+                        ->initialized(&getSettings()->moderationActions))
                 .getElement();
 
         view->setTitles({"Actions"});
@@ -185,7 +183,7 @@ ModerationPage::ModerationPage()
             0, QHeaderView::Stretch);
 
         view->addButtonPressed.connect([] {
-            getApp()->moderationActions->items.append(
+            getSettings()->moderationActions.append(
                 ModerationAction("/timeout {user} 300"));
         });
 

@@ -238,7 +238,7 @@ void TwitchMessageBuilder::triggerHighlights()
         return;
     }
 
-    if (getApp()->pings->isMuted(this->channel->getName()))
+    if (getCSettings().isMutedChannel(this->channel->getName()))
     {
         // Do nothing. Pings are muted in this channel.
         return;

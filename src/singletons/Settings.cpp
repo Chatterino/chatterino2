@@ -4,6 +4,7 @@
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
+#include "controllers/pings/MutedChannelController.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/WindowManager.hpp"
@@ -15,11 +16,21 @@ namespace chatterino {
 ConcurrentSettings *concurrentInstance_{};
 
 ConcurrentSettings::ConcurrentSettings()
+    // NOTE: these do not get deleted
     : highlightedMessages(*new SignalVector<HighlightPhrase>())
     , highlightedUsers(*new SignalVector<HighlightPhrase>())
     , blacklistedUsers(*new SignalVector<HighlightBlacklistUser>())
     , ignoredMessages(*new SignalVector<IgnorePhrase>())
+    , mutedChannels(*new SignalVector<QString>())
+    , moderationActions(*new SignalVector<ModerationAction>)
 {
+    persist(this->highlightedMessages, "/highlighting/highlights");
+    persist(this->blacklistedUsers, "/highlighting/blacklist");
+    persist(this->highlightedUsers, "/highlighting/users");
+    persist(this->ignoredMessages, "/ignore/phrases");
+    persist(this->mutedChannels, "/pings/muted");
+    // tagged users?
+    persist(this->moderationActions, "/moderation/actions");
 }
 
 bool ConcurrentSettings::isHighlightedUser(const QString &username)
@@ -46,6 +57,50 @@ bool ConcurrentSettings::isBlacklistedUser(const QString &username)
     return false;
 }
 
+bool ConcurrentSettings::isMutedChannel(const QString &channelName)
+{
+    for (const auto &channel : this->mutedChannels)
+    {
+        if (channelName.toLower() == channel.toLower())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void ConcurrentSettings::mute(const QString &channelName)
+{
+    mutedChannels.append(channelName);
+}
+
+void ConcurrentSettings::unmute(const QString &channelName)
+{
+    for (std::vector<int>::size_type i = 0; i != mutedChannels.raw().size();
+         i++)
+    {
+        if (mutedChannels.raw()[i].toLower() == channelName.toLower())
+        {
+            mutedChannels.removeAt(i);
+            i--;
+        }
+    }
+}
+
+bool ConcurrentSettings::toggleMutedChannel(const QString &channelName)
+{
+    if (this->isMutedChannel(channelName))
+    {
+        unmute(channelName);
+        return false;
+    }
+    else
+    {
+        mute(channelName);
+        return true;
+    }
+}
+
 ConcurrentSettings &getCSettings()
 {
     // `concurrentInstance_` gets assigned in Settings ctor.
@@ -61,11 +116,6 @@ Settings::Settings(const QString &settingsDirectory)
 {
     instance_ = this;
     concurrentInstance_ = this;
-
-    persist(this->highlightedMessages, "/highlighting/highlights");
-    persist(this->blacklistedUsers, "/highlighting/blacklist");
-    persist(this->highlightedUsers, "/highlighting/users");
-    persist(this->ignoredMessages, "/ignore/phrases");
 
 #ifdef USEWINSDK
     this->autorun = isRegisteredForStartup();

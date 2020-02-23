@@ -6,10 +6,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
-#include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "controllers/pings/MutedChannelController.hpp"
-#include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
@@ -54,9 +51,6 @@ Application::Application(Settings &_settings, Paths &_paths)
     , accounts(&this->emplace<AccountController>())
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
-    , pings(&this->emplace<MutedChannelController>())
-    , taggedUsers(&this->emplace<TaggedUsersController>())
-    , moderationActions(&this->emplace<ModerationActions>())
     , twitch2(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , logging(&this->emplace<Logging>())
@@ -111,9 +105,6 @@ void Application::initialize(Settings &settings, Paths &paths)
 
     this->initNm(paths);
     this->initPubsub();
-
-    this->moderationActions->items.delayedItemsChanged.connect(
-        [this] { this->windows->forceLayoutChannelViews(); });
 }
 
 int Application::run(QApplication &qtApp)
@@ -126,6 +117,8 @@ int Application::run(QApplication &qtApp)
 
     getSettings()->betaUpdates.connect(
         [] { Updates::instance().checkForUpdates(); }, false);
+    getSettings()->moderationActions.delayedItemsChanged.connect(
+        [this] { this->windows->forceLayoutChannelViews(); });
 
     return qtApp.exec();
 }

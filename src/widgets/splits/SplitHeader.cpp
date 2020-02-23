@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "controllers/pings/MutedChannelController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -189,7 +188,7 @@ void SplitHeader::initializeLayout()
                     switch (button)
                     {
                         case Qt::LeftButton:
-                            if (getApp()->moderationActions->items.empty())
+                            if (getSettings()->moderationActions.empty())
                             {
                                 getApp()->windows->showSettingsDialog(
                                     SettingsDialogPreference::
@@ -233,9 +232,9 @@ void SplitHeader::initializeLayout()
     });
 
     // update moderation button when items changed
-    this->managedConnect(getApp()->moderationActions->items.delayedItemsChanged,
+    this->managedConnect(getSettings()->moderationActions.delayedItemsChanged,
                          [this] {
-                             if (getApp()->moderationActions->items.empty())
+                             if (getSettings()->moderationActions.empty())
                              {
                                  if (this->split_->getModerationMode())
                                      this->split_->setModerationMode(true);
@@ -339,11 +338,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         action->setCheckable(true);
 
         QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-            action->setChecked(getApp()->pings->isMuted(
+            action->setChecked(getSettings()->isMutedChannel(
                 this->split_->getChannel()->getName()));
         });
         action->connect(action, &QAction::triggered, this, [this]() {
-            getApp()->pings->toggleMuted(this->split_->getChannel()->getName());
+            getSettings()->toggleMutedChannel(
+                this->split_->getChannel()->getName());
         });
 
         moreMenu->addAction(action);
@@ -567,7 +567,7 @@ void SplitHeader::updateChannelText()
 void SplitHeader::updateModerationModeIcon()
 {
     auto moderationMode = this->split_->getModerationMode() &&
-                          !getApp()->moderationActions->items.empty();
+                          !getSettings()->moderationActions.empty();
 
     this->moderationButton_->setPixmap(
         moderationMode ? getResources().buttons.modModeEnabled

@@ -138,13 +138,11 @@ SOURCES += \
     src/controllers/ignores/IgnoreModel.cpp \
     src/controllers/moderationactions/ModerationAction.cpp \
     src/controllers/moderationactions/ModerationActionModel.cpp \
-    src/controllers/moderationactions/ModerationActions.cpp \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
     src/controllers/pings/MutedChannelController.cpp \
     src/controllers/pings/MutedChannelModel.cpp \
     src/controllers/taggedusers/TaggedUser.cpp \
-    src/controllers/taggedusers/TaggedUsersController.cpp \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
     src/debug/Benchmark.cpp \
     src/main.cpp \
@@ -333,13 +331,11 @@ HEADERS += \
     src/controllers/ignores/IgnorePhrase.hpp \
     src/controllers/moderationactions/ModerationAction.hpp \
     src/controllers/moderationactions/ModerationActionModel.hpp \
-    src/controllers/moderationactions/ModerationActions.hpp \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
     src/controllers/pings/MutedChannelController.hpp \
     src/controllers/pings/MutedChannelModel.hpp \
     src/controllers/taggedusers/TaggedUser.hpp \
-    src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/debug/AssertInGuiThread.hpp \
     src/debug/Benchmark.hpp \
