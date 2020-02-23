@@ -31,7 +31,7 @@ public:
     void addChannelNotification(const QString &channelName, Platform p);
     void removeChannelNotification(const QString &channelName, Platform p);
 
-    void addNotification(QLayout *layout, QTime time,
+    void addNotification(QLayout *layout, std::chrono::milliseconds time,
                          std::function<void()> callback);
     void playSound();
 
@@ -51,7 +51,9 @@ private:
     std::vector<QString> fakeTwitchChannels;
     QTimer *liveStatusTimer_;
 
-    std::queue<std::tuple<QLayout *, QTime, std::function<void()>>> queue_;
+    std::queue<
+        std::tuple<QLayout *, std::chrono::milliseconds, std::function<void()>>>
+        queue_;
 
     ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
         "/notifications/twitch"};

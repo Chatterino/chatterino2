@@ -232,7 +232,8 @@ void NotificationController::mousePressEvent(QMouseEvent *event)
 }
 */
 
-void NotificationController::addNotification(QLayout *layout, QTime time,
+void NotificationController::addNotification(QLayout *layout,
+                                             std::chrono::milliseconds time,
                                              std::function<void()> callback)
 {
     queue_.push({layout, time, callback});
@@ -244,20 +245,11 @@ void NotificationController::addNotification(QLayout *layout, QTime time,
 
 void NotificationController::startNotification()
 {
-    popupWindow_->updatePosition();
-
-    if (popupWindow_->layout())
-    {
-        delete popupWindow_->layout();
-    }
-
-    popupWindow_->setLayout(std::get<0>(queue_.front()));
-    popupWindow_->update();
-    popupWindow_->show();
-    QTimer::singleShot(getSettings()->notificationDuration * 1000, [this] {
+    auto finishNotification = [this]() {
         queue_.pop();
 
-        //popupWindow_->hide();
+        popupWindow_->hide();
+        popupWindow_->mouseRelease.disconnectAll();
 
         if (queue_.size() == 0)
         {
@@ -265,7 +257,34 @@ void NotificationController::startNotification()
         }
 
         startNotification();
-    });
+    };
+    popupWindow_->updatePosition();
+
+    if (auto layout = popupWindow_->layout(); layout)
+    {
+        qDeleteAll(popupWindow_->findChildren<QWidget *>(
+            QString(), Qt ::FindDirectChildrenOnly));
+        delete layout;
+    }
+    auto callback = std::get<2>(queue_.front());
+
+    auto timer = new QTimer();
+    timer->callOnTimeout(finishNotification);
+    timer->setSingleShot(true);
+    timer->start(std::get<1>(queue_.front()));
+
+    popupWindow_->setLayout(std::get<0>(queue_.front()));
+    popupWindow_->mouseRelease.connect(
+        [finishNotification, timer, callback, this](QMouseEvent *event) {
+            if (event->button() == Qt::LeftButton)
+            {
+                timer->stop();
+                finishNotification();
+                callback();
+            }
+        });
+    popupWindow_->update();
+    popupWindow_->show();
 }
 
 }  // namespace chatterino

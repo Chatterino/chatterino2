@@ -82,31 +82,26 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
         bottomText = "Click here to " + mode;
     }
 
-    auto onMousePressed = [channelName](NotificationPopup *popup) {
-        return [channelName, popup](QMouseEvent *event) {
-            popup->hide();
-            if (event->button() == Qt::LeftButton)
-                switch (static_cast<ToastReaction>(
-                    getSettings()->openFromToast.getValue()))
-                {
-                    case ToastReaction::OpenInBrowser:
-                        QDesktopServices::openUrl(
-                            QUrl("https://twitch.tv/" + channelName));
-                        break;
-                    case ToastReaction::OpenInPlayer:
-                        QDesktopServices::openUrl(
-                            QUrl("https://player.twitch.tv/?channel=" +
-                                 channelName));
-                        break;
-                    case ToastReaction::OpenInStreamlink:
-                        openStreamlinkForChannel(channelName);
-                        break;
-                }
-        };
+    auto callback = [channelName]() {
+        switch (
+            static_cast<ToastReaction>(getSettings()->openFromToast.getValue()))
+        {
+            case ToastReaction::OpenInBrowser:
+                QDesktopServices::openUrl(
+                    QUrl("https://twitch.tv/" + channelName));
+                break;
+            case ToastReaction::OpenInPlayer:
+                QDesktopServices::openUrl(
+                    QUrl("https://player.twitch.tv/?channel=" + channelName));
+                break;
+            case ToastReaction::OpenInStreamlink:
+                openStreamlinkForChannel(channelName);
+                break;
+        }
     };
 
     NetworkRequest::twitchRequest(url)
-        .onSuccess([channelName, bottomText, onMousePressed,
+        .onSuccess([channelName, bottomText, callback,
                     this](auto result) -> Outcome {
             const auto data = result.getData();
 
@@ -118,46 +113,22 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
                     avatar,
                     QString("<b>" + channelName + "</b> just went live!"),
                     bottomText),
-                QTime(0, 0, 0, getSettings()->notificationDuration * 1000),
-                []() { qDebug() << "xd"; });
-            //auto *popup = new NotificationPopup();
-            //popup->updatePosition();
-            // popup->setImageAndText(
-            //     avatar, QString("<b>" + channelName + "</b> just went live!"),
-            //     bottomText);
-            // //popup->show();
-            // popup->mouseDown.connect(onMousePressed(popup));
-
-            // getApp()->notifications->addNotification(popup);
-
-            // //QTimer::singleShot(5000, [popup] {
-            //    popup->hide();
-            //    popup->deleteLater();
-            //});
+                std::chrono::milliseconds(getSettings()->notificationDuration *
+                                          1000),
+                callback);
 
             return Success;
         })
-        .onError([channelName, bottomText, onMousePressed,
+        .onError([channelName, bottomText, callback,
                   this](auto result) -> bool {
             getApp()->notifications->addNotification(
                 makeLayout(
                     getResources().icon,
                     QString("<b>" + channelName + "</b> just went live!"),
                     bottomText),
-                QTime(0, 0, 0, getSettings()->notificationDuration * 1000),
-                []() { qDebug() << "xd"; });
-            //auto *popup = new NotificationPopup();
-            ////popup->updatePosition();
-            //popup->setImageAndText(getResources().icon,
-            //                       QString(channelName + " just went live!"),
-            //                       bottomText);
-            ////popup->show();
-            //popup->mouseDown.connect(onMousePressed(popup));
-
-            //QTimer::singleShot(5000, [popup] {
-            //    popup->hide();
-            //    popup->deleteLater();
-            //});
+                std::chrono::milliseconds(getSettings()->notificationDuration *
+                                          1000),
+                callback);
             return false;
         })
         .execute();

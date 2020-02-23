@@ -42,10 +42,10 @@ void NotificationPopup::updatePosition()
     }
 }
 
-void NotificationPopup::mousePressEvent(QMouseEvent *event)
+void NotificationPopup::mouseReleaseEvent(QMouseEvent *event)
 {
-    mouseDown.invoke(event);
-    BaseWindow::mousePressEvent(event);
+    mouseRelease.invoke(event);
+    BaseWindow::mouseReleaseEvent(event);
 }
 
 }  // namespace chatterino
