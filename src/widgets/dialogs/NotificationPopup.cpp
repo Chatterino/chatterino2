@@ -6,24 +6,18 @@
 
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QLabel>
 #include <QScreen>
 
 namespace chatterino {
 
 NotificationPopup::NotificationPopup()
-    : BaseWindow(BaseWindow::Frameless)
-    , channel_(std::make_shared<Channel>("notifications", Channel::Type::None))
-
+    : BaseWindow({BaseWindow::Frameless, BaseWindow::TopMost})
 {
-    this->channelView_ = new ChannelView(this);
-
     auto *layout = new QVBoxLayout(this);
     this->setLayout(layout);
 
-    layout->addWidget(this->channelView_);
-
-    this->channelView_->setChannel(this->channel_);
-    this->setScaleIndependantSize(300, 150);
+    this->setScaleIndependantSize(360, 120);
 }
 
 void NotificationPopup::updatePosition()
@@ -35,7 +29,8 @@ void NotificationPopup::updatePosition()
 
     switch (location)
     {
-        case BottomRight: {
+        case BottomRight:
+        {
             this->move(rect.right() - this->width(),
                        rect.bottom() - this->height());
         }
@@ -43,11 +38,40 @@ void NotificationPopup::updatePosition()
     }
 }
 
-void NotificationPopup::addMessage(MessagePtr msg)
+void NotificationPopup::setImageAndText(const QPixmap &image,
+                                        const QString &text,
+                                        const QString &bottomText)
 {
-    this->channel_->addMessage(msg);
+    // TODO: make it look better
+    delete this->layout();
+    auto *layout = new QHBoxLayout(this);
 
-    //    QTimer::singleShot(5000, this, [this, msg] { this->channel->remove });
+    auto *imageLabel = new QLabel(this);
+    imageLabel->setPixmap(image);
+    imageLabel->setScaledContents(true);
+    imageLabel->setMinimumSize(1, 1);
+    imageLabel->setSizePolicy(QSizePolicy::MinimumExpanding,
+                              QSizePolicy::Minimum);
+    layout->addWidget(imageLabel, 1);
+
+    auto *vbox = new QVBoxLayout(this);
+    layout->addLayout(vbox, 2);
+
+    auto *textLabel = new QLabel(this);
+    textLabel->setText(text);
+    vbox->addWidget(textLabel);
+
+    auto *bottomTextLabel = new QLabel(this);
+    bottomTextLabel->setText(bottomText);
+    vbox->addWidget(bottomTextLabel);
+
+    this->setLayout(layout);
+}
+
+void NotificationPopup::mousePressEvent(QMouseEvent *event)
+{
+    mouseDown.invoke(event);
+    BaseWindow::mousePressEvent(event);
 }
 
 }  // namespace chatterino

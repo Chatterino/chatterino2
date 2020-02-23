@@ -3,14 +3,13 @@
 #include "Application.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "libsnore/snore.h"
-#include "libsnore/snore_p.h"
-#include "libsnore/utils.h"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Resources.hpp"
 #include "util/StreamLink.hpp"
+#include "widgets/dialogs/NotificationPopup.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 
 #include <QDesktopServices>
@@ -30,34 +29,7 @@ std::map<ToastReaction, QString> Toasts::reactionToString = {
     {ToastReaction::DontOpen, DONT_OPEN}};
 
 Toasts::Toasts()
-    : app(QStringLiteral("Chatterino2"), Snore::Icon::defaultIcon())
 {
-    Snore::SnoreCore &instance = Snore::SnoreCore::instance();
-    instance.loadPlugins(Snore::SnorePlugin::Backend);
-    Snore::SnoreCore::instance().registerApplication(app);
-    qDebug() << Snore::SnoreCore::instance().pluginNames(
-        Snore::SnorePlugin::Backend);
-
-    auto notifyCallback = [this](Snore::Notification notification) {
-        switch (
-            static_cast<ToastReaction>(getSettings()->openFromToast.getValue()))
-        {
-            case ToastReaction::OpenInBrowser:
-                QDesktopServices::openUrl(QUrl(
-                    "https://twitch.tv/" + notification.title().split(' ')[0]));
-                break;
-            case ToastReaction::OpenInPlayer:
-                QDesktopServices::openUrl(
-                    QUrl("https://player.twitch.tv/?channel=" +
-                         notification.title().split(' ')[0]));
-                break;
-            case ToastReaction::OpenInStreamlink:
-                openStreamlinkForChannel(notification.title().split(' ')[0]);
-                break;
-        }
-    };
-    QObject::connect(&instance, &Snore::SnoreCore::actionInvoked,
-                     notifyCallback);
 }
 
 QString Toasts::findStringFromReaction(const ToastReaction &reaction)
@@ -102,7 +74,6 @@ void Toasts::sendToastMessage(const QString &channelName)
 void Toasts::actuallySendToastMessage(const QUrl &url,
                                       const QString &channelName)
 {
-    Snore::SnoreCore &instance = Snore::SnoreCore::instance();
     QString bottomText = "";
     if (static_cast<ToastReaction>(getSettings()->openFromToast.getValue()) !=
         ToastReaction::DontOpen)
@@ -114,27 +85,68 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
         bottomText = "Click here to " + mode;
     }
 
+    auto onMousePressed = [channelName](NotificationPopup *popup) {
+        return [channelName, popup](QMouseEvent *event) {
+            // dont know if this is safe
+            popup->hide();
+            if (event->button() == Qt::LeftButton)
+                switch (static_cast<ToastReaction>(
+                    getSettings()->openFromToast.getValue()))
+                {
+                    case ToastReaction::OpenInBrowser:
+                        QDesktopServices::openUrl(
+                            QUrl("https://twitch.tv/" + channelName));
+                        break;
+                    case ToastReaction::OpenInPlayer:
+                        QDesktopServices::openUrl(
+                            QUrl("https://player.twitch.tv/?channel=" +
+                                 channelName));
+                        break;
+                    case ToastReaction::OpenInStreamlink:
+                        openStreamlinkForChannel(channelName);
+                        break;
+                }
+        };
+    };
+
     NetworkRequest::twitchRequest(url)
-        .onSuccess(
-            [this, channelName, bottomText, &instance](auto result) -> Outcome {
-                const auto data = result.getData();
+        .onSuccess([channelName, bottomText,
+                    onMousePressed](auto result) -> Outcome {
+            const auto data = result.getData();
 
-                qDebug() << instance.pluginNames(Snore::SnorePlugin::Backend);
-                QPixmap avatar;
-                avatar.loadFromData(data);
+            QPixmap avatar;
+            avatar.loadFromData(data);
 
-                instance.broadcastNotification(Snore::Notification(
-                    app, app.defaultAlert(), channelName + " just went live!",
-                    bottomText, Snore::Icon(avatar)));
-                return Success;
-            })
-        .onError(
-            [this, channelName, bottomText, &instance](auto result) -> bool {
-                instance.broadcastNotification(Snore::Notification(
-                    app, app.defaultAlert(), channelName + " just went live!",
-                    bottomText, app.icon()));
-                return false;
-            })
+            auto *popup = new NotificationPopup();
+            popup->updatePosition();
+            popup->setImageAndText(
+                avatar, QString(channelName + " just went live!"), bottomText);
+            popup->show();
+            popup->mouseDown.connect(onMousePressed(popup));
+
+            QTimer::singleShot(5000, [popup] {
+                popup->hide();
+                popup->deleteLater();
+            });
+
+            return Success;
+        })
+        .onError([channelName, bottomText,
+                  onMousePressed](auto result) -> bool {
+            auto *popup = new NotificationPopup();
+            popup->updatePosition();
+            popup->setImageAndText(getResources().icon,
+                                   QString(channelName + " just went live!"),
+                                   bottomText);
+            popup->show();
+            popup->mouseDown.connect(onMousePressed(popup));
+
+            QTimer::singleShot(5000, [popup] {
+                popup->hide();
+                popup->deleteLater();
+            });
+            return false;
+        })
         .execute();
 }
 }  // namespace chatterino

@@ -3,8 +3,6 @@
 #include "Application.hpp"
 #include "common/Singleton.hpp"
 
-#include "libsnore/snore.h"
-
 namespace chatterino {
 
 enum class Platform : uint8_t;
@@ -30,7 +28,6 @@ public:
     void sendToastMessage(const QString &channelName);
 
 private:
-    Snore::Application app;
     void actuallySendToastMessage(const QUrl &url, const QString &channelName);
 };
 }  // namespace chatterino
