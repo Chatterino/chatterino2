@@ -343,7 +343,7 @@ void UserInfoPopup::installEvents()
             else
             {
                 const auto &vector =
-                    getApp()->highlights->blacklistedUsers.getVector();
+                    getApp()->highlights->blacklistedUsers.raw();
 
                 for (int i = 0; i < vector.size(); i++)
                 {
@@ -456,7 +456,7 @@ void UserInfoPopup::updateUserData()
 
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
-        const auto &vector = getApp()->highlights->blacklistedUsers.getVector();
+        const auto &vector = getApp()->highlights->blacklistedUsers.raw();
         for (int i = 0; i < vector.size(); i++)
         {
             if (this->userName_ == vector[i].getPattern())

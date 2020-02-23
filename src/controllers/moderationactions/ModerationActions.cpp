@@ -27,7 +27,7 @@ void ModerationActions::initialize(Settings &settings, Paths &paths)
     }
 
     this->items.delayedItemsChanged.connect([this] {  //
-        this->setting_->setValue(this->items.getVector());
+        this->setting_->setValue(this->items.raw());
     });
 }
 

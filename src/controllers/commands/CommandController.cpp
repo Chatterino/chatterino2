@@ -212,7 +212,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)
     this->items_.delayedItemsChanged.connect([this] {  //
-        this->commandsSetting_->setValue(this->items_.getVector());
+        this->commandsSetting_->setValue(this->items_.raw());
     });
 
     // Load commands from commands.json

@@ -52,7 +52,7 @@ public:
         };
 
         int i = 0;
-        for (const TVectorItem &item : vec->getVector())
+        for (const TVectorItem &item : vec->raw())
         {
             SignalVectorItemArgs<TVectorItem> args{item, i++, 0};
 
@@ -272,15 +272,15 @@ public:
             int from = data->data("chatterino_row_id").toInt();
             int to = parent.row();
 
-            if (from < 0 || from > this->vector_->getVector().size() ||
-                to < 0 || to > this->vector_->getVector().size())
+            if (from < 0 || from > this->vector_->raw().size() ||
+                to < 0 || to > this->vector_->raw().size())
             {
                 return false;
             }
 
             if (from != to)
             {
-                auto item = this->vector_->getVector()[from];
+                auto item = this->vector_->raw()[from];
                 this->vector_->removeItem(from);
                 this->vector_->insertItem(item, to);
             }

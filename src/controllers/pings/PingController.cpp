@@ -12,7 +12,7 @@ void PingController::initialize(Settings &settings, Paths &paths)
     }
 
     this->channelVector.delayedItemsChanged.connect([this] {  //
-        this->pingSetting_.setValue(this->channelVector.getVector());
+        this->pingSetting_.setValue(this->channelVector.raw());
     });
 }
 
@@ -43,9 +43,9 @@ void PingController::muteChannel(const QString &channelName)
 void PingController::unmuteChannel(const QString &channelName)
 {
     for (std::vector<int>::size_type i = 0;
-         i != channelVector.getVector().size(); i++)
+         i != channelVector.raw().size(); i++)
     {
-        if (channelVector.getVector()[i].toLower() == channelName.toLower())
+        if (channelVector.raw()[i].toLower() == channelName.toLower())
         {
             channelVector.removeItem(i);
             i--;

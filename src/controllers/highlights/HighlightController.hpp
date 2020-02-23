@@ -40,13 +40,6 @@ public:
 
 private:
     bool initialized_ = false;
-
-    ChatterinoSetting<std::vector<HighlightPhrase>> highlightsSetting_ = {
-        "/highlighting/highlights"};
-    ChatterinoSetting<std::vector<HighlightBlacklistUser>> blacklistSetting_ = {
-        "/highlighting/blacklist"};
-    ChatterinoSetting<std::vector<HighlightPhrase>> userSetting_ = {
-        "/highlighting/users"};
 };
 
 }  // namespace chatterino

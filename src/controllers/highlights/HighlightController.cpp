@@ -12,38 +12,30 @@ HighlightController::HighlightController()
 {
 }
 
+template <typename T>
+inline void persist(SignalVector<T> &vec, const std::string &name)
+{
+    auto setting = std::make_unique<ChatterinoSetting<std::vector<T>>>(name);
+
+    for (auto &&item : setting->getValue())
+        vec.append(item);
+
+    vec.delayedItemsChanged.connect([setting = setting.get(), vec = &vec] {
+        setting->setValue(vec->raw());
+    });
+
+    // TODO
+    setting.release();
+}
+
 void HighlightController::initialize(Settings &settings, Paths &paths)
 {
     assert(!this->initialized_);
     this->initialized_ = true;
 
-    for (const HighlightPhrase &phrase : this->highlightsSetting_.getValue())
-    {
-        this->phrases.appendItem(phrase);
-    }
-
-    this->phrases.delayedItemsChanged.connect([this] {  //
-        this->highlightsSetting_.setValue(this->phrases.getVector());
-    });
-
-    for (const HighlightBlacklistUser &blacklistedUser :
-         this->blacklistSetting_.getValue())
-    {
-        this->blacklistedUsers.appendItem(blacklistedUser);
-    }
-
-    this->blacklistedUsers.delayedItemsChanged.connect([this] {
-        this->blacklistSetting_.setValue(this->blacklistedUsers.getVector());
-    });
-
-    for (const HighlightPhrase &user : this->userSetting_.getValue())
-    {
-        this->highlightedUsers.appendItem(user);
-    }
-
-    this->highlightedUsers.delayedItemsChanged.connect([this] {  //
-        this->userSetting_.setValue(this->highlightedUsers.getVector());
-    });
+    persist(this->phrases, "/highlighting/highlights");
+    persist(this->blacklistedUsers, "/highlighting/blacklist");
+    persist(this->highlightedUsers, "/highlighting/users");
 }
 
 HighlightModel *HighlightController::createModel(QObject *parent)

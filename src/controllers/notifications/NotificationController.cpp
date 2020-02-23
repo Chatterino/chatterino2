@@ -31,7 +31,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
 
     this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {  //
         this->twitchSetting_.setValue(
-            this->channelMap[Platform::Twitch].getVector());
+            this->channelMap[Platform::Twitch].raw());
     });
     /*
     for (const QString &channelName : this->mixerSetting_.getValue()) {
@@ -88,9 +88,9 @@ void NotificationController::removeChannelNotification(
     const QString &channelName, Platform p)
 {
     for (std::vector<int>::size_type i = 0;
-         i != channelMap[p].getVector().size(); i++)
+         i != channelMap[p].raw().size(); i++)
     {
-        if (channelMap[p].getVector()[i].toLower() == channelName.toLower())
+        if (channelMap[p].raw()[i].toLower() == channelName.toLower())
         {
             channelMap[p].removeItem(i);
             i--;
@@ -128,14 +128,14 @@ NotificationModel *NotificationController::createModel(QObject *parent,
 void NotificationController::fetchFakeChannels()
 {
     for (std::vector<int>::size_type i = 0;
-         i != channelMap[Platform::Twitch].getVector().size(); i++)
+         i != channelMap[Platform::Twitch].raw().size(); i++)
     {
         auto chan = getApp()->twitch.server->getChannelOrEmpty(
-            channelMap[Platform::Twitch].getVector()[i]);
+            channelMap[Platform::Twitch].raw()[i]);
         if (chan->isEmpty())
         {
             getFakeTwitchChannelLiveStatus(
-                channelMap[Platform::Twitch].getVector()[i]);
+                channelMap[Platform::Twitch].raw()[i]);
         }
     }
 }

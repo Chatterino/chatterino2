@@ -115,28 +115,31 @@ public:
         this->itemsChanged_();
     }
 
-    // compatability
-    [[deprecated]] int insertItem(const T &item, int proposedIndex = -1,
-                                  void *caller = nullptr)
-    {
-        return this->insert(item, proposedIndex, caller);
-    }
-
-    [[deprecated]] int appendItem(const T &item, void *caller = nullptr)
-    {
-        return this->append(item, caller);
-    }
-
-    [[deprecated]] void removeItem(int index, void *caller = nullptr)
-    {
-        this->removeAt(index, caller);
-    }
-
-    [[deprecated]] const std::vector<T> &getVector() const
+    const std::vector<T> &raw() const
     {
         assertInGuiThread();
 
         return this->items_;
+    }
+
+    // compatability
+    [[deprecated("use insert")]] int insertItem(const T &item,
+                                                int proposedIndex = -1,
+                                                void *caller = nullptr)
+    {
+        return this->insert(item, proposedIndex, caller);
+    }
+
+    [[deprecated("use append")]] int appendItem(const T &item,
+                                                void *caller = nullptr)
+    {
+        return this->append(item, caller);
+    }
+
+    [[deprecated("use removeAt")]] void removeItem(int index,
+                                                   void *caller = nullptr)
+    {
+        this->removeAt(index, caller);
     }
 
     [[deprecated]] std::vector<T> cloneVector()

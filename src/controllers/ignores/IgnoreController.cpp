@@ -18,7 +18,7 @@ void IgnoreController::initialize(Settings &, Paths &)
     }
 
     this->phrases.delayedItemsChanged.connect([this] {  //
-        this->ignoresSetting_.setValue(this->phrases.getVector());
+        this->ignoresSetting_.setValue(this->phrases.raw());
     });
 }
 
