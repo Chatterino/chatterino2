@@ -43,6 +43,7 @@ private:
     void removeFakeChannel(const QString channelName);
     void getFakeTwitchChannelLiveStatus(const QString &channelName);
 
+    // fakeTwitchChannels is a list of streams who are live that we have already sent out a notification for
     std::vector<QString> fakeTwitchChannels;
     QTimer *liveStatusTimer_;
 

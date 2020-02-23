@@ -260,10 +260,6 @@ void UserInfoPopup::installEvents()
         this->ui_.follow, &QCheckBox::stateChanged, [this](int) mutable {
             auto currentUser = getApp()->accounts->twitch.getCurrent();
 
-            QUrl requestUrl("https://api.twitch.tv/kraken/users/" +
-                            currentUser->getUserId() + "/follows/channels/" +
-                            this->userId_);
-
             const auto reenableFollowCheckbox = [this] {
                 this->ui_.follow->setEnabled(true);  //
             };
@@ -406,27 +402,14 @@ void UserInfoPopup::updateUserData()
 
         this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);
         this->ui_.userIDLabel->setProperty("copy-text", user.id);
-        // don't wait for the request to complete, just put the user id in the card
-        // right away
-        //
-        getHelix()->getUserById(
-            this->userId_,
-            [this](const auto &user) {
-                this->ui_.viewCountLabel->setText(
-                    TEXT_VIEWS.arg(user.viewCount));
-                // this->ui_.createdDateLabel->setText(TEXT_CREATED +
-                //                                     "NOT AVAILABLE IN HELIX");
-                this->ui_.createdDateLabel->setText(
-                    QString("%1 NOT AVAILABLE IN HELIX").arg(TEXT_CREATED));
 
-                this->loadAvatar(user.profileImageUrl);
-            },
-            [] {
-                // on failure
-            });
+        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(user.viewCount));
+        this->ui_.createdDateLabel->setText(
+            QString("%1 NOT AVAILABLE IN HELIX").arg(TEXT_CREATED));
+        this->loadAvatar(user.profileImageUrl);
 
         getHelix()->getUserFollowers(
-            this->userId_,
+            user.id,
             [this](const auto &followers) {
                 this->ui_.followerCountLabel->setText(
                     TEXT_FOLLOWERS.arg(followers.total));

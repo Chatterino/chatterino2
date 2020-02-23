@@ -4,7 +4,6 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "providers/twitch/PartialTwitchUser.hpp"
 #include "util/Helpers.hpp"
 
 #ifdef USEWINSDK
@@ -159,7 +158,6 @@ AdvancedLoginWidget::AdvancedLoginWidget()
     this->ui_.layout.addWidget(&this->ui_.instructionsLabel);
     this->ui_.layout.addLayout(&this->ui_.formLayout);
     this->ui_.layout.addLayout(&this->ui_.buttonUpperRow.layout);
-    this->ui_.layout.addLayout(&this->ui_.buttonLowerRow.layout);
 
     this->refreshButtons();
 
@@ -207,30 +205,10 @@ AdvancedLoginWidget::AdvancedLoginWidget()
 
                 LogInWithCredentials(userID, username, clientID, oauthToken);
             });
-
-    /// Lower button row
-    this->ui_.buttonLowerRow.fillInUserIDButton.setText(
-        "Get user ID from username");
-
-    this->ui_.buttonLowerRow.layout.addWidget(
-        &this->ui_.buttonLowerRow.fillInUserIDButton);
-
-    connect(&this->ui_.buttonLowerRow.fillInUserIDButton, &QPushButton::clicked,
-            [=]() {
-                const auto onIdFetched = [=](const QString &userID) {
-                    this->ui_.userIDInput.setText(userID);  //
-                };
-                // XXX(PAJLADA): Migration path: either use an external api backed by an app access token, or link to some service that can resolve username to userid
-                PartialTwitchUser::byName(this->ui_.usernameInput.text())
-                    .getId(onIdFetched, this);
-            });
 }
 
 void AdvancedLoginWidget::refreshButtons()
 {
-    this->ui_.buttonLowerRow.fillInUserIDButton.setEnabled(
-        !this->ui_.usernameInput.text().isEmpty());
-
     if (this->ui_.userIDInput.text().isEmpty() ||
         this->ui_.usernameInput.text().isEmpty() ||
         this->ui_.clientIDInput.text().isEmpty() ||

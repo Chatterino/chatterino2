@@ -138,6 +138,182 @@ void Helix::getUserFollowers(
     this->fetchUsersFollows("", userId, successCallback, failureCallback);
 }
 
+void Helix::getUserFollow(
+    QString userId, QString targetId,
+    ResultCallback<bool, HelixUsersFollowsRecord> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    this->fetchUsersFollows(
+        userId, targetId,
+        [successCallback](const auto &response) {
+            if (response.data.empty())
+            {
+                successCallback(false, HelixUsersFollowsRecord());
+                return;
+            }
+
+            successCallback(true, response.data[0]);
+        },
+        failureCallback);
+}
+
+void Helix::fetchStreams(
+    QStringList userIds, QStringList userLogins,
+    ResultCallback<std::vector<HelixStream>> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    for (const auto &id : userIds)
+    {
+        urlQuery.addQueryItem("user_id", id);
+    }
+
+    for (const auto &login : userLogins)
+    {
+        urlQuery.addQueryItem("user_login", login);
+    }
+
+    // TODO: set on success and on error
+    this->makeRequest("streams", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixStream> streams;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                streams.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(streams);
+
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::getStreamById(QString userId,
+                          ResultCallback<bool, HelixStream> successCallback,
+                          HelixFailureCallback failureCallback)
+{
+    QStringList userIds{userId};
+    QStringList userLogins;
+
+    this->fetchStreams(
+        userIds, userLogins,
+        [successCallback, failureCallback](const auto &streams) {
+            if (streams.empty())
+            {
+                successCallback(false, HelixStream());
+                return;
+            }
+            successCallback(true, streams[0]);
+        },
+        failureCallback);
+}
+
+void Helix::getStreamByName(QString userName,
+                            ResultCallback<bool, HelixStream> successCallback,
+                            HelixFailureCallback failureCallback)
+{
+    QStringList userIds;
+    QStringList userLogins{userName};
+
+    this->fetchStreams(
+        userIds, userLogins,
+        [successCallback, failureCallback](const auto &streams) {
+            if (streams.empty())
+            {
+                successCallback(false, HelixStream());
+                return;
+            }
+            successCallback(true, streams[0]);
+        },
+        failureCallback);
+}
+
+///
+
+void Helix::fetchGames(QStringList gameIds, QStringList gameNames,
+                       ResultCallback<std::vector<HelixGame>> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    assert((gameIds.length() + gameNames.length()) > 0);
+
+    QUrlQuery urlQuery;
+
+    for (const auto &id : gameIds)
+    {
+        urlQuery.addQueryItem("id", id);
+    }
+
+    for (const auto &login : gameNames)
+    {
+        urlQuery.addQueryItem("name", login);
+    }
+
+    // TODO: set on success and on error
+    this->makeRequest("games", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixGame> games;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                games.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(games);
+
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::getGameById(QString gameId,
+                        ResultCallback<HelixGame> successCallback,
+                        HelixFailureCallback failureCallback)
+{
+    QStringList gameIds{gameId};
+    QStringList gameNames;
+
+    this->fetchGames(
+        gameIds, gameNames,
+        [successCallback, failureCallback](const auto &games) {
+            if (games.empty())
+            {
+                failureCallback();
+                return;
+            }
+            successCallback(games[0]);
+        },
+        failureCallback);
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

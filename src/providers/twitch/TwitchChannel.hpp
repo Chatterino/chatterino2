@@ -8,14 +8,15 @@
 #include "common/UniqueAccess.hpp"
 #include "common/UsernameSet.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
+#include "providers/twitch/api/Helix.hpp"
 
-#include <rapidjson/document.h>
 #include <IrcConnection>
 #include <QColor>
 #include <QRegularExpression>
 #include <boost/optional.hpp>
-#include <mutex>
 #include <pajlada/signals/signalholder.hpp>
+
+#include <mutex>
 #include <unordered_map>
 
 namespace chatterino {
@@ -43,6 +44,7 @@ public:
         unsigned viewerCount = 0;
         QString title;
         QString game;
+        QString gameId;
         QString uptime;
         QString streamType;
     };
@@ -120,7 +122,7 @@ protected:
 private:
     // Methods
     void refreshLiveStatus();
-    Outcome parseLiveStatus(const rapidjson::Document &document);
+    void parseLiveStatus(bool live, const HelixStream &stream);
     void refreshPubsub();
     void refreshChatters();
     void refreshBadges();

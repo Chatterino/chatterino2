@@ -6,8 +6,8 @@
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
-#include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -151,12 +151,14 @@ void TwitchAccount::ignore(
     const QString &targetName,
     std::function<void(IgnoreResult, const QString &)> onFinished)
 {
-    const auto onIdFetched = [this, targetName,
-                              onFinished](QString targetUserId) {
-        this->ignoreByID(targetUserId, targetName, onFinished);  //
+    const auto onUserFetched = [this, targetName,
+                                onFinished](const auto &user) {
+        this->ignoreByID(user.id, targetName, onFinished);  //
     };
 
-    PartialTwitchUser::byName(targetName).getId(onIdFetched);
+    const auto onUserFetchFailed = [] {};
+
+    getHelix()->getUserByName(targetName, onUserFetched, onUserFetchFailed);
 }
 
 void TwitchAccount::ignoreByID(
@@ -226,12 +228,14 @@ void TwitchAccount::unignore(
     const QString &targetName,
     std::function<void(UnignoreResult, const QString &message)> onFinished)
 {
-    const auto onIdFetched = [this, targetName,
-                              onFinished](QString targetUserId) {
-        this->unignoreByID(targetUserId, targetName, onFinished);  //
+    const auto onUserFetched = [this, targetName,
+                                onFinished](const auto &user) {
+        this->unignoreByID(user.id, targetName, onFinished);  //
     };
 
-    PartialTwitchUser::byName(targetName).getId(onIdFetched);
+    const auto onUserFetchFailed = [] {};
+
+    getHelix()->getUserByName(targetName, onUserFetched, onUserFetchFailed);
 }
 
 void TwitchAccount::unignoreByID(
@@ -270,28 +274,18 @@ void TwitchAccount::unignoreByID(
 void TwitchAccount::checkFollow(const QString targetUserID,
                                 std::function<void(FollowResult)> onFinished)
 {
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                "/follows/channels/" + targetUserID);
+    const auto onResponse = [onFinished](bool following, const auto &record) {
+        if (!following)
+        {
+            onFinished(FollowResult_NotFollowing);
+            return;
+        }
 
-    NetworkRequest(url)
+        onFinished(FollowResult_Following);
+    };
 
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
-            if (result.status() == 203)
-            {
-                onFinished(FollowResult_NotFollowing);
-            }
-            else
-            {
-                onFinished(FollowResult_Failed);
-            }
-        })
-        .onSuccess([=](auto result) -> Outcome {
-            auto document = result.parseRapidJson();
-            onFinished(FollowResult_Following);
-            return Success;
-        })
-        .execute();
+    getHelix()->getUserFollow(this->getUserId(), targetUserID, onResponse,
+                              [] {});
 }
 
 void TwitchAccount::followUser(const QString userID,

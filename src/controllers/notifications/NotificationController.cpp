@@ -143,64 +143,47 @@ void NotificationController::fetchFakeChannels()
 void NotificationController::getFakeTwitchChannelLiveStatus(
     const QString &channelName)
 {
-    // XXX: we are passing this to a callback :rage:
-    getHelix()->getUserByName(
+    qDebug() << "XXX Get fake twitch channel" << channelName;
+    getHelix()->getStreamByName(
         channelName,
-        [channelName, this](const auto &user) {
+        [channelName, this](bool live, const auto &stream) {
             qDebug() << "[TwitchChannel" << channelName
                      << "] Refreshing live status";
 
-            QString url("https://api.twitch.tv/kraken/streams/" + user.id);
-            NetworkRequest::twitchRequest(url)
-                .onSuccess([this, channelName](auto result) -> Outcome {
-                    rapidjson::Document document = result.parseRapidJson();
-                    if (!document.IsObject())
-                    {
-                        qDebug()
-                            << "[TwitchChannel:refreshLiveStatus] root is not "
-                               "an object";
-                        return Failure;
-                    }
+            if (!live)
+            {
+                // Stream is offline
+                this->removeFakeChannel(channelName);
+                return;
+            }
 
-                    if (!document.HasMember("stream"))
-                    {
-                        qDebug() << "[TwitchChannel:refreshLiveStatus] Missing "
-                                    "stream in root";
-                        return Failure;
-                    }
+            // Stream is online
+            auto i = std::find(fakeTwitchChannels.begin(),
+                               fakeTwitchChannels.end(), channelName);
 
-                    const auto &stream = document["stream"];
+            if (i != fakeTwitchChannels.end())
+            {
+                // We have already pushed the live state of this stream
+                // Could not find stream in fake twitch channels!
+                return;
+            }
 
-                    if (!stream.IsObject())
-                    {
-                        // Stream is offline (stream is most likely null)
-                        // removeFakeChannel(channelName);
-                        return Failure;
-                    }
-                    // Stream is live
-                    auto i = std::find(fakeTwitchChannels.begin(),
-                                       fakeTwitchChannels.end(), channelName);
+            if (Toasts::isEnabled())
+            {
+                getApp()->toasts->sendChannelNotification(channelName,
+                                                          Platform::Twitch);
+            }
+            if (getSettings()->notificationPlaySound)
+            {
+                getApp()->notifications->playSound();
+            }
+            if (getSettings()->notificationFlashTaskbar)
+            {
+                getApp()->windows->sendAlert();
+            }
 
-                    if (!(i != fakeTwitchChannels.end()))
-                    {
-                        fakeTwitchChannels.push_back(channelName);
-                        if (Toasts::isEnabled())
-                        {
-                            getApp()->toasts->sendChannelNotification(
-                                channelName, Platform::Twitch);
-                        }
-                        if (getSettings()->notificationPlaySound)
-                        {
-                            getApp()->notifications->playSound();
-                        }
-                        if (getSettings()->notificationFlashTaskbar)
-                        {
-                            getApp()->windows->sendAlert();
-                        }
-                    }
-                    return Success;
-                })
-                .execute();
+            // Indicate that we have pushed notifications for this stream
+            fakeTwitchChannels.push_back(channelName);
         },
         [channelName, this] {
             qDebug() << "[TwitchChannel" << channelName

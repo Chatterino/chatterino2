@@ -15,8 +15,8 @@
 namespace chatterino {
 
 using HelixFailureCallback = std::function<void()>;
-template <typename T>
-using ResultCallback = std::function<void(T)>;
+template <typename... T>
+using ResultCallback = std::function<void(T...)>;
 
 struct HelixUser {
     const QString id;
@@ -44,6 +44,15 @@ struct HelixUsersFollowsRecord {
     const QString toName;
     const QString followedAt;  // date time object
 
+    HelixUsersFollowsRecord()
+        : fromId("")
+        , fromName("")
+        , toId("")
+        , toName("")
+        , followedAt("")
+    {
+    }
+
     HelixUsersFollowsRecord(QJsonObject jsonObject)
         : fromId(jsonObject.value("from_id").toString())
         , fromName(jsonObject.value("from_name").toString())
@@ -64,6 +73,60 @@ struct HelixUsersFollowsResponse {
         std::transform(jsonData.begin(), jsonData.end(),
                        std::back_inserter(this->data),
                        [](const QJsonValue &asd) { return asd.toObject(); });
+    }
+};
+
+struct HelixStream {
+    const QString id;  // stream id
+    const QString userId;
+    const QString userName;
+    const QString gameId;
+    const QString type;
+    const QString title;
+    const int viewerCount;
+    const QString startedAt;
+    const QString language;
+    const QString thumbnailUrl;
+
+    HelixStream()
+        : id("")
+        , userId("")
+        , userName("")
+        , gameId("")
+        , type("")
+        , title("")
+        , viewerCount()
+        , startedAt("")
+        , language("")
+        , thumbnailUrl("")
+    {
+    }
+
+    HelixStream(QJsonObject jsonObject)
+        : id(jsonObject.value("id").toString())
+        , userId(jsonObject.value("user_id").toString())
+        , userName(jsonObject.value("user_name").toString())
+        , gameId(jsonObject.value("game_id").toString())
+        , type(jsonObject.value("type").toString())
+        , title(jsonObject.value("title").toString())
+        , viewerCount(jsonObject.value("viewer_count").toInt())
+        , startedAt(jsonObject.value("started_at").toString())
+        , language(jsonObject.value("language").toString())
+        , thumbnailUrl(jsonObject.value("thumbnail_url").toString())
+    {
+    }
+};
+
+struct HelixGame {
+    const QString id;  // stream id
+    const QString name;
+    const QString boxArtUrl;
+
+    HelixGame(QJsonObject jsonObject)
+        : id(jsonObject.value("id").toString())
+        , name(jsonObject.value("name").toString())
+        , boxArtUrl(jsonObject.value("box_art_url").toString())
+    {
     }
 };
 
@@ -90,6 +153,32 @@ public:
         QString userId,
         ResultCallback<HelixUsersFollowsResponse> successCallback,
         HelixFailureCallback failureCallback);
+
+    void getUserFollow(
+        QString userId, QString targetId,
+        ResultCallback<bool, HelixUsersFollowsRecord> successCallback,
+        HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#get-streams
+    void fetchStreams(QStringList userIds, QStringList userLogins,
+                      ResultCallback<std::vector<HelixStream>> successCallback,
+                      HelixFailureCallback failureCallback);
+
+    void getStreamById(QString userId,
+                       ResultCallback<bool, HelixStream> successCallback,
+                       HelixFailureCallback failureCallback);
+
+    void getStreamByName(QString userName,
+                         ResultCallback<bool, HelixStream> successCallback,
+                         HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#get-games
+    void fetchGames(QStringList gameIds, QStringList gameNames,
+                    ResultCallback<std::vector<HelixGame>> successCallback,
+                    HelixFailureCallback failureCallback);
+
+    void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
+                     HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

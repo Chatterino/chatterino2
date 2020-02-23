@@ -180,7 +180,6 @@ SOURCES += \
     src/providers/LinkResolver.cpp \
     src/providers/twitch/api/Helix.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
-    src/providers/twitch/PartialTwitchUser.cpp \
     src/providers/twitch/PubsubActions.cpp \
     src/providers/twitch/PubsubClient.cpp \
     src/providers/twitch/PubsubHelpers.cpp \
@@ -383,7 +382,6 @@ HEADERS += \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
-    src/providers/twitch/PartialTwitchUser.hpp \
     src/providers/twitch/PubsubActions.hpp \
     src/providers/twitch/PubsubClient.hpp \
     src/providers/twitch/PubsubHelpers.hpp \

@@ -5,19 +5,11 @@ this folder describes what sort of API requests we do, what permissions are requ
 We use a bunch of Kraken (V5) in Chatterino2.
 
 ### Get Channel
-URL: https://dev.twitch.tv/docs/v5/reference/channels#get-channel  
+URL: https://dev.twitch.tv/docs/v5/reference/channels#get-channel
 
-Migration path: Use Helix GetStreams
+Migration path: **Unknown**
 
  * We use this API in `providers/twitch/TwitchChannel.cpp refreshTitle` to check the current stream title/game
-
-### Check user follows by Channel
-URL: https://dev.twitch.tv/docs/v5/reference/users#check-user-follows-by-channel  
-
-Migration path: User Helix GetUsersFollows (Base already implemented)
-
- * We use this API in `widgets/dialogs/UserInfoPopup.cpp installEvents` to show your follow status to the user whose name you just clicked to open the user info popup.
- * We implement this API in `providers/twitch/TwitchAccount.cpp checkFollow`
 
 ### Follow Channel
 URL: https://dev.twitch.tv/docs/v5/reference/users#follow-channel  
@@ -35,20 +27,6 @@ Migration path: **Unknown**
 
  * We implement this API in `providers/twitch/TwitchAccount.cpp unfollowUser`
 
-### Get Stream by User
-URL: https://dev.twitch.tv/docs/v5/reference/streams#get-stream-by-user
-
-Migration path: Use Helix GetStreams
-
- * We use this API in `controllers/notifications/NotificationController.cpp getFakeTwitchChannelLiveStatus` to provide notifications for channels you might now have open in Chatterino
- * We use this API in `providers/twitch/TwitchChannel refreshLiveStatus` to get the live status of a channel you have open in Chatterino
-
-### Get User
-URL: https://dev.twitch.tv/docs/v5/reference/users#get-user
-
-Migration path: Use Helix GetUsers (Already implemented)
-
- * We implement this API in `providers/twitch/PartialTwitchUser.cpp getId`
 
 ### Get Cheermotes
 URL: https://dev.twitch.tv/docs/v5/reference/bits#get-cheermotes
@@ -106,15 +84,25 @@ URL: https://dev.twitch.tv/docs/api/reference#get-users
 
  * We implement this in `providers/twitch/api/Helix.cpp fetchUsers`.  
    Used in:
-     * NotificationController
-     * CommandController
+     * `UserInfoPopup` to get ID and viewcount of username we clicked
+     * `CommandController` to power any commands that need to get a user ID
+     * `Toasts` to get the profile picture of a streamer who just went live
+     * `TwitchAccount` ignore and unignore features to translate user name to user ID
 
 ### Get Users Follows
 URL: https://dev.twitch.tv/docs/api/reference#get-users-follows
 
  * We implement this in `providers/twitch/api/Helix.cpp fetchUsersFollows`  
    Used in:
-     * UserInfoPopup
+     * `UserInfoPopup` to get number of followers a user has
+
+### Get Streams
+URL: https://dev.twitch.tv/docs/api/reference#get-streams
+
+ * We implement this in `providers/twitch/api/Helix.cpp fetchStreams`  
+   Used in:
+     * `TwitchChannel` to get live status, game, title, and viewer count of a channel
+     * `NotificationController` to provide notifications for channels you might not have open in Chatterino, but are still interested in getting notifications for
 
 ## TMI
 The TMI api is undocumented.
