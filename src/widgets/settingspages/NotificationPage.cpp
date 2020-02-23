@@ -51,8 +51,7 @@ NotificationPage::NotificationPage()
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
                 }
-                openIn->setContentsMargins(40, 0, 0, 0);
-                openIn->setSizeConstraint(QLayout::SetMaximumSize);
+
                 auto customSound =
                     layout.emplace<QHBoxLayout>().withoutMargin();
                 {

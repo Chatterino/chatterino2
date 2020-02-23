@@ -18,9 +18,7 @@ NotificationPopup::NotificationPopup()
     this->setWindowFlags(
         Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint |
         Qt::BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
-    //this->setWindowOpacity(0.95);
-    //auto *layout = new QVBoxLayout(this);
-    //this->setLayout(layout);
+    this->setWindowOpacity(0.95);
 
     this->setScaleIndependantSize(360, 120);
 }

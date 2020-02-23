@@ -101,36 +101,36 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
     };
 
     NetworkRequest::twitchRequest(url)
-        .onSuccess([channelName, bottomText, callback,
-                    this](auto result) -> Outcome {
-            const auto data = result.getData();
+        .onSuccess(
+            [channelName, bottomText, callback, this](auto result) -> Outcome {
+                const auto data = result.getData();
 
-            QPixmap avatar;
-            avatar.loadFromData(data);
+                QPixmap avatar;
+                avatar.loadFromData(data);
 
-            getApp()->notifications->addNotification(
-                makeLayout(
-                    avatar,
-                    QString("<b>" + channelName + "</b> just went live!"),
-                    bottomText),
-                std::chrono::milliseconds(getSettings()->notificationDuration *
-                                          1000),
-                callback);
+                getApp()->notifications->addNotification(
+                    makeLayout(
+                        avatar,
+                        QString("<b>" + channelName + "</b> just went live!"),
+                        bottomText),
+                    std::chrono::milliseconds(
+                        (int)getSettings()->notificationDuration * 1000),
+                    callback);
 
-            return Success;
-        })
-        .onError([channelName, bottomText, callback,
-                  this](auto result) -> bool {
-            getApp()->notifications->addNotification(
-                makeLayout(
-                    getResources().icon,
-                    QString("<b>" + channelName + "</b> just went live!"),
-                    bottomText),
-                std::chrono::milliseconds(getSettings()->notificationDuration *
-                                          1000),
-                callback);
-            return false;
-        })
+                return Success;
+            })
+        .onError(
+            [channelName, bottomText, callback, this](auto result) -> bool {
+                getApp()->notifications->addNotification(
+                    makeLayout(
+                        getResources().icon,
+                        QString("<b>" + channelName + "</b> just went live!"),
+                        bottomText),
+                    std::chrono::milliseconds(
+                        (int)getSettings()->notificationDuration * 1000),
+                    callback);
+                return false;
+            })
         .execute();
 }
 

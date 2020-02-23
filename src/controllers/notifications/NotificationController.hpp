@@ -3,7 +3,6 @@
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "singletons/Settings.hpp"
-#include "widgets/BaseWindow.hpp"
 #include "widgets/dialogs/NotificationPopup.hpp"
 
 #include <QLayout>

@@ -8,7 +8,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
-#include "widgets/BaseWindow.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/NotificationPopup.hpp"
 
@@ -50,15 +49,6 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
     this->liveStatusTimer_->start(60 * 1000);
 
     popupWindow_ = new NotificationPopup();
-
-    /*
-    popupWindow_->setWindowFlags(
-        Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint |
-        Qt::BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
-    popupWindow_->setWindowOpacity(0.95);
-
-    popupWindow_->setScaleIndependantSize(360, 120);
-    */
 }
 
 void NotificationController::updateChannelNotification(
@@ -224,13 +214,6 @@ void NotificationController::removeFakeChannel(const QString channelName)
         fakeTwitchChannels.erase(i);
     }
 }
-
-/*
-void NotificationController::mousePressEvent(QMouseEvent *event)
-{
-    std::get<2>(queue_.front())();
-}
-*/
 
 void NotificationController::addNotification(QLayout *layout,
                                              std::chrono::milliseconds time,
