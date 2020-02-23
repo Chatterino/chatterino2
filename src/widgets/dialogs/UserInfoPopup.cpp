@@ -7,6 +7,7 @@
 #include "controllers/highlights/HighlightController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
@@ -23,7 +24,7 @@
 
 const QString TEXT_VIEWS("Views: %1");
 const QString TEXT_FOLLOWERS("Followers: %1");
-#define TEXT_CREATED "Created: "
+const QString TEXT_CREATED("Created: %1");
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
 
@@ -95,7 +96,7 @@ UserInfoPopup::UserInfoPopup()
                 .assign(&this->ui_.viewCountLabel);
             vbox.emplace<Label>(TEXT_FOLLOWERS.arg(""))
                 .assign(&this->ui_.followerCountLabel);
-            vbox.emplace<Label>(TEXT_CREATED)
+            vbox.emplace<Label>(TEXT_CREATED.arg(""))
                 .assign(&this->ui_.createdDateLabel);
         }
     }
@@ -385,8 +386,7 @@ void UserInfoPopup::updateUserData()
         this->ui_.followerCountLabel->setText(
             TEXT_FOLLOWERS.arg(TEXT_UNAVAILABLE));
         this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(TEXT_UNAVAILABLE));
-        this->ui_.createdDateLabel->setText(TEXT_CREATED +
-                                            QString(TEXT_UNAVAILABLE));
+        this->ui_.createdDateLabel->setText(TEXT_CREATED.arg(TEXT_UNAVAILABLE));
 
         this->ui_.nameLabel->setText(this->userName_);
 
@@ -404,8 +404,15 @@ void UserInfoPopup::updateUserData()
         this->ui_.userIDLabel->setProperty("copy-text", user.id);
 
         this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(user.viewCount));
-        this->ui_.createdDateLabel->setText(
-            QString("%1 NOT AVAILABLE IN HELIX").arg(TEXT_CREATED));
+        getKraken()->getUser(
+            user.id,
+            [this](const auto &user) {
+                this->ui_.createdDateLabel->setText(
+                    TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
+            },
+            [] {
+                // failure
+            });
         this->loadAvatar(user.profileImageUrl);
 
         getHelix()->getUserFollowers(

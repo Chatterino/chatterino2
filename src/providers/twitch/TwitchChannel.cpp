@@ -14,6 +14,8 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/TwitchParseCheerEmotes.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
@@ -455,35 +457,25 @@ void TwitchChannel::refreshTitle()
     }
     this->titleRefreshedTime_ = QTime::currentTime();
 
-    QString url("https://api.twitch.tv/kraken/channels/" + roomID);
-    NetworkRequest::twitchRequest(url)
-        .onSuccess(
-            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-                ChannelPtr shared = weak.lock();
-                if (!shared)
-                    return Failure;
+    const auto onSuccess = [this,
+                            weak = weakOf<Channel>(this)](const auto &channel) {
+        ChannelPtr shared = weak.lock();
+        if (!shared)
+        {
+            return;
+        }
 
-                const auto document = result.parseRapidJson();
+        {
+            auto status = this->streamStatus_.access();
+            status->title = channel.status;
+        }
 
-                auto statusIt = document.FindMember("status");
+        this->liveStatusChanged.invoke();
+    };
 
-                if (statusIt == document.MemberEnd())
-                {
-                    return Failure;
-                }
+    const auto onFailure = [] {};
 
-                {
-                    auto status = this->streamStatus_.access();
-                    if (!rj::getSafe(statusIt->value, status->title))
-                    {
-                        return Failure;
-                    }
-                }
-
-                this->liveStatusChanged.invoke();
-                return Success;
-            })
-        .execute();
+    getKraken()->getChannel(roomID, onSuccess, onFailure);
 }
 
 void TwitchChannel::refreshLiveStatus()
@@ -497,8 +489,6 @@ void TwitchChannel::refreshLiveStatus()
         this->setLive(false);
         return;
     }
-
-    QString url("https://api.twitch.tv/kraken/streams/" + roomID);
 
     getHelix()->getStreamById(
         roomID,

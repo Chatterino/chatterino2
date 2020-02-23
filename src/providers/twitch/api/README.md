@@ -9,7 +9,9 @@ URL: https://dev.twitch.tv/docs/v5/reference/channels#get-channel
 
 Migration path: **Unknown**
 
- * We use this API in `providers/twitch/TwitchChannel.cpp refreshTitle` to check the current stream title/game
+ * We implement this in `providers/twitch/api/Kraken.cpp getChannel`  
+   Used in:
+     * `TwitchChannel::refreshTitle` to check the current stream title/game of offline channels
 
 ### Follow Channel
 URL: https://dev.twitch.tv/docs/v5/reference/users#follow-channel  
