@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "common/Singleton.hpp"
 
+#include <QLayout>
+
 namespace chatterino {
 
 enum class Platform : uint8_t;
@@ -27,5 +29,7 @@ public:
 
 private:
     void actuallySendToastMessage(const QUrl &url, const QString &channelName);
+    QHBoxLayout *makeLayout(const QPixmap &image, const QString &text,
+                            const QString &bottomText);
 };
 }  // namespace chatterino

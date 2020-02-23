@@ -8,9 +8,12 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
+#include "widgets/BaseWindow.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/dialogs/NotificationPopup.hpp"
 
 #include <QDesktopServices>
+#include <QDesktopWidget>
 #include <QDir>
 #include <QMediaPlayer>
 #include <QUrl>
@@ -26,8 +29,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
     }
 
     this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {  //
-        this->twitchSetting_.setValue(
-            this->channelMap[Platform::Twitch].raw());
+        this->twitchSetting_.setValue(this->channelMap[Platform::Twitch].raw());
     });
     /*
     for (const QString &channelName : this->mixerSetting_.getValue()) {
@@ -46,6 +48,17 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
     QObject::connect(this->liveStatusTimer_, &QTimer::timeout,
                      [=] { this->fetchFakeChannels(); });
     this->liveStatusTimer_->start(60 * 1000);
+
+    popupWindow_ = new NotificationPopup();
+
+    /*
+    popupWindow_->setWindowFlags(
+        Qt::FramelessWindowHint | Qt::X11BypassWindowManagerHint |
+        Qt::BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
+    popupWindow_->setWindowOpacity(0.95);
+
+    popupWindow_->setScaleIndependantSize(360, 120);
+    */
 }
 
 void NotificationController::updateChannelNotification(
@@ -83,8 +96,8 @@ void NotificationController::addChannelNotification(const QString &channelName,
 void NotificationController::removeChannelNotification(
     const QString &channelName, Platform p)
 {
-    for (std::vector<int>::size_type i = 0;
-         i != channelMap[p].raw().size(); i++)
+    for (std::vector<int>::size_type i = 0; i != channelMap[p].raw().size();
+         i++)
     {
         if (channelMap[p].raw()[i].toLower() == channelName.toLower())
         {
@@ -212,19 +225,47 @@ void NotificationController::removeFakeChannel(const QString channelName)
     }
 }
 
-void NotificationController::addNotification(NotificationPopup &notif)
+/*
+void NotificationController::mousePressEvent(QMouseEvent *event)
 {
-    if (queue.size() == 0)
+    std::get<2>(queue_.front())();
+}
+*/
+
+void NotificationController::addNotification(QLayout *layout, QTime time,
+                                             std::function<void()> callback)
+{
+    queue_.push({layout, time, callback});
+    if (queue_.size() == 1)
     {
         startNotification();
     }
-    queue.push_back(notif);
 }
 
 void NotificationController::startNotification()
 {
-    queue[0].updatePosition();
-    queue[0].show();
+    popupWindow_->updatePosition();
+
+    if (popupWindow_->layout())
+    {
+        delete popupWindow_->layout();
+    }
+
+    popupWindow_->setLayout(std::get<0>(queue_.front()));
+    popupWindow_->update();
+    popupWindow_->show();
+    QTimer::singleShot(getSettings()->notificationDuration * 1000, [this] {
+        queue_.pop();
+
+        //popupWindow_->hide();
+
+        if (queue_.size() == 0)
+        {
+            return;
+        }
+
+        startNotification();
+    });
 }
 
 }  // namespace chatterino

@@ -14,6 +14,7 @@
 
 #include <QDesktopServices>
 #include <QFileInfo>
+#include <QLayout>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QUrl>
@@ -105,37 +106,53 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
     };
 
     NetworkRequest::twitchRequest(url)
-        .onSuccess([channelName, bottomText,
-                    onMousePressed](auto result) -> Outcome {
+        .onSuccess([channelName, bottomText, onMousePressed,
+                    this](auto result) -> Outcome {
             const auto data = result.getData();
 
             QPixmap avatar;
             avatar.loadFromData(data);
 
-            auto *popup = new NotificationPopup();
+            getApp()->notifications->addNotification(
+                makeLayout(
+                    avatar,
+                    QString("<b>" + channelName + "</b> just went live!"),
+                    bottomText),
+                QTime(0, 0, 0, getSettings()->notificationDuration * 1000),
+                []() { qDebug() << "xd"; });
+            //auto *popup = new NotificationPopup();
             //popup->updatePosition();
-            popup->setImageAndText(
-                avatar, QString("<b>" + channelName + "</b> just went live!"),
-                bottomText);
-            //popup->show();
-            popup->mouseDown.connect(onMousePressed(popup));
+            // popup->setImageAndText(
+            //     avatar, QString("<b>" + channelName + "</b> just went live!"),
+            //     bottomText);
+            // //popup->show();
+            // popup->mouseDown.connect(onMousePressed(popup));
 
-            //QTimer::singleShot(5000, [popup] {
+            // getApp()->notifications->addNotification(popup);
+
+            // //QTimer::singleShot(5000, [popup] {
             //    popup->hide();
             //    popup->deleteLater();
             //});
 
             return Success;
         })
-        .onError([channelName, bottomText,
-                  onMousePressed](auto result) -> bool {
-            auto *popup = new NotificationPopup();
-            //popup->updatePosition();
-            popup->setImageAndText(getResources().icon,
-                                   QString(channelName + " just went live!"),
-                                   bottomText);
-            //popup->show();
-            popup->mouseDown.connect(onMousePressed(popup));
+        .onError([channelName, bottomText, onMousePressed,
+                  this](auto result) -> bool {
+            getApp()->notifications->addNotification(
+                makeLayout(
+                    getResources().icon,
+                    QString("<b>" + channelName + "</b> just went live!"),
+                    bottomText),
+                QTime(0, 0, 0, getSettings()->notificationDuration * 1000),
+                []() { qDebug() << "xd"; });
+            //auto *popup = new NotificationPopup();
+            ////popup->updatePosition();
+            //popup->setImageAndText(getResources().icon,
+            //                       QString(channelName + " just went live!"),
+            //                       bottomText);
+            ////popup->show();
+            //popup->mouseDown.connect(onMousePressed(popup));
 
             //QTimer::singleShot(5000, [popup] {
             //    popup->hide();
@@ -144,5 +161,32 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
             return false;
         })
         .execute();
+}
+
+QHBoxLayout *Toasts::makeLayout(const QPixmap &image, const QString &text,
+                                const QString &bottomText)
+{
+    auto *layout = new QHBoxLayout();
+
+    auto *imageLabel = new QLabel();
+    imageLabel->setPixmap(image);
+    imageLabel->setScaledContents(true);
+    imageLabel->setMinimumSize(1, 1);
+    imageLabel->setSizePolicy(QSizePolicy::MinimumExpanding,
+                              QSizePolicy::Minimum);
+    layout->addWidget(imageLabel, 1);
+
+    auto *vbox = new QVBoxLayout();
+    layout->addLayout(vbox, 2);
+
+    auto *textLabel = new QLabel();
+    textLabel->setText(text);
+    vbox->addWidget(textLabel);
+
+    auto *bottomTextLabel = new QLabel();
+    bottomTextLabel->setText(bottomText);
+    vbox->addWidget(bottomTextLabel);
+
+    return layout;
 }
 }  // namespace chatterino

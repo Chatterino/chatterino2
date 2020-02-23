@@ -3,8 +3,10 @@
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "singletons/Settings.hpp"
+#include "widgets/BaseWindow.hpp"
 #include "widgets/dialogs/NotificationPopup.hpp"
 
+#include <QLayout>
 #include <QTimer>
 
 namespace chatterino {
@@ -29,7 +31,8 @@ public:
     void addChannelNotification(const QString &channelName, Platform p);
     void removeChannelNotification(const QString &channelName, Platform p);
 
-    void addNotification(NotificationPopup &notif);
+    void addNotification(QLayout *layout, QTime time,
+                         std::function<void()> callback);
     void playSound();
 
     UnsortedSignalVector<QString> getVector(Platform p);
@@ -45,12 +48,10 @@ private:
     void removeFakeChannel(const QString channelName);
     void getFakeTwitchChannelLiveStatus(const QString &channelName);
 
-    void startNotification();
-
     std::vector<QString> fakeTwitchChannels;
     QTimer *liveStatusTimer_;
 
-    std::vector<NotificationPopup> queue;
+    std::queue<std::tuple<QLayout *, QTime, std::function<void()>>> queue_;
 
     ChatterinoSetting<std::vector<QString>> twitchSetting_ = {
         "/notifications/twitch"};
@@ -58,6 +59,10 @@ private:
     ChatterinoSetting<std::vector<QString>> mixerSetting_ = {
         "/notifications/mixer"};
     */
+
+    NotificationPopup *popupWindow_;
+
+    void startNotification();
 };
 
 }  // namespace chatterino
