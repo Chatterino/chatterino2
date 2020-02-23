@@ -170,7 +170,8 @@ bool TwitchMessageBuilder::isIgnored() const
     auto app = getApp();
 
     // TODO(pajlada): Do we need to check if the phrase is valid first?
-    for (const auto &phrase : app->ignores->phrases)
+    auto phrases = app->ignores->phrases.readOnly();
+    for (const auto &phrase : *phrases)
     {
         if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
         {
@@ -765,7 +766,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
     std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes)
 {
     auto app = getApp();
-    const auto &phrases = app->ignores->phrases;
+    auto phrases = app->ignores->phrases.readOnly();
     auto removeEmotesInRange =
         [](int pos, int len,
            std::vector<std::tuple<int, EmotePtr, EmoteName>>
@@ -828,7 +829,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         }
     };
 
-    for (const auto &phrase : phrases)
+    for (const auto &phrase : *phrases)
     {
         if (phrase.isBlock())
         {
@@ -1056,11 +1057,9 @@ void TwitchMessageBuilder::parseHighlights()
          */
     }
 
-    std::vector<HighlightPhrase> userHighlights =
-        app->highlights->highlightedUsers.cloneVector();
-
     // Highlight because of sender
-    for (const HighlightPhrase &userHighlight : userHighlights)
+    auto userHighlights = app->highlights->highlightedUsers.readOnly();
+    for (const HighlightPhrase &userHighlight : *userHighlights)
     {
         if (!userHighlight.isMatch(this->ircMessage->nick()))
         {

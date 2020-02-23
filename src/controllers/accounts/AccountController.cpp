@@ -30,10 +30,10 @@ AccountController::AccountController()
             case ProviderId::Twitch: {
                 if (args.caller != this)
                 {
-                    auto accs = this->twitch.accounts.cloneVector();
+                    auto &&accs = this->twitch.accounts;
                     auto it = std::find(accs.begin(), accs.end(), args.item);
                     assert(it != accs.end());
-                    this->twitch.accounts.removeItem(it - accs.begin(), this);
+                    this->twitch.accounts.removeAt(it - accs.begin(), this);
                 }
             }
             break;

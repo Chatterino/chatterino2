@@ -87,7 +87,7 @@ HighlightBlacklistModel *HighlightController::createBlacklistModel(
 
 bool HighlightController::blacklistContains(const QString &username)
 {
-    for (const auto &blacklistedUser : this->blacklistedUsers)
+    for (const auto &blacklistedUser : *this->blacklistedUsers.readOnly())
     {
         if (blacklistedUser.isMatch(username))
         {

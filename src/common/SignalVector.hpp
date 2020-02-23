@@ -4,243 +4,210 @@
 #include <QTimer>
 #include <boost/noncopyable.hpp>
 #include <pajlada/signals/signal.hpp>
-#include <shared_mutex>
 #include <vector>
 
 #include "debug/AssertInGuiThread.hpp"
 
 namespace chatterino {
 
-template <typename TVectorItem>
-struct SignalVectorItemArgs {
-    const TVectorItem &item;
+template <typename T>
+struct SignalVectorItemEvent {
+    const T &item;
     int index;
     void *caller;
 };
 
-template <typename TVectorItem>
-class ReadOnlySignalVector : boost::noncopyable
+template <typename T>
+class SignalVector : boost::noncopyable
 {
-    using VecIt = typename std::vector<TVectorItem>::iterator;
-
 public:
-    struct Iterator
-        : public std::iterator<std::input_iterator_tag, TVectorItem> {
-        Iterator(VecIt &&it, std::shared_mutex &mutex)
-            : it_(std::move(it))
-            , lock_(mutex)
-            , mutex_(mutex)
-        {
-        }
+    pajlada::Signals::Signal<SignalVectorItemEvent<T>> itemInserted;
+    pajlada::Signals::Signal<SignalVectorItemEvent<T>> itemRemoved;
+    pajlada::Signals::NoArgSignal delayedItemsChanged;
 
-        Iterator(const Iterator &other)
-            : it_(other.it_)
-            , lock_(other.mutex_)
-            , mutex_(other.mutex_)
-        {
-        }
-
-        Iterator &operator=(const Iterator &other)
-        {
-            this->lock_ = std::shared_lock(other.mutex_.get());
-            this->mutex_ = other.mutex_;
-
-            return *this;
-        }
-
-        TVectorItem &operator*()
-        {
-            return it_.operator*();
-        }
-
-        Iterator &operator++()
-        {
-            ++this->it_;
-            return *this;
-        }
-
-        bool operator==(const Iterator &other)
-        {
-            return this->it_ == other.it_;
-        }
-
-        bool operator!=(const Iterator &other)
-        {
-            return this->it_ != other.it_;
-        }
-
-        auto operator-(const Iterator &other)
-        {
-            return this->it_ - other.it_;
-        }
-
-    private:
-        VecIt it_;
-        std::shared_lock<std::shared_mutex> lock_;
-        std::reference_wrapper<std::shared_mutex> mutex_;
-    };
-
-    ReadOnlySignalVector()
+    SignalVector()
+        : readOnly_(new std::vector<T>())
     {
         QObject::connect(&this->itemsChangedTimer_, &QTimer::timeout,
                          [this] { this->delayedItemsChanged.invoke(); });
         this->itemsChangedTimer_.setInterval(100);
         this->itemsChangedTimer_.setSingleShot(true);
     }
-    virtual ~ReadOnlySignalVector() = default;
 
-    pajlada::Signals::Signal<SignalVectorItemArgs<TVectorItem>> itemInserted;
-    pajlada::Signals::Signal<SignalVectorItemArgs<TVectorItem>> itemRemoved;
-    pajlada::Signals::NoArgSignal delayedItemsChanged;
-
-    Iterator begin() const
+    SignalVector(std::function<bool(const T &, const T &)> &&compare)
+        : SignalVector()
     {
-        return Iterator(
-            const_cast<std::vector<TVectorItem> &>(this->vector_).begin(),
-            this->mutex_);
+        itemCompare_ = std::move(compare);
     }
 
-    Iterator end() const
+    virtual bool isSorted() const
     {
-        return Iterator(
-            const_cast<std::vector<TVectorItem> &>(this->vector_).end(),
-            this->mutex_);
+        return bool(this->itemCompare_);
     }
 
-    bool empty() const
+    /// A read-only version of the vector which can be used concurrently.
+    std::shared_ptr<const std::vector<T>> readOnly()
     {
-        std::shared_lock lock(this->mutex_);
-
-        return this->vector_.empty();
+        return this->readOnly_;
     }
 
-    const std::vector<TVectorItem> &getVector() const
+    /// This may only be called from the GUI thread.
+    ///
+    ///	@param item
+    /// 	Item to be inserted.
+    /// @param proposedIndex
+    /// 	Index to insert at. `-1` will append at the end.
+    ///		Will be ignored if the vector is sorted.
+    /// @param caller
+    ///     Caller id which will be passed in the itemInserted and itemRemoved
+    /// 	signals.
+    int insert(const T &item, int index = -1, void *caller = nullptr)
     {
         assertInGuiThread();
 
-        return this->vector_;
+        if (this->isSorted())
+        {
+            auto it = std::lower_bound(this->items_.begin(), this->items_.end(),
+                                       item, this->itemCompare_);
+            index = it - this->items_.begin();
+            this->items_.insert(it, item);
+        }
+        else
+        {
+            if (index == -1)
+                index = this->items_.size();
+            else
+                assert(index >= 0 && index <= this->items_.size());
+
+            this->items_.insert(this->items_.begin() + index, item);
+        }
+
+        SignalVectorItemEvent<T> args{item, index, caller};
+        this->itemInserted.invoke(args);
+        this->itemsChanged_();
+
+        return index;
     }
 
-    std::vector<TVectorItem> cloneVector() const
+    /// This may only be called from the GUI thread.
+    ///
+    ///	@param item
+    /// 	Item to be appended.
+    /// @param caller
+    ///     Caller id which will be passed in the itemInserted and itemRemoved
+    /// 	signals.
+    int append(const T &item, void *caller = nullptr)
     {
-        std::shared_lock lock(this->mutex_);
-
-        return this->vector_;
+        return this->insertItem(item, -1, caller);
     }
 
-    void invokeDelayedItemsChanged()
+    void removeAt(int index, void *caller = nullptr)
+    {
+        assertInGuiThread();
+        assert(index >= 0 && index < int(this->items_.size()));
+
+        T item = this->items_[index];
+        this->items_.erase(this->items_.begin() + index);
+
+        SignalVectorItemEvent<T> args{item, index, caller};
+        this->itemRemoved.invoke(args);
+
+        this->itemsChanged_();
+    }
+
+    // compatability
+    [[deprecated]] int insertItem(const T &item, int proposedIndex = -1,
+                                  void *caller = nullptr)
+    {
+        return this->insert(item, proposedIndex, caller);
+    }
+
+    [[deprecated]] int appendItem(const T &item, void *caller = nullptr)
+    {
+        return this->append(item, caller);
+    }
+
+    [[deprecated]] void removeItem(int index, void *caller = nullptr)
+    {
+        this->removeAt(index, caller);
+    }
+
+    [[deprecated]] const std::vector<T> &getVector() const
     {
         assertInGuiThread();
 
+        return this->items_;
+    }
+
+    [[deprecated]] std::vector<T> cloneVector()
+    {
+        return *this->readOnly();
+    }
+
+    // mirror vector functions
+    auto begin() const
+    {
+        assertInGuiThread();
+        return this->items_.begin();
+    }
+
+    auto end() const
+    {
+        assertInGuiThread();
+        return this->items_.end();
+    }
+
+    decltype(auto) operator[](size_t index)
+    {
+        assertInGuiThread();
+        return this->items[index];
+    }
+
+    auto empty()
+    {
+        assertInGuiThread();
+        return this->items_.empty();
+    }
+
+private:
+    void itemsChanged_()
+    {
+        // emit delayed event
         if (!this->itemsChangedTimer_.isActive())
         {
             this->itemsChangedTimer_.start();
         }
+
+        // update concurrent version
+        this->readOnly_ = std::make_shared<const std::vector<T>>(this->items_);
     }
 
-    virtual bool isSorted() const = 0;
-
-protected:
-    std::vector<TVectorItem> vector_;
+    std::vector<T> items_;
+    std::shared_ptr<const std::vector<T>> readOnly_;
     QTimer itemsChangedTimer_;
-    mutable std::shared_mutex mutex_;
+    std::function<bool(const T &, const T &)> itemCompare_;
 };
 
-template <typename TVectorItem>
-class BaseSignalVector : public ReadOnlySignalVector<TVectorItem>
+// compatability
+template <typename T>
+using SignalVectorItemArgs = SignalVectorItemEvent<T>;
+
+template <typename T>
+using ReadOnlySignalVector = SignalVector<T>;
+
+template <typename T>
+using BaseSignalVector = SignalVector<T>;
+
+template <typename T>
+using UnsortedSignalVector = SignalVector<T>;
+
+template <typename T, typename Compare>
+class SortedSignalVector : public SignalVector<T>
 {
 public:
-    // returns the actual index of the inserted item
-    virtual int insertItem(const TVectorItem &item, int proposedIndex = -1,
-                           void *caller = nullptr) = 0;
-
-    void removeItem(int index, void *caller = nullptr)
+    SortedSignalVector()
+        : SignalVector<T>(Compare{})
     {
-        assertInGuiThread();
-        std::unique_lock lock(this->mutex_);
-
-        assert(index >= 0 && index < int(this->vector_.size()));
-
-        TVectorItem item = this->vector_[index];
-
-        this->vector_.erase(this->vector_.begin() + index);
-        lock.unlock();  // manual unlock
-
-        SignalVectorItemArgs<TVectorItem> args{item, index, caller};
-        this->itemRemoved.invoke(args);
-
-        this->invokeDelayedItemsChanged();
-    }
-
-    int appendItem(const TVectorItem &item, void *caller = nullptr)
-    {
-        return this->insertItem(item, -1, caller);
-    }
-};
-
-template <typename TVectorItem>
-class UnsortedSignalVector : public BaseSignalVector<TVectorItem>
-{
-public:
-    virtual int insertItem(const TVectorItem &item, int index = -1,
-                           void *caller = nullptr) override
-    {
-        assertInGuiThread();
-
-        {
-            std::unique_lock lock(this->mutex_);
-            if (index == -1)
-            {
-                index = this->vector_.size();
-            }
-            else
-            {
-                assert(index >= 0 && index <= this->vector_.size());
-            }
-
-            this->vector_.insert(this->vector_.begin() + index, item);
-        }
-
-        SignalVectorItemArgs<TVectorItem> args{item, index, caller};
-        this->itemInserted.invoke(args);
-        this->invokeDelayedItemsChanged();
-        return index;
-    }
-
-    virtual bool isSorted() const override
-    {
-        return false;
-    }
-};
-
-template <typename TVectorItem, typename Compare>
-class SortedSignalVector : public BaseSignalVector<TVectorItem>
-{
-public:
-    virtual int insertItem(const TVectorItem &item, int = -1,
-                           void *caller = nullptr) override
-    {
-        assertInGuiThread();
-        int index = -1;
-
-        {
-            std::unique_lock lock(this->mutex_);
-
-            auto it = std::lower_bound(this->vector_.begin(),
-                                       this->vector_.end(), item, Compare{});
-            index = it - this->vector_.begin();
-            this->vector_.insert(it, item);
-        }
-
-        SignalVectorItemArgs<TVectorItem> args{item, index, caller};
-        this->itemInserted.invoke(args);
-        this->invokeDelayedItemsChanged();
-        return index;
-    }
-
-    virtual bool isSorted() const override
-    {
-        return true;
     }
 };
 
