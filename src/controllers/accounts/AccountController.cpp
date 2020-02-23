@@ -7,6 +7,7 @@
 namespace chatterino {
 
 AccountController::AccountController()
+    : accounts_(SharedPtrElementLess<Account>{})
 {
     this->twitch.accounts.itemInserted.connect([this](const auto &args) {
         this->accounts_.insert(std::dynamic_pointer_cast<Account>(args.item));

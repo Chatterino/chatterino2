@@ -14,7 +14,7 @@ class TaggedUsersController final : public Singleton
 public:
     TaggedUsersController();
 
-    SortedSignalVector<TaggedUser, std::less<TaggedUser>> users;
+    SignalVector<TaggedUser> users;
 
     TaggedUsersModel *createModel(QObject *parent = nullptr);
 };

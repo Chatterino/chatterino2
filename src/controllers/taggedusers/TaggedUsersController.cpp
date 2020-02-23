@@ -5,6 +5,7 @@
 namespace chatterino {
 
 TaggedUsersController::TaggedUsersController()
+    : users(std::less<TaggedUser>{})
 {
 }
 

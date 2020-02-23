@@ -171,15 +171,4 @@ private:
     std::function<bool(const T &, const T &)> itemCompare_;
 };
 
-// compatability
-template <typename T, typename Compare>
-class SortedSignalVector : public SignalVector<T>
-{
-public:
-    SortedSignalVector()
-        : SignalVector<T>(Compare{})
-    {
-    }
-};
-
 }  // namespace chatterino
