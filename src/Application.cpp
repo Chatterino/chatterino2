@@ -9,7 +9,7 @@
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "controllers/pings/PingController.hpp"
+#include "controllers/pings/MutedChannelController.hpp"
 #include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
@@ -56,7 +56,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , commands(&this->emplace<CommandController>())
     , highlights(&this->emplace<HighlightController>())
     , notifications(&this->emplace<NotificationController>())
-    , pings(&this->emplace<PingController>())
+    , pings(&this->emplace<MutedChannelController>())
     , ignores(&this->emplace<IgnoreController>())
     , taggedUsers(&this->emplace<TaggedUsersController>())
     , moderationActions(&this->emplace<ModerationActions>())

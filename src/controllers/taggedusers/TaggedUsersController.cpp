@@ -9,12 +9,4 @@ TaggedUsersController::TaggedUsersController()
 {
 }
 
-TaggedUsersModel *TaggedUsersController::createModel(QObject *parent)
-{
-    TaggedUsersModel *model = new TaggedUsersModel(parent);
-    model->initialize(&this->users);
-
-    return model;
-}
-
 }  // namespace chatterino

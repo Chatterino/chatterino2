@@ -18,7 +18,7 @@ class TaggedUsersController;
 class AccountController;
 class ModerationActions;
 class NotificationController;
-class PingController;
+class MutedChannelController;
 
 class Theme;
 class WindowManager;
@@ -60,7 +60,7 @@ public:
     CommandController *const commands{};
     HighlightController *const highlights{};
     NotificationController *const notifications{};
-    PingController *const pings{};
+    MutedChannelController *const pings{};
     IgnoreController *const ignores{};
     TaggedUsersController *const taggedUsers{};
     ModerationActions *const moderationActions{};

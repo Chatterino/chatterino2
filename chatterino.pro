@@ -142,8 +142,8 @@ SOURCES += \
     src/controllers/moderationactions/ModerationActions.cpp \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
-    src/controllers/pings/PingController.cpp \
-    src/controllers/pings/PingModel.cpp \
+    src/controllers/pings/MutedChannelController.cpp \
+    src/controllers/pings/MutedChannelModel.cpp \
     src/controllers/taggedusers/TaggedUser.cpp \
     src/controllers/taggedusers/TaggedUsersController.cpp \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
@@ -338,8 +338,8 @@ HEADERS += \
     src/controllers/moderationactions/ModerationActions.hpp \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
-    src/controllers/pings/PingController.hpp \
-    src/controllers/pings/PingModel.hpp \
+    src/controllers/pings/MutedChannelController.hpp \
+    src/controllers/pings/MutedChannelModel.hpp \
     src/controllers/taggedusers/TaggedUser.hpp \
     src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \

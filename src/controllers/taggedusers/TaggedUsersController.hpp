@@ -15,8 +15,6 @@ public:
     TaggedUsersController();
 
     SignalVector<TaggedUser> users;
-
-    TaggedUsersModel *createModel(QObject *parent = nullptr);
 };
 
 }  // namespace chatterino

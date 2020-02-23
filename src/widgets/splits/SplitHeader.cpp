@@ -4,7 +4,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "controllers/pings/PingController.hpp"
+#include "controllers/pings/MutedChannelController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
@@ -343,8 +343,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 this->split_->getChannel()->getName()));
         });
         action->connect(action, &QAction::triggered, this, [this]() {
-            getApp()->pings->toggleMuteChannel(
-                this->split_->getChannel()->getName());
+            getApp()->pings->toggleMuted(this->split_->getChannel()->getName());
         });
 
         moreMenu->addAction(action);
