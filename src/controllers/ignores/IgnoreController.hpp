@@ -19,8 +19,6 @@ class IgnoreController final : public Singleton
 public:
     virtual void initialize(Settings &settings, Paths &paths) override;
 
-    SignalVector<IgnorePhrase> phrases;
-
 private:
     bool initialized_ = false;
 };

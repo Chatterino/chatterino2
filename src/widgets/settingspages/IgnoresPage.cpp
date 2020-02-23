@@ -46,7 +46,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
         layout
             .emplace<EditableModelView>(
                 (new IgnoreModel(nullptr))
-                    ->initialized(&getApp()->ignores->phrases))
+                    ->initialized(&getSettings()->ignoredMessages))
             .getElement();
     view->setTitles(
         {"Pattern", "Regex", "Case Sensitive", "Block", "Replacement"});
@@ -62,7 +62,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
     });
 
     view->addButtonPressed.connect([] {
-        getApp()->ignores->phrases.append(
+        getSettings()->ignoredMessages.append(
             IgnorePhrase{"my pattern", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
     });

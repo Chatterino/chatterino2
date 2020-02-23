@@ -12,8 +12,6 @@ void IgnoreController::initialize(Settings &, Paths &)
 {
     assert(!this->initialized_);
     this->initialized_ = true;
-
-    persist(this->phrases, "/ignore/phrases");
 }
 
 }  // namespace chatterino

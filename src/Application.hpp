@@ -32,9 +32,6 @@ class Fonts;
 class Toasts;
 class ChatterinoBadges;
 
-class HighlightPhrase;
-class HighlightBlacklistUser;
-
 class Application
 {
     std::vector<std::unique_ptr<Singleton>> singletons_;
@@ -54,15 +51,6 @@ public:
 
     friend void test();
 
-    // clang-format off
-    SignalVector<HighlightPhrase>        &highlightedMessages;
-    SignalVector<HighlightPhrase>        &highlightedUsers;
-    SignalVector<HighlightBlacklistUser> &blacklistedUsers;
-    // clang-format on
-
-    bool isHighlightedUser(const QString &username);
-    bool isBlacklistedUser(const QString &username);
-
     Theme *const themes{};
     Fonts *const fonts{};
     Emotes *const emotes{};
@@ -73,7 +61,6 @@ public:
     CommandController *const commands{};
     NotificationController *const notifications{};
     MutedChannelController *const pings{};
-    IgnoreController *const ignores{};
     TaggedUsersController *const taggedUsers{};
     ModerationActions *const moderationActions{};
     TwitchIrcServer *const twitch2{};

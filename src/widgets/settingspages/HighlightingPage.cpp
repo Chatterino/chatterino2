@@ -52,7 +52,8 @@ HighlightingPage::HighlightingPage()
                     highlights
                         .emplace<EditableModelView>(
                             (new HighlightModel(nullptr))
-                                ->initialized(&app->highlightedMessages))
+                                ->initialized(
+                                    &getSettings()->highlightedMessages))
                         .getElement();
                 view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
@@ -71,7 +72,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlightedMessages.append(HighlightPhrase{
+                    getSettings()->highlightedMessages.append(HighlightPhrase{
                         "my phrase", true, false, false, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
@@ -94,7 +95,7 @@ HighlightingPage::HighlightingPage()
                     pingUsers
                         .emplace<EditableModelView>(
                             (new UserHighlightModel(nullptr))
-                                ->initialized(&app->highlightedUsers))
+                                ->initialized(&getSettings()->highlightedUsers))
                         .getElement();
 
                 view->addRegexHelpLink();
@@ -118,7 +119,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlightedUsers.append(HighlightPhrase{
+                    getSettings()->highlightedUsers.append(HighlightPhrase{
                         "highlighted user", true, false, false, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
@@ -140,7 +141,7 @@ HighlightingPage::HighlightingPage()
                     disabledUsers
                         .emplace<EditableModelView>(
                             (new HighlightBlacklistModel(nullptr))
-                                ->initialized(&app->blacklistedUsers))
+                                ->initialized(&getSettings()->blacklistedUsers))
                         .getElement();
 
                 view->addRegexHelpLink();
@@ -158,7 +159,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->blacklistedUsers.append(
+                    getSettings()->blacklistedUsers.append(
                         HighlightBlacklistUser{"blacklisted user", false});
                 });
             }

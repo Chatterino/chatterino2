@@ -5,8 +5,6 @@
 #include "common/Args.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
-#include "controllers/highlights/HighlightBlacklistUser.hpp"
-#include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
@@ -31,7 +29,6 @@
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
-#include "util/PersistSignalVector.hpp"
 #include "util/PostToThread.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
@@ -48,11 +45,7 @@ Application *Application::instance = nullptr;
 // to each other
 
 Application::Application(Settings &_settings, Paths &_paths)
-    : highlightedMessages(*new SignalVector<HighlightPhrase>())
-    , highlightedUsers(*new SignalVector<HighlightPhrase>())
-    , blacklistedUsers(*new SignalVector<HighlightBlacklistUser>())
-
-    , themes(&this->emplace<Theme>())
+    : themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
     , windows(&this->emplace<WindowManager>())
@@ -62,7 +55,6 @@ Application::Application(Settings &_settings, Paths &_paths)
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
     , pings(&this->emplace<MutedChannelController>())
-    , ignores(&this->emplace<IgnoreController>())
     , taggedUsers(&this->emplace<TaggedUsersController>())
     , moderationActions(&this->emplace<ModerationActions>())
     , twitch2(&this->emplace<TwitchIrcServer>())
@@ -70,10 +62,6 @@ Application::Application(Settings &_settings, Paths &_paths)
     , logging(&this->emplace<Logging>())
 {
     this->instance = this;
-
-    persist(this->highlightedMessages, "/highlighting/highlights");
-    persist(this->blacklistedUsers, "/highlighting/blacklist");
-    persist(this->highlightedUsers, "/highlighting/users");
 
     this->fonts->fontChanged.connect(
         [this]() { this->windows->layoutChannelViews(); });
@@ -327,30 +315,6 @@ Application *getApp()
     assert(Application::instance != nullptr);
 
     return Application::instance;
-}
-
-bool Application::isHighlightedUser(const QString &username)
-{
-    for (const auto &highlightedUser : this->highlightedUsers)
-    {
-        if (highlightedUser.isMatch(username))
-            return true;
-    }
-
-    return false;
-}
-
-bool Application::isBlacklistedUser(const QString &username)
-{
-    auto items = this->blacklistedUsers.readOnly();
-
-    for (const auto &blacklistedUser : *items)
-    {
-        if (blacklistedUser.isMatch(username))
-            return true;
-    }
-
-    return false;
 }
 
 }  // namespace chatterino
