@@ -98,7 +98,7 @@ public:
     /// 	signals.
     int append(const T &item, void *caller = nullptr)
     {
-        return this->insertItem(item, -1, caller);
+        return this->insert(item, -1, caller);
     }
 
     void removeAt(int index, void *caller = nullptr)
@@ -120,26 +120,6 @@ public:
         assertInGuiThread();
 
         return this->items_;
-    }
-
-    // compatability
-    [[deprecated("use insert")]] int insertItem(const T &item,
-                                                int proposedIndex = -1,
-                                                void *caller = nullptr)
-    {
-        return this->insert(item, proposedIndex, caller);
-    }
-
-    [[deprecated("use append")]] int appendItem(const T &item,
-                                                void *caller = nullptr)
-    {
-        return this->append(item, caller);
-    }
-
-    [[deprecated("use removeAt")]] void removeItem(int index,
-                                                   void *caller = nullptr)
-    {
-        this->removeAt(index, caller);
     }
 
     [[deprecated]] std::vector<T> cloneVector()

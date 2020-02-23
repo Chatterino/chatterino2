@@ -8,7 +8,7 @@ void PingController::initialize(Settings &settings, Paths &paths)
     this->initialized_ = true;
     for (const QString &channelName : this->pingSetting_.getValue())
     {
-        this->channelVector.appendItem(channelName);
+        this->channelVector.append(channelName);
     }
 
     this->channelVector.delayedItemsChanged.connect([this] {  //
@@ -37,7 +37,7 @@ bool PingController::isMuted(const QString &channelName)
 
 void PingController::muteChannel(const QString &channelName)
 {
-    channelVector.appendItem(channelName);
+    channelVector.append(channelName);
 }
 
 void PingController::unmuteChannel(const QString &channelName)
@@ -47,7 +47,7 @@ void PingController::unmuteChannel(const QString &channelName)
     {
         if (channelVector.raw()[i].toLower() == channelName.toLower())
         {
-            channelVector.removeItem(i);
+            channelVector.removeAt(i);
             i--;
         }
     }

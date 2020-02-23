@@ -221,7 +221,7 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
 
     //    std::lock_guard<std::mutex> lock(this->mutex);
 
-    this->accounts.insertItem(newUser);
+    this->accounts.insert(newUser);
 
     return AddUserResponse::UserAdded;
 }

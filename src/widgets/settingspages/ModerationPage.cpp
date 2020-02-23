@@ -184,7 +184,7 @@ ModerationPage::ModerationPage()
             0, QHeaderView::Stretch);
 
         view->addButtonPressed.connect([] {
-            getApp()->moderationActions->items.appendItem(
+            getApp()->moderationActions->items.append(
                 ModerationAction("/timeout {user} 300"));
         });
 

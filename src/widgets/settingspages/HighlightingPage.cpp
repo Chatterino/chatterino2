@@ -72,7 +72,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlights->phrases.appendItem(HighlightPhrase{
+                    getApp()->highlights->phrases.append(HighlightPhrase{
                         "my phrase", true, false, false, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
@@ -120,7 +120,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlights->highlightedUsers.appendItem(
+                    getApp()->highlights->highlightedUsers.append(
                         HighlightPhrase{"highlighted user", true, false, false,
                                         false, "",
                                         *ColorProvider::instance().color(
@@ -162,7 +162,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlights->blacklistedUsers.appendItem(
+                    getApp()->highlights->blacklistedUsers.append(
                         HighlightBlacklistUser{"blacklisted user", false});
                 });
             }

@@ -252,7 +252,7 @@ void Irc::load()
         {
             ids.insert(data.id);
 
-            this->connections.appendItem(data);
+            this->connections.append(data);
         }
     }
 }

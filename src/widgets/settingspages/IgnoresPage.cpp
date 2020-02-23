@@ -60,7 +60,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
     });
 
     view->addButtonPressed.connect([] {
-        getApp()->ignores->phrases.appendItem(
+        getApp()->ignores->phrases.append(
             IgnorePhrase{"my pattern", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
     });

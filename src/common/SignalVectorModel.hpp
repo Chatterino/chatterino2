@@ -153,12 +153,12 @@ public:
         else
         {
             int vecRow = this->getVectorIndexFromModelIndex(row);
-            this->vector_->removeItem(vecRow, this);
+            this->vector_->removeAt(vecRow, this);
 
             assert(this->rows_[row].original);
             TVectorItem item = this->getItemFromRow(
                 this->rows_[row].items, this->rows_[row].original.get());
-            this->vector_->insertItem(item, vecRow, this);
+            this->vector_->insert(item, vecRow, this);
         }
 
         return true;
@@ -225,7 +225,7 @@ public:
     void deleteRow(int row)
     {
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
-        this->vector_->removeItem(signalVectorRow);
+        this->vector_->removeAt(signalVectorRow);
     }
 
     bool removeRows(int row, int count, const QModelIndex &parent) override
@@ -240,7 +240,7 @@ public:
         assert(row >= 0 && row < this->rows_.size());
 
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
-        this->vector_->removeItem(signalVectorRow);
+        this->vector_->removeAt(signalVectorRow);
 
         return true;
     }
@@ -287,8 +287,8 @@ public:
             if (from != to)
             {
                 auto item = this->vector_->raw()[from];
-                this->vector_->removeItem(from);
-                this->vector_->insertItem(item, to);
+                this->vector_->removeAt(from);
+                this->vector_->insert(item, to);
             }
 
             // We return false since we remove items ourselves.

@@ -46,7 +46,7 @@ CommandPage::CommandPage()
     view->setTitles({"Trigger", "Command"});
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
     view->addButtonPressed.connect([] {
-        getApp()->commands->items_.appendItem(
+        getApp()->commands->items_.append(
             Command{"/command", "I made a new command HeyGuys"});
     });
 
@@ -65,7 +65,7 @@ CommandPage::CommandPage()
             {
                 if (int index = line.indexOf(' '); index != -1)
                 {
-                    getApp()->commands->items_.insertItem(
+                    getApp()->commands->items_.insert(
                         Command(line.mid(0, index), line.mid(index + 1)));
                 }
             }

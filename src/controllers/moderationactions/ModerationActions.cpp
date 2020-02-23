@@ -23,7 +23,7 @@ void ModerationActions::initialize(Settings &settings, Paths &paths)
 
     for (auto &val : this->setting_->getValue())
     {
-        this->items.insertItem(val);
+        this->items.insert(val);
     }
 
     this->items.delayedItemsChanged.connect([this] {  //

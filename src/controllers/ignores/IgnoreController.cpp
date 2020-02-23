@@ -14,7 +14,7 @@ void IgnoreController::initialize(Settings &, Paths &)
 
     for (const IgnorePhrase &phrase : this->ignoresSetting_.getValue())
     {
-        this->phrases.appendItem(phrase);
+        this->phrases.append(phrase);
     }
 
     this->phrases.delayedItemsChanged.connect([this] {  //

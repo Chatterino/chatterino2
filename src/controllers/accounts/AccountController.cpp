@@ -9,8 +9,7 @@ namespace chatterino {
 AccountController::AccountController()
 {
     this->twitch.accounts.itemInserted.connect([this](const auto &args) {
-        this->accounts_.insertItem(
-            std::dynamic_pointer_cast<Account>(args.item));
+        this->accounts_.insert(std::dynamic_pointer_cast<Account>(args.item));
     });
 
     this->twitch.accounts.itemRemoved.connect([this](const auto &args) {
@@ -20,7 +19,7 @@ AccountController::AccountController()
             auto it = std::find(accs.begin(), accs.end(), args.item);
             assert(it != accs.end());
 
-            this->accounts_.removeItem(it - accs.begin(), this);
+            this->accounts_.removeAt(it - accs.begin(), this);
         }
     });
 

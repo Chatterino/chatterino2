@@ -26,12 +26,11 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
     this->initialized_ = true;
     for (const QString &channelName : this->twitchSetting_.getValue())
     {
-        this->channelMap[Platform::Twitch].appendItem(channelName);
+        this->channelMap[Platform::Twitch].append(channelName);
     }
 
     this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {  //
-        this->twitchSetting_.setValue(
-            this->channelMap[Platform::Twitch].raw());
+        this->twitchSetting_.setValue(this->channelMap[Platform::Twitch].raw());
     });
     /*
     for (const QString &channelName : this->mixerSetting_.getValue()) {
@@ -81,18 +80,18 @@ bool NotificationController::isChannelNotified(const QString &channelName,
 void NotificationController::addChannelNotification(const QString &channelName,
                                                     Platform p)
 {
-    channelMap[p].appendItem(channelName);
+    channelMap[p].append(channelName);
 }
 
 void NotificationController::removeChannelNotification(
     const QString &channelName, Platform p)
 {
-    for (std::vector<int>::size_type i = 0;
-         i != channelMap[p].raw().size(); i++)
+    for (std::vector<int>::size_type i = 0; i != channelMap[p].raw().size();
+         i++)
     {
         if (channelMap[p].raw()[i].toLower() == channelName.toLower())
         {
-            channelMap[p].removeItem(i);
+            channelMap[p].removeAt(i);
             i--;
         }
     }

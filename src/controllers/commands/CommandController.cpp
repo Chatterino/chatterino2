@@ -222,7 +222,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // of commands)
     for (const auto &command : this->commandsSetting_->getValue())
     {
-        this->items_.appendItem(command);
+        this->items_.append(command);
     }
 }
 

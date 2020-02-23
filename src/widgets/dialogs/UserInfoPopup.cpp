@@ -336,7 +336,7 @@ void UserInfoPopup::installEvents()
 
             if (checked)
             {
-                getApp()->highlights->blacklistedUsers.insertItem(
+                getApp()->highlights->blacklistedUsers.insert(
                     HighlightBlacklistUser{this->userName_, false});
                 this->ui_.ignoreHighlights->setEnabled(true);
             }
@@ -349,7 +349,7 @@ void UserInfoPopup::installEvents()
                 {
                     if (this->userName_ == vector[i].getPattern())
                     {
-                        getApp()->highlights->blacklistedUsers.removeItem(i);
+                        getApp()->highlights->blacklistedUsers.removeAt(i);
                         i--;
                     }
                 }
