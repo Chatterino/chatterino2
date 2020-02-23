@@ -174,7 +174,8 @@ ModerationPage::ModerationPage()
         EditableModelView *view =
             modMode
                 .emplace<EditableModelView>(
-                    app->moderationActions->createModel(nullptr))
+                    (new ModerationActionModel(nullptr))
+                        ->initialized(&app->moderationActions->items))
                 .getElement();
 
         view->setTitles({"Actions"});
