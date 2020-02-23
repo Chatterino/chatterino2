@@ -434,6 +434,7 @@ HEADERS += \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
     src/util/Overloaded.hpp \
+    src/util/PersistSignalVector.hpp \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \

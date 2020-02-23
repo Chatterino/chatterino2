@@ -44,7 +44,9 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
     layout.emplace<QLabel>("Ignore messages based certain patterns.");
     EditableModelView *view =
         layout
-            .emplace<EditableModelView>(getApp()->ignores->createModel(nullptr))
+            .emplace<EditableModelView>(
+                (new IgnoreModel(nullptr))
+                    ->initialized(&getApp()->ignores->phrases))
             .getElement();
     view->setTitles(
         {"Pattern", "Regex", "Case Sensitive", "Block", "Replacement"});

@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/ignores/IgnoreModel.hpp"
+#include "util/PersistSignalVector.hpp"
 
 #include <cassert>
 
@@ -12,22 +13,7 @@ void IgnoreController::initialize(Settings &, Paths &)
     assert(!this->initialized_);
     this->initialized_ = true;
 
-    for (const IgnorePhrase &phrase : this->ignoresSetting_.getValue())
-    {
-        this->phrases.append(phrase);
-    }
-
-    this->phrases.delayedItemsChanged.connect([this] {  //
-        this->ignoresSetting_.setValue(this->phrases.raw());
-    });
-}
-
-IgnoreModel *IgnoreController::createModel(QObject *parent)
-{
-    IgnoreModel *model = new IgnoreModel(parent);
-    model->initialize(&this->phrases);
-
-    return model;
+    persist(this->phrases, "/ignore/phrases");
 }
 
 }  // namespace chatterino
