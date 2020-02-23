@@ -3,6 +3,7 @@
 #include <QApplication>
 #include <memory>
 
+#include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "singletons/NativeMessaging.hpp"
 
@@ -31,6 +32,9 @@ class Fonts;
 class Toasts;
 class ChatterinoBadges;
 
+class HighlightPhrase;
+class HighlightBlacklistUser;
+
 class Application
 {
     std::vector<std::unique_ptr<Singleton>> singletons_;
@@ -50,6 +54,15 @@ public:
 
     friend void test();
 
+    // clang-format off
+    SignalVector<HighlightPhrase>        &highlightedMessages;
+    SignalVector<HighlightPhrase>        &highlightedUsers;
+    SignalVector<HighlightBlacklistUser> &blacklistedUsers;
+    // clang-format on
+
+    bool isHighlightedUser(const QString &username);
+    bool isBlacklistedUser(const QString &username);
+
     Theme *const themes{};
     Fonts *const fonts{};
     Emotes *const emotes{};
@@ -58,7 +71,6 @@ public:
 
     AccountController *const accounts{};
     CommandController *const commands{};
-    HighlightController *const highlights{};
     NotificationController *const notifications{};
     MutedChannelController *const pings{};
     IgnoreController *const ignores{};

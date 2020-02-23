@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/pings/MutedChannelController.hpp"
 #include "messages/Message.hpp"
@@ -1018,7 +1017,7 @@ void TwitchMessageBuilder::parseHighlights()
 
     QString currentUsername = currentUser->getUserName();
 
-    if (app->highlights->blacklistContains(this->ircMessage->nick()))
+    if (app->isBlacklistedUser(this->ircMessage->nick()))
     {
         // Do nothing. We ignore highlights from this user.
         return;
@@ -1058,7 +1057,7 @@ void TwitchMessageBuilder::parseHighlights()
     }
 
     // Highlight because of sender
-    auto userHighlights = app->highlights->highlightedUsers.readOnly();
+    auto userHighlights = app->highlightedUsers.readOnly();
     for (const HighlightPhrase &userHighlight : *userHighlights)
     {
         if (!userHighlight.isMatch(this->ircMessage->nick()))
@@ -1110,7 +1109,7 @@ void TwitchMessageBuilder::parseHighlights()
     // TODO: This vector should only be rebuilt upon highlights being changed
     // fourtf: should be implemented in the HighlightsController
     std::vector<HighlightPhrase> activeHighlights =
-        app->highlights->phrases.cloneVector();
+        app->highlightedMessages.cloneVector();
 
     if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
     {

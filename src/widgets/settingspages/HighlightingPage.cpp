@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
 #include "controllers/highlights/UserHighlightModel.hpp"
 #include "singletons/Settings.hpp"
@@ -53,7 +52,7 @@ HighlightingPage::HighlightingPage()
                     highlights
                         .emplace<EditableModelView>(
                             (new HighlightModel(nullptr))
-                                ->initialized(&app->highlights->phrases))
+                                ->initialized(&app->highlightedMessages))
                         .getElement();
                 view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
@@ -72,7 +71,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlights->phrases.append(HighlightPhrase{
+                    getApp()->highlightedMessages.append(HighlightPhrase{
                         "my phrase", true, false, false, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
@@ -95,8 +94,7 @@ HighlightingPage::HighlightingPage()
                     pingUsers
                         .emplace<EditableModelView>(
                             (new UserHighlightModel(nullptr))
-                                ->initialized(
-                                    &app->highlights->highlightedUsers))
+                                ->initialized(&app->highlightedUsers))
                         .getElement();
 
                 view->addRegexHelpLink();
@@ -120,11 +118,10 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlights->highlightedUsers.append(
-                        HighlightPhrase{"highlighted user", true, false, false,
-                                        false, "",
-                                        *ColorProvider::instance().color(
-                                            ColorType::SelfHighlight)});
+                    getApp()->highlightedUsers.append(HighlightPhrase{
+                        "highlighted user", true, false, false, false, "",
+                        *ColorProvider::instance().color(
+                            ColorType::SelfHighlight)});
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
@@ -143,8 +140,7 @@ HighlightingPage::HighlightingPage()
                     disabledUsers
                         .emplace<EditableModelView>(
                             (new HighlightBlacklistModel(nullptr))
-                                ->initialized(
-                                    &app->highlights->blacklistedUsers))
+                                ->initialized(&app->blacklistedUsers))
                         .getElement();
 
                 view->addRegexHelpLink();
@@ -162,7 +158,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlights->blacklistedUsers.append(
+                    getApp()->blacklistedUsers.append(
                         HighlightBlacklistUser{"blacklisted user", false});
                 });
             }

@@ -7,7 +7,6 @@
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"

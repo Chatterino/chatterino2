@@ -4,7 +4,7 @@
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
+#include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Resources.hpp"
@@ -336,24 +336,23 @@ void UserInfoPopup::installEvents()
 
             if (checked)
             {
-                getApp()->highlights->blacklistedUsers.insert(
+                getApp()->blacklistedUsers.insert(
                     HighlightBlacklistUser{this->userName_, false});
                 this->ui_.ignoreHighlights->setEnabled(true);
             }
             else
             {
-                const auto &vector =
-                    getApp()->highlights->blacklistedUsers.raw();
+                const auto &vector = getApp()->blacklistedUsers.raw();
 
                 for (int i = 0; i < vector.size(); i++)
                 {
                     if (this->userName_ == vector[i].getPattern())
                     {
-                        getApp()->highlights->blacklistedUsers.removeAt(i);
+                        getApp()->blacklistedUsers.removeAt(i);
                         i--;
                     }
                 }
-                if (getApp()->highlights->blacklistContains(this->userName_))
+                if (getApp()->isBlacklistedUser(this->userName_))
                 {
                     this->ui_.ignoreHighlights->setToolTip(
                         "Name matched by regex");
@@ -456,7 +455,7 @@ void UserInfoPopup::updateUserData()
 
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
-        const auto &vector = getApp()->highlights->blacklistedUsers.raw();
+        const auto &vector = getApp()->blacklistedUsers.raw();
         for (int i = 0; i < vector.size(); i++)
         {
             if (this->userName_ == vector[i].getPattern())
@@ -465,7 +464,7 @@ void UserInfoPopup::updateUserData()
                 break;
             }
         }
-        if (getApp()->highlights->blacklistContains(this->userName_) &&
+        if (getApp()->isBlacklistedUser(this->userName_) &&
             !isIgnoringHighlights)
         {
             this->ui_.ignoreHighlights->setToolTip("Name matched by regex");

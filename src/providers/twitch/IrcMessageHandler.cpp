@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
