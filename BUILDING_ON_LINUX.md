@@ -9,7 +9,7 @@ Note on Qt version compatibility: If you are installing Qt from a package manage
 
 ## Arch Linux
 install [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) from the aur or build manually as follows:
-1. `sudo pacman -S qt5-base qt5-multimedia qt5-svg gst-plugins-ugly gst-plugins-good boost rapidjson extra-cmake-modules`
+1. `sudo pacman -S qt5-base qt5-multimedia qt5-svg gst-plugins-ugly gst-plugins-good boost rapidjson`
 1. go into project directory
 1. create build folder `mkdir build && cd build`
 1. `qmake .. && make`
