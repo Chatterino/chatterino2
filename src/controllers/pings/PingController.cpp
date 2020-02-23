@@ -42,8 +42,8 @@ void PingController::muteChannel(const QString &channelName)
 
 void PingController::unmuteChannel(const QString &channelName)
 {
-    for (std::vector<int>::size_type i = 0;
-         i != channelVector.raw().size(); i++)
+    for (std::vector<int>::size_type i = 0; i != channelVector.raw().size();
+         i++)
     {
         if (channelVector.raw()[i].toLower() == channelName.toLower())
         {
