@@ -12,9 +12,9 @@ class HighlightController final : public Singleton
 public:
     virtual void initialize(Settings &settings, Paths &paths) override;
 
-    UnsortedSignalVector<HighlightPhrase> phrases;
-    UnsortedSignalVector<HighlightBlacklistUser> blacklistedUsers;
-    UnsortedSignalVector<HighlightPhrase> highlightedUsers;
+    SignalVector<HighlightPhrase> phrases;
+    SignalVector<HighlightBlacklistUser> blacklistedUsers;
+    SignalVector<HighlightPhrase> highlightedUsers;
 
     bool isHighlightedUser(const QString &username);
     bool blacklistContains(const QString &username);

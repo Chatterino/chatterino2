@@ -25,11 +25,11 @@ public:
         }
     }
 
-    void initialize(BaseSignalVector<TVectorItem> *vec)
+    void initialize(SignalVector<TVectorItem> *vec)
     {
         this->vector_ = vec;
 
-        auto insert = [this](const SignalVectorItemArgs<TVectorItem> &args) {
+        auto insert = [this](const SignalVectorItemEvent<TVectorItem> &args) {
             if (args.caller == this)
             {
                 return;
@@ -54,7 +54,7 @@ public:
         int i = 0;
         for (const TVectorItem &item : vec->raw())
         {
-            SignalVectorItemArgs<TVectorItem> args{item, i++, 0};
+            SignalVectorItemEvent<TVectorItem> args{item, i++, 0};
 
             insert(args);
         }
@@ -89,8 +89,7 @@ public:
         this->afterInit();
     }
 
-    SignalVectorModel<TVectorItem> *initialized(
-        BaseSignalVector<TVectorItem> *vec)
+    SignalVectorModel<TVectorItem> *initialized(SignalVector<TVectorItem> *vec)
     {
         this->initialize(vec);
         return this;
@@ -393,7 +392,7 @@ protected:
 
 private:
     std::vector<QMap<int, QVariant>> headerData_;
-    BaseSignalVector<TVectorItem> *vector_;
+    SignalVector<TVectorItem> *vector_;
     std::vector<Row> rows_;
 
     int columnCount_;

@@ -19,7 +19,7 @@ class IgnoreController final : public Singleton
 public:
     virtual void initialize(Settings &settings, Paths &paths) override;
 
-    UnsortedSignalVector<IgnorePhrase> phrases;
+    SignalVector<IgnorePhrase> phrases;
 
     IgnoreModel *createModel(QObject *parent);
 

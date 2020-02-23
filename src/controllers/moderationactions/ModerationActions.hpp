@@ -20,7 +20,7 @@ public:
 
     virtual void initialize(Settings &settings, Paths &paths) override;
 
-    UnsortedSignalVector<ModerationAction> items;
+    SignalVector<ModerationAction> items;
 
     ModerationActionModel *createModel(QObject *parent);
 

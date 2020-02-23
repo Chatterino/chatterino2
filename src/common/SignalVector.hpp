@@ -192,18 +192,6 @@ private:
 };
 
 // compatability
-template <typename T>
-using SignalVectorItemArgs = SignalVectorItemEvent<T>;
-
-template <typename T>
-using ReadOnlySignalVector = SignalVector<T>;
-
-template <typename T>
-using BaseSignalVector = SignalVector<T>;
-
-template <typename T>
-using UnsortedSignalVector = SignalVector<T>;
-
 template <typename T, typename Compare>
 class SortedSignalVector : public SignalVector<T>
 {

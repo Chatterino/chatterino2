@@ -28,7 +28,7 @@ public:
 private:
     bool initialized_ = false;
 
-    UnsortedSignalVector<QString> channelVector;
+    SignalVector<QString> channelVector;
 
     ChatterinoSetting<std::vector<QString>> pingSetting_ = {"/pings/muted"};
 };
