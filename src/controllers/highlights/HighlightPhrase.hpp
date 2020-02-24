@@ -132,6 +132,15 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "color", encodedColor);
 
         auto _color = QColor(encodedColor);
+        if (!_color.isValid())
+        {
+            /*
+             * As a fallback, use the default self-highlight color. We can't use
+             * getApp()->themes here because the Application instance is not
+             * initialized when this function is called.
+             */
+            _color = QColor(140, 84, 89, 127);
+        }
 
         return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
                                            _isRegex, _isCaseSensitive,
