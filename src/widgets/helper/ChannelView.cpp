@@ -6,6 +6,7 @@
 #include <QGraphicsBlurEffect>
 #include <QMessageBox>
 #include <QPainter>
+#include <QScreen>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -1843,16 +1844,18 @@ void ChannelView::disableScrolling()
 
 void ChannelView::scrollUpdateRequested()
 {
-    // TODO(leon): Make this respect screen scale
-    const qreal delta =
-        this->currentMousePosition_.y() - this->lastMiddlePressPosition_.y();
+    const qreal dpi =
+        QGuiApplication::screenAt(this->pos())->devicePixelRatio();
+    const qreal delta = dpi * (this->currentMousePosition_.y() -
+                               this->lastMiddlePressPosition_.y());
+    const int cursorHeight = this->cursors_.neutral.pixmap().height();
 
-    if (fabs(delta) < this->cursors_.neutral.pixmap().height())
+    if (fabs(delta) < cursorHeight * dpi)
     {
         /*
-             * If within an area close to the initial position, don't do any
-             * scrolling at all.
-             */
+         * If within an area close to the initial position, don't do any
+         * scrolling at all.
+         */
         QGuiApplication::changeOverrideCursor(this->cursors_.neutral);
         return;
     }
