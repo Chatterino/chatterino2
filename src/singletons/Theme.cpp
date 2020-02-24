@@ -48,7 +48,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
     }
 
-    this->messages.backgrounds.highlighted = QColor(140, 84, 89, 127);
+    this->messages.backgrounds.highlighted = QColor(127, 63, 73, 127);
 
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
     this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);

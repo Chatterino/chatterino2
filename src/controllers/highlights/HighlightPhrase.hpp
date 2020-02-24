@@ -139,7 +139,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
              * getApp()->themes here because the Application instance is not
              * initialized when this function is called.
              */
-            _color = QColor(140, 84, 89, 127);
+            _color = QColor(127, 63, 73, 127);
         }
 
         return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
