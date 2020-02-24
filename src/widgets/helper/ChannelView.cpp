@@ -1850,7 +1850,7 @@ void ChannelView::scrollUpdateRequested()
                                this->lastMiddlePressPosition_.y());
     const int cursorHeight = this->cursors_.neutral.pixmap().height();
 
-    if (fabs(delta) < cursorHeight * dpi)
+    if (fabs(delta) <= cursorHeight * dpi)
     {
         /*
          * If within an area close to the initial position, don't do any
@@ -1860,18 +1860,21 @@ void ChannelView::scrollUpdateRequested()
         return;
     }
 
+    qreal offset;
     if (delta > 0)
     {
         QGuiApplication::changeOverrideCursor(this->cursors_.down);
+        offset = delta - cursorHeight;
     }
     else
     {
         QGuiApplication::changeOverrideCursor(this->cursors_.up);
+        offset = delta + cursorHeight;
     }
 
     // "Good" feeling multiplier found by trial-and-error
     const qreal multiplier = qreal(0.02);
-    this->scrollBar_->offset(multiplier * delta);
+    this->scrollBar_->offset(multiplier * offset);
 }
 
 }  // namespace chatterino
