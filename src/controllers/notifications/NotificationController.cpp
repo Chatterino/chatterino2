@@ -266,7 +266,6 @@ void NotificationController::startNotification()
                 callback();
             }
         });
-    popupWindow_->update();
     popupWindow_->show();
 }
 

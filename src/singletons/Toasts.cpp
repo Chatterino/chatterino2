@@ -114,7 +114,7 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
                         QString("<b>" + channelName + "</b> just went live!"),
                         bottomText),
                     std::chrono::milliseconds(
-                        (int)getSettings()->notificationDuration * 1000),
+                        (int)(getSettings()->notificationDuration * 1000)),
                     callback);
 
                 return Success;
@@ -127,7 +127,7 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
                         QString("<b>" + channelName + "</b> just went live!"),
                         bottomText),
                     std::chrono::milliseconds(
-                        (int)getSettings()->notificationDuration * 1000),
+                        (int)(getSettings()->notificationDuration * 1000)),
                     callback);
                 return false;
             })
