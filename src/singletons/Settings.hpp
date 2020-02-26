@@ -211,7 +211,7 @@ public:
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
-    FloatSetting notificationDuration = {"/notifications/duration", 2.5};
+    FloatSetting notificationDuration = {"/notifications/duration", 5};
 
     /// External tools
     // Streamlink
