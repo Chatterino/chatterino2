@@ -236,6 +236,7 @@ SOURCES += \
     src/widgets/dialogs/LoginDialog.cpp \
     src/widgets/dialogs/NotificationPopup.cpp \
     src/widgets/dialogs/QualityPopup.cpp \
+    src/widgets/dialogs/QuickSwitcherPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
     src/widgets/dialogs/TextInputDialog.cpp \
@@ -463,6 +464,7 @@ HEADERS += \
     src/widgets/dialogs/LoginDialog.hpp \
     src/widgets/dialogs/NotificationPopup.hpp \
     src/widgets/dialogs/QualityPopup.hpp \
+    src/widgets/dialogs/QuickSwitcherPopup.hpp \
     src/widgets/dialogs/SelectChannelDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
     src/widgets/dialogs/TextInputDialog.hpp \

@@ -14,6 +14,7 @@
 #include "util/Shortcut.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/dialogs/QuickSwitcherPopup.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
@@ -355,6 +356,11 @@ void Window::addShortcuts()
     createWindowShortcut(this, "CTRL+H", [this] {
         getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
         getApp()->windows->forceLayoutChannelViews();
+    });
+
+    createWindowShortcut(this, "CTRL+K", [this] {
+        auto quickSwitcher = new QuickSwitcherPopup;
+        quickSwitcher->show();
     });
 }
 
