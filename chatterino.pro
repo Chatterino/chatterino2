@@ -134,13 +134,11 @@ SOURCES += \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
     src/controllers/highlights/UserHighlightModel.cpp \
-    src/controllers/ignores/IgnoreController.cpp \
     src/controllers/ignores/IgnoreModel.cpp \
     src/controllers/moderationactions/ModerationAction.cpp \
     src/controllers/moderationactions/ModerationActionModel.cpp \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
-    src/controllers/pings/MutedChannelController.cpp \
     src/controllers/pings/MutedChannelModel.cpp \
     src/controllers/taggedusers/TaggedUser.cpp \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
@@ -333,7 +331,6 @@ HEADERS += \
     src/controllers/moderationactions/ModerationActionModel.hpp \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
-    src/controllers/pings/MutedChannelController.hpp \
     src/controllers/pings/MutedChannelModel.hpp \
     src/controllers/taggedusers/TaggedUser.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \

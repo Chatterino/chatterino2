@@ -4,7 +4,6 @@
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
-#include "controllers/pings/MutedChannelController.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/WindowManager.hpp"
