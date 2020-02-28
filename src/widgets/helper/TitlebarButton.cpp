@@ -67,7 +67,6 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
             color = "#999";
 
             painter.setRenderHint(QPainter::Antialiasing);
-            painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
             auto a = xD / 3;
             QPainterPath path;
@@ -92,7 +91,6 @@ void TitleBarButton::paintEvent(QPaintEvent *event)
         case TitleBarButtonStyle::Settings: {
             color = "#999";
             painter.setRenderHint(QPainter::Antialiasing);
-            painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
             painter.save();
             painter.translate(3, 3);
