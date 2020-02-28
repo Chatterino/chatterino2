@@ -125,6 +125,8 @@ public:
         "/behaviour/autocompletion/smallStreamerLimit", 1000};
     BoolSetting prefixOnlyEmoteCompletion = {
         "/behaviour/autocompletion/prefixOnlyCompletion", true};
+    BoolSetting userOnlyCompletionWithAt = {
+        "/behaviour/autocompletion/userOnlyCompletionWithAt", true};
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {
