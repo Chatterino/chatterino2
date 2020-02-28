@@ -20,8 +20,6 @@
 
 namespace chatterino {
 
-SettingsDialog *SettingsDialog::instance_ = nullptr;
-
 SettingsDialog::SettingsDialog()
     : BaseWindow(BaseWindow::DisableCustomScaling)
 {
@@ -136,11 +134,6 @@ void SettingsDialog::filterElements(const QString &text)
             shouldShowSpace |= item->widget()->isVisible();
         }
     }
-}
-
-SettingsDialog *SettingsDialog::instance()
-{
-    return SettingsDialog::instance_;
 }
 
 void SettingsDialog::addTabs()
