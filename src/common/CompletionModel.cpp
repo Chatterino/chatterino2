@@ -127,7 +127,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
                               TaggedString::Type::Username);
                 }
             }
-            else if (!getSettings()->userOnlyCompletionWithAt)
+            else if (!getSettings()->userCompletionOnlyWithAt)
             {
                 for (const auto &name :
                      usernames->subrange(Prefix(usernamePrefix)))
