@@ -102,7 +102,7 @@ void NotebookButton::paintEvent(QPaintEvent *event)
             remove.addEllipse(2 * a, 1 * a, 4 * a, 4 * a);
             path = path.subtracted(remove);
 
-            path.addEllipse(2.5 * a, 1.5 * a, 3 * a + 1, 3 * a);
+            path.addEllipse(2.5 * a, 1.5 * a, 3 * a, 3 * a);
 
             painter.fillPath(path, foreground);
         }
