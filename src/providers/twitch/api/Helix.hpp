@@ -26,7 +26,7 @@ struct HelixUser {
     const QString profileImageUrl;
     const int viewCount;
 
-    HelixUser(QJsonObject jsonObject)
+    explicit HelixUser(QJsonObject jsonObject)
         : id(jsonObject.value("id").toString())
         , login(jsonObject.value("login").toString())
         , displayName(jsonObject.value("display_name").toString())
@@ -53,7 +53,7 @@ struct HelixUsersFollowsRecord {
     {
     }
 
-    HelixUsersFollowsRecord(QJsonObject jsonObject)
+    explicit HelixUsersFollowsRecord(QJsonObject jsonObject)
         : fromId(jsonObject.value("from_id").toString())
         , fromName(jsonObject.value("from_name").toString())
         , toId(jsonObject.value("to_id").toString())
@@ -66,13 +66,15 @@ struct HelixUsersFollowsRecord {
 struct HelixUsersFollowsResponse {
     const int total;
     std::vector<HelixUsersFollowsRecord> data;
-    HelixUsersFollowsResponse(QJsonObject jsonObject)
+    explicit HelixUsersFollowsResponse(QJsonObject jsonObject)
         : total(jsonObject.value("total").toInt())
     {
         const auto &jsonData = jsonObject.value("data").toArray();
         std::transform(jsonData.begin(), jsonData.end(),
                        std::back_inserter(this->data),
-                       [](const QJsonValue &asd) { return asd.toObject(); });
+                       [](const QJsonValue &record) {
+                           return HelixUsersFollowsRecord(record.toObject());
+                       });
     }
 };
 
@@ -102,7 +104,7 @@ struct HelixStream {
     {
     }
 
-    HelixStream(QJsonObject jsonObject)
+    explicit HelixStream(QJsonObject jsonObject)
         : id(jsonObject.value("id").toString())
         , userId(jsonObject.value("user_id").toString())
         , userName(jsonObject.value("user_name").toString())
@@ -122,7 +124,7 @@ struct HelixGame {
     const QString name;
     const QString boxArtUrl;
 
-    HelixGame(QJsonObject jsonObject)
+    explicit HelixGame(QJsonObject jsonObject)
         : id(jsonObject.value("id").toString())
         , name(jsonObject.value("name").toString())
         , boxArtUrl(jsonObject.value("box_art_url").toString())

@@ -121,7 +121,7 @@ void Helix::fetchUsersFollows(
                 failureCallback();
                 return Failure;
             }
-            successCallback(root);
+            successCallback(HelixUsersFollowsResponse(root));
             return Success;
         })
         .onError([failureCallback](auto result) {
