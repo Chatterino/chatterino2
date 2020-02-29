@@ -49,10 +49,15 @@ public:
 protected:
     AbstractIrcServer();
 
+    // initializeConnectionSignals is called on a connection once in its lifetime.
+    // it can be used to connect signals to your class
     virtual void initializeConnectionSignals(IrcConnection *connection,
                                              ConnectionType type){};
+
+    // initializeConnection is called every time before we try to connect to the irc server
     virtual void initializeConnection(IrcConnection *connection,
                                       ConnectionType type) = 0;
+
     virtual std::shared_ptr<Channel> createChannel(
         const QString &channelName) = 0;
 
