@@ -185,7 +185,6 @@ public:
     void update(QString clientId, QString oauthToken);
 
     static void initialize();
-    static Helix *instance;
 
 private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
