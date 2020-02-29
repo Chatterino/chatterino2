@@ -19,12 +19,12 @@ template <typename... T>
 using ResultCallback = std::function<void(T...)>;
 
 struct HelixUser {
-    const QString id;
-    const QString login;
-    const QString displayName;
-    const QString description;
-    const QString profileImageUrl;
-    const int viewCount;
+    QString id;
+    QString login;
+    QString displayName;
+    QString description;
+    QString profileImageUrl;
+    int viewCount;
 
     explicit HelixUser(QJsonObject jsonObject)
         : id(jsonObject.value("id").toString())
@@ -38,11 +38,11 @@ struct HelixUser {
 };
 
 struct HelixUsersFollowsRecord {
-    const QString fromId;
-    const QString fromName;
-    const QString toId;
-    const QString toName;
-    const QString followedAt;  // date time object
+    QString fromId;
+    QString fromName;
+    QString toId;
+    QString toName;
+    QString followedAt;  // date time object
 
     HelixUsersFollowsRecord()
         : fromId("")
@@ -64,7 +64,7 @@ struct HelixUsersFollowsRecord {
 };
 
 struct HelixUsersFollowsResponse {
-    const int total;
+    int total;
     std::vector<HelixUsersFollowsRecord> data;
     explicit HelixUsersFollowsResponse(QJsonObject jsonObject)
         : total(jsonObject.value("total").toInt())
@@ -79,16 +79,16 @@ struct HelixUsersFollowsResponse {
 };
 
 struct HelixStream {
-    const QString id;  // stream id
-    const QString userId;
-    const QString userName;
-    const QString gameId;
-    const QString type;
-    const QString title;
-    const int viewerCount;
-    const QString startedAt;
-    const QString language;
-    const QString thumbnailUrl;
+    QString id;  // stream id
+    QString userId;
+    QString userName;
+    QString gameId;
+    QString type;
+    QString title;
+    int viewerCount;
+    QString startedAt;
+    QString language;
+    QString thumbnailUrl;
 
     HelixStream()
         : id("")
@@ -120,9 +120,9 @@ struct HelixStream {
 };
 
 struct HelixGame {
-    const QString id;  // stream id
-    const QString name;
-    const QString boxArtUrl;
+    QString id;  // stream id
+    QString name;
+    QString boxArtUrl;
 
     explicit HelixGame(QJsonObject jsonObject)
         : id(jsonObject.value("id").toString())
