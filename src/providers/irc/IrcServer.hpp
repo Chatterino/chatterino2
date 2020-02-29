@@ -33,6 +33,8 @@ protected:
 private:
     // pointer so we don't have to circle include Irc2.hpp
     IrcServerData *data_;
+
+    std::vector<QMetaObject::Connection> metaConnections_;
 };
 
 }  // namespace chatterino
