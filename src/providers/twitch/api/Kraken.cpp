@@ -5,7 +5,7 @@
 
 namespace chatterino {
 
-Kraken *Kraken::instance = nullptr;
+static Kraken *instance = nullptr;
 
 void Kraken::getChannel(QString userId,
                         ResultCallback<KrakenChannel> successCallback,
@@ -87,16 +87,18 @@ void Kraken::update(QString clientId, QString oauthToken)
 
 void Kraken::initialize()
 {
-    assert(Kraken::instance == nullptr);
+    assert(instance == nullptr);
 
-    Kraken::instance = new Kraken();
+    instance = new Kraken();
 
     getKraken()->update(getDefaultClientID(), "");
 }
 
 Kraken *getKraken()
 {
-    return Kraken::instance;
+    assert(instance != nullptr);
+
+    return instance;
 }
 
 }  // namespace chatterino

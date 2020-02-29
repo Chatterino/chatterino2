@@ -48,7 +48,6 @@ public:
     void update(QString clientId, QString oauthToken);
 
     static void initialize();
-    static Kraken *instance;
 
 private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
