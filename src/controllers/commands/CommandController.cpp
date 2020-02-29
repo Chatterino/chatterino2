@@ -212,7 +212,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)
     this->items_.delayedItemsChanged.connect([this] {  //
-        this->commandsSetting_->setValue(this->items_.getVector());
+        this->commandsSetting_->setValue(this->items_.raw());
     });
 
     // Load commands from commands.json
@@ -222,7 +222,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // of commands)
     for (const auto &command : this->commandsSetting_->getValue())
     {
-        this->items_.appendItem(command);
+        this->items_.append(command);
     }
 }
 
@@ -234,7 +234,7 @@ void CommandController::save()
 CommandModel *CommandController::createModel(QObject *parent)
 {
     CommandModel *model = new CommandModel(parent);
-    model->init(&this->items_);
+    model->initialize(&this->items_);
 
     return model;
 }
@@ -244,8 +244,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
     QStringList words = text.split(' ', QString::SkipEmptyParts);
-
-    std::lock_guard<std::mutex> lock(this->mutex_);
 
     if (words.length() == 0)
     {

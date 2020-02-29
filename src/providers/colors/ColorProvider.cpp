@@ -1,6 +1,5 @@
 #include "providers/colors/ColorProvider.hpp"
 
-#include "controllers/highlights/HighlightController.hpp"
 #include "singletons/Theme.hpp"
 
 namespace chatterino {
@@ -38,12 +37,12 @@ QSet<QColor> ColorProvider::recentColors() const
      * Currently, only colors used in highlight phrases are considered. This
      * may change at any point in the future.
      */
-    for (auto phrase : getApp()->highlights->phrases)
+    for (auto phrase : getSettings()->highlightedMessages)
     {
         retVal.insert(*phrase.getColor());
     }
 
-    for (auto userHl : getApp()->highlights->highlightedUsers)
+    for (auto userHl : getSettings()->highlightedUsers)
     {
         retVal.insert(*userHl.getColor());
     }

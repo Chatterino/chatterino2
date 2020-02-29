@@ -5,13 +5,47 @@
 
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
+#include "common/SignalVector.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
 
 namespace chatterino {
 
-class Settings : public ABSettings
+class HighlightPhrase;
+class HighlightBlacklistUser;
+class IgnorePhrase;
+class TaggedUser;
+
+/// Settings which are availlable for reading on all threads.
+class ConcurrentSettings
+{
+public:
+    ConcurrentSettings();
+
+    SignalVector<HighlightPhrase> &highlightedMessages;
+    SignalVector<HighlightPhrase> &highlightedUsers;
+    SignalVector<HighlightBlacklistUser> &blacklistedUsers;
+    SignalVector<IgnorePhrase> &ignoredMessages;
+    SignalVector<QString> &mutedChannels;
+    //SignalVector<TaggedUser> &taggedUsers;
+    SignalVector<ModerationAction> &moderationActions;
+
+    bool isHighlightedUser(const QString &username);
+    bool isBlacklistedUser(const QString &username);
+    bool isMutedChannel(const QString &channelName);
+    bool toggleMutedChannel(const QString &channelName);
+
+private:
+    void mute(const QString &channelName);
+    void unmute(const QString &channelName);
+};
+
+ConcurrentSettings &getCSettings();
+
+/// Settings which are availlable for reading and writing on the gui thread.
+// These settings are still accessed concurrently in the code but it is bad practice.
+class Settings : public ABSettings, public ConcurrentSettings
 {
     static Settings *instance_;
 

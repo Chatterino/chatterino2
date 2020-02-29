@@ -143,7 +143,7 @@ Irc::Irc()
 QAbstractTableModel *Irc::newConnectionModel(QObject *parent)
 {
     auto model = new Model(parent);
-    model->init(&this->connections);
+    model->initialize(&this->connections);
     return model;
 }
 
@@ -252,7 +252,7 @@ void Irc::load()
         {
             ids.insert(data.id);
 
-            this->connections.appendItem(data);
+            this->connections.append(data);
         }
     }
 }

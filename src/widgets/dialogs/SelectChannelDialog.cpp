@@ -152,7 +152,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 auto editor = new IrcConnectionEditor(unique);
                 if (editor->exec() == QDialog::Accepted)
                 {
-                    Irc::instance().connections.appendItem(editor->data());
+                    Irc::instance().connections.append(editor->data());
                 }
             });
 
@@ -160,21 +160,20 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 view->getTableView(), &QTableView::doubleClicked,
                 [](const QModelIndex &index) {
                     auto editor = new IrcConnectionEditor(
-                        Irc::instance()
-                            .connections.getVector()[size_t(index.row())]);
+                        Irc::instance().connections.raw()[size_t(index.row())]);
 
                     if (editor->exec() == QDialog::Accepted)
                     {
                         auto data = editor->data();
-                        auto &&conns = Irc::instance().connections.getVector();
+                        auto &&conns = Irc::instance().connections.raw();
                         int i = 0;
                         for (auto &&conn : conns)
                         {
                             if (conn.id == data.id)
                             {
-                                Irc::instance().connections.removeItem(
+                                Irc::instance().connections.removeAt(
                                     i, Irc::noEraseCredentialCaller);
-                                Irc::instance().connections.insertItem(data, i);
+                                Irc::instance().connections.insert(data, i);
                             }
                             i++;
                         }
@@ -348,7 +347,7 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
                           ->currentIndex()
                           .row();
 
-            auto &&vector = Irc::instance().connections.getVector();
+            auto &&vector = Irc::instance().connections.raw();
 
             if (row >= 0 && row < int(vector.size()))
             {

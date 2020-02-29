@@ -328,7 +328,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
     layout.addDropdown<float>(
-        "Pause on hover", {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
+        "Pause after hover",
+        {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
         s.pauseOnHoverDuration,
         [](auto val) {
             if (val < -0.5f)

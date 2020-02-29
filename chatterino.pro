@@ -131,21 +131,16 @@ SOURCES += \
     src/controllers/commands/CommandController.cpp \
     src/controllers/commands/CommandModel.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
-    src/controllers/highlights/HighlightController.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
     src/controllers/highlights/UserHighlightModel.cpp \
-    src/controllers/ignores/IgnoreController.cpp \
     src/controllers/ignores/IgnoreModel.cpp \
     src/controllers/moderationactions/ModerationAction.cpp \
     src/controllers/moderationactions/ModerationActionModel.cpp \
-    src/controllers/moderationactions/ModerationActions.cpp \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
-    src/controllers/pings/PingController.cpp \
-    src/controllers/pings/PingModel.cpp \
+    src/controllers/pings/MutedChannelModel.cpp \
     src/controllers/taggedusers/TaggedUser.cpp \
-    src/controllers/taggedusers/TaggedUsersController.cpp \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
     src/debug/Benchmark.cpp \
     src/main.cpp \
@@ -326,7 +321,6 @@ HEADERS += \
     src/controllers/commands/CommandModel.hpp \
     src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
-    src/controllers/highlights/HighlightController.hpp \
     src/controllers/highlights/HighlightModel.hpp \
     src/controllers/highlights/HighlightPhrase.hpp \
     src/controllers/highlights/UserHighlightModel.hpp \
@@ -335,13 +329,10 @@ HEADERS += \
     src/controllers/ignores/IgnorePhrase.hpp \
     src/controllers/moderationactions/ModerationAction.hpp \
     src/controllers/moderationactions/ModerationActionModel.hpp \
-    src/controllers/moderationactions/ModerationActions.hpp \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
-    src/controllers/pings/PingController.hpp \
-    src/controllers/pings/PingModel.hpp \
+    src/controllers/pings/MutedChannelModel.hpp \
     src/controllers/taggedusers/TaggedUser.hpp \
-    src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/debug/AssertInGuiThread.hpp \
     src/debug/Benchmark.hpp \
@@ -434,6 +425,7 @@ HEADERS += \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
     src/util/Overloaded.hpp \
+    src/util/PersistSignalVector.hpp \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
