@@ -525,6 +525,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
         s.prefixOnlyEmoteCompletion);
+    layout.addCheckbox("Only search for username autocompletion with an @",
+                       s.userCompletionOnlyWithAt);
 
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
     layout.addCheckbox("Highlight received inline whispers",
