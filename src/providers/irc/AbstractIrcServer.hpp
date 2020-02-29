@@ -21,6 +21,10 @@ public:
 
     virtual ~AbstractIrcServer() = default;
 
+    // initializeIrc must be called from the derived class
+    // this allows us to initialize the abstract irc server based on the derived class's parameters
+    void initializeIrc();
+
     // connection
     void connect();
     void disconnect();
@@ -45,11 +49,6 @@ public:
 protected:
     AbstractIrcServer();
 
-    // initializeConnectionSignals is called three times.
-    // 1. writeConnection with type write
-    // 2. readConnection with type read
-    // 3. readConnection with type both
-    // this can be cleaner once we pass the "connection type" variable into the ctor
     virtual void initializeConnectionSignals(IrcConnection *connection,
                                              ConnectionType type){};
     virtual void initializeConnection(IrcConnection *connection,
@@ -90,6 +89,8 @@ private:
 
     //    bool autoReconnect_ = false;
     pajlada::Signals::SignalHolder connections_;
+
+    bool initialized_{false};
 };
 
 }  // namespace chatterino

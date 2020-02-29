@@ -15,6 +15,8 @@ namespace chatterino {
 IrcServer::IrcServer(const IrcServerData &data)
     : data_(new IrcServerData(data))
 {
+    this->initializeIrc();
+
     this->connect();
 }
 
@@ -54,10 +56,7 @@ const QString &IrcServer::nick()
 void IrcServer::initializeConnectionSignals(IrcConnection *connection,
                                             ConnectionType type)
 {
-    if (type != Both)
-    {
-        return;
-    }
+    assert(type == Both);
 
     QObject::connect(
         connection, &Communi::IrcConnection::socketError, this,
