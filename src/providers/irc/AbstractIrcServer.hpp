@@ -45,6 +45,13 @@ public:
 protected:
     AbstractIrcServer();
 
+    // initializeConnectionSignals is called three times.
+    // 1. writeConnection with type write
+    // 2. readConnection with type read
+    // 3. readConnection with type both
+    // this can be cleaner once we pass the "connection type" variable into the ctor
+    virtual void initializeConnectionSignals(IrcConnection *connection,
+                                             ConnectionType type){};
     virtual void initializeConnection(IrcConnection *connection,
                                       ConnectionType type) = 0;
     virtual std::shared_ptr<Channel> createChannel(

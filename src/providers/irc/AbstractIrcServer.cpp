@@ -22,6 +22,9 @@ AbstractIrcServer::AbstractIrcServer()
     this->writeConnection_->moveToThread(
         QCoreApplication::instance()->thread());
 
+    this->initializeConnectionSignals(this->writeConnection_.get(),
+                                      ConnectionType::Write);
+
     QObject::connect(
         this->writeConnection_.get(), &Communi::IrcConnection::messageReceived,
         this, [this](auto msg) { this->writeConnectionMessageReceived(msg); });
@@ -32,6 +35,11 @@ AbstractIrcServer::AbstractIrcServer()
     // Listen to read connection message signals
     this->readConnection_.reset(new IrcConnection);
     this->readConnection_->moveToThread(QCoreApplication::instance()->thread());
+
+    this->initializeConnectionSignals(this->readConnection_.get(),
+                                      ConnectionType::Read);
+    this->initializeConnectionSignals(this->readConnection_.get(),
+                                      ConnectionType::Both);
 
     QObject::connect(
         this->readConnection_.get(), &Communi::IrcConnection::messageReceived,

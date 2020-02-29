@@ -21,6 +21,8 @@ public:
 
     // AbstractIrcServer interface
 protected:
+    void initializeConnectionSignals(IrcConnection *connection,
+                                     ConnectionType type) override;
     void initializeConnection(IrcConnection *connection,
                               ConnectionType type) override;
     std::shared_ptr<Channel> createChannel(const QString &channelName) override;
@@ -33,8 +35,6 @@ protected:
 private:
     // pointer so we don't have to circle include Irc2.hpp
     IrcServerData *data_;
-
-    std::vector<QMetaObject::Connection> metaConnections_;
 };
 
 }  // namespace chatterino
