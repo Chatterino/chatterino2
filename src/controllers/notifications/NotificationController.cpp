@@ -143,7 +143,6 @@ void NotificationController::fetchFakeChannels()
 void NotificationController::getFakeTwitchChannelLiveStatus(
     const QString &channelName)
 {
-    qDebug() << "XXX Get fake twitch channel" << channelName;
     getHelix()->getStreamByName(
         channelName,
         [channelName, this](bool live, const auto &stream) {
