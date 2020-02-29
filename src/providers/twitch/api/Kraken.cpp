@@ -55,15 +55,7 @@ NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
     if (this->clientId.isEmpty())
     {
         qDebug()
-            << "Helix::makeRequest called without a client ID set BabyRage";
-        // return boost::none;
-    }
-
-    if (this->oauthToken.isEmpty())
-    {
-        qDebug()
-            << "Helix::makeRequest called without an oauth token set BabyRage";
-        // return boost::none;
+            << "Kraken::makeRequest called without a client ID set BabyRage";
     }
 
     const QString baseUrl("https://api.twitch.tv/kraken/");
@@ -72,11 +64,19 @@ NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
 
     fullUrl.setQuery(urlQuery);
 
+    if (!this->oauthToken.isEmpty())
+    {
+        return NetworkRequest(fullUrl)
+            .timeout(5 * 1000)
+            .header("Accept", "application/vnd.twitchtv.v5+json")
+            .header("Client-ID", this->clientId)
+            .header("Authorization", "OAuth " + this->oauthToken);
+    }
+
     return NetworkRequest(fullUrl)
         .timeout(5 * 1000)
         .header("Accept", "application/vnd.twitchtv.v5+json")
-        .header("Client-ID", this->clientId)
-        .header("Authorization", "OAuth " + this->oauthToken);
+        .header("Client-ID", this->clientId);
 }
 
 void Kraken::update(QString clientId, QString oauthToken)
