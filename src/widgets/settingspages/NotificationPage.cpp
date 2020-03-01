@@ -50,6 +50,7 @@ NotificationPage::NotificationPage()
                             this->managedConnections_))
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
+                    openIn->addStretch();
                 }
 
                 auto customSound =

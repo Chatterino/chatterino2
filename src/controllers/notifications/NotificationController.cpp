@@ -219,7 +219,7 @@ void NotificationController::addNotification(QLayout *layout,
                                              std::chrono::milliseconds time,
                                              std::function<void()> callback)
 {
-    queue_.push({layout, time, callback});
+    this->queue_.push({layout, time, callback});
     if (queue_.size() == 1)
     {
         startNotification();

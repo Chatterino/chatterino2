@@ -20,7 +20,7 @@ NotificationPopup::NotificationPopup()
         Qt::BypassWindowManagerHint | Qt::WindowStaysOnTopHint);
     this->setWindowOpacity(0.95);
 
-    this->setScaleIndependantSize(360, 120);
+    this->setScaleIndependantSize(360, 133);
 }
 
 void NotificationPopup::updatePosition()
