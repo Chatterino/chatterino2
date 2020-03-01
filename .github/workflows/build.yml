@@ -107,10 +107,6 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         run: |
             brew install boost openssl rapidjson qt p7zip create-dmg
-            python3 -m venv venv
-            source venv/bin/activate
-            python3 -m pip install dmgbuild
-            dmgbuild --help
         shell: bash
 
       - name: Build (MacOS)
