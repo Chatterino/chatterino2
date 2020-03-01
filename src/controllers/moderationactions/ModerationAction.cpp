@@ -71,11 +71,11 @@ ModerationAction::ModerationAction(const QString &action)
     }
     else if (action.startsWith("/ban "))
     {
-        this->image_ = Image::fromPixmap(getResources().buttons.ban);
+        this->imageToLoad_ = 1;
     }
     else if (action.startsWith("/delete "))
     {
-        this->image_ = Image::fromPixmap(getResources().buttons.trashCan);
+        this->imageToLoad_ = 2;
     }
     else
     {
@@ -100,6 +100,16 @@ bool ModerationAction::isImage() const
 
 const boost::optional<ImagePtr> &ModerationAction::getImage() const
 {
+    assertInGuiThread();
+
+    if (this->imageToLoad_ != 0)
+    {
+        if (this->imageToLoad_ == 1)
+            this->image_ = Image::fromPixmap(getResources().buttons.ban);
+        else if (this->imageToLoad_ == 2)
+            this->image_ = Image::fromPixmap(getResources().buttons.trashCan);
+    }
+
     return this->image_;
 }
 

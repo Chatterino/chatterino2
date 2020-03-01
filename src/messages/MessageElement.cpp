@@ -1,7 +1,6 @@
 #include "messages/MessageElement.hpp"
 
 #include "Application.hpp"
-#include "controllers/moderationactions/ModerationActions.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
@@ -374,8 +373,8 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     {
         QSize size(int(container.getScale() * 16),
                    int(container.getScale() * 16));
-
-        for (const auto &action : getApp()->moderationActions->items)
+        auto actions = getCSettings().moderationActions.readOnly();
+        for (const auto &action : *actions)
         {
             if (auto image = action.getImage())
             {

@@ -2,9 +2,8 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
-#include "controllers/pings/PingController.hpp"
+#include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
@@ -170,7 +169,7 @@ bool TwitchMessageBuilder::isIgnored() const
     auto app = getApp();
 
     // TODO(pajlada): Do we need to check if the phrase is valid first?
-    auto phrases = app->ignores->phrases.readOnly();
+    auto phrases = getCSettings().ignoredMessages.readOnly();
     for (const auto &phrase : *phrases)
     {
         if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
@@ -239,7 +238,7 @@ void TwitchMessageBuilder::triggerHighlights()
         return;
     }
 
-    if (getApp()->pings->isMuted(this->channel->getName()))
+    if (getCSettings().isMutedChannel(this->channel->getName()))
     {
         // Do nothing. Pings are muted in this channel.
         return;
@@ -765,8 +764,7 @@ void TwitchMessageBuilder::appendUsername()
 void TwitchMessageBuilder::runIgnoreReplaces(
     std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes)
 {
-    auto app = getApp();
-    auto phrases = app->ignores->phrases.readOnly();
+    auto phrases = getCSettings().ignoredMessages.readOnly();
     auto removeEmotesInRange =
         [](int pos, int len,
            std::vector<std::tuple<int, EmotePtr, EmoteName>>
@@ -1018,7 +1016,7 @@ void TwitchMessageBuilder::parseHighlights()
 
     QString currentUsername = currentUser->getUserName();
 
-    if (app->highlights->blacklistContains(this->ircMessage->nick()))
+    if (getCSettings().isBlacklistedUser(this->ircMessage->nick()))
     {
         // Do nothing. We ignore highlights from this user.
         return;
@@ -1058,7 +1056,7 @@ void TwitchMessageBuilder::parseHighlights()
     }
 
     // Highlight because of sender
-    auto userHighlights = app->highlights->highlightedUsers.readOnly();
+    auto userHighlights = getCSettings().highlightedUsers.readOnly();
     for (const HighlightPhrase &userHighlight : *userHighlights)
     {
         if (!userHighlight.isMatch(this->ircMessage->nick()))
@@ -1110,7 +1108,7 @@ void TwitchMessageBuilder::parseHighlights()
     // TODO: This vector should only be rebuilt upon highlights being changed
     // fourtf: should be implemented in the HighlightsController
     std::vector<HighlightPhrase> activeHighlights =
-        app->highlights->phrases.cloneVector();
+        getSettings()->highlightedMessages.cloneVector();
 
     if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
     {

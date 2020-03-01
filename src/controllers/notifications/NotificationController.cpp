@@ -24,7 +24,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
     this->initialized_ = true;
     for (const QString &channelName : this->twitchSetting_.getValue())
     {
-        this->channelMap[Platform::Twitch].appendItem(channelName);
+        this->channelMap[Platform::Twitch].append(channelName);
     }
 
     this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {  //
@@ -80,7 +80,7 @@ bool NotificationController::isChannelNotified(const QString &channelName,
 void NotificationController::addChannelNotification(const QString &channelName,
                                                     Platform p)
 {
-    channelMap[p].appendItem(channelName);
+    channelMap[p].append(channelName);
 }
 
 void NotificationController::removeChannelNotification(
@@ -91,7 +91,7 @@ void NotificationController::removeChannelNotification(
     {
         if (channelMap[p].raw()[i].toLower() == channelName.toLower())
         {
-            channelMap[p].removeItem(i);
+            channelMap[p].removeAt(i);
             i--;
         }
     }
@@ -120,7 +120,7 @@ NotificationModel *NotificationController::createModel(QObject *parent,
                                                        Platform p)
 {
     NotificationModel *model = new NotificationModel(parent);
-    model->init(&this->channelMap[p]);
+    model->initialize(&this->channelMap[p]);
     return model;
 }
 

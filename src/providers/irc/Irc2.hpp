@@ -41,7 +41,7 @@ public:
     static inline void *const noEraseCredentialCaller =
         reinterpret_cast<void *>(1);
 
-    UnsortedSignalVector<IrcServerData> connections;
+    SignalVector<IrcServerData> connections;
     QAbstractTableModel *newConnectionModel(QObject *parent);
 
     ChannelPtr getOrAddChannel(int serverId, QString name);

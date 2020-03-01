@@ -152,7 +152,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                 auto editor = new IrcConnectionEditor(unique);
                 if (editor->exec() == QDialog::Accepted)
                 {
-                    Irc::instance().connections.appendItem(editor->data());
+                    Irc::instance().connections.append(editor->data());
                 }
             });
 
@@ -171,9 +171,9 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                         {
                             if (conn.id == data.id)
                             {
-                                Irc::instance().connections.removeItem(
+                                Irc::instance().connections.removeAt(
                                     i, Irc::noEraseCredentialCaller);
-                                Irc::instance().connections.insertItem(data, i);
+                                Irc::instance().connections.insert(data, i);
                             }
                             i++;
                         }

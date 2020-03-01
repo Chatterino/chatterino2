@@ -34,9 +34,9 @@ public:
                          std::function<void()> callback);
     void playSound();
 
-    UnsortedSignalVector<QString> getVector(Platform p);
+    SignalVector<QString> getVector(Platform p);
 
-    std::map<Platform, UnsortedSignalVector<QString>> channelMap;
+    std::map<Platform, SignalVector<QString>> channelMap;
 
     NotificationModel *createModel(QObject *parent, Platform p);
 

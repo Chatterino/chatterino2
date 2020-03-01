@@ -7,7 +7,8 @@
 namespace chatterino {
 
 TwitchAccountManager::TwitchAccountManager()
-    : anonymousUser_(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
+    : accounts(SharedPtrElementLess<TwitchAccount>{})
+    , anonymousUser_(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
 {
     this->currentUserChanged.connect([this] {
         auto currentUser = this->getCurrent();
@@ -221,7 +222,7 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
 
     //    std::lock_guard<std::mutex> lock(this->mutex);
 
-    this->accounts.insertItem(newUser);
+    this->accounts.insert(newUser);
 
     return AddUserResponse::UserAdded;
 }

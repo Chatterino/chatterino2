@@ -20,8 +20,6 @@
 
 namespace chatterino {
 
-SettingsDialog *SettingsDialog::instance_ = nullptr;
-
 SettingsDialog::SettingsDialog()
     : BaseWindow(BaseWindow::DisableCustomScaling)
 {
@@ -138,11 +136,6 @@ void SettingsDialog::filterElements(const QString &text)
     }
 }
 
-SettingsDialog *SettingsDialog::instance()
-{
-    return SettingsDialog::instance_;
-}
-
 void SettingsDialog::addTabs()
 {
     this->ui_.tabContainer->setMargin(0);
@@ -155,26 +148,26 @@ void SettingsDialog::addTabs()
     // clang-format off
     this->addTab([]{return new GeneralPage;},          "General",        ":/settings/about.svg");
     this->ui_.tabContainer->addSpacing(16);
-    this->addTab([]{return new AccountsPage;},         "Accounts",       ":/settings/accounts.svg");
+    this->addTab([]{return new AccountsPage;},         "Accounts",       ":/settings/accounts.svg", SettingsTabId::Accounts);
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new CommandPage;},          "Commands",       ":/settings/commands.svg");
     this->addTab([]{return new HighlightingPage;},     "Highlights",     ":/settings/notifications.svg");
     this->addTab([]{return new IgnoresPage;},          "Ignores",        ":/settings/ignore.svg");
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new KeyboardSettingsPage;}, "Keybindings",    ":/settings/keybinds.svg");
-    this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg");
+    this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg", SettingsTabId::Moderation);
     this->addTab([]{return new NotificationPage;},     "Notifications",  ":/settings/notification2.svg");
     this->addTab([]{return new ExternalToolsPage;},    "External tools", ":/settings/externaltools.svg");
     this->ui_.tabContainer->addStretch(1);
-    this->addTab([]{return new AboutPage;},            "About",          ":/settings/about.svg", Qt::AlignBottom);
+    this->addTab([]{return new AboutPage;},            "About",          ":/settings/about.svg", SettingsTabId(), Qt::AlignBottom);
     // clang-format on
 }
 
 void SettingsDialog::addTab(std::function<SettingsPage *()> page,
                             const QString &name, const QString &iconPath,
-                            Qt::Alignment alignment)
+                            SettingsTabId id, Qt::Alignment alignment)
 {
-    auto tab = new SettingsDialogTab(this, std::move(page), name, iconPath);
+    auto tab = new SettingsDialogTab(this, std::move(page), name, iconPath, id);
 
     this->ui_.tabContainer->addWidget(tab, 0, alignment);
     this->tabs_.push_back(tab);
@@ -216,7 +209,12 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
 
 void SettingsDialog::selectTab(SettingsTabId id)
 {
-    this->selectTab(this->tab(id));
+    auto t = this->tab(id);
+    assert(t);
+    if (!t)
+        return;
+
+    this->selectTab(t);
 }
 
 SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)

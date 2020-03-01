@@ -197,13 +197,6 @@ private:
 
     LimitedQueue<MessageLayoutPtr> messages_;
 
-    pajlada::Signals::Connection messageAppendedConnection_;
-    pajlada::Signals::Connection messageAddedAtStartConnection_;
-    pajlada::Signals::Connection messageRemovedConnection_;
-    pajlada::Signals::Connection messageReplacedConnection_;
-    pajlada::Signals::Connection repaintGifsConnection_;
-    pajlada::Signals::Connection layoutConnection_;
-
     std::vector<pajlada::Signals::ScopedConnection> connections_;
     std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
 

@@ -26,7 +26,7 @@ public:
     SettingsDialogTab(SettingsDialog *dialog_,
                       std::function<SettingsPage *()> page_,
                       const QString &name, QString imageFileName,
-                      SettingsTabId id = {});
+                      SettingsTabId id);
 
     void setSelected(bool selected_);
     SettingsPage *page();

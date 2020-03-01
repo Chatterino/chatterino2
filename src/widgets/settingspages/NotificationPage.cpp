@@ -96,7 +96,7 @@ NotificationPage::NotificationPage()
                 view->addButtonPressed.connect([] {
                     getApp()
                         ->notifications->channelMap[Platform::Twitch]
-                        .appendItem("channel");
+                        .append("channel");
                 });
             }
             /*

@@ -15,6 +15,8 @@ namespace chatterino {
 IrcServer::IrcServer(const IrcServerData &data)
     : data_(new IrcServerData(data))
 {
+    this->initializeIrc();
+
     this->connect();
 }
 
@@ -49,6 +51,57 @@ const QString &IrcServer::user()
 const QString &IrcServer::nick()
 {
     return this->data_->nick.isEmpty() ? this->data_->user : this->data_->nick;
+}
+
+void IrcServer::initializeConnectionSignals(IrcConnection *connection,
+                                            ConnectionType type)
+{
+    assert(type == Both);
+
+    QObject::connect(
+        connection, &Communi::IrcConnection::socketError, this,
+        [this](QAbstractSocket::SocketError error) {
+            static int index =
+                QAbstractSocket::staticMetaObject.indexOfEnumerator(
+                    "SocketError");
+
+            std::lock_guard lock(this->channelMutex);
+
+            for (auto &&weak : this->channels)
+            {
+                if (auto shared = weak.lock())
+                {
+                    shared->addMessage(makeSystemMessage(
+                        QStringLiteral("Socket error: ") +
+                        QAbstractSocket::staticMetaObject.enumerator(index)
+                            .valueToKey(error)));
+                }
+            }
+        });
+
+    QObject::connect(connection, &Communi::IrcConnection::nickNameRequired,
+                     this, [](const QString &reserved, QString *result) {
+                         *result = reserved + (std::rand() % 100);
+                     });
+
+    QObject::connect(connection, &Communi::IrcConnection::noticeMessageReceived,
+                     this, [this](Communi::IrcNoticeMessage *message) {
+                         MessageBuilder builder;
+
+                         builder.emplace<TimestampElement>();
+                         builder.emplace<TextElement>(
+                             message->nick(), MessageElementFlag::Username);
+                         builder.emplace<TextElement>(
+                             "-> you:", MessageElementFlag::Username);
+                         builder.emplace<TextElement>(message->content(),
+                                                      MessageElementFlag::Text);
+
+                         auto msg = builder.release();
+
+                         for (auto &&weak : this->channels)
+                             if (auto shared = weak.lock())
+                                 shared->addMessage(msg);
+                     });
 }
 
 void IrcServer::initializeConnection(IrcConnection *connection,
@@ -90,47 +143,6 @@ void IrcServer::initializeConnection(IrcConnection *connection,
                 this->open(Both);
         }
     }
-
-    QObject::connect(
-        connection, &Communi::IrcConnection::socketError, this,
-        [this](QAbstractSocket::SocketError error) {
-            static int index =
-                QAbstractSocket::staticMetaObject.indexOfEnumerator(
-                    "SocketError");
-
-            std::lock_guard lock(this->channelMutex);
-
-            for (auto &&weak : this->channels)
-                if (auto shared = weak.lock())
-                    shared->addMessage(makeSystemMessage(
-                        QStringLiteral("Socket error: ") +
-                        QAbstractSocket::staticMetaObject.enumerator(index)
-                            .valueToKey(error)));
-        });
-
-    QObject::connect(connection, &Communi::IrcConnection::nickNameRequired,
-                     this, [](const QString &reserved, QString *result) {
-                         *result = reserved + (std::rand() % 100);
-                     });
-
-    QObject::connect(connection, &Communi::IrcConnection::noticeMessageReceived,
-                     this, [this](Communi::IrcNoticeMessage *message) {
-                         MessageBuilder builder;
-
-                         builder.emplace<TimestampElement>();
-                         builder.emplace<TextElement>(
-                             message->nick(), MessageElementFlag::Username);
-                         builder.emplace<TextElement>(
-                             "-> you:", MessageElementFlag::Username);
-                         builder.emplace<TextElement>(message->content(),
-                                                      MessageElementFlag::Text);
-
-                         auto msg = builder.release();
-
-                         for (auto &&weak : this->channels)
-                             if (auto shared = weak.lock())
-                                 shared->addMessage(msg);
-                     });
 }
 
 std::shared_ptr<Channel> IrcServer::createChannel(const QString &channelName)
