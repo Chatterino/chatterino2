@@ -51,6 +51,9 @@ public:
     int windowCount();
     Window *windowAt(int index);
 
+    QPoint emotePopupPos();
+    void setEmotePopupPos(QPoint pos);
+
     virtual void initialize(Settings &settings, Paths &paths) override;
     virtual void save() override;
     void closeAll();
@@ -88,6 +91,8 @@ private:
     void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
 
     bool initialized_ = false;
+
+    QPoint emotePopupPos_;
 
     std::atomic<int> generation_{0};
 
