@@ -29,6 +29,7 @@ TranRed | https://github.com/TranRed |  | Contributor
 RAnders00 | https://github.com/RAnders00 | | Contributor
 YungLPR | https://github.com/leon-richardt | | Contributor
 Mm2PL | https://github.com/mm2pl | | Contributor
+tolekk | https://github.com/tolekk | | Contributor
 # If you are a contributor add yourself above this line
 
 Defman21 | https://github.com/Defman21 |  | Documentation
