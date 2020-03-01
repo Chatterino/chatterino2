@@ -27,6 +27,8 @@ TwitchIrcServer::TwitchIrcServer()
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
 {
+    this->initializeIrc();
+
     this->pubsub = new PubSub;
 
     // getSettings()->twitchSeperateWriteConnection.connect([this](auto, auto) {
