@@ -70,6 +70,8 @@ public:
     const QUrl &getSoundUrl() const;
     const std::shared_ptr<QColor> getColor() const;
 
+    static constexpr QColor FALLBACK_COLOR = QColor(127, 63, 73, 127);
+
 private:
     QString pattern_;
     bool hasAlert_;
@@ -133,14 +135,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
 
         auto _color = QColor(encodedColor);
         if (!_color.isValid())
-        {
-            /*
-             * As a fallback, use the default self-highlight color. We can't use
-             * getApp()->themes here because the Application instance is not
-             * initialized when this function is called.
-             */
-            _color = QColor(127, 63, 73, 127);
-        }
+            _color = chatterino::HighlightPhrase::FALLBACK_COLOR;
 
         return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
                                            _isRegex, _isCaseSensitive,

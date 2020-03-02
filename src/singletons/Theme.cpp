@@ -48,8 +48,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
         this->splits.resizeHandleBackground = QColor(0, 148, 255, 0x20);
     }
 
-    this->messages.backgrounds.highlighted = QColor(127, 63, 73, 127);
-
     this->splits.header.background = getColor(0, sat, flat ? 1 : 0.9);
     this->splits.header.border = getColor(0, sat, flat ? 1 : 0.85);
     this->splits.header.text = this->messages.textColors.regular;
@@ -74,15 +72,6 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
-
-    // Highlighted Messages
-    // hidden setting from PR #744 - if set it will overwrite theme color
-    // TODO: implement full theme support
-    if (getSettings()->highlightColor != "")
-    {
-        this->messages.backgrounds.highlighted =
-            QColor(getSettings()->highlightColor.getValue());
-    }
 }
 
 void Theme::normalizeColor(QColor &color)

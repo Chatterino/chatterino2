@@ -64,7 +64,6 @@ void ColorProvider::initTypeColorMap()
 {
     // Read settings for custom highlight colors and save them in map.
     // If no custom values can be found, set up default values instead.
-    auto backgrounds = getApp()->themes->messages.backgrounds;
 
     QString customColor = getSettings()->selfHighlightColor;
     if (QColor(customColor).isValid())
@@ -76,7 +75,7 @@ void ColorProvider::initTypeColorMap()
     {
         this->typeColorMap_.insert(
             {ColorType::SelfHighlight,
-             std::make_shared<QColor>(backgrounds.highlighted)});
+             std::make_shared<QColor>(HighlightPhrase::FALLBACK_COLOR)});
     }
 
     customColor = getSettings()->subHighlightColor;
@@ -89,7 +88,7 @@ void ColorProvider::initTypeColorMap()
     {
         this->typeColorMap_.insert(
             {ColorType::Subscription,
-             std::make_shared<QColor>(backgrounds.subscription)});
+             std::make_shared<QColor>(HighlightPhrase::FALLBACK_COLOR)});
     }
 
     customColor = getSettings()->whisperHighlightColor;
@@ -102,7 +101,7 @@ void ColorProvider::initTypeColorMap()
     {
         this->typeColorMap_.insert(
             {ColorType::Whisper,
-             std::make_shared<QColor>(backgrounds.highlighted)});
+             std::make_shared<QColor>(HighlightPhrase::FALLBACK_COLOR)});
     }
 }
 
@@ -116,7 +115,7 @@ void ColorProvider::initDefaultColors()
     this->defaultColors_.emplace_back(28, 141, 117, 127);  // Cyan-ish
 
     auto backgrounds = getApp()->themes->messages.backgrounds;
-    this->defaultColors_.push_back(backgrounds.highlighted);
+    this->defaultColors_.push_back(HighlightPhrase::FALLBACK_COLOR);
     this->defaultColors_.push_back(backgrounds.subscription);
 }
 
