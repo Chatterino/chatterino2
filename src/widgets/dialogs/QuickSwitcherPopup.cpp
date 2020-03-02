@@ -92,6 +92,9 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
 
         if (key == Qt::Key_Down || key == Qt::Key_Tab)
         {
+            if (count <= 0)
+                return true;
+
             const int newRow = (curRow + 1) % count;
 
             this->ui_.list->setCurrentRow(newRow,
@@ -100,6 +103,9 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
         }
         else if (key == Qt::Key_Up || key == Qt::Key_Backtab)
         {
+            if (count <= 0)
+                return true;
+
             int newRow = curRow - 1;
             if (newRow < 0)
                 newRow += count;
@@ -110,6 +116,9 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
         }
         else if (key == Qt::Key_Enter || key == Qt::Key_Return)
         {
+            if (count <= 0)
+                return true;
+
             Split *selectedSplit = this->ui_.list->currentItem()
                                        ->data(Qt::UserRole)
                                        .value<Split *>();
