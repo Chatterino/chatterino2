@@ -1427,6 +1427,13 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
             return;
         }
     }
+    else if (event->button() == Qt::MiddleButton)
+    {
+        if (event->screenPos() == this->lastMiddlePressPosition_)
+            this->enableScrolling(event);
+        else
+            this->disableScrolling();
+    }
     else
     {
         // not left or right button
