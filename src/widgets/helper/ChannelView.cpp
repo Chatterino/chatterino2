@@ -1367,7 +1367,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             if (this->isScrolling_)
                 this->disableScrolling();
             else
-                this->enableScrolling(event);
+                this->enableScrolling(event->screenPos());
         }
         break;
 
@@ -1430,7 +1430,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     else if (event->button() == Qt::MiddleButton)
     {
         if (event->screenPos() == this->lastMiddlePressPosition_)
-            this->enableScrolling(event);
+            this->enableScrolling(event->screenPos());
         else
             this->disableScrolling();
     }
@@ -1831,12 +1831,12 @@ void ChannelView::getWordBounds(MessageLayout *layout,
     wordEnd = wordStart + length;
 }
 
-void ChannelView::enableScrolling(QMouseEvent *event)
+void ChannelView::enableScrolling(const QPointF &scrollStart)
 {
     this->isScrolling_ = true;
-    this->lastMiddlePressPosition_ = event->screenPos();
+    this->lastMiddlePressPosition_ = scrollStart;
     // The line below prevents a sudden jerk at the beginning
-    this->currentMousePosition_ = event->screenPos();
+    this->currentMousePosition_ = scrollStart;
 
     this->scrollTimer_.start();
     QGuiApplication::setOverrideCursor(this->cursors_.neutral);

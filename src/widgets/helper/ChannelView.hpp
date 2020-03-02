@@ -148,7 +148,7 @@ private:
     void updatePauses();
     void unpaused();
 
-    void enableScrolling(QMouseEvent *event);
+    void enableScrolling(const QPointF &scrollStart);
     void disableScrolling();
 
     QTimer *layoutCooldown_;
