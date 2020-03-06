@@ -29,6 +29,8 @@ private:
     QTableView *tableView_{};
     QAbstractTableModel *model_{};
     QHBoxLayout *buttons_{};
+
+    void moveRow(int dir);
 };
 
 }  // namespace chatterino

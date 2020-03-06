@@ -58,30 +58,14 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
     // move up
     QPushButton *moveUp = new QPushButton("Move up");
     buttons->addWidget(moveUp);
-    QObject::connect(moveUp, &QPushButton::clicked, [this] {
-        auto selected = this->getTableView()->selectionModel()->selectedRows(0);
-
-        int row = selected.at(0).row();
-        if (selected.size() == 0 || row == 0)
-            return;
-
-        model_->moveRows(model_->index(row, 0), row, selected.size(),
-                         model_->index(row - 1, 0), row - 1);
-    });
+    QObject::connect(moveUp, &QPushButton::clicked,
+                     [this] { this->moveRow(-1); });
 
     // move down
     QPushButton *moveDown = new QPushButton("Move down");
     buttons->addWidget(moveDown);
-    QObject::connect(moveDown, &QPushButton::clicked, [this] {
-        auto selected = this->getTableView()->selectionModel()->selectedRows(0);
-
-        int row = selected.at(0).row();
-        if (selected.size() == 0)
-            return;
-
-        model_->moveRows(model_->index(row, 0), row, selected.size(),
-                         model_->index(row + 1, 0), row + 1);
-    });
+    QObject::connect(moveDown, &QPushButton::clicked,
+                     [this] { this->moveRow(1); });
 
     buttons->addStretch();
 
@@ -129,6 +113,23 @@ void EditableModelView::addRegexHelpLink()
                    "style='color:#99f'>regex info</span></a>");
     regexHelpLabel->setOpenExternalLinks(true);
     this->addCustomButton(regexHelpLabel);
+}
+
+void EditableModelView::moveRow(int dir)
+{
+    auto selected = this->getTableView()->selectionModel()->selectedRows(0);
+
+    int row = selected.at(0).row();
+    if (selected.size() == 0 ||
+        row + dir >= this->model_->rowCount(QModelIndex()) || row + dir < 0)
+        return;
+
+    model_->moveRows(model_->index(row, 0), row, selected.size(),
+                     model_->index(row + dir, 0), row + dir);
+
+    this->getTableView()->selectionModel()->clear();
+    this->getTableView()->selectionModel()->select(
+        model_->index(row + dir, 0), QItemSelectionModel::SelectCurrent);
 }
 
 }  // namespace chatterino
