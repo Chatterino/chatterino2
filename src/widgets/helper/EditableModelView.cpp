@@ -3,6 +3,7 @@
 #include <QAbstractTableModel>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QModelIndex>
 #include <QPushButton>
 #include <QTableView>
 #include <QVBoxLayout>
@@ -52,6 +53,34 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
 
         for (auto &&row : rows)
             model_->removeRow(row);
+    });
+
+    // move up
+    QPushButton *moveUp = new QPushButton("Move up");
+    buttons->addWidget(moveUp);
+    QObject::connect(moveUp, &QPushButton::clicked, [this] {
+        auto selected = this->getTableView()->selectionModel()->selectedRows(0);
+
+        int row = selected.at(0).row();
+        if (selected.size() == 0 || row == 0)
+            return;
+
+        model_->moveRows(model_->index(row, 0), row, selected.size(),
+                         model_->index(row - 1, 0), row - 1);
+    });
+
+    // move down
+    QPushButton *moveDown = new QPushButton("Move down");
+    buttons->addWidget(moveDown);
+    QObject::connect(moveDown, &QPushButton::clicked, [this] {
+        auto selected = this->getTableView()->selectionModel()->selectedRows(0);
+
+        int row = selected.at(0).row();
+        if (selected.size() == 0)
+            return;
+
+        model_->moveRows(model_->index(row, 0), row, selected.size(),
+                         model_->index(row + 1, 0), row + 1);
     });
 
     buttons->addStretch();

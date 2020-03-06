@@ -228,6 +228,27 @@ public:
         this->vector_->removeAt(signalVectorRow);
     }
 
+    bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
+                  const QModelIndex &destinationParent, int destinationChild)
+    {
+        if (count != 1)
+        {
+            return false;
+        }
+
+        assert(sourceRow >= 0 && sourceRow < this->rows_.size());
+
+        int signalVectorRow = this->getVectorIndexFromModelIndex(sourceRow);
+        TVectorItem item =
+            this->getItemFromRow(this->rows_[sourceRow].items,
+                                 this->rows_[sourceRow].original.get());
+        this->vector_->removeAt(signalVectorRow);
+        this->vector_->insert(
+            item, this->getVectorIndexFromModelIndex(destinationChild));
+
+        return true;
+    }
+
     bool removeRows(int row, int count, const QModelIndex &parent) override
     {
         (void)parent;
