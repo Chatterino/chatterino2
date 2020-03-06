@@ -129,7 +129,8 @@ void EditableModelView::moveRow(int dir)
 
     this->getTableView()->selectionModel()->clear();
     this->getTableView()->selectionModel()->select(
-        model_->index(row + dir, 0), QItemSelectionModel::SelectCurrent);
+        model_->index(row + dir, 0),
+        QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 }
 
 }  // namespace chatterino
