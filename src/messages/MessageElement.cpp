@@ -428,4 +428,227 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+static QRegularExpression regex("\u0003(\\d)?(,(\\d))?",
+                                QRegularExpression::UseUnicodePropertiesOption);
+
+// TEXT
+IrcTextElement::IrcTextElement(const QString &text, MessageElementFlags flags,
+                               FontStyle style)
+    : MessageElement(flags)
+    , style_(style)
+{
+    if (!regex.isValid())
+    {
+        qDebug() << "XDDDDDDDDDDDDDDDDDDDDDDDDDDDD";
+    }
+    assert(regex.isValid());
+    // static auto regex = QRegExp("\u0003(\\d)?(,(\\d))?");
+    int pos = 0;
+    int lastPos = 0;
+    int fg = -1, bg = -1;
+
+    auto i = regex.globalMatch(text);
+
+    while (i.hasNext())
+    {
+        auto match = i.next();
+
+        if (lastPos != match.capturedStart() && match.capturedStart() != 0)
+        {
+            auto seg = Segment{};
+            seg.text = text.mid(lastPos, match.capturedStart() - lastPos);
+            seg.foregroundColor = fg;  // default
+            seg.backgroundColor = bg;  // default
+            this->segments_.emplace_back(seg);
+            qDebug() << "Push message '" << seg.text << "'";
+            lastPos = match.capturedStart() + match.capturedLength();
+        }
+
+        if (!match.captured(1).isEmpty())
+        {
+            fg = match.captured(1).toInt(nullptr);
+            qDebug() << "Set paint brush FG to" << fg;
+        }
+        if (!match.captured(3).isEmpty())
+        {
+            bg = match.captured(3).toInt(nullptr);
+            qDebug() << "Set paint brush BG to" << bg;
+        }
+    }
+
+    auto seg = Segment{};
+    seg.text = text.mid(lastPos);
+    seg.foregroundColor = fg;  // default
+    seg.backgroundColor = bg;  // default
+    this->segments_.emplace_back(seg);
+    for (auto &segment : this->segments_)
+    {
+        qDebug() << "COLOR: " << segment.foregroundColor << ","
+                 << segment.backgroundColor << " = '" << segment.text << "'";
+        for (const auto &word : segment.text.split(' '))
+        {
+            segment.words_.push_back({word, -1});
+            // fourtf: add logic to store multiple spaces after message
+        }
+    }
+}
+
+// - 00 - White.
+// - 01 - Black.
+// - 02 - Blue.
+// - 03 - Green.
+// - 04 - Red.
+// - 05 - Brown.
+// - 06 - Magenta.
+// - 07 - Orange.
+// - 08 - Yellow.
+// - 09 - Light Green.
+// - 10 - Cyan.
+// - 11 - Light Cyan.
+// - 12 - Light Blue.
+// - 13 - Pink.
+// - 14 - Grey.
+// - 15 - Light Grey.
+//
+
+static auto colors = [] {
+    static QMap<int, QString> x;
+    if (x.isEmpty())
+    {
+        x.insert(0, QLatin1String("white"));
+        x.insert(1, QLatin1String("black"));
+        x.insert(2, QLatin1String("blue"));
+        x.insert(3, QLatin1String("green"));
+        x.insert(4, QLatin1String("red"));
+        x.insert(5, QLatin1String("brown"));
+        x.insert(6, QLatin1String("purple"));
+        x.insert(7, QLatin1String("orange"));
+        x.insert(8, QLatin1String("yellow"));
+        x.insert(9, QLatin1String("lightgreen"));
+        x.insert(10, QLatin1String("cyan"));
+        x.insert(11, QLatin1String("lightcyan"));
+        x.insert(12, QLatin1String("lightblue"));
+        x.insert(13, QLatin1String("pink"));
+        x.insert(14, QLatin1String("gray"));
+        x.insert(15, QLatin1String("lightgray"));
+    }
+    return x;
+}();
+
+void IrcTextElement::addToContainer(MessageLayoutContainer &container,
+                                    MessageElementFlags flags)
+{
+    auto app = getApp();
+
+    MessageColor defaultColorType = MessageColor::Text;
+    auto defaultColor = defaultColorType.getColor(*app->themes);
+    if (flags.hasAny(this->getFlags()))
+    {
+        QFontMetrics metrics =
+            app->fonts->getFontMetrics(this->style_, container.getScale());
+
+        for (auto &segment : this->segments_)
+        {
+            for (auto &word : segment.words_)
+            {
+                auto getTextLayoutElement = [&](QString text, int width,
+                                                bool hasTrailingSpace) {
+                    QColor color = defaultColor;
+                    if (segment.foregroundColor != -1)
+                    {
+                        color = colors[segment.foregroundColor];
+                    }
+                    app->themes->normalizeColor(color);
+                    qDebug()
+                        << "Color: " << segment.foregroundColor << " " << text;
+                    app->themes->normalizeColor(color);
+
+                    auto e = (new TextLayoutElement(
+                                  *this, text, QSize(width, metrics.height()),
+                                  color, this->style_, container.getScale()))
+                                 ->setLink(this->getLink());
+                    e->setTrailingSpace(hasTrailingSpace);
+                    e->setText(text);
+
+                    // If URL link was changed,
+                    // Should update it in MessageLayoutElement too!
+                    if (this->getLink().type == Link::Url)
+                    {
+                        static_cast<TextLayoutElement *>(e)
+                            ->listenToLinkChanges();
+                    }
+                    return e;
+                };
+
+                // fourtf: add again
+                //            if (word.width == -1) {
+                word.width = metrics.width(word.text);
+                //            }
+
+                // see if the text fits in the current line
+                if (container.fitsInLine(word.width))
+                {
+                    container.addElementNoLineBreak(getTextLayoutElement(
+                        word.text, word.width, this->hasTrailingSpace()));
+                    continue;
+                }
+
+                // see if the text fits in the next line
+                if (!container.atStartOfLine())
+                {
+                    container.breakLine();
+
+                    if (container.fitsInLine(word.width))
+                    {
+                        container.addElementNoLineBreak(getTextLayoutElement(
+                            word.text, word.width, this->hasTrailingSpace()));
+                        continue;
+                    }
+                }
+
+                // we done goofed, we need to wrap the text
+                QString text = word.text;
+                int textLength = text.length();
+                int wordStart = 0;
+                int width = 0;
+
+                // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
+
+                for (int i = 0; i < textLength; i++)  //
+                {
+                    auto isSurrogate =
+                        text.size() > i + 1 &&
+                        QChar::isHighSurrogate(text[i].unicode());
+
+                    auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
+                                                 : metrics.width(text[i]);
+
+                    if (!container.fitsInLine(width + charWidth))  //
+                    {
+                        container.addElementNoLineBreak(getTextLayoutElement(
+                            text.mid(wordStart, i - wordStart), width, false));
+                        container.breakLine();
+
+                        wordStart = i;
+                        width = charWidth;
+
+                        if (isSurrogate)
+                            i++;
+                        continue;
+                    }
+
+                    width += charWidth;
+
+                    if (isSurrogate)
+                        i++;
+                }
+
+                container.addElement(getTextLayoutElement(
+                    text.mid(wordStart), width, this->hasTrailingSpace()));
+                container.breakLine();
+            }
+        }
+    }
+}
+
 }  // namespace chatterino

@@ -171,6 +171,7 @@ SOURCES += \
     src/providers/irc/IrcChannel2.cpp \
     src/providers/irc/IrcCommands.cpp \
     src/providers/irc/IrcConnection2.cpp \
+    src/providers/irc/IrcMessageBuilder.cpp \
     src/providers/irc/IrcServer.cpp \
     src/providers/LinkResolver.cpp \
     src/providers/twitch/api/Helix.cpp \
@@ -371,6 +372,7 @@ HEADERS += \
     src/providers/irc/IrcChannel2.hpp \
     src/providers/irc/IrcCommands.hpp \
     src/providers/irc/IrcConnection2.hpp \
+    src/providers/irc/IrcMessageBuilder.hpp \
     src/providers/irc/IrcServer.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/api/Helix.hpp \

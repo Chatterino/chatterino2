@@ -291,4 +291,33 @@ public:
                         MessageElementFlags flags) override;
 };
 
+// contains a text, it will split it into words
+class IrcTextElement : public MessageElement
+{
+public:
+    IrcTextElement(const QString &text, MessageElementFlags flags,
+                   FontStyle style = FontStyle::ChatMedium);
+    ~IrcTextElement() override = default;
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+private:
+    FontStyle style_;
+
+    struct Word {
+        QString text;
+        int width = -1;
+    };
+
+    struct Segment {
+        QString text;
+        int foregroundColor = -1;
+        int backgroundColor = -1;
+        MessageColor color = MessageColor::Text;
+        std::vector<Word> words_;
+    };
+    std::vector<Segment> segments_;
+};
+
 }  // namespace chatterino
