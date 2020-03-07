@@ -1,5 +1,7 @@
 #pragma once
 
+#include "EditableTableView.hpp"
+
 #include <QWidget>
 
 #include <pajlada/signals/signal.hpp>
@@ -26,7 +28,7 @@ public:
     void addRegexHelpLink();
 
 private:
-    QTableView *tableView_{};
+    EditableTableView *tableView_{};
     QAbstractTableModel *model_{};
     QHBoxLayout *buttons_{};
 

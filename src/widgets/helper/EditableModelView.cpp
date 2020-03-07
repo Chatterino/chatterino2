@@ -1,5 +1,7 @@
 #include "EditableModelView.hpp"
+#include "EditableTableView.hpp"
 
+#include <QAbstractItemView>
 #include <QAbstractTableModel>
 #include <QHBoxLayout>
 #include <QHeaderView>
@@ -11,17 +13,10 @@
 namespace chatterino {
 
 EditableModelView::EditableModelView(QAbstractTableModel *model)
-    : tableView_(new QTableView(this))
-    , model_(model)
 {
+    this->model_ = model;
     this->model_->setParent(this);
-    this->tableView_->setModel(model);
-    this->tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
-    this->tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
-    this->tableView_->setDragDropMode(QTableView::DragDropMode::InternalMove);
-    this->tableView_->setDragDropOverwriteMode(false);
-    this->tableView_->setDefaultDropAction(Qt::DropAction::MoveAction);
-    this->tableView_->verticalHeader()->setVisible(false);
+    this->tableView_ = new EditableTableView(model_);
 
     // create layout
     QVBoxLayout *vbox = new QVBoxLayout(this);
