@@ -119,9 +119,11 @@ void EditableModelView::moveRow(int dir)
 {
     auto selected = this->getTableView()->selectionModel()->selectedRows(0);
 
-    int row = selected.at(0).row();
+    int row;
     if (selected.size() == 0 ||
-        row + dir >= this->model_->rowCount(QModelIndex()) || row + dir < 0)
+        (row = selected.at(0).row()) + dir >=
+            this->model_->rowCount(QModelIndex()) ||
+        row + dir < 0)
         return;
 
     model_->moveRows(model_->index(row, 0), row, selected.size(),
