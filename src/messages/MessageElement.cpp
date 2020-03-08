@@ -585,7 +585,7 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
                 for (const auto &segment : segments)
                 {
                     QColor color = defaultColor;
-                    if (segment.fg != -1)
+                    if (segment.fg >= 0 && segment.fg <= 98)
                     {
                         color = IRC_COLORS[segment.fg];
                     }
