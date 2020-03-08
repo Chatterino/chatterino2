@@ -70,7 +70,7 @@ public:
     const QUrl &getSoundUrl() const;
     const std::shared_ptr<QColor> getColor() const;
 
-    static constexpr QColor FALLBACK_COLOR = QColor(127, 63, 73, 127);
+    static QColor FALLBACK_COLOR = QColor(127, 63, 73, 127);
 
 private:
     QString pattern_;
