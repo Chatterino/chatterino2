@@ -244,7 +244,6 @@ SOURCES += \
     src/widgets/helper/ComboBoxItemDelegate.cpp \
     src/widgets/helper/DebugPopup.cpp \
     src/widgets/helper/EditableModelView.cpp \
-    src/widgets/helper/EditableTableView.cpp \
     src/widgets/helper/EffectLabel.cpp \
     src/widgets/helper/NotebookButton.cpp \
     src/widgets/helper/NotebookTab.cpp \

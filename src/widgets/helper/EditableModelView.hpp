@@ -1,7 +1,5 @@
 #pragma once
 
-#include "EditableTableView.hpp"
-
 #include <QWidget>
 
 #include <pajlada/signals/signal.hpp>
@@ -28,11 +26,12 @@ public:
     void addRegexHelpLink();
 
 private:
-    EditableTableView *tableView_{};
+    QTableView *tableView_{};
     QAbstractTableModel *model_{};
     QHBoxLayout *buttons_{};
 
     void moveRow(int dir);
+    void selectRow(int row);
 };
 
 }  // namespace chatterino

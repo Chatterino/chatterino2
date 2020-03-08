@@ -239,12 +239,17 @@ public:
         assert(sourceRow >= 0 && sourceRow < this->rows_.size());
 
         int signalVectorRow = this->getVectorIndexFromModelIndex(sourceRow);
+        this->beginMoveRows(sourceParent, sourceRow, sourceRow,
+                            destinationParent, destinationChild);
+
         TVectorItem item =
             this->getItemFromRow(this->rows_[sourceRow].items,
                                  this->rows_[sourceRow].original.get());
         this->vector_->removeAt(signalVectorRow);
         this->vector_->insert(
             item, this->getVectorIndexFromModelIndex(destinationChild));
+
+        this->endMoveRows();
 
         return true;
     }
@@ -299,17 +304,18 @@ public:
             int from = data->data("chatterino_row_id").toInt();
             int to = parent.row();
 
-            if (from < 0 || from > this->vector_->raw().size() || to < 0 ||
-                to > this->vector_->raw().size())
+            int vectorFrom = this->getVectorIndexFromModelIndex(from);
+            int vectorTo = this->getVectorIndexFromModelIndex(to);
+
+            if (vectorFrom < 0 || vectorFrom > this->vector_->raw().size() ||
+                vectorTo < 0 || vectorTo > this->vector_->raw().size())
             {
                 return false;
             }
 
             if (from != to)
             {
-                auto item = this->vector_->raw()[from];
-                this->vector_->removeAt(from);
-                this->vector_->insert(item, to);
+                this->moveRow(this->index(from, to), from, parent, to);
             }
 
             // We return false since we remove items ourselves.

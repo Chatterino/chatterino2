@@ -1,5 +1,4 @@
 #include "EditableModelView.hpp"
-#include "EditableTableView.hpp"
 
 #include <QAbstractItemView>
 #include <QAbstractTableModel>
@@ -13,10 +12,17 @@
 namespace chatterino {
 
 EditableModelView::EditableModelView(QAbstractTableModel *model)
+    : tableView_(new QTableView(this))
+    , model_(model)
 {
-    this->model_ = model;
     this->model_->setParent(this);
-    this->tableView_ = new EditableTableView(model_);
+    this->tableView_->setModel(model_);
+    this->tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
+    this->tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
+    this->tableView_->setDragDropMode(QTableView::DragDropMode::InternalMove);
+    this->tableView_->setDragDropOverwriteMode(false);
+    this->tableView_->setDefaultDropAction(Qt::DropAction::MoveAction);
+    this->tableView_->verticalHeader()->setVisible(false);
 
     // create layout
     QVBoxLayout *vbox = new QVBoxLayout(this);
@@ -63,6 +69,11 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
                      [this] { this->moveRow(1); });
 
     buttons->addStretch();
+
+    QObject::connect(this->model_, &QAbstractTableModel::rowsMoved,
+                     [this](const QModelIndex &parent, int start, int end,
+                            const QModelIndex &destination,
+                            int row) { this->selectRow(row); });
 
     // add tableview
     vbox->addWidget(this->tableView_);
@@ -123,10 +134,14 @@ void EditableModelView::moveRow(int dir)
 
     model_->moveRows(model_->index(row, 0), row, selected.size(),
                      model_->index(row + dir, 0), row + dir);
+    this->selectRow(row + dir);
+}
 
+void EditableModelView::selectRow(int row)
+{
     this->getTableView()->selectionModel()->clear();
     this->getTableView()->selectionModel()->select(
-        model_->index(row + dir, 0),
+        this->model_->index(row, 0),
         QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 }
 
