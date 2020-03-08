@@ -305,19 +305,19 @@ public:
 private:
     FontStyle style_;
 
+    struct Segment {
+        QString text;
+        int fg = -1;
+        int bg = -1;
+    };
+
     struct Word {
         QString text;
         int width = -1;
+        std::vector<Segment> segments;
     };
 
-    struct Segment {
-        QString text;
-        int foregroundColor = -1;
-        int backgroundColor = -1;
-        MessageColor color = MessageColor::Text;
-        std::vector<Word> words_;
-    };
-    std::vector<Segment> segments_;
+    std::vector<Word> words_;
 };
 
 }  // namespace chatterino

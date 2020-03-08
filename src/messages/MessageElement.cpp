@@ -11,6 +11,114 @@
 
 namespace chatterino {
 
+static auto IRC_COLORS = [] {
+    static QMap<int, QColor> x;
+    if (x.isEmpty())
+    {
+        // Colors taken from https://modern.ircdocs.horse/formatting.html
+        x.insert(0, QColor("white"));
+        x.insert(1, QColor("black"));
+        x.insert(2, QColor("blue"));
+        x.insert(3, QColor("green"));
+        x.insert(4, QColor("red"));
+        x.insert(5, QColor("brown"));
+        x.insert(6, QColor("purple"));
+        x.insert(7, QColor("orange"));
+        x.insert(8, QColor("yellow"));
+        x.insert(9, QColor("lightgreen"));
+        x.insert(10, QColor("cyan"));
+        x.insert(11, QColor("lightcyan"));
+        x.insert(12, QColor("lightblue"));
+        x.insert(13, QColor("pink"));
+        x.insert(14, QColor("gray"));
+        x.insert(15, QColor("lightgray"));
+        x.insert(16, QColor("#470000"));
+        x.insert(17, QColor("#472100"));
+        x.insert(18, QColor("#474700"));
+        x.insert(19, QColor("#324700"));
+        x.insert(20, QColor("#004700"));
+        x.insert(21, QColor("#00472c"));
+        x.insert(22, QColor("#004747"));
+        x.insert(23, QColor("#002747"));
+        x.insert(24, QColor("#000047"));
+        x.insert(25, QColor("#2e0047"));
+        x.insert(26, QColor("#470047"));
+        x.insert(27, QColor("#47002a"));
+        x.insert(28, QColor("#740000"));
+        x.insert(29, QColor("#743a00"));
+        x.insert(30, QColor("#747400"));
+        x.insert(31, QColor("#517400"));
+        x.insert(32, QColor("#007400"));
+        x.insert(33, QColor("#007449"));
+        x.insert(34, QColor("#007474"));
+        x.insert(35, QColor("#004074"));
+        x.insert(36, QColor("#000074"));
+        x.insert(37, QColor("#4b0074"));
+        x.insert(38, QColor("#740074"));
+        x.insert(39, QColor("#740045"));
+        x.insert(40, QColor("#b50000"));
+        x.insert(41, QColor("#b56300"));
+        x.insert(42, QColor("#b5b500"));
+        x.insert(43, QColor("#7db500"));
+        x.insert(44, QColor("#00b500"));
+        x.insert(45, QColor("#00b571"));
+        x.insert(46, QColor("#00b5b5"));
+        x.insert(47, QColor("#0063b5"));
+        x.insert(48, QColor("#0000b5"));
+        x.insert(49, QColor("#7500b5"));
+        x.insert(50, QColor("#b500b5"));
+        x.insert(51, QColor("#b5006b"));
+        x.insert(52, QColor("#ff0000"));
+        x.insert(53, QColor("#ff8c00"));
+        x.insert(54, QColor("#ffff00"));
+        x.insert(55, QColor("#b2ff00"));
+        x.insert(56, QColor("#00ff00"));
+        x.insert(57, QColor("#00ffa0"));
+        x.insert(58, QColor("#00ffff"));
+        x.insert(59, QColor("#008cff"));
+        x.insert(60, QColor("#0000ff"));
+        x.insert(61, QColor("#a500ff"));
+        x.insert(62, QColor("#ff00ff"));
+        x.insert(63, QColor("#ff0098"));
+        x.insert(64, QColor("#ff5959"));
+        x.insert(65, QColor("#ffb459"));
+        x.insert(66, QColor("#ffff71"));
+        x.insert(67, QColor("#cfff60"));
+        x.insert(68, QColor("#6fff6f"));
+        x.insert(69, QColor("#65ffc9"));
+        x.insert(70, QColor("#6dffff"));
+        x.insert(71, QColor("#59b4ff"));
+        x.insert(72, QColor("#5959ff"));
+        x.insert(73, QColor("#c459ff"));
+        x.insert(74, QColor("#ff66ff"));
+        x.insert(75, QColor("#ff59bc"));
+        x.insert(76, QColor("#ff9c9c"));
+        x.insert(77, QColor("#ffd39c"));
+        x.insert(78, QColor("#ffff9c"));
+        x.insert(79, QColor("#e2ff9c"));
+        x.insert(80, QColor("#9cff9c"));
+        x.insert(81, QColor("#9cffdb"));
+        x.insert(82, QColor("#9cffff"));
+        x.insert(83, QColor("#9cd3ff"));
+        x.insert(84, QColor("#9c9cff"));
+        x.insert(85, QColor("#dc9cff"));
+        x.insert(86, QColor("#ff9cff"));
+        x.insert(87, QColor("#ff94d3"));
+        x.insert(88, QColor("#000000"));
+        x.insert(89, QColor("#131313"));
+        x.insert(90, QColor("#282828"));
+        x.insert(91, QColor("#363636"));
+        x.insert(92, QColor("#4d4d4d"));
+        x.insert(93, QColor("#656565"));
+        x.insert(94, QColor("#818181"));
+        x.insert(95, QColor("#9f9f9f"));
+        x.insert(96, QColor("#bcbcbc"));
+        x.insert(97, QColor("#e2e2e2"));
+        x.insert(98, QColor("#ffffff"));
+    }
+    return x;
+}();
+
 MessageElement::MessageElement(MessageElementFlags flags)
     : flags_(flags)
 {
@@ -428,112 +536,86 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
-static QRegularExpression regex("\u0003(\\d)?(,(\\d))?",
+static QRegularExpression regex("\u0003(\\d{1,2})?(,(\\d{1,2}))?",
                                 QRegularExpression::UseUnicodePropertiesOption);
 
 // TEXT
-IrcTextElement::IrcTextElement(const QString &text, MessageElementFlags flags,
-                               FontStyle style)
+IrcTextElement::IrcTextElement(const QString &fullText,
+                               MessageElementFlags flags, FontStyle style)
     : MessageElement(flags)
     , style_(style)
 {
-    if (!regex.isValid())
-    {
-        qDebug() << "XDDDDDDDDDDDDDDDDDDDDDDDDDDDD";
-    }
     assert(regex.isValid());
-    // static auto regex = QRegExp("\u0003(\\d)?(,(\\d))?");
-    int pos = 0;
-    int lastPos = 0;
+
     int fg = -1, bg = -1;
 
-    auto i = regex.globalMatch(text);
-
-    while (i.hasNext())
+    for (const auto &text : fullText.split(' '))
     {
-        auto match = i.next();
+        std::vector<Segment> segments;
 
-        if (lastPos != match.capturedStart() && match.capturedStart() != 0)
+        int pos = 0;
+        int lastPos = 0;
+
+        auto i = regex.globalMatch(text);
+
+        while (i.hasNext())
         {
-            auto seg = Segment{};
-            seg.text = text.mid(lastPos, match.capturedStart() - lastPos);
-            seg.foregroundColor = fg;  // default
-            seg.backgroundColor = bg;  // default
-            this->segments_.emplace_back(seg);
-            qDebug() << "Push message '" << seg.text << "'";
+            auto match = i.next();
+
+            if (lastPos != match.capturedStart() && match.capturedStart() != 0)
+            {
+                auto seg = Segment{};
+                seg.text = text.mid(lastPos, match.capturedStart() - lastPos);
+                seg.fg = fg;
+                seg.bg = bg;
+                segments.emplace_back(seg);
+                lastPos = match.capturedStart() + match.capturedLength();
+                qDebug() << "Push segment with text" << seg.text;
+            }
+
+            if (!match.captured(1).isEmpty())
+            {
+                fg = match.captured(1).toInt(nullptr);
+                qDebug() << "Set paint brush FG to" << fg;
+            }
+            else
+            {
+                fg = -1;
+                qDebug() << "Set paint brush FG to" << fg;
+            }
+            if (!match.captured(3).isEmpty())
+            {
+                bg = match.captured(3).toInt(nullptr);
+                qDebug() << "Set paint brush BG to" << bg;
+            }
+            else if (fg == -1)
+            {
+                bg = -1;
+                qDebug() << "Set paint brush BG to" << bg;
+            }
+
             lastPos = match.capturedStart() + match.capturedLength();
         }
 
-        if (!match.captured(1).isEmpty())
-        {
-            fg = match.captured(1).toInt(nullptr);
-            qDebug() << "Set paint brush FG to" << fg;
-        }
-        if (!match.captured(3).isEmpty())
-        {
-            bg = match.captured(3).toInt(nullptr);
-            qDebug() << "Set paint brush BG to" << bg;
-        }
-    }
+        auto seg = Segment{};
+        seg.text = text.mid(lastPos);
+        seg.fg = fg;
+        seg.bg = bg;
+        segments.emplace_back(seg);
+        qDebug() << "Push segment with text 2" << seg.text;
 
-    auto seg = Segment{};
-    seg.text = text.mid(lastPos);
-    seg.foregroundColor = fg;  // default
-    seg.backgroundColor = bg;  // default
-    this->segments_.emplace_back(seg);
-    for (auto &segment : this->segments_)
-    {
-        qDebug() << "COLOR: " << segment.foregroundColor << ","
-                 << segment.backgroundColor << " = '" << segment.text << "'";
-        for (const auto &word : segment.text.split(' '))
-        {
-            segment.words_.push_back({word, -1});
-            // fourtf: add logic to store multiple spaces after message
-        }
+        QString n(text);
+
+        n.replace(regex, "");
+
+        Word w{
+            n,
+            -1,
+            segments,
+        };
+        this->words_.emplace_back(w);
     }
 }
-
-// - 00 - White.
-// - 01 - Black.
-// - 02 - Blue.
-// - 03 - Green.
-// - 04 - Red.
-// - 05 - Brown.
-// - 06 - Magenta.
-// - 07 - Orange.
-// - 08 - Yellow.
-// - 09 - Light Green.
-// - 10 - Cyan.
-// - 11 - Light Cyan.
-// - 12 - Light Blue.
-// - 13 - Pink.
-// - 14 - Grey.
-// - 15 - Light Grey.
-//
-
-static auto colors = [] {
-    static QMap<int, QString> x;
-    if (x.isEmpty())
-    {
-        x.insert(0, QLatin1String("white"));
-        x.insert(1, QLatin1String("black"));
-        x.insert(2, QLatin1String("blue"));
-        x.insert(3, QLatin1String("green"));
-        x.insert(4, QLatin1String("red"));
-        x.insert(5, QLatin1String("brown"));
-        x.insert(6, QLatin1String("purple"));
-        x.insert(7, QLatin1String("orange"));
-        x.insert(8, QLatin1String("yellow"));
-        x.insert(9, QLatin1String("lightgreen"));
-        x.insert(10, QLatin1String("cyan"));
-        x.insert(11, QLatin1String("lightcyan"));
-        x.insert(12, QLatin1String("lightblue"));
-        x.insert(13, QLatin1String("pink"));
-        x.insert(14, QLatin1String("gray"));
-        x.insert(15, QLatin1String("lightgray"));
-    }
-    return x;
-}();
 
 void IrcTextElement::addToContainer(MessageLayoutContainer &container,
                                     MessageElementFlags flags)
@@ -547,106 +629,110 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
         QFontMetrics metrics =
             app->fonts->getFontMetrics(this->style_, container.getScale());
 
-        for (auto &segment : this->segments_)
+        int fg = -1;
+        int bg = -1;
+
+        for (auto &word : this->words_)
         {
-            for (auto &word : segment.words_)
-            {
-                auto getTextLayoutElement = [&](QString text, int width,
-                                                bool hasTrailingSpace) {
+            auto getTextLayoutElement = [&](QString text,
+                                            std::vector<Segment> segments,
+                                            int width, bool hasTrailingSpace) {
+                std::vector<PajSegment> xd{};
+
+                for (const auto &segment : segments)
+                {
                     QColor color = defaultColor;
-                    if (segment.foregroundColor != -1)
+                    if (segment.fg != -1)
                     {
-                        color = colors[segment.foregroundColor];
+                        color = IRC_COLORS[segment.fg];
                     }
                     app->themes->normalizeColor(color);
-                    qDebug()
-                        << "Color: " << segment.foregroundColor << " " << text;
-                    app->themes->normalizeColor(color);
+                    xd.emplace_back(PajSegment{segment.text, color});
+                }
 
-                    auto e = (new TextLayoutElement(
-                                  *this, text, QSize(width, metrics.height()),
-                                  color, this->style_, container.getScale()))
-                                 ->setLink(this->getLink());
-                    e->setTrailingSpace(hasTrailingSpace);
-                    e->setText(text);
+                auto e = (new MultiColorTextLayoutElement(
+                              *this, text, QSize(width, metrics.height()), xd,
+                              this->style_, container.getScale()))
+                             ->setLink(this->getLink());
+                e->setTrailingSpace(true);
+                e->setText(text);
 
-                    // If URL link was changed,
-                    // Should update it in MessageLayoutElement too!
-                    if (this->getLink().type == Link::Url)
-                    {
-                        static_cast<TextLayoutElement *>(e)
-                            ->listenToLinkChanges();
-                    }
-                    return e;
-                };
+                // If URL link was changed,
+                // Should update it in MessageLayoutElement too!
+                if (this->getLink().type == Link::Url)
+                {
+                    static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
+                }
+                return e;
+            };
 
-                // fourtf: add again
-                //            if (word.width == -1) {
-                word.width = metrics.width(word.text);
-                //            }
+            // fourtf: add again
+            //            if (word.width == -1) {
+            word.width = metrics.width(word.text);
+            //            }
 
-                // see if the text fits in the current line
+            // see if the text fits in the current line
+            if (container.fitsInLine(word.width))
+            {
+                container.addElementNoLineBreak(
+                    getTextLayoutElement(word.text, word.segments, word.width,
+                                         this->hasTrailingSpace()));
+                continue;
+            }
+
+            // see if the text fits in the next line
+            if (!container.atStartOfLine())
+            {
+                container.breakLine();
+
                 if (container.fitsInLine(word.width))
                 {
                     container.addElementNoLineBreak(getTextLayoutElement(
-                        word.text, word.width, this->hasTrailingSpace()));
+                        word.text, word.segments, word.width,
+                        this->hasTrailingSpace()));
                     continue;
                 }
+            }
 
-                // see if the text fits in the next line
-                if (!container.atStartOfLine())
+            // we done goofed, we need to wrap the text
+            QString text = word.text;
+            int textLength = text.length();
+            int wordStart = 0;
+            int width = 0;
+
+            // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
+
+            for (int i = 0; i < textLength; i++)  //
+            {
+                auto isSurrogate = text.size() > i + 1 &&
+                                   QChar::isHighSurrogate(text[i].unicode());
+
+                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
+                                             : metrics.width(text[i]);
+
+                if (!container.fitsInLine(width + charWidth))  //
                 {
+                    container.addElementNoLineBreak(getTextLayoutElement(
+                        text.mid(wordStart, i - wordStart), {}, width, false));
                     container.breakLine();
 
-                    if (container.fitsInLine(word.width))
-                    {
-                        container.addElementNoLineBreak(getTextLayoutElement(
-                            word.text, word.width, this->hasTrailingSpace()));
-                        continue;
-                    }
-                }
-
-                // we done goofed, we need to wrap the text
-                QString text = word.text;
-                int textLength = text.length();
-                int wordStart = 0;
-                int width = 0;
-
-                // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
-
-                for (int i = 0; i < textLength; i++)  //
-                {
-                    auto isSurrogate =
-                        text.size() > i + 1 &&
-                        QChar::isHighSurrogate(text[i].unicode());
-
-                    auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
-                                                 : metrics.width(text[i]);
-
-                    if (!container.fitsInLine(width + charWidth))  //
-                    {
-                        container.addElementNoLineBreak(getTextLayoutElement(
-                            text.mid(wordStart, i - wordStart), width, false));
-                        container.breakLine();
-
-                        wordStart = i;
-                        width = charWidth;
-
-                        if (isSurrogate)
-                            i++;
-                        continue;
-                    }
-
-                    width += charWidth;
+                    wordStart = i;
+                    width = charWidth;
 
                     if (isSurrogate)
                         i++;
+                    continue;
                 }
 
-                container.addElement(getTextLayoutElement(
-                    text.mid(wordStart), width, this->hasTrailingSpace()));
-                container.breakLine();
+                width += charWidth;
+
+                if (isSurrogate)
+                    i++;
             }
+
+            container.addElement(getTextLayoutElement(
+                text.mid(wordStart), {}, width, this->hasTrailingSpace()));
+            container.breakLine();
         }
     }
 }
