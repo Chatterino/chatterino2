@@ -651,13 +651,13 @@ void ChannelView::messageAppended(MessagePtr &message,
         if (messageFlags->has(MessageFlag::Highlighted) &&
             !messageFlags->has(MessageFlag::Subscription))
         {
-            this->tabHighlightRequested.invoke(HighlightState::Highlighted);
-            this->tabHighlightColorRequested.invoke(message->highlightColor);
+            this->tabHighlightRequested.invoke(HighlightState::Highlighted,
+                                               message->highlightColor);
         }
         else
         {
-            this->tabHighlightRequested.invoke(HighlightState::NewMessage);
-            this->tabHighlightColorRequested.invoke(nullptr);
+            this->tabHighlightRequested.invoke(HighlightState::NewMessage,
+                                               nullptr);
         }
     }
 

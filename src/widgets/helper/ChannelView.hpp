@@ -85,9 +85,8 @@ public:
 
     pajlada::Signals::Signal<QMouseEvent *> mouseDown;
     pajlada::Signals::NoArgSignal selectionChanged;
-    pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
-    pajlada::Signals::Signal<std::shared_ptr<QColor>>
-        tabHighlightColorRequested;
+    pajlada::Signals::Signal<HighlightState, std::shared_ptr<QColor>>
+        tabHighlightRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::Signal<const Link &> linkClicked;
     pajlada::Signals::Signal<QString> joinToChannel;
