@@ -4,7 +4,6 @@
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
 #include "messages/Message.hpp"
-#include "providers/twitch/PartialTwitchUser.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "util/PostToThread.hpp"

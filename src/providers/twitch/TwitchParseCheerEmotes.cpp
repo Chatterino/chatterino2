@@ -278,6 +278,7 @@ namespace {
 
         return true;
     }
+
 }  // namespace
 
 // Look through the results of

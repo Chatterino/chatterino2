@@ -6,6 +6,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "util/StreamLink.hpp"
@@ -62,7 +63,6 @@ void Toasts::sendToastMessage(const QString &channelName)
                                                     .value("profile_image_url")
                                                     .toString()),
                                            channelName);
-
             return Success;
         })
         .execute();
