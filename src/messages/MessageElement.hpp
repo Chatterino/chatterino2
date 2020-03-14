@@ -223,17 +223,6 @@ private:
     EmotePtr emote_;
 };
 
-// Behaves like an emote element, except it creates a different image layout element that draws the mod badge background
-class ModBadgeElement : public EmoteElement
-{
-public:
-    ModBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
-
-protected:
-    MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
-                                                 const QSize &size) override;
-};
-
 class BadgeElement : public MessageElement
 {
 public:
@@ -244,8 +233,22 @@ public:
 
     EmotePtr getEmote() const;
 
+protected:
+    virtual MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
+                                                         const QSize &size);
+
 private:
     EmotePtr emote_;
+};
+
+class ModBadgeElement : public BadgeElement
+{
+public:
+    ModBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
+
+protected:
+    MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
+                                                 const QSize &size) override;
 };
 
 // contains a text, formated depending on the preferences
