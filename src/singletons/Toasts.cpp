@@ -52,20 +52,13 @@ QString Toasts::findStringFromReaction(
 
 void Toasts::sendToastMessage(const QString &channelName)
 {
-    QString url("https://api.twitch.tv/helix/users?login=" + channelName);
-
-    NetworkRequest::twitchRequest(url)
-        .onSuccess([this, channelName](auto result) -> Outcome {
-            auto obj = result.parseJson();
-            this->actuallySendToastMessage(QUrl(obj.value("data")
-                                                    .toArray()[0]
-                                                    .toObject()
-                                                    .value("profile_image_url")
-                                                    .toString()),
+    getHelix()->getUserByName(
+        channelName,
+        [=](const auto &user) {
+            this->actuallySendToastMessage(QUrl(user.profileImageUrl),
                                            channelName);
-            return Success;
-        })
-        .execute();
+        },
+        [] {});
 }
 
 void Toasts::actuallySendToastMessage(const QUrl &url,
