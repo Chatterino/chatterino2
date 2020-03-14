@@ -173,14 +173,14 @@ SOURCES += \
     src/providers/irc/IrcConnection2.cpp \
     src/providers/irc/IrcServer.cpp \
     src/providers/LinkResolver.cpp \
+    src/providers/twitch/api/Helix.cpp \
+    src/providers/twitch/api/Kraken.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
-    src/providers/twitch/PartialTwitchUser.cpp \
     src/providers/twitch/PubsubActions.cpp \
     src/providers/twitch/PubsubClient.cpp \
     src/providers/twitch/PubsubHelpers.cpp \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
-    src/providers/twitch/TwitchApi.cpp \
     src/providers/twitch/TwitchBadge.cpp \
     src/providers/twitch/TwitchBadges.cpp \
     src/providers/twitch/TwitchChannel.cpp \
@@ -372,15 +372,15 @@ HEADERS += \
     src/providers/irc/IrcConnection2.hpp \
     src/providers/irc/IrcServer.hpp \
     src/providers/LinkResolver.hpp \
+    src/providers/twitch/api/Helix.hpp \
+    src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
-    src/providers/twitch/PartialTwitchUser.hpp \
     src/providers/twitch/PubsubActions.hpp \
     src/providers/twitch/PubsubClient.hpp \
     src/providers/twitch/PubsubHelpers.hpp \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \
-    src/providers/twitch/TwitchApi.hpp \
     src/providers/twitch/TwitchBadge.hpp \
     src/providers/twitch/TwitchBadges.hpp \
     src/providers/twitch/TwitchChannel.hpp \
