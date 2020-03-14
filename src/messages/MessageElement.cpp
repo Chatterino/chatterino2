@@ -224,6 +224,112 @@ TextElement::TextElement(const QString &text, MessageElementFlags flags,
     }
 }
 
+void TextElement::addWord(Word &word, Application *app,
+                          MessageLayoutContainer &container,
+                          QFontMetrics metrics)
+{
+    auto getTextLayoutElement = [&](QString text, int width,
+                                    bool hasTrailingSpace) {
+        auto color = this->color_.getColor(*app->themes);
+        app->themes->normalizeColor(color);
+
+        auto e =
+            (new TextLayoutElement(*this, text, QSize(width, metrics.height()),
+                                   color, this->style_, container.getScale()))
+                ->setLink(this->getLink());
+        e->setTrailingSpace(hasTrailingSpace);
+        e->setText(text);
+
+        // If URL link was changed,
+        // Should update it in MessageLayoutElement too!
+        if (this->getLink().type == Link::Url)
+        {
+            static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
+        }
+        return e;
+    };
+
+    // fourtf: add again
+    //            if (word.width == -1) {
+    word.width = metrics.width(word.text);
+    //            }
+
+    if (word.text.contains("\n"))
+    {
+        auto lines = word.text.split("\n");
+        for (int i = 0; i < lines.length(); i++)
+        {
+            Word &newWord = *(new Word{lines[i], metrics.width(lines[i])});
+            this->addWord(newWord, app, container, metrics);
+            if (i != lines.length() - 1)
+            {
+                container.breakLine();
+            }
+        }
+        return;
+    }
+    // see if the text fits in the current line
+    if (container.fitsInLine(word.width))
+    {
+        container.addElementNoLineBreak(getTextLayoutElement(
+            word.text, word.width, this->hasTrailingSpace()));
+        return;
+    }
+
+    // see if the text fits in the next line
+    if (!container.atStartOfLine())
+    {
+        container.breakLine();
+
+        if (container.fitsInLine(word.width))
+        {
+            container.addElementNoLineBreak(getTextLayoutElement(
+                word.text, word.width, this->hasTrailingSpace()));
+            return;
+        }
+    }
+
+    // we done goofed, we need to wrap the text
+    QString text = word.text;
+    int textLength = text.length();
+    int wordStart = 0;
+    int width = 0;
+
+    // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
+
+    for (int i = 0; i < textLength; i++)  //
+    {
+        auto isSurrogate =
+            text.size() > i + 1 && QChar::isHighSurrogate(text[i].unicode());
+
+        auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
+                                     : metrics.width(text[i]);
+
+        if (!container.fitsInLine(width + charWidth))  //
+        {
+            container.addElementNoLineBreak(getTextLayoutElement(
+                text.mid(wordStart, i - wordStart), width, false));
+            container.breakLine();
+
+            wordStart = i;
+            width = charWidth;
+
+            if (isSurrogate)
+                i++;
+            continue;
+        }
+
+        width += charWidth;
+
+        if (isSurrogate)
+            i++;
+    }
+
+    container.addElement(getTextLayoutElement(text.mid(wordStart), width,
+                                              this->hasTrailingSpace()));
+    container.breakLine();
+}
+
 void TextElement::addToContainer(MessageLayoutContainer &container,
                                  MessageElementFlags flags)
 {
@@ -236,92 +342,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
         for (Word &word : this->words_)
         {
-            auto getTextLayoutElement = [&](QString text, int width,
-                                            bool hasTrailingSpace) {
-                auto color = this->color_.getColor(*app->themes);
-                app->themes->normalizeColor(color);
-
-                auto e = (new TextLayoutElement(
-                              *this, text, QSize(width, metrics.height()),
-                              color, this->style_, container.getScale()))
-                             ->setLink(this->getLink());
-                e->setTrailingSpace(hasTrailingSpace);
-                e->setText(text);
-
-                // If URL link was changed,
-                // Should update it in MessageLayoutElement too!
-                if (this->getLink().type == Link::Url)
-                {
-                    static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
-                }
-                return e;
-            };
-
-            // fourtf: add again
-            //            if (word.width == -1) {
-            word.width = metrics.width(word.text);
-            //            }
-
-            // see if the text fits in the current line
-            if (container.fitsInLine(word.width))
-            {
-                container.addElementNoLineBreak(getTextLayoutElement(
-                    word.text, word.width, this->hasTrailingSpace()));
-                continue;
-            }
-
-            // see if the text fits in the next line
-            if (!container.atStartOfLine())
-            {
-                container.breakLine();
-
-                if (container.fitsInLine(word.width))
-                {
-                    container.addElementNoLineBreak(getTextLayoutElement(
-                        word.text, word.width, this->hasTrailingSpace()));
-                    continue;
-                }
-            }
-
-            // we done goofed, we need to wrap the text
-            QString text = word.text;
-            int textLength = text.length();
-            int wordStart = 0;
-            int width = 0;
-
-            // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
-
-            for (int i = 0; i < textLength; i++)  //
-            {
-                auto isSurrogate = text.size() > i + 1 &&
-                                   QChar::isHighSurrogate(text[i].unicode());
-
-                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
-                                             : metrics.width(text[i]);
-
-                if (!container.fitsInLine(width + charWidth))  //
-                {
-                    container.addElementNoLineBreak(getTextLayoutElement(
-                        text.mid(wordStart, i - wordStart), width, false));
-                    container.breakLine();
-
-                    wordStart = i;
-                    width = charWidth;
-
-                    if (isSurrogate)
-                        i++;
-                    continue;
-                }
-
-                width += charWidth;
-
-                if (isSurrogate)
-                    i++;
-            }
-
-            container.addElement(getTextLayoutElement(
-                text.mid(wordStart), width, this->hasTrailingSpace()));
-            container.breakLine();
+            addWord(word, app, container, metrics);
         }
     }
 }

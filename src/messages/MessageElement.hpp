@@ -5,6 +5,7 @@
 #include "messages/MessageColor.hpp"
 #include "singletons/Fonts.hpp"
 
+#include <Application.hpp>
 #include <QRect>
 #include <QString>
 #include <QTime>
@@ -200,6 +201,8 @@ private:
         int width = -1;
     };
     std::vector<Word> words_;
+    void addWord(Word &word, Application *app,
+                 MessageLayoutContainer &container, QFontMetrics metrics);
 };
 
 // contains emote data and will pick the emote based on :
