@@ -204,10 +204,11 @@ void SplitContainer::addSplit(Split *split)
             if (this->tab_ != nullptr)
             {
                 this->tab_->setHighlightState(state);
-            }
-            if (color != nullptr)
-            {
-                this->tab_->setHighlightColor(color);
+
+                if (color != nullptr)
+                {
+                    this->tab_->setHighlightColor(color);
+                }
             }
         });
 
