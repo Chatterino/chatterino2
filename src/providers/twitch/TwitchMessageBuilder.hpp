@@ -2,7 +2,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
-#include "messages/MessageBuilder.hpp"
+#include "messages/SharedMessageBuilder.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
@@ -17,7 +17,7 @@ using EmotePtr = std::shared_ptr<const Emote>;
 class Channel;
 class TwitchChannel;
 
-class TwitchMessageBuilder : public MessageBuilder
+class TwitchMessageBuilder : public SharedMessageBuilder
 {
 public:
     enum UsernameDisplayMode : int {
@@ -36,30 +36,20 @@ public:
                                   const MessageParseArgs &_args,
                                   QString content, bool isAction);
 
-    Channel *channel;
     TwitchChannel *twitchChannel;
-    const Communi::IrcMessage *ircMessage;
-    MessageParseArgs args;
-    const QVariantMap tags;
 
-    QString userName;
-
-    [[nodiscard]] bool isIgnored() const;
-    // triggerHighlights triggers any alerts or sounds parsed by parseHighlights
-    void triggerHighlights();
-    MessagePtr build();
+    [[nodiscard]] bool isIgnored() const override;
+    void triggerHighlights() override;
+    MessagePtr build() override;
 
 private:
+    void parseUsernameColor() override;
+    void parseUsername() override;
     void parseMessageID();
     void parseRoomID();
-    void appendChannelName();
-    void parseUsernameColor();
-    void parseUsername();
     void appendUsername();
     void runIgnoreReplaces(
         std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes);
-    // parseHighlights only updates the visual state of the message, but leaves the playing of alerts and sounds to the triggerHighlights function
-    void parseHighlights();
 
     boost::optional<EmotePtr> getTwitchBadge(const Badge &badge);
     void appendTwitchEmote(
@@ -71,8 +61,8 @@ private:
     void addWords(
         const QStringList &words,
         const std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes);
-    void addTextOrEmoji(EmotePtr emote);
-    void addTextOrEmoji(const QString &value);
+    void addTextOrEmoji(EmotePtr emote) override;
+    void addTextOrEmoji(const QString &value) override;
 
     void appendTwitchBadges();
     void appendChatterinoBadges();
@@ -86,16 +76,7 @@ private:
     bool historicalMessage_ = false;
 
     QString userId_;
-    QColor usernameColor_;
-    QString originalMessage_;
     bool senderIsBroadcaster{};
-
-    const bool action_ = false;
-
-    bool highlightAlert_ = false;
-    bool highlightSound_ = false;
-
-    QUrl highlightSoundUrl_;
 };
 
 }  // namespace chatterino
