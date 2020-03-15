@@ -300,6 +300,7 @@ HEADERS += \
     src/common/DownloadManager.hpp \
     src/common/Env.hpp \
     src/common/FlagsEnum.hpp \
+    src/common/IrcColors.hpp \
     src/common/LinkParser.hpp \
     src/common/Modes.hpp \
     src/common/NetworkCommon.hpp \
