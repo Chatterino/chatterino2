@@ -5,6 +5,7 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 namespace chatterino {
@@ -67,7 +68,8 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
         auto *split = pairs.second;
         if (chan->getName().contains(text, Qt::CaseInsensitive))
         {
-            auto *item = new QListWidgetItem(chan->getName());
+            auto *item = new QListWidgetItem(
+                split->getContainer()->getTab()->getTitle());
             item->setData(Qt::UserRole, QVariant::fromValue(split));
             this->ui_.list->addItem(item);
         }
