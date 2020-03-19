@@ -1063,8 +1063,6 @@ void TwitchMessageBuilder::parseHighlights()
         {
             continue;
         }
-        qDebug() << "Highlight because user" << this->ircMessage->nick()
-                 << "sent a message";
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = userHighlight.getColor();
@@ -1127,9 +1125,6 @@ void TwitchMessageBuilder::parseHighlights()
         {
             continue;
         }
-
-        qDebug() << "Highlight because" << this->originalMessage_ << "matches"
-                 << highlight.getPattern();
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = highlight.getColor();
