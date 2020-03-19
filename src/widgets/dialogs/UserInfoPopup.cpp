@@ -158,8 +158,6 @@ UserInfoPopup::UserInfoPopup()
 
             if (twitchChannel)
             {
-                qDebug() << this->userName_;
-
                 bool isMyself =
                     QString::compare(
                         getApp()->accounts->twitch.getCurrent()->getUserName(),
