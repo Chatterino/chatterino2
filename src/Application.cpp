@@ -145,14 +145,6 @@ void Application::initNm(Paths &paths)
 
 void Application::initPubsub()
 {
-    this->twitch.pubsub->signals_.whisper.sent.connect([](const auto &msg) {
-        qDebug() << "WHISPER SENT LOL";  //
-    });
-
-    this->twitch.pubsub->signals_.whisper.received.connect([](const auto &msg) {
-        qDebug() << "WHISPER RECEIVED LOL";  //
-    });
-
     this->twitch.pubsub->signals_.moderation.chatCleared.connect(
         [this](const auto &action) {
             auto chan =
