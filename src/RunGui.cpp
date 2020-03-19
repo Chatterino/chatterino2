@@ -154,11 +154,6 @@ namespace {
                 toBeRemoved << info.absoluteFilePath();
             }
         }
-
-        for (auto &&path : toBeRemoved)
-        {
-            qDebug() << path << QFile(path).remove();
-        }
     }
 }  // namespace
 

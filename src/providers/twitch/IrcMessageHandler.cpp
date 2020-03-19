@@ -451,7 +451,6 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
-    qDebug() << "Received whisper!";
     MessageParseArgs args;
 
     args.isReceivedWhisper = true;

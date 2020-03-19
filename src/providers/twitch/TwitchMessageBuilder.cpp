@@ -174,8 +174,6 @@ bool TwitchMessageBuilder::isIgnored() const
     {
         if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
         {
-            qDebug() << "Blocking message because it contains ignored phrase"
-                     << phrase.getPattern();
             return true;
         }
     }
@@ -205,8 +203,7 @@ bool TwitchMessageBuilder::isIgnored() const
                     case ShowIgnoredUsersMessages::Never:
                         break;
                 }
-                qDebug() << "Blocking message because it's from blocked user"
-                         << user.name;
+
                 return true;
             }
         }
@@ -1063,8 +1060,6 @@ void TwitchMessageBuilder::parseHighlights()
         {
             continue;
         }
-        qDebug() << "Highlight because user" << this->ircMessage->nick()
-                 << "sent a message";
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = userHighlight.getColor();
@@ -1127,9 +1122,6 @@ void TwitchMessageBuilder::parseHighlights()
         {
             continue;
         }
-
-        qDebug() << "Highlight because" << this->originalMessage_ << "matches"
-                 << highlight.getPattern();
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = highlight.getColor();

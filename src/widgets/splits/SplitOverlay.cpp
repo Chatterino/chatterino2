@@ -158,8 +158,6 @@ void SplitOverlay::mouseMoveEvent(QMouseEvent *event)
 {
     BaseWidget::mouseMoveEvent(event);
 
-    //    qDebug() << QGuiApplication::queryKeyboardModifiers();
-
     //    if ((QGuiApplication::queryKeyboardModifiers() & Qt::AltModifier) ==
     //    Qt::AltModifier) {
     //        this->hide();

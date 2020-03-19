@@ -61,8 +61,6 @@ namespace {
         if (command.isNull())
             return QString();
 
-        qDebug() << command;
-
         // inject switch to enable private browsing
         command = injectPrivateSwitch(command);
         if (command.isNull())

@@ -226,10 +226,6 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
     {
         cache[url] = shared = ImagePtr(new Image(url, scale));
     }
-    else
-    {
-        // qDebug() << "same image created multiple times:" << url.string;
-    }
 
     return shared;
 }

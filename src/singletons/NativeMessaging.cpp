@@ -187,8 +187,6 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         return;
     }
 
-    qDebug() << root;
-
     if (action == "select")
     {
         QString _type = root.value("type").toString();

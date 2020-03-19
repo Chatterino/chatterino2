@@ -386,7 +386,6 @@ void TwitchAccount::autoModAllow(const QString msgID)
     QString url("https://api.twitch.tv/kraken/chat/twitchbot/approve");
 
     auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
-    qDebug() << qba;
 
     NetworkRequest(url, NetworkRequestType::Post)
         .header("Content-Type", "application/json")
@@ -406,7 +405,6 @@ void TwitchAccount::autoModDeny(const QString msgID)
     QString url("https://api.twitch.tv/kraken/chat/twitchbot/deny");
 
     auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
-    qDebug() << qba;
 
     NetworkRequest(url, NetworkRequestType::Post)
         .header("Content-Type", "application/json")

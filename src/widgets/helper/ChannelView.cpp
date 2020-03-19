@@ -1701,7 +1701,6 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserInfo: {
             auto user = link.value;
             this->showUserInfoPopup(user);
-            qDebug() << "Clicked " << user << "s message";
         }
         break;
 
