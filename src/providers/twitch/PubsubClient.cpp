@@ -820,7 +820,6 @@ void PubSub::listen(rapidjson::Document &&msg)
 
     this->addClient();
 
-    qDebug() << "Added to the back of the queue";
     this->requests.emplace_back(
         std::make_unique<rapidjson::Document>(std::move(msg)));
 }
