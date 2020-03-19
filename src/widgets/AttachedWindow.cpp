@@ -29,8 +29,6 @@ BOOL CALLBACK enumWindows(HWND hwnd, LPARAM)
     auto className = std::make_unique<WCHAR[]>(length);
     GetClassName(hwnd, className.get(), length);
 
-    // qDebug() << QString::fromWCharArray(className.get(), length);
-
     if (lstrcmp(className.get(), L"Shell_TrayWnd") == 0 ||
         lstrcmp(className.get(), L"Shell_Secondary") == 0)
     {
