@@ -826,7 +826,6 @@ void PubSub::listen(rapidjson::Document &&msg)
 
 bool PubSub::tryListen(rapidjson::Document &msg)
 {
-    qDebug() << "tryListen with" << this->clients.size() << "clients";
     for (const auto &p : this->clients)
     {
         const auto &client = p.second;
