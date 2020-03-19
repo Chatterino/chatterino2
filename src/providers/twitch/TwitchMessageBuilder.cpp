@@ -174,8 +174,6 @@ bool TwitchMessageBuilder::isIgnored() const
     {
         if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
         {
-            qDebug() << "Blocking message because it contains ignored phrase"
-                     << phrase.getPattern();
             return true;
         }
     }
@@ -205,8 +203,7 @@ bool TwitchMessageBuilder::isIgnored() const
                     case ShowIgnoredUsersMessages::Never:
                         break;
                 }
-                qDebug() << "Blocking message because it's from blocked user"
-                         << user.name;
+
                 return true;
             }
         }
