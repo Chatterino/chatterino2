@@ -542,7 +542,6 @@ void TwitchChannel::parseLiveStatus(bool live, const HelixStream &stream)
                     // failure
                 });
         }
-        status->game = stream.gameId;
         status->title = stream.title;
         QDateTime since = QDateTime::fromString(stream.startedAt, Qt::ISODate);
         auto diff = since.secsTo(QDateTime::currentDateTime());
