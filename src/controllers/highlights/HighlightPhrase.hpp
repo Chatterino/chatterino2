@@ -74,7 +74,7 @@ public:
      * XXX: Use the constexpr constructor here once we are building with
      * Qt>=5.13.
      */
-    static QColor FALLBACK_COLOR;
+    static QColor FALLBACK_HIGHLIGHT_COLOR;
 
 private:
     QString pattern_;
@@ -139,7 +139,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
 
         auto _color = QColor(encodedColor);
         if (!_color.isValid())
-            _color = chatterino::HighlightPhrase::FALLBACK_COLOR;
+            _color = chatterino::HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR;
 
         return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
                                            _isRegex, _isCaseSensitive,

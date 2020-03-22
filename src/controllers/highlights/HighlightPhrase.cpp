@@ -2,7 +2,7 @@
 
 namespace chatterino {
 
-QColor HighlightPhrase::FALLBACK_COLOR = QColor(127, 63, 73, 127);
+QColor HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
 
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const
 {
