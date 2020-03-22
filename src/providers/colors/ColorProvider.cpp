@@ -89,8 +89,7 @@ void ColorProvider::initTypeColorMap()
     {
         this->typeColorMap_.insert(
             {ColorType::Subscription,
-             std::make_shared<QColor>(
-                 HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR)});
+             std::make_shared<QColor>(HighlightPhrase::FALLBACK_SUB_COLOR)});
     }
 
     customColor = getSettings()->whisperHighlightColor;
