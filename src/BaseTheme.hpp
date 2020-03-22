@@ -64,7 +64,6 @@ public:
         struct {
             QColor regular;
             QColor alternate;
-            QColor subscription;
             // QColor whisper;
         } backgrounds;
 

@@ -117,9 +117,8 @@ void ColorProvider::initDefaultColors()
     this->defaultColors_.emplace_back(143, 48, 24, 127);   // Red-ish
     this->defaultColors_.emplace_back(28, 141, 117, 127);  // Cyan-ish
 
-    auto backgrounds = getApp()->themes->messages.backgrounds;
     this->defaultColors_.push_back(HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
-    this->defaultColors_.push_back(backgrounds.subscription);
+    this->defaultColors_.push_back(HighlightPhrase::FALLBACK_SUB_COLOR);
 }
 
 }  // namespace chatterino

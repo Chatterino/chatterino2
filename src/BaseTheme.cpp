@@ -159,9 +159,6 @@ void AB_THEME_CLASS::actuallyUpdate(double hue, double multiplier)
     this->messages.backgrounds.regular = getColor(0, sat, 1);
     this->messages.backgrounds.alternate = getColor(0, sat, 0.96);
 
-    this->messages.backgrounds.subscription =
-        blendColors(QColor("#C466FF"), this->messages.backgrounds.regular, 0.7);
-
     // this->messages.backgrounds.resub
     // this->messages.backgrounds.whisper
     this->messages.disabled = getColor(0, sat, 1, 0.6);

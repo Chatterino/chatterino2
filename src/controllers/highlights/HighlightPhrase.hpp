@@ -75,6 +75,7 @@ public:
      * Qt>=5.13.
      */
     static QColor FALLBACK_HIGHLIGHT_COLOR;
+    static QColor FALLBACK_SUB_COLOR;
 
 private:
     QString pattern_;
