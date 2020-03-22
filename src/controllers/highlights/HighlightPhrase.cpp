@@ -2,6 +2,8 @@
 
 namespace chatterino {
 
+QColor HighlightPhrase::FALLBACK_COLOR = QColor(127, 63, 73, 127);
+
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const
 {
     return std::tie(this->pattern_, this->hasSound_, this->hasAlert_,
