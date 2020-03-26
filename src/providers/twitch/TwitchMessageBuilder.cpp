@@ -682,14 +682,12 @@ void TwitchMessageBuilder::appendUsername()
 
     switch (usernameDisplayMode.getValue())
     {
-        case UsernameDisplayMode::Username:
-        {
+        case UsernameDisplayMode::Username: {
             usernameText = username;
         }
         break;
 
-        case UsernameDisplayMode::LocalizedName:
-        {
+        case UsernameDisplayMode::LocalizedName: {
             if (hasLocalizedName)
             {
                 usernameText = localizedName;
@@ -702,8 +700,7 @@ void TwitchMessageBuilder::appendUsername()
         break;
 
         default:
-        case UsernameDisplayMode::UsernameAndLocalizedName:
-        {
+        case UsernameDisplayMode::UsernameAndLocalizedName: {
             if (hasLocalizedName)
             {
                 usernameText = username + "(" + localizedName + ")";
