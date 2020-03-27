@@ -1340,6 +1340,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     switch (event->button())
     {
         case Qt::LeftButton: {
+            if (this->isScrolling_)
+                this->disableScrolling();
+
             this->lastLeftPressPosition_ = event->screenPos();
             this->isLeftMouseDown_ = true;
 
@@ -1358,6 +1361,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         break;
 
         case Qt::RightButton: {
+            if (this->isScrolling_)
+                this->disableScrolling();
+
             this->lastRightPressPosition_ = event->screenPos();
             this->isRightMouseDown_ = true;
         }
@@ -1839,7 +1845,9 @@ void ChannelView::enableScrolling(const QPointF &scrollStart)
     this->currentMousePosition_ = scrollStart;
 
     this->scrollTimer_.start();
-    QGuiApplication::setOverrideCursor(this->cursors_.neutral);
+
+    if (!QGuiApplication::overrideCursor())
+        QGuiApplication::setOverrideCursor(this->cursors_.neutral);
 }
 
 void ChannelView::disableScrolling()
