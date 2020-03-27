@@ -360,7 +360,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
     layout.addDropdown<QString>(
-        "Timestamps", {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a"},
+        "Timestamps",
+        {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
+         "h:mm:ss a", "hh:mm:ss a"},
         s.timestampFormat,
         [](auto val) {
             return getSettings()->showTimestamps.getValue()
