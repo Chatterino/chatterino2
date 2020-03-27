@@ -27,7 +27,8 @@
 namespace {
 
 const QSet<QString> zeroWidthEmotes{
-    "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane",
+    "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
+    "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
 };
 
 QColor getRandomColor(const QVariant &userId)
