@@ -12,6 +12,14 @@
 
 namespace chatterino {
 
+namespace {
+
+    QRegularExpression IRC_COLOR_PARSE_REGEX(
+        "\u0003(\\d{1,2})?(,(\\d{1,2}))?",
+        QRegularExpression::UseUnicodePropertiesOption);
+
+}  // namespace
+
 MessageElement::MessageElement(MessageElementFlags flags)
     : flags_(flags)
 {
@@ -429,19 +437,22 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
-static QRegularExpression regex("\u0003(\\d{1,2})?(,(\\d{1,2}))?",
-                                QRegularExpression::UseUnicodePropertiesOption);
-
 // TEXT
+// IrcTextElement gets its color from the color code in the message, and can change from character to character.
+// This differs from the TextElement
 IrcTextElement::IrcTextElement(const QString &fullText,
                                MessageElementFlags flags, FontStyle style)
     : MessageElement(flags)
     , style_(style)
 {
-    assert(regex.isValid());
+    assert(IRC_COLOR_PARSE_REGEX.isValid());
 
+    // Default pen colors. -1 = default theme colors
     int fg = -1, bg = -1;
 
+    // Split up the message in words (space separated)
+    // Each word contains one or more colored segments.
+    // The color of that segment is "global", as in it can be decided by the word before it.
     for (const auto &text : fullText.split(' '))
     {
         std::vector<Segment> segments;
@@ -449,7 +460,7 @@ IrcTextElement::IrcTextElement(const QString &fullText,
         int pos = 0;
         int lastPos = 0;
 
-        auto i = regex.globalMatch(text);
+        auto i = IRC_COLOR_PARSE_REGEX.globalMatch(text);
 
         while (i.hasNext())
         {
@@ -499,7 +510,7 @@ IrcTextElement::IrcTextElement(const QString &fullText,
 
         QString n(text);
 
-        n.replace(regex, "");
+        n.replace(IRC_COLOR_PARSE_REGEX, "");
 
         Word w{
             n,
