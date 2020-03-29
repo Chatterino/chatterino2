@@ -33,13 +33,13 @@ boost::optional<QByteArray> convertToPng(QImage image)
 
 namespace chatterino {
 // These variables are only used from the main thread.
-auto uploadMutex = QMutex();
-std::queue<RawImageData> uploadQueue;
+static auto uploadMutex = QMutex();
+static std::queue<RawImageData> uploadQueue;
 
 void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                         ResizingTextEdit &textEdit)
 {
-    const static char *boundary = "thisistheboudaryasd";
+    const static char *const boundary = "thisistheboudaryasd";
     const static QString contentType =
         QString("multipart/form-data; boundary=%1").arg(boundary);
     static QUrl url(Env::get().imageUploaderUrl);
