@@ -379,7 +379,12 @@ void UserInfoPopup::updateUserData()
 {
     std::weak_ptr<bool> hack = this->hack_;
 
-    const auto onUserFetchFailed = [this] {
+    const auto onUserFetchFailed = [this, hack] {
+        if (!hack.lock())
+        {
+            return;
+        }
+
         // this can occur when the account doesn't exist.
         this->ui_.followerCountLabel->setText(
             TEXT_FOLLOWERS.arg(TEXT_UNAVAILABLE));
@@ -394,6 +399,11 @@ void UserInfoPopup::updateUserData()
                                            QString(TEXT_UNAVAILABLE));
     };
     const auto onUserFetched = [this, hack](const auto &user) {
+        if (!hack.lock())
+        {
+            return;
+        }
+
         auto currentUser = getApp()->accounts->twitch.getCurrent();
 
         this->userId_ = user.id;
@@ -404,7 +414,11 @@ void UserInfoPopup::updateUserData()
         this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(user.viewCount));
         getKraken()->getUser(
             user.id,
-            [this](const auto &user) {
+            [this, hack](const auto &user) {
+                if (!hack.lock())
+                {
+                    return;
+                }
                 this->ui_.createdDateLabel->setText(
                     TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
             },
@@ -415,7 +429,11 @@ void UserInfoPopup::updateUserData()
 
         getHelix()->getUserFollowers(
             user.id,
-            [this](const auto &followers) {
+            [this, hack](const auto &followers) {
+                if (!hack.lock())
+                {
+                    return;
+                }
                 this->ui_.followerCountLabel->setText(
                     TEXT_FOLLOWERS.arg(followers.total));
             },
@@ -425,14 +443,14 @@ void UserInfoPopup::updateUserData()
 
         // get follow state
         currentUser->checkFollow(user.id, [this, hack](auto result) {
-            if (hack.lock())
+            if (!hack.lock())
             {
-                if (result != FollowResult_Failed)
-                {
-                    this->ui_.follow->setEnabled(true);
-                    this->ui_.follow->setChecked(result ==
-                                                 FollowResult_Following);
-                }
+                return;
+            }
+            if (result != FollowResult_Failed)
+            {
+                this->ui_.follow->setEnabled(true);
+                this->ui_.follow->setChecked(result == FollowResult_Following);
             }
         });
 
