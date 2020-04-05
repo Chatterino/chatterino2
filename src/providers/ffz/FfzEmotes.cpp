@@ -102,7 +102,7 @@ namespace {
             modBadge = std::make_shared<Emote>(Emote{
                 {""},
                 modBadgeImageSet,
-                Tooltip{"Twitch Channel Moderator"},
+                Tooltip{"Moderator"},
                 modBadge1x,
             });
         }
