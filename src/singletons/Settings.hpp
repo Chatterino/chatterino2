@@ -257,6 +257,9 @@ public:
                                        "Choose"};
     QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
 
+    // Custom URI Scheme
+    QStringSetting customURIScheme = {"/external/urischeme"};
+
     /// Misc
     BoolSetting betaUpdates = {"/misc/beta", false};
 #ifdef Q_OS_LINUX

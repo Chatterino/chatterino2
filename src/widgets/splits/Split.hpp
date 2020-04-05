@@ -126,6 +126,7 @@ public slots:
     void openInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
+    void openWithCustomScheme();
     void copyToClipboard();
     void showSearch();
     void showViewerList();
