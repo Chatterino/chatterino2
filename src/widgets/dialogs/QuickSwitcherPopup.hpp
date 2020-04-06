@@ -21,6 +21,19 @@ public slots:
     void updateSuggestions(const QString &text);
 
 private:
+    class SwitcherItem : public QListWidgetItem
+    {
+    public:
+        bool matches(const QString &query) const;
+
+    private:
+        std::function<void> action_;
+        Split *split_;
+
+        // TODO(leon): Check if needed
+        friend class QuickSwitcherPopup;
+    };
+
     struct {
         QLineEdit *searchEdit{};
         QListWidget *list{};
