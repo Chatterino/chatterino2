@@ -538,6 +538,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.enableExperimentalIrc);
     layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
+    layout.addCheckbox(
+        "Hide viewercount and stream length while hovering the split",
+        s.hideViewerCountAndDuration);
 
     layout.addTitle("Cache");
     layout.addDescription(
