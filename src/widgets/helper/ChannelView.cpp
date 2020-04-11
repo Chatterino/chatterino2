@@ -15,6 +15,7 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
@@ -1720,6 +1721,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                 .replace("{msg-id}", layout->getMessage()->id)
                 .replace("{message}", layout->getMessage()->messageText);
 
+            value =
+                getApp()->commands->execCommand(value, this->channel_, false);
             this->channel_->sendMessage(value);
         }
         break;
