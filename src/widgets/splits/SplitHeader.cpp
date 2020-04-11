@@ -87,16 +87,6 @@ namespace {
     }
     auto formatTooltip(const TwitchChannel::StreamStatus &s)
     {
-        if (getSettings()->hideViewerCountAndDuration)
-        {
-            return QString("<style>.center { text-align: center; }</style> \
-            <p class=\"center\">%1%2%3%4%5</p>")
-                .arg(s.title.toHtmlEscaped())
-                .arg(s.title.isEmpty() ? QString() : "<br><br>")
-                .arg(s.game.toHtmlEscaped())
-                .arg(s.game.isEmpty() ? QString() : "<br>")
-                .arg("&lt;Hidden&gt;");
-        }
         return QString("<style>.center { text-align: center; }</style> \
             <p class=\"center\">%1%2%3%4%5 for %6 with %7 viewers</p>")
             .arg(s.title.toHtmlEscaped())
@@ -104,8 +94,11 @@ namespace {
             .arg(s.game.toHtmlEscaped())
             .arg(s.game.isEmpty() ? QString() : "<br>")
             .arg(s.rerun ? "Vod-casting" : "Live")
-            .arg(s.uptime)
-            .arg(QString::number(s.viewerCount));
+            .arg(getSettings()->hideViewerCountAndDuration ? "&lt;Hidden&gt;"
+                                                           : s.uptime)
+            .arg(getSettings()->hideViewerCountAndDuration
+                     ? "&lt;Hidden&gt;"
+                     : QString::number(s.viewerCount));
     }
     auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
     {
