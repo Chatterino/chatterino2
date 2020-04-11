@@ -534,6 +534,23 @@ void Split::openInStreamlink()
     }
 }
 
+void Split::openWithCustomScheme()
+{
+    const auto scheme = getSettings()->customURIScheme.getValue();
+    if (scheme.isEmpty())
+    {
+        return;
+    }
+    const auto channel = this->getChannel().get();
+
+    if (const auto twitchChannel = dynamic_cast<TwitchChannel *>(channel))
+    {
+        QDesktopServices::openUrl(QString("%1https://twitch.tv/%2")
+                                      .arg(scheme)
+                                      .arg(twitchChannel->getName()));
+    }
+}
+
 void Split::showViewerList()
 {
     auto viewerDock = new QDockWidget("Viewer List", this);
