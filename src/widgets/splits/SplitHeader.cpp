@@ -94,8 +94,11 @@ namespace {
             .arg(s.game.toHtmlEscaped())
             .arg(s.game.isEmpty() ? QString() : "<br>")
             .arg(s.rerun ? "Vod-casting" : "Live")
-            .arg(s.uptime)
-            .arg(QString::number(s.viewerCount));
+            .arg(getSettings()->hideViewerCountAndDuration ? "&lt;Hidden&gt;"
+                                                           : s.uptime)
+            .arg(getSettings()->hideViewerCountAndDuration
+                     ? "&lt;Hidden&gt;"
+                     : QString::number(s.viewerCount));
     }
     auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
     {

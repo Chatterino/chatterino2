@@ -278,6 +278,8 @@ public:
     BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
     BoolSetting attachExtensionToAnyProcess = {
         "/misc/attachExtensionToAnyProcess", false};
+    BoolSetting hideViewerCountAndDuration = {
+        "/misc/hideViewerCountAndDuration", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
