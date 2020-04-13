@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/LinkParser.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "messages/Image.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
@@ -170,9 +171,12 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     this->message().searchText = text;
 }
 
+// XXX: This does not belong in the MessageBuilder, this should be part of the TwitchMessageBuilder
 MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     : MessageBuilder()
 {
+    auto current = getApp()->accounts->twitch.getCurrent();
+
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::Timeout);
@@ -181,43 +185,74 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
 
     QString text;
 
-    if (action.isBan())
+    if (action.target.id == current->getUserId())
     {
-        if (action.reason.isEmpty())
+        text.append("You were ");
+        if (action.isBan())
         {
-            text = QString("%1 banned %2.")  //
-                       .arg(action.source.name)
-                       .arg(action.target.name);
+            text.append("banned");
         }
         else
         {
-            text = QString("%1 banned %2: \"%3\".")  //
-                       .arg(action.source.name)
-                       .arg(action.target.name)
-                       .arg(action.reason);
+            text.append(
+                QString("timed out for %1").arg(formatTime(action.duration)));
+        }
+
+        if (!action.source.name.isEmpty())
+        {
+            text.append(" by ");
+            text.append(action.source.name);
+        }
+
+        if (action.reason.isEmpty())
+        {
+            text.append(".");
+        }
+        else
+        {
+            text.append(QString(": \"%1\".").arg(action.reason));
         }
     }
     else
     {
-        if (action.reason.isEmpty())
+        if (action.isBan())
         {
-            text = QString("%1 timed out %2 for %3.")  //
-                       .arg(action.source.name)
-                       .arg(action.target.name)
-                       .arg(formatTime(action.duration));
+            if (action.reason.isEmpty())
+            {
+                text = QString("%1 banned %2.")  //
+                           .arg(action.source.name)
+                           .arg(action.target.name);
+            }
+            else
+            {
+                text = QString("%1 banned %2: \"%3\".")  //
+                           .arg(action.source.name)
+                           .arg(action.target.name)
+                           .arg(action.reason);
+            }
         }
         else
         {
-            text = QString("%1 timed out %2 for %3: \"%4\".")  //
-                       .arg(action.source.name)
-                       .arg(action.target.name)
-                       .arg(formatTime(action.duration))
-                       .arg(action.reason);
-        }
+            if (action.reason.isEmpty())
+            {
+                text = QString("%1 timed out %2 for %3.")  //
+                           .arg(action.source.name)
+                           .arg(action.target.name)
+                           .arg(formatTime(action.duration));
+            }
+            else
+            {
+                text = QString("%1 timed out %2 for %3: \"%4\".")  //
+                           .arg(action.source.name)
+                           .arg(action.target.name)
+                           .arg(formatTime(action.duration))
+                           .arg(action.reason);
+            }
 
-        if (count > 1)
-        {
-            text.append(QString(" (%1 times)").arg(count));
+            if (count > 1)
+            {
+                text.append(QString(" (%1 times)").arg(count));
+            }
         }
     }
 
