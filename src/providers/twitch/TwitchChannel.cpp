@@ -600,9 +600,6 @@ void TwitchChannel::loadRecentMessages()
 
 void TwitchChannel::refreshPubsub()
 {
-    // listen to moderation actions
-    if (!this->hasModRights())
-        return;
     auto roomId = this->roomId();
     if (roomId.isEmpty())
         return;
