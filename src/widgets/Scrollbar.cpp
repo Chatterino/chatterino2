@@ -286,28 +286,26 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
         if (!highlight.isNull())
         {
-            if (highlight.isRedeemedHighlight() && !enableRedeemedHighlights)
+            if (!highlight.isRedeemedHighlight() || enableRedeemedHighlights)
             {
-                continue;
-            }
+                QColor color = highlight.getColor();
+                color.setAlpha(255);
 
-            QColor color = highlight.getColor();
-            color.setAlpha(255);
+                switch (highlight.getStyle())
+                {
+                    case ScrollbarHighlight::Default: {
+                        painter.fillRect(w / 8 * 3, int(y), w / 4,
+                                         highlightHeight, color);
+                    }
+                    break;
 
-            switch (highlight.getStyle())
-            {
-                case ScrollbarHighlight::Default: {
-                    painter.fillRect(w / 8 * 3, int(y), w / 4, highlightHeight,
-                                     color);
+                    case ScrollbarHighlight::Line: {
+                        painter.fillRect(0, int(y), w, 1, color);
+                    }
+                    break;
+
+                    case ScrollbarHighlight::None:;
                 }
-                break;
-
-                case ScrollbarHighlight::Line: {
-                    painter.fillRect(0, int(y), w, 1, color);
-                }
-                break;
-
-                case ScrollbarHighlight::None:;
             }
         }
 
