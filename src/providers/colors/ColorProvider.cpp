@@ -105,16 +105,35 @@ void ColorProvider::initTypeColorMap()
              std::make_shared<QColor>(
                  HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR)});
     }
+
+    customColor = getSettings()->redeemedHighlightColor;
+    if (QColor(customColor).isValid())
+    {
+        this->typeColorMap_.insert({ColorType::RedeemedHighlight,
+                                    std::make_shared<QColor>(customColor)});
+    }
+    else
+    {
+        this->typeColorMap_.insert(
+            {ColorType::RedeemedHighlight,
+             std::make_shared<QColor>(
+                 HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR)});
+    }
 }
 
 void ColorProvider::initDefaultColors()
 {
     // Init default colors
-    this->defaultColors_.emplace_back(31, 141, 43, 127);   // Green-ish
-    this->defaultColors_.emplace_back(28, 126, 141, 127);  // Blue-ish
-    this->defaultColors_.emplace_back(136, 141, 49, 127);  // Golden-ish
-    this->defaultColors_.emplace_back(143, 48, 24, 127);   // Red-ish
-    this->defaultColors_.emplace_back(28, 141, 117, 127);  // Cyan-ish
+    this->defaultColors_.emplace_back(75, 127, 107, 100);  // Teal
+    this->defaultColors_.emplace_back(105, 127, 63, 100);  // Olive
+    this->defaultColors_.emplace_back(63, 83, 127, 100);   // Blue
+    this->defaultColors_.emplace_back(72, 127, 63, 100);   // Green
+
+    this->defaultColors_.emplace_back(31, 141, 43, 115);  // Green
+    this->defaultColors_.emplace_back(28, 126, 141, 90);  // Blue
+    this->defaultColors_.emplace_back(136, 141, 49, 90);  // Golden
+    this->defaultColors_.emplace_back(143, 48, 24, 127);  // Red
+    this->defaultColors_.emplace_back(28, 141, 117, 90);  // Cyan
 
     this->defaultColors_.push_back(HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR);
     this->defaultColors_.push_back(HighlightPhrase::FALLBACK_SUB_COLOR);

@@ -263,6 +263,7 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
                                  Selection & /*selection*/)
 {
     auto app = getApp();
+    auto settings = getSettings();
 
     QPainter painter(buffer);
     painter.setRenderHint(QPainter::SmoothPixmapTransform);
@@ -295,6 +296,14 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
         backgroundColor = blendColors(
             backgroundColor,
             *ColorProvider::instance().color(ColorType::Subscription));
+    }
+    else if (this->message_->flags.has(MessageFlag::RedeemedHighlight) &&
+             settings->enableRedeemedHighlight.getValue())
+    {
+        // Blend highlight color with usual background color
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ColorProvider::instance().color(ColorType::RedeemedHighlight));
     }
     else if (this->message_->flags.has(MessageFlag::AutoMod))
     {

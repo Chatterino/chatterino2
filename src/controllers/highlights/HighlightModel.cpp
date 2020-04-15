@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
@@ -88,10 +89,11 @@ void HighlightModel::afterInit()
         QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
     setFilePathItem(whisperRow[Column::SoundPath], whisperSound, false);
 
-    auto whisperColor = ColorProvider::instance().color(ColorType::Whisper);
-    setColorItem(whisperRow[Column::Color], *whisperColor, false);
+    //    auto whisperColor = ColorProvider::instance().color(ColorType::Whisper);
+    //    setColorItem(whisperRow[Column::Color], *whisperColor, false);
+    whisperRow[Column::Color]->setFlags(Qt::ItemFlag::NoItemFlags);
 
-    this->insertCustomRow(whisperRow, 1);
+    this->insertCustomRow(whisperRow, WHISPER_ROW);
 
     // Highlight settings for subscription messages
     std::vector<QStandardItem *> subRow = this->createRow();
@@ -113,6 +115,31 @@ void HighlightModel::afterInit()
     setColorItem(subRow[Column::Color], *subColor, false);
 
     this->insertCustomRow(subRow, 2);
+
+    // Highlight settings for redeemed highlight messages
+    std::vector<QStandardItem *> redeemedRow = this->createRow();
+    setBoolItem(redeemedRow[Column::Pattern],
+                getSettings()->enableRedeemedHighlight.getValue(), true, false);
+    redeemedRow[Column::Pattern]->setData("Highlights redeemed with Bits",
+                                          Qt::DisplayRole);
+    setBoolItem(redeemedRow[Column::FlashTaskbar],
+                getSettings()->enableRedeemedHighlightTaskbar.getValue(), true,
+                false);
+    setBoolItem(redeemedRow[Column::PlaySound],
+                getSettings()->enableRedeemedHighlightSound.getValue(), true,
+                false);
+    redeemedRow[Column::UseRegex]->setFlags(0);
+    redeemedRow[Column::CaseSensitive]->setFlags(0);
+
+    QUrl RedeemedSound =
+        QUrl(getSettings()->redeemedHighlightSoundUrl.getValue());
+    setFilePathItem(redeemedRow[Column::SoundPath], RedeemedSound, false);
+
+    auto RedeemedColor =
+        ColorProvider::instance().color(ColorType::RedeemedHighlight);
+    setColorItem(redeemedRow[Column::Color], *RedeemedColor, false);
+
+    this->insertCustomRow(redeemedRow, 3);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
@@ -128,7 +155,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 {
                     getSettings()->enableSelfHighlight.setValue(value.toBool());
                 }
-                else if (rowIndex == 1)
+                else if (rowIndex == WHISPER_ROW)
                 {
                     getSettings()->enableWhisperHighlight.setValue(
                         value.toBool());
@@ -136,6 +163,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 2)
                 {
                     getSettings()->enableSubHighlight.setValue(value.toBool());
+                }
+                else if (rowIndex == 3)
+                {
+                    getSettings()->enableRedeemedHighlight.setValue(
+                        value.toBool());
                 }
             }
         }
@@ -148,7 +180,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->enableSelfHighlightTaskbar.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == 1)
+                else if (rowIndex == WHISPER_ROW)
                 {
                     getSettings()->enableWhisperHighlightTaskbar.setValue(
                         value.toBool());
@@ -156,6 +188,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 2)
                 {
                     getSettings()->enableSubHighlightTaskbar.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == 3)
+                {
+                    getSettings()->enableRedeemedHighlightTaskbar.setValue(
                         value.toBool());
                 }
             }
@@ -169,7 +206,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->enableSelfHighlightSound.setValue(
                         value.toBool());
                 }
-                else if (rowIndex == 1)
+                else if (rowIndex == WHISPER_ROW)
                 {
                     getSettings()->enableWhisperHighlightSound.setValue(
                         value.toBool());
@@ -177,6 +214,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 2)
                 {
                     getSettings()->enableSubHighlightSound.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == 3)
+                {
+                    getSettings()->enableRedeemedHighlightSound.setValue(
                         value.toBool());
                 }
             }
@@ -199,7 +241,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->selfHighlightSoundUrl.setValue(
                         value.toString());
                 }
-                else if (rowIndex == 1)
+                else if (rowIndex == WHISPER_ROW)
                 {
                     getSettings()->whisperHighlightSoundUrl.setValue(
                         value.toString());
@@ -207,6 +249,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 2)
                 {
                     getSettings()->subHighlightSoundUrl.setValue(
+                        value.toString());
+                }
+                else if (rowIndex == 3)
+                {
+                    getSettings()->redeemedHighlightSoundUrl.setValue(
                         value.toString());
                 }
             }
@@ -221,18 +268,27 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 {
                     getSettings()->selfHighlightColor.setValue(colorName);
                 }
-                else if (rowIndex == 1)
-                {
-                    getSettings()->whisperHighlightColor.setValue(colorName);
-                }
+                //                else if (rowIndex == WHISPER_ROW)
+                //                {
+                //                    getSettings()->whisperHighlightColor.setValue(colorName);
+                //                }
                 else if (rowIndex == 2)
                 {
                     getSettings()->subHighlightColor.setValue(colorName);
+                }
+                else if (rowIndex == 3)
+                {
+                    getSettings()->redeemedHighlightColor.setValue(colorName);
+                    const_cast<ColorProvider &>(ColorProvider::instance())
+                        .updateColor(ColorType::RedeemedHighlight,
+                                     QColor(colorName));
                 }
             }
         }
         break;
     }
+
+    getApp()->windows->forceLayoutChannelViews();
 }
 
 }  // namespace chatterino

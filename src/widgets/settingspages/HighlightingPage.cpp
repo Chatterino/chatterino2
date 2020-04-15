@@ -29,7 +29,6 @@ namespace chatterino {
 
 HighlightingPage::HighlightingPage()
 {
-    auto app = getApp();
     LayoutCreator<HighlightingPage> layoutCreator(this);
 
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
@@ -228,7 +227,8 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                       Qt::CheckStateRole);
         }
     }
-    else if (clicked.column() == Column::Color)
+    else if (clicked.column() == Column::Color &&
+             clicked.row() != HighlightModel::WHISPER_ROW)
     {
         auto initial =
             view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();

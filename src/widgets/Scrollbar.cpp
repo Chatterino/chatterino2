@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QDebug>
@@ -242,6 +243,8 @@ void Scrollbar::paintEvent(QPaintEvent *)
     QPainter painter(this);
     painter.fillRect(rect(), this->theme->scrollbars.background);
 
+    bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
+
     //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
     //                     this->themeManager->ScrollbarArrow);
     //    painter.fillRect(QRect(xOffset, height() - this->buttonHeight,
@@ -274,7 +277,8 @@ void Scrollbar::paintEvent(QPaintEvent *)
     int w = this->width();
     float y = 0;
     float dY = float(this->height()) / float(snapshotLength);
-    int highlightHeight = int(std::ceil(dY));
+    int highlightHeight =
+        int(std::ceil(std::max<float>(this->scale() * 2, dY)));
 
     for (size_t i = 0; i < snapshotLength; i++)
     {
@@ -282,7 +286,13 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
         if (!highlight.isNull())
         {
+            if (highlight.isRedeemedHighlight() && !enableRedeemedHighlights)
+            {
+                continue;
+            }
+
             QColor color = highlight.getColor();
+            color.setAlpha(255);
 
             switch (highlight.getStyle())
             {

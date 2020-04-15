@@ -295,6 +295,13 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->historicalMessage_ = this->tags.contains("historical");
 
+    if (this->tags.contains("msg-id") &&
+        this->tags["msg-id"].toString().split(';').contains(
+            "highlighted-message"))
+    {
+        this->message().flags.set(MessageFlag::RedeemedHighlight);
+    }
+
     // timestamp
     if (this->historicalMessage_)
     {

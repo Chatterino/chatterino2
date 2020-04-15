@@ -205,6 +205,17 @@ public:
     QStringSetting whisperHighlightColor = {
         "/highlighting/whisperHighlightColor", ""};
 
+    BoolSetting enableRedeemedHighlight = {
+        "/highlighting/redeemedHighlight/highlighted", true};
+    BoolSetting enableRedeemedHighlightSound = {
+        "/highlighting/redeemedHighlight/enableSound", false};
+    BoolSetting enableRedeemedHighlightTaskbar = {
+        "/highlighting/redeemedHighlight/enableTaskbarFlashing", false};
+    QStringSetting redeemedHighlightSoundUrl = {
+        "/highlighting/redeemedHighlightSoundUrl", ""};
+    QStringSetting redeemedHighlightColor = {
+        "/highlighting/redeemedHighlightColor", ""};
+
     BoolSetting enableSubHighlight = {
         "/highlighting/subHighlight/subsHighlighted", true};
     BoolSetting enableSubHighlightSound = {

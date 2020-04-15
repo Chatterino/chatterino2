@@ -120,6 +120,11 @@ int Application::run(QApplication &qtApp)
     getSettings()->moderationActions.delayedItemsChanged.connect(
         [this] { this->windows->forceLayoutChannelViews(); });
 
+    getSettings()->highlightedMessages.delayedItemsChanged.connect(
+        [this] { this->windows->forceLayoutChannelViews(); });
+    getSettings()->highlightedUsers.delayedItemsChanged.connect(
+        [this] { this->windows->forceLayoutChannelViews(); });
+
     return qtApp.exec();
 }
 

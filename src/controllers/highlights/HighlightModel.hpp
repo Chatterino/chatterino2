@@ -23,6 +23,8 @@ public:
         Color = 6
     };
 
+    constexpr static int WHISPER_ROW = 1;
+
 protected:
     // turn a vector item into a model row
     virtual HighlightPhrase getItemFromRow(
