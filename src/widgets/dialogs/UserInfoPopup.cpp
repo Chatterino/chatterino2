@@ -512,7 +512,9 @@ void UserInfoPopup::loadAvatar(const QUrl &url)
             // might want to cache the avatar image
             QPixmap avatar;
             avatar.loadFromData(data);
-            this->ui_.avatarButton->setPixmap(avatar);
+            auto size = this->ui_.avatarButton->size();
+            this->ui_.avatarButton->setPixmap(avatar.scaled(
+                size, Qt::IgnoreAspectRatio, Qt::SmoothTransformation));
         }
         else
         {
