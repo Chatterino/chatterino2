@@ -27,8 +27,7 @@ public:
     TwitchAccountManager twitch;
 
 private:
-    SortedSignalVector<std::shared_ptr<Account>, SharedPtrElementLess<Account>>
-        accounts_;
+    SignalVector<std::shared_ptr<Account>> accounts_;
 };
 
 }  // namespace chatterino

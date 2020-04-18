@@ -8,12 +8,16 @@
 namespace chatterino {
 
 SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog,
-                                     SettingsPage *_page, QString imageFileName)
+                                     std::function<SettingsPage *()> _lazyPage,
+                                     const QString &name, QString imageFileName,
+                                     SettingsTabId id)
     : BaseWidget(_dialog)
     , dialog_(_dialog)
-    , page_(_page)
+    , lazyPage_(std::move(_lazyPage))
+    , id_(id)
+    , name_(name)
 {
-    this->ui_.labelText = page_->getName();
+    this->ui_.labelText = name;
     this->ui_.icon.addFile(imageFileName);
 
     this->setCursor(QCursor(Qt::PointingHandCursor));
@@ -34,8 +38,13 @@ void SettingsDialogTab::setSelected(bool _selected)
     emit selectedChanged(selected_);
 }
 
-SettingsPage *SettingsDialogTab::getSettingsPage()
+SettingsPage *SettingsDialogTab::page()
 {
+    if (this->page_)
+        return this->page_;
+
+    this->page_ = this->lazyPage_();
+    this->page_->setTab(this);
     return this->page_;
 }
 
@@ -70,6 +79,16 @@ void SettingsDialogTab::mousePressEvent(QMouseEvent *event)
     this->dialog_->selectTab(this);
 
     this->setFocus();
+}
+
+const QString &SettingsDialogTab::name() const
+{
+    return name_;
+}
+
+SettingsTabId SettingsDialogTab::id() const
+{
+    return id_;
 }
 
 }  // namespace chatterino

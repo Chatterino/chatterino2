@@ -6,7 +6,9 @@
 #include <QStackedLayout>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <functional>
 #include <pajlada/settings/setting.hpp>
+#include "widgets/helper/SettingsDialogTab.hpp"
 
 class QLineEdit;
 
@@ -32,7 +34,6 @@ class SettingsDialog : public BaseWindow
 public:
     SettingsDialog();
 
-    static SettingsDialog *getHandle();  // may be NULL
     static void showDialog(SettingsDialogPreference preferredTab =
                                SettingsDialogPreference::NoPreference);
 
@@ -42,15 +43,16 @@ protected:
     virtual void showEvent(QShowEvent *) override;
 
 private:
-    static SettingsDialog *handle;
-
     void refresh();
 
     void initUi();
+    SettingsDialogTab *tab(SettingsTabId id);
     void addTabs();
-    void addTab(SettingsPage *page, Qt::Alignment alignment = Qt::AlignTop);
-    void selectTab(SettingsDialogTab *tab, bool byUser = true);
-    void selectPage(SettingsPage *page);
+    void addTab(std::function<SettingsPage *()> page, const QString &name,
+                const QString &iconPath, SettingsTabId id = {},
+                Qt::Alignment alignment = Qt::AlignTop);
+    void selectTab(SettingsDialogTab *tab, const bool byUser = true);
+    void selectTab(SettingsTabId id);
     void filterElements(const QString &query);
 
     void onOkClicked();
@@ -62,11 +64,9 @@ private:
         QStackedLayout *pageStack{};
         QPushButton *okButton{};
         QPushButton *cancelButton{};
-        ModerationPage *moderationPage{};
         QLineEdit *search{};
     } ui_;
     std::vector<SettingsDialogTab *> tabs_;
-    std::vector<SettingsPage *> pages_;
     SettingsDialogTab *selectedTab_{};
     SettingsDialogTab *lastSelectedByUser_{};
 

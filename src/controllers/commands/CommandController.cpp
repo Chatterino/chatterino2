@@ -8,9 +8,9 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/twitch/TwitchApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
@@ -212,7 +212,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)
     this->items_.delayedItemsChanged.connect([this] {  //
-        this->commandsSetting_->setValue(this->items_.getVector());
+        this->commandsSetting_->setValue(this->items_.raw());
     });
 
     // Load commands from commands.json
@@ -222,7 +222,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // of commands)
     for (const auto &command : this->commandsSetting_->getValue())
     {
-        this->items_.appendItem(command);
+        this->items_.append(command);
     }
 }
 
@@ -234,7 +234,7 @@ void CommandController::save()
 CommandModel *CommandController::createModel(QObject *parent)
 {
     CommandModel *model = new CommandModel(parent);
-    model->init(&this->items_);
+    model->initialize(&this->items_);
 
     return model;
 }
@@ -244,8 +244,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
     QStringList words = text.split(' ', QString::SkipEmptyParts);
-
-    std::lock_guard<std::mutex> lock(this->mutex_);
 
     if (words.length() == 0)
     {
@@ -366,18 +364,17 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                 return "";
             }
 
-            TwitchApi::findUserId(
-                target, [user, channel, target](QString userId) {
-                    if (userId.isEmpty())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "User " + target + " could not be followed!"));
-                        return;
-                    }
-                    user->followUser(userId, [channel, target]() {
+            getHelix()->getUserByName(
+                target,
+                [user, channel, target](const auto &targetUser) {
+                    user->followUser(targetUser.id, [channel, target]() {
                         channel->addMessage(makeSystemMessage(
                             "You successfully followed " + target));
                     });
+                },
+                [channel, target] {
+                    channel->addMessage(makeSystemMessage(
+                        "User " + target + " could not be followed!"));
                 });
 
             return "";
@@ -402,18 +399,17 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                 return "";
             }
 
-            TwitchApi::findUserId(
-                target, [user, channel, target](QString userId) {
-                    if (userId.isEmpty())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "User " + target + " could not be followed!"));
-                        return;
-                    }
-                    user->unfollowUser(userId, [channel, target]() {
+            getHelix()->getUserByName(
+                target,
+                [user, channel, target](const auto &targetUser) {
+                    user->unfollowUser(targetUser.id, [channel, target]() {
                         channel->addMessage(makeSystemMessage(
                             "You successfully unfollowed " + target));
                     });
+                },
+                [channel, target] {
+                    channel->addMessage(makeSystemMessage(
+                        "User " + target + " could not be followed!"));
                 });
 
             return "";

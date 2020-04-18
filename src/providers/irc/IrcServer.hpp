@@ -21,6 +21,8 @@ public:
 
     // AbstractIrcServer interface
 protected:
+    void initializeConnectionSignals(IrcConnection *connection,
+                                     ConnectionType type) override;
     void initializeConnection(IrcConnection *connection,
                               ConnectionType type) override;
     std::shared_ptr<Channel> createChannel(const QString &channelName) override;

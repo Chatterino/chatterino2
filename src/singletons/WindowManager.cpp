@@ -111,6 +111,12 @@ WindowManager::WindowManager()
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
         getApp()->windows->save();  //
     });
+
+    this->miscUpdateTimer_.start(100);
+
+    QObject::connect(&this->miscUpdateTimer_, &QTimer::timeout, [this] {
+        this->miscUpdate.invoke();  //
+    });
 }
 
 MessageElementFlags WindowManager::getWordFlags()
@@ -268,6 +274,16 @@ Window *WindowManager::windowAt(int index)
     return this->windows_.at(index);
 }
 
+QPoint WindowManager::emotePopupPos()
+{
+    return this->emotePopupPos_;
+}
+
+void WindowManager::setEmotePopupPos(QPoint pos)
+{
+    this->emotePopupPos_ = pos;
+}
+
 void WindowManager::initialize(Settings &settings, Paths &paths)
 {
     assertInGuiThread();
@@ -395,6 +411,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         }
         window.show();
 
+        QJsonObject emote_popup_obj = window_obj.value("emotePopup").toObject();
+        this->emotePopupPos_ = QPoint(emote_popup_obj.value("x").toInt(),
+                                      emote_popup_obj.value("y").toInt());
+
         if (window_obj.value("state") == "minimized")
         {
             window.setWindowState(Qt::WindowMinimized);
@@ -471,6 +491,11 @@ void WindowManager::save()
         window_obj.insert("y", rect.y());
         window_obj.insert("width", rect.width());
         window_obj.insert("height", rect.height());
+
+        QJsonObject emote_popup_obj;
+        emote_popup_obj.insert("x", this->emotePopupPos_.x());
+        emote_popup_obj.insert("y", this->emotePopupPos_.y());
+        window_obj.insert("emotePopup", emote_popup_obj);
 
         // window tabs
         QJsonArray tabs_arr;

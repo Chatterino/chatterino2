@@ -7,8 +7,6 @@
 
 namespace chatterino {
 
-class ModerationActions;
-
 class ModerationActionModel : public SignalVectorModel<ModerationAction>
 {
 public:
@@ -25,8 +23,6 @@ protected:
                                 std::vector<QStandardItem *> &row) override;
 
     friend class HighlightController;
-
-    friend class ModerationActions;
 };
 
 }  // namespace chatterino

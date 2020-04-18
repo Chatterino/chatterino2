@@ -18,7 +18,6 @@
 namespace chatterino {
 
 AboutPage::AboutPage()
-    : SettingsPage("About", ":/settings/about.svg")
 {
     LayoutCreator<AboutPage> layoutCreator(this);
 

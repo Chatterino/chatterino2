@@ -2,8 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/moderationactions/ModerationActionModel.hpp"
-#include "controllers/moderationactions/ModerationActions.hpp"
-#include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "controllers/taggedusers/TaggedUsersModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
@@ -73,7 +71,6 @@ QString fetchLogDirectorySize()
 }
 
 ModerationPage::ModerationPage()
-    : SettingsPage("Moderation", ":/settings/moderation.svg")
 {
     auto app = getApp();
     LayoutCreator<ModerationPage> layoutCreator(this);
@@ -175,7 +172,8 @@ ModerationPage::ModerationPage()
         EditableModelView *view =
             modMode
                 .emplace<EditableModelView>(
-                    app->moderationActions->createModel(nullptr))
+                    (new ModerationActionModel(nullptr))
+                        ->initialized(&getSettings()->moderationActions))
                 .getElement();
 
         view->setTitles({"Actions"});
@@ -185,7 +183,7 @@ ModerationPage::ModerationPage()
             0, QHeaderView::Stretch);
 
         view->addButtonPressed.connect([] {
-            getApp()->moderationActions->items.appendItem(
+            getSettings()->moderationActions.append(
                 ModerationAction("/timeout {user} 300"));
         });
 

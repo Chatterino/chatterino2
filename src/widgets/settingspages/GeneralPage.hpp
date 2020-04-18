@@ -17,6 +17,11 @@ class QComboBox;
 
 namespace chatterino {
 
+class Space : public QLabel
+{
+    Q_OBJECT
+};
+
 class TitleLabel : public QLabel
 {
     Q_OBJECT
@@ -162,6 +167,7 @@ private:
     struct Group {
         QString name;
         QWidget *title{};
+        Space *space{};
         std::vector<Widget> widgets;
     };
 

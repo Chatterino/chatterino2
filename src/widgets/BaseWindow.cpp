@@ -384,7 +384,6 @@ void BaseWindow::mousePressEvent(QMouseEvent *event)
 
             if (!recursiveCheckMouseTracking(widget))
             {
-                qDebug() << "Start moving";
                 this->moving = true;
             }
         }
@@ -401,7 +400,6 @@ void BaseWindow::mouseReleaseEvent(QMouseEvent *event)
     {
         if (this->moving)
         {
-            qDebug() << "Stop moving";
             this->moving = false;
         }
     }

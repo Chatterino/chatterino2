@@ -71,8 +71,30 @@ AbstractIrcServer::AbstractIrcServer()
     });
 }
 
+void AbstractIrcServer::initializeIrc()
+{
+    assert(!this->initialized_);
+
+    if (this->hasSeparateWriteConnection())
+    {
+        this->initializeConnectionSignals(this->writeConnection_.get(),
+                                          ConnectionType::Write);
+        this->initializeConnectionSignals(this->readConnection_.get(),
+                                          ConnectionType::Read);
+    }
+    else
+    {
+        this->initializeConnectionSignals(this->readConnection_.get(),
+                                          ConnectionType::Both);
+    }
+
+    this->initialized_ = true;
+}
+
 void AbstractIrcServer::connect()
 {
+    assert(this->initialized_);
+
     this->disconnect();
 
     if (this->hasSeparateWriteConnection())

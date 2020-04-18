@@ -1,7 +1,6 @@
 #include "messages/MessageElement.hpp"
 
 #include "Application.hpp"
-#include "controllers/moderationactions/ModerationActions.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
@@ -165,21 +164,6 @@ MessageLayoutElement *EmoteElement::makeImageLayoutElement(
     return new ImageLayoutElement(*this, image, size);
 }
 
-// MOD BADGE
-ModBadgeElement::ModBadgeElement(const EmotePtr &data,
-                                 MessageElementFlags flags_)
-    : EmoteElement(data, flags_)
-{
-}
-
-MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
-    const ImagePtr &image, const QSize &size)
-{
-    static const QColor modBadgeBackgroundColor("#34AE0A");
-    return new ImageWithBackgroundLayoutElement(*this, image, size,
-                                                modBadgeBackgroundColor);
-}
-
 // BADGE
 BadgeElement::BadgeElement(const EmotePtr &emote, MessageElementFlags flags)
     : MessageElement(flags)
@@ -201,14 +185,41 @@ void BadgeElement::addToContainer(MessageLayoutContainer &container,
         auto size = QSize(int(container.getScale() * image->width()),
                           int(container.getScale() * image->height()));
 
-        container.addElement((new ImageLayoutElement(*this, image, size))
-                                 ->setLink(this->getLink()));
+        container.addElement(this->makeImageLayoutElement(image, size));
     }
 }
 
 EmotePtr BadgeElement::getEmote() const
 {
     return this->emote_;
+}
+
+MessageLayoutElement *BadgeElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    auto element =
+        (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
+
+    return element;
+}
+
+// MOD BADGE
+ModBadgeElement::ModBadgeElement(const EmotePtr &data,
+                                 MessageElementFlags flags_)
+    : BadgeElement(data, flags_)
+{
+}
+
+MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    static const QColor modBadgeBackgroundColor("#34AE0A");
+
+    auto element = (new ImageWithBackgroundLayoutElement(
+                        *this, image, size, modBadgeBackgroundColor))
+                       ->setLink(this->getLink());
+
+    return element;
 }
 
 // TEXT
@@ -374,8 +385,8 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     {
         QSize size(int(container.getScale() * 16),
                    int(container.getScale() * 16));
-
-        for (const auto &action : getApp()->moderationActions->items)
+        auto actions = getCSettings().moderationActions.readOnly();
+        for (const auto &action : *actions)
         {
             if (auto image = action.getImage())
             {

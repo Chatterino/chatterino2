@@ -1,12 +1,14 @@
 #include "EmotePopup.hpp"
 
 #include "Application.hpp"
+#include "common/CompletionModel.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -37,7 +39,8 @@ namespace {
             std::sort(vec.begin(), vec.end(),
                       [](const std::pair<EmoteName, EmotePtr> &l,
                          const std::pair<EmoteName, EmotePtr> &r) {
-                          return l.first.string < r.first.string;
+                          return CompletionModel::compareStrings(
+                              l.first.string, r.first.string);
                       });
             for (const auto &emote : vec)
             {
@@ -111,6 +114,8 @@ namespace {
 EmotePopup::EmotePopup(QWidget *parent)
     : BasePopup(BaseWindow::EnableCustomFrame, parent)
 {
+    this->moveTo(this, getApp()->windows->emotePopupPos(), false);
+
     auto layout = new QVBoxLayout(this);
     this->getLayoutContainer()->setLayout(layout);
 
@@ -218,4 +223,9 @@ void EmotePopup::loadEmojis()
     this->viewEmojis_->setChannel(emojiChannel);
 }
 
+void EmotePopup::closeEvent(QCloseEvent *event)
+{
+    getApp()->windows->setEmotePopupPos(this->pos());
+    QWidget::closeEvent(event);
+}
 }  // namespace chatterino

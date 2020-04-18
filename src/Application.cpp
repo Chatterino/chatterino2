@@ -5,12 +5,8 @@
 #include "common/Args.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
-#include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "controllers/pings/PingController.hpp"
-#include "controllers/taggedusers/TaggedUsersController.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
@@ -54,16 +50,10 @@ Application::Application(Settings &_settings, Paths &_paths)
 
     , accounts(&this->emplace<AccountController>())
     , commands(&this->emplace<CommandController>())
-    , highlights(&this->emplace<HighlightController>())
     , notifications(&this->emplace<NotificationController>())
-    , pings(&this->emplace<PingController>())
-    , ignores(&this->emplace<IgnoreController>())
-    , taggedUsers(&this->emplace<TaggedUsersController>())
-    , moderationActions(&this->emplace<ModerationActions>())
     , twitch2(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , logging(&this->emplace<Logging>())
-
 {
     this->instance = this;
 
@@ -115,9 +105,6 @@ void Application::initialize(Settings &settings, Paths &paths)
 
     this->initNm(paths);
     this->initPubsub();
-
-    this->moderationActions->items.delayedItemsChanged.connect(
-        [this] { this->windows->forceLayoutChannelViews(); });
 }
 
 int Application::run(QApplication &qtApp)
@@ -130,6 +117,13 @@ int Application::run(QApplication &qtApp)
 
     getSettings()->betaUpdates.connect(
         [] { Updates::instance().checkForUpdates(); }, false);
+    getSettings()->moderationActions.delayedItemsChanged.connect(
+        [this] { this->windows->forceLayoutChannelViews(); });
+
+    getSettings()->highlightedMessages.delayedItemsChanged.connect(
+        [this] { this->windows->forceLayoutChannelViews(); });
+    getSettings()->highlightedUsers.delayedItemsChanged.connect(
+        [this] { this->windows->forceLayoutChannelViews(); });
 
     return qtApp.exec();
 }
@@ -156,14 +150,6 @@ void Application::initNm(Paths &paths)
 
 void Application::initPubsub()
 {
-    this->twitch.pubsub->signals_.whisper.sent.connect([](const auto &msg) {
-        qDebug() << "WHISPER SENT LOL";  //
-    });
-
-    this->twitch.pubsub->signals_.whisper.received.connect([](const auto &msg) {
-        qDebug() << "WHISPER RECEIVED LOL";  //
-    });
-
     this->twitch.pubsub->signals_.moderation.chatCleared.connect(
         [this](const auto &action) {
             auto chan =

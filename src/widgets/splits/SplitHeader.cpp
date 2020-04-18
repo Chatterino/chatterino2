@@ -2,9 +2,7 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/moderationactions/ModerationActions.hpp"
 #include "controllers/notifications/NotificationController.hpp"
-#include "controllers/pings/PingController.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
@@ -96,8 +94,11 @@ namespace {
             .arg(s.game.toHtmlEscaped())
             .arg(s.game.isEmpty() ? QString() : "<br>")
             .arg(s.rerun ? "Vod-casting" : "Live")
-            .arg(s.uptime)
-            .arg(QString::number(s.viewerCount));
+            .arg(getSettings()->hideViewerCountAndDuration ? "&lt;Hidden&gt;"
+                                                           : s.uptime)
+            .arg(getSettings()->hideViewerCountAndDuration
+                     ? "&lt;Hidden&gt;"
+                     : QString::number(s.viewerCount));
     }
     auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
     {
@@ -189,7 +190,7 @@ void SplitHeader::initializeLayout()
                     switch (button)
                     {
                         case Qt::LeftButton:
-                            if (getApp()->moderationActions->items.empty())
+                            if (getSettings()->moderationActions.empty())
                             {
                                 getApp()->windows->showSettingsDialog(
                                     SettingsDialogPreference::
@@ -233,9 +234,9 @@ void SplitHeader::initializeLayout()
     });
 
     // update moderation button when items changed
-    this->managedConnect(getApp()->moderationActions->items.delayedItemsChanged,
+    this->managedConnect(getSettings()->moderationActions.delayedItemsChanged,
                          [this] {
-                             if (getApp()->moderationActions->items.empty())
+                             if (getSettings()->moderationActions.empty())
                              {
                                  if (this->split_->getModerationMode())
                                      this->split_->setModerationMode(true);
@@ -246,6 +247,13 @@ void SplitHeader::initializeLayout()
                                      this->split_->setModerationMode(true);
                              }
                          });
+
+    getSettings()->customURIScheme.connect([this] {
+        if (const auto drop = this->dropdownButton_)
+        {
+            drop->setMenu(this->createMainMenu());
+        }
+    });
 
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -291,6 +299,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 #endif
         menu->addAction(OPEN_IN_STREAMLINK, this->split_,
                         &Split::openInStreamlink);
+
+        if (!getSettings()->customURIScheme.getValue().isEmpty())
+        {
+            menu->addAction("Open with URI Scheme", this->split_,
+                            &Split::openWithCustomScheme);
+        }
         menu->addSeparator();
     }
 
@@ -339,11 +353,11 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         action->setCheckable(true);
 
         QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-            action->setChecked(getApp()->pings->isMuted(
+            action->setChecked(getSettings()->isMutedChannel(
                 this->split_->getChannel()->getName()));
         });
         action->connect(action, &QAction::triggered, this, [this]() {
-            getApp()->pings->toggleMuteChannel(
+            getSettings()->toggleMutedChannel(
                 this->split_->getChannel()->getName());
         });
 
@@ -568,7 +582,7 @@ void SplitHeader::updateChannelText()
 void SplitHeader::updateModerationModeIcon()
 {
     auto moderationMode = this->split_->getModerationMode() &&
-                          !getApp()->moderationActions->items.empty();
+                          !getSettings()->moderationActions.empty();
 
     this->moderationButton_->setPixmap(
         moderationMode ? getResources().buttons.modModeEnabled

@@ -22,7 +22,7 @@ class CommandModel;
 class CommandController final : public Singleton
 {
 public:
-    UnsortedSignalVector<Command> items_;
+    SignalVector<Command> items_;
 
     QString execCommand(const QString &text, std::shared_ptr<Channel> channel,
                         bool dryRun);
@@ -38,8 +38,6 @@ private:
 
     QMap<QString, Command> commandsMap_;
     int maxSpaces_ = 0;
-
-    std::mutex mutex_;
 
     std::shared_ptr<pajlada::Settings::SettingManager> sm_;
     // Because the setting manager is not initialized until the initialize

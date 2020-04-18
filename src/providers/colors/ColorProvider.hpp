@@ -2,7 +2,12 @@
 
 namespace chatterino {
 
-enum class ColorType { SelfHighlight, Subscription, Whisper };
+enum class ColorType {
+    SelfHighlight,
+    Subscription,
+    Whisper,
+    RedeemedHighlight
+};
 
 class ColorProvider
 {

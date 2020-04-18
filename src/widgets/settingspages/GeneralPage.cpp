@@ -74,14 +74,16 @@ namespace {
 
 TitleLabel *SettingsLayout::addTitle(const QString &title)
 {
-    auto label = new TitleLabel(title + ":");
+    // space
+    if (!this->groups_.empty())
+        this->addWidget(this->groups_.back().space = new Space);
 
-    if (this->count() == 0)
-        label->setStyleSheet("margin-top: 0");
+    // title
+    auto label = new TitleLabel(title + ":");
     this->addWidget(label);
 
     // groups
-    this->groups_.push_back(Group{title, label, {}});
+    this->groups_.push_back(Group{title, label, nullptr, {}});
 
     return label;
 }
@@ -228,6 +230,8 @@ bool SettingsLayout::filterElements(const QString &query)
                 }
             }
 
+            if (group.space)
+                group.space->setVisible(groupAny);
             group.title->setVisible(groupAny);
             any |= groupAny;
         }
@@ -237,7 +241,6 @@ bool SettingsLayout::filterElements(const QString &query)
 }
 
 GeneralPage::GeneralPage()
-    : SettingsPage("General", ":/settings/about.svg")
 {
     auto y = new QVBoxLayout;
     auto scroll = new QScrollArea;
@@ -263,9 +266,7 @@ GeneralPage::GeneralPage()
 bool GeneralPage::filterElements(const QString &query)
 {
     if (this->settingsLayout_)
-        return this->settingsLayout_->filterElements(query) ||
-               this->name_.contains(query, Qt::CaseInsensitive) ||
-               query.isEmpty();
+        return this->settingsLayout_->filterElements(query) || query.isEmpty();
     else
         return false;
 }
@@ -304,6 +305,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Start with Windows", s.autorun);
 #endif
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
+    if (!BaseWindow::supportsCustomWindowFrame())
+    {
+        layout.addCheckbox("Show preferences button (ctrl+p to show)",
+                           s.hidePreferencesButton, true);
+        layout.addCheckbox("Show user button", s.hideUserButton, true);
+    }
 
     layout.addTitle("Chat");
 
@@ -321,7 +328,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
     layout.addDropdown<float>(
-        "Pause on hover", {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
+        "Pause after hover",
+        {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
         s.pauseOnHoverDuration,
         [](auto val) {
             if (val < -0.5f)
@@ -344,12 +352,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                                s.pauseChatModifier);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
-    if (!BaseWindow::supportsCustomWindowFrame())
-    {
-        layout.addCheckbox("Show preferences button (ctrl+p to show)",
-                           s.hidePreferencesButton, true);
-        layout.addCheckbox("Show user button", s.hideUserButton, true);
-    }
 
     layout.addTitle("Messages");
     layout.addCheckbox("Seperate with lines", s.separateMessages);
@@ -358,7 +360,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
     layout.addDropdown<QString>(
-        "Timestamps", {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a"},
+        "Timestamps",
+        {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
+         "h:mm:ss a", "hh:mm:ss a"},
         s.timestampFormat,
         [](auto val) {
             return getSettings()->showTimestamps.getValue()
@@ -411,6 +415,32 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
                         "Apple", "Google", "Messenger"},
                        s.emojiSet);
+
+    layout.addTitle("R9K");
+    layout.addDescription(
+        "Hide similar messages by the same user. Temporarily show hidden "
+        "messages by pressing Ctrl+H.");
+    layout.addCheckbox("Hide similar messages", s.similarityEnabled);
+    //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
+    layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
+    layout.addCheckbox("Receive notification sounds from hidden messages",
+                       s.shownSimilarTriggerHighlights);
+    s.hideSimilar.connect(
+        []() { getApp()->windows->forceLayoutChannelViews(); }, false);
+    layout.addDropdown<float>(
+        "Similarity threshold", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
+        [](auto val) { return QString::number(val); },
+        [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
+    layout.addDropdown<int>(
+        "Maximum delay between messages",
+        {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
+        [](auto val) { return QString::number(val) + "s"; },
+        [](auto args) { return fuzzyToInt(args.value, 5); });
+    layout.addDropdown<int>(
+        "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
+        s.hideSimilarMaxMessagesToCheck,
+        [](auto val) { return QString::number(val); },
+        [](auto args) { return fuzzyToInt(args.value, 3); });
 
     layout.addTitle("Visible badges");
     layout.addCheckbox("Authority (staff, admin)",
@@ -497,6 +527,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
         s.prefixOnlyEmoteCompletion);
+    layout.addCheckbox("Only search for username autocompletion with an @",
+                       s.userCompletionOnlyWithAt);
 
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
     layout.addCheckbox("Highlight received inline whispers",
@@ -508,6 +540,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.enableExperimentalIrc);
     layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
+    layout.addCheckbox(
+        "Hide viewercount and stream length while hovering the split",
+        s.hideViewerCountAndDuration);
 
     layout.addTitle("Cache");
     layout.addDescription(
@@ -546,33 +581,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addButton("Open AppData directory", [] {
         QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
     });
-
-    layout.addTitle("Similarity");
-    layout.addDescription(
-        "Hides or grays out similar messages from the same user");
-    layout.addCheckbox("Similarity enabled", s.similarityEnabled);
-    layout.addCheckbox("Gray out similar messages", s.colorSimilarDisabled);
-    layout.addCheckbox("Hide similar messages (Ctrl + H)", s.hideSimilar);
-    layout.addCheckbox("Hide or gray out my own similar messages",
-                       s.hideSimilarMyself);
-    layout.addCheckbox("Shown similar messages trigger highlights",
-                       s.shownSimilarTriggerHighlights);
-    layout.addDropdown<float>(
-        "Similarity percentage", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
-    s.hideSimilar.connect(
-        []() { getApp()->windows->forceLayoutChannelViews(); }, false);
-    layout.addDropdown<int>(
-        "Similar messages max delay in seconds",
-        {"5", "10", "15", "30", "60", "120"}, s.hideSimilarMaxDelay,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToInt(args.value, 5); });
-    layout.addDropdown<int>(
-        "Similar messages max previous messages to check",
-        {"1", "2", "3", "4", "5"}, s.hideSimilarMaxMessagesToCheck,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToInt(args.value, 3); });
 
     // invisible element for width
     auto inv = new BaseWidget(this);

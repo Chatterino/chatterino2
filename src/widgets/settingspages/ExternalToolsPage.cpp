@@ -12,7 +12,6 @@
 namespace chatterino {
 
 ExternalToolsPage::ExternalToolsPage()
-    : SettingsPage("External tools", ":/settings/externaltools.svg")
 {
     LayoutCreator<ExternalToolsPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
@@ -67,6 +66,23 @@ ExternalToolsPage::ExternalToolsPage()
                 customPath->setEnabled(value);  //
             },
             this->managedConnections_);
+    }
+
+    {
+        auto group = layout.emplace<QGroupBox>("Custom URI Scheme");
+        auto groupLayout = group.setLayoutType<QFormLayout>();
+
+        const auto description = new QLabel(
+            "You can open video streams directly in any video player that "
+            "has built-in Twitch support and has own URI Scheme.\nE.g.: "
+            "IINA for macOS and Potplayer (with extension) for Windows.");
+        description->setWordWrap(true);
+        description->setStyleSheet("color: #bbb");
+
+        groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
+
+        groupLayout->addRow("URI Scheme:", this->createLineEdit(
+                                               getSettings()->customURIScheme));
     }
 
     layout->addStretch(1);

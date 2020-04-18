@@ -7,11 +7,11 @@
 
 namespace chatterino {
 
-class PingController;
+class MutedChannelController;
 
-class PingModel : public SignalVectorModel<QString>
+class MutedChannelModel : public SignalVectorModel<QString>
 {
-    explicit PingModel(QObject *parent);
+    explicit MutedChannelModel(QObject *parent);
 
 protected:
     // turn a vector item into a model row
@@ -21,8 +21,6 @@ protected:
     // turns a row in the model into a vector item
     virtual void getRowFromItem(const QString &item,
                                 std::vector<QStandardItem *> &row) override;
-
-    friend class PingController;
 };
 
 }  // namespace chatterino

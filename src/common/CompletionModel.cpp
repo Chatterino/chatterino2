@@ -38,13 +38,7 @@ bool CompletionModel::TaggedString::operator<(const TaggedString &that) const
         return this->isEmote();
     }
 
-    // try comparing insensitively, if they are the same then senstively
-    // (fixes order of LuL and LUL)
-    int k = QString::compare(this->string, that.string, Qt::CaseInsensitive);
-    if (k == 0)
-        return this->string > that.string;
-
-    return k < 0;
+    return CompletionModel::compareStrings(this->string, that.string);
 }
 
 //
@@ -133,7 +127,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
                               TaggedString::Type::Username);
                 }
             }
-            else
+            else if (!getSettings()->userCompletionOnlyWithAt)
             {
                 for (const auto &name :
                      usernames->subrange(Prefix(usernamePrefix)))
@@ -189,6 +183,17 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
             addString(command, TaggedString::Command);
         }
     }
+}
+
+bool CompletionModel::compareStrings(const QString &a, const QString &b)
+{
+    // try comparing insensitively, if they are the same then senstively
+    // (fixes order of LuL and LUL)
+    int k = QString::compare(a, b, Qt::CaseInsensitive);
+    if (k == 0)
+        return a > b;
+
+    return k < 0;
 }
 
 }  // namespace chatterino

@@ -14,6 +14,8 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/TwitchParseCheerEmotes.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
@@ -21,6 +23,7 @@
 #include "util/PostToThread.hpp"
 #include "widgets/Window.hpp"
 
+#include <rapidjson/document.h>
 #include <IrcConnection>
 #include <QJsonArray>
 #include <QJsonObject>
@@ -454,35 +457,25 @@ void TwitchChannel::refreshTitle()
     }
     this->titleRefreshedTime_ = QTime::currentTime();
 
-    QString url("https://api.twitch.tv/kraken/channels/" + roomID);
-    NetworkRequest::twitchRequest(url)
-        .onSuccess(
-            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-                ChannelPtr shared = weak.lock();
-                if (!shared)
-                    return Failure;
+    const auto onSuccess = [this,
+                            weak = weakOf<Channel>(this)](const auto &channel) {
+        ChannelPtr shared = weak.lock();
+        if (!shared)
+        {
+            return;
+        }
 
-                const auto document = result.parseRapidJson();
+        {
+            auto status = this->streamStatus_.access();
+            status->title = channel.status;
+        }
 
-                auto statusIt = document.FindMember("status");
+        this->liveStatusChanged.invoke();
+    };
 
-                if (statusIt == document.MemberEnd())
-                {
-                    return Failure;
-                }
+    const auto onFailure = [] {};
 
-                {
-                    auto status = this->streamStatus_.access();
-                    if (!rj::getSafe(statusIt->value, status->title))
-                    {
-                        return Failure;
-                    }
-                }
-
-                this->liveStatusChanged.invoke();
-                return Success;
-            })
-        .execute();
+    getKraken()->getChannel(roomID, onSuccess, onFailure);
 }
 
 void TwitchChannel::refreshLiveStatus()
@@ -497,106 +490,72 @@ void TwitchChannel::refreshLiveStatus()
         return;
     }
 
-    QString url("https://api.twitch.tv/kraken/streams/" + roomID);
+    getHelix()->getStreamById(
+        roomID,
+        [this, weak = weakOf<Channel>(this)](bool live, const auto &stream) {
+            ChannelPtr shared = weak.lock();
+            if (!shared)
+            {
+                return;
+            }
 
-    //    auto request = makeGetStreamRequest(roomID, QThread::currentThread());
-    NetworkRequest::twitchRequest(url)
-
-        .onSuccess(
-            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-                ChannelPtr shared = weak.lock();
-                if (!shared)
-                    return Failure;
-
-                return this->parseLiveStatus(result.parseRapidJson());
-            })
-        .execute();
+            this->parseLiveStatus(live, stream);
+        },
+        [] {
+            // failure
+        });
 }
 
-Outcome TwitchChannel::parseLiveStatus(const rapidjson::Document &document)
+void TwitchChannel::parseLiveStatus(bool live, const HelixStream &stream)
 {
-    if (!document.IsObject())
+    if (!live)
     {
-        qDebug() << "[TwitchChannel:refreshLiveStatus] root is not an object";
-        return Failure;
-    }
-
-    if (!document.HasMember("stream"))
-    {
-        qDebug() << "[TwitchChannel:refreshLiveStatus] Missing stream in root";
-        return Failure;
-    }
-
-    const auto &stream = document["stream"];
-
-    if (!stream.IsObject())
-    {
-        // Stream is offline (stream is most likely null)
         this->setLive(false);
-        return Failure;
+        return;
     }
-
-    if (!stream.HasMember("viewers") || !stream.HasMember("game") ||
-        !stream.HasMember("channel") || !stream.HasMember("created_at"))
-    {
-        qDebug()
-            << "[TwitchChannel:refreshLiveStatus] Missing members in stream";
-        this->setLive(false);
-        return Failure;
-    }
-
-    const rapidjson::Value &streamChannel = stream["channel"];
-
-    if (!streamChannel.IsObject() || !streamChannel.HasMember("status"))
-    {
-        qDebug() << "[TwitchChannel:refreshLiveStatus] Missing member "
-                    "\"status\" in channel";
-        return Failure;
-    }
-
-    // Stream is live
 
     {
         auto status = this->streamStatus_.access();
-        status->viewerCount = stream["viewers"].GetUint();
-        status->game = stream["game"].GetString();
-        status->title = streamChannel["status"].GetString();
-        QDateTime since = QDateTime::fromString(
-            stream["created_at"].GetString(), Qt::ISODate);
+        status->viewerCount = stream.viewerCount;
+        if (status->gameId != stream.gameId)
+        {
+            status->gameId = stream.gameId;
+
+            // Resolve game ID to game name
+            getHelix()->getGameById(
+                stream.gameId,
+                [this, weak = weakOf<Channel>(this)](const auto &game) {
+                    ChannelPtr shared = weak.lock();
+                    if (!shared)
+                    {
+                        return;
+                    }
+
+                    {
+                        auto status = this->streamStatus_.access();
+                        status->game = game.name;
+                    }
+
+                    this->liveStatusChanged.invoke();
+                },
+                [] {
+                    // failure
+                });
+        }
+        status->title = stream.title;
+        QDateTime since = QDateTime::fromString(stream.startedAt, Qt::ISODate);
         auto diff = since.secsTo(QDateTime::currentDateTime());
         status->uptime = QString::number(diff / 3600) + "h " +
                          QString::number(diff % 3600 / 60) + "m";
 
         status->rerun = false;
-        if (stream.HasMember("stream_type"))
-        {
-            status->streamType = stream["stream_type"].GetString();
-        }
-        else
-        {
-            status->streamType = QString();
-        }
-
-        if (stream.HasMember("broadcast_platform"))
-        {
-            const auto &broadcastPlatformValue = stream["broadcast_platform"];
-
-            if (broadcastPlatformValue.IsString())
-            {
-                const char *broadcastPlatform =
-                    stream["broadcast_platform"].GetString();
-                if (strcmp(broadcastPlatform, "rerun") == 0)
-                {
-                    status->rerun = true;
-                }
-            }
-        }
+        status->streamType = stream.type;
     }
-    setLive(true);
+
+    this->setLive(true);
+
     // Signal all listeners that the stream status has been updated
     this->liveStatusChanged.invoke();
-
-    return Success;
 }
 
 void TwitchChannel::loadRecentMessages()
@@ -641,9 +600,6 @@ void TwitchChannel::loadRecentMessages()
 
 void TwitchChannel::refreshPubsub()
 {
-    // listen to moderation actions
-    if (!this->hasModRights())
-        return;
     auto roomId = this->roomId();
     if (roomId.isEmpty())
         return;

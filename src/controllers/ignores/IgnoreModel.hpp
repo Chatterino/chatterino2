@@ -7,10 +7,9 @@
 
 namespace chatterino {
 
-class IgnoreController;
-
 class IgnoreModel : public SignalVectorModel<IgnorePhrase>
 {
+public:
     explicit IgnoreModel(QObject *parent);
 
 protected:
@@ -21,8 +20,6 @@ protected:
     // turns a row in the model into a vector item
     virtual void getRowFromItem(const IgnorePhrase &item,
                                 std::vector<QStandardItem *> &row) override;
-
-    friend class IgnoreController;
 };
 
 }  // namespace chatterino

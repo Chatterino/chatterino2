@@ -13,9 +13,10 @@ ScrollbarHighlight::ScrollbarHighlight()
 }
 
 ScrollbarHighlight::ScrollbarHighlight(const std::shared_ptr<QColor> color,
-                                       Style style)
+                                       Style style, bool isRedeemedHighlight)
     : color_(color)
     , style_(style)
+    , isRedeemedHighlight_(isRedeemedHighlight)
 {
 }
 
@@ -27,6 +28,11 @@ QColor ScrollbarHighlight::getColor() const
 ScrollbarHighlight::Style ScrollbarHighlight::getStyle() const
 {
     return this->style_;
+}
+
+bool ScrollbarHighlight::isRedeemedHighlight() const
+{
+    return this->isRedeemedHighlight_;
 }
 
 bool ScrollbarHighlight::isNull() const

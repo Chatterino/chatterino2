@@ -2,9 +2,8 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
-#include "controllers/pings/PingController.hpp"
+#include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
@@ -28,7 +27,8 @@
 namespace {
 
 const QSet<QString> zeroWidthEmotes{
-    "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane",
+    "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
+    "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
 };
 
 QColor getRandomColor(const QVariant &userId)
@@ -170,12 +170,11 @@ bool TwitchMessageBuilder::isIgnored() const
     auto app = getApp();
 
     // TODO(pajlada): Do we need to check if the phrase is valid first?
-    for (const auto &phrase : app->ignores->phrases)
+    auto phrases = getCSettings().ignoredMessages.readOnly();
+    for (const auto &phrase : *phrases)
     {
         if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
         {
-            qDebug() << "Blocking message because it contains ignored phrase"
-                     << phrase.getPattern();
             return true;
         }
     }
@@ -205,8 +204,7 @@ bool TwitchMessageBuilder::isIgnored() const
                     case ShowIgnoredUsersMessages::Never:
                         break;
                 }
-                qDebug() << "Blocking message because it's from blocked user"
-                         << user.name;
+
                 return true;
             }
         }
@@ -238,7 +236,7 @@ void TwitchMessageBuilder::triggerHighlights()
         return;
     }
 
-    if (getApp()->pings->isMuted(this->channel->getName()))
+    if (getCSettings().isMutedChannel(this->channel->getName()))
     {
         // Do nothing. Pings are muted in this channel.
         return;
@@ -296,6 +294,13 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     this->historicalMessage_ = this->tags.contains("historical");
+
+    if (this->tags.contains("msg-id") &&
+        this->tags["msg-id"].toString().split(';').contains(
+            "highlighted-message"))
+    {
+        this->message().flags.set(MessageFlag::RedeemedHighlight);
+    }
 
     // timestamp
     if (this->historicalMessage_)
@@ -764,8 +769,7 @@ void TwitchMessageBuilder::appendUsername()
 void TwitchMessageBuilder::runIgnoreReplaces(
     std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes)
 {
-    auto app = getApp();
-    const auto &phrases = app->ignores->phrases;
+    auto phrases = getCSettings().ignoredMessages.readOnly();
     auto removeEmotesInRange =
         [](int pos, int len,
            std::vector<std::tuple<int, EmotePtr, EmoteName>>
@@ -828,7 +832,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         }
     };
 
-    for (const auto &phrase : phrases)
+    for (const auto &phrase : *phrases)
     {
         if (phrase.isBlock())
         {
@@ -1017,7 +1021,7 @@ void TwitchMessageBuilder::parseHighlights()
 
     QString currentUsername = currentUser->getUserName();
 
-    if (app->highlights->blacklistContains(this->ircMessage->nick()))
+    if (getCSettings().isBlacklistedUser(this->ircMessage->nick()))
     {
         // Do nothing. We ignore highlights from this user.
         return;
@@ -1056,18 +1060,14 @@ void TwitchMessageBuilder::parseHighlights()
          */
     }
 
-    std::vector<HighlightPhrase> userHighlights =
-        app->highlights->highlightedUsers.cloneVector();
-
     // Highlight because of sender
-    for (const HighlightPhrase &userHighlight : userHighlights)
+    auto userHighlights = getCSettings().highlightedUsers.readOnly();
+    for (const HighlightPhrase &userHighlight : *userHighlights)
     {
         if (!userHighlight.isMatch(this->ircMessage->nick()))
         {
             continue;
         }
-        qDebug() << "Highlight because user" << this->ircMessage->nick()
-                 << "sent a message";
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = userHighlight.getColor();
@@ -1111,7 +1111,7 @@ void TwitchMessageBuilder::parseHighlights()
     // TODO: This vector should only be rebuilt upon highlights being changed
     // fourtf: should be implemented in the HighlightsController
     std::vector<HighlightPhrase> activeHighlights =
-        app->highlights->phrases.cloneVector();
+        getSettings()->highlightedMessages.cloneVector();
 
     if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
     {
@@ -1130,9 +1130,6 @@ void TwitchMessageBuilder::parseHighlights()
         {
             continue;
         }
-
-        qDebug() << "Highlight because" << this->originalMessage_ << "matches"
-                 << highlight.getPattern();
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = highlight.getColor();

@@ -22,6 +22,7 @@ void GIFTimer::initialize()
             qApp->activeWindow() == nullptr)
             return;
 
+        this->position_ += gifFrameLength;
         this->signal.invoke();
         getApp()->windows->repaintGifEmotes();
     });

@@ -41,6 +41,14 @@ namespace detail {
                 getApp()->emotes->gifTimer.signal.connect(
                     [this] { this->advance(); });
         }
+
+        auto totalLength = std::accumulate(
+            this->items_.begin(), this->items_.end(), 0UL,
+            [](auto init, auto &&frame) { return init + frame.duration; });
+
+        this->durationOffset_ = std::min<int>(
+            int(getApp()->emotes->gifTimer.position() % totalLength), 60000);
+        this->processOffset();
     }
 
     Frames::~Frames()
@@ -58,16 +66,15 @@ namespace detail {
 
     void Frames::advance()
     {
-        this->durationOffset_ += GIF_FRAME_LENGTH;
+        this->durationOffset_ += gifFrameLength;
+        this->processOffset();
+    }
 
+    void Frames::processOffset()
+    {
         while (true)
         {
             this->index_ %= this->items_.size();
-
-            // TODO: Figure out what this was supposed to achieve
-            // if (this->index_ >= this->items_.size()) {
-            //     this->index_ = this->index_;
-            // }
 
             if (this->durationOffset_ > this->items_[this->index_].duration)
             {
@@ -218,10 +225,6 @@ ImagePtr Image::fromUrl(const Url &url, qreal scale)
     if (!shared)
     {
         cache[url] = shared = ImagePtr(new Image(url, scale));
-    }
-    else
-    {
-        // qDebug() << "same image created multiple times:" << url.string;
     }
 
     return shared;
