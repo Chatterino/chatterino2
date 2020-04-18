@@ -6,6 +6,7 @@
 #include <QGraphicsBlurEffect>
 #include <QMessageBox>
 #include <QPainter>
+#include <QScreen>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
@@ -25,6 +26,7 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/TooltipPreviewImage.hpp"
@@ -114,6 +116,10 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->initializeScrollbar();
     this->initializeSignals();
 
+    this->cursors_.neutral = QCursor(getResources().scrolling.neutralScroll);
+    this->cursors_.up = QCursor(getResources().scrolling.upScroll);
+    this->cursors_.down = QCursor(getResources().scrolling.downScroll);
+
     this->pauseTimer_.setSingleShot(true);
     QObject::connect(&this->pauseTimer_, &QTimer::timeout, this, [this] {
         /// remove elements that are finite
@@ -130,6 +136,10 @@ ChannelView::ChannelView(BaseWidget *parent)
     this->clickTimer_ = new QTimer(this);
     this->clickTimer_->setSingleShot(true);
     this->clickTimer_->setInterval(500);
+
+    this->scrollTimer_.setInterval(20);
+    QObject::connect(&this->scrollTimer_, &QTimer::timeout, this,
+                     &ChannelView::scrollUpdateRequested);
 
     this->setFocusPolicy(Qt::FocusPolicy::StrongFocus);
 }
@@ -1060,8 +1070,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         return;
     }
 
+    if (this->isScrolling_)
+    {
+        this->currentMousePosition_ = event->screenPos();
+    }
+
     // is selecting
-    if (this->isMouseDown_)
+    if (this->isLeftMouseDown_)
     {
         // this->pause(PauseReason::Selecting, 300);
         int index = layout->getSelectionIndex(relativePos);
@@ -1326,8 +1341,11 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
     switch (event->button())
     {
         case Qt::LeftButton: {
-            this->lastPressPosition_ = event->screenPos();
-            this->isMouseDown_ = true;
+            if (this->isScrolling_)
+                this->disableScrolling();
+
+            this->lastLeftPressPosition_ = event->screenPos();
+            this->isLeftMouseDown_ = true;
 
             if (layout->flags.has(MessageLayoutFlag::Collapsed))
                 return;
@@ -1344,8 +1362,19 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         break;
 
         case Qt::RightButton: {
+            if (this->isScrolling_)
+                this->disableScrolling();
+
             this->lastRightPressPosition_ = event->screenPos();
             this->isRightMouseDown_ = true;
+        }
+        break;
+
+        case Qt::MiddleButton: {
+            if (this->isScrolling_)
+                this->disableScrolling();
+            else
+                this->enableScrolling(event->screenPos());
         }
         break;
 
@@ -1373,11 +1402,11 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
                 return;
             }
         }
-        else if (this->isMouseDown_)
+        else if (this->isLeftMouseDown_)
         {
-            this->isMouseDown_ = false;
+            this->isLeftMouseDown_ = false;
 
-            if (fabsf(distanceBetweenPoints(this->lastPressPosition_,
+            if (fabsf(distanceBetweenPoints(this->lastLeftPressPosition_,
                                             event->screenPos())) > 15.f)
             {
                 return;
@@ -1404,6 +1433,13 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
         {
             return;
         }
+    }
+    else if (event->button() == Qt::MiddleButton)
+    {
+        if (event->screenPos() == this->lastMiddlePressPosition_)
+            this->enableScrolling(event->screenPos());
+        else
+            this->disableScrolling();
     }
     else
     {
@@ -1638,7 +1674,7 @@ void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
         return;
     }
 
-    if (!this->isMouseDown_)
+    if (!this->isLeftMouseDown_)
     {
         this->isDoubleClick_ = true;
 
@@ -1801,6 +1837,61 @@ void ChannelView::getWordBounds(MessageLayout *layout,
     const int length =
         element->hasTrailingSpace() ? selectionLength - 1 : selectionLength;
     wordEnd = wordStart + length;
+}
+
+void ChannelView::enableScrolling(const QPointF &scrollStart)
+{
+    this->isScrolling_ = true;
+    this->lastMiddlePressPosition_ = scrollStart;
+    // The line below prevents a sudden jerk at the beginning
+    this->currentMousePosition_ = scrollStart;
+
+    this->scrollTimer_.start();
+
+    if (!QGuiApplication::overrideCursor())
+        QGuiApplication::setOverrideCursor(this->cursors_.neutral);
+}
+
+void ChannelView::disableScrolling()
+{
+    this->isScrolling_ = false;
+    this->scrollTimer_.stop();
+    QGuiApplication::restoreOverrideCursor();
+}
+
+void ChannelView::scrollUpdateRequested()
+{
+    const qreal dpi =
+        QGuiApplication::screenAt(this->pos())->devicePixelRatio();
+    const qreal delta = dpi * (this->currentMousePosition_.y() -
+                               this->lastMiddlePressPosition_.y());
+    const int cursorHeight = this->cursors_.neutral.pixmap().height();
+
+    if (fabs(delta) <= cursorHeight * dpi)
+    {
+        /*
+         * If within an area close to the initial position, don't do any
+         * scrolling at all.
+         */
+        QGuiApplication::changeOverrideCursor(this->cursors_.neutral);
+        return;
+    }
+
+    qreal offset;
+    if (delta > 0)
+    {
+        QGuiApplication::changeOverrideCursor(this->cursors_.down);
+        offset = delta - cursorHeight;
+    }
+    else
+    {
+        QGuiApplication::changeOverrideCursor(this->cursors_.up);
+        offset = delta + cursorHeight;
+    }
+
+    // "Good" feeling multiplier found by trial-and-error
+    const qreal multiplier = qreal(0.02);
+    this->scrollBar_->offset(multiplier * offset);
 }
 
 }  // namespace chatterino
