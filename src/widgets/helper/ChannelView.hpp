@@ -148,6 +148,9 @@ private:
     void updatePauses();
     void unpaused();
 
+    void enableScrolling(const QPointF &scrollStart);
+    void disableScrolling();
+
     QTimer *layoutCooldown_;
     bool layoutQueued_;
 
@@ -183,14 +186,25 @@ private:
     bool onlyUpdateEmotes_ = false;
 
     // Mouse event variables
-    bool isMouseDown_ = false;
+    bool isLeftMouseDown_ = false;
     bool isRightMouseDown_ = false;
     bool isDoubleClick_ = false;
     DoubleClickSelection doubleClickSelection_;
-    QPointF lastPressPosition_;
+    QPointF lastLeftPressPosition_;
     QPointF lastRightPressPosition_;
     QPointF lastDClickPosition_;
     QTimer *clickTimer_;
+
+    bool isScrolling_ = false;
+    QPointF lastMiddlePressPosition_;
+    QPointF currentMousePosition_;
+    QTimer scrollTimer_;
+
+    struct {
+        QCursor neutral;
+        QCursor up;
+        QCursor down;
+    } cursors_;
 
     Selection selection_;
     bool selecting_ = false;
@@ -211,6 +225,8 @@ private slots:
         queueLayout();
         update();
     }
+
+    void scrollUpdateRequested();
 };
 
 }  // namespace chatterino

@@ -30,6 +30,9 @@ Resources2::Resources2()
     this->error = QPixmap(":/error.png");
     this->icon = QPixmap(":/icon.png");
     this->pajaDank = QPixmap(":/pajaDank.png");
+    this->scrolling.downScroll = QPixmap(":/scrolling/downScroll.png");
+    this->scrolling.neutralScroll = QPixmap(":/scrolling/neutralScroll.png");
+    this->scrolling.upScroll = QPixmap(":/scrolling/upScroll.png");
     this->settings.aboutlogo = QPixmap(":/settings/aboutlogo.png");
     this->split.down = QPixmap(":/split/down.png");
     this->split.left = QPixmap(":/split/left.png");
