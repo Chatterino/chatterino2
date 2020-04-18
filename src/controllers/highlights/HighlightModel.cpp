@@ -120,14 +120,16 @@ void HighlightModel::afterInit()
     std::vector<QStandardItem *> redeemedRow = this->createRow();
     setBoolItem(redeemedRow[Column::Pattern],
                 getSettings()->enableRedeemedHighlight.getValue(), true, false);
-    redeemedRow[Column::Pattern]->setData("Highlights redeemed with Bits",
-                                          Qt::DisplayRole);
-    setBoolItem(redeemedRow[Column::FlashTaskbar],
-                getSettings()->enableRedeemedHighlightTaskbar.getValue(), true,
-                false);
-    setBoolItem(redeemedRow[Column::PlaySound],
-                getSettings()->enableRedeemedHighlightSound.getValue(), true,
-                false);
+    redeemedRow[Column::Pattern]->setData(
+        "Highlights redeemed with Twitch Bits", Qt::DisplayRole);
+    //    setBoolItem(redeemedRow[Column::FlashTaskbar],
+    //                getSettings()->enableRedeemedHighlightTaskbar.getValue(), true,
+    //                false);
+    //    setBoolItem(redeemedRow[Column::PlaySound],
+    //                getSettings()->enableRedeemedHighlightSound.getValue(), true,
+    //                false);
+    redeemedRow[Column::FlashTaskbar]->setFlags(0);
+    redeemedRow[Column::PlaySound]->setFlags(0);
     redeemedRow[Column::UseRegex]->setFlags(0);
     redeemedRow[Column::CaseSensitive]->setFlags(0);
 
@@ -192,8 +194,8 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 }
                 else if (rowIndex == 3)
                 {
-                    getSettings()->enableRedeemedHighlightTaskbar.setValue(
-                        value.toBool());
+                    // getSettings()->enableRedeemedHighlightTaskbar.setValue(
+                    //     value.toBool());
                 }
             }
         }
@@ -218,8 +220,8 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 }
                 else if (rowIndex == 3)
                 {
-                    getSettings()->enableRedeemedHighlightSound.setValue(
-                        value.toBool());
+                    // getSettings()->enableRedeemedHighlightSound.setValue(
+                    //     value.toBool());
                 }
             }
         }

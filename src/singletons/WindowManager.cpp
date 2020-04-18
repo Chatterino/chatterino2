@@ -445,6 +445,8 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         [this](auto, auto) { this->forceLayoutChannelViews(); });
     settings.collpseMessagesMinLines.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.enableRedeemedHighlight.connect(
+        [this](auto, auto) { this->forceLayoutChannelViews(); });
 
     this->initialized_ = true;
 }
