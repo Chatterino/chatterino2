@@ -121,7 +121,7 @@ void HighlightModel::afterInit()
     setBoolItem(redeemedRow[Column::Pattern],
                 getSettings()->enableRedeemedHighlight.getValue(), true, false);
     redeemedRow[Column::Pattern]->setData(
-        "Highlights redeemed with Twitch Bits", Qt::DisplayRole);
+        "Highlights redeemed with Channel Points", Qt::DisplayRole);
     //    setBoolItem(redeemedRow[Column::FlashTaskbar],
     //                getSettings()->enableRedeemedHighlightTaskbar.getValue(), true,
     //                false);

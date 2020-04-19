@@ -359,7 +359,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     // layout.addCheckbox("Mark last message you read");
     // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
-    layout.addCheckbox("Highlight messages redeemed with Twitch Bits",
+    layout.addCheckbox("Highlight messages redeemed with Channel Points",
                        s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
         "Timestamps",
