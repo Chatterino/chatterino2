@@ -46,8 +46,16 @@ namespace detail {
             this->items_.begin(), this->items_.end(), 0UL,
             [](auto init, auto &&frame) { return init + frame.duration; });
 
-        this->durationOffset_ = std::min<int>(
-            int(getApp()->emotes->gifTimer.position() % totalLength), 60000);
+        if (totalLength == 0)
+        {
+            this->durationOffset_ = 0;
+        }
+        else
+        {
+            this->durationOffset_ = std::min<int>(
+                int(getApp()->emotes->gifTimer.position() % totalLength),
+                60000);
+        }
         this->processOffset();
     }
 
@@ -72,6 +80,11 @@ namespace detail {
 
     void Frames::processOffset()
     {
+        if (this->items_.isEmpty())
+        {
+            return;
+        }
+
         while (true)
         {
             this->index_ %= this->items_.size();

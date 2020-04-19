@@ -32,8 +32,11 @@ AboutPage::AboutPage()
 
         auto logo = layout.emplace<QLabel>().assign(&this->logo_);
         logo->setPixmap(pixmap);
-        logo->setFixedSize(PIXMAP_WIDTH,
-                           PIXMAP_WIDTH * pixmap.height() / pixmap.width());
+        if (pixmap.width() != 0)
+        {
+            logo->setFixedSize(PIXMAP_WIDTH,
+                               PIXMAP_WIDTH * pixmap.height() / pixmap.width());
+        }
         logo->setScaledContents(true);
 
         // this does nothing

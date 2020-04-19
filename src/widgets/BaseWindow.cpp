@@ -104,12 +104,12 @@ QRect BaseWindow::getBounds()
 
 float BaseWindow::scale() const
 {
-    return this->overrideScale().value_or(this->scale_);
+    return std::max<float>(0.01f, this->overrideScale().value_or(this->scale_));
 }
 
 float BaseWindow::qtFontScale() const
 {
-    return this->scale() / this->nativeScale_;
+    return this->scale() / std::max<float>(0.01, this->nativeScale_);
 }
 
 void BaseWindow::init()
