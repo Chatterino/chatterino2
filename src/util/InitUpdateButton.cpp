@@ -14,8 +14,16 @@ void initUpdateButton(Button &button,
     QObject::connect(&button, &Button::leftClicked, [&button] {
         auto dialog = new UpdateDialog();
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
-        dialog->move(button.mapToGlobal(
-            QPoint(int(-100 * button.scale()), button.height())));
+
+        auto globalPoint = button.mapToGlobal(
+                    QPoint(int(-100 * button.scale()), button.height()));
+
+        // Make sure that update dialog will not go off left edge of screen
+        if (globalPoint.x() < 0) {
+            globalPoint.setX(0);
+        }
+
+        dialog->move(globalPoint);
         dialog->show();
         dialog->raise();
 
