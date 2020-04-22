@@ -16,7 +16,7 @@ void initUpdateButton(Button &button,
         dialog->setActionOnFocusLoss(BaseWindow::Delete);
 
         auto globalPoint = button.mapToGlobal(
-                    QPoint(int(-100 * button.scale()), button.height()));
+            QPoint(int(-100 * button.scale()), button.height()));
 
         // Make sure that update dialog will not go off left edge of screen
         if (globalPoint.x() < 0)
