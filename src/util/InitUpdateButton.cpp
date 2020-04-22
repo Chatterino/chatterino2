@@ -19,7 +19,8 @@ void initUpdateButton(Button &button,
                     QPoint(int(-100 * button.scale()), button.height()));
 
         // Make sure that update dialog will not go off left edge of screen
-        if (globalPoint.x() < 0) {
+        if (globalPoint.x() < 0)
+        {
             globalPoint.setX(0);
         }
 
