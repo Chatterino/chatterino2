@@ -1380,7 +1380,8 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             if (hoverLayoutElement != nullptr)
             {
                 auto &link = hoverLayoutElement->getLink();
-                if (link.isValid()) {
+                if (link.isValid())
+                {
                     break;
                 }
             } else
@@ -1750,7 +1751,8 @@ void ChannelView::showUserInfoPopup(const QString &userName)
 void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                                   MessageLayout *layout)
 {
-    if (event->button() != Qt::LeftButton && event->button() != Qt::MiddleButton)
+    if (event->button() != Qt::LeftButton &&
+        event->button() != Qt::MiddleButton)
     {
         return;
     }
