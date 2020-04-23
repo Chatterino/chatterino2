@@ -1374,10 +1374,20 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         break;
 
         case Qt::MiddleButton: {
-            if (this->isScrolling_)
-                this->disableScrolling();
-            else
-                this->enableScrolling(event->screenPos());
+            const MessageLayoutElement *hoverLayoutElement =
+                layout->getElementAt(relativePos);
+
+            if (hoverLayoutElement != nullptr) {
+                auto &link = hoverLayoutElement->getLink();
+                if (link.isValid()) {
+                    break;
+                }
+            } else {
+                if (this->isScrolling_)
+                    this->disableScrolling();
+                else
+                    this->enableScrolling(event->screenPos());
+            }
         }
         break;
 
@@ -1545,6 +1555,14 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             else
             {
                 this->addContextMenuItems(hoveredElement, layout);
+            }
+        }
+        break;
+        case Qt::MiddleButton: {
+            auto &link = hoveredElement->getLink();
+            if (!getSettings()->linksDoubleClickOnly)
+            {
+                this->handleLinkClick(event, link, layout);
             }
         }
         break;
@@ -1730,7 +1748,7 @@ void ChannelView::showUserInfoPopup(const QString &userName)
 void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                                   MessageLayout *layout)
 {
-    if (event->button() != Qt::LeftButton)
+    if (event->button() != Qt::LeftButton && event->button() != Qt::MiddleButton)
     {
         return;
     }
