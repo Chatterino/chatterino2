@@ -1377,12 +1377,14 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             const MessageLayoutElement *hoverLayoutElement =
                 layout->getElementAt(relativePos);
 
-            if (hoverLayoutElement != nullptr) {
+            if (hoverLayoutElement != nullptr)
+            {
                 auto &link = hoverLayoutElement->getLink();
                 if (link.isValid()) {
                     break;
                 }
-            } else {
+            } else
+            {
                 if (this->isScrolling_)
                     this->disableScrolling();
                 else
