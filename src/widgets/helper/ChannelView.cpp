@@ -1384,7 +1384,8 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
                 {
                     break;
                 }
-            } else
+            }
+            else
             {
                 if (this->isScrolling_)
                     this->disableScrolling();
