@@ -212,7 +212,7 @@ void Button::mousePressEvent(QMouseEvent *event)
         return;
     }
 
-    if (event->button() != Qt::LeftButton && event->button() != Qt::MiddleButton)
+    if (event->button() != Qt::LeftButton)
     {
         return;
     }
