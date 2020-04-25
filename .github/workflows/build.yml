@@ -25,7 +25,7 @@ jobs:
           submodules: true
 
       - name: Install Qt
-        uses: jurplel/install-qt-action@v1
+        uses: jurplel/install-qt-action@v2
 
       # WINDOWS
       - name: Cache conan
