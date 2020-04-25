@@ -16,7 +16,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/CombinePath.hpp"
-#include "widgets/dialogs/LogsPopup.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include <QApplication>
@@ -416,45 +415,9 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
         else if (commandName == "/logs")
         {
-            if (words.size() < 2)
-            {
-                channel->addMessage(
-                    makeSystemMessage("Usage: /logs [user] (channel)"));
-                return "";
-            }
-            auto app = getApp();
-
-            auto logs = new LogsPopup();
-            QString target = words.at(1);
-
-            if (target.at(0) == '@')
-            {
-                target = target.mid(1);
-            }
-
-            logs->setTargetUserName(target);
-
-            std::shared_ptr<Channel> logsChannel = channel;
-
-            if (words.size() == 3)
-            {
-                QString channelName = words.at(2);
-                if (words.at(2).at(0) == '#')
-                {
-                    channelName = channelName.mid(1);
-                }
-
-                logs->setChannelName(channelName);
-
-                logsChannel =
-                    app->twitch.server->getChannelOrEmpty(channelName);
-            }
-
-            logs->setChannel(logsChannel);
-
-            logs->getLogs();
-            logs->setAttribute(Qt::WA_DeleteOnClose);
-            logs->show();
+            channel->addMessage(makeSystemMessage(
+                "Online logs functionality has been removed. If you're a "
+                "moderator, you can use the /user command"));
             return "";
         }
         else if (commandName == "/user")
