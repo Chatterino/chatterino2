@@ -1408,7 +1408,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     QPoint relativePos;
     int messageIndex;
 
-    bool foundMessage = tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
+    bool foundMessage =
+        tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
 
     // check if mouse was pressed
     if (event->button() == Qt::LeftButton)
