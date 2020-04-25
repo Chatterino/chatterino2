@@ -1377,13 +1377,10 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             const MessageLayoutElement *hoverLayoutElement =
                 layout->getElementAt(relativePos);
 
-            if (hoverLayoutElement != nullptr)
+            if (hoverLayoutElement != nullptr &&
+                hoverLayoutElement->getLink().isValid())
             {
-                auto &link = hoverLayoutElement->getLink();
-                if (link.isValid())
-                {
-                    break;
-                }
+                break;
             }
             else
             {
