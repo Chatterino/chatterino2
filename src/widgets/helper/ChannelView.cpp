@@ -1378,7 +1378,8 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
                 layout->getElementAt(relativePos);
 
             if (hoverLayoutElement != nullptr &&
-                hoverLayoutElement->getLink().isValid())
+                hoverLayoutElement->getLink().isUrl() &&
+                this->isScrolling_ == false)
             {
                 break;
             }
@@ -1400,6 +1401,15 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
 void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 {
+    // find message
+    this->queueLayout();
+
+    std::shared_ptr<MessageLayout> layout;
+    QPoint relativePos;
+    int messageIndex;
+
+    bool foundMessage = tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
+
     // check if mouse was pressed
     if (event->button() == Qt::LeftButton)
     {
@@ -1450,25 +1460,35 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
     else if (event->button() == Qt::MiddleButton)
     {
-        if (event->screenPos() == this->lastMiddlePressPosition_)
-            this->enableScrolling(event->screenPos());
+        if (this->isScrolling_)
+        {
+            if (event->screenPos() == this->lastMiddlePressPosition_)
+                this->enableScrolling(event->screenPos());
+            else
+                this->disableScrolling();
+
+            return;
+        }
         else
-            this->disableScrolling();
+        {
+            const MessageLayoutElement *hoverLayoutElement =
+                layout->getElementAt(relativePos);
+
+            if (hoverLayoutElement == nullptr ||
+                hoverLayoutElement->getLink().isUrl() == false)
+            {
+                return;
+            }
+        }
     }
     else
     {
         // not left or right button
         return;
     }
-    // find message
-    this->queueLayout();
-
-    std::shared_ptr<MessageLayout> layout;
-    QPoint relativePos;
-    int messageIndex;
 
     // no message found
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!foundMessage)
     {
         // No message at clicked position
         return;
