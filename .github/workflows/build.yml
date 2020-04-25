@@ -26,6 +26,8 @@ jobs:
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
+        with:
+          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
 
       # WINDOWS
       - name: Cache conan
