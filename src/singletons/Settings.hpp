@@ -207,10 +207,10 @@ public:
 
     BoolSetting enableRedeemedHighlight = {
         "/highlighting/redeemedHighlight/highlighted", true};
-    BoolSetting enableRedeemedHighlightSound = {
-        "/highlighting/redeemedHighlight/enableSound", false};
-    BoolSetting enableRedeemedHighlightTaskbar = {
-        "/highlighting/redeemedHighlight/enableTaskbarFlashing", false};
+    //    BoolSetting enableRedeemedHighlightSound = {
+    //        "/highlighting/redeemedHighlight/enableSound", false};
+    //    BoolSetting enableRedeemedHighlightTaskbar = {
+    //        "/highlighting/redeemedHighlight/enableTaskbarFlashing", false};
     QStringSetting redeemedHighlightSoundUrl = {
         "/highlighting/redeemedHighlightSoundUrl", ""};
     QStringSetting redeemedHighlightColor = {

@@ -319,7 +319,9 @@ void ChannelView::scaleChangedEvent(float scale)
     {
         auto factor = this->qtFontScale();
 #ifdef Q_OS_MACOS
-        factor = scale * 80.f / this->logicalDpiX() * this->devicePixelRatioF();
+        factor = scale * 80.f /
+                 std::max<float>(
+                     0.01, this->logicalDpiX() * this->devicePixelRatioF());
 #endif
         this->goToBottom_->getLabel().setFont(
             getFonts()->getFont(FontStyle::UiMedium, factor));
@@ -426,8 +428,9 @@ void ChannelView::updateScrollbar(
 
         if (h < 0)  // break condition
         {
-            this->scrollBar_->setLargeChange((messages.size() - i) +
-                                             qreal(h) / message->getHeight());
+            this->scrollBar_->setLargeChange(
+                (messages.size() - i) +
+                qreal(h) / std::max<int>(1, message->getHeight()));
 
             showScrollbar = true;
             break;
@@ -964,8 +967,8 @@ void ChannelView::wheelEvent(QWheelEvent *event)
         if (delta > 0)
         {
             qreal scrollFactor = fmod(desired, 1);
-            qreal currentScrollLeft =
-                int(scrollFactor * snapshot[i]->getHeight());
+            qreal currentScrollLeft = std::max<qreal>(
+                0.01, int(scrollFactor * snapshot[i]->getHeight()));
 
             for (; i >= 0; i--)
             {
@@ -997,8 +1000,8 @@ void ChannelView::wheelEvent(QWheelEvent *event)
         {
             delta = -delta;
             qreal scrollFactor = 1 - fmod(desired, 1);
-            qreal currentScrollLeft =
-                int(scrollFactor * snapshot[i]->getHeight());
+            qreal currentScrollLeft = std::max<qreal>(
+                0.01, int(scrollFactor * snapshot[i]->getHeight()));
 
             for (; i < snapshotLength; i++)
             {

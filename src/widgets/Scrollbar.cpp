@@ -357,7 +357,9 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
         int delta = event->pos().y() - this->lastMousePosition_.y();
 
         setDesiredValue(this->desiredValue_ +
-                        qreal(delta) / this->trackHeight_ * this->maximum_);
+                        qreal(delta) /
+                            std::max<qreal>(0.00000002, this->trackHeight_ *
+                                                            this->maximum_));
     }
 
     this->lastMousePosition_ = event->pos();
@@ -442,13 +444,14 @@ void Scrollbar::updateScroll()
     this->trackHeight_ = this->height() - this->buttonHeight_ -
                          this->buttonHeight_ - MIN_THUMB_HEIGHT - 1;
 
-    this->thumbRect_ =
-        QRect(0,
-              int(this->currentValue_ / this->maximum_ * this->trackHeight_) +
-                  1 + this->buttonHeight_,
-              this->width(),
-              int(this->largeChange_ / this->maximum_ * this->trackHeight_) +
-                  MIN_THUMB_HEIGHT);
+    auto div = std::max<qreal>(0.0000001, this->maximum_);
+
+    this->thumbRect_ = QRect(
+        0,
+        int(this->currentValue_ / div * this->trackHeight_) + 1 +
+            this->buttonHeight_,
+        this->width(),
+        int(this->largeChange_ / div * this->trackHeight_) + MIN_THUMB_HEIGHT);
 
     this->update();
 }

@@ -60,6 +60,7 @@ QColor getRandomColor(const QVariant &userId)
         colorSeed = std::rand();
     }
 
+    assert(twitchUsernameColors.size() != 0);
     const auto colorIndex = colorSeed % twitchUsernameColors.size();
     return twitchUsernameColors[colorIndex];
 }
