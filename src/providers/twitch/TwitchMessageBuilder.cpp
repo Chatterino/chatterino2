@@ -512,7 +512,9 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         if (string.startsWith('@'))
         {
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold);
+                                       textColor, FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, string.mid(1)});
+
             this->emplace<TextElement>(
                 string, MessageElementFlag::NonBoldUsername, textColor);
         }
