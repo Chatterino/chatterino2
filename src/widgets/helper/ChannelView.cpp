@@ -1288,7 +1288,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         }
         else
         {
-            tooltipPreviewImage.setImage(nullptr);
+            tooltipPreviewImage.setImage(hoverLayoutElement->getCreator().getThumbnail());
         }
 
         tooltipWidget->moveTo(this, event->globalPos());

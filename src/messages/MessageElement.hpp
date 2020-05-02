@@ -128,8 +128,12 @@ public:
     MessageElement *setLink(const Link &link);
     MessageElement *setText(const QString &text);
     MessageElement *setTooltip(const QString &tooltip);
+    MessageElement *setThumbnail(const ImagePtr &thumbnail);
+
     MessageElement *setTrailingSpace(bool value);
     const QString &getTooltip() const;
+    const ImagePtr &getThumbnail() const;
+
     const Link &getLink() const;
     bool hasTrailingSpace() const;
     MessageElementFlags getFlags() const;
@@ -148,6 +152,7 @@ private:
     QString text_;
     Link link_;
     QString tooltip_;
+    ImagePtr thumbnail_;
     MessageElementFlags flags_;
 };
 

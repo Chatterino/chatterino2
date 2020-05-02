@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "messages/Link.hpp"
 #include "singletons/Settings.hpp"
+#include "messages/Image.hpp"
 
 #include <QString>
 
@@ -12,11 +13,11 @@ namespace chatterino {
 
 void LinkResolver::getLinkInfo(
     const QString url, QObject *caller,
-    std::function<void(QString, Link)> successCallback)
+    std::function<void(QString, Link, ImagePtr)> successCallback)
 {
     if (!getSettings()->linkInfoTooltip)
     {
-        successCallback("No link info loaded", Link(Link::Url, url));
+        successCallback("No link info loaded", Link(Link::Url, url), nullptr);
         return;
     }
     // Uncomment to test crashes
@@ -30,9 +31,11 @@ void LinkResolver::getLinkInfo(
             auto statusCode = root.value("status").toInt();
             QString response = QString();
             QString linkString = url;
+            ImagePtr thumbnail = nullptr;
             if (statusCode == 200)
             {
                 response = root.value("tooltip").toString();
+                thumbnail = Image::fromUrl({root.value("thumbnail").toString()});
                 if (getSettings()->unshortLinks)
                 {
                     linkString = root.value("link").toString();
@@ -43,12 +46,13 @@ void LinkResolver::getLinkInfo(
                 response = root.value("message").toString();
             }
             successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
-                            Link(Link::Url, linkString));
+                            Link(Link::Url, linkString),
+                            thumbnail);
 
             return Success;
         })
         .onError([successCallback, url](auto /*result*/) {
-            successCallback("No link info found", Link(Link::Url, url));
+            successCallback("No link info found", Link(Link::Url, url), nullptr);
         })
         .execute();
     // });
