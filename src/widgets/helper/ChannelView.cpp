@@ -1470,7 +1470,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
             return;
         }
-        else
+        else if (foundMessage)
         {
             const MessageLayoutElement *hoverLayoutElement =
                 layout->getElementAt(relativePos);
