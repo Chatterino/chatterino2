@@ -856,10 +856,10 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     // draw paused sign
     if (this->paused())
     {
-        auto a = this->scale() * 16;
-        auto brush = QBrush(QColor(127, 127, 127, 63));
-        painter.fillRect(QRectF(this->width() - a, a / 4, a / 4, a), brush);
-        painter.fillRect(QRectF(this->width() - a / 2, a / 4, a / 4, a), brush);
+        auto a = this->scale() * 20;
+        auto brush = QBrush(QColor(127, 127, 127, 255));
+        painter.fillRect(QRectF(5, a / 4, a / 4, a), brush);
+        painter.fillRect(QRectF(15, a / 4, a / 4, a), brush);
     }
 }
 
