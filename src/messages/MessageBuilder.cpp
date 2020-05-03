@@ -437,7 +437,9 @@ void MessageBuilder::addLink(const QString &origLink,
                 linkMEOriginal->setLink(originalLink)->updateLink();
             }
             linkMELowercase->setThumbnail(thumbnail);
+            linkMELowercase->setThumbnailScale(200, 200);
             linkMEOriginal->setThumbnail(thumbnail);
+            linkMEOriginal->setThumbnailScale(200, 200);
         });
 }
 

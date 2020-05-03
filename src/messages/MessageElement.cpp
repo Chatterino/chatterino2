@@ -46,6 +46,13 @@ MessageElement *MessageElement::setThumbnail(const ImagePtr &thumbnail)
     return this;
 }
 
+MessageElement *MessageElement::setThumbnailScale(const int w, const int h)
+{
+    this->thumbnailWidth_ = w;
+    this->thumbnailHeight_ = h;
+    return this;
+}
+
 MessageElement *MessageElement::setTrailingSpace(bool value)
 {
     this->trailingSpace = value;
@@ -60,6 +67,16 @@ const QString &MessageElement::getTooltip() const
 const ImagePtr &MessageElement::getThumbnail() const
 {
     return this->thumbnail_;
+}
+
+const int &MessageElement::getThumbnailWidth() const
+{
+    return this->thumbnailWidth_;
+}
+
+const int &MessageElement::getThumbnailHeight() const
+{
+    return this->thumbnailHeight_;
 }
 
 const Link &MessageElement::getLink() const

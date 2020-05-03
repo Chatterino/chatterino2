@@ -38,6 +38,14 @@ void TooltipPreviewImage::setImage(ImagePtr image)
     this->refreshTooltipWidgetPixmap();
 }
 
+void TooltipPreviewImage::setImageScale(int w, int h)
+{
+    this->imageWidth_ = w;
+    this->imageHeight_ = h;
+
+    this->refreshTooltipWidgetPixmap();
+}
+
 void TooltipPreviewImage::refreshTooltipWidgetPixmap()
 {
     auto tooltipWidget = TooltipWidget::instance();
@@ -46,7 +54,13 @@ void TooltipPreviewImage::refreshTooltipWidgetPixmap()
     {
         if (auto pixmap = this->image_->pixmapOrLoad())
         {
-            tooltipWidget->setImage(*pixmap);
+            if (this->imageWidth_ != 0 && this->imageHeight_) {
+                tooltipWidget->setImage(pixmap->scaled(this->imageWidth_, this->imageHeight_, Qt::KeepAspectRatio));
+            }
+            else {
+                tooltipWidget->setImage(*pixmap);
+            }
+
             this->attemptRefresh = false;
         }
         else
