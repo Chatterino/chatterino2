@@ -1289,12 +1289,20 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         else
         {
             auto element = &hoverLayoutElement->getCreator();
-            tooltipPreviewImage.setImage(element->getThumbnail());
-            if (element->getThumbnailType() ==
-                MessageElement::ThumbnailType::Link_Thumbnail)
+            auto thumbnailSize = getSettings()->thumbnailSize;
+            if (thumbnailSize == 0.f)
             {
-                auto thumbnailSize = getSettings()->thumbnailSize;
-                tooltipPreviewImage.setImageScale(thumbnailSize, thumbnailSize);
+                tooltipPreviewImage.setImage(nullptr);
+            }
+            else
+            {
+                tooltipPreviewImage.setImage(element->getThumbnail());
+                if (element->getThumbnailType() ==
+                    MessageElement::ThumbnailType::Link_Thumbnail)
+                {
+                    tooltipPreviewImage.setImageScale(thumbnailSize,
+                                                      thumbnailSize);
+                }
             }
         }
 
