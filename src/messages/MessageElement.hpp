@@ -122,20 +122,23 @@ public:
         Update_Images = 4,
         Update_All = Update_Text | Update_Emotes | Update_Images
     };
+    enum ThumbnailType : char {
+        Link_Thumbnail = 1,
+    };
+
 
     virtual ~MessageElement();
 
     MessageElement *setLink(const Link &link);
     MessageElement *setText(const QString &text);
     MessageElement *setTooltip(const QString &tooltip);
+    MessageElement *setThumbnailType(const ThumbnailType type);
     MessageElement *setThumbnail(const ImagePtr &thumbnail);
-    MessageElement *setThumbnailScale(const int w = 0, const int h = 0);
 
     MessageElement *setTrailingSpace(bool value);
     const QString &getTooltip() const;
     const ImagePtr &getThumbnail() const;
-    const int &getThumbnailWidth() const;
-    const int &getThumbnailHeight() const;
+    const ThumbnailType &getThumbnailType() const;
 
     const Link &getLink() const;
     bool hasTrailingSpace() const;
@@ -156,8 +159,7 @@ private:
     Link link_;
     QString tooltip_;
     ImagePtr thumbnail_;
-    int thumbnailWidth_;
-    int thumbnailHeight_;
+    ThumbnailType thumbnailType_;
     MessageElementFlags flags_;
 };
 

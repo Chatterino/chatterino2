@@ -1290,7 +1290,10 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         {
             auto element = &hoverLayoutElement->getCreator();
             tooltipPreviewImage.setImage(element->getThumbnail());
-            tooltipPreviewImage.setImageScale(element->getThumbnailWidth(), element->getThumbnailHeight());
+            if (element->getThumbnailType() == MessageElement::ThumbnailType::Link_Thumbnail) {
+                auto thumbnailSize = getSettings()->thumbnailSize;
+                tooltipPreviewImage.setImageScale(thumbnailSize, thumbnailSize);
+            }
         }
 
         tooltipWidget->moveTo(this, event->globalPos());

@@ -46,10 +46,9 @@ MessageElement *MessageElement::setThumbnail(const ImagePtr &thumbnail)
     return this;
 }
 
-MessageElement *MessageElement::setThumbnailScale(const int w, const int h)
+MessageElement *MessageElement::setThumbnailType(const ThumbnailType type)
 {
-    this->thumbnailWidth_ = w;
-    this->thumbnailHeight_ = h;
+    this->thumbnailType_ = type;
     return this;
 }
 
@@ -69,14 +68,9 @@ const ImagePtr &MessageElement::getThumbnail() const
     return this->thumbnail_;
 }
 
-const int &MessageElement::getThumbnailWidth() const
+const MessageElement::ThumbnailType &MessageElement::getThumbnailType() const
 {
-    return this->thumbnailWidth_;
-}
-
-const int &MessageElement::getThumbnailHeight() const
-{
-    return this->thumbnailHeight_;
+    return this->thumbnailType_;
 }
 
 const Link &MessageElement::getLink() const
