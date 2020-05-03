@@ -46,6 +46,11 @@ bool getTargetUser(const rapidjson::Value &data, ActionUser &user)
     return rj::getSafe(data, "target_user_id", user.id);
 }
 
+bool getTargetUserName(const rapidjson::Value &data, ActionUser &user)
+{
+    return rj::getSafe(data, "target_user_login", user.name);
+}
+
 rapidjson::Document createListenMessage(const std::vector<QString> &topicsVec,
                                         std::shared_ptr<TwitchAccount> account)
 {
