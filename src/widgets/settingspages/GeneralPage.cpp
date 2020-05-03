@@ -520,6 +520,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val);
         },
         [](auto args) { return fuzzyToFloat(args.value, 63.f); });
+    layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
     layout.addDropdown<float>(
         "Link thumbnail", {"Off", "Small", "Medium", "Large"}, s.thumbnailSize,
         [](auto val) {
@@ -544,7 +545,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
             return fuzzyToFloat(args.value, 0.f);
         });
-    layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
     layout.addCheckbox("Double click to open links and other elements in chat",
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);

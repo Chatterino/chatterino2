@@ -85,7 +85,6 @@ public:
     BoolSetting alternateMessages = {
         "/appearance/messages/alternateMessageBackground", false};
     FloatSetting boldScale = {"/appearance/boldScale", 63};
-    FloatSetting thumbnailSize = {"/appearance/thumbnailSize", 0};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", false};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
@@ -162,6 +161,7 @@ public:
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};
+    FloatSetting thumbnailSize = {"/appearance/thumbnailSize", 0};
     BoolSetting unshortLinks = {"/links/unshortLinks", false};
     BoolSetting lowercaseDomains = {"/links/linkLowercase", true};
 

@@ -26,31 +26,32 @@ void LinkResolver::getLinkInfo(
                        QUrl::toPercentEncoding(url, "", "/:"))))
         .caller(caller)
         .timeout(30000)
-        .onSuccess([successCallback, url](auto result) mutable -> Outcome {
-            auto root = result.parseJson();
-            auto statusCode = root.value("status").toInt();
-            QString response = QString();
-            QString linkString = url;
-            ImagePtr thumbnail = nullptr;
-            if (statusCode == 200)
-            {
-                response = root.value("tooltip").toString();
-                thumbnail =
-                    Image::fromUrl({root.value("thumbnail").toString()});
-                if (getSettings()->unshortLinks)
+        .onSuccess(
+            [successCallback, url](NetworkResult result) mutable -> Outcome {
+                auto root = result.parseJson();
+                auto statusCode = root.value("status").toInt();
+                QString response = QString();
+                QString linkString = url;
+                ImagePtr thumbnail = nullptr;
+                if (statusCode == 200)
                 {
-                    linkString = root.value("link").toString();
+                    response = root.value("tooltip").toString();
+                    thumbnail =
+                        Image::fromUrl({root.value("thumbnail").toString()});
+                    if (getSettings()->unshortLinks)
+                    {
+                        linkString = root.value("link").toString();
+                    }
                 }
-            }
-            else
-            {
-                response = root.value("message").toString();
-            }
-            successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
-                            Link(Link::Url, linkString), thumbnail);
+                else
+                {
+                    response = root.value("message").toString();
+                }
+                successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
+                                Link(Link::Url, linkString), thumbnail);
 
-            return Success;
-        })
+                return Success;
+            })
         .onError([successCallback, url](auto /*result*/) {
             successCallback("No link info found", Link(Link::Url, url),
                             nullptr);
