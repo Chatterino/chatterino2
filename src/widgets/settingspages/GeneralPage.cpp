@@ -522,7 +522,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         [](auto args) { return fuzzyToFloat(args.value, 63.f); });
     layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
     layout.addDropdown<float>(
-        "Link thumbnail", {"Off", "Small", "Medium", "Large"}, s.thumbnailSize,
+        "Show link thumbnail", {"Off", "Small", "Medium", "Large"},
+        s.thumbnailSize,
         [](auto val) {
             if (val == 0)
                 return QString("Off");
