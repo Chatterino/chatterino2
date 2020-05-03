@@ -126,7 +126,6 @@ public:
         Link_Thumbnail = 1,
     };
 
-
     virtual ~MessageElement();
 
     MessageElement *setLink(const Link &link);

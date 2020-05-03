@@ -439,10 +439,10 @@ void MessageBuilder::addLink(const QString &origLink,
             }
             linkMELowercase->setThumbnail(thumbnail);
             linkMELowercase->setThumbnailType(
-                        MessageElement::ThumbnailType::Link_Thumbnail);
+                MessageElement::ThumbnailType::Link_Thumbnail);
             linkMEOriginal->setThumbnail(thumbnail);
             linkMEOriginal->setThumbnailType(
-                        MessageElement::ThumbnailType::Link_Thumbnail);
+                MessageElement::ThumbnailType::Link_Thumbnail);
         });
 }
 
