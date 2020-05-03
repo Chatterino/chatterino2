@@ -54,10 +54,14 @@ void TooltipPreviewImage::refreshTooltipWidgetPixmap()
     {
         if (auto pixmap = this->image_->pixmapOrLoad())
         {
-            if (this->imageWidth_ != 0 && this->imageHeight_) {
-                tooltipWidget->setImage(pixmap->scaled(this->imageWidth_, this->imageHeight_, Qt::KeepAspectRatio));
+            if (this->imageWidth_ != 0 && this->imageHeight_)
+            {
+                tooltipWidget->setImage(pixmap->scaled(this->imageWidth_,
+                                                       this->imageHeight_,
+                                                       Qt::KeepAspectRatio));
             }
-            else {
+            else
+            {
                 tooltipWidget->setImage(*pixmap);
             }
 

@@ -3,9 +3,9 @@
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "singletons/Settings.hpp"
-#include "messages/Image.hpp"
 
 #include <QString>
 
@@ -35,7 +35,8 @@ void LinkResolver::getLinkInfo(
             if (statusCode == 200)
             {
                 response = root.value("tooltip").toString();
-                thumbnail = Image::fromUrl({root.value("thumbnail").toString()});
+                thumbnail =
+                    Image::fromUrl({root.value("thumbnail").toString()});
                 if (getSettings()->unshortLinks)
                 {
                     linkString = root.value("link").toString();
@@ -46,13 +47,13 @@ void LinkResolver::getLinkInfo(
                 response = root.value("message").toString();
             }
             successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
-                            Link(Link::Url, linkString),
-                            thumbnail);
+                            Link(Link::Url, linkString), thumbnail);
 
             return Success;
         })
         .onError([successCallback, url](auto /*result*/) {
-            successCallback("No link info found", Link(Link::Url, url), nullptr);
+            successCallback("No link info found", Link(Link::Url, url),
+                            nullptr);
         })
         .execute();
     // });
