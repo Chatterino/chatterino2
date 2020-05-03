@@ -436,10 +436,13 @@ void MessageBuilder::addLink(const QString &origLink,
                 linkMELowercase->setLink(originalLink)->updateLink();
                 linkMEOriginal->setLink(originalLink)->updateLink();
             }
-            linkMELowercase->setThumbnail(thumbnail);
-            linkMELowercase->setThumbnailScale(200, 200);
-            linkMEOriginal->setThumbnail(thumbnail);
-            linkMEOriginal->setThumbnailScale(200, 200);
+            auto thumbnailSize = getSettings()->thumbnailSize;
+            if (thumbnailSize > 0) {
+                linkMELowercase->setThumbnail(thumbnail);
+                linkMELowercase->setThumbnailScale(getSettings()->thumbnailSize, getSettings()->thumbnailSize);
+                linkMEOriginal->setThumbnail(thumbnail);
+                linkMEOriginal->setThumbnailScale(getSettings()->thumbnailSize, getSettings()->thumbnailSize);
+            }
         });
 }
 
