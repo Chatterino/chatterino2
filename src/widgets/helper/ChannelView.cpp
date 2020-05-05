@@ -34,6 +34,7 @@
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/Twitch.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -1387,6 +1388,9 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             {
                 if (this->isScrolling_)
                     this->disableScrolling();
+                else if (hoverLayoutElement->getFlags().has(
+                             MessageElementFlag::Username))
+                    break;
                 else
                     this->enableScrolling(event->screenPos());
             }
@@ -1408,7 +1412,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     QPoint relativePos;
     int messageIndex;
 
-    bool foundMessage =
+    bool foundElement =
         tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
 
     // check if mouse was pressed
@@ -1470,13 +1474,23 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
             return;
         }
-        else if (foundMessage)
+        else if (foundElement)
         {
             const MessageLayoutElement *hoverLayoutElement =
                 layout->getElementAt(relativePos);
 
-            if (hoverLayoutElement == nullptr ||
-                hoverLayoutElement->getLink().isUrl() == false)
+            if (hoverLayoutElement == nullptr)
+            {
+                return;
+            }
+            else if (hoverLayoutElement->getFlags().has(
+                         MessageElementFlag::Username))
+            {
+                openTwitchUsercard(this->channel_->getName(),
+                                   hoverLayoutElement->getLink().value);
+                return;
+            }
+            else if (hoverLayoutElement->getLink().isUrl() == false)
             {
                 return;
             }
@@ -1489,7 +1503,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // no message found
-    if (!foundMessage)
+    if (!foundElement)
     {
         // No message at clicked position
         return;

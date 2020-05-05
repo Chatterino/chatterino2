@@ -16,6 +16,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/CombinePath.hpp"
+#include "util/Twitch.hpp";
 #include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include <QApplication>
@@ -437,8 +438,8 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                     channelName.remove(0, 1);
                 }
             }
-            QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
-                                      channelName + "/viewercard/" + words[1]);
+            openTwitchUsercard(channelName, words[1]);
+
             return "";
         }
         else if (commandName == "/usercard")
