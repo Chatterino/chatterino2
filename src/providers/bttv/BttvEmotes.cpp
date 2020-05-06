@@ -144,13 +144,14 @@ void BttvEmotes::loadChannel(TwitchChannel &channel, const QString &channelId,
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(3000)
-        .onSuccess([callback = std::move(callback), &channel](auto result) -> Outcome {
-            auto pair = parseChannelEmotes(result.parseJson());
-            if (pair.first)
-                callback(std::move(pair.second));
-            channel.addMessage(makeSystemMessage("BTTV: emotes reloaded."));
-            return pair.first;
-        })
+        .onSuccess(
+            [callback = std::move(callback), &channel](auto result) -> Outcome {
+                auto pair = parseChannelEmotes(result.parseJson());
+                if (pair.first)
+                    callback(std::move(pair.second));
+                channel.addMessage(makeSystemMessage("BTTV: emotes reloaded."));
+                return pair.first;
+            })
         .onError([channelId, &channel](auto result) {
             if (result.status() == 203)
             {
