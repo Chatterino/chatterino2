@@ -357,9 +357,9 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
         int delta = event->pos().y() - this->lastMousePosition_.y();
 
         setDesiredValue(this->desiredValue_ +
-                        qreal(delta) /
-                            std::max<qreal>(0.00000002, this->trackHeight_ *
-                                                            this->maximum_));
+                        (qreal(delta) /
+                            std::max<qreal>(0.00000002, this->trackHeight_)) *
+                                                            this->maximum_);
     }
 
     this->lastMousePosition_ = event->pos();
