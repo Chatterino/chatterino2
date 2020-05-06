@@ -516,7 +516,8 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
                 ->setLink({Link::UserInfo, string.mid(1)});
 
             this->emplace<TextElement>(
-                string, MessageElementFlag::NonBoldUsername, textColor);
+                    string, MessageElementFlag::NonBoldUsername, textColor)
+                ->setLink({Link::UserInfo, string.mid(1)});
         }
         else
         {
