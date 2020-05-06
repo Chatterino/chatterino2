@@ -4,6 +4,7 @@
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 
 namespace chatterino {
 
@@ -23,7 +24,7 @@ public:
     boost::optional<EmotePtr> emote(const EmoteName &name) const;
     void loadEmotes();
     static void loadChannel(
-        const QString &channelId,
+        TwitchChannel &channel, const QString &channelId,
         std::function<void(EmoteMap &&)> emoteCallback,
         std::function<void(boost::optional<EmotePtr>)> modBadgeCallback);
 

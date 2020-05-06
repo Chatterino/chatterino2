@@ -8,6 +8,7 @@
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
 namespace chatterino {
@@ -138,16 +139,40 @@ void BttvEmotes::loadEmotes()
         .execute();
 }
 
-void BttvEmotes::loadChannel(const QString &channelId,
+void BttvEmotes::loadChannel(TwitchChannel &channel, const QString &channelId,
                              std::function<void(EmoteMap &&)> callback)
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(3000)
-        .onSuccess([callback = std::move(callback)](auto result) -> Outcome {
+        .onSuccess([callback = std::move(callback), &channel](auto result) -> Outcome {
             auto pair = parseChannelEmotes(result.parseJson());
             if (pair.first)
                 callback(std::move(pair.second));
+            channel.addMessage(makeSystemMessage("BTTV: emotes reloaded."));
             return pair.first;
+        })
+        .onError([channelId, &channel](auto result) {
+            if (result.status() == 203)
+            {
+                // User does not have any BTTV emotes
+                channel.addMessage(
+                    makeSystemMessage("BTTV: this channel has no emotes."));
+            }
+            else if (result.status() == NetworkResult::timedoutStatus)
+            {
+                // TODO: Auto retry in case of a timeout, with a delay
+                qDebug() << "Fetching BTTV emotes for channel" << channelId
+                         << "failed due to timeout";
+                channel.addMessage(makeSystemMessage(
+                    "BTTV: failed to fetch emotes. (timed out)"));
+            }
+            else
+            {
+                qDebug() << "Error fetching BTTV emotes for channel"
+                         << channelId << ", error" << result.status();
+                channel.addMessage(makeSystemMessage(
+                    "BTTV: failed to fetch emotes. (unknown error)"));
+            }
         })
         .execute();
 }
