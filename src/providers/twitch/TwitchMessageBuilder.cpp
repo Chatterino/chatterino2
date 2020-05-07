@@ -26,6 +26,9 @@
 
 namespace {
 
+// matches a mention with punctuation at the end, like "@username," or "@username!!!" where capture group would return "username"
+const QRegularExpression mentionRegex("^@(\\w+)[.,!?;]*?$");
+
 const QSet<QString> zeroWidthEmotes{
     "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
     "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
@@ -503,66 +506,34 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
     // Actually just text
     auto linkString = this->matchLink(string);
-    auto link = Link();
     auto textColor = this->action_ ? MessageColor(this->usernameColor_)
                                    : MessageColor(MessageColor::Text);
 
-    if (linkString.isEmpty())
+    if (!linkString.isEmpty())
     {
-        if (string.startsWith('@'))
+        this->addLink(string, linkString);
+        return;
+    }
+
+    if (string.startsWith('@'))
+    {
+        auto match = mentionRegex.match(string);
+        // Only treat as @mention if valid username
+        if (match.hasMatch())
         {
+            QString username = match.captured(1);
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
-                ->setLink({Link::UserInfo, string.mid(1)});
+                ->setLink({Link::UserInfo, username});
 
             this->emplace<TextElement>(
                     string, MessageElementFlag::NonBoldUsername, textColor)
-                ->setLink({Link::UserInfo, string.mid(1)});
-        }
-        else
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::Text,
-                                       textColor);
+                ->setLink({Link::UserInfo, username});
+            return;
         }
     }
-    else
-    {
-        this->addLink(string, linkString);
-    }
 
-    // if (!linkString.isEmpty()) {
-    //    if (getSettings()->lowercaseLink) {
-    //        QRegularExpression httpRegex("\\bhttps?://",
-    //        QRegularExpression::CaseInsensitiveOption); QRegularExpression
-    //        ftpRegex("\\bftps?://",
-    //        QRegularExpression::CaseInsensitiveOption); QRegularExpression
-    //        getDomain("\\/\\/([^\\/]*)"); QString tempString = string;
-
-    //        if (!string.contains(httpRegex)) {
-    //            if (!string.contains(ftpRegex)) {
-    //                tempString.insert(0, "http://");
-    //            }
-    //        }
-    //        QString domain = getDomain.match(tempString).captured(1);
-    //        string.replace(domain, domain.toLower());
-    //    }
-    //    link = Link(Link::Url, linkString);
-    //    textColor = MessageColor(MessageColor::Link);
-    //}
-    // if (string.startsWith('@')) {
-    //    this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-    //    textColor,
-    //                               FontStyle::ChatMediumBold)  //
-    //        ->setLink(link);
-    //    this->emplace<TextElement>(string,
-    //    MessageElementFlag::NonBoldUsername,
-    //                               textColor)  //
-    //        ->setLink(link);
-    //} else {
-    //    this->emplace<TextElement>(string, MessageElementFlag::Text,
-    //    textColor)  //
-    //        ->setLink(link);
-    //}
+    this->emplace<TextElement>(string, MessageElementFlag::Text, textColor);
 }
 
 void TwitchMessageBuilder::parseMessageID()
