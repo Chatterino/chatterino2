@@ -22,7 +22,7 @@ int main(int argc, char **argv)
     QApplication a(argc, argv);
 
     QCoreApplication::setApplicationName("chatterino");
-    QCoreApplication::setApplicationVersion("2.1.7");
+    QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("https://www.chatterino.com");
 
     // convert char** to QStringList
