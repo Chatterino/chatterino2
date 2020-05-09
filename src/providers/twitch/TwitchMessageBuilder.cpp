@@ -1299,7 +1299,6 @@ void TwitchMessageBuilder::appendTwitchBadges()
         auto badgeEmote = this->getTwitchBadge(badge);
         if (!badgeEmote)
         {
-            qDebug() << "No channel/global variant found" << badge.key_;
             continue;
         }
         auto tooltip = (*badgeEmote)->tooltip.string;
