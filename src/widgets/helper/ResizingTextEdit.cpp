@@ -1,7 +1,10 @@
 #include "widgets/helper/ResizingTextEdit.hpp"
+
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
 #include "singletons/Settings.hpp"
+
+#include <QMimeData>
 
 namespace chatterino {
 
@@ -257,20 +260,20 @@ void ResizingTextEdit::insertCompletion(const QString &completion)
 
 bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 {
-    if (source->hasImage())
-    {
-        return false;
-    }
-    else if (source->hasFormat("text/plain"))
+    if (source->hasImage() || source->hasFormat("text/plain"))
     {
         return true;
     }
-    return false;
+    return QTextEdit::canInsertFromMimeData(source);
 }
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
-    if (!source->hasImage())
+    if (source->hasImage() || source->hasUrls())
+    {
+        this->imagePasted.invoke(source);
+    }
+    else
     {
         insertPlainText(source->text());
     }

@@ -19,6 +19,7 @@ public:
     pajlada::Signals::Signal<QKeyEvent *> keyPressed;
     pajlada::Signals::NoArgSignal focused;
     pajlada::Signals::NoArgSignal focusLost;
+    pajlada::Signals::Signal<const QMimeData *> imagePasted;
 
     void setCompleter(QCompleter *c);
     QCompleter *getCompleter() const;
