@@ -207,10 +207,33 @@ Split::Split(QWidget *parent)
         [this] { this->focused.invoke(); });
     this->input_->ui_.textEdit->focusLost.connect(
         [this] { this->focusLost.invoke(); });
-    this->input_->ui_.textEdit->imagePasted.connect(
-        [this](const QMimeData *source) {
-            upload(source, this->getChannel(), *this->input_->ui_.textEdit);
-        });
+    this->input_->ui_.textEdit->imagePasted.connect([this](const QMimeData
+                                                               *source) {
+        if (getSettings()->askOnImageUpload.getValue())
+        {
+            QMessageBox msgBox;
+            msgBox.setText("Image upload");
+            msgBox.setInformativeText(
+                "You are uploading an image to i.nuuls.com. You won't be able "
+                "to remove the image from the site. Are you okay with this?");
+            msgBox.addButton(QMessageBox::Cancel);
+            msgBox.addButton(QMessageBox::Yes);
+            msgBox.addButton("Yes, don't ask again", QMessageBox::YesRole);
+
+            msgBox.setDefaultButton(QMessageBox::Yes);
+
+            auto picked = msgBox.exec();
+            if (picked == QMessageBox::Cancel)
+            {
+                return;
+            }
+            else if (picked == 0)  // don't ask again button
+            {
+                getSettings()->askOnImageUpload.setValue(false);
+            }
+        }
+        upload(source, this->getChannel(), *this->input_->ui_.textEdit);
+    });
     setAcceptDrops(true);
 }
 
