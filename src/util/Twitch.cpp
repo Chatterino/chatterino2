@@ -1,3 +1,7 @@
+#include "util/Twitch.hpp";
+
+#include <QDesktopServices>
+
 namespace chatterino {
 
 void openTwitchUsercard(QString channel, QString username)

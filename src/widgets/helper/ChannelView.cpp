@@ -1388,7 +1388,8 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             {
                 if (this->isScrolling_)
                     this->disableScrolling();
-                else if (hoverLayoutElement->getFlags().has(
+                else if (hoverLayoutElement != nullptr &&
+                         hoverLayoutElement->getFlags().has(
                              MessageElementFlag::Username))
                     break;
                 else
