@@ -217,6 +217,7 @@ SOURCES += \
     src/util/JsonQuery.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamLink.cpp \
+    src/util/NuulsUploader.cpp \
     src/util/WindowsHelper.cpp \
     src/widgets/AccountSwitchPopup.cpp \
     src/widgets/AccountSwitchWidget.cpp \
@@ -438,6 +439,7 @@ HEADERS += \
     src/util/Shortcut.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamLink.hpp \
+    src/util/NuulsUploader.hpp \
     src/util/WindowsHelper.hpp \
     src/widgets/AccountSwitchPopup.hpp \
     src/widgets/AccountSwitchWidget.hpp \

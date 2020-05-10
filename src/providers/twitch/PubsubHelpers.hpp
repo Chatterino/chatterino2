@@ -16,6 +16,7 @@ const rapidjson::Value &getMsgID(const rapidjson::Value &data);
 bool getCreatedByUser(const rapidjson::Value &data, ActionUser &user);
 
 bool getTargetUser(const rapidjson::Value &data, ActionUser &user);
+bool getTargetUserName(const rapidjson::Value &data, ActionUser &user);
 
 rapidjson::Document createListenMessage(const std::vector<QString> &topicsVec,
                                         std::shared_ptr<TwitchAccount> account);

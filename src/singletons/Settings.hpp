@@ -292,6 +292,7 @@ public:
         "/misc/attachExtensionToAnyProcess", false};
     BoolSetting hideViewerCountAndDuration = {
         "/misc/hideViewerCountAndDuration", false};
+    BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",

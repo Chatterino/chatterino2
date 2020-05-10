@@ -570,6 +570,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Hide viewercount and stream length while hovering the split",
         s.hideViewerCountAndDuration);
+    layout.addCheckbox(
+        "Ask for confirmation when uploading an image to i.nuuls.com",
+        s.askOnImageUpload);
 
     layout.addTitle("Cache");
     layout.addDescription(
