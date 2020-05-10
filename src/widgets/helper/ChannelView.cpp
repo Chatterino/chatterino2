@@ -1291,7 +1291,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         {
             auto element = &hoverLayoutElement->getCreator();
             auto thumbnailSize = getSettings()->thumbnailSize;
-            if (thumbnailSize == 0.f)
+            if (thumbnailSize == 0)
             {
                 tooltipPreviewImage.setImage(nullptr);
             }

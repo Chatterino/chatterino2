@@ -161,7 +161,7 @@ public:
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};
-    FloatSetting thumbnailSize = {"/appearance/thumbnailSize", 0};
+    IntSetting thumbnailSize = {"/appearance/thumbnailSize", 0};
     BoolSetting unshortLinks = {"/links/unshortLinks", false};
     BoolSetting lowercaseDomains = {"/links/linkLowercase", true};
 

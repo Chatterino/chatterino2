@@ -521,7 +521,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) { return fuzzyToFloat(args.value, 63.f); });
     layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
-    layout.addDropdown<float>(
+    layout.addDropdown<int>(
         "Show link thumbnail", {"Off", "Small", "Medium", "Large"},
         s.thumbnailSize,
         [](auto val) {
@@ -538,13 +538,13 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) {
             if (args.value == "Small")
-                return 100.f;
+                return 100;
             else if (args.value == "Medium")
-                return 200.f;
+                return 200;
             else if (args.value == "Large")
-                return 300.f;
+                return 300;
 
-            return fuzzyToFloat(args.value, 0.f);
+            return fuzzyToInt(args.value, 0);
         });
     layout.addCheckbox("Double click to open links and other elements in chat",
                        s.linksDoubleClickOnly);
