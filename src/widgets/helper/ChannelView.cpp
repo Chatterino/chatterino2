@@ -1259,6 +1259,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     else
     {
         auto &tooltipPreviewImage = TooltipPreviewImage::instance();
+        tooltipPreviewImage.setImageScale(0, 0);
         auto emoteElement = dynamic_cast<const EmoteElement *>(
             &hoverLayoutElement->getCreator());
         auto badgeElement = dynamic_cast<const BadgeElement *>(
@@ -1288,7 +1289,22 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         }
         else
         {
-            tooltipPreviewImage.setImage(nullptr);
+            auto element = &hoverLayoutElement->getCreator();
+            auto thumbnailSize = getSettings()->thumbnailSize;
+            if (thumbnailSize == 0)
+            {
+                tooltipPreviewImage.setImage(nullptr);
+            }
+            else
+            {
+                tooltipPreviewImage.setImage(element->getThumbnail());
+                if (element->getThumbnailType() ==
+                    MessageElement::ThumbnailType::Link_Thumbnail)
+                {
+                    tooltipPreviewImage.setImageScale(thumbnailSize,
+                                                      thumbnailSize);
+                }
+            }
         }
 
         tooltipWidget->moveTo(this, event->globalPos());
