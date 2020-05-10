@@ -21,6 +21,10 @@ int main(int argc, char **argv)
 {
     QApplication a(argc, argv);
 
+    QCoreApplication::setApplicationName("chatterino");
+    QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
+    QCoreApplication::setOrganizationDomain("https://www.chatterino.com");
+
     // convert char** to QStringList
     auto args = QStringList();
     std::transform(argv + 1, argv + argc, std::back_inserter(args),
