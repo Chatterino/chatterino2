@@ -40,6 +40,18 @@ MessageElement *MessageElement::setTooltip(const QString &tooltip)
     return this;
 }
 
+MessageElement *MessageElement::setThumbnail(const ImagePtr &thumbnail)
+{
+    this->thumbnail_ = thumbnail;
+    return this;
+}
+
+MessageElement *MessageElement::setThumbnailType(const ThumbnailType type)
+{
+    this->thumbnailType_ = type;
+    return this;
+}
+
 MessageElement *MessageElement::setTrailingSpace(bool value)
 {
     this->trailingSpace = value;
@@ -49,6 +61,16 @@ MessageElement *MessageElement::setTrailingSpace(bool value)
 const QString &MessageElement::getTooltip() const
 {
     return this->tooltip_;
+}
+
+const ImagePtr &MessageElement::getThumbnail() const
+{
+    return this->thumbnail_;
+}
+
+const MessageElement::ThumbnailType &MessageElement::getThumbnailType() const
+{
+    return this->thumbnailType_;
 }
 
 const Link &MessageElement::getLink() const

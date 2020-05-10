@@ -19,6 +19,17 @@ Default value: `https://braize.pajlada.com/chatterino/twitchemotes/set/%1/`
 Arguments:  
  - `%1` = Emote set ID
 
+### CHATTERINO2_IMAGE_UPLOADER_URL
+Used to change the URL that Chatterino2 uses when trying to paste an image into chat. This can be used for hosting the uploaded images yourself.
+Default value: `https://i.nuuls.com/upload`
+
+Arguments:
+ - None
+
+Notes:
+ - If you want to host the images yourself. You need [Nuuls' filehost software](https://github.com/nuuls/filehost)
+ - Other image hosting software is currently not supported.
+
 ### CHATTERINO2_TWITCH_SERVER_HOST
 String value used to change what Twitch chat server host to connect to.  
 Default value: `irc.chat.twitch.tv`

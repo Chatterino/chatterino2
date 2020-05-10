@@ -161,6 +161,7 @@ public:
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};
+    IntSetting thumbnailSize = {"/appearance/thumbnailSize", 0};
     BoolSetting unshortLinks = {"/links/unshortLinks", false};
     BoolSetting lowercaseDomains = {"/links/linkLowercase", true};
 
@@ -291,6 +292,7 @@ public:
         "/misc/attachExtensionToAnyProcess", false};
     BoolSetting hideViewerCountAndDuration = {
         "/misc/hideViewerCountAndDuration", false};
+    BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",

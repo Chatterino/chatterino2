@@ -1,4 +1,4 @@
-#include "util/Twitch.hpp";
+#include "util/Twitch.hpp"
 
 #include <QDesktopServices>
 
