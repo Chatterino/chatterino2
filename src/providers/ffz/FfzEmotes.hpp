@@ -24,7 +24,7 @@ public:
     boost::optional<EmotePtr> emote(const EmoteName &name) const;
     void loadEmotes();
     static void loadChannel(
-        TwitchChannel &channel, const QString &channelId,
+        std::weak_ptr<Channel> channel, const QString &channelId,
         std::function<void(EmoteMap &&)> emoteCallback,
         std::function<void(boost::optional<EmotePtr>)> modBadgeCallback);
 

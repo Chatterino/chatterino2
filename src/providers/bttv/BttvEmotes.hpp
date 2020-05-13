@@ -25,7 +25,7 @@ public:
     std::shared_ptr<const EmoteMap> emotes() const;
     boost::optional<EmotePtr> emote(const EmoteName &name) const;
     void loadEmotes();
-    static void loadChannel(TwitchChannel &channel, const QString &channelId,
+    static void loadChannel(std::weak_ptr<Channel> channel, const QString &channelId,
                             std::function<void(EmoteMap &&)> callback);
 
 private:

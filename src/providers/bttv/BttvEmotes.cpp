@@ -139,24 +139,29 @@ void BttvEmotes::loadEmotes()
         .execute();
 }
 
-void BttvEmotes::loadChannel(TwitchChannel &channel, const QString &channelId,
+void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
+                             const QString &channelId,
                              std::function<void(EmoteMap &&)> callback)
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(3000)
-        .onSuccess(
-            [callback = std::move(callback), &channel](auto result) -> Outcome {
-                auto pair = parseChannelEmotes(result.parseJson());
-                if (pair.first)
-                    callback(std::move(pair.second));
-                channel.addMessage(makeSystemMessage("BTTV: emotes reloaded."));
-                return pair.first;
-            })
-        .onError([channelId, &channel](auto result) {
+        .onSuccess([callback = std::move(callback),
+                    channel](auto result) -> Outcome {
+            auto pair = parseChannelEmotes(result.parseJson());
+            if (pair.first)
+                callback(std::move(pair.second));
+            if (auto shared = channel.lock())
+                shared->addMessage(makeSystemMessage("BTTV: emotes reloaded."));
+            return pair.first;
+        })
+        .onError([channelId, channel](auto result) {
+            auto shared = channel.lock();
+            if (!shared)
+                return;
             if (result.status() == 203)
             {
                 // User does not have any BTTV emotes
-                channel.addMessage(
+                shared->addMessage(
                     makeSystemMessage("BTTV: this channel has no emotes."));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
@@ -164,14 +169,14 @@ void BttvEmotes::loadChannel(TwitchChannel &channel, const QString &channelId,
                 // TODO: Auto retry in case of a timeout, with a delay
                 qDebug() << "Fetching BTTV emotes for channel" << channelId
                          << "failed due to timeout";
-                channel.addMessage(makeSystemMessage(
+                shared->addMessage(makeSystemMessage(
                     "BTTV: failed to fetch emotes. (timed out)"));
             }
             else
             {
                 qDebug() << "Error fetching BTTV emotes for channel"
                          << channelId << ", error" << result.status();
-                channel.addMessage(makeSystemMessage(
+                shared->addMessage(makeSystemMessage(
                     "BTTV: failed to fetch emotes. (unknown error)"));
             }
         })
