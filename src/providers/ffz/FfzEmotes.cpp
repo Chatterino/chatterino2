@@ -186,7 +186,8 @@ void FfzEmotes::loadEmotes()
 void FfzEmotes::loadChannel(
     std::weak_ptr<Channel> channel, const QString &channelId,
     std::function<void(EmoteMap &&)> emoteCallback,
-    std::function<void(boost::optional<EmotePtr>)> modBadgeCallback)
+    std::function<void(boost::optional<EmotePtr>)> modBadgeCallback,
+    bool manualRefresh)
 {
     qDebug() << "[FFZEmotes] Reload FFZ Channel Emotes for channel"
              << channelId;
@@ -195,43 +196,47 @@ void FfzEmotes::loadChannel(
 
         .timeout(20000)
         .onSuccess([emoteCallback = std::move(emoteCallback),
-                    modBadgeCallback = std::move(modBadgeCallback),
-                    channel](auto result) -> Outcome {
+                    modBadgeCallback = std::move(modBadgeCallback), channel,
+                    manualRefresh](auto result) -> Outcome {
             auto json = result.parseJson();
             auto emoteMap = parseChannelEmotes(json);
             auto modBadge = parseModBadge(json);
 
             emoteCallback(std::move(emoteMap));
             modBadgeCallback(std::move(modBadge));
-            if (auto shared = channel.lock())
-                shared->addMessage(makeSystemMessage("FrankerFaceZ channel emotes reloaded."));
+            if (auto shared = channel.lock(); manualRefresh)
+                shared->addMessage(
+                    makeSystemMessage("FrankerFaceZ channel emotes reloaded."));
 
             return Success;
         })
-        .onError([channelId, channel](NetworkResult result) {
+        .onError([channelId, channel, manualRefresh](NetworkResult result) {
             auto shared = channel.lock();
             if (!shared)
                 return;
             if (result.status() == 203)
             {
                 // User does not have any FFZ emotes
-                shared->addMessage(
-                    makeSystemMessage("This channel has no FrankerFaceZ channel emotes."));
+                if (manualRefresh)
+                    shared->addMessage(makeSystemMessage(
+                        "This channel has no FrankerFaceZ channel emotes."));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay
                 qDebug() << "Fetching FFZ emotes for channel" << channelId
                          << "failed due to timeout";
-                shared->addMessage(makeSystemMessage(
-                    "Failed to fetch FrankerFaceZ channel emotes. (timed out)"));
+                shared->addMessage(
+                    makeSystemMessage("Failed to fetch FrankerFaceZ channel "
+                                      "emotes. (timed out)"));
             }
             else
             {
                 qDebug() << "Error fetching FFZ emotes for channel" << channelId
                          << ", error" << result.status();
-                shared->addMessage(makeSystemMessage(
-                    "Failed to fetch FrankerFaceZ channel emotes. (unknown error)"));
+                shared->addMessage(
+                    makeSystemMessage("Failed to fetch FrankerFaceZ channel "
+                                      "emotes. (unknown error)"));
             }
         })
         .execute();

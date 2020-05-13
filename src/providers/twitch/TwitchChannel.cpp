@@ -118,8 +118,8 @@ TwitchChannel::TwitchChannel(const QString &name,
         this->refreshLiveStatus();
         this->refreshBadges();
         this->refreshCheerEmotes();
-        this->refreshFFZChannelEmotes();
-        this->refreshBTTVChannelEmotes();
+        this->refreshFFZChannelEmotes(false);
+        this->refreshBTTVChannelEmotes(false);
     });
 
     // timers
@@ -155,7 +155,7 @@ bool TwitchChannel::canSendMessage() const
     return !this->isEmpty();
 }
 
-void TwitchChannel::refreshBTTVChannelEmotes()
+void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
 {
     BttvEmotes::loadChannel(
         weakOf<Channel>(this), this->roomId(),
@@ -163,10 +163,11 @@ void TwitchChannel::refreshBTTVChannelEmotes()
             if (auto shared = weak.lock())
                 this->bttvEmotes_.set(
                     std::make_shared<EmoteMap>(std::move(emoteMap)));
-        });
+        },
+        manualRefresh);
 }
 
-void TwitchChannel::refreshFFZChannelEmotes()
+void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
 {
     FfzEmotes::loadChannel(
         weakOf<Channel>(this), this->roomId(),
@@ -180,7 +181,8 @@ void TwitchChannel::refreshFFZChannelEmotes()
             {
                 this->ffzCustomModBadge_.set(std::move(modBadge));
             }
-        });
+        },
+        manualRefresh);
 }
 
 void TwitchChannel::sendMessage(const QString &message)

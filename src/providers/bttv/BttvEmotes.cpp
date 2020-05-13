@@ -141,28 +141,31 @@ void BttvEmotes::loadEmotes()
 
 void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                              const QString &channelId,
-                             std::function<void(EmoteMap &&)> callback)
+                             std::function<void(EmoteMap &&)> callback,
+                             bool manualRefresh)
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(3000)
-        .onSuccess([callback = std::move(callback),
-                    channel](auto result) -> Outcome {
+        .onSuccess([callback = std::move(callback), channel,
+                    manualRefresh](auto result) -> Outcome {
             auto pair = parseChannelEmotes(result.parseJson());
             if (pair.first)
                 callback(std::move(pair.second));
-            if (auto shared = channel.lock())
-                shared->addMessage(makeSystemMessage("BetterTTV channel emotes reloaded."));
+            if (auto shared = channel.lock(); manualRefresh)
+                shared->addMessage(
+                    makeSystemMessage("BetterTTV channel emotes reloaded."));
             return pair.first;
         })
-        .onError([channelId, channel](auto result) {
+        .onError([channelId, channel, manualRefresh](auto result) {
             auto shared = channel.lock();
             if (!shared)
                 return;
             if (result.status() == 203)
             {
                 // User does not have any BTTV emotes
-                shared->addMessage(
-                    makeSystemMessage("This channel has no BetterTTV channel emotes."));
+                if (manualRefresh)
+                    shared->addMessage(makeSystemMessage(
+                        "This channel has no BetterTTV channel emotes."));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {
@@ -176,8 +179,9 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             {
                 qDebug() << "Error fetching BTTV emotes for channel"
                          << channelId << ", error" << result.status();
-                shared->addMessage(makeSystemMessage(
-                    "Failed to fetch BetterTTV channel emotes. (unknown error)"));
+                shared->addMessage(
+                    makeSystemMessage("Failed to fetch BetterTTV channel "
+                                      "emotes. (unknown error)"));
             }
         })
         .execute();

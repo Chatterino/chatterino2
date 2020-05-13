@@ -26,7 +26,8 @@ public:
     static void loadChannel(
         std::weak_ptr<Channel> channel, const QString &channelId,
         std::function<void(EmoteMap &&)> emoteCallback,
-        std::function<void(boost::optional<EmotePtr>)> modBadgeCallback);
+        std::function<void(boost::optional<EmotePtr>)> modBadgeCallback,
+        bool manualRefresh);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;
