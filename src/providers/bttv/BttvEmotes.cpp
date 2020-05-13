@@ -151,7 +151,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             if (pair.first)
                 callback(std::move(pair.second));
             if (auto shared = channel.lock())
-                shared->addMessage(makeSystemMessage("BTTV: emotes reloaded."));
+                shared->addMessage(makeSystemMessage("BetterTTV channel emotes reloaded."));
             return pair.first;
         })
         .onError([channelId, channel](auto result) {
@@ -162,7 +162,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             {
                 // User does not have any BTTV emotes
                 shared->addMessage(
-                    makeSystemMessage("BTTV: this channel has no emotes."));
+                    makeSystemMessage("This channel has no BetterTTV channel emotes."));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {
@@ -170,14 +170,14 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                 qDebug() << "Fetching BTTV emotes for channel" << channelId
                          << "failed due to timeout";
                 shared->addMessage(makeSystemMessage(
-                    "BTTV: failed to fetch emotes. (timed out)"));
+                    "Failed to fetch BetterTTV channel emotes. (timed out)"));
             }
             else
             {
                 qDebug() << "Error fetching BTTV emotes for channel"
                          << channelId << ", error" << result.status();
                 shared->addMessage(makeSystemMessage(
-                    "BTTV: failed to fetch emotes. (unknown error)"));
+                    "Failed to fetch BetterTTV channel emotes. (unknown error)"));
             }
         })
         .execute();
