@@ -566,9 +566,13 @@ void BaseWindow::moveIntoDesktopRect(QWidget *parent)
 
     // move the widget into the screen geometry if it's not already in there
     QDesktopWidget *desktop = QApplication::desktop();
+    QPoint globalCursorPos = QCursor::pos();
 
     QRect s = desktop->availableGeometry(parent);
     QPoint p = this->pos();
+
+    bool stickRight = false;
+    bool stickBottom = false;
 
     if (p.x() < s.left())
     {
@@ -580,11 +584,18 @@ void BaseWindow::moveIntoDesktopRect(QWidget *parent)
     }
     if (p.x() + this->width() > s.right())
     {
+        stickRight = true;
         p.setX(s.right() - this->width());
     }
     if (p.y() + this->height() > s.bottom())
     {
+        stickBottom = true;
         p.setY(s.bottom() - this->height());
+    }
+
+    if (stickRight && stickBottom)
+    {
+        p.setY(globalCursorPos.y() - this->height() - 16);
     }
 
     if (p != this->pos())
