@@ -91,8 +91,8 @@ public:
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
 
-    virtual void refreshBTTVChannelEmotes();
-    virtual void refreshFFZChannelEmotes();
+    virtual void refreshBTTVChannelEmotes(bool manualRefresh);
+    virtual void refreshFFZChannelEmotes(bool manualRefresh);
 
     // Badges
     boost::optional<EmotePtr> ffzCustomModBadge() const;
