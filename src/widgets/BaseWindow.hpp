@@ -45,9 +45,6 @@ public:
                                       std::function<void()> onClicked);
     EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
 
-    void setStayInScreenRect(bool value);
-    bool getStayInScreenRect() const;
-
     void setActionOnFocusLoss(ActionOnFocusLoss value);
     ActionOnFocusLoss getActionOnFocusLoss() const;
 
@@ -90,7 +87,7 @@ protected:
 
 private:
     void init();
-    void moveIntoDesktopRect(QWidget *parent);
+    void moveIntoDesktopRect(QWidget *parent, QPoint point);
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
     void onFocusLost();
@@ -105,7 +102,6 @@ private:
     bool enableCustomFrame_;
     ActionOnFocusLoss actionOnFocusLoss_ = Nothing;
     bool frameless_;
-    bool stayInScreenRect_ = false;
     bool shown_ = false;
     FlagsEnum<Flags> flags_;
     float nativeScale_ = 1;

@@ -54,8 +54,6 @@ UserInfoPopup::UserInfoPopup()
     : BaseWindow({BaseWindow::Frameless, BaseWindow::FramelessDraggable})
     , hack_(new bool)
 {
-    this->setStayInScreenRect(true);
-
 #ifdef Q_OS_LINUX
     this->setWindowFlag(Qt::Popup);
 #endif

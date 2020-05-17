@@ -29,7 +29,6 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     this->setAttribute(Qt::WA_TranslucentBackground);
     //this->setWindowOpacity(0.8);
     this->updateFont();
-    this->setStayInScreenRect(true);
 
     this->setAttribute(Qt::WA_ShowWithoutActivating);
     this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
