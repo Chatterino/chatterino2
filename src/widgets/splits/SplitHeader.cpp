@@ -574,7 +574,9 @@ void SplitHeader::updateChannelText()
         if (streamStatus->live)
         {
             this->isLive_ = true;
-            if (getSettings()->showThumbnail)
+            if (getSettings()->showThumbnail &&
+                (this->lastThumbnail_.isNull() ||
+                 this->lastThumbnail_.addSecs(60) < QTime::currentTime()))
             {
                 QString url = "https://static-cdn.jtvnw.net/"
                               "previews-ttv/live_user_" +
@@ -583,6 +585,7 @@ void SplitHeader::updateChannelText()
                     .onSuccess([this](auto result) -> Outcome {
                         this->thumbnail_ =
                             QString::fromLatin1(result.getData().toBase64());
+                        updateChannelText();
                         return Success;
                     })
                     .execute();
