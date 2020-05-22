@@ -293,6 +293,7 @@ public:
     BoolSetting hideViewerCountAndDuration = {
         "/misc/hideViewerCountAndDuration", false};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
+    BoolSetting showThumbnail = {"/misc/thumbnail", true};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",

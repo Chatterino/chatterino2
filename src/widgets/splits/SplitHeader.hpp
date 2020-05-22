@@ -52,6 +52,7 @@ private:
     Split *const split_{};
     QString tooltipText_{};
     bool isLive_{false};
+    QString thumbnail_;
 
     // ui
     Button *dropdownButton_{};
