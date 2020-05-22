@@ -586,6 +586,7 @@ void SplitHeader::updateChannelText()
                         this->thumbnail_ =
                             QString::fromLatin1(result.getData().toBase64());
                         updateChannelText();
+                        this->lastThumbnail_ = QTime::currentTime();
                         return Success;
                     })
                     .execute();
