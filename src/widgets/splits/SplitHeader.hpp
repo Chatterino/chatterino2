@@ -53,7 +53,7 @@ private:
     QString tooltipText_{};
     bool isLive_{false};
     QString thumbnail_;
-    QTime lastThumbnail_;
+    QElapsedTimer lastThumbnail_;
 
     // ui
     Button *dropdownButton_{};

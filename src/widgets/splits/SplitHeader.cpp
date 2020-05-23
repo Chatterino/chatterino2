@@ -20,11 +20,9 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#include <QByteArray>
 #include <QDesktopWidget>
 #include <QDrag>
 #include <QHBoxLayout>
-#include <QImage>
 #include <QInputDialog>
 #include <QMenu>
 #include <QMimeData>
@@ -575,8 +573,8 @@ void SplitHeader::updateChannelText()
         {
             this->isLive_ = true;
             if (getSettings()->showThumbnail &&
-                (this->lastThumbnail_.isNull() ||
-                 this->lastThumbnail_.addSecs(60) < QTime::currentTime()))
+                (!this->lastThumbnail_.isValid() ||
+                 this->lastThumbnail_.elapsed() > 60 * 1000))
             {
                 QString url = "https://static-cdn.jtvnw.net/"
                               "previews-ttv/live_user_" +
@@ -586,7 +584,7 @@ void SplitHeader::updateChannelText()
                         this->thumbnail_ =
                             QString::fromLatin1(result.getData().toBase64());
                         updateChannelText();
-                        this->lastThumbnail_ = QTime::currentTime();
+                        this->lastThumbnail_.start();
                         return Success;
                     })
                     .execute();
