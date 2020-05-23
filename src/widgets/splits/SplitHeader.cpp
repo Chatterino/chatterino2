@@ -90,12 +90,9 @@ namespace {
             <p class=\"center\">%1%2%3%4%5%6 for %7 with %8 viewers</p>")
             .arg(s.title.toHtmlEscaped())
             .arg(s.title.isEmpty() ? QString() : "<br><br>")
-            .arg(s.title.isEmpty()
-                     ? QString()
-                     : (thumbnail.isEmpty()
-                            ? "Couldn't fetch thumbnail"
-                            : "<img src=\"data:image/jpg;base64, " + thumbnail +
-                                  "\"/><br>"))
+            .arg(thumbnail.isEmpty() ? "Couldn't fetch thumbnail"
+                                     : "<img src=\"data:image/jpg;base64, " +
+                                           thumbnail + "\"/><br>")
             .arg(s.game.toHtmlEscaped())
             .arg(s.game.isEmpty() ? QString() : "<br>")
             .arg(s.rerun ? "Vod-casting" : "Live")
@@ -572,22 +569,21 @@ void SplitHeader::updateChannelText()
         if (streamStatus->live)
         {
             this->isLive_ = true;
-            if (getSettings()->showThumbnail &&
-                (!this->lastThumbnail_.isValid() ||
-                 this->lastThumbnail_.elapsed() > 60 * 1000))
+            if (!this->lastThumbnail_.isValid() ||
+                this->lastThumbnail_.elapsed() > 5 * 60 * 1000)
             {
                 QString url = "https://static-cdn.jtvnw.net/"
                               "previews-ttv/live_user_" +
-                              channel->getName().toLower() + "-180x90.jpg";
+                              channel->getName().toLower() + "-160x90.jpg";
                 NetworkRequest(url, NetworkRequestType::Get)
                     .onSuccess([this](auto result) -> Outcome {
                         this->thumbnail_ =
                             QString::fromLatin1(result.getData().toBase64());
                         updateChannelText();
-                        this->lastThumbnail_.start();
                         return Success;
                     })
                     .execute();
+                this->lastThumbnail_.restart();
             }
             this->tooltipText_ = formatTooltip(*streamStatus, this->thumbnail_);
             title += formatTitle(*streamStatus, *getSettings());
