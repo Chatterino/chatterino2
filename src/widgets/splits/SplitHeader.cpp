@@ -586,8 +586,10 @@ void SplitHeader::updateChannelText()
                 case 3:
                     url.append("-360x180.jpg");
                     break;
+                default:
+                    url = "";
             }
-            if (getSettings()->thumbnailSizeStream > 0 &&
+            if (!url.isEmpty() &&
                 (!this->lastThumbnail_.isValid() ||
                  this->lastThumbnail_.elapsed() > 5 * 60 * 1000))
             {
@@ -611,7 +613,7 @@ void SplitHeader::updateChannelText()
     }
 
     this->titleLabel_->setText(title.isEmpty() ? "<empty>" : title);
-}  // namespace chatterino
+}
 
 void SplitHeader::updateModerationModeIcon()
 {
