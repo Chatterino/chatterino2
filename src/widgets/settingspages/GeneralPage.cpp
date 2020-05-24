@@ -546,6 +546,31 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
             return fuzzyToInt(args.value, 0);
         });
+    layout.addDropdown<int>(
+        "Show stream thumbnail", {"Off", "Small", "Medium", "Large"},
+        s.thumbnailSizeStream,
+        [](auto val) {
+            if (val == 0)
+                return QString("Off");
+            else if (val == 1)
+                return QString("Small");
+            else if (val == 2)
+                return QString("Medium");
+            else if (val == 3)
+                return QString("Large");
+            else
+                return QString::number(val);
+        },
+        [](auto args) {
+            if (args.value == "Small")
+                return 1;
+            else if (args.value == "Medium")
+                return 2;
+            else if (args.value == "Large")
+                return 3;
+
+            return fuzzyToInt(args.value, 0);
+        });
     layout.addCheckbox("Double click to open links and other elements in chat",
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);

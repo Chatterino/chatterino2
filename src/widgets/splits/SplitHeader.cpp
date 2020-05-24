@@ -569,12 +569,25 @@ void SplitHeader::updateChannelText()
         if (streamStatus->live)
         {
             this->isLive_ = true;
-            if (!this->lastThumbnail_.isValid() ||
-                this->lastThumbnail_.elapsed() > 5 * 60 * 1000)
+            QString url = "https://static-cdn.jtvnw.net/"
+                          "previews-ttv/live_user_" +
+                          channel->getName().toLower();
+            switch (getSettings()->thumbnailSizeStream.getValue())
             {
-                QString url = "https://static-cdn.jtvnw.net/"
-                              "previews-ttv/live_user_" +
-                              channel->getName().toLower() + "-160x90.jpg";
+                case 1:
+                    url.append("-80x45.jpg");
+                    break;
+                case 2:
+                    url.append("-160x90.jpg");
+                    break;
+                case 3:
+                    url.append("-360x180.jpg");
+                    break;
+            }
+            if (getSettings()->thumbnailSizeStream > 0 &&
+                (!this->lastThumbnail_.isValid() ||
+                 this->lastThumbnail_.elapsed() > 5 * 60 * 1000))
+            {
                 NetworkRequest(url, NetworkRequestType::Get)
                     .onSuccess([this](auto result) -> Outcome {
                         this->thumbnail_ =
@@ -595,7 +608,7 @@ void SplitHeader::updateChannelText()
     }
 
     this->titleLabel_->setText(title.isEmpty() ? "<empty>" : title);
-}
+}  // namespace chatterino
 
 void SplitHeader::updateModerationModeIcon()
 {
