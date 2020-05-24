@@ -1166,6 +1166,53 @@ void TwitchMessageBuilder::parseHighlights()
             break;
         }
     }
+
+    auto badges = parseBadges(this->tags);
+    auto badgeHighlights = getCSettings().highlightedBadges.readOnly();
+    for (const Badge &badge : badges)
+    {
+        for (const HighlightBadge &highlight : *badgeHighlights)
+        {
+            if (!highlight.isMatch(badge))
+            {
+                continue;
+            }
+
+            this->message().flags.set(MessageFlag::Highlighted);
+            this->message().highlightColor = highlight.getColor();
+
+            if (highlight.hasAlert())
+            {
+                this->highlightAlert_ = true;
+            }
+
+            // Only set highlightSound_ if it hasn't been set by badge
+            // highlights already.
+            if (highlight.hasSound() && !this->highlightSound_)
+            {
+                this->highlightSound_ = true;
+
+                // Use custom sound if set, otherwise use fallback sound
+                if (highlight.hasCustomSound())
+                {
+                    this->highlightSoundUrl_ = highlight.getSoundUrl();
+                }
+                else
+                {
+                    this->highlightSoundUrl_ = getFallbackHighlightSound();
+                }
+            }
+
+            if (this->highlightAlert_ && this->highlightSound_)
+            {
+                /*
+                 * Break once no further attributes (taskbar, sound) can be
+                 * applied.
+                 */
+                break;
+            }
+        }
+    }
 }
 
 void TwitchMessageBuilder::appendTwitchEmote(

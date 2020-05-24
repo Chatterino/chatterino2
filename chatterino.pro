@@ -130,6 +130,8 @@ SOURCES += \
     src/controllers/commands/Command.cpp \
     src/controllers/commands/CommandController.cpp \
     src/controllers/commands/CommandModel.cpp \
+    src/controllers/highlights/BadgeHighlightModel.cpp \
+    src/controllers/highlights/HighlightBadge.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
@@ -226,6 +228,7 @@ SOURCES += \
     src/widgets/BasePopup.cpp \
     src/widgets/BaseWidget.cpp \
     src/widgets/BaseWindow.cpp \
+    src/widgets/dialogs/BadgePickerDialog.cpp \
     src/widgets/dialogs/ColorPickerDialog.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
     src/widgets/dialogs/IrcConnectionEditor.cpp \
@@ -320,6 +323,8 @@ HEADERS += \
     src/controllers/commands/Command.hpp \
     src/controllers/commands/CommandController.hpp \
     src/controllers/commands/CommandModel.hpp \
+    src/controllers/highlights/BadgeHighlightModel.hpp \
+    src/controllers/highlights/HighlightBadge.hpp \
     src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
     src/controllers/highlights/HighlightModel.hpp \
@@ -449,6 +454,7 @@ HEADERS += \
     src/widgets/BasePopup.hpp \
     src/widgets/BaseWidget.hpp \
     src/widgets/BaseWindow.hpp \
+    src/widgets/dialogs/BadgePickerDialog.hpp \
     src/widgets/dialogs/ColorPickerDialog.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/IrcConnectionEditor.hpp \

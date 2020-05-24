@@ -1,6 +1,7 @@
 #include "HighlightingPage.hpp"
 
 #include "Application.hpp"
+#include "controllers/highlights/BadgeHighlightModel.hpp"
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
 #include "controllers/highlights/UserHighlightModel.hpp"
@@ -8,6 +9,7 @@
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/StandardItemHelper.hpp"
+#include "widgets/dialogs/BadgePickerDialog.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 
 #include <QFileDialog>
@@ -122,6 +124,88 @@ HighlightingPage::HighlightingPage()
                         "highlighted user", true, false, false, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
+                });
+
+                QObject::connect(view->getTableView(), &QTableView::clicked,
+                                 [this, view](const QModelIndex &clicked) {
+                                     this->tableCellClicked(clicked, view);
+                                 });
+            }
+
+            auto badgeHighlights = tabs.appendTab(new QVBoxLayout, "Badges");
+            {
+                badgeHighlights.emplace<QLabel>(
+                    "Play notification sounds and highlight messages based on "
+                    "user badges.");
+                auto view = badgeHighlights
+                                .emplace<EditableModelView>(
+                                    (new BadgeHighlightModel(nullptr))
+                                        ->initialized(
+                                            &getSettings()->highlightedBadges))
+                                .getElement();
+                view->setTitles({"Name", "Flash\ntaskbar", "Play\nsound",
+                                 "Custom\nsound", "Color"});
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    QHeaderView::Fixed);
+                view->getTableView()->horizontalHeader()->setSectionResizeMode(
+                    0, QHeaderView::Stretch);
+
+                // fourtf: make class extrend BaseWidget and add this to
+                // dpiChanged
+                QTimer::singleShot(1, [view] {
+                    view->getTableView()->resizeColumnsToContents();
+                    view->getTableView()->setColumnWidth(0, 200);
+                });
+
+                view->addButtonPressed.connect([this] {
+                    BadgePickerDialog d(this);
+
+                    d.setWindowTitle("Choose badge");
+                    if (d.exec() == QDialog::Accepted)
+                    {
+                        using Badges = BadgePickerDialog::Badges;
+                        QString name;
+                        QString version = "1";
+                        QString displayName;
+                        switch (d.getSelection())
+                        {
+                            case Badges::Broadcaster:
+                                name = "broadcaster";
+                                displayName = "Broadcaster";
+                                break;
+                            case Badges::Admin:
+                                name = "admin";
+                                displayName = "Admin";
+                                break;
+                            case Badges::Staff:
+                                name = "staff";
+                                displayName = "Staff";
+                                break;
+                            case Badges::Moderator:
+                                name = "moderator";
+                                displayName = "Moderator";
+                                break;
+                            case Badges::Verified:
+                                name = "partner";
+                                displayName = "Verified";
+                                break;
+                            case Badges::VIP:
+                                name = "vip";
+                                displayName = "VIP";
+                                break;
+                            case Badges::GlobalModerator:
+                                name = "global_mod";
+                                displayName = "Global Moderator";
+                                break;
+                            default:
+                                return;
+                        }
+
+                        getSettings()->highlightedBadges.append(HighlightBadge{
+                            name, version, displayName, false, false, "",
+                            ColorProvider::instance().color(
+                                ColorType::SelfHighlight)});
+                    }
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
