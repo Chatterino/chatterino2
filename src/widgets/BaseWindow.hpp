@@ -105,8 +105,8 @@ private:
     bool enableCustomFrame_;
     ActionOnFocusLoss actionOnFocusLoss_ = Nothing;
     bool frameless_;
-    bool shown_ = false;
     bool stayInScreenRect_ = false;
+    bool shown_ = false;
     FlagsEnum<Flags> flags_;
     float nativeScale_ = 1;
     bool isResizeFixing_ = false;
