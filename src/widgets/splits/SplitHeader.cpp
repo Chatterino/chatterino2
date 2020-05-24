@@ -91,10 +91,11 @@ namespace {
             .arg(s.title.toHtmlEscaped())
             .arg(s.title.isEmpty() ? QString() : "<br><br>")
             .arg(getSettings()->thumbnailSizeStream.getValue() > 0
-                     ? (thumbnail.isEmpty()
-                            ? "Couldn't fetch thumbnail"
-                            : "<img src=\"data:image/jpg;base64, " + thumbnail +
-                                  "\"/><br>")
+                     ? ((thumbnail.isEmpty()
+                             ? "Couldn't fetch thumbnail"
+                             : "<img src=\"data:image/jpg;base64, " +
+                                   thumbnail + "\"/>") +
+                        "<br>")
                      : QString())
             .arg(s.game.toHtmlEscaped())
             .arg(s.game.isEmpty() ? QString() : "<br>")
