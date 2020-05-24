@@ -90,9 +90,12 @@ namespace {
             <p class=\"center\">%1%2%3%4%5%6 for %7 with %8 viewers</p>")
             .arg(s.title.toHtmlEscaped())
             .arg(s.title.isEmpty() ? QString() : "<br><br>")
-            .arg(thumbnail.isEmpty() ? "Couldn't fetch thumbnail"
-                                     : "<img src=\"data:image/jpg;base64, " +
-                                           thumbnail + "\"/><br>")
+            .arg(getSettings()->thumbnailSizeStream.getValue() > 0
+                     ? (thumbnail.isEmpty()
+                            ? "Couldn't fetch thumbnail"
+                            : "<img src=\"data:image/jpg;base64, " + thumbnail +
+                                  "\"/><br>")
+                     : QString())
             .arg(s.game.toHtmlEscaped())
             .arg(s.game.isEmpty() ? QString() : "<br>")
             .arg(s.rerun ? "Vod-casting" : "Live")
