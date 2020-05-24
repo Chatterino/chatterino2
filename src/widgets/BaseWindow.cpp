@@ -224,7 +224,7 @@ void BaseWindow::setStayInScreenRect(bool value)
 {
     this->stayInScreenRect_ = value;
 
-    this->moveIntoDesktopRect(this);
+    this->moveIntoDesktopRect(this, this->pos());
 }
 
 bool BaseWindow::getStayInScreenRect() const
@@ -499,8 +499,7 @@ void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
         point.ry() += 16;
     }
 
-    this->move(point);
-    this->moveIntoDesktopRect(parent);
+    this->moveIntoDesktopRect(parent, point);
 }
 
 void BaseWindow::resizeEvent(QResizeEvent *)
@@ -551,15 +550,15 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
-    this->moveIntoDesktopRect(this);
+    this->moveIntoDesktopRect(this, this->pos());
     if (this->frameless_)
     {
-        QTimer::singleShot(30, this,
-                           [this] { this->moveIntoDesktopRect(this); });
+        QTimer::singleShot(
+            30, this, [this] { this->moveIntoDesktopRect(this, this->pos()); });
     }
 }
 
-void BaseWindow::moveIntoDesktopRect(QWidget *parent)
+void BaseWindow::moveIntoDesktopRect(QWidget *parent, QPoint point)
 {
     if (!this->stayInScreenRect_)
         return;
@@ -569,37 +568,35 @@ void BaseWindow::moveIntoDesktopRect(QWidget *parent)
     QPoint globalCursorPos = QCursor::pos();
 
     QRect s = desktop->availableGeometry(parent);
-    QPoint p = this->pos();
 
     bool stickRight = false;
     bool stickBottom = false;
 
-    if (p.x() < s.left())
+    if (point.x() < s.left())
     {
-        p.setX(s.left());
+        point.setX(s.left());
     }
-    if (p.y() < s.top())
+    if (point.y() < s.top())
     {
-        p.setY(s.top());
+        point.setY(s.top());
     }
-    if (p.x() + this->width() > s.right())
+    if (point.x() + this->width() > s.right())
     {
         stickRight = true;
-        p.setX(s.right() - this->width());
+        point.setX(s.right() - this->width());
     }
-    if (p.y() + this->height() > s.bottom())
+    if (point.y() + this->height() > s.bottom())
     {
         stickBottom = true;
-        p.setY(s.bottom() - this->height());
+        point.setY(s.bottom() - this->height());
     }
 
     if (stickRight && stickBottom)
     {
-        p.setY(globalCursorPos.y() - this->height() - 16);
+        point.setY(globalCursorPos.y() - this->height() - 16);
     }
 
-    if (p != this->pos())
-        this->move(p);
+    this->move(point);
 }
 
 bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
