@@ -20,7 +20,6 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#include <QByteArray>
 #include <QDesktopWidget>
 #include <QDrag>
 #include <QHBoxLayout>
@@ -85,12 +84,18 @@ namespace {
 
         return text;
     }
-    auto formatTooltip(const TwitchChannel::StreamStatus &s)
+    auto formatTooltip(const TwitchChannel::StreamStatus &s, QString thumbnail)
     {
         return QString("<style>.center { text-align: center; }</style> \
-            <p class=\"center\">%1%2%3%4%5 for %6 with %7 viewers</p>")
+            <p class=\"center\">%1%2%3%4%5%6 for %7 with %8 viewers</p>")
             .arg(s.title.toHtmlEscaped())
             .arg(s.title.isEmpty() ? QString() : "<br><br>")
+            .arg(getSettings()->thumbnailSizeStream.getValue() > 0
+                     ? (thumbnail.isEmpty()
+                            ? "Couldn't fetch thumbnail"
+                            : "<img src=\"data:image/jpg;base64, " + thumbnail +
+                                  "\"/><br>")
+                     : QString())
             .arg(s.game.toHtmlEscaped())
             .arg(s.game.isEmpty() ? QString() : "<br>")
             .arg(s.rerun ? "Vod-casting" : "Live")
@@ -567,7 +572,38 @@ void SplitHeader::updateChannelText()
         if (streamStatus->live)
         {
             this->isLive_ = true;
-            this->tooltipText_ = formatTooltip(*streamStatus);
+            QString url = "https://static-cdn.jtvnw.net/"
+                          "previews-ttv/live_user_" +
+                          channel->getName().toLower();
+            switch (getSettings()->thumbnailSizeStream.getValue())
+            {
+                case 1:
+                    url.append("-80x45.jpg");
+                    break;
+                case 2:
+                    url.append("-160x90.jpg");
+                    break;
+                case 3:
+                    url.append("-360x180.jpg");
+                    break;
+                default:
+                    url = "";
+            }
+            if (!url.isEmpty() &&
+                (!this->lastThumbnail_.isValid() ||
+                 this->lastThumbnail_.elapsed() > 5 * 60 * 1000))
+            {
+                NetworkRequest(url, NetworkRequestType::Get)
+                    .onSuccess([this](auto result) -> Outcome {
+                        this->thumbnail_ =
+                            QString::fromLatin1(result.getData().toBase64());
+                        updateChannelText();
+                        return Success;
+                    })
+                    .execute();
+                this->lastThumbnail_.restart();
+            }
+            this->tooltipText_ = formatTooltip(*streamStatus, this->thumbnail_);
             title += formatTitle(*streamStatus, *getSettings());
         }
         else

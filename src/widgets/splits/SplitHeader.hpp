@@ -52,6 +52,8 @@ private:
     Split *const split_{};
     QString tooltipText_{};
     bool isLive_{false};
+    QString thumbnail_;
+    QElapsedTimer lastThumbnail_;
 
     // ui
     Button *dropdownButton_{};
