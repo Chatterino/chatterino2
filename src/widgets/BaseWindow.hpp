@@ -45,6 +45,9 @@ public:
                                       std::function<void()> onClicked);
     EffectLabel *addTitleBarLabel(std::function<void()> onClicked);
 
+    void setStayInScreenRect(bool value);
+    bool getStayInScreenRect() const;
+
     void setActionOnFocusLoss(ActionOnFocusLoss value);
     ActionOnFocusLoss getActionOnFocusLoss() const;
 
@@ -103,6 +106,7 @@ private:
     ActionOnFocusLoss actionOnFocusLoss_ = Nothing;
     bool frameless_;
     bool shown_ = false;
+    bool stayInScreenRect_ = false;
     FlagsEnum<Flags> flags_;
     float nativeScale_ = 1;
     bool isResizeFixing_ = false;

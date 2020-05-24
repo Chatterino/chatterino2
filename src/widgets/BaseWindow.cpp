@@ -220,6 +220,18 @@ void BaseWindow::init()
 #endif
 }
 
+void BaseWindow::setStayInScreenRect(bool value)
+{
+    this->stayInScreenRect_ = value;
+
+    this->moveIntoDesktopRect(this, this->pos());
+}
+
+bool BaseWindow::getStayInScreenRect() const
+{
+    return this->stayInScreenRect_;
+}
+
 void BaseWindow::setActionOnFocusLoss(ActionOnFocusLoss value)
 {
     this->actionOnFocusLoss_ = value;
@@ -548,6 +560,9 @@ void BaseWindow::showEvent(QShowEvent *)
 
 void BaseWindow::moveIntoDesktopRect(QWidget *parent, QPoint point)
 {
+    if (!this->stayInScreenRect_)
+        return;
+
     // move the widget into the screen geometry if it's not already in there
     QDesktopWidget *desktop = QApplication::desktop();
     QPoint globalCursorPos = QCursor::pos();
