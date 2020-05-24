@@ -55,8 +55,7 @@ jobs:
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-            REM We use this source (temporarily?) until choco has updated their version of conan
-            choco install conan -y -s="https://api.bintray.com/nuget/anotherfoxguy/choco-pkg"
+            choco install conan -y
 
             refreshenv
         shell: cmd
