@@ -2,17 +2,21 @@
 #include <QSizePolicy>
 #include "singletons/Resources.hpp"
 
+#include "common/GlobalBadges.hpp"
+
 namespace chatterino {
 
-BadgePickerDialog::BadgePickerDialog(QWidget *parent)
+BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
+                                     QWidget *parent)
     : QDialog(parent)
     , vbox_(this)
     , okButton_("OK")
     , cancelButton_("Cancel")
+    , badges_(badges)
 {
     this->vbox_.addWidget(&dropdown_);
     this->vbox_.addLayout(&buttonBox_);
-    this->initializeValues();
+
     this->buttonBox_.addStretch(1);
     this->buttonBox_.addWidget(&okButton_);
     this->buttonBox_.addWidget(&cancelButton_);
@@ -27,31 +31,48 @@ BadgePickerDialog::BadgePickerDialog(QWidget *parent)
     this->setWindowFlags(
         (this->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
         Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+
+    // this has to be delayed so the constructor returns
+    // before we try to get a weak_ptr ref to this in initializeValues()
+    QTimer::singleShot(1, this, [this] { this->initializeValues(); });
 }
 
 void BadgePickerDialog::initializeValues()
 {
-    using Badges = BadgePickerDialog::Badges;
-    this->dropdown_.addItem(QIcon(getResources().twitch.broadcaster),
-                            "Broadcaster", Badges::Broadcaster);
-    this->dropdown_.addItem(QIcon(getResources().twitch.admin), "Admin",
-                            Badges::Admin);
-    this->dropdown_.addItem(QIcon(getResources().twitch.staff), "Staff",
-                            Badges::Staff);
-    this->dropdown_.addItem(QIcon(getResources().twitch.moderator), "Moderator",
-                            Badges::Moderator);
-    this->dropdown_.addItem(QIcon(getResources().twitch.verified), "Verified",
-                            Badges::Verified);
-    this->dropdown_.addItem(QIcon(getResources().twitch.vip), "VIP",
-                            Badges::VIP);
-    this->dropdown_.addItem(QIcon(getResources().twitch.globalmod),
-                            "Global Moderator", Badges::GlobalModerator);
+    QListIterator i(this->badges_);
+    while (i.hasNext())
+    {
+        auto item = i.next();
+        this->dropdown_.addItem(item.displayName(), item.identifier());
+    }
+
+    GlobalBadges::instance()->getBadgeIcons(
+        this->badges_,
+        [weak = weakOf(this)](QString identifier, const QIconPtr icon) {
+            auto shared = weak.lock();
+            if (!shared)
+                return;
+
+            int index = shared->dropdown_.findData(identifier);
+            if (index != -1)
+            {
+                shared->dropdown_.setItemIcon(index, *icon);
+            }
+        });
 }
 
-BadgePickerDialog::Badges BadgePickerDialog::getSelection() const
+boost::optional<DisplayBadge> BadgePickerDialog::getSelection() const
 {
-    return static_cast<BadgePickerDialog::Badges>(
-        this->dropdown_.currentData().toInt());
+    QString identifier = this->dropdown_.currentData().toString();
+    QListIterator i(this->badges_);
+    while (i.hasNext())
+    {
+        auto item = i.next();
+        if (item.identifier() == identifier)
+            return item;
+    }
+
+    return boost::none;
 }
 
 void BadgePickerDialog::okButtonClicked()

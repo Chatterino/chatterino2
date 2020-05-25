@@ -116,6 +116,7 @@ SOURCES += \
     src/common/Credentials.cpp \
     src/common/DownloadManager.cpp \
     src/common/Env.cpp \
+    src/common/GlobalBadges.cpp \
     src/common/LinkParser.cpp \
     src/common/Modes.cpp \
     src/common/NetworkManager.cpp \
@@ -210,6 +211,7 @@ SOURCES += \
     src/singletons/WindowManager.cpp \
     src/util/Clipboard.cpp \
     src/util/DebugCount.cpp \
+    src/util/DisplayBadge.cpp \
     src/util/FormatTime.cpp \
     src/util/FunctionEventFilter.cpp \
     src/util/FuzzyConvert.cpp \
@@ -301,6 +303,7 @@ HEADERS += \
     src/common/DownloadManager.hpp \
     src/common/Env.hpp \
     src/common/FlagsEnum.hpp \
+    src/common/GlobalBadges.hpp \
     src/common/LinkParser.hpp \
     src/common/Modes.hpp \
     src/common/NetworkCommon.hpp \
@@ -418,6 +421,7 @@ HEADERS += \
     src/util/CombinePath.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
+    src/util/DisplayBadge.hpp \
     src/util/DistanceBetweenPoints.hpp \
     src/util/FormatTime.hpp \
     src/util/FunctionEventFilter.hpp \

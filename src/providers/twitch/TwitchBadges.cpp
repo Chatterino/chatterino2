@@ -19,43 +19,46 @@ void TwitchBadges::loadTwitchBadges()
     NetworkRequest(url)
 
         .onSuccess([this](auto result) -> Outcome {
-            auto root = result.parseJson();
-            auto badgeSets = this->badgeSets_.access();
-
-            auto jsonSets = root.value("badge_sets").toObject();
-            for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt)
             {
-                auto key = sIt.key();
-                auto versions =
-                    sIt.value().toObject().value("versions").toObject();
+                auto root = result.parseJson();
+                auto badgeSets = this->badgeSets_.access();
 
-                for (auto vIt = versions.begin(); vIt != versions.end(); ++vIt)
+                auto jsonSets = root.value("badge_sets").toObject();
+                for (auto sIt = jsonSets.begin(); sIt != jsonSets.end(); ++sIt)
                 {
-                    auto versionObj = vIt.value().toObject();
+                    auto key = sIt.key();
+                    auto versions =
+                        sIt.value().toObject().value("versions").toObject();
 
-                    auto emote = Emote{
-                        {""},
-                        ImageSet{
-                            Image::fromUrl(
-                                {versionObj.value("image_url_1x").toString()},
-                                1),
-                            Image::fromUrl(
-                                {versionObj.value("image_url_2x").toString()},
-                                .5),
-                            Image::fromUrl(
-                                {versionObj.value("image_url_4x").toString()},
-                                .25),
-                        },
-                        Tooltip{versionObj.value("title").toString()},
-                        Url{versionObj.value("click_url").toString()}};
-                    // "title"
-                    // "clickAction"
+                    for (auto vIt = versions.begin(); vIt != versions.end();
+                         ++vIt)
+                    {
+                        auto versionObj = vIt.value().toObject();
 
-                    (*badgeSets)[key][vIt.key()] =
-                        std::make_shared<Emote>(emote);
+                        auto emote = Emote{
+                            {""},
+                            ImageSet{
+                                Image::fromUrl({versionObj.value("image_url_1x")
+                                                    .toString()},
+                                               1),
+                                Image::fromUrl({versionObj.value("image_url_2x")
+                                                    .toString()},
+                                               .5),
+                                Image::fromUrl({versionObj.value("image_url_4x")
+                                                    .toString()},
+                                               .25),
+                            },
+                            Tooltip{versionObj.value("title").toString()},
+                            Url{versionObj.value("click_url").toString()}};
+                        // "title"
+                        // "clickAction"
+
+                        (*badgeSets)[key][vIt.key()] =
+                            std::make_shared<Emote>(emote);
+                    }
                 }
             }
-
+            this->loaded.invoke();
             return Success;
         })
         .execute();

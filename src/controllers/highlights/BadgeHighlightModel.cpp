@@ -1,6 +1,7 @@
 #include "BadgeHighlightModel.hpp"
 
 #include "Application.hpp"
+#include "common/GlobalBadges.hpp"
 #include "messages/Emote.hpp"
 #include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"
@@ -11,6 +12,7 @@ namespace chatterino {
 BadgeHighlightModel::BadgeHighlightModel(QObject *parent)
     : SignalVectorModel<HighlightBadge>(5, parent)
 {
+    GlobalBadges::instance();
 }
 
 // turn vector item into model row
@@ -39,15 +41,20 @@ HighlightBadge BadgeHighlightModel::getItemFromRow(
 void BadgeHighlightModel::getRowFromItem(const HighlightBadge &item,
                                          std::vector<QStandardItem *> &row)
 {
+    using QIconPtr = std::shared_ptr<QIcon>;
     using Column = BadgeHighlightModel::Column;
 
-    row[Column::Badge]->setData(QVariant(item.badgePixmap()),
-                                Qt::DecorationRole);
     setStringItem(row[Column::Badge], item.displayName());
     setBoolItem(row[Column::FlashTaskbar], item.hasAlert());
     setBoolItem(row[Column::PlaySound], item.hasSound());
     setFilePathItem(row[Column::SoundPath], item.getSoundUrl());
     setColorItem(row[Column::Color], *item.getColor());
+
+    GlobalBadges::instance()->getBadgeIcon(
+        item.identifier(),
+        [item, row](QString /*identifier*/, const QIconPtr pixmap) {
+            row[Column::Badge]->setData(QVariant(*pixmap), Qt::DecorationRole);
+        });
 }
 
 }  // namespace chatterino

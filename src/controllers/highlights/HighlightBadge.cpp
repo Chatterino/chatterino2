@@ -76,41 +76,9 @@ bool HighlightBadge::isMatch(const Badge &badge) const
            this->badgeVersion_.compare(badge.value_, Qt::CaseInsensitive) == 0;
 }
 
-QPixmap HighlightBadge::badgePixmap() const
+QString HighlightBadge::identifier() const
 {
-    QString identifier = this->badgeName_ + "." + this->badgeVersion_;
-    if (identifier == "broadcaster.1")
-    {
-        return getResources().twitch.broadcaster;
-    }
-    else if (identifier == "admin.1")
-    {
-        return getResources().twitch.admin;
-    }
-    else if (identifier == "staff.1")
-    {
-        return getResources().twitch.staff;
-    }
-    else if (identifier == "moderator.1")
-    {
-        return getResources().twitch.moderator;
-    }
-    else if (identifier == "partner.1")
-    {
-        return getResources().twitch.verified;
-    }
-    else if (identifier == "vip.1")
-    {
-        return getResources().twitch.vip;
-    }
-    else if (identifier == "global_mod.1")
-    {
-        return getResources().twitch.globalmod;
-    }
-    else
-    {
-        return QPixmap();
-    }
+    return this->badgeName_ + "." + this->badgeVersion_;
 }
 
 bool HighlightBadge::hasCustomSound() const

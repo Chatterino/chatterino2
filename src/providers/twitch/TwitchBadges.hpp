@@ -7,6 +7,8 @@
 #include "common/UniqueAccess.hpp"
 #include "util/QStringHash.hpp"
 
+#include "pajlada/signals/signal.hpp"
+
 namespace chatterino {
 
 struct Emote;
@@ -22,6 +24,8 @@ public:
 
     boost::optional<EmotePtr> badge(const QString &set,
                                     const QString &version) const;
+
+    pajlada::Signals::NoArgSignal loaded;
 
 private:
     UniqueAccess<

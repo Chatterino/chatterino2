@@ -29,6 +29,18 @@
 
 namespace chatterino {
 
+namespace {
+    QList<DisplayBadge> availableBadges = {
+        {"Broadcaster", "broadcaster", "1"},
+        {"Admin", "admin", "1"},
+        {"Staff", "staff", "1"},
+        {"Global Moderator", "global_mod", "1"},
+        {"Moderator", "moderator", "1"},
+        {"Verified", "partner", "1"},
+        {"VIP", "vip", "1"},
+    };
+}
+
 HighlightingPage::HighlightingPage()
 {
     LayoutCreator<HighlightingPage> layoutCreator(this);
@@ -158,53 +170,18 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([this] {
-                    BadgePickerDialog d(this);
+                    auto d = std::make_shared<BadgePickerDialog>(
+                        availableBadges, this);
 
-                    d.setWindowTitle("Choose badge");
-                    if (d.exec() == QDialog::Accepted)
+                    d->setWindowTitle("Choose badge");
+                    if (d->exec() == QDialog::Accepted)
                     {
-                        using Badges = BadgePickerDialog::Badges;
-                        QString name;
-                        QString version = "1";
-                        QString displayName;
-                        switch (d.getSelection())
-                        {
-                            case Badges::Broadcaster:
-                                name = "broadcaster";
-                                displayName = "Broadcaster";
-                                break;
-                            case Badges::Admin:
-                                name = "admin";
-                                displayName = "Admin";
-                                break;
-                            case Badges::Staff:
-                                name = "staff";
-                                displayName = "Staff";
-                                break;
-                            case Badges::Moderator:
-                                name = "moderator";
-                                displayName = "Moderator";
-                                break;
-                            case Badges::Verified:
-                                name = "partner";
-                                displayName = "Verified";
-                                break;
-                            case Badges::VIP:
-                                name = "vip";
-                                displayName = "VIP";
-                                break;
-                            case Badges::GlobalModerator:
-                                name = "global_mod";
-                                displayName = "Global Moderator";
-                                break;
-                            default:
-                                return;
-                        }
-
-                        getSettings()->highlightedBadges.append(HighlightBadge{
-                            name, version, displayName, false, false, "",
-                            ColorProvider::instance().color(
-                                ColorType::SelfHighlight)});
+                        auto s = d->getSelection();
+                        getSettings()->highlightedBadges.append(
+                            HighlightBadge{s->badgeName(), s->badgeVersion(),
+                                           s->displayName(), false, false, "",
+                                           ColorProvider::instance().color(
+                                               ColorType::SelfHighlight)});
                     }
                 });
 

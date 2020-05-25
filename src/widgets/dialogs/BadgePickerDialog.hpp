@@ -1,5 +1,7 @@
 #pragma once
 
+#include "util/DisplayBadge.hpp"
+
 #include <QDialog>
 #include <QHBoxLayout>
 #include <QLineEdit>
@@ -9,24 +11,16 @@
 
 namespace chatterino {
 
-class BadgePickerDialog : public QDialog
+class BadgePickerDialog : public QDialog,
+                          public std::enable_shared_from_this<BadgePickerDialog>
 {
     Q_OBJECT
+    using QIconPtr = std::shared_ptr<QIcon>;
 
 public:
-    enum Badges {
-        Broadcaster = 0,
-        Admin = 1,
-        Verified = 2,
-        Staff = 3,
-        VIP = 4,
-        Moderator = 5,
-        GlobalModerator = 6
-    };
+    BadgePickerDialog(QList<DisplayBadge> badges, QWidget *parent = nullptr);
 
-    BadgePickerDialog(QWidget *parent = nullptr);
-
-    Badges getSelection() const;
+    boost::optional<DisplayBadge> getSelection() const;
 
 private:
     void initializeValues();
@@ -35,6 +29,7 @@ private:
     QHBoxLayout buttonBox_;
     QPushButton okButton_;
     QPushButton cancelButton_;
+    QList<DisplayBadge> badges_;
 
 private slots:
     void okButtonClicked();

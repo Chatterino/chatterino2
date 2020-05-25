@@ -28,8 +28,6 @@ public:
     bool hasSound() const;
     bool isMatch(const Badge &badge) const;
 
-    QPixmap badgePixmap() const;
-
     /**
      * @brief Check if this highlight phrase has a custom sound set.
      *
@@ -43,6 +41,8 @@ public:
 
     const QUrl &getSoundUrl() const;
     const std::shared_ptr<QColor> getColor() const;
+
+    QString identifier() const;
 
     /*
      * XXX: Use the constexpr constructor here once we are building with
