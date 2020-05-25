@@ -34,7 +34,6 @@ namespace {
         {"Broadcaster", "broadcaster", "1"},
         {"Admin", "admin", "1"},
         {"Staff", "staff", "1"},
-        {"Global Moderator", "global_mod", "1"},
         {"Moderator", "moderator", "1"},
         {"Verified", "partner", "1"},
         {"VIP", "vip", "1"},
