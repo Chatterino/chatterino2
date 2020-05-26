@@ -73,5 +73,4 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
         });
 }
 
-
 }  // namespace chatterino
