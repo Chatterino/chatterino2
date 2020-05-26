@@ -176,6 +176,10 @@ HighlightingPage::HighlightingPage()
                     if (d->exec() == QDialog::Accepted)
                     {
                         auto s = d->getSelection();
+                        if (!s)
+                        {
+                            return;
+                        }
                         getSettings()->highlightedBadges.append(
                             HighlightBadge{s->badgeName(), s->badgeVersion(),
                                            s->displayName(), false, false, "",

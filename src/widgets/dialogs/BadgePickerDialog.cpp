@@ -39,10 +39,8 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
 
 void BadgePickerDialog::initializeValues()
 {
-    QListIterator i(this->badges_);
-    while (i.hasNext())
+    for (const auto &item : this->badges_)
     {
-        auto item = i.next();
         this->dropdown_.addItem(item.displayName(), item.identifier());
     }
 
@@ -63,13 +61,10 @@ void BadgePickerDialog::initializeValues()
 
 boost::optional<DisplayBadge> BadgePickerDialog::getSelection() const
 {
-    QString identifier = this->dropdown_.currentData().toString();
-    QListIterator i(this->badges_);
-    while (i.hasNext())
+    const auto i = this->dropdown_.currentIndex();
+    if (i >= 0 && i < this->badges_.size())
     {
-        auto item = i.next();
-        if (item.identifier() == identifier)
-            return item;
+        return this->badges_[i];
     }
 
     return boost::none;

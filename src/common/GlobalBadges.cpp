@@ -104,10 +104,9 @@ void GlobalBadges::getBadgeIcon(const DisplayBadge &badge,
 void GlobalBadges::getBadgeIcons(const QList<DisplayBadge> &badges,
                                  BadgeIconCallback callback)
 {
-    QListIterator i(badges);
-    while (i.hasNext())
+    for (const auto &item : badges)
     {
-        this->getBadgeIcon(i.next(), callback);
+        this->getBadgeIcon(item, callback);
     }
 }
 

@@ -1081,15 +1081,10 @@ void TwitchMessageBuilder::parseHighlights()
         if (userHighlight.hasSound())
         {
             this->highlightSound_ = true;
-            // Use custom sound if set, otherwise use the fallback sound
-            if (userHighlight.hasCustomSound())
-            {
-                this->highlightSoundUrl_ = userHighlight.getSoundUrl();
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
+            // Use custom sound if set, otherwise use fallback sound
+            this->highlightSoundUrl_ = userHighlight.hasCustomSound()
+                                           ? userHighlight.getSoundUrl()
+                                           : getFallbackHighlightSound();
         }
 
         if (this->highlightAlert_ && this->highlightSound_)
@@ -1145,16 +1140,10 @@ void TwitchMessageBuilder::parseHighlights()
         if (highlight.hasSound() && !this->highlightSound_)
         {
             this->highlightSound_ = true;
-
             // Use custom sound if set, otherwise use fallback sound
-            if (highlight.hasCustomSound())
-            {
-                this->highlightSoundUrl_ = highlight.getSoundUrl();
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
+            this->highlightSoundUrl_ = highlight.hasCustomSound()
+                                           ? highlight.getSoundUrl()
+                                           : getFallbackHighlightSound();
         }
 
         if (this->highlightAlert_ && this->highlightSound_)
@@ -1191,16 +1180,10 @@ void TwitchMessageBuilder::parseHighlights()
             if (highlight.hasSound() && !this->highlightSound_)
             {
                 this->highlightSound_ = true;
-
                 // Use custom sound if set, otherwise use fallback sound
-                if (highlight.hasCustomSound())
-                {
-                    this->highlightSoundUrl_ = highlight.getSoundUrl();
-                }
-                else
-                {
-                    this->highlightSoundUrl_ = getFallbackHighlightSound();
-                }
+                this->highlightSoundUrl_ = highlight.hasCustomSound()
+                                               ? highlight.getSoundUrl()
+                                               : getFallbackHighlightSound();
             }
 
             if (this->highlightAlert_ && this->highlightSound_)
