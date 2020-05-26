@@ -9,22 +9,28 @@ namespace chatterino {
 BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
                                      QWidget *parent)
     : QDialog(parent)
-    , vbox_(this)
-    , okButton_("OK")
-    , cancelButton_("Cancel")
-    , badges_(badges)
 {
-    this->vbox_.addWidget(&dropdown_);
-    this->vbox_.addLayout(&buttonBox_);
+    this->dropdown_ = new QComboBox;
+    auto vbox = new QVBoxLayout(this);
+    auto buttonBox = new QHBoxLayout;
+    auto okButton = new QPushButton("OK");
+    auto cancelButton = new QPushButton("Cancel");
 
-    this->buttonBox_.addStretch(1);
-    this->buttonBox_.addWidget(&okButton_);
-    this->buttonBox_.addWidget(&cancelButton_);
+    vbox->addWidget(this->dropdown_);
+    vbox->addLayout(buttonBox);
 
-    QObject::connect(&this->okButton_, SIGNAL(clicked()), this,
-                     SLOT(okButtonClicked()));
-    QObject::connect(&this->cancelButton_, SIGNAL(clicked()), this,
-                     SLOT(cancelButtonClicked()));
+    buttonBox->addStretch(1);
+    buttonBox->addWidget(cancelButton);
+    buttonBox->addWidget(okButton);
+
+    QObject::connect(okButton, &QAbstractButton::clicked, [this] {
+        this->accept();
+        this->close();
+    });
+    QObject::connect(cancelButton, &QAbstractButton::clicked, [this] {
+        this->reject();
+        this->close();
+    });
 
     this->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
 
@@ -32,54 +38,40 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
         (this->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
         Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
-    // this has to be delayed so the constructor returns
-    // before we try to get a weak_ptr ref to this in initializeValues()
-    QTimer::singleShot(1, this, [this] { this->initializeValues(); });
-}
-
-void BadgePickerDialog::initializeValues()
-{
-    for (const auto &item : this->badges_)
+    // Add items.
+    for (const auto &item : badges)
     {
-        this->dropdown_.addItem(item.displayName(), item.identifier());
+        this->dropdown_->addItem(item.displayName(), item.identifier());
     }
 
+    const auto updateBadge = [=](int index) {
+        BadgeOpt badge;
+        if (index >= 0 && index < badges.size())
+        {
+            badge = badges[index];
+        }
+        this->currentBadge_ = badge;
+    };
+
+    QObject::connect(this->dropdown_,
+                     QOverload<int>::of(&QComboBox::currentIndexChanged),
+                     updateBadge);
+    updateBadge(0);
+
+    // Set icons.
     GlobalBadges::instance()->getBadgeIcons(
-        this->badges_,
-        [weak = weakOf(this)](QString identifier, const QIconPtr icon) {
-            auto shared = weak.lock();
-            if (!shared)
+        badges,
+        [&dropdown = this->dropdown_](QString identifier, const QIconPtr icon) {
+            if (!dropdown)
                 return;
 
-            int index = shared->dropdown_.findData(identifier);
+            int index = dropdown->findData(identifier);
             if (index != -1)
             {
-                shared->dropdown_.setItemIcon(index, *icon);
+                dropdown->setItemIcon(index, *icon);
             }
         });
 }
 
-boost::optional<DisplayBadge> BadgePickerDialog::getSelection() const
-{
-    const auto i = this->dropdown_.currentIndex();
-    if (i >= 0 && i < this->badges_.size())
-    {
-        return this->badges_[i];
-    }
-
-    return boost::none;
-}
-
-void BadgePickerDialog::okButtonClicked()
-{
-    this->accept();
-    this->close();
-}
-
-void BadgePickerDialog::cancelButtonClicked()
-{
-    this->reject();
-    this->close();
-}
 
 }  // namespace chatterino

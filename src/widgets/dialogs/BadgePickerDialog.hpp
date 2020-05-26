@@ -3,37 +3,27 @@
 #include "util/DisplayBadge.hpp"
 
 #include <QDialog>
-#include <QHBoxLayout>
-#include <QLineEdit>
-#include <QPushButton>
-#include <QString>
-#include <QVBoxLayout>
 
 namespace chatterino {
 
 class BadgePickerDialog : public QDialog,
                           public std::enable_shared_from_this<BadgePickerDialog>
 {
-    Q_OBJECT
     using QIconPtr = std::shared_ptr<QIcon>;
+    using BadgeOpt = boost::optional<DisplayBadge>;
 
 public:
     BadgePickerDialog(QList<DisplayBadge> badges, QWidget *parent = nullptr);
 
-    boost::optional<DisplayBadge> getSelection() const;
+    BadgeOpt getSelection() const
+    {
+        return this->currentBadge_;
+    }
 
 private:
-    void initializeValues();
-    QVBoxLayout vbox_;
-    QComboBox dropdown_;
-    QHBoxLayout buttonBox_;
-    QPushButton okButton_;
-    QPushButton cancelButton_;
-    QList<DisplayBadge> badges_;
+    QComboBox *dropdown_;
 
-private slots:
-    void okButtonClicked();
-    void cancelButtonClicked();
+    BadgeOpt currentBadge_;
 };
 
 }  // namespace chatterino
