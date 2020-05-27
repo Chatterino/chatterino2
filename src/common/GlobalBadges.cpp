@@ -86,8 +86,7 @@ void GlobalBadges::getBadgeIcon(const QString &identifier,
     else
     {
         auto parts = identifier.split(".");
-        auto badge = this->badges_->badge(parts.at(0), parts.at(1));
-        if (badge)
+        if (const auto badge = this->badges_->badge(parts.at(0), parts.at(1)))
         {
             this->loadEmoteImage(identifier, (*badge)->images.getImage3(),
                                  std::move(callback));
