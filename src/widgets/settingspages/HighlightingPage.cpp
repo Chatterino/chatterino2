@@ -92,7 +92,8 @@ HighlightingPage::HighlightingPage()
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
                                  [this, view](const QModelIndex &clicked) {
-                                     this->tableCellClicked(clicked, view);
+                                     this->tableCellClicked(
+                                         clicked, view, HighlightTab::Messages);
                                  });
             }
 
@@ -102,7 +103,7 @@ HighlightingPage::HighlightingPage()
                     "Play notification sounds and highlight messages from "
                     "certain users.\n"
                     "User highlights are prioritized over message "
-                    "highlights.");
+                    "and badge highlights.");
                 EditableModelView *view =
                     pingUsers
                         .emplace<EditableModelView>(
@@ -139,7 +140,8 @@ HighlightingPage::HighlightingPage()
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
                                  [this, view](const QModelIndex &clicked) {
-                                     this->tableCellClicked(clicked, view);
+                                     this->tableCellClicked(
+                                         clicked, view, HighlightTab::Users);
                                  });
             }
 
@@ -190,7 +192,8 @@ HighlightingPage::HighlightingPage()
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
                                  [this, view](const QModelIndex &clicked) {
-                                     this->tableCellClicked(clicked, view);
+                                     this->tableCellClicked(
+                                         clicked, view, HighlightTab::Badges);
                                  });
             }
 
@@ -271,71 +274,92 @@ HighlightingPage::HighlightingPage()
     this->disabledUsersChangedTimer_.setSingleShot(true);
 }  // namespace chatterino
 
-void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
-                                        EditableModelView *view)
+void HighlightingPage::openSoundDialog(const QModelIndex &clicked,
+                                       EditableModelView *view, int soundColumn)
 {
-    using Column = HighlightModel::Column;
+    auto fileUrl = QFileDialog::getOpenFileUrl(this, tr("Open Sound"), QUrl(),
+                                               tr("Audio Files (*.mp3 *.wav)"));
+    view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
+    view->getModel()->setData(clicked, fileUrl.fileName(), Qt::DisplayRole);
 
-    if (clicked.column() == Column::SoundPath)
+    // Enable custom sound check box if user set a sound
+    if (!fileUrl.isEmpty())
     {
-        auto fileUrl = QFileDialog::getOpenFileUrl(
-            this, tr("Open Sound"), QUrl(), tr("Audio Files (*.mp3 *.wav)"));
-        view->getModel()->setData(clicked, fileUrl, Qt::UserRole);
-        view->getModel()->setData(clicked, fileUrl.fileName(), Qt::DisplayRole);
-
-        // Enable custom sound check box if user set a sound
-        if (!fileUrl.isEmpty())
-        {
-            QModelIndex checkBox = clicked.siblingAtColumn(Column::PlaySound);
-            view->getModel()->setData(checkBox, Qt::Checked,
-                                      Qt::CheckStateRole);
-        }
+        QModelIndex checkBox = clicked.siblingAtColumn(soundColumn);
+        view->getModel()->setData(checkBox, Qt::Checked, Qt::CheckStateRole);
     }
-    else if (clicked.column() == Column::Color &&
-             clicked.row() != HighlightModel::WHISPER_ROW)
-    {
-        auto initial =
-            view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
+}
 
-        auto dialog = new ColorPickerDialog(initial, this);
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->show();
-        dialog->closed.connect([=] {
-            QColor selected = dialog->selectedColor();
+void HighlightingPage::openColorDialog(const QModelIndex &clicked,
+                                       EditableModelView *view,
+                                       HighlightTab tab)
+{
+    auto initial =
+        view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
 
-            if (selected.isValid())
+    auto dialog = new ColorPickerDialog(initial, this);
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->show();
+    dialog->closed.connect([=] {
+        QColor selected = dialog->selectedColor();
+
+        if (selected.isValid())
+        {
+            view->getModel()->setData(clicked, selected, Qt::DecorationRole);
+
+            if (tab == HighlightTab::Messages)
             {
-                view->getModel()->setData(clicked, selected,
-                                          Qt::DecorationRole);
-
-                // Hacky (?) way to figure out what tab the cell was clicked in
-                const bool fromMessages = (dynamic_cast<HighlightModel *>(
-                                               view->getModel()) != nullptr);
-
-                if (fromMessages)
-                {
-                    /*
+                /*
                      * For preset highlights in the "Messages" tab, we need to
                      * manually update the color map.
                      */
-                    auto instance = ColorProvider::instance();
-                    switch (clicked.row())
-                    {
-                        case 0:
-                            instance.updateColor(ColorType::SelfHighlight,
-                                                 selected);
-                            break;
-                        case 1:
-                            instance.updateColor(ColorType::Whisper, selected);
-                            break;
-                        case 2:
-                            instance.updateColor(ColorType::Subscription,
-                                                 selected);
-                            break;
-                    }
+                auto instance = ColorProvider::instance();
+                switch (clicked.row())
+                {
+                    case 0:
+                        instance.updateColor(ColorType::SelfHighlight,
+                                             selected);
+                        break;
+                    case 1:
+                        instance.updateColor(ColorType::Whisper, selected);
+                        break;
+                    case 2:
+                        instance.updateColor(ColorType::Subscription, selected);
+                        break;
                 }
             }
-        });
+        }
+    });
+}
+
+void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
+                                        EditableModelView *view,
+                                        HighlightTab tab)
+{
+    if (tab == HighlightTab::Messages || tab == HighlightTab::Users)
+    {
+        using Column = HighlightModel::Column;
+        if (clicked.column() == Column::SoundPath)
+        {
+            this->openSoundDialog(clicked, view, Column::SoundPath);
+        }
+        else if (clicked.column() == Column::Color &&
+                 clicked.row() != HighlightModel::WHISPER_ROW)
+        {
+            this->openColorDialog(clicked, view, tab);
+        }
+    }
+    else if (tab == HighlightTab::Badges)
+    {
+        using Column = BadgeHighlightModel::Column;
+        if (clicked.column() == Column::SoundPath)
+        {
+            this->openSoundDialog(clicked, view, Column::SoundPath);
+        }
+        else if (clicked.column() == Column::Color)
+        {
+            this->openColorDialog(clicked, view, tab);
+        }
     }
 }
 
