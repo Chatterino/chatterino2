@@ -59,7 +59,8 @@ Env::Env()
           "https://braize.pajlada.com/chatterino/twitchemotes/set/%1/"))
     , imageUploaderUrl(readStringEnv("CHATTERINO2_IMAGE_UPLOADER_URL",
                                      "https://i.nuuls.com/upload"))
-    , imageUploaderFormBody(readStringEnv("CHATTERINO2_IMAGE_UPLOADER_FORM_BODY", "attachment"))
+    , imageUploaderFormBody(
+          readStringEnv("CHATTERINO2_IMAGE_UPLOADER_FORM_BODY", "attachment"))
     , twitchServerHost(
           readStringEnv("CHATTERINO2_TWITCH_SERVER_HOST", "irc.chat.twitch.tv"))
     , twitchServerPort(readPortEnv("CHATTERINO2_TWITCH_SERVER_PORT", 443))
