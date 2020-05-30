@@ -43,7 +43,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
     const static QString contentType =
         QString("multipart/form-data; boundary=%1").arg(boundary);
     static QUrl url(Env::get().imageUploaderUrl);
-    static QString FormBody(Env::get().imageUploaderFormBody);
+    static QString formBody(Env::get().imageUploaderFormBody);
 
     QHttpMultiPart *payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     QHttpPart part = QHttpPart();
@@ -54,7 +54,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                    QVariant(imageData.data.length()));
     part.setHeader(QNetworkRequest::ContentDispositionHeader,
                    QString("form-data; name=\"%1\"; filename=\"control_v.%2\"")
-                       .arg(FormBody)
+                       .arg(formBody)
                        .arg(imageData.format));
     payload->setBoundary(boundary);
     payload->append(part);
