@@ -15,6 +15,7 @@ public:
     const QString linkResolverUrl;
     const QString twitchEmoteSetResolverUrl;
     const QString imageUploaderUrl;
+    const QString imageUploaderFormBody;
     const QString twitchServerHost;
     const uint16_t twitchServerPort;
     const bool twitchServerSecure;

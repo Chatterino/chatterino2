@@ -77,6 +77,10 @@ namespace {
 
                 auto id = EmoteId{jsonEmote.value("id").toString()};
                 auto name = EmoteName{jsonEmote.value("code").toString()};
+                auto author = EmoteAuthor{jsonEmote.value("user")
+                                              .toObject()
+                                              .value("name")
+                                              .toString()};
                 // emoteObject.value("imageType").toString();
 
                 auto emote = Emote({
@@ -86,7 +90,10 @@ namespace {
                         Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
                         Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
                     },
-                    Tooltip{name.string + "<br />Channel BetterTTV Emote"},
+                    Tooltip{name.string + "<br />Channel BetterTTV Emote" +
+                            ((author.string.isEmpty())
+                                 ? "<br />Channel Emote"
+                                 : "<br />By : " + author.string)},
                     Url{emoteLinkFormat.arg(id.string)},
                 });
 
