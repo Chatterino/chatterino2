@@ -214,9 +214,14 @@ void BaseWindow::init()
         });
     }
 #else
-//    if (getSettings()->windowTopMost.getValue()) {
-//        this->setWindowFlag(Qt::WindowStaysOnTopHint);
-//    }
+    // TopMost flag overrides setting
+    if (!this->flags_.has(TopMost))
+    {
+        getSettings()->windowTopMost.connect([this](bool topMost, auto) {
+            this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
+            this->show();
+        });
+    }
 #endif
 }
 
