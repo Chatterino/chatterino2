@@ -37,6 +37,31 @@ namespace chatterino {
 static auto uploadMutex = QMutex();
 static std::queue<RawImageData> uploadQueue;
 
+//logging information on successful uploads to a csv file
+void logToCsv(const QString originalFilePath, const QString link,
+              ChannelPtr channel)
+{
+    const QString csvFileName =
+        Paths::instance->messageLogDirectory + "/ImageUploader.csv";
+    QFile csvFile(csvFileName);
+    bool isCsvOkay = csvFile.open(QIODevice::Append | QIODevice::Text);
+    if (!isCsvOkay)
+    {
+        channel->addMessage(makeSystemMessage(
+            QString("Failed to open csv file with links at ") + csvFileName));
+        return;
+    }
+    QTextStream out(&csvFile);
+    out << originalFilePath + QString(",") << link + QString(",")
+        << QDateTime::currentSecsSinceEpoch()
+        << QString(",%1\n").arg(channel->getName());
+    // image path (can be empty)
+    // image link
+    // timestamp
+    // channel name
+    csvFile.close();
+}
+
 void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                         ResizingTextEdit &textEdit)
 {
@@ -70,15 +95,15 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
             if (uploadQueue.empty())
             {
                 channel->addMessage(makeSystemMessage(
-                    QString("Your image has been uploaded to ") +
-                    result.getData()));
+                    QString("Your image has been uploaded to ")
+                        + result.getData() + QString(" .")));
                 uploadMutex.unlock();
             }
             else
             {
                 channel->addMessage(makeSystemMessage(
                     QString(
-                        "Your image has been uploaded to %1 %2 left. Please "
+                        "Your image has been uploaded to %1 . %2 left. Please "
                         "wait until all of them are uploaded. About %3 "
                         "seconds left.")
                         .arg(result.getData() + QString(""))
@@ -93,30 +118,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                 });
             }
 
-            //logging to .csv file
-            const QString csvFileName =
-                Paths::instance->messageLogDirectory + "/ImageUploader.csv";
-            QFile csvFile(csvFileName);
-            bool isCsvOkay = csvFile.open(QIODevice::Append | QIODevice::Text);
-            if (!isCsvOkay)
-            {
-                channel->addMessage(makeSystemMessage(
-                    QString("Failed to open csv file with links at ") +
-                    csvFileName));
-            }
-            else
-            {
-                QTextStream out(&csvFile);
-                out << originalFilePath + QString(",")
-                    << result.getData() + QString(",")
-                    << QDateTime::currentSecsSinceEpoch()
-                    << QString(",%1\n").arg(channel->getName());
-                // image path (can be empty)
-                // image link
-                // timestamp
-                // channel name
-                csvFile.close();
-            }
+            logToCsv(originalFilePath, result.getData(), channel);
 
             return Success;
         })
@@ -247,4 +249,5 @@ void upload(const QMimeData *source, ChannelPtr channel,
         }
     }
 }
+
 }  // namespace chatterino
