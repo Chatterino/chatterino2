@@ -336,10 +336,10 @@ MessagePtr TwitchMessageBuilder::build()
     return this->release();
 }
 
-bool tryToAddATwitchEmoteXD(
+bool doesWordContainATwitchEmote(
     int cursor, const QString &word,
     const std::vector<TwitchEmoteOccurence> &twitchEmotes,
-    auto &currentTwitchEmoteIt)
+    std::vector<TwitchEmoteOccurence>::const_iterator &currentTwitchEmoteIt)
 {
     if (currentTwitchEmoteIt == twitchEmotes.end())
     {
@@ -353,12 +353,8 @@ bool tryToAddATwitchEmoteXD(
     qDebug() << "Word length is" << word.length();
     qDebug().nospace() << "Word is '" << word << "'";
 
-    auto wordEnd = cursor + word.length() - 1;
+    auto wordEnd = cursor + word.length();
 
-    qDebug() << "Does emote " << currentTwitchEmote.name.string << " at "
-             << currentTwitchEmote.start << "-" << currentTwitchEmote.end
-             << "fit within word " << word << " at " << cursor << "-" << wordEnd
-             << "?";
     // Check if this emote fits within the word boundaries
     if (currentTwitchEmote.start < cursor || currentTwitchEmote.end > wordEnd)
     {
@@ -373,42 +369,44 @@ void TwitchMessageBuilder::addWords(
     const QStringList &words,
     const std::vector<TwitchEmoteOccurence> &twitchEmotes)
 {
-    auto i = int();
+    // cursor currently indicates what character index we're currently operating in the full list of words
+    int cursor = 0;
     auto currentTwitchEmoteIt = twitchEmotes.begin();
 
     for (auto word : words)
     {
-        auto wordEnd = i + word.length();
-        while (
-            tryToAddATwitchEmoteXD(i, word, twitchEmotes, currentTwitchEmoteIt))
+        while (doesWordContainATwitchEmote(cursor, word, twitchEmotes,
+                                           currentTwitchEmoteIt))
         {
+            auto wordEnd = cursor + word.length();
             const auto &currentTwitchEmote = *currentTwitchEmoteIt;
 
-            qDebug() << "Found emote" << currentTwitchEmote.name.string
-                     << "within word" << word << "(" << i << "-" << wordEnd
-                     << ")";
-            qDebug() << "added an emote wow!";
+            // if (currentTwitchEmote.start == cursor && currentTwitchEmote.end == wordEnd) {
+            //     // Exact match
+            // }
 
-            if (currentTwitchEmote.start == i)
+            if (currentTwitchEmote.start == cursor)
             {
                 // This emote exists right at the start of the word!
                 this->emplace<EmoteElement>(currentTwitchEmote.ptr,
                                             MessageElementFlag::TwitchEmote);
                 auto len = currentTwitchEmote.name.string.length();
-                qDebug() << "Cursor was " << i;
-                i += len;
+                cursor += len;
                 word = word.mid(len);
-                qDebug() << "Remainder of word is" << word << ". Cursor is now "
-                         << i;
 
                 ++currentTwitchEmoteIt;
 
                 if (word.isEmpty())
                 {
                     // space
-                    i += 1;
+                    cursor += 1;
                     qDebug() << "Nothing left in word :)";
                     break;
+                }
+                else
+                {
+                    qDebug() << "Remove trailing space";
+                    // this->message().elements.back()->setTrailingSpace(false);
                 }
 
                 continue;
@@ -417,7 +415,7 @@ void TwitchMessageBuilder::addWords(
             // Emote is not at the start
 
             // 1. Add text before the emote
-            QString preText = word.left(currentTwitchEmote.start - i);
+            QString preText = word.left(currentTwitchEmote.start - cursor);
             qDebug() << "pretext is " << preText;
             for (auto &variant : getApp()->emotes->emojis.parse(preText))
             {
@@ -425,35 +423,13 @@ void TwitchMessageBuilder::addWords(
                     [&](auto &&arg) { this->addTextOrEmoji(arg); }, variant);
             }
 
-            i += preText.size();
+            cursor += preText.size();
 
             word = word.mid(preText.size());
-
-            continue;
-
-            qDebug() << "handle emote with word " << word;
-
-            assert(currentTwitchEmote.start == i);
-
-            // This emote exists right at the start of the word!
-            this->emplace<EmoteElement>(currentTwitchEmote.ptr,
-                                        MessageElementFlag::TwitchEmote);
-            auto len = currentTwitchEmote.name.string.length();
-            qDebug() << "Cursor was " << i;
-            i += len;
-            word = word.mid(len);
-            qDebug() << "Remainder of word is" << word << ". Cursor is now "
-                     << i;
-
-            ++currentTwitchEmoteIt;
         }
 
         if (word.isEmpty())
         {
-            // TODO: do we use this?
-            // space
-            // i += 1;
-            qDebug() << "Nothing left in word :)";
             continue;
         }
 
@@ -464,7 +440,7 @@ void TwitchMessageBuilder::addWords(
                                  variant);
         }
 
-        i += word.size() + 1;
+        cursor += word.size() + 1;
     }
 }
 
