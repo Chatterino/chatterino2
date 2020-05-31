@@ -95,8 +95,8 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
             if (uploadQueue.empty())
             {
                 channel->addMessage(makeSystemMessage(
-                    QString("Your image has been uploaded to ")
-                        + result.getData() + QString(" .")));
+                    QString("Your image has been uploaded to ") +
+                    result.getData() + QString(" .")));
                 uploadMutex.unlock();
             }
             else
