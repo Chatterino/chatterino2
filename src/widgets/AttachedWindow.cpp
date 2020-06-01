@@ -272,7 +272,8 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
         ::MoveWindow(hwnd, int(rect.right - this->width_ * scale - o),
                      int(rect.bottom - this->height_ * scale - o),
                      int(this->width_ * scale),
-                     int(this->height_ * scale), true);
+                     int(this->height_ * scale),
+                     true);
     }
 
 //    if (this->fullscreen_)
