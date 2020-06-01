@@ -269,8 +269,8 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
         // offset
         int o = this->fullscreen_ ? 0 : 8;
 
-        ::MoveWindow(hwnd, int(rect.right - this->width_ * scale - o),
-                     int(rect.bottom - this->height_ * scale - o),
+        ::MoveWindow(hwnd, int(rect.right - this->width_ * scale - o) - 2,
+                     int(rect.bottom - this->height_ * scale - o) - 2,
                      int(this->width_ * scale) - 5,
                      int(this->height_ * scale) - 5, true);
     }
