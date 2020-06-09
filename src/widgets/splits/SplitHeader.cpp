@@ -653,14 +653,16 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
 {
     switch (event->button())
     {
-        case Qt::LeftButton: {
+        case Qt::LeftButton:
+        {
             this->dragging_ = true;
 
             this->dragStart_ = event->pos();
         }
         break;
 
-        case Qt::RightButton: {
+        case Qt::RightButton:
+        {
             auto menu = this->createMainMenu().release();
             menu->setAttribute(Qt::WA_DeleteOnClose);
             menu->popup(this->mapToGlobal(event->pos() + QPoint(0, 4)));
@@ -694,6 +696,7 @@ void SplitHeader::mouseReleaseEvent(QMouseEvent *event)
                 tooltip->setText("Double click or press <Ctrl+R> to change the "
                                  "channel.\nClick and "
                                  "drag to move the split.");
+                tooltip->setFixedSize(tooltip->sizeHint());
                 tooltip->setAttribute(Qt::WA_DeleteOnClose);
                 tooltip->move(pos);
                 tooltip->show();
