@@ -4,6 +4,7 @@
 #include "common/NetworkRequest.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QBuffer>
 #include <QHttpMultiPart>
@@ -41,9 +42,12 @@ static std::queue<RawImageData> uploadQueue;
 void logToCsv(const QString originalFilePath, const QString link,
               ChannelPtr channel)
 {
-    const QString csvFileName =
-        Paths::instance->messageLogDirectory + "/ImageUploader.csv";
+    const QString csvFileName = (getSettings()->logPath.getValue().isEmpty()
+                                     ? getPaths()->messageLogDirectory
+                                     : getSettings()->logPath) +
+                                "/ImageUploader.csv";
     QFile csvFile(csvFileName);
+    bool csvExisted = csvFile.exists();
     bool isCsvOkay = csvFile.open(QIODevice::Append | QIODevice::Text);
     if (!isCsvOkay)
     {
@@ -52,6 +56,11 @@ void logToCsv(const QString originalFilePath, const QString link,
         return;
     }
     QTextStream out(&csvFile);
+    qDebug() << csvExisted;
+    if (!csvExisted)
+    {
+        out << "localPath,imageLink,timestamp,channelName\n";
+    }
     out << originalFilePath + QString(",") << link + QString(",")
         << QDateTime::currentSecsSinceEpoch()
         << QString(",%1\n").arg(channel->getName());
