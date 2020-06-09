@@ -653,16 +653,14 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
 {
     switch (event->button())
     {
-        case Qt::LeftButton:
-        {
+        case Qt::LeftButton: {
             this->dragging_ = true;
 
             this->dragStart_ = event->pos();
         }
         break;
 
-        case Qt::RightButton:
-        {
+        case Qt::RightButton: {
             auto menu = this->createMainMenu().release();
             menu->setAttribute(Qt::WA_DeleteOnClose);
             menu->popup(this->mapToGlobal(event->pos() + QPoint(0, 4)));
