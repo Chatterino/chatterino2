@@ -91,10 +91,10 @@ namespace {
                         Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
                         Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
                     },
-                    Tooltip{name.string + "<br />Channel BetterTTV Emote" +
+                    Tooltip{name.string + "<br>Channel BetterTTV Emote" +
                             ((author.string.isEmpty())
-                                 ? "<br />By: " + userName.toUtf8()
-                                 : "<br />By: " + author.string)},
+                                 ? "<br>By: " + userName.toUtf8()
+                                 : "<br>By: " + author.string)},
                     Url{emoteLinkFormat.arg(id.string)},
                 });
 
