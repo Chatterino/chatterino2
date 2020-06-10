@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
+#include "messages/Message.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
@@ -15,6 +16,7 @@
 #include "widgets/Label.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -48,12 +50,36 @@ namespace {
 
         return label.getElement();
     };
+    ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
+    {
+        LimitedQueueSnapshot<MessagePtr> snapshot =
+            channel->getMessageSnapshot();
+
+        ChannelPtr channelPtr(
+            new Channel(channel->getName(), Channel::Type::None));
+
+        for (size_t i = 0; i < snapshot.size(); i++)
+        {
+            MessagePtr message = snapshot[i];
+
+            bool isSelectedUser =
+                message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
+
+            if (isSelectedUser && !message->flags.has(MessageFlag::Whisper))
+            {
+                channelPtr->addMessage(message);
+            }
+        }
+
+        return channelPtr;
+    };
 }  // namespace
 
 UserInfoPopup::UserInfoPopup()
-    : BaseWindow({BaseWindow::Frameless, BaseWindow::FramelessDraggable})
+    : BaseWindow()
     , hack_(new bool)
 {
+    this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
 
 #ifdef Q_OS_LINUX
@@ -211,8 +237,14 @@ UserInfoPopup::UserInfoPopup()
         });
     }
 
-    this->installEvents();
+	// fourth line (last messages)
+    this->latestMessages_ = new ChannelView();
+    this->latestMessages_->setMinimumSize(150, 300);
+    this->latestMessages_->setSizePolicy(QSizePolicy::Expanding,
+                                         QSizePolicy::Expanding);
+    layout.append(this->latestMessages_);
 
+    this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
 }
 
@@ -361,6 +393,9 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     this->updateUserData();
 
     this->userStateChanged_.invoke();
+
+	this->latestMessages_->setChannel(
+        filterMessages(this->userName_, this->channel_));
 }
 
 void UserInfoPopup::updateUserData()

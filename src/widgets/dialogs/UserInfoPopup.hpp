@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/BaseWindow.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -36,6 +37,7 @@ private:
     QString userName_;
     QString userId_;
     ChannelPtr channel_;
+	ChannelView *latestMessages_{};
 
     pajlada::Signals::NoArgSignal userStateChanged_;
 
