@@ -29,6 +29,7 @@ protected:
 private:
     void installEvents();
     void updateUserData();
+    void updateLatestMessages();
 
     void loadAvatar(const QUrl &url);
     bool isMod_;
@@ -37,7 +38,6 @@ private:
     QString userName_;
     QString userId_;
     ChannelPtr channel_;
-    ChannelView *latestMessages_{};
 
     pajlada::Signals::NoArgSignal userStateChanged_;
 
@@ -55,6 +55,10 @@ private:
         QCheckBox *follow = nullptr;
         QCheckBox *ignore = nullptr;
         QCheckBox *ignoreHighlights = nullptr;
+
+        Label *noMessagesLabel = nullptr;
+        ChannelView *latestMessages = nullptr;
+        QPushButton *refreshButton = nullptr;
     } ui_;
 
     class TimeoutWidget : public BaseWidget

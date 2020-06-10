@@ -27,6 +27,7 @@
 const QString TEXT_VIEWS("Views: %1");
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
+const QString TEXT_TITLE("%1 usercard");
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
 
@@ -237,12 +238,30 @@ UserInfoPopup::UserInfoPopup()
         });
     }
 
+    layout.emplace<Line>(false);
+
     // fourth line (last messages)
-    this->latestMessages_ = new ChannelView();
-    this->latestMessages_->setMinimumSize(150, 300);
-    this->latestMessages_->setSizePolicy(QSizePolicy::Expanding,
-                                         QSizePolicy::Expanding);
-    layout.append(this->latestMessages_);
+    auto logs = layout.emplace<QVBoxLayout>().withoutMargin();
+    {
+        this->ui_.noMessagesLabel = new Label("No recent messages");
+        this->ui_.noMessagesLabel->setVisible(false);
+
+        this->ui_.latestMessages = new ChannelView(this);
+        this->ui_.latestMessages->setMinimumSize(400, 175);
+        this->ui_.latestMessages->setSizePolicy(QSizePolicy::Expanding,
+                                                QSizePolicy::Expanding);
+
+        this->ui_.refreshButton = new QPushButton(this);
+        this->ui_.refreshButton->setText("Refresh");
+        this->ui_.refreshButton->QObject::connect(
+            this->ui_.refreshButton, &QPushButton::clicked,
+            [this] { this->updateLatestMessages(); });
+
+        logs->addWidget(this->ui_.noMessagesLabel);
+        logs->addWidget(this->ui_.latestMessages);
+        logs->addWidget(this->ui_.refreshButton);
+        logs->setAlignment(this->ui_.noMessagesLabel, Qt::AlignHCenter);
+    }
 
     this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
@@ -386,6 +405,7 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 {
     this->userName_ = name;
     this->channel_ = channel;
+    this->setWindowTitle(TEXT_TITLE.arg(name));
 
     this->ui_.nameLabel->setText(name);
     this->ui_.nameLabel->setProperty("copy-text", name);
@@ -394,8 +414,16 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 
     this->userStateChanged_.invoke();
 
-    this->latestMessages_->setChannel(
-        filterMessages(this->userName_, this->channel_));
+    this->updateLatestMessages();
+    QTimer::singleShot(1, this, [this] { this->setStayInScreenRect(true); });
+}
+
+void UserInfoPopup::updateLatestMessages()
+{
+    auto filteredChannel = filterMessages(this->userName_, this->channel_);
+    this->ui_.latestMessages->setChannel(filteredChannel);
+    this->ui_.latestMessages->setVisible(filteredChannel->hasMessages());
+    this->ui_.noMessagesLabel->setVisible(!filteredChannel->hasMessages());
 }
 
 void UserInfoPopup::updateUserData()
