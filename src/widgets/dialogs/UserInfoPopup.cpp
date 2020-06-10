@@ -422,8 +422,10 @@ void UserInfoPopup::updateLatestMessages()
 {
     auto filteredChannel = filterMessages(this->userName_, this->channel_);
     this->ui_.latestMessages->setChannel(filteredChannel);
-    this->ui_.latestMessages->setVisible(filteredChannel->hasMessages());
-    this->ui_.noMessagesLabel->setVisible(!filteredChannel->hasMessages());
+
+    const bool hasMessages = filteredChannel->hasMessages();
+    this->ui_.latestMessages->setVisible(hasMessages);
+    this->ui_.noMessagesLabel->setVisible(!hasMessages);
 }
 
 void UserInfoPopup::updateUserData()
