@@ -93,8 +93,8 @@ namespace {
                     },
                     Tooltip{name.string + "<br />Channel BetterTTV Emote" +
                             ((author.string.isEmpty())
-                                 ? "<br />By : " + userName.toUtf8()
-                                 : "<br />By : " + author.string)},
+                                 ? "<br />By: " + userName.toUtf8()
+                                 : "<br />By: " + author.string)},
                     Url{emoteLinkFormat.arg(id.string)},
                 });
 
