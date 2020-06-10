@@ -533,6 +533,22 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         }
     }
 
+    if (this->twitchChannel != nullptr && getSettings()->boldAllUsernames)
+    {
+        auto chatters = this->twitchChannel->accessChatters();
+        if (chatters->contains(string))
+        {
+            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+                                       textColor, FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, string});
+
+            this->emplace<TextElement>(
+                    string, MessageElementFlag::NonBoldUsername, textColor)
+                ->setLink({Link::UserInfo, string});
+            return;
+        }
+    }
+
     this->emplace<TextElement>(string, MessageElementFlag::Text, textColor);
 }
 
