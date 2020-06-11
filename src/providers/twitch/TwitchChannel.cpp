@@ -85,7 +85,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     , ChannelChatters(*static_cast<Channel *>(this))
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
-    , popoutPlayerUrl_("https://player.twitch.tv/?channel=" + name)
+    , popoutPlayerUrl_("https://player.twitch.tv/?channel=" + name + "&parent=twitch.tv")
     , globalTwitchBadges_(globalTwitchBadges)
     , globalBttv_(bttv)
     , globalFfz_(ffz)
