@@ -511,7 +511,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
-    layout.addCheckbox("Link usernames without an '@' prefix",
+    layout.addCheckbox("Mention users without prefix or suffix",
                        s.boldAllUsernames);
     layout.addDropdown<float>(
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
