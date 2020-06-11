@@ -134,7 +134,9 @@ public:
             case ToastReaction::OpenInPlayer:
                 if (platform_ == Platform::Twitch)
                 {
-                    link = "https://player.twitch.tv/?parent=twitch.tv&channel=" + channelName_;
+                    link =
+                        "https://player.twitch.tv/?parent=twitch.tv&channel=" +
+                        channelName_;
                 }
                 QDesktopServices::openUrl(QUrl(link));
                 break;
