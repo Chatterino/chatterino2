@@ -288,7 +288,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         if (tc != nullptr)
         {
             StreamView *view = new StreamView(
-                _channel, "https://player.twitch.tv/?channel=" + tc->name);
+                _channel, "https://player.twitch.tv/?parent=twitch.tv&channel=" + tc->name);
             view->setAttribute(Qt::WA_DeleteOnClose, true);
             view->show();
         }
