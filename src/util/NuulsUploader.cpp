@@ -105,7 +105,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
             {
                 channel->addMessage(makeSystemMessage(
                     QString("Your image has been uploaded to ") +
-                    result.getData() + QString(" .")));
+                    result.getData()));
                 uploadMutex.unlock();
             }
             else
@@ -184,7 +184,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 else
                 {
                     channel->addMessage(makeSystemMessage(
-                        QString("Cannot upload file: %1, Couldn't convert "
+                        QString("Cannot upload file: %1. Couldn't convert "
                                 "image to png.")
                             .arg(localPath)));
                     uploadMutex.unlock();
@@ -212,7 +212,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
             else
             {
                 channel->addMessage(makeSystemMessage(
-                    QString("Cannot upload file: %1, not an image")
+                    QString("Cannot upload file: %1. Not an image.")
                         .arg(localPath)));
                 uploadMutex.unlock();
                 return;
