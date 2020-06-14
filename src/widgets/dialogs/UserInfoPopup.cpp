@@ -27,7 +27,7 @@
 const QString TEXT_VIEWS("Views: %1");
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
-const QString TEXT_TITLE("%1 usercard");
+const QString TEXT_TITLE("%1's Usercard");
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
 
@@ -83,11 +83,16 @@ UserInfoPopup::UserInfoPopup()
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
 #ifdef Q_OS_LINUX
-    this->setWindowFlag(Qt::Popup);
+    this->setWindowFlag(Qt::Dialog);
 #endif
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
+
+    // shortcuts
+    auto *shortcut_cancel = new QShortcut(QKeySequence("Esc"), this);
+    QObject::connect(shortcut_cancel, &QShortcut::activated,
+                     [=] { this->close(); });
 
     // first line
     auto head = layout.emplace<QHBoxLayout>().withoutMargin();
