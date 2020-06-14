@@ -217,10 +217,12 @@ void BaseWindow::init()
     // TopMost flag overrides setting
     if (!this->flags_.has(TopMost))
     {
-        getSettings()->windowTopMost.connect([this](bool topMost, auto) {
-            this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
-            this->show();
-        });
+        getSettings()->windowTopMost.connect(
+            [this](bool topMost, auto) {
+                this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
+                this->show();
+            },
+            this->managedConnections_);
     }
 #endif
 }
