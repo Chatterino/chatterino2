@@ -66,7 +66,6 @@ private:
     QPoint dragStart_{};
     bool dragging_{false};
     bool doubleClicked_{false};
-    bool showingHelpTooltip_{false};
     bool menuVisible_{false};
 
     // signals

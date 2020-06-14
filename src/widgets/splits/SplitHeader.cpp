@@ -673,41 +673,6 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
 
 void SplitHeader::mouseReleaseEvent(QMouseEvent *event)
 {
-    if (this->dragging_ && event->button() == Qt::LeftButton)
-    {
-        auto pos = event->globalPos();
-
-        if (!showingHelpTooltip_)
-        {
-            this->showingHelpTooltip_ = true;
-
-            QTimer::singleShot(400, this, [this, pos] {
-                if (this->doubleClicked_)
-                {
-                    this->doubleClicked_ = false;
-                    this->showingHelpTooltip_ = false;
-                    return;
-                }
-
-                auto tooltip = new TooltipWidget();
-
-                tooltip->setText("Double click or press <Ctrl+R> to change the "
-                                 "channel.\nClick and "
-                                 "drag to move the split.");
-                tooltip->setFixedSize(tooltip->sizeHint());
-                tooltip->setAttribute(Qt::WA_DeleteOnClose);
-                tooltip->move(pos);
-                tooltip->show();
-                tooltip->raise();
-
-                QTimer::singleShot(3000, tooltip, [this, tooltip] {
-                    tooltip->close();
-                    this->showingHelpTooltip_ = false;
-                });
-            });
-        }
-    }
-
     this->dragging_ = false;
 }
 
