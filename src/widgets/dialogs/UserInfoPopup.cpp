@@ -23,7 +23,6 @@
 #include <QLabel>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QSizeGrip>
 
 const QString TEXT_VIEWS("Views: %1");
 const QString TEXT_FOLLOWERS("Followers: %1");
@@ -261,8 +260,6 @@ UserInfoPopup::UserInfoPopup()
         logs->addWidget(this->ui_.latestMessages);
         logs->addWidget(this->ui_.refreshButton);
         logs->setAlignment(this->ui_.noMessagesLabel, Qt::AlignHCenter);
-		// Conflicts with desired funct of having multiple windows at once, because unable to close window if frameless
-        // layout->addWidget(new QSizeGrip(this), 0, Qt::AlignBottom | Qt::AlignRight);
     }
 
     this->installEvents();
