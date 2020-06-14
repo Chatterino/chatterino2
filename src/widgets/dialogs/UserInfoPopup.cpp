@@ -93,11 +93,6 @@ UserInfoPopup::UserInfoPopup()
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
 
-    // shortcuts
-    auto *shortcut_cancel = new QShortcut(QKeySequence("Esc"), this);
-    QObject::connect(shortcut_cancel, &QShortcut::activated,
-                     [=] { this->close(); });
-
     // first line
     auto head = layout.emplace<QHBoxLayout>().withoutMargin();
     {
