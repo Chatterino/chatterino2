@@ -144,7 +144,8 @@ UserInfoPopup::UserInfoPopup()
             .assign(&this->ui_.ignoreHighlights);
         auto usercard = user.emplace<EffectLabel2>(this);
         usercard->getLabel().setText("Usercard");
-
+        auto refresh = user.emplace<EffectLabel2>(this);
+        refresh->getLabel().setText("Refresh");
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(getResources().buttons.mod);
         mod->setScaleIndependantSize(30, 30);
@@ -160,6 +161,8 @@ UserInfoPopup::UserInfoPopup()
                                       "/viewercard/" + this->userName_);
         });
 
+        QObject::connect(refresh.getElement(), &Button::leftClicked,
+                         [this] { this->updateLatestMessages(); });
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/mod " + this->userName_);
         });
@@ -250,19 +253,12 @@ UserInfoPopup::UserInfoPopup()
         this->ui_.noMessagesLabel->setVisible(false);
 
         this->ui_.latestMessages = new ChannelView(this);
-        this->ui_.latestMessages->setMinimumSize(400, 175);
+        this->ui_.latestMessages->setMinimumSize(400, 275);
         this->ui_.latestMessages->setSizePolicy(QSizePolicy::Expanding,
                                                 QSizePolicy::Expanding);
 
-        this->ui_.refreshButton = new QPushButton(this);
-        this->ui_.refreshButton->setText("Refresh");
-        this->ui_.refreshButton->QObject::connect(
-            this->ui_.refreshButton, &QPushButton::clicked,
-            [this] { this->updateLatestMessages(); });
-
         logs->addWidget(this->ui_.noMessagesLabel);
         logs->addWidget(this->ui_.latestMessages);
-        logs->addWidget(this->ui_.refreshButton);
         logs->setAlignment(this->ui_.noMessagesLabel, Qt::AlignHCenter);
     }
 
