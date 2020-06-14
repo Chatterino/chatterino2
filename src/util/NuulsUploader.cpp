@@ -3,6 +3,8 @@
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/Settings.hpp"
 
 #include <QBuffer>
 #include <QHttpMultiPart>
@@ -36,6 +38,39 @@ namespace chatterino {
 static auto uploadMutex = QMutex();
 static std::queue<RawImageData> uploadQueue;
 
+//logging information on successful uploads to a csv file
+void logToCsv(const QString originalFilePath, const QString link,
+              ChannelPtr channel)
+{
+    const QString csvFileName = (getSettings()->logPath.getValue().isEmpty()
+                                     ? getPaths()->messageLogDirectory
+                                     : getSettings()->logPath) +
+                                "/ImageUploader.csv";
+    QFile csvFile(csvFileName);
+    bool csvExisted = csvFile.exists();
+    bool isCsvOkay = csvFile.open(QIODevice::Append | QIODevice::Text);
+    if (!isCsvOkay)
+    {
+        channel->addMessage(makeSystemMessage(
+            QString("Failed to open csv file with links at ") + csvFileName));
+        return;
+    }
+    QTextStream out(&csvFile);
+    qDebug() << csvExisted;
+    if (!csvExisted)
+    {
+        out << "localPath,imageLink,timestamp,channelName\n";
+    }
+    out << originalFilePath + QString(",") << link + QString(",")
+        << QDateTime::currentSecsSinceEpoch()
+        << QString(",%1\n").arg(channel->getName());
+    // image path (can be empty)
+    // image link
+    // timestamp
+    // channel name
+    csvFile.close();
+}
+
 void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                         ResizingTextEdit &textEdit)
 {
@@ -44,6 +79,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
         QString("multipart/form-data; boundary=%1").arg(boundary);
     static QUrl url(Env::get().imageUploaderUrl);
     static QString formBody(Env::get().imageUploaderFormBody);
+    QString originalFilePath = imageData.filePath;
 
     QHttpMultiPart *payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     QHttpPart part = QHttpPart();
@@ -62,20 +98,24 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
         .header("Content-Type", contentType)
 
         .multiPart(payload)
-        .onSuccess([&textEdit, channel](NetworkResult result) -> Outcome {
+        .onSuccess([&textEdit, channel,
+                    originalFilePath](NetworkResult result) -> Outcome {
             textEdit.insertPlainText(result.getData() + QString(" "));
             if (uploadQueue.empty())
             {
                 channel->addMessage(makeSystemMessage(
-                    QString("Your image has been uploaded.")));
+                    QString("Your image has been uploaded to ") +
+                    result.getData()));
                 uploadMutex.unlock();
             }
             else
             {
                 channel->addMessage(makeSystemMessage(
-                    QString("Your image has been uploaded. %1 left. Please "
-                            "wait until all of them are uploaded. About %2 "
-                            "seconds left.")
+                    QString(
+                        "Your image has been uploaded to %1 . %2 left. Please "
+                        "wait until all of them are uploaded. About %3 "
+                        "seconds left.")
+                        .arg(result.getData() + QString(""))
                         .arg(uploadQueue.size())
                         .arg(uploadQueue.size() * (UPLOAD_DELAY / 1000 + 1))));
                 // 2 seconds for the timer that's there not to spam the remote server
@@ -86,6 +126,9 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                     uploadQueue.pop();
                 });
             }
+
+            logToCsv(originalFilePath, result.getData(), channel);
+
             return Success;
         })
         .onError([channel](NetworkResult result) -> bool {
@@ -109,23 +152,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
     }
 
     channel->addMessage(makeSystemMessage(QString("Started upload...")));
-
-    if (source->hasFormat("image/png"))
-    {
-        uploadImageToNuuls({source->data("image/png"), "png"}, channel,
-                           outputTextEdit);
-    }
-    else if (source->hasFormat("image/jpeg"))
-    {
-        uploadImageToNuuls({source->data("image/jpeg"), "jpeg"}, channel,
-                           outputTextEdit);
-    }
-    else if (source->hasFormat("image/gif"))
-    {
-        uploadImageToNuuls({source->data("image/gif"), "gif"}, channel,
-                           outputTextEdit);
-    }
-    else if (source->hasUrls())
+    if (source->hasUrls())
     {
         auto mimeDb = QMimeDatabase();
         // This path gets chosen when files are copied from a file manager, like explorer.exe, caja.
@@ -151,13 +178,13 @@ void upload(const QMimeData *source, ChannelPtr channel,
                 boost::optional<QByteArray> imageData = convertToPng(img);
                 if (imageData)
                 {
-                    RawImageData data = {imageData.get(), "png"};
+                    RawImageData data = {imageData.get(), "png", localPath};
                     uploadQueue.push(data);
                 }
                 else
                 {
                     channel->addMessage(makeSystemMessage(
-                        QString("Cannot upload file: %1, Couldn't convert "
+                        QString("Cannot upload file: %1. Couldn't convert "
                                 "image to png.")
                             .arg(localPath)));
                     uploadMutex.unlock();
@@ -177,7 +204,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
                     uploadMutex.unlock();
                     return;
                 }
-                RawImageData data = {file.readAll(), "gif"};
+                RawImageData data = {file.readAll(), "gif", localPath};
                 uploadQueue.push(data);
                 file.close();
                 // file.readAll() => might be a bit big but it /should/ work
@@ -185,7 +212,7 @@ void upload(const QMimeData *source, ChannelPtr channel,
             else
             {
                 channel->addMessage(makeSystemMessage(
-                    QString("Cannot upload file: %1, not an image")
+                    QString("Cannot upload file: %1. Not an image.")
                         .arg(localPath)));
                 uploadMutex.unlock();
                 return;
@@ -197,13 +224,30 @@ void upload(const QMimeData *source, ChannelPtr channel,
             uploadQueue.pop();
         }
     }
+    else if (source->hasFormat("image/png"))
+    {
+        // the path to file is not present every time, thus the filePath is empty
+        uploadImageToNuuls({source->data("image/png"), "png", ""}, channel,
+                           outputTextEdit);
+    }
+    else if (source->hasFormat("image/jpeg"))
+    {
+        uploadImageToNuuls({source->data("image/jpeg"), "jpeg", ""}, channel,
+                           outputTextEdit);
+    }
+    else if (source->hasFormat("image/gif"))
+    {
+        uploadImageToNuuls({source->data("image/gif"), "gif", ""}, channel,
+                           outputTextEdit);
+    }
+
     else
     {  // not PNG, try loading it into QImage and save it to a PNG.
         QImage image = qvariant_cast<QImage>(source->imageData());
         boost::optional<QByteArray> imageData = convertToPng(image);
         if (imageData)
         {
-            uploadImageToNuuls({imageData.get(), "png"}, channel,
+            uploadImageToNuuls({imageData.get(), "png", ""}, channel,
                                outputTextEdit);
         }
         else
@@ -214,4 +258,5 @@ void upload(const QMimeData *source, ChannelPtr channel,
         }
     }
 }
+
 }  // namespace chatterino
