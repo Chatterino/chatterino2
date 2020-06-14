@@ -12,6 +12,7 @@
 #include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
@@ -59,6 +60,9 @@ UserInfoPopup::UserInfoPopup()
 #ifdef Q_OS_LINUX
     this->setWindowFlag(Qt::Popup);
 #endif
+
+    // Close the popup when Escape is pressed
+    createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
