@@ -63,10 +63,19 @@ namespace {
         {
             MessagePtr message = snapshot[i];
 
+            bool isSubscription =
+                message->flags.has(MessageFlag::Subscription) &&
+                message->loginName == "" &&
+                message->messageText.split(" ").at(0).compare(
+                    userName, Qt::CaseInsensitive) == 0;
+
+            bool isModAction = message->timeoutUser.compare(
+                                   userName, Qt::CaseInsensitive) == 0;
             bool isSelectedUser =
                 message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
 
-            if (isSelectedUser && !message->flags.has(MessageFlag::Whisper))
+            if ((isSubscription || isModAction || isSelectedUser) &&
+                !message->flags.has(MessageFlag::Whisper))
             {
                 channelPtr->addMessage(message);
             }
@@ -422,6 +431,7 @@ void UserInfoPopup::updateLatestMessages()
 {
     auto filteredChannel = filterMessages(this->userName_, this->channel_);
     this->ui_.latestMessages->setChannel(filteredChannel);
+    this->ui_.latestMessages->setSourceChannel(this->channel_);
 
     const bool hasMessages = filteredChannel->hasMessages();
     this->ui_.latestMessages->setVisible(hasMessages);

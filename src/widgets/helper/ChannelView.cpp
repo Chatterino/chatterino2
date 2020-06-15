@@ -109,6 +109,7 @@ namespace {
 
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
+    , sourceChannel_(nullptr)
     , scrollBar_(new Scrollbar(this))
 {
     this->setMouseTracking(true);
@@ -619,6 +620,21 @@ void ChannelView::setChannel(ChannelPtr channel)
             this->liveStatusChanged.invoke();  //
         }));
     }
+}
+
+ChannelPtr ChannelView::sourceChannel() const
+{
+    return this->sourceChannel_;
+}
+
+void ChannelView::setSourceChannel(ChannelPtr sourceChannel)
+{
+    this->sourceChannel_ = sourceChannel;
+}
+
+bool ChannelView::hasSourceChannel() const
+{
+    return this->sourceChannel_ != nullptr;
 }
 
 void ChannelView::messageAppended(MessagePtr &message,
@@ -1791,7 +1807,8 @@ void ChannelView::hideEvent(QHideEvent *)
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
     auto *userPopup = new UserInfoPopup;
-    userPopup->setData(userName, this->channel_);
+    userPopup->setData(userName, this->hasSourceChannel() ? this->sourceChannel_
+                                                          : this->channel_);
     userPopup->setActionOnFocusLoss(BaseWindow::Delete);
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     userPopup->move(QCursor::pos() - offset);
