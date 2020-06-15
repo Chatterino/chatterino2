@@ -8,14 +8,16 @@
 
 #include <QBuffer>
 #include <QHttpMultiPart>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QMimeDatabase>
 #include <QMutex>
+#include <QSaveFile>
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
 
 namespace {
-
 boost::optional<QByteArray> convertToPng(QImage image)
 {
     QByteArray imageData;
@@ -38,37 +40,51 @@ namespace chatterino {
 static auto uploadMutex = QMutex();
 static std::queue<RawImageData> uploadQueue;
 
-// logging information on successful uploads to a csv file
-void logToCsv(const QString originalFilePath, QString link,
-              QString deletionLink, ChannelPtr channel)
+// logging information on successful uploads to a json file
+void logToFile(const QString originalFilePath, QString imageLink,
+               QString deletionLink, ChannelPtr channel)
 {
-    const QString csvFileName = (getSettings()->logPath.getValue().isEmpty()
+    const QString logFileName = (getSettings()->logPath.getValue().isEmpty()
                                      ? getPaths()->messageLogDirectory
                                      : getSettings()->logPath) +
-                                "/ImageUploader.csv";
-    QFile csvFile(csvFileName);
-    bool csvExisted = csvFile.exists();
-    bool isCsvOkay = csvFile.open(QIODevice::Append | QIODevice::Text);
-    if (!isCsvOkay)
+                                "/ImageUploader.json";
+
+    QFile logReadFile(logFileName);
+    bool isLogFileOkay =
+        logReadFile.open(QIODevice::ReadOnly | QIODevice::Text);
+    if (!isLogFileOkay)
     {
         channel->addMessage(makeSystemMessage(
-            QString("Failed to open csv file with links at ") + csvFileName));
+            QString("Failed to open log file with links at ") + logFileName));
         return;
     }
-    QTextStream out(&csvFile);
-    if (!csvExisted)
+    auto logs = logReadFile.readAll();
+    logReadFile.close();  // already useless xd
+
+    if (logs.isEmpty())
     {
-        out << "localPath,imageLink,timestamp,channelName\n";
+        logs = QJsonDocument(QJsonArray()).toJson();
     }
-    out << QString("%1,%2,").arg(originalFilePath).arg(link)
-        << QDateTime::currentSecsSinceEpoch()
-        << QString(",%1,%2\n").arg(channel->getName()).arg(deletionLink);
-    // image path (can be empty)
-    // image link
-    // timestamp
+    QJsonObject jsonObject;
+    jsonObject["channelName"] = channel->getName();
+    jsonObject["deletionLink"] =
+        deletionLink.isEmpty() ? QJsonValue(QJsonValue::Null) : deletionLink;
+    jsonObject["imageLink"] = imageLink;
+    jsonObject["localPath"] = originalFilePath.isEmpty()
+                                  ? QJsonValue(QJsonValue::Null)
+                                  : originalFilePath;
+    jsonObject["timestamp"] = QDateTime::currentSecsSinceEpoch();
     // channel name
     // deletion link (can be empty)
-    csvFile.close();
+    // image link
+    // image path (can be empty)
+    // timestamp
+    QSaveFile logSaveFile(logFileName);
+    logSaveFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    QJsonArray entries = QJsonDocument::fromJson(logs).array();
+    entries.push_back(jsonObject);
+    logSaveFile.write(QJsonDocument(entries).toJson());
+    logSaveFile.commit();
 }
 
 // extracting link to either image or its deletion from response body
@@ -174,7 +190,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                 });
             }
 
-            logToCsv(originalFilePath, link, deletionLink, channel);
+            logToFile(originalFilePath, link, deletionLink, channel);
 
             return Success;
         })

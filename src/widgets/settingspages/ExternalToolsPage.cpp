@@ -98,13 +98,13 @@ ExternalToolsPage::ExternalToolsPage()
         auto group = layout.emplace<QGroupBox>("Image Uploader");
         auto groupLayout = group.setLayoutType<QFormLayout>();
 
-        const auto description = new QLabel(
-            "You can set custom host for uploading images, like "
-            "imgur.com or s-ul.eu.<br>Check " +
-            formatRichNamedLink(
-                "https://github.com/chatterino/chatterino2/wiki/ImageUploader",
-                "this guide") +
-            " for help.");
+        const auto description =
+            new QLabel("You can set custom host for uploading images, like "
+                       "imgur.com or s-ul.eu.<br>Check " +
+                       formatRichNamedLink("https://gist.github.com/zneix/"
+                                           "14d828c145f755394e5ab0301c314c2a",
+                                           "this guide") +
+                       " for help.");
         description->setWordWrap(true);
         description->setStyleSheet("color: #bbb");
         description->setTextFormat(Qt::RichText);
