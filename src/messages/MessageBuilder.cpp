@@ -130,8 +130,8 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag,
     QString text;
 
     this->emplace<TimestampElement>();
-    auto name = this->emplaceSystemTextAndUpdate(username, text);
-    name->setLink({Link::UserInfo, username});
+    this->emplaceSystemTextAndUpdate(username, text)
+        ->setLink({Link::UserInfo, username});
     this->emplaceSystemTextAndUpdate(
         QString("%1 (%2 times)").arg(remainder.trimmed()).arg(times), text);
 
@@ -148,8 +148,8 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     QString text;
 
     this->emplace<TimestampElement>();
-    auto name = this->emplaceSystemTextAndUpdate(username, fullText);
-    name->setLink({Link::UserInfo, username});
+    this->emplaceSystemTextAndUpdate(username, fullText)
+        ->setLink({Link::UserInfo, username});
 
     if (!durationInSeconds.isEmpty())
     {
@@ -224,10 +224,10 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
         if (!action.source.name.isEmpty())
         {
             this->emplaceSystemTextAndUpdate("by", text);
-            auto name = this->emplaceSystemTextAndUpdate(
-                action.source.name + (action.reason.isEmpty() ? "." : ":"),
-                text);
-            name->setLink({Link::UserInfo, action.source.name});
+            this->emplaceSystemTextAndUpdate(
+                    action.source.name + (action.reason.isEmpty() ? "." : ":"),
+                    text)
+                ->setLink({Link::UserInfo, action.source.name});
         }
 
         if (!action.reason.isEmpty())
@@ -240,34 +240,29 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     {
         if (action.isBan())
         {
-            auto name1 =
-                this->emplaceSystemTextAndUpdate(action.source.name, text);
-            name1->setLink({Link::UserInfo, action.source.name});
+            this->emplaceSystemTextAndUpdate(action.source.name, text)
+                ->setLink({Link::UserInfo, action.source.name});
             this->emplaceSystemTextAndUpdate("banned", text);
             if (action.reason.isEmpty())
             {
-                auto name2 =
-                    this->emplaceSystemTextAndUpdate(action.target.name, text);
-                name2->setLink({Link::UserInfo, action.target.name});
+                this->emplaceSystemTextAndUpdate(action.target.name, text)
+                    ->setLink({Link::UserInfo, action.target.name});
             }
             else
             {
-                auto name2 = this->emplaceSystemTextAndUpdate(
-                    action.target.name + ":", text);
-                name2->setLink({Link::UserInfo, action.target.name});
+                this->emplaceSystemTextAndUpdate(action.target.name + ":", text)
+                    ->setLink({Link::UserInfo, action.target.name});
                 this->emplaceSystemTextAndUpdate(
                     QString("\"%1\".").arg(action.reason), text);
             }
         }
         else
         {
-            auto name1 =
-                this->emplaceSystemTextAndUpdate(action.source.name, text);
-            name1->setLink({Link::UserInfo, action.source.name});
+            this->emplaceSystemTextAndUpdate(action.source.name, text)
+                ->setLink({Link::UserInfo, action.source.name});
             this->emplaceSystemTextAndUpdate("timed out", text);
-            auto name2 =
-                this->emplaceSystemTextAndUpdate(action.target.name, text);
-            name2->setLink({Link::UserInfo, action.target.name});
+            this->emplaceSystemTextAndUpdate(action.target.name, text)
+                ->setLink({Link::UserInfo, action.target.name});
             if (action.reason.isEmpty())
             {
                 this->emplaceSystemTextAndUpdate(
@@ -305,12 +300,12 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
 
     QString text;
 
-    auto name1 = this->emplaceSystemTextAndUpdate(action.source.name, text);
-    name1->setLink({Link::UserInfo, action.source.name});
+    this->emplaceSystemTextAndUpdate(action.source.name, text)
+        ->setLink({Link::UserInfo, action.source.name});
     this->emplaceSystemTextAndUpdate(
         action.wasBan() ? "unbanned" : "untimedout", text);
-    auto name2 = this->emplaceSystemTextAndUpdate(action.target.name, text);
-    name2->setLink({Link::UserInfo, action.target.name});
+    this->emplaceSystemTextAndUpdate(action.target.name, text)
+        ->setLink({Link::UserInfo, action.target.name});
 
     this->message().messageText = text;
     this->message().searchText = text;
