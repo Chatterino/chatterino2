@@ -8,7 +8,6 @@
 #include <QFormLayout>
 #include <QGroupBox>
 #include <QLabel>
-#include <QPushButton>
 
 #define STREAMLINK_QUALITY \
     "Choose", "Source", "High", "Medium", "Low", "Audio only"
@@ -46,7 +45,7 @@ ExternalToolsPage::ExternalToolsPage()
         links->setTextFormat(Qt::RichText);
         links->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                        Qt::LinksAccessibleByKeyboard |
-                                       Qt::LinksAccessibleByKeyboard);
+                                       Qt::LinksAccessibleByMouse);
         links->setOpenExternalLinks(true);
 
         groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
@@ -110,7 +109,7 @@ ExternalToolsPage::ExternalToolsPage()
         description->setTextFormat(Qt::RichText);
         description->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                              Qt::LinksAccessibleByKeyboard |
-                                             Qt::LinksAccessibleByKeyboard);
+                                             Qt::LinksAccessibleByMouse);
         description->setOpenExternalLinks(true);
 
         groupLayout->setWidget(0, QFormLayout::SpanningRole, description);

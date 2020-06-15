@@ -18,6 +18,7 @@
 // Delay between uploads in milliseconds
 
 namespace {
+
 boost::optional<QByteArray> convertToPng(QImage image)
 {
     QByteArray imageData;
@@ -49,6 +50,7 @@ void logToFile(const QString originalFilePath, QString imageLink,
                                      : getSettings()->logPath) +
                                 "/ImageUploader.json";
 
+    //reading existing logs
     QFile logReadFile(logFileName);
     bool isLogFileOkay =
         logReadFile.open(QIODevice::ReadOnly | QIODevice::Text);
@@ -59,30 +61,31 @@ void logToFile(const QString originalFilePath, QString imageLink,
         return;
     }
     auto logs = logReadFile.readAll();
-    logReadFile.close();  // already useless xd
-
     if (logs.isEmpty())
     {
         logs = QJsonDocument(QJsonArray()).toJson();
     }
-    QJsonObject jsonObject;
-    jsonObject["channelName"] = channel->getName();
-    jsonObject["deletionLink"] =
+    logReadFile.close();
+
+    //writing new data to logs
+    QJsonObject newLogEntry;
+    newLogEntry["channelName"] = channel->getName();
+    newLogEntry["deletionLink"] =
         deletionLink.isEmpty() ? QJsonValue(QJsonValue::Null) : deletionLink;
-    jsonObject["imageLink"] = imageLink;
-    jsonObject["localPath"] = originalFilePath.isEmpty()
-                                  ? QJsonValue(QJsonValue::Null)
-                                  : originalFilePath;
-    jsonObject["timestamp"] = QDateTime::currentSecsSinceEpoch();
+    newLogEntry["imageLink"] = imageLink;
+    newLogEntry["localPath"] = originalFilePath.isEmpty()
+                                   ? QJsonValue(QJsonValue::Null)
+                                   : originalFilePath;
+    newLogEntry["timestamp"] = QDateTime::currentSecsSinceEpoch();
     // channel name
     // deletion link (can be empty)
     // image link
-    // image path (can be empty)
+    // local path to an image (can be empty)
     // timestamp
     QSaveFile logSaveFile(logFileName);
     logSaveFile.open(QIODevice::WriteOnly | QIODevice::Text);
     QJsonArray entries = QJsonDocument::fromJson(logs).array();
-    entries.push_back(jsonObject);
+    entries.push_back(newLogEntry);
     logSaveFile.write(QJsonDocument(entries).toJson());
     logSaveFile.commit();
 }
