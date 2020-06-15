@@ -39,6 +39,8 @@ class MessageBuilder
 public:
     MessageBuilder();
     MessageBuilder(SystemMessageTag, const QString &text);
+    MessageBuilder(TimeoutMessageTag, const QString &systemMessageText,
+                   int times);
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, const QString &reason,
                    bool multipleTimes);
@@ -68,6 +70,9 @@ public:
     }
 
 private:
+    TextElement *emplaceSystemTextAndUpdate(const QString &text,
+                                            QString &toUpdate);
+
     std::shared_ptr<Message> message_;
 };
 }  // namespace chatterino
