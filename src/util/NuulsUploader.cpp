@@ -5,6 +5,7 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "util/CombinePath.hpp"
 
 #include <QBuffer>
 #include <QHttpMultiPart>
@@ -45,10 +46,11 @@ static std::queue<RawImageData> uploadQueue;
 void logToFile(const QString originalFilePath, QString imageLink,
                QString deletionLink, ChannelPtr channel)
 {
-    const QString logFileName = (getSettings()->logPath.getValue().isEmpty()
-                                     ? getPaths()->messageLogDirectory
-                                     : getSettings()->logPath) +
-                                "/ImageUploader.json";
+    const QString logFileName =
+        combinePath((getSettings()->logPath.getValue().isEmpty()
+                         ? getPaths()->messageLogDirectory
+                         : getSettings()->logPath),
+                    "ImageUploader.json");
 
     //reading existing logs
     QFile logReadFile(logFileName);
