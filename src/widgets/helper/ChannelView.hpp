@@ -10,6 +10,7 @@
 #include <unordered_set>
 
 #include "common/FlagsEnum.hpp"
+#include "controllers/filters/FilterSet.hpp"
 #include "messages/Image.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
@@ -75,6 +76,9 @@ public:
 
     ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
+
+    void setFilters(const QList<QUuid> &ids);
+    const QList<QUuid> getFilters() const;
 
     LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
     void queueLayout();
@@ -177,6 +181,8 @@ private:
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
+
+    FilterSet *channelFilters_ = nullptr;
 
     // This variable can be used to decide whether or not we should render the
     // "Show latest messages" button

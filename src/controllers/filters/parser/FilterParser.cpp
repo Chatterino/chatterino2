@@ -14,13 +14,14 @@ namespace {
         // author.name
         // author.subscribed
         // author.subscription_length
-        // author.message_color
+        // author.color
+        // author.no_color
         // author.badges
 
         QStringList badges;
         for (const auto &e : m->badges)
         {
-            badges << QString("%1").arg(e.key_);
+            badges << e.key_;
         }
 
         bool subscribed = badges.contains("subscriber");
@@ -31,7 +32,8 @@ namespace {
                 {"author.name", m->displayName},
                 {"author.subscribed", subscribed},
                 {"author.subscription_length", subLength},
-                {"author.message_color", QColor("#FF0000")},
+                {"author.color", m->usernameColor},
+                {"author.no_color", !m->usernameColor.isValid()},
                 {"author.badges", badges}};
     }
 }  // namespace

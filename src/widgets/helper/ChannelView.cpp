@@ -621,9 +621,37 @@ void ChannelView::setChannel(ChannelPtr channel)
     }
 }
 
+void ChannelView::setFilters(const QList<QUuid> &ids)
+{
+    this->channelFilters_ = new FilterSet(ids);
+}
+
+const QList<QUuid> ChannelView::getFilters() const
+{
+    if (this->channelFilters_ == nullptr)
+    {
+        return QList<QUuid>();
+    }
+
+    return this->channelFilters_->filterIds();
+}
+
 void ChannelView::messageAppended(MessagePtr &message,
                                   boost::optional<MessageFlags> overridingFlags)
 {
+    if (this->channelFilters_ != nullptr)
+    {
+        auto isNotCurrentUser = [loginName = message->loginName] {
+            return getApp()
+                       ->accounts->twitch.getCurrent()
+                       ->getUserName()
+                       .compare(loginName, Qt::CaseInsensitive) != 0;
+        };
+
+        if (!this->channelFilters_->filter(message) && isNotCurrentUser())
+            return;
+    }
+
     MessageLayoutPtr deleted;
 
     auto *messageFlags = &message->flags;

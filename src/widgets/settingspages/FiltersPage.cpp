@@ -26,20 +26,16 @@ FiltersPage::FiltersPage()
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Fixed);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        0, QHeaderView::Stretch);
+        1, QHeaderView::Stretch);
 
     QTimer::singleShot(1, [view] {
         view->getTableView()->resizeColumnsToContents();
-        view->getTableView()->setColumnWidth(0, 50);
-        view->getTableView()->setColumnWidth(1, 300);
+        view->getTableView()->setColumnWidth(0, 200);
     });
 
     view->addButtonPressed.connect([] {
-        auto next = QString::number(
-            getSettings()->filterRecords.readOnly()->size() + 1);
         getSettings()->filterRecords.append(
-            FilterRecord{QString("Filter %1").arg(next),
-                         "message.content contains \"hello\""});
+            FilterRecord{"My filter", "message.content contains \"hello\""});
     });
 }
 

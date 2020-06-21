@@ -20,6 +20,7 @@
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
+#include "widgets/dialogs/SelectChannelFiltersDialog.hpp"
 #include "widgets/dialogs/TextInputDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -709,6 +710,17 @@ void Split::openSubPage()
 void Split::copyToClipboard()
 {
     crossPlatformCopy(this->view_->getSelectedText());
+}
+
+void Split::setFilters()
+{
+    SelectChannelFiltersDialog d(this->view_->getFilters(), this);
+    d.setWindowTitle("Select filters");
+
+    if (d.exec() == QDialog::Accepted)
+    {
+        this->view_->setFilters(d.getSelection());
+    }
 }
 
 void Split::showSearch()

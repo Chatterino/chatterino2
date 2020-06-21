@@ -27,7 +27,6 @@ public:
         , filter_(filter)
         , id_(QUuid::createUuid())
     {
-        qDebug() << "uuid:" << this->id_;
         this->parser_ = new filterparser::FilterParser(filter);
     }
 

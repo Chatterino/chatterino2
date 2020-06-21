@@ -131,6 +131,7 @@ public slots:
     void openInStreamlink();
     void openWithCustomScheme();
     void copyToClipboard();
+    void setFilters();
     void showSearch();
     void showViewerList();
     void openSubPage();

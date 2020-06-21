@@ -276,6 +276,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                     QKeySequence("Ctrl+R"));
     menu->addAction("Close", this->split_, &Split::deleteFromContainer,
                     QKeySequence("Ctrl+W"));
+    menu->addAction("Set filters", this->split_, &Split::setFilters);
     menu->addSeparator();
     menu->addAction("Popup", this->split_, &Split::popup);
     menu->addAction("Search", this->split_, &Split::showSearch,

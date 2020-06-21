@@ -236,6 +236,7 @@ SOURCES += \
     src/widgets/dialogs/NotificationPopup.cpp \
     src/widgets/dialogs/QualityPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
+    src/widgets/dialogs/SelectChannelFiltersDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
     src/widgets/dialogs/TextInputDialog.cpp \
     src/widgets/dialogs/UpdateDialog.cpp \
@@ -325,6 +326,7 @@ HEADERS += \
     src/controllers/commands/CommandModel.hpp \
     src/controllers/filters/FilterModel.hpp \
     src/controllers/filters/FilterRecord.hpp \
+    src/controllers/filters/FilterSet.hpp \
     src/controllers/filters/parser/FilterParser.hpp \
     src/controllers/filters/parser/Tokenizer.hpp \
     src/controllers/filters/parser/Types.hpp \
@@ -465,6 +467,7 @@ HEADERS += \
     src/widgets/dialogs/NotificationPopup.hpp \
     src/widgets/dialogs/QualityPopup.hpp \
     src/widgets/dialogs/SelectChannelDialog.hpp \
+    src/widgets/dialogs/SelectChannelFiltersDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
     src/widgets/dialogs/TextInputDialog.hpp \
     src/widgets/dialogs/UpdateDialog.hpp \

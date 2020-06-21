@@ -4,13 +4,15 @@
 
 namespace filterparser {
 
-static const QStringList validIdentifiers = {"message.content",
-                                             "message.length",
-                                             "author.name",
-                                             "author.subscribed",
-                                             "author.subscription_length",
-                                             "author.message_color",
-                                             "author.badges"};
+static const QStringList validIdentifiers = {
+    "message.content",             // String
+    "message.length",              // Int
+    "author.name",                 // String
+    "author.subscribed",           // Bool
+    "author.subscription_length",  // Int
+    "author.color",                // QColor
+    "author.no_color",             // Bool
+    "author.badges"};              // String list
 
 // clang-format off
 static const QRegularExpression tokenRegex(
