@@ -16,10 +16,10 @@ static const QStringList validIdentifiers = {
 
 // clang-format off
 static const QRegularExpression tokenRegex(
-    QString("\\\"((\\\\\")|[^\\\"])*\\\"|") + // String literal
-    QString("[\\w\\.]+|") +                   // Identifier or reserved keyword
-    QString("(<=?|>=?|!=?|==|\\|\\||&&)+|") + // Operator
-    QString("[\\(\\)]")                       // Parenthesis
+    QString("\\\"((\\\\\")|[^\\\"])*\\\"|") +   // String literal
+    QString("[\\w\\.]+|") +                     // Identifier or reserved keyword
+    QString("(<=?|>=?|!=?|==|\\|\\||&&|%)+|") + // Operator
+    QString("[\\(\\)]")                         // Parenthesis
 );
 // clang-format on
 
@@ -126,6 +126,8 @@ private:
             return TokenType::EQ;
         else if (text == "!=")
             return TokenType::NEQ;
+        else if (text == "%")
+            return TokenType::MOD;
         else if (text == "<")
             return TokenType::LT;
         else if (text == ">")
