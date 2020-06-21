@@ -76,6 +76,10 @@ public:
     ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
 
+    ChannelPtr sourceChannel() const;
+    void setSourceChannel(ChannelPtr sourceChannel);
+    bool hasSourceChannel() const;
+
     LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
     void queueLayout();
 
@@ -174,6 +178,7 @@ private:
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
     ChannelPtr channel_;
+    ChannelPtr sourceChannel_;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
