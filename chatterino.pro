@@ -130,6 +130,8 @@ SOURCES += \
     src/controllers/commands/Command.cpp \
     src/controllers/commands/CommandController.cpp \
     src/controllers/commands/CommandModel.cpp \
+    src/controllers/filters/FilterModel.cpp \
+    src/controllers/filters/parser/FilterParser.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
@@ -262,6 +264,7 @@ SOURCES += \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
     src/widgets/settingspages/ExternalToolsPage.cpp \
+    src/widgets/settingspages/FiltersPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
     src/widgets/settingspages/HighlightingPage.cpp \
     src/widgets/settingspages/IgnoresPage.cpp \
@@ -320,6 +323,11 @@ HEADERS += \
     src/controllers/commands/Command.hpp \
     src/controllers/commands/CommandController.hpp \
     src/controllers/commands/CommandModel.hpp \
+    src/controllers/filters/FilterModel.hpp \
+    src/controllers/filters/FilterRecord.hpp \
+    src/controllers/filters/parser/FilterParser.hpp \
+    src/controllers/filters/parser/Tokenizer.hpp \
+    src/controllers/filters/parser/Types.hpp \
     src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
     src/controllers/highlights/HighlightModel.hpp \
@@ -487,6 +495,7 @@ HEADERS += \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
     src/widgets/settingspages/ExternalToolsPage.hpp \
+    src/widgets/settingspages/FiltersPage.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
     src/widgets/settingspages/HighlightingPage.hpp \
     src/widgets/settingspages/IgnoresPage.hpp \

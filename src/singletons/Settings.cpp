@@ -21,6 +21,7 @@ ConcurrentSettings::ConcurrentSettings()
     , blacklistedUsers(*new SignalVector<HighlightBlacklistUser>())
     , ignoredMessages(*new SignalVector<IgnorePhrase>())
     , mutedChannels(*new SignalVector<QString>())
+    , filterRecords(*new SignalVector<FilterRecord>())
     , moderationActions(*new SignalVector<ModerationAction>)
 {
     persist(this->highlightedMessages, "/highlighting/highlights");
@@ -28,6 +29,7 @@ ConcurrentSettings::ConcurrentSettings()
     persist(this->highlightedUsers, "/highlighting/users");
     persist(this->ignoredMessages, "/ignore/phrases");
     persist(this->mutedChannels, "/pings/muted");
+    persist(this->filterRecords, "/filters");
     // tagged users?
     persist(this->moderationActions, "/moderation/actions");
 }

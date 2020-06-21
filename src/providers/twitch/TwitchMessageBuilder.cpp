@@ -1333,6 +1333,9 @@ void TwitchMessageBuilder::appendTwitchBadges()
         this->emplace<BadgeElement>(badgeEmote.get(), badge.flag_)
             ->setTooltip(tooltip);
     }
+
+    this->message().badges = badges;
+    this->message().badgeInfos = badgeInfos;
 }
 
 void TwitchMessageBuilder::appendChatterinoBadges()
