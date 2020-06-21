@@ -223,8 +223,13 @@ public:
             this->firstChunkOffset_, this->lastChunkEnd_);
     }
 
+    bool empty() const
+    {
+        return this->limit_ - this->space() == 0;
+    }
+
 private:
-    qsizetype space()
+    qsizetype space() const
     {
         size_t totalSize = 0;
         for (auto &chunk : *this->chunks_)
