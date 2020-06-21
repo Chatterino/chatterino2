@@ -55,7 +55,7 @@ void logToFile(const QString originalFilePath, QString imageLink,
     //reading existing logs
     QFile logReadFile(logFileName);
     bool isLogFileOkay =
-        logReadFile.open(QIODevice::ReadOnly | QIODevice::Text);
+        logReadFile.open(QIODevice::ReadWrite | QIODevice::Text);
     if (!isLogFileOkay)
     {
         channel->addMessage(makeSystemMessage(
