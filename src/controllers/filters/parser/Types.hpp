@@ -129,6 +129,8 @@ namespace {
             case IDENTIFIER:
                 return "<identifier>";
         }
+
+        return "<unknown>";
     }
 
     QString binaryOperatorToString(BinaryOperator op)
@@ -282,6 +284,8 @@ public:
 
                 return false;
         }
+
+        return false;
     }
 
     QString debug() override
@@ -314,6 +318,8 @@ public:
                     return !right.toBool();
                 return false;
         }
+
+        return false;
     }
 
     QString debug() override
