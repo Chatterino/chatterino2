@@ -7,6 +7,7 @@ namespace filterparser {
 static const QStringList validIdentifiers = {
     "message.content",             // String
     "message.length",              // Int
+    "message.highlighted",         // Bool
     "author.name",                 // String
     "author.subscribed",           // Bool
     "author.subscription_length",  // Int
@@ -16,10 +17,10 @@ static const QStringList validIdentifiers = {
 
 // clang-format off
 static const QRegularExpression tokenRegex(
-    QString("\\\"((\\\\\")|[^\\\"])*\\\"|") +   // String literal
-    QString("[\\w\\.]+|") +                     // Identifier or reserved keyword
-    QString("(<=?|>=?|!=?|==|\\|\\||&&|%)+|") + // Operator
-    QString("[\\(\\)]")                         // Parenthesis
+    QString("\\\"((\\\\\")|[^\\\"])*\\\"|") +                 // String literal
+    QString("[\\w\\.]+|") +                                   // Identifier or reserved keyword
+    QString("(<=?|>=?|!=?|==|\\|\\||&&|\\+|-|\\*|\\/|%)+|") + // Operator
+    QString("[\\(\\)]")                                       // Parenthesis
 );
 // clang-format on
 
@@ -48,36 +49,44 @@ public:
         return this->tokens_.at(this->i_ - 1);
     }
 
-    TokenType nextTokenType()
+    TokenType nextTokenType() const
     {
         return this->tokenTypes_.at(this->i_);
     }
 
-    TokenType tokenType()
+    TokenType tokenType() const
     {
         return this->tokenTypes_.at(this->i_ - 1);
     }
 
-    bool nextTokenIsBinaryOp()
+    bool nextTokenIsBinaryOp() const
     {
-        auto next = this->nextTokenType();
-        return this - typeIsBinaryOp(next);
+        return this->typeIsBinaryOp(this->nextTokenType());
     }
 
-    bool typeIsBinaryOp(TokenType token)
+    bool typeIsBinaryOp(TokenType token) const
     {
         return token > TokenType::BINARY_START && token < TokenType::BINARY_END;
     }
 
-    bool nextTokenIsUnaryOp()
+    bool nextTokenIsUnaryOp() const
     {
-        auto next = this->nextTokenType();
-        return this->typeIsUnaryOp(next);
+        return this->typeIsUnaryOp(this->nextTokenType());
     }
 
-    bool typeIsUnaryOp(TokenType token)
+    bool typeIsUnaryOp(TokenType token) const
     {
         return token > TokenType::UNARY_START && token < TokenType::UNARY_END;
+    }
+
+    bool nextTokenIsMathOp() const
+    {
+        return this->typeIsMathOp(this->nextTokenType());
+    }
+
+    bool typeIsMathOp(TokenType token) const
+    {
+        return token > TokenType::MATH_START && token < TokenType::MATH_END;
     }
 
     void debug()
@@ -122,6 +131,14 @@ private:
             return TokenType::LP;
         else if (text == ")")
             return TokenType::RP;
+        else if (text == "+")
+            return TokenType::PLUS;
+        else if (text == "-")
+            return TokenType::MINUS;
+        else if (text == "*")
+            return TokenType::MULTIPLY;
+        else if (text == "/")
+            return TokenType::DIVIDE;
         else if (text == "==")
             return TokenType::EQ;
         else if (text == "!=")

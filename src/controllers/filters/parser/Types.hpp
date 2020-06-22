@@ -4,16 +4,6 @@
 
 namespace filterparser {
 
-namespace {
-    bool convertTypes(QVariant &a, QVariant &b, int type)
-    {
-        return a.convert(type) && b.convert(type);
-    }
-}  // namespace
-
-using MessagePtr = std::shared_ptr<const chatterino::Message>;
-using ContextMap = QMap<QString, QVariant>;
-
 enum TokenType {
     // control
     CONTROL_START = 0,
@@ -25,18 +15,13 @@ enum TokenType {
 
     // binary operator
     BINARY_START = 10,
-    PLUS = 11,
-    MINUS = 12,
-    MULTIPLY = 13,
-    DIVIDE = 14,
-    MOD = 15,
-    EQ = 16,
-    NEQ = 17,
-    LT = 18,
-    GT = 19,
-    LTE = 20,
-    GTE = 21,
-    CONTAINS = 22,
+    EQ = 11,
+    NEQ = 12,
+    LT = 13,
+    GT = 14,
+    LTE = 15,
+    GTE = 16,
+    CONTAINS = 17,
     BINARY_END = 49,
 
     // unary operator
@@ -44,11 +29,19 @@ enum TokenType {
     NOT = 51,
     UNARY_END = 99,
 
+    MATH_START = 100,
+    PLUS = 101,
+    MINUS = 102,
+    MULTIPLY = 103,
+    DIVIDE = 104,
+    MOD = 105,
+    MATH_END = 149,
+
     // other types
-    OTHER_START = 100,
-    STRING = 101,
-    INT = 102,
-    IDENTIFIER = 103,
+    OTHER_START = 150,
+    STRING = 151,
+    INT = 152,
+    IDENTIFIER = 153,
 
     NONE = 200
 };
@@ -57,27 +50,105 @@ enum BinaryOperator {
     And = 1,
     Or = 2,
 
-    Plus = 11,
-    Minus = 12,
-    Multiply = 13,
-    Divide = 14,
-    Modulus = 15,
+    Plus = 101,
+    Minus = 102,
+    Multiply = 103,
+    Divide = 104,
+    Modulus = 105,
 
-    Equals = 16,
-    NotEquals = 17,
-    LessThan = 18,
-    GreaterThan = 19,
-    LessThanEqual = 20,
-    GreaterThanEqual = 21,
-    Contains = 22
+    Equals = 11,
+    NotEquals = 12,
+    LessThan = 13,
+    GreaterThan = 14,
+    LessThanEqual = 15,
+    GreaterThanEqual = 16,
+    Contains = 17
 };
 
 enum UnaryOperator { Not = 51 };
 
+namespace {
+    bool convertTypes(QVariant &a, QVariant &b, int type)
+    {
+        return a.convert(type) && b.convert(type);
+    }
+
+    QString tokenTypeToString(TokenType type)
+    {
+        switch (type)
+        {
+            case CONTROL_START:
+            case CONTROL_END:
+            case BINARY_START:
+            case BINARY_END:
+            case UNARY_START:
+            case UNARY_END:
+            case MATH_START:
+            case MATH_END:
+            case OTHER_START:
+            case NONE:
+                return "";
+            case AND:
+                return "&&";
+            case OR:
+                return "||";
+            case LP:
+                return "(";
+            case RP:
+                return ")";
+            case PLUS:
+                return "+";
+            case MINUS:
+                return "-";
+            case MULTIPLY:
+                return "*";
+            case DIVIDE:
+                return "/";
+            case MOD:
+                return "%";
+            case EQ:
+                return "==";
+            case NEQ:
+                return "!=";
+            case LT:
+                return "<";
+            case GT:
+                return ">";
+            case LTE:
+                return "<=";
+            case GTE:
+                return ">=";
+            case CONTAINS:
+                return "contains";
+            case NOT:
+                return "!";
+            case STRING:
+                return "<string>";
+            case INT:
+                return "<int>";
+            case IDENTIFIER:
+                return "<identifier>";
+        }
+    }
+
+    QString binaryOperatorToString(BinaryOperator op)
+    {
+        return tokenTypeToString(TokenType(op));
+    }
+
+    QString unaryOperatorToString(UnaryOperator op)
+    {
+        return tokenTypeToString(TokenType(op));
+    }
+}  // namespace
+
+using MessagePtr = std::shared_ptr<const chatterino::Message>;
+using ContextMap = QMap<QString, QVariant>;
+
 class Expression
 {
 public:
-    virtual QVariant execute(const ContextMap &context)
+    virtual QVariant execute(const ContextMap &)
     {
         return false;
     }
@@ -112,7 +183,7 @@ public:
     QString debug() override
     {
         return QString("ValueExpression(%1, %2)")
-            .arg(QString::number(this->type_), this->value_.toString());
+            .arg(tokenTypeToString(this->type_), this->value_.toString());
     }
 
 private:
@@ -216,7 +287,7 @@ public:
     QString debug() override
     {
         return QString("BinaryOperation(%1, %2, %3)")
-            .arg(this->left->debug(), QString::number(this->op),
+            .arg(this->left->debug(), binaryOperatorToString(this->op),
                  this->right->debug());
     }
 };
@@ -248,7 +319,7 @@ public:
     QString debug() override
     {
         return QString("UnaryOperation(%1, %2)")
-            .arg(QString::number(this->op), this->right->debug());
+            .arg(unaryOperatorToString(this->op), this->right->debug());
     }
 };
 

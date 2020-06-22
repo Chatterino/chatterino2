@@ -11,6 +11,7 @@ namespace {
         // Known identifiers:
         // message.content
         // message.length
+        // message.highlighted
         // author.name
         // author.subscribed
         // author.subscription_length
@@ -29,6 +30,8 @@ namespace {
 
         return {{"message.content", m->messageText},
                 {"message.length", m->messageText.length()},
+                {"message.highlighted",
+                 m->flags.has(chatterino::MessageFlag::Highlighted)},
                 {"author.name", m->displayName},
                 {"author.subscribed", subscribed},
                 {"author.subscription_length", subLength},
@@ -42,8 +45,10 @@ FilterParser::FilterParser(const QString &text)
     : text_(text)
     , tokenizer_(Tokenizer(text))
 {
+    qDebug() << "---- parsing ----";
     this->builtExpression_ = this->parseExpression();
-    qDebug() << "Fully-built expression:" << this->builtExpression_->debug();
+    qDebug().noquote() << "Fully-built expression:\n" +
+                              this->builtExpression_->debug() + "\n";
 }
 
 bool FilterParser::execute(const MessagePtr &message) const
@@ -92,28 +97,45 @@ Expression *FilterParser::parseUnary()
     }
 }
 
+Expression *FilterParser::parseParenthesis()
+{
+    // Don't call .next() before calling this method
+    assert(this->tokenizer_.nextTokenType() == TokenType::LP);
+
+    this->tokenizer_.next();
+    auto e = this->parseExpression();
+    if (this->tokenizer_.hasNext() &&
+        this->tokenizer_.nextTokenType() == TokenType::RP)
+    {
+        this->tokenizer_.next();
+        return e;
+    }
+    else
+    {
+        qDebug() << "missing closing parenthesis";
+        this->tokenizer_.debug();
+        return e;
+    }
+}
+
 Expression *FilterParser::parseCondition()
 {
+    Expression *value = nullptr;
+    // parse expression wrapped in parenthesis
     if (this->tokenizer_.hasNext() &&
         this->tokenizer_.nextTokenType() == TokenType::LP)
     {
-        this->tokenizer_.next();
-        auto e = this->parseExpression();
-        if (this->tokenizer_.hasNext() &&
-            this->tokenizer_.nextTokenType() == TokenType::RP)
-        {
-            this->tokenizer_.next();
-            return e;
-        }
-        else
-        {
-            qDebug() << "missing closing parenthesis";
-            return e;
-        }
+        // get value inside parenthesis
+        value = this->parseParenthesis();
+    }
+    else
+    {
+        // get current value
+        value = this->parseValue();
     }
 
-    auto value = this->parseValue();
-    if (this->tokenizer_.hasNext())
+    // expecting an operator or nothing
+    while (this->tokenizer_.hasNext())
     {
         if (this->tokenizer_.nextTokenIsBinaryOp())
         {
@@ -122,23 +144,32 @@ Expression *FilterParser::parseCondition()
                 BinaryOperator(this->tokenizer_.tokenType()), value,
                 this->parseValue());
         }
+        else if (this->tokenizer_.nextTokenIsMathOp())
+        {
+            this->tokenizer_.next();
+            value = new BinaryOperation(
+                BinaryOperator(this->tokenizer_.tokenType()), value,
+                this->parseValue());
+        }
+        else if (this->tokenizer_.nextTokenType() != TokenType::RP)
+        {
+            qDebug() << "expected operator but got " +
+                            QString::number(this->tokenizer_.nextTokenType());
+            this->tokenizer_.debug();
+            break;
+        }
         else
         {
-            qDebug() << "got unexpected token:"
-                     << this->tokenizer_.nextTokenType();
+            break;
         }
     }
-    else
-    {
-        qDebug() << "ran out of tokens";
-    }
-    qDebug() << "expected an operator!";
-    //return new ValueExpression(0, TokenType::INT);
+
     return value;
 }
 
 Expression *FilterParser::parseValue()
 {
+    // parse a literal or an expression wrapped in parenthsis
     if (this->tokenizer_.hasNext())
     {
         auto type = this->tokenizer_.nextTokenType();
@@ -149,6 +180,7 @@ Expression *FilterParser::parseValue()
         else if (type == TokenType::STRING)
         {
             auto before = this->tokenizer_.next();
+            // remove quote marks
             auto val = before.mid(1);
             val.chop(1);
             return new ValueExpression(val, type);
@@ -159,20 +191,20 @@ Expression *FilterParser::parseValue()
         }
         else if (type == TokenType::LP)
         {
-            this->tokenizer_.next();
-            return this->parseAnd();
+            return this->parseParenthesis();
         }
         else
         {
-            qDebug() << "unexpected value type:" << int(type);
+            qDebug() << "expected value but got " + QString::number(type);
+            this->tokenizer_.debug();
         }
     }
     else
     {
-        qDebug() << "ran out of tokens";
+        qDebug() << "unexpected end of statement. expected value";
+        this->tokenizer_.debug();
     }
 
-    qDebug() << "expected a value!";
     return new ValueExpression(0, TokenType::INT);
 }
 

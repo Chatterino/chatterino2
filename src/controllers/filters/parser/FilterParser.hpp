@@ -15,6 +15,7 @@ private:
     Expression *parseExpression();
     Expression *parseAnd();
     Expression *parseUnary();
+    Expression *parseParenthesis();
     Expression *parseCondition();
     Expression *parseValue();
 
