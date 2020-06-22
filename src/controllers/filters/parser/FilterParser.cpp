@@ -18,6 +18,7 @@ namespace {
         // author.color
         // author.no_color
         // author.badges
+        // channel.name
 
         QStringList badges;
         for (const auto &e : m->badges)
@@ -37,7 +38,8 @@ namespace {
                 {"author.subscription_length", subLength},
                 {"author.color", m->usernameColor},
                 {"author.no_color", !m->usernameColor.isValid()},
-                {"author.badges", badges}};
+                {"author.badges", badges},
+                {"channel.name", m->channelName}};
     }
 }  // namespace
 

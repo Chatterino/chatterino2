@@ -13,7 +13,9 @@ static const QStringList validIdentifiers = {
     "author.subscription_length",  // Int
     "author.color",                // QColor
     "author.no_color",             // Bool
-    "author.badges"};              // String list
+    "author.badges",               // String list
+    "channel.name"                 // String
+};
 
 // clang-format off
 static const QRegularExpression tokenRegex(

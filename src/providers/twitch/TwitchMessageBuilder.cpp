@@ -280,6 +280,8 @@ MessagePtr TwitchMessageBuilder::build()
         this->senderIsBroadcaster = true;
     }
 
+    this->message().channelName = this->channel->getName();
+
     this->message().flags.set(MessageFlag::Collapsed);
 
     // PARSING

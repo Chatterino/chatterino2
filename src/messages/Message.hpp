@@ -58,6 +58,7 @@ struct Message : boost::noncopyable {
     QString displayName;
     QString localizedName;
     QString timeoutUser;
+    QString channelName;
     QColor usernameColor;
     std::vector<Badge> badges;
     std::map<QString, QString> badgeInfos;
