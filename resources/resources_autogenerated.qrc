@@ -1,6 +1,5 @@
 <RCC>
-  <qresource prefix="/">    <file>.DS_Store</file>
-    <file>.gitignore</file>
+  <qresource prefix="/">
     <file>avatars/fourtf.png</file>
     <file>avatars/pajlada.png</file>
     <file>buttons/addSplit.png</file>
@@ -81,7 +80,6 @@
     <file>split/right.png</file>
     <file>split/up.png</file>
     <file>tlds.txt</file>
-    <file>twitch/.DS_Store</file>
     <file>twitch/admin.png</file>
     <file>twitch/automod.png</file>
     <file>twitch/broadcaster.png</file>
