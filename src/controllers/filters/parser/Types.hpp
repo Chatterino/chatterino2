@@ -1,6 +1,6 @@
 #pragma once
 
-#import "messages/Message.hpp"
+#include "messages/Message.hpp"
 
 namespace filterparser {
 
