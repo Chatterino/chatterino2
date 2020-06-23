@@ -529,7 +529,7 @@ void WindowManager::save()
             // splits
             QJsonObject splits;
 
-            this->encodeNodeRecusively(tab->getBaseNode(), splits);
+            this->encodeNodeRecursively(tab->getBaseNode(), splits);
 
             tab_obj.insert("splits2", splits);
             tabs_arr.append(tab_obj);
@@ -577,16 +577,22 @@ void WindowManager::queueSave()
     this->saveTimer->start(10s);
 }
 
-void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
+void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
 {
     switch (node->getType())
     {
         case SplitNode::_Split: {
             obj.insert("type", "split");
             obj.insert("moderationMode", node->getSplit()->getModerationMode());
+
             QJsonObject split;
             encodeChannel(node->getSplit()->getIndirectChannel(), split);
             obj.insert("data", split);
+
+            QJsonArray filters;
+            encodeFilters(node->getSplit(), filters);
+            obj.insert("filters", filters);
+
             obj.insert("flexh", node->getHorizontalFlex());
             obj.insert("flexv", node->getVerticalFlex());
         }
@@ -601,7 +607,7 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
             for (const std::unique_ptr<SplitNode> &n : node->getChildren())
             {
                 QJsonObject subObj;
-                this->encodeNodeRecusively(n.get(), subObj);
+                this->encodeNodeRecursively(n.get(), subObj);
                 items_arr.append(subObj);
             }
             obj.insert("items", items_arr);
@@ -646,6 +652,17 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             }
         }
         break;
+    }
+}
+
+void WindowManager::encodeFilters(Split *split, QJsonArray &arr)
+{
+    assertInGuiThread();
+
+    auto filters = split->getFilters();
+    for (const auto &f : filters)
+    {
+        arr.append(f.toString(QUuid::WithoutBraces));
     }
 }
 

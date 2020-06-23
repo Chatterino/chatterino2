@@ -712,15 +712,25 @@ void Split::copyToClipboard()
     crossPlatformCopy(this->view_->getSelectedText());
 }
 
-void Split::setFilters()
+void Split::setFiltersDialog()
 {
     SelectChannelFiltersDialog d(this->view_->getFilters(), this);
     d.setWindowTitle("Select filters");
 
     if (d.exec() == QDialog::Accepted)
     {
-        this->view_->setFilters(d.getSelection());
+        this->setFilters(d.getSelection());
     }
+}
+
+void Split::setFilters(const QList<QUuid> ids)
+{
+    this->view_->setFilters(ids);
+}
+
+const QList<QUuid> Split::getFilters() const
+{
+    return this->view_->getFilters();
 }
 
 void Split::showSearch()

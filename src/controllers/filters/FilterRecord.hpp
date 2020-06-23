@@ -78,7 +78,8 @@ struct Serialize<chatterino::FilterRecord> {
 
         chatterino::rj::set(ret, "name", value.getName(), a);
         chatterino::rj::set(ret, "filter", value.getFilter(), a);
-        chatterino::rj::set(ret, "id", value.getId().toString(), a);
+        chatterino::rj::set(ret, "id",
+                            value.getId().toString(QUuid::WithoutBraces), a);
 
         return ret;
     }

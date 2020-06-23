@@ -680,10 +680,10 @@ void SplitContainer::decodeFromJson(QJsonObject &obj)
 {
     assert(this->baseNode_.type_ == Node::EmptyRoot);
 
-    this->decodeNodeRecusively(obj, &this->baseNode_);
+    this->decodeNodeRecursively(obj, &this->baseNode_);
 }
 
-void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
+void SplitContainer::decodeNodeRecursively(QJsonObject &obj, Node *node)
 {
     QString type = obj.value("type").toString();
 
@@ -693,6 +693,8 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
         split->setChannel(
             WindowManager::decodeChannel(obj.value("data").toObject()));
         split->setModerationMode(obj.value("moderationMode").toBool(false));
+        auto filters = obj.value("filters");
+        split->setFilters(decodeFilters(filters));
 
         this->appendSplit(split);
     }
@@ -717,6 +719,8 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
                     _obj.value("data").toObject()));
                 split->setModerationMode(
                     _obj.value("moderationMode").toBool(false));
+                auto filters = _obj.value("filters");
+                split->setFilters(decodeFilters(filters));
 
                 Node *_node = new Node();
                 _node->parent_ = node;
@@ -734,7 +738,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
                 Node *_node = new Node();
                 _node->parent_ = node;
                 node->children_.emplace_back(_node);
-                this->decodeNodeRecusively(_obj, _node);
+                this->decodeNodeRecursively(_obj, _node);
             }
         }
 
@@ -750,6 +754,21 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
             }
         }
     }
+}
+
+QList<QUuid> SplitContainer::decodeFilters(QJsonValue &val)
+{
+    QList<QUuid> filterIds;
+
+    if (!val.isUndefined())
+    {
+        for (const auto &id : val.toArray())
+        {
+            filterIds.append(QUuid::fromString(id.toString()));
+        }
+    }
+
+    return filterIds;
 }
 
 void SplitContainer::refreshTabTitle()

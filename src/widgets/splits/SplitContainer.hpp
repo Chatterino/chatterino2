@@ -199,6 +199,8 @@ public:
     static bool isDraggingSplit;
     static Split *draggingSplit;
 
+    static QList<QUuid> decodeFilters(QJsonValue &val);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 
@@ -220,7 +222,7 @@ private:
 
     void addSplit(Split *split);
 
-    void decodeNodeRecusively(QJsonObject &obj, Node *node);
+    void decodeNodeRecursively(QJsonObject &obj, Node *node);
     Split *getTopRightSplit(Node &node);
 
     void refreshTabTitle();
