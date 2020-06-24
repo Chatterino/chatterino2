@@ -452,7 +452,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             }
             auto *userPopup = new UserInfoPopup;
             userPopup->setData(words[1], channel);
-            userPopup->setActionOnFocusLoss(BaseWindow::Delete);
             userPopup->move(QCursor::pos());
             userPopup->show();
             return "";
