@@ -29,7 +29,7 @@
             "/unban", "/timeout", "/untimeout", "/slow", "/slowoff",    \
             "/r9kbeta", "/r9kbetaoff", "/emoteonly", "/emoteonlyoff",   \
             "/clear", "/subscribers", "/subscribersoff", "/followers",  \
-            "/followersoff", "/user"                                    \
+            "/followersoff", "/user", "/usercard"                       \
     }
 
 namespace {
