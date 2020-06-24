@@ -22,6 +22,7 @@ const SystemMessageTag systemMessage{};
 const TimeoutMessageTag timeoutMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
+MessagePtr makeSystemMessage(const QString &text, const QTime &time);
 std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     const AutomodAction &action);
 
@@ -38,7 +39,8 @@ class MessageBuilder
 {
 public:
     MessageBuilder();
-    MessageBuilder(SystemMessageTag, const QString &text);
+    MessageBuilder(SystemMessageTag, const QString &text,
+                   const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &systemMessageText,
                    int times);
     MessageBuilder(TimeoutMessageTag, const QString &username,

@@ -24,6 +24,11 @@ MessagePtr makeSystemMessage(const QString &text)
     return MessageBuilder(systemMessage, text).release();
 }
 
+MessagePtr makeSystemMessage(const QString &text, const QTime &time)
+{
+    return MessageBuilder(systemMessage, text, time).release();
+}
+
 std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     const AutomodAction &action)
 {
@@ -93,10 +98,11 @@ MessageBuilder::MessageBuilder()
 {
 }
 
-MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text)
+MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
+                               const QTime &time)
     : MessageBuilder()
 {
-    this->emplace<TimestampElement>();
+    this->emplace<TimestampElement>(time);
 
     // check system message for links
     // (e.g. needed for sub ticket message in sub only mode)
