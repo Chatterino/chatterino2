@@ -24,6 +24,18 @@ QString Tokenizer::next()
     return this->tokens_.at(this->i_ - 1);
 }
 
+QString Tokenizer::current() const
+{
+    return this->tokens_.at(this->i_ - 1);
+}
+
+QString Tokenizer::preview() const
+{
+    if (this->hasNext())
+        return this->tokens_.at(this->i_);
+    return "";
+}
+
 TokenType Tokenizer::nextTokenType() const
 {
     return this->tokenTypes_.at(this->i_);

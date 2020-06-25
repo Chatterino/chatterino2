@@ -1,5 +1,6 @@
 #pragma once
 
+#include "widgets/helper/EditableModelView.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 #include <QStringListModel>
@@ -16,6 +17,8 @@ public:
     void onShow() final;
 
 private:
+    void tableCellClicked(const QModelIndex &clicked, EditableModelView *view);
+
     QStringListModel userListModel_;
 };
 

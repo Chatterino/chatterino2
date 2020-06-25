@@ -29,6 +29,7 @@ public:
         , id_(QUuid::createUuid())
     {
         this->parser_ = new filterparser::FilterParser(filter);
+        this->valid_ = this->parser_->valid();
     }
 
     FilterRecord(const QString &name, const QString &filter, const QUuid &id)
@@ -37,6 +38,7 @@ public:
         , id_(id)
     {
         this->parser_ = new filterparser::FilterParser(filter);
+        this->valid_ = this->parser_->valid();
     }
 
     const QString &getName() const
@@ -54,6 +56,11 @@ public:
         return this->id_;
     }
 
+    bool valid() const
+    {
+        return this->valid_;
+    }
+
     bool filter(const MessagePtr &message) const
     {
         return this->parser_->execute(message);
@@ -68,9 +75,11 @@ private:
     QString name_;
     QString filter_;
     QUuid id_;
+    bool valid_;
 
     filterparser::FilterParser *parser_;
 };
+
 }  // namespace chatterino
 
 namespace pajlada {

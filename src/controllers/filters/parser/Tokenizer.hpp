@@ -33,6 +33,8 @@ public:
 
     bool hasNext() const;
     QString next();
+    QString current() const;
+    QString preview() const;
     TokenType nextTokenType() const;
     TokenType tokenType() const;
 

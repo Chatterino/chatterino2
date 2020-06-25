@@ -44,10 +44,7 @@ FilterParser::FilterParser(const QString &text)
     : text_(text)
     , tokenizer_(Tokenizer(text))
 {
-    qDebug() << "---- parsing ----";
     this->builtExpression_ = this->parseExpression();
-    qDebug().noquote() << "Fully-built expression:\n" +
-                              this->builtExpression_->debug() + "\n";
 }
 
 bool FilterParser::execute(const MessagePtr &message) const
@@ -59,6 +56,11 @@ bool FilterParser::execute(const MessagePtr &message) const
 bool FilterParser::execute(const ContextMap &context) const
 {
     return this->builtExpression_->execute(context).toBool();
+}
+
+bool FilterParser::valid() const
+{
+    return this->valid_;
 }
 
 Expression *FilterParser::parseExpression()
@@ -115,8 +117,16 @@ Expression *FilterParser::parseParenthesis()
     }
     else
     {
-        qDebug() << "missing closing parenthesis";
-        this->tokenizer_.debug();
+        if (this->tokenizer_.hasNext())
+        {
+            this->errorLog(QString("Missing closing parenthesis: got %1")
+                               .arg(this->tokenizer_.preview()));
+        }
+        else
+        {
+            this->errorLog("Missing closing parenthesis at end of statement");
+        }
+
         return e;
     }
 }
@@ -154,13 +164,15 @@ Expression *FilterParser::parseCondition()
         }
         else if (this->tokenizer_.nextTokenType() != TokenType::RP)
         {
-            qDebug() << "expected operator but got " +
-                            QString::number(this->tokenizer_.nextTokenType());
-            this->tokenizer_.debug();
+            this->errorLog(QString("Expected an operator but got %1 %2")
+                               .arg(this->tokenizer_.preview())
+                               .arg(tokenTypeToInfoString(
+                                   this->tokenizer_.nextTokenType())));
             break;
         }
         else
         {
+            // RP, so move on
             break;
         }
     }
@@ -196,17 +208,32 @@ Expression *FilterParser::parseValue()
         }
         else
         {
-            qDebug() << "expected value but got " + QString::number(type);
-            this->tokenizer_.debug();
+            this->tokenizer_.next();
+            this->errorLog(QString("Expected value but got %1 %2")
+                               .arg(this->tokenizer_.current())
+                               .arg(tokenTypeToInfoString(type)));
         }
     }
     else
     {
-        qDebug() << "unexpected end of statement. expected value";
-        this->tokenizer_.debug();
+        this->errorLog("Unexpected end of statement");
     }
 
     return new ValueExpression(0, TokenType::INT);
+}
+
+void FilterParser::errorLog(const QString &text, bool expand)
+{
+    this->valid_ = false;
+    if (expand || this->parseLog_.size() == 0)
+    {
+        this->parseLog_ << text;
+    }
+}
+
+const QStringList &FilterParser::errors() const
+{
+    return this->parseLog_;
 }
 
 }  // namespace filterparser

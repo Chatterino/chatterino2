@@ -51,7 +51,7 @@ enum TokenType {
 };
 
 bool convertVariantTypes(QVariant &a, QVariant &b, int type);
-QString tokenTypeToString(TokenType type);
+QString tokenTypeToInfoString(TokenType type);
 
 class Expression
 {

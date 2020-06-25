@@ -13,6 +13,9 @@ public:
     FilterParser(const QString &text);
     bool execute(const MessagePtr &message) const;
     bool execute(const ContextMap &context) const;
+    bool valid() const;
+
+    const QStringList &errors() const;
 
 private:
     Expression *parseExpression();
@@ -22,8 +25,13 @@ private:
     Expression *parseCondition();
     Expression *parseValue();
 
+    void errorLog(const QString &text, bool expand = false);
+
     QString text_;
     Tokenizer tokenizer_;
     Expression *builtExpression_;
+
+    QStringList parseLog_;
+    bool valid_ = true;
 };
 }  // namespace filterparser

@@ -7,7 +7,7 @@ bool convertVariantTypes(QVariant &a, QVariant &b, int type)
     return a.convert(type) && b.convert(type);
 }
 
-QString tokenTypeToString(TokenType type)
+QString tokenTypeToInfoString(TokenType type)
 {
     switch (type)
     {
@@ -21,41 +21,41 @@ QString tokenTypeToString(TokenType type)
         case MATH_END:
         case OTHER_START:
         case NONE:
-            return "<none>";
+            return "<unknown>";
         case AND:
-            return "&&";
+            return "<and>";
         case OR:
-            return "||";
+            return "<or>";
         case LP:
-            return "(";
+            return "<right parenthesis>";
         case RP:
-            return ")";
+            return "<left parenthesis>";
         case PLUS:
-            return "+";
+            return "<plus>";
         case MINUS:
-            return "-";
+            return "<minus>";
         case MULTIPLY:
-            return "*";
+            return "<multiply>";
         case DIVIDE:
-            return "/";
+            return "<divide>";
         case MOD:
-            return "%";
+            return "<modulus>";
         case EQ:
-            return "==";
+            return "<equals>";
         case NEQ:
-            return "!=";
+            return "<not equals>";
         case LT:
-            return "<";
+            return "<less than>";
         case GT:
-            return ">";
+            return "<greater than>";
         case LTE:
-            return "<=";
+            return "<less than equal>";
         case GTE:
-            return ">=";
+            return "<greater than equal>";
         case CONTAINS:
-            return "contains";
+            return "<contains>";
         case NOT:
-            return "!";
+            return "<not>";
         case STRING:
             return "<string>";
         case INT:
@@ -196,7 +196,7 @@ QVariant BinaryOperation::execute(const ContextMap &context)
 QString BinaryOperation::debug()
 {
     return QString("(%1 %2 %3)")
-        .arg(this->left_->debug(), tokenTypeToString(this->op_),
+        .arg(this->left_->debug(), tokenTypeToInfoString(this->op_),
              this->right_->debug());
 }
 
@@ -225,7 +225,7 @@ QVariant UnaryOperation::execute(const ContextMap &context)
 
 QString UnaryOperation::debug()
 {
-    return QString("(%1 %2)").arg(tokenTypeToString(this->op_),
+    return QString("(%1 %2)").arg(tokenTypeToInfoString(this->op_),
                                   this->right_->debug());
 }
 
