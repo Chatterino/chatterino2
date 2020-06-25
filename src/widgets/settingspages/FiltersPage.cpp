@@ -31,7 +31,7 @@ FiltersPage::FiltersPage()
     QTimer::singleShot(1, [view] {
         view->getTableView()->resizeColumnsToContents();
         view->getTableView()->setColumnWidth(0, 150);
-        view->getTableView()->setColumnWidth(2, 150);
+        view->getTableView()->setColumnWidth(2, 125);
     });
 
     view->addButtonPressed.connect([] {

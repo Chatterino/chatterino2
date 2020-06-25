@@ -34,7 +34,7 @@ public:
 
         for (const auto &f : this->filters_.values())
         {
-            if (!f.filter(context))
+            if (!f.valid() || !f.filter(context))
                 return false;
         }
 

@@ -183,6 +183,7 @@ private:
     EffectLabel *goToBottom_;
 
     FilterSet *channelFilters_ = nullptr;
+    bool filterMessage(const MessagePtr &m) const;
 
     // This variable can be used to decide whether or not we should render the
     // "Show latest messages" button

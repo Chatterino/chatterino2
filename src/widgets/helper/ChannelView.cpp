@@ -636,21 +636,29 @@ const QList<QUuid> ChannelView::getFilters() const
     return this->channelFilters_->filterIds();
 }
 
-void ChannelView::messageAppended(MessagePtr &message,
-                                  boost::optional<MessageFlags> overridingFlags)
+bool ChannelView::filterMessage(const MessagePtr &m) const
 {
     if (this->channelFilters_ != nullptr)
     {
-        auto isNotCurrentUser = [loginName = message->loginName] {
+        auto isNotCurrentUser = [loginName = m->loginName] {
             return getApp()
                        ->accounts->twitch.getCurrent()
                        ->getUserName()
                        .compare(loginName, Qt::CaseInsensitive) != 0;
         };
 
-        if (!this->channelFilters_->filter(message) && isNotCurrentUser())
-            return;
+        if (!this->channelFilters_->filter(m) && isNotCurrentUser())
+            return true;
     }
+
+    return false;
+}
+
+void ChannelView::messageAppended(MessagePtr &message,
+                                  boost::optional<MessageFlags> overridingFlags)
+{
+    if (this->filterMessage(message))
+        return;
 
     MessageLayoutPtr deleted;
 
@@ -739,7 +747,6 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
             this->scrollBar_->offset(qreal(messages.size()));
     }
 
-    /// Add highlights
     std::vector<ScrollbarHighlight> highlights;
     highlights.reserve(messages.size());
     for (size_t i = 0; i < messages.size(); i++)
