@@ -1,22 +1,40 @@
 #include "FilterParser.hpp"
 
+#include "Application.hpp"
 #include "controllers/filters/parser/Types.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 
 namespace filterparser {
 
 ContextMap buildContextMap(const MessagePtr &m)
 {
-    // Known identifiers:
-    // message.content
-    // message.length
-    // message.highlighted
-    // author.name
-    // author.subscribed
-    // author.subscription_length
-    // author.color
-    // author.no_color
-    // author.badges
-    // channel.name
+    auto watchingChannel =
+        chatterino::getApp()->twitch.server->watchingChannel.get();
+
+    /* Known Identifiers
+     *
+     * author.badges
+     * author.color
+     * author.name
+     * author.no_color
+     * author.subbed
+     * author.sub_length
+     *
+     * channel.name
+     * channel.watching
+     *
+     * flags.highlighted
+     * flags.points_redeemed
+     * flags.sub_message
+     * flags.system_message
+     * flags.whisper
+     *
+     * message.content
+     * message.length
+     *
+     */
+
+    using MessageFlag = chatterino::MessageFlag;
 
     QStringList badges;
     for (const auto &e : m->badges)
@@ -24,20 +42,33 @@ ContextMap buildContextMap(const MessagePtr &m)
         badges << e.key_;
     }
 
+    bool watching = !watchingChannel->getName().isEmpty() &&
+                    watchingChannel->getName().compare(
+                        m->channelName, Qt::CaseInsensitive) == 0;
+
     bool subscribed = badges.contains("subscriber");
     int subLength = subscribed ? m->badgeInfos.at("subscriber").toInt() : 0;
 
-    return {{"message.content", m->messageText},
-            {"message.length", m->messageText.length()},
-            {"message.highlighted",
-             m->flags.has(chatterino::MessageFlag::Highlighted)},
-            {"author.name", m->displayName},
-            {"author.subscribed", subscribed},
-            {"author.subscription_length", subLength},
-            {"author.color", m->usernameColor},
-            {"author.no_color", !m->usernameColor.isValid()},
-            {"author.badges", badges},
-            {"channel.name", m->channelName}};
+    return {
+        {"author.badges", badges},
+        {"author.color", m->usernameColor},
+        {"author.name", m->displayName},
+        {"author.no_color", !m->usernameColor.isValid()},
+        {"author.subbed", subscribed},
+        {"author.sub_length", subLength},
+
+        {"channel.name", m->channelName},
+        {"channel.watching", watching},
+
+        {"flags.highlighted", m->flags.has(MessageFlag::Highlighted)},
+        {"flags.points_redeemed", m->flags.has(MessageFlag::RedeemedHighlight)},
+        {"flags.sub_message", m->flags.has(MessageFlag::Subscription)},
+        {"flags.system_message", m->flags.has(MessageFlag::System)},
+        {"flags.whisper", m->flags.has(MessageFlag::Whisper)},
+
+        {"message.content", m->messageText},
+        {"message.length", m->messageText.length()},
+    };
 }
 
 FilterParser::FilterParser(const QString &text)

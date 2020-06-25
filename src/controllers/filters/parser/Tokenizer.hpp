@@ -5,16 +5,21 @@
 namespace filterparser {
 
 static const QStringList validIdentifiers = {
-    "message.content",             // String
-    "message.length",              // Int
-    "message.highlighted",         // Bool
-    "author.name",                 // String
-    "author.subscribed",           // Bool
-    "author.subscription_length",  // Int
-    "author.color",                // QColor
-    "author.no_color",             // Bool
-    "author.badges",               // String list
-    "channel.name"                 // String
+    "author.badges",          // String list
+    "author.color",           // QColor
+    "author.name",            // String
+    "author.no_color",        // Bool
+    "author.subbed",          // Bool
+    "author.sub_length",      // Int
+    "channel.name",           // String
+    "channel.watching",       // Bool
+    "flags.highlighted",      // Bool
+    "flags.points_redeemed",  // Bool
+    "flags.sub_message",      // Bool
+    "flags.system_message",   // Bool
+    "flags.whisper",          // Bool
+    "message.content",        // String
+    "message.length"          // Int
 };
 
 // clang-format off
