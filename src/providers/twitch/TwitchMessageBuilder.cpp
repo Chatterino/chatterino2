@@ -1325,8 +1325,14 @@ void TwitchMessageBuilder::appendTwitchBadges()
             auto badgeInfoIt = badgeInfos.find(badge.key_);
             if (badgeInfoIt != badgeInfos.end())
             {
+                const auto &subTier =
+                    badge.value_.length() > 3 ? badge.value_.front() : '1';
                 const auto &subMonths = badgeInfoIt->second;
-                tooltip += QString(" (%0 months)").arg(subMonths);
+                tooltip +=
+                    QString(" (%1%2 months)")
+                        .arg(subTier != '1' ? QString("Tier %1, ").arg(subTier)
+                                            : "")
+                        .arg(subMonths);
             }
         }
 
