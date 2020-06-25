@@ -44,7 +44,7 @@ FilterParser::FilterParser(const QString &text)
     : text_(text)
     , tokenizer_(Tokenizer(text))
 {
-    this->builtExpression_ = this->parseExpression();
+    this->builtExpression_ = this->parseExpression(true);
 }
 
 bool FilterParser::execute(const MessagePtr &message) const
@@ -63,7 +63,7 @@ bool FilterParser::valid() const
     return this->valid_;
 }
 
-Expression *FilterParser::parseExpression()
+Expression *FilterParser::parseExpression(bool top)
 {
     Expression *e = this->parseAnd();
     while (this->tokenizer_.hasNext() &&
@@ -72,6 +72,13 @@ Expression *FilterParser::parseExpression()
         this->tokenizer_.next();
         e = new BinaryOperation(TokenType::OR, e, this->parseAnd());
     }
+
+    if (this->tokenizer_.hasNext() && top)
+    {
+        this->errorLog(QString("Unexpected token at end: %1")
+                           .arg(this->tokenizer_.preview()));
+    }
+
     return e;
 }
 
@@ -162,7 +169,12 @@ Expression *FilterParser::parseCondition()
             value = new BinaryOperation(this->tokenizer_.tokenType(), value,
                                         this->parseValue());
         }
-        else if (this->tokenizer_.nextTokenType() != TokenType::RP)
+        else if (this->tokenizer_.nextTokenType() == TokenType::RP)
+        {
+            // RP, so move on
+            break;
+        }
+        else if (!this->tokenizer_.nextTokenIsOp())
         {
             this->errorLog(QString("Expected an operator but got %1 %2")
                                .arg(this->tokenizer_.preview())
@@ -172,7 +184,6 @@ Expression *FilterParser::parseCondition()
         }
         else
         {
-            // RP, so move on
             break;
         }
     }
@@ -234,6 +245,11 @@ void FilterParser::errorLog(const QString &text, bool expand)
 const QStringList &FilterParser::errors() const
 {
     return this->parseLog_;
+}
+
+const QString FilterParser::debugString() const
+{
+    return this->builtExpression_->debug();
 }
 
 }  // namespace filterparser

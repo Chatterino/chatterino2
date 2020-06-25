@@ -38,6 +38,7 @@ public:
     TokenType nextTokenType() const;
     TokenType tokenType() const;
 
+    bool nextTokenIsOp() const;
     bool nextTokenIsBinaryOp() const;
     bool nextTokenIsUnaryOp() const;
     bool nextTokenIsMathOp() const;
@@ -45,6 +46,7 @@ public:
     void debug();
     const QStringList allTokens();
 
+    static bool typeIsOp(TokenType token);
     static bool typeIsBinaryOp(TokenType token);
     static bool typeIsUnaryOp(TokenType token);
     static bool typeIsMathOp(TokenType token);

@@ -66,6 +66,8 @@ void FiltersPage::tableCellClicked(const QModelIndex &clicked,
             popup.setIcon(QMessageBox::Icon::Information);
             popup.setWindowTitle("Valid filter");
             popup.setText("Filter is valid");
+            popup.setInformativeText(
+                QString("Parsed as:\n%1").arg(f.debugString()));
         }
         else
         {

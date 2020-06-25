@@ -16,9 +16,10 @@ public:
     bool valid() const;
 
     const QStringList &errors() const;
+    const QString debugString() const;
 
 private:
-    Expression *parseExpression();
+    Expression *parseExpression(bool top = false);
     Expression *parseAnd();
     Expression *parseUnary();
     Expression *parseParenthesis();

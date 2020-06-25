@@ -188,7 +188,6 @@ QVariant BinaryOperation::execute(const ContextMap &context)
 
             return false;
         default:
-            qDebug() << "tried binary for non-binary op:" << this->op_;
             return false;
     }
 }
@@ -218,7 +217,6 @@ QVariant UnaryOperation::execute(const ContextMap &context)
                 return !right.toBool();
             return false;
         default:
-            qDebug() << "tried unary for non-unary op:" << this->op_;
             return false;
     }
 }

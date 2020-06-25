@@ -46,6 +46,11 @@ TokenType Tokenizer::tokenType() const
     return this->tokenTypes_.at(this->i_ - 1);
 }
 
+bool Tokenizer::nextTokenIsOp() const
+{
+    return this->typeIsOp(this->nextTokenType());
+}
+
 bool Tokenizer::nextTokenIsBinaryOp() const
 {
     return this->typeIsBinaryOp(this->nextTokenType());
@@ -138,6 +143,13 @@ TokenType Tokenizer::tokenize(const QString &text)
     }
 
     return TokenType::NONE;
+}
+
+bool Tokenizer::typeIsOp(TokenType token)
+{
+    return typeIsBinaryOp(token) || typeIsUnaryOp(token) ||
+           typeIsMathOp(token) || token == TokenType::AND ||
+           token == TokenType::OR;
 }
 
 bool Tokenizer::typeIsBinaryOp(TokenType token)
