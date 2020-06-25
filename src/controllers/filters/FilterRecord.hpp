@@ -4,6 +4,7 @@
 #include "util/RapidjsonHelpers.hpp"
 
 #include "controllers/filters/parser/FilterParser.hpp"
+#include "controllers/filters/parser/Types.hpp"
 
 #include <QRegularExpression>
 #include <QString>
@@ -56,6 +57,11 @@ public:
     bool filter(const MessagePtr &message) const
     {
         return this->parser_->execute(message);
+    }
+
+    bool filter(const filterparser::ContextMap &context) const
+    {
+        return this->parser_->execute(context);
     }
 
 private:

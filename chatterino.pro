@@ -132,6 +132,8 @@ SOURCES += \
     src/controllers/commands/CommandModel.cpp \
     src/controllers/filters/FilterModel.cpp \
     src/controllers/filters/parser/FilterParser.cpp \
+    src/controllers/filters/parser/Tokenizer.cpp \
+    src/controllers/filters/parser/Types.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \

@@ -4,44 +4,41 @@
 
 namespace filterparser {
 
-namespace {
+ContextMap buildContextMap(const MessagePtr &m)
+{
+    // Known identifiers:
+    // message.content
+    // message.length
+    // message.highlighted
+    // author.name
+    // author.subscribed
+    // author.subscription_length
+    // author.color
+    // author.no_color
+    // author.badges
+    // channel.name
 
-    ContextMap buildContextMap(const MessagePtr &m)
+    QStringList badges;
+    for (const auto &e : m->badges)
     {
-        // Known identifiers:
-        // message.content
-        // message.length
-        // message.highlighted
-        // author.name
-        // author.subscribed
-        // author.subscription_length
-        // author.color
-        // author.no_color
-        // author.badges
-        // channel.name
-
-        QStringList badges;
-        for (const auto &e : m->badges)
-        {
-            badges << e.key_;
-        }
-
-        bool subscribed = badges.contains("subscriber");
-        int subLength = subscribed ? m->badgeInfos.at("subscriber").toInt() : 0;
-
-        return {{"message.content", m->messageText},
-                {"message.length", m->messageText.length()},
-                {"message.highlighted",
-                 m->flags.has(chatterino::MessageFlag::Highlighted)},
-                {"author.name", m->displayName},
-                {"author.subscribed", subscribed},
-                {"author.subscription_length", subLength},
-                {"author.color", m->usernameColor},
-                {"author.no_color", !m->usernameColor.isValid()},
-                {"author.badges", badges},
-                {"channel.name", m->channelName}};
+        badges << e.key_;
     }
-}  // namespace
+
+    bool subscribed = badges.contains("subscriber");
+    int subLength = subscribed ? m->badgeInfos.at("subscriber").toInt() : 0;
+
+    return {{"message.content", m->messageText},
+            {"message.length", m->messageText.length()},
+            {"message.highlighted",
+             m->flags.has(chatterino::MessageFlag::Highlighted)},
+            {"author.name", m->displayName},
+            {"author.subscribed", subscribed},
+            {"author.subscription_length", subLength},
+            {"author.color", m->usernameColor},
+            {"author.no_color", !m->usernameColor.isValid()},
+            {"author.badges", badges},
+            {"channel.name", m->channelName}};
+}
 
 FilterParser::FilterParser(const QString &text)
     : text_(text)
@@ -55,8 +52,13 @@ FilterParser::FilterParser(const QString &text)
 
 bool FilterParser::execute(const MessagePtr &message) const
 {
-    auto map = buildContextMap(message);
-    return this->builtExpression_->execute(map).toBool();
+    auto context = buildContextMap(message);
+    return this->execute(context);
+}
+
+bool FilterParser::execute(const ContextMap &context) const
+{
+    return this->builtExpression_->execute(context).toBool();
 }
 
 Expression *FilterParser::parseExpression()
@@ -66,7 +68,7 @@ Expression *FilterParser::parseExpression()
            this->tokenizer_.nextTokenType() == TokenType::OR)
     {
         this->tokenizer_.next();
-        e = new BinaryOperation(BinaryOperator::Or, e, this->parseAnd());
+        e = new BinaryOperation(TokenType::OR, e, this->parseAnd());
     }
     return e;
 }
@@ -78,7 +80,7 @@ Expression *FilterParser::parseAnd()
            this->tokenizer_.nextTokenType() == TokenType::AND)
     {
         this->tokenizer_.next();
-        e = new BinaryOperation(BinaryOperator::And, e, this->parseUnary());
+        e = new BinaryOperation(TokenType::AND, e, this->parseUnary());
     }
     return e;
 }
@@ -89,8 +91,7 @@ Expression *FilterParser::parseUnary()
     {
         auto nextType = this->tokenizer_.nextTokenType();
         this->tokenizer_.next();
-        auto e =
-            new UnaryOperation(UnaryOperator(nextType), this->parseCondition());
+        auto e = new UnaryOperation(nextType, this->parseCondition());
         return e;
     }
     else
@@ -142,16 +143,14 @@ Expression *FilterParser::parseCondition()
         if (this->tokenizer_.nextTokenIsBinaryOp())
         {
             this->tokenizer_.next();
-            return new BinaryOperation(
-                BinaryOperator(this->tokenizer_.tokenType()), value,
-                this->parseValue());
+            return new BinaryOperation(this->tokenizer_.tokenType(), value,
+                                       this->parseValue());
         }
         else if (this->tokenizer_.nextTokenIsMathOp())
         {
             this->tokenizer_.next();
-            value = new BinaryOperation(
-                BinaryOperator(this->tokenizer_.tokenType()), value,
-                this->parseValue());
+            value = new BinaryOperation(this->tokenizer_.tokenType(), value,
+                                        this->parseValue());
         }
         else if (this->tokenizer_.nextTokenType() != TokenType::RP)
         {

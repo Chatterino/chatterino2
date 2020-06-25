@@ -5,11 +5,14 @@
 
 namespace filterparser {
 
+ContextMap buildContextMap(const MessagePtr &m);
+
 class FilterParser
 {
 public:
     FilterParser(const QString &text);
     bool execute(const MessagePtr &message) const;
+    bool execute(const ContextMap &context) const;
 
 private:
     Expression *parseExpression();

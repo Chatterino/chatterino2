@@ -30,9 +30,11 @@ public:
 
     bool filter(const MessagePtr &m) const
     {
+        filterparser::ContextMap context = filterparser::buildContextMap(m);
+
         for (const auto &f : this->filters_.values())
         {
-            if (!f.filter(m))
+            if (!f.filter(context))
                 return false;
         }
 
