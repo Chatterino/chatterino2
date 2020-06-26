@@ -80,6 +80,10 @@ public:
     void setFilters(const QList<QUuid> &ids);
     const QList<QUuid> getFilters() const;
 
+    ChannelPtr sourceChannel() const;
+    void setSourceChannel(ChannelPtr sourceChannel);
+    bool hasSourceChannel() const;
+
     LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
     void queueLayout();
 
@@ -178,6 +182,7 @@ private:
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
     ChannelPtr channel_;
+    ChannelPtr sourceChannel_;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
