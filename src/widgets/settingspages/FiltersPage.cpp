@@ -7,6 +7,9 @@
 
 #include <QTableView>
 
+#define FILTERS_DOCUMENTATION \
+    "https://github.com/Chatterino/chatterino2/blob/master/docs/Filters.md"
+
 namespace chatterino {
 
 FiltersPage::FiltersPage()
@@ -14,7 +17,9 @@ FiltersPage::FiltersPage()
     LayoutCreator<FiltersPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    layout.emplace<QLabel>("Filter channels");
+    layout.emplace<QLabel>(
+        "Selectively display messages in Splits using channel filters. Set "
+        "filters under a Split menu.");
     EditableModelView *view =
         layout
             .emplace<EditableModelView>(
@@ -43,6 +48,13 @@ FiltersPage::FiltersPage()
                      [this, view](const QModelIndex &clicked) {
                          this->tableCellClicked(clicked, view);
                      });
+
+    auto filterHelpLabel =
+        new QLabel(QString("<a href='%1'><span "
+                           "style='color:#99f'>filter info</span></a>")
+                       .arg(FILTERS_DOCUMENTATION));
+    filterHelpLabel->setOpenExternalLinks(true);
+    view->addCustomButton(filterHelpLabel);
 }
 
 void FiltersPage::onShow()
