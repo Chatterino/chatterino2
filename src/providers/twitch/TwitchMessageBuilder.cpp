@@ -416,6 +416,8 @@ MessagePtr TwitchMessageBuilder::build()
     if (this->args.isReceivedWhisper && getSettings()->highlightInlineWhispers)
     {
         this->message().flags.set(MessageFlag::HighlightedWhisper, true);
+        this->message().highlightColor =
+            ColorProvider::instance().color(ColorType::Whisper);
     }
 
     return this->release();
