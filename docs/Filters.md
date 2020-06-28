@@ -80,6 +80,7 @@ The following variables are available:
 | `flags.highlighted` | Bool | Whether the message is highlighted |
 | `flags.points_redeemed` | Bool | Whether the message was redeemed through channel points |
 | `flags.sub_message` | Bool | Whether the message is a sub/resub/gift message |
+| `flags.system_message` | Bool | Whether the message is a system message (i.e. timeout/ban/info) |
 | `flags.whisper` | Bool | Whether the message is a whisper |
 | **Message** | | Actual message sent |
 | `message.content` | String | Message content |
