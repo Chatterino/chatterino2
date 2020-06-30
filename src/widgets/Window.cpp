@@ -384,28 +384,42 @@ void Window::addMenuBar()
             [=] { this->notebook_->selectPreviousTab(); });
 }
 
+void Window::updateWindowTitle()
+{
+    auto user = getApp()->accounts->twitch.getCurrent();
+
+    QString windowTitle = Version::instance().fullVersion();
+
+    // appending username to window title
+    if (getSettings()->showUsernameInWindowTitle)
+    {
+        windowTitle +=
+            " - " + (user->isAnon() ? "not logged in" : user->getUserName());
+    }
+
+    this->setWindowTitle(windowTitle);
+}
+
 void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
 
     // update title
-    this->setWindowTitle(Version::instance().fullVersion());
+    getSettings()->showUsernameInWindowTitle.connectSimple(
+        [this](auto) { this->updateWindowTitle(); }, true);
 
     // update user
-    if (user->isAnon())
+    if (this->userLabel_)
     {
-        if (this->userLabel_)
+        if (user->isAnon())
         {
             this->userLabel_->getLabel().setText("anonymous");
         }
-    }
-    else
-    {
-        if (this->userLabel_)
+        else
         {
             this->userLabel_->getLabel().setText(user->getUserName());
         }
     }
-}  // namespace chatterino
+}
 
 }  // namespace chatterino

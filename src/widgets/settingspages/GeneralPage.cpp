@@ -299,6 +299,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val) + "x";
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+    layout.addCheckbox("Show username in window title",
+                       s.showUsernameInWindowTitle);
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost);
 #ifdef USEWINSDK
@@ -307,7 +309,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
     if (!BaseWindow::supportsCustomWindowFrame())
     {
-        layout.addCheckbox("Show preferences button (ctrl+p to show)",
+        layout.addCheckbox("Show preferences button (Ctrl+P to show)",
                            s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }

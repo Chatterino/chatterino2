@@ -85,6 +85,8 @@ public:
     BoolSetting alternateMessages = {
         "/appearance/messages/alternateMessageBackground", false};
     FloatSetting boldScale = {"/appearance/boldScale", 63};
+    BoolSetting showUsernameInWindowTitle = {
+        "/appearance/showUsernameInWindowTitle", false};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
     BoolSetting showTabLive = {"/appearance/showTabLiveButton", false};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
