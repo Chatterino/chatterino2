@@ -384,29 +384,25 @@ void Window::addMenuBar()
             [=] { this->notebook_->selectPreviousTab(); });
 }
 
-void Window::updateWindowTitle()
-{
-    auto user = getApp()->accounts->twitch.getCurrent();
-
-    QString windowTitle = Version::instance().fullVersion();
-
-    // appending username to window title
-    if (getSettings()->showUsernameInWindowTitle)
-    {
-        windowTitle +=
-            " - " + (user->isAnon() ? "not logged in" : user->getUserName());
-    }
-
-    this->setWindowTitle(windowTitle);
-}
-
 void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
 
-    // update title
-    getSettings()->showUsernameInWindowTitle.connectSimple(
-        [this](auto) { this->updateWindowTitle(); }, true);
+    // update title (also append username on Linux and MacOS)
+    QString windowTitle = Version::instance().fullVersion();
+
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    if (user->isAnon())
+    {
+        windowTitle += " - not logged in";
+    }
+    else
+    {
+        windowTitle += " - " + user->getUserName();
+    }
+#endif
+
+    this->setWindowTitle(windowTitle);
 
     // update user
     if (this->userLabel_)

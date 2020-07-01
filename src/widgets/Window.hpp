@@ -37,7 +37,6 @@ private:
     void addDebugStuff();
     void addShortcuts();
     void addLayout();
-    void updateWindowTitle();
     void onAccountSelected();
     void addMenuBar();
 

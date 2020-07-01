@@ -299,8 +299,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val) + "x";
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
-    layout.addCheckbox("Show username in window title",
-                       s.showUsernameInWindowTitle);
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost);
 #ifdef USEWINSDK
