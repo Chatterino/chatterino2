@@ -101,7 +101,8 @@ Expression *FilterParser::parseExpression(bool top)
            this->tokenizer_.nextTokenType() == TokenType::OR)
     {
         this->tokenizer_.next();
-        e = new BinaryOperation(TokenType::OR, e, this->parseAnd());
+        auto nextAnd = this->parseAnd();
+        e = new BinaryOperation(TokenType::OR, e, nextAnd);
     }
 
     if (this->tokenizer_.hasNext() && top)
@@ -120,7 +121,8 @@ Expression *FilterParser::parseAnd()
            this->tokenizer_.nextTokenType() == TokenType::AND)
     {
         this->tokenizer_.next();
-        e = new BinaryOperation(TokenType::AND, e, this->parseUnary());
+        auto nextUnary = this->parseUnary();
+        e = new BinaryOperation(TokenType::AND, e, nextUnary);
     }
     return e;
 }
@@ -129,10 +131,10 @@ Expression *FilterParser::parseUnary()
 {
     if (this->tokenizer_.hasNext() && this->tokenizer_.nextTokenIsUnaryOp())
     {
-        auto nextType = this->tokenizer_.nextTokenType();
         this->tokenizer_.next();
-        auto e = new UnaryOperation(nextType, this->parseCondition());
-        return e;
+        auto type = this->tokenizer_.tokenType();
+        auto nextCondition = this->parseCondition();
+        return new UnaryOperation(type, nextCondition);
     }
     else
     {
@@ -191,14 +193,16 @@ Expression *FilterParser::parseCondition()
         if (this->tokenizer_.nextTokenIsBinaryOp())
         {
             this->tokenizer_.next();
-            return new BinaryOperation(this->tokenizer_.tokenType(), value,
-                                       this->parseValue());
+            auto type = this->tokenizer_.tokenType();
+            auto nextValue = this->parseValue();
+            return new BinaryOperation(type, value, nextValue);
         }
         else if (this->tokenizer_.nextTokenIsMathOp())
         {
             this->tokenizer_.next();
-            value = new BinaryOperation(this->tokenizer_.tokenType(), value,
-                                        this->parseValue());
+            auto type = this->tokenizer_.tokenType();
+            auto nextValue = this->parseValue();
+            value = new BinaryOperation(type, value, nextValue);
         }
         else if (this->tokenizer_.nextTokenType() == TokenType::RP)
         {
