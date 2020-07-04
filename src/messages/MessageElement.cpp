@@ -474,28 +474,23 @@ IrcTextElement::IrcTextElement(const QString &fullText,
                 seg.bg = bg;
                 segments.emplace_back(seg);
                 lastPos = match.capturedStart() + match.capturedLength();
-                qDebug() << "Push segment with text" << seg.text;
             }
 
             if (!match.captured(1).isEmpty())
             {
                 fg = match.captured(1).toInt(nullptr);
-                qDebug() << "Set paint brush FG to" << fg;
             }
             else
             {
                 fg = -1;
-                qDebug() << "Set paint brush FG to" << fg;
             }
             if (!match.captured(3).isEmpty())
             {
                 bg = match.captured(3).toInt(nullptr);
-                qDebug() << "Set paint brush BG to" << bg;
             }
             else if (fg == -1)
             {
                 bg = -1;
-                qDebug() << "Set paint brush BG to" << bg;
             }
 
             lastPos = match.capturedStart() + match.capturedLength();
@@ -506,7 +501,6 @@ IrcTextElement::IrcTextElement(const QString &fullText,
         seg.fg = fg;
         seg.bg = bg;
         segments.emplace_back(seg);
-        qDebug() << "Push segment with text 2" << seg.text;
 
         QString n(text);
 
