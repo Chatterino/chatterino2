@@ -149,6 +149,7 @@ void SharedMessageBuilder::parseHighlights()
         return;
     }
 
+    // XXX: Non-common term in SharedMessageBuilder
     auto currentUser = app->accounts->twitch.getCurrent();
 
     QString currentUsername = currentUser->getUserName();
