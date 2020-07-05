@@ -388,24 +388,34 @@ void Window::onAccountSelected()
 {
     auto user = getApp()->accounts->twitch.getCurrent();
 
-    // update title
-    this->setWindowTitle(Version::instance().fullVersion());
+    // update title (also append username on Linux and MacOS)
+    QString windowTitle = Version::instance().fullVersion();
 
-    // update user
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     if (user->isAnon())
     {
-        if (this->userLabel_)
-        {
-            this->userLabel_->getLabel().setText("anonymous");
-        }
+        windowTitle += " - not logged in";
     }
     else
     {
-        if (this->userLabel_)
+        windowTitle += " - " + user->getUserName();
+    }
+#endif
+
+    this->setWindowTitle(windowTitle);
+
+    // update user
+    if (this->userLabel_)
+    {
+        if (user->isAnon())
+        {
+            this->userLabel_->getLabel().setText("anonymous");
+        }
+        else
         {
             this->userLabel_->getLabel().setText(user->getUserName());
         }
     }
-}  // namespace chatterino
+}
 
 }  // namespace chatterino
