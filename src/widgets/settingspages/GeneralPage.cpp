@@ -354,7 +354,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
 
     layout.addTitle("Messages");
-    layout.addCheckbox("Seperate with lines", s.separateMessages);
+    layout.addCheckbox("Separate with lines", s.separateMessages);
     layout.addCheckbox("Alternate background color", s.alternateMessages);
     // layout.addCheckbox("Mark last message you read");
     // layout.addDropdown("Last read message style", {"Default"});
