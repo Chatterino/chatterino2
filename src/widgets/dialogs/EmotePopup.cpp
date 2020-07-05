@@ -114,6 +114,7 @@ namespace {
 EmotePopup::EmotePopup(QWidget *parent)
     : BasePopup(BaseWindow::EnableCustomFrame, parent)
 {
+    this->setStayInScreenRect(true);
     this->moveTo(this, getApp()->windows->emotePopupPos(), false);
 
     auto layout = new QVBoxLayout(this);
