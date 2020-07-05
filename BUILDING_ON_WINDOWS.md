@@ -29,17 +29,19 @@ Note: This installation will take about 1.5 GB of disk space.
 
 ## OpenSSL
 ### For our websocket library, we need OpenSSL 1.1
-1. Download OpenSSL for windows, version `1.1.0j`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_0j.exe)**
+1. Download OpenSSL for windows, version `1.1.1g`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1g.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
 ### For Qt SSL, we need OpenSSL 1.0
-1. Download OpenSSL for windows, version `1.0.2r`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2r.exe)**
+1. Download OpenSSL for windows, version `1.0.2u`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2u.exe)**
 2. When prompted, install it to any arbitrary empty directory.
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 4. Copy the OpenSSL 1.0 files from its `\bin` folder to `C:\local\bin` (You will need to create the folder)
 5. Then copy the OpenSSL 1.1 files from its `\bin` folder to `C:\local\bin` (Overwrite any duplicate files)
 6. Add `C:\local\bin` to your path folder ([Follow guide here if you don't know how to do it]( https://www.computerhope.com/issues/ch000549.htm#windows8))
+
+**If the download links above do not work, try downloading similar 1.1.x & 1.0.x versions [here](https://slproweb.com/products/Win32OpenSSL.html). Note: Don't download the "light" installers, they do not have the required files.**
 
 Note: This installation will take about 200 MB of disk space.
 

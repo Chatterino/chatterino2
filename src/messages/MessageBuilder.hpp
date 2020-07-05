@@ -34,7 +34,6 @@ struct MessageParseArgs {
 };
 
 class MessageBuilder
-
 {
 public:
     MessageBuilder();
@@ -70,4 +69,5 @@ public:
 private:
     std::shared_ptr<Message> message_;
 };
+
 }  // namespace chatterino

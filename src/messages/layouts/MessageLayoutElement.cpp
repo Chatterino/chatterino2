@@ -395,4 +395,41 @@ int TextIconLayoutElement::getXFromIndex(int index)
     }
 }
 
+//
+// TEXT
+//
+
+MultiColorTextLayoutElement::MultiColorTextLayoutElement(
+    MessageElement &_creator, QString &_text, const QSize &_size,
+    std::vector<PajSegment> segments, FontStyle _style, float _scale)
+    : TextLayoutElement(_creator, _text, _size, QColor{}, _style, _scale)
+    , segments_(segments)
+{
+    this->setText(_text);
+}
+
+void MultiColorTextLayoutElement::paint(QPainter &painter)
+{
+    auto app = getApp();
+
+    painter.setPen(this->color_);
+
+    painter.setFont(app->fonts->getFont(this->style_, this->scale_));
+
+    int xOffset = 0;
+
+    auto metrics = app->fonts->getFontMetrics(this->style_, this->scale_);
+
+    for (const auto &segment : this->segments_)
+    {
+        // qDebug() << "Draw segment:" << segment.text;
+        painter.setPen(segment.color);
+        painter.drawText(QRectF(this->getRect().x() + xOffset,
+                                this->getRect().y(), 10000, 10000),
+                         segment.text,
+                         QTextOption(Qt::AlignLeft | Qt::AlignTop));
+        xOffset += metrics.width(segment.text);
+    }
+}
+
 }  // namespace chatterino
