@@ -5,11 +5,15 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "util/CombinePath.hpp"
 
 #include <QBuffer>
 #include <QHttpMultiPart>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QMimeDatabase>
 #include <QMutex>
+#include <QSaveFile>
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
@@ -38,37 +42,76 @@ namespace chatterino {
 static auto uploadMutex = QMutex();
 static std::queue<RawImageData> uploadQueue;
 
-//logging information on successful uploads to a csv file
-void logToCsv(const QString originalFilePath, const QString link,
-              ChannelPtr channel)
+// logging information on successful uploads to a json file
+void logToFile(const QString originalFilePath, QString imageLink,
+               QString deletionLink, ChannelPtr channel)
 {
-    const QString csvFileName = (getSettings()->logPath.getValue().isEmpty()
-                                     ? getPaths()->messageLogDirectory
-                                     : getSettings()->logPath) +
-                                "/ImageUploader.csv";
-    QFile csvFile(csvFileName);
-    bool csvExisted = csvFile.exists();
-    bool isCsvOkay = csvFile.open(QIODevice::Append | QIODevice::Text);
-    if (!isCsvOkay)
+    const QString logFileName =
+        combinePath((getSettings()->logPath.getValue().isEmpty()
+                         ? getPaths()->messageLogDirectory
+                         : getSettings()->logPath),
+                    "ImageUploader.json");
+
+    //reading existing logs
+    QFile logReadFile(logFileName);
+    bool isLogFileOkay =
+        logReadFile.open(QIODevice::ReadWrite | QIODevice::Text);
+    if (!isLogFileOkay)
     {
         channel->addMessage(makeSystemMessage(
-            QString("Failed to open csv file with links at ") + csvFileName));
+            QString("Failed to open log file with links at ") + logFileName));
         return;
     }
-    QTextStream out(&csvFile);
-    qDebug() << csvExisted;
-    if (!csvExisted)
+    auto logs = logReadFile.readAll();
+    if (logs.isEmpty())
     {
-        out << "localPath,imageLink,timestamp,channelName\n";
+        logs = QJsonDocument(QJsonArray()).toJson();
     }
-    out << originalFilePath + QString(",") << link + QString(",")
-        << QDateTime::currentSecsSinceEpoch()
-        << QString(",%1\n").arg(channel->getName());
-    // image path (can be empty)
-    // image link
-    // timestamp
+    logReadFile.close();
+
+    //writing new data to logs
+    QJsonObject newLogEntry;
+    newLogEntry["channelName"] = channel->getName();
+    newLogEntry["deletionLink"] =
+        deletionLink.isEmpty() ? QJsonValue(QJsonValue::Null) : deletionLink;
+    newLogEntry["imageLink"] = imageLink;
+    newLogEntry["localPath"] = originalFilePath.isEmpty()
+                                   ? QJsonValue(QJsonValue::Null)
+                                   : originalFilePath;
+    newLogEntry["timestamp"] = QDateTime::currentSecsSinceEpoch();
     // channel name
-    csvFile.close();
+    // deletion link (can be empty)
+    // image link
+    // local path to an image (can be empty)
+    // timestamp
+    QSaveFile logSaveFile(logFileName);
+    logSaveFile.open(QIODevice::WriteOnly | QIODevice::Text);
+    QJsonArray entries = QJsonDocument::fromJson(logs).array();
+    entries.push_back(newLogEntry);
+    logSaveFile.write(QJsonDocument(entries).toJson());
+    logSaveFile.commit();
+}
+
+// extracting link to either image or its deletion from response body
+QString getJSONValue(QJsonValue responseJson, QString jsonPattern)
+{
+    for (const QString &key : jsonPattern.split("."))
+    {
+        responseJson = responseJson[key];
+    }
+    return responseJson.toString();
+}
+
+QString getLinkFromResponse(NetworkResult response, QString pattern)
+{
+    QRegExp regExp("\\{(.+)\\}");
+    regExp.setMinimal(true);
+    while (regExp.indexIn(pattern) != -1)
+    {
+        pattern.replace(regExp.cap(0),
+                        getJSONValue(response.parseJson(), regExp.cap(1)));
+    }
+    return pattern;
 }
 
 void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
@@ -77,8 +120,15 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
     const static char *const boundary = "thisistheboudaryasd";
     const static QString contentType =
         QString("multipart/form-data; boundary=%1").arg(boundary);
-    static QUrl url(Env::get().imageUploaderUrl);
-    static QString formBody(Env::get().imageUploaderFormBody);
+    QUrl url(getSettings()->imageUploaderUrl.getValue().isEmpty()
+                 ? getSettings()->imageUploaderUrl.getDefaultValue()
+                 : getSettings()->imageUploaderUrl);
+    QString formField(
+        getSettings()->imageUploaderFormField.getValue().isEmpty()
+            ? getSettings()->imageUploaderFormField.getDefaultValue()
+            : getSettings()->imageUploaderFormField);
+    QStringList extraHeaders(
+        getSettings()->imageUploaderHeaders.getValue().split(";"));
     QString originalFilePath = imageData.filePath;
 
     QHttpMultiPart *payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);
@@ -90,32 +140,50 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                    QVariant(imageData.data.length()));
     part.setHeader(QNetworkRequest::ContentDispositionHeader,
                    QString("form-data; name=\"%1\"; filename=\"control_v.%2\"")
-                       .arg(formBody)
+                       .arg(formField)
                        .arg(imageData.format));
     payload->setBoundary(boundary);
     payload->append(part);
+
     NetworkRequest(url, NetworkRequestType::Post)
         .header("Content-Type", contentType)
-
+        .headerList(extraHeaders)
         .multiPart(payload)
         .onSuccess([&textEdit, channel,
                     originalFilePath](NetworkResult result) -> Outcome {
-            textEdit.insertPlainText(result.getData() + QString(" "));
+            QString link = getSettings()->imageUploaderLink.getValue().isEmpty()
+                               ? result.getData()
+                               : getLinkFromResponse(
+                                     result, getSettings()->imageUploaderLink);
+            QString deletionLink =
+                getSettings()->imageUploaderDeletionLink.getValue().isEmpty()
+                    ? ""
+                    : getLinkFromResponse(
+                          result, getSettings()->imageUploaderDeletionLink);
+            qDebug() << link << deletionLink;
+            textEdit.insertPlainText(link + " ");
             if (uploadQueue.empty())
             {
                 channel->addMessage(makeSystemMessage(
-                    QString("Your image has been uploaded to ") +
-                    result.getData()));
+                    QString("Your image has been uploaded to %1 %2.")
+                        .arg(link)
+                        .arg(deletionLink.isEmpty()
+                                 ? ""
+                                 : QString("(Deletion link: %1 )")
+                                       .arg(deletionLink))));
                 uploadMutex.unlock();
             }
             else
             {
                 channel->addMessage(makeSystemMessage(
-                    QString(
-                        "Your image has been uploaded to %1 . %2 left. Please "
-                        "wait until all of them are uploaded. About %3 "
-                        "seconds left.")
-                        .arg(result.getData() + QString(""))
+                    QString("Your image has been uploaded to %1 %2. %3 left. "
+                            "Please wait until all of them are uploaded. "
+                            "About %4 seconds left.")
+                        .arg(link)
+                        .arg(deletionLink.isEmpty()
+                                 ? ""
+                                 : QString("(Deletion link: %1 )")
+                                       .arg(deletionLink))
                         .arg(uploadQueue.size())
                         .arg(uploadQueue.size() * (UPLOAD_DELAY / 1000 + 1))));
                 // 2 seconds for the timer that's there not to spam the remote server
@@ -127,7 +195,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                 });
             }
 
-            logToCsv(originalFilePath, result.getData(), channel);
+            logToFile(originalFilePath, link, deletionLink, channel);
 
             return Success;
         })
@@ -161,7 +229,6 @@ void upload(const QMimeData *source, ChannelPtr channel,
         {
             QString localPath = path.toLocalFile();
             QMimeType mime = mimeDb.mimeTypeForUrl(path);
-            qDebug() << mime.name();
             if (mime.name().startsWith("image") && !mime.inherits("image/gif"))
             {
                 channel->addMessage(makeSystemMessage(
