@@ -995,8 +995,17 @@ void TwitchMessageBuilder::appendTwitchBadges()
             auto badgeInfoIt = badgeInfos.find(badge.key_);
             if (badgeInfoIt != badgeInfos.end())
             {
+                // badge.value_ is 4 chars long if user is subbed on higher tier
+                // (tier + amount of months with leading zero if less than 100)
+                // e.g. 3054 - tier 3 4,5-year sub. 2108 - tier 2 9-year sub
+                const auto &subTier =
+                    badge.value_.length() > 3 ? badge.value_.front() : '1';
                 const auto &subMonths = badgeInfoIt->second;
-                tooltip += QString(" (%0 months)").arg(subMonths);
+                tooltip +=
+                    QString(" (%1%2 months)")
+                        .arg(subTier != '1' ? QString("Tier %1, ").arg(subTier)
+                                            : "")
+                        .arg(subMonths);
             }
         }
 
