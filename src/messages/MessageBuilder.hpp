@@ -72,6 +72,9 @@ public:
     }
 
 private:
+    // Helper method that emplaces some text stylized as system text
+    // and then appends that text to the QString parameter "toUpdate".
+    // Returns the TextElement that was emplaced.
     TextElement *emplaceSystemTextAndUpdate(const QString &text,
                                             QString &toUpdate);
 

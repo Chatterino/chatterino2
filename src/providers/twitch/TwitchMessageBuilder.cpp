@@ -533,7 +533,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         }
     }
 
-    if (this->twitchChannel != nullptr && getSettings()->boldAllUsernames)
+    if (this->twitchChannel != nullptr && getSettings()->findAllUsernames)
     {
         auto chatters = this->twitchChannel->accessChatters();
         if (chatters->contains(string))
