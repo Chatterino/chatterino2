@@ -453,7 +453,8 @@ void MessageBuilder::addLink(const QString &origLink,
     LinkResolver::getLinkInfo(
         matchedLink, nullptr,
         [weakMessage = this->weakOf(), linkMELowercase, linkMEOriginal,
-         matchedLink](QString tooltipText, Link originalLink) {
+         matchedLink](QString tooltipText, Link originalLink,
+                      ImagePtr thumbnail) {
             auto shared = weakMessage.lock();
             if (!shared)
             {
@@ -470,6 +471,12 @@ void MessageBuilder::addLink(const QString &origLink,
                 linkMELowercase->setLink(originalLink)->updateLink();
                 linkMEOriginal->setLink(originalLink)->updateLink();
             }
+            linkMELowercase->setThumbnail(thumbnail);
+            linkMELowercase->setThumbnailType(
+                MessageElement::ThumbnailType::Link_Thumbnail);
+            linkMEOriginal->setThumbnail(thumbnail);
+            linkMEOriginal->setThumbnailType(
+                MessageElement::ThumbnailType::Link_Thumbnail);
         });
 }
 

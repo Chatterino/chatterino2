@@ -19,4 +19,9 @@ bool Link::isValid() const
     return this->type != None;
 }
 
+bool Link::isUrl() const
+{
+    return this->type == Url;
+}
+
 }  // namespace chatterino

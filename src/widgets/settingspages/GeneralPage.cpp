@@ -307,7 +307,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
     if (!BaseWindow::supportsCustomWindowFrame())
     {
-        layout.addCheckbox("Show preferences button (ctrl+p to show)",
+        layout.addCheckbox("Show preferences button (Ctrl+P to show)",
                            s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
@@ -354,7 +354,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
 
     layout.addTitle("Messages");
-    layout.addCheckbox("Seperate with lines", s.separateMessages);
+    layout.addCheckbox("Separate with lines", s.separateMessages);
     layout.addCheckbox("Alternate background color", s.alternateMessages);
     // layout.addCheckbox("Mark last message you read");
     // layout.addDropdown("Last read message style", {"Default"});
@@ -523,6 +523,56 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) { return fuzzyToFloat(args.value, 63.f); });
     layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
+    layout.addDropdown<int>(
+        "Show link thumbnail", {"Off", "Small", "Medium", "Large"},
+        s.thumbnailSize,
+        [](auto val) {
+            if (val == 0)
+                return QString("Off");
+            else if (val == 100)
+                return QString("Small");
+            else if (val == 200)
+                return QString("Medium");
+            else if (val == 300)
+                return QString("Large");
+            else
+                return QString::number(val);
+        },
+        [](auto args) {
+            if (args.value == "Small")
+                return 100;
+            else if (args.value == "Medium")
+                return 200;
+            else if (args.value == "Large")
+                return 300;
+
+            return fuzzyToInt(args.value, 0);
+        });
+    layout.addDropdown<int>(
+        "Show stream thumbnail", {"Off", "Small", "Medium", "Large"},
+        s.thumbnailSizeStream,
+        [](auto val) {
+            if (val == 0)
+                return QString("Off");
+            else if (val == 1)
+                return QString("Small");
+            else if (val == 2)
+                return QString("Medium");
+            else if (val == 3)
+                return QString("Large");
+            else
+                return QString::number(val);
+        },
+        [](auto args) {
+            if (args.value == "Small")
+                return 1;
+            else if (args.value == "Medium")
+                return 2;
+            else if (args.value == "Large")
+                return 3;
+
+            return fuzzyToInt(args.value, 0);
+        });
     layout.addCheckbox("Double click to open links and other elements in chat",
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
@@ -547,6 +597,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Hide viewercount and stream length while hovering the split",
         s.hideViewerCountAndDuration);
+    layout.addCheckbox(
+        "Ask for confirmation when uploading an image to i.nuuls.com",
+        s.askOnImageUpload);
 
     layout.addTitle("Cache");
     layout.addDescription(

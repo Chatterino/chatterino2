@@ -59,6 +59,11 @@ bool Channel::isEmpty() const
     return this->name_.isEmpty();
 }
 
+bool Channel::hasMessages() const
+{
+    return !this->messages_.empty();
+}
+
 LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 {
     return this->messages_.getSnapshot();

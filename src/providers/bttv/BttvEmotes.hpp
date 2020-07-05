@@ -4,6 +4,7 @@
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 
 namespace chatterino {
 
@@ -24,8 +25,10 @@ public:
     std::shared_ptr<const EmoteMap> emotes() const;
     boost::optional<EmotePtr> emote(const EmoteName &name) const;
     void loadEmotes();
-    static void loadChannel(const QString &channelId,
-                            std::function<void(EmoteMap &&)> callback);
+    static void loadChannel(std::weak_ptr<Channel> channel,
+                            const QString &channelId, const QString &userName,
+                            std::function<void(EmoteMap &&)> callback,
+                            bool manualRefresh);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;

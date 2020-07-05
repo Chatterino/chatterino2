@@ -3,6 +3,7 @@
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "messages/Image.hpp"
 #include "messages/Link.hpp"
 #include "singletons/Settings.hpp"
 
@@ -12,11 +13,11 @@ namespace chatterino {
 
 void LinkResolver::getLinkInfo(
     const QString url, QObject *caller,
-    std::function<void(QString, Link)> successCallback)
+    std::function<void(QString, Link, ImagePtr)> successCallback)
 {
     if (!getSettings()->linkInfoTooltip)
     {
-        successCallback("No link info loaded", Link(Link::Url, url));
+        successCallback("No link info loaded", Link(Link::Url, url), nullptr);
         return;
     }
     // Uncomment to test crashes
@@ -25,30 +26,35 @@ void LinkResolver::getLinkInfo(
                        QUrl::toPercentEncoding(url, "", "/:"))))
         .caller(caller)
         .timeout(30000)
-        .onSuccess([successCallback, url](auto result) mutable -> Outcome {
-            auto root = result.parseJson();
-            auto statusCode = root.value("status").toInt();
-            QString response = QString();
-            QString linkString = url;
-            if (statusCode == 200)
-            {
-                response = root.value("tooltip").toString();
-                if (getSettings()->unshortLinks)
+        .onSuccess(
+            [successCallback, url](NetworkResult result) mutable -> Outcome {
+                auto root = result.parseJson();
+                auto statusCode = root.value("status").toInt();
+                QString response = QString();
+                QString linkString = url;
+                ImagePtr thumbnail = nullptr;
+                if (statusCode == 200)
                 {
-                    linkString = root.value("link").toString();
+                    response = root.value("tooltip").toString();
+                    thumbnail =
+                        Image::fromUrl({root.value("thumbnail").toString()});
+                    if (getSettings()->unshortLinks)
+                    {
+                        linkString = root.value("link").toString();
+                    }
                 }
-            }
-            else
-            {
-                response = root.value("message").toString();
-            }
-            successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
-                            Link(Link::Url, linkString));
+                else
+                {
+                    response = root.value("message").toString();
+                }
+                successCallback(QUrl::fromPercentEncoding(response.toUtf8()),
+                                Link(Link::Url, linkString), thumbnail);
 
-            return Success;
-        })
+                return Success;
+            })
         .onError([successCallback, url](auto /*result*/) {
-            successCallback("No link info found", Link(Link::Url, url));
+            successCallback("No link info found", Link(Link::Url, url),
+                            nullptr);
         })
         .execute();
     // });

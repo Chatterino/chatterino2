@@ -28,6 +28,7 @@ public:
     QString value;
 
     bool isValid() const;
+    bool isUrl() const;
 };
 
 }  // namespace chatterino

@@ -90,7 +90,7 @@ protected:
 
 private:
     void init();
-    void moveIntoDesktopRect(QWidget *parent);
+    void moveIntoDesktopRect(QWidget *parent, QPoint point);
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
     void onFocusLost();

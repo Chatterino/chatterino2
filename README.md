@@ -32,6 +32,8 @@ git submodule update --init --recursive
 
 [Building on Mac](../master/BUILDING_ON_MAC.md)
 
+[Building on FreeBSD](../master/BUILDING_ON_FREEBSD.md)
+
 ## Code style
 The code is formatted using clang format in Qt Creator. [.clang-format](src/.clang-format) contains the style file for clang format.
 

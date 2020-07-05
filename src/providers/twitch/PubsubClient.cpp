@@ -347,29 +347,30 @@ PubSub::PubSub()
     this->moderationActionHandlers["mod"] = [this](const auto &data,
                                                    const auto &roomID) {
         ModerationStateAction action(data, roomID);
-
-        getTargetUser(data, action.target);
-
-        try
-        {
-            const auto &args = getArgs(data);
-
-            if (args.Size() < 1)
-            {
-                return;
-            }
-
-            if (!rj::getSafe(args[0], action.target.name))
-            {
-                return;
-            }
-        }
-        catch (const std::runtime_error &ex)
-        {
-            qDebug() << "Error parsing moderation action:" << ex.what();
-        }
-
         action.modded = true;
+
+        QString innerType;
+        if (rj::getSafe(data, "type", innerType) &&
+            innerType == "chat_login_moderation")
+        {
+            // Don't display the old message type
+            return;
+        }
+
+        if (!getTargetUser(data, action.target))
+        {
+            qDebug() << "Error parsing moderation action mod: Unable to get "
+                        "target_user_id";
+            return;
+        }
+
+        // Load target name from message.data.target_user_login
+        if (!getTargetUserName(data, action.target))
+        {
+            qDebug() << "Error parsing moderation action mod: Unable to get "
+                        "target_user_name";
+            return;
+        }
 
         this->signals_.moderation.moderationStateChanged.invoke(action);
     };

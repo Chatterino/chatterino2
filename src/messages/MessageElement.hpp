@@ -122,14 +122,23 @@ public:
         Update_Images = 4,
         Update_All = Update_Text | Update_Emotes | Update_Images
     };
+    enum ThumbnailType : char {
+        Link_Thumbnail = 1,
+    };
 
     virtual ~MessageElement();
 
     MessageElement *setLink(const Link &link);
     MessageElement *setText(const QString &text);
     MessageElement *setTooltip(const QString &tooltip);
+    MessageElement *setThumbnailType(const ThumbnailType type);
+    MessageElement *setThumbnail(const ImagePtr &thumbnail);
+
     MessageElement *setTrailingSpace(bool value);
     const QString &getTooltip() const;
+    const ImagePtr &getThumbnail() const;
+    const ThumbnailType &getThumbnailType() const;
+
     const Link &getLink() const;
     bool hasTrailingSpace() const;
     MessageElementFlags getFlags() const;
@@ -148,6 +157,8 @@ private:
     QString text_;
     Link link_;
     QString tooltip_;
+    ImagePtr thumbnail_;
+    ThumbnailType thumbnailType_;
     MessageElementFlags flags_;
 };
 
@@ -278,6 +289,36 @@ public:
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
+};
+
+// contains a full message string that's split into words on space and parses irc colors that are then put into segments
+// these segments are later passed to "MultiColorTextLayoutElement" elements to be rendered :)
+class IrcTextElement : public MessageElement
+{
+public:
+    IrcTextElement(const QString &text, MessageElementFlags flags,
+                   FontStyle style = FontStyle::ChatMedium);
+    ~IrcTextElement() override = default;
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+private:
+    FontStyle style_;
+
+    struct Segment {
+        QString text;
+        int fg = -1;
+        int bg = -1;
+    };
+
+    struct Word {
+        QString text;
+        int width = -1;
+        std::vector<Segment> segments;
+    };
+
+    std::vector<Word> words_;
 };
 
 }  // namespace chatterino

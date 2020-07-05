@@ -8,6 +8,7 @@
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 
 namespace chatterino {
@@ -64,11 +65,12 @@ namespace {
 
         return {Success, std::move(emotes)};
     }
-    std::pair<Outcome, EmoteMap> parseChannelEmotes(const QJsonObject &jsonRoot)
+    std::pair<Outcome, EmoteMap> parseChannelEmotes(const QJsonObject &jsonRoot,
+                                                    const QString &userName)
     {
         auto emotes = EmoteMap();
 
-        auto innerParse = [&jsonRoot, &emotes](const char *key) {
+        auto innerParse = [&jsonRoot, &emotes, &userName](const char *key) {
             auto jsonEmotes = jsonRoot.value(key).toArray();
             for (auto jsonEmote_ : jsonEmotes)
             {
@@ -76,6 +78,10 @@ namespace {
 
                 auto id = EmoteId{jsonEmote.value("id").toString()};
                 auto name = EmoteName{jsonEmote.value("code").toString()};
+                auto author = EmoteAuthor{jsonEmote.value("user")
+                                              .toObject()
+                                              .value("name")
+                                              .toString()};
                 // emoteObject.value("imageType").toString();
 
                 auto emote = Emote({
@@ -85,7 +91,10 @@ namespace {
                         Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
                         Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
                     },
-                    Tooltip{name.string + "<br />Channel BetterTTV Emote"},
+                    Tooltip{name.string + "<br>Channel BetterTTV Emote" +
+                            ((author.string.isEmpty())
+                                 ? "<br>By: " + userName.toUtf8()
+                                 : "<br>By: " + author.string)},
                     Url{emoteLinkFormat.arg(id.string)},
                 });
 
@@ -138,16 +147,50 @@ void BttvEmotes::loadEmotes()
         .execute();
 }
 
-void BttvEmotes::loadChannel(const QString &channelId,
-                             std::function<void(EmoteMap &&)> callback)
+void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
+                             const QString &channelId, const QString &userName,
+                             std::function<void(EmoteMap &&)> callback,
+                             bool manualRefresh)
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(3000)
-        .onSuccess([callback = std::move(callback)](auto result) -> Outcome {
-            auto pair = parseChannelEmotes(result.parseJson());
+        .onSuccess([callback = std::move(callback), channel, &userName,
+                    manualRefresh](auto result) -> Outcome {
+            auto pair = parseChannelEmotes(result.parseJson(), userName);
             if (pair.first)
                 callback(std::move(pair.second));
+            if (auto shared = channel.lock(); manualRefresh)
+                shared->addMessage(
+                    makeSystemMessage("BetterTTV channel emotes reloaded."));
             return pair.first;
+        })
+        .onError([channelId, channel, manualRefresh](auto result) {
+            auto shared = channel.lock();
+            if (!shared)
+                return;
+            if (result.status() == 203)
+            {
+                // User does not have any BTTV emotes
+                if (manualRefresh)
+                    shared->addMessage(makeSystemMessage(
+                        "This channel has no BetterTTV channel emotes."));
+            }
+            else if (result.status() == NetworkResult::timedoutStatus)
+            {
+                // TODO: Auto retry in case of a timeout, with a delay
+                qDebug() << "Fetching BTTV emotes for channel" << channelId
+                         << "failed due to timeout";
+                shared->addMessage(makeSystemMessage(
+                    "Failed to fetch BetterTTV channel emotes. (timed out)"));
+            }
+            else
+            {
+                qDebug() << "Error fetching BTTV emotes for channel"
+                         << channelId << ", error" << result.status();
+                shared->addMessage(
+                    makeSystemMessage("Failed to fetch BetterTTV channel "
+                                      "emotes. (unknown error)"));
+            }
         })
         .execute();
 }

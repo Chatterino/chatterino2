@@ -34,6 +34,7 @@
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/Twitch.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -108,6 +109,7 @@ namespace {
 
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
+    , sourceChannel_(nullptr)
     , scrollBar_(new Scrollbar(this))
 {
     this->setMouseTracking(true);
@@ -620,6 +622,21 @@ void ChannelView::setChannel(ChannelPtr channel)
     }
 }
 
+ChannelPtr ChannelView::sourceChannel() const
+{
+    return this->sourceChannel_;
+}
+
+void ChannelView::setSourceChannel(ChannelPtr sourceChannel)
+{
+    this->sourceChannel_ = sourceChannel;
+}
+
+bool ChannelView::hasSourceChannel() const
+{
+    return this->sourceChannel_ != nullptr;
+}
+
 void ChannelView::messageAppended(MessagePtr &message,
                                   boost::optional<MessageFlags> overridingFlags)
 {
@@ -856,10 +873,10 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     // draw paused sign
     if (this->paused())
     {
-        auto a = this->scale() * 16;
-        auto brush = QBrush(QColor(127, 127, 127, 63));
-        painter.fillRect(QRectF(this->width() - a, a / 4, a / 4, a), brush);
-        painter.fillRect(QRectF(this->width() - a / 2, a / 4, a / 4, a), brush);
+        auto a = this->scale() * 20;
+        auto brush = QBrush(QColor(127, 127, 127, 255));
+        painter.fillRect(QRectF(5, a / 4, a / 4, a), brush);
+        painter.fillRect(QRectF(15, a / 4, a / 4, a), brush);
     }
 }
 
@@ -1259,6 +1276,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     else
     {
         auto &tooltipPreviewImage = TooltipPreviewImage::instance();
+        tooltipPreviewImage.setImageScale(0, 0);
         auto emoteElement = dynamic_cast<const EmoteElement *>(
             &hoverLayoutElement->getCreator());
         auto badgeElement = dynamic_cast<const BadgeElement *>(
@@ -1288,7 +1306,22 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         }
         else
         {
-            tooltipPreviewImage.setImage(nullptr);
+            auto element = &hoverLayoutElement->getCreator();
+            auto thumbnailSize = getSettings()->thumbnailSize;
+            if (thumbnailSize == 0)
+            {
+                tooltipPreviewImage.setImage(nullptr);
+            }
+            else
+            {
+                tooltipPreviewImage.setImage(element->getThumbnail());
+                if (element->getThumbnailType() ==
+                    MessageElement::ThumbnailType::Link_Thumbnail)
+                {
+                    tooltipPreviewImage.setImageScale(thumbnailSize,
+                                                      thumbnailSize);
+                }
+            }
         }
 
         tooltipWidget->moveTo(this, event->globalPos());
@@ -1374,10 +1407,26 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
         break;
 
         case Qt::MiddleButton: {
-            if (this->isScrolling_)
-                this->disableScrolling();
+            const MessageLayoutElement *hoverLayoutElement =
+                layout->getElementAt(relativePos);
+
+            if (hoverLayoutElement != nullptr &&
+                hoverLayoutElement->getLink().isUrl() &&
+                this->isScrolling_ == false)
+            {
+                break;
+            }
             else
-                this->enableScrolling(event->screenPos());
+            {
+                if (this->isScrolling_)
+                    this->disableScrolling();
+                else if (hoverLayoutElement != nullptr &&
+                         hoverLayoutElement->getFlags().has(
+                             MessageElementFlag::Username))
+                    break;
+                else
+                    this->enableScrolling(event->screenPos());
+            }
         }
         break;
 
@@ -1389,6 +1438,16 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
 
 void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 {
+    // find message
+    this->queueLayout();
+
+    std::shared_ptr<MessageLayout> layout;
+    QPoint relativePos;
+    int messageIndex;
+
+    bool foundElement =
+        tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
+
     // check if mouse was pressed
     if (event->button() == Qt::LeftButton)
     {
@@ -1439,25 +1498,45 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
     else if (event->button() == Qt::MiddleButton)
     {
-        if (event->screenPos() == this->lastMiddlePressPosition_)
-            this->enableScrolling(event->screenPos());
-        else
-            this->disableScrolling();
+        if (this->isScrolling_)
+        {
+            if (event->screenPos() == this->lastMiddlePressPosition_)
+                this->enableScrolling(event->screenPos());
+            else
+                this->disableScrolling();
+
+            return;
+        }
+        else if (foundElement)
+        {
+            const MessageLayoutElement *hoverLayoutElement =
+                layout->getElementAt(relativePos);
+
+            if (hoverLayoutElement == nullptr)
+            {
+                return;
+            }
+            else if (hoverLayoutElement->getFlags().has(
+                         MessageElementFlag::Username))
+            {
+                openTwitchUsercard(this->channel_->getName(),
+                                   hoverLayoutElement->getLink().value);
+                return;
+            }
+            else if (hoverLayoutElement->getLink().isUrl() == false)
+            {
+                return;
+            }
+        }
     }
     else
     {
         // not left or right button
         return;
     }
-    // find message
-    this->queueLayout();
-
-    std::shared_ptr<MessageLayout> layout;
-    QPoint relativePos;
-    int messageIndex;
 
     // no message found
-    if (!tryGetMessageAt(event->pos(), layout, relativePos, messageIndex))
+    if (!foundElement)
     {
         // No message at clicked position
         return;
@@ -1491,12 +1570,12 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // handle the click
-    this->handleMouseClick(event, hoverLayoutElement, layout.get());
+    this->handleMouseClick(event, hoverLayoutElement, layout);
 }
 
 void ChannelView::handleMouseClick(QMouseEvent *event,
                                    const MessageLayoutElement *hoveredElement,
-                                   MessageLayout *layout)
+                                   MessageLayoutPtr layout)
 {
     switch (event->button())
     {
@@ -1514,7 +1593,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
-                this->handleLinkClick(event, link, layout);
+                this->handleLinkClick(event, link, layout.get());
             }
 
             // Invoke to signal from EmotePopup.
@@ -1548,18 +1627,28 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             }
         }
         break;
+        case Qt::MiddleButton: {
+            auto &link = hoveredElement->getLink();
+            if (!getSettings()->linksDoubleClickOnly)
+            {
+                this->handleLinkClick(event, link, layout.get());
+            }
+        }
+        break;
         default:;
     }
 }
 
 void ChannelView::addContextMenuItems(
-    const MessageLayoutElement *hoveredElement, MessageLayout *layout)
+    const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout)
 {
     const auto &creator = hoveredElement->getCreator();
     auto creatorFlags = creator.getFlags();
 
-    static QMenu *menu = new QMenu;
-    menu->clear();
+    auto menu = new QMenu;
+    connect(menu, &QMenu::aboutToHide, [menu] {
+        menu->deleteLater();  //
+    });
 
     // Emote actions
     if (creatorFlags.hasAny(
@@ -1720,8 +1809,8 @@ void ChannelView::hideEvent(QHideEvent *)
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
     auto *userPopup = new UserInfoPopup;
-    userPopup->setData(userName, this->channel_);
-    userPopup->setActionOnFocusLoss(BaseWindow::Delete);
+    userPopup->setData(userName, this->hasSourceChannel() ? this->sourceChannel_
+                                                          : this->channel_);
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     userPopup->move(QCursor::pos() - offset);
     userPopup->show();
@@ -1730,7 +1819,8 @@ void ChannelView::showUserInfoPopup(const QString &userName)
 void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                                   MessageLayout *layout)
 {
-    if (event->button() != Qt::LeftButton)
+    if (event->button() != Qt::LeftButton &&
+        event->button() != Qt::MiddleButton)
     {
         return;
     }

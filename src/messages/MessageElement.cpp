@@ -1,6 +1,7 @@
 #include "messages/MessageElement.hpp"
 
 #include "Application.hpp"
+#include "common/IrcColors.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
@@ -10,6 +11,14 @@
 #include "util/DebugCount.hpp"
 
 namespace chatterino {
+
+namespace {
+
+    QRegularExpression IRC_COLOR_PARSE_REGEX(
+        "\u0003(\\d{1,2})?(,(\\d{1,2}))?",
+        QRegularExpression::UseUnicodePropertiesOption);
+
+}  // namespace
 
 MessageElement::MessageElement(MessageElementFlags flags)
     : flags_(flags)
@@ -40,6 +49,18 @@ MessageElement *MessageElement::setTooltip(const QString &tooltip)
     return this;
 }
 
+MessageElement *MessageElement::setThumbnail(const ImagePtr &thumbnail)
+{
+    this->thumbnail_ = thumbnail;
+    return this;
+}
+
+MessageElement *MessageElement::setThumbnailType(const ThumbnailType type)
+{
+    this->thumbnailType_ = type;
+    return this;
+}
+
 MessageElement *MessageElement::setTrailingSpace(bool value)
 {
     this->trailingSpace = value;
@@ -49,6 +70,16 @@ MessageElement *MessageElement::setTrailingSpace(bool value)
 const QString &MessageElement::getTooltip() const
 {
     return this->tooltip_;
+}
+
+const ImagePtr &MessageElement::getThumbnail() const
+{
+    return this->thumbnail_;
+}
+
+const MessageElement::ThumbnailType &MessageElement::getThumbnailType() const
+{
+    return this->thumbnailType_;
 }
 
 const Link &MessageElement::getLink() const
@@ -402,6 +433,202 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
                                                container.getScale(), size))
                         ->setLink(Link(Link::UserAction, action.getAction())));
             }
+        }
+    }
+}
+
+// TEXT
+// IrcTextElement gets its color from the color code in the message, and can change from character to character.
+// This differs from the TextElement
+IrcTextElement::IrcTextElement(const QString &fullText,
+                               MessageElementFlags flags, FontStyle style)
+    : MessageElement(flags)
+    , style_(style)
+{
+    assert(IRC_COLOR_PARSE_REGEX.isValid());
+
+    // Default pen colors. -1 = default theme colors
+    int fg = -1, bg = -1;
+
+    // Split up the message in words (space separated)
+    // Each word contains one or more colored segments.
+    // The color of that segment is "global", as in it can be decided by the word before it.
+    for (const auto &text : fullText.split(' '))
+    {
+        std::vector<Segment> segments;
+
+        int pos = 0;
+        int lastPos = 0;
+
+        auto i = IRC_COLOR_PARSE_REGEX.globalMatch(text);
+
+        while (i.hasNext())
+        {
+            auto match = i.next();
+
+            if (lastPos != match.capturedStart() && match.capturedStart() != 0)
+            {
+                auto seg = Segment{};
+                seg.text = text.mid(lastPos, match.capturedStart() - lastPos);
+                seg.fg = fg;
+                seg.bg = bg;
+                segments.emplace_back(seg);
+                lastPos = match.capturedStart() + match.capturedLength();
+            }
+
+            if (!match.captured(1).isEmpty())
+            {
+                fg = match.captured(1).toInt(nullptr);
+            }
+            else
+            {
+                fg = -1;
+            }
+            if (!match.captured(3).isEmpty())
+            {
+                bg = match.captured(3).toInt(nullptr);
+            }
+            else if (fg == -1)
+            {
+                bg = -1;
+            }
+
+            lastPos = match.capturedStart() + match.capturedLength();
+        }
+
+        auto seg = Segment{};
+        seg.text = text.mid(lastPos);
+        seg.fg = fg;
+        seg.bg = bg;
+        segments.emplace_back(seg);
+
+        QString n(text);
+
+        n.replace(IRC_COLOR_PARSE_REGEX, "");
+
+        Word w{
+            n,
+            -1,
+            segments,
+        };
+        this->words_.emplace_back(w);
+    }
+}
+
+void IrcTextElement::addToContainer(MessageLayoutContainer &container,
+                                    MessageElementFlags flags)
+{
+    auto app = getApp();
+
+    MessageColor defaultColorType = MessageColor::Text;
+    auto defaultColor = defaultColorType.getColor(*app->themes);
+    if (flags.hasAny(this->getFlags()))
+    {
+        QFontMetrics metrics =
+            app->fonts->getFontMetrics(this->style_, container.getScale());
+
+        for (auto &word : this->words_)
+        {
+            auto getTextLayoutElement = [&](QString text,
+                                            std::vector<Segment> segments,
+                                            int width, bool hasTrailingSpace) {
+                std::vector<PajSegment> xd{};
+
+                for (const auto &segment : segments)
+                {
+                    QColor color = defaultColor;
+                    if (segment.fg >= 0 && segment.fg <= 98)
+                    {
+                        color = IRC_COLORS[segment.fg];
+                    }
+                    app->themes->normalizeColor(color);
+                    xd.emplace_back(PajSegment{segment.text, color});
+                }
+
+                auto e = (new MultiColorTextLayoutElement(
+                              *this, text, QSize(width, metrics.height()), xd,
+                              this->style_, container.getScale()))
+                             ->setLink(this->getLink());
+                e->setTrailingSpace(true);
+                e->setText(text);
+
+                // If URL link was changed,
+                // Should update it in MessageLayoutElement too!
+                if (this->getLink().type == Link::Url)
+                {
+                    static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
+                }
+                return e;
+            };
+
+            // fourtf: add again
+            //            if (word.width == -1) {
+            word.width = metrics.width(word.text);
+            //            }
+
+            // see if the text fits in the current line
+            if (container.fitsInLine(word.width))
+            {
+                container.addElementNoLineBreak(
+                    getTextLayoutElement(word.text, word.segments, word.width,
+                                         this->hasTrailingSpace()));
+                continue;
+            }
+
+            // see if the text fits in the next line
+            if (!container.atStartOfLine())
+            {
+                container.breakLine();
+
+                if (container.fitsInLine(word.width))
+                {
+                    container.addElementNoLineBreak(getTextLayoutElement(
+                        word.text, word.segments, word.width,
+                        this->hasTrailingSpace()));
+                    continue;
+                }
+            }
+
+            // we done goofed, we need to wrap the text
+            QString text = word.text;
+            int textLength = text.length();
+            int wordStart = 0;
+            int width = 0;
+
+            // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
+
+            // XXX(pajlada): NOT TESTED
+            for (int i = 0; i < textLength; i++)  //
+            {
+                auto isSurrogate = text.size() > i + 1 &&
+                                   QChar::isHighSurrogate(text[i].unicode());
+
+                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
+                                             : metrics.width(text[i]);
+
+                if (!container.fitsInLine(width + charWidth))  //
+                {
+                    container.addElementNoLineBreak(getTextLayoutElement(
+                        text.mid(wordStart, i - wordStart), {}, width, false));
+                    container.breakLine();
+
+                    wordStart = i;
+                    width = charWidth;
+
+                    if (isSurrogate)
+                        i++;
+                    continue;
+                }
+
+                width += charWidth;
+
+                if (isSurrogate)
+                    i++;
+            }
+
+            container.addElement(getTextLayoutElement(
+                text.mid(wordStart), {}, width, this->hasTrailingSpace()));
+            container.breakLine();
         }
     }
 }
