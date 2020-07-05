@@ -145,9 +145,9 @@ private:
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoverLayoutElement,
-                          MessageLayout *layout);
+                          MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
-                             MessageLayout *layout);
+                             MessageLayoutPtr layout);
     int getLayoutWidth() const;
     void updatePauses();
     void unpaused();

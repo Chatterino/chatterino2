@@ -9,5 +9,6 @@
 - Bugfix: Fix preview on hover not working when Animated emotes options was disabled (#1546)
 - Bugfix: FFZ custom mod badges no longer scale with the emote scale options (#1602)
 - Bugfix: MacOS updater looked for non-existing fields, causing it to always fail the update check (#1642)
+- Bugfix: Fixed message menu crashing if the message you right-clicked goes out of scope before you select an action (#1783) (#1787)
 - Settings open faster
 - Dev: Fully remove Twitch Chatroom support
