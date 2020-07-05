@@ -1570,12 +1570,12 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // handle the click
-    this->handleMouseClick(event, hoverLayoutElement, layout.get());
+    this->handleMouseClick(event, hoverLayoutElement, layout);
 }
 
 void ChannelView::handleMouseClick(QMouseEvent *event,
                                    const MessageLayoutElement *hoveredElement,
-                                   MessageLayout *layout)
+                                   MessageLayoutPtr layout)
 {
     switch (event->button())
     {
@@ -1593,7 +1593,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
-                this->handleLinkClick(event, link, layout);
+                this->handleLinkClick(event, link, layout.get());
             }
 
             // Invoke to signal from EmotePopup.
@@ -1631,7 +1631,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
-                this->handleLinkClick(event, link, layout);
+                this->handleLinkClick(event, link, layout.get());
             }
         }
         break;
@@ -1640,13 +1640,15 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 }
 
 void ChannelView::addContextMenuItems(
-    const MessageLayoutElement *hoveredElement, MessageLayout *layout)
+    const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout)
 {
     const auto &creator = hoveredElement->getCreator();
     auto creatorFlags = creator.getFlags();
 
-    static QMenu *menu = new QMenu;
-    menu->clear();
+    auto menu = new QMenu;
+    connect(menu, &QMenu::aboutToHide, [menu] {
+        menu->deleteLater();  //
+    });
 
     // Emote actions
     if (creatorFlags.hasAny(
