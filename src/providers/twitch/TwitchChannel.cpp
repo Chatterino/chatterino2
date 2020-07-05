@@ -85,7 +85,8 @@ TwitchChannel::TwitchChannel(const QString &name,
     , ChannelChatters(*static_cast<Channel *>(this))
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
-    , popoutPlayerUrl_("https://player.twitch.tv/?channel=" + name)
+    , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
+                       name)
     , globalTwitchBadges_(globalTwitchBadges)
     , globalBttv_(bttv)
     , globalFfz_(ffz)
@@ -158,7 +159,7 @@ bool TwitchChannel::canSendMessage() const
 void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
 {
     BttvEmotes::loadChannel(
-        weakOf<Channel>(this), this->roomId(),
+        weakOf<Channel>(this), this->roomId(), this->getName(),
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
                 this->bttvEmotes_.set(

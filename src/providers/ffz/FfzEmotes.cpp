@@ -128,11 +128,17 @@ namespace {
                 auto id =
                     EmoteId{QString::number(jsonEmote.value("id").toInt())};
                 auto name = EmoteName{jsonEmote.value("name").toString()};
+                auto author = EmoteAuthor{jsonEmote.value("owner")
+                                              .toObject()
+                                              .value("display_name")
+                                              .toString()};
                 auto urls = jsonEmote.value("urls").toObject();
 
                 Emote emote;
                 fillInEmoteData(urls, name,
-                                name.string + "<br/>Channel FFZ Emote", emote);
+                                name.string + "<br/>Channel FFZ Emote" +
+                                    "<br />By: " + author.string,
+                                emote);
                 emote.homePage =
                     Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
                             .arg(id.string)

@@ -38,7 +38,13 @@ int main(int argc, char **argv)
     }
     else if (getArgs().printVersion)
     {
-        qInfo().noquote() << Version::instance().fullVersion();
+        auto version = Version::instance();
+        qInfo().noquote() << QString("%1 (commit %2%3)")
+                                 .arg(version.fullVersion())
+                                 .arg(version.commitHash())
+                                 .arg(Modes::instance().isNightly
+                                          ? ", " + version.dateOfBuild()
+                                          : "");
     }
     else
     {
