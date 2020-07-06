@@ -164,6 +164,7 @@ public:
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};
     IntSetting thumbnailSize = {"/appearance/thumbnailSize", 0};
+    IntSetting thumbnailSizeStream = {"/appearance/thumbnailSizeStream", 2};
     BoolSetting unshortLinks = {"/links/unshortLinks", false};
     BoolSetting lowercaseDomains = {"/links/linkLowercase", true};
 
@@ -273,6 +274,17 @@ public:
 
     // Custom URI Scheme
     QStringSetting customURIScheme = {"/external/urischeme"};
+
+    // Image Uploader
+    QStringSetting imageUploaderUrl = {"/external/imageUploader/url",
+                                       "https://i.nuuls.com/upload"};
+    QStringSetting imageUploaderFormField = {
+        "/external/imageUploader/formField", "attachment"};
+    QStringSetting imageUploaderHeaders = {"/external/imageUploader/headers",
+                                           ""};
+    QStringSetting imageUploaderLink = {"/external/imageUploader/link", ""};
+    QStringSetting imageUploaderDeletionLink = {
+        "/external/imageUploader/deletionLink", ""};
 
     /// Misc
     BoolSetting betaUpdates = {"/misc/beta", false};

@@ -65,11 +65,12 @@ namespace {
 
         return {Success, std::move(emotes)};
     }
-    std::pair<Outcome, EmoteMap> parseChannelEmotes(const QJsonObject &jsonRoot)
+    std::pair<Outcome, EmoteMap> parseChannelEmotes(const QJsonObject &jsonRoot,
+                                                    const QString &userName)
     {
         auto emotes = EmoteMap();
 
-        auto innerParse = [&jsonRoot, &emotes](const char *key) {
+        auto innerParse = [&jsonRoot, &emotes, &userName](const char *key) {
             auto jsonEmotes = jsonRoot.value(key).toArray();
             for (auto jsonEmote_ : jsonEmotes)
             {
@@ -77,6 +78,10 @@ namespace {
 
                 auto id = EmoteId{jsonEmote.value("id").toString()};
                 auto name = EmoteName{jsonEmote.value("code").toString()};
+                auto author = EmoteAuthor{jsonEmote.value("user")
+                                              .toObject()
+                                              .value("name")
+                                              .toString()};
                 // emoteObject.value("imageType").toString();
 
                 auto emote = Emote({
@@ -86,7 +91,10 @@ namespace {
                         Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
                         Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
                     },
-                    Tooltip{name.string + "<br />Channel BetterTTV Emote"},
+                    Tooltip{name.string + "<br>Channel BetterTTV Emote" +
+                            ((author.string.isEmpty())
+                                 ? "<br>By: " + userName.toUtf8()
+                                 : "<br>By: " + author.string)},
                     Url{emoteLinkFormat.arg(id.string)},
                 });
 
@@ -140,15 +148,15 @@ void BttvEmotes::loadEmotes()
 }
 
 void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
-                             const QString &channelId,
+                             const QString &channelId, const QString &userName,
                              std::function<void(EmoteMap &&)> callback,
                              bool manualRefresh)
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(3000)
-        .onSuccess([callback = std::move(callback), channel,
+        .onSuccess([callback = std::move(callback), channel, &userName,
                     manualRefresh](auto result) -> Outcome {
-            auto pair = parseChannelEmotes(result.parseJson());
+            auto pair = parseChannelEmotes(result.parseJson(), userName);
             if (pair.first)
                 callback(std::move(pair.second));
             if (auto shared = channel.lock(); manualRefresh)

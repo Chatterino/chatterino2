@@ -75,6 +75,8 @@ public:
     void deleteMessage(QString messageID);
     void clearMessages();
 
+    bool hasMessages() const;
+
     QStringList modList;
 
     // CHANNEL INFO

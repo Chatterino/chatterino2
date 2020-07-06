@@ -8,6 +8,7 @@ namespace chatterino {
 struct RawImageData {
     QByteArray data;
     QString format;
+    QString filePath;
 };
 
 void upload(QByteArray imageData, ChannelPtr channel,

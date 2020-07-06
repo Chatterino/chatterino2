@@ -109,6 +109,7 @@ namespace {
 
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
+    , sourceChannel_(nullptr)
     , scrollBar_(new Scrollbar(this))
 {
     this->setMouseTracking(true);
@@ -619,6 +620,21 @@ void ChannelView::setChannel(ChannelPtr channel)
             this->liveStatusChanged.invoke();  //
         }));
     }
+}
+
+ChannelPtr ChannelView::sourceChannel() const
+{
+    return this->sourceChannel_;
+}
+
+void ChannelView::setSourceChannel(ChannelPtr sourceChannel)
+{
+    this->sourceChannel_ = sourceChannel;
+}
+
+bool ChannelView::hasSourceChannel() const
+{
+    return this->sourceChannel_ != nullptr;
 }
 
 void ChannelView::messageAppended(MessagePtr &message,
@@ -1554,12 +1570,12 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // handle the click
-    this->handleMouseClick(event, hoverLayoutElement, layout.get());
+    this->handleMouseClick(event, hoverLayoutElement, layout);
 }
 
 void ChannelView::handleMouseClick(QMouseEvent *event,
                                    const MessageLayoutElement *hoveredElement,
-                                   MessageLayout *layout)
+                                   MessageLayoutPtr layout)
 {
     switch (event->button())
     {
@@ -1577,7 +1593,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
-                this->handleLinkClick(event, link, layout);
+                this->handleLinkClick(event, link, layout.get());
             }
 
             // Invoke to signal from EmotePopup.
@@ -1615,7 +1631,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
-                this->handleLinkClick(event, link, layout);
+                this->handleLinkClick(event, link, layout.get());
             }
         }
         break;
@@ -1624,13 +1640,15 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 }
 
 void ChannelView::addContextMenuItems(
-    const MessageLayoutElement *hoveredElement, MessageLayout *layout)
+    const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout)
 {
     const auto &creator = hoveredElement->getCreator();
     auto creatorFlags = creator.getFlags();
 
-    static QMenu *menu = new QMenu;
-    menu->clear();
+    auto menu = new QMenu;
+    connect(menu, &QMenu::aboutToHide, [menu] {
+        menu->deleteLater();  //
+    });
 
     // Emote actions
     if (creatorFlags.hasAny(
@@ -1791,8 +1809,8 @@ void ChannelView::hideEvent(QHideEvent *)
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
     auto *userPopup = new UserInfoPopup;
-    userPopup->setData(userName, this->channel_);
-    userPopup->setActionOnFocusLoss(BaseWindow::Delete);
+    userPopup->setData(userName, this->hasSourceChannel() ? this->sourceChannel_
+                                                          : this->channel_);
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     userPopup->move(QCursor::pos() - offset);
     userPopup->show();

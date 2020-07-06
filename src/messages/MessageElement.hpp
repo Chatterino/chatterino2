@@ -291,4 +291,34 @@ public:
                         MessageElementFlags flags) override;
 };
 
+// contains a full message string that's split into words on space and parses irc colors that are then put into segments
+// these segments are later passed to "MultiColorTextLayoutElement" elements to be rendered :)
+class IrcTextElement : public MessageElement
+{
+public:
+    IrcTextElement(const QString &text, MessageElementFlags flags,
+                   FontStyle style = FontStyle::ChatMedium);
+    ~IrcTextElement() override = default;
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+private:
+    FontStyle style_;
+
+    struct Segment {
+        QString text;
+        int fg = -1;
+        int bg = -1;
+    };
+
+    struct Word {
+        QString text;
+        int width = -1;
+        std::vector<Segment> segments;
+    };
+
+    std::vector<Word> words_;
+};
+
 }  // namespace chatterino

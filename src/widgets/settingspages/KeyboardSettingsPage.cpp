@@ -19,8 +19,15 @@ KeyboardSettingsPage::KeyboardSettingsPage()
                  new QLabel("Show split overlay"));
 
     form->addItem(new QSpacerItem(16, 16));
+    form->addRow(new QLabel("Ctrl + ScrollDown/-"), new QLabel("Zoom out"));
+    form->addRow(new QLabel("Ctrl + ScrollUp/+"), new QLabel("Zoom in"));
+    form->addRow(new QLabel("Ctrl + 0"), new QLabel("Reset zoom size"));
+
+    form->addItem(new QSpacerItem(16, 16));
     form->addRow(new QLabel("Ctrl + T"), new QLabel("Create new split"));
     form->addRow(new QLabel("Ctrl + W"), new QLabel("Close current split"));
+    form->addRow(new QLabel("Ctrl + G"),
+                 new QLabel("Reopen last closed split"));
 
     form->addRow(new QLabel("Ctrl + Shift + T"), new QLabel("Create new tab"));
     form->addRow(new QLabel("Ctrl + Shift + W"),
@@ -31,12 +38,13 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     form->addItem(new QSpacerItem(16, 16));
     form->addRow(new QLabel("Ctrl + 1/2/3/..."),
                  new QLabel("Select tab 1/2/3/..."));
+    form->addRow(new QLabel("Ctrl + 9"), new QLabel("Select last tab"));
     form->addRow(new QLabel("Ctrl + Tab"), new QLabel("Select next tab"));
     form->addRow(new QLabel("Ctrl + Shift + Tab"),
                  new QLabel("Select previous tab"));
 
-    form->addRow(new QLabel("Alt + Left/Up/Right/Down"),
-                 new QLabel("Select split left/up/right/down"));
+    form->addRow(new QLabel("Alt + ←/↑/→/↓"),
+                 new QLabel("Select left/upper/right/bottom split"));
 
     form->addItem(new QSpacerItem(16, 16));
     form->addRow(new QLabel("Ctrl + R"), new QLabel("Change channel"));
