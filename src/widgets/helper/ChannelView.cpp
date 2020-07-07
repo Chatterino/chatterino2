@@ -673,9 +673,6 @@ bool ChannelView::hasSourceChannel() const
 void ChannelView::messageAppended(MessagePtr &message,
                                   boost::optional<MessageFlags> overridingFlags)
 {
-    if (this->filterMessage(message))
-        return;
-
     MessageLayoutPtr deleted;
 
     auto *messageFlags = &message->flags;
@@ -686,16 +683,23 @@ void ChannelView::messageAppended(MessagePtr &message,
 
     auto messageRef = new MessageLayout(message);
 
-    if (this->lastMessageHasAlternateBackground_)
+    if (this->filterMessage(message))
     {
-        messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
+        messageRef->flags.set(MessageLayoutFlag::Hidden);
     }
-    if (this->channel_->shouldIgnoreHighlights())
+    else
     {
-        messageRef->flags.set(MessageLayoutFlag::IgnoreHighlights);
+        if (this->lastMessageHasAlternateBackground_)
+        {
+            messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
+        }
+        if (this->channel_->shouldIgnoreHighlights())
+        {
+            messageRef->flags.set(MessageLayoutFlag::IgnoreHighlights);
+        }
+        this->lastMessageHasAlternateBackground_ =
+            !this->lastMessageHasAlternateBackground_;
     }
-    this->lastMessageHasAlternateBackground_ =
-        !this->lastMessageHasAlternateBackground_;
 
     if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
     {
@@ -743,13 +747,21 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     /// Create message layouts
     for (size_t i = 0; i < messages.size(); i++)
     {
-        auto layout = new MessageLayout(messages.at(i));
+        auto message = messages.at(i);
+        auto layout = new MessageLayout(message);
 
-        // alternate color
-        if (!this->lastMessageHasAlternateBackgroundReverse_)
-            layout->flags.set(MessageLayoutFlag::AlternateBackground);
-        this->lastMessageHasAlternateBackgroundReverse_ =
-            !this->lastMessageHasAlternateBackgroundReverse_;
+        if (this->filterMessage(message))
+        {
+            layout->flags.set(MessageLayoutFlag::Hidden);
+        }
+        else
+        {
+            // alternate color
+            if (!this->lastMessageHasAlternateBackgroundReverse_)
+                layout->flags.set(MessageLayoutFlag::AlternateBackground);
+            this->lastMessageHasAlternateBackgroundReverse_ =
+                !this->lastMessageHasAlternateBackgroundReverse_;
+        }
 
         messageRefs.at(i) = MessageLayoutPtr(layout);
     }
@@ -807,6 +819,11 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
         qDebug() << "Tried to replace out of bounds message. Index:" << index
                  << ". Length:" << snapshot.size();
         return;
+    }
+
+    if (this->filterMessage(replacement))
+    {
+        newItem->flags.set(MessageLayoutFlag::Hidden);
     }
 
     const auto &message = snapshot[index];

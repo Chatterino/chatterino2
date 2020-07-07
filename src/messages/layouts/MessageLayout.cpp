@@ -147,6 +147,11 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
             continue;
         }
 
+        if (this->flags.has(MessageLayoutFlag::Hidden))
+        {
+            continue;
+        }
+
         element->addToContainer(*this->container_, flags);
     }
 
@@ -262,6 +267,9 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
                                  Selection & /*selection*/)
 {
+    if (buffer->isNull())
+        return;
+
     auto app = getApp();
     auto settings = getSettings();
 
