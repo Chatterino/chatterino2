@@ -15,7 +15,7 @@ namespace chatterino {
 namespace {
 
     QRegularExpression IRC_COLOR_PARSE_REGEX(
-        "\u0003(\\d{1,2})?(,(\\d{1,2}))?",
+        "(\u0003(\\d{1,2})?(,(\\d{1,2}))?|\u000f)",
         QRegularExpression::UseUnicodePropertiesOption);
 
 }  // namespace
@@ -475,18 +475,23 @@ IrcTextElement::IrcTextElement(const QString &fullText,
                 segments.emplace_back(seg);
                 lastPos = match.capturedStart() + match.capturedLength();
             }
-
             if (!match.captured(1).isEmpty())
             {
-                fg = match.captured(1).toInt(nullptr);
+                fg = -1;
+                bg = -1;
+            }
+
+            if (!match.captured(2).isEmpty())
+            {
+                fg = match.captured(2).toInt(nullptr);
             }
             else
             {
                 fg = -1;
             }
-            if (!match.captured(3).isEmpty())
+            if (!match.captured(4).isEmpty())
             {
-                bg = match.captured(3).toInt(nullptr);
+                bg = match.captured(4).toInt(nullptr);
             }
             else if (fg == -1)
             {
