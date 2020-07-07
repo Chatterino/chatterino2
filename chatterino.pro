@@ -160,6 +160,7 @@ SOURCES += \
     src/messages/MessageColor.cpp \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
+    src/messages/SharedMessageBuilder.cpp \
     src/messages/search/AuthorPredicate.cpp \
     src/messages/search/LinkPredicate.cpp \
     src/messages/search/SubstringPredicate.cpp \
@@ -175,6 +176,7 @@ SOURCES += \
     src/providers/irc/IrcChannel2.cpp \
     src/providers/irc/IrcCommands.cpp \
     src/providers/irc/IrcConnection2.cpp \
+    src/providers/irc/IrcMessageBuilder.cpp \
     src/providers/irc/IrcServer.cpp \
     src/providers/LinkResolver.cpp \
     src/providers/twitch/api/Helix.cpp \
@@ -304,6 +306,7 @@ HEADERS += \
     src/common/DownloadManager.hpp \
     src/common/Env.hpp \
     src/common/FlagsEnum.hpp \
+    src/common/IrcColors.hpp \
     src/common/LinkParser.hpp \
     src/common/Modes.hpp \
     src/common/NetworkCommon.hpp \
@@ -365,6 +368,7 @@ HEADERS += \
     src/messages/MessageContainer.hpp \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
+    src/messages/SharedMessageBuilder.hpp \
     src/messages/search/AuthorPredicate.hpp \
     src/messages/search/LinkPredicate.hpp \
     src/messages/search/MessagePredicate.hpp \
@@ -383,6 +387,7 @@ HEADERS += \
     src/providers/irc/IrcChannel2.hpp \
     src/providers/irc/IrcCommands.hpp \
     src/providers/irc/IrcConnection2.hpp \
+    src/providers/irc/IrcMessageBuilder.hpp \
     src/providers/irc/IrcServer.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/api/Helix.hpp \

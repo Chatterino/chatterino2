@@ -92,9 +92,6 @@ UserInfoPopup::UserInfoPopup()
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
-#ifdef Q_OS_LINUX
-    this->setWindowFlag(Qt::Dialog);
-#endif
 
     // Close the popup when Escape is pressed
     createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
