@@ -55,6 +55,10 @@ FiltersPage::FiltersPage()
                        .arg(FILTERS_DOCUMENTATION));
     filterHelpLabel->setOpenExternalLinks(true);
     view->addCustomButton(filterHelpLabel);
+
+    layout.append(
+        this->createCheckBox("Do not filter my own messages",
+                             getSettings()->excludeUserMessagesFromFilter));
 }
 
 void FiltersPage::onShow()

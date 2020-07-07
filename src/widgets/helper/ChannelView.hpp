@@ -188,6 +188,8 @@ private:
     EffectLabel *goToBottom_;
 
     FilterSet *channelFilters_ = nullptr;
+
+    // Returns true if message should be hidden
     bool filterMessage(const MessagePtr &m) const;
 
     // This variable can be used to decide whether or not we should render the

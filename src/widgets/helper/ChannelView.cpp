@@ -641,15 +641,12 @@ bool ChannelView::filterMessage(const MessagePtr &m) const
 {
     if (this->channelFilters_ != nullptr)
     {
-        auto isNotCurrentUser = [loginName = m->loginName] {
-            return getApp()
-                       ->accounts->twitch.getCurrent()
-                       ->getUserName()
-                       .compare(loginName, Qt::CaseInsensitive) != 0;
-        };
+        if (getSettings()->excludeUserMessagesFromFilter &&
+            getApp()->accounts->twitch.getCurrent()->getUserName().compare(
+                m->loginName, Qt::CaseInsensitive) == 0)
+            return false;
 
-        if (!this->channelFilters_->filter(m) && isNotCurrentUser())
-            return true;
+        return !this->channelFilters_->filter(m);
     }
 
     return false;

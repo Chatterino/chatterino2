@@ -29,7 +29,7 @@ ConcurrentSettings::ConcurrentSettings()
     persist(this->highlightedUsers, "/highlighting/users");
     persist(this->ignoredMessages, "/ignore/phrases");
     persist(this->mutedChannels, "/pings/muted");
-    persist(this->filterRecords, "/filters");
+    persist(this->filterRecords, "/filtering/filters");
     // tagged users?
     persist(this->moderationActions, "/moderation/actions");
 }

@@ -235,6 +235,10 @@ public:
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 
+    /// Filtering
+    BoolSetting excludeUserMessagesFromFilter = {
+        "/filtering/excludeUserMessages", false};
+
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
 
