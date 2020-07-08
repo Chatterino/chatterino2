@@ -452,6 +452,8 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
             return;
         }
     }
+
+    this->emplace<TextElement>(string, MessageElementFlag::Text, textColor);
 }
 
 void TwitchMessageBuilder::parseMessageID()
