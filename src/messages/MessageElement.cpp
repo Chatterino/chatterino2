@@ -596,6 +596,7 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
 
             // we done goofed, we need to wrap the text
             QString text = word.text;
+            std::vector<Segment> segments = word.segments;
             int textLength = text.length();
             int wordStart = 0;
             int width = 0;
@@ -611,10 +612,47 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
                 auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
                                              : metrics.width(text[i]);
 
-                if (!container.fitsInLine(width + charWidth))  //
+                if (!container.fitsInLine(width + charWidth))
                 {
-                    container.addElementNoLineBreak(getTextLayoutElement(
-                        text.mid(wordStart, i - wordStart), {}, width, false));
+                    std::vector<Segment> pieceSegments;
+                    int charactersLeft = i - wordStart;
+                    assert(charactersLeft > 0);
+                    for (auto segmentIt = segments.begin();
+                         segmentIt != segments.end();)
+                    {
+                        assert(charactersLeft > 0);
+                        auto &segment = *segmentIt;
+                        if (charactersLeft >= segment.text.length())
+                        {
+                            // Entire segment fits in this piece
+                            pieceSegments.push_back(segment);
+                            charactersLeft -= segment.text.length();
+                            segmentIt = segments.erase(segmentIt);
+
+                            assert(charactersLeft >= 0);
+
+                            if (charactersLeft == 0)
+                            {
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            // Only part of the segment fits in this piece
+                            // We create a new segment with the characters that fit, and modify the segment we checked to only contain the characters we didn't consume
+                            Segment segmentThatFitsInPiece{
+                                segment.text.left(charactersLeft), segment.fg,
+                                segment.bg};
+                            pieceSegments.emplace_back(segmentThatFitsInPiece);
+                            segment.text = segment.text.mid(charactersLeft);
+
+                            break;
+                        }
+                    }
+
+                    container.addElementNoLineBreak(
+                        getTextLayoutElement(text.mid(wordStart, i - wordStart),
+                                             pieceSegments, width, false));
                     container.breakLine();
 
                     wordStart = i;
@@ -631,8 +669,10 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
                     i++;
             }
 
-            container.addElement(getTextLayoutElement(
-                text.mid(wordStart), {}, width, this->hasTrailingSpace()));
+            // Add last remaining text & segments
+            container.addElement(
+                getTextLayoutElement(text.mid(wordStart), segments, width,
+                                     this->hasTrailingSpace()));
             container.breakLine();
         }
     }
