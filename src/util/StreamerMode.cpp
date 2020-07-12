@@ -36,7 +36,6 @@ bool isInStreamerMode()
             {
                 QString processName = QString::fromUtf16(
                     reinterpret_cast<char16_t *>(pWPIs[i].pProcessName));
-                qDebug() << processName;
 
                 if (broadcastingBinaries().contains(processName))
                     return true;
