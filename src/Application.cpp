@@ -284,6 +284,15 @@ void Application::initPubsub()
             chan->deleteMessage(msg->id);
         });
 
+    this->twitch.pubsub->signals_.pointReward.redeemed.connect(
+        [&](const auto &data) {
+            const auto &channel = this->twitch.server->getChannelOrEmptyByID(
+                data["redemption"]["channel_id"].GetString());
+            qDebug() << "redeemed" << data["timestamp"].GetString()
+                     << data["redemption"]["user"]["display_name"].GetString()
+                     << channel->getName();
+        });
+
     this->twitch.pubsub->start();
 
     auto RequestModerationActions = [=]() {

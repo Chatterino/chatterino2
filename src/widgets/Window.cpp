@@ -25,6 +25,8 @@
 #include "widgets/splits/SplitContainer.hpp"
 
 #ifdef C_DEBUG
+#    include <rapidjson/document.h>
+#    include "providers/twitch/PubsubClient.hpp"
 #    include "util/SampleCheerMessages.hpp"
 #    include "util/SampleLinks.hpp"
 #endif
@@ -239,6 +241,9 @@ void Window::addDebugStuff()
     linkMessages.emplace_back(R"(@badge-info=subscriber/48;badges=broadcaster/1,subscriber/36,partner/1;color=#CC44FF;display-name=pajlada;emotes=;flags=;id=3c23cf3c-0864-4699-a76b-089350141147;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1577628844607;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada : Links that should pass: )" + getValidLinks().join(' '));
     linkMessages.emplace_back(R"(@badge-info=subscriber/48;badges=broadcaster/1,subscriber/36,partner/1;color=#CC44FF;display-name=pajlada;emotes=;flags=;id=3c23cf3c-0864-4699-a76b-089350141147;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1577628844607;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada : Links that should NOT pass: )" + getInvalidLinks().join(' '));
     linkMessages.emplace_back(R"(@badge-info=subscriber/48;badges=broadcaster/1,subscriber/36,partner/1;color=#CC44FF;display-name=pajlada;emotes=;flags=;id=3c23cf3c-0864-4699-a76b-089350141147;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1577628844607;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada : Links that should technically pass but we choose not to parse them: )" + getValidButIgnoredLinks().join(' '));
+
+    // channel point reward test
+    const char* channelRewardMessage = "{ \"type\": \"MESSAGE\", \"data\": { \"topic\": \"community-points-channel-v1.11148817\", \"message\": { \"type\": \"reward-redeemed\", \"data\": { \"timestamp\": \"2020-07-13T20:19:31.430785354Z\", \"redemption\": { \"id\": \"b9628798-1b4e-4122-b2a6-031658df6755\", \"user\": { \"id\": \"91800084\", \"login\": \"cranken1337\", \"display_name\": \"cranken1337\" }, \"channel_id\": \"11148817\", \"redeemed_at\": \"2020-07-13T20:19:31.345237005Z\", \"reward\": { \"id\": \"313969fe-cc9f-4a0a-83c6-172acbd96957\", \"channel_id\": \"11148817\", \"title\": \"annoying reward pogchamp\", \"prompt\": \"\", \"cost\": 3000, \"is_user_input_required\": false, \"is_sub_only\": false, \"image\": null, \"default_image\": { \"url_1x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-1.png\", \"url_2x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-2.png\", \"url_4x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-4.png\" }, \"background_color\": \"#52ACEC\", \"is_enabled\": true, \"is_paused\": false, \"is_in_stock\": true, \"max_per_stream\": { \"is_enabled\": false, \"max_per_stream\": 0 }, \"should_redemptions_skip_request_queue\": false, \"template_id\": null, \"updated_for_indicator_at\": \"2020-01-20T04:33:33.624956679Z\" }, \"status\": \"UNFULFILLED\", \"cursor\": \"Yjk2Mjg3OTgtMWI0ZS00MTIyLWIyYTYtMDMxNjU4ZGY2NzU1X18yMDIwLTA3LTEzVDIwOjE5OjMxLjM0NTIzNzAwNVo=\" } } } } }";
     // clang-format on
 
     createWindowShortcut(this, "F6", [=] {
@@ -270,8 +275,16 @@ void Window::addDebugStuff()
         dialog->show();
     });
 
+    createWindowShortcut(this, "F4", [=] {
+        rapidjson::Document doc;
+        doc.Parse(channelRewardMessage);
+        auto app = getApp();
+        app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
+            doc["data"]["message"]["data"]);
+    });
+
 #endif
-}
+}  // namespace chatterino
 
 void Window::addShortcuts()
 {

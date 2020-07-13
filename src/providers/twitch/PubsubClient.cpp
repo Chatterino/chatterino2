@@ -804,6 +804,26 @@ void PubSub::listenToChannelModerationActions(
     this->listenToTopic(topic, account);
 }
 
+void PubSub::listenToChannelPointRewards(const QString &channelID,
+                                         std::shared_ptr<TwitchAccount> account)
+{
+    static const QString topicFormat("community-points-channel-v1.%1");
+    assert(!channelID.isEmpty());
+    assert(account != nullptr);
+    QString userID = account->getUserId();
+
+    auto topic = topicFormat.arg(channelID);
+
+    if (this->isListeningToTopic(topic))
+    {
+        return;
+    }
+
+    qDebug() << "Listen to topic" << topic;
+
+    this->listenToTopic(topic, account);
+}
+
 void PubSub::listenToTopic(const QString &topic,
                            std::shared_ptr<TwitchAccount> account)
 {
@@ -1092,6 +1112,26 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
         // Invoke handler function
         handlerIt->second(data, topicParts[2]);
+    }
+    else if (topic.startsWith("community-points-channel-v1."))
+    {
+        std::string pointEventType;
+
+        if (!rj::getSafe(msg, "type", pointEventType))
+        {
+            qDebug() << "Bad channel point event data";
+            return;
+        }
+
+        if (pointEventType == "reward-redeemed")
+        {
+            const auto &data = msg["data"];
+            this->signals_.pointReward.redeemed.invoke(data);
+        }
+        else
+        {
+            qDebug() << "Invalid point event type:" << pointEventType.c_str();
+        }
     }
     else
     {
