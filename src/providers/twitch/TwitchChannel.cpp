@@ -186,6 +186,27 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
         manualRefresh);
 }
 
+void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
+{
+    bool result;
+    {
+        auto channelPointRewards = this->channelPointRewards_.access();
+        result = channelPointRewards->try_emplace(reward.getRewardId(), reward)
+                     .second;
+    }
+    if (result)
+    {
+        this->channelPointRewardAdded.invoke(reward);
+    }
+}
+
+bool TwitchChannel::isChannelPointRewardKnown(QString rewardId)
+{
+    const auto &pointRewards = this->channelPointRewards_.accessConst();
+    const auto &it = pointRewards->find(rewardId);
+    return it != pointRewards->end();
+}
+
 void TwitchChannel::sendMessage(const QString &message)
 {
     auto app = getApp();

@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>

@@ -31,6 +31,7 @@ struct MessageParseArgs {
     bool isSentWhisper = false;
     bool trimSubscriberUsername = false;
     bool isStaffOrBroadcaster = false;
+    bool isChannelPointReward = false;
 };
 
 class MessageBuilder

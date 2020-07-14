@@ -27,6 +27,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
+#include "util/RapidjsonHelpers.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/splits/Split.hpp"
@@ -286,11 +287,18 @@ void Application::initPubsub()
 
     this->twitch.pubsub->signals_.pointReward.redeemed.connect(
         [&](const auto &data) {
-            const auto &channel = this->twitch.server->getChannelOrEmptyByID(
-                data["redemption"]["channel_id"].GetString());
-            qDebug() << "redeemed" << data["timestamp"].GetString()
-                     << data["redemption"]["user"]["display_name"].GetString()
-                     << channel->getName();
+            QString channelId;
+            if (rj::getSafe(data, "channel_id", channelId))
+            {
+                const auto &chan =
+                    this->twitch.server->getChannelOrEmptyByID(channelId);
+                auto channel = dynamic_cast<TwitchChannel *>(chan.get());
+                channel->addChannelPointReward(ChannelPointReward(data));
+            }
+            else
+            {
+                qDebug() << "Couldn't find channel id of point reward";
+            }
         });
 
     this->twitch.pubsub->start();

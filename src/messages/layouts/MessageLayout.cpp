@@ -220,6 +220,13 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                          app->themes->messages.disabled);
     }
 
+    if (this->message_->flags.has(MessageFlag::RedeemedChannelPointReward))
+    {
+        painter.fillRect(
+            0, y, this->scale_ * 4, pixmap->height(),
+            *ColorProvider::instance().color(ColorType::Subscription));
+    }
+
     // draw selection
     if (!selection.isEmpty())
     {

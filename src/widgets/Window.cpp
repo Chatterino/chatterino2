@@ -244,6 +244,8 @@ void Window::addDebugStuff()
 
     // channel point reward test
     const char* channelRewardMessage = "{ \"type\": \"MESSAGE\", \"data\": { \"topic\": \"community-points-channel-v1.11148817\", \"message\": { \"type\": \"reward-redeemed\", \"data\": { \"timestamp\": \"2020-07-13T20:19:31.430785354Z\", \"redemption\": { \"id\": \"b9628798-1b4e-4122-b2a6-031658df6755\", \"user\": { \"id\": \"91800084\", \"login\": \"cranken1337\", \"display_name\": \"cranken1337\" }, \"channel_id\": \"11148817\", \"redeemed_at\": \"2020-07-13T20:19:31.345237005Z\", \"reward\": { \"id\": \"313969fe-cc9f-4a0a-83c6-172acbd96957\", \"channel_id\": \"11148817\", \"title\": \"annoying reward pogchamp\", \"prompt\": \"\", \"cost\": 3000, \"is_user_input_required\": false, \"is_sub_only\": false, \"image\": null, \"default_image\": { \"url_1x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-1.png\", \"url_2x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-2.png\", \"url_4x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-4.png\" }, \"background_color\": \"#52ACEC\", \"is_enabled\": true, \"is_paused\": false, \"is_in_stock\": true, \"max_per_stream\": { \"is_enabled\": false, \"max_per_stream\": 0 }, \"should_redemptions_skip_request_queue\": false, \"template_id\": null, \"updated_for_indicator_at\": \"2020-01-20T04:33:33.624956679Z\" }, \"status\": \"UNFULFILLED\", \"cursor\": \"Yjk2Mjg3OTgtMWI0ZS00MTIyLWIyYTYtMDMxNjU4ZGY2NzU1X18yMDIwLTA3LTEzVDIwOjE5OjMxLjM0NTIzNzAwNVo=\" } } } } }";
+    const char * channelRewardIRCMessage(R"(@badge-info=subscriber/43;badges=subscriber/42;color=#1E90FF;custom-reward-id=313969fe-cc9f-4a0a-83c6-172acbd96957;display-name=Cranken1337;emotes=;flags=;id=3cee3f27-a1d0-44d1-a606-722cebdad08b;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1594756484132;turbo=0;user-id=91800084;user-type= :cranken1337!cranken1337@cranken1337.tmi.twitch.tv PRIVMSG #pajlada :wow, amazing reward)");
+
     // clang-format on
 
     createWindowShortcut(this, "F6", [=] {
@@ -270,17 +272,12 @@ void Window::addDebugStuff()
     });
 
     createWindowShortcut(this, "F9", [=] {
-        auto *dialog = new WelcomeDialog();
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->show();
-    });
-
-    createWindowShortcut(this, "F4", [=] {
         rapidjson::Document doc;
         doc.Parse(channelRewardMessage);
         auto app = getApp();
+        app->twitch.server->addFakeMessage(channelRewardIRCMessage);
         app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
-            doc["data"]["message"]["data"]);
+            doc["data"]["message"]["data"]["redemption"]["reward"]);
     });
 
 #endif

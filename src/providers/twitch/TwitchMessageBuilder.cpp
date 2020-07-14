@@ -191,6 +191,11 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->appendChannelName();
 
+    if (this->args.isChannelPointReward)
+    {
+        this->message().flags.set(MessageFlag::RedeemedChannelPointReward);
+    }
+
     if (this->tags.contains("rm-deleted"))
     {
         this->message().flags.set(MessageFlag::Disabled);

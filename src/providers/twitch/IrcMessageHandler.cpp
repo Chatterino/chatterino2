@@ -1,4 +1,4 @@
-#include "IrcMessageHandler.hpp"
+﻿#include "IrcMessageHandler.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -215,6 +215,30 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         args.isStaffOrBroadcaster = true;
     }
 
+    auto channel = dynamic_cast<TwitchChannel *>(chan.get());
+
+    const auto &tags = _message->tags();
+    if (const auto &it = tags.find("custom-reward-id"); it != tags.end())
+    {
+        args.isChannelPointReward = true;
+        const auto rewardId = it.value().toString();
+        if (!channel->isChannelPointRewardKnown(rewardId))
+        {
+            // Need to wait for pubsub reward notification
+            channel->channelPointRewardAdded.connect(
+                [=, &server](ChannelPointReward reward) {
+                    if (reward.getRewardId() == rewardId)
+                    {
+                        this->addMessage(_message, target, content, server,
+                                         isSub, isAction);
+                        return true;
+                    }
+                    return false;
+                });
+            return;
+        }
+    }
+
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
 
     if (isSub || !builder.isIgnored())
@@ -224,7 +248,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             builder->flags.set(MessageFlag::Subscription);
             builder->flags.unset(MessageFlag::Highlighted);
         }
-
         auto msg = builder.build();
 
         IrcMessageHandler::setSimilarityFlags(msg, chan);
@@ -399,9 +422,9 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        qDebug()
-            << "[IrcMessageHandler:handleClearMessageMessage] Twitch channel"
-            << chanName << "not found";
+        qDebug() << "[IrcMessageHandler:handleClearMessageMessage] Twitch "
+                    "channel"
+                 << chanName << "not found";
         return;
     }
 
