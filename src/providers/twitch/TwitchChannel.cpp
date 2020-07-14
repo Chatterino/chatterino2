@@ -191,8 +191,7 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     bool result;
     {
         auto channelPointRewards = this->channelPointRewards_.access();
-        result = channelPointRewards->try_emplace(reward.getRewardId(), reward)
-                     .second;
+        result = channelPointRewards->try_emplace(reward.id, reward).second;
     }
     if (result)
     {

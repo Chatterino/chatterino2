@@ -9,26 +9,14 @@
         .arg(x)
 
 namespace chatterino {
-class ChannelPointReward
-{
-public:
+struct ChannelPointReward {
     ChannelPointReward(const rapidjson::Value &reward);
     ChannelPointReward() = delete;
-
-    QString getRewardId() const;
-    QString getChannelId() const;
-    QString getRewardTitle() const;
-    int getRewardCost() const;
-    ImageSet getRewardImage() const;
-
-private:
-    QString rewardId;
+    QString id;
     QString channelId;
-    QString rewardTitle;
-    int rewardCost;
-    ImageSet rewardImage;
-
-    QString parseImage(const rapidjson::Value &image, const char *key);
+    QString title;
+    int cost;
+    ImageSet image;
 };
 
 }  // namespace chatterino

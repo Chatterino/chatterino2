@@ -1127,29 +1127,20 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         {
             if (!rj::getSafe(msg, "data", msg))
             {
-                if (!rj::getSafe(msg, "redemption", msg))
-                {
-                    if (!rj::getSafe(msg, "reward", msg))
-                    {
-                        this->signals_.pointReward.redeemed.invoke(msg);
-                    }
-                    else
-                    {
-                        qDebug() << "No reward info found for redeemed reward";
-                        return;
-                    }
-                }
-                else
-                {
-                    qDebug() << "No redemption info found for redeemed reward";
-                    return;
-                }
-            }
-            else
-            {
                 qDebug() << "No data found for redeemed reward";
                 return;
             }
+            if (!rj::getSafe(msg, "redemption", msg))
+            {
+                qDebug() << "No redemption info found for redeemed reward";
+                return;
+            }
+            if (!rj::getSafe(msg, "reward", msg))
+            {
+                qDebug() << "No reward info found for redeemed reward";
+                return;
+            }
+            this->signals_.pointReward.redeemed.invoke(msg);
         }
         else
         {
