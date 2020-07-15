@@ -1116,7 +1116,7 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage()
 {
     const auto &reward = this->twitchChannel->channelPointReward(
         this->args.channelPointRewardId);
-    if (reward.has_value())
+    if (reward)
     {
         this->emplace<TextElement>(QString("Redeemed"),
                                    MessageElementFlag::Text);
