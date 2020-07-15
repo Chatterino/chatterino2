@@ -224,12 +224,14 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         if (!channel->isChannelPointRewardKnown(rewardId))
         {
             // Need to wait for pubsub reward notification
+            auto clone = _message->clone();
             channel->channelPointRewardAdded.connect(
                 [=, &server](ChannelPointReward reward) {
                     if (reward.id == rewardId)
                     {
-                        this->addMessage(_message, target, content, server,
-                                         isSub, isAction);
+                        this->addMessage(clone, target, content, server, isSub,
+                                         isAction);
+                        clone->deleteLater();
                         return true;
                     }
                     return false;

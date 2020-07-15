@@ -17,6 +17,7 @@ struct ChannelPointReward {
     QString title;
     int cost;
     ImageSet image;
+    bool hasParsedSuccessfully = false;
 };
 
 }  // namespace chatterino

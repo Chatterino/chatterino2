@@ -188,6 +188,11 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
 
 void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
 {
+    if (!reward.hasParsedSuccessfully)
+    {
+        return;
+    }
+
     bool result;
     {
         auto channelPointRewards = this->channelPointRewards_.access();
