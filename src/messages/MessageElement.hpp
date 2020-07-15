@@ -4,6 +4,7 @@
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "singletons/Fonts.hpp"
+#include "src/messages/ImageSet.hpp"
 
 #include <QRect>
 #include <QString>
@@ -323,6 +324,7 @@ private:
     std::vector<Word> words_;
 };
 
+// Forces a linebreak
 class LinebreakElement : public MessageElement
 {
 public:
@@ -334,4 +336,16 @@ public:
     static LinebreakElement &instance();
 };
 
+// Image element which will pick the quality of the image based on ui scale
+class ScalingImageElement : public MessageElement
+{
+public:
+    ScalingImageElement(ImageSet images, MessageElementFlags flags);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+private:
+    ImageSet images_;
+};
 }  // namespace chatterino

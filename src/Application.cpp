@@ -285,21 +285,20 @@ void Application::initPubsub()
             chan->deleteMessage(msg->id);
         });
 
-    this->twitch.pubsub->signals_.pointReward.redeemed.connect(
-        [&](const auto &data) {
-            QString channelId;
-            if (rj::getSafe(data, "channel_id", channelId))
-            {
-                const auto &chan =
-                    this->twitch.server->getChannelOrEmptyByID(channelId);
-                auto channel = dynamic_cast<TwitchChannel *>(chan.get());
-                channel->addChannelPointReward(ChannelPointReward(data));
-            }
-            else
-            {
-                qDebug() << "Couldn't find channel id of point reward";
-            }
-        });
+    this->twitch.pubsub->signals_.pointReward.redeemed.connect([&](auto &data) {
+        QString channelId;
+        if (rj::getSafe(data, "channel_id", channelId))
+        {
+            const auto &chan =
+                this->twitch.server->getChannelOrEmptyByID(channelId);
+            auto channel = dynamic_cast<TwitchChannel *>(chan.get());
+            channel->addChannelPointReward(ChannelPointReward(data));
+        }
+        else
+        {
+            qDebug() << "Couldn't find channel id of point reward";
+        }
+    });
 
     this->twitch.pubsub->start();
 

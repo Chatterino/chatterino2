@@ -124,7 +124,7 @@ public:
         } whisper;
 
         struct {
-            Signal<const rapidjson::Value &> redeemed;
+            Signal<rapidjson::Value &> redeemed;
         } pointReward;
     } signals_;
 

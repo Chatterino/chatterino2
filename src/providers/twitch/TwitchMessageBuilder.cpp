@@ -1123,9 +1123,8 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage()
         this->emplace<TextElement>(reward->title, MessageElementFlag::Text,
                                    MessageColor::Text,
                                    FontStyle::ChatMediumBold);
-        this->emplace<ImageElement>(
-            reward->image.getImageOrLoaded(getSettings()->emoteScale),
-            MessageElementFlag::EmoteImages);
+        this->emplace<ScalingImageElement>(reward->image,
+                                           MessageElementFlag::EmoteImages);
         this->emplace<TextElement>(QString::number(reward->cost),
                                    MessageElementFlag::Text, MessageColor::Text,
                                    FontStyle::ChatMediumBold);

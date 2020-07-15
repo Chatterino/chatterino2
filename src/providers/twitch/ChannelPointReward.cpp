@@ -3,28 +3,29 @@
 
 namespace chatterino {
 
-QString parseImage(const rapidjson::Value &image, const char *key)
+QString parseImage(const rapidjson::Value &obj, const char *key)
 {
     QString url;
-    assert(rj::getSafe(image, key, url));
+    assert(rj::getSafe(obj, key, url));
 
     return url;
 }
 
-ChannelPointReward::ChannelPointReward(const rapidjson::Value &reward)
+ChannelPointReward::ChannelPointReward(rapidjson::Value &reward)
 {
     assert(rj::getSafe(reward, "id", this->id));
     assert(rj::getSafe(reward, "channel_id", this->channelId));
     assert(rj::getSafe(reward, "title", this->title));
     assert(rj::getSafe(reward, "cost", this->cost));
 
-    rapidjson::Value image;
-    if (rj::getSafe(reward, "image", image))
+    rapidjson::Value obj;
+    if (rj::getSafeObject(reward, "image", obj) && !obj.IsNull() &&
+        obj.IsObject())
     {
         this->image = ImageSet{
-            Image::fromUrl({parseImage(image, "url_1x")}, 1),
-            Image::fromUrl({parseImage(image, "url_2x")}, 0.5),
-            Image::fromUrl({parseImage(image, "url_4x")}, 0.25),
+            Image::fromUrl({parseImage(obj, "url_1x")}, 1),
+            Image::fromUrl({parseImage(obj, "url_2x")}, 0.5),
+            Image::fromUrl({parseImage(obj, "url_4x")}, 0.25),
         };
     }
     else

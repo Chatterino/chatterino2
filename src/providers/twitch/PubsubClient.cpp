@@ -1116,7 +1116,6 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
     else if (topic.startsWith("community-points-channel-v1."))
     {
         std::string pointEventType;
-
         if (!rj::getSafe(msg, "type", pointEventType))
         {
             qDebug() << "Bad channel point event data";
@@ -1125,17 +1124,17 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
         if (pointEventType == "reward-redeemed")
         {
-            if (!rj::getSafe(msg, "data", msg))
+            if (!rj::getSafeObject(msg, "data", msg))
             {
                 qDebug() << "No data found for redeemed reward";
                 return;
             }
-            if (!rj::getSafe(msg, "redemption", msg))
+            if (!rj::getSafeObject(msg, "redemption", msg))
             {
                 qDebug() << "No redemption info found for redeemed reward";
                 return;
             }
-            if (!rj::getSafe(msg, "reward", msg))
+            if (!rj::getSafeObject(msg, "reward", msg))
             {
                 qDebug() << "No reward info found for redeemed reward";
                 return;

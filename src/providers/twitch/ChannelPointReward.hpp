@@ -10,7 +10,7 @@
 
 namespace chatterino {
 struct ChannelPointReward {
-    ChannelPointReward(const rapidjson::Value &reward);
+    ChannelPointReward(rapidjson::Value &reward);
     ChannelPointReward() = delete;
     QString id;
     QString channelId;

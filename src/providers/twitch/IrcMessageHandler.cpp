@@ -225,7 +225,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         {
             // Need to wait for pubsub reward notification
             channel->channelPointRewardAdded.connect(
-                [=, &server](ChannelPointReward reward) {
+                [=, &server, &_message](ChannelPointReward reward) {
                     if (reward.id == rewardId)
                     {
                         this->addMessage(_message, target, content, server,

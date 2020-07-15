@@ -695,4 +695,29 @@ LinebreakElement &LinebreakElement::instance()
     return instance;
 }
 
+ScalingImageElement::ScalingImageElement(ImageSet images,
+                                         MessageElementFlags flags)
+    : MessageElement(flags)
+    , images_(images)
+{
+}
+
+void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
+                                         MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
+    {
+        const auto &image =
+            this->images_.getImageOrLoaded(container.getScale());
+        if (image->isEmpty())
+            return;
+
+        auto size = QSize(image->width() * container.getScale(),
+                          image->height() * container.getScale());
+
+        container.addElement((new ImageLayoutElement(*this, image, size))
+                                 ->setLink(this->getLink()));
+    }
+}
+
 }  // namespace chatterino
