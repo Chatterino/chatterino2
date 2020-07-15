@@ -679,7 +679,7 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
 }
 
 LinebreakElement::LinebreakElement()
-    : MessageElement(MessageElementFlag::Linebreak)
+    : MessageElement(MessageElementFlag::Misc)
 {
 }
 

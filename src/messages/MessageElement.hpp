@@ -108,8 +108,6 @@ enum class MessageElementFlag {
     // e.g. BTTV's SoSnowy during christmas season
     ZeroWidthEmote = (1 << 31),
 
-    Linebreak = (1 << 32),
-
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
               AlwaysShow,
