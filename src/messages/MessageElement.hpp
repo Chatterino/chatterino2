@@ -107,6 +107,8 @@ enum class MessageElementFlag {
     // e.g. BTTV's SoSnowy during christmas season
     ZeroWidthEmote = (1 << 31),
 
+    Linebreak = (1 << 32),
+
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
               AlwaysShow,
@@ -319,6 +321,17 @@ private:
     };
 
     std::vector<Word> words_;
+};
+
+class LinebreakElement : public MessageElement
+{
+public:
+    LinebreakElement();
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+    static LinebreakElement &instance();
 };
 
 }  // namespace chatterino

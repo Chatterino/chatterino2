@@ -113,7 +113,9 @@ public:
     pajlada::Signals::SelfDisconnectingSignal<ChannelPointReward>
         channelPointRewardAdded;
     void addChannelPointReward(const ChannelPointReward &reward);
-    bool isChannelPointRewardKnown(QString rewardId);
+    bool isChannelPointRewardKnown(const QString &rewardId);
+    boost::optional<ChannelPointReward> channelPointReward(
+        const QString &rewardId) const;
 
 private:
     struct NameOptions {

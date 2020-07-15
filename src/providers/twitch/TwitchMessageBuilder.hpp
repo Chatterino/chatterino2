@@ -69,6 +69,8 @@ private:
     void appendChatterinoBadges();
     Outcome tryParseCheermote(const QString &string);
 
+    void appendChannelPointRewardMessage();
+
     QString roomID_;
     bool hasBits_ = false;
     QString bits;

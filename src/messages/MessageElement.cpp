@@ -678,4 +678,21 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
+LinebreakElement::LinebreakElement()
+    : MessageElement(MessageElementFlag::Linebreak)
+{
+}
+
+void LinebreakElement::addToContainer(MessageLayoutContainer &container,
+                                      MessageElementFlags flags)
+{
+    container.breakLine();
+}
+
+LinebreakElement &LinebreakElement::instance()
+{
+    static LinebreakElement instance;
+    return instance;
+}
+
 }  // namespace chatterino

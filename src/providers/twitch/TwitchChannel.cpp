@@ -199,11 +199,22 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     }
 }
 
-bool TwitchChannel::isChannelPointRewardKnown(QString rewardId)
+bool TwitchChannel::isChannelPointRewardKnown(const QString &rewardId)
 {
     const auto &pointRewards = this->channelPointRewards_.accessConst();
     const auto &it = pointRewards->find(rewardId);
     return it != pointRewards->end();
+}
+
+boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
+    const QString &rewardId) const
+{
+    auto rewards = this->channelPointRewards_.accessConst();
+    auto it = rewards->find(rewardId);
+
+    if (it == rewards->end())
+        return boost::none;
+    return it->second;
 }
 
 void TwitchChannel::sendMessage(const QString &message)

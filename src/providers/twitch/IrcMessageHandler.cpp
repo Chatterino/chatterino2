@@ -220,7 +220,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
     const auto &tags = _message->tags();
     if (const auto &it = tags.find("custom-reward-id"); it != tags.end())
     {
-        args.isChannelPointReward = true;
         const auto rewardId = it.value().toString();
         if (!channel->isChannelPointRewardKnown(rewardId))
         {
@@ -237,6 +236,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                 });
             return;
         }
+        args.channelPointRewardId = rewardId;
     }
 
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);

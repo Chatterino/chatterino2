@@ -189,12 +189,13 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->parseRoomID();
 
-    this->appendChannelName();
-
-    if (this->args.isChannelPointReward)
+    if (this->args.channelPointRewardId != "")
     {
         this->message().flags.set(MessageFlag::RedeemedChannelPointReward);
+        this->appendChannelPointRewardMessage();
     }
+
+    this->appendChannelName();
 
     if (this->tags.contains("rm-deleted"))
     {
@@ -1109,6 +1110,27 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     }
 
     return Success;
+}
+
+void TwitchMessageBuilder::appendChannelPointRewardMessage()
+{
+    const auto &reward = this->twitchChannel->channelPointReward(
+        this->args.channelPointRewardId);
+    if (reward.has_value())
+    {
+        this->emplace<TextElement>(QString("Redeemed"),
+                                   MessageElementFlag::Text);
+        this->emplace<TextElement>(reward->title, MessageElementFlag::Text,
+                                   MessageColor::Text,
+                                   FontStyle::ChatMediumBold);
+        this->emplace<ImageElement>(
+            reward->image.getImageOrLoaded(getSettings()->emoteScale),
+            MessageElementFlag::EmoteImages);
+        this->emplace<TextElement>(QString::number(reward->cost),
+                                   MessageElementFlag::Text, MessageColor::Text,
+                                   FontStyle::ChatMediumBold);
+        this->emplace<LinebreakElement>();
+    }
 }
 
 }  // namespace chatterino
