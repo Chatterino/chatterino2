@@ -4,6 +4,8 @@
 #include "widgets/BasePopup.hpp"
 #include "widgets/splits/Split.hpp"
 
+#include <functional>
+
 namespace chatterino {
 
 class QuickSwitcherPopup : public BasePopup
@@ -27,7 +29,7 @@ private:
         bool matches(const QString &query) const;
 
     private:
-        std::function<void> action_;
+        std::function<void()> action_;
         Split *split_;
 
         // TODO(leon): Check if needed
