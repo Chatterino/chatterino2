@@ -196,7 +196,6 @@ MessagePtr TwitchMessageBuilder::build()
             this->args.channelPointRewardId);
         if (reward)
         {
-            this->message().flags.set(MessageFlag::RedeemedChannelPointReward);
             this->appendChannelPointRewardMessage(reward.get(), this);
         }
     }
@@ -1144,6 +1143,8 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
         builder->emplace<LinebreakElement>(
             MessageElementFlag::ChannelPointReward);
     }
+
+    builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
 }
 
 }  // namespace chatterino
