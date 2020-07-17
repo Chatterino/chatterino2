@@ -169,7 +169,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 // Painting
 void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                           Selection &selection, bool isLastReadMessage,
-                          bool isWindowFocused)
+                          bool isWindowFocused, bool isMentions)
 {
     auto app = getApp();
     QPixmap *pixmap = this->buffer_.get();
@@ -220,7 +220,8 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                          app->themes->messages.disabled);
     }
 
-    if (this->message_->flags.has(MessageFlag::RedeemedChannelPointReward))
+    if (!isMentions &&
+        this->message_->flags.has(MessageFlag::RedeemedChannelPointReward))
     {
         painter.fillRect(
             0, y, this->scale_ * 4, pixmap->height(),

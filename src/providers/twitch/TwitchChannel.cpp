@@ -193,6 +193,14 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
         return;
     }
 
+    if (!reward.isUserInputRequired)
+    {
+        MessageBuilder builder;
+        TwitchMessageBuilder::appendChannelPointRewardMessage(reward, &builder);
+        this->addMessage(builder.release());
+        return;
+    }
+
     bool result;
     {
         auto channelPointRewards = this->channelPointRewards_.access();

@@ -678,21 +678,18 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
-LinebreakElement::LinebreakElement()
-    : MessageElement(MessageElementFlag::Misc)
+LinebreakElement::LinebreakElement(MessageElementFlags flags)
+    : MessageElement(flags)
 {
 }
 
 void LinebreakElement::addToContainer(MessageLayoutContainer &container,
                                       MessageElementFlags flags)
 {
-    container.breakLine();
-}
-
-LinebreakElement &LinebreakElement::instance()
-{
-    static LinebreakElement instance;
-    return instance;
+    if (flags.hasAny(this->getFlags()))
+    {
+        container.breakLine();
+    }
 }
 
 ScalingImageElement::ScalingImageElement(ImageSet images,

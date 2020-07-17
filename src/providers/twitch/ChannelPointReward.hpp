@@ -18,6 +18,16 @@ struct ChannelPointReward {
     int cost;
     ImageSet image;
     bool hasParsedSuccessfully = false;
+    bool isUserInputRequired = false;
+
+    struct {
+        QString id;
+        QString login;
+        QString displayName;
+    } user;
+
+private:
+    void parseUser(rapidjson::Value &user);
 };
 
 }  // namespace chatterino

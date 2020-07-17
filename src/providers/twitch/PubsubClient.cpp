@@ -1134,11 +1134,6 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                 qDebug() << "No redemption info found for redeemed reward";
                 return;
             }
-            if (!rj::getSafeObject(msg, "reward", msg))
-            {
-                qDebug() << "No reward info found for redeemed reward";
-                return;
-            }
             this->signals_.pointReward.redeemed.invoke(msg);
         }
         else

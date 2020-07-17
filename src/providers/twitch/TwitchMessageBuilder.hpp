@@ -43,6 +43,9 @@ public:
     void triggerHighlights() override;
     MessagePtr build() override;
 
+    static void appendChannelPointRewardMessage(
+        const ChannelPointReward &reward, MessageBuilder *builder);
+
 private:
     void parseUsernameColor() override;
     void parseUsername() override;
@@ -68,8 +71,6 @@ private:
     void appendTwitchBadges();
     void appendChatterinoBadges();
     Outcome tryParseCheermote(const QString &string);
-
-    void appendChannelPointRewardMessage();
 
     QString roomID_;
     bool hasBits_ = false;

@@ -40,6 +40,9 @@ enum class MessageElementFlag {
     BttvEmoteImage = (1 << 6),
     BttvEmoteText = (1 << 7),
     BttvEmote = BttvEmoteImage | BttvEmoteText,
+
+    ChannelPointReward = (1 << 8),
+
     FfzEmoteImage = (1 << 10),
     FfzEmoteText = (1 << 11),
     FfzEmote = FfzEmoteImage | FfzEmoteText,
@@ -326,12 +329,10 @@ private:
 class LinebreakElement : public MessageElement
 {
 public:
-    LinebreakElement();
+    LinebreakElement(MessageElementFlags flags);
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
-
-    static LinebreakElement &instance();
 };
 
 // Image element which will pick the quality of the image based on ui scale
