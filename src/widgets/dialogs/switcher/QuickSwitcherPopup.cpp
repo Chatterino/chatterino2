@@ -64,8 +64,8 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
 
     for (auto pairs : openedChannels())
     {
-        auto chan = pairs.first;
-        auto *split = pairs.second;
+        ChannelPtr chan = pairs.first;
+        Split *split = pairs.second;
         if (chan->getName().contains(text, Qt::CaseInsensitive))
         {
             auto *item = new QListWidgetItem(
@@ -120,6 +120,9 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
         {
             if (count <= 0)
                 return true;
+
+            // TODO(leon)
+            this->ui_.list->currenItem()->action();
 
             Split *selectedSplit = this->ui_.list->currentItem()
                                        ->data(Qt::UserRole)
