@@ -1,10 +1,12 @@
-#include "widgets/dialogs/QuickSwitcherPopup.hpp"
+#include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 
+// TODO(leon): Clean up includes
 #include "Application.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/dialogs/switcher/SwitchSplitItem.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
@@ -68,9 +70,8 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
         Split *split = pairs.second;
         if (chan->getName().contains(text, Qt::CaseInsensitive))
         {
-            auto *item = new QListWidgetItem(
-                split->getContainer()->getTab()->getTitle());
-            item->setData(Qt::UserRole, QVariant::fromValue(split));
+            const QString title = split->getContainer()->getTab()->getTitle();
+            SwitchSplitItem *item = new SwitchSplitItem(title, split);
             this->ui_.list->addItem(item);
         }
     }
@@ -121,14 +122,9 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
             if (count <= 0)
                 return true;
 
-            // TODO(leon)
-            this->ui_.list->currenItem()->action();
-
-            Split *selectedSplit = this->ui_.list->currentItem()
-                                       ->data(Qt::UserRole)
-                                       .value<Split *>();
-            auto &nb = getApp()->windows->getMainWindow().getNotebook();
-            nb.select(selectedSplit->getContainer());
+            auto *item =
+                dynamic_cast<SwitcherItem *>(this->ui_.list->currentItem());
+            item->action();
 
             this->close();
             return true;

@@ -156,10 +156,10 @@ SOURCES += \
     src/messages/MessageColor.cpp \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
-    src/messages/SharedMessageBuilder.cpp \
     src/messages/search/AuthorPredicate.cpp \
     src/messages/search/LinkPredicate.cpp \
     src/messages/search/SubstringPredicate.cpp \
+    src/messages/SharedMessageBuilder.cpp \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/bttv/LoadBttvChannelEmote.cpp \
     src/providers/chatterino/ChatterinoBadges.cpp \
@@ -217,11 +217,11 @@ SOURCES += \
     src/util/IncognitoBrowser.cpp \
     src/util/InitUpdateButton.cpp \
     src/util/JsonQuery.cpp \
-    src/util/RapidjsonHelpers.cpp \
-    src/util/StreamLink.cpp \
-    src/util/StreamerMode.cpp \
-    src/util/Twitch.cpp \
     src/util/NuulsUploader.cpp \
+    src/util/RapidjsonHelpers.cpp \
+    src/util/StreamerMode.cpp \
+    src/util/StreamLink.cpp \
+    src/util/Twitch.cpp \
     src/util/WindowsHelper.cpp \
     src/widgets/AccountSwitchPopup.cpp \
     src/widgets/AccountSwitchWidget.cpp \
@@ -236,9 +236,11 @@ SOURCES += \
     src/widgets/dialogs/LoginDialog.cpp \
     src/widgets/dialogs/NotificationPopup.cpp \
     src/widgets/dialogs/QualityPopup.cpp \
-    src/widgets/dialogs/QuickSwitcherPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
+    src/widgets/dialogs/switcher/QuickSwitcherPopup.cpp \
+    src/widgets/dialogs/switcher/SwitcherItem.cpp \
+    src/widgets/dialogs/switcher/SwitchSplitItem.cpp \
     src/widgets/dialogs/TextInputDialog.cpp \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/dialogs/UserInfoPopup.cpp \
@@ -358,12 +360,12 @@ HEADERS += \
     src/messages/MessageContainer.hpp \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
-    src/messages/SharedMessageBuilder.hpp \
     src/messages/search/AuthorPredicate.hpp \
     src/messages/search/LinkPredicate.hpp \
     src/messages/search/MessagePredicate.hpp \
     src/messages/search/SubstringPredicate.hpp \
     src/messages/Selection.hpp \
+    src/messages/SharedMessageBuilder.hpp \
     src/PrecompiledHeader.hpp \
     src/providers/bttv/BttvEmotes.hpp \
     src/providers/bttv/LoadBttvChannelEmote.hpp \
@@ -432,13 +434,12 @@ HEADERS += \
     src/util/JsonQuery.hpp \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
+    src/util/NuulsUploader.hpp \
     src/util/Overloaded.hpp \
     src/util/PersistSignalVector.hpp \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
-    src/util/StreamerMode.hpp \
-    src/util/Twitch.hpp \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
@@ -448,8 +449,9 @@ HEADERS += \
     src/util/SharedPtrElementLess.hpp \
     src/util/Shortcut.hpp \
     src/util/StandardItemHelper.hpp \
+    src/util/StreamerMode.hpp \
     src/util/StreamLink.hpp \
-    src/util/NuulsUploader.hpp \
+    src/util/Twitch.hpp \
     src/util/WindowsHelper.hpp \
     src/widgets/AccountSwitchPopup.hpp \
     src/widgets/AccountSwitchWidget.hpp \
@@ -464,9 +466,11 @@ HEADERS += \
     src/widgets/dialogs/LoginDialog.hpp \
     src/widgets/dialogs/NotificationPopup.hpp \
     src/widgets/dialogs/QualityPopup.hpp \
-    src/widgets/dialogs/QuickSwitcherPopup.hpp \
     src/widgets/dialogs/SelectChannelDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
+    src/widgets/dialogs/switcher/QuickSwitcherPopup.hpp \
+    src/widgets/dialogs/switcher/SwitcherItem.hpp \
+    src/widgets/dialogs/switcher/SwitchSplitItem.hpp \
     src/widgets/dialogs/TextInputDialog.hpp \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/dialogs/UserInfoPopup.hpp \
