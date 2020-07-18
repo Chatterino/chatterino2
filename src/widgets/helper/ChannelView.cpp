@@ -467,6 +467,9 @@ void ChannelView::clearMessages()
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
     this->queueLayout();
+
+    this->lastMessageHasAlternateBackground_ = false;
+    this->lastMessageHasAlternateBackgroundReverse_ = true;
 }
 
 Scrollbar &ChannelView::getScrollBar()
