@@ -31,9 +31,9 @@ enum class SettingsDialogPreference {
 
 class SettingsDialog : public BaseWindow
 {
-public:
     SettingsDialog();
 
+public:
     static void showDialog(SettingsDialogPreference preferredTab =
                                SettingsDialogPreference::NoPreference);
 
