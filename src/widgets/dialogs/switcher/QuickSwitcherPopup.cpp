@@ -58,6 +58,20 @@ void QuickSwitcherPopup::initWidgets()
 
     {
         vbox.emplace<QListWidget>().assign(&this->ui_.list);
+
+        /*
+         * I also tried handling key events using the according slots but
+         * it lead to all kind of problems that did not occur with the
+         * eventFilter approach.
+         */
+        QObject::connect(this->ui_.list, &QListWidget::itemClicked, this,
+                         [this](QListWidgetItem *activated) {
+                             auto *item =
+                                 dynamic_cast<SwitcherItem *>(activated);
+
+                             item->action();
+                             this->close();
+                         });
     }
 }
 
