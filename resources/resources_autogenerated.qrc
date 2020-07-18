@@ -78,6 +78,8 @@
     <file>split/move.png</file>
     <file>split/right.png</file>
     <file>split/up.png</file>
+    <file>switcher/plus.svg</file>
+    <file>switcher/switch.svg</file>
     <file>tlds.txt</file>
     <file>twitch/admin.png</file>
     <file>twitch/automod.png</file>

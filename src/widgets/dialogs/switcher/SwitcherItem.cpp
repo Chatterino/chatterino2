@@ -2,8 +2,13 @@
 
 namespace chatterino {
 
-SwitcherItem::SwitcherItem(const QString &title)
-    : QListWidgetItem(title)
+SwitcherItem::SwitcherItem(const QString &text)
+    : QListWidgetItem(text)
+{
+}
+
+SwitcherItem::SwitcherItem(const QIcon &icon, const QString &text)
+    : QListWidgetItem(icon, text)
 {
 }
 

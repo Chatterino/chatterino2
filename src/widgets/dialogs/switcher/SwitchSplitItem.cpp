@@ -6,7 +6,7 @@
 namespace chatterino {
 
 SwitchSplitItem::SwitchSplitItem(const QString &text, Split *split)
-    : SwitcherItem(text)
+    : SwitcherItem(QIcon(":/switcher/switch.svg"), text)
     , split_(split)
 {
 }
