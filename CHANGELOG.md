@@ -14,3 +14,4 @@
 - Bugfix: Fixed message menu crashing if the message you right-clicked goes out of scope before you select an action (#1783) (#1787)
 - Settings open faster
 - Dev: Fully remove Twitch Chatroom support
+- Dev: Handle conversion of historical CLEARCHAT messages to NOTICE messages in Chatterino instead of relying on the Recent Messages API to handle it for us. (#1804)
