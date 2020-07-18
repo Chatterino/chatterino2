@@ -71,6 +71,12 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
         if (chan->getName().contains(text, Qt::CaseInsensitive))
         {
             const QString title = split->getContainer()->getTab()->getTitle();
+
+            /*
+             * We don't need to worry about memory management here because
+             * QListWidget::addItem takes ownership of the pointer as per
+             * https://doc.qt.io/qt-5/qlistwidget.html#details .
+             */
             SwitchSplitItem *item = new SwitchSplitItem(title, split);
             this->ui_.list->addItem(item);
         }
