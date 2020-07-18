@@ -4,6 +4,7 @@
 
 - Major: We now support image thumbnails coming from the link resolver. This feature is off by default and can be enabled in the settings with the "Show link thumbnail" setting. This feature also requires the "Show link info when hovering" setting to be enabled (#1664)
 - Major: Added image upload functionality to i.nuuls.com with an ability to change upload destination. This works by dragging and dropping an image into a split, or pasting an image into the text edit field. (#1332, #1741)
+- Minor: Clicking on @mentions will open the User Popup. (#1674)
 - Minor: You can now open the Twitch User Card by middle-mouse clicking a username. (#1669)
 - Minor: User Popup now also includes recent user messages (#1729)
 - Minor: BetterTTV / FrankerFaceZ emote tooltips now also have emote authors' name (#1721)

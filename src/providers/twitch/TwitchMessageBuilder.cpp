@@ -27,6 +27,9 @@
 
 namespace {
 
+// matches a mention with punctuation at the end, like "@username," or "@username!!!" where capture group would return "username"
+const QRegularExpression mentionRegex("^@(\\w+)[.,!?;]*?$");
+
 const QSet<QString> zeroWidthEmotes{
     "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
     "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
@@ -407,29 +410,50 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
     // Actually just text
     auto linkString = this->matchLink(string);
-    auto link = Link();
     auto textColor = this->action_ ? MessageColor(this->usernameColor_)
                                    : MessageColor(MessageColor::Text);
 
-    if (linkString.isEmpty())
-    {
-        if (string.startsWith('@'))
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold);
-            this->emplace<TextElement>(
-                string, MessageElementFlag::NonBoldUsername, textColor);
-        }
-        else
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::Text,
-                                       textColor);
-        }
-    }
-    else
+    if (!linkString.isEmpty())
     {
         this->addLink(string, linkString);
+        return;
     }
+
+    if (string.startsWith('@'))
+    {
+        auto match = mentionRegex.match(string);
+        // Only treat as @mention if valid username
+        if (match.hasMatch())
+        {
+            QString username = match.captured(1);
+            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+                                       textColor, FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, username});
+
+            this->emplace<TextElement>(
+                    string, MessageElementFlag::NonBoldUsername, textColor)
+                ->setLink({Link::UserInfo, username});
+            return;
+        }
+    }
+
+    if (this->twitchChannel != nullptr && getSettings()->findAllUsernames)
+    {
+        auto chatters = this->twitchChannel->accessChatters();
+        if (chatters->contains(string))
+        {
+            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+                                       textColor, FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, string});
+
+            this->emplace<TextElement>(
+                    string, MessageElementFlag::NonBoldUsername, textColor)
+                ->setLink({Link::UserInfo, string});
+            return;
+        }
+    }
+
+    this->emplace<TextElement>(string, MessageElementFlag::Text, textColor);
 }
 
 void TwitchMessageBuilder::parseMessageID()

@@ -634,7 +634,25 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     {
         std::vector<MessagePtr> builtMessages;
 
-        builtMessages.emplace_back(makeSystemMessage(message->content()));
+        if (message->tags().contains("historical"))
+        {
+            bool customReceived = false;
+            qint64 ts = message->tags()
+                            .value("rm-received-ts")
+                            .toLongLong(&customReceived);
+            if (!customReceived)
+            {
+                ts = message->tags().value("tmi-sent-ts").toLongLong();
+            }
+
+            QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(ts);
+            builtMessages.emplace_back(
+                makeSystemMessage(message->content(), dateTime.time()));
+        }
+        else
+        {
+            builtMessages.emplace_back(makeSystemMessage(message->content()));
+        }
 
         return builtMessages;
     }

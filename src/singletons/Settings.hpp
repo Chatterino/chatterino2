@@ -94,6 +94,8 @@ public:
     BoolSetting enableSmoothScrollingNewMessages = {
         "/appearance/smoothScrollingNewMessages", false};
     BoolSetting boldUsernames = {"/appearance/messages/boldUsernames", false};
+    BoolSetting findAllUsernames = {"/appearance/messages/findAllUsernames",
+                                    false};
     // BoolSetting customizable splitheader
     BoolSetting headerViewerCount = {"/appearance/splitheader/showViewerCount",
                                      false};
