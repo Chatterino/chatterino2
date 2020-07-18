@@ -238,6 +238,7 @@ SOURCES += \
     src/widgets/dialogs/QualityPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
+    src/widgets/dialogs/switcher/NewTabItem.cpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.cpp \
     src/widgets/dialogs/switcher/SwitcherItem.cpp \
     src/widgets/dialogs/switcher/SwitchSplitItem.cpp \
@@ -468,6 +469,7 @@ HEADERS += \
     src/widgets/dialogs/QualityPopup.hpp \
     src/widgets/dialogs/SelectChannelDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
+    src/widgets/dialogs/switcher/NewTabItem.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.hpp \
     src/widgets/dialogs/switcher/SwitcherItem.hpp \
     src/widgets/dialogs/switcher/SwitchSplitItem.hpp \

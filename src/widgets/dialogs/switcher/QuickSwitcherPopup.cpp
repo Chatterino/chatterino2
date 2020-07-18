@@ -6,6 +6,7 @@
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/dialogs/switcher/NewTabItem.hpp"
 #include "widgets/dialogs/switcher/SwitchSplitItem.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/SplitContainer.hpp"
@@ -84,7 +85,9 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
 
     if (!text.isEmpty())
     {
-        this->ui_.list->addItem("Open channel \"" + text + "\"");
+        NewTabItem *item =
+            new NewTabItem("Open channel \"" + text + "\" in new tab", text);
+        this->ui_.list->addItem(item);
     }
 
     this->ui_.list->setCurrentRow(0, QItemSelectionModel::SelectCurrent);
