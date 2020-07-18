@@ -359,7 +359,8 @@ void Window::addShortcuts()
     });
 
     createWindowShortcut(this, "CTRL+K", [this] {
-        auto quickSwitcher = new QuickSwitcherPopup;
+        auto quickSwitcher =
+            new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
         quickSwitcher->show();
     });
 }

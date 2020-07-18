@@ -39,8 +39,15 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
                                              BaseWindow::Flags::TopMost},
                 parent)
 {
-    this->setAttribute(Qt::WA_DeleteOnClose);
+    this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
     this->initWidgets();
+
+    const QRect geom = parent->geometry();
+    const QRect bounds = this->getBounds();
+    const QPoint pos = geom.center() - QPoint(bounds.width() / 2, 0);
+
+    this->setStayInScreenRect(true);
+    this->moveTo(this, pos, false);
 }
 
 void QuickSwitcherPopup::initWidgets()
