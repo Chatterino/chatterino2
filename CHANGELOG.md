@@ -10,6 +10,7 @@
 - Minor: Emotes in the emote popup are now sorted in the same order as the tab completion (#1549)
 - Minor: Removed "Online Logs" functionality as services are shut down (#1640)
 - Minor: CTRL+F now selects the Find text input field in the Settings Dialog (#1806 #1811)
+- Minor: CTRL+F now selects the search text input field in the Search Popup (#1812)
 - Bugfix: Fix preview on hover not working when Animated emotes options was disabled (#1546)
 - Bugfix: FFZ custom mod badges no longer scale with the emote scale options (#1602)
 - Bugfix: MacOS updater looked for non-existing fields, causing it to always fail the update check (#1642)
