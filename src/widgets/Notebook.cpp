@@ -450,14 +450,8 @@ void Notebook::performLayout(bool animated)
     else
     {
         const int lineThickness = int(2 * scale);
-        auto largestWidth = 0;
         auto x = left;
         auto y = 0;
-
-        for (const auto &item : this->items_)
-        {
-            largestWidth = std::max(item.tab->normalTabWidth(), largestWidth);
-        }
 
         // set size of custom buttons (settings, user, ...)
         for (auto *btn : this->customButtons_)
@@ -468,28 +462,63 @@ void Notebook::performLayout(bool animated)
             }
 
             btn->setFixedSize(tabHeight, tabHeight - 1);
-            if (x > largestWidth)
-            {
-                x = left;
-                y += tabHeight;
-            }
             btn->move(x, y);
             x += tabHeight;
         }
 
-        y += tabHeight;
+        int buttonWidth = x;
 
-        for (auto &item : this->items_)
+        y += tabHeight;
+        int top = y;
+        x = left;
+
+        int verticalRowSpace = (this->height() - top) / tabHeight;
+        if (verticalRowSpace == 0)  // window hasn't properly rendered yet
+            return;
+        int count = this->items_.size() + (this->showAddButton_ ? 1 : 0);
+        int columnCount = ceil((float)count / verticalRowSpace);
+
+        for (int col = 0; col < columnCount; col++)
         {
-            /// Layout tab
-            item.tab->growWidth(largestWidth);
-            item.tab->moveAnimated(QPoint(left, y), animated);
-            y += tabHeight;
+            auto largestWidth = 0;
+            int colStart = col * verticalRowSpace;
+            int colEnd =
+                std::min((col + 1) * verticalRowSpace, this->items_.size());
+
+            for (int i = colStart; i < colEnd; i++)
+            {
+                largestWidth = std::max(
+                    this->items_.at(i).tab->normalTabWidth(), largestWidth);
+            }
+
+            for (int i = colStart; i < colEnd; i++)
+            {
+                auto item = this->items_.at(i);
+
+                /// Layout tab
+                item.tab->growWidth(largestWidth);
+                item.tab->moveAnimated(QPoint(x, y), animated);
+                y += tabHeight;
+            }
+
+            if (col == columnCount - 1 && this->showAddButton_)
+            {
+                this->addButton_->move(x, y);
+                if (largestWidth == 0)
+                {
+                    largestWidth = this->addButton_->width();
+                }
+            }
+
+            x += largestWidth + lineThickness;
+            y = top;
         }
 
-        if (this->lineOffset_ != largestWidth + lineThickness)
+        x = std::max(x, buttonWidth);
+
+        if (this->lineOffset_ != x - lineThickness)
         {
-            this->lineOffset_ = largestWidth + lineThickness;
+            this->lineOffset_ = x - lineThickness;
             this->update();
         }
 
@@ -501,16 +530,14 @@ void Notebook::performLayout(bool animated)
 
         if (this->showAddButton_)
         {
-            this->addButton_->move(left, y);
             this->addButton_->raise();
         }
 
         // set page bounds
         if (this->selectedPage_ != nullptr)
         {
-            this->selectedPage_->move(this->lineOffset_ + lineThickness, 0);
-            this->selectedPage_->resize(
-                width() - this->lineOffset_ - lineThickness, height());
+            this->selectedPage_->move(x, 0);
+            this->selectedPage_->resize(width() - x, height());
             this->selectedPage_->raise();
         }
     }
@@ -528,19 +555,22 @@ void Notebook::setHorizontalTabs(bool horizontal)
 void Notebook::paintEvent(QPaintEvent *event)
 {
     BaseWidget::paintEvent(event);
+    auto scale = this->scale();
 
     QPainter painter(this);
     if (this->horizontalTabs_)
     {
         /// horizontal line
-        painter.fillRect(0, this->lineOffset_, this->width(),
-                         int(2 * this->scale()), this->theme->tabs.dividerLine);
+        painter.fillRect(0, this->lineOffset_, this->width(), int(2 * scale),
+                         this->theme->tabs.dividerLine);
     }
     else
     {
+        painter.fillRect(0, int(NOTEBOOK_TAB_HEIGHT * scale), this->lineOffset_,
+                         int(2 * scale), this->theme->tabs.dividerLine);
         /// vertical line
-        painter.fillRect(this->lineOffset_, 0, int(2 * this->scale()),
-                         this->height(), this->theme->tabs.dividerLine);
+        painter.fillRect(this->lineOffset_, 0, int(2 * scale), this->height(),
+                         this->theme->tabs.dividerLine);
     }
 }
 
