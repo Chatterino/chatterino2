@@ -78,6 +78,9 @@ public:
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
                                      false};
 
+    // true = horizontal tabs, false = vertical tabs
+    BoolSetting tabDirection = {"/appearance/tabDirection", true};
+
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};
     IntSetting collpseMessagesMinLines = {

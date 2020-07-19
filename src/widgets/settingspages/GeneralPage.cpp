@@ -299,6 +299,16 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val) + "x";
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+    layout.addDropdown<bool>(
+        "Tab direction", {"Horizontal", "Vertical"}, s.tabDirection,
+        [](auto val) {
+            if (val)
+                return "Horizontal";
+            else
+                return "Vertical";
+        },
+        [](auto args) { return args.value == "Horizontal"; });
+
     layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost);
 #ifdef USEWINSDK

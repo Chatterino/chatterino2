@@ -52,6 +52,8 @@ public:
 
     void performLayout(bool animate = false);
 
+    void setHorizontalTabs(bool horizontal);
+
 protected:
     virtual void scaleChangedEvent(float scale_) override;
     virtual void resizeEvent(QResizeEvent *) override;
@@ -81,7 +83,8 @@ private:
 
     bool allowUserTabManagement_ = false;
     bool showAddButton_ = false;
-    int lineY_ = 20;
+    int lineOffset_ = 20;
+    bool horizontalTabs_ = true;
 };
 
 class SplitNotebook : public Notebook, pajlada::Signals::SignalHolder

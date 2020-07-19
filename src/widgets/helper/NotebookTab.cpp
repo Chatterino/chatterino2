@@ -89,7 +89,20 @@ void NotebookTab::themeChangedEvent()
     this->setMouseEffectColor(this->theme->tabs.regular.text);
 }
 
-void NotebookTab::updateSize()
+void NotebookTab::growWidth(int width)
+{
+    if (this->growWidth_ != width)
+    {
+        this->growWidth_ = width;
+        this->updateSize();
+    }
+    else
+    {
+        this->growWidth_ = width;
+    }
+}
+
+int NotebookTab::normalTabWidth()
 {
     float scale = this->scale();
     int width;
@@ -114,7 +127,20 @@ void NotebookTab::updateSize()
     {
         width = clamp(width, this->height(), int(150 * scale));
     }
+
+    return width;
+}
+
+void NotebookTab::updateSize()
+{
+    float scale = this->scale();
+    int width = this->normalTabWidth();
     auto height = int(NOTEBOOK_TAB_HEIGHT * scale);
+
+    if (width < this->growWidth_)
+    {
+        width = this->growWidth_;
+    }
 
     if (this->width() != width || this->height() != height)
     {
@@ -175,7 +201,7 @@ void NotebookTab::titleUpdated()
 {
     // Queue up save because: Tab title changed
     getApp()->windows->queueSave();
-
+    this->notebook_->performLayout();
     this->updateSize();
     this->update();
 }
