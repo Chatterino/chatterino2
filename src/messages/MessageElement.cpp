@@ -361,10 +361,9 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 if (isSurrogate)
                     i++;
             }
-
-            container.addElement(getTextLayoutElement(
+            //add the final piece of wrapped text
+            container.addElementNoLineBreak(getTextLayoutElement(
                 text.mid(wordStart), width, this->hasTrailingSpace()));
-            container.breakLine();
         }
     }
 }
@@ -670,10 +669,9 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
             }
 
             // Add last remaining text & segments
-            container.addElement(
+            container.addElementNoLineBreak(
                 getTextLayoutElement(text.mid(wordStart), segments, width,
                                      this->hasTrailingSpace()));
-            container.breakLine();
         }
     }
 }
