@@ -357,7 +357,7 @@ void Notebook::performLayout(bool animated)
     const auto tabHeight = int(NOTEBOOK_TAB_HEIGHT * scale);
     const auto addButtonWidth = this->showAddButton_ ? tabHeight : 0;
 
-    if (this->horizontalTabs_)
+    if (this->tabDirection_ == NotebookTabDirection::Horizontal)
     {
         auto x = left;
         auto y = 0;
@@ -543,11 +543,11 @@ void Notebook::performLayout(bool animated)
     }
 }
 
-void Notebook::setHorizontalTabs(bool horizontal)
+void Notebook::setTabDirection(NotebookTabDirection direction)
 {
-    if (horizontal != this->horizontalTabs_)
+    if (direction != this->tabDirection_)
     {
-        this->horizontalTabs_ = horizontal;
+        this->tabDirection_ = direction;
         this->performLayout();
     }
 }
@@ -558,7 +558,7 @@ void Notebook::paintEvent(QPaintEvent *event)
     auto scale = this->scale();
 
     QPainter painter(this);
-    if (this->horizontalTabs_)
+    if (this->tabDirection_ == NotebookTabDirection::Horizontal)
     {
         /// horizontal line
         painter.fillRect(0, this->lineOffset_, this->width(), int(2 * scale),

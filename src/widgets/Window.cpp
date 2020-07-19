@@ -62,8 +62,9 @@ Window::Window(WindowType type)
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
-        getSettings()->tabDirection.connect(
-            [this](bool val) { this->notebook_->setHorizontalTabs(val); });
+        getSettings()->tabDirection.connect([this](int val) {
+            this->notebook_->setTabDirection(NotebookTabDirection(val));
+        });
     }
     else
     {
@@ -173,7 +174,6 @@ void Window::addLayout()
 
     this->notebook_->setAllowUserTabManagement(true);
     this->notebook_->setShowAddButton(true);
-    this->notebook_->setHorizontalTabs(false);
 }
 
 void Window::addCustomTitlebarButtons()

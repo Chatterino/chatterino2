@@ -16,6 +16,8 @@ class NotebookButton;
 class NotebookTab;
 class SplitContainer;
 
+enum NotebookTabDirection { Horizontal = 0, Vertical = 1 };
+
 class Notebook : public BaseWidget
 {
     Q_OBJECT
@@ -52,7 +54,7 @@ public:
 
     void performLayout(bool animate = false);
 
-    void setHorizontalTabs(bool horizontal);
+    void setTabDirection(NotebookTabDirection direction);
 
 protected:
     virtual void scaleChangedEvent(float scale_) override;
@@ -84,7 +86,7 @@ private:
     bool allowUserTabManagement_ = false;
     bool showAddButton_ = false;
     int lineOffset_ = 20;
-    bool horizontalTabs_ = true;
+    NotebookTabDirection tabDirection_ = NotebookTabDirection::Horizontal;
 };
 
 class SplitNotebook : public Notebook, pajlada::Signals::SignalHolder
