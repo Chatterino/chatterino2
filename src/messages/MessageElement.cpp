@@ -669,10 +669,9 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
             }
 
             // Add last remaining text & segments
-            container.addElement(
+            container.addElementNoLineBreak(
                 getTextLayoutElement(text.mid(wordStart), segments, width,
                                      this->hasTrailingSpace()));
-            container.breakLine();
         }
     }
 }
