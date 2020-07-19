@@ -87,6 +87,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
 {
     this->ui_.list->clear();
 
+    // Add items for navigating to different splits
     for (auto pairs : openedChannels())
     {
         ChannelPtr chan = pairs.first;
@@ -105,6 +106,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
         }
     }
 
+    // Add item for opening a channel in a new tab
     if (!text.isEmpty())
     {
         NewTabItem *item =
