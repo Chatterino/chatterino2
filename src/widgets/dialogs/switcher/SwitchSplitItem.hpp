@@ -1,6 +1,6 @@
 #pragma once
 
-#include "widgets/dialogs/switcher/SwitcherItem.hpp"
+#include "widgets/dialogs/switcher/AbstractSwitcherItem.hpp"
 
 #include "singletons/WindowManager.hpp"
 #include "widgets/Notebook.hpp"
@@ -10,7 +10,7 @@
 
 namespace chatterino {
 
-class SwitchSplitItem : public SwitcherItem
+class SwitchSplitItem : public AbstractSwitcherItem
 {
 public:
     SwitchSplitItem(const QString &text, Split *split);

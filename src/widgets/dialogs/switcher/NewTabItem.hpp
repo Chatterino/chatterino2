@@ -1,10 +1,10 @@
 #pragma once
 
-#include "widgets/dialogs/switcher/SwitcherItem.hpp"
+#include "widgets/dialogs/switcher/AbstractSwitcherItem.hpp"
 
 namespace chatterino {
 
-class NewTabItem : public SwitcherItem
+class NewTabItem : public AbstractSwitcherItem
 {
 public:
     NewTabItem(const QString &text, const QString &channelName);

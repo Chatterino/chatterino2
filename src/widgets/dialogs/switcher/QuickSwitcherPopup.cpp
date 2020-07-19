@@ -72,14 +72,14 @@ void QuickSwitcherPopup::initWidgets()
          * it lead to all kind of problems that did not occur with the
          * eventFilter approach.
          */
-        QObject::connect(this->ui_.list, &QListWidget::itemClicked, this,
-                         [this](QListWidgetItem *activated) {
-                             auto *item =
-                                 dynamic_cast<SwitcherItem *>(activated);
+        QObject::connect(
+            this->ui_.list, &QListWidget::itemClicked, this,
+            [this](QListWidgetItem *activated) {
+                auto *item = dynamic_cast<AbstractSwitcherItem *>(activated);
 
-                             item->action();
-                             this->close();
-                         });
+                item->action();
+                this->close();
+            });
     }
 }
 
@@ -153,8 +153,8 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
             if (count <= 0)
                 return true;
 
-            auto *item =
-                dynamic_cast<SwitcherItem *>(this->ui_.list->currentItem());
+            auto *item = dynamic_cast<AbstractSwitcherItem *>(
+                this->ui_.list->currentItem());
             item->action();
 
             this->close();
