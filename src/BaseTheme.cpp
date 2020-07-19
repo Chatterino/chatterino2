@@ -148,7 +148,8 @@ void AB_THEME_CLASS::actuallyUpdate(double hue, double multiplier)
         //            this->tabs.highlighted = {fg, {QColor("#777"),
         //            QColor("#777"), QColor("#666")}};
 
-        this->tabs.dividerLine = this->tabs.selected.backgrounds.regular.color();
+        this->tabs.dividerLine =
+            this->tabs.selected.backgrounds.regular.color();
     }
 
     // Message
