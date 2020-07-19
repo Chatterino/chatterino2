@@ -39,6 +39,7 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
                                              BaseWindow::Flags::TopMost},
                 parent)
 {
+    this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
     this->initWidgets();
 
