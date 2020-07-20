@@ -466,9 +466,10 @@ void Notebook::performLayout(bool animated)
             x += tabHeight;
         }
 
-        int buttonWidth = x;
+        if (this->customButtons_.size() > 0)
+            y = tabHeight;
 
-        y += tabHeight;
+        int buttonWidth = x;
         int top = y;
         x = left;
 
@@ -566,8 +567,13 @@ void Notebook::paintEvent(QPaintEvent *event)
     }
     else
     {
-        painter.fillRect(0, int(NOTEBOOK_TAB_HEIGHT * scale), this->lineOffset_,
-                         int(2 * scale), this->theme->tabs.dividerLine);
+        if (this->customButtons_.size() > 0)
+        {
+            painter.fillRect(0, int(NOTEBOOK_TAB_HEIGHT * scale),
+                             this->lineOffset_, int(2 * scale),
+                             this->theme->tabs.dividerLine);
+        }
+
         /// vertical line
         painter.fillRect(this->lineOffset_, 0, int(2 * scale), this->height(),
                          this->theme->tabs.dividerLine);
