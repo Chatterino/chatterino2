@@ -492,6 +492,15 @@ void Notebook::performLayout(bool animated)
                     this->items_.at(i).tab->normalTabWidth(), largestWidth);
             }
 
+            if (col == columnCount - 1 && this->showAddButton_ &&
+                largestWidth == 0)
+            {
+                largestWidth = this->addButton_->width();
+            }
+
+            if (largestWidth + x < buttonWidth && col == columnCount - 1)
+                largestWidth = buttonWidth - x;
+
             for (int i = colStart; i < colEnd; i++)
             {
                 auto item = this->items_.at(i);
@@ -505,10 +514,6 @@ void Notebook::performLayout(bool animated)
             if (col == columnCount - 1 && this->showAddButton_)
             {
                 this->addButton_->move(x, y);
-                if (largestWidth == 0)
-                {
-                    largestWidth = this->addButton_->width();
-                }
             }
 
             x += largestWidth + lineThickness;
