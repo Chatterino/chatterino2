@@ -32,9 +32,9 @@ QString tokenTypeToInfoString(TokenType type)
         case OR:
             return "<or>";
         case LP:
-            return "<right parenthesis>";
-        case RP:
             return "<left parenthesis>";
+        case RP:
+            return "<right parenthesis>";
         case PLUS:
             return "<plus>";
         case MINUS:
@@ -95,6 +95,22 @@ TokenType ValueExpression::type()
 QString ValueExpression::debug()
 {
     return this->value_.toString();
+}
+
+QString ValueExpression::filterString()
+{
+    switch (this->type_)
+    {
+        case INT:
+            return QString::number(this->value_.toInt());
+        case STRING:
+            return QString("\"%1\"").arg(
+                this->value_.toString().replace("\"", "\\\""));
+        case IDENTIFIER:
+            return this->value_.toString();
+        default:
+            return "";
+    }
 }
 
 // BinaryOperation
@@ -212,6 +228,63 @@ QString BinaryOperation::debug()
              this->right_->debug());
 }
 
+QString BinaryOperation::filterString()
+{
+    QString opText;
+    switch (this->op_)
+    {
+        case AND:
+            opText = "&&";
+            break;
+        case OR:
+            opText = "||";
+            break;
+        case PLUS:
+            opText = "+";
+            break;
+        case MINUS:
+            opText = "-";
+            break;
+        case MULTIPLY:
+            opText = "*";
+            break;
+        case DIVIDE:
+            opText = "/";
+            break;
+        case MOD:
+            opText = "%";
+            break;
+        case EQ:
+            opText = "==";
+            break;
+        case NEQ:
+            opText = "!=";
+            break;
+        case LT:
+            opText = "<";
+            break;
+        case GT:
+            opText = ">";
+            break;
+        case LTE:
+            opText = "<=";
+            break;
+        case GTE:
+            opText = ">=";
+            break;
+        case CONTAINS:
+            opText = "contains";
+            break;
+        default:
+            opText = "";
+            break;
+    }
+    return QString("(%1) %2 (%3)")
+        .arg(this->left_->filterString())
+        .arg(opText)
+        .arg(this->right_->filterString());
+}
+
 // UnaryOperation
 
 UnaryOperation::UnaryOperation(TokenType op, Expression *right)
@@ -238,6 +311,21 @@ QString UnaryOperation::debug()
 {
     return QString("(%1 %2)").arg(tokenTypeToInfoString(this->op_),
                                   this->right_->debug());
+}
+
+QString UnaryOperation::filterString()
+{
+    QString opText;
+    switch (this->op_)
+    {
+        case NOT:
+            opText = "!";
+            break;
+        default:
+            opText = "";
+            break;
+    }
+    return QString("%1(%2)").arg(opText).arg(this->right_->filterString());
 }
 
 }  // namespace filterparser

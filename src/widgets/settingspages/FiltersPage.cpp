@@ -83,7 +83,7 @@ void FiltersPage::tableCellClicked(const QModelIndex &clicked,
             popup.setWindowTitle("Valid filter");
             popup.setText("Filter is valid");
             popup.setInformativeText(
-                QString("Parsed as:\n%1").arg(f.debugString()));
+                QString("Parsed as:\n%1").arg(f.filterString()));
         }
         else
         {

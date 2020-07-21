@@ -17,6 +17,7 @@ public:
 
     const QStringList &errors() const;
     const QString debugString() const;
+    const QString filterString() const;
 
 private:
     Expression *parseExpression(bool top = false);

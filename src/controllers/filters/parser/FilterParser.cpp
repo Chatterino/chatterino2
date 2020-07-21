@@ -242,6 +242,7 @@ Expression *FilterParser::parseValue()
             // remove quote marks
             auto val = before.mid(1);
             val.chop(1);
+            val = val.replace("\\\"", "\"");
             return new ValueExpression(val, type);
         }
         else if (type == TokenType::IDENTIFIER)
@@ -285,6 +286,11 @@ const QStringList &FilterParser::errors() const
 const QString FilterParser::debugString() const
 {
     return this->builtExpression_->debug();
+}
+
+const QString FilterParser::filterString() const
+{
+    return this->builtExpression_->filterString();
 }
 
 }  // namespace filterparser

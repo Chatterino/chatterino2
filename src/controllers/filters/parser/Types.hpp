@@ -65,6 +65,11 @@ public:
     {
         return "(false)";
     }
+
+    virtual QString filterString()
+    {
+        return "";
+    }
 };
 
 class ValueExpression : public Expression
@@ -75,6 +80,7 @@ public:
 
     QVariant execute(const ContextMap &context) override;
     QString debug() override;
+    QString filterString() override;
 
 private:
     QVariant value_;
@@ -88,6 +94,7 @@ public:
 
     QVariant execute(const ContextMap &context) override;
     QString debug() override;
+    QString filterString() override;
 
 private:
     TokenType op_;
@@ -102,6 +109,7 @@ public:
 
     QVariant execute(const ContextMap &context) override;
     QString debug() override;
+    QString filterString() override;
 
 private:
     TokenType op_;
