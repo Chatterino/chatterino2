@@ -23,7 +23,7 @@ private:
     Expression *parseExpression(bool top = false);
     Expression *parseAnd();
     Expression *parseUnary();
-    Expression *parseParenthesis();
+    Expression *parseParentheses();
     Expression *parseCondition();
     Expression *parseValue();
 

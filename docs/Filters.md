@@ -103,9 +103,9 @@ Double check the table above to see the types of each variable to prevent unexpe
 ### About the order of operations
 The order of operations in filters may not be exactly what you expect.
 
-- Expressions in parenthesis are evaluated first
+- Expressions in parentheses are evaluated first
 - Math operations are evaluated from left to right, not by MDAS. `2 + 3 * 4` yields `20`, not `14`.
 - `a && b || c && d` is evaluated as `(a && b) || (c && d)`
 - `a || b && c || d` is evaluated as `a || (b && c) || d`
 
-Basically, if you're unsure about the order of operations, use extra parenthesis.
+Basically, if you're unsure about the order of operations, use extra parentheses.

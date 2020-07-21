@@ -142,7 +142,7 @@ Expression *FilterParser::parseUnary()
     }
 }
 
-Expression *FilterParser::parseParenthesis()
+Expression *FilterParser::parseParentheses()
 {
     // Don't call .next() before calling this method
     assert(this->tokenizer_.nextTokenType() == TokenType::LP);
@@ -159,12 +159,12 @@ Expression *FilterParser::parseParenthesis()
     {
         if (this->tokenizer_.hasNext())
         {
-            this->errorLog(QString("Missing closing parenthesis: got %1")
+            this->errorLog(QString("Missing closing parentheses: got %1")
                                .arg(this->tokenizer_.preview()));
         }
         else
         {
-            this->errorLog("Missing closing parenthesis at end of statement");
+            this->errorLog("Missing closing parentheses at end of statement");
         }
 
         return e;
@@ -174,12 +174,12 @@ Expression *FilterParser::parseParenthesis()
 Expression *FilterParser::parseCondition()
 {
     Expression *value = nullptr;
-    // parse expression wrapped in parenthesis
+    // parse expression wrapped in parentheses
     if (this->tokenizer_.hasNext() &&
         this->tokenizer_.nextTokenType() == TokenType::LP)
     {
-        // get value inside parenthesis
-        value = this->parseParenthesis();
+        // get value inside parentheses
+        value = this->parseParentheses();
     }
     else
     {
@@ -251,7 +251,7 @@ Expression *FilterParser::parseValue()
         }
         else if (type == TokenType::LP)
         {
-            return this->parseParenthesis();
+            return this->parseParentheses();
         }
         else
         {
