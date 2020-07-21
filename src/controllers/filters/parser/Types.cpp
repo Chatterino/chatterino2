@@ -7,6 +7,11 @@ bool convertVariantTypes(QVariant &a, QVariant &b, int type)
     return a.convert(type) && b.convert(type);
 }
 
+bool variantTypesMatch(QVariant &a, QVariant &b, QVariant::Type type)
+{
+    return a.type() == type && b.type() == type;
+}
+
 QString tokenTypeToInfoString(TokenType type)
 {
     switch (type)
@@ -90,8 +95,6 @@ TokenType ValueExpression::type()
 QString ValueExpression::debug()
 {
     return this->value_.toString();
-    //        return QString("(%1 %2)").arg(tokenTypeToString(this->type_),
-    //                                      this->value_.toString());
 }
 
 // BinaryOperation
@@ -146,8 +149,18 @@ QVariant BinaryOperation::execute(const ContextMap &context)
                 return left.toBool() && right.toBool();
             return false;
         case EQ:
+            if (variantTypesMatch(left, right, QVariant::Type::String))
+            {
+                return left.toString().compare(right.toString(),
+                                               Qt::CaseInsensitive) == 0;
+            }
             return left == right;
         case NEQ:
+            if (variantTypesMatch(left, right, QVariant::Type::String))
+            {
+                return left.toString().compare(right.toString(),
+                                               Qt::CaseInsensitive) != 0;
+            }
             return left != right;
         case LT:
             if (convertVariantTypes(left, right, QMetaType::Int))
