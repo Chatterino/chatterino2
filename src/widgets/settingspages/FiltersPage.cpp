@@ -49,12 +49,12 @@ FiltersPage::FiltersPage()
         }
     });
 
-    auto addAdvancedButton = new QPushButton("Add (Advanced)");
-    QObject::connect(addAdvancedButton, &QPushButton::pressed, [] {
+    auto quickAddButton = new QPushButton("Quick Add");
+    QObject::connect(quickAddButton, &QPushButton::pressed, [] {
         getSettings()->filterRecords.append(
             FilterRecord{"My filter", "message.content contains \"hello\""});
     });
-    view->addCustomButton(addAdvancedButton);
+    view->addCustomButton(quickAddButton);
 
     QObject::connect(view->getTableView(), &QTableView::clicked,
                      [this, view](const QModelIndex &clicked) {
