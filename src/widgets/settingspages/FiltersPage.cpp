@@ -3,6 +3,7 @@
 #include "controllers/filters/FilterModel.hpp"
 #include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/dialogs/ChannelFilterEditorDialog.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
 #include <QTableView>
@@ -40,9 +41,20 @@ FiltersPage::FiltersPage()
     });
 
     view->addButtonPressed.connect([] {
+        ChannelFilterEditorDialog d;
+        if (d.exec() == QDialog::Accepted)
+        {
+            getSettings()->filterRecords.append(
+                FilterRecord{d.getTitle(), d.getFilter()});
+        }
+    });
+
+    auto addAdvancedButton = new QPushButton("Add (Advanced)");
+    QObject::connect(addAdvancedButton, &QPushButton::pressed, [] {
         getSettings()->filterRecords.append(
             FilterRecord{"My filter", "message.content contains \"hello\""});
     });
+    view->addCustomButton(addAdvancedButton);
 
     QObject::connect(view->getTableView(), &QTableView::clicked,
                      [this, view](const QModelIndex &clicked) {
