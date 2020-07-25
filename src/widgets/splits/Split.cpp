@@ -715,7 +715,7 @@ void Split::copyToClipboard()
 
 void Split::setFiltersDialog()
 {
-    SelectChannelFiltersDialog d(this->view_->getFilters(), this);
+    SelectChannelFiltersDialog d(this->getFilters(), this);
     d.setWindowTitle("Select filters");
 
     if (d.exec() == QDialog::Accepted)
@@ -731,13 +731,14 @@ void Split::setFilters(const QList<QUuid> ids)
 
 const QList<QUuid> Split::getFilters() const
 {
-    return this->view_->getFilters();
+    return this->view_->getFilterIds();
 }
 
 void Split::showSearch()
 {
     SearchPopup *popup = new SearchPopup();
 
+    popup->setChannelFilters(this->view_->getFilterSet());
     popup->setChannel(this->getChannel());
     popup->show();
 }

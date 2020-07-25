@@ -627,7 +627,7 @@ void ChannelView::setFilters(const QList<QUuid> &ids)
     this->channelFilters_ = new FilterSet(ids);
 }
 
-const QList<QUuid> ChannelView::getFilters() const
+const QList<QUuid> ChannelView::getFilterIds() const
 {
     if (this->channelFilters_ == nullptr)
     {
@@ -635,6 +635,11 @@ const QList<QUuid> ChannelView::getFilters() const
     }
 
     return this->channelFilters_->filterIds();
+}
+
+FilterSet *ChannelView::getFilterSet() const
+{
+    return this->channelFilters_;
 }
 
 bool ChannelView::filterMessage(const MessagePtr &m) const

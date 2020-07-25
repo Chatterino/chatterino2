@@ -78,7 +78,8 @@ public:
     void setChannel(ChannelPtr channel_);
 
     void setFilters(const QList<QUuid> &ids);
-    const QList<QUuid> getFilters() const;
+    const QList<QUuid> getFilterIds() const;
+    FilterSet *getFilterSet() const;
 
     ChannelPtr sourceChannel() const;
     void setSourceChannel(ChannelPtr sourceChannel);
