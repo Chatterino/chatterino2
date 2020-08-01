@@ -8,28 +8,30 @@
 fourtf | https://fourtf.com | avatars/fourtf.png | Author, main developer
 pajlada | https://pajlada.se | avatars/pajlada.png | Collaborator, co-developer
 
-Cranken | https://github.com/Cranken | | Contributor
-hemirt | https://github.com/hemirt | | Contributor
-LajamerrMittisdine | https://github.com/LajamerrMittisdine | | Contributor
-coral | https://github.com/coral |  | Contributor, design
+23rd | https://github.com/23rd |  | Contributor
 apa420 | https://github.com/apa420 |  | Contributor
-DatGuy1 | https://github.com/DatGuy1 |  | Contributor
-Confuseh | https://github.com/Confuseh |  | Contributor
-ch-ems | https://github.com/ch-ems |  | Contributor
 Bur0k | https://github.com/Bur0k |  | Contributor
-nuuls | https://github.com/nuuls |  | Contributor
+ch-ems | https://github.com/ch-ems |  | Contributor
 Chronophylos | https://github.com/Chronophylos |  | Contributor
 Ckath | https://github.com/Ckath |  | Contributor
-matijakevic | https://github.com/matijakevic |  | Contributor
-nforro | https://github.com/nforro |  | Contributor
-vanolpfan | https://github.com/vanolpfan |  | Contributor
-23rd | https://github.com/23rd |  | Contributor
-machgo | https://github.com/machgo |  | Contributor
-TranRed | https://github.com/TranRed |  | Contributor
-RAnders00 | https://github.com/RAnders00 | | Contributor
-YungLPR | https://github.com/leon-richardt | | Contributor
-Mm2PL | https://github.com/mm2pl | | Contributor
+Confuseh | https://github.com/Confuseh |  | Contributor
+coral | https://github.com/coral |  | Contributor, design
+Cranken | https://github.com/Cranken | | Contributor
+DatGuy1 | https://github.com/DatGuy1 |  | Contributor
 gempir | https://github.com/gempir | | Contributor
+hemirt | https://github.com/hemirt | | Contributor
+LajamerrMittisdine | https://github.com/LajamerrMittisdine | | Contributor
+machgo | https://github.com/machgo |  | Contributor
+matijakevic | https://github.com/matijakevic |  | Contributor
+mfmarlow | http://github.com/mfmarlow | | Contributor
+Mm2PL | https://github.com/mm2pl | | Contributor
+nforro | https://github.com/nforro |  | Contributor
+nuuls | https://github.com/nuuls |  | Contributor
+RAnders00 | https://github.com/RAnders00 | | Contributor
+TranRed | https://github.com/TranRed |  | Contributor
+vanolpfan | https://github.com/vanolpfan |  | Contributor
+YungLPR | https://github.com/leon-richardt | | Contributor
+
 # If you are a contributor add yourself above this line
 
 Defman21 | https://github.com/Defman21 |  | Documentation
