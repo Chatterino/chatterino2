@@ -91,6 +91,8 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
 
     window->fullscreen_ = args.fullscreen;
 
+    window->x_ = args.x;
+
     if (args.height != -1)
     {
         if (args.height == 0)
@@ -269,10 +271,21 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
         // offset
         int o = this->fullscreen_ ? 0 : 8;
 
-        ::MoveWindow(hwnd, int(rect.right - this->width_ * scale - o),
-                     int(rect.bottom - this->height_ * scale - o),
-                     int(this->width_ * scale), int(this->height_ * scale),
-                     true);
+        if (this->x_ != -1)
+        {
+            ::MoveWindow(hwnd, int(rect.left + this->x_ * scale + o),
+                         int(rect.bottom - this->height_ * scale - o),
+                         int(this->width_ * scale), int(this->height_ * scale),
+                         true);
+        }
+        //support for old extension version 1.2
+        else
+        {
+            ::MoveWindow(hwnd, int(rect.right - this->width_ * scale - o),
+                         int(rect.bottom - this->height_ * scale - o),
+                         int(this->width_ * scale), int(this->height_ * scale),
+                         true);
+        }
     }
 
 //    if (this->fullscreen_)

@@ -17,6 +17,7 @@ public:
     struct GetArgs {
         QString winId;
         int yOffset = -1;
+        int x = -1;
         int width = -1;
         int height = -1;
         bool fullscreen = false;
@@ -53,6 +54,7 @@ private:
     void *target_;
     int yOffset_;
     int currentYOffset_;
+    int x_ = -1;
     int width_ = 360;
     int height_ = -1;
     bool fullscreen_ = false;
