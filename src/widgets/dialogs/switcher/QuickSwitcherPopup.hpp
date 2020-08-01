@@ -2,6 +2,8 @@
 
 #include "common/Channel.hpp"
 #include "widgets/BasePopup.hpp"
+#include "widgets/dialogs/switcher/QuickSwitcherModel.hpp"
+#include "widgets/dialogs/switcher/SwitcherItemDelegate.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <functional>
@@ -15,6 +17,7 @@ public:
     // overload equality operator
     using ChannelSplits = std::pair<ChannelPtr, Split *>;
     explicit QuickSwitcherPopup(QWidget *parent = nullptr);
+    ~QuickSwitcherPopup();
 
 protected:
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
@@ -25,8 +28,11 @@ public slots:
 private:
     struct {
         QLineEdit *searchEdit{};
-        QListWidget *list{};
+        QListView *list{};
     } ui_;
+
+    QuickSwitcherModel switcherModel_;
+    SwitcherItemDelegate switcherItemDelegate_;
 
     void initWidgets();
 };

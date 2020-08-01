@@ -38,9 +38,12 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
     : BasePopup(FlagsEnum<BaseWindow::Flags>{BaseWindow::Flags::Frameless,
                                              BaseWindow::Flags::TopMost},
                 parent)
+    , switcherModel_(this)
+    , switcherItemDelegate_(this)
 {
     this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
+
     this->initWidgets();
 
     const QRect geom = parent->geometry();
@@ -49,6 +52,10 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
 
     this->setStayInScreenRect(true);
     this->moveTo(this, pos, false);
+}
+
+QuickSwitcherPopup::~QuickSwitcherPopup()
+{
 }
 
 void QuickSwitcherPopup::initWidgets()
@@ -65,27 +72,31 @@ void QuickSwitcherPopup::initWidgets()
     }
 
     {
-        vbox.emplace<QListWidget>().assign(&this->ui_.list);
+        vbox.emplace<QListView>().assign(&this->ui_.list);
+        this->ui_.list->setSelectionMode(QAbstractItemView::SingleSelection);
+        this->ui_.list->setSelectionBehavior(QAbstractItemView::SelectItems);
+        this->ui_.list->setModel(&this->switcherModel_);
+        this->ui_.list->setItemDelegate(&this->switcherItemDelegate_);
 
         /*
          * I also tried handling key events using the according slots but
          * it lead to all kind of problems that did not occur with the
          * eventFilter approach.
          */
-        QObject::connect(
-            this->ui_.list, &QListWidget::itemClicked, this,
-            [this](QListWidgetItem *activated) {
-                auto *item = dynamic_cast<AbstractSwitcherItem *>(activated);
+        QObject::connect(this->ui_.list, &QListView::clicked, this,
+                         [this](const QModelIndex &index) {
+                             auto *item = static_cast<AbstractSwitcherItem *>(
+                                 index.data().value<void *>());
 
-                item->action();
-                this->close();
-            });
+                             item->action();
+                             this->close();
+                         });
     }
 }
 
 void QuickSwitcherPopup::updateSuggestions(const QString &text)
 {
-    this->ui_.list->clear();
+    this->switcherModel_.clear();
 
     // Add items for navigating to different splits
     for (auto pairs : openedChannels())
@@ -102,7 +113,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
              * https://doc.qt.io/qt-5/qlistwidget.html#details .
              */
             SwitchSplitItem *item = new SwitchSplitItem(title, split);
-            this->ui_.list->addItem(item);
+            this->switcherModel_.addItem(item);
         }
     }
 
@@ -111,10 +122,13 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     {
         NewTabItem *item =
             new NewTabItem("Open channel \"" + text + "\" in new tab", text);
-        this->ui_.list->addItem(item);
+        this->switcherModel_.addItem(item);
     }
 
-    this->ui_.list->setCurrentRow(0, QItemSelectionModel::SelectCurrent);
+    const auto &startIdx = this->switcherModel_.index(0);
+    this->ui_.list->setCurrentIndex(startIdx);
+
+    QTimer::singleShot(0, [this] { this->adjustSize(); });
 }
 
 bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
@@ -123,8 +137,10 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
     {
         auto *keyEvent = static_cast<QKeyEvent *>(event);
         int key = keyEvent->key();
-        const int curRow = this->ui_.list->currentRow();
-        const int count = this->ui_.list->count();
+
+        const QModelIndex &curIdx = this->ui_.list->currentIndex();
+        const int curRow = curIdx.row();
+        const int count = this->switcherModel_.rowCount(curIdx);
 
         if (key == Qt::Key_Down || key == Qt::Key_Tab)
         {
@@ -133,8 +149,7 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
 
             const int newRow = (curRow + 1) % count;
 
-            this->ui_.list->setCurrentRow(newRow,
-                                          QItemSelectionModel::SelectCurrent);
+            this->ui_.list->setCurrentIndex(curIdx.siblingAtRow(newRow));
             return true;
         }
         else if (key == Qt::Key_Up || key == Qt::Key_Backtab)
@@ -146,8 +161,7 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
             if (newRow < 0)
                 newRow += count;
 
-            this->ui_.list->setCurrentRow(newRow,
-                                          QItemSelectionModel::SelectCurrent);
+            this->ui_.list->setCurrentIndex(curIdx.siblingAtRow(newRow));
             return true;
         }
         else if (key == Qt::Key_Enter || key == Qt::Key_Return)
@@ -155,8 +169,10 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
             if (count <= 0)
                 return true;
 
-            auto *item = dynamic_cast<AbstractSwitcherItem *>(
-                this->ui_.list->currentItem());
+            const auto index = this->ui_.list->currentIndex();
+            auto *item = static_cast<AbstractSwitcherItem *>(
+                index.data().value<void *>());
+
             item->action();
 
             this->close();

@@ -240,7 +240,9 @@ SOURCES += \
     src/widgets/dialogs/SettingsDialog.cpp \
     src/widgets/dialogs/switcher/AbstractSwitcherItem.cpp \
     src/widgets/dialogs/switcher/NewTabItem.cpp \
+    src/widgets/dialogs/switcher/QuickSwitcherModel.cpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.cpp \
+    src/widgets/dialogs/switcher/SwitcherItemDelegate.cpp \
     src/widgets/dialogs/switcher/SwitchSplitItem.cpp \
     src/widgets/dialogs/TextInputDialog.cpp \
     src/widgets/dialogs/UpdateDialog.cpp \
@@ -471,7 +473,9 @@ HEADERS += \
     src/widgets/dialogs/SettingsDialog.hpp \
     src/widgets/dialogs/switcher/AbstractSwitcherItem.hpp \
     src/widgets/dialogs/switcher/NewTabItem.hpp \
+    src/widgets/dialogs/switcher/QuickSwitcherModel.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.hpp \
+    src/widgets/dialogs/switcher/SwitcherItemDelegate.hpp \
     src/widgets/dialogs/switcher/SwitchSplitItem.hpp \
     src/widgets/dialogs/TextInputDialog.hpp \
     src/widgets/dialogs/UpdateDialog.hpp \
