@@ -15,7 +15,7 @@ public:
      *
      * @return  number of items currrently present in this model
      */
-    int rowCount(const QModelIndex &parent) const;
+    int rowCount(const QModelIndex &parent = QModelIndex()) const;
 
     /**
      * @brief   Reimplements QAbstractItemModel::data. Currently, the role parameter
