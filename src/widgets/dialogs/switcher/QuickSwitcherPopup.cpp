@@ -83,14 +83,13 @@ void QuickSwitcherPopup::initWidgets()
          * it lead to all kind of problems that did not occur with the
          * eventFilter approach.
          */
-        QObject::connect(this->ui_.list, &QListView::clicked, this,
-                         [this](const QModelIndex &index) {
-                             auto *item = static_cast<AbstractSwitcherItem *>(
-                                 index.data().value<void *>());
-
-                             item->action();
-                             this->close();
-                         });
+        QObject::connect(
+            this->ui_.list, &QListView::clicked, this,
+            [this](const QModelIndex &index) {
+                auto *item = AbstractSwitcherItem::fromVariant(index.data());
+                item->action();
+                this->close();
+            });
     }
 }
 
@@ -170,8 +169,7 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
                 return true;
 
             const auto index = this->ui_.list->currentIndex();
-            auto *item = static_cast<AbstractSwitcherItem *>(
-                index.data().value<void *>());
+            auto *item = AbstractSwitcherItem::fromVariant(index.data());
 
             item->action();
 

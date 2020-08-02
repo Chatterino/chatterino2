@@ -5,6 +5,16 @@ namespace chatterino {
 class AbstractSwitcherItem
 {
 public:
+    /**
+     * Attempt to obtain an AbstractSwitcherItem * from the passed QVariant.
+     *
+     * @param variant   variant to try to convert to AbstractSwitcherItem *
+     *
+     * @return an AbstractSwitcherItem * if the QVariant could be converted,
+     *         or nullptr if the variant did not contain AbstractSwitcherItem *
+     */
+    static AbstractSwitcherItem *fromVariant(const QVariant &variant);
+
     virtual ~AbstractSwitcherItem() = default;
 
     AbstractSwitcherItem(const QString &text);

@@ -29,12 +29,8 @@ QVariant QuickSwitcherModel::data(const QModelIndex &index, int role) const
     if (index.row() >= this->items_.size())
         return QVariant();
 
-    // TODO(leon): check if this is safe
-    /*
-     * Couldn't figure out a nicer way to do this (not sure if it's even possible).
-     * See https://stackoverflow.com/a/44503822 .
-     */
     auto item = this->items_.at(index.row());
+    // See https://stackoverflow.com/a/44503822 .
     return QVariant::fromValue(static_cast<void *>(item));
 }
 

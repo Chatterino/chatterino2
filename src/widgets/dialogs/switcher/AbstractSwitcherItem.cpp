@@ -9,6 +9,12 @@ namespace chatterino {
 const int PaintingScaleFactor = 20;
 const QSize iconSize(32, 32);
 
+AbstractSwitcherItem *AbstractSwitcherItem::fromVariant(const QVariant &variant)
+{
+    // See https://stackoverflow.com/a/44503822 .
+    return static_cast<AbstractSwitcherItem *>(variant.value<void *>());
+}
+
 AbstractSwitcherItem::AbstractSwitcherItem(const QString &text)
     : text_(text)
 {

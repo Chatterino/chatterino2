@@ -17,8 +17,7 @@ void SwitcherItemDelegate::paint(QPainter *painter,
                                  const QStyleOptionViewItem &option,
                                  const QModelIndex &index) const
 {
-    auto *item =
-        static_cast<AbstractSwitcherItem *>(index.data().value<void *>());
+    auto *item = AbstractSwitcherItem::fromVariant(index.data());
 
     if (item)
     {
@@ -33,8 +32,7 @@ void SwitcherItemDelegate::paint(QPainter *painter,
 QSize SwitcherItemDelegate::sizeHint(const QStyleOptionViewItem &option,
                                      const QModelIndex &index) const
 {
-    auto *item =
-        static_cast<AbstractSwitcherItem *>(index.data().value<void *>());
+    auto *item = AbstractSwitcherItem::fromVariant(index.data());
 
     if (item)
     {
