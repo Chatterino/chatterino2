@@ -1817,6 +1817,10 @@ void ChannelView::hideEvent(QHideEvent *)
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
     auto *userPopup = new UserInfoPopup;
+    if (getSettings()->autoCloseUserPopup)
+    {
+        userPopup->setActionOnFocusLoss(BaseWindow::Delete);
+    }
     userPopup->setData(userName, this->hasSourceChannel() ? this->sourceChannel_
                                                           : this->channel_);
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
