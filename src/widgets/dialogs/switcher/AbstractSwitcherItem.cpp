@@ -6,7 +6,6 @@
 
 namespace chatterino {
 
-const int PaintingScaleFactor = 20;
 const QSize iconSize(32, 32);
 
 AbstractSwitcherItem *AbstractSwitcherItem::fromVariant(const QVariant &variant)
@@ -45,7 +44,6 @@ void AbstractSwitcherItem::paint(QPainter *painter, const QRect &rect) const
         QRect(iconRect.topRight(),
               QSize(rect.width() - iconRect.width(), iconRect.height()));
     painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, this->text_);
-    painter->scale(PaintingScaleFactor, PaintingScaleFactor);
 
     painter->restore();
 }
