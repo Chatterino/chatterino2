@@ -126,7 +126,7 @@ public:
     BoolSetting showParts = {"/behaviour/showParts", false};
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier",
                                           1.0};
-    BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", false};
+    BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 
