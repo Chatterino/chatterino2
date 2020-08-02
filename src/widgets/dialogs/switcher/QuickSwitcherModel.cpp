@@ -21,7 +21,8 @@ int QuickSwitcherModel::rowCount(const QModelIndex &parent) const
     return this->items_.size();
 }
 
-QVariant QuickSwitcherModel::data(const QModelIndex &index, int role) const
+QVariant QuickSwitcherModel::data(const QModelIndex &index,
+                                  int /* role */) const
 {
     if (!index.isValid())
         return QVariant();
