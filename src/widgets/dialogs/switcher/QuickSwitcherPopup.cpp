@@ -47,11 +47,10 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
     this->initWidgets();
 
     const QRect geom = parent->geometry();
-    const QRect bounds = this->getBounds();
-    const QPoint pos = geom.center() - QPoint(bounds.width() / 2, 0);
-
     this->setStayInScreenRect(true);
-    this->moveTo(this, pos, false);
+
+    this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
+                                          this->size(), geom));
 }
 
 QuickSwitcherPopup::~QuickSwitcherPopup()
