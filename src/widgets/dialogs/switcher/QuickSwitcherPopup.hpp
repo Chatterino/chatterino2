@@ -16,7 +16,15 @@ public:
     // TODO(leon): Replace this with a custom type in order to be able to
     // overload equality operator
     using ChannelSplits = std::pair<ChannelPtr, Split *>;
+
+    /**
+     * @brief   Construct a new QuickSwitcherPopup.
+     *
+     * @param   parent  Parent widget of the popup. The popup will be placed
+     *                  in the center of the parent widget.
+     */
     explicit QuickSwitcherPopup(QWidget *parent = nullptr);
+
     ~QuickSwitcherPopup();
 
 protected:
