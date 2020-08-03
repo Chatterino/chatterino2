@@ -3,7 +3,7 @@ Below I have tried to list all environment variables that can be used to modify 
 
 ### CHATTERINO2_RECENT_MESSAGES_URL
 Used to change the URL that Chatterino2 uses when trying to load historic Twitch chat messages (if the setting is enabled).  
-Default value: `https://recent-messages.robotty.de/api/v2/recent-messages/%1` (an [open-source service](https://github.com/robotty/recent-messages) written and currently run by [@RAnders00](https://github.com/RAnders00))  
+Default value: `https://recent-messages.robotty.de/api/v2/recent-messages/%1` (an [open-source service](https://github.com/robotty/recent-messages2) written and currently run by [@RAnders00](https://github.com/RAnders00) - [visit the homepage for more details about the service](https://recent-messages.robotty.de/))  
 Arguments:  
  - `%1` = Name of the Twitch channel
 
