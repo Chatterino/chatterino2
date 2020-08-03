@@ -120,6 +120,10 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     const auto &startIdx = this->switcherModel_.index(0);
     this->ui_.list->setCurrentIndex(startIdx);
 
+    /*
+     * Timeout interval 0 means the call will be delayed until all window events
+     * have been processed (cf. https://doc.qt.io/qt-5/qtimer.html#interval-prop).
+     */
     QTimer::singleShot(0, [this] { this->adjustSize(); });
 }
 
