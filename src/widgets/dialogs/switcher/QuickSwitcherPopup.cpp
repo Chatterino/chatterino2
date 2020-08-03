@@ -1,6 +1,5 @@
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 
-// TODO(leon): Clean up includes
 #include "Application.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
