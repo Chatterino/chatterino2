@@ -4,8 +4,8 @@ namespace chatterino {
 
 QuickSwitcherModel::QuickSwitcherModel(QWidget *parent)
     : QAbstractListModel(parent)
+    , items_(INITIAL_ITEMS_SIZE)
 {
-    // TODO(leon): init items_ with reasonable size
 }
 
 QuickSwitcherModel::~QuickSwitcherModel()

@@ -47,6 +47,13 @@ public:
     void clear();
 
 private:
+    /*
+     * On my system, the default QVector capacity is 0. 20 is an attempt at preventing
+     * frequent reallocations. The number is not backed by any user data but rather a
+     * guess at how many switcher items are probably going to be added.
+     */
+    static constexpr int INITIAL_ITEMS_SIZE = 20;
+
     QVector<AbstractSwitcherItem *> items_;
 };
 }  // namespace chatterino
