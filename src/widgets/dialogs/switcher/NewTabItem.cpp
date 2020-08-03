@@ -10,8 +10,9 @@
 
 namespace chatterino {
 
-NewTabItem::NewTabItem(const QString &text, const QString &channelName)
-    : AbstractSwitcherItem(QIcon(":/switcher/plus.svg"), text)
+NewTabItem::NewTabItem(const QString &channelName)
+    : AbstractSwitcherItem(QIcon(":/switcher/plus.svg"),
+                           QString(TEXT_FORMAT).arg(channelName))
     , channelName_(channelName)
 {
 }

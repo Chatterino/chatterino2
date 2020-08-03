@@ -112,8 +112,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     // Add item for opening a channel in a new tab
     if (!text.isEmpty())
     {
-        NewTabItem *item =
-            new NewTabItem("Open channel \"" + text + "\" in new tab", text);
+        NewTabItem *item = new NewTabItem(text);
         this->switcherModel_.addItem(item);
     }
 
