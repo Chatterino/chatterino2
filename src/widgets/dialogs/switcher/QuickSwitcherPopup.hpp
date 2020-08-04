@@ -42,6 +42,8 @@ private:
     QuickSwitcherModel switcherModel_;
     SwitcherItemDelegate switcherItemDelegate_;
 
+    QSet<ChannelSplits> openSplits_;
+
     void initWidgets();
 };
 

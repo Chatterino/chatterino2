@@ -39,6 +39,7 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
                 parent)
     , switcherModel_(this)
     , switcherItemDelegate_(this)
+    , openSplits_(openedChannels())
 {
     this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
@@ -96,7 +97,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     this->switcherModel_.clear();
 
     // Add items for navigating to different splits
-    for (auto pairs : openedChannels())
+    for (auto pairs : this->openSplits_)
     {
         ChannelPtr chan = pairs.first;
         Split *split = pairs.second;
