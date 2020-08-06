@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QDialog>
 #include <QComboBox>
+#include <QDialog>
 #include <QDialogButtonBox>
 #include <QPushButton>
 #include <QVBoxLayout>
