@@ -97,6 +97,15 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
         const QString &tabTitle = sc->getTab()->getTitle();
         const auto splits = sc->getSplits();
 
+        // Check if tab title matches first
+        if (tabTitle.contains(text, Qt::CaseInsensitive))
+        {
+            SwitchSplitItem *item = new SwitchSplitItem(tabTitle, splits.at(0));
+            this->switcherModel_.addItem(item);
+            continue;
+        }
+
+        // Then check for splits on this page
         for (auto *split : splits)
         {
             if (split->getChannel()->getName().contains(text,
