@@ -5,6 +5,7 @@
 #include "widgets/dialogs/switcher/QuickSwitcherModel.hpp"
 #include "widgets/dialogs/switcher/SwitcherItemDelegate.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitContainer.hpp"
 
 #include <functional>
 
@@ -13,10 +14,6 @@ namespace chatterino {
 class QuickSwitcherPopup : public BasePopup
 {
 public:
-    // TODO(leon): Replace this with a custom type in order to be able to
-    // overload equality operator
-    using ChannelSplits = std::pair<ChannelPtr, Split *>;
-
     /**
      * @brief   Construct a new QuickSwitcherPopup.
      *
@@ -42,7 +39,7 @@ private:
     QuickSwitcherModel switcherModel_;
     SwitcherItemDelegate switcherItemDelegate_;
 
-    QSet<ChannelSplits> openSplits_;
+    QSet<SplitContainer *> openPages_;
 
     void initWidgets();
 };

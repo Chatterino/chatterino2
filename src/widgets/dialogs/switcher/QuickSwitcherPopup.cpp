@@ -8,28 +8,23 @@
 #include "widgets/dialogs/switcher/NewTabItem.hpp"
 #include "widgets/dialogs/switcher/SwitchSplitItem.hpp"
 #include "widgets/helper/NotebookTab.hpp"
-#include "widgets/splits/SplitContainer.hpp"
 
 namespace chatterino {
 
 namespace {
     using namespace chatterino;
 
-    QSet<QuickSwitcherPopup::ChannelSplits> openedChannels()
+    QSet<SplitContainer *> openPages()
     {
-        QSet<QuickSwitcherPopup::ChannelSplits> channelSplits;
+        QSet<SplitContainer *> pages;
+
         auto &nb = getApp()->windows->getMainWindow().getNotebook();
         for (int i = 0; i < nb.getPageCount(); ++i)
         {
-            auto *sc = static_cast<SplitContainer *>(nb.getPageAt(i));
-            for (auto *split : sc->getSplits())
-            {
-                channelSplits.insert(
-                    std::make_pair(split->getChannel(), split));
-            }
+            pages.insert(static_cast<SplitContainer *>(nb.getPageAt(i)));
         }
 
-        return channelSplits;
+        return pages;
     }
 }  // namespace
 
@@ -39,7 +34,7 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
                 parent)
     , switcherModel_(this)
     , switcherItemDelegate_(this)
-    , openSplits_(openedChannels())
+    , openPages_(openPages())
 {
     this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
@@ -97,16 +92,20 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     this->switcherModel_.clear();
 
     // Add items for navigating to different splits
-    for (auto pairs : this->openSplits_)
+    for (auto *sc : this->openPages_)
     {
-        ChannelPtr chan = pairs.first;
-        Split *split = pairs.second;
-        if (chan->getName().contains(text, Qt::CaseInsensitive))
-        {
-            const QString title = split->getContainer()->getTab()->getTitle();
+        const QString &tabTitle = sc->getTab()->getTitle();
+        const auto splits = sc->getSplits();
 
-            SwitchSplitItem *item = new SwitchSplitItem(title, split);
-            this->switcherModel_.addItem(item);
+        for (auto *split : splits)
+        {
+            if (split->getChannel()->getName().contains(text,
+                                                        Qt::CaseInsensitive))
+            {
+                SwitchSplitItem *item = new SwitchSplitItem(tabTitle, split);
+                this->switcherModel_.addItem(item);
+                continue;
+            }
         }
     }
 
