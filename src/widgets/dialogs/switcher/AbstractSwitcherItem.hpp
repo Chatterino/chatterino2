@@ -17,17 +17,16 @@ public:
 
     virtual ~AbstractSwitcherItem() = default;
 
-    AbstractSwitcherItem(const QString &text);
-    AbstractSwitcherItem(const QIcon &icon, const QString &text);
+    AbstractSwitcherItem(const QIcon &icon);
 
     virtual void action() = 0;
 
-    void paint(QPainter *painter, const QRect &rect) const;
-    QSize sizeHint(const QRect &rect) const;
+    virtual void paint(QPainter *painter, const QRect &rect) const = 0;
+    virtual QSize sizeHint(const QRect &rect) const = 0;
 
-private:
+protected:
     QIcon icon_;
-    QString text_;
+    static const QSize ICON_SIZE;
 };
 
 }  // namespace chatterino

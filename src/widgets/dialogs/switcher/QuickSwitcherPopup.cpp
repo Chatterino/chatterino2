@@ -38,6 +38,7 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
 {
     this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
+    this->setMinimumSize(500, 300);
 
     this->initWidgets();
 
@@ -97,25 +98,29 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
         const QString &tabTitle = sc->getTab()->getTitle();
         const auto splits = sc->getSplits();
 
-        // Check if tab title matches first
-        if (tabTitle.contains(text, Qt::CaseInsensitive))
-        {
-            SwitchSplitItem *item = new SwitchSplitItem(tabTitle, splits.at(0));
-            this->switcherModel_.addItem(item);
-            continue;
-        }
-
-        // Then check for splits on this page
+        // First, check for splits on this page
         for (auto *split : splits)
         {
             if (split->getChannel()->getName().contains(text,
                                                         Qt::CaseInsensitive))
             {
-                SwitchSplitItem *item = new SwitchSplitItem(tabTitle, split);
+                SwitchSplitItem *item = new SwitchSplitItem(split);
                 this->switcherModel_.addItem(item);
-                continue;
+
+                // We want to continue the outer loop so we need a goto
+                goto nextPage;
             }
         }
+
+        // Then check if tab title matches
+        if (tabTitle.contains(text, Qt::CaseInsensitive))
+        {
+            SwitchSplitItem *item = new SwitchSplitItem(sc);
+            this->switcherModel_.addItem(item);
+            continue;
+        }
+
+    nextPage:;
     }
 
     // Add item for opening a channel in a new tab
