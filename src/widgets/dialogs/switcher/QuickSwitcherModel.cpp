@@ -37,6 +37,7 @@ QVariant QuickSwitcherModel::data(const QModelIndex &index,
 
 void QuickSwitcherModel::addItem(AbstractSwitcherItem *item)
 {
+    // {begin,end}InsertRows needs to be called to notify attached views
     this->beginInsertRows(QModelIndex(), this->items_.size(),
                           this->items_.size());
     this->items_.append(item);
@@ -45,6 +46,7 @@ void QuickSwitcherModel::addItem(AbstractSwitcherItem *item)
 
 void QuickSwitcherModel::clear()
 {
+    // {begin,end}RemoveRows needs to be called to notify attached views
     this->beginRemoveRows(QModelIndex(), 0, this->items_.size() - 1);
 
     for (AbstractSwitcherItem *item : this->items_)
