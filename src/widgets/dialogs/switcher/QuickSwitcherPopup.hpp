@@ -44,9 +44,4 @@ private:
     void initWidgets();
 };
 
-inline uint qHash(const ChannelPtr &key)
-{
-    return qHash(key->getName());
-}
-
 }  // namespace chatterino
