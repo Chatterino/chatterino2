@@ -16,6 +16,7 @@
 #include "singletons/Theme.hpp"
 #include "util/CombinePath.hpp"
 #include "util/Twitch.hpp"
+#include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include <QApplication>
@@ -450,6 +451,11 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                 sendWhisperMessage(text);
             }
 
+            return "";
+        }
+        else if (commandName == "/xd")
+        {
+            QualityPopup::showDialog("pajlada", {"a", "b"});
             return "";
         }
     }
