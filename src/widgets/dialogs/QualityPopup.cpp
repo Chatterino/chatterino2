@@ -4,7 +4,8 @@
 namespace chatterino {
 
 QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
-    : channelName_(_channelName)
+    : BaseWindow(BaseWindow::Flags::Dialog, nullptr)
+    , channelName_(_channelName)
 {
     this->ui_.okButton.setText("OK");
     this->ui_.cancelButton.setText("Cancel");

@@ -30,6 +30,7 @@ public:
         DisableCustomScaling = 8,
         FramelessDraggable = 16,
         DontFocus = 32,
+        Dialog = 64,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };

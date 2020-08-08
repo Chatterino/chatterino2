@@ -104,13 +104,21 @@ namespace {
 
 }  // namespace
 
+#ifdef Q_OS_LINUX
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::Dialog,
+                                                BaseWindow::EnableCustomFrame};
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
+    userInfoPopupFlags};
+#else
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::EnableCustomFrame};
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
+    BaseWindow::EnableCustomFrame, BaseWindow::Frameless,
+    BaseWindow::FramelessDraggable};
+#endif
+
 UserInfoPopup::UserInfoPopup(bool closeAutomatically)
-    : BaseWindow(
-          closeAutomatically
-              ? FlagsEnum<BaseWindow::Flags>{BaseWindow::EnableCustomFrame,
-                                             BaseWindow::Frameless,
-                                             BaseWindow::FramelessDraggable}
-              : BaseWindow::EnableCustomFrame)
+    : BaseWindow(closeAutomatically ? userInfoPopupFlagsCloseAutomatically
+                                    : userInfoPopupFlags)
     , hack_(new bool)
 {
     this->setWindowTitle("Usercard");
