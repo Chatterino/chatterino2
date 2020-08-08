@@ -7,8 +7,17 @@ namespace chatterino {
 class NewTabItem : public AbstractSwitcherItem
 {
 public:
+    /**
+     * @brief   Construct a new NewTabItem that opens a passed channel in a new
+     *          tab.
+     *
+     * @param   channelName name of channel to open
+     */
     NewTabItem(const QString &channelName);
 
+    /**
+     * @brief   Open the channel passed in the constructor in a new tab.
+     */
     virtual void action() override;
 
     virtual void paint(QPainter *painter, const QRect &rect) const;
