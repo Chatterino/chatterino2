@@ -32,6 +32,7 @@ struct MessageParseArgs {
     bool isSentWhisper = false;
     bool trimSubscriberUsername = false;
     bool isStaffOrBroadcaster = false;
+    QString channelPointRewardId = "";
 };
 
 class MessageBuilder

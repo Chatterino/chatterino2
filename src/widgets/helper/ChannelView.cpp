@@ -856,6 +856,7 @@ MessageElementFlags ChannelView::getFlags() const
         if (this->channel_ == app->twitch.server->mentionsChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
+            flags.unset(MessageElementFlag::ChannelPointReward);
         }
     }
 
@@ -902,6 +903,9 @@ void ChannelView::drawMessages(QPainter &painter)
     MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
 
+    auto app = getApp();
+    bool isMentions = this->channel_ == app->twitch.server->mentionsChannel;
+
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
         MessageLayout *layout = messagesSnapshot[i].get();
@@ -913,7 +917,7 @@ void ChannelView::drawMessages(QPainter &painter)
         }
 
         layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
-                      isLastMessage, windowFocused);
+                      isLastMessage, windowFocused, isMentions);
 
         y += layout->getHeight();
 
