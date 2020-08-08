@@ -1,8 +1,9 @@
-#pragma once
+﻿#pragma once
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
@@ -41,6 +42,9 @@ public:
     [[nodiscard]] bool isIgnored() const override;
     void triggerHighlights() override;
     MessagePtr build() override;
+
+    static void appendChannelPointRewardMessage(
+        const ChannelPointReward &reward, MessageBuilder *builder);
 
 private:
     void parseUsernameColor() override;

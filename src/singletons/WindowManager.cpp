@@ -171,6 +171,7 @@ void WindowManager::updateWordTypeMask()
                                       : MEF::NonBoldUsername);
     flags.set(settings->lowercaseDomains ? MEF::LowercaseLink
                                          : MEF::OriginalLink);
+    flags.set(MEF::ChannelPointReward);
 
     // update flags
     MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);

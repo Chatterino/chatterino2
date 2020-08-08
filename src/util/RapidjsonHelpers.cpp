@@ -28,5 +28,22 @@ namespace rj {
         return std::string(buffer.GetString());
     }
 
+    bool getSafeObject(rapidjson::Value &obj, const char *key,
+                       rapidjson::Value &out)
+    {
+        if (!checkJsonValue(obj, key))
+        {
+            return false;
+        }
+
+        out = obj[key].Move();
+        return true;
+    }
+
+    bool checkJsonValue(const rapidjson::Value &obj, const char *key)
+    {
+        return obj.IsObject() && !obj.IsNull() && obj.HasMember(key);
+    }
+
 }  // namespace rj
 }  // namespace chatterino
