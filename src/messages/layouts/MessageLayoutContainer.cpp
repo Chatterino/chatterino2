@@ -123,9 +123,20 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         xOffset -= element->getRect().width() + this->spaceWidth_;
     }
 
+    auto yOffset = 0;
+
+    if (element->getCreator().getFlags().has(
+            MessageElementFlag::ChannelPointReward) &&
+        element->getCreator().getFlags().hasNone(
+            {MessageElementFlag::TwitchEmoteImage}))
+    {
+        yOffset -= (this->margin.top * this->scale_);
+    }
+
     // set move element
-    element->setPosition(QPoint(this->currentX_ + xOffset,
-                                this->currentY_ - element->getRect().height()));
+    element->setPosition(
+        QPoint(this->currentX_ + xOffset,
+               this->currentY_ - element->getRect().height() + yOffset));
 
     // add element
     this->elements_.push_back(std::unique_ptr<MessageLayoutElement>(element));

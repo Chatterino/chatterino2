@@ -42,6 +42,7 @@ enum class MessageElementFlag {
     BttvEmote = BttvEmoteImage | BttvEmoteText,
 
     ChannelPointReward = (1 << 8),
+    ChannelPointRewardImage = ChannelPointReward | TwitchEmoteImage,
 
     FfzEmoteImage = (1 << 10),
     FfzEmoteText = (1 << 11),
