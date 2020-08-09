@@ -50,4 +50,16 @@ QString formatTime(int totalSeconds)
     return res;
 }
 
+QString formatTime(QString totalSecondsString)
+{
+    bool ok = true;
+    int totalSeconds(totalSecondsString.toInt(&ok));
+    if (ok)
+    {
+        return formatTime(totalSeconds);
+    }
+
+    return "n/a";
+}
+
 }  // namespace chatterino

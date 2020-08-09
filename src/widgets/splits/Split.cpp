@@ -543,6 +543,13 @@ void Split::openInBrowser()
     }
 }
 
+void Split::openWhispersInBrowser()
+{
+    auto userName = getApp()->accounts->twitch.getCurrent()->getUserName();
+    QDesktopServices::openUrl("https://twitch.tv/popout/moderator/" + userName +
+                              "/whispers");
+}
+
 void Split::openBrowserPlayer()
 {
     ChannelPtr channel = this->getChannel();

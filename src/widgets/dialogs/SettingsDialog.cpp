@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/helper/Button.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
@@ -32,6 +33,11 @@ SettingsDialog::SettingsDialog()
     this->addTabs();
     this->overrideBackgroundColor_ = QColor("#111111");
     this->scaleChangedEvent(this->scale());  // execute twice to width of item
+
+    createWindowShortcut(this, "CTRL+F", [this] {
+        this->ui_.search->setFocus();
+        this->ui_.search->selectAll();
+    });
 }
 
 void SettingsDialog::initUi()

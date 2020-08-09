@@ -361,10 +361,9 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 if (isSurrogate)
                     i++;
             }
-
-            container.addElement(getTextLayoutElement(
+            //add the final piece of wrapped text
+            container.addElementNoLineBreak(getTextLayoutElement(
                 text.mid(wordStart), width, this->hasTrailingSpace()));
-            container.breakLine();
         }
     }
 }
@@ -670,11 +669,49 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
             }
 
             // Add last remaining text & segments
-            container.addElement(
+            container.addElementNoLineBreak(
                 getTextLayoutElement(text.mid(wordStart), segments, width,
                                      this->hasTrailingSpace()));
-            container.breakLine();
         }
+    }
+}
+
+LinebreakElement::LinebreakElement(MessageElementFlags flags)
+    : MessageElement(flags)
+{
+}
+
+void LinebreakElement::addToContainer(MessageLayoutContainer &container,
+                                      MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
+    {
+        container.breakLine();
+    }
+}
+
+ScalingImageElement::ScalingImageElement(ImageSet images,
+                                         MessageElementFlags flags)
+    : MessageElement(flags)
+    , images_(images)
+{
+}
+
+void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
+                                         MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
+    {
+        const auto &image =
+            this->images_.getImageOrLoaded(container.getScale());
+        if (image->isEmpty())
+            return;
+
+        auto size = QSize(image->width() * container.getScale(),
+                          image->height() * container.getScale());
+
+        container.addElement((new ImageLayoutElement(*this, image, size))
+                                 ->setLink(this->getLink()));
     }
 }
 

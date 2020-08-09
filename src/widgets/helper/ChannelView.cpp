@@ -467,6 +467,9 @@ void ChannelView::clearMessages()
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
     this->queueLayout();
+
+    this->lastMessageHasAlternateBackground_ = false;
+    this->lastMessageHasAlternateBackgroundReverse_ = true;
 }
 
 Scrollbar &ChannelView::getScrollBar()
@@ -853,6 +856,7 @@ MessageElementFlags ChannelView::getFlags() const
         if (this->channel_ == app->twitch.server->mentionsChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
+            flags.unset(MessageElementFlag::ChannelPointReward);
         }
     }
 
@@ -899,6 +903,9 @@ void ChannelView::drawMessages(QPainter &painter)
     MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
 
+    auto app = getApp();
+    bool isMentions = this->channel_ == app->twitch.server->mentionsChannel;
+
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
         MessageLayout *layout = messagesSnapshot[i].get();
@@ -910,7 +917,7 @@ void ChannelView::drawMessages(QPainter &painter)
         }
 
         layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
-                      isLastMessage, windowFocused);
+                      isLastMessage, windowFocused, isMentions);
 
         y += layout->getHeight();
 
@@ -1645,10 +1652,15 @@ void ChannelView::addContextMenuItems(
     const auto &creator = hoveredElement->getCreator();
     auto creatorFlags = creator.getFlags();
 
+    static QMenu *previousMenu = nullptr;
+    if (previousMenu != nullptr)
+    {
+        previousMenu->deleteLater();
+        previousMenu = nullptr;
+    }
+
     auto menu = new QMenu;
-    connect(menu, &QMenu::aboutToHide, [menu] {
-        menu->deleteLater();  //
-    });
+    previousMenu = menu;
 
     // Emote actions
     if (creatorFlags.hasAny(
@@ -1809,6 +1821,10 @@ void ChannelView::hideEvent(QHideEvent *)
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
     auto *userPopup = new UserInfoPopup;
+    if (getSettings()->autoCloseUserPopup)
+    {
+        userPopup->setActionOnFocusLoss(BaseWindow::Delete);
+    }
     userPopup->setData(userName, this->hasSourceChannel() ? this->sourceChannel_
                                                           : this->channel_);
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));

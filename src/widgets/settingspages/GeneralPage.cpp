@@ -509,8 +509,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.mentionUsersWithComma);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
+    layout.addCheckbox("Automatically close user popup when it loses focus",
+                       s.autoCloseUserPopup);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
+    layout.addCheckbox("Try to find usernames without @ prefix",
+                       s.findAllUsernames);
     layout.addDropdown<float>(
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
         [](auto val) {
