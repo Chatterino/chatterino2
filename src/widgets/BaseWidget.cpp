@@ -9,6 +9,7 @@
 #include <QIcon>
 #include <QLayout>
 #include <QtGlobal>
+#include <algorithm>
 
 namespace chatterino {
 
@@ -113,7 +114,8 @@ float BaseWidget::qtFontScale() const
 {
     if (auto window = dynamic_cast<BaseWindow *>(this->window()))
     {
-        return this->scale() / window->nativeScale_;
+        // ensure no div by 0
+        return this->scale() / std::max<float>(0.01f, window->nativeScale_);
     }
     else
     {

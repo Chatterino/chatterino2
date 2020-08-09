@@ -6,6 +6,8 @@
 #include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 
 namespace chatterino {
 namespace {
@@ -102,7 +104,7 @@ namespace {
             modBadge = std::make_shared<Emote>(Emote{
                 {""},
                 modBadgeImageSet,
-                Tooltip{"Twitch Channel Moderator"},
+                Tooltip{"Moderator"},
                 modBadge1x,
             });
         }
@@ -126,11 +128,17 @@ namespace {
                 auto id =
                     EmoteId{QString::number(jsonEmote.value("id").toInt())};
                 auto name = EmoteName{jsonEmote.value("name").toString()};
+                auto author = EmoteAuthor{jsonEmote.value("owner")
+                                              .toObject()
+                                              .value("display_name")
+                                              .toString()};
                 auto urls = jsonEmote.value("urls").toObject();
 
                 Emote emote;
                 fillInEmoteData(urls, name,
-                                name.string + "<br/>Channel FFZ Emote", emote);
+                                name.string + "<br/>Channel FFZ Emote" +
+                                    "<br />By: " + author.string,
+                                emote);
                 emote.homePage =
                     Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
                             .arg(id.string)
@@ -182,8 +190,10 @@ void FfzEmotes::loadEmotes()
 }
 
 void FfzEmotes::loadChannel(
-    const QString &channelId, std::function<void(EmoteMap &&)> emoteCallback,
-    std::function<void(boost::optional<EmotePtr>)> modBadgeCallback)
+    std::weak_ptr<Channel> channel, const QString &channelId,
+    std::function<void(EmoteMap &&)> emoteCallback,
+    std::function<void(boost::optional<EmotePtr>)> modBadgeCallback,
+    bool manualRefresh)
 {
     qDebug() << "[FFZEmotes] Reload FFZ Channel Emotes for channel"
              << channelId;
@@ -192,32 +202,47 @@ void FfzEmotes::loadChannel(
 
         .timeout(20000)
         .onSuccess([emoteCallback = std::move(emoteCallback),
-                    modBadgeCallback =
-                        std::move(modBadgeCallback)](auto result) -> Outcome {
+                    modBadgeCallback = std::move(modBadgeCallback), channel,
+                    manualRefresh](auto result) -> Outcome {
             auto json = result.parseJson();
             auto emoteMap = parseChannelEmotes(json);
             auto modBadge = parseModBadge(json);
 
             emoteCallback(std::move(emoteMap));
             modBadgeCallback(std::move(modBadge));
+            if (auto shared = channel.lock(); manualRefresh)
+                shared->addMessage(
+                    makeSystemMessage("FrankerFaceZ channel emotes reloaded."));
 
             return Success;
         })
-        .onError([channelId](NetworkResult result) {
+        .onError([channelId, channel, manualRefresh](NetworkResult result) {
+            auto shared = channel.lock();
+            if (!shared)
+                return;
             if (result.status() == 203)
             {
                 // User does not have any FFZ emotes
+                if (manualRefresh)
+                    shared->addMessage(makeSystemMessage(
+                        "This channel has no FrankerFaceZ channel emotes."));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay
                 qDebug() << "Fetching FFZ emotes for channel" << channelId
                          << "failed due to timeout";
+                shared->addMessage(
+                    makeSystemMessage("Failed to fetch FrankerFaceZ channel "
+                                      "emotes. (timed out)"));
             }
             else
             {
                 qDebug() << "Error fetching FFZ emotes for channel" << channelId
                          << ", error" << result.status();
+                shared->addMessage(
+                    makeSystemMessage("Failed to fetch FrankerFaceZ channel "
+                                      "emotes. (unknown error)"));
             }
         })
         .execute();

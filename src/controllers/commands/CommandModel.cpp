@@ -1,5 +1,7 @@
 #include "CommandModel.hpp"
 
+#include "util/StandardItemHelper.hpp"
+
 namespace chatterino {
 
 // commandmodel
@@ -20,12 +22,8 @@ Command CommandModel::getItemFromRow(std::vector<QStandardItem *> &row,
 void CommandModel::getRowFromItem(const Command &item,
                                   std::vector<QStandardItem *> &row)
 {
-    row[0]->setData(item.name, Qt::DisplayRole);
-    row[0]->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable |
-                     Qt::ItemIsEditable);
-    row[1]->setData(item.func, Qt::DisplayRole);
-    row[1]->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable |
-                     Qt::ItemIsEditable);
+    setStringItem(row[0], item.name);
+    setStringItem(row[1], item.func);
 }
 
 }  // namespace chatterino

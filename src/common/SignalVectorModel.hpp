@@ -25,11 +25,11 @@ public:
         }
     }
 
-    void init(BaseSignalVector<TVectorItem> *vec)
+    void initialize(SignalVector<TVectorItem> *vec)
     {
         this->vector_ = vec;
 
-        auto insert = [this](const SignalVectorItemArgs<TVectorItem> &args) {
+        auto insert = [this](const SignalVectorItemEvent<TVectorItem> &args) {
             if (args.caller == this)
             {
                 return;
@@ -52,9 +52,9 @@ public:
         };
 
         int i = 0;
-        for (const TVectorItem &item : vec->getVector())
+        for (const TVectorItem &item : vec->raw())
         {
-            SignalVectorItemArgs<TVectorItem> args{item, i++, 0};
+            SignalVectorItemEvent<TVectorItem> args{item, i++, 0};
 
             insert(args);
         }
@@ -87,6 +87,12 @@ public:
         });
 
         this->afterInit();
+    }
+
+    SignalVectorModel<TVectorItem> *initialized(SignalVector<TVectorItem> *vec)
+    {
+        this->initialize(vec);
+        return this;
     }
 
     virtual ~SignalVectorModel()
@@ -147,12 +153,12 @@ public:
         else
         {
             int vecRow = this->getVectorIndexFromModelIndex(row);
-            this->vector_->removeItem(vecRow, this);
+            this->vector_->removeAt(vecRow, this);
 
             assert(this->rows_[row].original);
             TVectorItem item = this->getItemFromRow(
                 this->rows_[row].items, this->rows_[row].original.get());
-            this->vector_->insertItem(item, vecRow, this);
+            this->vector_->insert(item, vecRow, this);
         }
 
         return true;
@@ -219,7 +225,7 @@ public:
     void deleteRow(int row)
     {
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
-        this->vector_->removeItem(signalVectorRow);
+        this->vector_->removeAt(signalVectorRow);
     }
 
     bool removeRows(int row, int count, const QModelIndex &parent) override
@@ -234,9 +240,69 @@ public:
         assert(row >= 0 && row < this->rows_.size());
 
         int signalVectorRow = this->getVectorIndexFromModelIndex(row);
-        this->vector_->removeItem(signalVectorRow);
+        this->vector_->removeAt(signalVectorRow);
 
         return true;
+    }
+
+    QStringList mimeTypes() const override
+    {
+        return {"chatterino_row_id"};
+    }
+
+    QMimeData *mimeData(const QModelIndexList &list) const
+    {
+        if (list.length() == 1)
+        {
+            return nullptr;
+        }
+
+        // Check if all indices are in the same row -> single row selected
+        for (auto &&x : list)
+        {
+            if (x.row() != list.first().row())
+                return nullptr;
+        }
+
+        auto data = new QMimeData;
+        data->setData("chatterino_row_id", QByteArray::number(list[0].row()));
+        return data;
+    }
+
+    bool dropMimeData(const QMimeData *data, Qt::DropAction action, int /*row*/,
+                      int /*column*/, const QModelIndex &parent) override
+    {
+        if (data->hasFormat("chatterino_row_id") &&
+            action & (Qt::DropAction::MoveAction | Qt::DropAction::CopyAction))
+        {
+            int from = data->data("chatterino_row_id").toInt();
+            int to = parent.row();
+
+            if (from < 0 || from > this->vector_->raw().size() || to < 0 ||
+                to > this->vector_->raw().size())
+            {
+                return false;
+            }
+
+            if (from != to)
+            {
+                auto item = this->vector_->raw()[from];
+                this->vector_->removeAt(from);
+                this->vector_->insert(item, to);
+            }
+
+            // We return false since we remove items ourselves.
+            return false;
+        }
+
+        return false;
+    }
+
+    Qt::DropActions supportedDropActions() const override
+    {
+        return this->vector_->isSorted()
+                   ? Qt::DropActions()
+                   : Qt::DropAction::CopyAction | Qt::DropAction::MoveAction;
     }
 
 protected:
@@ -326,7 +392,7 @@ protected:
 
 private:
     std::vector<QMap<int, QVariant>> headerData_;
-    BaseSignalVector<TVectorItem> *vector_;
+    SignalVector<TVectorItem> *vector_;
     std::vector<Row> rows_;
 
     int columnCount_;

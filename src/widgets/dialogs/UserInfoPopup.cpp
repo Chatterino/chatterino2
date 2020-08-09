@@ -4,14 +4,19 @@
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
-#include "providers/twitch/PartialTwitchUser.hpp"
+#include "controllers/highlights/HighlightBlacklistUser.hpp"
+#include "messages/Message.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Resources.hpp"
+#include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
+#include "util/Shortcut.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
-#include "widgets/dialogs/LogsPopup.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
 
@@ -21,9 +26,10 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#define TEXT_FOLLOWERS "Followers: "
-#define TEXT_VIEWS "Views: "
-#define TEXT_CREATED "Created: "
+const QString TEXT_VIEWS("Views: %1");
+const QString TEXT_FOLLOWERS("Followers: %1");
+const QString TEXT_CREATED("Created: %1");
+const QString TEXT_TITLE("%1's Usercard");
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
 
@@ -47,17 +53,49 @@ namespace {
 
         return label.getElement();
     };
+    ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
+    {
+        LimitedQueueSnapshot<MessagePtr> snapshot =
+            channel->getMessageSnapshot();
+
+        ChannelPtr channelPtr(
+            new Channel(channel->getName(), Channel::Type::None));
+
+        for (size_t i = 0; i < snapshot.size(); i++)
+        {
+            MessagePtr message = snapshot[i];
+
+            bool isSubscription =
+                message->flags.has(MessageFlag::Subscription) &&
+                message->loginName == "" &&
+                message->messageText.split(" ").at(0).compare(
+                    userName, Qt::CaseInsensitive) == 0;
+
+            bool isModAction = message->timeoutUser.compare(
+                                   userName, Qt::CaseInsensitive) == 0;
+            bool isSelectedUser =
+                message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
+
+            if ((isSubscription || isModAction || isSelectedUser) &&
+                !message->flags.has(MessageFlag::Whisper))
+            {
+                channelPtr->addMessage(message);
+            }
+        }
+
+        return channelPtr;
+    };
 }  // namespace
 
 UserInfoPopup::UserInfoPopup()
-    : BaseWindow({BaseWindow::Frameless, BaseWindow::FramelessDraggable})
+    : BaseWindow(BaseWindow::EnableCustomFrame)
     , hack_(new bool)
 {
+    this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
 
-#ifdef Q_OS_LINUX
-    this->setWindowFlag(Qt::Popup);
-#endif
+    // Close the popup when Escape is pressed
+    createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
@@ -91,10 +129,11 @@ UserInfoPopup::UserInfoPopup()
                 this->ui_.userIDLabel->setPalette(palette);
             }
 
-            vbox.emplace<Label>(TEXT_VIEWS).assign(&this->ui_.viewCountLabel);
-            vbox.emplace<Label>(TEXT_FOLLOWERS)
+            vbox.emplace<Label>(TEXT_VIEWS.arg(""))
+                .assign(&this->ui_.viewCountLabel);
+            vbox.emplace<Label>(TEXT_FOLLOWERS.arg(""))
                 .assign(&this->ui_.followerCountLabel);
-            vbox.emplace<Label>(TEXT_CREATED)
+            vbox.emplace<Label>(TEXT_CREATED.arg(""))
                 .assign(&this->ui_.createdDateLabel);
         }
     }
@@ -110,11 +149,10 @@ UserInfoPopup::UserInfoPopup()
         user.emplace<QCheckBox>("Ignore").assign(&this->ui_.ignore);
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
-        auto viewLogs = user.emplace<EffectLabel2>(this);
-        viewLogs->getLabel().setText("Online logs");
         auto usercard = user.emplace<EffectLabel2>(this);
         usercard->getLabel().setText("Usercard");
-
+        auto refresh = user.emplace<EffectLabel2>(this);
+        refresh->getLabel().setText("Refresh");
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(getResources().buttons.mod);
         mod->setScaleIndependantSize(30, 30);
@@ -124,21 +162,14 @@ UserInfoPopup::UserInfoPopup()
 
         user->addStretch(1);
 
-        QObject::connect(viewLogs.getElement(), &Button::leftClicked, [this] {
-            auto logs = new LogsPopup();
-            logs->setChannel(this->channel_);
-            logs->setTargetUserName(this->userName_);
-            logs->getLogs();
-            logs->setAttribute(Qt::WA_DeleteOnClose);
-            logs->show();
-        });
-
         QObject::connect(usercard.getElement(), &Button::leftClicked, [this] {
             QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
                                       this->channel_->getName() +
                                       "/viewercard/" + this->userName_);
         });
 
+        QObject::connect(refresh.getElement(), &Button::leftClicked,
+                         [this] { this->updateLatestMessages(); });
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/mod " + this->userName_);
         });
@@ -155,8 +186,6 @@ UserInfoPopup::UserInfoPopup()
 
             if (twitchChannel)
             {
-                qDebug() << this->userName_;
-
                 bool isMyself =
                     QString::compare(
                         getApp()->accounts->twitch.getCurrent()->getUserName(),
@@ -222,8 +251,25 @@ UserInfoPopup::UserInfoPopup()
         });
     }
 
-    this->installEvents();
+    layout.emplace<Line>(false);
 
+    // fourth line (last messages)
+    auto logs = layout.emplace<QVBoxLayout>().withoutMargin();
+    {
+        this->ui_.noMessagesLabel = new Label("No recent messages");
+        this->ui_.noMessagesLabel->setVisible(false);
+
+        this->ui_.latestMessages = new ChannelView(this);
+        this->ui_.latestMessages->setMinimumSize(400, 275);
+        this->ui_.latestMessages->setSizePolicy(QSizePolicy::Expanding,
+                                                QSizePolicy::Expanding);
+
+        logs->addWidget(this->ui_.noMessagesLabel);
+        logs->addWidget(this->ui_.latestMessages);
+        logs->setAlignment(this->ui_.noMessagesLabel, Qt::AlignHCenter);
+    }
+
+    this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
 }
 
@@ -258,10 +304,6 @@ void UserInfoPopup::installEvents()
     QObject::connect(
         this->ui_.follow, &QCheckBox::stateChanged, [this](int) mutable {
             auto currentUser = getApp()->accounts->twitch.getCurrent();
-
-            QUrl requestUrl("https://api.twitch.tv/kraken/users/" +
-                            currentUser->getUserId() + "/follows/channels/" +
-                            this->userId_);
 
             const auto reenableFollowCheckbox = [this] {
                 this->ui_.follow->setEnabled(true);  //
@@ -336,24 +378,23 @@ void UserInfoPopup::installEvents()
 
             if (checked)
             {
-                getApp()->highlights->blacklistedUsers.insertItem(
+                getSettings()->blacklistedUsers.insert(
                     HighlightBlacklistUser{this->userName_, false});
                 this->ui_.ignoreHighlights->setEnabled(true);
             }
             else
             {
-                const auto &vector =
-                    getApp()->highlights->blacklistedUsers.getVector();
+                const auto &vector = getSettings()->blacklistedUsers.raw();
 
                 for (int i = 0; i < vector.size(); i++)
                 {
                     if (this->userName_ == vector[i].getPattern())
                     {
-                        getApp()->highlights->blacklistedUsers.removeItem(i);
+                        getSettings()->blacklistedUsers.removeAt(i);
                         i--;
                     }
                 }
-                if (getApp()->highlights->blacklistContains(this->userName_))
+                if (getSettings()->isBlacklistedUser(this->userName_))
                 {
                     this->ui_.ignoreHighlights->setToolTip(
                         "Name matched by regex");
@@ -370,6 +411,7 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 {
     this->userName_ = name;
     this->channel_ = channel;
+    this->setWindowTitle(TEXT_TITLE.arg(name));
 
     this->ui_.nameLabel->setText(name);
     this->ui_.nameLabel->setProperty("copy-text", name);
@@ -377,20 +419,37 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     this->updateUserData();
 
     this->userStateChanged_.invoke();
+
+    this->updateLatestMessages();
+    QTimer::singleShot(1, this, [this] { this->setStayInScreenRect(true); });
+}
+
+void UserInfoPopup::updateLatestMessages()
+{
+    auto filteredChannel = filterMessages(this->userName_, this->channel_);
+    this->ui_.latestMessages->setChannel(filteredChannel);
+    this->ui_.latestMessages->setSourceChannel(this->channel_);
+
+    const bool hasMessages = filteredChannel->hasMessages();
+    this->ui_.latestMessages->setVisible(hasMessages);
+    this->ui_.noMessagesLabel->setVisible(!hasMessages);
 }
 
 void UserInfoPopup::updateUserData()
 {
     std::weak_ptr<bool> hack = this->hack_;
 
-    const auto onIdFetchFailed = [this]() {
+    const auto onUserFetchFailed = [this, hack] {
+        if (!hack.lock())
+        {
+            return;
+        }
+
         // this can occur when the account doesn't exist.
-        this->ui_.followerCountLabel->setText(TEXT_FOLLOWERS +
-                                              QString(TEXT_UNAVAILABLE));
-        this->ui_.viewCountLabel->setText(TEXT_VIEWS +
-                                          QString(TEXT_UNAVAILABLE));
-        this->ui_.createdDateLabel->setText(TEXT_CREATED +
-                                            QString(TEXT_UNAVAILABLE));
+        this->ui_.followerCountLabel->setText(
+            TEXT_FOLLOWERS.arg(TEXT_UNAVAILABLE));
+        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(TEXT_UNAVAILABLE));
+        this->ui_.createdDateLabel->setText(TEXT_CREATED.arg(TEXT_UNAVAILABLE));
 
         this->ui_.nameLabel->setText(this->userName_);
 
@@ -399,47 +458,62 @@ void UserInfoPopup::updateUserData()
         this->ui_.userIDLabel->setProperty("copy-text",
                                            QString(TEXT_UNAVAILABLE));
     };
-    const auto onIdFetched = [this, hack](QString id) {
+    const auto onUserFetched = [this, hack](const auto &user) {
+        if (!hack.lock())
+        {
+            return;
+        }
+
         auto currentUser = getApp()->accounts->twitch.getCurrent();
 
-        this->userId_ = id;
+        this->userId_ = user.id;
 
-        this->ui_.userIDLabel->setText(TEXT_USER_ID + id);
-        this->ui_.userIDLabel->setProperty("copy-text", id);
-        // don't wait for the request to complete, just put the user id in the card
-        // right away
+        this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);
+        this->ui_.userIDLabel->setProperty("copy-text", user.id);
 
-        QString url("https://api.twitch.tv/kraken/channels/" + id);
-
-        NetworkRequest::twitchRequest(url)
-            .caller(this)
-            .onSuccess([this](auto result) -> Outcome {
-                auto obj = result.parseJson();
-                this->ui_.followerCountLabel->setText(
-                    TEXT_FOLLOWERS +
-                    QString::number(obj.value("followers").toInt()));
-                this->ui_.viewCountLabel->setText(
-                    TEXT_VIEWS + QString::number(obj.value("views").toInt()));
+        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(user.viewCount));
+        getKraken()->getUser(
+            user.id,
+            [this, hack](const auto &user) {
+                if (!hack.lock())
+                {
+                    return;
+                }
                 this->ui_.createdDateLabel->setText(
-                    TEXT_CREATED +
-                    obj.value("created_at").toString().section("T", 0, 0));
+                    TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
+            },
+            [] {
+                // failure
+            });
+        if (!isInStreamerMode())
+        {
+            this->loadAvatar(user.profileImageUrl);
+        }
 
-                this->loadAvatar(QUrl(obj.value("logo").toString()));
-
-                return Success;
-            })
-            .execute();
+        getHelix()->getUserFollowers(
+            user.id,
+            [this, hack](const auto &followers) {
+                if (!hack.lock())
+                {
+                    return;
+                }
+                this->ui_.followerCountLabel->setText(
+                    TEXT_FOLLOWERS.arg(followers.total));
+            },
+            [] {
+                // on failure
+            });
 
         // get follow state
-        currentUser->checkFollow(id, [this, hack](auto result) {
-            if (hack.lock())
+        currentUser->checkFollow(user.id, [this, hack](auto result) {
+            if (!hack.lock())
             {
-                if (result != FollowResult_Failed)
-                {
-                    this->ui_.follow->setEnabled(true);
-                    this->ui_.follow->setChecked(result ==
-                                                 FollowResult_Following);
-                }
+                return;
+            }
+            if (result != FollowResult_Failed)
+            {
+                this->ui_.follow->setEnabled(true);
+                this->ui_.follow->setChecked(result == FollowResult_Following);
             }
         });
 
@@ -447,7 +521,7 @@ void UserInfoPopup::updateUserData()
         bool isIgnoring = false;
         for (const auto &ignoredUser : currentUser->getIgnores())
         {
-            if (id == ignoredUser.id)
+            if (user.id == ignoredUser.id)
             {
                 isIgnoring = true;
                 break;
@@ -456,7 +530,7 @@ void UserInfoPopup::updateUserData()
 
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
-        const auto &vector = getApp()->highlights->blacklistedUsers.getVector();
+        const auto &vector = getSettings()->blacklistedUsers.raw();
         for (int i = 0; i < vector.size(); i++)
         {
             if (this->userName_ == vector[i].getPattern())
@@ -465,7 +539,7 @@ void UserInfoPopup::updateUserData()
                 break;
             }
         }
-        if (getApp()->highlights->blacklistContains(this->userName_) &&
+        if (getSettings()->isBlacklistedUser(this->userName_) &&
             !isIgnoringHighlights)
         {
             this->ui_.ignoreHighlights->setToolTip("Name matched by regex");
@@ -479,8 +553,8 @@ void UserInfoPopup::updateUserData()
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
     };
 
-    PartialTwitchUser::byName(this->userName_)
-        .getId(onIdFetched, onIdFetchFailed, this);
+    getHelix()->getUserByName(this->userName_, onUserFetched,
+                              onUserFetchFailed);
 
     this->ui_.follow->setEnabled(false);
     this->ui_.ignore->setEnabled(false);

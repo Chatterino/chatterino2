@@ -52,6 +52,8 @@ private:
     Split *const split_{};
     QString tooltipText_{};
     bool isLive_{false};
+    QString thumbnail_;
+    QElapsedTimer lastThumbnail_;
 
     // ui
     Button *dropdownButton_{};
@@ -64,7 +66,6 @@ private:
     QPoint dragStart_{};
     bool dragging_{false};
     bool doubleClicked_{false};
-    bool showingHelpTooltip_{false};
     bool menuVisible_{false};
 
     // signals

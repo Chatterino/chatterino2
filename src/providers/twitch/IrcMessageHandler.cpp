@@ -1,8 +1,7 @@
-#include "IrcMessageHandler.hpp"
+﻿#include "IrcMessageHandler.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
 #include "providers/twitch/TwitchAccountManager.hpp"
@@ -54,7 +53,10 @@ static float relativeSimilarity(const QString &str1, const QString &str2)
         }
     }
 
-    return z == 0 ? 0.f : float(z) / std::max(str1.size(), str2.size());
+    // ensure that no div by 0
+    return z == 0 ? 0.f
+                  : float(z) /
+                        std::max<int>(1, std::max(str1.size(), str2.size()));
 };
 
 float IrcMessageHandler::similarity(
@@ -213,6 +215,32 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         args.isStaffOrBroadcaster = true;
     }
 
+    auto channel = dynamic_cast<TwitchChannel *>(chan.get());
+
+    const auto &tags = _message->tags();
+    if (const auto &it = tags.find("custom-reward-id"); it != tags.end())
+    {
+        const auto rewardId = it.value().toString();
+        if (!channel->isChannelPointRewardKnown(rewardId))
+        {
+            // Need to wait for pubsub reward notification
+            auto clone = _message->clone();
+            channel->channelPointRewardAdded.connect(
+                [=, &server](ChannelPointReward reward) {
+                    if (reward.id == rewardId)
+                    {
+                        this->addMessage(clone, target, content, server, isSub,
+                                         isAction);
+                        clone->deleteLater();
+                        return true;
+                    }
+                    return false;
+                });
+            return;
+        }
+        args.channelPointRewardId = rewardId;
+    }
+
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
 
     if (isSub || !builder.isIgnored())
@@ -222,7 +250,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             builder->flags.set(MessageFlag::Subscription);
             builder->flags.unset(MessageFlag::Highlighted);
         }
-
         auto msg = builder.build();
 
         IrcMessageHandler::setSimilarityFlags(msg, chan);
@@ -241,7 +268,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             if (highlighted)
             {
                 server.mentionsChannel->addMessage(msg);
-                getApp()->highlights->addHighlight(msg);
             }
         }
 
@@ -398,9 +424,9 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        qDebug()
-            << "[IrcMessageHandler:handleClearMessageMessage] Twitch channel"
-            << chanName << "not found";
+        qDebug() << "[IrcMessageHandler:handleClearMessageMessage] Twitch "
+                    "channel"
+                 << chanName << "not found";
         return;
     }
 
@@ -453,7 +479,6 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
-    qDebug() << "Received whisper!";
     MessageParseArgs args;
 
     args.isReceivedWhisper = true;
@@ -634,7 +659,25 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     {
         std::vector<MessagePtr> builtMessages;
 
-        builtMessages.emplace_back(makeSystemMessage(message->content()));
+        if (message->tags().contains("historical"))
+        {
+            bool customReceived = false;
+            qint64 ts = message->tags()
+                            .value("rm-received-ts")
+                            .toLongLong(&customReceived);
+            if (!customReceived)
+            {
+                ts = message->tags().value("tmi-sent-ts").toLongLong();
+            }
+
+            QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(ts);
+            builtMessages.emplace_back(
+                makeSystemMessage(message->content(), dateTime.time()));
+        }
+        else
+        {
+            builtMessages.emplace_back(makeSystemMessage(message->content()));
+        }
 
         return builtMessages;
     }

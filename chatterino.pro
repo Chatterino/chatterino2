@@ -131,21 +131,16 @@ SOURCES += \
     src/controllers/commands/CommandController.cpp \
     src/controllers/commands/CommandModel.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
-    src/controllers/highlights/HighlightController.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
     src/controllers/highlights/UserHighlightModel.cpp \
-    src/controllers/ignores/IgnoreController.cpp \
     src/controllers/ignores/IgnoreModel.cpp \
     src/controllers/moderationactions/ModerationAction.cpp \
     src/controllers/moderationactions/ModerationActionModel.cpp \
-    src/controllers/moderationactions/ModerationActions.cpp \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
-    src/controllers/pings/PingController.cpp \
-    src/controllers/pings/PingModel.cpp \
+    src/controllers/pings/MutedChannelModel.cpp \
     src/controllers/taggedusers/TaggedUser.cpp \
-    src/controllers/taggedusers/TaggedUsersController.cpp \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
     src/debug/Benchmark.cpp \
     src/main.cpp \
@@ -161,6 +156,7 @@ SOURCES += \
     src/messages/MessageColor.cpp \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
+    src/messages/SharedMessageBuilder.cpp \
     src/messages/search/AuthorPredicate.cpp \
     src/messages/search/LinkPredicate.cpp \
     src/messages/search/SubstringPredicate.cpp \
@@ -176,17 +172,18 @@ SOURCES += \
     src/providers/irc/IrcChannel2.cpp \
     src/providers/irc/IrcCommands.cpp \
     src/providers/irc/IrcConnection2.cpp \
+    src/providers/irc/IrcMessageBuilder.cpp \
     src/providers/irc/IrcServer.cpp \
     src/providers/LinkResolver.cpp \
-    src/providers/twitch/ChatroomChannel.cpp \
+    src/providers/twitch/ChannelPointReward.cpp \
+    src/providers/twitch/api/Helix.cpp \
+    src/providers/twitch/api/Kraken.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
-    src/providers/twitch/PartialTwitchUser.cpp \
     src/providers/twitch/PubsubActions.cpp \
     src/providers/twitch/PubsubClient.cpp \
     src/providers/twitch/PubsubHelpers.cpp \
     src/providers/twitch/TwitchAccount.cpp \
     src/providers/twitch/TwitchAccountManager.cpp \
-    src/providers/twitch/TwitchApi.cpp \
     src/providers/twitch/TwitchBadge.cpp \
     src/providers/twitch/TwitchBadges.cpp \
     src/providers/twitch/TwitchChannel.cpp \
@@ -223,6 +220,9 @@ SOURCES += \
     src/util/JsonQuery.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamLink.cpp \
+    src/util/StreamerMode.cpp \
+    src/util/Twitch.cpp \
+    src/util/NuulsUploader.cpp \
     src/util/WindowsHelper.cpp \
     src/widgets/AccountSwitchPopup.cpp \
     src/widgets/AccountSwitchWidget.cpp \
@@ -235,7 +235,6 @@ SOURCES += \
     src/widgets/dialogs/IrcConnectionEditor.cpp \
     src/widgets/dialogs/LastRunCrashDialog.cpp \
     src/widgets/dialogs/LoginDialog.cpp \
-    src/widgets/dialogs/LogsPopup.cpp \
     src/widgets/dialogs/NotificationPopup.cpp \
     src/widgets/dialogs/QualityPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
@@ -303,6 +302,7 @@ HEADERS += \
     src/common/DownloadManager.hpp \
     src/common/Env.hpp \
     src/common/FlagsEnum.hpp \
+    src/common/IrcColors.hpp \
     src/common/LinkParser.hpp \
     src/common/Modes.hpp \
     src/common/NetworkCommon.hpp \
@@ -327,7 +327,6 @@ HEADERS += \
     src/controllers/commands/CommandModel.hpp \
     src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
-    src/controllers/highlights/HighlightController.hpp \
     src/controllers/highlights/HighlightModel.hpp \
     src/controllers/highlights/HighlightPhrase.hpp \
     src/controllers/highlights/UserHighlightModel.hpp \
@@ -336,13 +335,10 @@ HEADERS += \
     src/controllers/ignores/IgnorePhrase.hpp \
     src/controllers/moderationactions/ModerationAction.hpp \
     src/controllers/moderationactions/ModerationActionModel.hpp \
-    src/controllers/moderationactions/ModerationActions.hpp \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
-    src/controllers/pings/PingController.hpp \
-    src/controllers/pings/PingModel.hpp \
+    src/controllers/pings/MutedChannelModel.hpp \
     src/controllers/taggedusers/TaggedUser.hpp \
-    src/controllers/taggedusers/TaggedUsersController.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/debug/AssertInGuiThread.hpp \
     src/debug/Benchmark.hpp \
@@ -362,6 +358,7 @@ HEADERS += \
     src/messages/MessageContainer.hpp \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
+    src/messages/SharedMessageBuilder.hpp \
     src/messages/search/AuthorPredicate.hpp \
     src/messages/search/LinkPredicate.hpp \
     src/messages/search/MessagePredicate.hpp \
@@ -380,18 +377,19 @@ HEADERS += \
     src/providers/irc/IrcChannel2.hpp \
     src/providers/irc/IrcCommands.hpp \
     src/providers/irc/IrcConnection2.hpp \
+    src/providers/irc/IrcMessageBuilder.hpp \
     src/providers/irc/IrcServer.hpp \
     src/providers/LinkResolver.hpp \
-    src/providers/twitch/ChatroomChannel.hpp \
+    src/providers/twitch/ChannelPointReward.hpp \
+    src/providers/twitch/api/Helix.hpp \
+    src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
-    src/providers/twitch/PartialTwitchUser.hpp \
     src/providers/twitch/PubsubActions.hpp \
     src/providers/twitch/PubsubClient.hpp \
     src/providers/twitch/PubsubHelpers.hpp \
     src/providers/twitch/TwitchAccount.hpp \
     src/providers/twitch/TwitchAccountManager.hpp \
-    src/providers/twitch/TwitchApi.hpp \
     src/providers/twitch/TwitchBadge.hpp \
     src/providers/twitch/TwitchBadges.hpp \
     src/providers/twitch/TwitchChannel.hpp \
@@ -436,9 +434,12 @@ HEADERS += \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
     src/util/Overloaded.hpp \
+    src/util/PersistSignalVector.hpp \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
+    src/util/StreamerMode.hpp \
+    src/util/Twitch.hpp \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
@@ -449,6 +450,7 @@ HEADERS += \
     src/util/Shortcut.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamLink.hpp \
+    src/util/NuulsUploader.hpp \
     src/util/WindowsHelper.hpp \
     src/widgets/AccountSwitchPopup.hpp \
     src/widgets/AccountSwitchWidget.hpp \
@@ -461,7 +463,6 @@ HEADERS += \
     src/widgets/dialogs/IrcConnectionEditor.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
     src/widgets/dialogs/LoginDialog.hpp \
-    src/widgets/dialogs/LogsPopup.hpp \
     src/widgets/dialogs/NotificationPopup.hpp \
     src/widgets/dialogs/QualityPopup.hpp \
     src/widgets/dialogs/SelectChannelDialog.hpp \

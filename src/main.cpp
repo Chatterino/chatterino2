@@ -9,6 +9,8 @@
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
 #include "common/Version.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/IncognitoBrowser.hpp"
@@ -18,6 +20,10 @@ using namespace chatterino;
 int main(int argc, char **argv)
 {
     QApplication a(argc, argv);
+
+    QCoreApplication::setApplicationName("chatterino");
+    QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
+    QCoreApplication::setOrganizationDomain("https://www.chatterino.com");
 
     // convert char** to QStringList
     auto args = QStringList();
@@ -32,10 +38,19 @@ int main(int argc, char **argv)
     }
     else if (getArgs().printVersion)
     {
-        qInfo().noquote() << Version::instance().fullVersion();
+        auto version = Version::instance();
+        qInfo().noquote() << QString("%1 (commit %2%3)")
+                                 .arg(version.fullVersion())
+                                 .arg(version.commitHash())
+                                 .arg(Modes::instance().isNightly
+                                          ? ", " + version.dateOfBuild()
+                                          : "");
     }
     else
     {
+        Helix::initialize();
+        Kraken::initialize();
+
         Paths *paths{};
 
         try

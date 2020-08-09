@@ -32,9 +32,13 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     this->setStayInScreenRect(true);
 
     this->setAttribute(Qt::WA_ShowWithoutActivating);
+#ifdef Q_OS_LINUX
+    this->setWindowFlags(Qt::ToolTip);
+#else
     this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
                          Qt::X11BypassWindowManagerHint |
                          Qt::BypassWindowManagerHint);
+#endif
 
     displayImage_->hide();
     displayImage_->setAlignment(Qt::AlignHCenter);

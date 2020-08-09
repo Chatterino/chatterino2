@@ -9,6 +9,7 @@ class TooltipPreviewImage
 public:
     static TooltipPreviewImage &instance();
     void setImage(ImagePtr image);
+    void setImageScale(int w, int h);
 
     TooltipPreviewImage(const TooltipPreviewImage &) = delete;
 
@@ -17,6 +18,9 @@ private:
 
 private:
     ImagePtr image_ = nullptr;
+    int imageWidth_ = 0;
+    int imageHeight_ = 0;
+
     std::vector<pajlada::Signals::ScopedConnection> connections_;
 
     // attemptRefresh is set to true in case we want to preview an image that has not loaded yet (if pixmapOrLoad fails)

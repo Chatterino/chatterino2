@@ -70,6 +70,14 @@ public:
     const QUrl &getSoundUrl() const;
     const std::shared_ptr<QColor> getColor() const;
 
+    /*
+     * XXX: Use the constexpr constructor here once we are building with
+     * Qt>=5.13.
+     */
+    static QColor FALLBACK_HIGHLIGHT_COLOR;
+    static QColor FALLBACK_REDEEMED_HIGHLIGHT_COLOR;
+    static QColor FALLBACK_SUB_COLOR;
+
 private:
     QString pattern_;
     bool hasAlert_;
@@ -132,6 +140,8 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "color", encodedColor);
 
         auto _color = QColor(encodedColor);
+        if (!_color.isValid())
+            _color = chatterino::HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR;
 
         return chatterino::HighlightPhrase(_pattern, _hasAlert, _hasSound,
                                            _isRegex, _isCaseSensitive,

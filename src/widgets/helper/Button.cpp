@@ -154,7 +154,6 @@ void Button::fancyPaint(QPainter &painter)
         return;
     }
 
-    painter.setRenderHint(QPainter::HighQualityAntialiasing);
     painter.setRenderHint(QPainter::Antialiasing);
     QColor c;
 

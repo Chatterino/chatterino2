@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QDebug>
@@ -242,6 +243,8 @@ void Scrollbar::paintEvent(QPaintEvent *)
     QPainter painter(this);
     painter.fillRect(rect(), this->theme->scrollbars.background);
 
+    bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
+
     //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
     //                     this->themeManager->ScrollbarArrow);
     //    painter.fillRect(QRect(xOffset, height() - this->buttonHeight,
@@ -274,7 +277,8 @@ void Scrollbar::paintEvent(QPaintEvent *)
     int w = this->width();
     float y = 0;
     float dY = float(this->height()) / float(snapshotLength);
-    int highlightHeight = int(std::ceil(dY));
+    int highlightHeight =
+        int(std::ceil(std::max<float>(this->scale() * 2, dY)));
 
     for (size_t i = 0; i < snapshotLength; i++)
     {
@@ -282,22 +286,26 @@ void Scrollbar::paintEvent(QPaintEvent *)
 
         if (!highlight.isNull())
         {
-            QColor color = highlight.getColor();
-
-            switch (highlight.getStyle())
+            if (!highlight.isRedeemedHighlight() || enableRedeemedHighlights)
             {
-                case ScrollbarHighlight::Default: {
-                    painter.fillRect(w / 8 * 3, int(y), w / 4, highlightHeight,
-                                     color);
-                }
-                break;
+                QColor color = highlight.getColor();
+                color.setAlpha(255);
 
-                case ScrollbarHighlight::Line: {
-                    painter.fillRect(0, int(y), w, 1, color);
-                }
-                break;
+                switch (highlight.getStyle())
+                {
+                    case ScrollbarHighlight::Default: {
+                        painter.fillRect(w / 8 * 3, int(y), w / 4,
+                                         highlightHeight, color);
+                    }
+                    break;
 
-                case ScrollbarHighlight::None:;
+                    case ScrollbarHighlight::Line: {
+                        painter.fillRect(0, int(y), w, 1, color);
+                    }
+                    break;
+
+                    case ScrollbarHighlight::None:;
+                }
             }
         }
 
@@ -348,8 +356,10 @@ void Scrollbar::mouseMoveEvent(QMouseEvent *event)
     {
         int delta = event->pos().y() - this->lastMousePosition_.y();
 
-        setDesiredValue(this->desiredValue_ +
-                        qreal(delta) / this->trackHeight_ * this->maximum_);
+        setDesiredValue(
+            this->desiredValue_ +
+            (qreal(delta) / std::max<qreal>(0.00000002, this->trackHeight_)) *
+                this->maximum_);
     }
 
     this->lastMousePosition_ = event->pos();
@@ -434,13 +444,14 @@ void Scrollbar::updateScroll()
     this->trackHeight_ = this->height() - this->buttonHeight_ -
                          this->buttonHeight_ - MIN_THUMB_HEIGHT - 1;
 
-    this->thumbRect_ =
-        QRect(0,
-              int(this->currentValue_ / this->maximum_ * this->trackHeight_) +
-                  1 + this->buttonHeight_,
-              this->width(),
-              int(this->largeChange_ / this->maximum_ * this->trackHeight_) +
-                  MIN_THUMB_HEIGHT);
+    auto div = std::max<qreal>(0.0000001, this->maximum_);
+
+    this->thumbRect_ = QRect(
+        0,
+        int(this->currentValue_ / div * this->trackHeight_) + 1 +
+            this->buttonHeight_,
+        this->width(),
+        int(this->largeChange_ / div * this->trackHeight_) + MIN_THUMB_HEIGHT);
 
     this->update();
 }

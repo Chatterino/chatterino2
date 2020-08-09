@@ -292,12 +292,11 @@ void NotebookTab::paintEvent(QPaintEvent *)
     QPainter painter(this);
     float scale = this->scale();
 
-    painter.setFont(getApp()->fonts->getFont(
-        FontStyle::UiTabs,
-        scale * 96.f / this->logicalDpiX() * deviceDpi(this)));
-    QFontMetrics metrics = app->fonts->getFontMetrics(
-        FontStyle::UiTabs,
-        scale * 96.f / this->logicalDpiX() * deviceDpi(this));
+    auto div = std::max<float>(0.01f, this->logicalDpiX() * deviceDpi(this));
+    painter.setFont(
+        getApp()->fonts->getFont(FontStyle::UiTabs, scale * 96.f / div));
+    QFontMetrics metrics =
+        app->fonts->getFontMetrics(FontStyle::UiTabs, scale * 96.f / div);
 
     int height = int(scale * NOTEBOOK_TAB_HEIGHT);
 

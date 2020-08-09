@@ -11,6 +11,7 @@ class HighlightController;
 
 class UserHighlightModel : public SignalVectorModel<HighlightPhrase>
 {
+public:
     explicit UserHighlightModel(QObject *parent);
 
 protected:
@@ -21,8 +22,6 @@ protected:
 
     virtual void getRowFromItem(const HighlightPhrase &item,
                                 std::vector<QStandardItem *> &row) override;
-
-    friend class HighlightController;
 };
 
 }  // namespace chatterino

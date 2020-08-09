@@ -57,12 +57,6 @@ public:
             QPushButton addUserButton;
             QPushButton clearFieldsButton;
         } buttonUpperRow;
-
-        struct {
-            QHBoxLayout layout;
-
-            QPushButton fillInUserIDButton;
-        } buttonLowerRow;
     } ui_;
 };
 

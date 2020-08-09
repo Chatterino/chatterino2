@@ -7,15 +7,17 @@
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
 #include "common/UsernameSet.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
+#include "providers/twitch/api/Helix.hpp"
 
-#include <rapidjson/document.h>
 #include <IrcConnection>
 #include <QColor>
 #include <QRegularExpression>
 #include <boost/optional.hpp>
-#include <mutex>
 #include <pajlada/signals/signalholder.hpp>
+
+#include <mutex>
 #include <unordered_map>
 
 namespace chatterino {
@@ -43,6 +45,7 @@ public:
         unsigned viewerCount = 0;
         QString title;
         QString game;
+        QString gameId;
         QString uptime;
         QString streamType;
     };
@@ -89,8 +92,8 @@ public:
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
 
-    virtual void refreshBTTVChannelEmotes();
-    virtual void refreshFFZChannelEmotes();
+    virtual void refreshBTTVChannelEmotes(bool manualRefresh);
+    virtual void refreshFFZChannelEmotes(bool manualRefresh);
 
     // Badges
     boost::optional<EmotePtr> ffzCustomModBadge() const;
@@ -106,6 +109,14 @@ public:
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::NoArgSignal roomModesChanged;
 
+    // Channel point rewards
+    pajlada::Signals::SelfDisconnectingSignal<ChannelPointReward>
+        channelPointRewardAdded;
+    void addChannelPointReward(const ChannelPointReward &reward);
+    bool isChannelPointRewardKnown(const QString &rewardId);
+    boost::optional<ChannelPointReward> channelPointReward(
+        const QString &rewardId) const;
+
 private:
     struct NameOptions {
         QString displayName;
@@ -120,7 +131,7 @@ protected:
 private:
     // Methods
     void refreshLiveStatus();
-    Outcome parseLiveStatus(const rapidjson::Document &document);
+    void parseLiveStatus(bool live, const HelixStream &stream);
     void refreshPubsub();
     void refreshChatters();
     void refreshBadges();
@@ -156,6 +167,7 @@ private:
     UniqueAccess<std::map<QString, std::map<QString, EmotePtr>>>
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
+    UniqueAccess<std::map<QString, ChannelPointReward>> channelPointRewards_;
 
     bool mod_ = false;
     bool vip_ = false;

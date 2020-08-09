@@ -8,28 +8,29 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/twitch/TwitchApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/CombinePath.hpp"
-#include "widgets/dialogs/LogsPopup.hpp"
+#include "util/Twitch.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include <QApplication>
 #include <QFile>
 #include <QRegularExpression>
 
-#define TWITCH_DEFAULT_COMMANDS                                         \
-    {                                                                   \
-        "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", \
-            "/unban", "/timeout", "/untimeout", "/slow", "/slowoff",    \
-            "/r9kbeta", "/r9kbetaoff", "/emoteonly", "/emoteonlyoff",   \
-            "/clear", "/subscribers", "/subscribersoff", "/followers",  \
-            "/followersoff", "/user"                                    \
+#define TWITCH_DEFAULT_COMMANDS                                            \
+    {                                                                      \
+        "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban",    \
+            "/unban", "/timeout", "/untimeout", "/slow", "/slowoff",       \
+            "/r9kbeta", "/r9kbetaoff", "/emoteonly", "/emoteonlyoff",      \
+            "/clear", "/subscribers", "/subscribersoff", "/followers",     \
+            "/followersoff", "/user", "/usercard", "/follow", "/unfollow", \
+            "/ignore", "/unignore"                                         \
     }
 
 namespace {
@@ -212,7 +213,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)
     this->items_.delayedItemsChanged.connect([this] {  //
-        this->commandsSetting_->setValue(this->items_.getVector());
+        this->commandsSetting_->setValue(this->items_.raw());
     });
 
     // Load commands from commands.json
@@ -222,7 +223,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // of commands)
     for (const auto &command : this->commandsSetting_->getValue())
     {
-        this->items_.appendItem(command);
+        this->items_.append(command);
     }
 }
 
@@ -234,7 +235,7 @@ void CommandController::save()
 CommandModel *CommandController::createModel(QObject *parent)
 {
     CommandModel *model = new CommandModel(parent);
-    model->init(&this->items_);
+    model->initialize(&this->items_);
 
     return model;
 }
@@ -244,8 +245,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
     QStringList words = text.split(' ', QString::SkipEmptyParts);
-
-    std::lock_guard<std::mutex> lock(this->mutex_);
 
     if (words.length() == 0)
     {
@@ -366,18 +365,17 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                 return "";
             }
 
-            TwitchApi::findUserId(
-                target, [user, channel, target](QString userId) {
-                    if (userId.isEmpty())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "User " + target + " could not be followed!"));
-                        return;
-                    }
-                    user->followUser(userId, [channel, target]() {
+            getHelix()->getUserByName(
+                target,
+                [user, channel, target](const auto &targetUser) {
+                    user->followUser(targetUser.id, [channel, target]() {
                         channel->addMessage(makeSystemMessage(
                             "You successfully followed " + target));
                     });
+                },
+                [channel, target] {
+                    channel->addMessage(makeSystemMessage(
+                        "User " + target + " could not be followed!"));
                 });
 
             return "";
@@ -402,63 +400,26 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                 return "";
             }
 
-            TwitchApi::findUserId(
-                target, [user, channel, target](QString userId) {
-                    if (userId.isEmpty())
-                    {
-                        channel->addMessage(makeSystemMessage(
-                            "User " + target + " could not be followed!"));
-                        return;
-                    }
-                    user->unfollowUser(userId, [channel, target]() {
+            getHelix()->getUserByName(
+                target,
+                [user, channel, target](const auto &targetUser) {
+                    user->unfollowUser(targetUser.id, [channel, target]() {
                         channel->addMessage(makeSystemMessage(
                             "You successfully unfollowed " + target));
                     });
+                },
+                [channel, target] {
+                    channel->addMessage(makeSystemMessage(
+                        "User " + target + " could not be followed!"));
                 });
 
             return "";
         }
         else if (commandName == "/logs")
         {
-            if (words.size() < 2)
-            {
-                channel->addMessage(
-                    makeSystemMessage("Usage: /logs [user] (channel)"));
-                return "";
-            }
-            auto app = getApp();
-
-            auto logs = new LogsPopup();
-            QString target = words.at(1);
-
-            if (target.at(0) == '@')
-            {
-                target = target.mid(1);
-            }
-
-            logs->setTargetUserName(target);
-
-            std::shared_ptr<Channel> logsChannel = channel;
-
-            if (words.size() == 3)
-            {
-                QString channelName = words.at(2);
-                if (words.at(2).at(0) == '#')
-                {
-                    channelName = channelName.mid(1);
-                }
-
-                logs->setChannelName(channelName);
-
-                logsChannel =
-                    app->twitch.server->getChannelOrEmpty(channelName);
-            }
-
-            logs->setChannel(logsChannel);
-
-            logs->getLogs();
-            logs->setAttribute(Qt::WA_DeleteOnClose);
-            logs->show();
+            channel->addMessage(makeSystemMessage(
+                "Online logs functionality has been removed. If you're a "
+                "moderator, you can use the /user command"));
             return "";
         }
         else if (commandName == "/user")
@@ -478,8 +439,8 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                     channelName.remove(0, 1);
                 }
             }
-            QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
-                                      channelName + "/viewercard/" + words[1]);
+            openTwitchUsercard(channelName, words[1]);
+
             return "";
         }
         else if (commandName == "/usercard")
@@ -492,7 +453,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             }
             auto *userPopup = new UserInfoPopup;
             userPopup->setData(words[1], channel);
-            userPopup->setActionOnFocusLoss(BaseWindow::Delete);
             userPopup->move(QCursor::pos());
             userPopup->show();
             return "";

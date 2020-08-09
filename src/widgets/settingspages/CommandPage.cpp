@@ -33,7 +33,6 @@ namespace {
 }  // namespace
 
 CommandPage::CommandPage()
-    : SettingsPage("Commands", ":/settings/commands.svg")
 {
     auto app = getApp();
 
@@ -47,10 +46,11 @@ CommandPage::CommandPage()
     view->setTitles({"Trigger", "Command"});
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
     view->addButtonPressed.connect([] {
-        getApp()->commands->items_.appendItem(
+        getApp()->commands->items_.append(
             Command{"/command", "I made a new command HeyGuys"});
     });
 
+    // TODO: asyncronously check path
     if (QFile(c1settingsPath()).exists())
     {
         auto button = new QPushButton("Import commands from Chatterino 1");
@@ -65,7 +65,7 @@ CommandPage::CommandPage()
             {
                 if (int index = line.indexOf(' '); index != -1)
                 {
-                    getApp()->commands->items_.insertItem(
+                    getApp()->commands->items_.insert(
                         Command(line.mid(0, index), line.mid(index + 1)));
                 }
             }

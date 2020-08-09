@@ -91,7 +91,6 @@ void NotebookButton::paintEvent(QPaintEvent *event)
 
         case User: {
             painter.setRenderHint(QPainter::Antialiasing);
-            painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
             auto a = w / 8;
             QPainterPath path;
@@ -99,19 +98,18 @@ void NotebookButton::paintEvent(QPaintEvent *event)
             path.arcMoveTo(a, 4 * a, 6 * a, 6 * a, 0);
             path.arcTo(a, 4 * a, 6 * a, 6 * a, 0, 180);
 
+            QPainterPath remove;
+            remove.addEllipse(2 * a, 1 * a, 4 * a, 4 * a);
+            path = path.subtracted(remove);
+
+            path.addEllipse(2.5 * a, 1.5 * a, 3 * a, 3 * a);
+
             painter.fillPath(path, foreground);
-
-            painter.setBrush(background);
-            painter.drawEllipse(2 * a, 1 * a, 4 * a, 4 * a);
-
-            painter.setBrush(foreground);
-            painter.drawEllipse(2.5 * a, 1.5 * a, 3 * a + 1, 3 * a);
         }
         break;
 
         case Settings: {
             painter.setRenderHint(QPainter::Antialiasing);
-            painter.setRenderHint(QPainter::HighQualityAntialiasing);
 
             auto a = w / 8;
             QPainterPath path;
@@ -126,10 +124,10 @@ void NotebookButton::paintEvent(QPaintEvent *event)
                            i * (360 / 8.0) + (360 / 32.0), (360 / 32.0));
             }
 
-            painter.fillPath(path, foreground);
+            QPainterPath remove;
+            remove.addEllipse(3 * a, 3 * a, 2 * a, 2 * a);
 
-            painter.setBrush(background);
-            painter.drawEllipse(3 * a, 3 * a, 2 * a, 2 * a);
+            painter.fillPath(path.subtracted(remove), foreground);
         }
         break;
 

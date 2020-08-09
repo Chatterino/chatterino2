@@ -15,9 +15,12 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
 {
     this->model_->setParent(this);
     this->tableView_->setModel(model);
-    this->tableView_->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    this->tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
     this->tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
-    this->tableView_->verticalHeader()->hide();
+    this->tableView_->setDragDropMode(QTableView::DragDropMode::InternalMove);
+    this->tableView_->setDragDropOverwriteMode(false);
+    this->tableView_->setDefaultDropAction(Qt::DropAction::MoveAction);
+    this->tableView_->verticalHeader()->setVisible(false);
 
     // create layout
     QVBoxLayout *vbox = new QVBoxLayout(this);
@@ -38,12 +41,17 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
     QPushButton *remove = new QPushButton("Remove");
     buttons->addWidget(remove);
     QObject::connect(remove, &QPushButton::clicked, [this] {
-        QModelIndexList list;
-        while ((list = this->getTableView()->selectionModel()->selectedRows(0))
-                   .length() > 0)
-        {
-            model_->removeRow(list[0].row());
-        }
+        auto selected = this->getTableView()->selectionModel()->selectedRows(0);
+
+        // Remove rows backwards so indices don't shift.
+        std::vector<int> rows;
+        for (auto &&index : selected)
+            rows.push_back(index.row());
+
+        std::sort(rows.begin(), rows.end(), std::greater{});
+
+        for (auto &&row : rows)
+            model_->removeRow(row);
     });
 
     buttons->addStretch();
@@ -87,9 +95,10 @@ void EditableModelView::addCustomButton(QWidget *widget)
 
 void EditableModelView::addRegexHelpLink()
 {
-    auto regexHelpLabel =
-        new QLabel("<a href='https://chatterino.com/help/regex'><span "
-                   "style='color:#99f'>regex info</span></a>");
+    auto regexHelpLabel = new QLabel(
+        "<a href='"
+        "https://github.com/Chatterino/chatterino2/blob/master/docs/Regex.md'>"
+        "<span style='color:#99f'>regex info</span></a>");
     regexHelpLabel->setOpenExternalLinks(true);
     this->addCustomButton(regexHelpLabel);
 }

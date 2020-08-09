@@ -3,11 +3,14 @@
 #include "common/Common.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/api/Kraken.hpp"
 
 namespace chatterino {
 
 TwitchAccountManager::TwitchAccountManager()
-    : anonymousUser_(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
+    : accounts(SharedPtrElementLess<TwitchAccount>{})
+    , anonymousUser_(new TwitchAccount(ANONYMOUS_USERNAME, "", "", ""))
 {
     this->currentUserChanged.connect([this] {
         auto currentUser = this->getCurrent();
@@ -140,6 +143,8 @@ void TwitchAccountManager::load()
         if (user)
         {
             qDebug() << "Twitch user updated to" << newUsername;
+            getHelix()->update(user->getOAuthClient(), user->getOAuthToken());
+            getKraken()->update(user->getOAuthClient(), user->getOAuthToken());
             this->currentUser_ = user;
         }
         else
@@ -221,7 +226,7 @@ TwitchAccountManager::AddUserResponse TwitchAccountManager::addUser(
 
     //    std::lock_guard<std::mutex> lock(this->mutex);
 
-    this->accounts.insertItem(newUser);
+    this->accounts.insert(newUser);
 
     return AddUserResponse::UserAdded;
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/BaseWindow.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -28,6 +29,7 @@ protected:
 private:
     void installEvents();
     void updateUserData();
+    void updateLatestMessages();
 
     void loadAvatar(const QUrl &url);
     bool isMod_;
@@ -43,7 +45,6 @@ private:
 
     struct {
         Button *avatarButton = nullptr;
-        // RippleEffectLabel2 *viewLogs = nullptr;
 
         Label *nameLabel = nullptr;
         Label *viewCountLabel = nullptr;
@@ -54,6 +55,10 @@ private:
         QCheckBox *follow = nullptr;
         QCheckBox *ignore = nullptr;
         QCheckBox *ignoreHighlights = nullptr;
+
+        Label *noMessagesLabel = nullptr;
+        ChannelView *latestMessages = nullptr;
+        QPushButton *refreshButton = nullptr;
     } ui_;
 
     class TimeoutWidget : public BaseWidget

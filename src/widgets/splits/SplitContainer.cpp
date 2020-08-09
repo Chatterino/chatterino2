@@ -967,8 +967,10 @@ void SplitContainer::Node::insertNextToThis(Split *_split, Direction _direction)
 {
     auto &siblings = this->parent_->children_;
 
-    qreal width = this->parent_->geometry_.width() / siblings.size();
-    qreal height = this->parent_->geometry_.height() / siblings.size();
+    qreal width = this->parent_->geometry_.width() /
+                  std::max<qreal>(0.0001, siblings.size());
+    qreal height = this->parent_->geometry_.height() /
+                   std::max<qreal>(0.0001, siblings.size());
 
     if (siblings.size() == 1)
     {
@@ -1122,15 +1124,19 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
             // vars
             qreal minSize = qreal(48 * _scale);
 
-            qreal totalFlex = this->getChildrensTotalFlex(isVertical);
+            qreal totalFlex = std::max<qreal>(
+                0.0001, this->getChildrensTotalFlex(isVertical));
             qreal totalSize = std::accumulate(
                 this->children_.begin(), this->children_.end(), qreal(0),
                 [=](int val, std::unique_ptr<Node> &node) {
-                    return val + std::max<qreal>(this->getSize(isVertical) /
-                                                     totalFlex *
-                                                     node->getFlex(isVertical),
-                                                 minSize);
+                    return val + std::max<qreal>(
+                                     this->getSize(isVertical) /
+                                         std::max<qreal>(0.0001, totalFlex) *
+                                         node->getFlex(isVertical),
+                                     minSize);
                 });
+
+            totalSize = std::max<qreal>(0.0001, totalSize);
 
             qreal sizeMultiplier = this->getSize(isVertical) / totalSize;
             QRectF childRect = this->geometry_;
@@ -1247,7 +1253,7 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
             }
         }
         break;
-    };
+    }
 }
 
 SplitContainer::Node::Type SplitContainer::Node::toContainerType(Direction _dir)

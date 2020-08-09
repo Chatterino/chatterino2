@@ -3,8 +3,11 @@
 #include "Application.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/RemoveScrollAreaBackground.hpp"
 
+#include <QFormLayout>
 #include <QGroupBox>
+#include <QLabel>
 
 #define STREAMLINK_QUALITY \
     "Choose", "Source", "High", "Medium", "Low", "Audio only"
@@ -12,10 +15,14 @@
 namespace chatterino {
 
 ExternalToolsPage::ExternalToolsPage()
-    : SettingsPage("External tools", ":/settings/externaltools.svg")
 {
     LayoutCreator<ExternalToolsPage> layoutCreator(this);
-    auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
+
+    auto scroll = layoutCreator.emplace<QScrollArea>();
+    auto widget = scroll.emplaceScrollAreaWidget();
+    removeScrollAreaBackground(scroll.getElement(), widget.getElement());
+
+    auto layout = widget.setLayoutType<QVBoxLayout>();
 
     {
         auto group = layout.emplace<QGroupBox>("Streamlink");
@@ -38,7 +45,7 @@ ExternalToolsPage::ExternalToolsPage()
         links->setTextFormat(Qt::RichText);
         links->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                        Qt::LinksAccessibleByKeyboard |
-                                       Qt::LinksAccessibleByKeyboard);
+                                       Qt::LinksAccessibleByMouse);
         links->setOpenExternalLinks(true);
 
         groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
@@ -67,6 +74,61 @@ ExternalToolsPage::ExternalToolsPage()
                 customPath->setEnabled(value);  //
             },
             this->managedConnections_);
+    }
+
+    {
+        auto group = layout.emplace<QGroupBox>("Custom URI Scheme");
+        auto groupLayout = group.setLayoutType<QFormLayout>();
+
+        const auto description = new QLabel(
+            "You can open video streams directly in any video player that "
+            "has built-in Twitch support and has own URI Scheme.\nE.g.: "
+            "IINA for macOS and Potplayer (with extension) for Windows.");
+        description->setWordWrap(true);
+        description->setStyleSheet("color: #bbb");
+
+        groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
+
+        groupLayout->addRow("URI Scheme:", this->createLineEdit(
+                                               getSettings()->customURIScheme));
+    }
+
+    {
+        auto group = layout.emplace<QGroupBox>("Image Uploader");
+        auto groupLayout = group.setLayoutType<QFormLayout>();
+
+        const auto description = new QLabel(
+            "You can set custom host for uploading images, like "
+            "imgur.com or s-ul.eu.<br>Check " +
+            formatRichNamedLink("https://github.com/Chatterino/chatterino2/"
+                                "blob/master/docs/IMAGEUPLOADER.md",
+                                "this guide") +
+            " for help.");
+        description->setWordWrap(true);
+        description->setStyleSheet("color: #bbb");
+        description->setTextFormat(Qt::RichText);
+        description->setTextInteractionFlags(Qt::TextBrowserInteraction |
+                                             Qt::LinksAccessibleByKeyboard |
+                                             Qt::LinksAccessibleByMouse);
+        description->setOpenExternalLinks(true);
+
+        groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
+
+        groupLayout->addRow(
+            "Request URL: ",
+            this->createLineEdit(getSettings()->imageUploaderUrl));
+        groupLayout->addRow(
+            "Form field: ",
+            this->createLineEdit(getSettings()->imageUploaderFormField));
+        groupLayout->addRow(
+            "Extra Headers: ",
+            this->createLineEdit(getSettings()->imageUploaderHeaders));
+        groupLayout->addRow(
+            "Image link: ",
+            this->createLineEdit(getSettings()->imageUploaderLink));
+        groupLayout->addRow(
+            "Deletion link: ",
+            this->createLineEdit(getSettings()->imageUploaderDeletionLink));
     }
 
     layout->addStretch(1);

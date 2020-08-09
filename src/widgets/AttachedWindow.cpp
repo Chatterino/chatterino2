@@ -29,8 +29,6 @@ BOOL CALLBACK enumWindows(HWND hwnd, LPARAM)
     auto className = std::make_unique<WCHAR[]>(length);
     GetClassName(hwnd, className.get(), length);
 
-    // qDebug() << QString::fromWCharArray(className.get(), length);
-
     if (lstrcmp(className.get(), L"Shell_TrayWnd") == 0 ||
         lstrcmp(className.get(), L"Shell_Secondary") == 0)
     {
@@ -92,6 +90,8 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
     QSize size = window->size();
 
     window->fullscreen_ = args.fullscreen;
+
+    window->x_ = args.x;
 
     if (args.height != -1)
     {
@@ -271,10 +271,21 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
         // offset
         int o = this->fullscreen_ ? 0 : 8;
 
-        ::MoveWindow(hwnd, int(rect.right - this->width_ * scale - o),
-                     int(rect.bottom - this->height_ * scale - o) + 4,
-                     int(this->width_ * scale) - 5,
-                     int(this->height_ * scale) - 5, true);
+        if (this->x_ != -1)
+        {
+            ::MoveWindow(hwnd, int(rect.left + this->x_ * scale + o),
+                         int(rect.bottom - this->height_ * scale - o),
+                         int(this->width_ * scale), int(this->height_ * scale),
+                         true);
+        }
+        //support for old extension version 1.2
+        else
+        {
+            ::MoveWindow(hwnd, int(rect.right - this->width_ * scale - o),
+                         int(rect.bottom - this->height_ * scale - o),
+                         int(this->width_ * scale), int(this->height_ * scale),
+                         true);
+        }
     }
 
 //    if (this->fullscreen_)

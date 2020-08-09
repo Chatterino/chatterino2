@@ -24,8 +24,18 @@ jobs:
         with:
           submodules: true
 
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v2
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache-v2
+
       - name: Install Qt
-        uses: jurplel/install-qt-action@v1
+        uses: jurplel/install-qt-action@v2
+        with:
+          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       # WINDOWS
       - name: Cache conan
@@ -45,8 +55,7 @@ jobs:
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-            REM We use this source (temporarily?) until choco has updated their version of conan
-            choco install conan -y -s="https://api.bintray.com/nuget/anotherfoxguy/choco-pkg"
+            choco install conan -y
 
             refreshenv
         shell: cmd

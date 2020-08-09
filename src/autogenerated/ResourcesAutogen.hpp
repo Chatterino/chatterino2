@@ -1,5 +1,4 @@
 #include <QPixmap>
-
 #include "common/Singleton.hpp"
 
 namespace chatterino {
@@ -39,6 +38,11 @@ public:
     QPixmap error;
     QPixmap icon;
     QPixmap pajaDank;
+    struct {
+        QPixmap downScroll;
+        QPixmap neutralScroll;
+        QPixmap upScroll;
+    } scrolling;
     struct {
         QPixmap aboutlogo;
     } settings;

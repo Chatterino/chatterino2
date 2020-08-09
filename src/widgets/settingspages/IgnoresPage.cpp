@@ -29,7 +29,6 @@ static void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> box,
                         QStringListModel &model);
 
 IgnoresPage::IgnoresPage()
-    : SettingsPage("Ignores", ":/settings/ignore.svg")
 {
     LayoutCreator<IgnoresPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
@@ -45,7 +44,9 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
     layout.emplace<QLabel>("Ignore messages based certain patterns.");
     EditableModelView *view =
         layout
-            .emplace<EditableModelView>(getApp()->ignores->createModel(nullptr))
+            .emplace<EditableModelView>(
+                (new IgnoreModel(nullptr))
+                    ->initialized(&getSettings()->ignoredMessages))
             .getElement();
     view->setTitles(
         {"Pattern", "Regex", "Case Sensitive", "Block", "Replacement"});
@@ -61,7 +62,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
     });
 
     view->addButtonPressed.connect([] {
-        getApp()->ignores->phrases.appendItem(
+        getSettings()->ignoredMessages.append(
             IgnorePhrase{"my pattern", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
     });

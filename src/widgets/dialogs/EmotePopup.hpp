@@ -19,6 +19,8 @@ public:
     void loadChannel(ChannelPtr channel);
     void loadEmojis();
 
+    virtual void closeEvent(QCloseEvent *event) override;
+
     pajlada::Signals::Signal<Link> linkClicked;
 
 private:

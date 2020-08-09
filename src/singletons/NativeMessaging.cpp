@@ -187,8 +187,6 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         return;
     }
 
-    qDebug() << root;
-
     if (action == "select")
     {
         QString _type = root.value("type").toString();
@@ -200,11 +198,12 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         AttachedWindow::GetArgs args;
         args.winId = root.value("winId").toString();
         args.yOffset = root.value("yOffset").toInt(-1);
+        args.x = root.value("size").toObject().value("x").toInt(-1);
         args.width = root.value("size").toObject().value("width").toInt(-1);
         args.height = root.value("size").toObject().value("height").toInt(-1);
         args.fullscreen = attachFullscreen;
 
-        qDebug() << args.width << args.height << args.winId;
+        qDebug() << args.x << args.width << args.height << args.winId;
 
         if (_type.isNull() || args.winId.isNull())
         {

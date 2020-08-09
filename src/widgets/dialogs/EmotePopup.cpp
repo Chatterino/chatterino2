@@ -8,6 +8,7 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -113,6 +114,9 @@ namespace {
 EmotePopup::EmotePopup(QWidget *parent)
     : BasePopup(BaseWindow::EnableCustomFrame, parent)
 {
+    this->setStayInScreenRect(true);
+    this->moveTo(this, getApp()->windows->emotePopupPos(), false);
+
     auto layout = new QVBoxLayout(this);
     this->getLayoutContainer()->setLayout(layout);
 
@@ -220,4 +224,9 @@ void EmotePopup::loadEmojis()
     this->viewEmojis_->setChannel(emojiChannel);
 }
 
+void EmotePopup::closeEvent(QCloseEvent *event)
+{
+    getApp()->windows->setEmotePopupPos(this->pos());
+    QWidget::closeEvent(event);
+}
 }  // namespace chatterino

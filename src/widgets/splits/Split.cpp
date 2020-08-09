@@ -1,6 +1,7 @@
 #include "widgets/splits/Split.hpp"
 
 #include "common/Common.hpp"
+#include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/EmoteValue.hpp"
@@ -11,6 +12,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
+#include "util/NuulsUploader.hpp"
 #include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Notebook.hpp"
@@ -205,6 +207,35 @@ Split::Split(QWidget *parent)
         [this] { this->focused.invoke(); });
     this->input_->ui_.textEdit->focusLost.connect(
         [this] { this->focusLost.invoke(); });
+    this->input_->ui_.textEdit->imagePasted.connect(
+        [this](const QMimeData *source) {
+            if (getSettings()->askOnImageUpload.getValue())
+            {
+                QMessageBox msgBox;
+                msgBox.setText("Image upload");
+                msgBox.setInformativeText(
+                    "You are uploading an image to an external server. You may "
+                    "not be able to remove the image from the site. Are you "
+                    "okay with this?");
+                msgBox.addButton(QMessageBox::Cancel);
+                msgBox.addButton(QMessageBox::Yes);
+                msgBox.addButton("Yes, don't ask again", QMessageBox::YesRole);
+
+                msgBox.setDefaultButton(QMessageBox::Yes);
+
+                auto picked = msgBox.exec();
+                if (picked == QMessageBox::Cancel)
+                {
+                    return;
+                }
+                else if (picked == 0)  // don't ask again button
+                {
+                    getSettings()->askOnImageUpload.setValue(false);
+                }
+            }
+            upload(source, this->getChannel(), *this->input_->ui_.textEdit);
+        });
+    setAcceptDrops(true);
 }
 
 Split::~Split()
@@ -512,13 +543,21 @@ void Split::openInBrowser()
     }
 }
 
+void Split::openWhispersInBrowser()
+{
+    auto userName = getApp()->accounts->twitch.getCurrent()->getUserName();
+    QDesktopServices::openUrl("https://twitch.tv/popout/moderator/" + userName +
+                              "/whispers");
+}
+
 void Split::openBrowserPlayer()
 {
     ChannelPtr channel = this->getChannel();
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        QDesktopServices::openUrl("https://player.twitch.tv/?channel=" +
-                                  twitchChannel->getName());
+        QDesktopServices::openUrl(
+            "https://player.twitch.tv/?parent=twitch.tv&channel=" +
+            twitchChannel->getName());
     }
 }
 
@@ -531,6 +570,23 @@ void Split::openInStreamlink()
     catch (const Exception &ex)
     {
         qDebug() << "Error in doOpenStreamlink:" << ex.what();
+    }
+}
+
+void Split::openWithCustomScheme()
+{
+    const auto scheme = getSettings()->customURIScheme.getValue();
+    if (scheme.isEmpty())
+    {
+        return;
+    }
+    const auto channel = this->getChannel().get();
+
+    if (const auto twitchChannel = dynamic_cast<TwitchChannel *>(channel))
+    {
+        QDesktopServices::openUrl(QString("%1https://twitch.tv/%2")
+                                      .arg(scheme)
+                                      .arg(twitchChannel->getName()));
     }
 }
 
@@ -678,11 +734,34 @@ void Split::reloadChannelAndSubscriberEmotes()
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        twitchChannel->refreshBTTVChannelEmotes();
-        twitchChannel->refreshFFZChannelEmotes();
+        twitchChannel->refreshBTTVChannelEmotes(true);
+        twitchChannel->refreshFFZChannelEmotes(true);
     }
 }
 
+void Split::dragEnterEvent(QDragEnterEvent *event)
+{
+    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+    {
+        event->acceptProposedAction();
+    }
+    else
+    {
+        BaseWidget::dragEnterEvent(event);
+    }
+}
+
+void Split::dropEvent(QDropEvent *event)
+{
+    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+    {
+        this->input_->ui_.textEdit->imagePasted.invoke(event->mimeData());
+    }
+    else
+    {
+        BaseWidget::dropEvent(event);
+    }
+}
 template <typename Iter, typename RandomGenerator>
 static Iter select_randomly(Iter start, Iter end, RandomGenerator &g)
 {

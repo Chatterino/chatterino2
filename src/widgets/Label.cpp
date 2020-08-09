@@ -93,10 +93,12 @@ void Label::paintEvent(QPaintEvent *)
 
     QFontMetrics metrics = getFonts()->getFontMetrics(
         this->getFontStyle(),
-        this->scale() * 96.f / this->logicalDpiX() * deviceDpi);
+        this->scale() * 96.f /
+            std::max<float>(0.01, this->logicalDpiX() * deviceDpi));
     painter.setFont(getFonts()->getFont(
         this->getFontStyle(),
-        this->scale() * 96.f / this->logicalDpiX() * deviceDpi));
+        this->scale() * 96.f /
+            std::max<float>(0.02, this->logicalDpiX() * deviceDpi)));
 
     int offset = this->getOffset();
 

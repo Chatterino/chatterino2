@@ -210,6 +210,7 @@ void ColorPickerDialog::initRecentColors(LayoutCreator<QWidget> &creator)
         this->ui_.recent.colors.push_back(new ColorButton(*it, this));
         auto *button = this->ui_.recent.colors[ind];
 
+        static_assert(RECENT_COLORS_PER_ROW != 0);
         const int rowInd = (ind / RECENT_COLORS_PER_ROW) + 1;
         const int columnInd = ind % RECENT_COLORS_PER_ROW;
 

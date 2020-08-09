@@ -5,13 +5,47 @@
 
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
+#include "common/SignalVector.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
 
 namespace chatterino {
 
-class Settings : public ABSettings
+class HighlightPhrase;
+class HighlightBlacklistUser;
+class IgnorePhrase;
+class TaggedUser;
+
+/// Settings which are availlable for reading on all threads.
+class ConcurrentSettings
+{
+public:
+    ConcurrentSettings();
+
+    SignalVector<HighlightPhrase> &highlightedMessages;
+    SignalVector<HighlightPhrase> &highlightedUsers;
+    SignalVector<HighlightBlacklistUser> &blacklistedUsers;
+    SignalVector<IgnorePhrase> &ignoredMessages;
+    SignalVector<QString> &mutedChannels;
+    //SignalVector<TaggedUser> &taggedUsers;
+    SignalVector<ModerationAction> &moderationActions;
+
+    bool isHighlightedUser(const QString &username);
+    bool isBlacklistedUser(const QString &username);
+    bool isMutedChannel(const QString &channelName);
+    bool toggleMutedChannel(const QString &channelName);
+
+private:
+    void mute(const QString &channelName);
+    void unmute(const QString &channelName);
+};
+
+ConcurrentSettings &getCSettings();
+
+/// Settings which are availlable for reading and writing on the gui thread.
+// These settings are still accessed concurrently in the code but it is bad practice.
+class Settings : public ABSettings, public ConcurrentSettings
 {
     static Settings *instance_;
 
@@ -60,6 +94,8 @@ public:
     BoolSetting enableSmoothScrollingNewMessages = {
         "/appearance/smoothScrollingNewMessages", false};
     BoolSetting boldUsernames = {"/appearance/messages/boldUsernames", false};
+    BoolSetting findAllUsernames = {"/appearance/messages/findAllUsernames",
+                                    false};
     // BoolSetting customizable splitheader
     BoolSetting headerViewerCount = {"/appearance/splitheader/showViewerCount",
                                      false};
@@ -90,6 +126,7 @@ public:
     BoolSetting showParts = {"/behaviour/showParts", false};
     FloatSetting mouseScrollMultiplier = {"/behaviour/mouseScrollMultiplier",
                                           1.0};
+    BoolSetting autoCloseUserPopup = {"/behaviour/autoCloseUserPopup", true};
     // BoolSetting twitchSeperateWriteConnection =
     // {"/behaviour/twitchSeperateWriteConnection", false};
 
@@ -100,6 +137,8 @@ public:
         "/behaviour/autocompletion/smallStreamerLimit", 1000};
     BoolSetting prefixOnlyEmoteCompletion = {
         "/behaviour/autocompletion/prefixOnlyCompletion", true};
+    BoolSetting userCompletionOnlyWithAt = {
+        "/behaviour/autocompletion/userCompletionOnlyWithAt", false};
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {
@@ -125,6 +164,8 @@ public:
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
     BoolSetting linkInfoTooltip = {"/links/linkInfoTooltip", false};
+    IntSetting thumbnailSize = {"/appearance/thumbnailSize", 0};
+    IntSetting thumbnailSizeStream = {"/appearance/thumbnailSizeStream", 2};
     BoolSetting unshortLinks = {"/links/unshortLinks", false};
     BoolSetting lowercaseDomains = {"/links/linkLowercase", true};
 
@@ -168,6 +209,17 @@ public:
         "/highlighting/whisperHighlightSoundUrl", ""};
     QStringSetting whisperHighlightColor = {
         "/highlighting/whisperHighlightColor", ""};
+
+    BoolSetting enableRedeemedHighlight = {
+        "/highlighting/redeemedHighlight/highlighted", true};
+    //    BoolSetting enableRedeemedHighlightSound = {
+    //        "/highlighting/redeemedHighlight/enableSound", false};
+    //    BoolSetting enableRedeemedHighlightTaskbar = {
+    //        "/highlighting/redeemedHighlight/enableTaskbarFlashing", false};
+    QStringSetting redeemedHighlightSoundUrl = {
+        "/highlighting/redeemedHighlightSoundUrl", ""};
+    QStringSetting redeemedHighlightColor = {
+        "/highlighting/redeemedHighlightColor", ""};
 
     BoolSetting enableSubHighlight = {
         "/highlighting/subHighlight/subsHighlighted", true};
@@ -221,6 +273,20 @@ public:
                                        "Choose"};
     QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
 
+    // Custom URI Scheme
+    QStringSetting customURIScheme = {"/external/urischeme"};
+
+    // Image Uploader
+    QStringSetting imageUploaderUrl = {"/external/imageUploader/url",
+                                       "https://i.nuuls.com/upload"};
+    QStringSetting imageUploaderFormField = {
+        "/external/imageUploader/formField", "attachment"};
+    QStringSetting imageUploaderHeaders = {"/external/imageUploader/headers",
+                                           ""};
+    QStringSetting imageUploaderLink = {"/external/imageUploader/link", ""};
+    QStringSetting imageUploaderDeletionLink = {
+        "/external/imageUploader/deletionLink", ""};
+
     /// Misc
     BoolSetting betaUpdates = {"/misc/beta", false};
 #ifdef Q_OS_LINUX
@@ -239,6 +305,9 @@ public:
     BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
     BoolSetting attachExtensionToAnyProcess = {
         "/misc/attachExtensionToAnyProcess", false};
+    BoolSetting hideViewerCountAndDuration = {
+        "/misc/hideViewerCountAndDuration", false};
+    BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",

@@ -77,6 +77,10 @@ public:
     ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
 
+    ChannelPtr sourceChannel() const;
+    void setSourceChannel(ChannelPtr sourceChannel);
+    bool hasSourceChannel() const;
+
     LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
     void queueLayout();
 
@@ -143,12 +147,15 @@ private:
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoverLayoutElement,
-                          MessageLayout *layout);
+                          MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
-                             MessageLayout *layout);
+                             MessageLayoutPtr layout);
     int getLayoutWidth() const;
     void updatePauses();
     void unpaused();
+
+    void enableScrolling(const QPointF &scrollStart);
+    void disableScrolling();
 
     QTimer *layoutCooldown_;
     bool layoutQueued_;
@@ -173,6 +180,7 @@ private:
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
     ChannelPtr channel_;
+    ChannelPtr sourceChannel_;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
@@ -185,26 +193,30 @@ private:
     bool onlyUpdateEmotes_ = false;
 
     // Mouse event variables
-    bool isMouseDown_ = false;
+    bool isLeftMouseDown_ = false;
     bool isRightMouseDown_ = false;
     bool isDoubleClick_ = false;
     DoubleClickSelection doubleClickSelection_;
-    QPointF lastPressPosition_;
+    QPointF lastLeftPressPosition_;
     QPointF lastRightPressPosition_;
     QPointF lastDClickPosition_;
     QTimer *clickTimer_;
+
+    bool isScrolling_ = false;
+    QPointF lastMiddlePressPosition_;
+    QPointF currentMousePosition_;
+    QTimer scrollTimer_;
+
+    struct {
+        QCursor neutral;
+        QCursor up;
+        QCursor down;
+    } cursors_;
 
     Selection selection_;
     bool selecting_ = false;
 
     LimitedQueue<MessageLayoutPtr> messages_;
-
-    pajlada::Signals::Connection messageAppendedConnection_;
-    pajlada::Signals::Connection messageAddedAtStartConnection_;
-    pajlada::Signals::Connection messageRemovedConnection_;
-    pajlada::Signals::Connection messageReplacedConnection_;
-    pajlada::Signals::Connection repaintGifsConnection_;
-    pajlada::Signals::Connection layoutConnection_;
 
     std::vector<pajlada::Signals::ScopedConnection> connections_;
     std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
@@ -220,6 +232,8 @@ private slots:
         queueLayout();
         update();
     }
+
+    void scrollUpdateRequested();
 };
 
 }  // namespace chatterino

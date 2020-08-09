@@ -34,6 +34,8 @@ enum class MessageFlag : uint32_t {
     HighlightedWhisper = (1 << 17),
     Debug = (1 << 18),
     Similar = (1 << 19),
+    RedeemedHighlight = (1 << 20),
+    RedeemedChannelPointReward = (1 << 21),
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 

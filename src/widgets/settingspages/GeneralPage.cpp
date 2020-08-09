@@ -74,14 +74,16 @@ namespace {
 
 TitleLabel *SettingsLayout::addTitle(const QString &title)
 {
-    auto label = new TitleLabel(title + ":");
+    // space
+    if (!this->groups_.empty())
+        this->addWidget(this->groups_.back().space = new Space);
 
-    if (this->count() == 0)
-        label->setStyleSheet("margin-top: 0");
+    // title
+    auto label = new TitleLabel(title + ":");
     this->addWidget(label);
 
     // groups
-    this->groups_.push_back(Group{title, label, {}});
+    this->groups_.push_back(Group{title, label, nullptr, {}});
 
     return label;
 }
@@ -228,6 +230,8 @@ bool SettingsLayout::filterElements(const QString &query)
                 }
             }
 
+            if (group.space)
+                group.space->setVisible(groupAny);
             group.title->setVisible(groupAny);
             any |= groupAny;
         }
@@ -237,7 +241,6 @@ bool SettingsLayout::filterElements(const QString &query)
 }
 
 GeneralPage::GeneralPage()
-    : SettingsPage("General", ":/settings/about.svg")
 {
     auto y = new QVBoxLayout;
     auto scroll = new QScrollArea;
@@ -263,9 +266,7 @@ GeneralPage::GeneralPage()
 bool GeneralPage::filterElements(const QString &query)
 {
     if (this->settingsLayout_)
-        return this->settingsLayout_->filterElements(query) ||
-               this->name_.contains(query, Qt::CaseInsensitive) ||
-               query.isEmpty();
+        return this->settingsLayout_->filterElements(query) || query.isEmpty();
     else
         return false;
 }
@@ -306,7 +307,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
     if (!BaseWindow::supportsCustomWindowFrame())
     {
-        layout.addCheckbox("Show preferences button (ctrl+p to show)",
+        layout.addCheckbox("Show preferences button (Ctrl+P to show)",
                            s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
@@ -327,7 +328,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
     layout.addDropdown<float>(
-        "Pause on hover", {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
+        "Pause after hover",
+        {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
         s.pauseOnHoverDuration,
         [](auto val) {
             if (val < -0.5f)
@@ -352,13 +354,17 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
 
     layout.addTitle("Messages");
-    layout.addCheckbox("Seperate with lines", s.separateMessages);
+    layout.addCheckbox("Separate with lines", s.separateMessages);
     layout.addCheckbox("Alternate background color", s.alternateMessages);
     // layout.addCheckbox("Mark last message you read");
     // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
+    layout.addCheckbox("Highlight messages redeemed with Channel Points",
+                       s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
-        "Timestamps", {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a"},
+        "Timestamps",
+        {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
+         "h:mm:ss a", "hh:mm:ss a"},
         s.timestampFormat,
         [](auto val) {
             return getSettings()->showTimestamps.getValue()
@@ -503,8 +509,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.mentionUsersWithComma);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
+    layout.addCheckbox("Automatically close user popup when it loses focus",
+                       s.autoCloseUserPopup);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
+    layout.addCheckbox("Try to find usernames without @ prefix",
+                       s.findAllUsernames);
     layout.addDropdown<float>(
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
         [](auto val) {
@@ -515,6 +525,56 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) { return fuzzyToFloat(args.value, 63.f); });
     layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
+    layout.addDropdown<int>(
+        "Show link thumbnail", {"Off", "Small", "Medium", "Large"},
+        s.thumbnailSize,
+        [](auto val) {
+            if (val == 0)
+                return QString("Off");
+            else if (val == 100)
+                return QString("Small");
+            else if (val == 200)
+                return QString("Medium");
+            else if (val == 300)
+                return QString("Large");
+            else
+                return QString::number(val);
+        },
+        [](auto args) {
+            if (args.value == "Small")
+                return 100;
+            else if (args.value == "Medium")
+                return 200;
+            else if (args.value == "Large")
+                return 300;
+
+            return fuzzyToInt(args.value, 0);
+        });
+    layout.addDropdown<int>(
+        "Show stream thumbnail", {"Off", "Small", "Medium", "Large"},
+        s.thumbnailSizeStream,
+        [](auto val) {
+            if (val == 0)
+                return QString("Off");
+            else if (val == 1)
+                return QString("Small");
+            else if (val == 2)
+                return QString("Medium");
+            else if (val == 3)
+                return QString("Large");
+            else
+                return QString::number(val);
+        },
+        [](auto args) {
+            if (args.value == "Small")
+                return 1;
+            else if (args.value == "Medium")
+                return 2;
+            else if (args.value == "Large")
+                return 3;
+
+            return fuzzyToInt(args.value, 0);
+        });
     layout.addCheckbox("Double click to open links and other elements in chat",
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
@@ -523,6 +583,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
         s.prefixOnlyEmoteCompletion);
+    layout.addCheckbox("Only search for username autocompletion with an @",
+                       s.userCompletionOnlyWithAt);
 
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
     layout.addCheckbox("Highlight received inline whispers",
@@ -534,6 +596,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.enableExperimentalIrc);
     layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
+    layout.addCheckbox(
+        "Hide viewercount and stream length while hovering the split",
+        s.hideViewerCountAndDuration);
+    layout.addCheckbox(
+        "Ask for confirmation when uploading an image to i.nuuls.com",
+        s.askOnImageUpload);
 
     layout.addTitle("Cache");
     layout.addDescription(

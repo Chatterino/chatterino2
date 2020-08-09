@@ -21,7 +21,6 @@
 namespace chatterino {
 
 NotificationPage::NotificationPage()
-    : SettingsPage("Notifications", ":/settings/notification2.svg")
 {
     LayoutCreator<NotificationPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
@@ -101,7 +100,7 @@ NotificationPage::NotificationPage()
                 view->addButtonPressed.connect([] {
                     getApp()
                         ->notifications->channelMap[Platform::Twitch]
-                        .appendItem("channel");
+                        .append("channel");
                 });
             }
             /*

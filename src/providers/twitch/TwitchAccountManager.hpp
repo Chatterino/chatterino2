@@ -51,9 +51,7 @@ public:
     pajlada::Signals::NoArgSignal currentUserChanged;
     pajlada::Signals::NoArgSignal userListUpdated;
 
-    SortedSignalVector<std::shared_ptr<TwitchAccount>,
-                       SharedPtrElementLess<TwitchAccount>>
-        accounts;
+    SignalVector<std::shared_ptr<TwitchAccount>> accounts;
 
 private:
     enum class AddUserResponse {

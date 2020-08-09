@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/highlights/HighlightBlacklistModel.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/highlights/HighlightModel.hpp"
 #include "controllers/highlights/UserHighlightModel.hpp"
 #include "singletons/Settings.hpp"
@@ -29,9 +28,7 @@
 namespace chatterino {
 
 HighlightingPage::HighlightingPage()
-    : SettingsPage("Highlights", ":/settings/notifications.svg")
 {
-    auto app = getApp();
     LayoutCreator<HighlightingPage> layoutCreator(this);
 
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
@@ -50,12 +47,13 @@ HighlightingPage::HighlightingPage()
                     "Play notification sounds and highlight messages based on "
                     "certain patterns.");
 
-                EditableModelView *view =
+                auto view =
                     highlights
                         .emplace<EditableModelView>(
-                            app->highlights->createModel(nullptr))
+                            (new HighlightModel(nullptr))
+                                ->initialized(
+                                    &getSettings()->highlightedMessages))
                         .getElement();
-
                 view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex", "Case-\nsensitive",
@@ -73,7 +71,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlights->phrases.appendItem(HighlightPhrase{
+                    getSettings()->highlightedMessages.append(HighlightPhrase{
                         "my phrase", true, false, false, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
@@ -95,7 +93,8 @@ HighlightingPage::HighlightingPage()
                 EditableModelView *view =
                     pingUsers
                         .emplace<EditableModelView>(
-                            app->highlights->createUserModel(nullptr))
+                            (new UserHighlightModel(nullptr))
+                                ->initialized(&getSettings()->highlightedUsers))
                         .getElement();
 
                 view->addRegexHelpLink();
@@ -119,11 +118,10 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlights->highlightedUsers.appendItem(
-                        HighlightPhrase{"highlighted user", true, false, false,
-                                        false, "",
-                                        *ColorProvider::instance().color(
-                                            ColorType::SelfHighlight)});
+                    getSettings()->highlightedUsers.append(HighlightPhrase{
+                        "highlighted user", true, false, false, false, "",
+                        *ColorProvider::instance().color(
+                            ColorType::SelfHighlight)});
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,
@@ -141,7 +139,8 @@ HighlightingPage::HighlightingPage()
                 EditableModelView *view =
                     disabledUsers
                         .emplace<EditableModelView>(
-                            app->highlights->createBlacklistModel(nullptr))
+                            (new HighlightBlacklistModel(nullptr))
+                                ->initialized(&getSettings()->blacklistedUsers))
                         .getElement();
 
                 view->addRegexHelpLink();
@@ -159,7 +158,7 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getApp()->highlights->blacklistedUsers.appendItem(
+                    getSettings()->blacklistedUsers.append(
                         HighlightBlacklistUser{"blacklisted user", false});
                 });
             }
@@ -206,7 +205,7 @@ HighlightingPage::HighlightingPage()
 
     // ---- misc
     this->disabledUsersChangedTimer_.setSingleShot(true);
-}
+}  // namespace chatterino
 
 void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                         EditableModelView *view)
@@ -228,7 +227,8 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                       Qt::CheckStateRole);
         }
     }
-    else if (clicked.column() == Column::Color)
+    else if (clicked.column() == Column::Color &&
+             clicked.row() != HighlightModel::WHISPER_ROW)
     {
         auto initial =
             view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();

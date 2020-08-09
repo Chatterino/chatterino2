@@ -149,7 +149,6 @@ void Notebook::select(QWidget *page)
         {
             if (containsChild(page, item.selectedWidget))
             {
-                qDebug() << item.selectedWidget;
                 item.selectedWidget->setFocus(Qt::MouseFocusReason);
             }
             else

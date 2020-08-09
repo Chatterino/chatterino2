@@ -7,20 +7,20 @@
 namespace chatterino {
 
 AccountController::AccountController()
+    : accounts_(SharedPtrElementLess<Account>{})
 {
     this->twitch.accounts.itemInserted.connect([this](const auto &args) {
-        this->accounts_.insertItem(
-            std::dynamic_pointer_cast<Account>(args.item));
+        this->accounts_.insert(std::dynamic_pointer_cast<Account>(args.item));
     });
 
     this->twitch.accounts.itemRemoved.connect([this](const auto &args) {
         if (args.caller != this)
         {
-            auto &accs = this->twitch.accounts.getVector();
+            auto &accs = this->twitch.accounts.raw();
             auto it = std::find(accs.begin(), accs.end(), args.item);
             assert(it != accs.end());
 
-            this->accounts_.removeItem(it - accs.begin(), this);
+            this->accounts_.removeAt(it - accs.begin(), this);
         }
     });
 
@@ -30,10 +30,10 @@ AccountController::AccountController()
             case ProviderId::Twitch: {
                 if (args.caller != this)
                 {
-                    auto accs = this->twitch.accounts.cloneVector();
+                    auto &&accs = this->twitch.accounts;
                     auto it = std::find(accs.begin(), accs.end(), args.item);
                     assert(it != accs.end());
-                    this->twitch.accounts.removeItem(it - accs.begin(), this);
+                    this->twitch.accounts.removeAt(it - accs.begin(), this);
                 }
             }
             break;
@@ -50,7 +50,7 @@ AccountModel *AccountController::createModel(QObject *parent)
 {
     AccountModel *model = new AccountModel(parent);
 
-    model->init(&this->accounts_);
+    model->initialize(&this->accounts_);
     return model;
 }
 

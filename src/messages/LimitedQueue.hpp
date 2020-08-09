@@ -125,8 +125,6 @@ public:
             newChunks->at(0) = newFirstChunk;
 
             this->chunks_ = newChunks;
-            // qDebug() << acceptedItems.size();
-            // qDebug() << this->chunks->at(0)->size();
 
             if (this->chunks_->size() == 1)
             {
@@ -225,8 +223,13 @@ public:
             this->firstChunkOffset_, this->lastChunkEnd_);
     }
 
+    bool empty() const
+    {
+        return this->limit_ - this->space() == 0;
+    }
+
 private:
-    qsizetype space()
+    qsizetype space() const
     {
         size_t totalSize = 0;
         for (auto &chunk : *this->chunks_)

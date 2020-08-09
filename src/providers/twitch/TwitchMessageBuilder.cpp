@@ -2,13 +2,13 @@
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "controllers/highlights/HighlightController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
-#include "controllers/pings/PingController.hpp"
+#include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
@@ -27,67 +27,34 @@
 
 namespace {
 
+// matches a mention with punctuation at the end, like "@username," or "@username!!!" where capture group would return "username"
+const QRegularExpression mentionRegex("^@(\\w+)[.,!?;]*?$");
+
 const QSet<QString> zeroWidthEmotes{
-    "SoSnowy", "IceCold", "SantaHat", "TopHat", "ReinDeer", "CandyCane",
+    "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
+    "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
 };
-
-QColor getRandomColor(const QVariant &userId)
-{
-    static const std::vector<QColor> twitchUsernameColors = {
-        {255, 0, 0},      // Red
-        {0, 0, 255},      // Blue
-        {0, 255, 0},      // Green
-        {178, 34, 34},    // FireBrick
-        {255, 127, 80},   // Coral
-        {154, 205, 50},   // YellowGreen
-        {255, 69, 0},     // OrangeRed
-        {46, 139, 87},    // SeaGreen
-        {218, 165, 32},   // GoldenRod
-        {210, 105, 30},   // Chocolate
-        {95, 158, 160},   // CadetBlue
-        {30, 144, 255},   // DodgerBlue
-        {255, 105, 180},  // HotPink
-        {138, 43, 226},   // BlueViolet
-        {0, 255, 127},    // SpringGreen
-    };
-
-    bool ok = true;
-    int colorSeed = userId.toInt(&ok);
-    if (!ok)
-    {
-        // We were unable to convert the user ID to an integer, this means Twitch has decided to start using non-integer user IDs
-        // Just randomize the users color
-        colorSeed = std::rand();
-    }
-
-    const auto colorIndex = colorSeed % twitchUsernameColors.size();
-    return twitchUsernameColors[colorIndex];
-}
-
-QUrl getFallbackHighlightSound()
-{
-    using namespace chatterino;
-
-    QString path = getSettings()->pathHighlightSound;
-    bool fileExists = QFileInfo::exists(path) && QFileInfo(path).isFile();
-
-    // Use fallback sound when checkbox is not checked
-    // or custom file doesn't exist
-    if (getSettings()->customHighlightSound && fileExists)
-    {
-        return QUrl::fromLocalFile(path);
-    }
-    else
-    {
-        return QUrl("qrc:/sounds/ping2.wav");
-    }
-}
 
 }  // namespace
 
 namespace chatterino {
 
 namespace {
+
+    QColor getRandomColor(const QVariant &userId)
+    {
+        bool ok = true;
+        int colorSeed = userId.toInt(&ok);
+        if (!ok)
+        {
+            // We were unable to convert the user ID to an integer, this means Twitch has decided to start using non-integer user IDs
+            // Just randomize the users color
+            colorSeed = std::rand();
+        }
+
+        const auto colorIndex = colorSeed % TWITCH_USERNAME_COLORS.size();
+        return TWITCH_USERNAME_COLORS[colorIndex];
+    }
 
     QStringList parseTagList(const QVariantMap &tags, const QString &key)
     {
@@ -140,13 +107,8 @@ namespace {
 TwitchMessageBuilder::TwitchMessageBuilder(
     Channel *_channel, const Communi::IrcPrivateMessage *_ircMessage,
     const MessageParseArgs &_args)
-    : channel(_channel)
+    : SharedMessageBuilder(_channel, _ircMessage, _args)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
-    , ircMessage(_ircMessage)
-    , args(_args)
-    , tags(this->ircMessage->tags())
-    , originalMessage_(_ircMessage->content())
-    , action_(_ircMessage->isAction())
 {
     this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
@@ -154,31 +116,20 @@ TwitchMessageBuilder::TwitchMessageBuilder(
 TwitchMessageBuilder::TwitchMessageBuilder(
     Channel *_channel, const Communi::IrcMessage *_ircMessage,
     const MessageParseArgs &_args, QString content, bool isAction)
-    : channel(_channel)
+    : SharedMessageBuilder(_channel, _ircMessage, _args, content, isAction)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
-    , ircMessage(_ircMessage)
-    , args(_args)
-    , tags(this->ircMessage->tags())
-    , originalMessage_(content)
-    , action_(isAction)
 {
     this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 bool TwitchMessageBuilder::isIgnored() const
 {
-    auto app = getApp();
-
-    // TODO(pajlada): Do we need to check if the phrase is valid first?
-    for (const auto &phrase : app->ignores->phrases)
+    if (SharedMessageBuilder::isIgnored())
     {
-        if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
-        {
-            qDebug() << "Blocking message because it contains ignored phrase"
-                     << phrase.getPattern();
-            return true;
-        }
+        return true;
     }
+
+    auto app = getApp();
 
     if (getSettings()->enableTwitchIgnoredUsers &&
         this->tags.contains("user-id"))
@@ -205,8 +156,7 @@ bool TwitchMessageBuilder::isIgnored() const
                     case ShowIgnoredUsersMessages::Never:
                         break;
                 }
-                qDebug() << "Blocking message because it's from blocked user"
-                         << user.name;
+
                 return true;
             }
         }
@@ -215,78 +165,43 @@ bool TwitchMessageBuilder::isIgnored() const
     return false;
 }
 
-inline QMediaPlayer *getPlayer()
-{
-    if (isGuiThread())
-    {
-        static auto player = new QMediaPlayer;
-        return player;
-    }
-    else
-    {
-        return nullptr;
-    }
-}
-
 void TwitchMessageBuilder::triggerHighlights()
 {
-    static QUrl currentPlayerUrl;
-
     if (this->historicalMessage_)
     {
         // Do nothing. Highlights should not be triggered on historical messages.
         return;
     }
 
-    if (getApp()->pings->isMuted(this->channel->getName()))
-    {
-        // Do nothing. Pings are muted in this channel.
-        return;
-    }
-
-    bool hasFocus = (QApplication::focusWidget() != nullptr);
-    bool resolveFocus = !hasFocus || getSettings()->highlightAlwaysPlaySound;
-
-    if (this->highlightSound_ && resolveFocus)
-    {
-        if (auto player = getPlayer())
-        {
-            // update the media player url if necessary
-            if (currentPlayerUrl != this->highlightSoundUrl_)
-            {
-                player->setMedia(this->highlightSoundUrl_);
-
-                currentPlayerUrl = this->highlightSoundUrl_;
-            }
-
-            player->play();
-        }
-    }
-
-    if (this->highlightAlert_)
-    {
-        getApp()->windows->sendAlert();
-    }
+    SharedMessageBuilder::triggerHighlights();
 }
 
 MessagePtr TwitchMessageBuilder::build()
 {
-    // PARSING
+    // PARSE
     this->userId_ = this->ircMessage->tag("user-id").toString();
 
-    this->parseUsername();
+    this->parse();
 
     if (this->userName == this->channel->getName())
     {
         this->senderIsBroadcaster = true;
     }
 
-    this->message().flags.set(MessageFlag::Collapsed);
-
-    // PARSING
     this->parseMessageID();
 
     this->parseRoomID();
+
+    // If it is a reward it has to be appended first
+    if (this->args.channelPointRewardId != "")
+    {
+        const auto &reward = this->twitchChannel->channelPointReward(
+            this->args.channelPointRewardId);
+        if (reward)
+        {
+            this->appendChannelPointRewardMessage(reward.get(), this);
+        }
+    }
 
     this->appendChannelName();
 
@@ -296,6 +211,13 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     this->historicalMessage_ = this->tags.contains("historical");
+
+    if (this->tags.contains("msg-id") &&
+        this->tags["msg-id"].toString().split(';').contains(
+            "highlighted-message"))
+    {
+        this->message().flags.set(MessageFlag::RedeemedHighlight);
+    }
 
     // timestamp
     if (this->historicalMessage_)
@@ -410,6 +332,8 @@ MessagePtr TwitchMessageBuilder::build()
     if (this->args.isReceivedWhisper && getSettings()->highlightInlineWhispers)
     {
         this->message().flags.set(MessageFlag::HighlightedWhisper, true);
+        this->message().highlightColor =
+            ColorProvider::instance().color(ColorType::Whisper);
     }
 
     return this->release();
@@ -471,7 +395,7 @@ void TwitchMessageBuilder::addWords(
 
 void TwitchMessageBuilder::addTextOrEmoji(EmotePtr emote)
 {
-    this->emplace<EmoteElement>(emote, MessageElementFlag::EmojiAll);
+    return SharedMessageBuilder::addTextOrEmoji(emote);
 }
 
 void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
@@ -497,63 +421,50 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
     // Actually just text
     auto linkString = this->matchLink(string);
-    auto link = Link();
     auto textColor = this->action_ ? MessageColor(this->usernameColor_)
                                    : MessageColor(MessageColor::Text);
 
-    if (linkString.isEmpty())
-    {
-        if (string.startsWith('@'))
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold);
-            this->emplace<TextElement>(
-                string, MessageElementFlag::NonBoldUsername, textColor);
-        }
-        else
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::Text,
-                                       textColor);
-        }
-    }
-    else
+    if (!linkString.isEmpty())
     {
         this->addLink(string, linkString);
+        return;
     }
 
-    // if (!linkString.isEmpty()) {
-    //    if (getSettings()->lowercaseLink) {
-    //        QRegularExpression httpRegex("\\bhttps?://",
-    //        QRegularExpression::CaseInsensitiveOption); QRegularExpression
-    //        ftpRegex("\\bftps?://",
-    //        QRegularExpression::CaseInsensitiveOption); QRegularExpression
-    //        getDomain("\\/\\/([^\\/]*)"); QString tempString = string;
+    if (string.startsWith('@'))
+    {
+        auto match = mentionRegex.match(string);
+        // Only treat as @mention if valid username
+        if (match.hasMatch())
+        {
+            QString username = match.captured(1);
+            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+                                       textColor, FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, username});
 
-    //        if (!string.contains(httpRegex)) {
-    //            if (!string.contains(ftpRegex)) {
-    //                tempString.insert(0, "http://");
-    //            }
-    //        }
-    //        QString domain = getDomain.match(tempString).captured(1);
-    //        string.replace(domain, domain.toLower());
-    //    }
-    //    link = Link(Link::Url, linkString);
-    //    textColor = MessageColor(MessageColor::Link);
-    //}
-    // if (string.startsWith('@')) {
-    //    this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-    //    textColor,
-    //                               FontStyle::ChatMediumBold)  //
-    //        ->setLink(link);
-    //    this->emplace<TextElement>(string,
-    //    MessageElementFlag::NonBoldUsername,
-    //                               textColor)  //
-    //        ->setLink(link);
-    //} else {
-    //    this->emplace<TextElement>(string, MessageElementFlag::Text,
-    //    textColor)  //
-    //        ->setLink(link);
-    //}
+            this->emplace<TextElement>(
+                    string, MessageElementFlag::NonBoldUsername, textColor)
+                ->setLink({Link::UserInfo, username});
+            return;
+        }
+    }
+
+    if (this->twitchChannel != nullptr && getSettings()->findAllUsernames)
+    {
+        auto chatters = this->twitchChannel->accessChatters();
+        if (chatters->contains(string))
+        {
+            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+                                       textColor, FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, string});
+
+            this->emplace<TextElement>(
+                    string, MessageElementFlag::NonBoldUsername, textColor)
+                ->setLink({Link::UserInfo, string});
+            return;
+        }
+    }
+
+    this->emplace<TextElement>(string, MessageElementFlag::Text, textColor);
 }
 
 void TwitchMessageBuilder::parseMessageID()
@@ -586,16 +497,6 @@ void TwitchMessageBuilder::parseRoomID()
     }
 }
 
-void TwitchMessageBuilder::appendChannelName()
-{
-    QString channelName("#" + this->channel->getName());
-    Link link(Link::Url, this->channel->getName() + "\n" + this->message().id);
-
-    this->emplace<TextElement>(channelName, MessageElementFlag::ChannelName,
-                               MessageColor::System)  //
-        ->setLink(link);
-}
-
 void TwitchMessageBuilder::parseUsernameColor()
 {
     const auto iterator = this->tags.find("color");
@@ -616,10 +517,7 @@ void TwitchMessageBuilder::parseUsernameColor()
 
 void TwitchMessageBuilder::parseUsername()
 {
-    this->parseUsernameColor();
-
-    // username
-    this->userName = this->ircMessage->nick();
+    SharedMessageBuilder::parseUsername();
 
     if (this->userName.isEmpty() || this->args.trimSubscriberUsername)
     {
@@ -764,8 +662,7 @@ void TwitchMessageBuilder::appendUsername()
 void TwitchMessageBuilder::runIgnoreReplaces(
     std::vector<std::tuple<int, EmotePtr, EmoteName>> &twitchEmotes)
 {
-    auto app = getApp();
-    const auto &phrases = app->ignores->phrases;
+    auto phrases = getCSettings().ignoredMessages.readOnly();
     auto removeEmotesInRange =
         [](int pos, int len,
            std::vector<std::tuple<int, EmotePtr, EmoteName>>
@@ -828,7 +725,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         }
     };
 
-    for (const auto &phrase : phrases)
+    for (const auto &phrase : *phrases)
     {
         if (phrase.isBlock())
         {
@@ -976,200 +873,6 @@ void TwitchMessageBuilder::runIgnoreReplaces(
     }
 }
 
-void TwitchMessageBuilder::parseHighlights()
-{
-    auto app = getApp();
-
-    if (this->message().flags.has(MessageFlag::Subscription) &&
-        getSettings()->enableSubHighlight)
-    {
-        if (getSettings()->enableSubHighlightTaskbar)
-        {
-            this->highlightAlert_ = true;
-        }
-
-        if (getSettings()->enableSubHighlightSound)
-        {
-            this->highlightSound_ = true;
-
-            // Use custom sound if set, otherwise use fallback
-            if (!getSettings()->subHighlightSoundUrl.getValue().isEmpty())
-            {
-                this->highlightSoundUrl_ =
-                    QUrl(getSettings()->subHighlightSoundUrl.getValue());
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor =
-            ColorProvider::instance().color(ColorType::Subscription);
-
-        // This message was a subscription.
-        // Don't check for any other highlight phrases.
-        return;
-    }
-
-    auto currentUser = app->accounts->twitch.getCurrent();
-
-    QString currentUsername = currentUser->getUserName();
-
-    if (app->highlights->blacklistContains(this->ircMessage->nick()))
-    {
-        // Do nothing. We ignore highlights from this user.
-        return;
-    }
-
-    // Highlight because it's a whisper
-    if (this->args.isReceivedWhisper && getSettings()->enableWhisperHighlight)
-    {
-        if (getSettings()->enableWhisperHighlightTaskbar)
-        {
-            this->highlightAlert_ = true;
-        }
-
-        if (getSettings()->enableWhisperHighlightSound)
-        {
-            this->highlightSound_ = true;
-
-            // Use custom sound if set, otherwise use fallback
-            if (!getSettings()->whisperHighlightSoundUrl.getValue().isEmpty())
-            {
-                this->highlightSoundUrl_ =
-                    QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        this->message().highlightColor =
-            ColorProvider::instance().color(ColorType::Whisper);
-
-        /*
-         * Do _NOT_ return yet, we might want to apply phrase/user name
-         * highlights (which override whisper color/sound).
-         */
-    }
-
-    std::vector<HighlightPhrase> userHighlights =
-        app->highlights->highlightedUsers.cloneVector();
-
-    // Highlight because of sender
-    for (const HighlightPhrase &userHighlight : userHighlights)
-    {
-        if (!userHighlight.isMatch(this->ircMessage->nick()))
-        {
-            continue;
-        }
-        qDebug() << "Highlight because user" << this->ircMessage->nick()
-                 << "sent a message";
-
-        this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor = userHighlight.getColor();
-
-        if (userHighlight.hasAlert())
-        {
-            this->highlightAlert_ = true;
-        }
-
-        if (userHighlight.hasSound())
-        {
-            this->highlightSound_ = true;
-            // Use custom sound if set, otherwise use the fallback sound
-            if (userHighlight.hasCustomSound())
-            {
-                this->highlightSoundUrl_ = userHighlight.getSoundUrl();
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        if (this->highlightAlert_ && this->highlightSound_)
-        {
-            /*
-             * User name highlights "beat" highlight phrases: If a message has
-             * all attributes (color, taskbar flashing, sound) set, highlight
-             * phrases will not be checked.
-             */
-            return;
-        }
-    }
-
-    if (this->ircMessage->nick() == currentUsername)
-    {
-        // Do nothing. Highlights cannot be triggered by yourself
-        return;
-    }
-
-    // TODO: This vector should only be rebuilt upon highlights being changed
-    // fourtf: should be implemented in the HighlightsController
-    std::vector<HighlightPhrase> activeHighlights =
-        app->highlights->phrases.cloneVector();
-
-    if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
-    {
-        HighlightPhrase selfHighlight(
-            currentUsername, getSettings()->enableSelfHighlightTaskbar,
-            getSettings()->enableSelfHighlightSound, false, false,
-            getSettings()->selfHighlightSoundUrl.getValue(),
-            ColorProvider::instance().color(ColorType::SelfHighlight));
-        activeHighlights.emplace_back(std::move(selfHighlight));
-    }
-
-    // Highlight because of message
-    for (const HighlightPhrase &highlight : activeHighlights)
-    {
-        if (!highlight.isMatch(this->originalMessage_))
-        {
-            continue;
-        }
-
-        qDebug() << "Highlight because" << this->originalMessage_ << "matches"
-                 << highlight.getPattern();
-
-        this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor = highlight.getColor();
-
-        if (highlight.hasAlert())
-        {
-            this->highlightAlert_ = true;
-        }
-
-        // Only set highlightSound_ if it hasn't been set by username
-        // highlights already.
-        if (highlight.hasSound() && !this->highlightSound_)
-        {
-            this->highlightSound_ = true;
-
-            // Use custom sound if set, otherwise use fallback sound
-            if (highlight.hasCustomSound())
-            {
-                this->highlightSoundUrl_ = highlight.getSoundUrl();
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        if (this->highlightAlert_ && this->highlightSound_)
-        {
-            /*
-             * Break once no further attributes (taskbar, sound) can be
-             * applied.
-             */
-            break;
-        }
-    }
-}
-
 void TwitchMessageBuilder::appendTwitchEmote(
     const QString &emote,
     std::vector<std::tuple<int, EmotePtr, EmoteName>> &vec,
@@ -1301,7 +1004,6 @@ void TwitchMessageBuilder::appendTwitchBadges()
         auto badgeEmote = this->getTwitchBadge(badge);
         if (!badgeEmote)
         {
-            qDebug() << "No channel/global variant found" << badge.key_;
             continue;
         }
         auto tooltip = (*badgeEmote)->tooltip.string;
@@ -1328,8 +1030,17 @@ void TwitchMessageBuilder::appendTwitchBadges()
             auto badgeInfoIt = badgeInfos.find(badge.key_);
             if (badgeInfoIt != badgeInfos.end())
             {
+                // badge.value_ is 4 chars long if user is subbed on higher tier
+                // (tier + amount of months with leading zero if less than 100)
+                // e.g. 3054 - tier 3 4,5-year sub. 2108 - tier 2 9-year sub
+                const auto &subTier =
+                    badge.value_.length() > 3 ? badge.value_.front() : '1';
                 const auto &subMonths = badgeInfoIt->second;
-                tooltip += QString(" (%0 months)").arg(subMonths);
+                tooltip +=
+                    QString(" (%1%2 months)")
+                        .arg(subTier != '1' ? QString("Tier %1, ").arg(subTier)
+                                            : "")
+                        .arg(subMonths);
             }
         }
 
@@ -1428,6 +1139,36 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     }
 
     return Success;
+}
+
+void TwitchMessageBuilder::appendChannelPointRewardMessage(
+    const ChannelPointReward &reward, MessageBuilder *builder)
+{
+    QString redeemed = "Redeemed";
+    if (!reward.isUserInputRequired)
+    {
+        builder->emplace<TextElement>(
+            reward.user.login, MessageElementFlag::ChannelPointReward,
+            MessageColor::Text, FontStyle::ChatMediumBold);
+        redeemed = "redeemed";
+    }
+    builder->emplace<TextElement>(redeemed,
+                                  MessageElementFlag::ChannelPointReward);
+    builder->emplace<TextElement>(
+        reward.title, MessageElementFlag::ChannelPointReward,
+        MessageColor::Text, FontStyle::ChatMediumBold);
+    builder->emplace<ScalingImageElement>(
+        reward.image, MessageElementFlag::ChannelPointRewardImage);
+    builder->emplace<TextElement>(
+        QString::number(reward.cost), MessageElementFlag::ChannelPointReward,
+        MessageColor::Text, FontStyle::ChatMediumBold);
+    if (reward.isUserInputRequired)
+    {
+        builder->emplace<LinebreakElement>(
+            MessageElementFlag::ChannelPointReward);
+    }
+
+    builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
 }
 
 }  // namespace chatterino

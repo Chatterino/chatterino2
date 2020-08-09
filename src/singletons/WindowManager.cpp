@@ -171,6 +171,7 @@ void WindowManager::updateWordTypeMask()
                                       : MEF::NonBoldUsername);
     flags.set(settings->lowercaseDomains ? MEF::LowercaseLink
                                          : MEF::OriginalLink);
+    flags.set(MEF::ChannelPointReward);
 
     // update flags
     MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);
@@ -272,6 +273,16 @@ Window *WindowManager::windowAt(int index)
     qDebug() << "getting window at bad index" << index;
 
     return this->windows_.at(index);
+}
+
+QPoint WindowManager::emotePopupPos()
+{
+    return this->emotePopupPos_;
+}
+
+void WindowManager::setEmotePopupPos(QPoint pos)
+{
+    this->emotePopupPos_ = pos;
 }
 
 void WindowManager::initialize(Settings &settings, Paths &paths)
@@ -401,6 +412,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         }
         window.show();
 
+        QJsonObject emote_popup_obj = window_obj.value("emotePopup").toObject();
+        this->emotePopupPos_ = QPoint(emote_popup_obj.value("x").toInt(),
+                                      emote_popup_obj.value("y").toInt());
+
         if (window_obj.value("state") == "minimized")
         {
             window.setWindowState(Qt::WindowMinimized);
@@ -430,6 +445,8 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     settings.separateMessages.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });
     settings.collpseMessagesMinLines.connect(
+        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.enableRedeemedHighlight.connect(
         [this](auto, auto) { this->forceLayoutChannelViews(); });
 
     this->initialized_ = true;
@@ -477,6 +494,11 @@ void WindowManager::save()
         window_obj.insert("y", rect.y());
         window_obj.insert("width", rect.width());
         window_obj.insert("height", rect.height());
+
+        QJsonObject emote_popup_obj;
+        emote_popup_obj.insert("x", this->emotePopupPos_.x());
+        emote_popup_obj.insert("y", this->emotePopupPos_.y());
+        window_obj.insert("emotePopup", emote_popup_obj);
 
         // window tabs
         QJsonArray tabs_arr;
