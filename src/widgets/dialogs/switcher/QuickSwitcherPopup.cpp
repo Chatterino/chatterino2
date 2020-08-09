@@ -28,6 +28,8 @@ namespace {
     }
 }  // namespace
 
+const QSize QuickSwitcherPopup::MINIMUM_SIZE(500, 300);
+
 QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
     : BasePopup(FlagsEnum<BaseWindow::Flags>{BaseWindow::Flags::Frameless,
                                              BaseWindow::Flags::TopMost},
@@ -38,7 +40,7 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
 {
     this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
-    this->setMinimumSize(500, 300);
+    this->setMinimumSize(QuickSwitcherPopup::MINIMUM_SIZE);
 
     this->initWidgets();
 
