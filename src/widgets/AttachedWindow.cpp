@@ -187,7 +187,9 @@ void AttachedWindow::attachToHwnd(void *_attachedPtr)
                 if (!qfilename.endsWith("chrome.exe") &&
                     !qfilename.endsWith("firefox.exe") &&
                     !qfilename.endsWith("vivaldi.exe") &&
-                    !qfilename.endsWith("opera.exe"))
+                    !qfilename.endsWith("opera.exe") &&
+                    !qfilename.endsWith("msedge.exe"))
+
                 {
                     qDebug() << "NM Illegal caller" << qfilename;
                     this->timer_.stop();
