@@ -7,6 +7,7 @@
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
 #include "common/UsernameSet.hpp"
+#include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
 
@@ -108,6 +109,14 @@ public:
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::NoArgSignal roomModesChanged;
 
+    // Channel point rewards
+    pajlada::Signals::SelfDisconnectingSignal<ChannelPointReward>
+        channelPointRewardAdded;
+    void addChannelPointReward(const ChannelPointReward &reward);
+    bool isChannelPointRewardKnown(const QString &rewardId);
+    boost::optional<ChannelPointReward> channelPointReward(
+        const QString &rewardId) const;
+
 private:
     struct NameOptions {
         QString displayName;
@@ -158,6 +167,7 @@ private:
     UniqueAccess<std::map<QString, std::map<QString, EmotePtr>>>
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
+    UniqueAccess<std::map<QString, ChannelPointReward>> channelPointRewards_;
 
     bool mod_ = false;
     bool vip_ = false;

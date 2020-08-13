@@ -4,6 +4,7 @@
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "singletons/Fonts.hpp"
+#include "src/messages/ImageSet.hpp"
 
 #include <QRect>
 #include <QString>
@@ -39,6 +40,10 @@ enum class MessageElementFlag {
     BttvEmoteImage = (1 << 6),
     BttvEmoteText = (1 << 7),
     BttvEmote = BttvEmoteImage | BttvEmoteText,
+
+    ChannelPointReward = (1 << 8),
+    ChannelPointRewardImage = ChannelPointReward | TwitchEmoteImage,
+
     FfzEmoteImage = (1 << 10),
     FfzEmoteText = (1 << 11),
     FfzEmote = FfzEmoteImage | FfzEmoteText,
@@ -321,4 +326,26 @@ private:
     std::vector<Word> words_;
 };
 
+// Forces a linebreak
+class LinebreakElement : public MessageElement
+{
+public:
+    LinebreakElement(MessageElementFlags flags);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+};
+
+// Image element which will pick the quality of the image based on ui scale
+class ScalingImageElement : public MessageElement
+{
+public:
+    ScalingImageElement(ImageSet images, MessageElementFlags flags);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+
+private:
+    ImageSet images_;
+};
 }  // namespace chatterino
