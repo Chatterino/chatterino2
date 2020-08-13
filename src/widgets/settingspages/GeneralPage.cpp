@@ -415,8 +415,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addDescription(
         "Extra information like \"youtube video stats\" or title of webpages "
         "can be loaded for all links if enabled. Optionally you can also show "
-        "thumbnails for emotes, videos and more. The information is pulled from"
-        "our servers.");
+        "thumbnails for emotes, videos and more. The information is pulled "
+        "from our servers.");
     layout.addCheckbox("Enable", s.linkInfoTooltip);
     layout.addDropdown<int>(
         "Also show thumbnails if available",
