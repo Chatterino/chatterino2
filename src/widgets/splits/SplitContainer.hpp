@@ -182,6 +182,7 @@ public:
     Position deleteSplit(Split *split);
 
     void selectNextSplit(Direction direction);
+    void setSelected(Split *selected_);
 
     void decodeFromJson(QJsonObject &obj);
 
@@ -214,7 +215,6 @@ protected:
 
 private:
     void layout();
-    void setSelected(Split *selected_);
     void selectSplitRecursive(Node *node, Direction direction);
     void focusSplitRecursive(Node *node, Direction direction);
     void setPreferedTargetRecursive(Node *node);

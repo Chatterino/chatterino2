@@ -17,6 +17,7 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
+#include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
@@ -392,6 +393,12 @@ void Window::addShortcuts()
     createWindowShortcut(this, "CTRL+H", [this] {
         getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
         getApp()->windows->forceLayoutChannelViews();
+    });
+
+    createWindowShortcut(this, "CTRL+K", [this] {
+        auto quickSwitcher =
+            new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
+        quickSwitcher->show();
     });
 }
 
