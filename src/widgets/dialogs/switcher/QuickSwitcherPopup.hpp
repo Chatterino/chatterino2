@@ -41,8 +41,6 @@ private:
     QuickSwitcherModel switcherModel_;
     SwitcherItemDelegate switcherItemDelegate_;
 
-    QSet<SplitContainer *> openPages_;
-
     void initWidgets();
 };
 

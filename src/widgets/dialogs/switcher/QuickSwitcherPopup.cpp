@@ -36,7 +36,6 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
                 parent)
     , switcherModel_(this)
     , switcherItemDelegate_(this)
-    , openPages_(openPages())
 {
     this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
@@ -95,7 +94,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     this->switcherModel_.clear();
 
     // Add items for navigating to different splits
-    for (auto *sc : this->openPages_)
+    for (auto *sc : openPages())
     {
         const QString &tabTitle = sc->getTab()->getTitle();
         const auto splits = sc->getSplits();
