@@ -87,12 +87,20 @@ namespace {
     };
 }  // namespace
 
-UserInfoPopup::UserInfoPopup()
-    : BaseWindow(BaseWindow::EnableCustomFrame)
+UserInfoPopup::UserInfoPopup(bool closeAutomatically)
+    : BaseWindow(
+          closeAutomatically
+              ? FlagsEnum<BaseWindow::Flags>{BaseWindow::EnableCustomFrame,
+                                             BaseWindow::Frameless,
+                                             BaseWindow::FramelessDraggable}
+              : BaseWindow::EnableCustomFrame)
     , hack_(new bool)
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
+
+    if (closeAutomatically)
+        this->setActionOnFocusLoss(BaseWindow::Delete);
 
     // Close the popup when Escape is pressed
     createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });

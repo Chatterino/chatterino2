@@ -162,7 +162,7 @@ void SettingsDialog::addTabs()
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new KeyboardSettingsPage;}, "Keybindings",    ":/settings/keybinds.svg");
     this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg", SettingsTabId::Moderation);
-    this->addTab([]{return new NotificationPage;},     "Notifications",  ":/settings/notification2.svg");
+    this->addTab([]{return new NotificationPage;},     "Live Notifications",  ":/settings/notification2.svg");
     this->addTab([]{return new ExternalToolsPage;},    "External tools", ":/settings/externaltools.svg");
     this->ui_.tabContainer->addStretch(1);
     this->addTab([]{return new AboutPage;},            "About",          ":/settings/about.svg", SettingsTabId(), Qt::AlignBottom);

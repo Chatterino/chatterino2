@@ -65,6 +65,9 @@ Window::Window(WindowType type)
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
+        getSettings()->tabDirection.connect([this](int val) {
+            this->notebook_->setTabDirection(NotebookTabDirection(val));
+        });
     }
     else
     {
@@ -324,6 +327,17 @@ void Window::addShortcuts()
                          [this] { this->notebook_->selectNextTab(); });
     createWindowShortcut(this, "CTRL+SHIFT+TAB",
                          [this] { this->notebook_->selectPreviousTab(); });
+
+    createWindowShortcut(this, "CTRL+N", [this] {
+        if (auto page = dynamic_cast<SplitContainer *>(
+                this->notebook_->getSelectedPage()))
+        {
+            if (auto split = page->getSelectedSplit())
+            {
+                split->popup();
+            }
+        }
+    });
 
     // Zoom in
     {
