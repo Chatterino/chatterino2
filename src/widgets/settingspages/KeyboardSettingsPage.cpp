@@ -12,7 +12,16 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     auto layout =
         LayoutCreator<KeyboardSettingsPage>(this).setLayoutType<QVBoxLayout>();
 
-    auto form = layout.emplace<QFormLayout>().withoutMargin();
+    auto scroll = layout.emplace<QScrollArea>();
+
+    this->setStyleSheet("QLabel, #container { background: #333 }");
+
+    auto form = new QFormLayout(this);
+    scroll->setWidgetResizable(true);
+    auto widget = new QWidget();
+    widget->setLayout(form);
+    widget->setObjectName("container");
+    scroll->setWidget(widget);
 
     form->addRow(new QLabel("Hold Ctrl"), new QLabel("Show resize handles"));
     form->addRow(new QLabel("Hold Ctrl + Alt"),
@@ -28,6 +37,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     form->addRow(new QLabel("Ctrl + W"), new QLabel("Close current split"));
     form->addRow(new QLabel("Ctrl + N"),
                  new QLabel("Open current split as a popup"));
+    form->addRow(new QLabel("Ctrl + K"), new QLabel("Jump to split"));
     form->addRow(new QLabel("Ctrl + G"),
                  new QLabel("Reopen last closed split"));
 
