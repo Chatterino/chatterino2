@@ -26,6 +26,8 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     form->addItem(new QSpacerItem(16, 16));
     form->addRow(new QLabel("Ctrl + T"), new QLabel("Create new split"));
     form->addRow(new QLabel("Ctrl + W"), new QLabel("Close current split"));
+    form->addRow(new QLabel("Ctrl + N"),
+                 new QLabel("Open current split as a popup"));
     form->addRow(new QLabel("Ctrl + G"),
                  new QLabel("Reopen last closed split"));
 

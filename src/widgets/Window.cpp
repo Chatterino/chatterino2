@@ -327,6 +327,17 @@ void Window::addShortcuts()
     createWindowShortcut(this, "CTRL+SHIFT+TAB",
                          [this] { this->notebook_->selectPreviousTab(); });
 
+    createWindowShortcut(this, "CTRL+N", [this] {
+        if (auto page = dynamic_cast<SplitContainer *>(
+                this->notebook_->getSelectedPage()))
+        {
+            if (auto split = page->getSelectedSplit())
+            {
+                split->popup();
+            }
+        }
+    });
+
     // Zoom in
     {
         auto s = new QShortcut(QKeySequence::ZoomIn, this);

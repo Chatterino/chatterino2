@@ -277,7 +277,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     menu->addAction("Close", this->split_, &Split::deleteFromContainer,
                     QKeySequence("Ctrl+W"));
     menu->addSeparator();
-    menu->addAction("Popup", this->split_, &Split::popup);
+    menu->addAction("Popup", this->split_, &Split::popup,
+                    QKeySequence("Ctrl+N"));
     menu->addAction("Search", this->split_, &Split::showSearch,
                     QKeySequence("Ctrl+F"));
     menu->addSeparator();
@@ -323,6 +324,20 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         menu->addSeparator();
     }
 
+    // reload / reconnect
+    if (this->split_->getChannel()->canReconnect())
+        menu->addAction("Reconnect", this, SLOT(reconnect()));
+
+    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    {
+        menu->addAction("Reload channel emotes", this,
+                        SLOT(reloadChannelEmotes()), QKeySequence("F5"));
+        menu->addAction("Reload subscriber emotes", this,
+                        SLOT(reloadSubscriberEmotes()));
+    }
+
+    menu->addSeparator();
+
     {
         // "How to..." sub menu
         auto subMenu = new QMenu("How to...", this);
@@ -330,6 +345,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         subMenu->addAction("add/split", this->split_, &Split::explainSplitting);
         menu->addMenu(subMenu);
     }
+
+    menu->addSeparator();
 
     // sub menu
     auto moreMenu = new QMenu("More", this);
@@ -379,17 +396,6 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         moreMenu->addAction(action);
     }
 
-    moreMenu->addSeparator();
-    if (this->split_->getChannel()->canReconnect())
-        moreMenu->addAction("Reconnect", this, SLOT(reconnect()));
-
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
-    {
-        moreMenu->addAction("Reload channel emotes", this,
-                            SLOT(reloadChannelEmotes()));
-        moreMenu->addAction("Reload subscriber emotes", this,
-                            SLOT(reloadSubscriberEmotes()));
-    }
     moreMenu->addSeparator();
     moreMenu->addAction("Clear messages", this->split_, &Split::clear);
     //    moreMenu->addSeparator();
