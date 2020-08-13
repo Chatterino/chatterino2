@@ -14,7 +14,10 @@ install [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) f
 1. create build folder `mkdir build && cd build`
 1. `qmake .. && make`
 
-## Fedora 28 and above
+## Fedora
+Run `dnf install chatterino2`
+
+## Manually building for Fedora 28 and above
 *most likely works the same for other Red Hat-like distros. Substitue `dnf` with `yum`.*
 ### Development dependencies
 1. `sudo dnf install qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qtsvg-devel libsecret-devel openssl-devel boost-devel`
