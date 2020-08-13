@@ -9,6 +9,7 @@
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
+#include "widgets/Notebook.hpp"
 
 namespace chatterino {
 
@@ -77,6 +78,9 @@ public:
         "/appearance/messages/hideModerationActions", false};
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
                                      false};
+
+    IntSetting tabDirection = {"/appearance/tabDirection",
+                               NotebookTabDirection::Horizontal};
 
     //    BoolSetting collapseLongMessages =
     //    {"/appearance/messages/collapseLongMessages", false};

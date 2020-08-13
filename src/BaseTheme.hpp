@@ -49,7 +49,7 @@ public:
         TabColors highlighted;
         TabColors selected;
         QColor border;
-        QColor bottomLine;
+        QColor dividerLine;
     } tabs;
 
     /// MESSAGES
