@@ -333,7 +333,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         menu->addAction("Reload channel emotes", this,
                         SLOT(reloadChannelEmotes()), QKeySequence("F5"));
         menu->addAction("Reload subscriber emotes", this,
-                        SLOT(reloadSubscriberEmotes()));
+                        SLOT(reloadSubscriberEmotes()), QKeySequence("F5"));
     }
 
     menu->addSeparator();
@@ -729,8 +729,8 @@ void SplitHeader::enterEvent(QEvent *event)
         tooltip->setText(this->tooltipText_);
         tooltip->setWordWrap(false);
         tooltip->adjustSize();
-        auto pos = this->mapToGlobal(this->rect().bottomLeft());
-        pos.setX(pos.x() + (this->width() - tooltip->width()) / 2);
+        auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
+                   QPoint((this->width() - tooltip->width()) / 2, 0);
 
         tooltip->moveTo(this, pos, false);
         tooltip->show();
