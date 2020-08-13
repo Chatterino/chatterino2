@@ -726,11 +726,13 @@ void SplitHeader::enterEvent(QEvent *event)
         TooltipPreviewImage::instance().setImage(nullptr);
 
         auto tooltip = TooltipWidget::instance();
-        tooltip->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()),
-                        false);
         tooltip->setText(this->tooltipText_);
         tooltip->setWordWrap(false);
         tooltip->adjustSize();
+        auto pos = this->mapToGlobal(this->rect().bottomLeft());
+        pos.setX(pos.x() + (this->width() - tooltip->width()) / 2);
+
+        tooltip->moveTo(this, pos, false);
         tooltip->show();
         tooltip->raise();
     }
