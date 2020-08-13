@@ -230,6 +230,13 @@ void SplitContainer::addSplit(Split *split)
 
 void SplitContainer::setSelected(Split *split)
 {
+    // safety
+    if (std::find(this->splits_.begin(), this->splits_.end(), split) ==
+        this->splits_.end())
+    {
+        return;
+    }
+
     this->selected_ = split;
 
     if (Node *node = this->baseNode_.findNodeContainingSplit(split))

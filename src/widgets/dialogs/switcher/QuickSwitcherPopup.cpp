@@ -60,7 +60,8 @@ void QuickSwitcherPopup::initWidgets()
     auto vbox = creator.setLayoutType<QVBoxLayout>();
 
     {
-        vbox.emplace<QLineEdit>().assign(&this->ui_.searchEdit);
+        auto lineEdit = vbox.emplace<QLineEdit>().assign(&this->ui_.searchEdit);
+        lineEdit->setPlaceholderText("Jump to a channel or open a new one");
         QObject::connect(this->ui_.searchEdit, &QLineEdit::textChanged, this,
                          &QuickSwitcherPopup::updateSuggestions);
 
