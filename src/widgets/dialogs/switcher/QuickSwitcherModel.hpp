@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "widgets/dialogs/switcher/AbstractSwitcherItem.hpp"
 
 namespace chatterino {
@@ -8,7 +9,6 @@ class QuickSwitcherModel : public QAbstractListModel
 {
 public:
     QuickSwitcherModel(QWidget *parent = nullptr);
-    ~QuickSwitcherModel();
 
     /**
      * @brief   Reimplements QAbstractItemModel::rowCount.
@@ -37,7 +37,7 @@ public:
      *
      * @param   item    item to add to the model
      */
-    void addItem(AbstractSwitcherItem *item);
+    void addItem(std::unique_ptr<AbstractSwitcherItem> item);
 
     /**
      * @brief   Clears this QuickSwitcherModel of all items. This will delete all
@@ -47,13 +47,6 @@ public:
     void clear();
 
 private:
-    /*
-     * On my system, the default QVector capacity is 0. 20 is an attempt at preventing
-     * frequent reallocations. The number is not backed by any user data but rather a
-     * guess at how many switcher items are probably going to be added.
-     */
-    static constexpr int INITIAL_ITEMS_SIZE = 20;
-
-    QVector<AbstractSwitcherItem *> items_;
+    std::vector<std::unique_ptr<AbstractSwitcherItem>> items_;
 };
 }  // namespace chatterino

@@ -390,7 +390,7 @@ void Window::addShortcuts()
         splitContainer->appendSplit(split);
     });
 
-    createWindowShortcut(this, "CTRL+H", [this] {
+    createWindowShortcut(this, "CTRL+H", [] {
         getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
         getApp()->windows->forceLayoutChannelViews();
     });

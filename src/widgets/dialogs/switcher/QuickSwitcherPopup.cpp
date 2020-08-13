@@ -106,8 +106,8 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
             if (split->getChannel()->getName().contains(text,
                                                         Qt::CaseInsensitive))
             {
-                SwitchSplitItem *item = new SwitchSplitItem(split);
-                this->switcherModel_.addItem(item);
+                auto item = std::make_unique<SwitchSplitItem>(split);
+                this->switcherModel_.addItem(std::move(item));
 
                 // We want to continue the outer loop so we need a goto
                 goto nextPage;
@@ -117,8 +117,8 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
         // Then check if tab title matches
         if (tabTitle.contains(text, Qt::CaseInsensitive))
         {
-            SwitchSplitItem *item = new SwitchSplitItem(sc);
-            this->switcherModel_.addItem(item);
+            auto item = std::make_unique<SwitchSplitItem>(sc);
+            this->switcherModel_.addItem(std::move(item));
             continue;
         }
 
@@ -128,8 +128,8 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     // Add item for opening a channel in a new tab
     if (!text.isEmpty())
     {
-        NewTabItem *item = new NewTabItem(text);
-        this->switcherModel_.addItem(item);
+        auto item = std::make_unique<NewTabItem>(text);
+        this->switcherModel_.addItem(std::move(item));
     }
 
     const auto &startIdx = this->switcherModel_.index(0);
