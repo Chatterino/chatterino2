@@ -300,7 +300,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
     layout.addDropdown<int>(
-        "Tab direction", {"Horizontal", "Vertical"}, s.tabDirection,
+        "Tab layout", {"Horizontal", "Vertical"}, s.tabDirection,
         [](auto val) {
             switch (val)
             {
@@ -329,7 +329,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 #ifdef USEWINSDK
     layout.addCheckbox("Start with Windows", s.autorun);
 #endif
-    layout.addCheckbox("Restart on crash", s.restartOnCrash);
     if (!BaseWindow::supportsCustomWindowFrame())
     {
         layout.addCheckbox("Show preferences button (Ctrl+P to show)",
@@ -445,7 +444,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle("R9K");
     layout.addDescription(
-        "Hide similar messages by the same user. Temporarily show hidden "
+        "Hide similar messages by the same user. Toggle hidden "
         "messages by pressing Ctrl+H.");
     layout.addCheckbox("Hide similar messages", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
@@ -516,6 +515,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         layout.addCheckbox("Open links in incognito/private mode",
                            s.openLinksIncognito);
     }
+
+    layout.addCheckbox("Restart on crash", s.restartOnCrash);
 
 #ifdef Q_OS_LINUX
     if (!getPaths()->isPortable())
