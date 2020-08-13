@@ -348,11 +348,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val) + "x";
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
-    layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
-    layout.addCheckbox("Smooth scrolling on new messages",
-                       s.enableSmoothScrollingNewMessages);
     layout.addDropdown<float>(
-        "Pause after hover",
+        "Pause on mouse hover",
         {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
         s.pauseOnHoverDuration,
         [](auto val) {
@@ -374,6 +371,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         });
     addKeyboardModifierSetting(layout, "Pause while holding a key",
                                s.pauseChatModifier);
+    layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
+    layout.addCheckbox("Smooth scrolling on new messages",
+                       s.enableSmoothScrollingNewMessages);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
 
@@ -411,10 +411,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        : QString("Never");
         },
         [](auto args) { return fuzzyToInt(args.value, 0); });
-    layout.addDropdown<int>(
-        "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
-        s.timeoutStackStyle, [](int index) { return index; },
-        [](auto args) { return args.index; }, false);
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
@@ -663,9 +659,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Hide viewercount and stream length while hovering the split",
         s.hideViewerCountAndDuration);
-    layout.addCheckbox(
-        "Ask for confirmation when uploading an image to i.nuuls.com",
-        s.askOnImageUpload);
+    layout.addDropdown<int>(
+        "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
+        s.timeoutStackStyle, [](int index) { return index; },
+        [](auto args) { return args.index; }, false);
+    layout.addCheckbox("Ask for confirmation when uploading an image",
+                       s.askOnImageUpload);
 
     // invisible element for width
     auto inv = new BaseWidget(this);
