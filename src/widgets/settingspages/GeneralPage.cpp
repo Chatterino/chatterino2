@@ -335,11 +335,12 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                            s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
+    layout.addCheckbox("Show which channels are live in tabs", s.showTabLive);
 
     layout.addTitle("Chat");
 
     layout.addDropdown<float>(
-        "Mouse scroll speed", {"0.5x", "0.75x", "Default", "1.5x", "2x"},
+        "Mousewheel scroll speed", {"0.5x", "0.75x", "Default", "1.5x", "2x"},
         s.mouseScrollMultiplier,
         [](auto val) {
             if (val == 1)
@@ -348,11 +349,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val) + "x";
         },
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
-    layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
-    layout.addCheckbox("Smooth scrolling on new messages",
-                       s.enableSmoothScrollingNewMessages);
     layout.addDropdown<float>(
-        "Pause after hover",
+        "Pause on mouse hover",
         {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
         s.pauseOnHoverDuration,
         [](auto val) {
@@ -374,6 +372,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         });
     addKeyboardModifierSetting(layout, "Pause while holding a key",
                                s.pauseChatModifier);
+    layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
+    layout.addCheckbox("Smooth scrolling on new messages",
+                       s.enableSmoothScrollingNewMessages);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
 
@@ -386,7 +387,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Highlight messages redeemed with Channel Points",
                        s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
-        "Timestamps",
+        "Timestamp format (a = am/pm)",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
          "h:mm:ss a", "hh:mm:ss a"},
         s.timestampFormat,
@@ -402,26 +403,77 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                                    : args.value;
         });
     layout.addDropdown<int>(
-        "Collapse messages",
-        {"Never", "After 2 lines", "After 3 lines", "After 4 lines",
-         "After 5 lines"},
+        "Limit message height",
+        {"Never", "2 lines", "3 lines", "4 lines", "5 lines"},
         s.collpseMessagesMinLines,
         [](auto val) {
-            return val ? QString("After ") + QString::number(val) + " lines"
-                       : QString("Never");
+            return val ? QString::number(val) + " lines" : QString("Never");
         },
         [](auto args) { return fuzzyToInt(args.value, 0); });
+
+    layout.addTitle("Link Information");
+    layout.addDescription(
+        "Extra information like \"youtube video stats\" or title of webpages "
+        "can be loaded for all links if enabled. Optionally you can also show "
+        "thumbnails for emotes, videos and more. The information is pulled from"
+        "our servers.");
+    layout.addCheckbox("Enable", s.linkInfoTooltip);
     layout.addDropdown<int>(
-        "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
-        s.timeoutStackStyle, [](int index) { return index; },
-        [](auto args) { return args.index; }, false);
+        "Also show thumbnails if available",
+        {"Off", "Small", "Medium", "Large"}, s.thumbnailSize,
+        [](auto val) {
+            if (val == 0)
+                return QString("Off");
+            else if (val == 100)
+                return QString("Small");
+            else if (val == 200)
+                return QString("Medium");
+            else if (val == 300)
+                return QString("Large");
+            else
+                return QString::number(val);
+        },
+        [](auto args) {
+            if (args.value == "Small")
+                return 100;
+            else if (args.value == "Medium")
+                return 200;
+            else if (args.value == "Large")
+                return 300;
+
+            return fuzzyToInt(args.value, 0);
+        });
+    layout.addDropdown<int>(
+        "Show thumbnails of streams", {"Off", "Small", "Medium", "Large"},
+        s.thumbnailSizeStream,
+        [](auto val) {
+            if (val == 0)
+                return QString("Off");
+            else if (val == 1)
+                return QString("Small");
+            else if (val == 2)
+                return QString("Medium");
+            else if (val == 3)
+                return QString("Large");
+            else
+                return QString::number(val);
+        },
+        [](auto args) {
+            if (args.value == "Small")
+                return 1;
+            else if (args.value == "Medium")
+                return 2;
+            else if (args.value == "Large")
+                return 3;
+
+            return fuzzyToInt(args.value, 0);
+        });
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
     layout.addCheckbox("Animate", s.animateEmotes);
     layout.addCheckbox("Animate only when Chatterino is focused",
                        s.animationsWhenFocused);
-    layout.addCheckbox("Stack bits", s.stackBits);
     layout.addDropdown<float>(
         "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
         s.emoteScale,
@@ -434,10 +486,10 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         [](auto args) { return fuzzyToFloat(args.value, 1.f); });
 
     layout.addDropdown<int>(
-        "Preview on hover", {"Don't show", "Always show", "Hold shift"},
+        "Show info on hover", {"Don't show", "Always show", "Hold shift"},
         s.emotesTooltipPreview, [](int index) { return index; },
         [](auto args) { return args.index; }, false);
-    layout.addDropdown("Emoji set",
+    layout.addDropdown("Emoji style",
                        {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
                         "Apple", "Google", "Messenger"},
                        s.emojiSet);
@@ -588,61 +640,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 return QString::number(val);
         },
         [](auto args) { return fuzzyToFloat(args.value, 63.f); });
-    layout.addCheckbox("Show link info when hovering", s.linkInfoTooltip);
-    layout.addDropdown<int>(
-        "Show link thumbnail", {"Off", "Small", "Medium", "Large"},
-        s.thumbnailSize,
-        [](auto val) {
-            if (val == 0)
-                return QString("Off");
-            else if (val == 100)
-                return QString("Small");
-            else if (val == 200)
-                return QString("Medium");
-            else if (val == 300)
-                return QString("Large");
-            else
-                return QString::number(val);
-        },
-        [](auto args) {
-            if (args.value == "Small")
-                return 100;
-            else if (args.value == "Medium")
-                return 200;
-            else if (args.value == "Large")
-                return 300;
-
-            return fuzzyToInt(args.value, 0);
-        });
-    layout.addDropdown<int>(
-        "Show stream thumbnail", {"Off", "Small", "Medium", "Large"},
-        s.thumbnailSizeStream,
-        [](auto val) {
-            if (val == 0)
-                return QString("Off");
-            else if (val == 1)
-                return QString("Small");
-            else if (val == 2)
-                return QString("Medium");
-            else if (val == 3)
-                return QString("Large");
-            else
-                return QString::number(val);
-        },
-        [](auto args) {
-            if (args.value == "Small")
-                return 1;
-            else if (args.value == "Medium")
-                return 2;
-            else if (args.value == "Large")
-                return 3;
-
-            return fuzzyToInt(args.value, 0);
-        });
     layout.addCheckbox("Double click to open links and other elements in chat",
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
-    layout.addCheckbox("Show live indicator in tabs", s.showTabLive);
 
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
@@ -663,9 +663,13 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Hide viewercount and stream length while hovering the split",
         s.hideViewerCountAndDuration);
-    layout.addCheckbox(
-        "Ask for confirmation when uploading an image to i.nuuls.com",
-        s.askOnImageUpload);
+    layout.addDropdown<int>(
+        "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
+        s.timeoutStackStyle, [](int index) { return index; },
+        [](auto args) { return args.index; }, false);
+    layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
+    layout.addCheckbox("Ask for confirmation when uploading an image",
+                       s.askOnImageUpload);
 
     // invisible element for width
     auto inv = new BaseWidget(this);
