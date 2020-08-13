@@ -508,6 +508,44 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.attachExtensionToAnyProcess);
 #endif
 
+    layout.addTitle("Cache");
+    layout.addDescription(
+        "Files that are used often (such as emotes) are saved to disk to "
+        "reduce bandwidth usage and to speed up loading.");
+
+    auto cachePathLabel = layout.addDescription("placeholder :D");
+    getSettings()->cachePath.connect([cachePathLabel](const auto &,
+                                                      auto) mutable {
+        QString newPath = getPaths()->cacheDirectory();
+
+        QString pathShortened = "Cache saved at <a href=\"file:///" + newPath +
+                                "\"><span style=\"color: white;\">" +
+                                shortenString(newPath, 50) + "</span></a>";
+        cachePathLabel->setText(pathShortened);
+        cachePathLabel->setToolTip(newPath);
+    });
+
+    // Choose and reset buttons
+    {
+        auto box = new QHBoxLayout;
+
+        box->addWidget(layout.makeButton("Choose cache path", [this]() {
+            getSettings()->cachePath = QFileDialog::getExistingDirectory(this);
+        }));
+        box->addWidget(layout.makeButton(
+            "Reset", []() { getSettings()->cachePath = ""; }));
+        box->addStretch(1);
+
+        layout.addLayout(box);
+    }
+
+    layout.addTitle("AppData");
+    layout.addDescription("All local files like settings and cache files are "
+                          "store in this directory.");
+    layout.addButton("Open AppData directory", [] {
+        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+    });
+
     layout.addTitle("Miscellaneous");
 
     if (supportsIncognitoLinks())
@@ -628,44 +666,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Ask for confirmation when uploading an image to i.nuuls.com",
         s.askOnImageUpload);
-
-    layout.addTitle("Cache");
-    layout.addDescription(
-        "Files that are used often (such as emotes) are saved to disk to "
-        "reduce bandwidth usage and to speed up loading.");
-
-    auto cachePathLabel = layout.addDescription("placeholder :D");
-    getSettings()->cachePath.connect([cachePathLabel](const auto &,
-                                                      auto) mutable {
-        QString newPath = getPaths()->cacheDirectory();
-
-        QString pathShortened = "Cache saved at <a href=\"file:///" + newPath +
-                                "\"><span style=\"color: white;\">" +
-                                shortenString(newPath, 50) + "</span></a>";
-        cachePathLabel->setText(pathShortened);
-        cachePathLabel->setToolTip(newPath);
-    });
-
-    // Choose and reset buttons
-    {
-        auto box = new QHBoxLayout;
-
-        box->addWidget(layout.makeButton("Choose cache path", [this]() {
-            getSettings()->cachePath = QFileDialog::getExistingDirectory(this);
-        }));
-        box->addWidget(layout.makeButton(
-            "Reset", []() { getSettings()->cachePath = ""; }));
-        box->addStretch(1);
-
-        layout.addLayout(box);
-    }
-
-    layout.addTitle("AppData");
-    layout.addDescription("All local files like settings and cache files are "
-                          "store in this directory.");
-    layout.addButton("Open AppData directory", [] {
-        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
-    });
 
     // invisible element for width
     auto inv = new BaseWidget(this);
