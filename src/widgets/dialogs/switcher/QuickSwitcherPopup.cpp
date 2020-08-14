@@ -1,6 +1,7 @@
 #include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 
 #include "Application.hpp"
+#include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
@@ -48,6 +49,8 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
     // This places the popup in the middle of the parent widget
     this->setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
                                           this->size(), geom));
+
+    this->themeChangedEvent();
 }
 
 QuickSwitcherPopup::~QuickSwitcherPopup()
@@ -195,6 +198,29 @@ bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
     }
 
     return false;
+}
+
+void QuickSwitcherPopup::themeChangedEvent()
+{
+    BasePopup::themeChangedEvent();
+
+    const QString textCol = this->theme->window.text.name();
+    const QString bgCol = this->theme->window.background.name();
+
+    const QString selCol =
+        (this->theme->isLightTheme()
+             ? "#68B1FF"  // Copied from Theme::splits.input.styleSheet
+             : this->theme->tabs.selected.backgrounds.regular.color().name());
+
+    const QString listStyle =
+        QString(
+            "color: %1; background-color: %2; selection-background-color: %3")
+            .arg(textCol)
+            .arg(bgCol)
+            .arg(selCol);
+
+    this->ui_.searchEdit->setStyleSheet(this->theme->splits.input.styleSheet);
+    this->ui_.list->setStyleSheet(listStyle);
 }
 
 }  // namespace chatterino
