@@ -47,13 +47,11 @@ EmoteInputPopup::EmoteInputPopup(QWidget *parent)
 {
     this->initLayout();
 
-    //    this->connections_.addConnection(
-    //        getApp()->emotes->gifTimer.signal.connect([this] {
-    //            if (this->isVisible())
-    //            {
-    //                // redraw listview somehow
-    //            }
-    //        }));
+    QObject::connect(&this->redrawTimer_, &QTimer::timeout, this, [this] {
+        if (this->isVisible())
+            this->ui_.listView->doItemsLayout();
+    });
+    this->redrawTimer_.setInterval(33);
 }
 
 void EmoteInputPopup::initLayout()
@@ -121,6 +119,16 @@ bool EmoteInputPopup::eventFilter(QObject *watched, QEvent *event)
 void EmoteInputPopup::setInputAction(ActionCallback callback)
 {
     this->callback_ = std::move(callback);
+}
+
+void EmoteInputPopup::showEvent(QShowEvent *)
+{
+    this->redrawTimer_.start();
+}
+
+void EmoteInputPopup::hideEvent(QHideEvent *)
+{
+    this->redrawTimer_.stop();
 }
 
 }  // namespace chatterino

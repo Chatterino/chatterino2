@@ -23,6 +23,10 @@ public:
 
     void setInputAction(ActionCallback callback);
 
+protected:
+    void showEvent(QShowEvent *event) override;
+    void hideEvent(QHideEvent *event) override;
+
 private:
     void initLayout();
 
@@ -32,7 +36,7 @@ private:
 
     GenericListModel model_;
     ActionCallback callback_;
-    //    pajlada::Signals::SignalHolder connections_;
+    QTimer redrawTimer_;
 };
 
 }  // namespace chatterino
