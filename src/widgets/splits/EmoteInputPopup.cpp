@@ -1,10 +1,12 @@
 #include "EmoteInputPopup.hpp"
 
 #include "Application.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "messages/Emote.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/listview/GenericListView.hpp"
@@ -72,6 +74,12 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
 
     if (auto tc = dynamic_cast<TwitchChannel *>(channel.get()))
     {
+        if (auto user = getApp()->accounts->twitch.getCurrent())
+        {
+            auto twitch = user->accessEmotes();
+            addEmotes(emotes, twitch->emotes, text, "Twitch Emote");
+        }
+
         // TODO extract "Channel BetterTTV" text into a #define.
         if (auto bttv = tc->bttvEmotes())
             addEmotes(emotes, *bttv, text, "Channel BetterTTV");
