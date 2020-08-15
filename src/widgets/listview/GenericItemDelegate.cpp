@@ -1,4 +1,4 @@
-#include "widgets/dialogs/switcher/SwitcherItemDelegate.hpp"
+#include "widgets/dialogs/switcher/GenericItemDelegate.hpp"
 
 #include "widgets/dialogs/switcher/AbstractSwitcherItem.hpp"
 

@@ -3,13 +3,14 @@
 #include "common/Channel.hpp"
 #include "widgets/BasePopup.hpp"
 #include "widgets/dialogs/switcher/QuickSwitcherModel.hpp"
-#include "widgets/dialogs/switcher/SwitcherItemDelegate.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <functional>
 
 namespace chatterino {
+
+class GenericListView;
 
 class QuickSwitcherPopup : public BasePopup
 {
@@ -22,10 +23,7 @@ public:
      */
     explicit QuickSwitcherPopup(QWidget *parent = nullptr);
 
-    ~QuickSwitcherPopup();
-
 protected:
-    virtual bool eventFilter(QObject *watched, QEvent *event) override;
     virtual void themeChangedEvent() override;
 
 public slots:
@@ -36,11 +34,10 @@ private:
 
     struct {
         QLineEdit *searchEdit{};
-        QListView *list{};
+        GenericListView *list{};
     } ui_;
 
     QuickSwitcherModel switcherModel_;
-    SwitcherItemDelegate switcherItemDelegate_;
 
     void initWidgets();
 };

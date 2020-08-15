@@ -22,6 +22,11 @@ public:
         this->set(t);
     }
 
+    QObjectRef(const QObjectRef &other)
+    {
+        this->set(other.t_);
+    }
+
     ~QObjectRef()
     {
         this->set(nullptr);

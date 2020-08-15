@@ -29,6 +29,7 @@ public:
         TopMost = 4,
         DisableCustomScaling = 8,
         FramelessDraggable = 16,
+        DontFocus = 32,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };

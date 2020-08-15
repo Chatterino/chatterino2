@@ -239,11 +239,9 @@ SOURCES += \
     src/widgets/dialogs/QualityPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
-    src/widgets/dialogs/switcher/AbstractSwitcherItem.cpp \
+    src/widgets/listview/GenericItemDelegate.cpp \
     src/widgets/dialogs/switcher/NewTabItem.cpp \
-    src/widgets/dialogs/switcher/QuickSwitcherModel.cpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.cpp \
-    src/widgets/dialogs/switcher/SwitcherItemDelegate.cpp \
     src/widgets/dialogs/switcher/SwitchSplitItem.cpp \
     src/widgets/dialogs/TextInputDialog.cpp \
     src/widgets/dialogs/UpdateDialog.cpp \
@@ -268,6 +266,9 @@ SOURCES += \
     src/widgets/Label.cpp \
     src/widgets/Notebook.cpp \
     src/widgets/Scrollbar.cpp \
+    src/widgets/listview/GenericListItem.cpp \
+    src/widgets/listview/GenericListModel.cpp \
+    src/widgets/listview/GenericListView.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
@@ -280,6 +281,8 @@ SOURCES += \
     src/widgets/settingspages/NotificationPage.cpp \
     src/widgets/settingspages/SettingsPage.cpp \
     src/widgets/splits/ClosedSplits.cpp \
+    src/widgets/splits/EmoteInputItem.cpp \
+    src/widgets/splits/EmoteInputPopup.cpp \
     src/widgets/splits/Split.cpp \
     src/widgets/splits/SplitContainer.cpp \
     src/widgets/splits/SplitHeader.cpp \
@@ -474,10 +477,10 @@ HEADERS += \
     src/widgets/dialogs/SelectChannelDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
     src/widgets/dialogs/switcher/AbstractSwitcherItem.hpp \
+    src/widgets/listview/GenericItemDelegate.hpp \
     src/widgets/dialogs/switcher/NewTabItem.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherModel.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.hpp \
-    src/widgets/dialogs/switcher/SwitcherItemDelegate.hpp \
     src/widgets/dialogs/switcher/SwitchSplitItem.hpp \
     src/widgets/dialogs/TextInputDialog.hpp \
     src/widgets/dialogs/UpdateDialog.hpp \
@@ -504,6 +507,9 @@ HEADERS += \
     src/widgets/Label.hpp \
     src/widgets/Notebook.hpp \
     src/widgets/Scrollbar.hpp \
+    src/widgets/listview/GenericListItem.hpp \
+    src/widgets/listview/GenericListModel.hpp \
+    src/widgets/listview/GenericListView.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
@@ -516,6 +522,8 @@ HEADERS += \
     src/widgets/settingspages/NotificationPage.hpp \
     src/widgets/settingspages/SettingsPage.hpp \
     src/widgets/splits/ClosedSplits.hpp \
+    src/widgets/splits/EmoteInputItem.hpp \
+    src/widgets/splits/EmoteInputPopup.hpp \
     src/widgets/splits/Split.hpp \
     src/widgets/splits/SplitContainer.hpp \
     src/widgets/splits/SplitHeader.hpp \

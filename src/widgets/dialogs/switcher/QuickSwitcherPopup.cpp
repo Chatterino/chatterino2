@@ -9,6 +9,7 @@
 #include "widgets/dialogs/switcher/NewTabItem.hpp"
 #include "widgets/dialogs/switcher/SwitchSplitItem.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/listview/GenericListView.hpp"
 
 namespace chatterino {
 
@@ -36,7 +37,6 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
                                              BaseWindow::Flags::TopMost},
                 parent)
     , switcherModel_(this)
-    , switcherItemDelegate_(this)
 {
     this->setWindowFlag(Qt::Dialog);
     this->setActionOnFocusLoss(BaseWindow::ActionOnFocusLoss::Delete);
@@ -51,10 +51,8 @@ QuickSwitcherPopup::QuickSwitcherPopup(QWidget *parent)
                                           this->size(), geom));
 
     this->themeChangedEvent();
-}
 
-QuickSwitcherPopup::~QuickSwitcherPopup()
-{
+    this->installEventFilter(this->ui_.list);
 }
 
 void QuickSwitcherPopup::initWidgets()
@@ -72,24 +70,12 @@ void QuickSwitcherPopup::initWidgets()
     }
 
     {
-        vbox.emplace<QListView>().assign(&this->ui_.list);
-        this->ui_.list->setSelectionMode(QAbstractItemView::SingleSelection);
-        this->ui_.list->setSelectionBehavior(QAbstractItemView::SelectItems);
-        this->ui_.list->setModel(&this->switcherModel_);
-        this->ui_.list->setItemDelegate(&this->switcherItemDelegate_);
+        auto listView = vbox.emplace<GenericListView>().assign(&this->ui_.list);
+        listView->setModel(&this->switcherModel_);
 
-        /*
-         * I also tried handling key events using the according slots but
-         * it lead to all kind of problems that did not occur with the
-         * eventFilter approach.
-         */
-        QObject::connect(
-            this->ui_.list, &QListView::clicked, this,
-            [this](const QModelIndex &index) {
-                auto *item = AbstractSwitcherItem::fromVariant(index.data());
-                item->action();
-                this->close();
-            });
+        QObject::connect(listView.getElement(),
+                         &GenericListView::closeRequested, this,
+                         [this] { this->close(); });
     }
 }
 
@@ -145,61 +131,6 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
     QTimer::singleShot(0, [this] { this->adjustSize(); });
 }
 
-bool QuickSwitcherPopup::eventFilter(QObject *watched, QEvent *event)
-{
-    if (event->type() == QEvent::KeyPress)
-    {
-        auto *keyEvent = static_cast<QKeyEvent *>(event);
-        int key = keyEvent->key();
-
-        const QModelIndex &curIdx = this->ui_.list->currentIndex();
-        const int curRow = curIdx.row();
-        const int count = this->switcherModel_.rowCount(curIdx);
-
-        if (key == Qt::Key_Down || key == Qt::Key_Tab)
-        {
-            if (count <= 0)
-                return true;
-
-            const int newRow = (curRow + 1) % count;
-
-            this->ui_.list->setCurrentIndex(curIdx.siblingAtRow(newRow));
-            return true;
-        }
-        else if (key == Qt::Key_Up || key == Qt::Key_Backtab)
-        {
-            if (count <= 0)
-                return true;
-
-            int newRow = curRow - 1;
-            if (newRow < 0)
-                newRow += count;
-
-            this->ui_.list->setCurrentIndex(curIdx.siblingAtRow(newRow));
-            return true;
-        }
-        else if (key == Qt::Key_Enter || key == Qt::Key_Return)
-        {
-            if (count <= 0)
-                return true;
-
-            const auto index = this->ui_.list->currentIndex();
-            auto *item = AbstractSwitcherItem::fromVariant(index.data());
-
-            item->action();
-
-            this->close();
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    return false;
-}
-
 void QuickSwitcherPopup::themeChangedEvent()
 {
     BasePopup::themeChangedEvent();
@@ -220,7 +151,7 @@ void QuickSwitcherPopup::themeChangedEvent()
             .arg(selCol);
 
     this->ui_.searchEdit->setStyleSheet(this->theme->splits.input.styleSheet);
-    this->ui_.list->setStyleSheet(listStyle);
+    this->ui_.list->refreshTheme(*this->theme);
 }
 
 }  // namespace chatterino
