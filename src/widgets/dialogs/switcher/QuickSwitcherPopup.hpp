@@ -26,6 +26,7 @@ public:
 
 protected:
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
+    virtual void themeChangedEvent() override;
 
 public slots:
     void updateSuggestions(const QString &text);
