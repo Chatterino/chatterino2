@@ -319,7 +319,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     if (this->split_->getChannel()->getType() == Channel::Type::TwitchWhispers)
     {
-        menu->addAction(OPEN_IN_BROWSER, this->split_,
+        menu->addAction(OPEN_WHISPERS_IN_BROWSER, this->split_,
                         &Split::openWhispersInBrowser);
         menu->addSeparator();
     }
