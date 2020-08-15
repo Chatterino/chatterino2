@@ -18,6 +18,8 @@ void EmoteInputItem::action()
 
 void EmoteInputItem::paint(QPainter *painter, const QRect &rect) const
 {
+    painter->setRenderHint(QPainter::SmoothPixmapTransform);
+
     if (this->emote_)
     {
         if (auto image = this->emote_->images.getImage(4))
