@@ -1,6 +1,6 @@
-#include "widgets/dialogs/switcher/GenericItemDelegate.hpp"
+#include "widgets/listview/GenericItemDelegate.hpp"
 
-#include "widgets/dialogs/switcher/AbstractSwitcherItem.hpp"
+#include "widgets/listview/GenericListItem.hpp"
 
 namespace chatterino {
 
@@ -17,7 +17,7 @@ void SwitcherItemDelegate::paint(QPainter *painter,
                                  const QStyleOptionViewItem &option,
                                  const QModelIndex &index) const
 {
-    auto *item = AbstractSwitcherItem::fromVariant(index.data());
+    auto *item = GenericListItem::fromVariant(index.data());
 
     if (item)
     {
@@ -35,7 +35,7 @@ void SwitcherItemDelegate::paint(QPainter *painter,
 QSize SwitcherItemDelegate::sizeHint(const QStyleOptionViewItem &option,
                                      const QModelIndex &index) const
 {
-    auto *item = AbstractSwitcherItem::fromVariant(index.data());
+    auto *item = GenericListItem::fromVariant(index.data());
 
     if (item)
     {
