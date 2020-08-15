@@ -103,7 +103,7 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
             emote.emote, emote.emote->name.string + " - " + emote.providerName,
             this->callback_));
 
-        if (count++ == maxLineCount)
+        if (count++ == maxEmoteCount)
             break;
     }
 

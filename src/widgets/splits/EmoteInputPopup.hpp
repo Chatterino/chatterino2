@@ -13,7 +13,7 @@ class EmoteInputPopup : public BasePopup
 {
     using ActionCallback = std::function<void(const QString &)>;
 
-    constexpr static int maxLineCount = 10;
+    constexpr static int maxEmoteCount = 200;
 
 public:
     EmoteInputPopup(QWidget *parent = nullptr);
