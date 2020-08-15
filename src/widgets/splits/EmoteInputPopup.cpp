@@ -25,6 +25,16 @@ namespace {
             if (emote.first.string.contains(text, Qt::CaseInsensitive))
                 out.push_back({emote.second, providerName});
     }
+
+    void addEmojis(std::vector<_Emote> &out, const EmojiMap &map,
+                   const QString &text)
+    {
+        map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
+            for (auto &&shortCode : emoji->shortCodes)
+                if (shortCode.contains(text, Qt::CaseInsensitive))
+                    out.push_back({emoji->emote, "Emoji"});
+        });
+    }
 }  // namespace
 
 EmoteInputPopup::EmoteInputPopup(QWidget *parent)
@@ -72,6 +82,8 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
             addEmotes(emotes, *bttvG, text, "Global BetterTTV");
         if (auto ffzG = tc->globalFfz().emotes())
             addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
+
+        addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
     }
 
     this->model_.clear();
