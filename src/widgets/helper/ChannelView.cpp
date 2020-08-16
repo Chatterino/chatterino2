@@ -1966,7 +1966,7 @@ void ChannelView::disableScrolling()
 
 void ChannelView::scrollUpdateRequested()
 {
-    const qreal dpi = this->devicePixelRatio();
+    const qreal dpi = this->devicePixelRatioF();
     const qreal delta = dpi * (this->currentMousePosition_.y() -
                                this->lastMiddlePressPosition_.y());
     const int cursorHeight = this->cursors_.neutral.pixmap().height();
