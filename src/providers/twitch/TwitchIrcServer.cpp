@@ -336,7 +336,7 @@ void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
             if (this->lastErrorTimeSpeed_ + 30s < now)
             {
                 auto errorMessage =
-                    makeSystemMessage("sending messages too fast");
+                    makeSystemMessage("You are sending messages too fast.");
 
                 channel->addMessage(errorMessage);
 
