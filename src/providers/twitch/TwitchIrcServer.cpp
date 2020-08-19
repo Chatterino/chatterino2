@@ -357,7 +357,7 @@ void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
             if (this->lastErrorTimeAmount_ + 30s < now)
             {
                 auto errorMessage =
-                    makeSystemMessage("sending too many messages");
+                    makeSystemMessage("You are sending too many messages.");
 
                 channel->addMessage(errorMessage);
 
