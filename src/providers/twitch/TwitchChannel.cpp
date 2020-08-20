@@ -620,34 +620,39 @@ void TwitchChannel::loadRecentMessages()
 
     NetworkRequest(Env::get().recentMessagesApiUrl.arg(this->getName()))
         .concurrent()
-        .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
-            auto shared = weak.lock();
-            if (!shared)
-                return Failure;
+        .onSuccess(
+            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+                auto shared = weak.lock();
+                if (!shared)
+                    return Failure;
 
-            auto messages = parseRecentMessages(result.parseJson(), shared);
+                auto messages = parseRecentMessages(result.parseJson(), shared);
 
-            auto &handler = IrcMessageHandler::instance();
+                auto &handler = IrcMessageHandler::instance();
 
-            std::vector<MessagePtr> allBuiltMessages;
+                std::vector<MessagePtr> allBuiltMessages;
 
-            for (auto message : messages)
-            {
-                for (auto builtMessage :
-                     handler.parseMessage(shared.get(), message))
+                for (auto message : messages)
                 {
-                    builtMessage->flags.set(MessageFlag::RecentMessage);
-                    allBuiltMessages.emplace_back(builtMessage);
+                    for (auto builtMessage :
+                         handler.parseMessage(shared.get(), message))
+                    {
+                        if (!getSettings()->lowercaseUsernames)
+                        {
+                            this->addRecentChatter(builtMessage->displayName);
+                        }
+                        builtMessage->flags.set(MessageFlag::RecentMessage);
+                        allBuiltMessages.emplace_back(builtMessage);
+                    }
                 }
-            }
 
-            postToThread(
-                [shared, messages = std::move(allBuiltMessages)]() mutable {
-                    shared->addMessagesAtStart(messages);
-                });
+                postToThread(
+                    [shared, messages = std::move(allBuiltMessages)]() mutable {
+                        shared->addMessagesAtStart(messages);
+                    });
 
-            return Success;
-        })
+                return Success;
+            })
         .execute();
 }
 
@@ -676,26 +681,40 @@ void TwitchChannel::refreshChatters()
         }
     }
 
-    // get viewer list
-    NetworkRequest("https://tmi.twitch.tv/group/user/" + this->getName() +
-                   "/chatters")
+    if (getSettings()->lowercaseUsernames)
+    {
+        // get viewer list
+        NetworkRequest("https://tmi.twitch.tv/group/user/" + this->getName() +
+                       "/chatters")
 
-        .onSuccess(
-            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-                // channel still exists?
-                auto shared = weak.lock();
-                if (!shared)
-                    return Failure;
+            .onSuccess(
+                [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+                    // channel still exists?
+                    auto shared = weak.lock();
+                    if (!shared)
+                        return Failure;
 
-                auto pair = parseChatters(result.parseJson());
-                if (pair.first)
-                {
-                    this->setChatters(std::move(pair.second));
-                }
+                    auto pair = parseChatters(result.parseJson());
+                    if (pair.first)
+                    {
+                        this->setChatters(std::move(pair.second));
+                    }
 
-                return pair.first;
-            })
-        .execute();
+                    return pair.first;
+                })
+            .execute();
+    }
+    else
+    {
+        getHelix()->getUserByName(
+            this->getName(),
+            [this](const auto &user) {
+                this->addRecentChatter(user.displayName);
+            },
+            [] {
+                // on failure
+            });
+    }
 }
 
 void TwitchChannel::refreshBadges()

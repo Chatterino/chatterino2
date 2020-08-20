@@ -138,6 +138,8 @@ public:
         "/behaviour/autocompletion/prefixOnlyCompletion", true};
     BoolSetting userCompletionOnlyWithAt = {
         "/behaviour/autocompletion/userCompletionOnlyWithAt", false};
+    BoolSetting lowercaseUsernames = {
+        "/behaviour/autocompletion/lowercaseUsernames", true};
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {

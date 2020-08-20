@@ -249,7 +249,14 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         chan->addMessage(msg);
         if (auto chatters = dynamic_cast<ChannelChatters *>(chan.get()))
         {
-            chatters->addRecentChatter(msg->displayName);
+            if (getSettings()->lowercaseUsernames)
+            {
+                chatters->addRecentChatter(msg->displayName);
+            }
+            else
+            {
+                chatters->addRecentChatter(msg->loginName);
+            }
         }
     }
 }
