@@ -45,3 +45,13 @@ Replace `XXXXXXXXXXXXXXX` with your API key from s-ul.eu. It can be found on [yo
 |Extra headers||
 |Image link|`{url}`|
 |Deletion link|`https://s-ul.eu/delete.php?file={filename}&key=XXXXXXXXXXXXXXX`|
+
+### [i.fourtf.com](https://github.com/fourtf/i)
+
+|Row|Description|
+|-|-|
+|Request URL|`https://i.yourwebsite.com/upload`|
+|Form field|`file`|
+|Extra headers|`Authorization: Basic <Your base64 encoded user and password>`|
+|Image link||
+|Deletion link||
