@@ -48,10 +48,12 @@ Replace `XXXXXXXXXXXXXXX` with your API key from s-ul.eu. It can be found on [yo
 
 ### [i.fourtf.com](https://github.com/fourtf/i)
 
+This is not a hosted service, but rather a service that can be self-hosted. Click on the URL for more information.
+Replace `XXXXXXXXXXXXXXX` with your Base64-encoded user and password
 |Row|Description|
 |-|-|
 |Request URL|`https://i.yourwebsite.com/upload`|
 |Form field|`file`|
-|Extra headers|`Authorization: Basic <Your base64 encoded user and password>`|
+|Extra headers|`Authorization: Basic XXXXXXXXXXXXXXX`|
 |Image link||
 |Deletion link||
