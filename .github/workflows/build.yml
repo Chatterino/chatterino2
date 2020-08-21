@@ -2,7 +2,7 @@
 name: Build
 
 on:
-  push	
+  push:
     paths-ignore:
       - 'docs/**'
       - '*.md'
