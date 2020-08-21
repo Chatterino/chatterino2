@@ -2,8 +2,12 @@
 
 ## Unversioned
 
+- Minor: Added support for Brave browser. (#1862)
 - Major: We now support image thumbnails coming from the link resolver. This feature is off by default and can be enabled in the settings with the "Show link thumbnail" setting. This feature also requires the "Show link info when hovering" setting to be enabled (#1664)
 - Major: Added image upload functionality to i.nuuls.com with an ability to change upload destination. This works by dragging and dropping an image into a split, or pasting an image into the text edit field. (#1332, #1741)
+- Minor: Add a switcher widget, similar to Discord. It can be opened by pressing Ctrl+K. (#1588)
+- Major: Added option to display tabs vertically. (#1815)
+- Minor: Clicking on `Open in browser` in a whisper split will now open your whispers on twitch. (#1828)
 - Minor: Clicking on @mentions will open the User Popup. (#1674)
 - Minor: You can now open the Twitch User Card by middle-mouse clicking a username. (#1669)
 - Minor: User Popup now also includes recent user messages (#1729)
@@ -12,6 +16,7 @@
 - Minor: Removed "Online Logs" functionality as services are shut down (#1640)
 - Minor: CTRL+F now selects the Find text input field in the Settings Dialog (#1806 #1811)
 - Minor: CTRL+F now selects the search text input field in the Search Popup (#1812)
+- Bugfix: Fix the incorrect `Open stream in browser` labelling in the whisper split (#1860)
 - Bugfix: Fix preview on hover not working when Animated emotes options was disabled (#1546)
 - Bugfix: FFZ custom mod badges no longer scale with the emote scale options (#1602)
 - Bugfix: MacOS updater looked for non-existing fields, causing it to always fail the update check (#1642)

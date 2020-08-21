@@ -57,6 +57,18 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         this->setWindowFlag(Qt::FramelessWindowHint);
     }
 
+    if (_flags.has(DontFocus))
+    {
+        this->setAttribute(Qt::WA_ShowWithoutActivating);
+#ifdef Q_OS_LINUX
+        this->setWindowFlags(Qt::ToolTip);
+#else
+        this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
+                             Qt::X11BypassWindowManagerHint |
+                             Qt::BypassWindowManagerHint);
+#endif
+    }
+
     this->init();
 
     getSettings()->uiScale.connect(

@@ -18,7 +18,7 @@ class UserInfoPopup final : public BaseWindow
     Q_OBJECT
 
 public:
-    UserInfoPopup();
+    UserInfoPopup(bool closeAutomatically);
 
     void setData(const QString &name, const ChannelPtr &channel);
 

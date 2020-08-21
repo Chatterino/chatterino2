@@ -122,6 +122,10 @@ public:
             Signal<const rapidjson::Value &> received;
             Signal<const rapidjson::Value &> sent;
         } whisper;
+
+        struct {
+            Signal<rapidjson::Value &> redeemed;
+        } pointReward;
     } signals_;
 
     void listenToWhispers(std::shared_ptr<TwitchAccount> account);
@@ -130,6 +134,9 @@ public:
 
     void listenToChannelModerationActions(
         const QString &channelID, std::shared_ptr<TwitchAccount> account);
+
+    void listenToChannelPointRewards(const QString &channelID,
+                                     std::shared_ptr<TwitchAccount> account);
 
     std::vector<std::unique_ptr<rapidjson::Document>> requests;
 

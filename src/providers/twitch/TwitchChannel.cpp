@@ -235,6 +235,50 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
         manualRefresh);
 }
 
+void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
+{
+    if (!reward.hasParsedSuccessfully)
+    {
+        return;
+    }
+
+    if (!reward.isUserInputRequired)
+    {
+        MessageBuilder builder;
+        TwitchMessageBuilder::appendChannelPointRewardMessage(reward, &builder);
+        this->addMessage(builder.release());
+        return;
+    }
+
+    bool result;
+    {
+        auto channelPointRewards = this->channelPointRewards_.access();
+        result = channelPointRewards->try_emplace(reward.id, reward).second;
+    }
+    if (result)
+    {
+        this->channelPointRewardAdded.invoke(reward);
+    }
+}
+
+bool TwitchChannel::isChannelPointRewardKnown(const QString &rewardId)
+{
+    const auto &pointRewards = this->channelPointRewards_.accessConst();
+    const auto &it = pointRewards->find(rewardId);
+    return it != pointRewards->end();
+}
+
+boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
+    const QString &rewardId) const
+{
+    auto rewards = this->channelPointRewards_.accessConst();
+    auto it = rewards->find(rewardId);
+
+    if (it == rewards->end())
+        return boost::none;
+    return it->second;
+}
+
 void TwitchChannel::sendMessage(const QString &message)
 {
     auto app = getApp();
@@ -665,6 +709,7 @@ void TwitchChannel::refreshPubsub()
     auto account = getApp()->accounts->twitch.getCurrent();
     getApp()->twitch2->pubsub->listenToChannelModerationActions(roomId,
                                                                 account);
+    getApp()->twitch2->pubsub->listenToChannelPointRewards(roomId, account);
 }
 
 void TwitchChannel::refreshChatters()

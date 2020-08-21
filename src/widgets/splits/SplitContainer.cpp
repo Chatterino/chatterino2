@@ -187,6 +187,18 @@ void SplitContainer::insertSplit(Split *split, Direction direction,
     this->addSplit(split);
 }
 
+Split *SplitContainer::getSelectedSplit() const
+{
+    // safety check
+    if (std::find(this->splits_.begin(), this->splits_.end(),
+                  this->selected_) == this->splits_.end())
+    {
+        return nullptr;
+    }
+
+    return this->selected_;
+}
+
 void SplitContainer::addSplit(Split *split)
 {
     assertInGuiThread();
@@ -218,6 +230,13 @@ void SplitContainer::addSplit(Split *split)
 
 void SplitContainer::setSelected(Split *split)
 {
+    // safety
+    if (std::find(this->splits_.begin(), this->splits_.end(), split) ==
+        this->splits_.end())
+    {
+        return;
+    }
+
     this->selected_ = split;
 
     if (Node *node = this->baseNode_.findNodeContainingSplit(split))

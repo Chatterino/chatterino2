@@ -11,8 +11,6 @@ public:
     explicit BasePopup(FlagsEnum<BaseWindow::Flags> flags_ = None,
                        QWidget *parent = nullptr);
 
-    virtual ~BasePopup() = default;
-
 protected:
     void keyPressEvent(QKeyEvent *e) override;
 };
