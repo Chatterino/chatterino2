@@ -681,7 +681,7 @@ void TwitchChannel::loadRecentMessages()
                     for (auto builtMessage :
                          handler.parseMessage(shared.get(), message))
                     {
-                        if (!getSettings()->lowercaseUsernames)
+                        if (!getSettings()->lowercaseUsernamesOnCompletion)
                         {
                             this->addRecentChatter(builtMessage->displayName);
                         }
@@ -726,7 +726,7 @@ void TwitchChannel::refreshChatters()
         }
     }
 
-    if (getSettings()->lowercaseUsernames)
+    if (getSettings()->lowercaseUsernamesOnCompletion)
     {
         // get viewer list
         NetworkRequest("https://tmi.twitch.tv/group/user/" + this->getName() +

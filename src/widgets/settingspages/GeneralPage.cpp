@@ -650,7 +650,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Only search for username autocompletion with an @",
                        s.userCompletionOnlyWithAt);
     layout.addCheckbox("Lowercase usernames on autocompletion",
-                       s.lowercaseUsernames);
+                       s.lowercaseUsernamesOnCompletion);
 
     layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
     layout.addCheckbox("Highlight received inline whispers",
