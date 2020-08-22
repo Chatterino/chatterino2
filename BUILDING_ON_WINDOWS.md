@@ -83,7 +83,7 @@ Compiling with Breakpad support enables crash reports that can be of use for dev
   - In the main screen, click the green "play symbol" on the bottom left to run the project directly.
   - Click the hammer on the bottom left to generate a build (does not run the build though).
 
-Build results will be placed in a folder at the same level as the "chatterino2" project folder (e.g. if your sources are at `C:\Users\example\src\chatterino2`, then the build will be placed in an automatically generated folder under `C:\Users\example\src`, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_11_2_MSVC2019_64bit-Release`.)
+Build results will be placed in a folder at the same level as the "chatterino2" project folder (e.g. if your sources are at `C:\Users\example\src\chatterino2`, then the build will be placed in an automatically generated folder under `C:\Users\example\src`, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_0_MSVC2019_64bit-Release`.)
 
   - Note that if you are building chatterino purely for usage, not for development, it is recommended that you click the "PC" icon above the play icon and select "Release" instead of "Debug".
   - Output and error messages produced by the compiler can be seen under the "4 Compile Output" tab in Qt Creator.
