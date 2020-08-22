@@ -221,7 +221,9 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     }
 
     if (!isMentions &&
-        this->message_->flags.has(MessageFlag::RedeemedChannelPointReward))
+        (this->message_->flags.has(MessageFlag::RedeemedChannelPointReward) ||
+         this->message_->flags.has(MessageFlag::RedeemedHighlight)) &&
+        getSettings()->enableRedeemedHighlight.getValue())
     {
         painter.fillRect(
             0, y, this->scale_ * 4, pixmap->height(),
@@ -305,7 +307,9 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
             backgroundColor,
             *ColorProvider::instance().color(ColorType::Subscription));
     }
-    else if (this->message_->flags.has(MessageFlag::RedeemedHighlight) &&
+    else if ((this->message_->flags.has(MessageFlag::RedeemedHighlight) ||
+              this->message_->flags.has(
+                  MessageFlag::RedeemedChannelPointReward)) &&
              settings->enableRedeemedHighlight.getValue())
     {
         // Blend highlight color with usual background color
