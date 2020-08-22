@@ -119,6 +119,9 @@ ExternalToolsPage::ExternalToolsPage()
 
         groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
 
+        groupLayout->addRow(this->createCheckBox(
+            "Enable image uploader", getSettings()->imageUploaderEnabled));
+
         groupLayout->addRow(
             "Request URL: ",
             this->createLineEdit(getSettings()->imageUploaderUrl));
