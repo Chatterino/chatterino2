@@ -1,5 +1,9 @@
 # Changelog
 
+## Unversioned
+
+- Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
+
 ## 2.2.0
 
 - Major: We now support image thumbnails coming from the link resolver. This feature is off by default and can be enabled in the settings with the "Show link thumbnail" setting. This feature also requires the "Show link info when hovering" setting to be enabled (#1664)
