@@ -311,7 +311,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
         if (!getSettings()->customURIScheme.getValue().isEmpty())
         {
-            menu->addAction("Open with URI Scheme", this->split_,
+            menu->addAction("Open in custom player", this->split_,
                             &Split::openWithCustomScheme);
         }
         menu->addSeparator();

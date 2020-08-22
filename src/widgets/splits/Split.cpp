@@ -575,11 +575,18 @@ void Split::openInStreamlink()
 
 void Split::openWithCustomScheme()
 {
-    const auto scheme = getSettings()->customURIScheme.getValue();
+    QString scheme = getSettings()->customURIScheme.getValue();
     if (scheme.isEmpty())
     {
         return;
     }
+
+    if (!scheme.endsWith("://"))
+    {
+        // Idiot proof
+        scheme.append("://");
+    }
+
     const auto channel = this->getChannel().get();
 
     if (const auto twitchChannel = dynamic_cast<TwitchChannel *>(channel))
