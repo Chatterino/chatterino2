@@ -485,7 +485,10 @@ void SplitInput::updateColonMenu()
         }
         else if (text[i] == ':')
         {
-            this->showColonMenu(text.mid(i, position - i).mid(1));
+            if (i == 0 || text[i - 1].isSpace())
+                this->showColonMenu(text.mid(i, position - i).mid(1));
+            else
+                this->hideColonMenu();
             return;
         }
     }
@@ -526,9 +529,10 @@ void SplitInput::hideColonMenu()
         popup->hide();
 }
 
-void SplitInput::insertColonText(const QString &input)
+void SplitInput::insertColonText(const QString &input_)
 {
     auto &edit = *this->ui_.textEdit;
+    auto input = input_ + ' ';
 
     auto text = edit.toPlainText();
     auto position = edit.textCursor().position();
