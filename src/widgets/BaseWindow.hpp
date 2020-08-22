@@ -36,6 +36,7 @@ public:
 
     explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
                         QWidget *parent = nullptr);
+    ~BaseWindow() override;
 
     void setInitialBounds(const QRect &bounds);
     QRect getBounds();
