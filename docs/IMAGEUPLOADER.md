@@ -27,6 +27,7 @@ However, popular hosts like [imgur.com](https://imgur.com) are [s-ul.eu](https:/
 |-|-|
 |Request URL|`https://i.nuuls.com/upload`|
 |Form field|`attachment`|
+
 Other fields empty.
 
 ### imgur.com
