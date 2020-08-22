@@ -16,6 +16,7 @@
 - Minor: Removed "Online Logs" functionality as services are shut down (#1640)
 - Minor: CTRL+F now selects the Find text input field in the Settings Dialog (#1806 #1811)
 - Minor: CTRL+F now selects the search text input field in the Search Popup (#1812)
+- Minor: Modify our word boundary logic in highlight phrase searching to accomodate non-regex phrases with "word-boundary-creating" characters like ! (#1885, #1890)
 - Bugfix: Fixed not being able to open links in incognito with Microsoft Edge (Chromium) (#1875)
 - Bugfix: Fix the incorrect `Open stream in browser` labelling in the whisper split (#1860)
 - Bugfix: Fix preview on hover not working when Animated emotes options was disabled (#1546)
