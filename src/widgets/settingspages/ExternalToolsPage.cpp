@@ -100,8 +100,7 @@ ExternalToolsPage::ExternalToolsPage()
         const auto description = new QLabel(
             "You can set custom host for uploading images, like "
             "imgur.com or s-ul.eu.<br>Check " +
-            formatRichNamedLink("https://github.com/Chatterino/chatterino2/"
-                                "blob/master/docs/IMAGEUPLOADER.md",
+            formatRichNamedLink("https://chatterino.com/help/image-uploader",
                                 "this guide") +
             " for help.");
         description->setWordWrap(true);
