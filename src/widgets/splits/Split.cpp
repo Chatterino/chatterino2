@@ -730,6 +730,7 @@ void Split::showSearch()
 {
     SearchPopup *popup = new SearchPopup();
 
+    popup->setAttribute(Qt::WA_DeleteOnClose);
     popup->setChannel(this->getChannel());
     popup->show();
 }
