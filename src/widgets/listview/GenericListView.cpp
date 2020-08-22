@@ -82,6 +82,11 @@ bool GenericListView::eventFilter(QObject * /*watched*/, QEvent *event)
             emit this->closeRequested();
             return true;
         }
+        else if (key == Qt::Key_Escape)
+        {
+            emit this->closeRequested();
+            return true;
+        }
         else
         {
             return false;

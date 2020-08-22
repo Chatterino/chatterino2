@@ -214,9 +214,9 @@ Split::Split(QWidget *parent)
                 QMessageBox msgBox;
                 msgBox.setText("Image upload");
                 msgBox.setInformativeText(
-                    "You are uploading an image to an external server. You may "
-                    "not be able to remove the image from the site. Are you "
-                    "okay with this?");
+                    "You are uploading an image to a 3rd party service not in "
+                    "control of the chatterino team. You may not be able to "
+                    "remove the image from the site. Are you okay with this?");
                 msgBox.addButton(QMessageBox::Cancel);
                 msgBox.addButton(QMessageBox::Yes);
                 msgBox.addButton("Yes, don't ask again", QMessageBox::YesRole);

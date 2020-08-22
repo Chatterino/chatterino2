@@ -75,6 +75,7 @@ ExternalToolsPage::ExternalToolsPage()
             },
             this->managedConnections_);
     }
+    layout->addSpacing(16);
 
     {
         auto group = layout.emplace<QGroupBox>("Custom stream player");
@@ -96,6 +97,7 @@ ExternalToolsPage::ExternalToolsPage()
         lineEdit->setPlaceholderText("custom-player-scheme://");
         groupLayout->addRow("Custom stream player URI Scheme:", lineEdit);
     }
+    layout->addSpacing(16);
 
     {
         auto group = layout.emplace<QGroupBox>("Image Uploader");
