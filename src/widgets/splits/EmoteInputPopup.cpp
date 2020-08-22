@@ -95,7 +95,7 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
     }
 
     // if there is an exact match, put that emote first
-    for (int i = 1; i < (int)emotes.size(); i++)
+    for (size_t i = 1; i < emotes.size(); i++)
     {
         auto emoteText = emotes.at(i).displayName;
 
@@ -103,7 +103,9 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
         if (emoteText.compare(text, Qt::CaseInsensitive) == 0 ||
             emoteText.compare(":" + text, Qt::CaseInsensitive) == 0)
         {
-            std::iter_swap(emotes.begin(), emotes.begin() + i);
+            auto emote = emotes[i];
+            emotes.erase(emotes.begin() + int(i));
+            emotes.insert(emotes.begin(), emote);
             break;
         }
     }
