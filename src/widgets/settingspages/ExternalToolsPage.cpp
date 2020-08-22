@@ -75,6 +75,7 @@ ExternalToolsPage::ExternalToolsPage()
             },
             this->managedConnections_);
     }
+    layout->addSpacing(16);
 
     {
         auto group = layout.emplace<QGroupBox>("Custom stream player");
@@ -96,6 +97,7 @@ ExternalToolsPage::ExternalToolsPage()
         lineEdit->setPlaceholderText("custom-player-scheme://");
         groupLayout->addRow("Custom stream player URI Scheme:", lineEdit);
     }
+    layout->addSpacing(16);
 
     {
         auto group = layout.emplace<QGroupBox>("Image Uploader");
@@ -116,6 +118,9 @@ ExternalToolsPage::ExternalToolsPage()
         description->setOpenExternalLinks(true);
 
         groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
+
+        groupLayout->addRow(this->createCheckBox(
+            "Enable image uploader", getSettings()->imageUploaderEnabled));
 
         groupLayout->addRow(
             "Request URL: ",

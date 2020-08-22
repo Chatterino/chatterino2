@@ -227,7 +227,7 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
     {
         painter.fillRect(
             0, y, this->scale_ * 4, pixmap->height(),
-            *ColorProvider::instance().color(ColorType::Subscription));
+            *ColorProvider::instance().color(ColorType::RedeemedHighlight));
     }
 
     // draw selection
