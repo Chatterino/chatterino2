@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Bugfix: Handle symlinks properly when saving commands & settings (#1856, #1908)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
 
 ## 2.2.0
