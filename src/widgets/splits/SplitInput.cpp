@@ -468,7 +468,7 @@ void SplitInput::updateColonMenu()
     auto &edit = *this->ui_.textEdit;
 
     auto text = edit.toPlainText();
-    auto position = edit.textCursor().position();
+    auto position = edit.textCursor().position() - 1;
 
     if (text.length() == 0)
     {
