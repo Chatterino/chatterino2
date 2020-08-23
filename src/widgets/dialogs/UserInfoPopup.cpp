@@ -108,7 +108,7 @@ namespace {
 FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::Dialog,
                                                 BaseWindow::EnableCustomFrame};
 FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
-    userInfoPopupFlags};
+    BaseWindow::EnableCustomFrame};
 #else
 FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::EnableCustomFrame};
 FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
