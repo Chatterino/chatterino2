@@ -75,23 +75,29 @@ ExternalToolsPage::ExternalToolsPage()
             },
             this->managedConnections_);
     }
+    layout->addSpacing(16);
 
     {
-        auto group = layout.emplace<QGroupBox>("Custom URI Scheme");
+        auto group = layout.emplace<QGroupBox>("Custom stream player");
         auto groupLayout = group.setLayoutType<QFormLayout>();
 
         const auto description = new QLabel(
-            "You can open video streams directly in any video player that "
+            "You can open Twitch streams directly in any video player that "
             "has built-in Twitch support and has own URI Scheme.\nE.g.: "
-            "IINA for macOS and Potplayer (with extension) for Windows.");
+            "IINA for macOS and Potplayer (with extension) for "
+            "Windows.\n\nWith this value set, you will get the option to "
+            "\"Open in custom player\" when "
+            "right-clicking a channel header.");
         description->setWordWrap(true);
         description->setStyleSheet("color: #bbb");
 
         groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
 
-        groupLayout->addRow("URI Scheme:", this->createLineEdit(
-                                               getSettings()->customURIScheme));
+        auto lineEdit = this->createLineEdit(getSettings()->customURIScheme);
+        lineEdit->setPlaceholderText("custom-player-scheme://");
+        groupLayout->addRow("Custom stream player URI Scheme:", lineEdit);
     }
+    layout->addSpacing(16);
 
     {
         auto group = layout.emplace<QGroupBox>("Image Uploader");
@@ -100,8 +106,7 @@ ExternalToolsPage::ExternalToolsPage()
         const auto description = new QLabel(
             "You can set custom host for uploading images, like "
             "imgur.com or s-ul.eu.<br>Check " +
-            formatRichNamedLink("https://github.com/Chatterino/chatterino2/"
-                                "blob/master/docs/IMAGEUPLOADER.md",
+            formatRichNamedLink("https://chatterino.com/help/image-uploader",
                                 "this guide") +
             " for help.");
         description->setWordWrap(true);
@@ -113,6 +118,9 @@ ExternalToolsPage::ExternalToolsPage()
         description->setOpenExternalLinks(true);
 
         groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
+
+        groupLayout->addRow(this->createCheckBox(
+            "Enable image uploader", getSettings()->imageUploaderEnabled));
 
         groupLayout->addRow(
             "Request URL: ",

@@ -33,6 +33,11 @@ void GenericListView::setModel(GenericListModel *model)
     QListView::setModel(model);
 }
 
+void GenericListView::setInvokeActionOnTab(bool value)
+{
+    this->invokeActionOnTab_ = value;
+}
+
 bool GenericListView::eventFilter(QObject * /*watched*/, QEvent *event)
 {
     if (!this->model_)
@@ -47,7 +52,22 @@ bool GenericListView::eventFilter(QObject * /*watched*/, QEvent *event)
         const int curRow = curIdx.row();
         const int count = this->model_->rowCount(curIdx);
 
-        if (key == Qt::Key_Down || key == Qt::Key_Tab)
+        if (key == Qt::Key_Enter || key == Qt::Key_Return ||
+            (key == Qt::Key_Tab && this->invokeActionOnTab_))
+        {
+            // keep this before the other tab handler
+            if (count <= 0)
+                return true;
+
+            const auto index = this->currentIndex();
+            auto *item = GenericListItem::fromVariant(index.data());
+
+            item->action();
+
+            emit this->closeRequested();
+            return true;
+        }
+        else if (key == Qt::Key_Down || key == Qt::Key_Tab)
         {
             if (count <= 0)
                 return true;
@@ -57,7 +77,8 @@ bool GenericListView::eventFilter(QObject * /*watched*/, QEvent *event)
             this->setCurrentIndex(curIdx.siblingAtRow(newRow));
             return true;
         }
-        else if (key == Qt::Key_Up || key == Qt::Key_Backtab)
+        else if (key == Qt::Key_Up ||
+                 (!this->invokeActionOnTab_ && key == Qt::Key_Backtab))
         {
             if (count <= 0)
                 return true;
@@ -69,16 +90,8 @@ bool GenericListView::eventFilter(QObject * /*watched*/, QEvent *event)
             this->setCurrentIndex(curIdx.siblingAtRow(newRow));
             return true;
         }
-        else if (key == Qt::Key_Enter || key == Qt::Key_Return)
+        else if (key == Qt::Key_Escape)
         {
-            if (count <= 0)
-                return true;
-
-            const auto index = this->currentIndex();
-            auto *item = GenericListItem::fromVariant(index.data());
-
-            item->action();
-
             emit this->closeRequested();
             return true;
         }

@@ -289,10 +289,14 @@ void Application::initPubsub()
         QString channelId;
         if (rj::getSafe(data, "channel_id", channelId))
         {
-            const auto &chan =
-                this->twitch.server->getChannelOrEmptyByID(channelId);
-            auto channel = dynamic_cast<TwitchChannel *>(chan.get());
-            channel->addChannelPointReward(ChannelPointReward(data));
+            auto chan = this->twitch.server->getChannelOrEmptyByID(channelId);
+
+            auto reward = ChannelPointReward(data);
+
+            postToThread([chan, reward] {
+                auto channel = dynamic_cast<TwitchChannel *>(chan.get());
+                channel->addChannelPointReward(reward);
+            });
         }
         else
         {
