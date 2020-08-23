@@ -241,6 +241,7 @@ void SplitContainer::setSelected(Split *split)
 
     if (Node *node = this->baseNode_.findNodeContainingSplit(split))
     {
+        this->focusSplitRecursive(node);
         this->setPreferedTargetRecursive(node);
     }
 }
@@ -331,7 +332,7 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
                 else
                 {
                     this->focusSplitRecursive(
-                        siblings[it - siblings.begin() - 1].get(), direction);
+                        siblings[it - siblings.begin() - 1].get());
                 }
             }
             else
@@ -343,7 +344,7 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
                 else
                 {
                     this->focusSplitRecursive(
-                        siblings[it - siblings.begin() + 1].get(), direction);
+                        siblings[it - siblings.begin() + 1].get());
                 }
             }
         }
@@ -354,7 +355,7 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
     }
 }
 
-void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
+void SplitContainer::focusSplitRecursive(Node *node)
 {
     switch (node->type_)
     {
@@ -374,12 +375,11 @@ void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
 
             if (it != children.end())
             {
-                this->focusSplitRecursive(it->get(), direction);
+                this->focusSplitRecursive(it->get());
             }
             else
             {
-                this->focusSplitRecursive(node->children_.front().get(),
-                                          direction);
+                this->focusSplitRecursive(node->children_.front().get());
             }
         }
         break;
