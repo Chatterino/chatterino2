@@ -488,7 +488,7 @@ void SplitInput::updateColonMenu()
         else if (text[i] == ':')
         {
             if (i == 0 || text[i - 1].isSpace())
-                this->showColonMenu(text.mid(i, position - i).mid(1));
+                this->showColonMenu(text.mid(i, position - i + 1).mid(1));
             else
                 this->hideColonMenu();
             return;
