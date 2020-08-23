@@ -143,6 +143,8 @@ public:
         "/behaviour/autocompletion/prefixOnlyCompletion", true};
     BoolSetting userCompletionOnlyWithAt = {
         "/behaviour/autocompletion/userCompletionOnlyWithAt", false};
+    BoolSetting emoteCompletionWithColon = {
+        "/behaviour/autocompletion/emoteCompletionWithColon", true};
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {

@@ -459,9 +459,11 @@ void SplitInput::onCursorPositionChanged()
 
 void SplitInput::updateColonMenu()
 {
-    if (!dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    if (!getSettings()->emoteCompletionWithColon ||
+        !dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
     {
         this->hideColonMenu();
+        return;
     }
 
     // check if in :

@@ -62,6 +62,7 @@ void EmoteInputPopup::initLayout()
 
     auto listView =
         creator.emplace<GenericListView>().assign(&this->ui_.listView);
+    listView->setInvokeActionOnTab(true);
 
     listView->setModel(&this->model_);
     QObject::connect(listView.getElement(), &GenericListView::closeRequested,
