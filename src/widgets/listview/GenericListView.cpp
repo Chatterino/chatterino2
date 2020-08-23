@@ -33,6 +33,11 @@ void GenericListView::setModel(GenericListModel *model)
     QListView::setModel(model);
 }
 
+void GenericListView::setInvokeActionOnTab(bool value)
+{
+    this->invokeActionOnTab_ = value;
+}
+
 bool GenericListView::eventFilter(QObject * /*watched*/, QEvent *event)
 {
     if (!this->model_)
@@ -47,30 +52,10 @@ bool GenericListView::eventFilter(QObject * /*watched*/, QEvent *event)
         const int curRow = curIdx.row();
         const int count = this->model_->rowCount(curIdx);
 
-        if (key == Qt::Key_Down || key == Qt::Key_Tab)
+        if (key == Qt::Key_Enter || key == Qt::Key_Return ||
+            (key == Qt::Key_Tab && this->invokeActionOnTab_))
         {
-            if (count <= 0)
-                return true;
-
-            const int newRow = (curRow + 1) % count;
-
-            this->setCurrentIndex(curIdx.siblingAtRow(newRow));
-            return true;
-        }
-        else if (key == Qt::Key_Up || key == Qt::Key_Backtab)
-        {
-            if (count <= 0)
-                return true;
-
-            int newRow = curRow - 1;
-            if (newRow < 0)
-                newRow += count;
-
-            this->setCurrentIndex(curIdx.siblingAtRow(newRow));
-            return true;
-        }
-        else if (key == Qt::Key_Enter || key == Qt::Key_Return)
-        {
+            // keep this before the other tab handler
             if (count <= 0)
                 return true;
 
@@ -80,6 +65,29 @@ bool GenericListView::eventFilter(QObject * /*watched*/, QEvent *event)
             item->action();
 
             emit this->closeRequested();
+            return true;
+        }
+        else if (key == Qt::Key_Down || key == Qt::Key_Tab)
+        {
+            if (count <= 0)
+                return true;
+
+            const int newRow = (curRow + 1) % count;
+
+            this->setCurrentIndex(curIdx.siblingAtRow(newRow));
+            return true;
+        }
+        else if (key == Qt::Key_Up ||
+                 (!this->invokeActionOnTab_ && key == Qt::Key_Backtab))
+        {
+            if (count <= 0)
+                return true;
+
+            int newRow = curRow - 1;
+            if (newRow < 0)
+                newRow += count;
+
+            this->setCurrentIndex(curIdx.siblingAtRow(newRow));
             return true;
         }
         else if (key == Qt::Key_Escape)
