@@ -287,7 +287,7 @@ void Updates::checkForUpdates()
                 this->updateGuideLink_ = updateGuide_val.toString();
             }
 #endif
-#if !defined(Q_OS_WIN) && !defined(Q_OS_MAC) && !defined(Q_OS_LINUX)
+#if !defined(Q_OS_WIN) && !defined(Q_OS_MACOS) && !defined(Q_OS_LINUX)
             return Failure;
 #endif
 
