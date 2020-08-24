@@ -98,6 +98,7 @@ public:
     /// 	signals.
     int append(const T &item, void *caller = nullptr)
     {
+        assertInGuiThread();
         return this->insert(item, -1, caller);
     }
 

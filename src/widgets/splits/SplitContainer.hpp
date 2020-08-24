@@ -216,7 +216,7 @@ protected:
 private:
     void layout();
     void selectSplitRecursive(Node *node, Direction direction);
-    void focusSplitRecursive(Node *node, Direction direction);
+    void focusSplitRecursive(Node *node);
     void setPreferedTargetRecursive(Node *node);
 
     void addSplit(Split *split);

@@ -227,9 +227,15 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                       Qt::CheckStateRole);
         }
     }
-    else if (clicked.column() == Column::Color &&
-             clicked.row() != HighlightModel::WHISPER_ROW)
+    else if (clicked.column() == Column::Color)
     {
+        // Hacky (?) way to figure out what tab the cell was clicked in
+        const bool fromMessagesTab =
+            (dynamic_cast<HighlightModel *>(view->getModel()) != nullptr);
+
+        if (fromMessagesTab && clicked.row() == HighlightModel::WHISPER_ROW)
+            return;
+
         auto initial =
             view->getModel()->data(clicked, Qt::DecorationRole).value<QColor>();
 
@@ -244,11 +250,7 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                 view->getModel()->setData(clicked, selected,
                                           Qt::DecorationRole);
 
-                // Hacky (?) way to figure out what tab the cell was clicked in
-                const bool fromMessages = (dynamic_cast<HighlightModel *>(
-                                               view->getModel()) != nullptr);
-
-                if (fromMessages)
+                if (fromMessagesTab)
                 {
                     /*
                      * For preset highlights in the "Messages" tab, we need to

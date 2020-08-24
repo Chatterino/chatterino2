@@ -19,23 +19,38 @@ void EmoteInputItem::action()
 void EmoteInputItem::paint(QPainter *painter, const QRect &rect) const
 {
     painter->setRenderHint(QPainter::SmoothPixmapTransform);
+    painter->setRenderHint(QPainter::Antialiasing);
+
+    auto margin = 4;
+    auto imageHeight = ICON_SIZE.height() - margin * 2;
+
+    QRect iconRect{
+        rect.topLeft() + QPoint{margin, margin},
+        QSize{imageHeight, imageHeight},
+    };
 
     if (this->emote_)
     {
-        if (auto image = this->emote_->images.getImage(4))
+        if (auto image = this->emote_->images.getImage(2))
         {
             if (auto pixmap = image->pixmapOrLoad())
             {
-                painter->drawPixmap(QRect(rect.x(), rect.y(), ICON_SIZE.width(),
-                                          ICON_SIZE.height()),
-                                    *pixmap);
+                if (image->height() != 0)
+                {
+                    auto aspectRatio =
+                        double(image->width()) / double(image->height());
+
+                    iconRect = {
+                        rect.topLeft() + QPoint{margin, margin},
+                        QSize(int(imageHeight * aspectRatio), imageHeight)};
+                    painter->drawPixmap(iconRect, *pixmap);
+                }
             }
         }
     }
 
-    QRect iconRect(rect.topLeft(), ICON_SIZE);
     QRect textRect =
-        QRect(iconRect.topRight(),
+        QRect(iconRect.topRight() + QPoint{margin, 0},
               QSize(rect.width() - iconRect.width(), iconRect.height()));
     painter->drawText(textRect, Qt::AlignLeft | Qt::AlignVCenter, this->text_);
 }

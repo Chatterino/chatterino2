@@ -10,6 +10,8 @@
 
 namespace chatterino {
 
+constexpr int cooldownInS = 10;
+
 const QStringList &broadcastingBinaries()
 {
 #ifdef USEWINSDK
@@ -25,6 +27,17 @@ bool isInStreamerMode()
 #ifdef USEWINSDK
     if (IsWindowsVistaOrGreater())
     {
+        static bool cache = false;
+        static QDateTime time = QDateTime();
+
+        if (time.isValid() &&
+            time.addSecs(cooldownInS) > QDateTime::currentDateTime())
+        {
+            return cache;
+        }
+
+        time = QDateTime::currentDateTime();
+
         WTS_PROCESS_INFO *pWPIs = nullptr;
         DWORD dwProcCount = 0;
 
@@ -38,12 +51,17 @@ bool isInStreamerMode()
                     reinterpret_cast<char16_t *>(pWPIs[i].pProcessName));
 
                 if (broadcastingBinaries().contains(processName))
+                {
+                    cache = true;
                     return true;
+                }
             }
         }
 
         if (pWPIs)
             WTSFreeMemory(pWPIs);
+
+        cache = false;
     }
 #endif
 

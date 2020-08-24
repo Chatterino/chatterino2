@@ -311,7 +311,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
         if (!getSettings()->customURIScheme.getValue().isEmpty())
         {
-            menu->addAction("Open with URI Scheme", this->split_,
+            menu->addAction("Open in custom player", this->split_,
                             &Split::openWithCustomScheme);
         }
         menu->addSeparator();
@@ -727,7 +727,7 @@ void SplitHeader::enterEvent(QEvent *event)
 
         auto tooltip = TooltipWidget::instance();
         tooltip->setText(this->tooltipText_);
-        tooltip->setWordWrap(false);
+        tooltip->setWordWrap(true);
         tooltip->adjustSize();
         auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
                    QPoint((this->width() - tooltip->width()) / 2, 0);
