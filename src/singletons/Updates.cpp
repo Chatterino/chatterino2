@@ -268,8 +268,8 @@ void Updates::checkForUpdates()
                 return Failure;
             }
             this->updateExe_ = updateExe_val.toString();
-#endif
-#ifdef Q_OS_WIN
+
+#    ifdef Q_OS_WIN
             /// Windows portable
             QJsonValue portable_val = object.value("portable_download");
             if (!portable_val.isString())
@@ -279,15 +279,15 @@ void Updates::checkForUpdates()
                 return Failure;
             }
             this->updatePortable_ = portable_val.toString();
-#endif
-#ifdef Q_OS_LINUX
+#    endif
+
+#elif defined Q_OS_LINUX
             QJsonValue updateGuide_val = object.value("updateguide");
             if (updateGuide_val.isString())
             {
                 this->updateGuideLink_ = updateGuide_val.toString();
             }
-#endif
-#if !defined(Q_OS_WIN) && !defined(Q_OS_MACOS) && !defined(Q_OS_LINUX)
+#else
             return Failure;
 #endif
 
