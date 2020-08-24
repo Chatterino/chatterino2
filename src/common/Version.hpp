@@ -28,6 +28,7 @@ public:
     const QString &commitHash() const;
     const QString &dateOfBuild() const;
     const QString &fullVersion() const;
+    const bool &isSupportedOS() const;
 
 private:
     Version();
@@ -36,6 +37,7 @@ private:
     QString commitHash_;
     QString dateOfBuild_;
     QString fullVersion_;
+    bool isSupportedOS_;
 };
 
 };  // namespace chatterino

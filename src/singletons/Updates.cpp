@@ -232,11 +232,13 @@ void Updates::installUpdates()
 
 void Updates::checkForUpdates()
 {
-#if !defined(Q_OS_WIN) && !defined(Q_OS_LINUX) && !defined(Q_OS_MACOS)
-    qDebug() << "Update checking disabled because OS doesn't appear to be one "
-                "of Windows, GNU/Linux or macOS.";
-    return;
-#endif
+    if (!Version::instance().isSupportedOS())
+    {
+        qDebug()
+            << "Update checking disabled because OS doesn't appear to be one "
+               "of Windows, GNU/Linux or macOS.";
+        return;
+    }
 
     // Disable updates if on nightly and windows.
 #ifdef Q_OS_WIN
