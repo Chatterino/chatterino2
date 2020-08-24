@@ -666,39 +666,41 @@ void TwitchChannel::loadRecentMessages()
 
     NetworkRequest(Env::get().recentMessagesApiUrl.arg(this->getName()))
         .concurrent()
-        .onSuccess(
-            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-                auto shared = weak.lock();
-                if (!shared)
-                    return Failure;
+        .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
+            auto shared = weak.lock();
+            if (!shared)
+                return Failure;
 
-                auto messages = parseRecentMessages(result.parseJson(), shared);
+            auto messages = parseRecentMessages(result.parseJson(), shared);
 
-                auto &handler = IrcMessageHandler::instance();
+            auto &handler = IrcMessageHandler::instance();
 
-                std::vector<MessagePtr> allBuiltMessages;
+            std::vector<MessagePtr> allBuiltMessages;
 
-                for (auto message : messages)
+            auto channel = static_cast<TwitchChannel *>(shared.get());
+            bool truecaseUsernamesOnCompletion =
+                !getSettings()->lowercaseUsernamesOnCompletion;
+            for (auto message : messages)
+            {
+                for (auto builtMessage :
+                     handler.parseMessage(shared.get(), message))
                 {
-                    for (auto builtMessage :
-                         handler.parseMessage(shared.get(), message))
+                    if (truecaseUsernamesOnCompletion)
                     {
-                        if (!getSettings()->lowercaseUsernamesOnCompletion)
-                        {
-                            this->addRecentChatter(builtMessage->displayName);
-                        }
-                        builtMessage->flags.set(MessageFlag::RecentMessage);
-                        allBuiltMessages.emplace_back(builtMessage);
+                        channel->addRecentChatter(builtMessage->displayName);
                     }
+                    builtMessage->flags.set(MessageFlag::RecentMessage);
+                    allBuiltMessages.emplace_back(builtMessage);
                 }
+            }
 
-                postToThread(
-                    [shared, messages = std::move(allBuiltMessages)]() mutable {
-                        shared->addMessagesAtStart(messages);
-                    });
+            postToThread(
+                [shared, messages = std::move(allBuiltMessages)]() mutable {
+                    shared->addMessagesAtStart(messages);
+                });
 
-                return Success;
-            })
+            return Success;
+        })
         .execute();
 }
 
@@ -734,29 +736,32 @@ void TwitchChannel::refreshChatters()
         NetworkRequest("https://tmi.twitch.tv/group/user/" + this->getName() +
                        "/chatters")
 
-            .onSuccess(
-                [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
-                    // channel still exists?
-                    auto shared = weak.lock();
-                    if (!shared)
-                        return Failure;
+            .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
+                // channel still exists?
+                auto shared = weak.lock();
+                if (!shared)
+                    return Failure;
+                auto pair = parseChatters(result.parseJson());
+                if (pair.first)
+                {
+                    auto channel = static_cast<TwitchChannel *>(shared.get());
+                    channel->setChatters(std::move(pair.second));
+                }
 
-                    auto pair = parseChatters(result.parseJson());
-                    if (pair.first)
-                    {
-                        this->setChatters(std::move(pair.second));
-                    }
-
-                    return pair.first;
-                })
+                return pair.first;
+            })
             .execute();
     }
     else
     {
         getHelix()->getUserByName(
             this->getName(),
-            [this](const auto &user) {
-                this->addRecentChatter(user.displayName);
+            [weak = weakOf<Channel>(this)](const auto &user) {
+                auto shared = weak.lock();
+                if (!shared)
+                    return;
+                auto channel = static_cast<TwitchChannel *>(shared.get());
+                channel->addRecentChatter(user.displayName);
             },
             [] {
                 // on failure
