@@ -540,10 +540,17 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Title", s.headerStreamTitle);
 
     layout.addTitle("Beta");
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     layout.addDescription(
         "You can receive updates earlier by ticking the box below. Report "
         "issues <a href='https://chatterino.com/link/issues'>here</a>.");
     layout.addCheckbox("Receive beta updates", s.betaUpdates);
+#else
+    layout.addDescription(
+        "Your operating system is not officially supplied with builds. For "
+        "updates, please rebuild chatterino from sources. Report "
+        "issues <a href='https://chatterino.com/link/issues'>here</a>.");
+#endif
 
 #ifdef Q_OS_WIN
     layout.addTitle("Browser Integration");

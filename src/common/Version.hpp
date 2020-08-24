@@ -11,6 +11,8 @@
 #    define CHATTERINO_OS "macos"
 #elif defined(Q_OS_LINUX)
 #    define CHATTERINO_OS "linux"
+#elif defined(Q_OS_FREEBSD)
+#    define CHATTERINO_OS "freebsd"
 #else
 #    define CHATTERINO_OS "unknown"
 #endif

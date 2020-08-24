@@ -189,7 +189,13 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     });
 
     chatterino::NetworkManager::init();
+
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     chatterino::Updates::instance().checkForUpdates();
+#else
+    qDebug() << "Update checking disabled because OS doesn't appear to be one "
+                "of Windows, GNU/Linux or macOS.";
+#endif
 
 #ifdef C_USE_BREAKPAD
     QBreakpadInstance.setDumpPath(getPaths()->settingsFolderPath + "/Crashes");

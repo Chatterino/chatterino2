@@ -116,8 +116,13 @@ int Application::run(QApplication &qtApp)
 
     this->windows->getMainWindow().show();
 
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     getSettings()->betaUpdates.connect(
         [] { Updates::instance().checkForUpdates(); }, false);
+#else
+    qDebug() << "Checking for beta updates disabled because OS doesn't appear "
+                "to be one of Windows, GNU/Linux or macOS.";
+#endif
     getSettings()->moderationActions.delayedItemsChanged.connect(
         [this] { this->windows->forceLayoutChannelViews(); });
 
