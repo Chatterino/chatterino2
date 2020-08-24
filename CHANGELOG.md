@@ -2,11 +2,18 @@
 
 ## Unversioned
 
-- Minor: Added support for Brave browser. (#1862)
+- Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
+
+## 2.2.0
+
 - Major: We now support image thumbnails coming from the link resolver. This feature is off by default and can be enabled in the settings with the "Show link thumbnail" setting. This feature also requires the "Show link info when hovering" setting to be enabled (#1664)
 - Major: Added image upload functionality to i.nuuls.com with an ability to change upload destination. This works by dragging and dropping an image into a split, or pasting an image into the text edit field. (#1332, #1741)
-- Minor: Add a switcher widget, similar to Discord. It can be opened by pressing Ctrl+K. (#1588)
 - Major: Added option to display tabs vertically. (#1815)
+- Major: Support the highlighted messages redeemed with channel points on twitch.tv.
+- Major: Added emote completion with `:`
+- Minor: Added a "Streamer Mode" that hides user generated images while obs is open.
+- Minor: Added extension support for Brave browser and Microsoft Edge. (#1862)
+- Minor: Add a switcher widget, similar to Discord. It can be opened by pressing Ctrl+K. (#1588)
 - Minor: Clicking on `Open in browser` in a whisper split will now open your whispers on twitch. (#1828)
 - Minor: Clicking on @mentions will open the User Popup. (#1674)
 - Minor: You can now open the Twitch User Card by middle-mouse clicking a username. (#1669)
@@ -16,6 +23,8 @@
 - Minor: Removed "Online Logs" functionality as services are shut down (#1640)
 - Minor: CTRL+F now selects the Find text input field in the Settings Dialog (#1806 #1811)
 - Minor: CTRL+F now selects the search text input field in the Search Popup (#1812)
+- Minor: Modify our word boundary logic in highlight phrase searching to accomodate non-regex phrases with "word-boundary-creating" characters like ! (#1885, #1890)
+- Bugfix: Fixed not being able to open links in incognito with Microsoft Edge (Chromium) (#1875)
 - Bugfix: Fix the incorrect `Open stream in browser` labelling in the whisper split (#1860)
 - Bugfix: Fix preview on hover not working when Animated emotes options was disabled (#1546)
 - Bugfix: FFZ custom mod badges no longer scale with the emote scale options (#1602)

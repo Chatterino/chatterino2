@@ -34,6 +34,7 @@
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/StreamerMode.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
@@ -1315,7 +1316,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         {
             auto element = &hoverLayoutElement->getCreator();
             auto thumbnailSize = getSettings()->thumbnailSize;
-            if (thumbnailSize == 0)
+            if (thumbnailSize == 0 || isInStreamerMode())
             {
                 tooltipPreviewImage.setImage(nullptr);
             }

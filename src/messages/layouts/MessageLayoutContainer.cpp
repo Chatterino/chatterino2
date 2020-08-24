@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QPainter>
 
-#define COMPACT_EMOTES_OFFSET 6
+#define COMPACT_EMOTES_OFFSET 4
 #define MAX_UNCOLLAPSED_LINES \
     (getSettings()->collpseMessagesMinLines.getValue())
 

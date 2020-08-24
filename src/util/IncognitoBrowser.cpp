@@ -15,6 +15,7 @@ namespace {
             {"firefox", "-private-window"},     {"chrome", "-incognito"},
             {"vivaldi", "-incognito"},          {"opera", "-newprivatetab"},
             {"opera\\\\launcher", "--private"}, {"iexplore", "-private"},
+            {"msedge", "-inprivate"},
         };
 
         // transform into regex and replacement string
