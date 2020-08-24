@@ -5,6 +5,7 @@
 #include <QScrollArea>
 
 #include "Application.hpp"
+#include "common/Version.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Theme.hpp"
@@ -540,10 +541,20 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Title", s.headerStreamTitle);
 
     layout.addTitle("Beta");
-    layout.addDescription(
-        "You can receive updates earlier by ticking the box below. Report "
-        "issues <a href='https://chatterino.com/link/issues'>here</a>.");
-    layout.addCheckbox("Receive beta updates", s.betaUpdates);
+    if (Version::instance().isSupportedOS())
+    {
+        layout.addDescription(
+            "You can receive updates earlier by ticking the box below. Report "
+            "issues <a href='https://chatterino.com/link/issues'>here</a>.");
+        layout.addCheckbox("Receive beta updates", s.betaUpdates);
+    }
+    else
+    {
+        layout.addDescription(
+            "Your operating system is not officially supplied with builds. For "
+            "updates, please rebuild chatterino from sources. Report "
+            "issues <a href='https://chatterino.com/link/issues'>here</a>.");
+    }
 
 #ifdef Q_OS_WIN
     layout.addTitle("Browser Integration");
