@@ -63,6 +63,11 @@ void UsernameSet::insertPrefix(const QString &value)
         string = value;
 }
 
+bool UsernameSet::contains(const QString &value) const
+{
+    return this->items.count(value) == 1;
+}
+
 //
 // Range
 //

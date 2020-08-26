@@ -27,6 +27,9 @@
 
 namespace {
 
+// matches a mention with punctuation at the end, like "@username," or "@username!!!" where capture group would return "username"
+const QRegularExpression mentionRegex("^@(\\w+)[.,!?;]*?$");
+
 const QSet<QString> zeroWidthEmotes{
     "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
     "ReinDeer", "CandyCane", "cvMask",   "cvHazmat",
@@ -190,6 +193,17 @@ MessagePtr TwitchMessageBuilder::build()
     this->parseMessageID();
 
     this->parseRoomID();
+
+    // If it is a reward it has to be appended first
+    if (this->args.channelPointRewardId != "")
+    {
+        const auto &reward = this->twitchChannel->channelPointReward(
+            this->args.channelPointRewardId);
+        if (reward)
+        {
+            this->appendChannelPointRewardMessage(reward.get(), this);
+        }
+    }
 
     this->appendChannelName();
 
@@ -409,29 +423,50 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
     // Actually just text
     auto linkString = this->matchLink(string);
-    auto link = Link();
     auto textColor = this->action_ ? MessageColor(this->usernameColor_)
                                    : MessageColor(MessageColor::Text);
 
-    if (linkString.isEmpty())
-    {
-        if (string.startsWith('@'))
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       textColor, FontStyle::ChatMediumBold);
-            this->emplace<TextElement>(
-                string, MessageElementFlag::NonBoldUsername, textColor);
-        }
-        else
-        {
-            this->emplace<TextElement>(string, MessageElementFlag::Text,
-                                       textColor);
-        }
-    }
-    else
+    if (!linkString.isEmpty())
     {
         this->addLink(string, linkString);
+        return;
     }
+
+    if (string.startsWith('@'))
+    {
+        auto match = mentionRegex.match(string);
+        // Only treat as @mention if valid username
+        if (match.hasMatch())
+        {
+            QString username = match.captured(1);
+            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+                                       textColor, FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, username});
+
+            this->emplace<TextElement>(
+                    string, MessageElementFlag::NonBoldUsername, textColor)
+                ->setLink({Link::UserInfo, username});
+            return;
+        }
+    }
+
+    if (this->twitchChannel != nullptr && getSettings()->findAllUsernames)
+    {
+        auto chatters = this->twitchChannel->accessChatters();
+        if (chatters->contains(string))
+        {
+            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+                                       textColor, FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, string});
+
+            this->emplace<TextElement>(
+                    string, MessageElementFlag::NonBoldUsername, textColor)
+                ->setLink({Link::UserInfo, string});
+            return;
+        }
+    }
+
+    this->emplace<TextElement>(string, MessageElementFlag::Text, textColor);
 }
 
 void TwitchMessageBuilder::parseMessageID()
@@ -1111,6 +1146,36 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     }
 
     return Success;
+}
+
+void TwitchMessageBuilder::appendChannelPointRewardMessage(
+    const ChannelPointReward &reward, MessageBuilder *builder)
+{
+    QString redeemed = "Redeemed";
+    if (!reward.isUserInputRequired)
+    {
+        builder->emplace<TextElement>(
+            reward.user.login, MessageElementFlag::ChannelPointReward,
+            MessageColor::Text, FontStyle::ChatMediumBold);
+        redeemed = "redeemed";
+    }
+    builder->emplace<TextElement>(redeemed,
+                                  MessageElementFlag::ChannelPointReward);
+    builder->emplace<TextElement>(
+        reward.title, MessageElementFlag::ChannelPointReward,
+        MessageColor::Text, FontStyle::ChatMediumBold);
+    builder->emplace<ScalingImageElement>(
+        reward.image, MessageElementFlag::ChannelPointRewardImage);
+    builder->emplace<TextElement>(
+        QString::number(reward.cost), MessageElementFlag::ChannelPointReward,
+        MessageColor::Text, FontStyle::ChatMediumBold);
+    if (reward.isUserInputRequired)
+    {
+        builder->emplace<LinebreakElement>(
+            MessageElementFlag::ChannelPointReward);
+    }
+
+    builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
 }
 
 }  // namespace chatterino

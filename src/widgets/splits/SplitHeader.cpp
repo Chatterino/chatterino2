@@ -277,7 +277,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     menu->addAction("Close", this->split_, &Split::deleteFromContainer,
                     QKeySequence("Ctrl+W"));
     menu->addSeparator();
-    menu->addAction("Popup", this->split_, &Split::popup);
+    menu->addAction("Popup", this->split_, &Split::popup,
+                    QKeySequence("Ctrl+N"));
     menu->addAction("Search", this->split_, &Split::showSearch,
                     QKeySequence("Ctrl+F"));
     menu->addAction("Set filters", this->split_, &Split::setFiltersDialog);
@@ -311,11 +312,32 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
         if (!getSettings()->customURIScheme.getValue().isEmpty())
         {
-            menu->addAction("Open with URI Scheme", this->split_,
+            menu->addAction("Open in custom player", this->split_,
                             &Split::openWithCustomScheme);
         }
         menu->addSeparator();
     }
+
+    if (this->split_->getChannel()->getType() == Channel::Type::TwitchWhispers)
+    {
+        menu->addAction(OPEN_WHISPERS_IN_BROWSER, this->split_,
+                        &Split::openWhispersInBrowser);
+        menu->addSeparator();
+    }
+
+    // reload / reconnect
+    if (this->split_->getChannel()->canReconnect())
+        menu->addAction("Reconnect", this, SLOT(reconnect()));
+
+    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    {
+        menu->addAction("Reload channel emotes", this,
+                        SLOT(reloadChannelEmotes()), QKeySequence("F5"));
+        menu->addAction("Reload subscriber emotes", this,
+                        SLOT(reloadSubscriberEmotes()), QKeySequence("F5"));
+    }
+
+    menu->addSeparator();
 
     {
         // "How to..." sub menu
@@ -324,6 +346,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         subMenu->addAction("add/split", this->split_, &Split::explainSplitting);
         menu->addMenu(subMenu);
     }
+
+    menu->addSeparator();
 
     // sub menu
     auto moreMenu = new QMenu("More", this);
@@ -373,17 +397,6 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         moreMenu->addAction(action);
     }
 
-    moreMenu->addSeparator();
-    if (this->split_->getChannel()->canReconnect())
-        moreMenu->addAction("Reconnect", this, SLOT(reconnect()));
-
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
-    {
-        moreMenu->addAction("Reload channel emotes", this,
-                            SLOT(reloadChannelEmotes()));
-        moreMenu->addAction("Reload subscriber emotes", this,
-                            SLOT(reloadSubscriberEmotes()));
-    }
     moreMenu->addSeparator();
     moreMenu->addAction("Clear messages", this->split_, &Split::clear);
     //    moreMenu->addSeparator();
@@ -714,11 +727,13 @@ void SplitHeader::enterEvent(QEvent *event)
         TooltipPreviewImage::instance().setImage(nullptr);
 
         auto tooltip = TooltipWidget::instance();
-        tooltip->moveTo(this, this->mapToGlobal(this->rect().bottomLeft()),
-                        false);
         tooltip->setText(this->tooltipText_);
-        tooltip->setWordWrap(false);
+        tooltip->setWordWrap(true);
         tooltip->adjustSize();
+        auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
+                   QPoint((this->width() - tooltip->width()) / 2, 0);
+
+        tooltip->moveTo(this, pos, false);
         tooltip->show();
         tooltip->raise();
     }

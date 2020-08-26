@@ -27,8 +27,8 @@
         <keyword>twitch</keyword>
     </keywords>
     <url type="homepage">https://chatterino.com/</url>
-    <url type="bugtracker">https://github.com/Chatterino/chatterino2/issues</url>
-    <url type="donation">https://streamelements.com/fourtf/tip</url>
+    <url type="bugtracker">https://chatterino.com/link/issues</url>
+    <url type="donation">https://chatterino.com/link/tips</url>
     <provides>
         <binary>chatterino</binary>
     </provides>

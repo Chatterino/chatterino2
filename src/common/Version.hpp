@@ -3,7 +3,7 @@
 #include <QString>
 #include <QtGlobal>
 
-#define CHATTERINO_VERSION "2.1.7"
+#define CHATTERINO_VERSION "2.2.1"
 
 #if defined(Q_OS_WIN)
 #    define CHATTERINO_OS "win"
@@ -11,6 +11,8 @@
 #    define CHATTERINO_OS "macos"
 #elif defined(Q_OS_LINUX)
 #    define CHATTERINO_OS "linux"
+#elif defined(Q_OS_FREEBSD)
+#    define CHATTERINO_OS "freebsd"
 #else
 #    define CHATTERINO_OS "unknown"
 #endif
@@ -26,6 +28,7 @@ public:
     const QString &commitHash() const;
     const QString &dateOfBuild() const;
     const QString &fullVersion() const;
+    const bool &isSupportedOS() const;
 
 private:
     Version();
@@ -34,6 +37,7 @@ private:
     QString commitHash_;
     QString dateOfBuild_;
     QString fullVersion_;
+    bool isSupportedOS_;
 };
 
 };  // namespace chatterino

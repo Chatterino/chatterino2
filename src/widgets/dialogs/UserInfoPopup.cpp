@@ -14,6 +14,7 @@
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Shortcut.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -86,12 +87,20 @@ namespace {
     };
 }  // namespace
 
-UserInfoPopup::UserInfoPopup()
-    : BaseWindow(BaseWindow::EnableCustomFrame)
+UserInfoPopup::UserInfoPopup(bool closeAutomatically)
+    : BaseWindow(
+          closeAutomatically
+              ? FlagsEnum<BaseWindow::Flags>{BaseWindow::EnableCustomFrame,
+                                             BaseWindow::Frameless,
+                                             BaseWindow::FramelessDraggable}
+              : BaseWindow::EnableCustomFrame)
     , hack_(new bool)
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
+
+    if (closeAutomatically)
+        this->setActionOnFocusLoss(BaseWindow::Delete);
 
     // Close the popup when Escape is pressed
     createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
@@ -484,7 +493,10 @@ void UserInfoPopup::updateUserData()
             [] {
                 // failure
             });
-        this->loadAvatar(user.profileImageUrl);
+        if (!isInStreamerMode())
+        {
+            this->loadAvatar(user.profileImageUrl);
+        }
 
         getHelix()->getUserFollowers(
             user.id,

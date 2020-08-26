@@ -187,6 +187,18 @@ void SplitContainer::insertSplit(Split *split, Direction direction,
     this->addSplit(split);
 }
 
+Split *SplitContainer::getSelectedSplit() const
+{
+    // safety check
+    if (std::find(this->splits_.begin(), this->splits_.end(),
+                  this->selected_) == this->splits_.end())
+    {
+        return nullptr;
+    }
+
+    return this->selected_;
+}
+
 void SplitContainer::addSplit(Split *split)
 {
     assertInGuiThread();
@@ -218,10 +230,18 @@ void SplitContainer::addSplit(Split *split)
 
 void SplitContainer::setSelected(Split *split)
 {
+    // safety
+    if (std::find(this->splits_.begin(), this->splits_.end(), split) ==
+        this->splits_.end())
+    {
+        return;
+    }
+
     this->selected_ = split;
 
     if (Node *node = this->baseNode_.findNodeContainingSplit(split))
     {
+        this->focusSplitRecursive(node);
         this->setPreferedTargetRecursive(node);
     }
 }
@@ -312,7 +332,7 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
                 else
                 {
                     this->focusSplitRecursive(
-                        siblings[it - siblings.begin() - 1].get(), direction);
+                        siblings[it - siblings.begin() - 1].get());
                 }
             }
             else
@@ -324,7 +344,7 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
                 else
                 {
                     this->focusSplitRecursive(
-                        siblings[it - siblings.begin() + 1].get(), direction);
+                        siblings[it - siblings.begin() + 1].get());
                 }
             }
         }
@@ -335,7 +355,7 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
     }
 }
 
-void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
+void SplitContainer::focusSplitRecursive(Node *node)
 {
     switch (node->type_)
     {
@@ -355,12 +375,11 @@ void SplitContainer::focusSplitRecursive(Node *node, Direction direction)
 
             if (it != children.end())
             {
-                this->focusSplitRecursive(it->get(), direction);
+                this->focusSplitRecursive(it->get());
             }
             else
             {
-                this->focusSplitRecursive(node->children_.front().get(),
-                                          direction);
+                this->focusSplitRecursive(node->children_.front().get());
             }
         }
         break;

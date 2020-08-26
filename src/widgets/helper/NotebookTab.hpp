@@ -51,6 +51,9 @@ public:
     QRect getDesiredRect() const;
     void hideTabXChanged();
 
+    void growWidth(int width);
+    int normalTabWidth();
+
 protected:
     virtual void themeChangedEvent() override;
 
@@ -97,6 +100,8 @@ private:
     QAction *highlightNewMessagesAction_;
 
     bool isLive_{};
+
+    int growWidth_ = 0;
 
     QMenu menu_;
 

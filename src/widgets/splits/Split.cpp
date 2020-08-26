@@ -210,14 +210,17 @@ Split::Split(QWidget *parent)
         [this] { this->focusLost.invoke(); });
     this->input_->ui_.textEdit->imagePasted.connect(
         [this](const QMimeData *source) {
+            if (!getSettings()->imageUploaderEnabled)
+                return;
+
             if (getSettings()->askOnImageUpload.getValue())
             {
                 QMessageBox msgBox;
                 msgBox.setText("Image upload");
                 msgBox.setInformativeText(
-                    "You are uploading an image to an external server. You may "
-                    "not be able to remove the image from the site. Are you "
-                    "okay with this?");
+                    "You are uploading an image to a 3rd party service not in "
+                    "control of the chatterino team. You may not be able to "
+                    "remove the image from the site. Are you okay with this?");
                 msgBox.addButton(QMessageBox::Cancel);
                 msgBox.addButton(QMessageBox::Yes);
                 msgBox.addButton("Yes, don't ask again", QMessageBox::YesRole);
@@ -236,7 +239,10 @@ Split::Split(QWidget *parent)
             }
             upload(source, this->getChannel(), *this->input_->ui_.textEdit);
         });
-    setAcceptDrops(true);
+
+    getSettings()->imageUploaderEnabled.connect(
+        [this](const bool &val) { this->setAcceptDrops(val); },
+        this->managedConnections_);
 }
 
 Split::~Split()
@@ -544,6 +550,13 @@ void Split::openInBrowser()
     }
 }
 
+void Split::openWhispersInBrowser()
+{
+    auto userName = getApp()->accounts->twitch.getCurrent()->getUserName();
+    QDesktopServices::openUrl("https://twitch.tv/popout/moderator/" + userName +
+                              "/whispers");
+}
+
 void Split::openBrowserPlayer()
 {
     ChannelPtr channel = this->getChannel();
@@ -569,11 +582,12 @@ void Split::openInStreamlink()
 
 void Split::openWithCustomScheme()
 {
-    const auto scheme = getSettings()->customURIScheme.getValue();
+    QString scheme = getSettings()->customURIScheme.getValue();
     if (scheme.isEmpty())
     {
         return;
     }
+
     const auto channel = this->getChannel().get();
 
     if (const auto twitchChannel = dynamic_cast<TwitchChannel *>(channel))
@@ -739,6 +753,7 @@ void Split::showSearch()
     SearchPopup *popup = new SearchPopup();
 
     popup->setChannelFilters(this->view_->getFilterSet());
+    popup->setAttribute(Qt::WA_DeleteOnClose);
     popup->setChannel(this->getChannel());
     popup->show();
 }
@@ -757,7 +772,8 @@ void Split::reloadChannelAndSubscriberEmotes()
 
 void Split::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+    if (getSettings()->imageUploaderEnabled &&
+        (event->mimeData()->hasImage() || event->mimeData()->hasUrls()))
     {
         event->acceptProposedAction();
     }
@@ -769,7 +785,8 @@ void Split::dragEnterEvent(QDragEnterEvent *event)
 
 void Split::dropEvent(QDropEvent *event)
 {
-    if (event->mimeData()->hasImage() || event->mimeData()->hasUrls())
+    if (getSettings()->imageUploaderEnabled &&
+        (event->mimeData()->hasImage() || event->mimeData()->hasUrls()))
     {
         this->input_->ui_.textEdit->imagePasted.invoke(event->mimeData());
     }

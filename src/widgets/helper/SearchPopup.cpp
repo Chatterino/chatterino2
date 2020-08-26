@@ -10,6 +10,7 @@
 #include "messages/search/AuthorPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {
@@ -55,6 +56,11 @@ SearchPopup::SearchPopup()
 {
     this->initLayout();
     this->resize(400, 600);
+
+    createShortcut(this, "CTRL+F", [this] {
+        this->searchInput_->setFocus();
+        this->searchInput_->selectAll();
+    });
 }
 
 void SearchPopup::setChannelFilters(FilterSet *filters)

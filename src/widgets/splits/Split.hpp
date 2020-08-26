@@ -130,6 +130,7 @@ public slots:
     void popup();
     void clear();
     void openInBrowser();
+    void openWhispersInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
     void openWithCustomScheme();

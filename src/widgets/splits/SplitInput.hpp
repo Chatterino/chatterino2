@@ -16,6 +16,7 @@ namespace chatterino {
 
 class Split;
 class EmotePopup;
+class EmoteInputPopup;
 class EffectLabel;
 class ResizingTextEdit;
 
@@ -44,11 +45,17 @@ protected:
 private:
     void initLayout();
     void installKeyPressedEvent();
+    void onCursorPositionChanged();
     void updateEmoteButton();
+    void updateColonMenu();
+    void showColonMenu(const QString &text);
+    void hideColonMenu();
+    void insertColonText(const QString &text);
     void openEmotePopup();
 
     Split *const split_;
     QObjectRef<EmotePopup> emotePopup_;
+    QObjectRef<EmoteInputPopup> emoteInputPopup_;
 
     struct {
         ResizingTextEdit *textEdit;

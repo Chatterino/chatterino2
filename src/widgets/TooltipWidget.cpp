@@ -21,7 +21,7 @@ TooltipWidget *TooltipWidget::instance()
 }
 
 TooltipWidget::TooltipWidget(BaseWidget *parent)
-    : BaseWindow(BaseWindow::TopMost, parent)
+    : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus}, parent)
     , displayImage_(new QLabel())
     , displayText_(new QLabel())
 {
@@ -30,11 +30,6 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     //this->setWindowOpacity(0.8);
     this->updateFont();
     this->setStayInScreenRect(true);
-
-    this->setAttribute(Qt::WA_ShowWithoutActivating);
-    this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
-                         Qt::X11BypassWindowManagerHint |
-                         Qt::BypassWindowManagerHint);
 
     displayImage_->hide();
     displayImage_->setAlignment(Qt::AlignHCenter);

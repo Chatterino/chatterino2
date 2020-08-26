@@ -27,6 +27,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
+#include "util/RapidjsonHelpers.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/splits/Split.hpp"
@@ -283,6 +284,25 @@ void Application::initPubsub()
             postToThread([chan, msg] { chan->addMessage(msg); });
             chan->deleteMessage(msg->id);
         });
+
+    this->twitch.pubsub->signals_.pointReward.redeemed.connect([&](auto &data) {
+        QString channelId;
+        if (rj::getSafe(data, "channel_id", channelId))
+        {
+            auto chan = this->twitch.server->getChannelOrEmptyByID(channelId);
+
+            auto reward = ChannelPointReward(data);
+
+            postToThread([chan, reward] {
+                auto channel = dynamic_cast<TwitchChannel *>(chan.get());
+                channel->addChannelPointReward(reward);
+            });
+        }
+        else
+        {
+            qDebug() << "Couldn't find channel id of point reward";
+        }
+    });
 
     this->twitch.pubsub->start();
 

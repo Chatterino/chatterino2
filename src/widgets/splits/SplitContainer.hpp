@@ -177,10 +177,12 @@ public:
     void insertSplit(Split *split, Direction direction, Split *relativeTo);
     void insertSplit(Split *split, Direction direction,
                      Node *relativeTo = nullptr);
+    Split *getSelectedSplit() const;
     Position releaseSplit(Split *split);
     Position deleteSplit(Split *split);
 
     void selectNextSplit(Direction direction);
+    void setSelected(Split *selected_);
 
     void decodeFromJson(QJsonObject &obj);
 
@@ -215,9 +217,8 @@ protected:
 
 private:
     void layout();
-    void setSelected(Split *selected_);
     void selectSplitRecursive(Node *node, Direction direction);
-    void focusSplitRecursive(Node *node, Direction direction);
+    void focusSplitRecursive(Node *node);
     void setPreferedTargetRecursive(Node *node);
 
     void addSplit(Split *split);
@@ -246,7 +247,7 @@ private:
     QPoint mouseOverPoint_;
 
     Node baseNode_;
-    Split *selected_;
+    Split *selected_{};
     Split *topRight_{};
 
     NotebookTab *tab_;
