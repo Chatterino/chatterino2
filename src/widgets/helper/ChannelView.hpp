@@ -191,7 +191,7 @@ private:
 
     FilterSet *channelFilters_ = nullptr;
 
-    // Returns true if message should be hidden
+    // Returns true if message should be included
     bool shouldIncludeMessage(const MessagePtr &m) const;
 
     // This variable can be used to decide whether or not we should render the
