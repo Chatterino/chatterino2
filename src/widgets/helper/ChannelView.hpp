@@ -183,6 +183,7 @@ private:
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
     ChannelPtr channel_;
+    ChannelPtr underlyingChannel_;
     ChannelPtr sourceChannel_;
 
     Scrollbar *scrollBar_;
@@ -191,7 +192,7 @@ private:
     FilterSet *channelFilters_ = nullptr;
 
     // Returns true if message should be hidden
-    bool filterMessage(const MessagePtr &m) const;
+    bool shouldIncludeMessage(const MessagePtr &m) const;
 
     // This variable can be used to decide whether or not we should render the
     // "Show latest messages" button

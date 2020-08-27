@@ -58,9 +58,6 @@ const Message *MessageLayout::getMessage()
 // Height
 int MessageLayout::getHeight() const
 {
-    if (this->flags.has(MessageLayoutFlag::Hidden))
-        return 0;
-
     return container_->getHeight();
 }
 
@@ -118,10 +115,6 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 {
     this->layoutCount_++;
-
-    if (this->flags.has(MessageLayoutFlag::Hidden))
-        return;
-
     auto messageFlags = this->message_->flags;
 
     if (this->flags.has(MessageLayoutFlag::Expanded) ||
@@ -177,9 +170,6 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                           Selection &selection, bool isLastReadMessage,
                           bool isWindowFocused, bool isMentions)
 {
-    if (this->flags.has(MessageLayoutFlag::Hidden))
-        return;
-
     auto app = getApp();
     QPixmap *pixmap = this->buffer_.get();
 

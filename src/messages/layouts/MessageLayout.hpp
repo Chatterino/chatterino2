@@ -27,7 +27,6 @@ enum class MessageLayoutFlag : uint8_t {
     Collapsed = 1 << 4,
     Expanded = 1 << 5,
     IgnoreHighlights = 1 << 6,
-    Hidden = 1 << 7,
 };
 using MessageLayoutFlags = FlagsEnum<MessageLayoutFlag>;
 

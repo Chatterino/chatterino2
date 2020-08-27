@@ -111,6 +111,7 @@ namespace {
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
     , sourceChannel_(nullptr)
+    , underlyingChannel_(nullptr)
     , scrollBar_(new Scrollbar(this))
 {
     this->setMouseTracking(true);
@@ -556,7 +557,7 @@ ChannelPtr ChannelView::channel()
     return this->channel_;
 }
 
-void ChannelView::setChannel(ChannelPtr channel)
+void ChannelView::setChannel(ChannelPtr underlyingChannel)
 {
     /// Clear connections from the last channel
     this->channelConnections_.clear();
@@ -564,31 +565,75 @@ void ChannelView::setChannel(ChannelPtr channel)
     this->clearMessages();
     this->scrollBar_->clearHighlights();
 
+    /// make copy of channel and expose
+    this->channel_ = std::make_unique<Channel>(underlyingChannel->getName(),
+                                               underlyingChannel->getType());
+
+    //
+    // Proxy channel connections
+    // Use a proxy channel to keep filtered messages past the time they are removed from their origin channel
+    //
+
+    this->channelConnections_.push_back(
+        underlyingChannel->messageAppended.connect(
+            [this](MessagePtr &message,
+                   boost::optional<MessageFlags> overridingFlags) {
+                if (this->shouldIncludeMessage(message))
+                    this->channel_->addMessage(message, overridingFlags);
+            }));
+
+    this->channelConnections_.push_back(
+        underlyingChannel->messagesAddedAtStart.connect(
+            [this](std::vector<MessagePtr> &messages) {
+                std::vector<MessagePtr> filtered;
+                std::copy_if(  //
+                    messages.begin(), messages.end(),
+                    std::back_inserter(filtered), [this](MessagePtr msg) {
+                        return this->shouldIncludeMessage(msg);
+                    });
+
+                if (filtered.size() > 0)
+                    this->channel_->addMessagesAtStart(filtered);
+            }));
+
+    this->channelConnections_.push_back(
+        underlyingChannel->messageReplaced.connect(
+            [this](size_t index, MessagePtr replacement) {
+                if (this->shouldIncludeMessage(replacement))
+                    this->channel_->replaceMessage(index, replacement);
+            }));
+
+    //
+    // Standard channel connections
+    //
+
     // on new message
-    this->channelConnections_.push_back(channel->messageAppended.connect(
+    this->channelConnections_.push_back(this->channel_->messageAppended.connect(
         [this](MessagePtr &message,
                boost::optional<MessageFlags> overridingFlags) {
             this->messageAppended(message, overridingFlags);
         }));
 
-    this->channelConnections_.push_back(channel->messagesAddedAtStart.connect(
-        [this](std::vector<MessagePtr> &messages) {
-            this->messageAddedAtStart(messages);
-        }));
+    this->channelConnections_.push_back(
+        this->channel_->messagesAddedAtStart.connect(
+            [this](std::vector<MessagePtr> &messages) {
+                this->messageAddedAtStart(messages);
+            }));
 
     // on message removed
     this->channelConnections_.push_back(
-        channel->messageRemovedFromStart.connect([this](MessagePtr &message) {
-            this->messageRemoveFromStart(message);
-        }));
+        this->channel_->messageRemovedFromStart.connect(
+            [this](MessagePtr &message) {
+                this->messageRemoveFromStart(message);
+            }));
 
     // on message replaced
-    this->channelConnections_.push_back(channel->messageReplaced.connect(
+    this->channelConnections_.push_back(this->channel_->messageReplaced.connect(
         [this](size_t index, MessagePtr replacement) {
             this->messageReplaced(index, replacement);
         }));
 
-    auto snapshot = channel->getMessageSnapshot();
+    auto snapshot = underlyingChannel->getMessageSnapshot();
 
     for (size_t i = 0; i < snapshot.size(); i++)
     {
@@ -603,7 +648,7 @@ void ChannelView::setChannel(ChannelPtr channel)
         this->lastMessageHasAlternateBackground_ =
             !this->lastMessageHasAlternateBackground_;
 
-        if (channel->shouldIgnoreHighlights())
+        if (underlyingChannel->shouldIgnoreHighlights())
         {
             messageLayout->flags.set(MessageLayoutFlag::IgnoreHighlights);
         }
@@ -612,13 +657,13 @@ void ChannelView::setChannel(ChannelPtr channel)
         this->scrollBar_->addHighlight(snapshot[i]->getScrollBarHighlight());
     }
 
-    this->channel_ = channel;
+    this->underlyingChannel_ = underlyingChannel;
 
     this->queueLayout();
     this->queueUpdate();
 
     // Notifications
-    if (auto tc = dynamic_cast<TwitchChannel *>(channel.get()))
+    if (auto tc = dynamic_cast<TwitchChannel *>(underlyingChannel.get()))
     {
         this->connections_.push_back(tc->liveStatusChanged.connect([this]() {
             this->liveStatusChanged.invoke();  //
@@ -646,19 +691,19 @@ FilterSet *ChannelView::getFilterSet() const
     return this->channelFilters_;
 }
 
-bool ChannelView::filterMessage(const MessagePtr &m) const
+bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
 {
     if (this->channelFilters_ != nullptr)
     {
         if (getSettings()->excludeUserMessagesFromFilter &&
             getApp()->accounts->twitch.getCurrent()->getUserName().compare(
                 m->loginName, Qt::CaseInsensitive) == 0)
-            return false;
+            return true;
 
-        return !this->channelFilters_->filter(m);
+        return this->channelFilters_->filter(m);
     }
 
-    return false;
+    return true;
 }
 
 ChannelPtr ChannelView::sourceChannel() const
@@ -689,23 +734,16 @@ void ChannelView::messageAppended(MessagePtr &message,
 
     auto messageRef = new MessageLayout(message);
 
-    if (this->filterMessage(message))
+    if (this->lastMessageHasAlternateBackground_)
     {
-        messageRef->flags.set(MessageLayoutFlag::Hidden);
+        messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
     }
-    else
+    if (this->channel_->shouldIgnoreHighlights())
     {
-        if (this->lastMessageHasAlternateBackground_)
-        {
-            messageRef->flags.set(MessageLayoutFlag::AlternateBackground);
-        }
-        if (this->channel_->shouldIgnoreHighlights())
-        {
-            messageRef->flags.set(MessageLayoutFlag::IgnoreHighlights);
-        }
-        this->lastMessageHasAlternateBackground_ =
-            !this->lastMessageHasAlternateBackground_;
+        messageRef->flags.set(MessageLayoutFlag::IgnoreHighlights);
     }
+    this->lastMessageHasAlternateBackground_ =
+        !this->lastMessageHasAlternateBackground_;
 
     if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
     {
@@ -756,18 +794,11 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
         auto message = messages.at(i);
         auto layout = new MessageLayout(message);
 
-        if (this->filterMessage(message))
-        {
-            layout->flags.set(MessageLayoutFlag::Hidden);
-        }
-        else
-        {
-            // alternate color
-            if (!this->lastMessageHasAlternateBackgroundReverse_)
-                layout->flags.set(MessageLayoutFlag::AlternateBackground);
-            this->lastMessageHasAlternateBackgroundReverse_ =
-                !this->lastMessageHasAlternateBackgroundReverse_;
-        }
+        // alternate color
+        if (!this->lastMessageHasAlternateBackgroundReverse_)
+            layout->flags.set(MessageLayoutFlag::AlternateBackground);
+        this->lastMessageHasAlternateBackgroundReverse_ =
+            !this->lastMessageHasAlternateBackgroundReverse_;
 
         messageRefs.at(i) = MessageLayoutPtr(layout);
     }
@@ -825,11 +856,6 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
         qDebug() << "Tried to replace out of bounds message. Index:" << index
                  << ". Length:" << snapshot.size();
         return;
-    }
-
-    if (this->filterMessage(replacement))
-    {
-        newItem->flags.set(MessageLayoutFlag::Hidden);
     }
 
     const auto &message = snapshot[index];
@@ -908,7 +934,7 @@ MessageElementFlags ChannelView::getFlags() const
         {
             flags.set(MessageElementFlag::ModeratorTools);
         }
-        if (this->channel_ == app->twitch.server->mentionsChannel)
+        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
@@ -959,7 +985,8 @@ void ChannelView::drawMessages(QPainter &painter)
     bool windowFocused = this->window() == QApplication::activeWindow();
 
     auto app = getApp();
-    bool isMentions = this->channel_ == app->twitch.server->mentionsChannel;
+    bool isMentions =
+        this->underlyingChannel_ == app->twitch.server->mentionsChannel;
 
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
