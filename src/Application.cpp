@@ -294,8 +294,10 @@ void Application::initPubsub()
             auto reward = ChannelPointReward(data);
 
             postToThread([chan, reward] {
-                auto channel = dynamic_cast<TwitchChannel *>(chan.get());
-                channel->addChannelPointReward(reward);
+                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->addChannelPointReward(reward);
+                }
             });
         }
         else
