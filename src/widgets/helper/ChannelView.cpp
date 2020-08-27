@@ -557,6 +557,11 @@ ChannelPtr ChannelView::channel()
     return this->channel_;
 }
 
+bool ChannelView::showScrollbackHighlights() const
+{
+    return this->channel_->getType() != Channel::Type::TwitchMentions;
+}
+
 void ChannelView::setChannel(ChannelPtr underlyingChannel)
 {
     /// Clear connections from the last channel
@@ -654,7 +659,11 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
         }
 
         this->messages_.pushBack(MessageLayoutPtr(messageLayout), deleted);
-        this->scrollBar_->addHighlight(snapshot[i]->getScrollBarHighlight());
+        if (this->showScrollbackHighlights())
+        {
+            this->scrollBar_->addHighlight(
+                snapshot[i]->getScrollBarHighlight());
+        }
     }
 
     this->underlyingChannel_ = underlyingChannel;
@@ -774,7 +783,7 @@ void ChannelView::messageAppended(MessagePtr &message,
         }
     }
 
-    if (this->channel_->getType() != Channel::Type::TwitchMentions)
+    if (this->showScrollbackHighlights())
     {
         this->scrollBar_->addHighlight(message->getScrollBarHighlight());
     }
@@ -812,14 +821,17 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
             this->scrollBar_->offset(qreal(messages.size()));
     }
 
-    std::vector<ScrollbarHighlight> highlights;
-    highlights.reserve(messages.size());
-    for (size_t i = 0; i < messages.size(); i++)
+    if (this->showScrollbackHighlights())
     {
-        highlights.push_back(messages.at(i)->getScrollBarHighlight());
-    }
+        std::vector<ScrollbarHighlight> highlights;
+        highlights.reserve(messages.size());
+        for (size_t i = 0; i < messages.size(); i++)
+        {
+            highlights.push_back(messages.at(i)->getScrollBarHighlight());
+        }
 
-    this->scrollBar_->addHighlightsAtStart(highlights);
+        this->scrollBar_->addHighlightsAtStart(highlights);
+    }
 
     this->messageWasAdded_ = true;
     this->queueLayout();
