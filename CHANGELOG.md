@@ -4,6 +4,7 @@
 
 - Minor: Disable checking for updates on unsupported platforms (#1874)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
+- Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
 
 ## 2.2.0
 
