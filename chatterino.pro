@@ -82,7 +82,9 @@ include(lib/settings.pri)
 include(lib/serialize.pri)
 include(lib/winsdk.pri)
 include(lib/rapidjson.pri)
+!freebsd {
 include(lib/qtkeychain.pri)
+}
 
 exists( $$OUT_PWD/conanbuildinfo.pri ) {
     message("Using conan packages")
