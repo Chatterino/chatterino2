@@ -33,7 +33,7 @@ win32-msvc* {
 
     QMAKE_CXXFLAGS_WARN_ON += -Werror=return-type
 
-    CXX_VERSION = $$system($QMAKE_CXX --version)
+    CXX_VERSION = $$system($$QMAKE_CXX --version)
     contains(CXX_VERSION, "clang") {
         QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-local-typedef
         QMAKE_CXXFLAGS_WARN_ON += -Wno-unused-private-field
