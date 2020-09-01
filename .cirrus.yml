@@ -1,0 +1,13 @@
+freebsd_instance:
+  image: freebsd-12-1-release-amd64
+
+task:
+  install_script:
+  - pkg install -y boost-libs git qt5-buildtools qt5-concurrent qt5-core qt5-multimedia qt5-qmake qt5-svg qtkeychain rapidjson
+  script: |
+    git submodule init
+    git submodule update
+    mkdir build
+    cd build
+    qmake INCLUDEPATH+=/usr/local/include/qt5keychain LIBS+=-lqt5keychain RAPIDJSON_SYSTEM=1 QMAKE_CC="cc" QMAKE_CXX="c++"  QMAKE_LINK_C="cc" QMAKE_LINK_C_SHLIB="cc"  QMAKE_LINK="c++" QMAKE_LINK_SHLIB="c++"  QMAKE_CFLAGS="-O2 -pipe  -fstack-protector-strong -fno-strict-aliasing "  QMAKE_CXXFLAGS="-O2 -pipe -fstack-protector-strong -fno-strict-aliasing  "  QMAKE_LFLAGS="-fstack-protector-strong"  QMAKE_LIBS=""  QMAKE_CFLAGS_DEBUG=""  QMAKE_CFLAGS_RELEASE=""  QMAKE_CXXFLAGS_DEBUG=""  QMAKE_CXXFLAGS_RELEASE=""  PREFIX="/usr/local" CONFIG+="release"  CONFIG-="debug separate_debug_info" -recursive ..
+    make -j $(getconf _NPROCESSORS_ONLN)
