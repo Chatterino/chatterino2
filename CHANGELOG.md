@@ -6,6 +6,7 @@
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
 - Bugfix: Handle symlinks properly when saving commands & settings (#1856, #1908)
+- Bugfix: Starting Chatterino in a minimized state after an update will no longer cause a crash
 
 ## 2.2.0
 
