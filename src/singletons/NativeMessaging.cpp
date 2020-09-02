@@ -178,7 +178,6 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
     const QJsonObject &root)
 {
     auto app = getApp();
-    qDebug() << "Message Received: Size: " << root.size();
     QString action = root.value("action").toString();
 
     if (action.isNull())
