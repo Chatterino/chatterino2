@@ -178,7 +178,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
     const QJsonObject &root)
 {
     auto app = getApp();
-
+    qDebug() << "Message Received: Size: " << root.size();
     QString action = root.value("action").toString();
 
     if (action.isNull())
@@ -198,12 +198,15 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         AttachedWindow::GetArgs args;
         args.winId = root.value("winId").toString();
         args.yOffset = root.value("yOffset").toInt(-1);
-        args.x = root.value("size").toObject().value("x").toInt(-1);
+        args.x = root.value("size").toObject().value("x").toDouble(-1.0);
+        args.pixelRatio =
+            root.value("size").toObject().value("pixelRatio").toDouble(-1.0);
         args.width = root.value("size").toObject().value("width").toInt(-1);
         args.height = root.value("size").toObject().value("height").toInt(-1);
         args.fullscreen = attachFullscreen;
 
-        qDebug() << args.x << args.width << args.height << args.winId;
+        qDebug() << args.x << args.pixelRatio << args.width << args.height
+                 << args.winId;
 
         if (_type.isNull() || args.winId.isNull())
         {
