@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QCommandLineParser>
 #include <QDebug>
 #include <QMessageBox>
 #include <QStringList>
@@ -25,14 +26,11 @@ int main(int argc, char **argv)
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("https://www.chatterino.com");
 
-    // convert char** to QStringList
-    auto args = QStringList();
-    std::transform(argv + 1, argv + argc, std::back_inserter(args),
-                   [&](auto s) { return s; });
-    initArgs(args);
-
+    initArgs(a);
+    qDebug() << getArgs().channelsToJoin.isEmpty();
+    //return 0;
     // run in gui mode or browser extension host mode
-    if (shouldRunBrowserExtensionHost(args))
+    if (false)
     {
         runBrowserExtensionHost();
     }

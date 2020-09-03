@@ -12,6 +12,7 @@
 #include <chrono>
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
@@ -361,6 +362,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
         // load tabs
         QJsonArray tabs = window_obj.value("tabs").toArray();
+        if (getArgs().joinArgumentChannels)
+        {
+            tabs = getArgs().channelsToJoin;
+        }
         for (QJsonValue tab_val : tabs)
         {
             SplitContainer *page = window.getNotebook().addPage(false);
@@ -454,6 +459,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
 void WindowManager::save()
 {
+    if (getArgs().joinArgumentChannels)
+    {
+        return;
+    }
     qDebug() << "[WindowManager] Saving";
     assertInGuiThread();
     QJsonDocument document;
@@ -582,7 +591,8 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
 {
     switch (node->getType())
     {
-        case SplitNode::_Split: {
+        case SplitNode::_Split:
+        {
             obj.insert("type", "split");
             obj.insert("moderationMode", node->getSplit()->getModerationMode());
             QJsonObject split;
@@ -593,7 +603,8 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
         }
         break;
         case SplitNode::HorizontalContainer:
-        case SplitNode::VerticalContainer: {
+        case SplitNode::VerticalContainer:
+        {
             obj.insert("type", node->getType() == SplitNode::HorizontalContainer
                                    ? "horizontal"
                                    : "vertical");
@@ -617,24 +628,29 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
 
     switch (channel.getType())
     {
-        case Channel::Type::Twitch: {
+        case Channel::Type::Twitch:
+        {
             obj.insert("type", "twitch");
             obj.insert("name", channel.get()->getName());
         }
         break;
-        case Channel::Type::TwitchMentions: {
+        case Channel::Type::TwitchMentions:
+        {
             obj.insert("type", "mentions");
         }
         break;
-        case Channel::Type::TwitchWatching: {
+        case Channel::Type::TwitchWatching:
+        {
             obj.insert("type", "watching");
         }
         break;
-        case Channel::Type::TwitchWhispers: {
+        case Channel::Type::TwitchWhispers:
+        {
             obj.insert("type", "whispers");
         }
         break;
-        case Channel::Type::Irc: {
+        case Channel::Type::Irc:
+        {
             if (auto ircChannel =
                     dynamic_cast<IrcChannel *>(channel.get().get()))
             {
