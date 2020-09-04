@@ -27,10 +27,9 @@ int main(int argc, char **argv)
     QCoreApplication::setOrganizationDomain("https://www.chatterino.com");
 
     initArgs(a);
-    qDebug() << getArgs().channelsToJoin.isEmpty();
-    //return 0;
+
     // run in gui mode or browser extension host mode
-    if (false)
+    if (getArgs().shouldRunBrowserExtensionHost)
     {
         runBrowserExtensionHost();
     }

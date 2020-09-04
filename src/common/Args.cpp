@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QDebug>
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -30,6 +31,11 @@ Args::Args(const QApplication &app)
     parser.addOption(crashRecoveryOption);
     parser.addOption(channelsOption);
     parser.process(app);
+
+    const QStringList args = parser.positionalArguments();
+    this->shouldRunBrowserExtensionHost =
+        (args.size() > 0 && (args[0].startsWith("chrome-extension://") ||
+                             args[0].endsWith(".json")));
 
     if (parser.isSet(channelsOption))
     {
