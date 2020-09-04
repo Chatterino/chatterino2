@@ -2,8 +2,8 @@
 
 ## Unversioned
 
-- Bugfix: Fixed bug misplacing chat when zooming on Chrome with Chatterino Native Host extension (#1936)
 - Minor: Disable checking for updates on unsupported platforms (#1874)
+- Bugfix: Fixed bug misplacing chat when zooming on Chrome with Chatterino Native Host extension (#1936)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
 - Bugfix: Handle symlinks properly when saving commands & settings (#1856, #1908)
