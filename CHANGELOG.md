@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940)
 - Minor: Disable checking for updates on unsupported platforms (#1874)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)

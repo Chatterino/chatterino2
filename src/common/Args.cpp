@@ -16,20 +16,14 @@ Args::Args(const QApplication &app)
     parser.setApplicationDescription("Chatterino 2 Client for Twitch Chat");
     parser.addHelpOption();
     //parser.addVersionOption();
-    QCommandLineOption versionOption(QStringList() << "v"
-                                                   << "version",
-                                     "Displays version information.");
-    QCommandLineOption crashRecoveryOption(
-        "crash-recovery",
-        "Used internally by app itself to restart after unexpected crashes.");
-    QCommandLineOption channelsOption(
-        QStringList() << "c"
-                      << "channels",
-        "Tells which channels to join on startup.", "channel1,channel2,...");
-
-    parser.addOption(versionOption);
-    parser.addOption(crashRecoveryOption);
-    parser.addOption(channelsOption);
+    parser.addOptions({
+        {{"v", "version"}, "Displays version information."},
+        {"crash-recovery",
+         "Used internally by app to restart after unexpected crashes."},
+    });
+    parser.addOption(QCommandLineOption(
+        {"c", "channels"}, "Join only supplied channels on startup.",
+        "channel1,channel2,..."));
     parser.process(app);
 
     const QStringList args = parser.positionalArguments();
@@ -37,28 +31,26 @@ Args::Args(const QApplication &app)
         (args.size() > 0 && (args[0].startsWith("chrome-extension://") ||
                              args[0].endsWith(".json")));
 
-    if (parser.isSet(channelsOption))
+    if (parser.isSet("c"))
     {
-        QStringList channelList = parser.value(channelsOption).split(",");
+        QStringList channelList = parser.value("c").split(",");
         QJsonArray channelArray;
         for (QString channel : channelList)
         {
+            // TODO: maybe this can be improved to not use strings?
             QString channelObjectString =
                 "{\"splits2\": { \"data\": { \"name\": \"" + channel +
-                "\", \"type\": "
-                "\"twitch\" }, \"type\": \"split\" }}";
-            QJsonObject channelObject;
-            QJsonDocument doc =
-                QJsonDocument::fromJson(channelObjectString.toUtf8());
-            channelObject = doc.object();
-            channelArray.push_back(channelObject);
+                "\", \"type\": \"twitch\" }, \"type\": \"split\" }}";
+            channelArray.push_back(
+                QJsonDocument::fromJson(channelObjectString.toUtf8()).object());
         };
         this->joinArgumentChannels = true;
+        qDebug() << channelArray;
         this->channelsToJoin = channelArray;
     }
 
-    this->printVersion = parser.isSet(versionOption);
-    this->crashRecovery = parser.isSet(crashRecoveryOption);
+    this->printVersion = parser.isSet("v");
+    this->crashRecovery = parser.isSet("crash-recovery");
 }
 
 static Args *instance = nullptr;
