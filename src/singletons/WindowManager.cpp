@@ -591,8 +591,7 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
 {
     switch (node->getType())
     {
-        case SplitNode::_Split:
-        {
+        case SplitNode::_Split: {
             obj.insert("type", "split");
             obj.insert("moderationMode", node->getSplit()->getModerationMode());
             QJsonObject split;
@@ -603,8 +602,7 @@ void WindowManager::encodeNodeRecusively(SplitNode *node, QJsonObject &obj)
         }
         break;
         case SplitNode::HorizontalContainer:
-        case SplitNode::VerticalContainer:
-        {
+        case SplitNode::VerticalContainer: {
             obj.insert("type", node->getType() == SplitNode::HorizontalContainer
                                    ? "horizontal"
                                    : "vertical");
@@ -628,29 +626,24 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
 
     switch (channel.getType())
     {
-        case Channel::Type::Twitch:
-        {
+        case Channel::Type::Twitch: {
             obj.insert("type", "twitch");
             obj.insert("name", channel.get()->getName());
         }
         break;
-        case Channel::Type::TwitchMentions:
-        {
+        case Channel::Type::TwitchMentions: {
             obj.insert("type", "mentions");
         }
         break;
-        case Channel::Type::TwitchWatching:
-        {
+        case Channel::Type::TwitchWatching: {
             obj.insert("type", "watching");
         }
         break;
-        case Channel::Type::TwitchWhispers:
-        {
+        case Channel::Type::TwitchWhispers: {
             obj.insert("type", "whispers");
         }
         break;
-        case Channel::Type::Irc:
-        {
+        case Channel::Type::Irc: {
             if (auto ircChannel =
                     dynamic_cast<IrcChannel *>(channel.get().get()))
             {
