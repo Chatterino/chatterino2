@@ -22,6 +22,14 @@ static const QStringList validIdentifiers = {
     "message.length"          // Int
 };
 
+static const QStringList friendlyValidIdentifiers = {
+    "author badges",        "author color",       "author name",
+    "author has no color?", "author subscribed?", "author sub length",
+    "channel name",         "/watching channel?", "highlighted?",
+    "redeemed points?",     "sub/resub message?", "whisper message?",
+    "message text",         "message length",
+};
+
 // clang-format off
 static const QRegularExpression tokenRegex(
     QString("\\\"((\\\\\")|[^\\\"])*\\\"|") +                 // String literal
