@@ -59,6 +59,10 @@ QString tokenTypeToInfoString(TokenType type)
             return "<greater than equal>";
         case CONTAINS:
             return "<contains>";
+        case STARTS_WITH:
+            return "<starts with>";
+        case ENDS_WITH:
+            return "<ends with>";
         case NOT:
             return "<not>";
         case STRING:
@@ -216,6 +220,43 @@ QVariant BinaryOperation::execute(const ContextMap &context)
             }
 
             return false;
+        case STARTS_WITH:
+            if (left.type() == QVariant::Type::StringList &&
+                right.canConvert(QMetaType::QString))
+            {
+                auto list = left.toStringList();
+                return !list.isEmpty() &&
+                       list.first().compare(right.toString(),
+                                            Qt::CaseInsensitive);
+            }
+
+            if (left.canConvert(QMetaType::QString) &&
+                right.canConvert(QMetaType::QString))
+            {
+                return left.toString().startsWith(right.toString(),
+                                                  Qt::CaseInsensitive);
+            }
+
+            return false;
+
+        case ENDS_WITH:
+            if (left.type() == QVariant::Type::StringList &&
+                right.canConvert(QMetaType::QString))
+            {
+                auto list = left.toStringList();
+                return !list.isEmpty() &&
+                       list.last().compare(right.toString(),
+                                           Qt::CaseInsensitive);
+            }
+
+            if (left.canConvert(QMetaType::QString) &&
+                right.canConvert(QMetaType::QString))
+            {
+                return left.toString().endsWith(right.toString(),
+                                                Qt::CaseInsensitive);
+            }
+
+            return false;
         default:
             return false;
     }
@@ -274,6 +315,12 @@ QString BinaryOperation::filterString()
             break;
         case CONTAINS:
             opText = "contains";
+            break;
+        case STARTS_WITH:
+            opText = "startswith";
+            break;
+        case ENDS_WITH:
+            opText = "endswith";
             break;
         default:
             opText = "";

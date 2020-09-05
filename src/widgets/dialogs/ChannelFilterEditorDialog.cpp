@@ -3,6 +3,18 @@
 #include "controllers/filters/parser/FilterParser.hpp"
 
 namespace chatterino {
+
+namespace {
+    const QStringList friendlyBinaryOps = {
+        "and", "or",       "+",           "-",         "*",        "/",
+        "%",   "equals",   "not equals",  "<",         ">",        "<=",
+        ">=",  "contains", "starts with", "ends with", "(nothing)"};
+    const QStringList realBinaryOps = {
+        "&&", "||",       "+",          "-",        "*", "/",
+        "%",  "==",       "!=",         "<",        ">", "<=",
+        ">=", "contains", "startswith", "endswith", ""};
+}  // namespace
+
 ChannelFilterEditorDialog::ChannelFilterEditorDialog(QWidget *parent)
     : QDialog(parent)
 {
@@ -174,9 +186,7 @@ ChannelFilterEditorDialog::BinaryOperationSpecifier::BinaryOperationSpecifier(
     this->opCombo_ = new QComboBox;
     this->layout_ = new QVBoxLayout;
 
-    this->opCombo_->insertItems(
-        0, {"and", "or", "+", "-", "*", "/", "%", "equals", "not equals", "<",
-            ">", "<=", ">=", "contains", "(nothing)"});
+    this->opCombo_->insertItems(0, friendlyBinaryOps);
 
     this->layout_->addLayout(this->left_->layout());
     this->layout_->addWidget(this->opCombo_);
@@ -186,8 +196,8 @@ ChannelFilterEditorDialog::BinaryOperationSpecifier::BinaryOperationSpecifier(
     QObject::connect(  //
         this->opCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
         [this](int index) {
-            // enable if not set to "(nothing)"
-            this->right_->setEnabled(index != 14);
+            // disable if set to "(nothing)"
+            this->right_->setEnabled(realBinaryOps.at(index) != "");
         });
 }
 
@@ -212,56 +222,7 @@ QLayout *ChannelFilterEditorDialog::BinaryOperationSpecifier::layout() const
 
 QString ChannelFilterEditorDialog::BinaryOperationSpecifier::expressionText()
 {
-    QString opText;
-    switch (this->opCombo_->currentIndex())
-    {
-        case 0:
-            opText = "&&";
-            break;
-        case 1:
-            opText = "||";
-            break;
-        case 2:
-            opText = "+";
-            break;
-        case 3:
-            opText = "-";
-            break;
-        case 4:
-            opText = "*";
-            break;
-        case 5:
-            opText = "/";
-            break;
-        case 6:
-            opText = "%";
-            break;
-        case 7:
-            opText = "==";
-            break;
-        case 8:
-            opText = "!=";
-            break;
-        case 9:
-            opText = "<";
-            break;
-        case 10:
-            opText = ">";
-            break;
-        case 11:
-            opText = "<=";
-            break;
-        case 12:
-            opText = ">=";
-            break;
-        case 13:
-            opText = "contains";
-            break;
-        default:
-            opText = "";
-            break;
-    }
-
+    QString opText = realBinaryOps.at(this->opCombo_->currentIndex());
     if (opText == "")
     {
         return this->left_->expressionText();

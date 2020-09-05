@@ -127,6 +127,10 @@ TokenType Tokenizer::tokenize(const QString &text)
         return TokenType::GTE;
     else if (text == "contains")
         return TokenType::CONTAINS;
+    else if (text == "startswith")
+        return TokenType::STARTS_WITH;
+    else if (text == "endswith")
+        return TokenType::ENDS_WITH;
     else if (text == "!")
         return TokenType::NOT;
     else

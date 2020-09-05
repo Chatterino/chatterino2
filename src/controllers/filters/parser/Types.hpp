@@ -25,6 +25,8 @@ enum TokenType {
     LTE = 15,
     GTE = 16,
     CONTAINS = 17,
+    STARTS_WITH = 18,
+    ENDS_WITH = 19,
     BINARY_END = 49,
 
     // unary operator
