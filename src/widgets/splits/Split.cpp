@@ -741,6 +741,7 @@ void Split::setFiltersDialog()
 void Split::setFilters(const QList<QUuid> ids)
 {
     this->view_->setFilters(ids);
+    this->header_->updateChannelText();
 }
 
 const QList<QUuid> Split::getFilters() const
