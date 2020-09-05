@@ -54,6 +54,8 @@ The following operators are available:
 | `>` | Greater than |
 | `>=` | Greater than or equal to |
 | `contains` | String, List, or Map contains |
+| `startswith` | String or List starts with text or string, respectively |
+| `endswith` | String or List ends with text or string, respectively |
 | `+` | Add (or string concatenation) |
 | `-` | Subtract |
 | `*` | Multiply |
