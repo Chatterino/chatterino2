@@ -3,6 +3,7 @@
 #include <atomic>
 
 #include "common/Args.hpp"
+#include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
@@ -69,6 +70,23 @@ void Application::initialize(Settings &settings, Paths &paths)
 {
     assert(isAppInitialized == false);
     isAppInitialized = true;
+
+    // Show changelog
+    if (getSettings()->currentVersion.getValue() != "" &&
+        getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
+    {
+        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
+                                   "Show changelog?",
+                                   QMessageBox::Yes | QMessageBox::No);
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        if (box->exec() == QMessageBox::Yes)
+        {
+            QDesktopServices::openUrl(
+                QUrl("https://www.chatterino.com/changelog"));
+        }
+    }
+
+    getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
 
     if (getSettings()->enableExperimentalIrc)
     {
@@ -294,8 +312,10 @@ void Application::initPubsub()
             auto reward = ChannelPointReward(data);
 
             postToThread([chan, reward] {
-                auto channel = dynamic_cast<TwitchChannel *>(chan.get());
-                channel->addChannelPointReward(reward);
+                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->addChannelPointReward(reward);
+                }
             });
         }
         else

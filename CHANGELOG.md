@@ -2,8 +2,12 @@
 
 ## Unversioned
 
+- Minor: Disable checking for updates on unsupported platforms (#1874)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
+- Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
+- Bugfix: Handle symlinks properly when saving commands & settings (#1856, #1908)
+- Bugfix: Starting Chatterino in a minimized state after an update will no longer cause a crash
 
 ## 2.2.0
 
