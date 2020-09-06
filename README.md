@@ -1,5 +1,5 @@
 ![alt text](https://fourtf.com/img/chatterino-icon-64.png)
-Chatterino 2
+Chatterino 2 [![GitHub Actions Build (Windows, Ubuntu, MacOS)](https://github.com/Chatterino/chatterino2/workflows/Build/badge.svg?branch=master)](https://github.com/Chatterino/chatterino2/actions?query=workflow%3ABuild+branch%3Amaster) [![Cirrus CI Build (FreeBSD only)](https://api.cirrus-ci.com/github/Chatterino/chatterino2.svg?branch=master)](https://cirrus-ci.com/github/Chatterino/chatterino2/master)
 ============
 
 Chatterino 2 is the second installment of the Twitch chat client series "Chatterino".
