@@ -119,35 +119,6 @@ bool Window::event(QEvent *event)
     return BaseWindow::event(event);
 }
 
-void Window::showEvent(QShowEvent *event)
-{
-    // Startup notification
-    /*if (getSettings()->startUpNotification.getValue() < 1)
-    {
-        getSettings()->startUpNotification = 1;
-    }*/
-
-    // Show changelog
-    if (getSettings()->currentVersion.getValue() != "" &&
-        getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
-    {
-        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
-                                   "Show changelog?",
-                                   QMessageBox::Yes | QMessageBox::No);
-        box->setAttribute(Qt::WA_DeleteOnClose);
-        if (box->exec() == QMessageBox::Yes)
-        {
-            QDesktopServices::openUrl(
-                QUrl("https://www.chatterino.com/changelog"));
-        }
-    }
-
-    getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
-
-    // --
-    BaseWindow::showEvent(event);
-}
-
 void Window::closeEvent(QCloseEvent *)
 {
     if (this->type_ == WindowType::Main)
