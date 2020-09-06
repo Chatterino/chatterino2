@@ -16,10 +16,13 @@ Args::Args(const QApplication &app)
     parser.setApplicationDescription("Chatterino 2 Client for Twitch Chat");
     parser.addHelpOption();
     //parser.addVersionOption();
+    QCommandLineOption crashRecoveryOption(
+        "crash-recovery",
+        "Used internally by app to restart after unexpected crashes.");
+    crashRecoveryOption.setHidden(true);
     parser.addOptions({
         {{"v", "version"}, "Displays version information."},
-        {"crash-recovery",
-         "Used internally by app to restart after unexpected crashes."},
+        crashRecoveryOption,
     });
     parser.addOption(QCommandLineOption(
         {"c", "channels"}, "Join only supplied channels on startup.",
