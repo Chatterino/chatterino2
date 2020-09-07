@@ -9,6 +9,7 @@
 #include <csignal>
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "common/Modes.hpp"
 #include "common/NetworkManager.hpp"
 #include "singletons/Paths.hpp"
@@ -215,7 +216,10 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
 
     removeRunningFile(runningPath);
 
-    pajlada::Settings::SettingManager::gSave();
+    if (!getArgs().dontSaveSettings)
+    {
+        pajlada::Settings::SettingManager::gSave();
+    }
 
     chatterino::NetworkManager::deinit();
 

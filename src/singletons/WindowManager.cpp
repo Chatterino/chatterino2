@@ -362,7 +362,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
         // load tabs
         QJsonArray tabs = window_obj.value("tabs").toArray();
-        if (getArgs().joinArgumentChannels)
+        if (getArgs().dontSaveSettings)
         {
             tabs = getArgs().channelsToJoin;
         }
@@ -459,7 +459,7 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
 void WindowManager::save()
 {
-    if (getArgs().joinArgumentChannels)
+    if (getArgs().dontSaveSettings)
     {
         return;
     }

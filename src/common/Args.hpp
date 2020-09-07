@@ -14,7 +14,7 @@ public:
     bool printVersion{};
     bool crashRecovery{};
     bool shouldRunBrowserExtensionHost{};
-    bool joinArgumentChannels{};
+    bool dontSaveSettings{};
     QJsonArray channelsToJoin{};
 };
 

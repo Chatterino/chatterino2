@@ -15,11 +15,12 @@ Args::Args(const QApplication &app)
     QCommandLineParser parser;
     parser.setApplicationDescription("Chatterino 2 Client for Twitch Chat");
     parser.addHelpOption();
-    //parser.addVersionOption();
+
     QCommandLineOption crashRecoveryOption(
         "crash-recovery",
         "Used internally by app to restart after unexpected crashes.");
     crashRecoveryOption.setHidden(true);
+
     parser.addOptions({
         {{"v", "version"}, "Displays version information."},
         crashRecoveryOption,
@@ -47,7 +48,7 @@ Args::Args(const QApplication &app)
             channelArray.push_back(
                 QJsonDocument::fromJson(channelObjectString.toUtf8()).object());
         };
-        this->joinArgumentChannels = true;
+        this->dontSaveSettings = true;
         qDebug() << channelArray;
         this->channelsToJoin = channelArray;
     }
