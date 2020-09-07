@@ -194,8 +194,8 @@ private:
     // Returns true if message should be included
     bool shouldIncludeMessage(const MessagePtr &m) const;
 
-    // Returns whether the scrollback should have highlights
-    bool showScrollbackHighlights() const;
+    // Returns whether the scrollbar should have highlights
+    bool showScrollbarHighlights() const;
 
     // This variable can be used to decide whether or not we should render the
     // "Show latest messages" button

@@ -557,7 +557,7 @@ ChannelPtr ChannelView::channel()
     return this->channel_;
 }
 
-bool ChannelView::showScrollbackHighlights() const
+bool ChannelView::showScrollbarHighlights() const
 {
     return this->channel_->getType() != Channel::Type::TwitchMentions;
 }
@@ -659,7 +659,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
         }
 
         this->messages_.pushBack(MessageLayoutPtr(messageLayout), deleted);
-        if (this->showScrollbackHighlights())
+        if (this->showScrollbarHighlights())
         {
             this->scrollBar_->addHighlight(
                 snapshot[i]->getScrollBarHighlight());
@@ -783,7 +783,7 @@ void ChannelView::messageAppended(MessagePtr &message,
         }
     }
 
-    if (this->showScrollbackHighlights())
+    if (this->showScrollbarHighlights())
     {
         this->scrollBar_->addHighlight(message->getScrollBarHighlight());
     }
@@ -821,7 +821,7 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
             this->scrollBar_->offset(qreal(messages.size()));
     }
 
-    if (this->showScrollbackHighlights())
+    if (this->showScrollbarHighlights())
     {
         std::vector<ScrollbarHighlight> highlights;
         highlights.reserve(messages.size());
