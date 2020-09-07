@@ -1915,8 +1915,9 @@ void ChannelView::hideEvent(QHideEvent *)
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
     auto *userPopup = new UserInfoPopup(getSettings()->autoCloseUserPopup);
-    userPopup->setData(userName, this->hasSourceChannel() ? this->sourceChannel_
-                                                          : this->channel_);
+    userPopup->setData(userName, this->hasSourceChannel()
+                                     ? this->sourceChannel_
+                                     : this->underlyingChannel_);
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     userPopup->move(QCursor::pos() - offset);
     userPopup->show();
@@ -1956,9 +1957,9 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                 .replace("{msg-id}", layout->getMessage()->id)
                 .replace("{message}", layout->getMessage()->messageText);
 
-            value =
-                getApp()->commands->execCommand(value, this->channel_, false);
-            this->channel_->sendMessage(value);
+            value = getApp()->commands->execCommand(
+                value, this->underlyingChannel_, false);
+            this->underlyingChannel_->sendMessage(value);
         }
         break;
 
