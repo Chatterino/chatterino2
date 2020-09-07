@@ -310,22 +310,43 @@ void UserInfoPopup::installEvents()
 
     // follow
     QObject::connect(
-        this->ui_.follow, &QCheckBox::stateChanged, [this](int) mutable {
+        this->ui_.follow, &QCheckBox::stateChanged,
+        [this](int newState) mutable {
             auto currentUser = getApp()->accounts->twitch.getCurrent();
 
             const auto reenableFollowCheckbox = [this] {
                 this->ui_.follow->setEnabled(true);  //
             };
 
-            this->ui_.follow->setEnabled(false);
-            if (this->ui_.follow->isChecked())
+            if (!this->ui_.follow->isEnabled())
             {
-                currentUser->followUser(this->userId_, reenableFollowCheckbox);
+                // We received a state update while the checkbox was disabled
+                // This can only happen from the "check current follow state" call
+                // The state has been updated to properly reflect the users current follow state
+                reenableFollowCheckbox();
+                return;
             }
-            else
+
+            switch (newState)
             {
-                currentUser->unfollowUser(this->userId_,
-                                          reenableFollowCheckbox);
+                case Qt::CheckState::Unchecked: {
+                    this->ui_.follow->setEnabled(false);
+                    currentUser->unfollowUser(this->userId_,
+                                              reenableFollowCheckbox);
+                }
+                break;
+
+                case Qt::CheckState::PartiallyChecked: {
+                    // We deliberately ignore this state
+                }
+                break;
+
+                case Qt::CheckState::Checked: {
+                    this->ui_.follow->setEnabled(false);
+                    currentUser->followUser(this->userId_,
+                                            reenableFollowCheckbox);
+                }
+                break;
             }
         });
 
@@ -445,6 +466,8 @@ void UserInfoPopup::updateLatestMessages()
 
 void UserInfoPopup::updateUserData()
 {
+    this->ui_.follow->setEnabled(false);
+
     std::weak_ptr<bool> hack = this->hack_;
 
     const auto onUserFetchFailed = [this, hack] {
@@ -520,8 +543,8 @@ void UserInfoPopup::updateUserData()
             }
             if (result != FollowResult_Failed)
             {
-                this->ui_.follow->setEnabled(true);
                 this->ui_.follow->setChecked(result == FollowResult_Following);
+                this->ui_.follow->setEnabled(true);
             }
         });
 
