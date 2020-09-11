@@ -47,7 +47,9 @@ ContextMap buildContextMap(const MessagePtr &m)
                         m->channelName, Qt::CaseInsensitive) == 0;
 
     bool subscribed = badges.contains("subscriber");
-    int subLength = subscribed ? m->badgeInfos.at("subscriber").toInt() : 0;
+    int subLength = (subscribed && m->badgeInfos.count("subscriber") != 0)
+                        ? m->badgeInfos.at("subscriber").toInt()
+                        : 0;
 
     return {
         {"author.badges", badges},
