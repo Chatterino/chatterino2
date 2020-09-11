@@ -378,6 +378,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.enableSmoothScrollingNewMessages);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
+    layout.addCheckbox("Allow sending duplicate messages",
+                       s.allowDuplicateMessages);
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
