@@ -28,7 +28,7 @@ Args::Args(const QApplication &app)
         {"c", "channels"},
         "Join only supplied channels on startup. Use letters with colons to "
         "specify platform. Only twitch channels are supported at the moment.",
-        "t:channel1;t:channel2;..."));
+        "t-channel1;t-channel2;..."));
     parser.process(app);
 
     const QStringList args = parser.positionalArguments();
@@ -38,12 +38,11 @@ Args::Args(const QApplication &app)
 
     if (parser.isSet("c"))
     {
-        //
         QStringList channelList = parser.value("c").split(";");
         QJsonArray channelArray;
         for (QString channel : channelList)
         {
-            const QRegExp regExp("(.):(.*)");
+            const QRegExp regExp("(.)-(.*)");
             if (regExp.indexIn(channel) == -1)
             {
                 qDebug()
@@ -51,12 +50,11 @@ Args::Args(const QApplication &app)
                     << channel;
                 continue;
             }
-            qDebug() << regExp.capturedTexts();
 
             // Twitch
             if (regExp.cap(1) == "t")
             {
-                // TODO: try not to parse JSON?
+                // TODO: try not to parse JSON
                 QString channelObjectString =
                     "{\"splits2\": { \"data\": { \"name\": \"" + regExp.cap(2) +
                     "\", \"type\": \"twitch\" }, \"type\": \"split\" }}";
