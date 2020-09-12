@@ -16,9 +16,8 @@ Args::Args(const QApplication &app)
     parser.setApplicationDescription("Chatterino 2 Client for Twitch Chat");
     parser.addHelpOption();
 
-    QCommandLineOption crashRecoveryOption(
-        "crash-recovery",
-        "Used internally by app to restart after unexpected crashes.");
+    // Used internally by app to restart after unexpected crashes
+    QCommandLineOption crashRecoveryOption("crash-recovery");
     crashRecoveryOption.setHidden(true);
 
     parser.addOptions({
@@ -26,8 +25,10 @@ Args::Args(const QApplication &app)
         crashRecoveryOption,
     });
     parser.addOption(QCommandLineOption(
-        {"c", "channels"}, "Join only supplied channels on startup.",
-        "channel1,channel2,..."));
+        {"c", "channels"},
+        "Join only supplied channels on startup. Use letters with colons to "
+        "specify platform. Only twitch channels are supported at the moment.",
+        "t:channel1;t:channel2;..."));
     parser.process(app);
 
     const QStringList args = parser.positionalArguments();
@@ -37,20 +38,38 @@ Args::Args(const QApplication &app)
 
     if (parser.isSet("c"))
     {
-        QStringList channelList = parser.value("c").split(",");
+        //
+        QStringList channelList = parser.value("c").split(";");
         QJsonArray channelArray;
         for (QString channel : channelList)
         {
-            // TODO: maybe this can be improved to not use strings?
-            QString channelObjectString =
-                "{\"splits2\": { \"data\": { \"name\": \"" + channel +
-                "\", \"type\": \"twitch\" }, \"type\": \"split\" }}";
-            channelArray.push_back(
-                QJsonDocument::fromJson(channelObjectString.toUtf8()).object());
-        };
-        this->dontSaveSettings = true;
-        qDebug() << channelArray;
-        this->channelsToJoin = channelArray;
+            const QRegExp regExp("(.):(.*)");
+            if (regExp.indexIn(channel) == -1)
+            {
+                qDebug()
+                    << "[CommandLineArguments] Invalid channel specification"
+                    << channel;
+                continue;
+            }
+            qDebug() << regExp.capturedTexts();
+
+            // Twitch
+            if (regExp.cap(1) == "t")
+            {
+                // TODO: try not to parse JSON?
+                QString channelObjectString =
+                    "{\"splits2\": { \"data\": { \"name\": \"" + regExp.cap(2) +
+                    "\", \"type\": \"twitch\" }, \"type\": \"split\" }}";
+                channelArray.push_back(
+                    QJsonDocument::fromJson(channelObjectString.toUtf8())
+                        .object());
+            }
+        }
+        if (channelArray.size() > 0)
+        {
+            this->dontSaveSettings = true;
+            this->channelsToJoin = channelArray;
+        }
     }
 
     this->printVersion = parser.isSet("v");
