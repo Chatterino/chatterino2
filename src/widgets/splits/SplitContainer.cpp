@@ -695,55 +695,51 @@ SplitContainer::Node *SplitContainer::getBaseNode()
     return &this->baseNode_;
 }
 
-void SplitContainer::decodeFromJson(QJsonObject &obj)
+void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 {
     assert(this->baseNode_.type_ == Node::EmptyRoot);
 
-    this->decodeNodeRecusively(obj, &this->baseNode_);
+    this->applyFromDescriptorRecursively(rootNode, &this->baseNode_);
 }
 
-void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
+void SplitContainer::applyFromDescriptorRecursively(
+    const NodeDescriptor &rootNode, Node *node)
 {
-    QString type = obj.value("type").toString();
-
-    if (type == "split")
+    if (std::holds_alternative<SplitNodeDescriptor>(rootNode))
     {
+        const auto &splitNode = std::get<SplitNodeDescriptor>(rootNode);
         auto *split = new Split(this);
-        split->setChannel(
-            WindowManager::decodeChannel(obj.value("data").toObject()));
-        split->setModerationMode(obj.value("moderationMode").toBool(false));
+        split->setChannel(WindowManager::decodeChannel(splitNode));
+        split->setModerationMode(splitNode.moderationMode_);
 
         this->appendSplit(split);
     }
-    else if (type == "horizontal" || type == "vertical")
+    else if (std::holds_alternative<ContainerNodeDescriptor>(rootNode))
     {
-        bool vertical = type == "vertical";
+        const auto &containerNode = std::get<ContainerNodeDescriptor>(rootNode);
+        bool vertical = containerNode.vertical_;
 
         Direction direction = vertical ? Direction::Below : Direction::Right;
 
         node->type_ =
             vertical ? Node::VerticalContainer : Node::HorizontalContainer;
 
-        for (QJsonValue _val : obj.value("items").toArray())
+        for (const auto &item : containerNode.items_)
         {
-            auto _obj = _val.toObject();
-
-            auto _type = _obj.value("type");
-            if (_type == "split")
+            if (std::holds_alternative<SplitNodeDescriptor>(item))
             {
+                const auto &splitNode = std::get<SplitNodeDescriptor>(item);
                 auto *split = new Split(this);
-                split->setChannel(WindowManager::decodeChannel(
-                    _obj.value("data").toObject()));
-                split->setModerationMode(
-                    _obj.value("moderationMode").toBool(false));
+                split->setChannel(WindowManager::decodeChannel(splitNode));
+                split->setModerationMode(splitNode.moderationMode_);
 
                 Node *_node = new Node();
                 _node->parent_ = node;
                 _node->split_ = split;
                 _node->type_ = Node::_Split;
 
-                _node->flexH_ = _obj.value("flexh").toDouble(1.0);
-                _node->flexV_ = _obj.value("flexv").toDouble(1.0);
+                _node->flexH_ = splitNode.flexH_;
+                _node->flexV_ = splitNode.flexV_;
                 node->children_.emplace_back(_node);
 
                 this->addSplit(split);
@@ -753,19 +749,7 @@ void SplitContainer::decodeNodeRecusively(QJsonObject &obj, Node *node)
                 Node *_node = new Node();
                 _node->parent_ = node;
                 node->children_.emplace_back(_node);
-                this->decodeNodeRecusively(_obj, _node);
-            }
-        }
-
-        for (int i = 0; i < 2; i++)
-        {
-            if (node->getChildren().size() < 2)
-            {
-                auto *split = new Split(this);
-                split->setChannel(
-                    WindowManager::decodeChannel(obj.value("data").toObject()));
-
-                this->insertSplit(split, direction, node);
+                this->applyFromDescriptorRecursively(item, _node);
             }
         }
     }
