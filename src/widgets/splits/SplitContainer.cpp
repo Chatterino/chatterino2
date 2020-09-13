@@ -707,7 +707,12 @@ void SplitContainer::applyFromDescriptorRecursively(
 {
     if (std::holds_alternative<SplitNodeDescriptor>(rootNode))
     {
-        const auto &splitNode = std::get<SplitNodeDescriptor>(rootNode);
+        auto *n = std::get_if<SplitNodeDescriptor>(&rootNode);
+        if (!n)
+        {
+            return;
+        }
+        const auto &splitNode = *n;
         auto *split = new Split(this);
         split->setChannel(WindowManager::decodeChannel(splitNode));
         split->setModerationMode(splitNode.moderationMode_);
@@ -716,7 +721,13 @@ void SplitContainer::applyFromDescriptorRecursively(
     }
     else if (std::holds_alternative<ContainerNodeDescriptor>(rootNode))
     {
-        const auto &containerNode = std::get<ContainerNodeDescriptor>(rootNode);
+        auto *n = std::get_if<ContainerNodeDescriptor>(&rootNode);
+        if (!n)
+        {
+            return;
+        }
+        const auto &containerNode = *n;
+
         bool vertical = containerNode.vertical_;
 
         Direction direction = vertical ? Direction::Below : Direction::Right;
@@ -728,7 +739,12 @@ void SplitContainer::applyFromDescriptorRecursively(
         {
             if (std::holds_alternative<SplitNodeDescriptor>(item))
             {
-                const auto &splitNode = std::get<SplitNodeDescriptor>(item);
+                auto *n = std::get_if<SplitNodeDescriptor>(&item);
+                if (!n)
+                {
+                    return;
+                }
+                const auto &splitNode = *n;
                 auto *split = new Split(this);
                 split->setChannel(WindowManager::decodeChannel(splitNode));
                 split->setModerationMode(splitNode.moderationMode_);
