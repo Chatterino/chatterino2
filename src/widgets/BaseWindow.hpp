@@ -29,12 +29,14 @@ public:
         TopMost = 4,
         DisableCustomScaling = 8,
         FramelessDraggable = 16,
+        DontFocus = 32,
     };
 
     enum ActionOnFocusLoss { Nothing, Delete, Close, Hide };
 
     explicit BaseWindow(FlagsEnum<Flags> flags_ = None,
                         QWidget *parent = nullptr);
+    ~BaseWindow() override;
 
     void setInitialBounds(const QRect &bounds);
     QRect getBounds();
@@ -90,7 +92,7 @@ protected:
 
 private:
     void init();
-    void moveIntoDesktopRect(QWidget *parent);
+    void moveIntoDesktopRect(QWidget *parent, QPoint point);
     void calcButtonsSizes();
     void drawCustomWindowFrame(QPainter &painter);
     void onFocusLost();

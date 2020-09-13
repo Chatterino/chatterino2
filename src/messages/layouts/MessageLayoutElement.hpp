@@ -107,7 +107,6 @@ protected:
     int getMouseOverIndex(const QPoint &abs) const override;
     int getXFromIndex(int index) override;
 
-private:
     QColor color_;
     FontStyle style_;
     float scale_;
@@ -136,6 +135,27 @@ private:
     float scale;
     QString line1;
     QString line2;
+};
+
+struct PajSegment {
+    QString text;
+    QColor color;
+};
+
+// TEXT
+class MultiColorTextLayoutElement : public TextLayoutElement
+{
+public:
+    MultiColorTextLayoutElement(MessageElement &creator_, QString &text,
+                                const QSize &size,
+                                std::vector<PajSegment> segments,
+                                FontStyle style_, float scale_);
+
+protected:
+    void paint(QPainter &painter) override;
+
+private:
+    std::vector<PajSegment> segments_;
 };
 
 }  // namespace chatterino

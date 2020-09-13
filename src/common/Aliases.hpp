@@ -34,3 +34,4 @@ QStringAlias(Url);
 QStringAlias(Tooltip);
 QStringAlias(EmoteId);
 QStringAlias(EmoteName);
+QStringAlias(EmoteAuthor);

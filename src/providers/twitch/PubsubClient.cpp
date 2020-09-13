@@ -347,29 +347,30 @@ PubSub::PubSub()
     this->moderationActionHandlers["mod"] = [this](const auto &data,
                                                    const auto &roomID) {
         ModerationStateAction action(data, roomID);
-
-        getTargetUser(data, action.target);
-
-        try
-        {
-            const auto &args = getArgs(data);
-
-            if (args.Size() < 1)
-            {
-                return;
-            }
-
-            if (!rj::getSafe(args[0], action.target.name))
-            {
-                return;
-            }
-        }
-        catch (const std::runtime_error &ex)
-        {
-            qDebug() << "Error parsing moderation action:" << ex.what();
-        }
-
         action.modded = true;
+
+        QString innerType;
+        if (rj::getSafe(data, "type", innerType) &&
+            innerType == "chat_login_moderation")
+        {
+            // Don't display the old message type
+            return;
+        }
+
+        if (!getTargetUser(data, action.target))
+        {
+            qDebug() << "Error parsing moderation action mod: Unable to get "
+                        "target_user_id";
+            return;
+        }
+
+        // Load target name from message.data.target_user_login
+        if (!getTargetUserName(data, action.target))
+        {
+            qDebug() << "Error parsing moderation action mod: Unable to get "
+                        "target_user_name";
+            return;
+        }
 
         this->signals_.moderation.moderationStateChanged.invoke(action);
     };
@@ -803,6 +804,26 @@ void PubSub::listenToChannelModerationActions(
     this->listenToTopic(topic, account);
 }
 
+void PubSub::listenToChannelPointRewards(const QString &channelID,
+                                         std::shared_ptr<TwitchAccount> account)
+{
+    static const QString topicFormat("community-points-channel-v1.%1");
+    assert(!channelID.isEmpty());
+    assert(account != nullptr);
+    QString userID = account->getUserId();
+
+    auto topic = topicFormat.arg(channelID);
+
+    if (this->isListeningToTopic(topic))
+    {
+        return;
+    }
+
+    qDebug() << "Listen to topic" << topic;
+
+    this->listenToTopic(topic, account);
+}
+
 void PubSub::listenToTopic(const QString &topic,
                            std::shared_ptr<TwitchAccount> account)
 {
@@ -1091,6 +1112,34 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
         // Invoke handler function
         handlerIt->second(data, topicParts[2]);
+    }
+    else if (topic.startsWith("community-points-channel-v1."))
+    {
+        std::string pointEventType;
+        if (!rj::getSafe(msg, "type", pointEventType))
+        {
+            qDebug() << "Bad channel point event data";
+            return;
+        }
+
+        if (pointEventType == "reward-redeemed")
+        {
+            if (!rj::getSafeObject(msg, "data", msg))
+            {
+                qDebug() << "No data found for redeemed reward";
+                return;
+            }
+            if (!rj::getSafeObject(msg, "redemption", msg))
+            {
+                qDebug() << "No redemption info found for redeemed reward";
+                return;
+            }
+            this->signals_.pointReward.redeemed.invoke(msg);
+        }
+        else
+        {
+            qDebug() << "Invalid point event type:" << pointEventType.c_str();
+        }
     }
     else
     {

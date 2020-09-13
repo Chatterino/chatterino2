@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
+#include "messages/Message.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
@@ -12,7 +13,10 @@
 #include "singletons/Settings.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
+#include "util/Shortcut.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
 
@@ -25,6 +29,7 @@
 const QString TEXT_VIEWS("Views: %1");
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
+const QString TEXT_TITLE("%1's Usercard");
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
 
@@ -48,17 +53,57 @@ namespace {
 
         return label.getElement();
     };
+    ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
+    {
+        LimitedQueueSnapshot<MessagePtr> snapshot =
+            channel->getMessageSnapshot();
+
+        ChannelPtr channelPtr(
+            new Channel(channel->getName(), Channel::Type::None));
+
+        for (size_t i = 0; i < snapshot.size(); i++)
+        {
+            MessagePtr message = snapshot[i];
+
+            bool isSubscription =
+                message->flags.has(MessageFlag::Subscription) &&
+                message->loginName == "" &&
+                message->messageText.split(" ").at(0).compare(
+                    userName, Qt::CaseInsensitive) == 0;
+
+            bool isModAction = message->timeoutUser.compare(
+                                   userName, Qt::CaseInsensitive) == 0;
+            bool isSelectedUser =
+                message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
+
+            if ((isSubscription || isModAction || isSelectedUser) &&
+                !message->flags.has(MessageFlag::Whisper))
+            {
+                channelPtr->addMessage(message);
+            }
+        }
+
+        return channelPtr;
+    };
 }  // namespace
 
-UserInfoPopup::UserInfoPopup()
-    : BaseWindow({BaseWindow::Frameless, BaseWindow::FramelessDraggable})
+UserInfoPopup::UserInfoPopup(bool closeAutomatically)
+    : BaseWindow(
+          closeAutomatically
+              ? FlagsEnum<BaseWindow::Flags>{BaseWindow::EnableCustomFrame,
+                                             BaseWindow::Frameless,
+                                             BaseWindow::FramelessDraggable}
+              : BaseWindow::EnableCustomFrame)
     , hack_(new bool)
 {
+    this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
 
-#ifdef Q_OS_LINUX
-    this->setWindowFlag(Qt::Popup);
-#endif
+    if (closeAutomatically)
+        this->setActionOnFocusLoss(BaseWindow::Delete);
+
+    // Close the popup when Escape is pressed
+    createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
@@ -114,7 +159,8 @@ UserInfoPopup::UserInfoPopup()
             .assign(&this->ui_.ignoreHighlights);
         auto usercard = user.emplace<EffectLabel2>(this);
         usercard->getLabel().setText("Usercard");
-
+        auto refresh = user.emplace<EffectLabel2>(this);
+        refresh->getLabel().setText("Refresh");
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(getResources().buttons.mod);
         mod->setScaleIndependantSize(30, 30);
@@ -130,6 +176,8 @@ UserInfoPopup::UserInfoPopup()
                                       "/viewercard/" + this->userName_);
         });
 
+        QObject::connect(refresh.getElement(), &Button::leftClicked,
+                         [this] { this->updateLatestMessages(); });
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/mod " + this->userName_);
         });
@@ -211,8 +259,25 @@ UserInfoPopup::UserInfoPopup()
         });
     }
 
-    this->installEvents();
+    layout.emplace<Line>(false);
 
+    // fourth line (last messages)
+    auto logs = layout.emplace<QVBoxLayout>().withoutMargin();
+    {
+        this->ui_.noMessagesLabel = new Label("No recent messages");
+        this->ui_.noMessagesLabel->setVisible(false);
+
+        this->ui_.latestMessages = new ChannelView(this);
+        this->ui_.latestMessages->setMinimumSize(400, 275);
+        this->ui_.latestMessages->setSizePolicy(QSizePolicy::Expanding,
+                                                QSizePolicy::Expanding);
+
+        logs->addWidget(this->ui_.noMessagesLabel);
+        logs->addWidget(this->ui_.latestMessages);
+        logs->setAlignment(this->ui_.noMessagesLabel, Qt::AlignHCenter);
+    }
+
+    this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
 }
 
@@ -245,22 +310,43 @@ void UserInfoPopup::installEvents()
 
     // follow
     QObject::connect(
-        this->ui_.follow, &QCheckBox::stateChanged, [this](int) mutable {
+        this->ui_.follow, &QCheckBox::stateChanged,
+        [this](int newState) mutable {
             auto currentUser = getApp()->accounts->twitch.getCurrent();
 
             const auto reenableFollowCheckbox = [this] {
                 this->ui_.follow->setEnabled(true);  //
             };
 
-            this->ui_.follow->setEnabled(false);
-            if (this->ui_.follow->isChecked())
+            if (!this->ui_.follow->isEnabled())
             {
-                currentUser->followUser(this->userId_, reenableFollowCheckbox);
+                // We received a state update while the checkbox was disabled
+                // This can only happen from the "check current follow state" call
+                // The state has been updated to properly reflect the users current follow state
+                reenableFollowCheckbox();
+                return;
             }
-            else
+
+            switch (newState)
             {
-                currentUser->unfollowUser(this->userId_,
-                                          reenableFollowCheckbox);
+                case Qt::CheckState::Unchecked: {
+                    this->ui_.follow->setEnabled(false);
+                    currentUser->unfollowUser(this->userId_,
+                                              reenableFollowCheckbox);
+                }
+                break;
+
+                case Qt::CheckState::PartiallyChecked: {
+                    // We deliberately ignore this state
+                }
+                break;
+
+                case Qt::CheckState::Checked: {
+                    this->ui_.follow->setEnabled(false);
+                    currentUser->followUser(this->userId_,
+                                            reenableFollowCheckbox);
+                }
+                break;
             }
         });
 
@@ -354,6 +440,7 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 {
     this->userName_ = name;
     this->channel_ = channel;
+    this->setWindowTitle(TEXT_TITLE.arg(name));
 
     this->ui_.nameLabel->setText(name);
     this->ui_.nameLabel->setProperty("copy-text", name);
@@ -361,10 +448,26 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     this->updateUserData();
 
     this->userStateChanged_.invoke();
+
+    this->updateLatestMessages();
+    QTimer::singleShot(1, this, [this] { this->setStayInScreenRect(true); });
+}
+
+void UserInfoPopup::updateLatestMessages()
+{
+    auto filteredChannel = filterMessages(this->userName_, this->channel_);
+    this->ui_.latestMessages->setChannel(filteredChannel);
+    this->ui_.latestMessages->setSourceChannel(this->channel_);
+
+    const bool hasMessages = filteredChannel->hasMessages();
+    this->ui_.latestMessages->setVisible(hasMessages);
+    this->ui_.noMessagesLabel->setVisible(!hasMessages);
 }
 
 void UserInfoPopup::updateUserData()
 {
+    this->ui_.follow->setEnabled(false);
+
     std::weak_ptr<bool> hack = this->hack_;
 
     const auto onUserFetchFailed = [this, hack] {
@@ -413,7 +516,10 @@ void UserInfoPopup::updateUserData()
             [] {
                 // failure
             });
-        this->loadAvatar(user.profileImageUrl);
+        if (!isInStreamerMode())
+        {
+            this->loadAvatar(user.profileImageUrl);
+        }
 
         getHelix()->getUserFollowers(
             user.id,
@@ -437,8 +543,8 @@ void UserInfoPopup::updateUserData()
             }
             if (result != FollowResult_Failed)
             {
-                this->ui_.follow->setEnabled(true);
                 this->ui_.follow->setChecked(result == FollowResult_Following);
+                this->ui_.follow->setEnabled(true);
             }
         });
 

@@ -76,6 +76,10 @@ public:
     ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
 
+    ChannelPtr sourceChannel() const;
+    void setSourceChannel(ChannelPtr sourceChannel);
+    bool hasSourceChannel() const;
+
     LimitedQueueSnapshot<MessageLayoutPtr> getMessagesSnapshot();
     void queueLayout();
 
@@ -141,9 +145,9 @@ private:
 
     void handleMouseClick(QMouseEvent *event,
                           const MessageLayoutElement *hoverLayoutElement,
-                          MessageLayout *layout);
+                          MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
-                             MessageLayout *layout);
+                             MessageLayoutPtr layout);
     int getLayoutWidth() const;
     void updatePauses();
     void unpaused();
@@ -174,6 +178,7 @@ private:
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
     ChannelPtr channel_;
+    ChannelPtr sourceChannel_;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;

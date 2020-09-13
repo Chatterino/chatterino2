@@ -4,9 +4,9 @@
 #include <cstdlib>
 
 #include "messages/Message.hpp"
-#include "messages/MessageBuilder.hpp"
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
+#include "providers/irc/IrcMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
 #include "util/QObjectRef.hpp"
 
@@ -86,6 +86,7 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
 
     QObject::connect(connection, &Communi::IrcConnection::noticeMessageReceived,
                      this, [this](Communi::IrcNoticeMessage *message) {
+                         // XD PAJLADA
                          MessageBuilder builder;
 
                          builder.emplace<TimestampElement>();
@@ -176,15 +177,18 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
     if (auto channel = this->getChannelOrEmpty(target); !channel->isEmpty())
     {
-        MessageBuilder builder;
+        MessageParseArgs args;
+        IrcMessageBuilder builder(channel.get(), message, args);
 
-        builder.emplace<TimestampElement>();
-        builder.emplace<TextElement>(message->nick() + ":",
-                                     MessageElementFlag::Username);
-        builder.emplace<TextElement>(message->content(),
-                                     MessageElementFlag::Text);
-
-        channel->addMessage(builder.release());
+        if (!builder.isIgnored())
+        {
+            builder.triggerHighlights();
+            channel->addMessage(builder.build());
+        }
+        else
+        {
+            qDebug() << "message ignored :rage:";
+        }
     }
 }
 
@@ -205,8 +209,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 {
                     if (message->nick() == this->data_->nick)
                     {
-                        shared->addMessage(
-                            MessageBuilder(systemMessage, "joined").release());
+                        shared->addMessage(makeSystemMessage("joined"));
                     }
                     else
                     {
@@ -230,8 +233,7 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
                 {
                     if (message->nick() == this->data_->nick)
                     {
-                        shared->addMessage(
-                            MessageBuilder(systemMessage, "parted").release());
+                        shared->addMessage(makeSystemMessage("parted"));
                     }
                     else
                     {

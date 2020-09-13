@@ -16,19 +16,21 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/CombinePath.hpp"
+#include "util/Twitch.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include <QApplication>
 #include <QFile>
 #include <QRegularExpression>
 
-#define TWITCH_DEFAULT_COMMANDS                                         \
-    {                                                                   \
-        "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", \
-            "/unban", "/timeout", "/untimeout", "/slow", "/slowoff",    \
-            "/r9kbeta", "/r9kbetaoff", "/emoteonly", "/emoteonlyoff",   \
-            "/clear", "/subscribers", "/subscribersoff", "/followers",  \
-            "/followersoff", "/user"                                    \
+#define TWITCH_DEFAULT_COMMANDS                                            \
+    {                                                                      \
+        "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban",    \
+            "/unban", "/timeout", "/untimeout", "/slow", "/slowoff",       \
+            "/r9kbeta", "/r9kbetaoff", "/emoteonly", "/emoteonlyoff",      \
+            "/clear", "/subscribers", "/subscribersoff", "/followers",     \
+            "/followersoff", "/user", "/usercard", "/follow", "/unfollow", \
+            "/ignore", "/unignore"                                         \
     }
 
 namespace {
@@ -437,8 +439,8 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                     channelName.remove(0, 1);
                 }
             }
-            QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
-                                      channelName + "/viewercard/" + words[1]);
+            openTwitchUsercard(channelName, words[1]);
+
             return "";
         }
         else if (commandName == "/usercard")
@@ -449,9 +451,10 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                     makeSystemMessage("Usage /usercard [user]"));
                 return "";
             }
-            auto *userPopup = new UserInfoPopup;
+
+            auto *userPopup =
+                new UserInfoPopup(getSettings()->autoCloseUserPopup);
             userPopup->setData(words[1], channel);
-            userPopup->setActionOnFocusLoss(BaseWindow::Delete);
             userPopup->move(QCursor::pos());
             userPopup->show();
             return "";

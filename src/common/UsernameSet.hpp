@@ -76,6 +76,8 @@ public:
     std::pair<Iterator, bool> insert(const QString &value);
     std::pair<Iterator, bool> insert(QString &&value);
 
+    bool contains(const QString &value) const;
+
 private:
     void insertPrefix(const QString &string);
 

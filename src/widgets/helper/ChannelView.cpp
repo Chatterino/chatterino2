@@ -34,6 +34,8 @@
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/StreamerMode.hpp"
+#include "util/Twitch.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -108,6 +110,7 @@ namespace {
 
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
+    , sourceChannel_(nullptr)
     , scrollBar_(new Scrollbar(this))
 {
     this->setMouseTracking(true);
@@ -465,6 +468,9 @@ void ChannelView::clearMessages()
     this->messages_.clear();
     this->scrollBar_->clearHighlights();
     this->queueLayout();
+
+    this->lastMessageHasAlternateBackground_ = false;
+    this->lastMessageHasAlternateBackgroundReverse_ = true;
 }
 
 Scrollbar &ChannelView::getScrollBar()
@@ -618,6 +624,21 @@ void ChannelView::setChannel(ChannelPtr channel)
             this->liveStatusChanged.invoke();  //
         }));
     }
+}
+
+ChannelPtr ChannelView::sourceChannel() const
+{
+    return this->sourceChannel_;
+}
+
+void ChannelView::setSourceChannel(ChannelPtr sourceChannel)
+{
+    this->sourceChannel_ = sourceChannel;
+}
+
+bool ChannelView::hasSourceChannel() const
+{
+    return this->sourceChannel_ != nullptr;
 }
 
 void ChannelView::messageAppended(MessagePtr &message,
@@ -836,6 +857,7 @@ MessageElementFlags ChannelView::getFlags() const
         if (this->channel_ == app->twitch.server->mentionsChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
+            flags.unset(MessageElementFlag::ChannelPointReward);
         }
     }
 
@@ -856,10 +878,10 @@ void ChannelView::paintEvent(QPaintEvent * /*event*/)
     // draw paused sign
     if (this->paused())
     {
-        auto a = this->scale() * 16;
-        auto brush = QBrush(QColor(127, 127, 127, 63));
-        painter.fillRect(QRectF(this->width() - a, a / 4, a / 4, a), brush);
-        painter.fillRect(QRectF(this->width() - a / 2, a / 4, a / 4, a), brush);
+        auto a = this->scale() * 20;
+        auto brush = QBrush(QColor(127, 127, 127, 255));
+        painter.fillRect(QRectF(5, a / 4, a / 4, a), brush);
+        painter.fillRect(QRectF(15, a / 4, a / 4, a), brush);
     }
 }
 
@@ -882,6 +904,9 @@ void ChannelView::drawMessages(QPainter &painter)
     MessageLayout *end = nullptr;
     bool windowFocused = this->window() == QApplication::activeWindow();
 
+    auto app = getApp();
+    bool isMentions = this->channel_ == app->twitch.server->mentionsChannel;
+
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
         MessageLayout *layout = messagesSnapshot[i].get();
@@ -893,7 +918,7 @@ void ChannelView::drawMessages(QPainter &painter)
         }
 
         layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
-                      isLastMessage, windowFocused);
+                      isLastMessage, windowFocused, isMentions);
 
         y += layout->getHeight();
 
@@ -1259,6 +1284,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     else
     {
         auto &tooltipPreviewImage = TooltipPreviewImage::instance();
+        tooltipPreviewImage.setImageScale(0, 0);
         auto emoteElement = dynamic_cast<const EmoteElement *>(
             &hoverLayoutElement->getCreator());
         auto badgeElement = dynamic_cast<const BadgeElement *>(
@@ -1288,7 +1314,22 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         }
         else
         {
-            tooltipPreviewImage.setImage(nullptr);
+            auto element = &hoverLayoutElement->getCreator();
+            auto thumbnailSize = getSettings()->thumbnailSize;
+            if (thumbnailSize == 0 || isInStreamerMode())
+            {
+                tooltipPreviewImage.setImage(nullptr);
+            }
+            else
+            {
+                tooltipPreviewImage.setImage(element->getThumbnail());
+                if (element->getThumbnailType() ==
+                    MessageElement::ThumbnailType::Link_Thumbnail)
+                {
+                    tooltipPreviewImage.setImageScale(thumbnailSize,
+                                                      thumbnailSize);
+                }
+            }
         }
 
         tooltipWidget->moveTo(this, event->globalPos());
@@ -1387,6 +1428,10 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
             {
                 if (this->isScrolling_)
                     this->disableScrolling();
+                else if (hoverLayoutElement != nullptr &&
+                         hoverLayoutElement->getFlags().has(
+                             MessageElementFlag::Username))
+                    break;
                 else
                     this->enableScrolling(event->screenPos());
             }
@@ -1408,7 +1453,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     QPoint relativePos;
     int messageIndex;
 
-    bool foundMessage =
+    bool foundElement =
         tryGetMessageAt(event->pos(), layout, relativePos, messageIndex);
 
     // check if mouse was pressed
@@ -1470,13 +1515,23 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
             return;
         }
-        else if (foundMessage)
+        else if (foundElement)
         {
             const MessageLayoutElement *hoverLayoutElement =
                 layout->getElementAt(relativePos);
 
-            if (hoverLayoutElement == nullptr ||
-                hoverLayoutElement->getLink().isUrl() == false)
+            if (hoverLayoutElement == nullptr)
+            {
+                return;
+            }
+            else if (hoverLayoutElement->getFlags().has(
+                         MessageElementFlag::Username))
+            {
+                openTwitchUsercard(this->channel_->getName(),
+                                   hoverLayoutElement->getLink().value);
+                return;
+            }
+            else if (hoverLayoutElement->getLink().isUrl() == false)
             {
                 return;
             }
@@ -1489,7 +1544,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // no message found
-    if (!foundMessage)
+    if (!foundElement)
     {
         // No message at clicked position
         return;
@@ -1523,12 +1578,12 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
 
     // handle the click
-    this->handleMouseClick(event, hoverLayoutElement, layout.get());
+    this->handleMouseClick(event, hoverLayoutElement, layout);
 }
 
 void ChannelView::handleMouseClick(QMouseEvent *event,
                                    const MessageLayoutElement *hoveredElement,
-                                   MessageLayout *layout)
+                                   MessageLayoutPtr layout)
 {
     switch (event->button())
     {
@@ -1546,7 +1601,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
-                this->handleLinkClick(event, link, layout);
+                this->handleLinkClick(event, link, layout.get());
             }
 
             // Invoke to signal from EmotePopup.
@@ -1584,7 +1639,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             auto &link = hoveredElement->getLink();
             if (!getSettings()->linksDoubleClickOnly)
             {
-                this->handleLinkClick(event, link, layout);
+                this->handleLinkClick(event, link, layout.get());
             }
         }
         break;
@@ -1593,13 +1648,20 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 }
 
 void ChannelView::addContextMenuItems(
-    const MessageLayoutElement *hoveredElement, MessageLayout *layout)
+    const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout)
 {
     const auto &creator = hoveredElement->getCreator();
     auto creatorFlags = creator.getFlags();
 
-    static QMenu *menu = new QMenu;
-    menu->clear();
+    static QMenu *previousMenu = nullptr;
+    if (previousMenu != nullptr)
+    {
+        previousMenu->deleteLater();
+        previousMenu = nullptr;
+    }
+
+    auto menu = new QMenu;
+    previousMenu = menu;
 
     // Emote actions
     if (creatorFlags.hasAny(
@@ -1759,9 +1821,9 @@ void ChannelView::hideEvent(QHideEvent *)
 
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
-    auto *userPopup = new UserInfoPopup;
-    userPopup->setData(userName, this->channel_);
-    userPopup->setActionOnFocusLoss(BaseWindow::Delete);
+    auto *userPopup = new UserInfoPopup(getSettings()->autoCloseUserPopup);
+    userPopup->setData(userName, this->hasSourceChannel() ? this->sourceChannel_
+                                                          : this->channel_);
     QPoint offset(int(150 * this->scale()), int(70 * this->scale()));
     userPopup->move(QCursor::pos() - offset);
     userPopup->show();

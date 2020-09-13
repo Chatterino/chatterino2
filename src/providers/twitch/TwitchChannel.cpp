@@ -20,6 +20,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/FormatTime.hpp"
 #include "util/PostToThread.hpp"
 #include "widgets/Window.hpp"
 
@@ -36,6 +37,47 @@ namespace {
     constexpr int TITLE_REFRESH_PERIOD = 10;
     constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
 
+    // convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT command and converts it to a readable NOTICE message
+    // This has historically been done in the Recent Messages API, but this functionality is being moved to Chatterino instead
+    auto convertClearchatToNotice(Communi::IrcMessage *message)
+    {
+        auto channelName = message->parameter(0);
+        QString noticeMessage{};
+        if (message->tags().contains("target-user-id"))
+        {
+            auto target = message->parameter(1);
+
+            if (message->tags().contains("ban-duration"))
+            {
+                // User was timed out
+                noticeMessage =
+                    QString("%1 has been timed out for %2.")
+                        .arg(target)
+                        .arg(formatTime(
+                            message->tag("ban-duration").toString()));
+            }
+            else
+            {
+                // User was permanently banned
+                noticeMessage =
+                    QString("%1 has been permanently banned.").arg(target);
+            }
+        }
+        else
+        {
+            // Chat was cleared
+            noticeMessage = "Chat has been cleared by a moderator.";
+        }
+
+        // rebuild the raw irc message so we can convert it back to an ircmessage again!
+        // this could probably be done in a smarter way
+        auto s = QString(":tmi.twitch.tv NOTICE %1 :%2")
+                     .arg(channelName)
+                     .arg(noticeMessage);
+
+        return Communi::IrcMessage::fromData(s.toUtf8(), nullptr);
+    }
+
     // parseRecentMessages takes a json object and returns a vector of
     // Communi IrcMessages
     auto parseRecentMessages(const QJsonObject &jsonRoot, ChannelPtr channel)
@@ -49,8 +91,15 @@ namespace {
         for (const auto jsonMessage : jsonMessages)
         {
             auto content = jsonMessage.toString().toUtf8();
-            messages.emplace_back(
-                Communi::IrcMessage::fromData(content, nullptr));
+
+            auto message = Communi::IrcMessage::fromData(content, nullptr);
+
+            if (message->command() == "CLEARCHAT")
+            {
+                message = convertClearchatToNotice(message);
+            }
+
+            messages.emplace_back(std::move(message));
         }
 
         return messages;
@@ -85,7 +134,8 @@ TwitchChannel::TwitchChannel(const QString &name,
     , ChannelChatters(*static_cast<Channel *>(this))
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
-    , popoutPlayerUrl_("https://player.twitch.tv/?channel=" + name)
+    , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
+                       name)
     , globalTwitchBadges_(globalTwitchBadges)
     , globalBttv_(bttv)
     , globalFfz_(ffz)
@@ -118,8 +168,8 @@ TwitchChannel::TwitchChannel(const QString &name,
         this->refreshLiveStatus();
         this->refreshBadges();
         this->refreshCheerEmotes();
-        this->refreshFFZChannelEmotes();
-        this->refreshBTTVChannelEmotes();
+        this->refreshFFZChannelEmotes(false);
+        this->refreshBTTVChannelEmotes(false);
     });
 
     // timers
@@ -155,20 +205,22 @@ bool TwitchChannel::canSendMessage() const
     return !this->isEmpty();
 }
 
-void TwitchChannel::refreshBTTVChannelEmotes()
+void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
 {
     BttvEmotes::loadChannel(
-        this->roomId(), [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+        weakOf<Channel>(this), this->roomId(), this->getName(),
+        [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
                 this->bttvEmotes_.set(
                     std::make_shared<EmoteMap>(std::move(emoteMap)));
-        });
+        },
+        manualRefresh);
 }
 
-void TwitchChannel::refreshFFZChannelEmotes()
+void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
 {
     FfzEmotes::loadChannel(
-        this->roomId(),
+        weakOf<Channel>(this), this->roomId(),
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
                 this->ffzEmotes_.set(
@@ -179,7 +231,54 @@ void TwitchChannel::refreshFFZChannelEmotes()
             {
                 this->ffzCustomModBadge_.set(std::move(modBadge));
             }
-        });
+        },
+        manualRefresh);
+}
+
+void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
+{
+    assertInGuiThread();
+
+    if (!reward.hasParsedSuccessfully)
+    {
+        return;
+    }
+
+    if (!reward.isUserInputRequired)
+    {
+        MessageBuilder builder;
+        TwitchMessageBuilder::appendChannelPointRewardMessage(reward, &builder);
+        this->addMessage(builder.release());
+        return;
+    }
+
+    bool result;
+    {
+        auto channelPointRewards = this->channelPointRewards_.access();
+        result = channelPointRewards->try_emplace(reward.id, reward).second;
+    }
+    if (result)
+    {
+        this->channelPointRewardAdded.invoke(reward);
+    }
+}
+
+bool TwitchChannel::isChannelPointRewardKnown(const QString &rewardId)
+{
+    const auto &pointRewards = this->channelPointRewards_.accessConst();
+    const auto &it = pointRewards->find(rewardId);
+    return it != pointRewards->end();
+}
+
+boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
+    const QString &rewardId) const
+{
+    auto rewards = this->channelPointRewards_.accessConst();
+    auto it = rewards->find(rewardId);
+
+    if (it == rewards->end())
+        return boost::none;
+    return it->second;
 }
 
 void TwitchChannel::sendMessage(const QString &message)
@@ -607,6 +706,7 @@ void TwitchChannel::refreshPubsub()
     auto account = getApp()->accounts->twitch.getCurrent();
     getApp()->twitch2->pubsub->listenToChannelModerationActions(roomId,
                                                                 account);
+    getApp()->twitch2->pubsub->listenToChannelPointRewards(roomId, account);
 }
 
 void TwitchChannel::refreshChatters()

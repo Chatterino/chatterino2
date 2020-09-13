@@ -86,6 +86,9 @@ protected:
     void leaveEvent(QEvent *event) override;
     void focusInEvent(QFocusEvent *event) override;
 
+    void dragEnterEvent(QDragEnterEvent *event) override;
+    void dropEvent(QDropEvent *event) override;
+
 private:
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
@@ -124,6 +127,7 @@ public slots:
     void popup();
     void clear();
     void openInBrowser();
+    void openWhispersInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
     void openWithCustomScheme();

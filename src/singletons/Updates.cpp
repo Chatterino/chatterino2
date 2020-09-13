@@ -232,6 +232,14 @@ void Updates::installUpdates()
 
 void Updates::checkForUpdates()
 {
+    if (!Version::instance().isSupportedOS())
+    {
+        qDebug()
+            << "Update checking disabled because OS doesn't appear to be one "
+               "of Windows, GNU/Linux or macOS.";
+        return;
+    }
+
     // Disable updates if on nightly and windows.
 #ifdef Q_OS_WIN
     if (Modes::instance().isNightly)
@@ -259,7 +267,7 @@ void Updates::checkForUpdates()
             }
 
 #if defined Q_OS_WIN || defined Q_OS_MACOS
-            /// Windows downloads an installer for the new version
+            /// Downloads an installer for the new version
             QJsonValue updateExe_val = object.value("updateexe");
             if (!updateExe_val.isString())
             {
@@ -269,6 +277,7 @@ void Updates::checkForUpdates()
             }
             this->updateExe_ = updateExe_val.toString();
 
+#    ifdef Q_OS_WIN
             /// Windows portable
             QJsonValue portable_val = object.value("portable_download");
             if (!portable_val.isString())
@@ -278,6 +287,7 @@ void Updates::checkForUpdates()
                 return Failure;
             }
             this->updatePortable_ = portable_val.toString();
+#    endif
 
 #elif defined Q_OS_LINUX
             QJsonValue updateGuide_val = object.value("updateguide");

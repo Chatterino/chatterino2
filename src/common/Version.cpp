@@ -32,6 +32,12 @@ Version::Version()
     }
 
     this->fullVersion_ += this->version_;
+
+#if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
+    this->isSupportedOS_ = true;
+#else
+    this->isSupportedOS_ = false;
+#endif
 }
 
 const Version &Version::instance()
@@ -58,6 +64,11 @@ const QString &Version::commitHash() const
 const QString &Version::dateOfBuild() const
 {
     return this->dateOfBuild_;
+}
+
+const bool &Version::isSupportedOS() const
+{
+    return this->isSupportedOS_;
 }
 
 }  // namespace chatterino

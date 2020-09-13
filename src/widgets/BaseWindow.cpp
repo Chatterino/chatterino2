@@ -3,6 +3,7 @@
 #include "BaseSettings.hpp"
 #include "BaseTheme.hpp"
 #include "boost/algorithm/algorithm.hpp"
+#include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Shortcut.hpp"
 #include "util/WindowsHelper.hpp"
@@ -57,6 +58,18 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         this->setWindowFlag(Qt::FramelessWindowHint);
     }
 
+    if (_flags.has(DontFocus))
+    {
+        this->setAttribute(Qt::WA_ShowWithoutActivating);
+#ifdef Q_OS_LINUX
+        this->setWindowFlags(Qt::ToolTip);
+#else
+        this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
+                             Qt::X11BypassWindowManagerHint |
+                             Qt::BypassWindowManagerHint);
+#endif
+    }
+
     this->init();
 
     getSettings()->uiScale.connect(
@@ -82,6 +95,12 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 #endif
 
     this->themeChangedEvent();
+    DebugCount::increase("BaseWindow");
+}
+
+BaseWindow::~BaseWindow()
+{
+    DebugCount::decrease("BaseWindow");
 }
 
 void BaseWindow::setInitialBounds(const QRect &bounds)
@@ -214,9 +233,16 @@ void BaseWindow::init()
         });
     }
 #else
-//    if (getSettings()->windowTopMost.getValue()) {
-//        this->setWindowFlag(Qt::WindowStaysOnTopHint);
-//    }
+    // TopMost flag overrides setting
+    if (!this->flags_.has(TopMost))
+    {
+        getSettings()->windowTopMost.connect(
+            [this](bool topMost, auto) {
+                this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
+                this->show();
+            },
+            this->managedConnections_);
+    }
 #endif
 }
 
@@ -224,7 +250,7 @@ void BaseWindow::setStayInScreenRect(bool value)
 {
     this->stayInScreenRect_ = value;
 
-    this->moveIntoDesktopRect(this);
+    this->moveIntoDesktopRect(this, this->pos());
 }
 
 bool BaseWindow::getStayInScreenRect() const
@@ -499,8 +525,7 @@ void BaseWindow::moveTo(QWidget *parent, QPoint point, bool offset)
         point.ry() += 16;
     }
 
-    this->move(point);
-    this->moveIntoDesktopRect(parent);
+    this->moveIntoDesktopRect(parent, point);
 }
 
 void BaseWindow::resizeEvent(QResizeEvent *)
@@ -551,44 +576,53 @@ void BaseWindow::closeEvent(QCloseEvent *)
 
 void BaseWindow::showEvent(QShowEvent *)
 {
-    this->moveIntoDesktopRect(this);
+    this->moveIntoDesktopRect(this, this->pos());
     if (this->frameless_)
     {
-        QTimer::singleShot(30, this,
-                           [this] { this->moveIntoDesktopRect(this); });
+        QTimer::singleShot(
+            30, this, [this] { this->moveIntoDesktopRect(this, this->pos()); });
     }
 }
 
-void BaseWindow::moveIntoDesktopRect(QWidget *parent)
+void BaseWindow::moveIntoDesktopRect(QWidget *parent, QPoint point)
 {
     if (!this->stayInScreenRect_)
         return;
 
     // move the widget into the screen geometry if it's not already in there
     QDesktopWidget *desktop = QApplication::desktop();
+    QPoint globalCursorPos = QCursor::pos();
 
     QRect s = desktop->availableGeometry(parent);
-    QPoint p = this->pos();
 
-    if (p.x() < s.left())
+    bool stickRight = false;
+    bool stickBottom = false;
+
+    if (point.x() < s.left())
     {
-        p.setX(s.left());
+        point.setX(s.left());
     }
-    if (p.y() < s.top())
+    if (point.y() < s.top())
     {
-        p.setY(s.top());
+        point.setY(s.top());
     }
-    if (p.x() + this->width() > s.right())
+    if (point.x() + this->width() > s.right())
     {
-        p.setX(s.right() - this->width());
+        stickRight = true;
+        point.setX(s.right() - this->width());
     }
-    if (p.y() + this->height() > s.bottom())
+    if (point.y() + this->height() > s.bottom())
     {
-        p.setY(s.bottom() - this->height());
+        stickBottom = true;
+        point.setY(s.bottom() - this->height());
     }
 
-    if (p != this->pos())
-        this->move(p);
+    if (stickRight && stickBottom)
+    {
+        point.setY(globalCursorPos.y() - this->height() - 16);
+    }
+
+    this->move(point);
 }
 
 bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,

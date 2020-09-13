@@ -59,6 +59,11 @@ bool Channel::isEmpty() const
     return this->name_.isEmpty();
 }
 
+bool Channel::hasMessages() const
+{
+    return !this->messages_.empty();
+}
+
 LimitedQueueSnapshot<MessagePtr> Channel::getMessageSnapshot()
 {
     return this->messages_.getSnapshot();
@@ -143,9 +148,8 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
 
             int count = s->count + 1;
 
-            MessageBuilder replacement(systemMessage,
-                                       message->searchText + QString(" (") +
-                                           QString::number(count) + " times)");
+            MessageBuilder replacement(timeoutMessage, message->searchText,
+                                       count);
 
             replacement->timeoutUser = message->timeoutUser;
             replacement->count = count;

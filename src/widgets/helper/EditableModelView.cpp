@@ -96,8 +96,9 @@ void EditableModelView::addCustomButton(QWidget *widget)
 void EditableModelView::addRegexHelpLink()
 {
     auto regexHelpLabel =
-        new QLabel("<a href='https://chatterino.com/help/regex'><span "
-                   "style='color:#99f'>regex info</span></a>");
+        new QLabel("<a href='"
+                   "https://chatterino.com/help/regex'>"
+                   "<span style='color:#99f'>regex info</span></a>");
     regexHelpLabel->setOpenExternalLinks(true);
     this->addCustomButton(regexHelpLabel);
 }
