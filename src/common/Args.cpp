@@ -26,9 +26,10 @@ Args::Args(const QApplication &app)
     });
     parser.addOption(QCommandLineOption(
         {"c", "channels"},
-        "Join only supplied channels on startup. Use letters with colons to "
-        "specify platform. Only twitch channels are supported at the moment.",
-        "t-channel1;t-channel2;..."));
+        "Joins only supplied channels on startup. Use letters with colons to "
+        "specify platform. Only twitch channels are supported at the moment.\n"
+        "If platform isn't specified, default is Twitch.",
+        "t:channel1;t:channel2;..."));
     parser.process(app);
 
     const QStringList args = parser.positionalArguments();
@@ -38,25 +39,27 @@ Args::Args(const QApplication &app)
 
     if (parser.isSet("c"))
     {
-        QStringList channelList = parser.value("c").split(";");
         QJsonArray channelArray;
-        for (QString channel : channelList)
+        QStringList channelArgList = parser.value("c").split(";");
+        for (QString channelArg : channelArgList)
         {
-            const QRegExp regExp("(.)-(.*)");
-            if (regExp.indexIn(channel) == -1)
+            // Twitch is default platform
+            QString platform = "t";
+            QString channelName = channelArg;
+
+            const QRegExp regExp("(.):(.*)");
+            if (regExp.indexIn(channelArg) != -1)
             {
-                qDebug()
-                    << "[CommandLineArguments] Invalid channel specification"
-                    << channel;
-                continue;
+                platform = regExp.cap(1);
+                channelName = regExp.cap(2);
             }
 
-            // Twitch
-            if (regExp.cap(1) == "t")
+            // Twitch (default)
+            if (platform == "t")
             {
                 // TODO: try not to parse JSON
                 QString channelObjectString =
-                    "{\"splits2\": { \"data\": { \"name\": \"" + regExp.cap(2) +
+                    "{\"splits2\": { \"data\": { \"name\": \"" + channelName +
                     "\", \"type\": \"twitch\" }, \"type\": \"split\" }}";
                 channelArray.push_back(
                     QJsonDocument::fromJson(channelObjectString.toUtf8())
