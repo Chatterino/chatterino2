@@ -584,7 +584,20 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             [this](MessagePtr &message,
                    boost::optional<MessageFlags> overridingFlags) {
                 if (this->shouldIncludeMessage(message))
+                {
+                    // When the message was received in the underlyingChannel,
+                    // logging will be handled. Prevent duplications.
+                    if (overridingFlags)
+                    {
+                        overridingFlags.get().set(MessageFlag::DoNotLog);
+                    }
+                    else
+                    {
+                        overridingFlags = MessageFlags(MessageFlag::DoNotLog);
+                    }
+
                     this->channel_->addMessage(message, overridingFlags);
+                }
             }));
 
     this->channelConnections_.push_back(
