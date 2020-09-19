@@ -124,6 +124,7 @@ SOURCES += \
     src/common/NetworkResult.cpp \
     src/common/UsernameSet.cpp \
     src/common/Version.cpp \
+    src/common/WindowDescriptors.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
