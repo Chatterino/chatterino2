@@ -3,6 +3,8 @@ Chatterino 2 [![GitHub Actions Build (Windows, Ubuntu, MacOS)](https://github.co
 ============
 
 Chatterino 2 is the second installment of the Twitch chat client series "Chatterino".
+The Chatterino 2 wiki can be found [here](https://wiki.chatterino.com).
+Contribution guidelines can be found [here](https://wiki.chatterino.com/contributing).
 
 ## Download
 Current releases are available at [https://chatterino.com](https://chatterino.com).
@@ -26,13 +28,13 @@ cd chatterino2
 git submodule update --init --recursive
 ```
 
-[Building on Windows](../master/BUILDING_ON_WINDOWS.md)
+[Building on Windows](https://wiki.chatterino.com/Building%20Chatterino%202/Windows)
 
-[Building on Linux](../master/BUILDING_ON_LINUX.md)
+[Building on Linux](https://wiki.chatterino.com/Building%20Chatterino%202/Linux)
 
-[Building on Mac](../master/BUILDING_ON_MAC.md)
+[Building on Mac](https://wiki.chatterino.com/Building%20Chatterino%202/macOS)
 
-[Building on FreeBSD](../master/BUILDING_ON_FREEBSD.md)
+[Building on FreeBSD](https://wiki.chatterino.com/Building%20Chatterino%202/FreeBSD)
 
 ## Code style
 The code is formatted using clang format in Qt Creator. [.clang-format](src/.clang-format) contains the style file for clang format.
