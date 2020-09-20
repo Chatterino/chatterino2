@@ -20,7 +20,7 @@
 #include <QTextEdit>
 
 // clang-format off
-#define TEXT "{1} => first word &nbsp;&nbsp;&nbsp; {1+} => first word and after &nbsp;&nbsp;&nbsp; {{ => { &nbsp;&nbsp;&nbsp; <a href='https://chatterino.com/help/commands'>more info</a>"
+#define TEXT "{1} => first word || {1+} => first word and after || <a href='https://wiki.chatterino.com/Commands'>More Information</a>"
 // clang-format on
 
 namespace chatterino {
