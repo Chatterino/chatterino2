@@ -41,6 +41,8 @@ private:
 
     pajlada::Signals::NoArgSignal userStateChanged_;
 
+    pajlada::Signals::Connection refreshConnection_;
+
     std::shared_ptr<bool> hack_;
 
     struct {

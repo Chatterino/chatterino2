@@ -53,6 +53,23 @@ namespace {
 
         return label.getElement();
     };
+
+    bool checkMessage(const QString &userName, MessagePtr message)
+    {
+        bool isSubscription = message->flags.has(MessageFlag::Subscription) &&
+                              message->loginName == "" &&
+                              message->messageText.split(" ").at(0).compare(
+                                  userName, Qt::CaseInsensitive) == 0;
+
+        bool isModAction =
+            message->timeoutUser.compare(userName, Qt::CaseInsensitive) == 0;
+        bool isSelectedUser =
+            message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
+
+        return (isSubscription || isModAction || isSelectedUser) &&
+               !message->flags.has(MessageFlag::Whisper);
+    }
+
     ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
     {
         LimitedQueueSnapshot<MessagePtr> snapshot =
@@ -64,20 +81,7 @@ namespace {
         for (size_t i = 0; i < snapshot.size(); i++)
         {
             MessagePtr message = snapshot[i];
-
-            bool isSubscription =
-                message->flags.has(MessageFlag::Subscription) &&
-                message->loginName == "" &&
-                message->messageText.split(" ").at(0).compare(
-                    userName, Qt::CaseInsensitive) == 0;
-
-            bool isModAction = message->timeoutUser.compare(
-                                   userName, Qt::CaseInsensitive) == 0;
-            bool isSelectedUser =
-                message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
-
-            if ((isSubscription || isModAction || isSelectedUser) &&
-                !message->flags.has(MessageFlag::Whisper))
+            if (checkMessage(userName, message))
             {
                 channelPtr->addMessage(message);
             }
@@ -462,6 +466,29 @@ void UserInfoPopup::updateLatestMessages()
     const bool hasMessages = filteredChannel->hasMessages();
     this->ui_.latestMessages->setVisible(hasMessages);
     this->ui_.noMessagesLabel->setVisible(!hasMessages);
+    this->adjustSize();
+
+    this->refreshConnection_.disconnect();
+    if (hasMessages)
+    {
+        this->refreshConnection_ =
+            this->channel_->messageAppended.connect([this](auto message, auto) {
+                if (checkMessage(this->userName_, message))
+                {
+                    this->ui_.latestMessages->channel()->addMessage(message);
+                }
+            });
+    }
+    else
+    {
+        this->refreshConnection_ =
+            this->channel_->messageAppended.connect([this](auto message, auto) {
+                if (checkMessage(this->userName_, message))
+                {
+                    this->updateLatestMessages();
+                }
+            });
+    }
 }
 
 void UserInfoPopup::updateUserData()
