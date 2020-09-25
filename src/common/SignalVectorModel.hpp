@@ -71,8 +71,7 @@ public:
             assert(row >= 0 && row <= this->rows_.size());
 
             // remove row
-            std::vector<QStandardItem *> items =
-                std::move(this->rows_[row].items);
+            std::vector<QStandardItem *> items = this->rows_[row].items;
 
             this->beginRemoveRows(QModelIndex(), row, row);
             this->rows_.erase(this->rows_.begin() + row);
