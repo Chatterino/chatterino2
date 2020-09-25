@@ -15,7 +15,8 @@ class BaseWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BaseWidget(QWidget *parent, Qt::WindowFlags f = Qt::WindowFlags());
+    explicit BaseWidget(QWidget *parent = nullptr,
+                        Qt::WindowFlags f = Qt::WindowFlags());
 
     virtual float scale() const;
     pajlada::Signals::Signal<float> scaleChanged;

@@ -174,6 +174,9 @@ SplitHeader::SplitHeader(Split *_split)
 void SplitHeader::initializeLayout()
 {
     auto layout = makeLayout<QHBoxLayout>({
+        // space
+        makeWidget<BaseWidget>(
+            [](auto w) { w->setScaleIndependantSize(8, 4); }),
         // title
         this->titleLabel_ = makeWidget<Label>([](auto w) {
             w->setSizePolicy(QSizePolicy::MinimumExpanding,
@@ -181,6 +184,9 @@ void SplitHeader::initializeLayout()
             w->setCentered(true);
             w->setHasOffset(false);
         }),
+        // space
+        makeWidget<BaseWidget>(
+            [](auto w) { w->setScaleIndependantSize(8, 4); }),
         // mode
         this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
             w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
