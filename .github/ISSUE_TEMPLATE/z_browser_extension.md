@@ -1,5 +1,5 @@
 ---
-name: Issue about the Chatterino Extension
+name: Issue about the Chatterino Browser Extension
 about: Make a suggestion or report a bug about the Chatterino browser extension.
 
 ---
