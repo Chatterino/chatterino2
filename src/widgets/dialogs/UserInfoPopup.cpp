@@ -54,10 +54,13 @@ namespace {
         return label.getElement();
     };
 
-    bool checkMessage(const QString &userName, MessagePtr message)
+    bool checkMessageUserName(const QString &userName, MessagePtr message)
     {
+        if (message->flags.has(MessageFlag::Whisper))
+            return false;
+
         bool isSubscription = message->flags.has(MessageFlag::Subscription) &&
-                              message->loginName == "" &&
+                              message->loginName.isEmpty() &&
                               message->messageText.split(" ").at(0).compare(
                                   userName, Qt::CaseInsensitive) == 0;
 
@@ -66,8 +69,7 @@ namespace {
         bool isSelectedUser =
             message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
 
-        return (isSubscription || isModAction || isSelectedUser) &&
-               !message->flags.has(MessageFlag::Whisper);
+        return (isSubscription || isModAction || isSelectedUser);
     }
 
     ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
@@ -81,7 +83,7 @@ namespace {
         for (size_t i = 0; i < snapshot.size(); i++)
         {
             MessagePtr message = snapshot[i];
-            if (checkMessage(userName, message))
+            if (checkMessageUserName(userName, message))
             {
                 channelPtr->addMessage(message);
             }
@@ -466,29 +468,28 @@ void UserInfoPopup::updateLatestMessages()
     const bool hasMessages = filteredChannel->hasMessages();
     this->ui_.latestMessages->setVisible(hasMessages);
     this->ui_.noMessagesLabel->setVisible(!hasMessages);
+
+    // shrink dialog in case ChannelView goes from visible to hidden
     this->adjustSize();
 
     this->refreshConnection_.disconnect();
-    if (hasMessages)
-    {
-        this->refreshConnection_ =
-            this->channel_->messageAppended.connect([this](auto message, auto) {
-                if (checkMessage(this->userName_, message))
-                {
-                    this->ui_.latestMessages->channel()->addMessage(message);
-                }
-            });
-    }
-    else
-    {
-        this->refreshConnection_ =
-            this->channel_->messageAppended.connect([this](auto message, auto) {
-                if (checkMessage(this->userName_, message))
-                {
-                    this->updateLatestMessages();
-                }
-            });
-    }
+    this->refreshConnection_ = this->channel_->messageAppended.connect(
+        [this, hasMessages](auto message, auto) {
+            if (!checkMessageUserName(this->userName_, message))
+                return;
+
+            if (hasMessages)
+            {
+                // display message in ChannelView
+                this->ui_.latestMessages->channel()->addMessage(message);
+            }
+            else
+            {
+                // The ChannelView is currently hidden, so manually refresh
+                // and display the latest messages
+                this->updateLatestMessages();
+            }
+        });
 }
 
 void UserInfoPopup::updateUserData()
