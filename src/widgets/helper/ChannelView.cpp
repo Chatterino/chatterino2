@@ -1579,6 +1579,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
     // handle the click
     this->handleMouseClick(event, hoverLayoutElement, layout);
+
+    this->update();
 }
 
 void ChannelView::handleMouseClick(QMouseEvent *event,
