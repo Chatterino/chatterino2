@@ -730,7 +730,7 @@ void SplitHeader::enterEvent(QEvent *event)
         tooltip->setWordWrap(true);
         tooltip->adjustSize();
         auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
-                   QPoint((this->width() - tooltip->width()) / 2, 0);
+                   QPoint((this->width() - tooltip->width()) / 2, 1);
 
         tooltip->moveTo(this, pos, false);
         tooltip->show();
