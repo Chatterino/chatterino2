@@ -37,7 +37,6 @@ NotificationPage::NotificationPage()
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
                 settings.append(this->createCheckBox(
                     "Play sound", getSettings()->notificationPlaySound));
-#ifdef Q_OS_WIN
                 settings.append(this->createCheckBox(
                     "Show notification", getSettings()->notificationToast));
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
@@ -56,10 +55,9 @@ NotificationPage::NotificationPage()
                             this->managedConnections_))
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
+                    openIn->addStretch();
                 }
-                openIn->setContentsMargins(40, 0, 0, 0);
-                openIn->setSizeConstraint(QLayout::SetMaximumSize);
-#endif
+
                 auto customSound =
                     layout.emplace<QHBoxLayout>().withoutMargin();
                 {

@@ -9,12 +9,10 @@
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/Window.hpp"
-
-#ifdef Q_OS_WIN
-#    include <wintoastlib.h>
-#endif
+#include "widgets/dialogs/NotificationPopup.hpp"
 
 #include <QDesktopServices>
+#include <QDesktopWidget>
 #include <QDir>
 #include <QMediaPlayer>
 #include <QUrl>
@@ -49,6 +47,8 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
     QObject::connect(this->liveStatusTimer_, &QTimer::timeout,
                      [=] { this->fetchFakeChannels(); });
     this->liveStatusTimer_->start(60 * 1000);
+
+    popupWindow_ = new NotificationPopup();
 }
 
 void NotificationController::updateChannelNotification(
@@ -166,10 +166,9 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
                 return;
             }
 
-            if (Toasts::isEnabled())
+            if (getSettings()->notificationToast)
             {
-                getApp()->toasts->sendChannelNotification(channelName,
-                                                          Platform::Twitch);
+                getApp()->toasts->sendToastMessage(channelName);
             }
             if (getSettings()->notificationPlaySound)
             {
@@ -198,6 +197,60 @@ void NotificationController::removeFakeChannel(const QString channelName)
     {
         fakeTwitchChannels.erase(i);
     }
+}
+
+void NotificationController::addNotification(QLayout *layout,
+                                             std::chrono::milliseconds time,
+                                             std::function<void()> callback)
+{
+    this->queue_.push({layout, time, callback});
+    if (queue_.size() == 1)
+    {
+        startNotification();
+    }
+}
+
+void NotificationController::startNotification()
+{
+    auto finishNotification = [this]() {
+        queue_.pop();
+
+        popupWindow_->hide();
+        popupWindow_->mouseRelease.disconnectAll();
+
+        if (queue_.size() == 0)
+        {
+            return;
+        }
+
+        startNotification();
+    };
+    popupWindow_->updatePosition();
+
+    if (auto layout = popupWindow_->layout(); layout)
+    {
+        qDeleteAll(popupWindow_->findChildren<QWidget *>(
+            QString(), Qt ::FindDirectChildrenOnly));
+        delete layout;
+    }
+    auto callback = std::get<2>(queue_.front());
+
+    auto timer = new QTimer();
+    timer->callOnTimeout(finishNotification);
+    timer->setSingleShot(true);
+    timer->start(std::get<1>(queue_.front()));
+
+    popupWindow_->setLayout(std::get<0>(queue_.front()));
+    popupWindow_->mouseRelease.connect(
+        [finishNotification, timer, callback, this](QMouseEvent *event) {
+            if (event->button() == Qt::LeftButton)
+            {
+                timer->stop();
+                finishNotification();
+                callback();
+            }
+        });
+    popupWindow_->show();
 }
 
 }  // namespace chatterino

@@ -7,9 +7,6 @@
 [submodule "lib/qBreakpad"]
 	path = lib/qBreakpad
 	url = https://github.com/jiakuan/qBreakpad.git
-[submodule "lib/WinToast"]
-	path = lib/WinToast
-	url = https://github.com/mohabouje/WinToast.git
 [submodule "lib/settings"]
 	path = lib/settings
 	url = https://github.com/pajlada/settings
