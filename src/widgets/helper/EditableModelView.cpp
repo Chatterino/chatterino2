@@ -59,18 +59,18 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
     // move up
     QPushButton *moveUp = new QPushButton("Move up");
     buttons->addWidget(moveUp);
-    QObject::connect(moveUp, &QPushButton::clicked,
+    QObject::connect(moveUp, &QPushButton::clicked, this,
                      [this] { this->moveRow(-1); });
 
     // move down
     QPushButton *moveDown = new QPushButton("Move down");
     buttons->addWidget(moveDown);
-    QObject::connect(moveDown, &QPushButton::clicked,
+    QObject::connect(moveDown, &QPushButton::clicked, this,
                      [this] { this->moveRow(1); });
 
     buttons->addStretch();
 
-    QObject::connect(this->model_, &QAbstractTableModel::rowsMoved,
+    QObject::connect(this->model_, &QAbstractTableModel::rowsMoved, this,
                      [this](const QModelIndex &parent, int start, int end,
                             const QModelIndex &destination,
                             int row) { this->selectRow(row); });
