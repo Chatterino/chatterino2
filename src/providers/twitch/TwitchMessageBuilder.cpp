@@ -351,10 +351,6 @@ bool doesWordContainATwitchEmote(
 
     const auto &currentTwitchEmote = *currentTwitchEmoteIt;
 
-    qDebug() << "Cursor is" << cursor;
-    qDebug() << "Word length is" << word.length();
-    qDebug().nospace() << "Word is '" << word << "'";
-
     auto wordEnd = cursor + word.length();
 
     // Check if this emote fits within the word boundaries
