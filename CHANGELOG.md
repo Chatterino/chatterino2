@@ -40,6 +40,7 @@
 - Bugfix: MacOS updater looked for non-existing fields, causing it to always fail the update check (#1642)
 - Bugfix: Fixed message menu crashing if the message you right-clicked goes out of scope before you select an action (#1783) (#1787)
 - Bugfix: Fixed alternate messages flickering in UserInfoPopup when clicking Refresh if there was an odd number of messages in there (#1789 #1810)
+- Bugfix: Fix a crash when using middle click scroll on a chat window. (#1870)
 - Settings open faster
 - Dev: Fully remove Twitch Chatroom support
 - Dev: Handle conversion of historical CLEARCHAT messages to NOTICE messages in Chatterino instead of relying on the Recent Messages API to handle it for us. (#1804)
