@@ -345,8 +345,14 @@ public:
 
     ChatterinoSetting<std::vector<TimeoutButton>> timeoutButtons = {
         "/timeouts/timeoutButtons",
-            { { "s", 1 },  { "s", 30 }, { "m", 1 }, { "m", 5 },
-              { "m", 30 }, { "h", 1 },  { "d", 1 }, { "w", 1 } } };
+        {{"s", 1},
+         {"s", 30},
+         {"m", 1},
+         {"m", 5},
+         {"m", 30},
+         {"h", 1},
+         {"d", 1},
+         {"w", 1}}};
 
 private:
     void updateModerationActions();
