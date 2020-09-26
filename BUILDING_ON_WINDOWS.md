@@ -29,7 +29,7 @@ Note: This installation will take about 1.5 GB of disk space.
 
 ## OpenSSL
 ### For our websocket library, we need OpenSSL 1.1
-1. Download OpenSSL for windows, version `1.1.1g`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1g.exe)**
+1. Download OpenSSL for windows, version `1.1.1h`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1h.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 

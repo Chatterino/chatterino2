@@ -3,10 +3,16 @@
 ## Unversioned
 
 - Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940)
+- Minor: Added customizable timeout buttons to the user info popup
+- Minor: Deprecate loading of "v1" window layouts. If you haven't updated Chatterino in more than 2 years, there's a chance you will lose your window layout.
 - Minor: Disable checking for updates on unsupported platforms (#1874)
+- Minor: Changed the English in two rate-limited system messages (#1878)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
+- Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
 - Bugfix: Handle symlinks properly when saving commands & settings (#1856, #1908)
+- Bugfix: Starting Chatterino in a minimized state after an update will no longer cause a crash
+- Bugfix: Modify the emote parsing to handle some edge-cases with dots and stuff (#1704, #1714)
 
 ## 2.2.0
 
@@ -35,6 +41,7 @@
 - Bugfix: MacOS updater looked for non-existing fields, causing it to always fail the update check (#1642)
 - Bugfix: Fixed message menu crashing if the message you right-clicked goes out of scope before you select an action (#1783) (#1787)
 - Bugfix: Fixed alternate messages flickering in UserInfoPopup when clicking Refresh if there was an odd number of messages in there (#1789 #1810)
+- Bugfix: Fix a crash when using middle click scroll on a chat window. (#1870)
 - Settings open faster
 - Dev: Fully remove Twitch Chatroom support
 - Dev: Handle conversion of historical CLEARCHAT messages to NOTICE messages in Chatterino instead of relying on the Recent Messages API to handle it for us. (#1804)
