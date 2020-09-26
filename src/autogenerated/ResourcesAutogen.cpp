@@ -25,8 +25,10 @@ Resources2::Resources2()
     this->buttons.trashCan = QPixmap(":/buttons/trashCan.png");
     this->buttons.unban = QPixmap(":/buttons/unban.png");
     this->buttons.unmod = QPixmap(":/buttons/unmod.png");
+    this->buttons.unvip = QPixmap(":/buttons/unvip.png");
     this->buttons.update = QPixmap(":/buttons/update.png");
     this->buttons.updateError = QPixmap(":/buttons/updateError.png");
+    this->buttons.vip = QPixmap(":/buttons/vip.png");
     this->error = QPixmap(":/error.png");
     this->icon = QPixmap(":/icon.png");
     this->pajaDank = QPixmap(":/pajaDank.png");

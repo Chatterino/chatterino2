@@ -118,6 +118,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
 
     if (closeAutomatically)
         this->setActionOnFocusLoss(BaseWindow::Delete);
+    else
+        this->setAttribute(Qt::WA_DeleteOnClose);
 
     // Close the popup when Escape is pressed
     createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
@@ -184,6 +186,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
         auto unmod = user.emplace<Button>(this);
         unmod->setPixmap(getResources().buttons.unmod);
         unmod->setScaleIndependantSize(30, 30);
+        auto vip = user.emplace<Button>(this);
+        vip->setPixmap(getResources().buttons.vip);
+        vip->setScaleIndependantSize(30, 30);
+        auto unvip = user.emplace<Button>(this);
+        unvip->setPixmap(getResources().buttons.unvip);
+        unvip->setScaleIndependantSize(30, 30);
 
         user->addStretch(1);
 
@@ -200,6 +208,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
         });
         QObject::connect(unmod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/unmod " + this->userName_);
+        });
+        QObject::connect(vip.getElement(), &Button::leftClicked, [this] {
+            this->channel_->sendMessage("/vip " + this->userName_);
+        });
+        QObject::connect(unvip.getElement(), &Button::leftClicked, [this] {
+            this->channel_->sendMessage("/unvip " + this->userName_);
         });
 
         // userstate
