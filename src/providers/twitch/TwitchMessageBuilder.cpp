@@ -306,7 +306,9 @@ MessagePtr TwitchMessageBuilder::build()
     this->runIgnoreReplaces(twitchEmotes);
 
     std::sort(twitchEmotes.begin(), twitchEmotes.end(),
-              [](const auto &a, const auto &b) { return a.start < b.start; });
+              [](const auto &a, const auto &b) {
+                  return a.start < b.start;  //
+              });
     twitchEmotes.erase(std::unique(twitchEmotes.begin(), twitchEmotes.end(),
                                    [](const auto &first, const auto &second) {
                                        return first.start == second.start;
