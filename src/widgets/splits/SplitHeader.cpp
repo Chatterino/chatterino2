@@ -594,6 +594,7 @@ void SplitHeader::updateChannelText()
         if (streamStatus->live)
         {
             this->isLive_ = true;
+            // XXX: This URL format can be figured out from the Helix Get Streams API which we parse in TwitchChannel::parseLiveStatus
             QString url = "https://static-cdn.jtvnw.net/"
                           "previews-ttv/live_user_" +
                           channel->getName().toLower();
@@ -617,9 +618,17 @@ void SplitHeader::updateChannelText()
             {
                 NetworkRequest(url, NetworkRequestType::Get)
                     .onSuccess([this](auto result) -> Outcome {
-                        this->thumbnail_ =
-                            QString::fromLatin1(result.getData().toBase64());
-                        updateChannelText();
+                        // NOTE: We do not follow the redirects, so we need to make sure we only treat code 200 as a valid image
+                        if (result.status() == 200)
+                        {
+                            this->thumbnail_ = QString::fromLatin1(
+                                result.getData().toBase64());
+                        }
+                        else
+                        {
+                            this->thumbnail_.clear();
+                        }
+                        this->updateChannelText();
                         return Success;
                     })
                     .execute();

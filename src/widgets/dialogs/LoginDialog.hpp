@@ -29,6 +29,7 @@ public:
         QHBoxLayout horizontalLayout;
         QPushButton loginButton;
         QPushButton pasteCodeButton;
+        QLabel unableToOpenBrowserHelper;
     } ui_;
 };
 

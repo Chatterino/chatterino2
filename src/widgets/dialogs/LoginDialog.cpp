@@ -84,19 +84,33 @@ namespace {
 
 BasicLoginWidget::BasicLoginWidget()
 {
+    const QString logInLink = "https://chatterino.com/client_login";
     this->setLayout(&this->ui_.layout);
 
     this->ui_.loginButton.setText("Log in (Opens in browser)");
     this->ui_.pasteCodeButton.setText("Paste login info");
+    this->ui_.unableToOpenBrowserHelper.setWordWrap(true);
+    this->ui_.unableToOpenBrowserHelper.hide();
+    this->ui_.unableToOpenBrowserHelper.setText(
+        "An error occured while attempting to open <a href='" + logInLink +
+        "'>the log in link (" + logInLink + ")</a> " +
+        " - open it manually in your browser and proceed from there.");
+    this->ui_.unableToOpenBrowserHelper.setOpenExternalLinks(true);
 
     this->ui_.horizontalLayout.addWidget(&this->ui_.loginButton);
     this->ui_.horizontalLayout.addWidget(&this->ui_.pasteCodeButton);
 
     this->ui_.layout.addLayout(&this->ui_.horizontalLayout);
+    this->ui_.layout.addWidget(&this->ui_.unableToOpenBrowserHelper);
 
-    connect(&this->ui_.loginButton, &QPushButton::clicked, []() {
-        printf("open login in browser\n");
-        QDesktopServices::openUrl(QUrl("https://chatterino.com/client_login"));
+    connect(&this->ui_.loginButton, &QPushButton::clicked, [this, logInLink]() {
+        qDebug() << "open login in browser";
+        auto res = QDesktopServices::openUrl(QUrl(logInLink));
+        if (!res)
+        {
+            qDebug() << "open login in browser failed";
+            this->ui_.unableToOpenBrowserHelper.show();
+        }
     });
 
     connect(&this->ui_.pasteCodeButton, &QPushButton::clicked, [this]() {
