@@ -17,6 +17,7 @@ namespace {
 
     struct _Emote {
         EmotePtr emote;
+        QString displayName;
         QString providerName;
     };
 
@@ -25,7 +26,8 @@ namespace {
     {
         for (auto &&emote : map)
             if (emote.first.string.contains(text, Qt::CaseInsensitive))
-                out.push_back({emote.second, providerName});
+                out.push_back(
+                    {emote.second, emote.second->name.string, providerName});
     }
 
     void addEmojis(std::vector<_Emote> &out, const EmojiMap &map,
@@ -34,7 +36,7 @@ namespace {
         map.each([&](const QString &, const std::shared_ptr<EmojiData> &emoji) {
             for (auto &&shortCode : emoji->shortCodes)
                 if (shortCode.contains(text, Qt::CaseInsensitive))
-                    out.push_back({emoji->emote, "Emoji"});
+                    out.push_back({emoji->emote, shortCode, "Emoji"});
         });
     }
 }  // namespace
@@ -60,6 +62,7 @@ void EmoteInputPopup::initLayout()
 
     auto listView =
         creator.emplace<GenericListView>().assign(&this->ui_.listView);
+    listView->setInvokeActionOnTab(true);
 
     listView->setModel(&this->model_);
     QObject::connect(listView.getElement(), &GenericListView::closeRequested,
@@ -92,13 +95,29 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
         addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
     }
 
+    // if there is an exact match, put that emote first
+    for (size_t i = 1; i < emotes.size(); i++)
+    {
+        auto emoteText = emotes.at(i).displayName;
+
+        // test for match or match with colon at start for emotes like ":)"
+        if (emoteText.compare(text, Qt::CaseInsensitive) == 0 ||
+            emoteText.compare(":" + text, Qt::CaseInsensitive) == 0)
+        {
+            auto emote = emotes[i];
+            emotes.erase(emotes.begin() + int(i));
+            emotes.insert(emotes.begin(), emote);
+            break;
+        }
+    }
+
     this->model_.clear();
 
     int count = 0;
     for (auto &&emote : emotes)
     {
         this->model_.addItem(std::make_unique<EmoteInputItem>(
-            emote.emote, emote.emote->name.string + " - " + emote.providerName,
+            emote.emote, emote.displayName + " - " + emote.providerName,
             this->callback_));
 
         if (count++ == maxEmoteCount)

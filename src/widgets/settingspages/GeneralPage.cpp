@@ -5,6 +5,7 @@
 #include <QScrollArea>
 
 #include "Application.hpp"
+#include "common/Version.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Theme.hpp"
@@ -377,6 +378,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.enableSmoothScrollingNewMessages);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
+    layout.addCheckbox("Allow sending duplicate messages",
+                       s.allowDuplicateMessages);
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
@@ -474,6 +477,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Animate", s.animateEmotes);
     layout.addCheckbox("Animate only when Chatterino is focused",
                        s.animationsWhenFocused);
+    layout.addCheckbox("Enable emote auto-completion by typing :",
+                       s.emoteCompletionWithColon);
     layout.addDropdown<float>(
         "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
         s.emoteScale,
@@ -538,10 +543,20 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Title", s.headerStreamTitle);
 
     layout.addTitle("Beta");
-    layout.addDescription(
-        "You can receive updates earlier by ticking the box below. Report "
-        "issues <a href='https://chatterino.com/link/issues'>here</a>.");
-    layout.addCheckbox("Receive beta updates", s.betaUpdates);
+    if (Version::instance().isSupportedOS())
+    {
+        layout.addDescription(
+            "You can receive updates earlier by ticking the box below. Report "
+            "issues <a href='https://chatterino.com/link/issues'>here</a>.");
+        layout.addCheckbox("Receive beta updates", s.betaUpdates);
+    }
+    else
+    {
+        layout.addDescription(
+            "Your operating system is not officially supplied with builds. For "
+            "updates, please rebuild chatterino from sources. Report "
+            "issues <a href='https://chatterino.com/link/issues'>here</a>.");
+    }
 
 #ifdef Q_OS_WIN
     layout.addTitle("Browser Integration");

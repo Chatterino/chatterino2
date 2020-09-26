@@ -435,7 +435,8 @@ void SplitInput::installKeyPressedEvent()
                 }
             }
         }
-        else if (event->key() == Qt::Key_C &&
+        else if ((event->key() == Qt::Key_C ||
+                  event->key() == Qt::Key_Insert) &&
                  event->modifiers() == Qt::ControlModifier)
         {
             if (this->split_->view_->hasSelection())
@@ -459,16 +460,18 @@ void SplitInput::onCursorPositionChanged()
 
 void SplitInput::updateColonMenu()
 {
-    if (!dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    if (!getSettings()->emoteCompletionWithColon ||
+        !dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
     {
         this->hideColonMenu();
+        return;
     }
 
     // check if in :
     auto &edit = *this->ui_.textEdit;
 
     auto text = edit.toPlainText();
-    auto position = edit.textCursor().position();
+    auto position = edit.textCursor().position() - 1;
 
     if (text.length() == 0)
     {
@@ -485,7 +488,10 @@ void SplitInput::updateColonMenu()
         }
         else if (text[i] == ':')
         {
-            this->showColonMenu(text.mid(i, position - i).mid(1));
+            if (i == 0 || text[i - 1].isSpace())
+                this->showColonMenu(text.mid(i, position - i + 1).mid(1));
+            else
+                this->hideColonMenu();
             return;
         }
     }
@@ -526,9 +532,10 @@ void SplitInput::hideColonMenu()
         popup->hide();
 }
 
-void SplitInput::insertColonText(const QString &input)
+void SplitInput::insertColonText(const QString &input_)
 {
     auto &edit = *this->ui_.textEdit;
+    auto input = input_ + ' ';
 
     auto text = edit.toPlainText();
     auto position = edit.textCursor().position();

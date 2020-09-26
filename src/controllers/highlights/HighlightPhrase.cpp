@@ -2,9 +2,16 @@
 
 namespace chatterino {
 
+namespace {
+
+    const QString REGEX_START_BOUNDARY("(\\b|\\s|^)");
+    const QString REGEX_END_BOUNDARY("(\\b|\\s|$)");
+
+}  // namespace
+
 QColor HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
 QColor HighlightPhrase::FALLBACK_REDEEMED_HIGHLIGHT_COLOR =
-    QColor(28, 126, 141, 90);
+    QColor(28, 126, 141, 60);
 QColor HighlightPhrase::FALLBACK_SUB_COLOR = QColor(196, 102, 255, 100);
 
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const
@@ -27,8 +34,10 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool hasAlert,
     , isRegex_(isRegex)
     , isCaseSensitive_(isCaseSensitive)
     , soundUrl_(soundUrl)
-    , regex_(isRegex_ ? pattern
-                      : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+    , regex_(isRegex_
+                 ? pattern
+                 : REGEX_START_BOUNDARY + QRegularExpression::escape(pattern) +
+                       REGEX_END_BOUNDARY,
              QRegularExpression::UseUnicodePropertiesOption |
                  (isCaseSensitive_ ? QRegularExpression::NoPatternOption
                                    : QRegularExpression::CaseInsensitiveOption))
@@ -47,8 +56,10 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool hasAlert,
     , isCaseSensitive_(isCaseSensitive)
     , soundUrl_(soundUrl)
     , color_(color)
-    , regex_(isRegex_ ? pattern
-                      : "\\b" + QRegularExpression::escape(pattern) + "\\b",
+    , regex_(isRegex_
+                 ? pattern
+                 : REGEX_START_BOUNDARY + QRegularExpression::escape(pattern) +
+                       REGEX_END_BOUNDARY,
              QRegularExpression::UseUnicodePropertiesOption |
                  (isCaseSensitive_ ? QRegularExpression::NoPatternOption
                                    : QRegularExpression::CaseInsensitiveOption))

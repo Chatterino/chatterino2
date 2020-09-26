@@ -34,6 +34,7 @@
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/StreamerMode.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
@@ -131,7 +132,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->updatePauses();
     });
 
-    auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
+    auto shortcut = new QShortcut(QKeySequence::StandardKey::Copy, this);
     QObject::connect(shortcut, &QShortcut::activated,
                      [this] { crossPlatformCopy(this->getSelectedText()); });
 
@@ -1315,7 +1316,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         {
             auto element = &hoverLayoutElement->getCreator();
             auto thumbnailSize = getSettings()->thumbnailSize;
-            if (thumbnailSize == 0)
+            if (thumbnailSize == 0 || isInStreamerMode())
             {
                 tooltipPreviewImage.setImage(nullptr);
             }
@@ -1578,6 +1579,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
     // handle the click
     this->handleMouseClick(event, hoverLayoutElement, layout);
+
+    this->update();
 }
 
 void ChannelView::handleMouseClick(QMouseEvent *event,

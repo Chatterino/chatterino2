@@ -3,6 +3,7 @@
 #include "BaseSettings.hpp"
 #include "BaseTheme.hpp"
 #include "boost/algorithm/algorithm.hpp"
+#include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Shortcut.hpp"
 #include "util/WindowsHelper.hpp"
@@ -94,6 +95,12 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 #endif
 
     this->themeChangedEvent();
+    DebugCount::increase("BaseWindow");
+}
+
+BaseWindow::~BaseWindow()
+{
+    DebugCount::decrease("BaseWindow");
 }
 
 void BaseWindow::setInitialBounds(const QRect &bounds)

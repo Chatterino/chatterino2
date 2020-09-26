@@ -71,8 +71,7 @@ public:
             assert(row >= 0 && row <= this->rows_.size());
 
             // remove row
-            std::vector<QStandardItem *> items =
-                std::move(this->rows_[row].items);
+            std::vector<QStandardItem *> items = this->rows_[row].items;
 
             this->beginRemoveRows(QModelIndex(), row, row);
             this->rows_.erase(this->rows_.begin() + row);
@@ -144,7 +143,11 @@ public:
 
         Row &rowItem = this->rows_[row];
 
-        rowItem.items[column]->setData(value, role);
+        assert(this->columnCount_ == rowItem.items.size());
+
+        auto &cell = rowItem.items[column];
+
+        cell->setData(value, role);
 
         if (rowItem.isCustomRow)
         {
@@ -211,7 +214,11 @@ public:
         assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
                column < this->columnCount_);
 
-        return this->rows_[row].items[column]->flags();
+        const auto &rowItem = this->rows_[row];
+
+        assert(this->columnCount_ == rowItem.items.size());
+
+        return rowItem.items[column]->flags();
     }
 
     QStandardItem *getItem(int row, int column)
@@ -219,7 +226,11 @@ public:
         assert(row >= 0 && row < this->rows_.size() && column >= 0 &&
                column < this->columnCount_);
 
-        return rows_[row].items[column];
+        const auto &rowItem = this->rows_[row];
+
+        assert(this->columnCount_ == rowItem.items.size());
+
+        return rowItem.items[column];
     }
 
     void deleteRow(int row)
@@ -395,7 +406,7 @@ private:
     SignalVector<TVectorItem> *vector_;
     std::vector<Row> rows_;
 
-    int columnCount_;
+    const int columnCount_;
 
     // returns the related index of the SignalVector
     int getVectorIndexFromModelIndex(int index)

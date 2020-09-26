@@ -2,11 +2,24 @@
 
 ## Unversioned
 
-- Minor: Added support for Brave browser. (#1862)
+- Minor: Deprecate loading of "v1" window layouts. If you haven't updated Chatterino in more than 2 years, there's a chance you will lose your window layout.
+- Minor: Disable checking for updates on unsupported platforms (#1874)
+- Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
+- Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
+- Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
+- Bugfix: Handle symlinks properly when saving commands & settings (#1856, #1908)
+- Bugfix: Starting Chatterino in a minimized state after an update will no longer cause a crash
+
+## 2.2.0
+
 - Major: We now support image thumbnails coming from the link resolver. This feature is off by default and can be enabled in the settings with the "Show link thumbnail" setting. This feature also requires the "Show link info when hovering" setting to be enabled (#1664)
 - Major: Added image upload functionality to i.nuuls.com with an ability to change upload destination. This works by dragging and dropping an image into a split, or pasting an image into the text edit field. (#1332, #1741)
-- Minor: Add a switcher widget, similar to Discord. It can be opened by pressing Ctrl+K. (#1588)
 - Major: Added option to display tabs vertically. (#1815)
+- Major: Support the highlighted messages redeemed with channel points on twitch.tv.
+- Major: Added emote completion with `:`
+- Minor: Added a "Streamer Mode" that hides user generated images while obs is open.
+- Minor: Added extension support for Brave browser and Microsoft Edge. (#1862)
+- Minor: Add a switcher widget, similar to Discord. It can be opened by pressing Ctrl+K. (#1588)
 - Minor: Clicking on `Open in browser` in a whisper split will now open your whispers on twitch. (#1828)
 - Minor: Clicking on @mentions will open the User Popup. (#1674)
 - Minor: You can now open the Twitch User Card by middle-mouse clicking a username. (#1669)
@@ -17,6 +30,8 @@
 - Minor: CTRL+F now selects the Find text input field in the Settings Dialog (#1806 #1811)
 - Minor: CTRL+F now selects the search text input field in the Search Popup (#1812)
 - Minor: Changed the English in two rate-limited system messages (#1878)
+- Minor: Modify our word boundary logic in highlight phrase searching to accomodate non-regex phrases with "word-boundary-creating" characters like ! (#1885, #1890)
+- Bugfix: Fixed not being able to open links in incognito with Microsoft Edge (Chromium) (#1875)
 - Bugfix: Fix the incorrect `Open stream in browser` labelling in the whisper split (#1860)
 - Bugfix: Fix preview on hover not working when Animated emotes options was disabled (#1546)
 - Bugfix: FFZ custom mod badges no longer scale with the emote scale options (#1602)

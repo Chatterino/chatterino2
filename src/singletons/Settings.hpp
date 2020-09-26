@@ -143,6 +143,8 @@ public:
         "/behaviour/autocompletion/prefixOnlyCompletion", true};
     BoolSetting userCompletionOnlyWithAt = {
         "/behaviour/autocompletion/userCompletionOnlyWithAt", false};
+    BoolSetting emoteCompletionWithColon = {
+        "/behaviour/autocompletion/emoteCompletionWithColon", true};
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {
@@ -281,10 +283,11 @@ public:
     QStringSetting customURIScheme = {"/external/urischeme"};
 
     // Image Uploader
-    QStringSetting imageUploaderUrl = {"/external/imageUploader/url",
-                                       "https://i.nuuls.com/upload"};
+    BoolSetting imageUploaderEnabled = {"/external/imageUploader/enabled",
+                                        false};
+    QStringSetting imageUploaderUrl = {"/external/imageUploader/url", ""};
     QStringSetting imageUploaderFormField = {
-        "/external/imageUploader/formField", "attachment"};
+        "/external/imageUploader/formField", ""};
     QStringSetting imageUploaderHeaders = {"/external/imageUploader/headers",
                                            ""};
     QStringSetting imageUploaderLink = {"/external/imageUploader/link", ""};

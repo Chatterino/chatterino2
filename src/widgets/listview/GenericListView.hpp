@@ -18,6 +18,7 @@ public:
 
     virtual void setModel(QAbstractItemModel *model) override;
     void setModel(GenericListModel *);
+    void setInvokeActionOnTab(bool);
     bool eventFilter(QObject *watched, QEvent *event) override;
 
     GenericListModel *model_{};
@@ -27,6 +28,9 @@ public:
 
 signals:
     void closeRequested();
+
+private:
+    bool invokeActionOnTab_{};
 };
 
 }  // namespace chatterino
