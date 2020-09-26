@@ -684,7 +684,10 @@ void ChannelView::messageAppended(MessagePtr &message,
     if (!messageFlags->has(MessageFlag::DoNotTriggerNotification))
     {
         if (messageFlags->has(MessageFlag::Highlighted) &&
-            !messageFlags->has(MessageFlag::Subscription))
+            !messageFlags->has(MessageFlag::Subscription) &&
+            (getSettings()->highlightMentions ||
+             this->channel_ != getApp()->twitch2->mentionsChannel))
+
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
         }

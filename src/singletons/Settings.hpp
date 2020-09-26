@@ -243,6 +243,8 @@ public:
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 
+    BoolSetting highlightMentions = {"/hightlighting/mentions", true};
+
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
 

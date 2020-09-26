@@ -685,6 +685,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Ask for confirmation when uploading an image",
                        s.askOnImageUpload);
+    layout.addCheckbox("/mentions highlights tab as well", s.highlightMentions);
 
     // invisible element for width
     auto inv = new BaseWidget(this);

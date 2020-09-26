@@ -361,6 +361,23 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         this->split_->setModerationMode(!this->split_->getModerationMode());
     });
 
+    if (this->split_->getChannel()->getType() == Channel::Type::TwitchMentions)
+    {
+        auto action = new QAction(this);
+        action->setText("Enable /mention tab highlights");
+        action->setCheckable(true);
+
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
+            action->setChecked(getSettings()->highlightMentions);
+        });
+        action->connect(action, &QAction::triggered, this, [this]() {
+            getSettings()->highlightMentions =
+                !getSettings()->highlightMentions;
+        });
+
+        moreMenu->addAction(action);
+    }
+
     if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
     {
         moreMenu->addAction("Show viewer list", this->split_,
