@@ -118,6 +118,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
 
     if (closeAutomatically)
         this->setActionOnFocusLoss(BaseWindow::Delete);
+    else
+        this->setAttribute(Qt::WA_DeleteOnClose);
 
     // Close the popup when Escape is pressed
     createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
