@@ -627,6 +627,17 @@ SplitNotebook::SplitNotebook(Window *parent)
     }
 }
 
+void SplitNotebook::showEvent(QShowEvent *)
+{
+    if (auto page = this->getSelectedPage())
+    {
+        if (auto split = page->findChild<Split *>())
+        {
+            split->giveFocus(Qt::OtherFocusReason);
+        }
+    }
+}
+
 void SplitNotebook::addCustomButtons()
 {
     // settings

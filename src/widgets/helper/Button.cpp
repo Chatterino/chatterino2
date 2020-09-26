@@ -9,6 +9,20 @@
 #include "util/FunctionEventFilter.hpp"
 
 namespace chatterino {
+namespace {
+
+    // returns a new resized image or the old one if the size didn't change
+    auto resizePixmap(const QPixmap &current, const QPixmap resized,
+                      const QSize &size) -> QPixmap
+    {
+        if (resized.size() == size)
+            return resized;
+        else
+            return current.scaled(size, Qt::IgnoreAspectRatio,
+                                  Qt::SmoothTransformation);
+    }
+
+}  // namespace
 
 Button::Button(BaseWidget *parent)
     : BaseWidget(parent)
@@ -30,6 +44,7 @@ void Button::setMouseEffectColor(boost::optional<QColor> color)
 void Button::setPixmap(const QPixmap &_pixmap)
 {
     this->pixmap_ = _pixmap;
+    this->resizedPixmap_ = {};
     this->update();
 }
 
@@ -123,6 +138,9 @@ void Button::paintEvent(QPaintEvent *)
 
         QRect rect = this->rect();
 
+        this->resizedPixmap_ =
+            resizePixmap(this->pixmap_, this->resizedPixmap_, rect.size());
+
         int margin = this->height() < 22 * this->scale() ? 3 : 6;
 
         int s = this->enableMargin_ ? int(margin * this->scale()) : 0;
@@ -132,7 +150,7 @@ void Button::paintEvent(QPaintEvent *)
         rect.moveTop(s);
         rect.setBottom(rect.bottom() - s - s);
 
-        painter.drawPixmap(rect, this->pixmap_);
+        painter.drawPixmap(rect, this->resizedPixmap_);
 
         painter.setOpacity(1);
     }
