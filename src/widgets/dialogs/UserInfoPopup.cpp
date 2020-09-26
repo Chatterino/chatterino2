@@ -567,6 +567,10 @@ void UserInfoPopup::updateUserData()
         {
             this->loadAvatar(user.profileImageUrl);
         }
+        else
+        {
+            this->ui_.avatarButton->setPixmap(getResources().streamerMode);
+        }
 
         getHelix()->getUserFollowers(
             user.id,
