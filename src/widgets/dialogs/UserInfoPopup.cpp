@@ -563,13 +563,13 @@ void UserInfoPopup::updateUserData()
             [] {
                 // failure
             });
-        if (!isInStreamerMode())
+        if (isInStreamerMode())
         {
-            this->loadAvatar(user.profileImageUrl);
+            this->ui_.avatarButton->setPixmap(getResources().streamerMode);
         }
         else
         {
-            this->ui_.avatarButton->setPixmap(getResources().streamerMode);
+            this->loadAvatar(user.profileImageUrl);
         }
 
         getHelix()->getUserFollowers(
