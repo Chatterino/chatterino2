@@ -26,8 +26,10 @@
     <file>buttons/trashcan.svg</file>
     <file>buttons/unban.png</file>
     <file>buttons/unmod.png</file>
+    <file>buttons/unvip.png</file>
     <file>buttons/update.png</file>
     <file>buttons/updateError.png</file>
+    <file>buttons/vip.png</file>
     <file>chatterino.icns</file>
     <file>com.chatterino.chatterino.appdata.xml</file>
     <file>com.chatterino.chatterino.desktop</file>
