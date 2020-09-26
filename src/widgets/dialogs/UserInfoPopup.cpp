@@ -287,6 +287,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
 }
 
+// remove once https://github.com/pajlada/signals/pull/10 gets merged
+UserInfoPopup::~UserInfoPopup()
+{
+    this->refreshConnection_.disconnect();
+}
+
 void UserInfoPopup::themeChangedEvent()
 {
     BaseWindow::themeChangedEvent();
@@ -472,7 +478,9 @@ void UserInfoPopup::updateLatestMessages()
     // shrink dialog in case ChannelView goes from visible to hidden
     this->adjustSize();
 
-    this->refreshConnection_.disconnect();
+    this->refreshConnection_
+        .disconnect();  // remove once https://github.com/pajlada/signals/pull/10 gets merged
+
     this->refreshConnection_ = this->channel_->messageAppended.connect(
         [this, hasMessages](auto message, auto) {
             if (!checkMessageUserName(this->userName_, message))
