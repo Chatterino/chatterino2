@@ -1,9 +1,8 @@
 #pragma once
 
-#include "widgets/BaseWindow.hpp"
-#include "widgets/helper/ChannelView.hpp"
-
 #include <pajlada/signals/signal.hpp>
+
+#include "widgets/BaseWindow.hpp"
 
 class QCheckBox;
 
@@ -36,7 +35,6 @@ private:
     QString userName_;
     QString userId_;
     ChannelPtr channel_;
-    ChannelView *latestMessages_{};
 
     pajlada::Signals::NoArgSignal userStateChanged_;
 
@@ -45,7 +43,6 @@ private:
     struct {
         Button *avatarButton = nullptr;
 
-        // RippleEffectLabel2 *viewLogs = nullptr;
         Label *nameLabel = nullptr;
         Label *viewCountLabel = nullptr;
         Label *followerCountLabel = nullptr;

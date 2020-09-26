@@ -42,30 +42,6 @@ namespace {
         return timeout.second * durations[timeout.first];
     }
 
-    ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
-    {
-        LimitedQueueSnapshot<MessagePtr> snapshot =
-            channel->getMessageSnapshot();
-
-        ChannelPtr channelPtr(
-            new Channel(channel->getName(), Channel::Type::None));
-
-        for (size_t i = 0; i < snapshot.size(); i++)
-        {
-            MessagePtr message = snapshot[i];
-
-            bool isSelectedUser =
-                message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
-
-            if (isSelectedUser && !message->flags.has(MessageFlag::Whisper))
-            {
-                channelPtr->addMessage(message);
-            }
-        }
-
-        return channelPtr;
-    }
-
 }  // namespace
 
 UserInfoPopup::UserInfoPopup()
@@ -123,13 +99,10 @@ UserInfoPopup::UserInfoPopup()
         user.emplace<QCheckBox>("Ignore").assign(&this->ui_.ignore);
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
-        auto viewLogs = user.emplace<EffectLabel2>(this);
-        viewLogs->getLabel().setText("Online logs");
+
         auto usercard = user.emplace<EffectLabel2>(this);
         usercard->getLabel().setText("Usercard");
-
         usercard->setBorderColor(borderColor);
-        viewLogs->setBorderColor(borderColor);
 
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(app->resources->buttons.mod);
@@ -242,11 +215,6 @@ UserInfoPopup::UserInfoPopup()
             }
         });
     }
-
-    // fourth line (last messages)
-    this->latestMessages_ = new ChannelView();
-    this->latestMessages_->setScaleIndependantHeight(150);
-    layout.append(this->latestMessages_);
 
     this->setStyleSheet("font-size: 11pt;");
 
@@ -386,9 +354,6 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     this->updateUserData();
 
     this->userStateChanged_.invoke();
-
-    this->latestMessages_->setChannel(
-        filterMessages(this->userName_, this->channel_));
 }
 
 void UserInfoPopup::updateUserData()
