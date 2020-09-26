@@ -1,8 +1,10 @@
 #include "EditableModelView.hpp"
 
+#include <QAbstractItemView>
 #include <QAbstractTableModel>
 #include <QHBoxLayout>
 #include <QHeaderView>
+#include <QModelIndex>
 #include <QPushButton>
 #include <QTableView>
 #include <QVBoxLayout>
@@ -14,7 +16,7 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
     , model_(model)
 {
     this->model_->setParent(this);
-    this->tableView_->setModel(model);
+    this->tableView_->setModel(model_);
     this->tableView_->setSelectionMode(QAbstractItemView::SingleSelection);
     this->tableView_->setSelectionBehavior(QAbstractItemView::SelectRows);
     this->tableView_->setDragDropMode(QTableView::DragDropMode::InternalMove);
@@ -54,7 +56,24 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
             model_->removeRow(row);
     });
 
+    // move up
+    QPushButton *moveUp = new QPushButton("Move up");
+    buttons->addWidget(moveUp);
+    QObject::connect(moveUp, &QPushButton::clicked,
+                     [this] { this->moveRow(-1); });
+
+    // move down
+    QPushButton *moveDown = new QPushButton("Move down");
+    buttons->addWidget(moveDown);
+    QObject::connect(moveDown, &QPushButton::clicked,
+                     [this] { this->moveRow(1); });
+
     buttons->addStretch();
+
+    QObject::connect(this->model_, &QAbstractTableModel::rowsMoved,
+                     [this](const QModelIndex &parent, int start, int end,
+                            const QModelIndex &destination,
+                            int row) { this->selectRow(row); });
 
     // add tableview
     vbox->addWidget(this->tableView_);
@@ -101,6 +120,30 @@ void EditableModelView::addRegexHelpLink()
                    "<span style='color:#99f'>regex info</span></a>");
     regexHelpLabel->setOpenExternalLinks(true);
     this->addCustomButton(regexHelpLabel);
+}
+
+void EditableModelView::moveRow(int dir)
+{
+    auto selected = this->getTableView()->selectionModel()->selectedRows(0);
+
+    int row;
+    if (selected.size() == 0 ||
+        (row = selected.at(0).row()) + dir >=
+            this->model_->rowCount(QModelIndex()) ||
+        row + dir < 0)
+        return;
+
+    model_->moveRows(model_->index(row, 0), row, selected.size(),
+                     model_->index(row + dir, 0), row + dir);
+    this->selectRow(row + dir);
+}
+
+void EditableModelView::selectRow(int row)
+{
+    this->getTableView()->selectionModel()->clear();
+    this->getTableView()->selectionModel()->select(
+        this->model_->index(row, 0),
+        QItemSelectionModel::SelectCurrent | QItemSelectionModel::Rows);
 }
 
 }  // namespace chatterino
