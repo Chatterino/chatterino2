@@ -398,8 +398,7 @@ void TwitchMessageBuilder::addWords(
                 }
                 else
                 {
-                    qDebug() << "Remove trailing space";
-                    // this->message().elements.back()->setTrailingSpace(false);
+                    this->message().elements.back()->setTrailingSpace(false);
                 }
 
                 continue;
