@@ -53,6 +53,25 @@ namespace {
 
         return label.getElement();
     };
+
+    bool checkMessageUserName(const QString &userName, MessagePtr message)
+    {
+        if (message->flags.has(MessageFlag::Whisper))
+            return false;
+
+        bool isSubscription = message->flags.has(MessageFlag::Subscription) &&
+                              message->loginName.isEmpty() &&
+                              message->messageText.split(" ").at(0).compare(
+                                  userName, Qt::CaseInsensitive) == 0;
+
+        bool isModAction =
+            message->timeoutUser.compare(userName, Qt::CaseInsensitive) == 0;
+        bool isSelectedUser =
+            message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
+
+        return (isSubscription || isModAction || isSelectedUser);
+    }
+
     ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
     {
         LimitedQueueSnapshot<MessagePtr> snapshot =
@@ -64,20 +83,7 @@ namespace {
         for (size_t i = 0; i < snapshot.size(); i++)
         {
             MessagePtr message = snapshot[i];
-
-            bool isSubscription =
-                message->flags.has(MessageFlag::Subscription) &&
-                message->loginName == "" &&
-                message->messageText.split(" ").at(0).compare(
-                    userName, Qt::CaseInsensitive) == 0;
-
-            bool isModAction = message->timeoutUser.compare(
-                                   userName, Qt::CaseInsensitive) == 0;
-            bool isSelectedUser =
-                message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
-
-            if ((isSubscription || isModAction || isSelectedUser) &&
-                !message->flags.has(MessageFlag::Whisper))
+            if (checkMessageUserName(userName, message))
             {
                 channelPtr->addMessage(message);
             }
@@ -292,6 +298,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
 }
 
+// remove once https://github.com/pajlada/signals/pull/10 gets merged
+UserInfoPopup::~UserInfoPopup()
+{
+    this->refreshConnection_.disconnect();
+}
+
 void UserInfoPopup::themeChangedEvent()
 {
     BaseWindow::themeChangedEvent();
@@ -473,6 +485,30 @@ void UserInfoPopup::updateLatestMessages()
     const bool hasMessages = filteredChannel->hasMessages();
     this->ui_.latestMessages->setVisible(hasMessages);
     this->ui_.noMessagesLabel->setVisible(!hasMessages);
+
+    // shrink dialog in case ChannelView goes from visible to hidden
+    this->adjustSize();
+
+    this->refreshConnection_
+        .disconnect();  // remove once https://github.com/pajlada/signals/pull/10 gets merged
+
+    this->refreshConnection_ = this->channel_->messageAppended.connect(
+        [this, hasMessages](auto message, auto) {
+            if (!checkMessageUserName(this->userName_, message))
+                return;
+
+            if (hasMessages)
+            {
+                // display message in ChannelView
+                this->ui_.latestMessages->channel()->addMessage(message);
+            }
+            else
+            {
+                // The ChannelView is currently hidden, so manually refresh
+                // and display the latest messages
+                this->updateLatestMessages();
+            }
+        });
 }
 
 void UserInfoPopup::updateUserData()

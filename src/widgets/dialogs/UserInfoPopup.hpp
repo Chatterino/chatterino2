@@ -19,6 +19,7 @@ class UserInfoPopup final : public BaseWindow
 
 public:
     UserInfoPopup(bool closeAutomatically);
+    ~UserInfoPopup();
 
     void setData(const QString &name, const ChannelPtr &channel);
 
@@ -40,6 +41,9 @@ private:
     ChannelPtr channel_;
 
     pajlada::Signals::NoArgSignal userStateChanged_;
+
+    // replace with ScopedConnection once https://github.com/pajlada/signals/pull/10 gets merged
+    pajlada::Signals::Connection refreshConnection_;
 
     std::shared_ptr<bool> hack_;
 
