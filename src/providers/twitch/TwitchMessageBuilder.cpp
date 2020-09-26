@@ -379,10 +379,6 @@ void TwitchMessageBuilder::addWords(
             auto wordEnd = cursor + word.length();
             const auto &currentTwitchEmote = *currentTwitchEmoteIt;
 
-            // if (currentTwitchEmote.start == cursor && currentTwitchEmote.end == wordEnd) {
-            //     // Exact match
-            // }
-
             if (currentTwitchEmote.start == cursor)
             {
                 // This emote exists right at the start of the word!
@@ -398,7 +394,6 @@ void TwitchMessageBuilder::addWords(
                 {
                     // space
                     cursor += 1;
-                    qDebug() << "Nothing left in word :)";
                     break;
                 }
                 else
@@ -414,7 +409,6 @@ void TwitchMessageBuilder::addWords(
 
             // 1. Add text before the emote
             QString preText = word.left(currentTwitchEmote.start - cursor);
-            qDebug() << "pretext is " << preText;
             for (auto &variant : getApp()->emotes->emojis.parse(preText))
             {
                 boost::apply_visitor(
@@ -765,7 +759,9 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     twitchEmotes.push_back(TwitchEmoteOccurence{
                         startIndex + pos,
                         startIndex + pos + emote.first.string.length(),
-                        emote.second, emote.first});
+                        emote.second,
+                        emote.first,
+                    });
                 }
             }
             pos += word.length() + 1;
