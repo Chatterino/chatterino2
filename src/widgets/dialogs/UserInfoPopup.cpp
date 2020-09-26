@@ -577,7 +577,11 @@ void UserInfoPopup::updateUserData()
             [] {
                 // failure
             });
-        if (!isInStreamerMode())
+        if (isInStreamerMode())
+        {
+            this->ui_.avatarButton->setPixmap(getResources().streamerMode);
+        }
+        else
         {
             this->loadAvatar(user.profileImageUrl);
         }

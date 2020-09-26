@@ -55,6 +55,7 @@ public:
         QPixmap right;
         QPixmap up;
     } split;
+    QPixmap streamerMode;
     struct {
         QPixmap admin;
         QPixmap automod;
