@@ -35,8 +35,6 @@ NotificationPage::NotificationPage()
 
                 settings.append(this->createCheckBox(
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
-                settings.append(this->createCheckBox(
-                    "Play sound", getSettings()->notificationPlaySound));
 #ifdef Q_OS_WIN
                 settings.append(this->createCheckBox(
                     "Show notification", getSettings()->notificationToast));
@@ -60,24 +58,6 @@ NotificationPage::NotificationPage()
                 openIn->setContentsMargins(40, 0, 0, 0);
                 openIn->setSizeConstraint(QLayout::SetMaximumSize);
 #endif
-                auto customSound =
-                    layout.emplace<QHBoxLayout>().withoutMargin();
-                {
-                    customSound.append(this->createCheckBox(
-                        "Custom sound",
-                        getSettings()->notificationCustomSound));
-                    auto selectFile = customSound.emplace<QPushButton>(
-                        "Select custom sound file");
-                    QObject::connect(
-                        selectFile.getElement(), &QPushButton::clicked, this,
-                        [this] {
-                            auto fileName = QFileDialog::getOpenFileName(
-                                this, tr("Open Sound"), "",
-                                tr("Audio Files (*.mp3 *.wav)"));
-                            getSettings()->notificationPathSound = fileName;
-                        });
-                }
-
                 settings->addStretch(1);
             }
             auto twitchChannels =

@@ -104,9 +104,9 @@ void NotificationController::playSound()
     static QUrl currentPlayerUrl;
 
     QUrl highlightSoundUrl =
-        getSettings()->notificationCustomSound
+        getSettings()->liveHighlightSoundUrl != ""
             ? QUrl::fromLocalFile(
-                  getSettings()->notificationPathSound.getValue())
+                  getSettings()->liveHighlightSoundUrl.getValue())
             : QUrl("qrc:/sounds/ping2.wav");
 
     if (currentPlayerUrl != highlightSoundUrl)
@@ -176,8 +176,9 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
             if (getSettings()->notificationPlaySound &&
                 !(isInStreamerMode() &&
                   getSettings()->streamerModeSuppressLiveNotifications))
+            //if (getSettings()->enableLiveHighlightSound)
             {
-                getApp()->notifications->playSound();
+                this->playSound();
             }
             if (getSettings()->notificationFlashTaskbar &&
                 !(isInStreamerMode() &&

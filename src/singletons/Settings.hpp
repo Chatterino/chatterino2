@@ -274,8 +274,6 @@ public:
         "/highlighting/liveHighlight/enableTaskbarFlashing", false};
     QStringSetting liveHighlightSoundUrl = {
         "/highlighting/liveHighlightSoundUrl", ""};
-    QStringSetting liveHighlightColor = {"/highlighting/liveHighlightColor",
-                                         ""};
 
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
@@ -305,10 +303,6 @@ public:
     /// Notifications
     BoolSetting notificationFlashTaskbar = {"/notifications/enableFlashTaskbar",
                                             false};
-    BoolSetting notificationPlaySound = {"/notifications/enablePlaySound",
-                                         false};
-    BoolSetting notificationCustomSound = {"/notifications/customPlaySound",
-                                           false};
     QStringSetting notificationPathSound = {"/notifications/highlightSoundPath",
                                             "qrc:/sounds/ping3.wav"};
 

@@ -1310,8 +1310,6 @@ void TwitchMessageBuilder::liveMessage(const QString &channelName,
                                   MessageElementFlag::Text, MessageColor::Text,
                                   FontStyle::ChatMediumBold);
     builder->message().flags.set(MessageFlag::Live);
-    //builder->message()->
-    this->parseHighlights();
 }
 
 void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,

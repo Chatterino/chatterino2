@@ -182,40 +182,6 @@ void SharedMessageBuilder::parseHighlights()
         // Don't check for any other highlight phrases.
         return;
     }
-    if (this->message().flags.has(MessageFlag::Live))
-        qDebug() << "I am here";
-    if (this->message().flags.has(MessageFlag::Live) &&
-        getSettings()->enableLiveHighlight)
-    {
-        if (getSettings()->enableLiveHighlightTaskbar)
-        {
-            this->highlightAlert_ = true;
-        }
-
-        if (getSettings()->enableLiveHighlightSound)
-        {
-            this->highlightSound_ = true;
-
-            // Use custom sound if set, otherwise use fallback
-            if (!getSettings()->liveHighlightSoundUrl.getValue().isEmpty())
-            {
-                this->highlightSoundUrl_ =
-                    QUrl(getSettings()->liveHighlightSoundUrl.getValue());
-            }
-            else
-            {
-                this->highlightSoundUrl_ = getFallbackHighlightSound();
-            }
-        }
-
-        this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor =
-            ColorProvider::instance().color(ColorType::Live);
-
-        // This message was a live message.
-        // Don't check for any other highlight phrases.
-        return;
-    }
 
     // XXX: Non-common term in SharedMessageBuilder
     auto currentUser = app->accounts->twitch.getCurrent();

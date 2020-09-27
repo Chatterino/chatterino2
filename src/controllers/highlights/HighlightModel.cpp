@@ -4,6 +4,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StandardItemHelper.hpp"
+#include "widgets/TooltipWidget.hpp"
 
 namespace chatterino {
 
@@ -127,21 +128,20 @@ void HighlightModel::afterInit()
     std::vector<QStandardItem *> liveRow = this->createRow();
     setBoolItem(liveRow[Column::Pattern],
                 getSettings()->enableLiveHighlight.getValue(), true, false);
-    liveRow[Column::Pattern]->setData("Live", Qt::DisplayRole);
+    liveRow[Column::Pattern]->setData("Live (Check Notifications)",
+                                      Qt::DisplayRole);
     setBoolItem(liveRow[Column::FlashTaskbar],
                 getSettings()->enableLiveHighlightTaskbar.getValue(), true,
                 false);
     setBoolItem(liveRow[Column::PlaySound],
                 getSettings()->enableLiveHighlightSound.getValue(), true,
                 false);
+
     liveRow[Column::UseRegex]->setFlags(0);
     liveRow[Column::CaseSensitive]->setFlags(0);
 
     QUrl liveSound = QUrl(getSettings()->liveHighlightSoundUrl.getValue());
     setFilePathItem(liveRow[Column::SoundPath], liveSound, false);
-
-    auto liveColor = ColorProvider::instance().color(ColorType::Live);
-    setColorItem(liveRow[Column::Color], *liveColor, false);
 
     this->insertCustomRow(liveRow, 3);
 
@@ -270,6 +270,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 }
                 else if (rowIndex == 3)
                 {
+                    getSettings()->enableLiveHighlightSound.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == 4)
+                {
                     // getSettings()->enableRedeemedHighlightSound.setValue(
                     //     value.toBool());
                 }
@@ -332,10 +337,6 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 2)
                 {
                     getSettings()->subHighlightColor.setValue(colorName);
-                }
-                else if (rowIndex == 3)
-                {
-                    getSettings()->liveHighlightColor.setValue(colorName);
                 }
                 else if (rowIndex == 4)
                 {

@@ -11,7 +11,6 @@ enum class ColorType {
     SelfHighlight,
     Subscription,
     Whisper,
-    Live,
     RedeemedHighlight
 };
 
