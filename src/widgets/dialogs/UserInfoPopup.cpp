@@ -580,7 +580,7 @@ void UserInfoPopup::updateUserData()
             [] {
                 // failure
             });
-        if (isInStreamerMode() && !getSettings()->hideAvatarsInStreamerMode)
+        if (isInStreamerMode())
         {
             this->ui_.avatarButton->setPixmap(getResources().streamerMode);
         }

@@ -1,5 +1,7 @@
 #include "StreamerMode.hpp"
 
+#include "singletons/Settings.hpp"
+
 #ifdef USEWINSDK
 #    include <Windows.h>
 
@@ -25,9 +27,9 @@ const QStringList &broadcastingBinaries()
 bool isInStreamerMode()
 {
 #ifdef USEWINSDK
-    if (!IsWindowsVistaOrGreater())
+    if (!IsWindowsVistaOrGreater() || getSettings()->hideImagesInStreamerMode)
     {
-        return;
+        return false;
     }
     static bool cache = false;
     static QDateTime time = QDateTime();
@@ -67,7 +69,6 @@ bool isInStreamerMode()
 
     cache = false;
 #endif
-
     return false;
 }
 

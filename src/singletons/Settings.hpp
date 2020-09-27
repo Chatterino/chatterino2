@@ -316,8 +316,8 @@ public:
         "/misc/attachExtensionToAnyProcess", false};
     BoolSetting hideViewerCountAndDuration = {
         "/misc/hideViewerCountAndDuration", false};
-    BoolSetting hideAvatarsInStreamerMode = {"/misc/hideAvatarsInStreamerMode",
-                                             true};
+    BoolSetting hideImagesInStreamerMode = {"/misc/hideImagesInStreamerMode",
+                                            true};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
 
     /// Debug
