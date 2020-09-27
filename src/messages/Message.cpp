@@ -42,17 +42,11 @@ SBHighlight Message::getScrollBarHighlight() const
             ColorProvider::instance().color(ColorType::RedeemedHighlight),
             SBHighlight::Default, true);
     }
-    else if (this->flags.has(MessageFlag::Live))
+    else if (this->flags.has(MessageFlag::Live) &&
+             getSettings()->enableLiveHighlight)
     {
-        return SBHighlight(ColorProvider::instance().color(ColorType::Live),
-                           SBHighlight::Default, true);
+        return SBHighlight(ColorProvider::instance().color(ColorType::Live));
     }
     return SBHighlight();
 }
-
-// Static
-namespace {
-
-}  // namespace
-
 }  // namespace chatterino

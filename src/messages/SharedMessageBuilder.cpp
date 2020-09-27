@@ -186,7 +186,6 @@ void SharedMessageBuilder::parseHighlights()
     if (this->message().flags.has(MessageFlag::Live) &&
         getSettings()->enableLiveHighlight)
     {
-        qDebug() << "penisssssssssssssssssssssssssss";
         if (getSettings()->enableLiveHighlightTaskbar)
         {
             this->highlightAlert_ = true;

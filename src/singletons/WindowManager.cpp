@@ -558,6 +558,7 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
         case Channel::Type::TwitchWhispers: {
             obj.insert("type", "whispers");
         }
+        break;
         case Channel::Type::TwitchLive: {
             obj.insert("type", "live");
         }

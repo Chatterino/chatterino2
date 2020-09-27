@@ -130,20 +130,19 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
         QObject::connect(
             live_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { live_btn->setVisible(enabled); });
+            [=](bool enabled) mutable { live_lbl->setVisible(enabled); });
 
         vbox->addStretch(1);
 
         // tabbing order
         QWidget::setTabOrder(live_btn.getElement(), channel_btn.getElement());
-        QWidget::setTabOrder(watching_btn.getElement(),
-                             channel_btn.getElement());
         QWidget::setTabOrder(channel_btn.getElement(),
                              whispers_btn.getElement());
         QWidget::setTabOrder(whispers_btn.getElement(),
                              mentions_btn.getElement());
         QWidget::setTabOrder(mentions_btn.getElement(),
                              watching_btn.getElement());
+        QWidget::setTabOrder(watching_btn.getElement(), live_btn.getElement());
 
         // tab
         auto tab = notebook->addPage(obj.getElement());
@@ -445,10 +444,12 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
                 this->dialog->ui_.twitch.whispers->setFocus();
                 return true;
             }
-            else
+            else if (widget == this->dialog->ui_.twitch.live)
             {
-                widget->nextInFocusChain()->setFocus();
+                this->dialog->ui_.twitch.channel->setFocus();
+                return true;
             }
+            widget->nextInFocusChain()->setFocus();
             return true;
         }
         else if (((event_key->key() == Qt::Key_Tab ||
@@ -459,12 +460,7 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
         {
             if (widget == this->dialog->ui_.twitch.channelName)
             {
-                this->dialog->ui_.twitch.watching->setFocus();
-                return true;
-            }
-            else if (widget == this->dialog->ui_.twitch.whispers)
-            {
-                this->dialog->ui_.twitch.channel->setFocus();
+                this->dialog->ui_.twitch.live->setFocus();
                 return true;
             }
 
