@@ -266,15 +266,6 @@ public:
                                            ""};
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
-    BoolSetting enableLiveHighlight = {
-        "/highlighting/liveHighlight/liveHighlighted", true};
-    BoolSetting enableLiveHighlightSound = {
-        "/highlighting/liveHighlight/enableSound", false};
-    BoolSetting enableLiveHighlightTaskbar = {
-        "/highlighting/liveHighlight/enableTaskbarFlashing", false};
-    QStringSetting liveHighlightSoundUrl = {
-        "/highlighting/liveHighlightSoundUrl", ""};
-
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
@@ -303,9 +294,8 @@ public:
     /// Notifications
     BoolSetting notificationFlashTaskbar = {"/notifications/enableFlashTaskbar",
                                             false};
-    QStringSetting notificationPathSound = {"/notifications/highlightSoundPath",
-                                            "qrc:/sounds/ping3.wav"};
-
+    BoolSetting notificationSound = {"/notifications/enableSound", false};
+    QStringSetting notificationSoundUrl = {"/notifications/soundUrl", ""};
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
