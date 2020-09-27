@@ -217,7 +217,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
         });
 
         // userstate
-        this->userStateChanged_.connect([this, mod, unmod]() mutable {
+        this->userStateChanged_.connect([this, mod, unmod, vip,
+                                         unvip]() mutable {
             TwitchChannel *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->channel_.get());
 
@@ -235,6 +236,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
             }
             mod->setVisible(visibilityModButtons);
             unmod->setVisible(visibilityModButtons);
+            vip->setVisible(visibilityModButtons);
+            unvip->setVisible(visibilityModButtons);
         });
     }
 
