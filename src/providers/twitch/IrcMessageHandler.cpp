@@ -318,6 +318,13 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             }
         }
 
+        auto live = msg->flags.has(MessageFlag::Live);
+
+        if (live)
+        {
+            server.liveChannel->addMessage(msg);
+        }
+
         chan->addMessage(msg);
         if (auto chatters = dynamic_cast<ChannelChatters *>(chan.get()))
         {
@@ -548,6 +555,10 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
         if (_message->flags.has(MessageFlag::Highlighted))
         {
             app->twitch.server->mentionsChannel->addMessage(_message);
+        }
+        if (_message->flags.has(MessageFlag::Live))
+        {
+            app->twitch.server->liveChannel->addMessage(_message);
         }
 
         c->addMessage(_message);

@@ -182,7 +182,8 @@ void SharedMessageBuilder::parseHighlights()
         // Don't check for any other highlight phrases.
         return;
     }
-
+    if (this->message().flags.has(MessageFlag::Live))
+        qDebug() << "I am here";
     if (this->message().flags.has(MessageFlag::Live) &&
         getSettings()->enableLiveHighlight)
     {

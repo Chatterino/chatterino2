@@ -831,6 +831,8 @@ void ChannelView::messageAppended(MessagePtr &message,
     }
 
     if (this->showScrollbarHighlights())
+    //    if (this->channel_->getType() != Channel::Type::TwitchMentions ||
+    //        this->channel_->getType() != Channel::Type::TwitchLive)
     {
         this->scrollBar_->addHighlight(message->getScrollBarHighlight());
     }
@@ -995,6 +997,11 @@ MessageElementFlags ChannelView::getFlags() const
             flags.set(MessageElementFlag::ModeratorTools);
         }
         if (this->underlyingChannel_ == app->twitch.server->mentionsChannel)
+        {
+            flags.set(MessageElementFlag::ChannelName);
+            flags.unset(MessageElementFlag::ChannelPointReward);
+        }
+        if (this->channel_ == app->twitch.server->liveChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
