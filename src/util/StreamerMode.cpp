@@ -1,7 +1,5 @@
 #include "StreamerMode.hpp"
 
-#include "singletons/Settings.hpp"
-
 #ifdef USEWINSDK
 #    include <Windows.h>
 
@@ -27,7 +25,7 @@ const QStringList &broadcastingBinaries()
 bool isInStreamerMode()
 {
 #ifdef USEWINSDK
-    if (!IsWindowsVistaOrGreater() || !getSettings()->hideAvatarsInStreamerMode)
+    if (!IsWindowsVistaOrGreater())
     {
         return;
     }
