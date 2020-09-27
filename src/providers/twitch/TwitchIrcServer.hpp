@@ -35,6 +35,7 @@ public:
 
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
+    const ChannelPtr liveChannel;
     IndirectChannel watchingChannel;
 
     PubSub *pubsub;

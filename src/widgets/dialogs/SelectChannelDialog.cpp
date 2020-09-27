@@ -119,9 +119,23 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                              watching_lbl->setVisible(enabled);
                          });
 
+        // live_btn
+        auto live_btn =
+            vbox.emplace<QRadioButton>("Live").assign(&this->ui_.twitch.live);
+        auto live_lbl =
+            vbox.emplace<QLabel>("Shows when channels go live.").hidden();
+
+        live_lbl->setWordWrap(true);
+        live_btn->installEventFilter(&this->tabFilter_);
+
+        QObject::connect(
+            live_btn.getElement(), &QRadioButton::toggled,
+            [=](bool enabled) mutable { live_btn->setVisible(enabled); });
+
         vbox->addStretch(1);
 
         // tabbing order
+        QWidget::setTabOrder(live_btn.getElement(), channel_btn.getElement());
         QWidget::setTabOrder(watching_btn.getElement(),
                              channel_btn.getElement());
         QWidget::setTabOrder(channel_btn.getElement(),
@@ -294,6 +308,11 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
             this->ui_.twitch.whispers->setFocus();
         }
         break;
+        case Channel::Type::TwitchLive: {
+            this->ui_.notebook->selectIndex(TAB_TWITCH);
+            this->ui_.twitch.live->setFocus();
+        }
+        break;
         case Channel::Type::Irc: {
             this->ui_.notebook->selectIndex(TAB_IRC);
             this->ui_.irc.channel->setText(_channel.get()->getName());
@@ -356,6 +375,10 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
             else if (this->ui_.twitch.whispers->isChecked())
             {
                 return app->twitch.server->whispersChannel;
+            }
+            else if (this->ui_.twitch.live->isChecked())
+            {
+                return app->twitch.server->liveChannel;
             }
         }
         break;

@@ -266,6 +266,17 @@ public:
                                            ""};
     QStringSetting subHighlightColor = {"/highlighting/subHighlightColor", ""};
 
+    BoolSetting enableLiveHighlight = {
+        "/highlighting/liveHighlight/liveHighlighted", true};
+    BoolSetting enableLiveHighlightSound = {
+        "/highlighting/liveHighlight/enableSound", false};
+    BoolSetting enableLiveHighlightTaskbar = {
+        "/highlighting/liveHighlight/enableTaskbarFlashing", false};
+    QStringSetting liveHighlightSoundUrl = {
+        "/highlighting/liveHighlightSoundUrl", ""};
+    QStringSetting liveHighlightColor = {"/highlighting/liveHighlightColor",
+                                         ""};
+
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};

@@ -558,6 +558,9 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
         case Channel::Type::TwitchWhispers: {
             obj.insert("type", "whispers");
         }
+        case Channel::Type::TwitchLive: {
+            obj.insert("type", "live");
+        }
         break;
         case Channel::Type::Irc: {
             if (auto ircChannel =
@@ -607,6 +610,10 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     else if (descriptor.type_ == "whispers")
     {
         return app->twitch.server->whispersChannel;
+    }
+    else if (descriptor.type_ == "live")
+    {
+        return app->twitch.server->liveChannel;
     }
     else if (descriptor.type_ == "irc")
     {

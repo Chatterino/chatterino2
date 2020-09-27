@@ -563,10 +563,17 @@ void TwitchChannel::setLive(bool newLiveStatus)
                         getApp()->windows->sendAlert();
                     }
                 }
+                // Channel live message
                 MessageBuilder builder;
                 TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
                                                         &builder);
                 this->addMessage(builder.release());
+
+                // Message in /live channel
+                MessageBuilder builder2;
+                TwitchMessageBuilder::liveMessage(this->getDisplayName(),
+                                                  &builder2);
+                this->addMessage(builder2.release());
             }
             else
             {

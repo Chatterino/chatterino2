@@ -1302,6 +1302,16 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
 }
 
+void TwitchMessageBuilder::liveMessage(const QString &channelName,
+                                       MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->emplace<TextElement>(
+        channelName + " is live!", MessageElementFlag::System,
+        MessageColor::Text, FontStyle::ChatMediumBold);
+    builder->message().flags.set(MessageFlag::Live);
+}
+
 void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
                                              MessageBuilder *builder)
 {

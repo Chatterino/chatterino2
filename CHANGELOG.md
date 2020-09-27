@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Major: New split for channels going live! /live. (#1797)
+- Minor: Tabbing in `Select a channel to open` is now consistent.
 - Minor: Hosting messages are now clickable. (#2655)
 - Minor: Messages held by automod are now shown to the user. (#2626)
 - Bugfix: Automod messages now work properly again. (#2682)

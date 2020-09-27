@@ -123,6 +123,28 @@ void HighlightModel::afterInit()
 
     this->insertCustomRow(subRow, 2);
 
+    // Highlight settings for live messages
+    std::vector<QStandardItem *> liveRow = this->createRow();
+    setBoolItem(liveRow[Column::Pattern],
+                getSettings()->enableLiveHighlight.getValue(), true, false);
+    liveRow[Column::Pattern]->setData("Live", Qt::DisplayRole);
+    setBoolItem(liveRow[Column::FlashTaskbar],
+                getSettings()->enableLiveHighlightTaskbar.getValue(), true,
+                false);
+    setBoolItem(liveRow[Column::PlaySound],
+                getSettings()->enableLiveHighlightSound.getValue(), true,
+                false);
+    liveRow[Column::UseRegex]->setFlags(0);
+    liveRow[Column::CaseSensitive]->setFlags(0);
+
+    QUrl liveSound = QUrl(getSettings()->liveHighlightSoundUrl.getValue());
+    setFilePathItem(liveRow[Column::SoundPath], liveSound, false);
+
+    auto liveColor = ColorProvider::instance().color(ColorType::Live);
+    setColorItem(liveRow[Column::Color], *liveColor, false);
+
+    this->insertCustomRow(liveRow, 3);
+
     // Highlight settings for redeemed highlight messages
     std::vector<QStandardItem *> redeemedRow = this->createRow();
     setBoolItem(redeemedRow[Column::Pattern],
@@ -149,7 +171,7 @@ void HighlightModel::afterInit()
         ColorProvider::instance().color(ColorType::RedeemedHighlight);
     setColorItem(redeemedRow[Column::Color], *RedeemedColor, false);
 
-    this->insertCustomRow(redeemedRow, 3);
+    this->insertCustomRow(redeemedRow, 4);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
@@ -175,6 +197,10 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->enableSubHighlight.setValue(value.toBool());
                 }
                 else if (rowIndex == 3)
+                {
+                    getSettings()->enableLiveHighlight.setValue(value.toBool());
+                }
+                else if (rowIndex == 4)
                 {
                     getSettings()->enableRedeemedHighlight.setValue(
                         value.toBool());
@@ -212,6 +238,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                         value.toBool());
                 }
                 else if (rowIndex == 3)
+                {
+                    getSettings()->enableLiveHighlightTaskbar.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == 4)
                 {
                     // getSettings()->enableRedeemedHighlightTaskbar.setValue(
                     //     value.toBool());
@@ -274,6 +305,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 }
                 else if (rowIndex == 3)
                 {
+                    getSettings()->liveHighlightSoundUrl.setValue(
+                        value.toString());
+                }
+                else if (rowIndex == 4)
+                {
                     getSettings()->redeemedHighlightSoundUrl.setValue(
                         value.toString());
                 }
@@ -298,6 +334,10 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->subHighlightColor.setValue(colorName);
                 }
                 else if (rowIndex == 3)
+                {
+                    getSettings()->liveHighlightColor.setValue(colorName);
+                }
+                else if (rowIndex == 4)
                 {
                     getSettings()->redeemedHighlightColor.setValue(colorName);
                     const_cast<ColorProvider &>(ColorProvider::instance())

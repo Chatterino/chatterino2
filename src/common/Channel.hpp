@@ -34,8 +34,9 @@ public:
         Direct,
         Twitch,
         TwitchWhispers,
-        TwitchWatching,
         TwitchMentions,
+        TwitchWatching,
+        TwitchLive,
         TwitchEnd,
         Irc,
         Misc
