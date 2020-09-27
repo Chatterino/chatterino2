@@ -678,6 +678,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Hide viewercount and stream length while hovering the split",
         s.hideViewerCountAndDuration);
+    layout.addCheckbox("Hide avatars in usercard in streamer mode",
+                       s.hideAvatarsInStreamerMode);
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle, [](int index) { return index; },

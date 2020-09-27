@@ -1,5 +1,7 @@
 #include "StreamerMode.hpp"
 
+#include "singletons/Settings.hpp"
+
 #ifdef USEWINSDK
 #    include <Windows.h>
 
@@ -25,44 +27,47 @@ const QStringList &broadcastingBinaries()
 bool isInStreamerMode()
 {
 #ifdef USEWINSDK
-    if (IsWindowsVistaOrGreater())
+    if (!IsWindowsVistaOrGreater() || !getSettings()->hideAvatarsInStreamerMode)
     {
-        static bool cache = false;
-        static QDateTime time = QDateTime();
+        return;
+    }
+    static bool cache = false;
+    static QDateTime time = QDateTime();
 
-        if (time.isValid() &&
-            time.addSecs(cooldownInS) > QDateTime::currentDateTime())
+    if (time.isValid() &&
+        time.addSecs(cooldownInS) > QDateTime::currentDateTime())
+    {
+        return cache;
+    }
+
+    time = QDateTime::currentDateTime();
+
+    WTS_PROCESS_INFO *pWPIs = nullptr;
+    DWORD dwProcCount = 0;
+
+    if (WTSEnumerateProcesses(WTS_CURRENT_SERVER_HANDLE, NULL, 1, &pWPIs,
+                              &dwProcCount))
+    {
+        //Go through all processes retrieved
+        for (DWORD i = 0; i < dwProcCount; i++)
         {
-            return cache;
-        }
+            QString processName = QString::fromUtf16(
+                reinterpret_cast<char16_t *>(pWPIs[i].pProcessName));
 
-        time = QDateTime::currentDateTime();
-
-        WTS_PROCESS_INFO *pWPIs = nullptr;
-        DWORD dwProcCount = 0;
-
-        if (WTSEnumerateProcesses(WTS_CURRENT_SERVER_HANDLE, NULL, 1, &pWPIs,
-                                  &dwProcCount))
-        {
-            //Go through all processes retrieved
-            for (DWORD i = 0; i < dwProcCount; i++)
+            if (broadcastingBinaries().contains(processName))
             {
-                QString processName = QString::fromUtf16(
-                    reinterpret_cast<char16_t *>(pWPIs[i].pProcessName));
-
-                if (broadcastingBinaries().contains(processName))
-                {
-                    cache = true;
-                    return true;
-                }
+                cache = true;
+                return true;
             }
         }
-
-        if (pWPIs)
-            WTSFreeMemory(pWPIs);
-
-        cache = false;
     }
+
+    if (pWPIs)
+    {
+        WTSFreeMemory(pWPIs);
+    }
+
+    cache = false;
 #endif
 
     return false;
