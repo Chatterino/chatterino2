@@ -32,8 +32,10 @@ public:
         QPixmap trashCan;
         QPixmap unban;
         QPixmap unmod;
+        QPixmap unvip;
         QPixmap update;
         QPixmap updateError;
+        QPixmap vip;
     } buttons;
     QPixmap error;
     QPixmap icon;
@@ -53,6 +55,7 @@ public:
         QPixmap right;
         QPixmap up;
     } split;
+    QPixmap streamerMode;
     struct {
         QPixmap admin;
         QPixmap automod;

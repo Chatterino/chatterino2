@@ -53,6 +53,25 @@ namespace {
 
         return label.getElement();
     };
+
+    bool checkMessageUserName(const QString &userName, MessagePtr message)
+    {
+        if (message->flags.has(MessageFlag::Whisper))
+            return false;
+
+        bool isSubscription = message->flags.has(MessageFlag::Subscription) &&
+                              message->loginName.isEmpty() &&
+                              message->messageText.split(" ").at(0).compare(
+                                  userName, Qt::CaseInsensitive) == 0;
+
+        bool isModAction =
+            message->timeoutUser.compare(userName, Qt::CaseInsensitive) == 0;
+        bool isSelectedUser =
+            message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
+
+        return (isSubscription || isModAction || isSelectedUser);
+    }
+
     ChannelPtr filterMessages(const QString &userName, ChannelPtr channel)
     {
         LimitedQueueSnapshot<MessagePtr> snapshot =
@@ -64,20 +83,7 @@ namespace {
         for (size_t i = 0; i < snapshot.size(); i++)
         {
             MessagePtr message = snapshot[i];
-
-            bool isSubscription =
-                message->flags.has(MessageFlag::Subscription) &&
-                message->loginName == "" &&
-                message->messageText.split(" ").at(0).compare(
-                    userName, Qt::CaseInsensitive) == 0;
-
-            bool isModAction = message->timeoutUser.compare(
-                                   userName, Qt::CaseInsensitive) == 0;
-            bool isSelectedUser =
-                message->loginName.compare(userName, Qt::CaseInsensitive) == 0;
-
-            if ((isSubscription || isModAction || isSelectedUser) &&
-                !message->flags.has(MessageFlag::Whisper))
+            if (checkMessageUserName(userName, message))
             {
                 channelPtr->addMessage(message);
             }
@@ -85,6 +91,17 @@ namespace {
 
         return channelPtr;
     };
+
+    const auto borderColor = QColor(255, 255, 255, 80);
+
+    int calculateTimeoutDuration(TimeoutButton timeout)
+    {
+        static const QMap<QString, int> durations{
+            {"s", 1}, {"m", 60}, {"h", 3600}, {"d", 86400}, {"w", 604800},
+        };
+        return timeout.second * durations[timeout.first];
+    }
+
 }  // namespace
 
 UserInfoPopup::UserInfoPopup(bool closeAutomatically)
@@ -101,6 +118,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
 
     if (closeAutomatically)
         this->setActionOnFocusLoss(BaseWindow::Delete);
+    else
+        this->setAttribute(Qt::WA_DeleteOnClose);
 
     // Close the popup when Escape is pressed
     createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
@@ -167,6 +186,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
         auto unmod = user.emplace<Button>(this);
         unmod->setPixmap(getResources().buttons.unmod);
         unmod->setScaleIndependantSize(30, 30);
+        auto vip = user.emplace<Button>(this);
+        vip->setPixmap(getResources().buttons.vip);
+        vip->setScaleIndependantSize(30, 30);
+        auto unvip = user.emplace<Button>(this);
+        unvip->setPixmap(getResources().buttons.unvip);
+        unvip->setScaleIndependantSize(30, 30);
 
         user->addStretch(1);
 
@@ -183,6 +208,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
         });
         QObject::connect(unmod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/unmod " + this->userName_);
+        });
+        QObject::connect(vip.getElement(), &Button::leftClicked, [this] {
+            this->channel_->sendMessage("/vip " + this->userName_);
+        });
+        QObject::connect(unvip.getElement(), &Button::leftClicked, [this] {
+            this->channel_->sendMessage("/unvip " + this->userName_);
         });
 
         // userstate
@@ -279,6 +310,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
 
     this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
+}
+
+// remove once https://github.com/pajlada/signals/pull/10 gets merged
+UserInfoPopup::~UserInfoPopup()
+{
+    this->refreshConnection_.disconnect();
 }
 
 void UserInfoPopup::themeChangedEvent()
@@ -462,6 +499,30 @@ void UserInfoPopup::updateLatestMessages()
     const bool hasMessages = filteredChannel->hasMessages();
     this->ui_.latestMessages->setVisible(hasMessages);
     this->ui_.noMessagesLabel->setVisible(!hasMessages);
+
+    // shrink dialog in case ChannelView goes from visible to hidden
+    this->adjustSize();
+
+    this->refreshConnection_
+        .disconnect();  // remove once https://github.com/pajlada/signals/pull/10 gets merged
+
+    this->refreshConnection_ = this->channel_->messageAppended.connect(
+        [this, hasMessages](auto message, auto) {
+            if (!checkMessageUserName(this->userName_, message))
+                return;
+
+            if (hasMessages)
+            {
+                // display message in ChannelView
+                this->ui_.latestMessages->channel()->addMessage(message);
+            }
+            else
+            {
+                // The ChannelView is currently hidden, so manually refresh
+                // and display the latest messages
+                this->updateLatestMessages();
+            }
+        });
 }
 
 void UserInfoPopup::updateUserData()
@@ -516,7 +577,11 @@ void UserInfoPopup::updateUserData()
             [] {
                 // failure
             });
-        if (!isInStreamerMode())
+        if (isInStreamerMode())
+        {
+            this->ui_.avatarButton->setPixmap(getResources().streamerMode);
+        }
+        else
         {
             this->loadAvatar(user.profileImageUrl);
         }
@@ -628,99 +693,126 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
     QColor color1(255, 255, 255, 80);
     QColor color2(255, 255, 255, 0);
 
-    int buttonWidth = 24;
+    int buttonWidth = 40;
+    // int buttonWidth = 24;
     int buttonWidth2 = 32;
     int buttonHeight = 32;
 
     layout->setSpacing(16);
 
-    auto addButton = [&](Action action, const QString &text,
-                         const QPixmap &pixmap) {
+    //auto addButton = [&](Action action, const QString &text,
+    //                     const QPixmap &pixmap) {
+    //    auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
+    //    {
+    //        auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
+    //        title->addStretch(1);
+    //        auto label = title.emplace<Label>(text);
+    //        label->setHasOffset(false);
+    //        label->setStyleSheet("color: #BBB");
+    //        title->addStretch(1);
+
+    //        auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
+    //        hbox->setSpacing(0);
+    //        {
+    //            auto button = hbox.emplace<Button>(nullptr);
+    //            button->setPixmap(pixmap);
+    //            button->setScaleIndependantSize(buttonHeight, buttonHeight);
+    //            button->setBorderColor(QColor(255, 255, 255, 127));
+
+    //            QObject::connect(
+    //                button.getElement(), &Button::leftClicked, [this, action] {
+    //                    this->buttonClicked.invoke(std::make_pair(action, -1));
+    //                });
+    //        }
+    //    }
+    //};
+
+    const auto addLayout = [&](const QString &text) {
         auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
+        auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
+        title->addStretch(1);
+        auto label = title.emplace<Label>(text);
+        label->setStyleSheet("color: #BBB");
+        label->setHasOffset(false);
+        title->addStretch(1);
+
+        auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
+        hbox->setSpacing(0);
+        return hbox;
+    };
+
+    const auto addButton = [&](Action action, const QString &title,
+                               const QPixmap &pixmap) {
+        auto button = addLayout(title).emplace<Button>(nullptr);
+        button->setPixmap(pixmap);
+        button->setScaleIndependantSize(buttonHeight, buttonHeight);
+        button->setBorderColor(QColor(255, 255, 255, 127));
+
+        QObject::connect(
+            button.getElement(), &Button::leftClicked, [this, action] {
+                this->buttonClicked.invoke(std::make_pair(action, -1));
+            });
+    };
+
+    auto addTimeouts = [&](const QString &title) {
+        auto hbox = addLayout(title);
+
+        for (const auto &item : getSettings()->timeoutButtons.getValue())
         {
-            auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-            title->addStretch(1);
-            auto label = title.emplace<Label>(text);
-            label->setHasOffset(false);
-            label->setStyleSheet("color: #BBB");
-            title->addStretch(1);
+            auto a = hbox.emplace<EffectLabel2>();
+            a->getLabel().setText(QString::number(item.second) + item.first);
 
-            auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            hbox->setSpacing(0);
-            {
-                auto button = hbox.emplace<Button>(nullptr);
-                button->setPixmap(pixmap);
-                button->setScaleIndependantSize(buttonHeight, buttonHeight);
-                button->setBorderColor(QColor(255, 255, 255, 127));
+            a->setScaleIndependantSize(buttonWidth, buttonHeight);
+            a->setBorderColor(borderColor);
 
-                QObject::connect(
-                    button.getElement(), &Button::leftClicked, [this, action] {
-                        this->buttonClicked.invoke(std::make_pair(action, -1));
-                    });
-            }
+            const auto pair =
+                std::make_pair(Action::Timeout, calculateTimeoutDuration(item));
+
+            QObject::connect(
+                a.getElement(), &EffectLabel2::leftClicked,
+                [this, pair] { this->buttonClicked.invoke(pair); });
+
+            //auto addTimeouts = [&](const QString &title_,
+            //                       const std::vector<std::pair<QString, int>> &items) {
+            //    auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
+            //    {
+            //        auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
+            //        title->addStretch(1);
+            //        auto label = title.emplace<Label>(title_);
+            //        label->setStyleSheet("color: #BBB");
+            //        label->setHasOffset(false);
+            //        title->addStretch(1);
+
+            //        auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
+            //        hbox->setSpacing(0);
+
+            //        for (const auto &item : items)
+            //        {
+            //            auto a = hbox.emplace<EffectLabel2>();
+            //            a->getLabel().setText(std::get<0>(item));
+
+            //            if (std::get<0>(item).length() > 1)
+            //            {
+            //                a->setScaleIndependantSize(buttonWidth2, buttonHeight);
+            //            }
+            //            else
+            //            {
+            //                a->setScaleIndependantSize(buttonWidth, buttonHeight);
+            //            }
+            //            a->setBorderColor(color1);
+
+            //            QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
+            //                             [this, timeout = std::get<1>(item)] {
+            //                                 this->buttonClicked.invoke(std::make_pair(
+            //                                     Action::Timeout, timeout));
+            //                             });
+            //        }
         }
     };
 
-    auto addTimeouts = [&](const QString &title_,
-                           const std::vector<std::pair<QString, int>> &items) {
-        auto vbox = layout.emplace<QVBoxLayout>().withoutMargin();
-        {
-            auto title = vbox.emplace<QHBoxLayout>().withoutMargin();
-            title->addStretch(1);
-            auto label = title.emplace<Label>(title_);
-            label->setStyleSheet("color: #BBB");
-            label->setHasOffset(false);
-            title->addStretch(1);
-
-            auto hbox = vbox.emplace<QHBoxLayout>().withoutMargin();
-            hbox->setSpacing(0);
-
-            for (const auto &item : items)
-            {
-                auto a = hbox.emplace<EffectLabel2>();
-                a->getLabel().setText(std::get<0>(item));
-
-                if (std::get<0>(item).length() > 1)
-                {
-                    a->setScaleIndependantSize(buttonWidth2, buttonHeight);
-                }
-                else
-                {
-                    a->setScaleIndependantSize(buttonWidth, buttonHeight);
-                }
-                a->setBorderColor(color1);
-
-                QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
-                                 [this, timeout = std::get<1>(item)] {
-                                     this->buttonClicked.invoke(std::make_pair(
-                                         Action::Timeout, timeout));
-                                 });
-            }
-        }
-    };
-
-    addButton(Unban, "unban", getResources().buttons.unban);
-
-    addTimeouts("sec", {{"1", 1}});
-    addTimeouts("min", {
-                           {"1", 1 * 60},
-                           {"5", 5 * 60},
-                           {"10", 10 * 60},
-                       });
-    addTimeouts("hour", {
-                            {"1", 1 * 60 * 60},
-                            {"4", 4 * 60 * 60},
-                        });
-    addTimeouts("days", {
-                            {"1", 1 * 60 * 60 * 24},
-                            {"3", 3 * 60 * 60 * 24},
-                        });
-    addTimeouts("weeks", {
-                             {"1", 1 * 60 * 60 * 24 * 7},
-                             {"2", 2 * 60 * 60 * 24 * 7},
-                         });
-
-    addButton(Ban, "ban", getResources().buttons.ban);
+    addButton(Unban, "Unban", getResources().buttons.unban);
+    addTimeouts("Timeouts");
+    addButton(Ban, "Ban", getResources().buttons.ban);
 }
 
 void UserInfoPopup::TimeoutWidget::paintEvent(QPaintEvent *)

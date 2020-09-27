@@ -133,7 +133,7 @@ ChannelView::ChannelView(BaseWidget *parent)
         this->updatePauses();
     });
 
-    auto shortcut = new QShortcut(QKeySequence("Ctrl+C"), this);
+    auto shortcut = new QShortcut(QKeySequence::StandardKey::Copy, this);
     QObject::connect(shortcut, &QShortcut::activated,
                      [this] { crossPlatformCopy(this->getSelectedText()); });
 
@@ -1685,6 +1685,8 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
 
     // handle the click
     this->handleMouseClick(event, hoverLayoutElement, layout);
+
+    this->update();
 }
 
 void ChannelView::handleMouseClick(QMouseEvent *event,
@@ -2074,8 +2076,7 @@ void ChannelView::disableScrolling()
 
 void ChannelView::scrollUpdateRequested()
 {
-    const qreal dpi =
-        QGuiApplication::screenAt(this->pos())->devicePixelRatio();
+    const qreal dpi = this->devicePixelRatioF();
     const qreal delta = dpi * (this->currentMousePosition_.y() -
                                this->lastMiddlePressPosition_.y());
     const int cursorHeight = this->cursors_.neutral.pixmap().height();

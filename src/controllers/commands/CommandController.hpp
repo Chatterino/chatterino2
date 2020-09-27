@@ -4,6 +4,7 @@
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "controllers/commands/Command.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 
 #include <QMap>
 #include <pajlada/settings.hpp>
@@ -36,7 +37,16 @@ public:
 private:
     void load(Paths &paths);
 
-    QMap<QString, Command> commandsMap_;
+    using CommandFunction =
+        std::function<QString(QStringList /*words*/, ChannelPtr /*channel*/)>;
+
+    void registerCommand(QString commandName, CommandFunction commandFunction);
+
+    // Chatterino commands
+    QMap<QString, CommandFunction> commands_;
+
+    // User-created commands
+    QMap<QString, Command> userCommands_;
     int maxSpaces_ = 0;
 
     std::shared_ptr<pajlada::Settings::SettingManager> sm_;
@@ -49,6 +59,8 @@ private:
 
     QString execCustomCommand(const QStringList &words, const Command &command,
                               bool dryRun);
+
+    QStringList commandAutoCompletions_;
 };
 
 }  // namespace chatterino

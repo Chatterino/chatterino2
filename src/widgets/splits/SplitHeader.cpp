@@ -174,6 +174,9 @@ SplitHeader::SplitHeader(Split *_split)
 void SplitHeader::initializeLayout()
 {
     auto layout = makeLayout<QHBoxLayout>({
+        // space
+        makeWidget<BaseWidget>(
+            [](auto w) { w->setScaleIndependantSize(8, 4); }),
         // title
         this->titleLabel_ = makeWidget<Label>([](auto w) {
             w->setSizePolicy(QSizePolicy::MinimumExpanding,
@@ -181,6 +184,9 @@ void SplitHeader::initializeLayout()
             w->setCentered(true);
             w->setHasOffset(false);
         }),
+        // space
+        makeWidget<BaseWidget>(
+            [](auto w) { w->setScaleIndependantSize(8, 4); }),
         // mode
         this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
             w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -589,6 +595,7 @@ void SplitHeader::updateChannelText()
         if (streamStatus->live)
         {
             this->isLive_ = true;
+            // XXX: This URL format can be figured out from the Helix Get Streams API which we parse in TwitchChannel::parseLiveStatus
             QString url = "https://static-cdn.jtvnw.net/"
                           "previews-ttv/live_user_" +
                           channel->getName().toLower();
@@ -612,9 +619,17 @@ void SplitHeader::updateChannelText()
             {
                 NetworkRequest(url, NetworkRequestType::Get)
                     .onSuccess([this](auto result) -> Outcome {
-                        this->thumbnail_ =
-                            QString::fromLatin1(result.getData().toBase64());
-                        updateChannelText();
+                        // NOTE: We do not follow the redirects, so we need to make sure we only treat code 200 as a valid image
+                        if (result.status() == 200)
+                        {
+                            this->thumbnail_ = QString::fromLatin1(
+                                result.getData().toBase64());
+                        }
+                        else
+                        {
+                            this->thumbnail_.clear();
+                        }
+                        this->updateChannelText();
                         return Success;
                     })
                     .execute();
@@ -736,7 +751,7 @@ void SplitHeader::enterEvent(QEvent *event)
         tooltip->setWordWrap(true);
         tooltip->adjustSize();
         auto pos = this->mapToGlobal(this->rect().bottomLeft()) +
-                   QPoint((this->width() - tooltip->width()) / 2, 0);
+                   QPoint((this->width() - tooltip->width()) / 2, 1);
 
         tooltip->moveTo(this, pos, false);
         tooltip->show();

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/WindowDescriptors.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QDragEnterEvent>
@@ -184,8 +185,6 @@ public:
     void selectNextSplit(Direction direction);
     void setSelected(Split *selected_);
 
-    void decodeFromJson(QJsonObject &obj);
-
     int getSplitCount();
     const std::vector<Split *> getSplits() const;
 
@@ -201,7 +200,7 @@ public:
     static bool isDraggingSplit;
     static Split *draggingSplit;
 
-    static QList<QUuid> decodeFilters(QJsonValue &val);
+    void applyFromDescriptor(const NodeDescriptor &rootNode);
 
 protected:
     void paintEvent(QPaintEvent *event) override;
@@ -216,6 +215,9 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
+    void applyFromDescriptorRecursively(const NodeDescriptor &rootNode,
+                                        Node *node);
+
     void layout();
     void selectSplitRecursive(Node *node, Direction direction);
     void focusSplitRecursive(Node *node);
@@ -223,7 +225,6 @@ private:
 
     void addSplit(Split *split);
 
-    void decodeNodeRecursively(QJsonObject &obj, Node *node);
     Split *getTopRightSplit(Node &node);
 
     void refreshTabTitle();
