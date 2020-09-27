@@ -831,8 +831,8 @@ void ChannelView::messageAppended(MessagePtr &message,
     }
 
     if (this->showScrollbarHighlights())
-    //    if (this->channel_->getType() != Channel::Type::TwitchMentions ||
-    //        this->channel_->getType() != Channel::Type::TwitchLive)
+    //if (this->channel_->getType() != Channel::Type::TwitchMentions &&
+    //    this->channel_->getType() != Channel::Type::TwitchLive)
     {
         this->scrollBar_->addHighlight(message->getScrollBarHighlight());
     }
