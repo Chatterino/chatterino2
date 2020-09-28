@@ -1,5 +1,7 @@
 #include "GeneralPage.hpp"
 
+#include <QDesktopServices>
+#include <QFileDialog>
 #include <QFontDialog>
 #include <QLabel>
 #include <QScrollArea>
@@ -478,10 +480,11 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         "Chatterino can automatically change behavior if it "
         "detects that \"OBS Studio\" is running.\nSelect which "
         "things you want to change while streaming");
-    layout.addDropdown<int>(
+
+    layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
         "Enable Streamer Mode", {"Yes", "No", "Detect OBS (win)"},
         s.enableStreamerMode,
-        [](auto val) {
+        [](int val) {
             switch (val)
             {
                 case StreamerModeSetting::Enabled:
@@ -490,11 +493,11 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                     return "No";
                 case StreamerModeSetting::DetectObs:
                     return "Detect OBS (win)";
+                default:
+                    return "";
             }
-
-            return "";
         },
-        [](auto args) {
+        [](DropdownArgs args) {
             if (args.value == "Yes")
             {
                 return StreamerModeSetting::Enabled;
@@ -508,7 +511,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 // default to Detecting if OBS.exe is running
                 return StreamerModeSetting::DetectObs;
             }
-        });
+        },
+        false);
     layout.addCheckbox("Hide usercard avatars",
                        s.streamerModeHideUsercardAvatars);
     layout.addCheckbox("Hide link thumbnails",

@@ -179,8 +179,8 @@ public:
     BoolSetting lowercaseDomains = {"/links/linkLowercase", true};
 
     /// Streamer Mode
-    IntSetting enableStreamerMode = {"/streamerMode/enabled",
-                                     StreamerModeSetting::DetectObs};
+    EnumSetting<StreamerModeSetting> enableStreamerMode = {
+        "/streamerMode/enabled", StreamerModeSetting::DetectObs};
     BoolSetting streamerModeHideUsercardAvatars = {
         "/streamerMode/hideUsercardAvatars", true};
     BoolSetting streamerModeHideLinkThumbnails = {
