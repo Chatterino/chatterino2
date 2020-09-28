@@ -58,21 +58,23 @@ QString tokenTypeToInfoString(TokenType type);
 class Expression
 {
 public:
-    virtual QVariant execute(const ContextMap &)
+    virtual QVariant execute(const ContextMap &) const
     {
         return false;
     }
 
-    virtual QString debug()
+    virtual QString debug() const
     {
         return "(false)";
     }
 
-    virtual QString filterString()
+    virtual QString filterString() const
     {
         return "";
     }
 };
+
+using ExpressionPtr = std::unique_ptr<Expression>;
 
 class ValueExpression : public Expression
 {
@@ -80,9 +82,9 @@ public:
     ValueExpression(QVariant value, TokenType type);
     TokenType type();
 
-    QVariant execute(const ContextMap &context) override;
-    QString debug() override;
-    QString filterString() override;
+    QVariant execute(const ContextMap &context) const override;
+    QString debug() const override;
+    QString filterString() const override;
 
 private:
     QVariant value_;
@@ -92,30 +94,30 @@ private:
 class BinaryOperation : public Expression
 {
 public:
-    BinaryOperation(TokenType op, Expression *left, Expression *right);
+    BinaryOperation(TokenType op, ExpressionPtr left, ExpressionPtr right);
 
-    QVariant execute(const ContextMap &context) override;
-    QString debug() override;
-    QString filterString() override;
+    QVariant execute(const ContextMap &context) const override;
+    QString debug() const override;
+    QString filterString() const override;
 
 private:
     TokenType op_;
-    Expression *left_;
-    Expression *right_;
+    ExpressionPtr left_;
+    ExpressionPtr right_;
 };
 
 class UnaryOperation : public Expression
 {
 public:
-    UnaryOperation(TokenType op, Expression *right);
+    UnaryOperation(TokenType op, ExpressionPtr right);
 
-    QVariant execute(const ContextMap &context) override;
-    QString debug() override;
-    QString filterString() override;
+    QVariant execute(const ContextMap &context) const override;
+    QString debug() const override;
+    QString filterString() const override;
 
 private:
     TokenType op_;
-    Expression *right_;
+    ExpressionPtr right_;
 };
 
 }  // namespace filterparser

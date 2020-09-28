@@ -45,14 +45,14 @@ FiltersPage::FiltersPage()
         if (d.exec() == QDialog::Accepted)
         {
             getSettings()->filterRecords.append(
-                FilterRecord{d.getTitle(), d.getFilter()});
+                std::make_shared<FilterRecord>(d.getTitle(), d.getFilter()));
         }
     });
 
     auto quickAddButton = new QPushButton("Quick Add");
     QObject::connect(quickAddButton, &QPushButton::pressed, [] {
-        getSettings()->filterRecords.append(
-            FilterRecord{"My filter", "message.content contains \"hello\""});
+        getSettings()->filterRecords.append(std::make_shared<FilterRecord>(
+            "My filter", "message.content contains \"hello\""));
     });
     view->addCustomButton(quickAddButton);
 

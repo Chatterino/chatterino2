@@ -27,18 +27,16 @@ public:
         : name_(name)
         , filter_(filter)
         , id_(QUuid::createUuid())
+        , parser_(std::make_unique<filterparser::FilterParser>(filter))
     {
-        this->parser_ = new filterparser::FilterParser(filter);
-        this->valid_ = this->parser_->valid();
     }
 
     FilterRecord(const QString &name, const QString &filter, const QUuid &id)
         : name_(name)
         , filter_(filter)
         , id_(id)
+        , parser_(std::make_unique<filterparser::FilterParser>(filter))
     {
-        this->parser_ = new filterparser::FilterParser(filter);
-        this->valid_ = this->parser_->valid();
     }
 
     const QString &getName() const
@@ -58,7 +56,7 @@ public:
 
     bool valid() const
     {
-        return this->valid_;
+        return this->parser_->valid();
     }
 
     bool filter(const MessagePtr &message) const
@@ -75,38 +73,40 @@ private:
     QString name_;
     QString filter_;
     QUuid id_;
-    bool valid_;
 
-    filterparser::FilterParser *parser_;
+    std::unique_ptr<filterparser::FilterParser> parser_;
 };
+
+using FilterRecordPtr = std::shared_ptr<FilterRecord>;
 
 }  // namespace chatterino
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::FilterRecord> {
-    static rapidjson::Value get(const chatterino::FilterRecord &value,
+struct Serialize<chatterino::FilterRecordPtr> {
+    static rapidjson::Value get(const chatterino::FilterRecordPtr &value,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
-        chatterino::rj::set(ret, "name", value.getName(), a);
-        chatterino::rj::set(ret, "filter", value.getFilter(), a);
+        chatterino::rj::set(ret, "name", value->getName(), a);
+        chatterino::rj::set(ret, "filter", value->getFilter(), a);
         chatterino::rj::set(ret, "id",
-                            value.getId().toString(QUuid::WithoutBraces), a);
+                            value->getId().toString(QUuid::WithoutBraces), a);
 
         return ret;
     }
 };
 
 template <>
-struct Deserialize<chatterino::FilterRecord> {
-    static chatterino::FilterRecord get(const rapidjson::Value &value)
+struct Deserialize<chatterino::FilterRecordPtr> {
+    static chatterino::FilterRecordPtr get(const rapidjson::Value &value)
     {
         if (!value.IsObject())
         {
-            return chatterino::FilterRecord(QString(), QString());
+            return std::make_shared<chatterino::FilterRecord>(QString(),
+                                                              QString());
         }
 
         QString _name, _filter, _id;
@@ -115,7 +115,8 @@ struct Deserialize<chatterino::FilterRecord> {
         chatterino::rj::getSafe(value, "filter", _filter);
         chatterino::rj::getSafe(value, "id", _id);
 
-        return chatterino::FilterRecord(_name, _filter, QUuid::fromString(_id));
+        return std::make_shared<chatterino::FilterRecord>(
+            _name, _filter, QUuid::fromString(_id));
     }
 };
 

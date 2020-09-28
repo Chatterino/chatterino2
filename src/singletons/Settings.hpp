@@ -33,7 +33,7 @@ public:
     SignalVector<HighlightBlacklistUser> &blacklistedUsers;
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
-    SignalVector<FilterRecord> &filterRecords;
+    SignalVector<FilterRecordPtr> &filterRecords;
     //SignalVector<TaggedUser> &taggedUsers;
     SignalVector<ModerationAction> &moderationActions;
 

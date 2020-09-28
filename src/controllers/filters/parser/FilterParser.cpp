@@ -76,8 +76,8 @@ ContextMap buildContextMap(const MessagePtr &m)
 FilterParser::FilterParser(const QString &text)
     : text_(text)
     , tokenizer_(Tokenizer(text))
+    , builtExpression_(this->parseExpression(true))
 {
-    this->builtExpression_ = this->parseExpression(true);
 }
 
 bool FilterParser::execute(const MessagePtr &message) const
@@ -96,15 +96,16 @@ bool FilterParser::valid() const
     return this->valid_;
 }
 
-Expression *FilterParser::parseExpression(bool top)
+ExpressionPtr FilterParser::parseExpression(bool top)
 {
-    Expression *e = this->parseAnd();
+    auto e = this->parseAnd();
     while (this->tokenizer_.hasNext() &&
            this->tokenizer_.nextTokenType() == TokenType::OR)
     {
         this->tokenizer_.next();
         auto nextAnd = this->parseAnd();
-        e = new BinaryOperation(TokenType::OR, e, nextAnd);
+        e = std::make_unique<BinaryOperation>(TokenType::OR, std::move(e),
+                                              std::move(nextAnd));
     }
 
     if (this->tokenizer_.hasNext() && top)
@@ -116,7 +117,7 @@ Expression *FilterParser::parseExpression(bool top)
     return e;
 }
 
-Expression *FilterParser::parseAnd()
+ExpressionPtr FilterParser::parseAnd()
 {
     auto e = this->parseUnary();
     while (this->tokenizer_.hasNext() &&
@@ -124,19 +125,20 @@ Expression *FilterParser::parseAnd()
     {
         this->tokenizer_.next();
         auto nextUnary = this->parseUnary();
-        e = new BinaryOperation(TokenType::AND, e, nextUnary);
+        e = std::make_unique<BinaryOperation>(TokenType::AND, std::move(e),
+                                              std::move(nextUnary));
     }
     return e;
 }
 
-Expression *FilterParser::parseUnary()
+ExpressionPtr FilterParser::parseUnary()
 {
     if (this->tokenizer_.hasNext() && this->tokenizer_.nextTokenIsUnaryOp())
     {
         this->tokenizer_.next();
         auto type = this->tokenizer_.tokenType();
         auto nextCondition = this->parseCondition();
-        return new UnaryOperation(type, nextCondition);
+        return std::make_unique<UnaryOperation>(type, std::move(nextCondition));
     }
     else
     {
@@ -144,7 +146,7 @@ Expression *FilterParser::parseUnary()
     }
 }
 
-Expression *FilterParser::parseParentheses()
+ExpressionPtr FilterParser::parseParentheses()
 {
     // Don't call .next() before calling this method
     assert(this->tokenizer_.nextTokenType() == TokenType::LP);
@@ -173,9 +175,9 @@ Expression *FilterParser::parseParentheses()
     }
 }
 
-Expression *FilterParser::parseCondition()
+ExpressionPtr FilterParser::parseCondition()
 {
-    Expression *value = nullptr;
+    ExpressionPtr value;
     // parse expression wrapped in parentheses
     if (this->tokenizer_.hasNext() &&
         this->tokenizer_.nextTokenType() == TokenType::LP)
@@ -197,14 +199,16 @@ Expression *FilterParser::parseCondition()
             this->tokenizer_.next();
             auto type = this->tokenizer_.tokenType();
             auto nextValue = this->parseValue();
-            return new BinaryOperation(type, value, nextValue);
+            return std::make_unique<BinaryOperation>(type, std::move(value),
+                                                     std::move(nextValue));
         }
         else if (this->tokenizer_.nextTokenIsMathOp())
         {
             this->tokenizer_.next();
             auto type = this->tokenizer_.tokenType();
             auto nextValue = this->parseValue();
-            value = new BinaryOperation(type, value, nextValue);
+            value = std::make_unique<BinaryOperation>(type, std::move(value),
+                                                      std::move(nextValue));
         }
         else if (this->tokenizer_.nextTokenType() == TokenType::RP)
         {
@@ -228,7 +232,7 @@ Expression *FilterParser::parseCondition()
     return value;
 }
 
-Expression *FilterParser::parseValue()
+ExpressionPtr FilterParser::parseValue()
 {
     // parse a literal or an expression wrapped in parenthsis
     if (this->tokenizer_.hasNext())
@@ -236,7 +240,8 @@ Expression *FilterParser::parseValue()
         auto type = this->tokenizer_.nextTokenType();
         if (type == TokenType::INT)
         {
-            return new ValueExpression(this->tokenizer_.next().toInt(), type);
+            return std::make_unique<ValueExpression>(
+                this->tokenizer_.next().toInt(), type);
         }
         else if (type == TokenType::STRING)
         {
@@ -245,11 +250,12 @@ Expression *FilterParser::parseValue()
             auto val = before.mid(1);
             val.chop(1);
             val = val.replace("\\\"", "\"");
-            return new ValueExpression(val, type);
+            return std::make_unique<ValueExpression>(val, type);
         }
         else if (type == TokenType::IDENTIFIER)
         {
-            return new ValueExpression(this->tokenizer_.next(), type);
+            return std::make_unique<ValueExpression>(this->tokenizer_.next(),
+                                                     type);
         }
         else if (type == TokenType::LP)
         {
@@ -268,7 +274,7 @@ Expression *FilterParser::parseValue()
         this->errorLog("Unexpected end of statement");
     }
 
-    return new ValueExpression(0, TokenType::INT);
+    return std::make_unique<ValueExpression>(0, TokenType::INT);
 }
 
 void FilterParser::errorLog(const QString &text, bool expand)

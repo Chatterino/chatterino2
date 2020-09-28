@@ -695,7 +695,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
 
 void ChannelView::setFilters(const QList<QUuid> &ids)
 {
-    this->channelFilters_ = new FilterSet(ids);
+    this->channelFilters_ = std::make_shared<FilterSet>(ids);
 }
 
 const QList<QUuid> ChannelView::getFilterIds() const
@@ -708,7 +708,7 @@ const QList<QUuid> ChannelView::getFilterIds() const
     return this->channelFilters_->filterIds();
 }
 
-FilterSet *ChannelView::getFilterSet() const
+FilterSetPtr ChannelView::getFilterSet() const
 {
     return this->channelFilters_;
 }

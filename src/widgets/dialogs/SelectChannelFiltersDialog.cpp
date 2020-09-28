@@ -45,18 +45,18 @@ SelectChannelFiltersDialog::SelectChannelFiltersDialog(
     {
         for (const auto &f : *availableFilters)
         {
-            auto checkbox = new QCheckBox(f.getName(), this);
-            bool alreadySelected = previousSelection.contains(f.getId());
+            auto checkbox = new QCheckBox(f->getName(), this);
+            bool alreadySelected = previousSelection.contains(f->getId());
             checkbox->setCheckState(alreadySelected
                                         ? Qt::CheckState::Checked
                                         : Qt::CheckState::Unchecked);
             if (alreadySelected)
             {
-                this->currentSelection_.append(f.getId());
+                this->currentSelection_.append(f->getId());
             }
 
             QObject::connect(checkbox, &QCheckBox::stateChanged,
-                             [this, id = f.getId()](int state) {
+                             [this, id = f->getId()](int state) {
                                  if (state == 0)
                                  {
                                      this->currentSelection_.removeOne(id);

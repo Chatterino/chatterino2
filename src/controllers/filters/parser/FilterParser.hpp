@@ -20,18 +20,18 @@ public:
     const QString filterString() const;
 
 private:
-    Expression *parseExpression(bool top = false);
-    Expression *parseAnd();
-    Expression *parseUnary();
-    Expression *parseParentheses();
-    Expression *parseCondition();
-    Expression *parseValue();
+    ExpressionPtr parseExpression(bool top = false);
+    ExpressionPtr parseAnd();
+    ExpressionPtr parseUnary();
+    ExpressionPtr parseParentheses();
+    ExpressionPtr parseCondition();
+    ExpressionPtr parseValue();
 
     void errorLog(const QString &text, bool expand = false);
 
     QString text_;
     Tokenizer tokenizer_;
-    Expression *builtExpression_;
+    ExpressionPtr builtExpression_;
 
     QStringList parseLog_;
     bool valid_ = true;

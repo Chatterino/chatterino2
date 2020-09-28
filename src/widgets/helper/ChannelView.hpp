@@ -79,7 +79,7 @@ public:
 
     void setFilters(const QList<QUuid> &ids);
     const QList<QUuid> getFilterIds() const;
-    FilterSet *getFilterSet() const;
+    FilterSetPtr getFilterSet() const;
 
     ChannelPtr sourceChannel() const;
     void setSourceChannel(ChannelPtr sourceChannel);
@@ -189,7 +189,7 @@ private:
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
 
-    FilterSet *channelFilters_ = nullptr;
+    FilterSetPtr channelFilters_;
 
     // Returns true if message should be included
     bool shouldIncludeMessage(const MessagePtr &m) const;

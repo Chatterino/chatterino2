@@ -18,7 +18,7 @@ public:
     SearchPopup();
 
     virtual void setChannel(const ChannelPtr &channel);
-    virtual void setChannelFilters(FilterSet *filters);
+    virtual void setChannelFilters(FilterSetPtr filters);
 
 protected:
     virtual void updateWindowTitle();
@@ -41,7 +41,7 @@ private:
      */
     static ChannelPtr filter(const QString &text, const QString &channelName,
                              const LimitedQueueSnapshot<MessagePtr> &snapshot,
-                             FilterSet *filterSet);
+                             FilterSetPtr filterSet);
 
     /**
      * @brief Checks the input for tags and registers their corresponding
@@ -57,7 +57,7 @@ private:
     QLineEdit *searchInput_{};
     ChannelView *channelView_{};
     QString channelName_{};
-    FilterSet *channelFilters_ = nullptr;
+    FilterSetPtr channelFilters_;
 };
 
 }  // namespace chatterino

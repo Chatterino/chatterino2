@@ -17,7 +17,7 @@ namespace chatterino {
 
 ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
                                const LimitedQueueSnapshot<MessagePtr> &snapshot,
-                               FilterSet *filterSet)
+                               FilterSetPtr filterSet)
 {
     ChannelPtr channel(new Channel(channelName, Channel::Type::None));
 
@@ -63,7 +63,7 @@ SearchPopup::SearchPopup()
     });
 }
 
-void SearchPopup::setChannelFilters(FilterSet *filters)
+void SearchPopup::setChannelFilters(FilterSetPtr filters)
 {
     this->channelFilters_ = filters;
 }

@@ -82,7 +82,7 @@ ValueExpression::ValueExpression(QVariant value, TokenType type)
     : value_(value)
     , type_(type){};
 
-QVariant ValueExpression::execute(const ContextMap &context)
+QVariant ValueExpression::execute(const ContextMap &context) const
 {
     if (this->type_ == TokenType::IDENTIFIER)
     {
@@ -96,12 +96,12 @@ TokenType ValueExpression::type()
     return this->type_;
 }
 
-QString ValueExpression::debug()
+QString ValueExpression::debug() const
 {
     return this->value_.toString();
 }
 
-QString ValueExpression::filterString()
+QString ValueExpression::filterString() const
 {
     switch (this->type_)
     {
@@ -119,15 +119,15 @@ QString ValueExpression::filterString()
 
 // BinaryOperation
 
-BinaryOperation::BinaryOperation(TokenType op, Expression *left,
-                                 Expression *right)
+BinaryOperation::BinaryOperation(TokenType op, ExpressionPtr left,
+                                 ExpressionPtr right)
     : op_(op)
-    , left_(left)
-    , right_(right)
+    , left_(std::move(left))
+    , right_(std::move(right))
 {
 }
 
-QVariant BinaryOperation::execute(const ContextMap &context)
+QVariant BinaryOperation::execute(const ContextMap &context) const
 {
     auto left = this->left_->execute(context);
     auto right = this->right_->execute(context);
@@ -262,14 +262,14 @@ QVariant BinaryOperation::execute(const ContextMap &context)
     }
 }
 
-QString BinaryOperation::debug()
+QString BinaryOperation::debug() const
 {
     return QString("(%1 %2 %3)")
         .arg(this->left_->debug(), tokenTypeToInfoString(this->op_),
              this->right_->debug());
 }
 
-QString BinaryOperation::filterString()
+QString BinaryOperation::filterString() const
 {
     QString opText;
     switch (this->op_)
@@ -334,13 +334,13 @@ QString BinaryOperation::filterString()
 
 // UnaryOperation
 
-UnaryOperation::UnaryOperation(TokenType op, Expression *right)
+UnaryOperation::UnaryOperation(TokenType op, ExpressionPtr right)
     : op_(op)
-    , right_(right)
+    , right_(std::move(right))
 {
 }
 
-QVariant UnaryOperation::execute(const ContextMap &context)
+QVariant UnaryOperation::execute(const ContextMap &context) const
 {
     auto right = this->right_->execute(context);
     switch (this->op_)
@@ -354,13 +354,13 @@ QVariant UnaryOperation::execute(const ContextMap &context)
     }
 }
 
-QString UnaryOperation::debug()
+QString UnaryOperation::debug() const
 {
     return QString("(%1 %2)").arg(tokenTypeToInfoString(this->op_),
                                   this->right_->debug());
 }
 
-QString UnaryOperation::filterString()
+QString UnaryOperation::filterString() const
 {
     QString opText;
     switch (this->op_)

@@ -7,18 +7,19 @@
 
 namespace chatterino {
 
-class FilterModel : public SignalVectorModel<FilterRecord>
+class FilterModel : public SignalVectorModel<FilterRecordPtr>
 {
 public:
     explicit FilterModel(QObject *parent);
 
 protected:
     // turn a vector item into a model row
-    virtual FilterRecord getItemFromRow(std::vector<QStandardItem *> &row,
-                                        const FilterRecord &original) override;
+    virtual FilterRecordPtr getItemFromRow(
+        std::vector<QStandardItem *> &row,
+        const FilterRecordPtr &original) override;
 
     // turns a row in the model into a vector item
-    virtual void getRowFromItem(const FilterRecord &item,
+    virtual void getRowFromItem(const FilterRecordPtr &item,
                                 std::vector<QStandardItem *> &row) override;
 };
 

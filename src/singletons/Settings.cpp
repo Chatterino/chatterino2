@@ -21,7 +21,7 @@ ConcurrentSettings::ConcurrentSettings()
     , blacklistedUsers(*new SignalVector<HighlightBlacklistUser>())
     , ignoredMessages(*new SignalVector<IgnorePhrase>())
     , mutedChannels(*new SignalVector<QString>())
-    , filterRecords(*new SignalVector<FilterRecord>())
+    , filterRecords(*new SignalVector<FilterRecordPtr>())
     , moderationActions(*new SignalVector<ModerationAction>)
 {
     persist(this->highlightedMessages, "/highlighting/highlights");
