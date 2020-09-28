@@ -489,7 +489,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                 case StreamerModeSetting::Disabled:
                     return "No";
                 case StreamerModeSetting::DetectObs:
-                    return "Detect OBS";
+                    return "Detect OBS (win)";
             }
 
             return "";

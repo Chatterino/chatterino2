@@ -1316,7 +1316,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         {
             auto element = &hoverLayoutElement->getCreator();
             auto thumbnailSize = getSettings()->thumbnailSize;
-            if (thumbnailSize == 0 || isInStreamerMode())
+            if (thumbnailSize == 0 ||
+                (isInStreamerMode() &&
+                 getSettings()->streamerModeHideLinkThumbnails))
             {
                 tooltipPreviewImage.setImage(nullptr);
             }

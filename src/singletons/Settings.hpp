@@ -184,7 +184,7 @@ public:
     BoolSetting streamerModeHideUsercardAvatars = {
         "/streamerMode/hideUsercardAvatars", true};
     BoolSetting streamerModeHideLinkThumbnails = {
-        "/streamerMode/HideLinkThumbnails", true};
+        "/streamerMode/hideLinkThumbnails", true};
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
 
     /// Ignored Phrases
