@@ -8,8 +8,7 @@
 
 #include <QTableView>
 
-#define FILTERS_DOCUMENTATION \
-    "https://github.com/Chatterino/chatterino2/blob/master/docs/Filters.md"
+#define FILTERS_DOCUMENTATION "https://wiki.chatterino.com/Filters/"
 
 namespace chatterino {
 
