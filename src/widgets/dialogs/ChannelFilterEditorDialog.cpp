@@ -106,26 +106,14 @@ ChannelFilterEditorDialog::ValueSpecifier::ValueSpecifier()
     QObject::connect(  //
         this->typeCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
         [this](int index) {
-            if (index == 2)
-            {
-                this->valueInput_->hide();
-                this->varCombo_->show();
-            }
-            else
-            {
-                this->valueInput_->show();
-                this->varCombo_->hide();
-                if (index == 1)
-                {
-                    auto validator = new QIntValidator;
-                    validator->setBottom(0);
-                    this->valueInput_->setValidator(validator);
-                }
-                else
-                {
-                    this->valueInput_->setValidator(nullptr);
-                }
-            }
+            const auto isNumber = (index == 1);
+            const auto isVariable = (index == 2);
+
+            this->valueInput_->setVisible(!isVariable);
+            this->varCombo_->setVisible(isVariable);
+            this->valueInput_->setValidator(
+                isNumber ? (new QIntValidator(0, INT_MAX)) : nullptr);
+
             this->valueInput_->clear();
         });
 
@@ -200,7 +188,7 @@ ChannelFilterEditorDialog::BinaryOperationSpecifier::BinaryOperationSpecifier(
         this->opCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
         [this](int index) {
             // disable if set to "(nothing)"
-            this->right_->setEnabled(realBinaryOps.at(index) != "");
+            this->right_->setEnabled(!realBinaryOps.at(index).isEmpty());
         });
 }
 
@@ -226,7 +214,7 @@ QLayout *ChannelFilterEditorDialog::BinaryOperationSpecifier::layout() const
 QString ChannelFilterEditorDialog::BinaryOperationSpecifier::expressionText()
 {
     QString opText = realBinaryOps.at(this->opCombo_->currentIndex());
-    if (opText == "")
+    if (opText.isEmpty())
     {
         return this->left_->expressionText();
     }

@@ -9,7 +9,6 @@ class FilterSet
 {
 public:
     FilterSet()
-        : filters_(QMap<QUuid, FilterRecordPtr>())
     {
         this->listener_ =
             getCSettings().filterRecords.delayedItemsChanged.connect(
@@ -17,7 +16,6 @@ public:
     }
 
     FilterSet(const QList<QUuid> &filterIds)
-        : filters_(QMap<QUuid, FilterRecordPtr>())
     {
         auto filters = getCSettings().filterRecords.readOnly();
         for (const auto &f : *filters)

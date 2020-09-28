@@ -271,61 +271,46 @@ QString BinaryOperation::debug() const
 
 QString BinaryOperation::filterString() const
 {
-    QString opText;
-    switch (this->op_)
-    {
-        case AND:
-            opText = "&&";
-            break;
-        case OR:
-            opText = "||";
-            break;
-        case PLUS:
-            opText = "+";
-            break;
-        case MINUS:
-            opText = "-";
-            break;
-        case MULTIPLY:
-            opText = "*";
-            break;
-        case DIVIDE:
-            opText = "/";
-            break;
-        case MOD:
-            opText = "%";
-            break;
-        case EQ:
-            opText = "==";
-            break;
-        case NEQ:
-            opText = "!=";
-            break;
-        case LT:
-            opText = "<";
-            break;
-        case GT:
-            opText = ">";
-            break;
-        case LTE:
-            opText = "<=";
-            break;
-        case GTE:
-            opText = ">=";
-            break;
-        case CONTAINS:
-            opText = "contains";
-            break;
-        case STARTS_WITH:
-            opText = "startswith";
-            break;
-        case ENDS_WITH:
-            opText = "endswith";
-            break;
-        default:
-            opText = "";
-            break;
-    }
+    const auto opText = [&]() -> QString {
+        switch (this->op_)
+        {
+            case AND:
+                return "&&";
+            case OR:
+                return "||";
+            case PLUS:
+                return "+";
+            case MINUS:
+                return "-";
+            case MULTIPLY:
+                return "*";
+            case DIVIDE:
+                return "/";
+            case MOD:
+                return "%";
+            case EQ:
+                return "==";
+            case NEQ:
+                return "!=";
+            case LT:
+                return "<";
+            case GT:
+                return ">";
+            case LTE:
+                return "<=";
+            case GTE:
+                return ">=";
+            case CONTAINS:
+                return "contains";
+            case STARTS_WITH:
+                return "startswith";
+            case ENDS_WITH:
+                return "endswith";
+            default:
+                return QString();
+        }
+    }();
+
     return QString("(%1) %2 (%3)")
         .arg(this->left_->filterString())
         .arg(opText)
@@ -362,16 +347,16 @@ QString UnaryOperation::debug() const
 
 QString UnaryOperation::filterString() const
 {
-    QString opText;
-    switch (this->op_)
-    {
-        case NOT:
-            opText = "!";
-            break;
-        default:
-            opText = "";
-            break;
-    }
+    const auto opText = [&]() -> QString {
+        switch (this->op_)
+        {
+            case NOT:
+                return "!";
+            default:
+                return QString();
+        }
+    }();
+
     return QString("%1(%2)").arg(opText).arg(this->right_->filterString());
 }
 

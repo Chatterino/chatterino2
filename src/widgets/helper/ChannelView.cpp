@@ -610,7 +610,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                         return this->shouldIncludeMessage(msg);
                     });
 
-                if (filtered.size() > 0)
+                if (!filtered.empty())
                     this->channel_->addMessagesAtStart(filtered);
             }));
 
@@ -700,7 +700,7 @@ void ChannelView::setFilters(const QList<QUuid> &ids)
 
 const QList<QUuid> ChannelView::getFilterIds() const
 {
-    if (this->channelFilters_ == nullptr)
+    if (!this->channelFilters_)
     {
         return QList<QUuid>();
     }
@@ -715,7 +715,7 @@ FilterSetPtr ChannelView::getFilterSet() const
 
 bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
 {
-    if (this->channelFilters_ != nullptr)
+    if (this->channelFilters_)
     {
         if (getSettings()->excludeUserMessagesFromFilter &&
             getApp()->accounts->twitch.getCurrent()->getUserName().compare(
@@ -838,9 +838,9 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     {
         std::vector<ScrollbarHighlight> highlights;
         highlights.reserve(messages.size());
-        for (size_t i = 0; i < messages.size(); i++)
+        for (const auto &message : messages)
         {
-            highlights.push_back(messages.at(i)->getScrollBarHighlight());
+            highlights.push_back(message->getScrollBarHighlight());
         }
 
         this->scrollBar_->addHighlightsAtStart(highlights);

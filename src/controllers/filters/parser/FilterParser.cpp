@@ -37,6 +37,7 @@ ContextMap buildContextMap(const MessagePtr &m)
     using MessageFlag = chatterino::MessageFlag;
 
     QStringList badges;
+    badges.reserve(m->badges.size());
     for (const auto &e : m->badges)
     {
         badges << e.key_;
@@ -52,7 +53,7 @@ ContextMap buildContextMap(const MessagePtr &m)
                         : 0;
 
     return {
-        {"author.badges", badges},
+        {"author.badges", std::move(badges)},
         {"author.color", m->usernameColor},
         {"author.name", m->displayName},
         {"author.no_color", !m->usernameColor.isValid()},
@@ -161,15 +162,12 @@ ExpressionPtr FilterParser::parseParentheses()
     }
     else
     {
-        if (this->tokenizer_.hasNext())
-        {
-            this->errorLog(QString("Missing closing parentheses: got %1")
-                               .arg(this->tokenizer_.preview()));
-        }
-        else
-        {
-            this->errorLog("Missing closing parentheses at end of statement");
-        }
+        const auto message =
+            this->tokenizer_.hasNext()
+                ? QString("Missing closing parentheses: got %1")
+                      .arg(this->tokenizer_.preview())
+                : "Missing closing parentheses at end of statement";
+        this->errorLog(message);
 
         return e;
     }

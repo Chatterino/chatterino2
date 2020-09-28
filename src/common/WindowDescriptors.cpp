@@ -74,7 +74,9 @@ namespace {
 
         if (!val.isUndefined())
         {
-            for (const auto &id : val.toArray())
+            const auto array = val.toArray();
+            filterIds.reserve(array.size());
+            for (const auto &id : array)
             {
                 filterIds.append(QUuid::fromString(id.toString()));
             }
