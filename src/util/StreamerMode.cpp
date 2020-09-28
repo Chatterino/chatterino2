@@ -26,8 +26,17 @@ const QStringList &broadcastingBinaries()
 
 bool isInStreamerMode()
 {
+    if (getSettings()->enableStreamerMode == StreamerModeSetting::Enabled)
+    {
+        return true;
+    }
+    if (getSettings()->enableStreamerMode == StreamerModeSetting::Disabled)
+    {
+        return false;
+    }
+
 #ifdef USEWINSDK
-    if (!IsWindowsVistaOrGreater() || !getSettings()->hideImagesInStreamerMode)
+    if (!IsWindowsVistaOrGreater())
     {
         return false;
     }

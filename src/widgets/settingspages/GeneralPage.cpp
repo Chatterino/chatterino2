@@ -13,6 +13,7 @@
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 
@@ -472,6 +473,48 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             return fuzzyToInt(args.value, 0);
         });
 
+    layout.addTitle("Streamer Mode");
+    layout.addDescription(
+        "Chatterino can automatically change behavior if it "
+        "detects that \"OBS Studio\" is running.\nSelect which "
+        "things you want to change while streaming");
+    layout.addDropdown<int>(
+        "Enable Streamer Mode", {"Yes", "No", "Detect OBS"},
+        s.enableStreamerMode,
+        [](auto val) {
+            switch (val)
+            {
+                case StreamerModeSetting::Enabled:
+                    return "Yes";
+                case StreamerModeSetting::Disabled:
+                    return "No";
+                case StreamerModeSetting::DetectObs:
+                    return "Detect OBS";
+            }
+
+            return "";
+        },
+        [](auto args) {
+            if (args.value == "Yes")
+            {
+                return StreamerModeSetting::Enabled;
+            }
+            else if (args.value == "No")
+            {
+                return StreamerModeSetting::Disabled;
+            }
+            else
+            {
+                // default to Detecting if OBS.exe is running
+                return StreamerModeSetting::DetectObs;
+            }
+        });
+    layout.addCheckbox("Hide usercard avatars",
+                       s.streamerModeHideUsercardAvatars);
+    layout.addCheckbox("Hide link thumbnails",
+                       s.streamerModeHideLinkThumbnails);
+    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
+
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
     layout.addCheckbox("Animate", s.animateEmotes);
@@ -678,9 +721,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox(
         "Hide viewercount and stream length while hovering the split",
         s.hideViewerCountAndDuration);
-    layout.addCheckbox(
-        "Hide usercard avatars and link thumbnails in streamer mode",
-        s.hideImagesInStreamerMode);
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle, [](int index) { return index; },

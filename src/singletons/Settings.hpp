@@ -9,6 +9,7 @@
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
 
 using TimeoutButton = std::pair<QString, int>;
@@ -177,7 +178,16 @@ public:
     BoolSetting unshortLinks = {"/links/unshortLinks", false};
     BoolSetting lowercaseDomains = {"/links/linkLowercase", true};
 
-    /// Ignored phrases
+    /// Streamer Mode
+    IntSetting enableStreamerMode = {"/streamerMode/enabled",
+                                     StreamerModeSetting::DetectObs};
+    BoolSetting streamerModeHideUsercardAvatars = {
+        "/streamerMode/hideUsercardAvatars", true};
+    BoolSetting streamerModeHideLinkThumbnails = {
+        "/streamerMode/HideLinkThumbnails", true};
+    BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
+
+    /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
                                            "***"};
 
@@ -316,8 +326,6 @@ public:
         "/misc/attachExtensionToAnyProcess", false};
     BoolSetting hideViewerCountAndDuration = {
         "/misc/hideViewerCountAndDuration", false};
-    BoolSetting hideImagesInStreamerMode = {"/misc/hideImagesInStreamerMode",
-                                            true};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
 
     /// Debug
