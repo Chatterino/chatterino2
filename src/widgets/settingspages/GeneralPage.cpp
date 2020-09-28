@@ -1,7 +1,5 @@
 #include "GeneralPage.hpp"
 
-#include <QDesktopServices>
-#include <QFileDialog>
 #include <QFontDialog>
 #include <QLabel>
 #include <QScrollArea>
@@ -508,7 +506,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             }
             else
             {
-                // default to Detecting if OBS.exe is running
                 return StreamerModeSetting::DetectObs;
             }
         },

@@ -2,7 +2,6 @@
 
 #include <QDebug>
 #include <QLabel>
-#include <QPushButton>
 #include <QVBoxLayout>
 
 #include "Application.hpp"
