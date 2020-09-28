@@ -479,7 +479,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         "detects that \"OBS Studio\" is running.\nSelect which "
         "things you want to change while streaming");
     layout.addDropdown<int>(
-        "Enable Streamer Mode", {"Yes", "No", "Detect OBS"},
+        "Enable Streamer Mode", {"Yes", "No", "Detect OBS (win)"},
         s.enableStreamerMode,
         [](auto val) {
             switch (val)
