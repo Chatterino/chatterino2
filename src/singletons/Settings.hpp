@@ -11,6 +11,8 @@
 #include "singletons/Toasts.hpp"
 #include "widgets/Notebook.hpp"
 
+using TimeoutButton = std::pair<QString, int>;
+
 namespace chatterino {
 
 class HighlightPhrase;
@@ -338,6 +340,19 @@ public:
     IntSetting hideSimilarMaxDelay = {"/similarity/hideSimilarMaxDelay", 5};
     IntSetting hideSimilarMaxMessagesToCheck = {
         "/similarity/hideSimilarMaxMessagesToCheck", 3};
+
+    /// Timeout buttons
+
+    ChatterinoSetting<std::vector<TimeoutButton>> timeoutButtons = {
+        "/timeouts/timeoutButtons",
+        {{"s", 1},
+         {"s", 30},
+         {"m", 1},
+         {"m", 5},
+         {"m", 30},
+         {"h", 1},
+         {"d", 1},
+         {"w", 1}}};
 
 private:
     void updateModerationActions();

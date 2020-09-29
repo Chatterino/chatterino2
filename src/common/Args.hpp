@@ -1,6 +1,7 @@
 #pragma once
 
-#include <QStringList>
+#include <QApplication>
+#include <QJsonArray>
 
 namespace chatterino {
 
@@ -8,13 +9,16 @@ namespace chatterino {
 class Args
 {
 public:
-    Args(const QStringList &args);
+    Args(const QApplication &app);
 
     bool printVersion{};
     bool crashRecovery{};
+    bool shouldRunBrowserExtensionHost{};
+    bool dontSaveSettings{};
+    QJsonArray channelsToJoin{};
 };
 
-void initArgs(const QStringList &args);
+void initArgs(const QApplication &app);
 const Args &getArgs();
 
 }  // namespace chatterino
