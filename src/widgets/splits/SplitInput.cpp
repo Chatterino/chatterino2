@@ -435,7 +435,8 @@ void SplitInput::installKeyPressedEvent()
                 }
             }
         }
-        else if (event->key() == Qt::Key_C &&
+        else if ((event->key() == Qt::Key_C ||
+                  event->key() == Qt::Key_Insert) &&
                  event->modifiers() == Qt::ControlModifier)
         {
             if (this->split_->view_->hasSelection())

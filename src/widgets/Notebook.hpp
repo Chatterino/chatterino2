@@ -98,6 +98,9 @@ public:
     SplitContainer *getOrAddSelectedPage();
     void select(QWidget *page) override;
 
+protected:
+    void showEvent(QShowEvent *event) override;
+
 private:
     void addCustomButtons();
 

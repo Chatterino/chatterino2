@@ -163,14 +163,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         return;
     }
 
-    // (hemirt)
-    // this resets the selection in the completion list, it should probably only
-    // trigger on actual chat input (space, character) and not on every key
-    // input (pressing alt for example) (fourtf) fixed for shift+tab, there
-    // might be a better solution but nobody is gonna bother anyways
-    if (event->key() != Qt::Key_Shift && event->key() != Qt::Key_Control &&
-        event->key() != Qt::Key_Alt && event->key() != Qt::Key_Super_L &&
-        event->key() != Qt::Key_Super_R)
+    if (!event->text().isEmpty())
     {
         this->completionInProgress_ = false;
     }

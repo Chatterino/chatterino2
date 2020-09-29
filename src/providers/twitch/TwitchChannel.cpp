@@ -665,7 +665,6 @@ void TwitchChannel::loadRecentMessages()
     }
 
     NetworkRequest(Env::get().recentMessagesApiUrl.arg(this->getName()))
-        .concurrent()
         .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
