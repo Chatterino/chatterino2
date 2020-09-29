@@ -197,11 +197,15 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         AttachedWindow::GetArgs args;
         args.winId = root.value("winId").toString();
         args.yOffset = root.value("yOffset").toInt(-1);
-        args.x = root.value("size").toObject().value("x").toDouble(-1.0);
-        args.pixelRatio =
-            root.value("size").toObject().value("pixelRatio").toDouble(-1.0);
-        args.width = root.value("size").toObject().value("width").toInt(-1);
-        args.height = root.value("size").toObject().value("height").toInt(-1);
+
+        {
+            const auto sizeObject = root.value("size").toObject();
+            args.x = sizeObject.value("x").toDouble(-1.0);
+            args.pixelRatio = sizeObject.value("pixelRatio").toDouble(-1.0);
+            args.width = sizeObject.value("width").toInt(-1);
+            args.height = sizeObject.value("height").toInt(-1);
+        }
+
         args.fullscreen = attachFullscreen;
 
         qDebug() << args.x << args.pixelRatio << args.width << args.height
