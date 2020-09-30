@@ -69,4 +69,9 @@ void ChannelChatters::setChatters(UsernameSet &&set)
     *this->chatters_.access() = set;
 }
 
+void ChannelChatters::clearChatters()
+{
+    this->chatters_.access()->clear();
+}
+
 }  // namespace chatterino

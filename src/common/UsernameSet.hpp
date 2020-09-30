@@ -5,6 +5,8 @@
 #include <set>
 #include <unordered_map>
 
+#include "singletons/Settings.hpp"
+
 namespace chatterino {
 
 class Prefix
@@ -77,6 +79,7 @@ public:
     std::pair<Iterator, bool> insert(QString &&value);
 
     bool contains(const QString &value) const;
+    void clear();
 
 private:
     void insertPrefix(const QString &string);

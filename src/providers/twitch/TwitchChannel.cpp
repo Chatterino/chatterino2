@@ -158,6 +158,19 @@ TwitchChannel::TwitchChannel(const QString &name,
     // pubsub
     this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
                          [=] { this->refreshPubsub(); });
+
+    auto lockedSetting =
+        getSettings()->lowercaseUsernamesOnCompletion.getData().lock();
+    if (!lockedSetting)
+        qDebug() << "Failed to get lowercaseUsernamesOnCompletion setting";
+
+    auto connection = lockedSetting->updated.connect(
+        [this](const rapidjson::Value &,
+               const pajlada::Settings::SignalArgs &) {
+            [this] { this->clearChatters(); }();
+        });
+    addConnection(std::move(connection));
+
     this->refreshPubsub();
     this->userStateChanged.connect([this] { this->refreshPubsub(); });
 

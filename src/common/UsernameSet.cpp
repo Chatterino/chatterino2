@@ -68,6 +68,12 @@ bool UsernameSet::contains(const QString &value) const
     return this->items.count(value) == 1;
 }
 
+void UsernameSet::clear()
+{
+    this->items.clear();
+    this->firstKeyForPrefix.clear();
+}
+
 //
 // Range
 //
