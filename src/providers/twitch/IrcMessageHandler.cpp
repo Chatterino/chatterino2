@@ -276,11 +276,11 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         {
             if (getSettings()->lowercaseUsernamesOnCompletion)
             {
-                chatters->addRecentChatter(msg->displayName);
+                chatters->addRecentChatter(msg->loginName);
             }
             else
             {
-                chatters->addRecentChatter(msg->loginName);
+                chatters->addRecentChatter(msg->displayName);
             }
         }
     }
