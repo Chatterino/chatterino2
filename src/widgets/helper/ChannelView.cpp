@@ -1325,7 +1325,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 const auto isHideLink =
                     isInStreamerMode() &&
                     getSettings()->streamerModeHideLinkThumbnails &&
-                    !element->getThumbnail()->url().string.isEmpty();
+                    (!element->getThumbnail()->url().string.isEmpty());
                 auto thumb =
                     isHideLink ? Image::fromPixmap(getResources().streamerMode)
                                : element->getThumbnail();
