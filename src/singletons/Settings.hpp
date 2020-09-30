@@ -185,6 +185,8 @@ public:
         "/streamerMode/hideUsercardAvatars", true};
     BoolSetting streamerModeHideLinkThumbnails = {
         "/streamerMode/hideLinkThumbnails", true};
+    BoolSetting streamerModeHideViewerCountAndDuration = {
+        "/streamerMode/hideViewerCountAndDuration", false};
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
 
     /// Ignored Phrases
@@ -324,8 +326,6 @@ public:
     BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
     BoolSetting attachExtensionToAnyProcess = {
         "/misc/attachExtensionToAnyProcess", false};
-    BoolSetting hideViewerCountAndDuration = {
-        "/misc/hideViewerCountAndDuration", false};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
 
     /// Debug

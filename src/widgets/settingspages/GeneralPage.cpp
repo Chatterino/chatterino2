@@ -490,6 +490,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.streamerModeHideUsercardAvatars);
     layout.addCheckbox("Hide link thumbnails",
                        s.streamerModeHideLinkThumbnails);
+    layout.addCheckbox(
+        "Hide viewer count and stream length while hovering over split header",
+        s.streamerModeHideViewerCountAndDuration);
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
 
     layout.addTitle("Emotes");
@@ -695,9 +698,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.enableExperimentalIrc);
     layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
-    layout.addCheckbox(
-        "Hide viewercount and stream length while hovering the split",
-        s.hideViewerCountAndDuration);
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle, [](int index) { return index; },
