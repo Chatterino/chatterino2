@@ -5,8 +5,6 @@
 #include <set>
 #include <unordered_map>
 
-#include "singletons/Settings.hpp"
-
 namespace chatterino {
 
 class Prefix
