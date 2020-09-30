@@ -1,6 +1,7 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/Shortcut.hpp"
@@ -315,7 +316,10 @@ void SettingsDialog::showEvent(QShowEvent *)
 ///// Widget creation helpers
 void SettingsDialog::onOkClicked()
 {
-    pajlada::Settings::SettingManager::gSave();
+    if (!getArgs().dontSaveSettings)
+    {
+        pajlada::Settings::SettingManager::gSave();
+    }
     this->close();
 }
 

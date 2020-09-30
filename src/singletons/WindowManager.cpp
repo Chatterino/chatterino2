@@ -12,6 +12,7 @@
 #include <chrono>
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
@@ -326,6 +327,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
 void WindowManager::save()
 {
+    if (getArgs().dontSaveSettings)
+    {
+        return;
+    }
     qDebug() << "[WindowManager] Saving";
     assertInGuiThread();
     QJsonDocument document;
