@@ -480,34 +480,10 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         "things you want to change while streaming");
 
     layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
-        "Enable Streamer Mode", {"Yes", "No", "Detect OBS (win)"},
-        s.enableStreamerMode,
-        [](int val) {
-            switch (val)
-            {
-                case StreamerModeSetting::Enabled:
-                    return "Yes";
-                case StreamerModeSetting::Disabled:
-                    return "No";
-                case StreamerModeSetting::DetectObs:
-                    return "Detect OBS (win)";
-                default:
-                    return "";
-            }
-        },
+        "Enable Streamer Mode", {"No", "Yes", "Detect OBS (win)"},
+        s.enableStreamerMode, [](int value) { return value; },
         [](DropdownArgs args) {
-            if (args.value == "Yes")
-            {
-                return StreamerModeSetting::Enabled;
-            }
-            else if (args.value == "No")
-            {
-                return StreamerModeSetting::Disabled;
-            }
-            else
-            {
-                return StreamerModeSetting::DetectObs;
-            }
+            return static_cast<StreamerModeSetting>(args.index);
         },
         false);
     layout.addCheckbox("Hide usercard avatars",

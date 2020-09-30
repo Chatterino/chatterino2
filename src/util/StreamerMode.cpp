@@ -26,15 +26,12 @@ const QStringList &broadcastingBinaries()
 
 bool isInStreamerMode()
 {
-    if (getSettings()->enableStreamerMode.getEnum() ==
-        StreamerModeSetting::Enabled)
+    switch (getSettings()->enableStreamerMode.getEnum())
     {
-        return true;
-    }
-    if (getSettings()->enableStreamerMode.getEnum() ==
-        StreamerModeSetting::Disabled)
-    {
-        return false;
+        case StreamerModeSetting::Enabled:
+            return true;
+        case StreamerModeSetting::Disabled:
+            return false;
     }
 
 #ifdef USEWINSDK
