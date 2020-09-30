@@ -52,4 +52,4 @@ Qt creator should now format the documents when saving it.
 ## Doxygen
 Doxygen is used to generate project information daily and is available [here](https://doxygen.chatterino.com).
 ## chocolatey 
- a chocolatey version is available [here](https://chocolatey.org/packages/chatterino).  
+ A chocolatey version is available [here](https://chocolatey.org/packages/chatterino).  
