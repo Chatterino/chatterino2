@@ -161,15 +161,19 @@ TwitchChannel::TwitchChannel(const QString &name,
 
     auto lockedSetting =
         getSettings()->lowercaseUsernamesOnCompletion.getData().lock();
-    if (!lockedSetting)
+    if (lockedSetting)
+    {
+        auto connection = lockedSetting->updated.connect(
+            [this](const rapidjson::Value &,
+                   const pajlada::Settings::SignalArgs &) {
+                [this] { this->clearChatters(); }();
+            });
+        addConnection(std::move(connection));
+    }
+    else
+    {
         qDebug() << "Failed to get lowercaseUsernamesOnCompletion setting";
-
-    auto connection = lockedSetting->updated.connect(
-        [this](const rapidjson::Value &,
-               const pajlada::Settings::SignalArgs &) {
-            [this] { this->clearChatters(); }();
-        });
-    addConnection(std::move(connection));
+    }
 
     this->refreshPubsub();
     this->userStateChanged.connect([this] { this->refreshPubsub(); });
