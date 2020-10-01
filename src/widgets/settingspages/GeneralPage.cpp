@@ -13,10 +13,7 @@
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
-#include "util/StandardItemHelper.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/dialogs/ColorPickerDialog.hpp"
-#include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
 
 #define CHROME_EXTENSION_LINK                                           \
@@ -415,20 +412,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             }
         },
         false);
-    auto lastMessageColor = layout.addButton("", [] {
-        auto dialog =
-            new ColorPickerDialog(QColor(getSettings()->lastMessageColor));
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->show();
-        dialog->closed.connect([=] {
-            QColor selected = dialog->selectedColor();
-
-            if (selected.isValid())
-            {
-                getSettings()->lastMessageColor = selected.name();
-            }
-        });
-    });
+    layout.addColorButton("Last message line color",
+                          QColor(getSettings()->lastMessageColor.getValue()),
+                          getSettings()->lastMessageColor);
     layout.addCheckbox("Highlight messages redeemed with Channel Points",
                        s.enableRedeemedHighlight);
     layout.addDropdown<QString>(

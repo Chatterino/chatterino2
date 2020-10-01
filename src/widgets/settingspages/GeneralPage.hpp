@@ -9,6 +9,8 @@
 #include "pajlada/signals/signal.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "widgets/dialogs/ColorPickerDialog.hpp"
+#include "widgets/helper/ColorButton.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 class QLabel;
@@ -91,6 +93,36 @@ public:
         layout->addStretch(1);
         this->addLayout(layout);
         return button;
+    }
+
+    template <typename T>
+    ColorButton *addColorButton(const QString &text, const QColor &color,
+                                pajlada::Settings::Setting<T> &setting)
+    {
+        auto colorButton = new ColorButton(color);
+        auto layout = new QHBoxLayout();
+        auto label = new QLabel(text + ":");
+        layout->addWidget(label);
+        layout->addStretch(1);
+        layout->addWidget(colorButton);
+        this->addLayout(layout);
+        QObject::connect(
+            colorButton, &ColorButton::clicked, [setting, colorButton]() {
+                auto dialog = new ColorPickerDialog(QColor(setting));
+                dialog->setAttribute(Qt::WA_DeleteOnClose);
+                dialog->show();
+                dialog->closed.connect([=] {
+                    QColor selected = dialog->selectedColor();
+
+                    if (selected.isValid())
+                    {
+                        getSettings()->lastMessageColor = selected.name();
+                        colorButton->setColor(selected);
+                    }
+                });
+            });
+
+        return colorButton;
     }
 
     template <typename T>
