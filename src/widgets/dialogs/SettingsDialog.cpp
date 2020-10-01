@@ -16,6 +16,7 @@
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
 #include "widgets/settingspages/ModerationPage.hpp"
 #include "widgets/settingspages/NotificationPage.hpp"
+#include "controllers/commands/CommandController.hpp"
 
 #include <QDialogButtonBox>
 #include <QLineEdit>
@@ -318,6 +319,7 @@ void SettingsDialog::onOkClicked()
 {
     if (!getArgs().dontSaveSettings)
     {
+        getApp()->commands->save();
         pajlada::Settings::SettingManager::gSave();
     }
     this->close();
