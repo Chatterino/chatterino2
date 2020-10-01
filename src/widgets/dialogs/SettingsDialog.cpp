@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/Shortcut.hpp"
@@ -16,7 +17,6 @@
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
 #include "widgets/settingspages/ModerationPage.hpp"
 #include "widgets/settingspages/NotificationPage.hpp"
-#include "controllers/commands/CommandController.hpp"
 
 #include <QDialogButtonBox>
 #include <QLineEdit>
