@@ -13,7 +13,10 @@
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/StandardItemHelper.hpp"
 #include "widgets/BaseWindow.hpp"
+#include "widgets/dialogs/ColorPickerDialog.hpp"
+#include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
 
 #define CHROME_EXTENSION_LINK                                           \
@@ -387,6 +390,45 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     // layout.addCheckbox("Mark last message you read");
     // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
+    layout.addCheckbox("Show last message line", s.showLastMessageIndicator);
+    layout.addDropdown<std::underlying_type<Qt::BrushStyle>::type>(
+        "Last message line style", {"Dotted", "Solid"}, s.lastMessagePattern,
+        [](int value) {
+            switch (value)
+            {
+                case Qt::VerPattern:
+                    return 0;
+                case Qt::SolidPattern:
+                default:
+                    return 1;
+            }
+        },
+        [](DropdownArgs args) {
+            qDebug() << args.index;
+            switch (args.index)
+            {
+                case 0:
+                    return Qt::VerPattern;
+                case 1:
+                default:
+                    return Qt::SolidPattern;
+            }
+        },
+        false);
+    auto lastMessageColor = layout.addButton("", [] {
+        auto dialog =
+            new ColorPickerDialog(QColor(getSettings()->lastMessageColor));
+        dialog->setAttribute(Qt::WA_DeleteOnClose);
+        dialog->show();
+        dialog->closed.connect([=] {
+            QColor selected = dialog->selectedColor();
+
+            if (selected.isValid())
+            {
+                getSettings()->lastMessageColor = selected.name();
+            }
+        });
+    });
     layout.addCheckbox("Highlight messages redeemed with Channel Points",
                        s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
@@ -415,11 +457,13 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         [](auto args) { return fuzzyToInt(args.value, 0); });
 
     layout.addTitle("Link Information");
-    layout.addDescription(
-        "Extra information like \"youtube video stats\" or title of webpages "
-        "can be loaded for all links if enabled. Optionally you can also show "
-        "thumbnails for emotes, videos and more. The information is pulled "
-        "from our servers.");
+    layout.addDescription("Extra information like \"youtube video "
+                          "stats\" or title of webpages "
+                          "can be loaded for all links if enabled. "
+                          "Optionally you can also show "
+                          "thumbnails for emotes, videos and more. The "
+                          "information is pulled "
+                          "from our servers.");
     layout.addCheckbox("Enable", s.linkInfoTooltip);
     layout.addDropdown<int>(
         "Also show thumbnails if available",
@@ -546,16 +590,20 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     if (Version::instance().isSupportedOS())
     {
         layout.addDescription(
-            "You can receive updates earlier by ticking the box below. Report "
-            "issues <a href='https://chatterino.com/link/issues'>here</a>.");
+            "You can receive updates earlier by ticking the box below. "
+            "Report "
+            "issues <a "
+            "href='https://chatterino.com/link/issues'>here</a>.");
         layout.addCheckbox("Receive beta updates", s.betaUpdates);
     }
     else
     {
         layout.addDescription(
-            "Your operating system is not officially supplied with builds. For "
+            "Your operating system is not officially supplied with "
+            "builds. For "
             "updates, please rebuild chatterino from sources. Report "
-            "issues <a href='https://chatterino.com/link/issues'>here</a>.");
+            "issues <a "
+            "href='https://chatterino.com/link/issues'>here</a>.");
     }
 
 #ifdef Q_OS_WIN
@@ -577,7 +625,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle("Cache");
     layout.addDescription(
-        "Files that are used often (such as emotes) are saved to disk to "
+        "Files that are used often (such as emotes) are saved to disk "
+        "to "
         "reduce bandwidth usage and to speed up loading.");
 
     auto cachePathLabel = layout.addDescription("placeholder :D");
@@ -659,9 +708,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
 
-    layout.addCheckbox(
-        "Only search for emote autocompletion at the start of emote names",
-        s.prefixOnlyEmoteCompletion);
+    layout.addCheckbox("Only search for emote autocompletion at the "
+                       "start of emote names",
+                       s.prefixOnlyEmoteCompletion);
     layout.addCheckbox("Only search for username autocompletion with an @",
                        s.userCompletionOnlyWithAt);
 

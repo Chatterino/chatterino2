@@ -65,8 +65,8 @@ public:
                                       "h:mm"};
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
-    IntSetting lastMessagePattern = {"/appearance/messages/lastMessagePattern",
-                                     Qt::VerPattern};
+    EnumSetting<Qt::BrushStyle> lastMessagePattern = {
+        "/appearance/messages/lastMessagePattern", Qt::VerPattern};
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
                                        ""};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
