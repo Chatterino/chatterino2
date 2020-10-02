@@ -58,4 +58,25 @@ inline QString parseTagString(const QString &input)
     return output;
 }
 
+inline QTime calculateMessageTimestamp(const Communi::IrcMessage *message)
+{
+    // Check if message is from recent-messages API
+    if (message->tags().contains("historical"))
+    {
+        bool customReceived = false;
+        qint64 ts =
+            message->tags().value("rm-received-ts").toLongLong(&customReceived);
+        if (!customReceived)
+        {
+            ts = message->tags().value("tmi-sent-ts").toLongLong();
+        }
+
+        return QDateTime::fromMSecsSinceEpoch(ts).time();
+    }
+    else
+    {
+        return QTime::currentTime();
+    }
+}
+
 }  // namespace chatterino
