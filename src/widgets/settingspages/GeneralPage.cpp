@@ -182,7 +182,7 @@ ColorButton *SettingsLayout::addColorButton(
 
                 if (selected.isValid())
                 {
-                    setting = selected.name();
+                    setting = selected.name(QColor::HexArgb);
                     colorButton->setColor(selected);
                 }
             });
