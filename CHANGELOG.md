@@ -16,6 +16,7 @@
 - Bugfix: Handle symlinks properly when saving commands & settings (#1856, #1908)
 - Bugfix: Starting Chatterino in a minimized state after an update will no longer cause a crash
 - Bugfix: Modify the emote parsing to handle some edge-cases with dots and stuff (#1704, #1714)
+- Bugfix: Fix recent messages timestamp (#1286)
 
 ## 2.2.0
 
