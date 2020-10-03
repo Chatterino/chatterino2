@@ -370,7 +370,8 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     {
         chan->disableAllMessages();
         chan->addMessage(
-            makeSystemMessage("Chat has been cleared by a moderator."));
+            makeSystemMessage("Chat has been cleared by a moderator.",
+                              calculateMessageTimestamp(message)));
 
         return;
     }
@@ -390,9 +391,10 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         reason = v.toString();
     }
 
-    auto timeoutMsg = MessageBuilder(timeoutMessage, username,
-                                     durationInSeconds, reason, false)
-                          .release();
+    auto timeoutMsg =
+        MessageBuilder(timeoutMessage, username, durationInSeconds, reason,
+                       false, calculateMessageTimestamp(message))
+            .release();
     chan->addOrReplaceTimeout(timeoutMsg);
 
     // refresh all
@@ -556,8 +558,9 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
 
     if (it != tags.end())
     {
-        auto b = MessageBuilder(systemMessage,
-                                parseTagString(it.value().toString()));
+        auto b =
+            MessageBuilder(systemMessage, parseTagString(it.value().toString()),
+                           calculateMessageTimestamp(message));
 
         b->flags.set(MessageFlag::Subscription);
         auto newMessage = b.release();
@@ -597,8 +600,9 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
 
     if (it != tags.end())
     {
-        auto b = MessageBuilder(systemMessage,
-                                parseTagString(it.value().toString()));
+        auto b =
+            MessageBuilder(systemMessage, parseTagString(it.value().toString()),
+                           calculateMessageTimestamp(message));
 
         b->flags.set(MessageFlag::Subscription);
         auto newMessage = b.release();
@@ -659,25 +663,8 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     {
         std::vector<MessagePtr> builtMessages;
 
-        if (message->tags().contains("historical"))
-        {
-            bool customReceived = false;
-            qint64 ts = message->tags()
-                            .value("rm-received-ts")
-                            .toLongLong(&customReceived);
-            if (!customReceived)
-            {
-                ts = message->tags().value("tmi-sent-ts").toLongLong();
-            }
-
-            QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(ts);
-            builtMessages.emplace_back(
-                makeSystemMessage(message->content(), dateTime.time()));
-        }
-        else
-        {
-            builtMessages.emplace_back(makeSystemMessage(message->content()));
-        }
+        builtMessages.emplace_back(makeSystemMessage(
+            message->content(), calculateMessageTimestamp(message)));
 
         return builtMessages;
     }
