@@ -474,7 +474,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addTitle("Link Information");
     layout.addDescription(
         "Extra information like \"youtube video stats\" or title of webpages "
-        "can be loaded for all links if enabled.  Optionally you can also show "
+        "can be loaded for all links if enabled. Optionally you can also show "
         "thumbnails for emotes, videos and more. The information is pulled "
         "from our servers.");
     layout.addCheckbox("Enable", s.linkInfoTooltip);
@@ -611,8 +611,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     {
         layout.addDescription(
             "Your operating system is not officially supplied with builds. For "
-            "updates, please rebuild chatterino from sources. Report issues <a "
-            "href='https://chatterino.com/link/issues'>here</a>.");
+            "updates, please rebuild chatterino from sources. Report "
+            "issues <a href='https://chatterino.com/link/issues'>here</a>.");
     }
 
 #ifdef Q_OS_WIN
@@ -634,8 +634,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addTitle("Cache");
     layout.addDescription(
-        "Files that are used often (such as emotes) are saved to disk "
-        "to "
+        "Files that are used often (such as emotes) are saved to disk to "
         "reduce bandwidth usage and to speed up loading.");
 
     auto cachePathLabel = layout.addDescription("placeholder :D");
