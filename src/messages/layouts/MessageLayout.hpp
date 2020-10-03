@@ -47,7 +47,7 @@ public:
     // Painting
     void paint(QPainter &painter, int width, int y, int messageIndex,
                Selection &selection, bool isLastReadMessage,
-               bool isWindowFocused, bool isMentions, bool isPastMidnight);
+               bool isWindowFocused, bool isMentions, bool isNewDay);
     void invalidateBuffer();
     void deleteBuffer();
     void deleteCache();
