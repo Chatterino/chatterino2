@@ -22,6 +22,11 @@ public:
         this->set(t);
     }
 
+    QObjectRef(const QObjectRef &other)
+    {
+        this->set(other.t_);
+    }
+
     ~QObjectRef()
     {
         this->set(nullptr);
@@ -61,10 +66,11 @@ private:
         // new
         if (other)
         {
-            this->conn_ = QObject::connect(
-                other, &QObject::destroyed, qApp,
-                [this](QObject *) { this->set(nullptr); },
-                Qt::DirectConnection);
+            // the cast here should absolutely not be necessary, but gcc still requires it
+            this->conn_ =
+                QObject::connect((QObject *)other, &QObject::destroyed, qApp,
+                                 [this](QObject *) { this->set(nullptr); },
+                                 Qt::DirectConnection);
         }
 
         this->t_ = other;

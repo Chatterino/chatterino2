@@ -24,6 +24,11 @@ MessagePtr makeSystemMessage(const QString &text)
     return MessageBuilder(systemMessage, text).release();
 }
 
+MessagePtr makeSystemMessage(const QString &text, const QTime &time)
+{
+    return MessageBuilder(systemMessage, text, time).release();
+}
+
 std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     const AutomodAction &action)
 {
@@ -93,10 +98,11 @@ MessageBuilder::MessageBuilder()
 {
 }
 
-MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text)
+MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
+                               const QTime &time)
     : MessageBuilder()
 {
-    this->emplace<TimestampElement>();
+    this->emplace<TimestampElement>(time);
 
     // check system message for links
     // (e.g. needed for sub ticket message in sub only mode)
@@ -120,17 +126,42 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text)
     this->message().searchText = text;
 }
 
-MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
-                               const QString &durationInSeconds,
-                               const QString &reason, bool multipleTimes)
+MessageBuilder::MessageBuilder(TimeoutMessageTag,
+                               const QString &systemMessageText, int times,
+                               const QTime &time)
     : MessageBuilder()
 {
+    QString username = systemMessageText.split(" ").at(0);
+    QString remainder = systemMessageText.mid(username.length() + 1);
+
     QString text;
 
-    text.append(username);
+    this->emplace<TimestampElement>(time);
+    this->emplaceSystemTextAndUpdate(username, text)
+        ->setLink({Link::UserInfo, username});
+    this->emplaceSystemTextAndUpdate(
+        QString("%1 (%2 times)").arg(remainder.trimmed()).arg(times), text);
+
+    this->message().messageText = text;
+    this->message().searchText = text;
+}
+
+MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
+                               const QString &durationInSeconds,
+                               const QString &reason, bool multipleTimes,
+                               const QTime &time)
+    : MessageBuilder()
+{
+    QString fullText;
+    QString text;
+
+    this->emplace<TimestampElement>(time);
+    this->emplaceSystemTextAndUpdate(username, fullText)
+        ->setLink({Link::UserInfo, username});
+
     if (!durationInSeconds.isEmpty())
     {
-        text.append(" has been timed out");
+        text.append("has been timed out");
 
         // TODO: Implement who timed the user out
 
@@ -144,7 +175,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     }
     else
     {
-        text.append(" has been permanently banned");
+        text.append("has been permanently banned");
     }
 
     if (reason.length() > 0)
@@ -164,11 +195,10 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
     this->message().flags.set(MessageFlag::Timeout);
     this->message().flags.set(MessageFlag::DoNotTriggerNotification);
     this->message().timeoutUser = username;
-    this->emplace<TimestampElement>();
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
-    this->message().messageText = text;
-    this->message().searchText = text;
+
+    this->emplaceSystemTextAndUpdate(text, fullText);
+    this->message().messageText = fullText;
+    this->message().searchText = fullText;
 }
 
 // XXX: This does not belong in the MessageBuilder, this should be part of the TwitchMessageBuilder
@@ -187,77 +217,82 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
 
     if (action.target.id == current->getUserId())
     {
-        text.append("You were ");
+        this->emplaceSystemTextAndUpdate("You were", text);
         if (action.isBan())
         {
-            text.append("banned");
+            this->emplaceSystemTextAndUpdate("banned", text);
         }
         else
         {
-            text.append(
-                QString("timed out for %1").arg(formatTime(action.duration)));
+            this->emplaceSystemTextAndUpdate(
+                QString("timed out for %1").arg(formatTime(action.duration)),
+                text);
         }
 
         if (!action.source.name.isEmpty())
         {
-            text.append(" by ");
-            text.append(action.source.name);
+            this->emplaceSystemTextAndUpdate("by", text);
+            this->emplaceSystemTextAndUpdate(
+                    action.source.name + (action.reason.isEmpty() ? "." : ":"),
+                    text)
+                ->setLink({Link::UserInfo, action.source.name});
         }
 
-        if (action.reason.isEmpty())
+        if (!action.reason.isEmpty())
         {
-            text.append(".");
-        }
-        else
-        {
-            text.append(QString(": \"%1\".").arg(action.reason));
+            this->emplaceSystemTextAndUpdate(
+                QString("\"%1\".").arg(action.reason), text);
         }
     }
     else
     {
         if (action.isBan())
         {
+            this->emplaceSystemTextAndUpdate(action.source.name, text)
+                ->setLink({Link::UserInfo, action.source.name});
+            this->emplaceSystemTextAndUpdate("banned", text);
             if (action.reason.isEmpty())
             {
-                text = QString("%1 banned %2.")  //
-                           .arg(action.source.name)
-                           .arg(action.target.name);
+                this->emplaceSystemTextAndUpdate(action.target.name, text)
+                    ->setLink({Link::UserInfo, action.target.name});
             }
             else
             {
-                text = QString("%1 banned %2: \"%3\".")  //
-                           .arg(action.source.name)
-                           .arg(action.target.name)
-                           .arg(action.reason);
+                this->emplaceSystemTextAndUpdate(action.target.name + ":", text)
+                    ->setLink({Link::UserInfo, action.target.name});
+                this->emplaceSystemTextAndUpdate(
+                    QString("\"%1\".").arg(action.reason), text);
             }
         }
         else
         {
+            this->emplaceSystemTextAndUpdate(action.source.name, text)
+                ->setLink({Link::UserInfo, action.source.name});
+            this->emplaceSystemTextAndUpdate("timed out", text);
+            this->emplaceSystemTextAndUpdate(action.target.name, text)
+                ->setLink({Link::UserInfo, action.target.name});
             if (action.reason.isEmpty())
             {
-                text = QString("%1 timed out %2 for %3.")  //
-                           .arg(action.source.name)
-                           .arg(action.target.name)
-                           .arg(formatTime(action.duration));
+                this->emplaceSystemTextAndUpdate(
+                    QString("for %1.").arg(formatTime(action.duration)), text);
             }
             else
             {
-                text = QString("%1 timed out %2 for %3: \"%4\".")  //
-                           .arg(action.source.name)
-                           .arg(action.target.name)
-                           .arg(formatTime(action.duration))
-                           .arg(action.reason);
+                this->emplaceSystemTextAndUpdate(
+                    QString("for %1: \"%2\".")
+                        .arg(formatTime(action.duration))
+                        .arg(action.reason),
+                    text);
             }
 
             if (count > 1)
             {
-                text.append(QString(" (%1 times)").arg(count));
+                this->emplaceSystemTextAndUpdate(
+                    QString("(%1 times)").arg(count), text);
             }
         }
     }
 
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
     this->message().messageText = text;
     this->message().searchText = text;
 }
@@ -271,14 +306,15 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
 
     this->message().timeoutUser = action.target.name;
 
-    QString text =
-        QString("%1 %2 %3.")
-            .arg(action.source.name)
-            .arg(QString(action.wasBan() ? "unbanned" : "untimedout"))
-            .arg(action.target.name);
+    QString text;
 
-    this->emplace<TextElement>(text, MessageElementFlag::Text,
-                               MessageColor::System);
+    this->emplaceSystemTextAndUpdate(action.source.name, text)
+        ->setLink({Link::UserInfo, action.source.name});
+    this->emplaceSystemTextAndUpdate(
+        action.wasBan() ? "unbanned" : "untimedout", text);
+    this->emplaceSystemTextAndUpdate(action.target.name, text)
+        ->setLink({Link::UserInfo, action.target.name});
+
     this->message().messageText = text;
     this->message().searchText = text;
 }
@@ -444,6 +480,14 @@ void MessageBuilder::addLink(const QString &origLink,
             linkMEOriginal->setThumbnailType(
                 MessageElement::ThumbnailType::Link_Thumbnail);
         });
+}
+
+TextElement *MessageBuilder::emplaceSystemTextAndUpdate(const QString &text,
+                                                        QString &toUpdate)
+{
+    toUpdate.append(text + " ");
+    return this->emplace<TextElement>(text, MessageElementFlag::Text,
+                                      MessageColor::System);
 }
 
 }  // namespace chatterino

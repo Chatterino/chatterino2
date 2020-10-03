@@ -86,12 +86,6 @@ namespace {
     }
 }  // namespace
 
-bool shouldRunBrowserExtensionHost(const QStringList &args)
-{
-    return args.size() > 0 && (args[0].startsWith("chrome-extension://") ||
-                               args[0].endsWith(".json"));
-}
-
 void runBrowserExtensionHost()
 {
     initFileMode();

@@ -3,6 +3,7 @@
 #include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
+#include "common/WindowDescriptors.hpp"
 #include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
@@ -25,7 +26,7 @@ public:
     WindowManager();
 
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
-    static IndirectChannel decodeChannel(const QJsonObject &obj);
+    static IndirectChannel decodeChannel(const SplitDescriptor &descriptor);
 
     void showSettingsDialog(
         SettingsDialogPreference preference = SettingsDialogPreference());
@@ -89,6 +90,15 @@ public:
 
 private:
     void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
+
+    // Load window layout from the window-layout.json file
+    WindowLayout loadWindowLayoutFromFile() const;
+
+    // Apply a window layout for this window manager.
+    void applyWindowLayout(const WindowLayout &layout);
+
+    // Contains the full path to the window layout file, e.g. /home/pajlada/.local/share/Chatterino/Settings/window-layout.json
+    const QString windowLayoutFilePath;
 
     bool initialized_ = false;
 

@@ -12,6 +12,7 @@
 #include <chrono>
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
@@ -23,6 +24,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
+#include "util/CombinePath.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
@@ -31,25 +33,17 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#define SETTINGS_FILENAME "/window-layout.json"
-
 namespace chatterino {
 namespace {
-    QJsonArray loadWindowArray(const QString &settingsPath)
-    {
-        QFile file(settingsPath);
-        file.open(QIODevice::ReadOnly);
-        QByteArray data = file.readAll();
-        QJsonDocument document = QJsonDocument::fromJson(data);
-        QJsonArray windows_arr = document.object().value("windows").toArray();
-        return windows_arr;
-    }
+
+    const QString WINDOW_LAYOUT_FILENAME(QStringLiteral("window-layout.json"));
 
     boost::optional<bool> &shouldMoveOutOfBoundsWindow()
     {
         static boost::optional<bool> x;
         return x;
     }
+
 }  // namespace
 
 using SplitNode = SplitContainer::Node;
@@ -86,6 +80,8 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 }
 
 WindowManager::WindowManager()
+    : windowLayoutFilePath(
+          combinePath(getPaths()->settingsDirectory, WINDOW_LAYOUT_FILENAME))
 {
     qDebug() << "init WindowManager";
 
@@ -171,6 +167,7 @@ void WindowManager::updateWordTypeMask()
                                       : MEF::NonBoldUsername);
     flags.set(settings->lowercaseDomains ? MEF::LowercaseLink
                                          : MEF::OriginalLink);
+    flags.set(MEF::ChannelPointReward);
 
     // update flags
     MessageElementFlags newFlags = static_cast<MessageElementFlags>(flags);
@@ -293,141 +290,18 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
     assert(!this->initialized_);
 
-    // load file
-    QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QJsonArray windows_arr = loadWindowArray(settingsPath);
-
-    // "deserialize"
-    for (QJsonValue window_val : windows_arr)
     {
-        QJsonObject window_obj = window_val.toObject();
+        auto windowLayout = this->loadWindowLayoutFromFile();
 
-        // get type
-        QString type_val = window_obj.value("type").toString();
-        WindowType type =
-            type_val == "main" ? WindowType::Main : WindowType::Popup;
+        this->emotePopupPos_ = windowLayout.emotePopupPos_;
 
-        if (type == WindowType::Main && mainWindow_ != nullptr)
-        {
-            type = WindowType::Popup;
-        }
-
-        Window &window = createWindow(type, false);
-
-        if (type == WindowType::Main)
-        {
-            mainWindow_ = &window;
-        }
-
-        // get geometry
-        {
-            int x = window_obj.value("x").toInt(-1);
-            int y = window_obj.value("y").toInt(-1);
-            int width = window_obj.value("width").toInt(-1);
-            int height = window_obj.value("height").toInt(-1);
-
-            QRect geometry{x, y, width, height};
-
-            // out of bounds windows
-            auto screens = qApp->screens();
-            bool outOfBounds = std::none_of(
-                screens.begin(), screens.end(), [&](QScreen *screen) {
-                    return screen->availableGeometry().intersects(geometry);
-                });
-
-            // ask if move into bounds
-            auto &&should = shouldMoveOutOfBoundsWindow();
-            if (outOfBounds && !should)
-            {
-                should =
-                    QMessageBox(QMessageBox::Icon::Warning,
-                                "Windows out of bounds",
-                                "Some windows were detected out of bounds. "
-                                "Should they be moved into bounds?",
-                                QMessageBox::Yes | QMessageBox::No)
-                        .exec() == QMessageBox::Yes;
-            }
-
-            if ((!outOfBounds || !should.value()) && x != -1 && y != -1 &&
-                width != -1 && height != -1)
-            {
-                // Have to offset x by one because qt moves the window 1px too
-                // far to the left:w
-
-                window.setInitialBounds({x, y, width, height});
-            }
-        }
-
-        // load tabs
-        QJsonArray tabs = window_obj.value("tabs").toArray();
-        for (QJsonValue tab_val : tabs)
-        {
-            SplitContainer *page = window.getNotebook().addPage(false);
-
-            QJsonObject tab_obj = tab_val.toObject();
-
-            // set custom title
-            QJsonValue title_val = tab_obj.value("title");
-            if (title_val.isString())
-            {
-                page->getTab()->setCustomTitle(title_val.toString());
-            }
-
-            // selected
-            if (tab_obj.value("selected").toBool(false))
-            {
-                window.getNotebook().select(page);
-            }
-
-            // highlighting on new messages
-            bool val = tab_obj.value("highlightsEnabled").toBool(true);
-            page->getTab()->setHighlightsEnabled(val);
-
-            // load splits
-            QJsonObject splitRoot = tab_obj.value("splits2").toObject();
-
-            if (!splitRoot.isEmpty())
-            {
-                page->decodeFromJson(splitRoot);
-
-                continue;
-            }
-
-            // fallback load splits (old)
-            int colNr = 0;
-            for (QJsonValue column_val : tab_obj.value("splits").toArray())
-            {
-                for (QJsonValue split_val : column_val.toArray())
-                {
-                    Split *split = new Split(page);
-
-                    QJsonObject split_obj = split_val.toObject();
-                    split->setChannel(decodeChannel(split_obj));
-
-                    page->appendSplit(split);
-                }
-                colNr++;
-            }
-        }
-        window.show();
-
-        QJsonObject emote_popup_obj = window_obj.value("emotePopup").toObject();
-        this->emotePopupPos_ = QPoint(emote_popup_obj.value("x").toInt(),
-                                      emote_popup_obj.value("y").toInt());
-
-        if (window_obj.value("state") == "minimized")
-        {
-            window.setWindowState(Qt::WindowMinimized);
-        }
-        else if (window_obj.value("state") == "maximized")
-        {
-            window.setWindowState(Qt::WindowMaximized);
-        }
+        this->applyWindowLayout(windowLayout);
     }
 
+    // No main window has been created from loading, create an empty one
     if (mainWindow_ == nullptr)
     {
-        mainWindow_ = &createWindow(WindowType::Main);
+        mainWindow_ = &this->createWindow(WindowType::Main);
         mainWindow_->getNotebook().addPage(true);
     }
 
@@ -453,6 +327,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 
 void WindowManager::save()
 {
+    if (getArgs().dontSaveSettings)
+    {
+        return;
+    }
     qDebug() << "[WindowManager] Saving";
     assertInGuiThread();
     QJsonDocument document;
@@ -544,8 +422,7 @@ void WindowManager::save()
     document.setObject(obj);
 
     // save file
-    QString settingsPath = getPaths()->settingsDirectory + SETTINGS_FILENAME;
-    QSaveFile file(settingsPath);
+    QSaveFile file(this->windowLayoutFilePath);
     file.open(QIODevice::WriteOnly | QIODevice::Truncate);
 
     QJsonDocument::JsonFormat format =
@@ -649,34 +526,32 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
     }
 }
 
-IndirectChannel WindowManager::decodeChannel(const QJsonObject &obj)
+IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
 {
     assertInGuiThread();
 
     auto app = getApp();
 
-    QString type = obj.value("type").toString();
-    if (type == "twitch")
+    if (descriptor.type_ == "twitch")
     {
-        return app->twitch.server->getOrAddChannel(
-            obj.value("name").toString());
+        return app->twitch.server->getOrAddChannel(descriptor.channelName_);
     }
-    else if (type == "mentions")
+    else if (descriptor.type_ == "mentions")
     {
         return app->twitch.server->mentionsChannel;
     }
-    else if (type == "watching")
+    else if (descriptor.type_ == "watching")
     {
         return app->twitch.server->watchingChannel;
     }
-    else if (type == "whispers")
+    else if (descriptor.type_ == "whispers")
     {
         return app->twitch.server->whispersChannel;
     }
-    else if (type == "irc")
+    else if (descriptor.type_ == "irc")
     {
-        return Irc::instance().getOrAddChannel(obj.value("server").toInt(-1),
-                                               obj.value("channel").toString());
+        return Irc::instance().getOrAddChannel(descriptor.server_,
+                                               descriptor.channelName_);
     }
 
     return Channel::getEmpty();
@@ -700,6 +575,111 @@ int WindowManager::getGeneration() const
 void WindowManager::incGeneration()
 {
     this->generation_++;
+}
+
+WindowLayout WindowManager::loadWindowLayoutFromFile() const
+{
+    return WindowLayout::loadFromFile(this->windowLayoutFilePath);
+}
+
+void WindowManager::applyWindowLayout(const WindowLayout &layout)
+{
+    // Set emote popup position
+    this->emotePopupPos_ = layout.emotePopupPos_;
+
+    for (const auto &windowData : layout.windows_)
+    {
+        auto type = windowData.type_;
+
+        Window &window = this->createWindow(type, false);
+
+        if (type == WindowType::Main)
+        {
+            assert(this->mainWindow_ == nullptr);
+
+            this->mainWindow_ = &window;
+        }
+
+        // get geometry
+        {
+            // out of bounds windows
+            auto screens = qApp->screens();
+            bool outOfBounds = std::none_of(
+                screens.begin(), screens.end(), [&](QScreen *screen) {
+                    return screen->availableGeometry().intersects(
+                        windowData.geometry_);
+                });
+
+            // ask if move into bounds
+            auto &&should = shouldMoveOutOfBoundsWindow();
+            if (outOfBounds && !should)
+            {
+                should =
+                    QMessageBox(QMessageBox::Icon::Warning,
+                                "Windows out of bounds",
+                                "Some windows were detected out of bounds. "
+                                "Should they be moved into bounds?",
+                                QMessageBox::Yes | QMessageBox::No)
+                        .exec() == QMessageBox::Yes;
+            }
+
+            if ((!outOfBounds || !should.value()) &&
+                windowData.geometry_.x() != -1 &&
+                windowData.geometry_.y() != -1 &&
+                windowData.geometry_.width() != -1 &&
+                windowData.geometry_.height() != -1)
+            {
+                // Have to offset x by one because qt moves the window 1px too
+                // far to the left:w
+
+                window.setInitialBounds({windowData.geometry_.x(),
+                                         windowData.geometry_.y(),
+                                         windowData.geometry_.width(),
+                                         windowData.geometry_.height()});
+            }
+        }
+
+        // open tabs
+        for (const auto &tab : windowData.tabs_)
+        {
+            SplitContainer *page = window.getNotebook().addPage(false);
+
+            // set custom title
+            if (!tab.customTitle_.isEmpty())
+            {
+                page->getTab()->setCustomTitle(tab.customTitle_);
+            }
+
+            // selected
+            if (tab.selected_)
+            {
+                window.getNotebook().select(page);
+            }
+
+            // highlighting on new messages
+            page->getTab()->setHighlightsEnabled(tab.highlightsEnabled_);
+
+            if (tab.rootNode_)
+            {
+                page->applyFromDescriptor(*tab.rootNode_);
+            }
+        }
+        window.show();
+
+        // Set window state
+        switch (windowData.state_)
+        {
+            case WindowDescriptor::State::Minimized: {
+                window.setWindowState(Qt::WindowMinimized);
+            }
+            break;
+
+            case WindowDescriptor::State::Maximized: {
+                window.setWindowState(Qt::WindowMaximized);
+            }
+            break;
+        }
+    }
 }
 
 }  // namespace chatterino

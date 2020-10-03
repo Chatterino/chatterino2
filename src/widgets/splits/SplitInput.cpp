@@ -7,6 +7,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "util/Clamp.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -14,6 +15,7 @@
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/ResizingTextEdit.hpp"
+#include "widgets/splits/EmoteInputPopup.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitInput.hpp"
@@ -41,6 +43,7 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     // misc
     this->installKeyPressedEvent();
+    this->ui_.textEdit->focusLost.connect([this] { this->hideColonMenu(); });
     this->scaleChangedEvent(this->scale());
 }
 
@@ -78,6 +81,8 @@ void SplitInput::initLayout()
     // set edit font
     this->ui_.textEdit->setFont(
         app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+    QObject::connect(this->ui_.textEdit, &QTextEdit::cursorPositionChanged,
+                     this, &SplitInput::onCursorPositionChanged);
 
     this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
         this->ui_.textEdit->setFont(
@@ -187,6 +192,18 @@ void SplitInput::installKeyPressedEvent()
     auto app = getApp();
 
     this->ui_.textEdit->keyPressed.connect([this, app](QKeyEvent *event) {
+        if (auto popup = this->emoteInputPopup_.get())
+        {
+            if (popup->isVisible())
+            {
+                if (popup->eventFilter(nullptr, event))
+                {
+                    event->accept();
+                    return;
+                }
+            }
+        }
+
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
         {
             auto c = this->split_->getChannel();
@@ -418,7 +435,8 @@ void SplitInput::installKeyPressedEvent()
                 }
             }
         }
-        else if (event->key() == Qt::Key_C &&
+        else if ((event->key() == Qt::Key_C ||
+                  event->key() == Qt::Key_Insert) &&
                  event->modifiers() == Qt::ControlModifier)
         {
             if (this->split_->view_->hasSelection())
@@ -433,6 +451,108 @@ void SplitInput::installKeyPressedEvent()
             this->openEmotePopup();
         }
     });
+}
+
+void SplitInput::onCursorPositionChanged()
+{
+    this->updateColonMenu();
+}
+
+void SplitInput::updateColonMenu()
+{
+    if (!getSettings()->emoteCompletionWithColon ||
+        !dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    {
+        this->hideColonMenu();
+        return;
+    }
+
+    // check if in :
+    auto &edit = *this->ui_.textEdit;
+
+    auto text = edit.toPlainText();
+    auto position = edit.textCursor().position() - 1;
+
+    if (text.length() == 0)
+    {
+        this->hideColonMenu();
+        return;
+    }
+
+    for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
+    {
+        if (text[i] == ' ')
+        {
+            this->hideColonMenu();
+            return;
+        }
+        else if (text[i] == ':')
+        {
+            if (i == 0 || text[i - 1].isSpace())
+                this->showColonMenu(text.mid(i, position - i + 1).mid(1));
+            else
+                this->hideColonMenu();
+            return;
+        }
+    }
+
+    this->hideColonMenu();
+}
+
+void SplitInput::showColonMenu(const QString &text)
+{
+    if (!this->emoteInputPopup_.get())
+    {
+        this->emoteInputPopup_ = new EmoteInputPopup(this);
+        this->emoteInputPopup_->setInputAction(
+            [that = QObjectRef(this)](const QString &text) mutable {
+                if (auto this2 = that.get())
+                {
+                    this2->insertColonText(text);
+                    this2->hideColonMenu();
+                }
+            });
+    }
+
+    auto popup = this->emoteInputPopup_.get();
+    assert(popup);
+
+    popup->updateEmotes(text, this->split_->getChannel());
+
+    auto pos = this->mapToGlobal({0, 0}) - QPoint(0, popup->height()) +
+               QPoint((this->width() - popup->width()) / 2, 0);
+
+    popup->move(pos);
+    popup->show();
+}
+
+void SplitInput::hideColonMenu()
+{
+    if (auto popup = this->emoteInputPopup_.get())
+        popup->hide();
+}
+
+void SplitInput::insertColonText(const QString &input_)
+{
+    auto &edit = *this->ui_.textEdit;
+    auto input = input_ + ' ';
+
+    auto text = edit.toPlainText();
+    auto position = edit.textCursor().position();
+
+    for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
+    {
+        if (text[i] == ':')
+        {
+            auto cursor = edit.textCursor();
+
+            edit.setText(text.remove(i, position - i).insert(i, input));
+
+            cursor.setPosition(i + input.size());
+            edit.setTextCursor(cursor);
+            break;
+        }
+    }
 }
 
 void SplitInput::clearSelection()

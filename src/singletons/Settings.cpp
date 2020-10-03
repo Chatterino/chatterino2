@@ -36,7 +36,9 @@ ConcurrentSettings::ConcurrentSettings()
 
 bool ConcurrentSettings::isHighlightedUser(const QString &username)
 {
-    for (const auto &highlightedUser : this->highlightedUsers)
+    auto items = this->highlightedUsers.readOnly();
+
+    for (const auto &highlightedUser : *items)
     {
         if (highlightedUser.isMatch(username))
             return true;
@@ -60,7 +62,9 @@ bool ConcurrentSettings::isBlacklistedUser(const QString &username)
 
 bool ConcurrentSettings::isMutedChannel(const QString &channelName)
 {
-    for (const auto &channel : this->mutedChannels)
+    auto items = this->mutedChannels.readOnly();
+
+    for (const auto &channel : *items)
     {
         if (channelName.toLower() == channel.toLower())
         {

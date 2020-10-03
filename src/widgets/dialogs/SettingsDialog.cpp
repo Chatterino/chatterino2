@@ -1,8 +1,10 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/helper/Button.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
@@ -32,6 +34,11 @@ SettingsDialog::SettingsDialog()
     this->addTabs();
     this->overrideBackgroundColor_ = QColor("#111111");
     this->scaleChangedEvent(this->scale());  // execute twice to width of item
+
+    createWindowShortcut(this, "CTRL+F", [this] {
+        this->ui_.search->setFocus();
+        this->ui_.search->selectAll();
+    });
 }
 
 void SettingsDialog::initUi()
@@ -47,7 +54,7 @@ void SettingsDialog::initUi()
                     .withoutMargin()
                     .emplace<QLineEdit>()
                     .assign(&this->ui_.search);
-    edit->setPlaceholderText("Find in settings...");
+    edit->setPlaceholderText("Find in settings... (Ctrl+F)");
 
     QObject::connect(edit.getElement(), &QLineEdit::textChanged, this,
                      &SettingsDialog::filterElements);
@@ -156,7 +163,7 @@ void SettingsDialog::addTabs()
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new KeyboardSettingsPage;}, "Keybindings",    ":/settings/keybinds.svg");
     this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg", SettingsTabId::Moderation);
-    this->addTab([]{return new NotificationPage;},     "Notifications",  ":/settings/notification2.svg");
+    this->addTab([]{return new NotificationPage;},     "Live Notifications",  ":/settings/notification2.svg");
     this->addTab([]{return new ExternalToolsPage;},    "External tools", ":/settings/externaltools.svg");
     this->ui_.tabContainer->addStretch(1);
     this->addTab([]{return new AboutPage;},            "About",          ":/settings/about.svg", SettingsTabId(), Qt::AlignBottom);
@@ -309,7 +316,10 @@ void SettingsDialog::showEvent(QShowEvent *)
 ///// Widget creation helpers
 void SettingsDialog::onOkClicked()
 {
-    pajlada::Settings::SettingManager::gSave();
+    if (!getArgs().dontSaveSettings)
+    {
+        pajlada::Settings::SettingManager::gSave();
+    }
     this->close();
 }
 

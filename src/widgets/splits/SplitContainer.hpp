@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/WindowDescriptors.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QDragEnterEvent>
@@ -177,12 +178,12 @@ public:
     void insertSplit(Split *split, Direction direction, Split *relativeTo);
     void insertSplit(Split *split, Direction direction,
                      Node *relativeTo = nullptr);
+    Split *getSelectedSplit() const;
     Position releaseSplit(Split *split);
     Position deleteSplit(Split *split);
 
     void selectNextSplit(Direction direction);
-
-    void decodeFromJson(QJsonObject &obj);
+    void setSelected(Split *selected_);
 
     int getSplitCount();
     const std::vector<Split *> getSplits() const;
@@ -199,6 +200,8 @@ public:
     static bool isDraggingSplit;
     static Split *draggingSplit;
 
+    void applyFromDescriptor(const NodeDescriptor &rootNode);
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 
@@ -212,15 +215,16 @@ protected:
     void resizeEvent(QResizeEvent *event) override;
 
 private:
+    void applyFromDescriptorRecursively(const NodeDescriptor &rootNode,
+                                        Node *node);
+
     void layout();
-    void setSelected(Split *selected_);
     void selectSplitRecursive(Node *node, Direction direction);
-    void focusSplitRecursive(Node *node, Direction direction);
+    void focusSplitRecursive(Node *node);
     void setPreferedTargetRecursive(Node *node);
 
     void addSplit(Split *split);
 
-    void decodeNodeRecusively(QJsonObject &obj, Node *node);
     Split *getTopRightSplit(Node &node);
 
     void refreshTabTitle();
@@ -244,7 +248,7 @@ private:
     QPoint mouseOverPoint_;
 
     Node baseNode_;
-    Split *selected_;
+    Split *selected_{};
     Split *topRight_{};
 
     NotebookTab *tab_;

@@ -40,6 +40,7 @@ UpdateDialog::UpdateDialog()
         [this](auto status) { this->updateStatusChanged(status); });
 
     this->setScaleIndependantHeight(150);
+    this->setScaleIndependantWidth(500);
 }
 
 void UpdateDialog::updateStatusChanged(Updates::Status status)

@@ -125,6 +125,7 @@ SOURCES += \
     src/common/NetworkResult.cpp \
     src/common/UsernameSet.cpp \
     src/common/Version.cpp \
+    src/common/WindowDescriptors.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
@@ -159,10 +160,10 @@ SOURCES += \
     src/messages/MessageColor.cpp \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
-    src/messages/SharedMessageBuilder.cpp \
     src/messages/search/AuthorPredicate.cpp \
     src/messages/search/LinkPredicate.cpp \
     src/messages/search/SubstringPredicate.cpp \
+    src/messages/SharedMessageBuilder.cpp \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/bttv/LoadBttvChannelEmote.cpp \
     src/providers/chatterino/ChatterinoBadges.cpp \
@@ -178,6 +179,7 @@ SOURCES += \
     src/providers/irc/IrcMessageBuilder.cpp \
     src/providers/irc/IrcServer.cpp \
     src/providers/LinkResolver.cpp \
+    src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/api/Helix.cpp \
     src/providers/twitch/api/Kraken.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
@@ -221,10 +223,11 @@ SOURCES += \
     src/util/IncognitoBrowser.cpp \
     src/util/InitUpdateButton.cpp \
     src/util/JsonQuery.cpp \
+    src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
+    src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
     src/util/Twitch.cpp \
-    src/util/NuulsUploader.cpp \
     src/util/WindowsHelper.cpp \
     src/widgets/AccountSwitchPopup.cpp \
     src/widgets/AccountSwitchWidget.cpp \
@@ -242,6 +245,10 @@ SOURCES += \
     src/widgets/dialogs/QualityPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
+    src/widgets/listview/GenericItemDelegate.cpp \
+    src/widgets/dialogs/switcher/NewTabItem.cpp \
+    src/widgets/dialogs/switcher/QuickSwitcherPopup.cpp \
+    src/widgets/dialogs/switcher/SwitchSplitItem.cpp \
     src/widgets/dialogs/TextInputDialog.cpp \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/dialogs/UserInfoPopup.cpp \
@@ -265,6 +272,9 @@ SOURCES += \
     src/widgets/Label.cpp \
     src/widgets/Notebook.cpp \
     src/widgets/Scrollbar.cpp \
+    src/widgets/listview/GenericListItem.cpp \
+    src/widgets/listview/GenericListModel.cpp \
+    src/widgets/listview/GenericListView.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
@@ -277,6 +287,8 @@ SOURCES += \
     src/widgets/settingspages/NotificationPage.cpp \
     src/widgets/settingspages/SettingsPage.cpp \
     src/widgets/splits/ClosedSplits.cpp \
+    src/widgets/splits/EmoteInputItem.cpp \
+    src/widgets/splits/EmoteInputPopup.cpp \
     src/widgets/splits/Split.cpp \
     src/widgets/splits/SplitContainer.cpp \
     src/widgets/splits/SplitHeader.cpp \
@@ -364,12 +376,12 @@ HEADERS += \
     src/messages/MessageContainer.hpp \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
-    src/messages/SharedMessageBuilder.hpp \
     src/messages/search/AuthorPredicate.hpp \
     src/messages/search/LinkPredicate.hpp \
     src/messages/search/MessagePredicate.hpp \
     src/messages/search/SubstringPredicate.hpp \
     src/messages/Selection.hpp \
+    src/messages/SharedMessageBuilder.hpp \
     src/PrecompiledHeader.hpp \
     src/providers/bttv/BttvEmotes.hpp \
     src/providers/bttv/LoadBttvChannelEmote.hpp \
@@ -386,6 +398,7 @@ HEADERS += \
     src/providers/irc/IrcMessageBuilder.hpp \
     src/providers/irc/IrcServer.hpp \
     src/providers/LinkResolver.hpp \
+    src/providers/twitch/ChannelPointReward.hpp \
     src/providers/twitch/api/Helix.hpp \
     src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/EmoteValue.hpp \
@@ -439,12 +452,12 @@ HEADERS += \
     src/util/JsonQuery.hpp \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
+    src/util/NuulsUploader.hpp \
     src/util/Overloaded.hpp \
     src/util/PersistSignalVector.hpp \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
-    src/util/Twitch.hpp \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
@@ -454,8 +467,9 @@ HEADERS += \
     src/util/SharedPtrElementLess.hpp \
     src/util/Shortcut.hpp \
     src/util/StandardItemHelper.hpp \
+    src/util/StreamerMode.hpp \
     src/util/StreamLink.hpp \
-    src/util/NuulsUploader.hpp \
+    src/util/Twitch.hpp \
     src/util/WindowsHelper.hpp \
     src/widgets/AccountSwitchPopup.hpp \
     src/widgets/AccountSwitchWidget.hpp \
@@ -473,6 +487,12 @@ HEADERS += \
     src/widgets/dialogs/QualityPopup.hpp \
     src/widgets/dialogs/SelectChannelDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
+    src/widgets/dialogs/switcher/AbstractSwitcherItem.hpp \
+    src/widgets/listview/GenericItemDelegate.hpp \
+    src/widgets/dialogs/switcher/NewTabItem.hpp \
+    src/widgets/dialogs/switcher/QuickSwitcherModel.hpp \
+    src/widgets/dialogs/switcher/QuickSwitcherPopup.hpp \
+    src/widgets/dialogs/switcher/SwitchSplitItem.hpp \
     src/widgets/dialogs/TextInputDialog.hpp \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/dialogs/UserInfoPopup.hpp \
@@ -498,6 +518,9 @@ HEADERS += \
     src/widgets/Label.hpp \
     src/widgets/Notebook.hpp \
     src/widgets/Scrollbar.hpp \
+    src/widgets/listview/GenericListItem.hpp \
+    src/widgets/listview/GenericListModel.hpp \
+    src/widgets/listview/GenericListView.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
@@ -510,6 +533,8 @@ HEADERS += \
     src/widgets/settingspages/NotificationPage.hpp \
     src/widgets/settingspages/SettingsPage.hpp \
     src/widgets/splits/ClosedSplits.hpp \
+    src/widgets/splits/EmoteInputItem.hpp \
+    src/widgets/splits/EmoteInputPopup.hpp \
     src/widgets/splits/Split.hpp \
     src/widgets/splits/SplitContainer.hpp \
     src/widgets/splits/SplitHeader.hpp \

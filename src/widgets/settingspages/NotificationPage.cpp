@@ -29,18 +29,22 @@ NotificationPage::NotificationPage()
         {
             auto settings = tabs.appendTab(new QVBoxLayout, "Options");
             {
-                settings.emplace<QLabel>("Enable for selected channels");
+                settings.emplace<QLabel>("You can be informed when certain "
+                                         "channels go live. You can be "
+                                         "informed in multiple ways:");
+
                 settings.append(this->createCheckBox(
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
                 settings.append(this->createCheckBox(
                     "Play sound", getSettings()->notificationPlaySound));
 #ifdef Q_OS_WIN
-                settings.append(
-                    this->createCheckBox("Enable toasts (Windows 8 or later)",
-                                         getSettings()->notificationToast));
+                settings.append(this->createCheckBox(
+                    "Show notification", getSettings()->notificationToast));
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
                 {
-                    openIn.emplace<QLabel>("Open stream from Toast:  ")
+                    openIn
+                        .emplace<QLabel>(
+                            "Action when clicking on a notification:  ")
                         ->setSizePolicy(QSizePolicy::Maximum,
                                         QSizePolicy::Preferred);
 
@@ -77,8 +81,12 @@ NotificationPage::NotificationPage()
                 settings->addStretch(1);
             }
             auto twitchChannels =
-                tabs.appendTab(new QVBoxLayout, "Channel going live");
+                tabs.appendTab(new QVBoxLayout, "Selected Channels");
             {
+                twitchChannels.emplace<QLabel>(
+                    "These are the channels for which you will be informed "
+                    "when they go live:");
+
                 EditableModelView *view =
                     twitchChannels
                         .emplace<EditableModelView>(
@@ -103,34 +111,6 @@ NotificationPage::NotificationPage()
                         .append("channel");
                 });
             }
-            /*
-            auto mixerChannels = tabs.appendTab(new QVBoxLayout, "Mixer");
-            {
-                EditableModelView *view =
-                    mixerChannels
-                        .emplace<EditableModelView>(
-                            getApp()->notifications->createModel(
-                                nullptr, Platform::Mixer))
-                        .getElement();
-                view->setTitles({"Mixer channels"});
-
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    QHeaderView::Fixed);
-                view->getTableView()->horizontalHeader()->setSectionResizeMode(
-                    0, QHeaderView::Stretch);
-
-                QTimer::singleShot(1, [view] {
-                    view->getTableView()->resizeColumnsToContents();
-                    view->getTableView()->setColumnWidth(0, 200);
-                });
-
-                view->addButtonPressed.connect([] {
-                    getApp()
-                        ->notifications->channelMap[Platform::Mixer]
-                        .appendItem("channel");
-                });
-            }
-            */
         }
     }
 }

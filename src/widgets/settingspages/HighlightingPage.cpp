@@ -272,7 +272,7 @@ HighlightingPage::HighlightingPage()
 
     // ---- misc
     this->disabledUsersChangedTimer_.setSingleShot(true);
-}  // namespace chatterino
+}
 
 void HighlightingPage::openSoundDialog(const QModelIndex &clicked,
                                        EditableModelView *view, int soundColumn)
@@ -310,9 +310,9 @@ void HighlightingPage::openColorDialog(const QModelIndex &clicked,
             if (tab == HighlightTab::Messages)
             {
                 /*
-                     * For preset highlights in the "Messages" tab, we need to
-                     * manually update the color map.
-                     */
+                 * For preset highlights in the "Messages" tab, we need to
+                 * manually update the color map.
+                 */
                 auto instance = ColorProvider::instance();
                 switch (clicked.row())
                 {

@@ -135,8 +135,10 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                     reply->abort();
                     if (data->onError_)
                     {
-                        data->onError_(
-                            NetworkResult({}, NetworkResult::timedoutStatus));
+                        postToThread([data] {
+                            data->onError_(NetworkResult(
+                                {}, NetworkResult::timedoutStatus));
+                        });
                     }
                 });
         }
@@ -157,7 +159,10 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             {
                 if (data->onError_)
                 {
-                    data->onError_(NetworkResult({}, reply->error()));
+                    auto error = reply->error();
+                    postToThread([data, error] {
+                        data->onError_(NetworkResult({}, error));
+                    });
                 }
                 return;
             }

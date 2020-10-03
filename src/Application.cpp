@@ -3,6 +3,7 @@
 #include <atomic>
 
 #include "common/Args.hpp"
+#include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
@@ -27,6 +28,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/IsBigEndian.hpp"
 #include "util/PostToThread.hpp"
+#include "util/RapidjsonHelpers.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/splits/Split.hpp"
@@ -68,6 +70,23 @@ void Application::initialize(Settings &settings, Paths &paths)
 {
     assert(isAppInitialized == false);
     isAppInitialized = true;
+
+    // Show changelog
+    if (getSettings()->currentVersion.getValue() != "" &&
+        getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
+    {
+        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
+                                   "Show changelog?",
+                                   QMessageBox::Yes | QMessageBox::No);
+        box->setAttribute(Qt::WA_DeleteOnClose);
+        if (box->exec() == QMessageBox::Yes)
+        {
+            QDesktopServices::openUrl(
+                QUrl("https://www.chatterino.com/changelog"));
+        }
+    }
+
+    getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
 
     if (getSettings()->enableExperimentalIrc)
     {
@@ -283,6 +302,27 @@ void Application::initPubsub()
             postToThread([chan, msg] { chan->addMessage(msg); });
             chan->deleteMessage(msg->id);
         });
+
+    this->twitch.pubsub->signals_.pointReward.redeemed.connect([&](auto &data) {
+        QString channelId;
+        if (rj::getSafe(data, "channel_id", channelId))
+        {
+            auto chan = this->twitch.server->getChannelOrEmptyByID(channelId);
+
+            auto reward = ChannelPointReward(data);
+
+            postToThread([chan, reward] {
+                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->addChannelPointReward(reward);
+                }
+            });
+        }
+        else
+        {
+            qDebug() << "Couldn't find channel id of point reward";
+        }
+    });
 
     this->twitch.pubsub->start();
 

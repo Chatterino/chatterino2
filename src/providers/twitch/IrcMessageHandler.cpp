@@ -1,4 +1,4 @@
-#include "IrcMessageHandler.hpp"
+﻿#include "IrcMessageHandler.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -215,6 +215,32 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         args.isStaffOrBroadcaster = true;
     }
 
+    auto channel = dynamic_cast<TwitchChannel *>(chan.get());
+
+    const auto &tags = _message->tags();
+    if (const auto &it = tags.find("custom-reward-id"); it != tags.end())
+    {
+        const auto rewardId = it.value().toString();
+        if (!channel->isChannelPointRewardKnown(rewardId))
+        {
+            // Need to wait for pubsub reward notification
+            auto clone = _message->clone();
+            channel->channelPointRewardAdded.connect(
+                [=, &server](ChannelPointReward reward) {
+                    if (reward.id == rewardId)
+                    {
+                        this->addMessage(clone, target, content, server, isSub,
+                                         isAction);
+                        clone->deleteLater();
+                        return true;
+                    }
+                    return false;
+                });
+            return;
+        }
+        args.channelPointRewardId = rewardId;
+    }
+
     TwitchMessageBuilder builder(chan.get(), _message, args, content, isAction);
 
     if (isSub || !builder.isIgnored())
@@ -224,7 +250,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             builder->flags.set(MessageFlag::Subscription);
             builder->flags.unset(MessageFlag::Highlighted);
         }
-
         auto msg = builder.build();
 
         IrcMessageHandler::setSimilarityFlags(msg, chan);
@@ -345,7 +370,8 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     {
         chan->disableAllMessages();
         chan->addMessage(
-            makeSystemMessage("Chat has been cleared by a moderator."));
+            makeSystemMessage("Chat has been cleared by a moderator.",
+                              calculateMessageTimestamp(message)));
 
         return;
     }
@@ -365,9 +391,10 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         reason = v.toString();
     }
 
-    auto timeoutMsg = MessageBuilder(timeoutMessage, username,
-                                     durationInSeconds, reason, false)
-                          .release();
+    auto timeoutMsg =
+        MessageBuilder(timeoutMessage, username, durationInSeconds, reason,
+                       false, calculateMessageTimestamp(message))
+            .release();
     chan->addOrReplaceTimeout(timeoutMsg);
 
     // refresh all
@@ -399,9 +426,9 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        qDebug()
-            << "[IrcMessageHandler:handleClearMessageMessage] Twitch channel"
-            << chanName << "not found";
+        qDebug() << "[IrcMessageHandler:handleClearMessageMessage] Twitch "
+                    "channel"
+                 << chanName << "not found";
         return;
     }
 
@@ -531,8 +558,9 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
 
     if (it != tags.end())
     {
-        auto b = MessageBuilder(systemMessage,
-                                parseTagString(it.value().toString()));
+        auto b =
+            MessageBuilder(systemMessage, parseTagString(it.value().toString()),
+                           calculateMessageTimestamp(message));
 
         b->flags.set(MessageFlag::Subscription);
         auto newMessage = b.release();
@@ -572,8 +600,9 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
 
     if (it != tags.end())
     {
-        auto b = MessageBuilder(systemMessage,
-                                parseTagString(it.value().toString()));
+        auto b =
+            MessageBuilder(systemMessage, parseTagString(it.value().toString()),
+                           calculateMessageTimestamp(message));
 
         b->flags.set(MessageFlag::Subscription);
         auto newMessage = b.release();
@@ -634,7 +663,8 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     {
         std::vector<MessagePtr> builtMessages;
 
-        builtMessages.emplace_back(makeSystemMessage(message->content()));
+        builtMessages.emplace_back(makeSystemMessage(
+            message->content(), calculateMessageTimestamp(message)));
 
         return builtMessages;
     }

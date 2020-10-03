@@ -3,6 +3,7 @@
 #include "BaseSettings.hpp"
 #include "BaseTheme.hpp"
 #include "boost/algorithm/algorithm.hpp"
+#include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Shortcut.hpp"
 #include "util/WindowsHelper.hpp"
@@ -57,6 +58,18 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         this->setWindowFlag(Qt::FramelessWindowHint);
     }
 
+    if (_flags.has(DontFocus))
+    {
+        this->setAttribute(Qt::WA_ShowWithoutActivating);
+#ifdef Q_OS_LINUX
+        this->setWindowFlags(Qt::ToolTip);
+#else
+        this->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint |
+                             Qt::X11BypassWindowManagerHint |
+                             Qt::BypassWindowManagerHint);
+#endif
+    }
+
     this->init();
 
     getSettings()->uiScale.connect(
@@ -82,6 +95,12 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 #endif
 
     this->themeChangedEvent();
+    DebugCount::increase("BaseWindow");
+}
+
+BaseWindow::~BaseWindow()
+{
+    DebugCount::decrease("BaseWindow");
 }
 
 void BaseWindow::setInitialBounds(const QRect &bounds)
