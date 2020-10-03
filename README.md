@@ -8,6 +8,7 @@ Contribution guidelines can be found [here](https://wiki.chatterino.com/contribu
 
 ## Download
 Current releases are available at [https://chatterino.com](https://chatterino.com).
+Windows users can also install Chatterino [from Chocolatey](https://chocolatey.org/packages/chatterino).
 
 ## Nightly build
 You can download the latest Chatterino 2 build over [here](https://github.com/Chatterino/chatterino2/releases/tag/nightly-build)
