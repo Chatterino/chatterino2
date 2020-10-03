@@ -79,7 +79,7 @@ public:
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
-                                     false};
+                                     true};
 
     IntSetting tabDirection = {"/appearance/tabDirection",
                                NotebookTabDirection::Horizontal};
@@ -92,14 +92,14 @@ public:
         "/appearance/messages/alternateMessageBackground", false};
     FloatSetting boldScale = {"/appearance/boldScale", 63};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
-    BoolSetting showTabLive = {"/appearance/showTabLiveButton", false};
+    BoolSetting showTabLive = {"/appearance/showTabLiveButton", true};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
                                          false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
     BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
     BoolSetting enableSmoothScrollingNewMessages = {
         "/appearance/smoothScrollingNewMessages", false};
-    BoolSetting boldUsernames = {"/appearance/messages/boldUsernames", false};
+    BoolSetting boldUsernames = {"/appearance/messages/boldUsernames", true};
     BoolSetting findAllUsernames = {"/appearance/messages/findAllUsernames",
                                     false};
     // BoolSetting customizable splitheader
