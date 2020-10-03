@@ -907,6 +907,7 @@ void ChannelView::drawMessages(QPainter &painter)
     auto app = getApp();
     bool isMentions = this->channel_ == app->twitch.server->mentionsChannel;
 
+    auto lastMessageTime = QTime();
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
         MessageLayout *layout = messagesSnapshot[i].get();
@@ -917,24 +918,19 @@ void ChannelView::drawMessages(QPainter &painter)
             isLastMessage = this->lastReadMessage_.get() == layout;
         }
 
-        bool isPastMidnight = false;
-        if (i != messagesSnapshot.size() - 1)
+        bool isNewDay = false;
+        for (const auto &element : layout->getMessage()->elements)
         {
-            auto elements = &messagesSnapshot[i]->getMessage()->elements;
-            auto elementsAfter =
-                &messagesSnapshot[i + 1]->getMessage()->elements;
-
-            for (int j = 0; j < elements->size(); j++)
-                if ((*elements)[j]->getTime() != QTime(0, 0))
-                    for (int k = 0; k < elementsAfter->size(); k++)
-                        if ((*elementsAfter)[k]->getTime() != QTime(0, 0))
-                            isPastMidnight =
-                                (*elements)[j]->getTime().hour() >
-                                (*elementsAfter)[k]->getTime().hour();
+            const auto &time = element->getTime();
+            if (!time.isNull())
+            {
+                isNewDay = (time < lastMessageTime);
+                lastMessageTime = time;
+            }
         }
 
         layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
-                      isLastMessage, windowFocused, isMentions, isPastMidnight);
+                      isLastMessage, windowFocused, isMentions, isNewDay);
 
         y += layout->getHeight();
 

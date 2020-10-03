@@ -169,8 +169,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 // Painting
 void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                           Selection &selection, bool isLastReadMessage,
-                          bool isWindowFocused, bool isMentions,
-                          bool isPastMidnight)
+                          bool isWindowFocused, bool isMentions, bool isNewDay)
 {
     auto app = getApp();
     QPixmap *pixmap = this->buffer_.get();
@@ -267,12 +266,11 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                          pixmap->width(), 1, brush);
     }
 
-    if (isPastMidnight)
+    if (isNewDay)
     {
-        QBrush brush = QBrush(Qt::SolidPattern);
-        brush.setColor(app->themes->messages.textColors.system);
-        painter.fillRect(0, y + this->container_->getHeight() - 1,
-                         pixmap->width(), 1, brush);
+        const auto brush =
+            QBrush(app->themes->messages.textColors.system, Qt::SolidPattern);
+        painter.fillRect(0, y - 1, pixmap->width(), 1, brush);
     }
 
     this->bufferValid_ = true;

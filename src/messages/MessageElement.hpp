@@ -153,7 +153,7 @@ public:
                                 MessageElementFlags flags) = 0;
     virtual QTime getTime()
     {
-        return QTime(0, 0);
+        return QTime();
     };
 
     pajlada::Signals::NoArgSignal linkChanged;
