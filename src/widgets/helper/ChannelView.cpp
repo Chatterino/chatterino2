@@ -917,8 +917,24 @@ void ChannelView::drawMessages(QPainter &painter)
             isLastMessage = this->lastReadMessage_.get() == layout;
         }
 
+        bool isPastMidnight = false;
+        if (i != messagesSnapshot.size() - 1)
+        {
+            auto elements = &messagesSnapshot[i]->getMessage()->elements;
+            auto elementsAfter =
+                &messagesSnapshot[i + 1]->getMessage()->elements;
+
+            for (int j = 0; j < elements->size(); j++)
+                if ((*elements)[j]->getTime() != QTime(0, 0))
+                    for (int k = 0; k < elementsAfter->size(); k++)
+                        if ((*elementsAfter)[k]->getTime() != QTime(0, 0))
+                            isPastMidnight =
+                                (*elements)[j]->getTime().hour() >
+                                (*elementsAfter)[k]->getTime().hour();
+        }
+
         layout->paint(painter, DRAW_WIDTH, y, i, this->selection_,
-                      isLastMessage, windowFocused, isMentions);
+                      isLastMessage, windowFocused, isMentions, isPastMidnight);
 
         y += layout->getHeight();
 

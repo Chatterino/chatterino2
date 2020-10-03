@@ -151,6 +151,10 @@ public:
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElementFlags flags) = 0;
+    virtual QTime getTime()
+    {
+        return QTime(0, 0);
+    };
 
     pajlada::Signals::NoArgSignal linkChanged;
 
@@ -278,6 +282,8 @@ public:
                         MessageElementFlags flags) override;
 
     TextElement *formatTime(const QTime &time);
+
+    QTime getTime() override;
 
 private:
     QTime time_;
