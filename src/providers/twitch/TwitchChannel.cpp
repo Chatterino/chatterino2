@@ -71,11 +71,15 @@ namespace {
 
         // rebuild the raw irc message so we can convert it back to an ircmessage again!
         // this could probably be done in a smarter way
+
         auto s = QString(":tmi.twitch.tv NOTICE %1 :%2")
                      .arg(channelName)
                      .arg(noticeMessage);
 
-        return Communi::IrcMessage::fromData(s.toUtf8(), nullptr);
+        auto newMessage = Communi::IrcMessage::fromData(s.toUtf8(), nullptr);
+        newMessage->setTags(message->tags());
+
+        return newMessage;
     }
 
     // parseRecentMessages takes a json object and returns a vector of

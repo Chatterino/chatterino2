@@ -127,7 +127,8 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
 }
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag,
-                               const QString &systemMessageText, int times)
+                               const QString &systemMessageText, int times,
+                               const QTime &time)
     : MessageBuilder()
 {
     QString username = systemMessageText.split(" ").at(0);
@@ -135,7 +136,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag,
 
     QString text;
 
-    this->emplace<TimestampElement>();
+    this->emplace<TimestampElement>(time);
     this->emplaceSystemTextAndUpdate(username, text)
         ->setLink({Link::UserInfo, username});
     this->emplaceSystemTextAndUpdate(
@@ -147,13 +148,14 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag,
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
                                const QString &durationInSeconds,
-                               const QString &reason, bool multipleTimes)
+                               const QString &reason, bool multipleTimes,
+                               const QTime &time)
     : MessageBuilder()
 {
     QString fullText;
     QString text;
 
-    this->emplace<TimestampElement>();
+    this->emplace<TimestampElement>(time);
     this->emplaceSystemTextAndUpdate(username, fullText)
         ->setLink({Link::UserInfo, username});
 
