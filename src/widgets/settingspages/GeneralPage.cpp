@@ -472,13 +472,11 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         [](auto args) { return fuzzyToInt(args.value, 0); });
 
     layout.addTitle("Link Information");
-    layout.addDescription("Extra information like \"youtube video "
-                          "stats\" or title of webpages "
-                          "can be loaded for all links if enabled. "
-                          "Optionally you can also show "
-                          "thumbnails for emotes, videos and more. The "
-                          "information is pulled "
-                          "from our servers.");
+    layout.addDescription(
+        "Extra information like \"youtube video stats\" or title of webpages "
+        "can be loaded for all links if enabled.  Optionally you can also show "
+        "thumbnails for emotes, videos and more. The information is pulled "
+        "from our servers.");
     layout.addCheckbox("Enable", s.linkInfoTooltip);
     layout.addDropdown<int>(
         "Also show thumbnails if available",
@@ -605,19 +603,15 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     if (Version::instance().isSupportedOS())
     {
         layout.addDescription(
-            "You can receive updates earlier by ticking the box below. "
-            "Report "
-            "issues <a "
-            "href='https://chatterino.com/link/issues'>here</a>.");
+            "You can receive updates earlier by ticking the box below. Report "
+            "issues <a href='https://chatterino.com/link/issues'>here</a>.");
         layout.addCheckbox("Receive beta updates", s.betaUpdates);
     }
     else
     {
         layout.addDescription(
-            "Your operating system is not officially supplied with "
-            "builds. For "
-            "updates, please rebuild chatterino from sources. Report "
-            "issues <a "
+            "Your operating system is not officially supplied with builds. For "
+            "updates, please rebuild chatterino from sources. Report issues <a "
             "href='https://chatterino.com/link/issues'>here</a>.");
     }
 
@@ -723,9 +717,9 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
 
-    layout.addCheckbox("Only search for emote autocompletion at the "
-                       "start of emote names",
-                       s.prefixOnlyEmoteCompletion);
+    layout.addCheckbox(
+        "Only search for emote autocompletion at the start of emote names",
+        s.prefixOnlyEmoteCompletion);
     layout.addCheckbox("Only search for username autocompletion with an @",
                        s.userCompletionOnlyWithAt);
 
