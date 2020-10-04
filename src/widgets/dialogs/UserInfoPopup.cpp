@@ -665,7 +665,7 @@ void UserInfoPopup::updateUserData()
                 {
                     return;
                 }
-                
+
                 QString labelText;
 
                 if (!subageInfo.followingSince.isEmpty())
