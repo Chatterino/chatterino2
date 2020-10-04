@@ -6,9 +6,9 @@
 #include "singletons/Fonts.hpp"
 #include "src/messages/ImageSet.hpp"
 
+#include <QDateTime>
 #include <QRect>
 #include <QString>
-#include <QTime>
 #include <boost/noncopyable.hpp>
 #include <cstdint>
 #include <memory>
@@ -151,9 +151,9 @@ public:
 
     virtual void addToContainer(MessageLayoutContainer &container,
                                 MessageElementFlags flags) = 0;
-    virtual QTime getTime()
+    virtual QDateTime getTime()
     {
-        return QTime();
+        return QDateTime();
     };
 
     pajlada::Signals::NoArgSignal linkChanged;
@@ -275,18 +275,18 @@ protected:
 class TimestampElement : public MessageElement
 {
 public:
-    TimestampElement(QTime time_ = QTime::currentTime());
+    TimestampElement(QDateTime time_ = QDateTime::currentDateTime());
     ~TimestampElement() override = default;
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
-    TextElement *formatTime(const QTime &time);
+    TextElement *formatTime(const QDateTime &time);
 
-    QTime getTime() override;
+    QDateTime getTime() override;
 
 private:
-    QTime time_;
+    QDateTime time_;
     std::unique_ptr<TextElement> element_;
     QString format_;
 };

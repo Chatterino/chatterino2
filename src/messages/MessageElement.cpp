@@ -369,7 +369,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 }
 
 // TIMESTAMP
-TimestampElement::TimestampElement(QTime time)
+TimestampElement::TimestampElement(QDateTime time)
     : MessageElement(MessageElementFlag::Timestamp)
     , time_(time)
     , element_(this->formatTime(time))
@@ -392,7 +392,7 @@ void TimestampElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
-TextElement *TimestampElement::formatTime(const QTime &time)
+TextElement *TimestampElement::formatTime(const QDateTime &time)
 {
     static QLocale locale("en_US");
 
@@ -402,7 +402,7 @@ TextElement *TimestampElement::formatTime(const QTime &time)
                            MessageColor::System, FontStyle::ChatMedium);
 }
 
-QTime TimestampElement::getTime()
+QDateTime TimestampElement::getTime()
 {
     return this->time_;
 }

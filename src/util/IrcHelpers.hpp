@@ -58,7 +58,7 @@ inline QString parseTagString(const QString &input)
     return output;
 }
 
-inline QTime calculateMessageTimestamp(const Communi::IrcMessage *message)
+inline QDateTime calculateMessageTimestamp(const Communi::IrcMessage *message)
 {
     // Check if message is from recent-messages API
     if (message->tags().contains("historical"))
@@ -71,11 +71,11 @@ inline QTime calculateMessageTimestamp(const Communi::IrcMessage *message)
             ts = message->tags().value("tmi-sent-ts").toLongLong();
         }
 
-        return QDateTime::fromMSecsSinceEpoch(ts).time();
+        return QDateTime::fromMSecsSinceEpoch(ts);
     }
     else
     {
-        return QTime::currentTime();
+        return QDateTime::currentDateTime();
     }
 }
 

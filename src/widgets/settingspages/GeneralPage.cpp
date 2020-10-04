@@ -392,7 +392,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addDropdown<QString>(
         "Timestamp format (a = am/pm)",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
-         "h:mm:ss a", "hh:mm:ss a"},
+         "h:mm:ss a", "hh:mm:ss a", "dd.MM.yyyy h:mm"},
         s.timestampFormat,
         [](auto val) {
             return getSettings()->showTimestamps.getValue()

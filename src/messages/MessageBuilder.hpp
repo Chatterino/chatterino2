@@ -22,7 +22,7 @@ const SystemMessageTag systemMessage{};
 const TimeoutMessageTag timeoutMessage{};
 
 MessagePtr makeSystemMessage(const QString &text);
-MessagePtr makeSystemMessage(const QString &text, const QTime &time);
+MessagePtr makeSystemMessage(const QString &text, const QDateTime &time);
 std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     const AutomodAction &action);
 
@@ -40,13 +40,14 @@ class MessageBuilder
 public:
     MessageBuilder();
     MessageBuilder(SystemMessageTag, const QString &text,
-                   const QTime &time = QTime::currentTime());
+                   const QDateTime &time = QDateTime::currentDateTime());
     MessageBuilder(TimeoutMessageTag, const QString &systemMessageText,
-                   int times, const QTime &time = QTime::currentTime());
+                   int times,
+                   const QDateTime &time = QDateTime::currentDateTime());
     MessageBuilder(TimeoutMessageTag, const QString &username,
                    const QString &durationInSeconds, const QString &reason,
                    bool multipleTimes,
-                   const QTime &time = QTime::currentTime());
+                   const QDateTime &time = QDateTime::currentDateTime());
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
     MessageBuilder(const AutomodUserAction &action);

@@ -24,7 +24,7 @@ MessagePtr makeSystemMessage(const QString &text)
     return MessageBuilder(systemMessage, text).release();
 }
 
-MessagePtr makeSystemMessage(const QString &text, const QTime &time)
+MessagePtr makeSystemMessage(const QString &text, const QDateTime &time)
 {
     return MessageBuilder(systemMessage, text, time).release();
 }
@@ -99,7 +99,7 @@ MessageBuilder::MessageBuilder()
 }
 
 MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
-                               const QTime &time)
+                               const QDateTime &time)
     : MessageBuilder()
 {
     this->emplace<TimestampElement>(time);
@@ -128,7 +128,7 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag,
                                const QString &systemMessageText, int times,
-                               const QTime &time)
+                               const QDateTime &time)
     : MessageBuilder()
 {
     QString username = systemMessageText.split(" ").at(0);
@@ -149,7 +149,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag,
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
                                const QString &durationInSeconds,
                                const QString &reason, bool multipleTimes,
-                               const QTime &time)
+                               const QDateTime &time)
     : MessageBuilder()
 {
     QString fullText;

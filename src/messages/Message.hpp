@@ -3,7 +3,7 @@
 #include "common/FlagsEnum.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
-#include <QTime>
+#include <QDateTime>
 #include <boost/noncopyable.hpp>
 #include <cinttypes>
 #include <memory>
@@ -50,7 +50,7 @@ struct Message : boost::noncopyable {
     // const-correct way to deal with this is.
     // This might bring race conditions with it
     mutable MessageFlags flags;
-    QTime parseTime;
+    QDateTime parseTime;
     QString id;
     QString searchText;
     QString messageText;

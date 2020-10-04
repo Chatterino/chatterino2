@@ -253,7 +253,7 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
             auto timer = new QTimer;
             QObject::connect(timer, &QTimer::timeout, [] {
                 channel->addMessage(
-                    makeSystemMessage(QTime::currentTime().toString()));
+                    makeSystemMessage(QDateTime::currentDateTime().toString()));
             });
             timer->start(500);
             return timer;

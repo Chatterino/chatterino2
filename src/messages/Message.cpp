@@ -12,7 +12,7 @@ using SBHighlight = chatterino::ScrollbarHighlight;
 namespace chatterino {
 
 Message::Message()
-    : parseTime(QTime::currentTime())
+    : parseTime(QDateTime::currentDateTime())
 {
     DebugCount::increase("messages");
 }

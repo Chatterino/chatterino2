@@ -907,7 +907,7 @@ void ChannelView::drawMessages(QPainter &painter)
     auto app = getApp();
     bool isMentions = this->channel_ == app->twitch.server->mentionsChannel;
 
-    auto lastMessageTime = QTime();
+    auto lastMessageTime = QDateTime();
     for (size_t i = start; i < messagesSnapshot.size(); ++i)
     {
         MessageLayout *layout = messagesSnapshot[i].get();
@@ -924,7 +924,11 @@ void ChannelView::drawMessages(QPainter &painter)
             const auto &time = element->getTime();
             if (!time.isNull())
             {
-                isNewDay = (time < lastMessageTime);
+                if ((isNewDay = (time.date() > lastMessageTime.date())))
+                {
+                    lastMessageTime = time;
+                    break;
+                }
                 lastMessageTime = time;
             }
         }

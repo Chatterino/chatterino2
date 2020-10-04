@@ -72,7 +72,7 @@ float IrcMessageHandler::similarity(
             break;
         }
         const auto &prevMsg = messages[messages.size() - i];
-        if (prevMsg->parseTime.secsTo(QTime::currentTime()) >=
+        if (prevMsg->parseTime.secsTo(QDateTime::currentDateTime()) >=
             getSettings()->hideSimilarMaxDelay)
         {
             break;

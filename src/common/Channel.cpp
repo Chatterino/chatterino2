@@ -99,7 +99,7 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
 
     bool addMessage = true;
 
-    QTime minimumTime = QTime::currentTime().addSecs(-5);
+    QDateTime minimumTime = QDateTime::currentDateTime().addSecs(-5);
 
     auto timeoutStackStyle = static_cast<TimeoutStackStyle>(
         getSettings()->timeoutStackStyle.getValue());
