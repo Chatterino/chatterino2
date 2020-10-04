@@ -2,7 +2,7 @@
 Chatterino 2 [![GitHub Actions Build (Windows, Ubuntu, MacOS)](https://github.com/Chatterino/chatterino2/workflows/Build/badge.svg?branch=master)](https://github.com/Chatterino/chatterino2/actions?query=workflow%3ABuild+branch%3Amaster) [![Cirrus CI Build (FreeBSD only)](https://api.cirrus-ci.com/github/Chatterino/chatterino2.svg?branch=master)](https://cirrus-ci.com/github/Chatterino/chatterino2/master)
 ============
 
-Chatterino 2 is a chat client for Twitch.tv.
+Chatterino 2 is a chat client for [Twitch.tv](https://twitch.tv).
 The Chatterino 2 wiki can be found [here](https://wiki.chatterino.com).
 Contribution guidelines can be found [here](https://wiki.chatterino.com/contributing).
 
