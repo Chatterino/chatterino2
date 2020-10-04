@@ -24,18 +24,18 @@ jobs:
         with:
           submodules: true
 
-      - name: Cache Qt
-        id: cache-qt
-        uses: actions/cache@v2
-        with:
-          path: ../Qt
-          key: ${{ runner.os }}-QtCache-v4
+          # - name: Cache Qt
+          #   id: cache-qt
+          #   uses: actions/cache@v2
+          #   with:
+          #     path: ../Qt
+          #     key: ${{ runner.os }}-QtCache-v4
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
           # mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          # cached: ${{ steps.cache-qt.outputs.cache-hit }}
           aqtversion: '==0.9.6'
 
       # WINDOWS
