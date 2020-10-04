@@ -31,13 +31,17 @@ jobs:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-v4
 
+      # LINUX
+      - name: Install dependencies 2 (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update && sudo apt-get -y p7zip-full
+
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
           # mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          aqtversion: '==0.9.6'
-          py7zrversion: '==0.10.0'
+          extra: --external 7z
 
       # WINDOWS
       - name: Cache conan
