@@ -661,6 +661,11 @@ void UserInfoPopup::updateUserData()
         getIvr()->getSubage(
             this->userName_, this->channel_->getName(),
             [this, hack](const IvrSubage &subageInfo) {
+                if (!hack.lock())
+                {
+                    return;
+                }
+                
                 QString labelText;
 
                 if (!subageInfo.followingSince.isEmpty())
