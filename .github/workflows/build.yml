@@ -34,7 +34,7 @@ jobs:
       # LINUX
       - name: Install dependencies 2 (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get update && sudo apt-get -y p7zip-full
+        run: sudo apt-get update && sudo apt-get -y install p7zip-full
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
