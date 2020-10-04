@@ -29,12 +29,12 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ../Qt
-          key: ${{ runner.os }}-QtCache-v3
+          key: ${{ runner.os }}-QtCache-v4
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          # mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
 
       # WINDOWS
