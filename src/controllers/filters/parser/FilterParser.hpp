@@ -29,11 +29,11 @@ private:
 
     void errorLog(const QString &text, bool expand = false);
 
+    QStringList parseLog_;
+    bool valid_ = true;
+
     QString text_;
     Tokenizer tokenizer_;
     ExpressionPtr builtExpression_;
-
-    QStringList parseLog_;
-    bool valid_ = true;
 };
 }  // namespace filterparser

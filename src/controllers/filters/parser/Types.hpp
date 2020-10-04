@@ -58,6 +58,8 @@ QString tokenTypeToInfoString(TokenType type);
 class Expression
 {
 public:
+    virtual ~Expression() = default;
+
     virtual QVariant execute(const ContextMap &) const
     {
         return false;
