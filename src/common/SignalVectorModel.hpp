@@ -240,7 +240,8 @@ public:
     }
 
     bool moveRows(const QModelIndex &sourceParent, int sourceRow, int count,
-                  const QModelIndex &destinationParent, int destinationChild)
+                  const QModelIndex &destinationParent,
+                  int destinationChild) override
     {
         if (count != 1)
         {
@@ -287,7 +288,7 @@ public:
         return {"chatterino_row_id"};
     }
 
-    QMimeData *mimeData(const QModelIndexList &list) const
+    QMimeData *mimeData(const QModelIndexList &list) const override
     {
         if (list.length() == 1)
         {
