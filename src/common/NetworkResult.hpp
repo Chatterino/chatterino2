@@ -24,8 +24,8 @@ public:
     static constexpr int timedoutStatus = -2;
 
 private:
-    int status_;
     QByteArray data_;
+    int status_;
 };
 
 }  // namespace chatterino

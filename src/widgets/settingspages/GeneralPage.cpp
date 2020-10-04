@@ -691,7 +691,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
-    layout.addCheckbox("Random username color for users who never set a color",
+    layout.addCheckbox("Colorize users without color set (gray names)",
                        s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
