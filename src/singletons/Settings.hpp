@@ -58,7 +58,7 @@ public:
     static Settings &instance();
 
     /// Appearance
-    BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", true};
+    BoolSetting showTimestamps = {"/appearance/messages/showTimestamps", false};
     BoolSetting animationsWhenFocused = {
         "/appearance/enableAnimationsWhenFocused", false};
     QStringSetting timestampFormat = {"/appearance/messages/timestampFormat",
