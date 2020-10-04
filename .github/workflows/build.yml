@@ -32,14 +32,14 @@ jobs:
           key: ${{ runner.os }}-QtCache-v5
 
       # LINUX
-      - name: Install dependencies 2 (Ubuntu)
+      - name: Install p7zip (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get update && sudo apt-get -y install p7zip-full
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          # mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           extra: --external 7z
 
