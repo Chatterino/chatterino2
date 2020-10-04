@@ -36,6 +36,7 @@ jobs:
         with:
           # mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          aqtversion: '==0.9.6'
 
       # WINDOWS
       - name: Cache conan
