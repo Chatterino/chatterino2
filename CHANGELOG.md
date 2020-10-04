@@ -10,6 +10,7 @@
 - Minor: Changed the English in two rate-limited system messages (#1878)
 - Minor: Added image for streamer mode in the user popup icon.
 - Minor: Added vip and unvip buttons.
+- Minor: Commands are now saved upon pressing Ok in the settings window
 - Minor: Colorized nicknames now enabled by default
 - Minor: Show channels live now enabled by default
 - Minor: Bold usernames enabled by default
