@@ -690,12 +690,7 @@ void UserInfoPopup::updateUserData()
 
                 this->ui_.followageSubageLabel->setText(labelText);
             },
-            [hack] {
-                if (!hack.lock())
-                {
-                    return;
-                }
-            });
+            [] {});
     };
 
     getHelix()->getUserByName(this->userName_, onUserFetched,
