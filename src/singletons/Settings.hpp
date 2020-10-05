@@ -294,7 +294,7 @@ public:
     /// Notifications
     BoolSetting notificationFlashTaskbar = {"/notifications/enableFlashTaskbar",
                                             false};
-    BoolSetting notificationSound = {"/notifications/enableSound", false};
+    BoolSetting notificationSound = {"/notifications/enablePlaySound", false};
     QStringSetting notificationSoundUrl = {"/notifications/soundUrl", ""};
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",

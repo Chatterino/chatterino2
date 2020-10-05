@@ -317,6 +317,12 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
                 server.mentionsChannel->addMessage(msg);
             }
         }
+
+        chan->addMessage(msg);
+        if (auto chatters = dynamic_cast<ChannelChatters *>(chan.get()))
+        {
+            chatters->addRecentChatter(msg->displayName);
+        }
     }
 }
 
