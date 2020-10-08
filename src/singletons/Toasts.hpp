@@ -28,7 +28,7 @@ public:
 
 private:
 #ifdef Q_OS_WIN
-    void sendWindowsNotification(const QString &channelName, 
+    void sendWindowsNotification(const QString &channelName,
                                  const QString &channelTitle, Platform p);
 #endif
 };
