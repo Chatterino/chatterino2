@@ -17,7 +17,7 @@ enum class ToastReaction {
 class Toasts final : public Singleton
 {
 public:
-    void sendChannelNotification(const QString &channelName, Platform p);
+    void sendChannelNotification(const QString &channelName, const QString &channelTitle, Platform p);
     static QString findStringFromReaction(const ToastReaction &reaction);
     static QString findStringFromReaction(
         const pajlada::Settings::Setting<int> &reaction);
@@ -27,7 +27,7 @@ public:
 
 private:
 #ifdef Q_OS_WIN
-    void sendWindowsNotification(const QString &channelName, Platform p);
+    void sendWindowsNotification(const QString &channelName, const QString &channelTitle, Platform p);
 #endif
 };
 }  // namespace chatterino
