@@ -18,7 +18,7 @@ class Toasts final : public Singleton
 {
 public:
     void sendChannelNotification(const QString &channelName,
-        const QString &channelTitle, Platform p);
+                                 const QString &channelTitle, Platform p);
     static QString findStringFromReaction(const ToastReaction &reaction);
     static QString findStringFromReaction(
         const pajlada::Settings::Setting<int> &reaction);

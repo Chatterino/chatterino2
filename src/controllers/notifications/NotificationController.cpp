@@ -168,8 +168,8 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
 
             if (Toasts::isEnabled())
             {
-                getApp()->toasts->sendChannelNotification(channelName, QString(),
-                                                          Platform::Twitch);
+                getApp()->toasts->sendChannelNotification(
+                    channelName, QString(), Platform::Twitch);
             }
             if (getSettings()->notificationPlaySound)
             {
