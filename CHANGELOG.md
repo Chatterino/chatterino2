@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added stream titles to windows live toast notifications. (#1297)
 - Minor: Added followage and subage information to usercard. (#2023)
 - Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940)
 - Minor: Added customizable timeout buttons to the user info popup

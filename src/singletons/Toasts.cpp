@@ -178,7 +178,7 @@ void Toasts::sendWindowsNotification(const QString &channelName, const QString &
             Toasts::findStringFromReaction(getSettings()->openFromToast);
         mode = mode.toLower();
 
-        templ.setTextField(channelTitle.toStdWString() + L" \nClick here to " + mode.toStdWString(),
+        templ.setTextField(channelTitle.toStdWString() + L" \nClick to " + mode.toStdWString(),
                            WinToastLib::WinToastTemplate::SecondLine);
     }
 
