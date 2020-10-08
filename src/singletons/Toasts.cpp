@@ -180,11 +180,11 @@ void Toasts::sendWindowsNotification(const QString &channelName,
             Toasts::findStringFromReaction(getSettings()->openFromToast);
         mode = mode.toLower();
 
-+        templ.setTextField(QString(L"%1 \nClick to %2")
-+                               .arg(channelTitle)
-+                               .arg(mode)
-+                               .toStdWString(),
-+                           WinToastLib::WinToastTemplate::SecondLine);
+        templ.setTextField(QString("%1 \nClick to %2")
+                               .arg(channelTitle)
+                               .arg(mode)
+                               .toStdWString(),
+                           WinToastLib::WinToastTemplate::SecondLine);
     }
 
     QString Path;
