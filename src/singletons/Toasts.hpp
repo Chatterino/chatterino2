@@ -28,7 +28,8 @@ public:
 
 private:
 #ifdef Q_OS_WIN
-    void sendWindowsNotification(const QString &channelName, const QString &channelTitle, Platform p);
+    void sendWindowsNotification(const QString &channelName, 
+                                 const QString &channelTitle, Platform p);
 #endif
 };
 }  // namespace chatterino

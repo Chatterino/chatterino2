@@ -162,7 +162,8 @@ public:
     }
 };
 
-void Toasts::sendWindowsNotification(const QString &channelName, const QString &channelTitle, Platform p)
+void Toasts::sendWindowsNotification(const QString &channelName,
+                                     const QString &channelTitle, Platform p)
 {
     WinToastLib::WinToastTemplate templ = WinToastLib::WinToastTemplate(
         WinToastLib::WinToastTemplate::ImageAndText03);
