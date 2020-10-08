@@ -314,7 +314,8 @@ void Split::setChannel(IndirectChannel newChannel)
     this->header_->updateChannelText();
     this->header_->updateRoomModes();
 
-    if(newChannel.getType() == Channel::Type::Twitch){
+    if(newChannel.getType() == Channel::Type::Twitch)
+    {
         this->header_->setViewersButtonVisible(true);
     }
     else
