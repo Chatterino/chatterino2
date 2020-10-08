@@ -1,5 +1,5 @@
 <RCC>
-  <qresource prefix="/qt/etc">
-    <file>qt.conf</file>
-  </qresource>
+    <qresource prefix="/qt/etc">
+        <file>qt.conf</file>
+    </qresource>
 </RCC>

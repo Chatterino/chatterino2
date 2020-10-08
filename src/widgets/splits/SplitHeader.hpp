@@ -25,6 +25,7 @@ public:
     explicit SplitHeader(Split *_chatWidget);
 
     void setAddButtonVisible(bool value);
+    void setViewersButtonVisible(bool value);
 
     void updateChannelText();
     void updateModerationModeIcon();
@@ -60,6 +61,7 @@ private:
     Label *titleLabel_{};
     EffectLabel *modeButton_{};
     Button *moderationButton_{};
+    Button *viewersButton_{};
     Button *addButton_{};
 
     // states
