@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/Shortcut.hpp"
@@ -318,6 +319,7 @@ void SettingsDialog::onOkClicked()
 {
     if (!getArgs().dontSaveSettings)
     {
+        getApp()->commands->save();
         pajlada::Settings::SettingManager::gSave();
     }
     this->close();

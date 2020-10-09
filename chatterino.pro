@@ -175,6 +175,7 @@ SOURCES += \
     src/providers/irc/IrcConnection2.cpp \
     src/providers/irc/IrcMessageBuilder.cpp \
     src/providers/irc/IrcServer.cpp \
+    src/providers/IvrApi.cpp \
     src/providers/LinkResolver.cpp \
     src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/api/Helix.cpp \
@@ -389,6 +390,7 @@ HEADERS += \
     src/providers/irc/IrcConnection2.hpp \
     src/providers/irc/IrcMessageBuilder.hpp \
     src/providers/irc/IrcServer.hpp \
+    src/providers/IvrApi.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/ChannelPointReward.hpp \
     src/providers/twitch/api/Helix.hpp \

@@ -38,6 +38,7 @@
 #include "util/Twitch.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
@@ -1879,6 +1880,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::AutoModDeny: {
             getApp()->accounts->twitch.getCurrent()->autoModDeny(link.value);
         }
+        break;
+
+        case Link::OpenAccountsPage: {
+            SettingsDialog::showDialog(SettingsDialogPreference::Accounts);
+        }
+        break;
 
         default:;
     }
