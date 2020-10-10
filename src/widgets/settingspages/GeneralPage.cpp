@@ -605,9 +605,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
 
-    layout.addCheckbox("Ask for confirmation when uploading an image",
-                       s.askOnImageUpload);
-
     // Advanced Settings setup
     {
         auto *const advancedSettings =

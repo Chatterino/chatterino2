@@ -121,6 +121,9 @@ ExternalToolsPage::ExternalToolsPage()
 
         groupLayout->addRow(this->createCheckBox(
             "Enable image uploader", getSettings()->imageUploaderEnabled));
+        groupLayout->addRow(
+            this->createCheckBox("Ask for confirmation when uploading an image",
+                                 getSettings()->askOnImageUpload));
 
         groupLayout->addRow(
             "Request URL: ",
