@@ -588,8 +588,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
-    layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
-    layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
     layout.addCheckbox("Automatically close user popup when it loses focus",
                        s.autoCloseUserPopup);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
@@ -808,6 +806,8 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
                             true);
         layout->addCheckbox("Colorize users without color set (gray names)",
                             s.colorizeNicknames);
+        layout->addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
+        layout->addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
     }
 
     return layout;
