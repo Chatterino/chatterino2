@@ -16,6 +16,7 @@
 #include "widgets/BaseWindow.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/ColorButton.hpp"
+#include "widgets/helper/ExpandableLayout.hpp"
 #include "widgets/helper/Line.hpp"
 
 #define CHROME_EXTENSION_LINK                                           \
@@ -743,10 +744,29 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Ask for confirmation when uploading an image",
                        s.askOnImageUpload);
 
+    // Advanced Settings setup
+    {
+        auto *const advancedSettings =
+            new ExpandableLayout("Advanced Settings", this);
+        auto *const advancedSettingsLayout =
+            this->buildAdvancedSettingsLayout();
+        advancedSettings->setContent(advancedSettingsLayout);
+        layout.addWidget(advancedSettings);
+    }
+
     // invisible element for width
     auto inv = new BaseWidget(this);
     inv->setScaleIndependantWidth(500);
     layout.addWidget(inv);
+}
+
+QLayout *GeneralPage::buildAdvancedSettingsLayout()
+{
+    auto &s = *getSettings();
+    auto layout = new SettingsLayout;
+    layout->setContentsMargins(0, 0, 0, 0);
+
+    return layout;
 }
 
 void GeneralPage::initExtra()

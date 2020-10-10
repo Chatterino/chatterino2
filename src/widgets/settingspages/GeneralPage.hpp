@@ -189,6 +189,7 @@ public:
 
 private:
     void initLayout(SettingsLayout &layout);
+    QLayout *buildAdvancedSettingsLayout();
     void initExtra();
 
     QString getFont(const DropdownArgs &args) const;
