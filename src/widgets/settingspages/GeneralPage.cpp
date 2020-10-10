@@ -543,7 +543,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                         "Apple", "Google", "Messenger"},
                        s.emojiSet);
 
-    layout.addTitle("Chat title");
+    layout.addTitle("Chat Title");
     layout.addDescription("In live channels show:");
     layout.addCheckbox("Uptime", s.headerUptime);
     layout.addCheckbox("Viewer count", s.headerViewerCount);
