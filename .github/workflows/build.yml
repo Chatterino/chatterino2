@@ -203,7 +203,7 @@ jobs:
       #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
 
       - name: Upload release asset (Windows)
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -213,7 +213,7 @@ jobs:
           asset_content_type: application/zip
 
       - name: Upload release asset (Ubuntu)
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -223,7 +223,7 @@ jobs:
           asset_content_type: application/x-executable
 
       - name: Upload release asset (MacOS)
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
