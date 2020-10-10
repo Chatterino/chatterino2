@@ -605,10 +605,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
 
-    layout.addDropdown<int>(
-        "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
-        s.timeoutStackStyle, [](int index) { return index; },
-        [](auto args) { return args.index; }, false);
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Ask for confirmation when uploading an image",
                        s.askOnImageUpload);
@@ -815,6 +811,10 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
         layout->addCheckbox(
             "Hide viewercount and stream length while hovering the split",
             s.hideViewerCountAndDuration);
+        layout->addDropdown<int>(
+            "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
+            s.timeoutStackStyle, [](int index) { return index; },
+            [](auto args) { return args.index; }, false);
     }
 
     return layout;
