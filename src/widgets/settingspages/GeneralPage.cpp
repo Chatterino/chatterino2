@@ -364,8 +364,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 #endif
     if (!BaseWindow::supportsCustomWindowFrame())
     {
-        layout.addCheckbox("Show preferences button (Ctrl+P to show)",
-                           s.hidePreferencesButton, true);
         layout.addCheckbox("Show user button", s.hideUserButton, true);
     }
     layout.addCheckbox("Show which channels are live in tabs", s.showTabLive);
@@ -769,6 +767,12 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
     {
         layout->addTitle("Interface");
         layout->addCheckbox("Show tab close button", s.showTabCloseButton);
+
+        if (!BaseWindow::supportsCustomWindowFrame())
+        {
+            layout->addCheckbox("Show preferences button (Ctrl+P to show)",
+                                s.hidePreferencesButton, true);
+        }
     }
 
     return layout;
