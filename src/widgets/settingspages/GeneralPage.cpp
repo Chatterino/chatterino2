@@ -401,7 +401,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
-    layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
     layout.addCheckbox("Allow sending duplicate messages",
                        s.allowDuplicateMessages);
@@ -772,6 +771,12 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
 
         layout->addCheckbox("Show which channels are live in tabs",
                             s.showTabLive);
+    }
+
+    // "Chat" section
+    {
+        layout->addTitle("Chat");
+        layout->addCheckbox("Show input when it's empty", s.showEmptyInput);
     }
 
     return layout;
