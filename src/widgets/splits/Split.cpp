@@ -8,6 +8,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -608,7 +609,7 @@ void Split::openWithCustomScheme()
 
 void Split::showViewerList()
 {
-    auto viewerDock = new QDockWidget("Viewer List", this);
+    auto viewerDock = new QDockWidget("Viewers List - " + this->getChannel()->getName(), this);
     viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
     viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
                             QDockWidget::DockWidgetClosable |
@@ -635,7 +636,9 @@ void Split::showViewerList()
     for (auto &x : labels)
     {
         auto label = new QListWidgetItem(x);
-        label->setBackgroundColor(this->theme->splits.header.background);
+        label->setBackground(this->theme->splits.header.background);
+        label->setForeground(QColor(169, 112, 255));
+        label->setFont(getApp()->fonts->getFont(FontStyle::ChatMediumBold, 1.1));
         labelList.append(label);
     }
     auto loadingLabel = new QLabel("Loading...");
@@ -659,7 +662,12 @@ void Split::showViewerList()
 
                 chattersList->addItem(labelList.at(i));
                 foreach (const QJsonValue &v, currentCategory)
-                    chattersList->addItem(v.toString());
+                {
+                    auto chatter = new QListWidgetItem(chattersList);
+                    chatter->setText(v.toString());
+                    chatter->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
+                    chattersList->addItem(chatter);
+                }
             }
 
             return Success;
