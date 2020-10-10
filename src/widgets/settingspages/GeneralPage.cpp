@@ -586,15 +586,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
 
-#ifdef Q_OS_LINUX
-    if (!getPaths()->isPortable())
-    {
-        layout.addCheckbox(
-            "Use libsecret/KWallet/Gnome keychain to secure passwords",
-            s.useKeyring);
-    }
-#endif
-
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
     layout.addCheckbox("Colorize users without color set (gray names)",
@@ -802,6 +793,20 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
         layout->addButton("Open AppData directory", [] {
             QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
         });
+    }
+
+    // "Miscellaneous" section
+    {
+        layout->addTitle("Miscellaneous");
+
+#ifdef Q_OS_LINUX
+        if (!getPaths()->isPortable())
+        {
+            layout->addCheckbox(
+                "Use libsecret/KWallet/Gnome keychain to secure passwords",
+                s.useKeyring);
+        }
+#endif
     }
 
     return layout;
