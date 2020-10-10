@@ -586,8 +586,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
 
-    layout.addCheckbox("Colorize users without color set (gray names)",
-                       s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
@@ -808,6 +806,8 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
 
         layout->addCheckbox("Show moderation messages", s.hideModerationActions,
                             true);
+        layout->addCheckbox("Colorize users without color set (gray names)",
+                            s.colorizeNicknames);
     }
 
     return layout;
