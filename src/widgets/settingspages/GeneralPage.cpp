@@ -543,16 +543,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                         "Apple", "Google", "Messenger"},
                        s.emojiSet);
 
-    layout.addTitle("Visible Badges");
-    layout.addCheckbox("Authority (staff, admin)",
-                       getSettings()->showBadgesGlobalAuthority);
-    layout.addCheckbox("Channel (broadcaster, moderator)",
-                       getSettings()->showBadgesChannelAuthority);
-    layout.addCheckbox("Subscriber ", getSettings()->showBadgesSubscription);
-    layout.addCheckbox("Vanity (prime, bits, subgifter)",
-                       getSettings()->showBadgesVanity);
-    layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
-
     layout.addTitle("Chat title");
     layout.addDescription("In live channels show:");
     layout.addCheckbox("Uptime", s.headerUptime);
@@ -787,6 +777,19 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
             s.hideSimilarMaxMessagesToCheck,
             [](auto val) { return QString::number(val); },
             [](auto args) { return fuzzyToInt(args.value, 3); });
+    }
+
+    // "Visible Badges" section
+    {
+        layout->addTitle("Visible Badges");
+        layout->addCheckbox("Authority (staff, admin)",
+                            s.showBadgesGlobalAuthority);
+        layout->addCheckbox("Channel (broadcaster, moderator)",
+                            s.showBadgesChannelAuthority);
+        layout->addCheckbox("Subscriber ", s.showBadgesSubscription);
+        layout->addCheckbox("Vanity (prime, bits, subgifter)",
+                            s.showBadgesVanity);
+        layout->addCheckbox("Chatterino", s.showBadgesChatterino);
     }
 
     return layout;
