@@ -576,13 +576,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.attachExtensionToAnyProcess);
 #endif
 
-    layout.addTitle("AppData");
-    layout.addDescription("All local files like settings and cache files are "
-                          "store in this directory.");
-    layout.addButton("Open AppData directory", [] {
-        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
-    });
-
     layout.addTitle("Miscellaneous");
 
     if (supportsIncognitoLinks())
@@ -798,6 +791,17 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
 
             layout->addLayout(box);
         }
+    }
+
+    // "AppData" section
+    {
+        layout->addTitle("AppData");
+        layout->addDescription(
+            "All local files like settings and cache files are "
+            "store in this directory.");
+        layout->addButton("Open AppData directory", [] {
+            QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+        });
     }
 
     return layout;
