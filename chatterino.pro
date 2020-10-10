@@ -177,9 +177,9 @@ SOURCES += \
     src/providers/irc/IrcServer.cpp \
     src/providers/IvrApi.cpp \
     src/providers/LinkResolver.cpp \
-    src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/api/Helix.cpp \
     src/providers/twitch/api/Kraken.cpp \
+    src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
     src/providers/twitch/PubsubActions.cpp \
     src/providers/twitch/PubsubClient.cpp \
@@ -241,8 +241,8 @@ SOURCES += \
     src/widgets/dialogs/QualityPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
-    src/widgets/listview/GenericItemDelegate.cpp \
     src/widgets/dialogs/switcher/NewTabItem.cpp \
+    src/widgets/dialogs/switcher/QuickSwitcherModel.cpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.cpp \
     src/widgets/dialogs/switcher/SwitchSplitItem.cpp \
     src/widgets/dialogs/TextInputDialog.cpp \
@@ -266,11 +266,12 @@ SOURCES += \
     src/widgets/helper/SignalLabel.cpp \
     src/widgets/helper/TitlebarButton.cpp \
     src/widgets/Label.cpp \
-    src/widgets/Notebook.cpp \
-    src/widgets/Scrollbar.cpp \
+    src/widgets/listview/GenericItemDelegate.cpp \
     src/widgets/listview/GenericListItem.cpp \
     src/widgets/listview/GenericListModel.cpp \
     src/widgets/listview/GenericListView.cpp \
+    src/widgets/Notebook.cpp \
+    src/widgets/Scrollbar.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
@@ -330,6 +331,7 @@ HEADERS += \
     src/common/UniqueAccess.hpp \
     src/common/UsernameSet.hpp \
     src/common/Version.hpp \
+    src/common/WindowDescriptors.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
     src/controllers/accounts/AccountModel.hpp \
@@ -392,9 +394,9 @@ HEADERS += \
     src/providers/irc/IrcServer.hpp \
     src/providers/IvrApi.hpp \
     src/providers/LinkResolver.hpp \
-    src/providers/twitch/ChannelPointReward.hpp \
     src/providers/twitch/api/Helix.hpp \
     src/providers/twitch/api/Kraken.hpp \
+    src/providers/twitch/ChannelPointReward.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
     src/providers/twitch/PubsubActions.hpp \
@@ -480,7 +482,6 @@ HEADERS += \
     src/widgets/dialogs/SelectChannelDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
     src/widgets/dialogs/switcher/AbstractSwitcherItem.hpp \
-    src/widgets/listview/GenericItemDelegate.hpp \
     src/widgets/dialogs/switcher/NewTabItem.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherModel.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.hpp \
@@ -508,11 +509,12 @@ HEADERS += \
     src/widgets/helper/SignalLabel.hpp \
     src/widgets/helper/TitlebarButton.hpp \
     src/widgets/Label.hpp \
-    src/widgets/Notebook.hpp \
-    src/widgets/Scrollbar.hpp \
+    src/widgets/listview/GenericItemDelegate.hpp \
     src/widgets/listview/GenericListItem.hpp \
     src/widgets/listview/GenericListModel.hpp \
     src/widgets/listview/GenericListView.hpp \
+    src/widgets/Notebook.hpp \
+    src/widgets/Scrollbar.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
