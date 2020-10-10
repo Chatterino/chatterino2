@@ -80,7 +80,7 @@ TitleLabel *SettingsLayout::addTitle(const QString &title)
 {
     // space
     if (!this->groups_.empty())
-        this->addWidget(this->groups_.back().space = new Space);
+        this->addSpace();
 
     // title
     auto label = new TitleLabel(title + ":");
@@ -212,6 +212,11 @@ DescriptionLabel *SettingsLayout::addDescription(const QString &text)
 void SettingsLayout::addSeperator()
 {
     this->addWidget(new Line(false));
+}
+
+void SettingsLayout::addSpace()
+{
+    this->addWidget(this->groups_.back().space = new Space);
 }
 
 bool SettingsLayout::filterElements(const QString &query)
@@ -612,6 +617,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         auto *const advancedSettingsLayout =
             this->buildAdvancedSettingsLayout();
         advancedSettings->setContent(advancedSettingsLayout);
+        layout.addSpace();
         layout.addWidget(advancedSettings);
     }
 
