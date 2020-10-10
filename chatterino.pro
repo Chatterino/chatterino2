@@ -256,6 +256,7 @@ SOURCES += \
     src/widgets/helper/DebugPopup.cpp \
     src/widgets/helper/EditableModelView.cpp \
     src/widgets/helper/EffectLabel.cpp \
+    src/widgets/helper/ExpandableLayout.cpp \
     src/widgets/helper/NotebookButton.cpp \
     src/widgets/helper/NotebookTab.cpp \
     src/widgets/helper/QColorPicker.cpp \
@@ -498,6 +499,7 @@ HEADERS += \
     src/widgets/helper/DebugPopup.hpp \
     src/widgets/helper/EditableModelView.hpp \
     src/widgets/helper/EffectLabel.hpp \
+    src/widgets/helper/ExpandableLayout.hpp \
     src/widgets/helper/Line.hpp \
     src/widgets/helper/NotebookButton.hpp \
     src/widgets/helper/NotebookTab.hpp \
