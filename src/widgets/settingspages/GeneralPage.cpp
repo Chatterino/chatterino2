@@ -358,7 +358,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             }
         });
 
-    layout.addCheckbox("Show tab close button", s.showTabCloseButton);
     layout.addCheckbox("Always on top", s.windowTopMost);
 #ifdef USEWINSDK
     layout.addCheckbox("Start with Windows", s.autorun);
@@ -765,6 +764,12 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
     auto &s = *getSettings();
     auto layout = new SettingsLayout;
     layout->setContentsMargins(0, 0, 0, 0);
+
+    // "Interface" section
+    {
+        layout->addTitle("Interface");
+        layout->addCheckbox("Show tab close button", s.showTabCloseButton);
+    }
 
     return layout;
 }
