@@ -61,9 +61,7 @@ namespace {
     }
     void addEmoteSets(
         std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> sets,
-        Channel &globalChannel,
-        Channel &subChannel,
-        QString currentChannelName)
+        Channel &globalChannel, Channel &subChannel, QString currentChannelName)
     {
         QMap<QString, QPair<bool, std::vector<MessagePtr>>> mapOfSets;
 
