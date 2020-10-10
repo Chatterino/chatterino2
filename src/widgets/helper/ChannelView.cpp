@@ -1273,12 +1273,11 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
     const auto &tooltip = hoverLayoutElement->getCreator().getTooltip();
     bool isLinkValid = hoverLayoutElement->getLink().isValid();
+    auto emoteElement =
+        dynamic_cast<const EmoteElement *>(&hoverLayoutElement->getCreator());
 
-    if (tooltip.isEmpty())
-    {
-        tooltipWidget->hide();
-    }
-    else if (isLinkValid && !getSettings()->linkInfoTooltip)
+    if (tooltip.isEmpty() || (isLinkValid && emoteElement == nullptr &&
+                              !getSettings()->linkInfoTooltip))
     {
         tooltipWidget->hide();
     }
@@ -1286,8 +1285,6 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto &tooltipPreviewImage = TooltipPreviewImage::instance();
         tooltipPreviewImage.setImageScale(0, 0);
-        auto emoteElement = dynamic_cast<const EmoteElement *>(
-            &hoverLayoutElement->getCreator());
         auto badgeElement = dynamic_cast<const BadgeElement *>(
             &hoverLayoutElement->getCreator());
 
