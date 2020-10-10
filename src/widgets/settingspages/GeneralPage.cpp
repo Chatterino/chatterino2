@@ -605,10 +605,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
 
-    layout.addCheckbox("Enable experimental IRC support (requires restart)",
-                       s.enableExperimentalIrc);
-    layout.addCheckbox("Show unhandled IRC messages",
-                       s.showUnhandledIrcMessages);
     layout.addCheckbox(
         "Hide viewercount and stream length while hovering the split",
         s.hideViewerCountAndDuration);
@@ -773,6 +769,16 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
         layout->addButton("Open AppData directory", [] {
             QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
         });
+    }
+
+    // "IRC" section
+    {
+        layout->addTitle("IRC");
+        layout->addCheckbox(
+            "Enable experimental IRC support (requires restart)",
+            s.enableExperimentalIrc);
+        layout->addCheckbox("Show unhandled IRC messages",
+                            s.showUnhandledIrcMessages);
     }
 
     // "Miscellaneous" section
