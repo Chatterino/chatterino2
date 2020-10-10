@@ -543,7 +543,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                         "Apple", "Google", "Messenger"},
                        s.emojiSet);
 
-    layout.addTitle("Visible badges");
+    layout.addTitle("Visible Badges");
     layout.addCheckbox("Authority (staff, admin)",
                        getSettings()->showBadgesGlobalAuthority);
     layout.addCheckbox("Channel (broadcaster, moderator)",
