@@ -586,8 +586,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
 
-    layout.addCheckbox("Show moderation messages", s.hideModerationActions,
-                       true);
     layout.addCheckbox("Colorize users without color set (gray names)",
                        s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
@@ -807,6 +805,9 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
                 s.useKeyring);
         }
 #endif
+
+        layout->addCheckbox("Show moderation messages", s.hideModerationActions,
+                            true);
     }
 
     return layout;
