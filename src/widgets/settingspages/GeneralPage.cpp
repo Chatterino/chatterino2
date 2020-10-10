@@ -401,8 +401,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
-    layout.addCheckbox("Allow sending duplicate messages",
-                       s.allowDuplicateMessages);
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
@@ -778,6 +776,8 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
         layout->addCheckbox("Show input when it's empty", s.showEmptyInput);
         layout->addCheckbox("Show message length while typing",
                             s.showMessageLength);
+        layout->addCheckbox("Allow sending duplicate messages",
+                            s.allowDuplicateMessages);
     }
 
     return layout;
