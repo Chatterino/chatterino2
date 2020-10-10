@@ -362,7 +362,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 #ifdef USEWINSDK
     layout.addCheckbox("Start with Windows", s.autorun);
 #endif
-    layout.addCheckbox("Show which channels are live in tabs", s.showTabLive);
 
     layout.addTitle("Chat");
 
@@ -770,6 +769,9 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
                                 s.hidePreferencesButton, true);
             layout->addCheckbox("Show user button", s.hideUserButton, true);
         }
+
+        layout->addCheckbox("Show which channels are live in tabs",
+                            s.showTabLive);
     }
 
     return layout;
