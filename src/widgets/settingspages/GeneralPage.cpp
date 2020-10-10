@@ -605,9 +605,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
 
-    layout.addCheckbox(
-        "Hide viewercount and stream length while hovering the split",
-        s.hideViewerCountAndDuration);
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle, [](int index) { return index; },
@@ -815,6 +812,9 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
                     return QString::number(val);
             },
             [](auto args) { return fuzzyToFloat(args.value, 63.f); });
+        layout->addCheckbox(
+            "Hide viewercount and stream length while hovering the split",
+            s.hideViewerCountAndDuration);
     }
 
     return layout;
