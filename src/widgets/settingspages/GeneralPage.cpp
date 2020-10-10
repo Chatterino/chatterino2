@@ -543,32 +543,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                         "Apple", "Google", "Messenger"},
                        s.emojiSet);
 
-    layout.addTitle("R9K");
-    layout.addDescription(
-        "Hide similar messages by the same user. Toggle hidden "
-        "messages by pressing Ctrl+H.");
-    layout.addCheckbox("Hide similar messages", s.similarityEnabled);
-    //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
-    layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
-    layout.addCheckbox("Receive notification sounds from hidden messages",
-                       s.shownSimilarTriggerHighlights);
-    s.hideSimilar.connect(
-        []() { getApp()->windows->forceLayoutChannelViews(); }, false);
-    layout.addDropdown<float>(
-        "Similarity threshold", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
-    layout.addDropdown<int>(
-        "Maximum delay between messages",
-        {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
-        [](auto val) { return QString::number(val) + "s"; },
-        [](auto args) { return fuzzyToInt(args.value, 5); });
-    layout.addDropdown<int>(
-        "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
-        s.hideSimilarMaxMessagesToCheck,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToInt(args.value, 3); });
-
     layout.addTitle("Visible badges");
     layout.addCheckbox("Authority (staff, admin)",
                        getSettings()->showBadgesGlobalAuthority);
@@ -783,6 +757,36 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
         layout->addTitle("Emotes");
         layout->addCheckbox("Enable emote auto-completion by typing :",
                             s.emoteCompletionWithColon);
+    }
+
+    // "R9K" section
+    {
+        layout->addTitle("R9K");
+        layout->addDescription(
+            "Hide similar messages by the same user. Toggle hidden "
+            "messages by pressing Ctrl+H.");
+        layout->addCheckbox("Hide similar messages", s.similarityEnabled);
+        //layout->addCheckbox("Gray out matches", s.colorSimilarDisabled);
+        layout->addCheckbox("Hide my own messages", s.hideSimilarMyself);
+        layout->addCheckbox("Receive notification sounds from hidden messages",
+                            s.shownSimilarTriggerHighlights);
+        s.hideSimilar.connect(
+            []() { getApp()->windows->forceLayoutChannelViews(); }, false);
+        layout->addDropdown<float>(
+            "Similarity threshold", {"0.5", "0.75", "0.9"},
+            s.similarityPercentage,
+            [](auto val) { return QString::number(val); },
+            [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
+        layout->addDropdown<int>(
+            "Maximum delay between messages",
+            {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
+            [](auto val) { return QString::number(val) + "s"; },
+            [](auto args) { return fuzzyToInt(args.value, 5); });
+        layout->addDropdown<int>(
+            "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
+            s.hideSimilarMaxMessagesToCheck,
+            [](auto val) { return QString::number(val); },
+            [](auto args) { return fuzzyToInt(args.value, 3); });
     }
 
     return layout;
