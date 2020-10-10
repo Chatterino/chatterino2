@@ -25,6 +25,8 @@
 - Bugfix: Starting Chatterino in a minimized state after an update will no longer cause a crash
 - Bugfix: Modify the emote parsing to handle some edge-cases with dots and stuff (#1704, #1714)
 - Bugfix: Fixed timestamps being incorrect on some messages loaded from the recent-messages service on startup (#1286, #2020)
+- Bugfix: Fixed timestamps missing on channel point redemption messages (#1943)
+- Bugfix: Fixed tooltip didn't show in `EmotePopup` depending on the `Link preview` setting enabled or no (#2008)
 
 ## 2.2.0
 
