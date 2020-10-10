@@ -29,6 +29,8 @@
     <file>buttons/unvip.png</file>
     <file>buttons/update.png</file>
     <file>buttons/updateError.png</file>
+    <file>buttons/viewersDark.png</file>
+    <file>buttons/viewersLight.png</file>
     <file>buttons/vip.png</file>
     <file>chatterino.icns</file>
     <file>com.chatterino.chatterino.appdata.xml</file>
