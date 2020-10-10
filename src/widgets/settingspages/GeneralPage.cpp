@@ -589,15 +589,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
-    layout.addDropdown<float>(
-        "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
-        [](auto val) {
-            if (val == 63)
-                return QString("Default");
-            else
-                return QString::number(val);
-        },
-        [](auto args) { return fuzzyToFloat(args.value, 63.f); });
     layout.addCheckbox("Double click to open links and other elements in chat",
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
@@ -809,6 +800,15 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
         layout->addCheckbox("Bold @usernames", s.boldUsernames);
         layout->addCheckbox("Try to find usernames without @ prefix",
                             s.findAllUsernames);
+        layout->addDropdown<float>(
+            "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
+            [](auto val) {
+                if (val == 63)
+                    return QString("Default");
+                else
+                    return QString::number(val);
+            },
+            [](auto args) { return fuzzyToFloat(args.value, 63.f); });
     }
 
     return layout;
