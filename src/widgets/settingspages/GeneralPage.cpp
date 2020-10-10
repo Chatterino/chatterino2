@@ -543,13 +543,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                         "Apple", "Google", "Messenger"},
                        s.emojiSet);
 
-    layout.addTitle("Chat Title");
-    layout.addDescription("In live channels show:");
-    layout.addCheckbox("Uptime", s.headerUptime);
-    layout.addCheckbox("Viewer count", s.headerViewerCount);
-    layout.addCheckbox("Category", s.headerGame);
-    layout.addCheckbox("Title", s.headerStreamTitle);
-
     layout.addTitle("Beta");
     if (Version::instance().isSupportedOS())
     {
@@ -790,6 +783,16 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
         layout->addCheckbox("Vanity (prime, bits, subgifter)",
                             s.showBadgesVanity);
         layout->addCheckbox("Chatterino", s.showBadgesChatterino);
+    }
+
+    // "Chat Title" section
+    {
+        layout->addTitle("Chat Title");
+        layout->addDescription("In live channels show:");
+        layout->addCheckbox("Uptime", s.headerUptime);
+        layout->addCheckbox("Viewer count", s.headerViewerCount);
+        layout->addCheckbox("Category", s.headerGame);
+        layout->addCheckbox("Title", s.headerStreamTitle);
     }
 
     return layout;
