@@ -589,7 +589,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
-    layout.addCheckbox("Bold @usernames", s.boldUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames);
     layout.addDropdown<float>(
@@ -809,6 +808,7 @@ QLayout *GeneralPage::buildAdvancedSettingsLayout()
         layout->addCheckbox(
             "Automatically close user popup when it loses focus",
             s.autoCloseUserPopup);
+        layout->addCheckbox("Bold @usernames", s.boldUsernames);
     }
 
     return layout;
