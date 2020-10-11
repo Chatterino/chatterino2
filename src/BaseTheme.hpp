@@ -34,7 +34,7 @@ public:
         } line;
     };
 
-    QColor accent;
+    QColor accent{"#00aeef"};
 
     /// WINDOW
     struct {
