@@ -2,7 +2,9 @@
 
 #include <QFontDialog>
 #include <QLabel>
+#include <QPropertyAnimation>
 #include <QScrollArea>
+#include <QScrollBar>
 
 #include "Application.hpp"
 #include "common/Version.hpp"
@@ -73,6 +75,24 @@ namespace {
                 }
             },
             false);
+    }
+
+    void scrollToWidget(const QWidget *widget, const QScrollArea *scroll)
+    {
+        const auto top = widget->mapTo(scroll, QPoint(0, 0));
+        const auto oldVal = scroll->verticalScrollBar()->value();
+        const auto newVal = oldVal + top.y();
+
+        // Animate smooth scrolling
+        QPropertyAnimation *scrollAnimation =
+            new QPropertyAnimation(scroll->verticalScrollBar(), "value");
+        scrollAnimation->setStartValue(oldVal);
+        scrollAnimation->setEndValue(newVal);
+
+        QObject::connect(scrollAnimation, &QPropertyAnimation::finished,
+                         scrollAnimation, &QObject::deleteLater);
+
+        scrollAnimation->start();
     }
 }  // namespace
 
@@ -616,9 +636,27 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             new ExpandableLayout("Advanced Settings", this);
         auto *const advancedSettingsLayout =
             this->buildAdvancedSettingsLayout();
+
         advancedSettings->setContent(advancedSettingsLayout);
         layout.addSpace();
         layout.addWidget(advancedSettings);
+
+        // Scroll down when "Advanced Settings" are expanded
+        QObject::connect(
+            advancedSettings, &ExpandableLayout::buttonToggled,
+            [this, advancedSettings](bool toggled) {
+                if (!toggled)
+                    return;
+
+                const auto *frame = this->settingsLayout_->parentWidget();
+                const auto *viewPort = frame->parentWidget();
+                const auto *scroll =
+                    static_cast<QScrollArea *>(viewPort->parentWidget());
+
+                QTimer::singleShot(0, [advancedSettings, scroll] {
+                    scrollToWidget(advancedSettings, scroll);
+                });
+            });
     }
 
     // invisible element for width
