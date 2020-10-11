@@ -65,8 +65,6 @@ void QuickSwitcherPopup::initWidgets()
         lineEdit->setPlaceholderText("Jump to a channel or open a new one");
         QObject::connect(this->ui_.searchEdit, &QLineEdit::textChanged, this,
                          &QuickSwitcherPopup::updateSuggestions);
-
-        this->ui_.searchEdit->installEventFilter(this);
     }
 
     {
@@ -76,6 +74,8 @@ void QuickSwitcherPopup::initWidgets()
         QObject::connect(listView.getElement(),
                          &GenericListView::closeRequested, this,
                          [this] { this->close(); });
+
+        this->ui_.searchEdit->installEventFilter(listView.getElement());
     }
 }
 
