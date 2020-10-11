@@ -38,7 +38,7 @@ chatterino--PageHeader {
 chatterino--TitleLabel {
     font-family: "Segoe UI light";
     font-size: 24px;
-    color: #4FC3F7;
+    color: #4FC3F7; /* Should this be same as accent color? */
 }
 
 chatterino--DescriptionLabel {

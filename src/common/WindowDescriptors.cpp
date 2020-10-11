@@ -93,6 +93,7 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
 {
     descriptor.type_ = data.value("type").toString();
     descriptor.server_ = data.value("server").toInt(-1);
+    descriptor.moderationMode_ = root.value("moderationMode").toBool();
     if (data.contains("channel"))
     {
         descriptor.channelName_ = data.value("channel").toString();

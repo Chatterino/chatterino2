@@ -19,6 +19,7 @@ public:
         UserAction,
         AutoModAllow,
         AutoModDeny,
+        OpenAccountsPage,
     };
 
     Link();

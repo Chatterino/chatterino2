@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/Shortcut.hpp"
@@ -207,8 +208,9 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
     }
 
     tab->setSelected(true);
-    tab->setStyleSheet("background: #222; color: #4FC3F7;"
-                       "/*border: 1px solid #555; border-right: none;*/");
+    tab->setStyleSheet(
+        "background: #222; color: #4FC3F7;"  // Should this be same as accent color?
+        "/*border: 1px solid #555; border-right: none;*/");
     this->selectedTab_ = tab;
     if (byUser)
     {
@@ -320,6 +322,7 @@ void SettingsDialog::onOkClicked()
 {
     if (!getArgs().dontSaveSettings)
     {
+        getApp()->commands->save();
         pajlada::Settings::SettingManager::gSave();
     }
     this->close();

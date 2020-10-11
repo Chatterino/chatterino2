@@ -13,7 +13,10 @@
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
+#include "widgets/dialogs/ColorPickerDialog.hpp"
+#include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
 
 #define CHROME_EXTENSION_LINK                                           \
@@ -157,6 +160,36 @@ ComboBox *SettingsLayout::addDropdown(
                      });
 
     return combo;
+}
+
+ColorButton *SettingsLayout::addColorButton(
+    const QString &text, const QColor &color,
+    pajlada::Settings::Setting<QString> &setting)
+{
+    auto colorButton = new ColorButton(color);
+    auto layout = new QHBoxLayout();
+    auto label = new QLabel(text + ":");
+    layout->addWidget(label);
+    layout->addStretch(1);
+    layout->addWidget(colorButton);
+    this->addLayout(layout);
+    QObject::connect(
+        colorButton, &ColorButton::clicked, [&setting, colorButton]() {
+            auto dialog = new ColorPickerDialog(QColor(setting));
+            dialog->setAttribute(Qt::WA_DeleteOnClose);
+            dialog->show();
+            dialog->closed.connect([&setting, colorButton, &dialog] {
+                QColor selected = dialog->selectedColor();
+
+                if (selected.isValid())
+                {
+                    setting = selected.name(QColor::HexArgb);
+                    colorButton->setColor(selected);
+                }
+            });
+        });
+
+    return colorButton;
 }
 
 DescriptionLabel *SettingsLayout::addDescription(const QString &text)
@@ -384,9 +417,34 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
     layout.addCheckbox("Alternate background color", s.alternateMessages);
-    // layout.addCheckbox("Mark last message you read");
-    // layout.addDropdown("Last read message style", {"Default"});
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
+    layout.addCheckbox("Show last message line", s.showLastMessageIndicator);
+    layout.addDropdown<std::underlying_type<Qt::BrushStyle>::type>(
+        "Last message line style", {"Dotted", "Solid"}, s.lastMessagePattern,
+        [](int value) {
+            switch (value)
+            {
+                case Qt::VerPattern:
+                    return 0;
+                case Qt::SolidPattern:
+                default:
+                    return 1;
+            }
+        },
+        [](DropdownArgs args) {
+            switch (args.index)
+            {
+                case 0:
+                    return Qt::VerPattern;
+                case 1:
+                default:
+                    return Qt::SolidPattern;
+            }
+        },
+        false);
+    layout.addColorButton("Last message line color",
+                          QColor(getSettings()->lastMessageColor.getValue()),
+                          getSettings()->lastMessageColor);
     layout.addCheckbox("Highlight messages redeemed with Channel Points",
                        s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
@@ -471,6 +529,31 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
             return fuzzyToInt(args.value, 0);
         });
+
+    layout.addTitle("Streamer Mode");
+    layout.addDescription(
+        "Chatterino can automatically change behavior if it "
+        "detects that \"OBS Studio\" is running.\nSelect which "
+        "things you want to change while streaming");
+
+    ComboBox *dankDropdown =
+        layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
+            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
+            s.enableStreamerMode, [](int value) { return value; },
+            [](DropdownArgs args) {
+                return static_cast<StreamerModeSetting>(args.index);
+            },
+            false);
+    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 10);
+
+    layout.addCheckbox("Hide usercard avatars",
+                       s.streamerModeHideUsercardAvatars);
+    layout.addCheckbox("Hide link thumbnails",
+                       s.streamerModeHideLinkThumbnails);
+    layout.addCheckbox(
+        "Hide viewer count and stream length while hovering over split header",
+        s.streamerModeHideViewerCountAndDuration);
+    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
@@ -634,7 +717,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
-    layout.addCheckbox("Random username color for users who never set a color",
+    layout.addCheckbox("Colorize users without color set (gray names)",
                        s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
@@ -675,9 +758,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.enableExperimentalIrc);
     layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
-    layout.addCheckbox(
-        "Hide viewercount and stream length while hovering the split",
-        s.hideViewerCountAndDuration);
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle, [](int index) { return index; },

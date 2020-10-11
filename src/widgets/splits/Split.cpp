@@ -315,6 +315,15 @@ void Split::setChannel(IndirectChannel newChannel)
     this->header_->updateChannelText();
     this->header_->updateRoomModes();
 
+    if (newChannel.getType() == Channel::Type::Twitch)
+    {
+        this->header_->setViewersButtonVisible(true);
+    }
+    else
+    {
+        this->header_->setViewersButtonVisible(false);
+    }
+
     this->channelChanged.invoke();
 
     // Queue up save because: Split channel changed

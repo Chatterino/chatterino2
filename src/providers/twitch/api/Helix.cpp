@@ -52,12 +52,12 @@ void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
         .execute();
 }
 
-void Helix::getUserByName(QString userId,
+void Helix::getUserByName(QString userName,
                           ResultCallback<HelixUser> successCallback,
                           HelixFailureCallback failureCallback)
 {
     QStringList userIds;
-    QStringList userLogins{userId};
+    QStringList userLogins{userName};
 
     this->fetchUsers(
         userIds, userLogins,

@@ -103,7 +103,7 @@ void AB_THEME_CLASS::actuallyUpdate(double hue, double multiplier)
             this->tabs.selected = {
                 QColor("#000"),
                 {QColor("#b4d7ff"), QColor("#b4d7ff"), QColor("#b4d7ff")},
-                {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
+                {this->accent, this->accent, this->accent}};
         }
         else
         {
@@ -123,7 +123,7 @@ void AB_THEME_CLASS::actuallyUpdate(double hue, double multiplier)
             this->tabs.selected = {
                 QColor("#fff"),
                 {QColor("#555555"), QColor("#555555"), QColor("#555555")},
-                {QColor("#00aeef"), QColor("#00aeef"), QColor("#00aeef")}};
+                {this->accent, this->accent, this->accent}};
         }
 
         // scrollbar

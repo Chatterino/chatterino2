@@ -6,6 +6,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "messages/Message.hpp"
+#include "providers/IvrApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
@@ -140,9 +141,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
                 QUrl("https://twitch.tv/" + this->userName_.toLower()));
         });
 
-        // items on the right
         auto vbox = head.emplace<QVBoxLayout>();
         {
+            // items on the right
             {
                 auto box = vbox.emplace<QHBoxLayout>()
                                .withoutMargin()
@@ -150,18 +151,23 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
                 this->ui_.nameLabel = addCopyableLabel(box);
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
                 box->addStretch(1);
-                this->ui_.userIDLabel = addCopyableLabel(box);
                 auto palette = QPalette();
                 palette.setColor(QPalette::WindowText, QColor("#aaa"));
+                this->ui_.userIDLabel = addCopyableLabel(box);
                 this->ui_.userIDLabel->setPalette(palette);
             }
 
+            // items on the left
             vbox.emplace<Label>(TEXT_VIEWS.arg(""))
                 .assign(&this->ui_.viewCountLabel);
             vbox.emplace<Label>(TEXT_FOLLOWERS.arg(""))
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED.arg(""))
                 .assign(&this->ui_.createdDateLabel);
+            vbox.emplace<Line>(true);
+            vbox.emplace<Label>("")
+                .assign(&this->ui_.followageSubageLabel)
+                ->setMinimumSize(this->minimumSizeHint());
         }
     }
 
@@ -533,6 +539,7 @@ void UserInfoPopup::updateUserData()
     this->ui_.follow->setEnabled(false);
 
     std::weak_ptr<bool> hack = this->hack_;
+    auto currentUser = getApp()->accounts->twitch.getCurrent();
 
     const auto onUserFetchFailed = [this, hack] {
         if (!hack.lock())
@@ -548,18 +555,17 @@ void UserInfoPopup::updateUserData()
 
         this->ui_.nameLabel->setText(this->userName_);
 
-        this->ui_.userIDLabel->setText(QString("ID") +
+        this->ui_.userIDLabel->setText(QString("ID ") +
                                        QString(TEXT_UNAVAILABLE));
         this->ui_.userIDLabel->setProperty("copy-text",
                                            QString(TEXT_UNAVAILABLE));
     };
-    const auto onUserFetched = [this, hack](const auto &user) {
+    const auto onUserFetched = [this, hack,
+                                currentUser](const HelixUser &user) {
         if (!hack.lock())
         {
             return;
         }
-
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
 
         this->userId_ = user.id;
 
@@ -580,7 +586,8 @@ void UserInfoPopup::updateUserData()
             [] {
                 // failure
             });
-        if (isInStreamerMode())
+        if (isInStreamerMode() &&
+            getSettings()->streamerModeHideUsercardAvatars)
         {
             this->ui_.avatarButton->setPixmap(getResources().streamerMode);
         }
@@ -650,6 +657,46 @@ void UserInfoPopup::updateUserData()
         this->ui_.ignore->setEnabled(true);
         this->ui_.ignore->setChecked(isIgnoring);
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
+
+        // get followage and subage
+        getIvr()->getSubage(
+            this->userName_, this->channel_->getName(),
+            [this, hack](const IvrSubage &subageInfo) {
+                if (!hack.lock())
+                {
+                    return;
+                }
+
+                QString labelText;
+
+                if (!subageInfo.followingSince.isEmpty())
+                {
+                    QDateTime followedAt = QDateTime::fromString(
+                        subageInfo.followingSince, Qt::ISODate);
+                    QString followingSince = followedAt.toString("yyyy-MM-dd");
+                    labelText = "Following since " + followingSince;
+                }
+
+                if (subageInfo.isSubHidden)
+                {
+                    labelText += "\nSubscribtion status hidden";
+                }
+                if (subageInfo.isSubbed)
+                {
+                    labelText += QString("\nTier %1 - Subscribed for %2 months")
+                                     .arg(subageInfo.subTier)
+                                     .arg(subageInfo.totalSubMonths);
+                }
+                else if (subageInfo.totalSubMonths)
+                {
+                    labelText +=
+                        QString("\nPreviously subscribed for %1 months")
+                            .arg(subageInfo.totalSubMonths);
+                }
+
+                this->ui_.followageSubageLabel->setText(labelText);
+            },
+            [] {});
     };
 
     getHelix()->getUserByName(this->userName_, onUserFetched,

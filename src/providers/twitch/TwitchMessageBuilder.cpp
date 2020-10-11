@@ -1176,6 +1176,7 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
 void TwitchMessageBuilder::appendChannelPointRewardMessage(
     const ChannelPointReward &reward, MessageBuilder *builder)
 {
+    builder->emplace<TimestampElement>();
     QString redeemed = "Redeemed";
     if (!reward.isUserInputRequired)
     {
