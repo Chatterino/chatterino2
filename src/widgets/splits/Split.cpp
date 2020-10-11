@@ -609,7 +609,8 @@ void Split::openWithCustomScheme()
 
 void Split::showViewerList()
 {
-    auto viewerDock = new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
+    auto viewerDock =
+            new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
     viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
     viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
                             QDockWidget::DockWidgetClosable |
@@ -638,13 +639,13 @@ void Split::showViewerList()
         auto label = new QListWidgetItem(x);
         label->setBackground(this->theme->splits.header.background);
         label->setForeground(QColor(169, 112, 255));
-        label->setFont(getApp()->fonts->getFont(FontStyle::ChatMediumBold, 1.1));
+        label->setFont(
+            getApp()->fonts->getFont(FontStyle::ChatMediumBold, 1.1));
         labelList.append(label);
     }
     auto loadingLabel = new QLabel("Loading...");
 
-    auto formatChatterText = [](QString text)
-    { 
+    auto formatChatterText = [](QString text) {
         auto item = new QListWidgetItem();
         item->setText(text);
         item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
