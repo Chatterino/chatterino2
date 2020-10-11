@@ -4,31 +4,22 @@
 
 namespace filterparser {
 
-static const QStringList validIdentifiers = {
-    "author.badges",          // String list
-    "author.color",           // QColor
-    "author.name",            // String
-    "author.no_color",        // Bool
-    "author.subbed",          // Bool
-    "author.sub_length",      // Int
-    "channel.name",           // String
-    "channel.watching",       // Bool
-    "flags.highlighted",      // Bool
-    "flags.points_redeemed",  // Bool
-    "flags.sub_message",      // Bool
-    "flags.system_message",   // Bool
-    "flags.whisper",          // Bool
-    "message.content",        // String
-    "message.length"          // Int
-};
-
-static const QStringList friendlyValidIdentifiers = {
-    "author badges",        "author color",       "author name",
-    "author has no color?", "author subscribed?", "author sub length",
-    "channel name",         "/watching channel?", "highlighted?",
-    "redeemed points?",     "sub/resub message?", "whisper message?",
-    "message text",         "message length",
-};
+static const QMap<QString, QString> validIdentifiersMap = {
+    {"author.badges", "author badges"},
+    {"author.color", "author color"},
+    {"author.name", "author name"},
+    {"author.no_color", "author has no color?"},
+    {"author.subbed", "author subscribed?"},
+    {"author.sub_length", "author sub length"},
+    {"channel.name", "channel name"},
+    {"channel.watching", "/watching channel?"},
+    {"flags.highlighted", "highlighted?"},
+    {"flags.points_redeemed", "redeemed points?"},
+    {"flags.sub_message", "sub/resub message?"},
+    {"flags.system_message", "system message?"},
+    {"flags.whisper", "whisper message?"},
+    {"message.content", "message text"},
+    {"message.length", "message length"}};
 
 // clang-format off
 static const QRegularExpression tokenRegex(

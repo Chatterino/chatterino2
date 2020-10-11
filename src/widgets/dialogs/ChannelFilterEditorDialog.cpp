@@ -96,7 +96,7 @@ ChannelFilterEditorDialog::ValueSpecifier::ValueSpecifier()
     this->layout_ = new QHBoxLayout;
 
     this->typeCombo_->insertItems(0, {"Text", "Number", "Variable"});
-    this->varCombo_->insertItems(0, filterparser::friendlyValidIdentifiers);
+    this->varCombo_->insertItems(0, filterparser::validIdentifiersMap.values());
 
     this->layout_->addWidget(this->typeCombo_);
     this->layout_->addWidget(this->varCombo_, 1);
@@ -138,8 +138,7 @@ void ChannelFilterEditorDialog::ValueSpecifier::setValue(const QString &value)
     if (this->typeCombo_->currentIndex() == 2)
     {
         this->varCombo_->setCurrentText(
-            filterparser::friendlyValidIdentifiers.at(
-                filterparser::validIdentifiers.indexOf(value)));
+            filterparser::validIdentifiersMap.value(value));
     }
     else
     {
@@ -162,8 +161,8 @@ QString ChannelFilterEditorDialog::ValueSpecifier::expressionText()
         case 1:  // number
             return this->valueInput_->text();
         case 2:  // variable
-            return filterparser::validIdentifiers.at(
-                this->varCombo_->currentIndex());
+            return filterparser::validIdentifiersMap.key(
+                this->varCombo_->currentText());
         default:
             return "";
     }

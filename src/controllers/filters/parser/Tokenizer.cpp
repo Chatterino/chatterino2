@@ -138,7 +138,7 @@ TokenType Tokenizer::tokenize(const QString &text)
         if (text.front() == '"' && text.back() == '"')
             return TokenType::STRING;
 
-        if (validIdentifiers.contains(text))
+        if (validIdentifiersMap.keys().contains(text))
             return TokenType::IDENTIFIER;
 
         bool flag;
