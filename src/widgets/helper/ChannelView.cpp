@@ -38,6 +38,7 @@
 #include "util/Twitch.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
@@ -1272,12 +1273,11 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
     const auto &tooltip = hoverLayoutElement->getCreator().getTooltip();
     bool isLinkValid = hoverLayoutElement->getLink().isValid();
+    auto emoteElement =
+        dynamic_cast<const EmoteElement *>(&hoverLayoutElement->getCreator());
 
-    if (tooltip.isEmpty())
-    {
-        tooltipWidget->hide();
-    }
-    else if (isLinkValid && !getSettings()->linkInfoTooltip)
+    if (tooltip.isEmpty() || (isLinkValid && emoteElement == nullptr &&
+                              !getSettings()->linkInfoTooltip))
     {
         tooltipWidget->hide();
     }
@@ -1285,8 +1285,6 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto &tooltipPreviewImage = TooltipPreviewImage::instance();
         tooltipPreviewImage.setImageScale(0, 0);
-        auto emoteElement = dynamic_cast<const EmoteElement *>(
-            &hoverLayoutElement->getCreator());
         auto badgeElement = dynamic_cast<const BadgeElement *>(
             &hoverLayoutElement->getCreator());
 
@@ -1887,6 +1885,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::AutoModDeny: {
             getApp()->accounts->twitch.getCurrent()->autoModDeny(link.value);
         }
+        break;
+
+        case Link::OpenAccountsPage: {
+            SettingsDialog::showDialog(SettingsDialogPreference::Accounts);
+        }
+        break;
 
         default:;
     }

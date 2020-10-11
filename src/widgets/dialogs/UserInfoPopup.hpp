@@ -55,6 +55,7 @@ private:
         Label *followerCountLabel = nullptr;
         Label *createdDateLabel = nullptr;
         Label *userIDLabel = nullptr;
+        Label *followageSubageLabel = nullptr;
 
         QCheckBox *follow = nullptr;
         QCheckBox *ignore = nullptr;

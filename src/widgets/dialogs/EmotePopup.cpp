@@ -61,7 +61,7 @@ namespace {
     }
     void addEmoteSets(
         std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> sets,
-        Channel &globalChannel, Channel &subChannel)
+        Channel &globalChannel, Channel &subChannel, QString currentChannelName)
     {
         QMap<QString, QPair<bool, std::vector<MessagePtr>>> mapOfSets;
 
@@ -100,6 +100,14 @@ namespace {
 
         // Output to channel all created messages,
         // That contain title or emotes.
+        // Put current channel emotes at the top
+        auto currentChannelPair = mapOfSets[currentChannelName];
+        for (auto message : currentChannelPair.second)
+        {
+            subChannel.addMessage(message);
+        }
+        mapOfSets.remove(currentChannelName);
+
         foreach (auto pair, mapOfSets)
         {
             auto &channel = pair.first ? globalChannel : subChannel;
@@ -174,7 +182,7 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     // twitch
     addEmoteSets(
         getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets,
-        *globalChannel, *subChannel);
+        *globalChannel, *subChannel, _channel->getName());
 
     // global
     addEmotes(*globalChannel, *twitchChannel->globalBttv().emotes(),

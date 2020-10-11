@@ -220,24 +220,8 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     // timestamp
-    if (this->historicalMessage_)
-    {
-        // This may be architecture dependent(datatype)
-        bool customReceived = false;
-        qint64 ts =
-            this->tags.value("rm-received-ts").toLongLong(&customReceived);
-        if (!customReceived)
-        {
-            ts = this->tags.value("tmi-sent-ts").toLongLong();
-        }
-
-        QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(ts);
-        this->emplace<TimestampElement>(dateTime.time());
-    }
-    else
-    {
-        this->emplace<TimestampElement>();
-    }
+    this->emplace<TimestampElement>(
+        calculateMessageTimestamp(this->ircMessage));
 
     bool addModerationElement = true;
     if (this->senderIsBroadcaster)
@@ -1185,6 +1169,7 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
 void TwitchMessageBuilder::appendChannelPointRewardMessage(
     const ChannelPointReward &reward, MessageBuilder *builder)
 {
+    builder->emplace<TimestampElement>();
     QString redeemed = "Redeemed";
     if (!reward.isUserInputRequired)
     {
