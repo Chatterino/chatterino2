@@ -643,6 +643,14 @@ void Split::showViewerList()
     }
     auto loadingLabel = new QLabel("Loading...");
 
+    auto formatChatterText = [](QString text)
+    { 
+        auto item = new QListWidgetItem();
+        item->setText(text);
+        item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
+        return item;
+    };
+
     NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
                                   this->getChannel()->getName() + "/chatters")
         .caller(this)
@@ -663,10 +671,7 @@ void Split::showViewerList()
                 chattersList->addItem(labelList.at(i));
                 foreach (const QJsonValue &v, currentCategory)
                 {
-                    auto chatter = new QListWidgetItem(chattersList);
-                    chatter->setText(v.toString());
-                    chatter->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
-                    chattersList->addItem(chatter);
+                    chattersList->addItem(formatChatterText(v.toString()));
                 }
             }
 
@@ -685,7 +690,9 @@ void Split::showViewerList()
             for (auto &item : results)
             {
                 if (!labels.contains(item->text()))
-                    resultList->addItem(item->text());
+                {
+                    resultList->addItem(formatChatterText(item->text()));
+                }
             }
             resultList->show();
         }
