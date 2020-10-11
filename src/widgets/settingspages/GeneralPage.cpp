@@ -479,13 +479,16 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         "detects that \"OBS Studio\" is running.\nSelect which "
         "things you want to change while streaming");
 
-    layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
-        "Enable Streamer Mode", {"No", "Yes", "Detect OBS (win)"},
-        s.enableStreamerMode, [](int value) { return value; },
-        [](DropdownArgs args) {
-            return static_cast<StreamerModeSetting>(args.index);
-        },
-        false);
+    ComboBox *dankDropdown =
+        layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
+            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
+            s.enableStreamerMode, [](int value) { return value; },
+            [](DropdownArgs args) {
+                return static_cast<StreamerModeSetting>(args.index);
+            },
+            false);
+    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 10);
+
     layout.addCheckbox("Hide usercard avatars",
                        s.streamerModeHideUsercardAvatars);
     layout.addCheckbox("Hide link thumbnails",
