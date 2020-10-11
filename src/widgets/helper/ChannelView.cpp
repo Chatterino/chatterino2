@@ -1314,13 +1314,21 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         {
             auto element = &hoverLayoutElement->getCreator();
             auto thumbnailSize = getSettings()->thumbnailSize;
-            if (thumbnailSize == 0 || isInStreamerMode())
+            if (!thumbnailSize)
             {
                 tooltipPreviewImage.setImage(nullptr);
             }
             else
             {
-                tooltipPreviewImage.setImage(element->getThumbnail());
+                const auto isHideLink =
+                    isInStreamerMode() &&
+                    getSettings()->streamerModeHideLinkThumbnails &&
+                    (!element->getThumbnail()->url().string.isEmpty());
+                auto thumb =
+                    isHideLink ? Image::fromPixmap(getResources().streamerMode)
+                               : element->getThumbnail();
+                tooltipPreviewImage.setImage(std::move(thumb));
+
                 if (element->getThumbnailType() ==
                     MessageElement::ThumbnailType::Link_Thumbnail)
                 {

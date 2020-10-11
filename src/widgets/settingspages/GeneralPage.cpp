@@ -13,6 +13,7 @@
 #include "util/FuzzyConvert.hpp"
 #include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
 #include "widgets/dialogs/ColorPickerDialog.hpp"
 #include "widgets/helper/ColorButton.hpp"
@@ -529,6 +530,31 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             return fuzzyToInt(args.value, 0);
         });
 
+    layout.addTitle("Streamer Mode");
+    layout.addDescription(
+        "Chatterino can automatically change behavior if it "
+        "detects that \"OBS Studio\" is running.\nSelect which "
+        "things you want to change while streaming");
+
+    ComboBox *dankDropdown =
+        layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
+            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
+            s.enableStreamerMode, [](int value) { return value; },
+            [](DropdownArgs args) {
+                return static_cast<StreamerModeSetting>(args.index);
+            },
+            false);
+    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 10);
+
+    layout.addCheckbox("Hide usercard avatars",
+                       s.streamerModeHideUsercardAvatars);
+    layout.addCheckbox("Hide link thumbnails",
+                       s.streamerModeHideLinkThumbnails);
+    layout.addCheckbox(
+        "Hide viewer count and stream length while hovering over split header",
+        s.streamerModeHideViewerCountAndDuration);
+    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
+
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
     layout.addCheckbox("Animate", s.animateEmotes);
@@ -732,9 +758,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
                        s.enableExperimentalIrc);
     layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
-    layout.addCheckbox(
-        "Hide viewercount and stream length while hovering the split",
-        s.hideViewerCountAndDuration);
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle, [](int index) { return index; },
