@@ -639,6 +639,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
         advancedSettings->setContent(advancedSettingsLayout);
         layout.addSpace();
+        layout.addSeperator();
         layout.addWidget(advancedSettings);
 
         // Scroll down when "Advanced Settings" are expanded
