@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Improve UX of Viewer List window and sync font with settings.
+- Minor: Improved viewer list window.
 - Minor: Added viewer list button to twitch channel header. (#1978)
 - Minor: Added followage and subage information to usercard. (#2023)
 - Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940)
