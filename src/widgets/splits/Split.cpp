@@ -610,7 +610,7 @@ void Split::openWithCustomScheme()
 void Split::showViewerList()
 {
     auto viewerDock =
-            new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
+        new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
     viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
     viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
                             QDockWidget::DockWidgetClosable |
