@@ -87,26 +87,60 @@ namespace {
     }
     auto formatTooltip(const TwitchChannel::StreamStatus &s, QString thumbnail)
     {
-        return QString(
-            "<p style=\"text-align: center;\">" + s.title.toHtmlEscaped() +
-            (s.title.isEmpty() ? "" : "<br><br>") +
-            (getSettings()->thumbnailSizeStream.getValue() > 0
-                 ? ((thumbnail.isEmpty()
-                         ? "Couldn't fetch thumbnail"
-                         : "<img src=\"data:image/jpg;base64, " + thumbnail +
-                               "\">") +
-                    "<br>")
-                 : "") +
-            s.game.toHtmlEscaped() + (s.game.isEmpty() ? "" : "<br>") +
-            ((isInStreamerMode() &&
-              getSettings()->streamerModeHideViewerCountAndDuration)
-                 ? QString("<span style=\"color: #808892;\">&lt;Streamer "
-                           "Mode&gt;</span>")
-                 : (QString("%1 for %2 with %3 viewers")
-                        .arg(s.rerun ? "Vod-casting" : "Live")
-                        .arg(s.uptime)
-                        .arg(QString::number(s.viewerCount)))) +
-            "</p>");
+        auto title = [&s]() -> QString {
+            if (s.title.isEmpty())
+            {
+                return QStringLiteral("");
+            }
+
+            return s.title.toHtmlEscaped() + "<br><br>";
+        }();
+
+        auto tooltip = [&thumbnail]() -> QString {
+            if (getSettings()->thumbnailSizeStream.getValue() == 0)
+            {
+                return QStringLiteral("");
+            }
+
+            if (thumbnail.isEmpty())
+            {
+                return QStringLiteral("Couldn't fetch thumbnail<br>");
+            }
+
+            return "<img src=\"data:image/jpg;base64, " + thumbnail + "\"><br>";
+        }();
+
+        auto game = [&s]() -> QString {
+            if (s.game.isEmpty())
+            {
+                return QStringLiteral("");
+            }
+
+            return s.game.toHtmlEscaped() + "<br>";
+        }();
+
+        auto extraStreamData = [&s]() -> QString {
+            if (isInStreamerMode() &&
+                getSettings()->streamerModeHideViewerCountAndDuration)
+            {
+                return QStringLiteral(
+                    "<span style=\"color: #808892;\">&lt;Streamer "
+                    "Mode&gt;</span>");
+            }
+
+            return QString("%1 for %2 with %3 viewers")
+                .arg(s.rerun ? "Vod-casting" : "Live")
+                .arg(s.uptime)
+                .arg(QString::number(s.viewerCount));
+        }();
+
+        return QString("<p style=\"text-align: center;\">" +  //
+                       title +                                //
+                       tooltip +                              //
+                       game +                                 //
+                       extraStreamData +                      //
+                       "</p>"                                 //
+        );
     }
     auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
     {
