@@ -25,7 +25,8 @@
 namespace chatterino {
 
 SettingsDialog::SettingsDialog()
-    : BaseWindow(BaseWindow::DisableCustomScaling)
+    : BaseWindow(
+          {BaseWindow::Flags::DisableCustomScaling, BaseWindow::Flags::Dialog})
 {
     this->setWindowTitle("Chatterino Settings");
     this->resize(815, 600);
