@@ -1,5 +1,7 @@
 #include "StreamerMode.hpp"
 
+#include "singletons/Settings.hpp"
+
 #ifdef USEWINSDK
 #    include <Windows.h>
 
@@ -24,47 +26,57 @@ const QStringList &broadcastingBinaries()
 
 bool isInStreamerMode()
 {
-#ifdef USEWINSDK
-    if (IsWindowsVistaOrGreater())
+    switch (getSettings()->enableStreamerMode.getEnum())
     {
-        static bool cache = false;
-        static QDateTime time = QDateTime();
+        case StreamerModeSetting::Enabled:
+            return true;
+        case StreamerModeSetting::Disabled:
+            return false;
+    }
 
-        if (time.isValid() &&
-            time.addSecs(cooldownInS) > QDateTime::currentDateTime())
+#ifdef USEWINSDK
+    if (!IsWindowsVistaOrGreater())
+    {
+        return false;
+    }
+    static bool cache = false;
+    static QDateTime time = QDateTime();
+
+    if (time.isValid() &&
+        time.addSecs(cooldownInS) > QDateTime::currentDateTime())
+    {
+        return cache;
+    }
+
+    time = QDateTime::currentDateTime();
+
+    WTS_PROCESS_INFO *pWPIs = nullptr;
+    DWORD dwProcCount = 0;
+
+    if (WTSEnumerateProcesses(WTS_CURRENT_SERVER_HANDLE, NULL, 1, &pWPIs,
+                              &dwProcCount))
+    {
+        //Go through all processes retrieved
+        for (DWORD i = 0; i < dwProcCount; i++)
         {
-            return cache;
-        }
+            QString processName = QString::fromUtf16(
+                reinterpret_cast<char16_t *>(pWPIs[i].pProcessName));
 
-        time = QDateTime::currentDateTime();
-
-        WTS_PROCESS_INFO *pWPIs = nullptr;
-        DWORD dwProcCount = 0;
-
-        if (WTSEnumerateProcesses(WTS_CURRENT_SERVER_HANDLE, NULL, 1, &pWPIs,
-                                  &dwProcCount))
-        {
-            //Go through all processes retrieved
-            for (DWORD i = 0; i < dwProcCount; i++)
+            if (broadcastingBinaries().contains(processName))
             {
-                QString processName = QString::fromUtf16(
-                    reinterpret_cast<char16_t *>(pWPIs[i].pProcessName));
-
-                if (broadcastingBinaries().contains(processName))
-                {
-                    cache = true;
-                    return true;
-                }
+                cache = true;
+                return true;
             }
         }
-
-        if (pWPIs)
-            WTSFreeMemory(pWPIs);
-
-        cache = false;
     }
-#endif
 
+    if (pWPIs)
+    {
+        WTSFreeMemory(pWPIs);
+    }
+
+    cache = false;
+#endif
     return false;
 }
 

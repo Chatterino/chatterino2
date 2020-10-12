@@ -3,6 +3,8 @@
 ## Unversioned
 
 - Minor: Improved viewer list window.
+- Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
+- Minor: Made the current channels emotes appear at the top of the emote picker popup. (#2057)
 - Minor: Added viewer list button to twitch channel header. (#1978)
 - Minor: Added followage and subage information to usercard. (#2023)
 - Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940)
