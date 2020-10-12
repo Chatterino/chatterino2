@@ -7,6 +7,7 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/StreamerMode.hpp"
 
 namespace chatterino {
 
@@ -364,6 +365,12 @@ inline QMediaPlayer *getPlayer()
 void SharedMessageBuilder::triggerHighlights()
 {
     static QUrl currentPlayerUrl;
+
+    if (isInStreamerMode() && getSettings()->streamerModeMuteMentions)
+    {
+        // We are in streamer mode with muting mention sounds enabled. Do nothing.
+        return;
+    }
 
     if (getCSettings().isMutedChannel(this->channel->getName()))
     {
