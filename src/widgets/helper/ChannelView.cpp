@@ -1706,11 +1706,21 @@ void ChannelView::addContextMenuItems(
         menu->addSeparator();
     }
 
-    // Copy actions
+    // Selection actions
     if (!this->selection_.isEmpty())
     {
         menu->addAction("Copy selection",
                         [this] { crossPlatformCopy(this->getSelectedText()); });
+
+
+        menu->addAction("Search with Google",
+                [this] 
+                { 
+                    auto query = 
+                        QString(QUrl::toPercentEncoding(this->getSelectedText()));
+                    QDesktopServices::openUrl(QUrl("https://google.com/search?q=" +
+                        query)); 
+                });
     }
 
     menu->addAction("Copy message", [layout] {
