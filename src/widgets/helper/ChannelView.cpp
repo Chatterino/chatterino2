@@ -1717,7 +1717,7 @@ void ChannelView::addContextMenuItems(
             auto query = 
                 QString(QUrl::toPercentEncoding(this->getSelectedText()));
             QDesktopServices::openUrl(
-                QUrl("https://google.com/search?q=" + query)); 
+                QUrl("https://google.com/search?q=" + query));
         });
     }
 
