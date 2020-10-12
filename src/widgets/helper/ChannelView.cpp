@@ -1712,7 +1712,6 @@ void ChannelView::addContextMenuItems(
         menu->addAction("Copy selection",
                         [this] { crossPlatformCopy(this->getSelectedText()); });
 
-
         menu->addAction("Search with Google", [this] {
             auto query =
                 QString(QUrl::toPercentEncoding(this->getSelectedText()));
