@@ -627,6 +627,13 @@ void Split::showViewerList()
     auto chattersList = new QListWidget();
     auto resultList = new QListWidget();
 
+    auto formatListItemText = [](QString text) {
+        auto item = new QListWidgetItem();
+        item->setText(text);
+        item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
+        return item;
+    };
+
     static QStringList labels = {"Broadcaster", "VIPs",   "Moderators",
                                  "Staff",       "Admins", "Global Moderators",
                                  "Viewers"};
@@ -636,21 +643,11 @@ void Split::showViewerList()
     QList<QListWidgetItem *> labelList;
     for (auto &x : labels)
     {
-        auto label = new QListWidgetItem(x);
-        label->setBackground(this->theme->splits.header.background);
-        label->setForeground(QColor(169, 112, 255));
-        label->setFont(
-            getApp()->fonts->getFont(FontStyle::ChatMediumBold, 1.1));
+        auto label = formatListItemText(x);
+        label->setForeground(this->theme->accent);
         labelList.append(label);
     }
     auto loadingLabel = new QLabel("Loading...");
-
-    auto formatChatterText = [](QString text) {
-        auto item = new QListWidgetItem();
-        item->setText(text);
-        item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
-        return item;
-    };
 
     NetworkRequest::twitchRequest("https://tmi.twitch.tv/group/user/" +
                                   this->getChannel()->getName() + "/chatters")
@@ -672,8 +669,9 @@ void Split::showViewerList()
                 chattersList->addItem(labelList.at(i));
                 foreach (const QJsonValue &v, currentCategory)
                 {
-                    chattersList->addItem(formatChatterText(v.toString()));
+                    chattersList->addItem(formatListItemText(v.toString()));
                 }
+                chattersList->addItem(new QListWidgetItem());
             }
 
             return Success;
@@ -692,7 +690,7 @@ void Split::showViewerList()
             {
                 if (!labels.contains(item->text()))
                 {
-                    resultList->addItem(formatChatterText(item->text()));
+                    resultList->addItem(formatListItemText(item->text()));
                 }
             }
             resultList->show();
@@ -708,7 +706,7 @@ void Split::showViewerList()
                      [=]() { viewerDock->setMinimumWidth(300); });
 
     auto listDoubleClick = [=](QString userName) {
-        if (!labels.contains(userName))
+        if (!labels.contains(userName) && !userName.isEmpty())
         {
             this->view_->showUserInfoPopup(userName);
         }
