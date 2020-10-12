@@ -1713,8 +1713,8 @@ void ChannelView::addContextMenuItems(
                         [this] { crossPlatformCopy(this->getSelectedText()); });
 
 
-        menu->addAction("Search with Google", [this] { 
-            auto query = 
+        menu->addAction("Search with Google", [this] {
+            auto query =
                 QString(QUrl::toPercentEncoding(this->getSelectedText()));
             QDesktopServices::openUrl(
                 QUrl("https://google.com/search?q=" + query));
