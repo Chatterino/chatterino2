@@ -82,7 +82,7 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
             addEmotes(emotes, twitch->emotes, text, "Twitch Emote");
         }
 
-        if(tc)
+        if (tc)
         {
             // TODO extract "Channel BetterTTV" text into a #define.
             if (auto bttv = tc->bttvEmotes())
