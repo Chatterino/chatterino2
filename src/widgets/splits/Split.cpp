@@ -637,12 +637,8 @@ void Split::showViewerList()
     static QStringList labels = {
         "Broadcaster", "Moderators",        "VIPs",   "Staff",
         "Admins",      "Global Moderators", "Viewers"};
-    static QStringList jsonLabels = {"broadcaster",
-                                     "moderators",
-                                     "vips",
-                                     "staff",
-                                     "admins",
-                                     "global_mods",
+    static QStringList jsonLabels = {"broadcaster", "moderators", "vips",
+                                     "staff",       "admins",     "global_mods",
                                      "viewers"};
     QList<QListWidgetItem *> labelList;
     for (auto &x : labels)
