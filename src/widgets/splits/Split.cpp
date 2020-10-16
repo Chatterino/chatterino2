@@ -641,7 +641,7 @@ void Split::showViewerList()
                                      "moderators",
                                      "vips",
                                      "staff",
-                                     "admins"
+                                     "admins",
                                      "global_mods",
                                      "viewers"};
     QList<QListWidgetItem *> labelList;
