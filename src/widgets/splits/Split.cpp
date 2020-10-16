@@ -643,7 +643,7 @@ void Split::showViewerList()
                                      "staff",
                                      "admins"
                                      "global_mods",
-                                      "viewers"};
+                                    "viewers"};
     QList<QListWidgetItem *> labelList;
     for (auto &x : labels)
     {
