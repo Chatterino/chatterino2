@@ -189,6 +189,9 @@ ColorButton *SettingsLayout::addColorButton(
             });
         });
 
+    this->groups_.back().widgets.push_back({label, {text}});
+    this->groups_.back().widgets.push_back({colorButton, {text}});
+
     return colorButton;
 }
 
