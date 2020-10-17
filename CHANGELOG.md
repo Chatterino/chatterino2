@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Improved viewer list window.
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
 - Minor: Added emote completion with `:` to the whispers channel (#2075)
 - Minor: Made the current channels emotes appear at the top of the emote picker popup. (#2057)
