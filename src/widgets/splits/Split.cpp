@@ -8,6 +8,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -608,7 +609,8 @@ void Split::openWithCustomScheme()
 
 void Split::showViewerList()
 {
-    auto viewerDock = new QDockWidget("Viewer List", this);
+    auto viewerDock =
+        new QDockWidget("Viewer List - " + this->getChannel()->getName(), this);
     viewerDock->setAllowedAreas(Qt::LeftDockWidgetArea);
     viewerDock->setFeatures(QDockWidget::DockWidgetVerticalTitleBar |
                             QDockWidget::DockWidgetClosable |
@@ -625,17 +627,24 @@ void Split::showViewerList()
     auto chattersList = new QListWidget();
     auto resultList = new QListWidget();
 
-    static QStringList labels = {"Broadcaster", "VIPs",   "Moderators",
-                                 "Staff",       "Admins", "Global Moderators",
-                                 "Viewers"};
-    static QStringList jsonLabels = {"broadcaster", "vips",   "moderators",
-                                     "staff",       "admins", "global_mods",
+    auto formatListItemText = [](QString text) {
+        auto item = new QListWidgetItem();
+        item->setText(text);
+        item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
+        return item;
+    };
+
+    static QStringList labels = {
+        "Broadcaster", "Moderators",        "VIPs",   "Staff",
+        "Admins",      "Global Moderators", "Viewers"};
+    static QStringList jsonLabels = {"broadcaster", "moderators", "vips",
+                                     "staff",       "admins",     "global_mods",
                                      "viewers"};
     QList<QListWidgetItem *> labelList;
     for (auto &x : labels)
     {
-        auto label = new QListWidgetItem(x);
-        label->setBackgroundColor(this->theme->splits.header.background);
+        auto label = formatListItemText(x);
+        label->setForeground(this->theme->accent);
         labelList.append(label);
     }
     auto loadingLabel = new QLabel("Loading...");
@@ -659,7 +668,10 @@ void Split::showViewerList()
 
                 chattersList->addItem(labelList.at(i));
                 foreach (const QJsonValue &v, currentCategory)
-                    chattersList->addItem(v.toString());
+                {
+                    chattersList->addItem(formatListItemText(v.toString()));
+                }
+                chattersList->addItem(new QListWidgetItem());
             }
 
             return Success;
@@ -677,7 +689,9 @@ void Split::showViewerList()
             for (auto &item : results)
             {
                 if (!labels.contains(item->text()))
-                    resultList->addItem(item->text());
+                {
+                    resultList->addItem(formatListItemText(item->text()));
+                }
             }
             resultList->show();
         }
@@ -692,7 +706,7 @@ void Split::showViewerList()
                      [=]() { viewerDock->setMinimumWidth(300); });
 
     auto listDoubleClick = [=](QString userName) {
-        if (!labels.contains(userName))
+        if (!labels.contains(userName) && !userName.isEmpty())
         {
             this->view_->showUserInfoPopup(userName);
         }
