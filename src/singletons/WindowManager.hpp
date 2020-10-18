@@ -26,6 +26,7 @@ public:
     WindowManager();
 
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
+    static void encodeFilters(Split *split, QJsonArray &arr);
     static IndirectChannel decodeChannel(const SplitDescriptor &descriptor);
 
     void showSettingsDialog(
@@ -89,7 +90,7 @@ public:
     pajlada::Signals::NoArgSignal miscUpdate;
 
 private:
-    void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
+    void encodeNodeRecursively(SplitContainer::Node *node, QJsonObject &obj);
 
     // Load window layout from the window-layout.json file
     WindowLayout loadWindowLayoutFromFile() const;

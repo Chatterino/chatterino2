@@ -53,6 +53,9 @@ public:
     ChannelPtr getChannel();
     void setChannel(IndirectChannel newChannel);
 
+    void setFilters(const QList<QUuid> ids);
+    const QList<QUuid> getFilters() const;
+
     void setModerationMode(bool value);
     bool getModerationMode() const;
 
@@ -132,6 +135,7 @@ public slots:
     void openInStreamlink();
     void openWithCustomScheme();
     void copyToClipboard();
+    void setFiltersDialog();
     void showSearch();
     void showViewerList();
     void openSubPage();
