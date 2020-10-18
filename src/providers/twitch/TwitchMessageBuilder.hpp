@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
