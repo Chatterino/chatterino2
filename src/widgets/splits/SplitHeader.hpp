@@ -48,6 +48,13 @@ private:
     void initializeModeSignals(EffectLabel &label);
     std::unique_ptr<QMenu> createMainMenu();
     std::unique_ptr<QMenu> createChatModeMenu();
+
+    /**
+     * @brief   Reset the thumbnail data and timer so a new
+     *          thumbnail can be fetched
+     **/
+    void resetThumbnail();
+
     void handleChannelChanged();
 
     Split *const split_{};
