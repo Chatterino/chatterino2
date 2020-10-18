@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  build:
+  check:
     runs-on: ubuntu-20.04
 
     steps:
