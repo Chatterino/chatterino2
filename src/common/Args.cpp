@@ -30,7 +30,18 @@ Args::Args(const QApplication &app)
         "specify platform. Only twitch channels are supported at the moment.\n"
         "If platform isn't specified, default is Twitch.",
         "t:channel1;t:channel2;..."));
-    parser.process(app);
+
+    if (!parser.parse(app.arguments()))
+    {
+        qDebug() << "Warning: Unhandled options:"
+                 << parser.unknownOptionNames();
+    }
+
+    if (parser.isSet("help"))
+    {
+        qDebug().noquote() << parser.helpText();
+        ::exit(EXIT_SUCCESS);
+    }
 
     const QStringList args = parser.positionalArguments();
     this->shouldRunBrowserExtensionHost =
