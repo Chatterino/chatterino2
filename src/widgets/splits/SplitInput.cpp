@@ -450,6 +450,20 @@ void SplitInput::installKeyPressedEvent()
         {
             this->openEmotePopup();
         }
+        else if (event->key() == Qt::Key_PageUp)
+        {
+            auto &scrollbar = this->split_->getChannelView().getScrollBar();
+            scrollbar.offset(-scrollbar.getLargeChange());
+
+            event->accept();
+        }
+        else if (event->key() == Qt::Key_PageDown)
+        {
+            auto &scrollbar = this->split_->getChannelView().getScrollBar();
+            scrollbar.offset(scrollbar.getLargeChange());
+
+            event->accept();
+        }
     });
 }
 
