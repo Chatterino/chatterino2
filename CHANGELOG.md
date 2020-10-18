@@ -31,6 +31,7 @@
 - Bugfix: Fixed timestamps being incorrect on some messages loaded from the recent-messages service on startup (#1286, #2020)
 - Bugfix: Fixed timestamps missing on channel point redemption messages (#1943)
 - Bugfix: Fixed tooltip didn't show in `EmotePopup` depending on the `Link preview` setting enabled or no (#2008)
+- Bugfix: Fixed Stream thumbnail not updating after using the "Change channel" feature (#2074, #2080)
 
 ## 2.2.0
 
