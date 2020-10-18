@@ -450,6 +450,20 @@ void SplitInput::installKeyPressedEvent()
         {
             this->openEmotePopup();
         }
+        else if (event->key() == Qt::Key_PageUp)
+        {
+            auto &scrollbar = this->split_->getChannelView().getScrollBar();
+            scrollbar.offset(-scrollbar.getLargeChange());
+
+            event->accept();
+        }
+        else if (event->key() == Qt::Key_PageDown)
+        {
+            auto &scrollbar = this->split_->getChannelView().getScrollBar();
+            scrollbar.offset(scrollbar.getLargeChange());
+
+            event->accept();
+        }
     });
 }
 
@@ -460,8 +474,10 @@ void SplitInput::onCursorPositionChanged()
 
 void SplitInput::updateColonMenu()
 {
+    auto channel = this->split_->getChannel().get();
     if (!getSettings()->emoteCompletionWithColon ||
-        !dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+        (!dynamic_cast<TwitchChannel *>(channel) &&
+         !(channel->getType() == Channel::Type::TwitchWhispers)))
     {
         this->hideColonMenu();
         return;

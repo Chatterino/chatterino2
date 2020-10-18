@@ -588,16 +588,27 @@ void SplitHeader::initializeModeSignals(EffectLabel &label)
     });
 }
 
+void SplitHeader::resetThumbnail()
+{
+    this->lastThumbnail_.invalidate();
+    this->thumbnail_.clear();
+}
+
 void SplitHeader::handleChannelChanged()
 {
+    this->resetThumbnail();
+
+    this->updateChannelText();
+
     this->channelConnections_.clear();
 
     auto channel = this->split_->getChannel();
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         this->channelConnections_.emplace_back(
-            twitchChannel->liveStatusChanged.connect(
-                [this]() { this->updateChannelText(); }));
+            twitchChannel->liveStatusChanged.connect([this]() {
+                this->updateChannelText();  //
+            }));
     }
 }
 
