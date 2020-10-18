@@ -4,6 +4,8 @@ set -eu
 
 fail="0"
 
+dos2unix --version
+
 while read -r file; do
     num_dos_line_endings=$(dos2unix -id "$file" | awk '/[0-9]+/{print $(NF-1)}')
     if [ "$num_dos_line_endings" -gt "0" ]; then

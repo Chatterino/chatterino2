@@ -4,6 +4,8 @@ set -eu
 
 fail="0"
 
+clang-format --version
+
 while read -r file; do
     if ! diff -u <(cat "$file") <(clang-format "$file"); then
         echo "$file differs!!!!!!!"
