@@ -716,6 +716,7 @@ void SplitContainer::applyFromDescriptorRecursively(
         auto *split = new Split(this);
         split->setChannel(WindowManager::decodeChannel(splitNode));
         split->setModerationMode(splitNode.moderationMode_);
+        split->setFilters(splitNode.filters_);
 
         this->appendSplit(split);
     }
@@ -748,6 +749,7 @@ void SplitContainer::applyFromDescriptorRecursively(
                 auto *split = new Split(this);
                 split->setChannel(WindowManager::decodeChannel(splitNode));
                 split->setModerationMode(splitNode.moderationMode_);
+                split->setFilters(splitNode.filters_);
 
                 Node *_node = new Node();
                 _node->parent_ = node;

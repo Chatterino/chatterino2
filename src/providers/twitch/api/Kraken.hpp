@@ -5,7 +5,6 @@
 #include <QString>
 #include <QStringList>
 #include <QUrlQuery>
-#include <boost/noncopyable.hpp>
 
 #include <functional>
 

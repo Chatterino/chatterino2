@@ -10,6 +10,7 @@
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
 #include "common/Version.hpp"
+#include "providers/IvrApi.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Paths.hpp"
@@ -45,6 +46,7 @@ int main(int argc, char **argv)
     }
     else
     {
+        IvrApi::initialize();
         Helix::initialize();
         Kraken::initialize();
 

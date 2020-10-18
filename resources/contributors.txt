@@ -33,10 +33,11 @@ gempir | https://github.com/gempir | | Contributor
 mfmarlow | https://github.com/mfmarlow | | Contributor
 dnsge | https://github.com/dnsge | | Contributor
 zneix | https://github.com/zneix | | Contributor
+y0dax | https://github.com/y0dax | | Contributor
 # If you are a contributor add yourself above this line
 
 Defman21 | https://github.com/Defman21 |  | Documentation
-Jarel1337 | https://github.com/Jarel1337 |  | Documentation
+vilgotf | https://github.com/vilgotf |  | Documentation
 Ian321 | https://github.com/Ian321 |  | Documentation
 Yardanico | https://github.com/Yardanico |  | Documentation
 huti26 | https://github.com/huti26 |  | Documentation

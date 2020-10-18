@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
@@ -66,7 +66,7 @@ private:
     void appendTwitchEmote(const QString &emote,
                            std::vector<TwitchEmoteOccurence> &vec,
                            std::vector<int> &correctPositions);
-    Outcome tryAppendEmote(const EmoteName &name);
+    Outcome tryAppendEmote(const EmoteName &name) override;
 
     void addWords(const QStringList &words,
                   const std::vector<TwitchEmoteOccurence> &twitchEmotes);

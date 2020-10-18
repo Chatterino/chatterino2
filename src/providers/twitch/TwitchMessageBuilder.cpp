@@ -188,6 +188,8 @@ MessagePtr TwitchMessageBuilder::build()
         this->senderIsBroadcaster = true;
     }
 
+    this->message().channelName = this->channel->getName();
+
     this->parseMessageID();
 
     this->parseRoomID();
@@ -220,24 +222,8 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     // timestamp
-    if (this->historicalMessage_)
-    {
-        // This may be architecture dependent(datatype)
-        bool customReceived = false;
-        qint64 ts =
-            this->tags.value("rm-received-ts").toLongLong(&customReceived);
-        if (!customReceived)
-        {
-            ts = this->tags.value("tmi-sent-ts").toLongLong();
-        }
-
-        QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(ts);
-        this->emplace<TimestampElement>(dateTime.time());
-    }
-    else
-    {
-        this->emplace<TimestampElement>();
-    }
+    this->emplace<TimestampElement>(
+        calculateMessageTimestamp(this->ircMessage));
 
     bool addModerationElement = true;
     if (this->senderIsBroadcaster)
@@ -547,6 +533,7 @@ void TwitchMessageBuilder::parseUsernameColor()
         if (const auto color = iterator.value().toString(); !color.isEmpty())
         {
             this->usernameColor_ = QColor(color);
+            this->message().usernameColor = this->usernameColor_;
             return;
         }
     }
@@ -554,6 +541,7 @@ void TwitchMessageBuilder::parseUsernameColor()
     if (getSettings()->colorizeNicknames && this->tags.contains("user-id"))
     {
         this->usernameColor_ = getRandomColor(this->tags.value("user-id"));
+        this->message().usernameColor = this->usernameColor_;
     }
 }
 
@@ -1088,6 +1076,9 @@ void TwitchMessageBuilder::appendTwitchBadges()
         this->emplace<BadgeElement>(badgeEmote.get(), badge.flag_)
             ->setTooltip(tooltip);
     }
+
+    this->message().badges = badges;
+    this->message().badgeInfos = badgeInfos;
 }
 
 void TwitchMessageBuilder::appendChatterinoBadges()
@@ -1185,6 +1176,7 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
 void TwitchMessageBuilder::appendChannelPointRewardMessage(
     const ChannelPointReward &reward, MessageBuilder *builder)
 {
+    builder->emplace<TimestampElement>();
     QString redeemed = "Redeemed";
     if (!reward.isUserInputRequired)
     {

@@ -9,6 +9,7 @@
 #include "pajlada/signals/signal.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "widgets/helper/ColorButton.hpp"
 #include "widgets/settingspages/SettingsPage.hpp"
 
 class QLabel;
@@ -72,6 +73,8 @@ public:
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           pajlada::Settings::Setting<QString> &setting,
                           bool editable = false);
+    ColorButton *addColorButton(const QString &text, const QColor &color,
+                                pajlada::Settings::Setting<QString> &setting);
 
     template <typename OnClick>
     QPushButton *makeButton(const QString &text, OnClick onClick)
