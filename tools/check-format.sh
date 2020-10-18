@@ -9,7 +9,7 @@ while read -r file; do
         echo "$file differs!!!!!!!"
         fail="1"
     fi
-done < <(find src/ \( -iname "*.hpp" -o -iname "*.cpp" \))
+done < <(find src/ -type f \( -iname "*.hpp" -o -iname "*.cpp" \))
 
 if [ "$fail" = "1" ]; then
     echo "At least one file is poorly formatted - check the output above"
