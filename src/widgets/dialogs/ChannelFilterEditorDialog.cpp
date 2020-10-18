@@ -30,8 +30,7 @@ ChannelFilterEditorDialog::ChannelFilterEditorDialog(QWidget *parent)
     auto helpLabel =
         new QLabel(QString("<a href='%1'><span "
                            "style='color:#99f'>variable help</span></a>")
-                       .arg("https://github.com/Chatterino/chatterino2/blob/"
-                            "master/docs/Filters.md#variables"));
+                       .arg("https://wiki.chatterino.com/Filters/#variables"));
     helpLabel->setOpenExternalLinks(true);
 
     buttonBox->addWidget(helpLabel);
