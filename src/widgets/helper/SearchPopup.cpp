@@ -61,6 +61,7 @@ SearchPopup::SearchPopup()
 
 void SearchPopup::setChannel(const ChannelPtr &channel)
 {
+    this->channelView_->setSourceChannel(channel);
     this->channelName_ = channel->getName();
     this->snapshot_ = channel->getMessageSnapshot();
     this->search();
