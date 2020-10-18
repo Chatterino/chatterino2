@@ -17,7 +17,10 @@ jobs:
       run: sudo apt-get update
 
     - name: Install clang-format
-      run: sudo apt-get -y install clang-format
+      run: sudo apt-get -y install clang-format dos2unix
 
     - name: Check formatting
       run: ./tools/check-format.sh
+
+    - name: Check line-endings
+      run: ./tools/check-line-endings.sh
