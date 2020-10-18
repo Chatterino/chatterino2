@@ -187,6 +187,11 @@ qreal Scrollbar::getCurrentValue() const
     return this->currentValue_;
 }
 
+const QPropertyAnimation &Scrollbar::getCurrentValueAnimation() const
+{
+    return this->currentValueAnimation_;
+}
+
 void Scrollbar::offset(qreal value)
 {
     if (this->currentValueAnimation_.state() == QPropertyAnimation::Running)
