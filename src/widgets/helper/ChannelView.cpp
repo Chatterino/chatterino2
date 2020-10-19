@@ -594,7 +594,8 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                     }
                     else
                     {
-                        overridingFlags = MessageFlags(MessageFlag::DoNotLog);
+                        overridingFlags = message->flags;
+                        overridingFlags.get().set(MessageFlag::DoNotLog);
                     }
 
                     this->channel_->addMessage(message, overridingFlags);
