@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "providers/twitch/TwitchBadge.hpp"
 #include "widgets/helper/ScrollbarHighlight.hpp"
 
 #include <QTime>
@@ -58,6 +59,10 @@ struct Message : boost::noncopyable {
     QString displayName;
     QString localizedName;
     QString timeoutUser;
+    QString channelName;
+    QColor usernameColor;
+    std::vector<Badge> badges;
+    std::map<QString, QString> badgeInfos;
     std::shared_ptr<QColor> highlightColor;
     uint32_t count = 1;
     std::vector<std::unique_ptr<MessageElement>> elements;

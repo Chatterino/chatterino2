@@ -35,6 +35,8 @@ public:
         QPixmap unvip;
         QPixmap update;
         QPixmap updateError;
+        QPixmap viewersDark;
+        QPixmap viewersLight;
         QPixmap vip;
     } buttons;
     QPixmap error;

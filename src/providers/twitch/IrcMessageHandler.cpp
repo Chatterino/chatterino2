@@ -1,4 +1,4 @@
-﻿#include "IrcMessageHandler.hpp"
+#include "IrcMessageHandler.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -655,9 +655,25 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 {
     if (message->content().startsWith("Login auth", Qt::CaseInsensitive))
     {
-        return {MessageBuilder(systemMessage,
-                               "Login expired! Try logging in again.")
-                    .release()};
+        const auto linkColor = MessageColor(MessageColor::Link);
+        const auto accountsLink = Link(Link::OpenAccountsPage, QString());
+        const auto curUser = getApp()->accounts->twitch.getCurrent();
+        const auto expirationText = QString("Login expired for user \"%1\"!")
+                                        .arg(curUser->getUserName());
+        const auto loginPromptText = QString(" Try adding your account again.");
+
+        auto builder = MessageBuilder();
+        builder.message().flags.set(MessageFlag::System);
+
+        builder.emplace<TimestampElement>();
+        builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
+                                     MessageColor::System);
+        builder
+            .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                                  linkColor)
+            ->setLink(accountsLink);
+
+        return {builder.release()};
     }
     else
     {
