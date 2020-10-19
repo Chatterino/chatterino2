@@ -41,7 +41,7 @@ git submodule update --init --recursive
 The code is formatted using clang format in Qt Creator. [.clang-format](src/.clang-format) contains the style file for clang format.
 
 ### Get it automated with QT Creator + Beautifier + Clang Format
-1. Download LLVM: https://releases.llvm.org/9.0.0/LLVM-9.0.0-win64.exe
+1. Download LLVM: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/LLVM-11.0.0-win64.exe
 2. During the installation, make sure to add it to your path
 3. In QT Creator, select `Help` > `About Plugins` > `C++` > `Beautifier` to enable the plugin
 4. Restart QT Creator

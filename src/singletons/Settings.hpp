@@ -6,6 +6,7 @@
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
 #include "common/SignalVector.hpp"
+#include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
@@ -20,6 +21,7 @@ class HighlightPhrase;
 class HighlightBlacklistUser;
 class IgnorePhrase;
 class TaggedUser;
+class FilterRecord;
 
 /// Settings which are availlable for reading on all threads.
 class ConcurrentSettings
@@ -32,6 +34,7 @@ public:
     SignalVector<HighlightBlacklistUser> &blacklistedUsers;
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
+    SignalVector<FilterRecordPtr> &filterRecords;
     //SignalVector<TaggedUser> &taggedUsers;
     SignalVector<ModerationAction> &moderationActions;
 
@@ -254,6 +257,10 @@ public:
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
+
+    /// Filtering
+    BoolSetting excludeUserMessagesFromFilter = {
+        "/filtering/excludeUserMessages", false};
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};

@@ -10,6 +10,7 @@
 #include <unordered_set>
 
 #include "common/FlagsEnum.hpp"
+#include "controllers/filters/FilterSet.hpp"
 #include "messages/Image.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
@@ -75,6 +76,10 @@ public:
 
     ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
+
+    void setFilters(const QList<QUuid> &ids);
+    const QList<QUuid> getFilterIds() const;
+    FilterSetPtr getFilterSet() const;
 
     ChannelPtr sourceChannel() const;
     void setSourceChannel(ChannelPtr sourceChannel);
@@ -178,10 +183,19 @@ private:
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
     ChannelPtr channel_;
+    ChannelPtr underlyingChannel_;
     ChannelPtr sourceChannel_;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
+
+    FilterSetPtr channelFilters_;
+
+    // Returns true if message should be included
+    bool shouldIncludeMessage(const MessagePtr &m) const;
+
+    // Returns whether the scrollbar should have highlights
+    bool showScrollbarHighlights() const;
 
     // This variable can be used to decide whether or not we should render the
     // "Show latest messages" button

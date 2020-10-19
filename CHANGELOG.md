@@ -2,8 +2,9 @@
 
 ## Unversioned
 
-- Minor: Improved viewer list window.
+- Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
+- Minor: Improved viewer list window.
 - Minor: Added emote completion with `:` to the whispers channel (#2075)
 - Minor: Made the current channels emotes appear at the top of the emote picker popup. (#2057)
 - Minor: Added viewer list button to twitch channel header. (#1978)
@@ -22,6 +23,7 @@
 - Minor: Show channels live now enabled by default
 - Minor: Bold usernames enabled by default
 - Minor: Improve UX of the "Login expired!" message (#2029)
+- Minor: PageUp and PageDown now scroll in the selected split (#2070, #2081)
 - Bugfix: Fix bug preventing moderator actions when viewing a user card from the search window (#1089)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
@@ -32,6 +34,7 @@
 - Bugfix: Fixed timestamps being incorrect on some messages loaded from the recent-messages service on startup (#1286, #2020)
 - Bugfix: Fixed timestamps missing on channel point redemption messages (#1943)
 - Bugfix: Fixed tooltip didn't show in `EmotePopup` depending on the `Link preview` setting enabled or no (#2008)
+- Bugfix: Fixed Stream thumbnail not updating after using the "Change channel" feature (#2074, #2080)
 
 ## 2.2.0
 

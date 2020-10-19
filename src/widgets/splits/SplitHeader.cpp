@@ -327,6 +327,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                     QKeySequence("Ctrl+N"));
     menu->addAction("Search", this->split_, &Split::showSearch,
                     QKeySequence("Ctrl+F"));
+    menu->addAction("Set filters", this->split_, &Split::setFiltersDialog);
     menu->addSeparator();
 #ifdef USEWEBENGINE
     this->dropdownMenu.addAction("Start watching", this, [this] {
@@ -587,16 +588,27 @@ void SplitHeader::initializeModeSignals(EffectLabel &label)
     });
 }
 
+void SplitHeader::resetThumbnail()
+{
+    this->lastThumbnail_.invalidate();
+    this->thumbnail_.clear();
+}
+
 void SplitHeader::handleChannelChanged()
 {
+    this->resetThumbnail();
+
+    this->updateChannelText();
+
     this->channelConnections_.clear();
 
     auto channel = this->split_->getChannel();
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         this->channelConnections_.emplace_back(
-            twitchChannel->liveStatusChanged.connect(
-                [this]() { this->updateChannelText(); }));
+            twitchChannel->liveStatusChanged.connect([this]() {
+                this->updateChannelText();  //
+            }));
     }
 }
 
@@ -687,6 +699,11 @@ void SplitHeader::updateChannelText()
         {
             this->tooltipText_ = formatOfflineTooltip(*streamStatus);
         }
+    }
+
+    if (!title.isEmpty() && this->split_->getFilters().size() != 0)
+    {
+        title += " - filtered";
     }
 
     this->titleLabel_->setText(title.isEmpty() ? "<empty>" : title);

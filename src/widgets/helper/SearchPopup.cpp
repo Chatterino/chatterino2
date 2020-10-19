@@ -16,7 +16,8 @@
 namespace chatterino {
 
 ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
-                               const LimitedQueueSnapshot<MessagePtr> &snapshot)
+                               const LimitedQueueSnapshot<MessagePtr> &snapshot,
+                               FilterSetPtr filterSet)
 {
     ChannelPtr channel(new Channel(channelName, Channel::Type::None));
 
@@ -40,6 +41,9 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
             }
         }
 
+        if (accept && filterSet)
+            accept = filterSet->filter(message);
+
         // If all predicates match, add the message to the channel
         if (accept)
             channel->addMessage(message);
@@ -57,6 +61,11 @@ SearchPopup::SearchPopup()
         this->searchInput_->setFocus();
         this->searchInput_->selectAll();
     });
+}
+
+void SearchPopup::setChannelFilters(FilterSetPtr filters)
+{
+    this->channelFilters_ = filters;
 }
 
 void SearchPopup::setChannel(const ChannelPtr &channel)
@@ -77,7 +86,8 @@ void SearchPopup::updateWindowTitle()
 void SearchPopup::search()
 {
     this->channelView_->setChannel(filter(this->searchInput_->text(),
-                                          this->channelName_, this->snapshot_));
+                                          this->channelName_, this->snapshot_,
+                                          this->channelFilters_));
 }
 
 void SearchPopup::initLayout()

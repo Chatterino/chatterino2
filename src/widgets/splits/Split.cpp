@@ -21,6 +21,7 @@
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
+#include "widgets/dialogs/SelectChannelFiltersDialog.hpp"
 #include "widgets/dialogs/TextInputDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -749,10 +750,33 @@ void Split::copyToClipboard()
     crossPlatformCopy(this->view_->getSelectedText());
 }
 
+void Split::setFiltersDialog()
+{
+    SelectChannelFiltersDialog d(this->getFilters(), this);
+    d.setWindowTitle("Select filters");
+
+    if (d.exec() == QDialog::Accepted)
+    {
+        this->setFilters(d.getSelection());
+    }
+}
+
+void Split::setFilters(const QList<QUuid> ids)
+{
+    this->view_->setFilters(ids);
+    this->header_->updateChannelText();
+}
+
+const QList<QUuid> Split::getFilters() const
+{
+    return this->view_->getFilterIds();
+}
+
 void Split::showSearch()
 {
     SearchPopup *popup = new SearchPopup();
 
+    popup->setChannelFilters(this->view_->getFilterSet());
     popup->setAttribute(Qt::WA_DeleteOnClose);
     popup->setChannel(this->getChannel());
     popup->show();

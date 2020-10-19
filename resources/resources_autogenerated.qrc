@@ -1,5 +1,5 @@
 <RCC>
-  <qresource prefix="/">    <file>.gitignore</file>
+  <qresource prefix="/">
     <file>avatars/fourtf.png</file>
     <file>avatars/pajlada.png</file>
     <file>buttons/addSplit.png</file>
@@ -70,6 +70,7 @@
     <file>settings/commands.svg</file>
     <file>settings/emote.svg</file>
     <file>settings/externaltools.svg</file>
+    <file>settings/filters.svg</file>
     <file>settings/ignore.svg</file>
     <file>settings/keybinds.svg</file>
     <file>settings/moderation.svg</file>
