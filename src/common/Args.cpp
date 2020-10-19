@@ -18,11 +18,16 @@ Args::Args(const QApplication &app)
 
     // Used internally by app to restart after unexpected crashes
     QCommandLineOption crashRecoveryOption("crash-recovery");
-    crashRecoveryOption.setHidden(true);
+    crashRecoveryOption.setFlags(QCommandLineOption::HiddenFromHelp);
+
+    // Added to ignore the parent-window option passed during native messaging
+    QCommandLineOption parentWindowOption("parent-window");
+    parentWindowOption.setFlags(QCommandLineOption::HiddenFromHelp);
 
     parser.addOptions({
         {{"v", "version"}, "Displays version information."},
         crashRecoveryOption,
+        parentWindowOption,
     });
     parser.addOption(QCommandLineOption(
         {"c", "channels"},
