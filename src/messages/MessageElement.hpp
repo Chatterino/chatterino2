@@ -275,6 +275,18 @@ protected:
                                                  const QSize &size) override;
 };
 
+class FfzBadgeElement : public BadgeElement
+{
+public:
+    FfzBadgeElement(const EmotePtr &data, MessageElementFlags flags_,
+                    QColor &color);
+
+protected:
+    MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
+                                                 const QSize &size) override;
+    QColor color;
+};
+
 // contains a text, formated depending on the preferences
 class TimestampElement : public MessageElement
 {

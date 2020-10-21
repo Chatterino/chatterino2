@@ -20,11 +20,13 @@ public:
     FfzBadges();
 
     boost::optional<EmotePtr> getBadge(const UserId &id);
+    boost::optional<QColor> getBadgeColor(const UserId &id);
 
 private:
     void loadFfzBadges();
     std::map<QString, int> badgeMap;
     std::vector<EmotePtr> emotes;
+    std::map<int, QColor> colorMap;
 };
 
 }  // namespace chatterino

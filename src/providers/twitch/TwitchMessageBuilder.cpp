@@ -1096,7 +1096,11 @@ void TwitchMessageBuilder::appendFfzBadges()
 {
     if (auto badge = getApp()->ffzBadges->getBadge({this->userId_}))
     {
-        this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeFfz);
+        if (auto color = getApp()->ffzBadges->getBadgeColor({this->userId_}))
+        {
+            this->emplace<FfzBadgeElement>(*badge, MessageElementFlag::BadgeFfz,
+                                           color.get());
+        }
     }
 }
 

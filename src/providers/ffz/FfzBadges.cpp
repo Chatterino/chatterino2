@@ -31,6 +31,20 @@ boost::optional<EmotePtr> FfzBadges::getBadge(const UserId &id)
     }
     return boost::none;
 }
+boost::optional<QColor> FfzBadges::getBadgeColor(const UserId &id)
+{
+    auto badgeIt = badgeMap.find(id.string);
+    if (badgeIt != badgeMap.end())
+    {
+        auto colorIt = colorMap.find(badgeIt->second);
+        if (colorIt != colorMap.end())
+        {
+            return colorIt->second;
+        }
+        return boost::none;
+    }
+    return boost::none;
+}
 
 void FfzBadges::loadFfzBadges()
 {
@@ -44,6 +58,7 @@ void FfzBadges::loadFfzBadges()
             {
                 auto jsonBadge = jsonBadge_.toObject();
                 auto jsonUrls = jsonBadge.value("urls").toObject();
+
                 auto emote = Emote{
                     EmoteName{},
                     ImageSet{
@@ -55,6 +70,7 @@ void FfzBadges::loadFfzBadges()
 
                 emotes.push_back(
                     std::make_shared<const Emote>(std::move(emote)));
+                colorMap[index] = QColor(jsonBadge.value("color").toString());
 
                 auto badgeId = QString::number(jsonBadge.value("id").toInt());
                 for (const auto &user : jsonRoot.value("users")
