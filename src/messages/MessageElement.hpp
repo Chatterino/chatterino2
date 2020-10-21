@@ -118,6 +118,8 @@ enum class MessageElementFlag : int64_t {
     // e.g. BTTV's SoSnowy during christmas season
     ZeroWidthEmote = (1LL << 31),
 
+    // (1LL << 32) is used by BadgeFfz, it is next to BadgeChatterino
+
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
               AlwaysShow,
