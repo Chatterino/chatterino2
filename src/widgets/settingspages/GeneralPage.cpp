@@ -620,7 +620,8 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Vanity (prime, bits, subgifter)",
                        getSettings()->showBadgesVanity);
     layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
-    layout.addCheckbox("FrankerFaceZ", getSettings()->showBadgesFfz);
+    layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
+                       getSettings()->showBadgesFfz);
 
     layout.addTitle("Chat title");
     layout.addDescription("In live channels show:");
