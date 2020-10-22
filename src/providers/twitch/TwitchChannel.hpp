@@ -133,10 +133,10 @@ private:
     void refreshLiveStatus();
     void parseLiveStatus(bool live, const HelixStream &stream);
     void refreshPubsub();
-    void refreshChatters();
     void refreshBadges();
     void refreshCheerEmotes();
     void loadRecentMessages();
+    void fetchDisplayName();
 
     void setLive(bool newLiveStatus);
     void setMod(bool value);
@@ -178,7 +178,6 @@ private:
     QString lastSentMessage_;
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
-    QTimer chattersListTimer_;
     QTime titleRefreshedTime_;
 
     friend class TwitchIrcServer;

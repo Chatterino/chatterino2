@@ -163,22 +163,6 @@ TwitchChannel::TwitchChannel(const QString &name,
     this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
                          [=] { this->refreshPubsub(); });
 
-    auto lockedSetting =
-        getSettings()->lowercaseUsernamesOnCompletion.getData().lock();
-    if (lockedSetting)
-    {
-        auto connection = lockedSetting->updated.connect(
-            [this](const rapidjson::Value &,
-                   const pajlada::Settings::SignalArgs &) {
-                [this] { this->clearChatters(); }();
-            });
-        addConnection(std::move(connection));
-    }
-    else
-    {
-        qDebug() << "Failed to get lowercaseUsernamesOnCompletion setting";
-    }
-
     this->refreshPubsub();
     this->userStateChanged.connect([this] { this->refreshPubsub(); });
 
@@ -194,10 +178,6 @@ TwitchChannel::TwitchChannel(const QString &name,
     });
 
     // timers
-    QObject::connect(&this->chattersListTimer_, &QTimer::timeout,
-                     [=] { this->refreshChatters(); });
-    this->chattersListTimer_.start(5 * 60 * 1000);
-
     QObject::connect(&this->liveStatusTimer_, &QTimer::timeout,
                      [=] { this->refreshLiveStatus(); });
     this->liveStatusTimer_.start(60 * 1000);
@@ -212,7 +192,7 @@ TwitchChannel::TwitchChannel(const QString &name,
 
 void TwitchChannel::initialize()
 {
-    this->refreshChatters();
+    this->fetchDisplayName();
     this->refreshBadges();
 }
 
@@ -698,17 +678,12 @@ void TwitchChannel::loadRecentMessages()
             std::vector<MessagePtr> allBuiltMessages;
 
             auto channel = static_cast<TwitchChannel *>(shared.get());
-            bool truecaseUsernamesOnCompletion =
-                !getSettings()->lowercaseUsernamesOnCompletion;
             for (auto message : messages)
             {
                 for (auto builtMessage :
                      handler.parseMessage(shared.get(), message))
                 {
-                    if (truecaseUsernamesOnCompletion)
-                    {
-                        channel->addRecentChatter(builtMessage->displayName);
-                    }
+                    channel->addRecentChatter(builtMessage->displayName);
                     builtMessage->flags.set(MessageFlag::RecentMessage);
                     allBuiltMessages.emplace_back(builtMessage);
                 }
@@ -736,57 +711,32 @@ void TwitchChannel::refreshPubsub()
     getApp()->twitch2->pubsub->listenToChannelPointRewards(roomId, account);
 }
 
-void TwitchChannel::refreshChatters()
+void TwitchChannel::fetchDisplayName()
 {
-    // setting?
-    const auto streamStatus = this->accessStreamStatus();
-    const auto viewerCount = static_cast<int>(streamStatus->viewerCount);
-    if (getSettings()->onlyFetchChattersForSmallerStreamers)
-    {
-        if (streamStatus->live &&
-            viewerCount > getSettings()->smallStreamerLimit)
-        {
-            return;
-        }
-    }
-
-    if (getSettings()->lowercaseUsernamesOnCompletion)
-    {
-        // get viewer list
-        NetworkRequest("https://tmi.twitch.tv/group/user/" + this->getName() +
-                       "/chatters")
-
-            .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
-                // channel still exists?
-                auto shared = weak.lock();
-                if (!shared)
-                    return Failure;
-                auto pair = parseChatters(result.parseJson());
-                if (pair.first)
-                {
-                    auto channel = static_cast<TwitchChannel *>(shared.get());
-                    channel->setChatters(std::move(pair.second));
-                }
-
-                return pair.first;
-            })
-            .execute();
-    }
-    else
-    {
-        getHelix()->getUserByName(
-            this->getName(),
-            [weak = weakOf<Channel>(this)](const auto &user) {
-                auto shared = weak.lock();
-                if (!shared)
-                    return;
-                auto channel = static_cast<TwitchChannel *>(shared.get());
+    getHelix()->getUserByName(
+        this->getName(),
+        [weak = weakOf<Channel>(this)](const auto &user) {
+            auto shared = weak.lock();
+            if (!shared)
+                return;
+            auto channel = static_cast<TwitchChannel *>(shared.get());
+            if (QString::compare(user.displayName, channel->getName(),
+                                 Qt::CaseInsensitive) == 0)
+            {
                 channel->addRecentChatter(user.displayName);
-            },
-            [] {
-                // on failure
-            });
-    }
+            }
+            else
+            {
+                channel->addRecentChatter(channel->getName());
+            }
+        },
+        [weak = weakOf<Channel>(this)] {
+            auto shared = weak.lock();
+            if (!shared)
+                return;
+            auto channel = static_cast<TwitchChannel *>(shared.get());
+            channel->addRecentChatter(channel->getName());
+        });
 }
 
 void TwitchChannel::refreshBadges()

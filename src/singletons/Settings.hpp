@@ -149,8 +149,6 @@ public:
         "/behaviour/autocompletion/prefixOnlyCompletion", true};
     BoolSetting userCompletionOnlyWithAt = {
         "/behaviour/autocompletion/userCompletionOnlyWithAt", false};
-    BoolSetting lowercaseUsernamesOnCompletion = {
-        "/behaviour/autocompletion/lowercaseUsernamesOnCompletion", true};
     BoolSetting emoteCompletionWithColon = {
         "/behaviour/autocompletion/emoteCompletionWithColon", true};
 
