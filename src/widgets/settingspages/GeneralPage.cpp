@@ -15,9 +15,8 @@
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/dialogs/ColorPickerDialog.hpp"
-#include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/settingspages/GeneralPageView.hpp"
 
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
@@ -36,7 +35,7 @@
 
 namespace chatterino {
 namespace {
-    void addKeyboardModifierSetting(SettingsLayout &layout,
+    void addKeyboardModifierSetting(GeneralPageView &layout,
                                     const QString &title,
                                     EnumSetting<Qt::KeyboardModifier> &setting)
     {
@@ -76,239 +75,32 @@ namespace {
     }
 }  // namespace
 
-TitleLabel *SettingsLayout::addTitle(const QString &title)
-{
-    // space
-    if (!this->groups_.empty())
-        this->addWidget(this->groups_.back().space = new Space);
-
-    // title
-    auto label = new TitleLabel(title + ":");
-    this->addWidget(label);
-
-    // groups
-    this->groups_.push_back(Group{title, label, nullptr, {}});
-
-    return label;
-}
-
-QCheckBox *SettingsLayout::addCheckbox(const QString &text,
-                                       BoolSetting &setting, bool inverse)
-{
-    auto check = new QCheckBox(text);
-
-    // update when setting changes
-    setting.connect(
-        [inverse, check](const bool &value, auto) {
-            check->setChecked(inverse ^ value);
-        },
-        this->managedConnections_);
-
-    // update setting on toggle
-    QObject::connect(
-        check, &QCheckBox::toggled, this,
-        [&setting, inverse](bool state) { setting = inverse ^ state; });
-
-    this->addWidget(check);
-
-    // groups
-    this->groups_.back().widgets.push_back({check, {text}});
-
-    return check;
-}
-
-ComboBox *SettingsLayout::addDropdown(const QString &text,
-                                      const QStringList &list)
-{
-    auto layout = new QHBoxLayout;
-    auto combo = new ComboBox;
-    combo->setFocusPolicy(Qt::StrongFocus);
-    combo->addItems(list);
-
-    auto label = new QLabel(text + ":");
-    layout->addWidget(label);
-    layout->addStretch(1);
-    layout->addWidget(combo);
-
-    this->addLayout(layout);
-
-    // groups
-    this->groups_.back().widgets.push_back({combo, {text}});
-    this->groups_.back().widgets.push_back({label, {text}});
-
-    return combo;
-}
-
-ComboBox *SettingsLayout::addDropdown(
-    const QString &text, const QStringList &items,
-    pajlada::Settings::Setting<QString> &setting, bool editable)
-{
-    auto combo = this->addDropdown(text, items);
-
-    if (editable)
-        combo->setEditable(true);
-
-    // update when setting changes
-    setting.connect(
-        [combo](const QString &value, auto) { combo->setCurrentText(value); },
-        this->managedConnections_);
-
-    QObject::connect(combo, &QComboBox::currentTextChanged,
-                     [&setting](const QString &newValue) {
-                         setting = newValue;
-                         getApp()->windows->forceLayoutChannelViews();
-                     });
-
-    return combo;
-}
-
-ColorButton *SettingsLayout::addColorButton(
-    const QString &text, const QColor &color,
-    pajlada::Settings::Setting<QString> &setting)
-{
-    auto colorButton = new ColorButton(color);
-    auto layout = new QHBoxLayout();
-    auto label = new QLabel(text + ":");
-    layout->addWidget(label);
-    layout->addStretch(1);
-    layout->addWidget(colorButton);
-    this->addLayout(layout);
-    QObject::connect(
-        colorButton, &ColorButton::clicked, [&setting, colorButton]() {
-            auto dialog = new ColorPickerDialog(QColor(setting));
-            dialog->setAttribute(Qt::WA_DeleteOnClose);
-            dialog->show();
-            dialog->closed.connect([&setting, colorButton, &dialog] {
-                QColor selected = dialog->selectedColor();
-
-                if (selected.isValid())
-                {
-                    setting = selected.name(QColor::HexArgb);
-                    colorButton->setColor(selected);
-                }
-            });
-        });
-
-    this->groups_.back().widgets.push_back({label, {text}});
-    this->groups_.back().widgets.push_back({colorButton, {text}});
-
-    return colorButton;
-}
-
-DescriptionLabel *SettingsLayout::addDescription(const QString &text)
-{
-    auto label = new DescriptionLabel(text);
-
-    label->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                   Qt::LinksAccessibleByKeyboard);
-    label->setOpenExternalLinks(true);
-    label->setWordWrap(true);
-
-    this->addWidget(label);
-
-    // groups
-    this->groups_.back().widgets.push_back({label, {text}});
-
-    return label;
-}
-
-void SettingsLayout::addSeperator()
-{
-    this->addWidget(new Line(false));
-}
-
-bool SettingsLayout::filterElements(const QString &query)
-{
-    bool any{};
-
-    for (auto &&group : this->groups_)
-    {
-        // if a description in a group matches `query` then show the entire group
-        bool descriptionMatches{};
-        for (auto &&widget : group.widgets)
-        {
-            if (auto x = dynamic_cast<DescriptionLabel *>(widget.element); x)
-            {
-                if (x->text().contains(query, Qt::CaseInsensitive))
-                {
-                    descriptionMatches = true;
-                    break;
-                }
-            }
-        }
-
-        // if group name matches then all should be visible
-        if (group.name.contains(query, Qt::CaseInsensitive) ||
-            descriptionMatches)
-        {
-            for (auto &&widget : group.widgets)
-                widget.element->show();
-            group.title->show();
-            any = true;
-        }
-        // check if any match
-        else
-        {
-            auto groupAny = false;
-
-            for (auto &&widget : group.widgets)
-            {
-                for (auto &&keyword : widget.keywords)
-                {
-                    if (keyword.contains(query, Qt::CaseInsensitive))
-                    {
-                        widget.element->show();
-                        groupAny = true;
-                    }
-                    else
-                    {
-                        widget.element->hide();
-                    }
-                }
-            }
-
-            if (group.space)
-                group.space->setVisible(groupAny);
-            group.title->setVisible(groupAny);
-            any |= groupAny;
-        }
-    }
-
-    return any;
-}
-
 GeneralPage::GeneralPage()
 {
     auto y = new QVBoxLayout;
-    auto scroll = new QScrollArea;
-    scroll->setWidgetResizable(true);
-    y->addWidget(scroll);
     auto x = new QHBoxLayout;
-    auto layout = new SettingsLayout;
-    this->settingsLayout_ = layout;
-    x->addLayout(layout, 0);
-    x->addStretch(1);
+    auto view = new GeneralPageView;
+    this->view_ = view;
+    x->addWidget(view);
     auto z = new QFrame;
     z->setLayout(x);
-    scroll->setWidget(z);
+    y->addWidget(z);
     this->setLayout(y);
 
-    this->initLayout(*layout);
-
-    layout->addStretch(1);
+    this->initLayout(*view);
 
     this->initExtra();
 }
 
 bool GeneralPage::filterElements(const QString &query)
 {
-    if (this->settingsLayout_)
-        return this->settingsLayout_->filterElements(query) || query.isEmpty();
+    if (this->view_)
+        return this->view_->filterElements(query) || query.isEmpty();
     else
         return false;
 }
 
-void GeneralPage::initLayout(SettingsLayout &layout)
+void GeneralPage::initLayout(GeneralPageView &layout)
 {
     auto &s = *getSettings();
 

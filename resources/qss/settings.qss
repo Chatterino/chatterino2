@@ -16,7 +16,6 @@ QScrollArea {
 }
 
 QScrollArea QFrame {
-    background: #222;
     border: none;
 }
 
@@ -27,8 +26,6 @@ QComboBox QFrame {
 
 chatterino--SettingsPage {
     background: #222;
-    /*border: 1px solid #555;
-    border-left: none;*/
 }
 
 chatterino--PageHeader {
