@@ -1,5 +1,6 @@
 #include "GeneralPageView.hpp"
 #include <QScrollBar>
+#include "Application.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutHelper.hpp"
