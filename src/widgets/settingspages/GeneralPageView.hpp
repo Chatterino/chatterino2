@@ -4,6 +4,7 @@
 #include <boost/variant.hpp>
 #include "common/ChatterinoSetting.hpp"
 #include "widgets/helper/SignalLabel.hpp"
+#include "Application.hpp"
 
 class QScrollArea;
 
