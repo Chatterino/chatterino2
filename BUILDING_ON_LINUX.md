@@ -12,7 +12,7 @@ install [chatterino2-git](https://aur.archlinux.org/packages/chatterino2-git/) f
 1. `sudo pacman -S qt5-base qt5-multimedia qt5-svg gst-plugins-ugly gst-plugins-good boost rapidjson pkgconf openssl`
 1. go into project directory
 1. create build folder `mkdir build && cd build`
-1. `qmake .. && make -j$(nproc)`
+1. `qmake .. && make`
 
 ## Fedora 28 and above
 *most likely works the same for other Red Hat-like distros. Substitue `dnf` with `yum`.*
