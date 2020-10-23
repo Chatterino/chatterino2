@@ -29,6 +29,17 @@ public:
     }
 };
 
+class SubtitleLabel : public QLabel
+{
+    Q_OBJECT
+
+public:
+    SubtitleLabel(const QString &text)
+        : QLabel(text)
+    {
+    }
+};
+
 class NavigationLabel : public SignalLabel
 {
     Q_OBJECT
@@ -76,8 +87,10 @@ public:
 
     void addWidget(QWidget *widget);
     void addLayout(QLayout *layout);
+    void addStretch();
 
     TitleLabel *addTitle(const QString &text);
+    SubtitleLabel *addSubtitle(const QString &text);
     /// @param inverse Inverses true to false and vice versa
     QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
                            bool inverse = false);

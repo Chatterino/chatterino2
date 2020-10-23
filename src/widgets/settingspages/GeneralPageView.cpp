@@ -40,6 +40,11 @@ void GeneralPageView::addLayout(QLayout *layout)
     this->contentLayout_->addLayout(layout);
 }
 
+void GeneralPageView::addStretch()
+{
+    this->contentLayout_->addStretch();
+}
+
 TitleLabel *GeneralPageView::addTitle(const QString &title)
 {
     // space
@@ -64,6 +69,16 @@ TitleLabel *GeneralPageView::addTitle(const QString &title)
 
     if (this->groups_.size() == 1)
         this->updateNavigationHighlighting();
+
+    return label;
+}
+
+SubtitleLabel *GeneralPageView::addSubtitle(const QString &title)
+{
+    auto label = new SubtitleLabel(title + ":");
+    this->addWidget(label);
+
+    this->groups_.back().widgets.push_back({label, {title}});
 
     return label;
 }
@@ -224,7 +239,9 @@ bool GeneralPageView::filterElements(const QString &query)
         {
             for (auto &&widget : group.widgets)
                 widget.element->show();
+
             group.title->show();
+            group.navigationLink->show();
             any = true;
         }
         // check if any match
@@ -232,12 +249,26 @@ bool GeneralPageView::filterElements(const QString &query)
         {
             auto groupAny = false;
 
+            QWidget *currentSubtitle = nullptr;
+            bool currentSubtitleVisible = false;
+
             for (auto &&widget : group.widgets)
             {
+                if (dynamic_cast<SubtitleLabel *>(widget.element))
+                {
+                    if (currentSubtitle)
+                        currentSubtitle->setVisible(currentSubtitleVisible);
+
+                    currentSubtitleVisible = false;
+                    currentSubtitle = widget.element;
+                    continue;
+                }
+
                 for (auto &&keyword : widget.keywords)
                 {
                     if (keyword.contains(query, Qt::CaseInsensitive))
                     {
+                        currentSubtitleVisible = true;
                         widget.element->show();
                         groupAny = true;
                     }
@@ -248,9 +279,14 @@ bool GeneralPageView::filterElements(const QString &query)
                 }
             }
 
+            if (currentSubtitle)
+                currentSubtitle->setVisible(currentSubtitleVisible);
+
             if (group.space)
                 group.space->setVisible(groupAny);
+
             group.title->setVisible(groupAny);
+            group.navigationLink->setVisible(groupAny);
             any |= groupAny;
         }
     }

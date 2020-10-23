@@ -26,6 +26,7 @@
 
 // define to highlight sections in editor
 #define addTitle addTitle
+#define addSubtitle addSubtitle
 
 #ifdef Q_OS_WIN
 #    define META_KEY "Windows"
@@ -169,16 +170,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addTitle("Chat");
 
     layout.addDropdown<float>(
-        "Mousewheel scroll speed", {"0.5x", "0.75x", "Default", "1.5x", "2x"},
-        s.mouseScrollMultiplier,
-        [](auto val) {
-            if (val == 1)
-                return QString("Default");
-            else
-                return QString::number(val) + "x";
-        },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
-    layout.addDropdown<float>(
         "Pause on mouse hover",
         {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
         s.pauseOnHoverDuration,
@@ -201,6 +192,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
     addKeyboardModifierSetting(layout, "Pause while holding a key",
                                s.pauseChatModifier);
+    layout.addDropdown<float>(
+        "Mousewheel scroll speed", {"0.5x", "0.75x", "Default", "1.5x", "2x"},
+        s.mouseScrollMultiplier,
+        [](auto val) {
+            if (val == 1)
+                return QString("Default");
+            else
+                return QString::number(val) + "x";
+        },
+        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
@@ -267,7 +268,59 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         [](auto args) { return fuzzyToInt(args.value, 0); });
 
-    layout.addTitle("Link Information");
+    layout.addTitle("Emotes");
+    layout.addCheckbox("Enable", s.enableEmoteImages);
+    layout.addCheckbox("Animate", s.animateEmotes);
+    layout.addCheckbox("Animate only when Chatterino is focused",
+                       s.animationsWhenFocused);
+    layout.addCheckbox("Enable emote auto-completion by typing :",
+                       s.emoteCompletionWithColon);
+    layout.addDropdown<float>(
+        "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
+        s.emoteScale,
+        [](auto val) {
+            if (val == 1)
+                return QString("Default");
+            else
+                return QString::number(val) + "x";
+        },
+        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+
+    layout.addDropdown<int>(
+        "Show info on hover", {"Don't show", "Always show", "Hold shift"},
+        s.emotesTooltipPreview, [](int index) { return index; },
+        [](auto args) { return args.index; }, false);
+    layout.addDropdown("Emoji style",
+                       {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
+                        "Apple", "Google", "Messenger"},
+                       s.emojiSet);
+
+    layout.addTitle("Streamer Mode");
+    layout.addDescription(
+        "Chatterino can automatically change behavior if it "
+        "detects that \"OBS Studio\" is running.\nSelect which "
+        "things you want to change while streaming");
+
+    ComboBox *dankDropdown =
+        layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
+            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
+            s.enableStreamerMode, [](int value) { return value; },
+            [](DropdownArgs args) {
+                return static_cast<StreamerModeSetting>(args.index);
+            },
+            false);
+    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 10);
+
+    layout.addCheckbox("Hide usercard avatars",
+                       s.streamerModeHideUsercardAvatars);
+    layout.addCheckbox("Hide link thumbnails",
+                       s.streamerModeHideLinkThumbnails);
+    layout.addCheckbox(
+        "Hide viewer count and stream length while hovering over split header",
+        s.streamerModeHideViewerCountAndDuration);
+    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
+
+    layout.addTitle("Link Previews");
     layout.addDescription(
         "Extra information like \"youtube video stats\" or title of webpages "
         "can be loaded for all links if enabled. Optionally you can also show "
@@ -325,101 +378,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToInt(args.value, 0);
         });
 
-    layout.addTitle("Streamer Mode");
-    layout.addDescription(
-        "Chatterino can automatically change behavior if it "
-        "detects that \"OBS Studio\" is running.\nSelect which "
-        "things you want to change while streaming");
-
-    ComboBox *dankDropdown =
-        layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
-            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
-            s.enableStreamerMode, [](int value) { return value; },
-            [](DropdownArgs args) {
-                return static_cast<StreamerModeSetting>(args.index);
-            },
-            false);
-    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 10);
-
-    layout.addCheckbox("Hide usercard avatars",
-                       s.streamerModeHideUsercardAvatars);
-    layout.addCheckbox("Hide link thumbnails",
-                       s.streamerModeHideLinkThumbnails);
-    layout.addCheckbox(
-        "Hide viewer count and stream length while hovering over split header",
-        s.streamerModeHideViewerCountAndDuration);
-    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
-
-    layout.addTitle("Emotes");
-    layout.addCheckbox("Enable", s.enableEmoteImages);
-    layout.addCheckbox("Animate", s.animateEmotes);
-    layout.addCheckbox("Animate only when Chatterino is focused",
-                       s.animationsWhenFocused);
-    layout.addCheckbox("Enable emote auto-completion by typing :",
-                       s.emoteCompletionWithColon);
-    layout.addDropdown<float>(
-        "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
-        s.emoteScale,
-        [](auto val) {
-            if (val == 1)
-                return QString("Default");
-            else
-                return QString::number(val) + "x";
-        },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
-
-    layout.addDropdown<int>(
-        "Show info on hover", {"Don't show", "Always show", "Hold shift"},
-        s.emotesTooltipPreview, [](int index) { return index; },
-        [](auto args) { return args.index; }, false);
-    layout.addDropdown("Emoji style",
-                       {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
-                        "Apple", "Google", "Messenger"},
-                       s.emojiSet);
-
-    layout.addTitle("R9K");
-    layout.addDescription(
-        "Hide similar messages by the same user. Toggle hidden "
-        "messages by pressing Ctrl+H.");
-    layout.addCheckbox("Hide similar messages", s.similarityEnabled);
-    //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
-    layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
-    layout.addCheckbox("Receive notification sounds from hidden messages",
-                       s.shownSimilarTriggerHighlights);
-    s.hideSimilar.connect(
-        []() { getApp()->windows->forceLayoutChannelViews(); }, false);
-    layout.addDropdown<float>(
-        "Similarity threshold", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
-    layout.addDropdown<int>(
-        "Maximum delay between messages",
-        {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
-        [](auto val) { return QString::number(val) + "s"; },
-        [](auto args) { return fuzzyToInt(args.value, 5); });
-    layout.addDropdown<int>(
-        "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
-        s.hideSimilarMaxMessagesToCheck,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToInt(args.value, 3); });
-
-    layout.addTitle("Visible badges");
-    layout.addCheckbox("Authority (staff, admin)",
-                       getSettings()->showBadgesGlobalAuthority);
-    layout.addCheckbox("Channel (broadcaster, moderator)",
-                       getSettings()->showBadgesChannelAuthority);
-    layout.addCheckbox("Subscriber ", getSettings()->showBadgesSubscription);
-    layout.addCheckbox("Vanity (prime, bits, subgifter)",
-                       getSettings()->showBadgesVanity);
-    layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
-
-    layout.addTitle("Chat title");
-    layout.addDescription("In live channels show:");
-    layout.addCheckbox("Uptime", s.headerUptime);
-    layout.addCheckbox("Viewer count", s.headerViewerCount);
-    layout.addCheckbox("Category", s.headerGame);
-    layout.addCheckbox("Title", s.headerStreamTitle);
-
     layout.addNavigationSpacing();
     layout.addTitle("Beta");
     if (Version::instance().isSupportedOS())
@@ -450,11 +408,20 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addDescription("Chatterino only attaches to known browsers to avoid "
                           "attaching to other windows by accident.");
-    layout.addCheckbox("Attach to any browser (may cause issues).",
+    layout.addCheckbox("Attach to any browser (may cause issues)",
                        s.attachExtensionToAnyProcess);
 #endif
 
-    layout.addTitle("Cache");
+    layout.addTitle("AppData & Cache");
+
+    layout.addSubtitle("Application Data");
+    layout.addDescription("All local files like settings and cache files are "
+                          "store in this directory.");
+    layout.addButton("Open AppData directory", [] {
+        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+    });
+
+    layout.addSubtitle("Temporary files (Cache)");
     layout.addDescription(
         "Files that are used often (such as emotes) are saved to disk to "
         "reduce bandwidth usage and to speed up loading.");
@@ -485,14 +452,52 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         layout.addLayout(box);
     }
 
-    layout.addTitle("AppData");
-    layout.addDescription("All local files like settings and cache files are "
-                          "store in this directory.");
-    layout.addButton("Open AppData directory", [] {
-        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
-    });
+    layout.addTitle("Advanced");
 
-    layout.addTitle("Miscellaneous");
+    layout.addSubtitle("Chat title");
+    layout.addDescription("In live channels show:");
+    layout.addCheckbox("Uptime", s.headerUptime);
+    layout.addCheckbox("Viewer count", s.headerViewerCount);
+    layout.addCheckbox("Category", s.headerGame);
+    layout.addCheckbox("Title", s.headerStreamTitle);
+
+    layout.addSubtitle("R9K");
+    layout.addDescription(
+        "Hide similar messages by the same user. Toggle hidden "
+        "messages by pressing Ctrl+H.");
+    layout.addCheckbox("Hide similar messages", s.similarityEnabled);
+    //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
+    layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
+    layout.addCheckbox("Receive notification sounds from hidden messages",
+                       s.shownSimilarTriggerHighlights);
+    s.hideSimilar.connect(
+        []() { getApp()->windows->forceLayoutChannelViews(); }, false);
+    layout.addDropdown<float>(
+        "Similarity threshold", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
+        [](auto val) { return QString::number(val); },
+        [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
+    layout.addDropdown<int>(
+        "Maximum delay between messages",
+        {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
+        [](auto val) { return QString::number(val) + "s"; },
+        [](auto args) { return fuzzyToInt(args.value, 5); });
+    layout.addDropdown<int>(
+        "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
+        s.hideSimilarMaxMessagesToCheck,
+        [](auto val) { return QString::number(val); },
+        [](auto args) { return fuzzyToInt(args.value, 3); });
+
+    layout.addSubtitle("Visible badges");
+    layout.addCheckbox("Authority (staff, admin)",
+                       getSettings()->showBadgesGlobalAuthority);
+    layout.addCheckbox("Channel (broadcaster, moderator)",
+                       getSettings()->showBadgesChannelAuthority);
+    layout.addCheckbox("Subscriber ", getSettings()->showBadgesSubscription);
+    layout.addCheckbox("Vanity (prime, bits, subgifter)",
+                       getSettings()->showBadgesVanity);
+    layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
+
+    layout.addSubtitle("Miscellaneous");
 
     if (supportsIncognitoLinks())
     {
@@ -561,6 +566,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Ask for confirmation when uploading an image",
                        s.askOnImageUpload);
+
+    layout.addStretch();
 
     // invisible element for width
     auto inv = new BaseWidget(this);

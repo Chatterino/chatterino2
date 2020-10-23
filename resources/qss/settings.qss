@@ -1,5 +1,6 @@
 * {
     font-size: <font-size>px;
+    font-family: "Segoe UI";
 }
 
 QCheckBox::indicator {
@@ -43,13 +44,18 @@ chatterino--TitleLabel {
     color: #4FC3F7; /* Should this be same as accent color? */
 }
 
+chatterino--SubtitleLabel {
+    font-family: "Segoe UI light";
+    font-size: 16px;
+    color: #4FC3F7; /* Should this be same as accent color? */
+}
+
 chatterino--DescriptionLabel {
-    font-size: 14px;
     color: #999;
 }
 
 chatterino--NavigationLabel {
     font-family: "Segoe UI light";
-    font-size: 16px;
+    font-size: 15px;
     color: #A6DDF4;
 }
