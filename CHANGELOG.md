@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added a navigation list to the settings and reordered them.
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
 - Minor: Improved viewer list window.
