@@ -420,6 +420,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Category", s.headerGame);
     layout.addCheckbox("Title", s.headerStreamTitle);
 
+    layout.addNavigationSpacing();
     layout.addTitle("Beta");
     if (Version::instance().isSupportedOS())
     {
@@ -563,7 +564,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     // invisible element for width
     auto inv = new BaseWidget(this);
-    inv->setScaleIndependantWidth(500);
+    //    inv->setScaleIndependantWidth(600);
     layout.addWidget(inv);
 }
 

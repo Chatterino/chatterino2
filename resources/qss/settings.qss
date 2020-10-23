@@ -24,7 +24,12 @@ QComboBox QFrame {
     border: 1px solid #66BCFF;
 }
 
-chatterino--SettingsPage {
+chatterino--SettingsDialog chatterino--SettingsDialogTab {
+    font-family: "Segoe UI";
+    font-size: 14;
+}
+
+chatterino--SettingsPage #generalSettingsScrollContent {
     background: #222;
 }
 
@@ -39,5 +44,12 @@ chatterino--TitleLabel {
 }
 
 chatterino--DescriptionLabel {
+    font-size: 14px;
     color: #999;
+}
+
+chatterino--NavigationLabel {
+    font-family: "Segoe UI light";
+    font-size: 16px;
+    color: #A6DDF4;
 }

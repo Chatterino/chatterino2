@@ -87,6 +87,7 @@ public:
                           bool editable = false);
     ColorButton *addColorButton(const QString &text, const QColor &color,
                                 pajlada::Settings::Setting<QString> &setting);
+    void addNavigationSpacing();
 
     template <typename OnClick>
     QPushButton *makeButton(const QString &text, OnClick onClick)

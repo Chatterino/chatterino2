@@ -15,11 +15,16 @@ GeneralPageView::GeneralPageView(QWidget *parent)
 {
     auto scrollArea = this->contentScrollArea_ =
         makeScrollArea(this->contentLayout_ = new QVBoxLayout);
+    scrollArea->setObjectName("generalSettingsScrollContent");
 
     auto navigation =
         wrapLayout(this->navigationLayout_ = makeLayout<QVBoxLayout>({}));
+    navigation->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Minimum);
+    this->navigationLayout_->setAlignment(Qt::AlignTop);
+    this->navigationLayout_->addSpacing(6);
 
-    this->setLayout(makeLayout<QHBoxLayout>({scrollArea, navigation}));
+    this->setLayout(makeLayout<QHBoxLayout>(
+        {scrollArea, new QSpacerItem(16, 1), navigation}));
 
     QObject::connect(scrollArea->verticalScrollBar(), &QScrollBar::valueChanged,
                      this, [=] { this->updateNavigationHighlighting(); });
@@ -166,6 +171,11 @@ ColorButton *GeneralPageView::addColorButton(
     return colorButton;
 }
 
+void GeneralPageView::addNavigationSpacing()
+{
+    this->navigationLayout_->addSpacing(24);
+}
+
 DescriptionLabel *GeneralPageView::addDescription(const QString &text)
 {
     auto label = new DescriptionLabel(text);
@@ -259,7 +269,7 @@ void GeneralPageView::updateNavigationHighlighting()
                       &group == &this->groups_.back()))
         {
             first = false;
-            group.navigationLink->setStyleSheet("color: #4FC3F7");
+            group.navigationLink->setStyleSheet("color: #00ABF4");
         }
         else
         {

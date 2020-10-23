@@ -12,7 +12,7 @@ QWidget *wrapLayout(QLayout *layout)
     return widget;
 }
 
-QScrollArea *makeScrollArea(LayoutItem item)
+QScrollArea *makeScrollArea(WidgetOrLayout item)
 {
     auto area = new QScrollArea();
 
