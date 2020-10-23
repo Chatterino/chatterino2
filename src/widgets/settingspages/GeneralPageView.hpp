@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <boost/variant.hpp>
 #include "Application.hpp"
+#include "singletons/WindowManager.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "widgets/helper/SignalLabel.hpp"
 
