@@ -72,6 +72,7 @@ public:
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
+    void replaceMessage(size_t index, MessagePtr replacement);
     void deleteMessage(QString messageID);
     void clearMessages();
 

@@ -68,6 +68,23 @@ namespace {
         return descriptor;
     }
 
+    const QList<QUuid> loadFilters(QJsonValue val)
+    {
+        QList<QUuid> filterIds;
+
+        if (!val.isUndefined())
+        {
+            const auto array = val.toArray();
+            filterIds.reserve(array.size());
+            for (const auto &id : array)
+            {
+                filterIds.append(QUuid::fromString(id.toString()));
+            }
+        }
+
+        return filterIds;
+    }
+
 }  // namespace
 
 void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
@@ -85,6 +102,7 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
     {
         descriptor.channelName_ = data.value("name").toString();
     }
+    descriptor.filters_ = loadFilters(root.value("filters"));
 }
 
 WindowLayout WindowLayout::loadFromFile(const QString &path)

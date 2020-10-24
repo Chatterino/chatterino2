@@ -224,6 +224,14 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
     }
 }
 
+void Channel::replaceMessage(size_t index, MessagePtr replacement)
+{
+    if (this->messages_.replaceItem(index, replacement))
+    {
+        this->messageReplaced.invoke(index, replacement);
+    }
+}
+
 void Channel::deleteMessage(QString messageID)
 {
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();

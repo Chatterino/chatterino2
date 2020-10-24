@@ -15,9 +15,8 @@
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/BaseWindow.hpp"
-#include "widgets/dialogs/ColorPickerDialog.hpp"
-#include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/settingspages/GeneralPageView.hpp"
 
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
@@ -27,6 +26,7 @@
 
 // define to highlight sections in editor
 #define addTitle addTitle
+#define addSubtitle addSubtitle
 
 #ifdef Q_OS_WIN
 #    define META_KEY "Windows"
@@ -36,7 +36,7 @@
 
 namespace chatterino {
 namespace {
-    void addKeyboardModifierSetting(SettingsLayout &layout,
+    void addKeyboardModifierSetting(GeneralPageView &layout,
                                     const QString &title,
                                     EnumSetting<Qt::KeyboardModifier> &setting)
     {
@@ -76,236 +76,32 @@ namespace {
     }
 }  // namespace
 
-TitleLabel *SettingsLayout::addTitle(const QString &title)
-{
-    // space
-    if (!this->groups_.empty())
-        this->addWidget(this->groups_.back().space = new Space);
-
-    // title
-    auto label = new TitleLabel(title + ":");
-    this->addWidget(label);
-
-    // groups
-    this->groups_.push_back(Group{title, label, nullptr, {}});
-
-    return label;
-}
-
-QCheckBox *SettingsLayout::addCheckbox(const QString &text,
-                                       BoolSetting &setting, bool inverse)
-{
-    auto check = new QCheckBox(text);
-
-    // update when setting changes
-    setting.connect(
-        [inverse, check](const bool &value, auto) {
-            check->setChecked(inverse ^ value);
-        },
-        this->managedConnections_);
-
-    // update setting on toggle
-    QObject::connect(
-        check, &QCheckBox::toggled, this,
-        [&setting, inverse](bool state) { setting = inverse ^ state; });
-
-    this->addWidget(check);
-
-    // groups
-    this->groups_.back().widgets.push_back({check, {text}});
-
-    return check;
-}
-
-ComboBox *SettingsLayout::addDropdown(const QString &text,
-                                      const QStringList &list)
-{
-    auto layout = new QHBoxLayout;
-    auto combo = new ComboBox;
-    combo->setFocusPolicy(Qt::StrongFocus);
-    combo->addItems(list);
-
-    auto label = new QLabel(text + ":");
-    layout->addWidget(label);
-    layout->addStretch(1);
-    layout->addWidget(combo);
-
-    this->addLayout(layout);
-
-    // groups
-    this->groups_.back().widgets.push_back({combo, {text}});
-    this->groups_.back().widgets.push_back({label, {text}});
-
-    return combo;
-}
-
-ComboBox *SettingsLayout::addDropdown(
-    const QString &text, const QStringList &items,
-    pajlada::Settings::Setting<QString> &setting, bool editable)
-{
-    auto combo = this->addDropdown(text, items);
-
-    if (editable)
-        combo->setEditable(true);
-
-    // update when setting changes
-    setting.connect(
-        [combo](const QString &value, auto) { combo->setCurrentText(value); },
-        this->managedConnections_);
-
-    QObject::connect(combo, &QComboBox::currentTextChanged,
-                     [&setting](const QString &newValue) {
-                         setting = newValue;
-                         getApp()->windows->forceLayoutChannelViews();
-                     });
-
-    return combo;
-}
-
-ColorButton *SettingsLayout::addColorButton(
-    const QString &text, const QColor &color,
-    pajlada::Settings::Setting<QString> &setting)
-{
-    auto colorButton = new ColorButton(color);
-    auto layout = new QHBoxLayout();
-    auto label = new QLabel(text + ":");
-    layout->addWidget(label);
-    layout->addStretch(1);
-    layout->addWidget(colorButton);
-    this->addLayout(layout);
-    QObject::connect(
-        colorButton, &ColorButton::clicked, [&setting, colorButton]() {
-            auto dialog = new ColorPickerDialog(QColor(setting));
-            dialog->setAttribute(Qt::WA_DeleteOnClose);
-            dialog->show();
-            dialog->closed.connect([&setting, colorButton, &dialog] {
-                QColor selected = dialog->selectedColor();
-
-                if (selected.isValid())
-                {
-                    setting = selected.name(QColor::HexArgb);
-                    colorButton->setColor(selected);
-                }
-            });
-        });
-
-    return colorButton;
-}
-
-DescriptionLabel *SettingsLayout::addDescription(const QString &text)
-{
-    auto label = new DescriptionLabel(text);
-
-    label->setTextInteractionFlags(Qt::TextBrowserInteraction |
-                                   Qt::LinksAccessibleByKeyboard);
-    label->setOpenExternalLinks(true);
-    label->setWordWrap(true);
-
-    this->addWidget(label);
-
-    // groups
-    this->groups_.back().widgets.push_back({label, {text}});
-
-    return label;
-}
-
-void SettingsLayout::addSeperator()
-{
-    this->addWidget(new Line(false));
-}
-
-bool SettingsLayout::filterElements(const QString &query)
-{
-    bool any{};
-
-    for (auto &&group : this->groups_)
-    {
-        // if a description in a group matches `query` then show the entire group
-        bool descriptionMatches{};
-        for (auto &&widget : group.widgets)
-        {
-            if (auto x = dynamic_cast<DescriptionLabel *>(widget.element); x)
-            {
-                if (x->text().contains(query, Qt::CaseInsensitive))
-                {
-                    descriptionMatches = true;
-                    break;
-                }
-            }
-        }
-
-        // if group name matches then all should be visible
-        if (group.name.contains(query, Qt::CaseInsensitive) ||
-            descriptionMatches)
-        {
-            for (auto &&widget : group.widgets)
-                widget.element->show();
-            group.title->show();
-            any = true;
-        }
-        // check if any match
-        else
-        {
-            auto groupAny = false;
-
-            for (auto &&widget : group.widgets)
-            {
-                for (auto &&keyword : widget.keywords)
-                {
-                    if (keyword.contains(query, Qt::CaseInsensitive))
-                    {
-                        widget.element->show();
-                        groupAny = true;
-                    }
-                    else
-                    {
-                        widget.element->hide();
-                    }
-                }
-            }
-
-            if (group.space)
-                group.space->setVisible(groupAny);
-            group.title->setVisible(groupAny);
-            any |= groupAny;
-        }
-    }
-
-    return any;
-}
-
 GeneralPage::GeneralPage()
 {
     auto y = new QVBoxLayout;
-    auto scroll = new QScrollArea;
-    scroll->setWidgetResizable(true);
-    y->addWidget(scroll);
     auto x = new QHBoxLayout;
-    auto layout = new SettingsLayout;
-    this->settingsLayout_ = layout;
-    x->addLayout(layout, 0);
-    x->addStretch(1);
+    auto view = new GeneralPageView;
+    this->view_ = view;
+    x->addWidget(view);
     auto z = new QFrame;
     z->setLayout(x);
-    scroll->setWidget(z);
+    y->addWidget(z);
     this->setLayout(y);
 
-    this->initLayout(*layout);
-
-    layout->addStretch(1);
+    this->initLayout(*view);
 
     this->initExtra();
 }
 
 bool GeneralPage::filterElements(const QString &query)
 {
-    if (this->settingsLayout_)
-        return this->settingsLayout_->filterElements(query) || query.isEmpty();
+    if (this->view_)
+        return this->view_->filterElements(query) || query.isEmpty();
     else
         return false;
 }
 
-void GeneralPage::initLayout(SettingsLayout &layout)
+void GeneralPage::initLayout(GeneralPageView &layout)
 {
     auto &s = *getSettings();
 
@@ -374,16 +170,6 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addTitle("Chat");
 
     layout.addDropdown<float>(
-        "Mousewheel scroll speed", {"0.5x", "0.75x", "Default", "1.5x", "2x"},
-        s.mouseScrollMultiplier,
-        [](auto val) {
-            if (val == 1)
-                return QString("Default");
-            else
-                return QString::number(val) + "x";
-        },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
-    layout.addDropdown<float>(
         "Pause on mouse hover",
         {"Disabled", "0.5s", "1s", "2s", "5s", "Indefinite"},
         s.pauseOnHoverDuration,
@@ -406,6 +192,16 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         });
     addKeyboardModifierSetting(layout, "Pause while holding a key",
                                s.pauseChatModifier);
+    layout.addDropdown<float>(
+        "Mousewheel scroll speed", {"0.5x", "0.75x", "Default", "1.5x", "2x"},
+        s.mouseScrollMultiplier,
+        [](auto val) {
+            if (val == 1)
+                return QString("Default");
+            else
+                return QString::number(val) + "x";
+        },
+        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
@@ -472,7 +268,59 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         },
         [](auto args) { return fuzzyToInt(args.value, 0); });
 
-    layout.addTitle("Link Information");
+    layout.addTitle("Emotes");
+    layout.addCheckbox("Enable", s.enableEmoteImages);
+    layout.addCheckbox("Animate", s.animateEmotes);
+    layout.addCheckbox("Animate only when Chatterino is focused",
+                       s.animationsWhenFocused);
+    layout.addCheckbox("Enable emote auto-completion by typing :",
+                       s.emoteCompletionWithColon);
+    layout.addDropdown<float>(
+        "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
+        s.emoteScale,
+        [](auto val) {
+            if (val == 1)
+                return QString("Default");
+            else
+                return QString::number(val) + "x";
+        },
+        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+
+    layout.addDropdown<int>(
+        "Show info on hover", {"Don't show", "Always show", "Hold shift"},
+        s.emotesTooltipPreview, [](int index) { return index; },
+        [](auto args) { return args.index; }, false);
+    layout.addDropdown("Emoji style",
+                       {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
+                        "Apple", "Google", "Messenger"},
+                       s.emojiSet);
+
+    layout.addTitle("Streamer Mode");
+    layout.addDescription(
+        "Chatterino can automatically change behavior if it "
+        "detects that \"OBS Studio\" is running.\nSelect which "
+        "things you want to change while streaming");
+
+    ComboBox *dankDropdown =
+        layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
+            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
+            s.enableStreamerMode, [](int value) { return value; },
+            [](DropdownArgs args) {
+                return static_cast<StreamerModeSetting>(args.index);
+            },
+            false);
+    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 10);
+
+    layout.addCheckbox("Hide usercard avatars",
+                       s.streamerModeHideUsercardAvatars);
+    layout.addCheckbox("Hide link thumbnails",
+                       s.streamerModeHideLinkThumbnails);
+    layout.addCheckbox(
+        "Hide viewer count and stream length while hovering over split header",
+        s.streamerModeHideViewerCountAndDuration);
+    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
+
+    layout.addTitle("Link Previews");
     layout.addDescription(
         "Extra information like \"youtube video stats\" or title of webpages "
         "can be loaded for all links if enabled. Optionally you can also show "
@@ -530,101 +378,7 @@ void GeneralPage::initLayout(SettingsLayout &layout)
             return fuzzyToInt(args.value, 0);
         });
 
-    layout.addTitle("Streamer Mode");
-    layout.addDescription(
-        "Chatterino can automatically change behavior if it "
-        "detects that \"OBS Studio\" is running.\nSelect which "
-        "things you want to change while streaming");
-
-    ComboBox *dankDropdown =
-        layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
-            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
-            s.enableStreamerMode, [](int value) { return value; },
-            [](DropdownArgs args) {
-                return static_cast<StreamerModeSetting>(args.index);
-            },
-            false);
-    dankDropdown->setMinimumWidth(dankDropdown->minimumSizeHint().width() + 10);
-
-    layout.addCheckbox("Hide usercard avatars",
-                       s.streamerModeHideUsercardAvatars);
-    layout.addCheckbox("Hide link thumbnails",
-                       s.streamerModeHideLinkThumbnails);
-    layout.addCheckbox(
-        "Hide viewer count and stream length while hovering over split header",
-        s.streamerModeHideViewerCountAndDuration);
-    layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
-
-    layout.addTitle("Emotes");
-    layout.addCheckbox("Enable", s.enableEmoteImages);
-    layout.addCheckbox("Animate", s.animateEmotes);
-    layout.addCheckbox("Animate only when Chatterino is focused",
-                       s.animationsWhenFocused);
-    layout.addCheckbox("Enable emote auto-completion by typing :",
-                       s.emoteCompletionWithColon);
-    layout.addDropdown<float>(
-        "Size", {"0.5x", "0.75x", "Default", "1.25x", "1.5x", "2x"},
-        s.emoteScale,
-        [](auto val) {
-            if (val == 1)
-                return QString("Default");
-            else
-                return QString::number(val) + "x";
-        },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
-
-    layout.addDropdown<int>(
-        "Show info on hover", {"Don't show", "Always show", "Hold shift"},
-        s.emotesTooltipPreview, [](int index) { return index; },
-        [](auto args) { return args.index; }, false);
-    layout.addDropdown("Emoji style",
-                       {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
-                        "Apple", "Google", "Messenger"},
-                       s.emojiSet);
-
-    layout.addTitle("R9K");
-    layout.addDescription(
-        "Hide similar messages by the same user. Toggle hidden "
-        "messages by pressing Ctrl+H.");
-    layout.addCheckbox("Hide similar messages", s.similarityEnabled);
-    //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
-    layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
-    layout.addCheckbox("Receive notification sounds from hidden messages",
-                       s.shownSimilarTriggerHighlights);
-    s.hideSimilar.connect(
-        []() { getApp()->windows->forceLayoutChannelViews(); }, false);
-    layout.addDropdown<float>(
-        "Similarity threshold", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
-    layout.addDropdown<int>(
-        "Maximum delay between messages",
-        {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
-        [](auto val) { return QString::number(val) + "s"; },
-        [](auto args) { return fuzzyToInt(args.value, 5); });
-    layout.addDropdown<int>(
-        "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
-        s.hideSimilarMaxMessagesToCheck,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToInt(args.value, 3); });
-
-    layout.addTitle("Visible badges");
-    layout.addCheckbox("Authority (staff, admin)",
-                       getSettings()->showBadgesGlobalAuthority);
-    layout.addCheckbox("Channel (broadcaster, moderator)",
-                       getSettings()->showBadgesChannelAuthority);
-    layout.addCheckbox("Subscriber ", getSettings()->showBadgesSubscription);
-    layout.addCheckbox("Vanity (prime, bits, subgifter)",
-                       getSettings()->showBadgesVanity);
-    layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
-
-    layout.addTitle("Chat title");
-    layout.addDescription("In live channels show:");
-    layout.addCheckbox("Uptime", s.headerUptime);
-    layout.addCheckbox("Viewer count", s.headerViewerCount);
-    layout.addCheckbox("Category", s.headerGame);
-    layout.addCheckbox("Title", s.headerStreamTitle);
-
+    layout.addNavigationSpacing();
     layout.addTitle("Beta");
     if (Version::instance().isSupportedOS())
     {
@@ -654,11 +408,20 @@ void GeneralPage::initLayout(SettingsLayout &layout)
 
     layout.addDescription("Chatterino only attaches to known browsers to avoid "
                           "attaching to other windows by accident.");
-    layout.addCheckbox("Attach to any browser (may cause issues).",
+    layout.addCheckbox("Attach to any browser (may cause issues)",
                        s.attachExtensionToAnyProcess);
 #endif
 
-    layout.addTitle("Cache");
+    layout.addTitle("AppData & Cache");
+
+    layout.addSubtitle("Application Data");
+    layout.addDescription("All local files like settings and cache files are "
+                          "store in this directory.");
+    layout.addButton("Open AppData directory", [] {
+        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+    });
+
+    layout.addSubtitle("Temporary files (Cache)");
     layout.addDescription(
         "Files that are used often (such as emotes) are saved to disk to "
         "reduce bandwidth usage and to speed up loading.");
@@ -689,14 +452,52 @@ void GeneralPage::initLayout(SettingsLayout &layout)
         layout.addLayout(box);
     }
 
-    layout.addTitle("AppData");
-    layout.addDescription("All local files like settings and cache files are "
-                          "store in this directory.");
-    layout.addButton("Open AppData directory", [] {
-        QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
-    });
+    layout.addTitle("Advanced");
 
-    layout.addTitle("Miscellaneous");
+    layout.addSubtitle("Chat title");
+    layout.addDescription("In live channels show:");
+    layout.addCheckbox("Uptime", s.headerUptime);
+    layout.addCheckbox("Viewer count", s.headerViewerCount);
+    layout.addCheckbox("Category", s.headerGame);
+    layout.addCheckbox("Title", s.headerStreamTitle);
+
+    layout.addSubtitle("R9K");
+    layout.addDescription(
+        "Hide similar messages by the same user. Toggle hidden "
+        "messages by pressing Ctrl+H.");
+    layout.addCheckbox("Hide similar messages", s.similarityEnabled);
+    //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
+    layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
+    layout.addCheckbox("Receive notification sounds from hidden messages",
+                       s.shownSimilarTriggerHighlights);
+    s.hideSimilar.connect(
+        []() { getApp()->windows->forceLayoutChannelViews(); }, false);
+    layout.addDropdown<float>(
+        "Similarity threshold", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
+        [](auto val) { return QString::number(val); },
+        [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
+    layout.addDropdown<int>(
+        "Maximum delay between messages",
+        {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
+        [](auto val) { return QString::number(val) + "s"; },
+        [](auto args) { return fuzzyToInt(args.value, 5); });
+    layout.addDropdown<int>(
+        "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
+        s.hideSimilarMaxMessagesToCheck,
+        [](auto val) { return QString::number(val); },
+        [](auto args) { return fuzzyToInt(args.value, 3); });
+
+    layout.addSubtitle("Visible badges");
+    layout.addCheckbox("Authority (staff, admin)",
+                       getSettings()->showBadgesGlobalAuthority);
+    layout.addCheckbox("Channel (broadcaster, moderator)",
+                       getSettings()->showBadgesChannelAuthority);
+    layout.addCheckbox("Subscriber ", getSettings()->showBadgesSubscription);
+    layout.addCheckbox("Vanity (prime, bits, subgifter)",
+                       getSettings()->showBadgesVanity);
+    layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
+
+    layout.addSubtitle("Miscellaneous");
 
     if (supportsIncognitoLinks())
     {
@@ -766,9 +567,11 @@ void GeneralPage::initLayout(SettingsLayout &layout)
     layout.addCheckbox("Ask for confirmation when uploading an image",
                        s.askOnImageUpload);
 
+    layout.addStretch();
+
     // invisible element for width
     auto inv = new BaseWidget(this);
-    inv->setScaleIndependantWidth(500);
+    //    inv->setScaleIndependantWidth(600);
     layout.addWidget(inv);
 }
 

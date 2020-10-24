@@ -188,6 +188,8 @@ MessagePtr TwitchMessageBuilder::build()
         this->senderIsBroadcaster = true;
     }
 
+    this->message().channelName = this->channel->getName();
+
     this->parseMessageID();
 
     this->parseRoomID();
@@ -531,6 +533,7 @@ void TwitchMessageBuilder::parseUsernameColor()
         if (const auto color = iterator.value().toString(); !color.isEmpty())
         {
             this->usernameColor_ = QColor(color);
+            this->message().usernameColor = this->usernameColor_;
             return;
         }
     }
@@ -538,6 +541,7 @@ void TwitchMessageBuilder::parseUsernameColor()
     if (getSettings()->colorizeNicknames && this->tags.contains("user-id"))
     {
         this->usernameColor_ = getRandomColor(this->tags.value("user-id"));
+        this->message().usernameColor = this->usernameColor_;
     }
 }
 
@@ -1072,6 +1076,9 @@ void TwitchMessageBuilder::appendTwitchBadges()
         this->emplace<BadgeElement>(badgeEmote.get(), badge.flag_)
             ->setTooltip(tooltip);
     }
+
+    this->message().badges = badges;
+    this->message().badgeInfos = badgeInfos;
 }
 
 void TwitchMessageBuilder::appendChatterinoBadges()

@@ -131,6 +131,10 @@ SOURCES += \
     src/controllers/commands/Command.cpp \
     src/controllers/commands/CommandController.cpp \
     src/controllers/commands/CommandModel.cpp \
+    src/controllers/filters/FilterModel.cpp \
+    src/controllers/filters/parser/FilterParser.cpp \
+    src/controllers/filters/parser/Tokenizer.cpp \
+    src/controllers/filters/parser/Types.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
@@ -220,6 +224,7 @@ SOURCES += \
     src/util/IncognitoBrowser.cpp \
     src/util/InitUpdateButton.cpp \
     src/util/JsonQuery.cpp \
+    src/util/LayoutHelper.cpp \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamerMode.cpp \
@@ -232,6 +237,7 @@ SOURCES += \
     src/widgets/BasePopup.cpp \
     src/widgets/BaseWidget.cpp \
     src/widgets/BaseWindow.cpp \
+    src/widgets/dialogs/ChannelFilterEditorDialog.cpp \
     src/widgets/dialogs/ColorPickerDialog.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
     src/widgets/dialogs/IrcConnectionEditor.cpp \
@@ -240,6 +246,7 @@ SOURCES += \
     src/widgets/dialogs/NotificationPopup.cpp \
     src/widgets/dialogs/QualityPopup.cpp \
     src/widgets/dialogs/SelectChannelDialog.cpp \
+    src/widgets/dialogs/SelectChannelFiltersDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
     src/widgets/listview/GenericItemDelegate.cpp \
     src/widgets/dialogs/switcher/NewTabItem.cpp \
@@ -275,7 +282,9 @@ SOURCES += \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
     src/widgets/settingspages/ExternalToolsPage.cpp \
+    src/widgets/settingspages/FiltersPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
+    src/widgets/settingspages/GeneralPageView.cpp \
     src/widgets/settingspages/HighlightingPage.cpp \
     src/widgets/settingspages/IgnoresPage.cpp \
     src/widgets/settingspages/KeyboardSettingsPage.cpp \
@@ -336,6 +345,12 @@ HEADERS += \
     src/controllers/commands/Command.hpp \
     src/controllers/commands/CommandController.hpp \
     src/controllers/commands/CommandModel.hpp \
+    src/controllers/filters/FilterModel.hpp \
+    src/controllers/filters/FilterRecord.hpp \
+    src/controllers/filters/FilterSet.hpp \
+    src/controllers/filters/parser/FilterParser.hpp \
+    src/controllers/filters/parser/Tokenizer.hpp \
+    src/controllers/filters/parser/Types.hpp \
     src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
     src/controllers/highlights/HighlightModel.hpp \
@@ -470,6 +485,7 @@ HEADERS += \
     src/widgets/BasePopup.hpp \
     src/widgets/BaseWidget.hpp \
     src/widgets/BaseWindow.hpp \
+    src/widgets/dialogs/ChannelFilterEditorDialog.hpp \
     src/widgets/dialogs/ColorPickerDialog.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/IrcConnectionEditor.hpp \
@@ -478,6 +494,7 @@ HEADERS += \
     src/widgets/dialogs/NotificationPopup.hpp \
     src/widgets/dialogs/QualityPopup.hpp \
     src/widgets/dialogs/SelectChannelDialog.hpp \
+    src/widgets/dialogs/SelectChannelFiltersDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
     src/widgets/dialogs/switcher/AbstractSwitcherItem.hpp \
     src/widgets/listview/GenericItemDelegate.hpp \
@@ -517,7 +534,9 @@ HEADERS += \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
     src/widgets/settingspages/ExternalToolsPage.hpp \
+    src/widgets/settingspages/FiltersPage.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
+    src/widgets/settingspages/GeneralPageView.hpp \
     src/widgets/settingspages/HighlightingPage.hpp \
     src/widgets/settingspages/IgnoresPage.hpp \
     src/widgets/settingspages/KeyboardSettingsPage.hpp \
