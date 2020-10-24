@@ -25,7 +25,7 @@ public:
 private:
     void loadFfzBadges();
     std::map<QString, int> badgeMap;
-    std::vector<EmotePtr> emotes;
+    std::vector<EmotePtr> badges;
     std::map<int, QColor> colorMap;
 };
 
