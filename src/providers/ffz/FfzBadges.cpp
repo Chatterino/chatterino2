@@ -27,7 +27,7 @@ boost::optional<EmotePtr> FfzBadges::getBadge(const UserId &id)
     auto it = this->badgeMap.find(id.string);
     if (it != this->badgeMap.end())
     {
-        return this->emotes[it->second];
+        return this->badges[it->second];
     }
     return boost::none;
 }
@@ -68,7 +68,7 @@ void FfzBadges::loadFfzBadges()
                             jsonUrls.value("4").toString()}},
                     Tooltip{jsonBadge.value("title").toString()}, Url{}};
 
-                this->emotes.push_back(
+                this->badges.push_back(
                     std::make_shared<const Emote>(std::move(emote)));
                 this->colorMap[index] =
                     QColor(jsonBadge.value("color").toString());
