@@ -1,4 +1,4 @@
-﻿#include "IrcMessageHandler.hpp"
+#include "IrcMessageHandler.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"

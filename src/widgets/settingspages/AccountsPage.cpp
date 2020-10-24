@@ -24,7 +24,9 @@ AccountsPage::AccountsPage()
     auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
 
     EditableModelView *view =
-        layout.emplace<EditableModelView>(app->accounts->createModel(nullptr))
+        layout
+            .emplace<EditableModelView>(app->accounts->createModel(nullptr),
+                                        false)
             .getElement();
 
     view->getTableView()->horizontalHeader()->setVisible(false);

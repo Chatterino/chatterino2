@@ -18,11 +18,16 @@ Args::Args(const QApplication &app)
 
     // Used internally by app to restart after unexpected crashes
     QCommandLineOption crashRecoveryOption("crash-recovery");
-    crashRecoveryOption.setHidden(true);
+    crashRecoveryOption.setFlags(QCommandLineOption::HiddenFromHelp);
+
+    // Added to ignore the parent-window option passed during native messaging
+    QCommandLineOption parentWindowOption("parent-window");
+    parentWindowOption.setFlags(QCommandLineOption::HiddenFromHelp);
 
     parser.addOptions({
         {{"v", "version"}, "Displays version information."},
         crashRecoveryOption,
+        parentWindowOption,
     });
     parser.addOption(QCommandLineOption(
         {"c", "channels"},
@@ -30,7 +35,18 @@ Args::Args(const QApplication &app)
         "specify platform. Only twitch channels are supported at the moment.\n"
         "If platform isn't specified, default is Twitch.",
         "t:channel1;t:channel2;..."));
-    parser.process(app);
+
+    if (!parser.parse(app.arguments()))
+    {
+        qDebug() << "Warning: Unhandled options:"
+                 << parser.unknownOptionNames();
+    }
+
+    if (parser.isSet("help"))
+    {
+        qDebug().noquote() << parser.helpText();
+        ::exit(EXIT_SUCCESS);
+    }
 
     const QStringList args = parser.positionalArguments();
     this->shouldRunBrowserExtensionHost =
