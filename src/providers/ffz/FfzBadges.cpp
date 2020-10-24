@@ -24,20 +24,20 @@ FfzBadges::FfzBadges()
 
 boost::optional<EmotePtr> FfzBadges::getBadge(const UserId &id)
 {
-    auto it = badgeMap.find(id.string);
-    if (it != badgeMap.end())
+    auto it = this->badgeMap.find(id.string);
+    if (it != this->badgeMap.end())
     {
-        return emotes[it->second];
+        return this->emotes[it->second];
     }
     return boost::none;
 }
 boost::optional<QColor> FfzBadges::getBadgeColor(const UserId &id)
 {
-    auto badgeIt = badgeMap.find(id.string);
-    if (badgeIt != badgeMap.end())
+    auto badgeIt = this->badgeMap.find(id.string);
+    if (badgeIt != this->badgeMap.end())
     {
-        auto colorIt = colorMap.find(badgeIt->second);
-        if (colorIt != colorMap.end())
+        auto colorIt = this->colorMap.find(badgeIt->second);
+        if (colorIt != this->colorMap.end())
         {
             return colorIt->second;
         }
@@ -68,9 +68,10 @@ void FfzBadges::loadFfzBadges()
                             jsonUrls.value("4").toString()}},
                     Tooltip{jsonBadge.value("title").toString()}, Url{}};
 
-                emotes.push_back(
+                this->emotes.push_back(
                     std::make_shared<const Emote>(std::move(emote)));
-                colorMap[index] = QColor(jsonBadge.value("color").toString());
+                this->colorMap[index] =
+                    QColor(jsonBadge.value("color").toString());
 
                 auto badgeId = QString::number(jsonBadge.value("id").toInt());
                 for (const auto &user : jsonRoot.value("users")
@@ -78,7 +79,7 @@ void FfzBadges::loadFfzBadges()
                                             .value(badgeId)
                                             .toArray())
                 {
-                    badgeMap[QString::number(user.toInt())] = index;
+                    this->badgeMap[QString::number(user.toInt())] = index;
                 }
                 ++index;
             }
