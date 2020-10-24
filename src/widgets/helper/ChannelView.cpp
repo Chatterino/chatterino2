@@ -594,7 +594,8 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                     }
                     else
                     {
-                        overridingFlags = MessageFlags(MessageFlag::DoNotLog);
+                        overridingFlags = message->flags;
+                        overridingFlags.get().set(MessageFlag::DoNotLog);
                     }
 
                     this->channel_->addMessage(message, overridingFlags);
@@ -787,6 +788,7 @@ void ChannelView::messageAppended(MessagePtr &message,
     if (!messageFlags->has(MessageFlag::DoNotTriggerNotification))
     {
         if (messageFlags->has(MessageFlag::Highlighted) &&
+            messageFlags->has(MessageFlag::ShowInMentions) &&
             !messageFlags->has(MessageFlag::Subscription))
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);

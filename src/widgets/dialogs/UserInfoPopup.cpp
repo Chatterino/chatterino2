@@ -23,7 +23,6 @@
 
 #include <QCheckBox>
 #include <QDesktopServices>
-#include <QLabel>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
@@ -164,10 +163,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED.arg(""))
                 .assign(&this->ui_.createdDateLabel);
-            vbox.emplace<Line>(true);
-            vbox.emplace<Label>("")
-                .assign(&this->ui_.followageSubageLabel)
-                ->setMinimumSize(this->minimumSizeHint());
+            vbox.emplace<Label>("").assign(&this->ui_.followageLabel);
+            vbox.emplace<Label>("").assign(&this->ui_.subageLabel);
         }
     }
 
@@ -667,34 +664,33 @@ void UserInfoPopup::updateUserData()
                     return;
                 }
 
-                QString labelText;
-
                 if (!subageInfo.followingSince.isEmpty())
                 {
                     QDateTime followedAt = QDateTime::fromString(
                         subageInfo.followingSince, Qt::ISODate);
                     QString followingSince = followedAt.toString("yyyy-MM-dd");
-                    labelText = "Following since " + followingSince;
+                    this->ui_.followageLabel->setText("❤ Following since " +
+                                                      followingSince);
                 }
 
                 if (subageInfo.isSubHidden)
                 {
-                    labelText += "\nSubscribtion status hidden";
+                    this->ui_.subageLabel->setText(
+                        "Subscription status hidden");
                 }
-                if (subageInfo.isSubbed)
+                else if (subageInfo.isSubbed)
                 {
-                    labelText += QString("\nTier %1 - Subscribed for %2 months")
-                                     .arg(subageInfo.subTier)
-                                     .arg(subageInfo.totalSubMonths);
+                    this->ui_.subageLabel->setText(
+                        QString("★ Tier %1 - Subscribed for %2 months")
+                            .arg(subageInfo.subTier)
+                            .arg(subageInfo.totalSubMonths));
                 }
                 else if (subageInfo.totalSubMonths)
                 {
-                    labelText +=
-                        QString("\nPreviously subscribed for %1 months")
-                            .arg(subageInfo.totalSubMonths);
+                    this->ui_.subageLabel->setText(
+                        QString("★ Previously subscribed for %1 months")
+                            .arg(subageInfo.totalSubMonths));
                 }
-
-                this->ui_.followageSubageLabel->setText(labelText);
             },
             [] {});
     };

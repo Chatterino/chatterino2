@@ -1,5 +1,6 @@
 * {
     font-size: <font-size>px;
+    font-family: "Segoe UI";
 }
 
 QCheckBox::indicator {
@@ -16,7 +17,6 @@ QScrollArea {
 }
 
 QScrollArea QFrame {
-    background: #222;
     border: none;
 }
 
@@ -25,10 +25,13 @@ QComboBox QFrame {
     border: 1px solid #66BCFF;
 }
 
-chatterino--SettingsPage {
+chatterino--SettingsDialog chatterino--SettingsDialogTab {
+    font-family: "Segoe UI";
+    font-size: 14;
+}
+
+chatterino--SettingsPage #generalSettingsScrollContent {
     background: #222;
-    /*border: 1px solid #555;
-    border-left: none;*/
 }
 
 chatterino--PageHeader {
@@ -41,6 +44,18 @@ chatterino--TitleLabel {
     color: #4FC3F7; /* Should this be same as accent color? */
 }
 
+chatterino--SubtitleLabel {
+    font-family: "Segoe UI light";
+    font-size: 16px;
+    color: #4FC3F7; /* Should this be same as accent color? */
+}
+
 chatterino--DescriptionLabel {
     color: #999;
+}
+
+chatterino--NavigationLabel {
+    font-family: "Segoe UI light";
+    font-size: 15px;
+    color: #A6DDF4;
 }

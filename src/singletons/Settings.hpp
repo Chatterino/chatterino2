@@ -214,6 +214,8 @@ public:
 
     BoolSetting enableSelfHighlight = {
         "/highlighting/selfHighlight/nameIsHighlightKeyword", true};
+    BoolSetting showSelfHighlightInMentions = {
+        "/highlighting/selfHighlight/showSelfHighlightInMentions", true};
     BoolSetting enableSelfHighlightSound = {
         "/highlighting/selfHighlight/enableSound", true};
     BoolSetting enableSelfHighlightTaskbar = {
