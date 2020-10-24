@@ -788,6 +788,7 @@ void ChannelView::messageAppended(MessagePtr &message,
     if (!messageFlags->has(MessageFlag::DoNotTriggerNotification))
     {
         if (messageFlags->has(MessageFlag::Highlighted) &&
+            messageFlags->has(MessageFlag::ShowInMentions) &&
             !messageFlags->has(MessageFlag::Subscription))
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);

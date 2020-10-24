@@ -7,9 +7,11 @@
 
 namespace chatterino {
 
+using Column = HighlightModel::Column;
+
 // commandmodel
 UserHighlightModel::UserHighlightModel(QObject *parent)
-    : SignalVectorModel<HighlightPhrase>(7, parent)
+    : SignalVectorModel<HighlightPhrase>(Column::COUNT, parent)
 {
 }
 
@@ -17,8 +19,6 @@ UserHighlightModel::UserHighlightModel(QObject *parent)
 HighlightPhrase UserHighlightModel::getItemFromRow(
     std::vector<QStandardItem *> &row, const HighlightPhrase &original)
 {
-    using Column = HighlightModel::Column;
-
     // In order for old messages to update their highlight color, we need to
     // update the highlight color here.
     auto highlightColor = original.getColor();
@@ -27,6 +27,7 @@ HighlightPhrase UserHighlightModel::getItemFromRow(
 
     return HighlightPhrase{
         row[Column::Pattern]->data(Qt::DisplayRole).toString(),
+        row[Column::ShowInMentions]->data(Qt::CheckStateRole).toBool(),
         row[Column::FlashTaskbar]->data(Qt::CheckStateRole).toBool(),
         row[Column::PlaySound]->data(Qt::CheckStateRole).toBool(),
         row[Column::UseRegex]->data(Qt::CheckStateRole).toBool(),
@@ -39,9 +40,8 @@ HighlightPhrase UserHighlightModel::getItemFromRow(
 void UserHighlightModel::getRowFromItem(const HighlightPhrase &item,
                                         std::vector<QStandardItem *> &row)
 {
-    using Column = HighlightModel::Column;
-
     setStringItem(row[Column::Pattern], item.getPattern());
+    setBoolItem(row[Column::ShowInMentions], item.showInMentions());
     setBoolItem(row[Column::FlashTaskbar], item.hasAlert());
     setBoolItem(row[Column::PlaySound], item.hasSound());
     setBoolItem(row[Column::UseRegex], item.isRegex());
