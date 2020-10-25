@@ -24,9 +24,10 @@
 
 namespace chatterino {
 
-SettingsDialog::SettingsDialog()
+SettingsDialog::SettingsDialog(QWidget *parent)
     : BaseWindow(
-          {BaseWindow::Flags::DisableCustomScaling, BaseWindow::Flags::Dialog})
+          {BaseWindow::Flags::DisableCustomScaling, BaseWindow::Flags::Dialog},
+          parent)
 {
     this->setWindowTitle("Chatterino Settings");
     this->resize(815, 600);
@@ -239,9 +240,10 @@ SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
     return nullptr;
 }
 
-void SettingsDialog::showDialog(SettingsDialogPreference preferredTab)
+void SettingsDialog::showDialog(QWidget *parent,
+                                SettingsDialogPreference preferredTab)
 {
-    static SettingsDialog *instance = new SettingsDialog();
+    static SettingsDialog *instance = new SettingsDialog(parent);
     static bool hasShownBefore = false;
     if (hasShownBefore)
         instance->refresh();

@@ -1997,7 +1997,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         break;
 
         case Link::OpenAccountsPage: {
-            SettingsDialog::showDialog(SettingsDialogPreference::Accounts);
+            SettingsDialog::showDialog(this,
+                                       SettingsDialogPreference::Accounts);
         }
         break;
 
