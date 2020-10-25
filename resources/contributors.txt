@@ -4,7 +4,7 @@
 
 # Adding yourself? Copy and paste this template at the bottom of this file and fill in the fields in a PR!
 # Name | Link | Avatar (Loaded as a resource) | Title (description of work done).
-#
+
 # Avatar should be located in avatars/ directory. Its size should be 128x128 (get it from https://github.com/username.png?size=128).
 # Make sure to reduce avatar's size as much as possible with tool like pngcrush or optipng and run ./generate_resources.py
 # Contributor is what we use for someone who has contributed in general (like sent a programming-related PR)
