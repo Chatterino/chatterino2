@@ -43,6 +43,10 @@ SettingsDialog::SettingsDialog(QWidget *parent)
         this->ui_.search->setFocus();
         this->ui_.search->selectAll();
     });
+
+    // Disable the ? button in the titlebar until we decide to use it
+    this->setWindowFlags(this->windowFlags() &
+                         ~Qt::WindowContextHelpButtonHint);
 }
 
 void SettingsDialog::initUi()
