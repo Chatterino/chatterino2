@@ -13,13 +13,10 @@
 #include <map>
 
 namespace chatterino {
+
 void FfzBadges::initialize(Settings &settings, Paths &paths)
 {
     this->loadFfzBadges();
-}
-
-FfzBadges::FfzBadges()
-{
 }
 
 boost::optional<EmotePtr> FfzBadges::getBadge(const UserId &id)

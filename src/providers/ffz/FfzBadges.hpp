@@ -17,7 +17,7 @@ class FfzBadges : public Singleton
 {
 public:
     virtual void initialize(Settings &settings, Paths &paths) override;
-    FfzBadges();
+    FfzBadges() = default;
 
     boost::optional<EmotePtr> getBadge(const UserId &id);
     boost::optional<QColor> getBadgeColor(const UserId &id);
