@@ -165,8 +165,8 @@ ColorButton *GeneralPageView::addColorButton(
     layout->addWidget(colorButton);
     this->addLayout(layout);
     QObject::connect(
-        colorButton, &ColorButton::clicked, [&setting, colorButton]() {
-            auto dialog = new ColorPickerDialog(QColor(setting));
+        colorButton, &ColorButton::clicked, [this, &setting, colorButton]() {
+            auto dialog = new ColorPickerDialog(QColor(setting), this);
             dialog->setAttribute(Qt::WA_DeleteOnClose);
             dialog->show();
             dialog->closed.connect([&setting, colorButton, &dialog] {
