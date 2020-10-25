@@ -496,6 +496,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Vanity (prime, bits, subgifter)",
                        getSettings()->showBadgesVanity);
     layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
+    layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
+                       getSettings()->showBadgesFfz);
 
     layout.addSubtitle("Miscellaneous");
 

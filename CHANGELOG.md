@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added support for FrankerFaceZ badges. (#2101, part of #1658)
 - Minor: Added a navigation list to the settings and reordered them.
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
@@ -37,6 +38,7 @@
 - Bugfix: Fixed tooltip didn't show in `EmotePopup` depending on the `Link preview` setting enabled or no (#2008)
 - Bugfix: Fixed Stream thumbnail not updating after using the "Change channel" feature (#2074, #2080)
 - Bugfix: Fix Tab key not working in the Ctrl+K Quick Switcher (#2065)
+- Bugfix: Fix bug preventing moderator actions when viewing a user card from the search window (#1089)
 
 ## 2.2.0
 
