@@ -38,6 +38,7 @@
 - Bugfix: Fixed tooltip didn't show in `EmotePopup` depending on the `Link preview` setting enabled or no (#2008)
 - Bugfix: Fixed Stream thumbnail not updating after using the "Change channel" feature (#2074, #2080)
 - Bugfix: Fix Tab key not working in the Ctrl+K Quick Switcher (#2065)
+- Bugfix: Fix bug preventing moderator actions when viewing a user card from the search window (#1089)
 
 ## 2.2.0
 
