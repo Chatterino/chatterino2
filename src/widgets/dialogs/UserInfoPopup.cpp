@@ -116,9 +116,10 @@ FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
     BaseWindow::FramelessDraggable};
 #endif
 
-UserInfoPopup::UserInfoPopup(bool closeAutomatically)
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
     : BaseWindow(closeAutomatically ? userInfoPopupFlagsCloseAutomatically
-                                    : userInfoPopupFlags)
+                                    : userInfoPopupFlags,
+                 parent)
     , hack_(new bool)
 {
     this->setWindowTitle("Usercard");
