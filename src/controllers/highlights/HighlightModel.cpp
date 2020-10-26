@@ -25,7 +25,7 @@ HighlightPhrase HighlightModel::getItemFromRow(
 
     return HighlightPhrase{
         row[Column::Pattern]->data(Qt::DisplayRole).toString(),
-        row[Column::ShowInMentions]->data(Qt::DisplayRole).toBool(),
+        row[Column::ShowInMentions]->data(Qt::CheckStateRole).toBool(),
         row[Column::FlashTaskbar]->data(Qt::CheckStateRole).toBool(),
         row[Column::PlaySound]->data(Qt::CheckStateRole).toBool(),
         row[Column::UseRegex]->data(Qt::CheckStateRole).toBool(),
