@@ -159,7 +159,7 @@ jobs:
     steps:
       - name: Create release
         id: create_release
-        uses: pajlada/create-release@v2
+        uses: pajlada/create-release@v2.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
