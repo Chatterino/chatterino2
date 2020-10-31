@@ -240,8 +240,8 @@ void SplitHeader::initializeLayout()
                             if (getSettings()->moderationActions.empty())
                             {
                                 getApp()->windows->showSettingsDialog(
-                                    SettingsDialogPreference::
-                                        ModerationActions);
+                                    this, SettingsDialogPreference::
+                                              ModerationActions);
                                 this->split_->setModerationMode(true);
                             }
                             else
@@ -258,6 +258,7 @@ void SplitHeader::initializeLayout()
                         case Qt::RightButton:
                         case Qt::MiddleButton:
                             getApp()->windows->showSettingsDialog(
+                                this,
                                 SettingsDialogPreference::ModerationActions);
                             break;
                     }

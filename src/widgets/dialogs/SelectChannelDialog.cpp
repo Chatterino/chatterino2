@@ -4,6 +4,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/IrcConnectionEditor.hpp"
 #include "widgets/helper/NotebookTab.hpp"
@@ -25,7 +26,9 @@
 namespace chatterino {
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
-    : BaseWindow(BaseWindow::EnableCustomFrame, parent)
+    : BaseWindow(
+          {BaseWindow::Flags::EnableCustomFrame, BaseWindow::Flags::Dialog},
+          parent)
     , selectedChannel_(Channel::getEmpty())
 {
     this->setWindowTitle("Select a channel to join");
@@ -213,17 +216,24 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     this->ui_.twitch.channel->setFocus();
 
     // Shortcuts
-    auto *shortcut_ok = new QShortcut(QKeySequence("Return"), this);
-    QObject::connect(shortcut_ok, &QShortcut::activated, [=] { this->ok(); });
-    auto *shortcut_cancel = new QShortcut(QKeySequence("Esc"), this);
-    QObject::connect(shortcut_cancel, &QShortcut::activated,
-                     [=] { this->close(); });
+    createWindowShortcut(this, "Return", [=] {
+        this->ok();  //
+    });
+    createWindowShortcut(this, "Esc", [=] {
+        this->close();  //
+    });
 
     // restore ui state
     // fourtf: enable when releasing irc
     if (getSettings()->enableExperimentalIrc)
     {
         this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
+        createWindowShortcut(this, "Ctrl+Tab", [=] {
+            this->ui_.notebook->selectNextTab();  //
+        });
+        createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
+            this->ui_.notebook->selectPreviousTab();  //
+        });
     }
 
     this->ui_.irc.servers->getTableView()->selectRow(

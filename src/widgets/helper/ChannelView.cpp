@@ -1937,7 +1937,8 @@ void ChannelView::hideEvent(QHideEvent *)
 
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
-    auto *userPopup = new UserInfoPopup(getSettings()->autoCloseUserPopup);
+    auto *userPopup =
+        new UserInfoPopup(getSettings()->autoCloseUserPopup, this);
     userPopup->setData(userName, this->hasSourceChannel()
                                      ? this->sourceChannel_
                                      : this->underlyingChannel_);
@@ -1997,7 +1998,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         break;
 
         case Link::OpenAccountsPage: {
-            SettingsDialog::showDialog(SettingsDialogPreference::Accounts);
+            SettingsDialog::showDialog(this,
+                                       SettingsDialogPreference::Accounts);
         }
         break;
 
