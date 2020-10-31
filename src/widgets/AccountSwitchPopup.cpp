@@ -30,8 +30,9 @@ AccountSwitchPopup::AccountSwitchPopup(QWidget *parent)
     hbox->addWidget(manageAccountsButton);
     vbox->addLayout(hbox);
 
-    connect(manageAccountsButton, &QPushButton::clicked, []() {
-        SettingsDialog::showDialog(SettingsDialogPreference::Accounts);  //
+    connect(manageAccountsButton, &QPushButton::clicked, [this]() {
+        SettingsDialog::showDialog(this,
+                                   SettingsDialogPreference::Accounts);  //
     });
 
     this->getLayoutContainer()->setLayout(vbox);

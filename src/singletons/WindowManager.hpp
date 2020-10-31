@@ -30,6 +30,7 @@ public:
     static IndirectChannel decodeChannel(const SplitDescriptor &descriptor);
 
     void showSettingsDialog(
+        QWidget *parent,
         SettingsDialogPreference preference = SettingsDialogPreference());
 
     // Show the account selector widget at point

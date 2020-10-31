@@ -32,7 +32,7 @@ machgo | https://github.com/machgo |  | Contributor
 TranRed | https://github.com/TranRed |  | Contributor
 RAnders00 | https://github.com/RAnders00 | | Contributor
 YungLPR | https://github.com/leon-richardt | | Contributor
-Mm2PL | https://github.com/mm2pl | | Contributor
+Mm2PL | https://github.com/mm2pl | :/avatars/mm2pl.png | Contributor
 gempir | https://github.com/gempir | | Contributor
 mfmarlow | https://github.com/mfmarlow | | Contributor
 dnsge | https://github.com/dnsge | | Contributor

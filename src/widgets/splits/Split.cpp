@@ -57,7 +57,7 @@ namespace {
                            const QString &title, const QString &description)
     {
         auto window =
-            new BaseWindow(BaseWindow::Flags::EnableCustomFrame, parent);
+            new BasePopup(BaseWindow::Flags::EnableCustomFrame, parent);
         window->setWindowTitle("Chatterino - " + title);
         window->setAttribute(Qt::WA_DeleteOnClose);
         auto layout = new QVBoxLayout();
@@ -120,6 +120,7 @@ Split::Split(QWidget *parent)
     createShortcut(this, "F10", [] {
         auto *popup = new DebugPopup;
         popup->setAttribute(Qt::WA_DeleteOnClose);
+        popup->setWindowTitle("Chatterino - Debug popup");
         popup->show();
     });
 
