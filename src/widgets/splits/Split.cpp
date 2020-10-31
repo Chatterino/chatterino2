@@ -292,7 +292,7 @@ void Split::onAccountSelected()
     else
     {
         placeholderText =
-            QString("Chat as %1...")
+            QString("Send message as %1...")
                 .arg(getApp()->accounts->twitch.getCurrent()->getUserName());
     }
 
