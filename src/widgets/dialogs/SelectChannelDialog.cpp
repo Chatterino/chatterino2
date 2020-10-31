@@ -214,18 +214,24 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     this->ui_.twitch.channel->setFocus();
 
     // Shortcuts
-    createWindowShortcut(this, "Return", [=] { this->ok(); });
-    createWindowShortcut(this, "Esc", [=] { this->close(); });
+    createWindowShortcut(this, "Return", [=] {
+        this->ok();  //
+    });
+    createWindowShortcut(this, "Esc", [=] {
+        this->close();  //
+    });
 
     // restore ui state
     // fourtf: enable when releasing irc
     if (getSettings()->enableExperimentalIrc)
     {
         this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
-        createWindowShortcut(this, "Ctrl+Tab",
-                             [=] { this->ui_.notebook->selectNextTab(); });
-        createWindowShortcut(this, "CTRL+Shift+Tab",
-                             [=] { this->ui_.notebook->selectPreviousTab(); });
+        createWindowShortcut(this, "Ctrl+Tab", [=] {
+            this->ui_.notebook->selectNextTab();  //
+        });
+        createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
+            this->ui_.notebook->selectPreviousTab();  //
+        });
     }
 
     this->ui_.irc.servers->getTableView()->selectRow(
