@@ -53,6 +53,8 @@ namespace {
                            SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 
 #endif
+            messageBox.setWindowTitle(
+                "Chatterino - invalid account credentials");
             messageBox.setIcon(QMessageBox::Critical);
             messageBox.setText(errors.join("<br />"));
             messageBox.setStandardButtons(QMessageBox::Ok);
@@ -89,6 +91,8 @@ BasicLoginWidget::BasicLoginWidget()
 
     this->ui_.loginButton.setText("Log in (Opens in browser)");
     this->ui_.pasteCodeButton.setText("Paste login info");
+    this->ui_.unableToOpenBrowserHelper.setWindowTitle(
+        "Chatterino - unable to open in browser");
     this->ui_.unableToOpenBrowserHelper.setWordWrap(true);
     this->ui_.unableToOpenBrowserHelper.hide();
     this->ui_.unableToOpenBrowserHelper.setText(
@@ -243,12 +247,12 @@ LoginWidget::LoginWidget()
                    SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
 #endif
 
-    this->setLayout(&this->ui_.mainLayout);
+    this->setWindowTitle("Chatterino - add new account");
 
+    this->setLayout(&this->ui_.mainLayout);
     this->ui_.mainLayout.addWidget(&this->ui_.tabWidget);
 
     this->ui_.tabWidget.addTab(&this->ui_.basic, "Basic");
-
     this->ui_.tabWidget.addTab(&this->ui_.advanced, "Advanced");
 
     this->ui_.buttonBox.setStandardButtons(QDialogButtonBox::Close);

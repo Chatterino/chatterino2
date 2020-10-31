@@ -230,9 +230,11 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
     auto *a = new QLabel("<a href=\"" + website + "\">" + name + "</a>");
     a->setOpenExternalLinks(true);
     auto *b = new QLabel("<a href=\"" + licenseLink + "\">show license</a>");
-    QObject::connect(b, &QLabel::linkActivated, [licenseLink] {
+    QObject::connect(b, &QLabel::linkActivated, [licenseLink, name] {
         auto *edit = new QTextEdit;
 
+        edit->setWindowTitle(
+            QString("Chatterino - showing %1's license").arg(name));
         QFile file(licenseLink);
         file.open(QIODevice::ReadOnly);
         edit->setText(file.readAll());
