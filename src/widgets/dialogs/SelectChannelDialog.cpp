@@ -26,7 +26,9 @@
 namespace chatterino {
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
-    : BaseWindow(BaseWindow::EnableCustomFrame, parent)
+    : BaseWindow(
+          {BaseWindow::Flags::EnableCustomFrame, BaseWindow::Flags::Dialog},
+          parent)
     , selectedChannel_(Channel::getEmpty())
 {
     this->setWindowTitle("Select a channel to join");

@@ -1,10 +1,15 @@
 #include "QualityPopup.hpp"
+#include "Application.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/StreamLink.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 
 QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
-    : channelName_(_channelName)
+    : BasePopup({},
+                static_cast<QWidget *>(&(getApp()->windows->getMainWindow())))
+    , channelName_(_channelName)
 {
     this->ui_.okButton.setText("OK");
     this->ui_.cancelButton.setText("Cancel");

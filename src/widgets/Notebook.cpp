@@ -652,7 +652,7 @@ void SplitNotebook::addCustomButtons()
     settingsBtn->setIcon(NotebookButton::Settings);
 
     QObject::connect(settingsBtn, &NotebookButton::leftClicked,
-                     [] { getApp()->windows->showSettingsDialog(); });
+                     [this] { getApp()->windows->showSettingsDialog(this); });
 
     // account
     auto userBtn = this->addCustomButton();
