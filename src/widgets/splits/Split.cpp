@@ -132,7 +132,7 @@ Split::Split(QWidget *parent)
 
     this->input_->ui_.textEdit->installEventFilter(parent);
 
-    this->SignalHolder_.managedConnect(
+    this->signalHolder_.managedConnect(
         getApp()->accounts->twitch.currentUserChanged,
         [this] { this->onAccountSelected(); });
     this->onAccountSelected();

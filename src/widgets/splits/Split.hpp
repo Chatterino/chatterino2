@@ -120,7 +120,7 @@ private:
     pajlada::Signals::Connection roomModeChangedConnection_;
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
-    pajlada::Signals::SignalHolder SignalHolder_;
+    pajlada::Signals::SignalHolder signalHolder_;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
