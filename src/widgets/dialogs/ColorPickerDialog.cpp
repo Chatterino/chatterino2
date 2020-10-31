@@ -123,7 +123,7 @@ QColor ColorPickerDialog::selectedColor() const
 
 void ColorPickerDialog::closeEvent(QCloseEvent *)
 {
-    this->closed.invoke();
+    this->closed.invoke(this->selectedColor());
 }
 
 void ColorPickerDialog::themeChangedEvent()

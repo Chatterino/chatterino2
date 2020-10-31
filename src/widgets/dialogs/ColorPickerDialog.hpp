@@ -42,7 +42,7 @@ public:
      */
     QColor selectedColor() const;
 
-    pajlada::Signals::NoArgSignal closed;
+    pajlada::Signals::Signal<QColor> closed;
 
 protected:
     void closeEvent(QCloseEvent *);

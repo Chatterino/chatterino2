@@ -169,9 +169,7 @@ ColorButton *GeneralPageView::addColorButton(
             auto dialog = new ColorPickerDialog(QColor(setting), this);
             dialog->setAttribute(Qt::WA_DeleteOnClose);
             dialog->show();
-            dialog->closed.connect([&setting, colorButton, &dialog] {
-                QColor selected = dialog->selectedColor();
-
+            dialog->closed.connect([&setting, colorButton](QColor selected) {
                 if (selected.isValid())
                 {
                     setting = selected.name(QColor::HexArgb);
