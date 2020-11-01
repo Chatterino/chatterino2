@@ -49,10 +49,12 @@ namespace {
 using SplitNode = SplitContainer::Node;
 using SplitDirection = SplitContainer::Direction;
 
-void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
+void WindowManager::showSettingsDialog(QWidget *parent,
+                                       SettingsDialogPreference preference)
 {
-    QTimer::singleShot(
-        80, [preference] { SettingsDialog::showDialog(preference); });
+    QTimer::singleShot(80, [parent, preference] {
+        SettingsDialog::showDialog(parent, preference);
+    });
 }
 
 void WindowManager::showAccountSelectPopup(QPoint point)
@@ -93,6 +95,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
     this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
+    this->wordFlagsListener_.addSetting(settings->showBadgesFfz);
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
@@ -156,6 +159,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->showBadgesVanity ? MEF::BadgeVanity : MEF::None);
     flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
                                              : MEF::None);
+    flags.set(settings->showBadgesFfz ? MEF::BadgeFfz : MEF::None);
 
     // username
     flags.set(MEF::Username);

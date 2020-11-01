@@ -594,7 +594,8 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                     }
                     else
                     {
-                        overridingFlags = MessageFlags(MessageFlag::DoNotLog);
+                        overridingFlags = message->flags;
+                        overridingFlags.get().set(MessageFlag::DoNotLog);
                     }
 
                     this->channel_->addMessage(message, overridingFlags);
@@ -787,6 +788,7 @@ void ChannelView::messageAppended(MessagePtr &message,
     if (!messageFlags->has(MessageFlag::DoNotTriggerNotification))
     {
         if (messageFlags->has(MessageFlag::Highlighted) &&
+            messageFlags->has(MessageFlag::ShowInMentions) &&
             !messageFlags->has(MessageFlag::Subscription))
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
@@ -1935,7 +1937,8 @@ void ChannelView::hideEvent(QHideEvent *)
 
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
-    auto *userPopup = new UserInfoPopup(getSettings()->autoCloseUserPopup);
+    auto *userPopup =
+        new UserInfoPopup(getSettings()->autoCloseUserPopup, this);
     userPopup->setData(userName, this->hasSourceChannel()
                                      ? this->sourceChannel_
                                      : this->underlyingChannel_);
@@ -1995,7 +1998,8 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         break;
 
         case Link::OpenAccountsPage: {
-            SettingsDialog::showDialog(SettingsDialogPreference::Accounts);
+            SettingsDialog::showDialog(this,
+                                       SettingsDialogPreference::Accounts);
         }
         break;
 

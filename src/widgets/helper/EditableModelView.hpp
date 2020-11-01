@@ -13,7 +13,7 @@ namespace chatterino {
 class EditableModelView : public QWidget
 {
 public:
-    EditableModelView(QAbstractTableModel *model);
+    EditableModelView(QAbstractTableModel *model, bool movable = true);
 
     void setTitles(std::initializer_list<QString> titles);
 
