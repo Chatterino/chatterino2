@@ -1,5 +1,3 @@
-#pragma once
-
 #ifdef __cplusplus
 #    include <irccommand.h>
 #    include <ircconnection.h>
