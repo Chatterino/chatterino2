@@ -253,6 +253,24 @@ MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
     return element;
 }
 
+// FFZ Badge
+FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
+                                 MessageElementFlags flags_, QColor &color)
+    : BadgeElement(data, flags_)
+{
+    this->color = color;
+}
+
+MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    auto element =
+        (new ImageWithBackgroundLayoutElement(*this, image, size, this->color))
+            ->setLink(this->getLink());
+
+    return element;
+}
+
 // TEXT
 TextElement::TextElement(const QString &text, MessageElementFlags flags,
                          const MessageColor &color, FontStyle style)

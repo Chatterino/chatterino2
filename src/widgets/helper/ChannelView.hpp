@@ -32,7 +32,7 @@ using MessageFlags = FlagsEnum<MessageFlag>;
 class MessageLayout;
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;
 
-enum class MessageElementFlag;
+enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 class Scrollbar;

@@ -14,7 +14,7 @@ class Paths;
 class Window;
 class SplitContainer;
 
-enum class MessageElementFlag;
+enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 enum class WindowType;
 
@@ -30,6 +30,7 @@ public:
     static IndirectChannel decodeChannel(const SplitDescriptor &descriptor);
 
     void showSettingsDialog(
+        QWidget *parent,
         SettingsDialogPreference preference = SettingsDialogPreference());
 
     // Show the account selector widget at point

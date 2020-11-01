@@ -26,6 +26,7 @@ private:
     ExpressionPtr parseParentheses();
     ExpressionPtr parseCondition();
     ExpressionPtr parseValue();
+    ExpressionPtr parseList();
 
     void errorLog(const QString &text, bool expand = false);
 

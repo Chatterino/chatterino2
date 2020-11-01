@@ -123,7 +123,7 @@ QColor ColorPickerDialog::selectedColor() const
 
 void ColorPickerDialog::closeEvent(QCloseEvent *)
 {
-    this->closed.invoke();
+    this->closed.invoke(this->selectedColor());
 }
 
 void ColorPickerDialog::themeChangedEvent()
@@ -264,6 +264,7 @@ void ColorPickerDialog::initDefaultColors(LayoutCreator<QWidget> &creator)
 
 void ColorPickerDialog::initColorPicker(LayoutCreator<QWidget> &creator)
 {
+    this->setWindowTitle("Chatterino - color picker");
     auto cpPanel = creator.setLayoutType<QHBoxLayout>();
 
     /*

@@ -170,6 +170,7 @@ SOURCES += \
     src/providers/chatterino/ChatterinoBadges.cpp \
     src/providers/colors/ColorProvider.cpp \
     src/providers/emoji/Emojis.cpp \
+    src/providers/ffz/FfzBadges.cpp \
     src/providers/ffz/FfzEmotes.cpp \
     src/providers/irc/AbstractIrcServer.cpp \
     src/providers/irc/Irc2.cpp \
@@ -224,6 +225,7 @@ SOURCES += \
     src/util/IncognitoBrowser.cpp \
     src/util/InitUpdateButton.cpp \
     src/util/JsonQuery.cpp \
+    src/util/LayoutHelper.cpp \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamerMode.cpp \
@@ -283,6 +285,7 @@ SOURCES += \
     src/widgets/settingspages/ExternalToolsPage.cpp \
     src/widgets/settingspages/FiltersPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
+    src/widgets/settingspages/GeneralPageView.cpp \
     src/widgets/settingspages/HighlightingPage.cpp \
     src/widgets/settingspages/IgnoresPage.cpp \
     src/widgets/settingspages/KeyboardSettingsPage.cpp \
@@ -394,6 +397,7 @@ HEADERS += \
     src/providers/chatterino/ChatterinoBadges.hpp \
     src/providers/colors/ColorProvider.hpp \
     src/providers/emoji/Emojis.hpp \
+    src/providers/ffz/FfzBadges.hpp \
     src/providers/ffz/FfzEmotes.hpp \
     src/providers/irc/AbstractIrcServer.hpp \
     src/providers/irc/Irc2.hpp \
@@ -534,6 +538,7 @@ HEADERS += \
     src/widgets/settingspages/ExternalToolsPage.hpp \
     src/widgets/settingspages/FiltersPage.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
+    src/widgets/settingspages/GeneralPageView.hpp \
     src/widgets/settingspages/HighlightingPage.hpp \
     src/widgets/settingspages/IgnoresPage.hpp \
     src/widgets/settingspages/KeyboardSettingsPage.hpp \

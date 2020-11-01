@@ -127,6 +127,7 @@ public:
                                           true};
     BoolSetting showBadgesVanity = {"/appearance/badges/vanity", true};
     BoolSetting showBadgesChatterino = {"/appearance/badges/chatterino", true};
+    BoolSetting showBadgesFfz = {"/appearance/badges/ffz", true};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
@@ -213,6 +214,8 @@ public:
 
     BoolSetting enableSelfHighlight = {
         "/highlighting/selfHighlight/nameIsHighlightKeyword", true};
+    BoolSetting showSelfHighlightInMentions = {
+        "/highlighting/selfHighlight/showSelfHighlightInMentions", true};
     BoolSetting enableSelfHighlightSound = {
         "/highlighting/selfHighlight/enableSound", true};
     BoolSetting enableSelfHighlightTaskbar = {

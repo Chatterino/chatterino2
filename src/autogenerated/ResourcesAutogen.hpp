@@ -10,7 +10,9 @@ public:
 
     struct {
         QPixmap fourtf;
+        QPixmap mm2pl;
         QPixmap pajlada;
+        QPixmap zneix;
     } avatars;
     struct {
         QPixmap addSplit;
