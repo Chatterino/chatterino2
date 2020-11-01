@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
+#include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QFont>
@@ -95,6 +96,7 @@ protected:
 private:
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
+    void onAccountSelected();
 
     SplitContainer *container_;
     IndirectChannel channel_;
@@ -118,6 +120,7 @@ private:
     pajlada::Signals::Connection roomModeChangedConnection_;
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
+    pajlada::Signals::SignalHolder signalHolder_;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 

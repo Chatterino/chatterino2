@@ -1,5 +1,6 @@
 #include "widgets/splits/Split.hpp"
 
+#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
@@ -131,6 +132,11 @@ Split::Split(QWidget *parent)
     // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
 
     this->input_->ui_.textEdit->installEventFilter(parent);
+
+    this->signalHolder_.managedConnect(
+        getApp()->accounts->twitch.currentUserChanged,
+        [this] { this->onAccountSelected(); });
+    this->onAccountSelected();
 
     this->view_->mouseDown.connect([this](QMouseEvent *) {  //
         this->giveFocus(Qt::MouseFocusReason);
@@ -273,6 +279,25 @@ bool Split::isInContainer() const
 void Split::setContainer(SplitContainer *container)
 {
     this->container_ = container;
+}
+
+void Split::onAccountSelected()
+{
+    auto user = getApp()->accounts->twitch.getCurrent();
+    QString placeholderText;
+
+    if (user->isAnon())
+    {
+        placeholderText = "Log in to send messages...";
+    }
+    else
+    {
+        placeholderText =
+            QString("Send message as %1...")
+                .arg(getApp()->accounts->twitch.getCurrent()->getUserName());
+    }
+
+    this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
 }
 
 IndirectChannel Split::getIndirectChannel()

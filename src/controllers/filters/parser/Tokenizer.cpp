@@ -103,6 +103,12 @@ TokenType Tokenizer::tokenize(const QString &text)
         return TokenType::LP;
     else if (text == ")")
         return TokenType::RP;
+    else if (text == "{")
+        return TokenType::LIST_START;
+    else if (text == "}")
+        return TokenType::LIST_END;
+    else if (text == ",")
+        return TokenType::COMMA;
     else if (text == "+")
         return TokenType::PLUS;
     else if (text == "-")
