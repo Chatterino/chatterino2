@@ -104,13 +104,22 @@ namespace {
 
 }  // namespace
 
-UserInfoPopup::UserInfoPopup(bool closeAutomatically)
-    : BaseWindow(
-          closeAutomatically
-              ? FlagsEnum<BaseWindow::Flags>{BaseWindow::EnableCustomFrame,
-                                             BaseWindow::Frameless,
-                                             BaseWindow::FramelessDraggable}
-              : BaseWindow::EnableCustomFrame)
+#ifdef Q_OS_LINUX
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::Dialog,
+                                                BaseWindow::EnableCustomFrame};
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
+    BaseWindow::EnableCustomFrame};
+#else
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::EnableCustomFrame};
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
+    BaseWindow::EnableCustomFrame, BaseWindow::Frameless,
+    BaseWindow::FramelessDraggable};
+#endif
+
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
+    : BaseWindow(closeAutomatically ? userInfoPopupFlagsCloseAutomatically
+                                    : userInfoPopupFlags,
+                 parent)
     , hack_(new bool)
 {
     this->setWindowTitle("Usercard");

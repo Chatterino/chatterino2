@@ -24,11 +24,13 @@
 
 namespace chatterino {
 
-SettingsDialog::SettingsDialog()
-    : BaseWindow(BaseWindow::DisableCustomScaling)
+SettingsDialog::SettingsDialog(QWidget *parent)
+    : BaseWindow(
+          {BaseWindow::Flags::DisableCustomScaling, BaseWindow::Flags::Dialog},
+          parent)
 {
     this->setWindowTitle("Chatterino Settings");
-    this->resize(815, 600);
+    this->resize(915, 600);
     this->themeChangedEvent();
     this->scaleChangedEvent(this->scale());
 
@@ -41,6 +43,10 @@ SettingsDialog::SettingsDialog()
         this->ui_.search->setFocus();
         this->ui_.search->selectAll();
     });
+
+    // Disable the ? button in the titlebar until we decide to use it
+    this->setWindowFlags(this->windowFlags() &
+                         ~Qt::WindowContextHelpButtonHint);
 }
 
 void SettingsDialog::initUi()
@@ -238,9 +244,10 @@ SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
     return nullptr;
 }
 
-void SettingsDialog::showDialog(SettingsDialogPreference preferredTab)
+void SettingsDialog::showDialog(QWidget *parent,
+                                SettingsDialogPreference preferredTab)
 {
-    static SettingsDialog *instance = new SettingsDialog();
+    static SettingsDialog *instance = new SettingsDialog(parent);
     static bool hasShownBefore = false;
     if (hasShownBefore)
         instance->refresh();

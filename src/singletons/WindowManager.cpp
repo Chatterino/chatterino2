@@ -49,10 +49,12 @@ namespace {
 using SplitNode = SplitContainer::Node;
 using SplitDirection = SplitContainer::Direction;
 
-void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
+void WindowManager::showSettingsDialog(QWidget *parent,
+                                       SettingsDialogPreference preference)
 {
-    QTimer::singleShot(
-        80, [preference] { SettingsDialog::showDialog(preference); });
+    QTimer::singleShot(80, [parent, preference] {
+        SettingsDialog::showDialog(parent, preference);
+    });
 }
 
 void WindowManager::showAccountSelectPopup(QPoint point)

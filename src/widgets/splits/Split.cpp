@@ -1,5 +1,6 @@
 #include "widgets/splits/Split.hpp"
 
+#include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
@@ -57,7 +58,7 @@ namespace {
                            const QString &title, const QString &description)
     {
         auto window =
-            new BaseWindow(BaseWindow::Flags::EnableCustomFrame, parent);
+            new BasePopup(BaseWindow::Flags::EnableCustomFrame, parent);
         window->setWindowTitle("Chatterino - " + title);
         window->setAttribute(Qt::WA_DeleteOnClose);
         auto layout = new QVBoxLayout();
@@ -120,6 +121,7 @@ Split::Split(QWidget *parent)
     createShortcut(this, "F10", [] {
         auto *popup = new DebugPopup;
         popup->setAttribute(Qt::WA_DeleteOnClose);
+        popup->setWindowTitle("Chatterino - Debug popup");
         popup->show();
     });
 
@@ -130,6 +132,11 @@ Split::Split(QWidget *parent)
     // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
 
     this->input_->ui_.textEdit->installEventFilter(parent);
+
+    this->signalHolder_.managedConnect(
+        getApp()->accounts->twitch.currentUserChanged,
+        [this] { this->onAccountSelected(); });
+    this->onAccountSelected();
 
     this->view_->mouseDown.connect([this](QMouseEvent *) {  //
         this->giveFocus(Qt::MouseFocusReason);
@@ -272,6 +279,25 @@ bool Split::isInContainer() const
 void Split::setContainer(SplitContainer *container)
 {
     this->container_ = container;
+}
+
+void Split::onAccountSelected()
+{
+    auto user = getApp()->accounts->twitch.getCurrent();
+    QString placeholderText;
+
+    if (user->isAnon())
+    {
+        placeholderText = "Log in to send messages...";
+    }
+    else
+    {
+        placeholderText =
+            QString("Send message as %1...")
+                .arg(getApp()->accounts->twitch.getCurrent()->getUserName());
+    }
+
+    this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
 }
 
 IndirectChannel Split::getIndirectChannel()

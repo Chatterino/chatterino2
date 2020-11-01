@@ -45,9 +45,9 @@
 namespace chatterino {
 
 BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
-    : BaseWidget(parent,
-                 Qt::Window | (_flags.has(TopMost) ? Qt::WindowStaysOnTopHint
-                                                   : Qt::WindowFlags()))
+    : BaseWidget(parent, (_flags.has(Dialog) ? Qt::Dialog : Qt::Window) |
+                             (_flags.has(TopMost) ? Qt::WindowStaysOnTopHint
+                                                  : Qt::WindowFlags()))
     , enableCustomFrame_(_flags.has(EnableCustomFrame))
     , frameless_(_flags.has(Frameless))
     , flags_(_flags)
