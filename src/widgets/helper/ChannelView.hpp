@@ -182,9 +182,9 @@ private:
 
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
-    ChannelPtr channel_;
-    ChannelPtr underlyingChannel_;
-    ChannelPtr sourceChannel_;
+    ChannelPtr channel_ = nullptr;
+    ChannelPtr underlyingChannel_ = nullptr;
+    ChannelPtr sourceChannel_ = nullptr;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;

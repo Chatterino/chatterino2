@@ -111,8 +111,6 @@ namespace {
 
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
-    , sourceChannel_(nullptr)
-    , underlyingChannel_(nullptr)
     , scrollBar_(new Scrollbar(this))
 {
     this->setMouseTracking(true);
