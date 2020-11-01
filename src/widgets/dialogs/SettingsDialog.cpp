@@ -30,7 +30,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
           parent)
 {
     this->setWindowTitle("Chatterino Settings");
-    this->resize(815, 600);
+    this->resize(915, 600);
     this->themeChangedEvent();
     this->scaleChangedEvent(this->scale());
 
