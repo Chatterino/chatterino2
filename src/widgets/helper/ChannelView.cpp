@@ -24,6 +24,7 @@
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "providers/LinkResolver.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
@@ -1377,13 +1378,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         }
     }
 
-    const auto &tooltip = hoverLayoutElement->getCreator().getTooltip();
+    auto element = &hoverLayoutElement->getCreator();
     bool isLinkValid = hoverLayoutElement->getLink().isValid();
-    auto emoteElement =
-        dynamic_cast<const EmoteElement *>(&hoverLayoutElement->getCreator());
+    auto emoteElement = dynamic_cast<const EmoteElement *>(element);
 
-    if (tooltip.isEmpty() || (isLinkValid && emoteElement == nullptr &&
-                              !getSettings()->linkInfoTooltip))
+    if (element->getTooltip().isEmpty() ||
+        (isLinkValid && emoteElement == nullptr &&
+         !getSettings()->linkInfoTooltip))
     {
         tooltipWidget->hide();
     }
@@ -1391,8 +1392,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto &tooltipPreviewImage = TooltipPreviewImage::instance();
         tooltipPreviewImage.setImageScale(0, 0);
-        auto badgeElement = dynamic_cast<const BadgeElement *>(
-            &hoverLayoutElement->getCreator());
+        auto badgeElement = dynamic_cast<const BadgeElement *>(element);
 
         if ((badgeElement || emoteElement) &&
             getSettings()->emotesTooltipPreview.getValue())
@@ -1418,7 +1418,21 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         }
         else
         {
-            auto element = &hoverLayoutElement->getCreator();
+            if (element->getTooltip() == "No link info loaded")
+            {
+                std::weak_ptr<MessageLayout> weakLayout = layout;
+                LinkResolver::getLinkInfo(
+                    element->getLink().value, nullptr,
+                    [weakLayout, element](QString tooltipText,
+                                          Link originalLink,
+                                          ImagePtr thumbnail) {
+                        auto shared = weakLayout.lock();
+                        if (!shared)
+                            return;
+                        element->setTooltip(tooltipText);
+                        element->setThumbnail(thumbnail);
+                    });
+            }
             auto thumbnailSize = getSettings()->thumbnailSize;
             if (!thumbnailSize)
             {
@@ -1446,7 +1460,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
-        tooltipWidget->setText(tooltip);
+        tooltipWidget->setText(element->getTooltip());
         tooltipWidget->adjustSize();
         tooltipWidget->show();
         tooltipWidget->raise();
