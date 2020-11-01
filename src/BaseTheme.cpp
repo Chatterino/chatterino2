@@ -156,6 +156,8 @@ void AB_THEME_CLASS::actuallyUpdate(double hue, double multiplier)
     this->messages.textColors.link =
         isLight_ ? QColor(66, 134, 244) : QColor(66, 134, 244);
     this->messages.textColors.system = QColor(140, 127, 127);
+    this->messages.textColors.chatPlaceholder =
+        isLight_ ? QColor(175, 159, 159) : QColor(93, 85, 85);
 
     this->messages.backgrounds.regular = getColor(0, sat, 1);
     this->messages.backgrounds.alternate = getColor(0, sat, 0.96);

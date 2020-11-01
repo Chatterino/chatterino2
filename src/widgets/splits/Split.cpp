@@ -283,6 +283,11 @@ void Split::setContainer(SplitContainer *container)
 
 void Split::onAccountSelected()
 {
+    if (!this->getChannel()->isTwitchChannel())
+    {
+        return;
+    }
+
     auto user = getApp()->accounts->twitch.getCurrent();
     QString placeholderText;
 
@@ -298,6 +303,19 @@ void Split::onAccountSelected()
     }
 
     this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
+
+    this->updateTooltipColor();
+    this->signalHolder_.managedConnect(this->theme->updated, [this]() {
+        this->updateTooltipColor();  //
+    });
+}
+
+void Split::updateTooltipColor()
+{
+    QPalette dankPalette;
+    dankPalette.setColor(QPalette::PlaceholderText,
+                         this->theme->messages.textColors.chatPlaceholder);
+    this->input_->ui_.textEdit->setPalette(dankPalette);
 }
 
 IndirectChannel Split::getIndirectChannel()
