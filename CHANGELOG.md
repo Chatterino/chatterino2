@@ -44,6 +44,7 @@
 - Bugfix: Fix Tab key not working in the Ctrl+K Quick Switcher (#2065)
 - Bugfix: Fix bug preventing moderator actions when viewing a user card from the search window (#1089)
 - Bugfix: Fix `:` emote completion menu ignoring emote capitalization (#1962)
+- Bugfix: Fix a bug that caused `Ignore page` to fall into an infinity loop with an empty pattern and regex enabled (#2125)
 
 ## 2.2.0
 

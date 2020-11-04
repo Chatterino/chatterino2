@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v2.3.3
+      - uses: actions/checkout@v2.3.4
         with:
           submodules: true
 
@@ -159,7 +159,7 @@ jobs:
     steps:
       - name: Create release
         id: create_release
-        uses: pajlada/create-release@v2.0.2
+        uses: pajlada/create-release@v2.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
