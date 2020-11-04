@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Added placeholder text for message text input box. (#2143)
+- Minor: Added placeholder text for message text input box. (#2143, #2149)
 - Minor: Added support for FrankerFaceZ badges. (#2101, part of #1658)
 - Minor: Added a navigation list to the settings and reordered them.
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083)
