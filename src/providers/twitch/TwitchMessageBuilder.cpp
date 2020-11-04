@@ -763,6 +763,11 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         {
             continue;
         }
+        const auto &pattern = phrase.getPattern();
+        if (pattern.isEmpty())
+        {
+            continue;
+        }
         if (phrase.isRegex())
         {
             const auto &regex = phrase.getRegex();
@@ -835,11 +840,6 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         }
         else
         {
-            const auto &pattern = phrase.getPattern();
-            if (pattern.isEmpty())
-            {
-                continue;
-            }
             int from = 0;
             while ((from = this->originalMessage_.indexOf(
                         pattern, from, phrase.caseSensitivity())) != -1)
