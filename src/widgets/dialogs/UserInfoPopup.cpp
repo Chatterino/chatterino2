@@ -586,6 +586,7 @@ void UserInfoPopup::updateUserData()
                 {
                     return;
                 }
+                this->ui_.nameLabel->setText(user.displayName);
                 this->ui_.createdDateLabel->setText(
                     TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
             },

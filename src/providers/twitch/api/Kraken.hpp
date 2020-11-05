@@ -25,9 +25,11 @@ struct KrakenChannel {
 
 struct KrakenUser {
     const QString createdAt;
+    const QString displayName;
 
     KrakenUser(QJsonObject jsonObject)
         : createdAt(jsonObject.value("created_at").toString())
+        , displayName(jsonObject.value("display_name").toString())
     {
     }
 };
