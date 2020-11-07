@@ -29,7 +29,7 @@
 - Minor: PageUp and PageDown now scroll in the selected split (#2070, #2081)
 - Minor: Allow highlights to be excluded from `/mentions`. Excluded highlights will not trigger tab highlights either. (#1793, #2036)
 - Minor: Flag all popup dialogs as actual dialogs so they get the relevant window manager hints (#1843)
-- Minor: Apply nightly update logic to macOS and Linux too (#2163, #2164)
+- Minor: Don't show update button for nightly builds on macOS and Linux, this was already the case for Windows (#2163, #2164)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
