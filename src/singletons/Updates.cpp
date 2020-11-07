@@ -240,13 +240,11 @@ void Updates::checkForUpdates()
         return;
     }
 
-    // Disable updates if on nightly and windows.
-#ifdef Q_OS_WIN
+    // Disable updates if on nightly
     if (Modes::instance().isNightly)
     {
         return;
     }
-#endif
 
     QString url =
         "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/" +
