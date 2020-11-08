@@ -156,14 +156,18 @@ TwitchChannel::TwitchChannel(const QString &name,
         }
     });
 
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
-                         [=] { this->setMod(false); });
+    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [=] {
+        this->setMod(false);
+    });
 
     // pubsub
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
-                         [=] { this->refreshPubsub(); });
+    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [=] {
+        this->refreshPubsub();
+    });
     this->refreshPubsub();
-    this->userStateChanged.connect([this] { this->refreshPubsub(); });
+    this->userStateChanged.connect([this] {
+        this->refreshPubsub();
+    });
 
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
@@ -177,12 +181,14 @@ TwitchChannel::TwitchChannel(const QString &name,
     });
 
     // timers
-    QObject::connect(&this->chattersListTimer_, &QTimer::timeout,
-                     [=] { this->refreshChatters(); });
+    QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
+        this->refreshChatters();
+    });
     this->chattersListTimer_.start(5 * 60 * 1000);
 
-    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout,
-                     [=] { this->refreshLiveStatus(); });
+    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [=] {
+        this->refreshLiveStatus();
+    });
     this->liveStatusTimer_.start(60 * 1000);
 
     // debugging

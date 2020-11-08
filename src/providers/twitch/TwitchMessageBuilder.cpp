@@ -399,7 +399,10 @@ void TwitchMessageBuilder::addWords(
             for (auto &variant : getApp()->emotes->emojis.parse(preText))
             {
                 boost::apply_visitor(
-                    [&](auto &&arg) { this->addTextOrEmoji(arg); }, variant);
+                    [&](auto &&arg) {
+                        this->addTextOrEmoji(arg);
+                    },
+                    variant);
             }
 
             cursor += preText.size();
@@ -415,8 +418,11 @@ void TwitchMessageBuilder::addWords(
         // split words
         for (auto &variant : getApp()->emotes->emojis.parse(word))
         {
-            boost::apply_visitor([&](auto &&arg) { this->addTextOrEmoji(arg); },
-                                 variant);
+            boost::apply_visitor(
+                [&](auto &&arg) {
+                    this->addTextOrEmoji(arg);
+                },
+                variant);
         }
 
         cursor += word.size() + 1;

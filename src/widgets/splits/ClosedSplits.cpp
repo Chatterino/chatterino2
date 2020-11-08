@@ -8,9 +8,11 @@ std::vector<ClosedSplits::SplitInfo> ClosedSplits::closedSplits_;
 void ClosedSplits::invalidateTab(NotebookTab *const tab)
 {
     std::lock_guard<std::mutex> lk(ClosedSplits::m_);
-    auto it = std::find_if(
-        ClosedSplits::closedSplits_.begin(), ClosedSplits::closedSplits_.end(),
-        [tab](const auto &item) -> bool { return item.tab == tab; });
+    auto it = std::find_if(ClosedSplits::closedSplits_.begin(),
+                           ClosedSplits::closedSplits_.end(),
+                           [tab](const auto &item) -> bool {
+                               return item.tab == tab;
+                           });
     if (it == ClosedSplits::closedSplits_.end())
     {
         return;

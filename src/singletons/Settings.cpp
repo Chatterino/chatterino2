@@ -125,7 +125,10 @@ Settings::Settings(const QString &settingsDirectory)
 #ifdef USEWINSDK
     this->autorun = isRegisteredForStartup();
     this->autorun.connect(
-        [](bool autorun) { setRegisteredForStartup(autorun); }, false);
+        [](bool autorun) {
+            setRegisteredForStartup(autorun);
+        },
+        false);
 #endif
 }
 

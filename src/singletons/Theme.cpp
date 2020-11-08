@@ -13,8 +13,16 @@ Theme::Theme()
 {
     this->update();
 
-    this->themeName.connectSimple([this](auto) { this->update(); }, false);
-    this->themeHue.connectSimple([this](auto) { this->update(); }, false);
+    this->themeName.connectSimple(
+        [this](auto) {
+            this->update();
+        },
+        false);
+    this->themeHue.connectSimple(
+        [this](auto) {
+            this->update();
+        },
+        false);
 }
 
 // hue: theme color (0 - 1)

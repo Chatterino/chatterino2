@@ -38,8 +38,11 @@ TwitchIrcServer::TwitchIrcServer()
 
 void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
 {
-    getApp()->accounts->twitch.currentUserChanged.connect(
-        [this]() { postToThread([this] { this->connect(); }); });
+    getApp()->accounts->twitch.currentUserChanged.connect([this]() {
+        postToThread([this] {
+            this->connect();
+        });
+    });
 
     this->twitchBadges.loadTwitchBadges();
     this->bttv.loadEmotes();

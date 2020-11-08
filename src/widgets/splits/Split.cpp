@@ -134,8 +134,9 @@ Split::Split(QWidget *parent)
     this->input_->ui_.textEdit->installEventFilter(parent);
 
     this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged,
-        [this] { this->onAccountSelected(); });
+        getApp()->accounts->twitch.currentUserChanged, [this] {
+            this->onAccountSelected();
+        });
     this->onAccountSelected();
 
     this->view_->mouseDown.connect([this](QMouseEvent *) {
@@ -212,10 +213,12 @@ Split::Split(QWidget *parent)
         }
     });
 
-    this->input_->ui_.textEdit->focused.connect(
-        [this] { this->focused.invoke(); });
-    this->input_->ui_.textEdit->focusLost.connect(
-        [this] { this->focusLost.invoke(); });
+    this->input_->ui_.textEdit->focused.connect([this] {
+        this->focused.invoke();
+    });
+    this->input_->ui_.textEdit->focusLost.connect([this] {
+        this->focusLost.invoke();
+    });
     this->input_->ui_.textEdit->imagePasted.connect(
         [this](const QMimeData *source) {
             if (!getSettings()->imageUploaderEnabled)
@@ -249,7 +252,9 @@ Split::Split(QWidget *parent)
         });
 
     getSettings()->imageUploaderEnabled.connect(
-        [this](const bool &val) { this->setAcceptDrops(val); },
+        [this](const bool &val) {
+            this->setAcceptDrops(val);
+        },
         this->managedConnections_);
 }
 
@@ -347,13 +352,16 @@ void Split::setChannel(IndirectChannel newChannel)
             this->header_->updateRoomModes();
         });
 
-        this->roomModeChangedConnection_ = tc->roomModesChanged.connect(
-            [this] { this->header_->updateRoomModes(); });
+        this->roomModeChangedConnection_ = tc->roomModesChanged.connect([this] {
+            this->header_->updateRoomModes();
+        });
     }
 
     this->indirectChannelChangedConnection_ =
         newChannel.getChannelChanged().connect([this] {
-            QTimer::singleShot(0, [this] { this->setChannel(this->channel_); });
+            QTimer::singleShot(0, [this] {
+                this->setChannel(this->channel_);
+            });
         });
 
     this->header_->updateModerationModeIcon();
@@ -544,8 +552,9 @@ void Split::deleteFromContainer()
     {
         this->container_->deleteSplit(this);
         auto *tab = this->getContainer()->getTab();
-        tab->connect(tab, &QWidget::destroyed,
-                     [tab]() mutable { ClosedSplits::invalidateTab(tab); });
+        tab->connect(tab, &QWidget::destroyed, [tab]() mutable {
+            ClosedSplits::invalidateTab(tab);
+        });
         ClosedSplits::push({this->getChannel()->getName(), tab});
     }
 }
@@ -747,8 +756,9 @@ void Split::showViewerList()
         }
     });
 
-    QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this,
-                     [=]() { viewerDock->setMinimumWidth(300); });
+    QObject::connect(viewerDock, &QDockWidget::topLevelChanged, this, [=]() {
+        viewerDock->setMinimumWidth(300);
+    });
 
     auto listDoubleClick = [=](QString userName) {
         if (!labels.contains(userName) && !userName.isEmpty())

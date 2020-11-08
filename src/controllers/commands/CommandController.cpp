@@ -115,8 +115,11 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                         }
                     }
                 } visitor;
-                boost::apply_visitor([&b](auto &&arg) { visitor(arg, b); },
-                                     variant);
+                boost::apply_visitor(
+                    [&b](auto &&arg) {
+                        visitor(arg, b);
+                    },
+                    variant);
             }  // emoji/text
         }
     }

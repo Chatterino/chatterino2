@@ -22,36 +22,47 @@ AbstractIrcServer::AbstractIrcServer()
     this->writeConnection_->moveToThread(
         QCoreApplication::instance()->thread());
 
-    QObject::connect(
-        this->writeConnection_.get(), &Communi::IrcConnection::messageReceived,
-        this, [this](auto msg) { this->writeConnectionMessageReceived(msg); });
-    QObject::connect(
-        this->writeConnection_.get(), &Communi::IrcConnection::connected, this,
-        [this] { this->onWriteConnected(this->writeConnection_.get()); });
+    QObject::connect(this->writeConnection_.get(),
+                     &Communi::IrcConnection::messageReceived, this,
+                     [this](auto msg) {
+                         this->writeConnectionMessageReceived(msg);
+                     });
+    QObject::connect(this->writeConnection_.get(),
+                     &Communi::IrcConnection::connected, this, [this] {
+                         this->onWriteConnected(this->writeConnection_.get());
+                     });
 
     // Listen to read connection message signals
     this->readConnection_.reset(new IrcConnection);
     this->readConnection_->moveToThread(QCoreApplication::instance()->thread());
 
-    QObject::connect(
-        this->readConnection_.get(), &Communi::IrcConnection::messageReceived,
-        this, [this](auto msg) { this->readConnectionMessageReceived(msg); });
+    QObject::connect(this->readConnection_.get(),
+                     &Communi::IrcConnection::messageReceived, this,
+                     [this](auto msg) {
+                         this->readConnectionMessageReceived(msg);
+                     });
     QObject::connect(this->readConnection_.get(),
                      &Communi::IrcConnection::privateMessageReceived, this,
-                     [this](auto msg) { this->privateMessageReceived(msg); });
-    QObject::connect(
-        this->readConnection_.get(), &Communi::IrcConnection::connected, this,
-        [this] { this->onReadConnected(this->readConnection_.get()); });
+                     [this](auto msg) {
+                         this->privateMessageReceived(msg);
+                     });
     QObject::connect(this->readConnection_.get(),
-                     &Communi::IrcConnection::disconnected, this,
-                     [this] { this->onDisconnected(); });
+                     &Communi::IrcConnection::connected, this, [this] {
+                         this->onReadConnected(this->readConnection_.get());
+                     });
     QObject::connect(this->readConnection_.get(),
-                     &Communi::IrcConnection::socketError, this,
-                     [this] { this->onSocketError(); });
+                     &Communi::IrcConnection::disconnected, this, [this] {
+                         this->onDisconnected();
+                     });
+    QObject::connect(this->readConnection_.get(),
+                     &Communi::IrcConnection::socketError, this, [this] {
+                         this->onSocketError();
+                     });
 
     // listen to reconnect request
-    this->readConnection_->reconnectRequested.connect(
-        [this] { this->connect(); });
+    this->readConnection_->reconnectRequested.connect([this] {
+        this->connect();
+    });
     //    this->writeConnection->reconnectRequested.connect([this] {
     //    this->connect(); });
     this->reconnectTimer_.setInterval(RECONNECT_BASE_INTERVAL);

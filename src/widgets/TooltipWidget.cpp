@@ -43,8 +43,9 @@ TooltipWidget::TooltipWidget(BaseWidget *parent)
     layout->addWidget(displayText_);
     this->setLayout(layout);
 
-    this->fontChangedConnection_ =
-        getFonts()->fontChanged.connect([this] { this->updateFont(); });
+    this->fontChangedConnection_ = getFonts()->fontChanged.connect([this] {
+        this->updateFont();
+    });
 }
 
 TooltipWidget::~TooltipWidget()

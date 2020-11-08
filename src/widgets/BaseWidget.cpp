@@ -137,7 +137,9 @@ void BaseWidget::childEvent(QChildEvent *event)
     {
         // find element to be removed
         auto it = std::find_if(this->widgets_.begin(), this->widgets_.end(),
-                               [&](auto &&x) { return x == event->child(); });
+                               [&](auto &&x) {
+                                   return x == event->child();
+                               });
 
         // remove if found
         if (it != this->widgets_.end())

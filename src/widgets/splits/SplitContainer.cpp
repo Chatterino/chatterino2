@@ -223,7 +223,9 @@ void SplitContainer::addSplit(Split *split)
         this->refreshTabLiveStatus();
     });
 
-    split->focused.connect([this, split] { this->setSelected(split); });
+    split->focused.connect([this, split] {
+        this->setSelected(split);
+    });
 
     this->layout();
 }
@@ -318,9 +320,10 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
         {
             auto &siblings = node->parent_->children_;
 
-            auto it = std::find_if(
-                siblings.begin(), siblings.end(),
-                [node](const auto &other) { return other.get() == node; });
+            auto it = std::find_if(siblings.begin(), siblings.end(),
+                                   [node](const auto &other) {
+                                       return other.get() == node;
+                                   });
             assert(it != siblings.end());
 
             if (direction == Direction::Left || direction == Direction::Above)
@@ -993,8 +996,10 @@ void SplitContainer::Node::insertNextToThis(Split *_split, Direction _direction)
         this->geometry_ = QRect(0, 0, int(width), int(height));
     }
 
-    auto it = std::find_if(siblings.begin(), siblings.end(),
-                           [this](auto &node) { return this == node.get(); });
+    auto it =
+        std::find_if(siblings.begin(), siblings.end(), [this](auto &node) {
+            return this == node.get();
+        });
 
     assert(it != siblings.end());
     if (_direction == Direction::Right || _direction == Direction::Below)
@@ -1035,8 +1040,9 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
         auto &siblings = this->parent_->children_;
 
         auto it =
-            std::find_if(begin(siblings), end(siblings),
-                         [this](auto &node) { return this == node.get(); });
+            std::find_if(begin(siblings), end(siblings), [this](auto &node) {
+                return this == node.get();
+            });
         assert(it != siblings.end());
 
         Position position;

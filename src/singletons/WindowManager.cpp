@@ -289,8 +289,9 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 {
     assertInGuiThread();
 
-    getApp()->themes->repaintVisibleChatWidgets_.connect(
-        [this] { this->repaintVisibleChatWidgets(); });
+    getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
+        this->repaintVisibleChatWidgets();
+    });
 
     assert(!this->initialized_);
 
@@ -309,22 +310,29 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         mainWindow_->getNotebook().addPage(true);
     }
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->layoutChannelViews(); });
+    settings.timestampFormat.connect([this](auto, auto) {
+        this->layoutChannelViews();
+    });
 
-    settings.emoteScale.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.emoteScale.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.alternateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.separateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.collpseMessagesMinLines.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.enableRedeemedHighlight.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.timestampFormat.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.alternateMessages.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.separateMessages.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.collpseMessagesMinLines.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.enableRedeemedHighlight.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
 
     this->initialized_ = true;
 }
