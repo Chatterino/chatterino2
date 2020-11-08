@@ -476,7 +476,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     menu->addAction(setR9k);
     menu->addAction(setFollowers);
 
-    this->managedConnections_.push_back(this->modeUpdateRequested_.connect(  //
+    this->managedConnections_.push_back(this->modeUpdateRequested_.connect(
         [this, setSub, setEmote, setSlow, setR9k, setFollowers]() {
             auto twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
@@ -569,8 +569,8 @@ void SplitHeader::updateRoomModes()
 void SplitHeader::initializeModeSignals(EffectLabel &label)
 {
     this->modeUpdateRequested_.connect([this, &label] {
-        if (auto twitchChannel = dynamic_cast<TwitchChannel *>(
-                this->split_->getChannel().get()))  //
+        if (auto twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
         {
             label.setEnable(twitchChannel->hasModRights());
 
@@ -608,7 +608,7 @@ void SplitHeader::handleChannelChanged()
     {
         this->channelConnections_.emplace_back(
             twitchChannel->liveStatusChanged.connect([this]() {
-                this->updateChannelText();  //
+                this->updateChannelText();
             }));
     }
 }

@@ -130,17 +130,17 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
         }
 
         if (s->flags.has(MessageFlag::Timeout) &&
-            s->timeoutUser == message->timeoutUser)  //
+            s->timeoutUser == message->timeoutUser)
         {
             if (message->flags.has(MessageFlag::PubSub) &&
-                !s->flags.has(MessageFlag::PubSub))  //
+                !s->flags.has(MessageFlag::PubSub))
             {
                 this->replaceMessage(s, message);
                 addMessage = false;
                 break;
             }
             if (!message->flags.has(MessageFlag::PubSub) &&
-                s->flags.has(MessageFlag::PubSub))  //
+                s->flags.has(MessageFlag::PubSub))
             {
                 addMessage = timeoutStackStyle == TimeoutStackStyle::DontStack;
                 break;

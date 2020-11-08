@@ -159,7 +159,7 @@ void Window::addCustomTitlebarButtons()
 
     // settings
     this->addTitleBarButton(TitleBarButtonStyle::Settings, [this] {
-        getApp()->windows->showSettingsDialog(this);  //
+        getApp()->windows->showSettingsDialog(this);
     });
 
     // updates
@@ -293,7 +293,7 @@ void Window::addShortcuts()
     /// Initialize program-wide hotkeys
     // Open settings
     createWindowShortcut(this, "CTRL+P", [this] {
-        SettingsDialog::showDialog(this);  //
+        SettingsDialog::showDialog(this);
     });
 
     // Switch tab
@@ -402,7 +402,7 @@ void Window::addMenuBar()
     QAction *prefs = menu->addAction(QString());
     prefs->setMenuRole(QAction::PreferencesRole);
     connect(prefs, &QAction::triggered, this, [this] {
-        SettingsDialog::showDialog(this);  //
+        SettingsDialog::showDialog(this);
     });
 
     // Window menu.

@@ -60,7 +60,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
         "border:" + this->tabs.selected.backgrounds.regular.color().name() +
-        ";" + "color:" + this->messages.textColors.regular.name() + ";" +  //
+        ";" + "color:" + this->messages.textColors.regular.name() + ";" +
         "selection-background-color:" +
         (isLight ? "#68B1FF"
                  : this->tabs.selected.backgrounds.regular.color().name());

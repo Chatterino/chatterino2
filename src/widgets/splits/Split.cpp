@@ -138,7 +138,7 @@ Split::Split(QWidget *parent)
         [this] { this->onAccountSelected(); });
     this->onAccountSelected();
 
-    this->view_->mouseDown.connect([this](QMouseEvent *) {  //
+    this->view_->mouseDown.connect([this](QMouseEvent *) {
         this->giveFocus(Qt::MouseFocusReason);
     });
     this->view_->selectionChanged.connect([this]() {
@@ -306,7 +306,7 @@ void Split::onAccountSelected()
 
     this->updateTooltipColor();
     this->signalHolder_.managedConnect(this->theme->updated, [this]() {
-        this->updateTooltipColor();  //
+        this->updateTooltipColor();
     });
 }
 
@@ -352,7 +352,7 @@ void Split::setChannel(IndirectChannel newChannel)
     }
 
     this->indirectChannelChangedConnection_ =
-        newChannel.getChannelChanged().connect([this] {  //
+        newChannel.getChannelChanged().connect([this] {
             QTimer::singleShot(0, [this] { this->setChannel(this->channel_); });
         });
 

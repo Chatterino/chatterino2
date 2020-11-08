@@ -166,7 +166,7 @@ namespace detail {
                          return;
                      }
 
-                     self->ping();  //
+                     self->ping();
                  });
     }
 

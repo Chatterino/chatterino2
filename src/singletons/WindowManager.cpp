@@ -100,7 +100,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
     this->wordFlagsListener_.setCB([this] {
-        this->updateWordTypeMask();  //
+        this->updateWordTypeMask();
     });
 
     this->saveTimer = new QTimer;
@@ -108,13 +108,13 @@ WindowManager::WindowManager()
     this->saveTimer->setSingleShot(true);
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getApp()->windows->save();  //
+        getApp()->windows->save();
     });
 
     this->miscUpdateTimer_.start(100);
 
     QObject::connect(&this->miscUpdateTimer_, &QTimer::timeout, [this] {
-        this->miscUpdate.invoke();  //
+        this->miscUpdate.invoke();
     });
 }
 

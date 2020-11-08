@@ -17,7 +17,7 @@ TwitchAccountManager::TwitchAccountManager()
         currentUser->loadIgnores();
     });
 
-    this->accounts.itemRemoved.connect([this](const auto &acc) {  //
+    this->accounts.itemRemoved.connect([this](const auto &acc) {
         this->removeUser(acc.item.get());
     });
 }

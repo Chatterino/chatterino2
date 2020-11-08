@@ -197,7 +197,7 @@ void Application::initPubsub()
             }
 
             QString text =
-                QString("%1 turned %2 %3 mode")  //
+                QString("%1 turned %2 %3 mode")
                     .arg(action.source.name)
                     .arg(action.state == ModeChangedAction::State::On ? "on"
                                                                       : "off")
@@ -334,7 +334,7 @@ void Application::initPubsub()
         // moderation topics this->twitch.pubsub->UnlistenAllAuthedTopics();
 
         this->twitch.server->pubsub->listenToWhispers(
-            this->accounts->twitch.getCurrent());  //
+            this->accounts->twitch.getCurrent());
     };
 
     this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);

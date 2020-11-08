@@ -295,7 +295,7 @@ MessagePtr TwitchMessageBuilder::build()
 
     std::sort(twitchEmotes.begin(), twitchEmotes.end(),
               [](const auto &a, const auto &b) {
-                  return a.start < b.start;  //
+                  return a.start < b.start;
               });
     twitchEmotes.erase(std::unique(twitchEmotes.begin(), twitchEmotes.end(),
                                    [](const auto &first, const auto &second) {

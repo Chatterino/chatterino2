@@ -559,7 +559,7 @@ void NotebookTab::dragEnterEvent(QDragEnterEvent *event)
 void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 {
     if (getSettings()->showTabCloseButton &&
-        this->notebook_->getAllowUserTabManagement())  //
+        this->notebook_->getAllowUserTabManagement())
     {
         bool overX = this->getXRect().contains(event->pos());
 
@@ -575,7 +575,7 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
     QPoint relPoint = this->mapToParent(event->pos());
 
     if (this->mouseDown_ && !this->getDesiredRect().contains(relPoint) &&
-        this->notebook_->getAllowUserTabManagement())  //
+        this->notebook_->getAllowUserTabManagement())
     {
         int index;
         QWidget *clickedPage =

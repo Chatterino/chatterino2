@@ -217,10 +217,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     // Shortcuts
     createWindowShortcut(this, "Return", [=] {
-        this->ok();  //
+        this->ok();
     });
     createWindowShortcut(this, "Esc", [=] {
-        this->close();  //
+        this->close();
     });
 
     // restore ui state
@@ -229,10 +229,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     {
         this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
         createWindowShortcut(this, "Ctrl+Tab", [=] {
-            this->ui_.notebook->selectNextTab();  //
+            this->ui_.notebook->selectNextTab();
         });
         createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
-            this->ui_.notebook->selectPreviousTab();  //
+            this->ui_.notebook->selectPreviousTab();
         });
     }
 

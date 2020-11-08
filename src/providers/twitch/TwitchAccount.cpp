@@ -153,7 +153,7 @@ void TwitchAccount::ignore(
 {
     const auto onUserFetched = [this, targetName,
                                 onFinished](const auto &user) {
-        this->ignoreByID(user.id, targetName, onFinished);  //
+        this->ignoreByID(user.id, targetName, onFinished);
     };
 
     const auto onUserFetchFailed = [] {};
@@ -230,7 +230,7 @@ void TwitchAccount::unignore(
 {
     const auto onUserFetched = [this, targetName,
                                 onFinished](const auto &user) {
-        this->unignoreByID(user.id, targetName, onFinished);  //
+        this->unignoreByID(user.id, targetName, onFinished);
     };
 
     const auto onUserFetchFailed = [] {};

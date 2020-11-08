@@ -103,7 +103,7 @@ ChannelFilterEditorDialog::ValueSpecifier::ValueSpecifier()
     this->layout_->addWidget(this->valueInput_, 1);
     this->layout_->setContentsMargins(5, 5, 5, 5);
 
-    QObject::connect(  //
+    QObject::connect(
         this->typeCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
         [this](int index) {
             const auto isNumber = (index == 1);
@@ -183,7 +183,7 @@ ChannelFilterEditorDialog::BinaryOperationSpecifier::BinaryOperationSpecifier(
     this->layout_->addLayout(this->right_->layout());
     this->layout_->setContentsMargins(5, 5, 5, 5);
 
-    QObject::connect(  //
+    QObject::connect(
         this->opCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
         [this](int index) {
             // disable if set to "(nothing)"

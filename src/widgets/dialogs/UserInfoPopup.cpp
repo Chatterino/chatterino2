@@ -367,7 +367,7 @@ void UserInfoPopup::installEvents()
             auto currentUser = getApp()->accounts->twitch.getCurrent();
 
             const auto reenableFollowCheckbox = [this] {
-                this->ui_.follow->setEnabled(true);  //
+                this->ui_.follow->setEnabled(true);
             };
 
             if (!this->ui_.follow->isEnabled())

@@ -220,7 +220,7 @@ void SplitContainer::addSplit(Split *split)
         });
 
     split->getChannelView().liveStatusChanged.connect([this]() {
-        this->refreshTabLiveStatus();  //
+        this->refreshTabLiveStatus();
     });
 
     split->focused.connect([this, split] { this->setSelected(split); });

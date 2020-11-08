@@ -259,7 +259,7 @@ LoginWidget::LoginWidget()
 
     QObject::connect(&this->ui_.buttonBox, &QDialogButtonBox::rejected,
                      [this]() {
-                         this->close();  //
+                         this->close();
                      });
 
     this->ui_.mainLayout.addWidget(&this->ui_.buttonBox);

@@ -96,7 +96,7 @@ QCheckBox *SettingsPage::createCheckBox(
     // update when setting changes
     setting.connect(
         [checkbox](const bool &value, auto) {
-            checkbox->setChecked(value);  //
+            checkbox->setChecked(value);
         },
         this->managedConnections_);
 

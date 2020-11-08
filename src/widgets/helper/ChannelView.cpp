@@ -93,10 +93,10 @@ namespace {
             copyMenu->addAction(
                 "Copy " + name + " emote link",
                 [url = emote.homePage] { crossPlatformCopy(url.string); });
-            openMenu->addAction(
-                "Open " + name + " emote link", [url = emote.homePage] {
-                    QDesktopServices::openUrl(QUrl(url.string));  //
-                });
+            openMenu->addAction("Open " + name + " emote link",
+                                [url = emote.homePage] {
+                                    QDesktopServices::openUrl(QUrl(url.string));
+                                });
         };
 
         if (creatorFlags.has(MessageElementFlag::BttvEmote))
@@ -605,11 +605,11 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
         underlyingChannel->messagesAddedAtStart.connect(
             [this](std::vector<MessagePtr> &messages) {
                 std::vector<MessagePtr> filtered;
-                std::copy_if(  //
-                    messages.begin(), messages.end(),
-                    std::back_inserter(filtered), [this](MessagePtr msg) {
-                        return this->shouldIncludeMessage(msg);
-                    });
+                std::copy_if(messages.begin(), messages.end(),
+                             std::back_inserter(filtered),
+                             [this](MessagePtr msg) {
+                                 return this->shouldIncludeMessage(msg);
+                             });
 
                 if (!filtered.empty())
                     this->channel_->addMessagesAtStart(filtered);
@@ -689,7 +689,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     if (auto tc = dynamic_cast<TwitchChannel *>(underlyingChannel.get()))
     {
         this->connections_.push_back(tc->liveStatusChanged.connect([this]() {
-            this->liveStatusChanged.invoke();  //
+            this->liveStatusChanged.invoke();
         }));
     }
 }
