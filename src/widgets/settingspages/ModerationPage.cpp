@@ -120,21 +120,23 @@ ModerationPage::ModerationPage()
 
         // Show how big (size-wise) the logs are
         auto logsPathSizeLabel = logs.emplace<QLabel>();
-        logsPathSizeLabel->setText(
-            QtConcurrent::run([] { return fetchLogDirectorySize(); }));
+        logsPathSizeLabel->setText(QtConcurrent::run([] {
+            return fetchLogDirectorySize();
+        }));
 
         // Select event
-        QObject::connect(
-            selectDir.getElement(), &QPushButton::clicked, this,
-            [this, logsPathSizeLabel]() mutable {
-                auto dirName = QFileDialog::getExistingDirectory(this);
+        QObject::connect(selectDir.getElement(), &QPushButton::clicked, this,
+                         [this, logsPathSizeLabel]() mutable {
+                             auto dirName =
+                                 QFileDialog::getExistingDirectory(this);
 
-                getSettings()->logPath = dirName;
+                             getSettings()->logPath = dirName;
 
-                // Refresh: Show how big (size-wise) the logs are
-                logsPathSizeLabel->setText(
-                    QtConcurrent::run([] { return fetchLogDirectorySize(); }));
-            });
+                             // Refresh: Show how big (size-wise) the logs are
+                             logsPathSizeLabel->setText(QtConcurrent::run([] {
+                                 return fetchLogDirectorySize();
+                             }));
+                         });
 
         buttons->addSpacing(16);
 
@@ -144,8 +146,9 @@ ModerationPage::ModerationPage()
                              getSettings()->logPath = "";
 
                              // Refresh: Show how big (size-wise) the logs are
-                             logsPathSizeLabel->setText(QtConcurrent::run(
-                                 [] { return fetchLogDirectorySize(); }));
+                             logsPathSizeLabel->setText(QtConcurrent::run([] {
+                                 return fetchLogDirectorySize();
+                             }));
                          });
 
     }  // logs end

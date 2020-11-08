@@ -45,8 +45,9 @@ IrcConnection::IrcConnection(QObject *parent)
         }
     });
 
-    QObject::connect(this, &Communi::IrcConnection::connected, this,
-                     [this] { this->waitingForPong_ = false; });
+    QObject::connect(this, &Communi::IrcConnection::connected, this, [this] {
+        this->waitingForPong_ = false;
+    });
 
     QObject::connect(this, &Communi::IrcConnection::pongMessageReceived,
                      [this](Communi::IrcPongMessage *message) {

@@ -11,8 +11,9 @@ public:
     FilterSet()
     {
         this->listener_ =
-            getCSettings().filterRecords.delayedItemsChanged.connect(
-                [this] { this->reloadFilters(); });
+            getCSettings().filterRecords.delayedItemsChanged.connect([this] {
+                this->reloadFilters();
+            });
     }
 
     FilterSet(const QList<QUuid> &filterIds)
@@ -25,8 +26,9 @@ public:
         }
 
         this->listener_ =
-            getCSettings().filterRecords.delayedItemsChanged.connect(
-                [this] { this->reloadFilters(); });
+            getCSettings().filterRecords.delayedItemsChanged.connect([this] {
+                this->reloadFilters();
+            });
     }
 
     ~FilterSet()

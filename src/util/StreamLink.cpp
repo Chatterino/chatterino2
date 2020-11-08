@@ -101,7 +101,7 @@ namespace {
         QObject::connect(
             p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
             [=](int res) {
-                p->deleteLater();  //
+                p->deleteLater();
             });
 
         return p;

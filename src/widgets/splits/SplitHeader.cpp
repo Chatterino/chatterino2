@@ -191,15 +191,23 @@ SplitHeader::SplitHeader(Split *_split)
     this->handleChannelChanged();
     this->updateModerationModeIcon();
 
-    this->split_->focused.connect([this]() { this->themeChangedEvent(); });
-    this->split_->focusLost.connect([this]() { this->themeChangedEvent(); });
-    this->split_->channelChanged.connect(
-        [this]() { this->handleChannelChanged(); });
+    this->split_->focused.connect([this]() {
+        this->themeChangedEvent();
+    });
+    this->split_->focusLost.connect([this]() {
+        this->themeChangedEvent();
+    });
+    this->split_->channelChanged.connect([this]() {
+        this->handleChannelChanged();
+    });
 
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
-                         [this] { this->updateModerationModeIcon(); });
+    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [this] {
+        this->updateModerationModeIcon();
+    });
 
-    auto _ = [this](const auto &, const auto &) { this->updateChannelText(); };
+    auto _ = [this](const auto &, const auto &) {
+        this->updateChannelText();
+    };
     getSettings()->headerViewerCount.connect(_, this->managedConnections_);
     getSettings()->headerStreamTitle.connect(_, this->managedConnections_);
     getSettings()->headerGame.connect(_, this->managedConnections_);
@@ -210,8 +218,9 @@ void SplitHeader::initializeLayout()
 {
     auto layout = makeLayout<QHBoxLayout>({
         // space
-        makeWidget<BaseWidget>(
-            [](auto w) { w->setScaleIndependantSize(8, 4); }),
+        makeWidget<BaseWidget>([](auto w) {
+            w->setScaleIndependantSize(8, 4);
+        }),
         // title
         this->titleLabel_ = makeWidget<Label>([](auto w) {
             w->setSizePolicy(QSizePolicy::MinimumExpanding,
@@ -220,8 +229,9 @@ void SplitHeader::initializeLayout()
             w->setHasOffset(false);
         }),
         // space
-        makeWidget<BaseWidget>(
-            [](auto w) { w->setScaleIndependantSize(8, 4); }),
+        makeWidget<BaseWidget>([](auto w) {
+            w->setScaleIndependantSize(8, 4);
+        }),
         // mode
         this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
             w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -266,8 +276,9 @@ void SplitHeader::initializeLayout()
         }),
         // viewer list
         this->viewersButton_ = makeWidget<Button>([&](auto w) {
-            QObject::connect(w, &Button::leftClicked, this,
-                             [this]() { this->split_->showViewerList(); });
+            QObject::connect(w, &Button::leftClicked, this, [this]() {
+                this->split_->showViewerList();
+            });
         }),
         // dropdown
         this->dropdownButton_ = makeWidget<Button>([&](auto w) {
@@ -281,8 +292,9 @@ void SplitHeader::initializeLayout()
             w->setPixmap(getResources().buttons.addSplitDark);
             w->setEnableMargin(false);
 
-            QObject::connect(w, &Button::leftClicked, this,
-                             [this]() { this->split_->addSibling(); });
+            QObject::connect(w, &Button::leftClicked, this, [this]() {
+                this->split_->addSibling();
+            });
         }),
     });
 
@@ -476,7 +488,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     menu->addAction(setR9k);
     menu->addAction(setFollowers);
 
-    this->managedConnections_.push_back(this->modeUpdateRequested_.connect(  //
+    this->managedConnections_.push_back(this->modeUpdateRequested_.connect(
         [this, setSub, setEmote, setSlow, setR9k, setFollowers]() {
             auto twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
@@ -501,13 +513,15 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
         action->setChecked(!action->isChecked());
     };
 
-    QObject::connect(
-        setSub, &QAction::triggered, this,
-        [setSub, toggle]() mutable { toggle("/subscribers", setSub); });
+    QObject::connect(setSub, &QAction::triggered, this,
+                     [setSub, toggle]() mutable {
+                         toggle("/subscribers", setSub);
+                     });
 
-    QObject::connect(
-        setEmote, &QAction::triggered, this,
-        [setEmote, toggle]() mutable { toggle("/emoteonly", setEmote); });
+    QObject::connect(setEmote, &QAction::triggered, this,
+                     [setEmote, toggle]() mutable {
+                         toggle("/emoteonly", setEmote);
+                     });
 
     QObject::connect(setSlow, &QAction::triggered, this, [setSlow, this]() {
         if (!setSlow->isChecked())
@@ -554,9 +568,10 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
             }
         });
 
-    QObject::connect(
-        setR9k, &QAction::triggered, this,
-        [setR9k, toggle]() mutable { toggle("/r9kbeta", setR9k); });
+    QObject::connect(setR9k, &QAction::triggered, this,
+                     [setR9k, toggle]() mutable {
+                         toggle("/r9kbeta", setR9k);
+                     });
 
     return menu;
 }
@@ -569,8 +584,8 @@ void SplitHeader::updateRoomModes()
 void SplitHeader::initializeModeSignals(EffectLabel &label)
 {
     this->modeUpdateRequested_.connect([this, &label] {
-        if (auto twitchChannel = dynamic_cast<TwitchChannel *>(
-                this->split_->getChannel().get()))  //
+        if (auto twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
         {
             label.setEnable(twitchChannel->hasModRights());
 
@@ -608,7 +623,7 @@ void SplitHeader::handleChannelChanged()
     {
         this->channelConnections_.emplace_back(
             twitchChannel->liveStatusChanged.connect([this]() {
-                this->updateChannelText();  //
+                this->updateChannelText();
             }));
     }
 }

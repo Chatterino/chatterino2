@@ -4,6 +4,7 @@ AccessModifierOffset: -4
 AlignEscapedNewlinesLeft: true
 AllowShortFunctionsOnASingleLine: false
 AllowShortIfStatementsOnASingleLine: false
+AllowShortLambdasOnASingleLine: Empty
 AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: false
 AlwaysBreakBeforeMultilineStrings: false

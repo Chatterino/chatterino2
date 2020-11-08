@@ -27,7 +27,9 @@ GeneralPageView::GeneralPageView(QWidget *parent)
         {scrollArea, new QSpacerItem(16, 1), navigation}));
 
     QObject::connect(scrollArea->verticalScrollBar(), &QScrollBar::valueChanged,
-                     this, [=] { this->updateNavigationHighlighting(); });
+                     this, [=] {
+                         this->updateNavigationHighlighting();
+                     });
 }
 
 void GeneralPageView::addWidget(QWidget *widget)
@@ -96,9 +98,10 @@ QCheckBox *GeneralPageView::addCheckbox(const QString &text,
         this->managedConnections_);
 
     // update setting on toggle
-    QObject::connect(
-        check, &QCheckBox::toggled, this,
-        [&setting, inverse](bool state) { setting = inverse ^ state; });
+    QObject::connect(check, &QCheckBox::toggled, this,
+                     [&setting, inverse](bool state) {
+                         setting = inverse ^ state;
+                     });
 
     this->addWidget(check);
 
@@ -141,7 +144,9 @@ ComboBox *GeneralPageView::addDropdown(
 
     // update when setting changes
     setting.connect(
-        [combo](const QString &value, auto) { combo->setCurrentText(value); },
+        [combo](const QString &value, auto) {
+            combo->setCurrentText(value);
+        },
         this->managedConnections_);
 
     QObject::connect(combo, &QComboBox::currentTextChanged,

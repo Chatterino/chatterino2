@@ -110,13 +110,22 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        getApp()->themes->themeName);
     layout.addDropdown<QString>(
         "Font", {"Segoe UI", "Arial", "Choose..."},
-        getApp()->fonts->chatFontFamily, [](auto val) { return val; },
-        [this](auto args) { return this->getFont(args); });
+        getApp()->fonts->chatFontFamily,
+        [](auto val) {
+            return val;
+        },
+        [this](auto args) {
+            return this->getFont(args);
+        });
     layout.addDropdown<int>(
         "Font size", {"9pt", "10pt", "12pt", "14pt", "16pt", "20pt"},
         getApp()->fonts->chatFontSize,
-        [](auto val) { return QString::number(val) + "pt"; },
-        [](auto args) { return fuzzyToInt(args.value, 10); });
+        [](auto val) {
+            return QString::number(val) + "pt";
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 10);
+        });
     layout.addDropdown<float>(
         "Zoom",
         {"0.5x", "0.6x", "0.7x", "0.8x", "0.9x", "Default", "1.2x", "1.4x",
@@ -128,7 +137,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             else
                 return QString::number(val) + "x";
         },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+        [](auto args) {
+            return fuzzyToFloat(args.value, 1.f);
+        });
     layout.addDropdown<int>(
         "Tab layout", {"Horizontal", "Vertical"}, s.tabDirection,
         [](auto val) {
@@ -201,7 +212,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             else
                 return QString::number(val) + "x";
         },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+        [](auto args) {
+            return fuzzyToFloat(args.value, 1.f);
+        });
     layout.addCheckbox("Smooth scrolling", s.enableSmoothScrolling);
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
@@ -266,7 +279,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto val) {
             return val ? QString::number(val) + " lines" : QString("Never");
         },
-        [](auto args) { return fuzzyToInt(args.value, 0); });
+        [](auto args) {
+            return fuzzyToInt(args.value, 0);
+        });
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
@@ -284,12 +299,20 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             else
                 return QString::number(val) + "x";
         },
-        [](auto args) { return fuzzyToFloat(args.value, 1.f); });
+        [](auto args) {
+            return fuzzyToFloat(args.value, 1.f);
+        });
 
     layout.addDropdown<int>(
         "Show info on hover", {"Don't show", "Always show", "Hold shift"},
-        s.emotesTooltipPreview, [](int index) { return index; },
-        [](auto args) { return args.index; }, false);
+        s.emotesTooltipPreview,
+        [](int index) {
+            return index;
+        },
+        [](auto args) {
+            return args.index;
+        },
+        false);
     layout.addDropdown("Emoji style",
                        {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
                         "Apple", "Google", "Messenger"},
@@ -304,7 +327,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     ComboBox *dankDropdown =
         layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
             "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
-            s.enableStreamerMode, [](int value) { return value; },
+            s.enableStreamerMode,
+            [](int value) {
+                return value;
+            },
             [](DropdownArgs args) {
                 return static_cast<StreamerModeSetting>(args.index);
             },
@@ -445,8 +471,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         box->addWidget(layout.makeButton("Choose cache path", [this]() {
             getSettings()->cachePath = QFileDialog::getExistingDirectory(this);
         }));
-        box->addWidget(layout.makeButton(
-            "Reset", []() { getSettings()->cachePath = ""; }));
+        box->addWidget(layout.makeButton("Reset", []() {
+            getSettings()->cachePath = "";
+        }));
         box->addStretch(1);
 
         layout.addLayout(box);
@@ -471,21 +498,36 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Receive notification sounds from hidden messages",
                        s.shownSimilarTriggerHighlights);
     s.hideSimilar.connect(
-        []() { getApp()->windows->forceLayoutChannelViews(); }, false);
+        []() {
+            getApp()->windows->forceLayoutChannelViews();
+        },
+        false);
     layout.addDropdown<float>(
         "Similarity threshold", {"0.5", "0.75", "0.9"}, s.similarityPercentage,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToFloat(args.value, 0.9f); });
+        [](auto val) {
+            return QString::number(val);
+        },
+        [](auto args) {
+            return fuzzyToFloat(args.value, 0.9f);
+        });
     layout.addDropdown<int>(
         "Maximum delay between messages",
         {"5s", "10s", "15s", "30s", "60s", "120s"}, s.hideSimilarMaxDelay,
-        [](auto val) { return QString::number(val) + "s"; },
-        [](auto args) { return fuzzyToInt(args.value, 5); });
+        [](auto val) {
+            return QString::number(val) + "s";
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 5);
+        });
     layout.addDropdown<int>(
         "Amount of previous messages to check", {"1", "2", "3", "4", "5"},
         s.hideSimilarMaxMessagesToCheck,
-        [](auto val) { return QString::number(val); },
-        [](auto args) { return fuzzyToInt(args.value, 3); });
+        [](auto val) {
+            return QString::number(val);
+        },
+        [](auto args) {
+            return fuzzyToInt(args.value, 3);
+        });
 
     layout.addSubtitle("Visible badges");
     layout.addCheckbox("Authority (staff, admin)",
@@ -540,7 +582,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             else
                 return QString::number(val);
         },
-        [](auto args) { return fuzzyToFloat(args.value, 63.f); });
+        [](auto args) {
+            return fuzzyToFloat(args.value, 63.f);
+        });
     layout.addCheckbox("Double click to open links and other elements in chat",
                        s.linksDoubleClickOnly);
     layout.addCheckbox("Unshorten links", s.unshortLinks);
@@ -563,8 +607,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.showUnhandledIrcMessages);
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
-        s.timeoutStackStyle, [](int index) { return index; },
-        [](auto args) { return args.index; }, false);
+        s.timeoutStackStyle,
+        [](int index) {
+            return index;
+        },
+        [](auto args) {
+            return args.index;
+        },
+        false);
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Ask for confirmation when uploading an image",
                        s.askOnImageUpload);

@@ -109,7 +109,9 @@ void SearchPopup::initLayout()
                 this->searchInput_ = new QLineEdit(this);
                 layout2->addWidget(this->searchInput_);
                 QObject::connect(this->searchInput_, &QLineEdit::returnPressed,
-                                 [this] { this->search(); });
+                                 [this] {
+                                     this->search();
+                                 });
             }
 
             // SEARCH BUTTON
@@ -117,8 +119,9 @@ void SearchPopup::initLayout()
                 QPushButton *searchButton = new QPushButton(this);
                 searchButton->setText("Search");
                 layout2->addWidget(searchButton);
-                QObject::connect(searchButton, &QPushButton::clicked,
-                                 [this] { this->search(); });
+                QObject::connect(searchButton, &QPushButton::clicked, [this] {
+                    this->search();
+                });
             }
 
             layout1->addLayout(layout2);

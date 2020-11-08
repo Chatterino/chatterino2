@@ -119,8 +119,9 @@ void Button::setMenu(std::unique_ptr<QMenu> menu)
         new FunctionEventFilter(this, [this](QObject *, QEvent *event) {
             if (event->type() == QEvent::Hide)
             {
-                QTimer::singleShot(20, this,
-                                   [this] { this->menuVisible_ = false; });
+                QTimer::singleShot(20, this, [this] {
+                    this->menuVisible_ = false;
+                });
             }
             return false;
         }));
@@ -243,7 +244,9 @@ void Button::mousePressEvent(QMouseEvent *event)
 
     if (this->menu_ && !this->menuVisible_)
     {
-        QTimer::singleShot(80, this, [this] { this->showMenu(); });
+        QTimer::singleShot(80, this, [this] {
+            this->showMenu();
+        });
         this->mouseDown_ = false;
         this->mouseOver_ = false;
     }

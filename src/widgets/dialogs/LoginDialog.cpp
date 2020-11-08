@@ -187,14 +187,18 @@ AdvancedLoginWidget::AdvancedLoginWidget()
 
     this->ui_.oauthTokenInput.setEchoMode(QLineEdit::Password);
 
-    connect(&this->ui_.userIDInput, &QLineEdit::textChanged,
-            [=]() { this->refreshButtons(); });
-    connect(&this->ui_.usernameInput, &QLineEdit::textChanged,
-            [=]() { this->refreshButtons(); });
-    connect(&this->ui_.clientIDInput, &QLineEdit::textChanged,
-            [=]() { this->refreshButtons(); });
-    connect(&this->ui_.oauthTokenInput, &QLineEdit::textChanged,
-            [=]() { this->refreshButtons(); });
+    connect(&this->ui_.userIDInput, &QLineEdit::textChanged, [=]() {
+        this->refreshButtons();
+    });
+    connect(&this->ui_.usernameInput, &QLineEdit::textChanged, [=]() {
+        this->refreshButtons();
+    });
+    connect(&this->ui_.clientIDInput, &QLineEdit::textChanged, [=]() {
+        this->refreshButtons();
+    });
+    connect(&this->ui_.oauthTokenInput, &QLineEdit::textChanged, [=]() {
+        this->refreshButtons();
+    });
 
     /// Upper button row
 
@@ -259,7 +263,7 @@ LoginWidget::LoginWidget()
 
     QObject::connect(&this->ui_.buttonBox, &QDialogButtonBox::rejected,
                      [this]() {
-                         this->close();  //
+                         this->close();
                      });
 
     this->ui_.mainLayout.addWidget(&this->ui_.buttonBox);

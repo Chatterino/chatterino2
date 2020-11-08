@@ -61,8 +61,9 @@ Application::Application(Settings &_settings, Paths &_paths)
 {
     this->instance = this;
 
-    this->fonts->fontChanged.connect(
-        [this]() { this->windows->layoutChannelViews(); });
+    this->fonts->fontChanged.connect([this]() {
+        this->windows->layoutChannelViews();
+    });
 
     this->twitch.server = this->twitch2;
     this->twitch.pubsub = this->twitch2->pubsub;
@@ -137,14 +138,20 @@ int Application::run(QApplication &qtApp)
     this->windows->getMainWindow().show();
 
     getSettings()->betaUpdates.connect(
-        [] { Updates::instance().checkForUpdates(); }, false);
-    getSettings()->moderationActions.delayedItemsChanged.connect(
-        [this] { this->windows->forceLayoutChannelViews(); });
+        [] {
+            Updates::instance().checkForUpdates();
+        },
+        false);
+    getSettings()->moderationActions.delayedItemsChanged.connect([this] {
+        this->windows->forceLayoutChannelViews();
+    });
 
-    getSettings()->highlightedMessages.delayedItemsChanged.connect(
-        [this] { this->windows->forceLayoutChannelViews(); });
-    getSettings()->highlightedUsers.delayedItemsChanged.connect(
-        [this] { this->windows->forceLayoutChannelViews(); });
+    getSettings()->highlightedMessages.delayedItemsChanged.connect([this] {
+        this->windows->forceLayoutChannelViews();
+    });
+    getSettings()->highlightedUsers.delayedItemsChanged.connect([this] {
+        this->windows->forceLayoutChannelViews();
+    });
 
     return qtApp.exec();
 }
@@ -184,7 +191,9 @@ void Application::initPubsub()
                 QString("%1 cleared the chat").arg(action.source.name);
 
             auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] { chan->addMessage(msg); });
+            postToThread([chan, msg] {
+                chan->addMessage(msg);
+            });
         });
 
     this->twitch.pubsub->signals_.moderation.modeChanged.connect(
@@ -197,7 +206,7 @@ void Application::initPubsub()
             }
 
             QString text =
-                QString("%1 turned %2 %3 mode")  //
+                QString("%1 turned %2 %3 mode")
                     .arg(action.source.name)
                     .arg(action.state == ModeChangedAction::State::On ? "on"
                                                                       : "off")
@@ -210,7 +219,9 @@ void Application::initPubsub()
             }
 
             auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] { chan->addMessage(msg); });
+            postToThread([chan, msg] {
+                chan->addMessage(msg);
+            });
         });
 
     this->twitch.pubsub->signals_.moderation.moderationStateChanged.connect(
@@ -236,7 +247,9 @@ void Application::initPubsub()
             }
 
             auto msg = makeSystemMessage(text);
-            postToThread([chan, msg] { chan->addMessage(msg); });
+            postToThread([chan, msg] {
+                chan->addMessage(msg);
+            });
         });
 
     this->twitch.pubsub->signals_.moderation.userBanned.connect(
@@ -269,7 +282,9 @@ void Application::initPubsub()
 
             auto msg = MessageBuilder(action).release();
 
-            postToThread([chan, msg] { chan->addMessage(msg); });
+            postToThread([chan, msg] {
+                chan->addMessage(msg);
+            });
         });
 
     this->twitch.pubsub->signals_.moderation.automodMessage.connect(
@@ -301,7 +316,9 @@ void Application::initPubsub()
 
             auto msg = MessageBuilder(action).release();
 
-            postToThread([chan, msg] { chan->addMessage(msg); });
+            postToThread([chan, msg] {
+                chan->addMessage(msg);
+            });
             chan->deleteMessage(msg->id);
         });
 
@@ -334,7 +351,7 @@ void Application::initPubsub()
         // moderation topics this->twitch.pubsub->UnlistenAllAuthedTopics();
 
         this->twitch.server->pubsub->listenToWhispers(
-            this->accounts->twitch.getCurrent());  //
+            this->accounts->twitch.getCurrent());
     };
 
     this->accounts->twitch.currentUserChanged.connect(RequestModerationActions);

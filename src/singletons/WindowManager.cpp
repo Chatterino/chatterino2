@@ -100,7 +100,7 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
     this->wordFlagsListener_.setCB([this] {
-        this->updateWordTypeMask();  //
+        this->updateWordTypeMask();
     });
 
     this->saveTimer = new QTimer;
@@ -108,13 +108,13 @@ WindowManager::WindowManager()
     this->saveTimer->setSingleShot(true);
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getApp()->windows->save();  //
+        getApp()->windows->save();
     });
 
     this->miscUpdateTimer_.start(100);
 
     QObject::connect(&this->miscUpdateTimer_, &QTimer::timeout, [this] {
-        this->miscUpdate.invoke();  //
+        this->miscUpdate.invoke();
     });
 }
 
@@ -289,8 +289,9 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 {
     assertInGuiThread();
 
-    getApp()->themes->repaintVisibleChatWidgets_.connect(
-        [this] { this->repaintVisibleChatWidgets(); });
+    getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
+        this->repaintVisibleChatWidgets();
+    });
 
     assert(!this->initialized_);
 
@@ -309,22 +310,29 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         mainWindow_->getNotebook().addPage(true);
     }
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->layoutChannelViews(); });
+    settings.timestampFormat.connect([this](auto, auto) {
+        this->layoutChannelViews();
+    });
 
-    settings.emoteScale.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.emoteScale.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.alternateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.separateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.collpseMessagesMinLines.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.enableRedeemedHighlight.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.timestampFormat.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.alternateMessages.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.separateMessages.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.collpseMessagesMinLines.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.enableRedeemedHighlight.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
 
     this->initialized_ = true;
 }

@@ -217,7 +217,7 @@ void TextLayoutElement::listenToLinkChanges()
             .linkChanged.connect([this]() {
                 // log("Old link: {}", this->getCreator().getLink().value);
                 // log("This link: {}", this->getLink().value);
-                this->setLink(this->getCreator().getLink());  //
+                this->setLink(this->getCreator().getLink());
             }));
 }
 

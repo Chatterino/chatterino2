@@ -33,9 +33,13 @@ Outcome invokeIrcCommand(const QString &commandName, const QString &allParams,
 
     // CUSTOM COMMANDS
     auto params = allParams.split(' ');
-    auto paramsAfter = [&](int i) { return params.mid(i + 1).join(' '); };
+    auto paramsAfter = [&](int i) {
+        return params.mid(i + 1).join(' ');
+    };
 
-    auto sendRaw = [&](QString str) { channel.server()->sendRawMessage(str); };
+    auto sendRaw = [&](QString str) {
+        channel.server()->sendRawMessage(str);
+    };
 
     if (cmd == "msg")
     {

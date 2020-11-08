@@ -38,13 +38,16 @@ namespace detail {
             DebugCount::increase("animated images");
 
             this->gifTimerConnection_ =
-                getApp()->emotes->gifTimer.signal.connect(
-                    [this] { this->advance(); });
+                getApp()->emotes->gifTimer.signal.connect([this] {
+                    this->advance();
+                });
         }
 
-        auto totalLength = std::accumulate(
-            this->items_.begin(), this->items_.end(), 0UL,
-            [](auto init, auto &&frame) { return init + frame.duration; });
+        auto totalLength =
+            std::accumulate(this->items_.begin(), this->items_.end(), 0UL,
+                            [](auto init, auto &&frame) {
+                                return init + frame.duration;
+                            });
 
         if (totalLength == 0)
         {
@@ -222,7 +225,9 @@ Image::~Image()
     // run destructor of Frames in gui thread
     if (!isGuiThread())
     {
-        postToThread([frames = this->frames_.release()]() { delete frames; });
+        postToThread([frames = this->frames_.release()]() {
+            delete frames;
+        });
     }
 }
 

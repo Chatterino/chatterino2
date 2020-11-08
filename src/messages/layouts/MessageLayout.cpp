@@ -119,7 +119,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 
     if (this->flags.has(MessageLayoutFlag::Expanded) ||
         (flags.has(MessageElementFlag::ModeratorTools) &&
-         !this->message_->flags.has(MessageFlag::Disabled)))  //
+         !this->message_->flags.has(MessageFlag::Disabled)))
     {
         messageFlags.unset(MessageFlag::Collapsed);
     }

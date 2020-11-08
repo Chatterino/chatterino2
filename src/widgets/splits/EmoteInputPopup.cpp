@@ -66,7 +66,9 @@ void EmoteInputPopup::initLayout()
 
     listView->setModel(&this->model_);
     QObject::connect(listView.getElement(), &GenericListView::closeRequested,
-                     this, [this] { this->close(); });
+                     this, [this] {
+                         this->close();
+                     });
 }
 
 void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)

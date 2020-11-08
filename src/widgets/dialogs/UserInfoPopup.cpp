@@ -131,7 +131,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         this->setAttribute(Qt::WA_DeleteOnClose);
 
     // Close the popup when Escape is pressed
-    createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
+    createWindowShortcut(this, "Escape", [this] {
+        this->deleteLater();
+    });
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
@@ -213,8 +215,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                       "/viewercard/" + this->userName_);
         });
 
-        QObject::connect(refresh.getElement(), &Button::leftClicked,
-                         [this] { this->updateLatestMessages(); });
+        QObject::connect(refresh.getElement(), &Button::leftClicked, [this] {
+            this->updateLatestMessages();
+        });
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/mod " + this->userName_);
         });
@@ -367,7 +370,7 @@ void UserInfoPopup::installEvents()
             auto currentUser = getApp()->accounts->twitch.getCurrent();
 
             const auto reenableFollowCheckbox = [this] {
-                this->ui_.follow->setEnabled(true);  //
+                this->ui_.follow->setEnabled(true);
             };
 
             if (!this->ui_.follow->isEnabled())
@@ -502,7 +505,9 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     this->userStateChanged_.invoke();
 
     this->updateLatestMessages();
-    QTimer::singleShot(1, this, [this] { this->setStayInScreenRect(true); });
+    QTimer::singleShot(1, this, [this] {
+        this->setStayInScreenRect(true);
+    });
 }
 
 void UserInfoPopup::updateLatestMessages()
@@ -825,9 +830,10 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             const auto pair =
                 std::make_pair(Action::Timeout, calculateTimeoutDuration(item));
 
-            QObject::connect(
-                a.getElement(), &EffectLabel2::leftClicked,
-                [this, pair] { this->buttonClicked.invoke(pair); });
+            QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
+                             [this, pair] {
+                                 this->buttonClicked.invoke(pair);
+                             });
 
             //auto addTimeouts = [&](const QString &title_,
             //                       const std::vector<std::pair<QString, int>> &items) {

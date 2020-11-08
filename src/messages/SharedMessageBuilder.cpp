@@ -356,7 +356,7 @@ void SharedMessageBuilder::appendChannelName()
     Link link(Link::Url, this->channel->getName() + "\n" + this->message().id);
 
     this->emplace<TextElement>(channelName, MessageElementFlag::ChannelName,
-                               MessageColor::System)  //
+                               MessageColor::System)
         ->setLink(link);
 }
 

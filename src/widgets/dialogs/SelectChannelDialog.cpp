@@ -80,9 +80,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         whispers_lbl->setWordWrap(true);
         whispers_btn->installEventFilter(&this->tabFilter_);
 
-        QObject::connect(
-            whispers_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { whispers_lbl->setVisible(enabled); });
+        QObject::connect(whispers_btn.getElement(), &QRadioButton::toggled,
+                         [=](bool enabled) mutable {
+                             whispers_lbl->setVisible(enabled);
+                         });
 
         // mentions_btn
         auto mentions_btn = vbox.emplace<QRadioButton>("Mentions")
@@ -95,9 +96,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         mentions_lbl->setWordWrap(true);
         mentions_btn->installEventFilter(&this->tabFilter_);
 
-        QObject::connect(
-            mentions_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { mentions_lbl->setVisible(enabled); });
+        QObject::connect(mentions_btn.getElement(), &QRadioButton::toggled,
+                         [=](bool enabled) mutable {
+                             mentions_lbl->setVisible(enabled);
+                         });
 
         // watching_btn
         auto watching_btn = vbox.emplace<QRadioButton>("Watching")
@@ -109,9 +111,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         watching_lbl->setWordWrap(true);
         watching_btn->installEventFilter(&this->tabFilter_);
 
-        QObject::connect(
-            watching_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { watching_lbl->setVisible(enabled); });
+        QObject::connect(watching_btn.getElement(), &QRadioButton::toggled,
+                         [=](bool enabled) mutable {
+                             watching_lbl->setVisible(enabled);
+                         });
 
         vbox->addStretch(1);
 
@@ -204,11 +207,13 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         layout.emplace<QHBoxLayout>().emplace<QDialogButtonBox>(this);
     {
         auto *button_ok = buttons->addButton(QDialogButtonBox::Ok);
-        QObject::connect(button_ok, &QPushButton::clicked,
-                         [=](bool) { this->ok(); });
+        QObject::connect(button_ok, &QPushButton::clicked, [=](bool) {
+            this->ok();
+        });
         auto *button_cancel = buttons->addButton(QDialogButtonBox::Cancel);
-        QObject::connect(button_cancel, &QAbstractButton::clicked,
-                         [=](bool) { this->close(); });
+        QObject::connect(button_cancel, &QAbstractButton::clicked, [=](bool) {
+            this->close();
+        });
     }
 
     this->setMinimumSize(300, 310);
@@ -217,10 +222,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
 
     // Shortcuts
     createWindowShortcut(this, "Return", [=] {
-        this->ok();  //
+        this->ok();
     });
     createWindowShortcut(this, "Esc", [=] {
-        this->close();  //
+        this->close();
     });
 
     // restore ui state
@@ -229,10 +234,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     {
         this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
         createWindowShortcut(this, "Ctrl+Tab", [=] {
-            this->ui_.notebook->selectNextTab();  //
+            this->ui_.notebook->selectNextTab();
         });
         createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
-            this->ui_.notebook->selectPreviousTab();  //
+            this->ui_.notebook->selectPreviousTab();
         });
     }
 

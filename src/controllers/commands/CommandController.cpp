@@ -115,8 +115,11 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                         }
                     }
                 } visitor;
-                boost::apply_visitor([&b](auto &&arg) { visitor(arg, b); },
-                                     variant);
+                boost::apply_visitor(
+                    [&b](auto &&arg) {
+                        visitor(arg, b);
+                    },
+                    variant);
             }  // emoji/text
         }
     }
@@ -211,7 +214,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)
-    this->items_.delayedItemsChanged.connect([this] {  //
+    this->items_.delayedItemsChanged.connect([this] {
         this->commandsSetting_->setValue(this->items_.raw());
     });
 

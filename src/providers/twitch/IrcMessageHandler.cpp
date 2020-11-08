@@ -702,7 +702,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             // channels
             app->twitch.server->forEachChannelAndSpecialChannels(
                 [msg](const auto &c) {
-                    c->addMessage(msg);  //
+                    c->addMessage(msg);
                 });
 
             return;

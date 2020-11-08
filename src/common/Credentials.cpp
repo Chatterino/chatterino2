@@ -113,7 +113,9 @@ namespace {
                 job->setKey(set.name);
                 job->setTextData(set.credential);
                 QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                 [](auto) { runNextJob(); });
+                                 [](auto) {
+                                     runNextJob();
+                                 });
                 job->start();
             }
             else  // erase job
@@ -123,7 +125,9 @@ namespace {
                 job->setAutoDelete(true);
                 job->setKey(erase.name);
                 QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                 [](auto) { runNextJob(); });
+                                 [](auto) {
+                                     runNextJob();
+                                 });
                 job->start();
             }
 

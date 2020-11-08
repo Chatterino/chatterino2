@@ -29,7 +29,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
         this->channelMap[Platform::Twitch].append(channelName);
     }
 
-    this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {  //
+    this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {
         this->twitchSetting_.setValue(this->channelMap[Platform::Twitch].raw());
     });
     /*
@@ -37,7 +37,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
         this->channelMap[Platform::Mixer].appendItem(channelName);
     }
 
-    this->channelMap[Platform::Mixer].delayedItemsChanged.connect([this] {  //
+    this->channelMap[Platform::Mixer].delayedItemsChanged.connect([this] {
         this->mixerSetting_.setValue(
             this->channelMap[Platform::Mixer]);
     });*/
@@ -46,8 +46,9 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
 
     this->fetchFakeChannels();
 
-    QObject::connect(this->liveStatusTimer_, &QTimer::timeout,
-                     [=] { this->fetchFakeChannels(); });
+    QObject::connect(this->liveStatusTimer_, &QTimer::timeout, [=] {
+        this->fetchFakeChannels();
+    });
     this->liveStatusTimer_->start(60 * 1000);
 }
 

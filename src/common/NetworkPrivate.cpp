@@ -180,9 +180,10 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             if (data->onSuccess_)
             {
                 if (data->executeConcurrently_)
-                    QtConcurrent::run(
-                        [onSuccess = std::move(data->onSuccess_),
-                         result = std::move(result)] { onSuccess(result); });
+                    QtConcurrent::run([onSuccess = std::move(data->onSuccess_),
+                                       result = std::move(result)] {
+                        onSuccess(result);
+                    });
                 else
                     data->onSuccess_(result);
             }
