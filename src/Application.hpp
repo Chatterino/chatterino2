@@ -50,10 +50,10 @@ public:
     Theme *const themes{};
     Fonts *const fonts{};
     Emotes *const emotes{};
+    AccountController *const accounts{};
     WindowManager *const windows{};
     Toasts *const toasts{};
 
-    AccountController *const accounts{};
     CommandController *const commands{};
     NotificationController *const notifications{};
     TwitchIrcServer *const twitch2{};

@@ -377,6 +377,10 @@ void Split::setChannel(IndirectChannel newChannel)
         this->header_->setViewersButtonVisible(false);
     }
 
+    this->channel_.get()->displayNameChanged.connect([this]() {
+        this->container_->refreshTab();
+    });
+
     this->channelChanged.invoke();
 
     // Queue up save because: Split channel changed

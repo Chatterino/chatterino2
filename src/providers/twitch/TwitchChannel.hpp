@@ -121,7 +121,7 @@ private:
     struct NameOptions {
         QString displayName;
         QString localizedName;
-    };
+    } nameOptions;
 
 protected:
     explicit TwitchChannel(const QString &channelName,
@@ -137,6 +137,7 @@ private:
     void refreshBadges();
     void refreshCheerEmotes();
     void loadRecentMessages();
+    void fetchDisplayName();
 
     void setLive(bool newLiveStatus);
     void setMod(bool value);
@@ -144,6 +145,11 @@ private:
     void setStaff(bool value);
     void setRoomId(const QString &id);
     void setRoomModes(const RoomModes &roomModes_);
+    void setDisplayName(const QString &name);
+    void setLocalizedName(const QString &name);
+
+    const QString &getDisplayName() const override;
+    const QString &getLocalizedName() const override;
 
     // Data
     const QString subscriptionUrl_;

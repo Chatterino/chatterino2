@@ -656,7 +656,7 @@ void SplitHeader::updateChannelText()
     this->isLive_ = false;
     this->tooltipText_ = QString();
 
-    auto title = channel->getName();
+    auto title = channel->getLocalizedName();
 
     if (indirectChannel.getType() == Channel::Type::TwitchWatching)
         title = "watching: " + (title.isEmpty() ? "none" : title);
