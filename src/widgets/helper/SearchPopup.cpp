@@ -52,7 +52,8 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
     return channel;
 }
 
-SearchPopup::SearchPopup()
+SearchPopup::SearchPopup(QWidget *parent)
+    : BasePopup({}, parent)
 {
     this->initLayout();
     this->resize(400, 600);
