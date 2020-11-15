@@ -39,6 +39,7 @@
 #include "util/Twitch.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -1965,8 +1966,14 @@ void ChannelView::hideEvent(QHideEvent *)
 
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
+    QWidget *userCardParent = this;
+#ifdef Q_OS_MACOS
+    // Order of closing/opening/killing widgets when the "Automatically close user info popups" setting is enabled is special on macOS, so user info popups should always use the main window as its parent
+    userCardParent =
+        static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
+#endif
     auto *userPopup =
-        new UserInfoPopup(getSettings()->autoCloseUserPopup, this);
+        new UserInfoPopup(getSettings()->autoCloseUserPopup, userCardParent);
     userPopup->setData(userName, this->hasSourceChannel()
                                      ? this->sourceChannel_
                                      : this->underlyingChannel_);
