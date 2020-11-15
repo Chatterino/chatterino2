@@ -29,7 +29,7 @@
 - Minor: Improve UX of the "Login expired!" message (#2029)
 - Minor: PageUp and PageDown now scroll in the selected split (#2070, #2081)
 - Minor: Allow highlights to be excluded from `/mentions`. Excluded highlights will not trigger tab highlights either. (#1793, #2036)
-- Minor: Flag all popup dialogs as actual dialogs so they get the relevant window manager hints (#1843, #2182)
+- Minor: Flag all popup dialogs as actual dialogs so they get the relevant window manager hints (#1843, #2182, #2185)
 - Minor: Don't show update button for nightly builds on macOS and Linux, this was already the case for Windows (#2163, #2164)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
