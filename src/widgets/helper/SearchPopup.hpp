@@ -15,7 +15,7 @@ namespace chatterino {
 class SearchPopup : public BasePopup
 {
 public:
-    SearchPopup();
+    SearchPopup(QWidget *parent);
 
     virtual void setChannel(const ChannelPtr &channel);
     virtual void setChannelFilters(FilterSetPtr filters);
