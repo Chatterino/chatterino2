@@ -44,7 +44,8 @@ QString Paths::cacheDirectory()
         QStringSetting cachePathSetting("/cache/path");
 
         cachePathSetting.connect([](const auto &newPath, auto) {
-            if (newPath.length() > 0) {
+            if (newPath.length() > 0)
+            {
                 QDir().mkpath(newPath);
             }
         });
