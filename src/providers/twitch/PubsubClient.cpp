@@ -709,7 +709,11 @@ PubSub::PubSub()
             // qDebug() << QString::fromStdString(rj::stringify(data));
         };
 
+#ifdef QT_NO_DEBUG_OUTPUT
+    this->websocketClient.set_access_channels(websocketpp::log::alevel::none);
+#else
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
+#endif
     this->websocketClient.clear_access_channels(
         websocketpp::log::alevel::frame_payload);
 
