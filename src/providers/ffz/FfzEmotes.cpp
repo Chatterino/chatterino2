@@ -14,12 +14,10 @@ namespace {
     Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
     {
         auto emote = urls.value(emoteScale);
-        if (emote.isUndefined())
+        if (emote.isUndefined() || !emote.isString())
         {
             return {""};
         }
-
-        assert(emote.isString());
 
         return {"https:" + emote.toString()};
     }
