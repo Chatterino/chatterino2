@@ -20,7 +20,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2.3.4
         with:
           submodules: true
 
@@ -29,13 +29,19 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ../Qt
-          key: ${{ runner.os }}-QtCache-v2
+          key: ${{ runner.os }}-QtCache-20201005
+
+      # LINUX
+      - name: Install p7zip (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update && sudo apt-get -y install p7zip-full
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          # mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          extra: --external 7z
 
       # WINDOWS
       - name: Cache conan
@@ -78,7 +84,7 @@ jobs:
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.0
         with:
           name: chatterino-windows-x86-64.zip
           path: build/chatterino-windows-x86-64.zip
@@ -106,7 +112,7 @@ jobs:
 
       - name: Upload artifact (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.0
         with:
           name: Chatterino-x86_64.AppImage
           path: build/Chatterino-x86_64.AppImage
@@ -140,7 +146,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v2.2.0
         with:
           name: chatterino-osx.dmg
           path: build/chatterino-osx.dmg
@@ -153,13 +159,13 @@ jobs:
     steps:
       - name: Create release
         id: create_release
-        uses: pajlada/create-release@v2
+        uses: pajlada/create-release@v2.0.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: github-actions-nightly
           backup_tag_name: backup-github-actions-nightly
-          release_name: GitHub Actions Nightly Test
+          release_name: Nightly Release
           body: |
               1 ${{ github.eventName }}
               2 ${{ github.sha }}
@@ -169,17 +175,17 @@ jobs:
               6 ${{ github.actor }}
           prerelease: true
 
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v2.0.5
         with:
           name: chatterino-windows-x86-64.zip
           path: windows/
 
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v2.0.5
         with:
           name: Chatterino-x86_64.AppImage
           path: linux/
 
-      - uses: actions/download-artifact@v1
+      - uses: actions/download-artifact@v2.0.5
         with:
           name: chatterino-osx.dmg
           path: macos/
@@ -197,7 +203,7 @@ jobs:
       #     echo "::set-output name=upload_url::$(cat release-upload-url.txt/release-upload-url.txt)"
 
       - name: Upload release asset (Windows)
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -207,7 +213,7 @@ jobs:
           asset_content_type: application/zip
 
       - name: Upload release asset (Ubuntu)
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -217,7 +223,7 @@ jobs:
           asset_content_type: application/x-executable
 
       - name: Upload release asset (MacOS)
-        uses: actions/upload-release-asset@v1.0.1
+        uses: actions/upload-release-asset@v1.0.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
