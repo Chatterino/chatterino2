@@ -639,7 +639,7 @@ void Split::openInStreamlink()
     }
     catch (const Exception &ex)
     {
-        qDebug() << "Error in doOpenStreamlink:" << ex.what();
+        qWarning() << "Error in doOpenStreamlink:" << ex.what();
     }
 }
 

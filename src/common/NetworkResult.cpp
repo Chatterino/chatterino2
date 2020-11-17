@@ -43,9 +43,9 @@ rapidjson::Document NetworkResult::parseRapidJson() const
 
     if (result.Code() != rapidjson::kParseErrorNone)
     {
-        qDebug() << "JSON parse error:"
-                 << rapidjson::GetParseError_En(result.Code()) << "("
-                 << result.Offset() << ")";
+        qWarning() << "JSON parse error:"
+                   << rapidjson::GetParseError_En(result.Code()) << "("
+                   << result.Offset() << ")";
         return ret;
     }
 

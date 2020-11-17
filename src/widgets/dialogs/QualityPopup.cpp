@@ -55,7 +55,8 @@ void QualityPopup::okButtonClicked()
     }
     catch (const Exception &ex)
     {
-        qDebug() << "Exception caught trying to open streamlink:" << ex.what();
+        qWarning() << "Exception caught trying to open streamlink:"
+                   << ex.what();
     }
 
     this->close();

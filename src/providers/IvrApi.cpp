@@ -23,8 +23,8 @@ void IvrApi::getSubage(QString userName, QString channelName,
             return Success;
         })
         .onError([failureCallback](NetworkResult result) {
-            qDebug() << "Failed IVR API Call!" << result.status()
-                     << QString(result.getData());
+            qWarning() << "Failed IVR API Call!" << result.status()
+                       << QString(result.getData());
             failureCallback();
         })
         .execute();

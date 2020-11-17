@@ -92,7 +92,7 @@ namespace {
             }
             else
             {
-                qDebug() << "Error occured" << err;
+                qWarning() << "Error occured" << err;
             }
 
             p->deleteLater();
@@ -119,7 +119,7 @@ void getStreamQualities(const QString &channelURL,
         [=](int res) {
             if (res != 0)
             {
-                qDebug() << "Got error code" << res;
+                qWarning() << "Got error code" << res;
                 // return;
             }
             QString lastLine = QString(p->readAllStandardOutput());

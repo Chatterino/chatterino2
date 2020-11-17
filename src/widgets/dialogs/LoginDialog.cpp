@@ -112,7 +112,7 @@ BasicLoginWidget::BasicLoginWidget()
         auto res = QDesktopServices::openUrl(QUrl(logInLink));
         if (!res)
         {
-            qDebug() << "open login in browser failed";
+            qWarning() << "open login in browser failed";
             this->ui_.unableToOpenBrowserHelper.show();
         }
     });
@@ -152,7 +152,7 @@ BasicLoginWidget::BasicLoginWidget()
             }
             else
             {
-                qDebug() << "Unknown key in code: " << key;
+                qWarning() << "Unknown key in code: " << key;
             }
         }
 
