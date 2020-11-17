@@ -69,6 +69,8 @@ macx {
 CONFIG(debug, debug|release) {
     DEFINES += C_DEBUG
     DEFINES += QT_DEBUG
+} else {
+    DEFINES += NDEBUG
 }
 
 # Submodules
