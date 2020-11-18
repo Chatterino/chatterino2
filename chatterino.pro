@@ -617,6 +617,7 @@ CONFIG(debug, debug|release) {
     message("Building Chatterino2 DEBUG")
 } else {
     message("Building Chatterino2 RELEASE")
+    DEFINES += DEBUG_OFF
 }
 
 message("Injected git values: $$git_commit ($$git_release) $$git_hash")
