@@ -93,7 +93,7 @@ namespace {
             }
             else
             {
-                qCDebug(chatterinoStreamlink) << "Error occured" << err;
+                qCWarning(chatterinoStreamlink) << "Error occured" << err;
             }
 
             p->deleteLater();
@@ -120,7 +120,7 @@ void getStreamQualities(const QString &channelURL,
         [=](int res) {
             if (res != 0)
             {
-                qCDebug(chatterinoStreamlink) << "Got error code" << res;
+                qCWarning(chatterinoStreamlink) << "Got error code" << res;
                 // return;
             }
             QString lastLine = QString(p->readAllStandardOutput());

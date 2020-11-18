@@ -231,16 +231,16 @@ void FfzEmotes::loadChannel(
             else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay
-                qCDebug(chatterinoFfzemotes) << "Fetching FFZ emotes for channel" << channelId
-                         << "failed due to timeout";
+                qCWarning(chatterinoFfzemotes) << "Fetching FFZ emotes for channel" << channelId
+                           << "failed due to timeout";
                 shared->addMessage(
                     makeSystemMessage("Failed to fetch FrankerFaceZ channel "
                                       "emotes. (timed out)"));
             }
             else
             {
-                qCDebug(chatterinoFfzemotes) << "Error fetching FFZ emotes for channel" << channelId
-                         << ", error" << result.status();
+                qCWarning(chatterinoFfzemotes) << "Error fetching FFZ emotes for channel"
+                           << channelId << ", error" << result.status();
                 shared->addMessage(
                     makeSystemMessage("Failed to fetch FrankerFaceZ channel "
                                       "emotes. (unknown error)"));

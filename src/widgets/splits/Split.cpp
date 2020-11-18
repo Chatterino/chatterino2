@@ -640,7 +640,7 @@ void Split::openInStreamlink()
     }
     catch (const Exception &ex)
     {
-        qCDebug(chatterinoWidget) << "Error in doOpenStreamlink:" << ex.what();
+        qCWarning(chatterinoWidget) << "Error in doOpenStreamlink:" << ex.what();
     }
 }
 

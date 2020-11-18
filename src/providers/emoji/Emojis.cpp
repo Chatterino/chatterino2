@@ -132,9 +132,9 @@ void Emojis::loadEmojis()
 
     if (result.Code() != rapidjson::kParseErrorNone)
     {
-        qCDebug(chatterinoEmoji) << "JSON parse error:"
-                 << rapidjson::GetParseError_En(result.Code()) << "("
-                 << result.Offset() << ")";
+        qCWarning(chatterinoEmoji) << "JSON parse error:"
+                   << rapidjson::GetParseError_En(result.Code()) << "("
+                   << result.Offset() << ")";
         return;
     }
 

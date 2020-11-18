@@ -193,7 +193,7 @@ void AttachedWindow::attachToHwnd(void *_attachedPtr)
                     !qfilename.endsWith("brave.exe"))
 
                 {
-                    qCDebug(chatterinoWidget) << "NM Illegal caller" << qfilename;
+                    qCWarning(chatterinoWidget) << "NM Illegal caller" << qfilename;
                     this->timer_.stop();
                     this->deleteLater();
                     return;
@@ -242,7 +242,7 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
 
     if (::GetLastError() != 0)
     {
-        qCDebug(chatterinoWidget) << "NM GetLastError()" << ::GetLastError();
+        qCWarning(chatterinoWidget) << "NM GetLastError()" << ::GetLastError();
 
         this->timer_.stop();
         this->deleteLater();
