@@ -41,7 +41,7 @@ namespace log {
     class chatterinowebsocketpplogger : public basic<concurrency, names>
     {
     public:
-        typedef basic<concurrency, names> base;
+        typedef chatterinowebsocketpplogger<concurrency, names> base;
 
         chatterinowebsocketpplogger<concurrency, names>(
             channel_type_hint::value)
