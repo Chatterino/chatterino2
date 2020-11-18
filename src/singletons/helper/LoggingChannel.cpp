@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "qlogging.hpp"
 
 #include <QDir>
 
@@ -63,13 +64,13 @@ void LoggingChannel::openLogFile()
 
     if (!QDir().mkpath(directory))
     {
-        qDebug() << "Unable to create logging path";
+        qCDebug(chatterinoHelper) << "Unable to create logging path";
         return;
     }
 
     // Open file handle to log file of current date
     QString fileName = directory + QDir::separator() + baseFileName;
-    qDebug() << "Logging to" << fileName;
+    qCDebug(chatterinoHelper) << "Logging to" << fileName;
     this->fileHandle.setFileName(fileName);
 
     this->fileHandle.open(QIODevice::Append);

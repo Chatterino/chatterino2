@@ -18,6 +18,7 @@
 #include "singletons/Updates.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
+#include "qlogging.hpp"
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
@@ -144,7 +145,7 @@ namespace {
     // improved in the future.
     void clearCache(const QDir &dir)
     {
-        qDebug() << "[Cache] cleared cache";
+        qCDebug(chatterinoCache) << "[Cache] cleared cache";
 
         QStringList toBeRemoved;
 

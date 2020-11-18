@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QtConcurrent>
+#include "qlogging.hpp"
 
 #include <cassert>
 
@@ -167,7 +168,7 @@ void NetworkRequest::execute()
     if (this->data->cache_ &&
         this->data->requestType_ != NetworkRequestType::Get)
     {
-        qDebug() << "Can only cache GET requests!";
+        qCDebug(chatterinoCommon) << "Can only cache GET requests!";
         this->data->cache_ = false;
     }
 

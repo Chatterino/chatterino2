@@ -14,6 +14,7 @@
 #include <QMimeDatabase>
 #include <QMutex>
 #include <QSaveFile>
+#include "qlogging.hpp"
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
@@ -160,7 +161,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                     ? ""
                     : getLinkFromResponse(
                           result, getSettings()->imageUploaderDeletionLink);
-            qDebug() << link << deletionLink;
+            qCDebug(chatterinoNuulsuploader) << link << deletionLink;
             textEdit.insertPlainText(link + " ");
             if (uploadQueue.empty())
             {

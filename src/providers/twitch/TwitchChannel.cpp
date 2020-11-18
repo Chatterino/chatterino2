@@ -31,6 +31,7 @@
 #include <QJsonValue>
 #include <QThread>
 #include <QTimer>
+#include "qlogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -148,7 +149,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     , mod_(false)
     , titleRefreshedTime_(QTime::currentTime().addSecs(-TITLE_REFRESH_PERIOD))
 {
-    qDebug() << "[TwitchChannel" << name << "] Opened";
+    qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
     this->liveStatusChanged.connect([this]() {
         if (this->isLive() == 1)
@@ -305,7 +306,7 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    qDebug() << "[TwitchChannel" << this->getName()
+    qCDebug(chatterinoTwitch) << "[TwitchChannel" << this->getName()
              << "] Send message:" << message;
 
     // Do last message processing
@@ -334,7 +335,7 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (messageSent)
     {
-        qDebug() << "sent";
+        qCDebug(chatterinoTwitch) << "sent";
         this->lastSentMessage_ = parsedMessage;
     }
 }
@@ -593,7 +594,7 @@ void TwitchChannel::refreshLiveStatus()
 
     if (roomID.isEmpty())
     {
-        qDebug() << "[TwitchChannel" << this->getName()
+        qCDebug(chatterinoTwitch) << "[TwitchChannel" << this->getName()
                  << "] Refreshing live status (Missing ID)";
         this->setLive(false);
         return;
@@ -908,7 +909,7 @@ boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
         int bitAmount = amount.toInt(&ok);
         if (!ok)
         {
-            qDebug() << "Error parsing bit amount in cheerEmote";
+            qCDebug(chatterinoTwitch) << "Error parsing bit amount in cheerEmote";
         }
         for (const auto &emote : set.cheerEmotes)
         {

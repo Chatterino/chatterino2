@@ -203,6 +203,7 @@ SOURCES += \
     src/providers/twitch/TwitchParseCheerEmotes.cpp \
     src/providers/twitch/TwitchUser.cpp \
     src/RunGui.cpp \
+    src/qlogging.cpp \
     src/singletons/Badges.cpp \
     src/singletons/Emotes.cpp \
     src/singletons/Fonts.cpp \
@@ -432,6 +433,8 @@ HEADERS += \
     src/providers/twitch/TwitchParseCheerEmotes.hpp \
     src/providers/twitch/TwitchUser.hpp \
     src/RunGui.hpp \
+    src/providers/twitch/chatterinowebsocketpplogger.hpp \
+    src/qlogging.hpp \
     src/singletons/Badges.hpp \
     src/singletons/Emotes.hpp \
     src/singletons/Fonts.hpp \

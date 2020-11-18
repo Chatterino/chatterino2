@@ -1,4 +1,5 @@
 #include "controllers/filters/parser/Tokenizer.hpp"
+#include "qlogging.hpp"
 
 namespace filterparser {
 
@@ -70,21 +71,21 @@ void Tokenizer::debug()
 {
     if (this->i_ > 0)
     {
-        qDebug() << "= current" << this->tokens_.at(this->i_ - 1);
-        qDebug() << "= current type" << this->tokenTypes_.at(this->i_ - 1);
+        qCDebug(chatterinoTokenizer) << "= current" << this->tokens_.at(this->i_ - 1);
+        qCDebug(chatterinoTokenizer) << "= current type" << this->tokenTypes_.at(this->i_ - 1);
     }
     else
     {
-        qDebug() << "= no current";
+        qCDebug(chatterinoTokenizer) << "= no current";
     }
     if (this->hasNext())
     {
-        qDebug() << "= next" << this->tokens_.at(this->i_);
-        qDebug() << "= next type" << this->tokenTypes_.at(this->i_);
+        qCDebug(chatterinoTokenizer) << "= next" << this->tokens_.at(this->i_);
+        qCDebug(chatterinoTokenizer) << "= next type" << this->tokenTypes_.at(this->i_);
     }
     else
     {
-        qDebug() << "= no next";
+        qCDebug(chatterinoTokenizer) << "= no next";
     }
 }
 

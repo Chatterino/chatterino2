@@ -3,6 +3,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <QJsonDocument>
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -43,7 +44,7 @@ rapidjson::Document NetworkResult::parseRapidJson() const
 
     if (result.Code() != rapidjson::kParseErrorNone)
     {
-        qDebug() << "JSON parse error:"
+        qCDebug(chatterinoCommon) << "JSON parse error:"
                  << rapidjson::GetParseError_En(result.Code()) << "("
                  << result.Offset() << ")";
         return ret;

@@ -3,6 +3,7 @@
 #include "singletons/Paths.hpp"
 
 #include <QDesktopServices>
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -40,7 +41,7 @@ void DownloadManager::setFile(QString fileURL, const QString &channelName)
 
 void DownloadManager::onDownloadProgress(qint64 bytesRead, qint64 bytesTotal)
 {
-    qDebug() << "Download progress: " << bytesRead << "/" << bytesTotal;
+    qCDebug(chatterinoCommon) << "Download progress: " << bytesRead << "/" << bytesTotal;
 }
 
 void DownloadManager::onFinished(QNetworkReply *reply)
@@ -48,11 +49,11 @@ void DownloadManager::onFinished(QNetworkReply *reply)
     switch (reply->error())
     {
         case QNetworkReply::NoError: {
-            qDebug("file is downloaded successfully.");
+            qCDebug(chatterinoCommon) << "file is downloaded successfully.";
         }
         break;
         default: {
-            qDebug() << reply->errorString().toLatin1();
+            qCDebug(chatterinoCommon) << reply->errorString().toLatin1();
         };
     }
 

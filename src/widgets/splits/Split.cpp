@@ -35,6 +35,7 @@
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
 #include "widgets/splits/SplitOverlay.hpp"
+#include "qlogging.hpp"
 
 #include <QApplication>
 #include <QClipboard>
@@ -639,7 +640,7 @@ void Split::openInStreamlink()
     }
     catch (const Exception &ex)
     {
-        qDebug() << "Error in doOpenStreamlink:" << ex.what();
+        qCDebug(chatterinoWidget) << "Error in doOpenStreamlink:" << ex.what();
     }
 }
 

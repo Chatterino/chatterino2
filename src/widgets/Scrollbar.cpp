@@ -5,6 +5,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/ChannelView.hpp"
+#include "qlogging.hpp"
 
 #include <QDebug>
 #include <QMouseEvent>
@@ -228,7 +229,7 @@ void Scrollbar::setCurrentValue(qreal value)
 
 void Scrollbar::printCurrentState(const QString &prefix) const
 {
-    qDebug() << prefix                                         //
+    qCDebug(chatterinoWidget) << prefix                                         //
              << "Current value: " << this->getCurrentValue()   //
              << ". Maximum: " << this->getMaximum()            //
              << ". Minimum: " << this->getMinimum()            //

@@ -10,6 +10,7 @@
 #include "messages/ImageSet.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "qlogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -178,14 +179,14 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay
-                qDebug() << "Fetching BTTV emotes for channel" << channelId
+                qCDebug(chatterinoBttv) << "Fetching BTTV emotes for channel" << channelId
                          << "failed due to timeout";
                 shared->addMessage(makeSystemMessage(
                     "Failed to fetch BetterTTV channel emotes. (timed out)"));
             }
             else
             {
-                qDebug() << "Error fetching BTTV emotes for channel"
+                qCDebug(chatterinoBttv) << "Error fetching BTTV emotes for channel"
                          << channelId << ", error" << result.status();
                 shared->addMessage(
                     makeSystemMessage("Failed to fetch BetterTTV channel "

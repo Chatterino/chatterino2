@@ -3,6 +3,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Window.hpp"
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -55,7 +56,7 @@ void QualityPopup::okButtonClicked()
     }
     catch (const Exception &ex)
     {
-        qDebug() << "Exception caught trying to open streamlink:" << ex.what();
+        qCDebug(chatterinoWidget) << "Exception caught trying to open streamlink:" << ex.what();
     }
 
     this->close();

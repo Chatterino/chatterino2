@@ -1,4 +1,5 @@
 #include "Benchmark.hpp"
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -10,7 +11,7 @@ BenchmarkGuard::BenchmarkGuard(const QString &_name)
 
 BenchmarkGuard::~BenchmarkGuard()
 {
-    qDebug() << this->name_ << float(timer_.nsecsElapsed()) / 1000000.0f
+    qCDebug(chatterinoBenchmark) << this->name_ << float(timer_.nsecsElapsed()) / 1000000.0f
              << "ms";
 }
 

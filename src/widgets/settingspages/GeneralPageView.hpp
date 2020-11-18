@@ -6,6 +6,7 @@
 #include "common/ChatterinoSetting.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/SignalLabel.hpp"
+#include "qlogging.hpp"
 
 class QScrollArea;
 
@@ -190,7 +191,7 @@ public:
 protected:
     void resizeEvent(QResizeEvent *ev) override
     {
-        qDebug() << ev->size();
+        qCDebug(chatterinoWidget) << ev->size();
     }
 
 private:

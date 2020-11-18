@@ -3,12 +3,16 @@
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/chatterinowebsocketpplogger.hpp"
 
 #include <rapidjson/document.h>
 #include <QString>
 #include <pajlada/signals/signal.hpp>
 #include <websocketpp/client.hpp>
 #include <websocketpp/config/asio_client.hpp>
+#include <websocketpp/logger/basic.hpp>
+#include <websocketpp/logger/syslog.hpp>
+#include <websocketpp/extensions/permessage_deflate/enabled.hpp>
 
 #include <atomic>
 #include <chrono>
@@ -21,8 +25,13 @@
 
 namespace chatterino {
 
+struct chatterinoconfig : public websocketpp::config::asio_tls_client {
+    typedef websocketpp::log::chatterinowebsocketpplogger<concurrency_type, websocketpp::log::elevel> elog_type;
+    typedef websocketpp::log::chatterinowebsocketpplogger<concurrency_type, websocketpp::log::alevel> alog_type;
+};
+
 using WebsocketClient =
-    websocketpp::client<websocketpp::config::asio_tls_client>;
+    websocketpp::client<chatterinoconfig>;
 using WebsocketHandle = websocketpp::connection_hdl;
 using WebsocketErrorCode = websocketpp::lib::error_code;
 

@@ -13,6 +13,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/IrcHelpers.hpp"
+#include "qlogging.hpp"
 
 #include <IrcMessage>
 
@@ -361,7 +362,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        qDebug() << "[IrcMessageHandler:handleClearChatMessage] Twitch channel"
+        qCDebug(chatterinoTwitch) << "[IrcMessageHandler:handleClearChatMessage] Twitch channel"
                  << chanName << "not found";
         return;
     }
@@ -427,7 +428,7 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        qDebug() << "[IrcMessageHandler:handleClearMessageMessage] Twitch "
+        qCDebug(chatterinoTwitch) << "[IrcMessageHandler:handleClearMessageMessage] Twitch "
                     "channel"
                  << chanName << "not found";
         return;
@@ -712,7 +713,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 
         if (channel->isEmpty())
         {
-            qDebug() << "[IrcManager:handleNoticeMessage] Channel"
+            qCDebug(chatterinoTwitch) << "[IrcManager:handleNoticeMessage] Channel"
                      << channelName << "not found in channel manager";
             return;
         }

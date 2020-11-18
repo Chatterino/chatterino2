@@ -9,11 +9,11 @@
 #include "util/CombinePath.hpp"
 #include "util/PostToThread.hpp"
 
-#include <QDebug>
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
+#include "qlogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -59,7 +59,7 @@ Updates::Updates()
     : currentVersion_(CHATTERINO_VERSION)
     , updateGuideLink_("https://chatterino.com")
 {
-    qDebug() << "init UpdateManager";
+    qCDebug(chatterinoUpdate) << "init UpdateManager";
 }
 
 Updates &Updates::instance()
@@ -234,7 +234,7 @@ void Updates::checkForUpdates()
 {
     if (!Version::instance().isSupportedOS())
     {
-        qDebug()
+        qCDebug(chatterinoUpdate)
             << "Update checking disabled because OS doesn't appear to be one "
                "of Windows, GNU/Linux or macOS.";
         return;
@@ -260,7 +260,7 @@ void Updates::checkForUpdates()
             if (!version_val.isString())
             {
                 this->setStatus_(SearchFailed);
-                qDebug() << "error updating";
+                qCDebug(chatterinoUpdate) << "error updating";
                 return Failure;
             }
 
@@ -270,7 +270,7 @@ void Updates::checkForUpdates()
             if (!updateExe_val.isString())
             {
                 this->setStatus_(SearchFailed);
-                qDebug() << "error updating";
+                qCDebug(chatterinoUpdate) << "error updating";
                 return Failure;
             }
             this->updateExe_ = updateExe_val.toString();
@@ -281,7 +281,7 @@ void Updates::checkForUpdates()
             if (!portable_val.isString())
             {
                 this->setStatus_(SearchFailed);
-                qDebug() << "error updating";
+                qCDebug(chatterinoUpdate) << "error updating";
                 return Failure;
             }
             this->updatePortable_ = portable_val.toString();

@@ -12,6 +12,7 @@
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
+#include "qlogging.hpp"
 
 #include <QDebug>
 #include <QFile>
@@ -153,7 +154,7 @@ void Notebook::select(QWidget *page)
             }
             else
             {
-                qDebug()
+                qCDebug(chatterinoWidget)
                     << "Notebook: selected child of page doesn't exist anymore";
             }
         }

@@ -7,6 +7,7 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
+#include "qlogging.hpp"
 
 #include <QDebug>
 #include <QPainter>
@@ -422,7 +423,7 @@ void MultiColorTextLayoutElement::paint(QPainter &painter)
 
     for (const auto &segment : this->segments_)
     {
-        // qDebug() << "Draw segment:" << segment.text;
+        qCDebug(chatterinoMessage) << "Draw segment:" << segment.text;
         painter.setPen(segment.color);
         painter.drawText(QRectF(this->getRect().x() + xOffset,
                                 this->getRect().y(), 10000, 10000),

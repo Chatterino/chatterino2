@@ -44,6 +44,7 @@
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
+#include "qlogging.hpp"
 
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
@@ -892,7 +893,7 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     auto snapshot = this->messages_.getSnapshot();
     if (index >= snapshot.size())
     {
-        qDebug() << "Tried to replace out of bounds message. Index:" << index
+        qCDebug(chatterinoWidget) << "Tried to replace out of bounds message. Index:" << index
                  << ". Length:" << snapshot.size();
         return;
     }

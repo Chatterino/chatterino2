@@ -1,6 +1,7 @@
 #include "providers/twitch/api/Helix.hpp"
 
 #include "common/Outcome.hpp"
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -320,14 +321,14 @@ NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 
     if (this->clientId.isEmpty())
     {
-        qDebug()
+        qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without a client ID set BabyRage";
         // return boost::none;
     }
 
     if (this->oauthToken.isEmpty())
     {
-        qDebug()
+        qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without an oauth token set BabyRage";
         // return boost::none;
     }

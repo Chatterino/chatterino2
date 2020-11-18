@@ -1,6 +1,5 @@
 #include <QApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QMessageBox>
 #include <QStringList>
 #include <memory>
@@ -16,6 +15,7 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/IncognitoBrowser.hpp"
+#include "qlogging.hpp"
 
 using namespace chatterino;
 
@@ -37,7 +37,7 @@ int main(int argc, char **argv)
     else if (getArgs().printVersion)
     {
         auto version = Version::instance();
-        qInfo().noquote() << QString("%1 (commit %2%3)")
+        qCInfo(chatterinoMain).noquote() << QString("%1 (commit %2%3)")
                                  .arg(version.fullVersion())
                                  .arg(version.commitHash())
                                  .arg(Modes::instance().isNightly

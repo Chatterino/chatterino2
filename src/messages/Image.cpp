@@ -18,6 +18,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
+#include "qlogging.hpp"
 
 namespace chatterino {
 namespace detail {
@@ -130,7 +131,7 @@ namespace detail {
 
         if (reader.imageCount() == 0)
         {
-            qDebug() << "Error while reading image" << url.string << ": '"
+            qCDebug(chatterinoImage) << "Error while reading image" << url.string << ": '"
                      << reader.errorString() << "'";
             return frames;
         }
@@ -149,7 +150,7 @@ namespace detail {
 
         if (frames.size() == 0)
         {
-            qDebug() << "Error while reading image" << url.string << ": '"
+            qCDebug(chatterinoImage) << "Error while reading image" << url.string << ": '"
                      << reader.errorString() << "'";
         }
 

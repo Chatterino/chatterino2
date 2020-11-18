@@ -11,6 +11,7 @@
 #include <QCryptographicHash>
 #include <QFile>
 #include <QtConcurrent>
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -123,7 +124,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
         if (reply == nullptr)
         {
-            qDebug() << "Unhandled request type";
+            qCDebug(chatterinoCommon) << "Unhandled request type";
             return;
         }
 
@@ -131,7 +132,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
         {
             QObject::connect(
                 data->timer_, &QTimer::timeout, worker, [reply, data]() {
-                    qDebug() << "Aborted!";
+                    qCDebug(chatterinoCommon) << "Aborted!";
                     reply->abort();
                     if (data->onError_)
                     {

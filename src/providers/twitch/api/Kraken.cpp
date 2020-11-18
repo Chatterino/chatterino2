@@ -2,6 +2,7 @@
 
 #include "common/Outcome.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -54,7 +55,7 @@ NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
 
     if (this->clientId.isEmpty())
     {
-        qDebug()
+        qCDebug(chatterinoTwitch)
             << "Kraken::makeRequest called without a client ID set BabyRage";
     }
 

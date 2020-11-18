@@ -1,5 +1,6 @@
 #include "ChannelPointReward.hpp"
 #include "util/RapidjsonHelpers.hpp"
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -9,7 +10,7 @@ QString parseRewardImage(const rapidjson::Value &obj, const char *key,
     QString url;
     if (!(result = rj::getSafe(obj, key, url)))
     {
-        qDebug() << "No url value found for key in reward image object:" << key;
+        qCDebug(chatterinoTwitch) << "No url value found for key in reward image object:" << key;
         return "";
     }
 
@@ -22,7 +23,7 @@ ChannelPointReward::ChannelPointReward(rapidjson::Value &redemption)
     if (!(this->hasParsedSuccessfully =
               rj::getSafeObject(redemption, "user", user)))
     {
-        qDebug() << "No user info found for redemption";
+        qCDebug(chatterinoTwitch) << "No user info found for redemption";
         return;
     }
 
@@ -30,41 +31,41 @@ ChannelPointReward::ChannelPointReward(rapidjson::Value &redemption)
     if (!(this->hasParsedSuccessfully =
               rj::getSafeObject(redemption, "reward", reward)))
     {
-        qDebug() << "No reward info found for redemption";
+        qCDebug(chatterinoTwitch) << "No reward info found for redemption";
         return;
     }
 
     if (!(this->hasParsedSuccessfully = rj::getSafe(reward, "id", this->id)))
     {
-        qDebug() << "No id found for reward";
+        qCDebug(chatterinoTwitch) << "No id found for reward";
         return;
     }
 
     if (!(this->hasParsedSuccessfully =
               rj::getSafe(reward, "channel_id", this->channelId)))
     {
-        qDebug() << "No channel_id found for reward";
+        qCDebug(chatterinoTwitch) << "No channel_id found for reward";
         return;
     }
 
     if (!(this->hasParsedSuccessfully =
               rj::getSafe(reward, "title", this->title)))
     {
-        qDebug() << "No title found for reward";
+        qCDebug(chatterinoTwitch) << "No title found for reward";
         return;
     }
 
     if (!(this->hasParsedSuccessfully =
               rj::getSafe(reward, "cost", this->cost)))
     {
-        qDebug() << "No cost found for reward";
+        qCDebug(chatterinoTwitch) << "No cost found for reward";
         return;
     }
 
     if (!(this->hasParsedSuccessfully = rj::getSafe(
               reward, "is_user_input_required", this->isUserInputRequired)))
     {
-        qDebug() << "No information if user input is required found for reward";
+        qCDebug(chatterinoTwitch) << "No information if user input is required found for reward";
         return;
     }
 
@@ -105,21 +106,21 @@ void ChannelPointReward::parseUser(rapidjson::Value &user)
 {
     if (!(this->hasParsedSuccessfully = rj::getSafe(user, "id", this->user.id)))
     {
-        qDebug() << "No id found for user in reward";
+        qCDebug(chatterinoTwitch) << "No id found for user in reward";
         return;
     }
 
     if (!(this->hasParsedSuccessfully =
               rj::getSafe(user, "login", this->user.login)))
     {
-        qDebug() << "No login name found for user in reward";
+        qCDebug(chatterinoTwitch) << "No login name found for user in reward";
         return;
     }
 
     if (!(this->hasParsedSuccessfully =
               rj::getSafe(user, "display_name", this->user.displayName)))
     {
-        qDebug() << "No display name found for user in reward";
+        qCDebug(chatterinoTwitch) << "No display name found for user in reward";
         return;
     }
 }

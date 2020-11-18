@@ -33,6 +33,7 @@
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/splits/Split.hpp"
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -339,7 +340,7 @@ void Application::initPubsub()
         }
         else
         {
-            qDebug() << "Couldn't find channel id of point reward";
+            qCDebug(chatterinoApp) << "Couldn't find channel id of point reward";
         }
     });
 

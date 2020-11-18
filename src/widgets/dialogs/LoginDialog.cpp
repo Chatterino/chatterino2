@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "util/Helpers.hpp"
+#include "qlogging.hpp"
 
 #ifdef USEWINSDK
 #    include <Windows.h>
@@ -108,11 +109,11 @@ BasicLoginWidget::BasicLoginWidget()
     this->ui_.layout.addWidget(&this->ui_.unableToOpenBrowserHelper);
 
     connect(&this->ui_.loginButton, &QPushButton::clicked, [this, logInLink]() {
-        qDebug() << "open login in browser";
+        qCDebug(chatterinoWidget) << "open login in browser";
         auto res = QDesktopServices::openUrl(QUrl(logInLink));
         if (!res)
         {
-            qDebug() << "open login in browser failed";
+            qCDebug(chatterinoWidget) << "open login in browser failed";
             this->ui_.unableToOpenBrowserHelper.show();
         }
     });
@@ -152,7 +153,7 @@ BasicLoginWidget::BasicLoginWidget()
             }
             else
             {
-                qDebug() << "Unknown key in code: " << key;
+                qCDebug(chatterinoWidget) << "Unknown key in code: " << key;
             }
         }
 

@@ -5,6 +5,7 @@
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -105,23 +106,23 @@ void TwitchAccountManager::reloadUsers()
         switch (this->addUser(userData))
         {
             case AddUserResponse::UserAlreadyExists: {
-                qDebug() << "User" << userData.username << "already exists";
+                qCDebug(chatterinoTwitch) << "User" << userData.username << "already exists";
                 // Do nothing
             }
             break;
             case AddUserResponse::UserValuesUpdated: {
-                qDebug() << "User" << userData.username
+                qCDebug(chatterinoTwitch) << "User" << userData.username
                          << "already exists, and values updated!";
                 if (userData.username == this->getCurrent()->getUserName())
                 {
-                    qDebug() << "It was the current user, so we need to "
+                    qCDebug(chatterinoTwitch) << "It was the current user, so we need to "
                                 "reconnect stuff!";
                     this->currentUserChanged.invoke();
                 }
             }
             break;
             case AddUserResponse::UserAdded: {
-                qDebug() << "Added user" << userData.username;
+                qCDebug(chatterinoTwitch) << "Added user" << userData.username;
                 listUpdated = true;
             }
             break;
@@ -142,14 +143,14 @@ void TwitchAccountManager::load()
         auto user = this->findUserByUsername(newUsername);
         if (user)
         {
-            qDebug() << "Twitch user updated to" << newUsername;
+            qCDebug(chatterinoTwitch) << "Twitch user updated to" << newUsername;
             getHelix()->update(user->getOAuthClient(), user->getOAuthToken());
             getKraken()->update(user->getOAuthClient(), user->getOAuthToken());
             this->currentUser_ = user;
         }
         else
         {
-            qDebug() << "Twitch user updated to anonymous";
+            qCDebug(chatterinoTwitch) << "Twitch user updated to anonymous";
             this->currentUser_ = this->anonymousUser_;
         }
 

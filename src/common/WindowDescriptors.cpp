@@ -1,6 +1,7 @@
 #include "common/WindowDescriptors.hpp"
 
 #include "widgets/Window.hpp"
+#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -126,7 +127,7 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
         {
             if (hasSetAMainWindow)
             {
-                qDebug()
+                qCDebug(chatterinoCommon)
                     << "Window Layout file contains more than one Main window "
                        "- demoting to Popup type";
                 type = WindowType::Popup;
@@ -180,7 +181,7 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
             {
                 if (hasSetASelectedTab)
                 {
-                    qDebug() << "Window contains more than one selected tab - "
+                    qCDebug(chatterinoCommon) << "Window contains more than one selected tab - "
                                 "demoting to unselected";
                     tab.selected_ = false;
                 }
