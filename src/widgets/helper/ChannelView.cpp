@@ -27,6 +27,7 @@
 #include "providers/LinkResolver.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "qlogging.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -44,7 +45,6 @@
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/splits/Split.hpp"
-#include "qlogging.hpp"
 
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
@@ -893,8 +893,9 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     auto snapshot = this->messages_.getSnapshot();
     if (index >= snapshot.size())
     {
-        qCDebug(chatterinoWidget) << "Tried to replace out of bounds message. Index:" << index
-                 << ". Length:" << snapshot.size();
+        qCDebug(chatterinoWidget)
+            << "Tried to replace out of bounds message. Index:" << index
+            << ". Length:" << snapshot.size();
         return;
     }
 

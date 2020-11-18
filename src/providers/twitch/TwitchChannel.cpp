@@ -306,8 +306,8 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    qCDebug(chatterinoTwitch) << "[TwitchChannel" << this->getName()
-             << "] Send message:" << message;
+    qCDebug(chatterinoTwitch)
+        << "[TwitchChannel" << this->getName() << "] Send message:" << message;
 
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
@@ -595,7 +595,7 @@ void TwitchChannel::refreshLiveStatus()
     if (roomID.isEmpty())
     {
         qCDebug(chatterinoTwitch) << "[TwitchChannel" << this->getName()
-                 << "] Refreshing live status (Missing ID)";
+                                  << "] Refreshing live status (Missing ID)";
         this->setLive(false);
         return;
     }
@@ -909,7 +909,8 @@ boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
         int bitAmount = amount.toInt(&ok);
         if (!ok)
         {
-            qCDebug(chatterinoTwitch) << "Error parsing bit amount in cheerEmote";
+            qCDebug(chatterinoTwitch)
+                << "Error parsing bit amount in cheerEmote";
         }
         for (const auto &emote : set.cheerEmotes)
         {

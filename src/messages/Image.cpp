@@ -14,11 +14,11 @@
 #include "common/NetworkRequest.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
+#include "qlogging.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
-#include "qlogging.hpp"
 
 namespace chatterino {
 namespace detail {
@@ -131,8 +131,9 @@ namespace detail {
 
         if (reader.imageCount() == 0)
         {
-            qCDebug(chatterinoImage) << "Error while reading image" << url.string << ": '"
-                     << reader.errorString() << "'";
+            qCDebug(chatterinoImage)
+                << "Error while reading image" << url.string << ": '"
+                << reader.errorString() << "'";
             return frames;
         }
 
@@ -150,8 +151,9 @@ namespace detail {
 
         if (frames.size() == 0)
         {
-            qCDebug(chatterinoImage) << "Error while reading image" << url.string << ": '"
-                     << reader.errorString() << "'";
+            qCDebug(chatterinoImage)
+                << "Error while reading image" << url.string << ": '"
+                << reader.errorString() << "'";
         }
 
         return frames;

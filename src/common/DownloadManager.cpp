@@ -41,7 +41,8 @@ void DownloadManager::setFile(QString fileURL, const QString &channelName)
 
 void DownloadManager::onDownloadProgress(qint64 bytesRead, qint64 bytesTotal)
 {
-    qCDebug(chatterinoCommon) << "Download progress: " << bytesRead << "/" << bytesTotal;
+    qCDebug(chatterinoCommon)
+        << "Download progress: " << bytesRead << "/" << bytesTotal;
 }
 
 void DownloadManager::onFinished(QNetworkReply *reply)

@@ -12,10 +12,10 @@
 #include "providers/IvrApi.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
+#include "qlogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/IncognitoBrowser.hpp"
-#include "qlogging.hpp"
 
 using namespace chatterino;
 
@@ -37,12 +37,13 @@ int main(int argc, char **argv)
     else if (getArgs().printVersion)
     {
         auto version = Version::instance();
-        qCInfo(chatterinoMain).noquote() << QString("%1 (commit %2%3)")
-                                 .arg(version.fullVersion())
-                                 .arg(version.commitHash())
-                                 .arg(Modes::instance().isNightly
-                                          ? ", " + version.dateOfBuild()
-                                          : "");
+        qCInfo(chatterinoMain).noquote()
+            << QString("%1 (commit %2%3)")
+                   .arg(version.fullVersion())
+                   .arg(version.commitHash())
+                   .arg(Modes::instance().isNightly
+                            ? ", " + version.dateOfBuild()
+                            : "");
     }
     else
     {

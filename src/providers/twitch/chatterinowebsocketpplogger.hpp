@@ -28,134 +28,172 @@
 #ifndef CHATTERINOWEBSOCKETPPLOGGER_HPP
 #define CHATTERINOWEBSOCKETPPLOGGER_HPP
 
-#include <websocketpp/logger/basic.hpp>
-#include <websocketpp/common/cpp11.hpp>
-#include <websocketpp/logger/levels.hpp>
 #include <string>
+#include <websocketpp/common/cpp11.hpp>
+#include <websocketpp/logger/basic.hpp>
+#include <websocketpp/logger/levels.hpp>
 #include "qlogging.hpp"
 
 namespace websocketpp {
 namespace log {
 
-template <typename concurrency, typename names>
-class chatterinowebsocketpplogger : public basic<concurrency, names> {
-public:
-    typedef basic<concurrency, names> base;
+    template <typename concurrency, typename names>
+    class chatterinowebsocketpplogger : public basic<concurrency, names>
+    {
+    public:
+        typedef basic<concurrency, names> base;
 
-    chatterinowebsocketpplogger<concurrency, names>(channel_type_hint::value):
-        m_static_channels(0xffffffff),
-        m_dynamic_channels(0) {}
-
-    chatterinowebsocketpplogger<concurrency, names>(std::ostream *):
-        m_static_channels(0xffffffff),
-        m_dynamic_channels(0) {}
-
-    chatterinowebsocketpplogger<concurrency,names>(level c, channel_type_hint::value):
-        m_static_channels(c),
-        m_dynamic_channels(0) {}
-
-    chatterinowebsocketpplogger<concurrency, names>(level c, std::ostream *):
-        m_static_channels(c),
-        m_dynamic_channels(0) {}
-
-    ~chatterinowebsocketpplogger<concurrency,names>() {}
-
-    chatterinowebsocketpplogger<concurrency,names>(chatterinowebsocketpplogger<concurrency,names> const & other):
-        m_static_channels(other.m_static_channels),
-        m_dynamic_channels(other.m_dynamic_channels) {}
-
-#ifdef _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
-    chatterinowebsocketpplogger<concurrency,names> & operator=(chatterinowebsocketpplogger<concurrency,names> const &) = delete;
-#endif // _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
-
-#ifdef _WEBSOCKETPP_MOVE_SEMANTICS_
-    /// Move constructor
-    chatterinowebsocketpplogger<concurrency,names>(chatterinowebsocketpplogger<concurrency,names> && other):
-        m_static_channels(other.m_static_channels),
-        m_dynamic_channels(other.m_dynamic_channels) {}
-#ifdef _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
-    // no move assignment operator because of const member variables
-    chatterinowebsocketpplogger<concurrency,names> & operator=(chatterinowebsocketpplogger<concurrency,names> &&) = delete;
-#endif // _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
-#endif // _WEBSOCKETPP_MOVE_SEMANTICS_
-
-    /// Explicitly do nothing, this logger doesn't support changing ostream
-    void set_ostream(std::ostream *) {
-    }
-
-    /// Dynamically enable the given list of channels
-    /**
-     * @param channels The package of channels to enable
-     */
-    void set_channels(level channels) {
-        if (channels == names::none) {
-            clear_channels(names::all);
-            return;
+        chatterinowebsocketpplogger<concurrency, names>(
+            channel_type_hint::value)
+            : m_static_channels(0xffffffff)
+            , m_dynamic_channels(0)
+        {
         }
 
-        scoped_lock_type lock(m_lock);
-        m_dynamic_channels |= (channels & m_static_channels);
-    }
+        chatterinowebsocketpplogger<concurrency, names>(std::ostream *)
+            : m_static_channels(0xffffffff)
+            , m_dynamic_channels(0)
+        {
+        }
 
-    /// Dynamically disable the given list of channels
-    /**
+        chatterinowebsocketpplogger<concurrency, names>(
+            level c, channel_type_hint::value)
+            : m_static_channels(c)
+            , m_dynamic_channels(0)
+        {
+        }
+
+        chatterinowebsocketpplogger<concurrency, names>(level c, std::ostream *)
+            : m_static_channels(c)
+            , m_dynamic_channels(0)
+        {
+        }
+
+        ~chatterinowebsocketpplogger<concurrency, names>()
+        {
+        }
+
+        chatterinowebsocketpplogger<concurrency, names>(
+            chatterinowebsocketpplogger<concurrency, names> const &other)
+            : m_static_channels(other.m_static_channels)
+            , m_dynamic_channels(other.m_dynamic_channels)
+        {
+        }
+
+#ifdef _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
+        chatterinowebsocketpplogger<concurrency, names> &operator=(
+            chatterinowebsocketpplogger<concurrency, names> const &) = delete;
+#endif  // _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
+
+#ifdef _WEBSOCKETPP_MOVE_SEMANTICS_
+        /// Move constructor
+        chatterinowebsocketpplogger<concurrency, names>(
+            chatterinowebsocketpplogger<concurrency, names> &&other)
+            : m_static_channels(other.m_static_channels)
+            , m_dynamic_channels(other.m_dynamic_channels)
+        {
+        }
+#    ifdef _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
+        // no move assignment operator because of const member variables
+        chatterinowebsocketpplogger<concurrency, names> &operator=(
+            chatterinowebsocketpplogger<concurrency, names> &&) = delete;
+#    endif  // _WEBSOCKETPP_DEFAULT_DELETE_FUNCTIONS_
+#endif      // _WEBSOCKETPP_MOVE_SEMANTICS_
+
+        /// Explicitly do nothing, this logger doesn't support changing ostream
+        void set_ostream(std::ostream *)
+        {
+        }
+
+        /// Dynamically enable the given list of channels
+        /**
+     * @param channels The package of channels to enable
+     */
+        void set_channels(level channels)
+        {
+            if (channels == names::none)
+            {
+                clear_channels(names::all);
+                return;
+            }
+
+            scoped_lock_type lock(m_lock);
+            m_dynamic_channels |= (channels & m_static_channels);
+        }
+
+        /// Dynamically disable the given list of channels
+        /**
      * @param channels The package of channels to disable
      */
-    void clear_channels(level channels) {
-        scoped_lock_type lock(m_lock);
-        m_dynamic_channels &= ~channels;
-    }
+        void clear_channels(level channels)
+        {
+            scoped_lock_type lock(m_lock);
+            m_dynamic_channels &= ~channels;
+        }
 
-    /// Write a string message to the given channel
-    /**
+        /// Write a string message to the given channel
+        /**
      * @param channel The channel to write to
      * @param msg The message to write
      */
-    void write(level channel, std::string const & msg) {
-        scoped_lock_type lock(m_lock);
-        if (!this->dynamic_test(channel)) { return; }
-        qCDebug(chatterinoWebsocket).nospace() << names::channel_name(channel) << ": " << QString::fromStdString(msg);
-    }
+        void write(level channel, std::string const &msg)
+        {
+            scoped_lock_type lock(m_lock);
+            if (!this->dynamic_test(channel))
+            {
+                return;
+            }
+            qCDebug(chatterinoWebsocket).nospace()
+                << names::channel_name(channel) << ": "
+                << QString::fromStdString(msg);
+        }
 
-    /// Write a cstring message to the given channel
-    /**
+        /// Write a cstring message to the given channel
+        /**
      * @param channel The channel to write to
      * @param msg The message to write
      */
-    void write(level channel, char const * msg) {
-        scoped_lock_type lock(m_lock);
-        if (!this->dynamic_test(channel)) { return; }
-        qCDebug(chatterinoWebsocket).nospace() << names::channel_name(channel) << ": " << msg;
-    }
+        void write(level channel, char const *msg)
+        {
+            scoped_lock_type lock(m_lock);
+            if (!this->dynamic_test(channel))
+            {
+                return;
+            }
+            qCDebug(chatterinoWebsocket).nospace()
+                << names::channel_name(channel) << ": " << msg;
+        }
 
-    /// Test whether a channel is statically enabled
-    /**
+        /// Test whether a channel is statically enabled
+        /**
      * @param channel The package of channels to test
      */
 
-    _WEBSOCKETPP_CONSTEXPR_TOKEN_ bool static_test(level channel) const {
-        return ((channel & m_static_channels) != 0);
-    }
+        _WEBSOCKETPP_CONSTEXPR_TOKEN_ bool static_test(level channel) const
+        {
+            return ((channel & m_static_channels) != 0);
+        }
 
-    /// Test whether a channel is dynamically enabled
-    /**
+        /// Test whether a channel is dynamically enabled
+        /**
      * @param channel The package of channels to test
      */
-    bool dynamic_test(level channel) {
-        return ((channel & m_dynamic_channels) != 0);
-    }
+        bool dynamic_test(level channel)
+        {
+            return ((channel & m_dynamic_channels) != 0);
+        }
 
-protected:
-    typedef typename concurrency::scoped_lock_type scoped_lock_type;
-    typedef typename concurrency::mutex_type mutex_type;
-    mutex_type m_lock;
+    protected:
+        typedef typename concurrency::scoped_lock_type scoped_lock_type;
+        typedef typename concurrency::mutex_type mutex_type;
+        mutex_type m_lock;
 
-private:
-    level const m_static_channels;
-    level m_dynamic_channels;
-};
+    private:
+        level const m_static_channels;
+        level m_dynamic_channels;
+    };
 
-} // log
-} // websocketpp
+}  // namespace log
+}  // namespace websocketpp
 
-#endif // CHATTERINOWEBSOCKETPPLOGGER_HPP
+#endif  // CHATTERINOWEBSOCKETPPLOGGER_HPP

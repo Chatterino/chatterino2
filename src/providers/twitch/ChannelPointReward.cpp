@@ -1,6 +1,6 @@
 #include "ChannelPointReward.hpp"
-#include "util/RapidjsonHelpers.hpp"
 #include "qlogging.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
 
@@ -10,7 +10,8 @@ QString parseRewardImage(const rapidjson::Value &obj, const char *key,
     QString url;
     if (!(result = rj::getSafe(obj, key, url)))
     {
-        qCDebug(chatterinoTwitch) << "No url value found for key in reward image object:" << key;
+        qCDebug(chatterinoTwitch)
+            << "No url value found for key in reward image object:" << key;
         return "";
     }
 
@@ -65,7 +66,8 @@ ChannelPointReward::ChannelPointReward(rapidjson::Value &redemption)
     if (!(this->hasParsedSuccessfully = rj::getSafe(
               reward, "is_user_input_required", this->isUserInputRequired)))
     {
-        qCDebug(chatterinoTwitch) << "No information if user input is required found for reward";
+        qCDebug(chatterinoTwitch)
+            << "No information if user input is required found for reward";
         return;
     }
 

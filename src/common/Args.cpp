@@ -39,8 +39,8 @@ Args::Args(const QApplication &app)
 
     if (!parser.parse(app.arguments()))
     {
-        qCWarning(chatterinoArgs) << "Unhandled options:"
-                 << parser.unknownOptionNames();
+        qCWarning(chatterinoArgs)
+            << "Unhandled options:" << parser.unknownOptionNames();
     }
 
     if (parser.isSet("help"))

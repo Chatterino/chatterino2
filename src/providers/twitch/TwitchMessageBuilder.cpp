@@ -713,7 +713,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         {
             if ((*copy).ptr == nullptr)
             {
-                qCDebug(chatterinoTwitch) << "remem nullptr" << (*copy).name.string;
+                qCDebug(chatterinoTwitch)
+                    << "remem nullptr" << (*copy).name.string;
             }
         }
         std::vector<TwitchEmoteOccurence> v(it, twitchEmotes.end());
@@ -750,7 +751,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 {
                     if (emote.second == nullptr)
                     {
-                        qCDebug(chatterinoTwitch) << "emote null" << emote.first.string;
+                        qCDebug(chatterinoTwitch)
+                            << "emote null" << emote.first.string;
                     }
                     twitchEmotes.push_back(TwitchEmoteOccurence{
                         startIndex + pos,
@@ -822,7 +824,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 {
                     if (tup.ptr == nullptr)
                     {
-                        qCDebug(chatterinoTwitch) << "v nullptr" << tup.name.string;
+                        qCDebug(chatterinoTwitch)
+                            << "v nullptr" << tup.name.string;
                         continue;
                     }
                     QRegularExpression emoteregex(
@@ -886,7 +889,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 {
                     if (tup.ptr == nullptr)
                     {
-                        qCDebug(chatterinoTwitch) << "v nullptr" << tup.name.string;
+                        qCDebug(chatterinoTwitch)
+                            << "v nullptr" << tup.name.string;
                         continue;
                     }
                     QRegularExpression emoteregex(
@@ -956,7 +960,8 @@ void TwitchMessageBuilder::appendTwitchEmote(
             start, end, app->emotes->twitch.getOrCreateEmote(id, name), name};
         if (emoteOccurence.ptr == nullptr)
         {
-            qCDebug(chatterinoTwitch) << "nullptr" << emoteOccurence.name.string;
+            qCDebug(chatterinoTwitch)
+                << "nullptr" << emoteOccurence.name.string;
         }
         vec.push_back(std::move(emoteOccurence));
     }

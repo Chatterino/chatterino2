@@ -5,10 +5,10 @@
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "qlogging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StreamerMode.hpp"
-#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -89,8 +89,9 @@ bool SharedMessageBuilder::isIgnored() const
     {
         if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
         {
-            qCDebug(chatterinoMessage) << "Blocking message because it contains ignored phrase"
-                     << phrase.getPattern();
+            qCDebug(chatterinoMessage)
+                << "Blocking message because it contains ignored phrase"
+                << phrase.getPattern();
             return true;
         }
     }
@@ -203,8 +204,9 @@ void SharedMessageBuilder::parseHighlights()
         {
             continue;
         }
-        qCDebug(chatterinoMessage) << "Highlight because user" << this->ircMessage->nick()
-                 << "sent a message";
+        qCDebug(chatterinoMessage)
+            << "Highlight because user" << this->ircMessage->nick()
+            << "sent a message";
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = userHighlight.getColor();

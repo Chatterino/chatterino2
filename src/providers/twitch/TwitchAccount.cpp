@@ -8,9 +8,9 @@
 #include "common/Outcome.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "qlogging.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/RapidjsonHelpers.hpp"
-#include "qlogging.hpp"
 
 namespace chatterino {
 
@@ -134,8 +134,9 @@ void TwitchAccount::loadIgnores()
                     TwitchUser ignoredUser;
                     if (!rj::getSafe(userIt->value, ignoredUser))
                     {
-                        qCWarning(chatterinoTwitch) << "Error parsing twitch user JSON"
-                                   << rj::stringify(userIt->value).c_str();
+                        qCWarning(chatterinoTwitch)
+                            << "Error parsing twitch user JSON"
+                            << rj::stringify(userIt->value).c_str();
                         continue;
                     }
 
@@ -339,7 +340,8 @@ std::set<TwitchUser> TwitchAccount::getIgnores() const
 
 void TwitchAccount::loadEmotes()
 {
-    qCDebug(chatterinoTwitch) << "Loading Twitch emotes for user" << this->getUserName();
+    qCDebug(chatterinoTwitch)
+        << "Loading Twitch emotes for user" << this->getUserName();
 
     const auto &clientID = this->getOAuthClient();
     const auto &oauthToken = this->getOAuthToken();
@@ -357,8 +359,8 @@ void TwitchAccount::loadEmotes()
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](NetworkResult result) {
-            qCWarning(chatterinoTwitch) << "[TwitchAccount::loadEmotes] Error"
-                       << result.status();
+            qCWarning(chatterinoTwitch)
+                << "[TwitchAccount::loadEmotes] Error" << result.status();
             if (result.status() == 203)
             {
                 // onFinished(FollowResult_NotFollowing);
@@ -396,8 +398,8 @@ void TwitchAccount::autoModAllow(const QString msgID)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](NetworkResult result) {
-            qCWarning(chatterinoTwitch) << "[TwitchAccounts::autoModAllow] Error"
-                       << result.status();
+            qCWarning(chatterinoTwitch)
+                << "[TwitchAccounts::autoModAllow] Error" << result.status();
         })
         .execute();
 }
@@ -415,8 +417,8 @@ void TwitchAccount::autoModDeny(const QString msgID)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](NetworkResult result) {
-            qCWarning(chatterinoTwitch) << "[TwitchAccounts::autoModDeny] Error"
-                       << result.status();
+            qCWarning(chatterinoTwitch)
+                << "[TwitchAccounts::autoModDeny] Error" << result.status();
         })
         .execute();
 }
@@ -431,7 +433,8 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
     auto emoticonSets = root.FindMember("emoticon_sets");
     if (emoticonSets == root.MemberEnd() || !emoticonSets->value.IsObject())
     {
-        qCWarning(chatterinoTwitch) << "No emoticon_sets in load emotes response";
+        qCWarning(chatterinoTwitch)
+            << "No emoticon_sets in load emotes response";
         return;
     }
 
@@ -461,7 +464,8 @@ void TwitchAccount::parseEmotes(const rapidjson::Document &root)
             QString _code;
             if (!rj::getSafe(emoteJSON, "code", _code))
             {
-                qCWarning(chatterinoTwitch) << "No code key found in Emote value";
+                qCWarning(chatterinoTwitch)
+                    << "No code key found in Emote value";
                 return;
             }
 
@@ -505,7 +509,7 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
         .cache()
         .onError([](NetworkResult result) {
             qCWarning(chatterinoTwitch) << "Error code" << result.status()
-                       << "while loading emote set data";
+                                        << "while loading emote set data";
         })
         .onSuccess([emoteSet](auto result) -> Outcome {
             auto root = result.parseRapidJson();
@@ -527,7 +531,8 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
                 return Failure;
             }
 
-            qCDebug(chatterinoTwitch) << "Loaded twitch emote set data for" << emoteSet->key;
+            qCDebug(chatterinoTwitch)
+                << "Loaded twitch emote set data for" << emoteSet->key;
 
             auto name = channelName;
             name.detach();

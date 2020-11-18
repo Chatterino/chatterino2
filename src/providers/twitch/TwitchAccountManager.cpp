@@ -106,17 +106,20 @@ void TwitchAccountManager::reloadUsers()
         switch (this->addUser(userData))
         {
             case AddUserResponse::UserAlreadyExists: {
-                qCDebug(chatterinoTwitch) << "User" << userData.username << "already exists";
+                qCDebug(chatterinoTwitch)
+                    << "User" << userData.username << "already exists";
                 // Do nothing
             }
             break;
             case AddUserResponse::UserValuesUpdated: {
-                qCDebug(chatterinoTwitch) << "User" << userData.username
-                         << "already exists, and values updated!";
+                qCDebug(chatterinoTwitch)
+                    << "User" << userData.username
+                    << "already exists, and values updated!";
                 if (userData.username == this->getCurrent()->getUserName())
                 {
-                    qCDebug(chatterinoTwitch) << "It was the current user, so we need to "
-                                "reconnect stuff!";
+                    qCDebug(chatterinoTwitch)
+                        << "It was the current user, so we need to "
+                           "reconnect stuff!";
                     this->currentUserChanged.invoke();
                 }
             }
@@ -143,7 +146,8 @@ void TwitchAccountManager::load()
         auto user = this->findUserByUsername(newUsername);
         if (user)
         {
-            qCDebug(chatterinoTwitch) << "Twitch user updated to" << newUsername;
+            qCDebug(chatterinoTwitch)
+                << "Twitch user updated to" << newUsername;
             getHelix()->update(user->getOAuthClient(), user->getOAuthToken());
             getKraken()->update(user->getOAuthClient(), user->getOAuthToken());
             this->currentUser_ = user;

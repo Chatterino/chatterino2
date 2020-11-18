@@ -5,9 +5,9 @@
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
+#include "qlogging.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
-#include "qlogging.hpp"
 
 #include <QDebug>
 #include <QPainter>

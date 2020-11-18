@@ -132,9 +132,9 @@ void Emojis::loadEmojis()
 
     if (result.Code() != rapidjson::kParseErrorNone)
     {
-        qCWarning(chatterinoEmoji) << "JSON parse error:"
-                   << rapidjson::GetParseError_En(result.Code()) << "("
-                   << result.Offset() << ")";
+        qCWarning(chatterinoEmoji)
+            << "JSON parse error:" << rapidjson::GetParseError_En(result.Code())
+            << "(" << result.Offset() << ")";
         return;
     }
 
@@ -166,8 +166,9 @@ void Emojis::loadEmojis()
                 auto toneNameIt = toneNames.find(tone);
                 if (toneNameIt == toneNames.end())
                 {
-                    qCDebug(chatterinoEmoji) << "Tone with key" << tone.c_str()
-                             << "does not exist in tone names map";
+                    qCDebug(chatterinoEmoji)
+                        << "Tone with key" << tone.c_str()
+                        << "does not exist in tone names map";
                     continue;
                 }
 

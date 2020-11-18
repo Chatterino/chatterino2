@@ -8,8 +8,8 @@
 #include <rapidjson/error/en.h>
 
 #include <exception>
-#include <thread>
 #include <iostream>
+#include <thread>
 #include "qlogging.hpp"
 
 #define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
@@ -156,7 +156,8 @@ namespace detail {
 
                      if (self->awaitingPong_)
                      {
-                         qCDebug(chatterinoPubsub) << "No pong response, disconnect!";
+                         qCDebug(chatterinoPubsub)
+                             << "No pong response, disconnect!";
                          // TODO(pajlada): Label this connection as "disconnect me"
                      }
                  });
@@ -180,8 +181,8 @@ namespace detail {
 
         if (ec)
         {
-            qCDebug(chatterinoPubsub) << "Error sending message" << payload << ":"
-                     << ec.message().c_str();
+            qCDebug(chatterinoPubsub) << "Error sending message" << payload
+                                      << ":" << ec.message().c_str();
             // TODO(pajlada): Check which error code happened and maybe
             // gracefully handle it
 
@@ -237,7 +238,8 @@ PubSub::PubSub()
 
         if (args.Size() == 0)
         {
-            qCDebug(chatterinoPubsub) << "Missing duration argument in slowmode on";
+            qCDebug(chatterinoPubsub)
+                << "Missing duration argument in slowmode on";
             return;
         }
 
@@ -338,7 +340,8 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            qCDebug(chatterinoPubsub) << "Error parsing moderation action:" << ex.what();
+            qCDebug(chatterinoPubsub)
+                << "Error parsing moderation action:" << ex.what();
         }
 
         action.modded = false;
@@ -361,16 +364,18 @@ PubSub::PubSub()
 
         if (!getTargetUser(data, action.target))
         {
-            qCDebug(chatterinoPubsub) << "Error parsing moderation action mod: Unable to get "
-                        "target_user_id";
+            qCDebug(chatterinoPubsub)
+                << "Error parsing moderation action mod: Unable to get "
+                   "target_user_id";
             return;
         }
 
         // Load target name from message.data.target_user_login
         if (!getTargetUserName(data, action.target))
         {
-            qCDebug(chatterinoPubsub) << "Error parsing moderation action mod: Unable to get "
-                        "target_user_name";
+            qCDebug(chatterinoPubsub)
+                << "Error parsing moderation action mod: Unable to get "
+                   "target_user_name";
             return;
         }
 
@@ -418,7 +423,8 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            qCDebug(chatterinoPubsub) << "Error parsing moderation action:" << ex.what();
+            qCDebug(chatterinoPubsub)
+                << "Error parsing moderation action:" << ex.what();
         }
     };
 
@@ -455,7 +461,8 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            qCDebug(chatterinoPubsub) << "Error parsing moderation action:" << ex.what();
+            qCDebug(chatterinoPubsub)
+                << "Error parsing moderation action:" << ex.what();
         }
     };
 
@@ -486,7 +493,8 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            qCDebug(chatterinoPubsub) << "Error parsing moderation action:" << ex.what();
+            qCDebug(chatterinoPubsub)
+                << "Error parsing moderation action:" << ex.what();
         }
     };
 
@@ -517,7 +525,8 @@ PubSub::PubSub()
         }
         catch (const std::runtime_error &ex)
         {
-            qCDebug(chatterinoPubsub) << "Error parsing moderation action:" << ex.what();
+            qCDebug(chatterinoPubsub)
+                << "Error parsing moderation action:" << ex.what();
         }
     };
 
@@ -569,7 +578,8 @@ PubSub::PubSub()
             }
             catch (const std::runtime_error &ex)
             {
-                qCDebug(chatterinoPubsub) << "Error parsing moderation action:" << ex.what();
+                qCDebug(chatterinoPubsub)
+                    << "Error parsing moderation action:" << ex.what();
             }
         };
 
@@ -598,7 +608,8 @@ PubSub::PubSub()
             }
             catch (const std::runtime_error &ex)
             {
-                qCDebug(chatterinoPubsub) << "Error parsing moderation action:" << ex.what();
+                qCDebug(chatterinoPubsub)
+                    << "Error parsing moderation action:" << ex.what();
             }
         };
 
@@ -627,7 +638,8 @@ PubSub::PubSub()
             }
             catch (const std::runtime_error &ex)
             {
-                qCDebug(chatterinoPubsub) << "Error parsing moderation action:" << ex.what();
+                qCDebug(chatterinoPubsub)
+                    << "Error parsing moderation action:" << ex.what();
             }
         };
 
@@ -656,7 +668,8 @@ PubSub::PubSub()
             }
             catch (const std::runtime_error &ex)
             {
-                qCDebug(chatterinoPubsub) << "Error parsing moderation action:" << ex.what();
+                qCDebug(chatterinoPubsub)
+                    << "Error parsing moderation action:" << ex.what();
             }
         };
 
@@ -686,7 +699,8 @@ PubSub::PubSub()
             }
             catch (const std::runtime_error &ex)
             {
-                qCDebug(chatterinoPubsub) << "Error parsing moderation action:" << ex.what();
+                qCDebug(chatterinoPubsub)
+                    << "Error parsing moderation action:" << ex.what();
             }
         };
 
@@ -699,17 +713,20 @@ PubSub::PubSub()
             this->signals_.moderation.automodUserMessage.invoke(action);
         };
 
-    this->moderationActionHandlers["denied_automod_message"] =
-        [](const auto &data, const auto &roomID) {
-            // This message got denied by a moderator
-            // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
-        };
+    this->moderationActionHandlers["denied_automod_message"] = [](const auto
+                                                                      &data,
+                                                                  const auto
+                                                                      &roomID) {
+        // This message got denied by a moderator
+        // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
+    };
 
-    this->moderationActionHandlers["approved_automod_message"] =
-        [](const auto &data, const auto &roomID) {
-            // This message got approved by a moderator
-            // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
-        };
+    this->moderationActionHandlers
+        ["approved_automod_message"] = [](const auto &data,
+                                          const auto &roomID) {
+        // This message got approved by a moderator
+        // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
+    };
 
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
     this->websocketClient.clear_access_channels(
@@ -739,7 +756,8 @@ void PubSub::addClient()
 
     if (ec)
     {
-        qCDebug(chatterinoPubsub) << "Unable to establish connection:" << ec.message().c_str();
+        qCDebug(chatterinoPubsub)
+            << "Unable to establish connection:" << ec.message().c_str();
         return;
     }
 
@@ -769,8 +787,9 @@ void PubSub::listenToWhispers(std::shared_ptr<TwitchAccount> account)
 
     if (ec)
     {
-        qCDebug(chatterinoPubsub) << "Unable to send message to websocket server:"
-                 << ec.message().c_str();
+        qCDebug(chatterinoPubsub)
+            << "Unable to send message to websocket server:"
+            << ec.message().c_str();
         return;
     }
 }
@@ -885,16 +904,18 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
     if (!res)
     {
-        qCDebug(chatterinoPubsub) << "Error parsing message '" << payload.c_str()
-                 << "' from PubSub:" << rapidjson::GetParseError_En(res.Code());
+        qCDebug(chatterinoPubsub)
+            << "Error parsing message '" << payload.c_str()
+            << "' from PubSub:" << rapidjson::GetParseError_En(res.Code());
         return;
     }
 
     if (!msg.IsObject())
     {
-        qCDebug(chatterinoPubsub) << "Error parsing message '" << payload.c_str()
-                 << "' from PubSub. Root object is not an "
-                    "object";
+        qCDebug(chatterinoPubsub)
+            << "Error parsing message '" << payload.c_str()
+            << "' from PubSub. Root object is not an "
+               "object";
         return;
     }
 
@@ -902,7 +923,8 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
     if (!rj::getSafe(msg, "type", type))
     {
-        qCDebug(chatterinoPubsub) << "Missing required string member `type` in message root";
+        qCDebug(chatterinoPubsub)
+            << "Missing required string member `type` in message root";
         return;
     }
 
@@ -914,7 +936,8 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
     {
         if (!msg.HasMember("data"))
         {
-            qCDebug(chatterinoPubsub) << "Missing required object member `data` in message root";
+            qCDebug(chatterinoPubsub)
+                << "Missing required object member `data` in message root";
             return;
         }
 
@@ -1003,7 +1026,8 @@ PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
     }
     catch (const std::exception &e)
     {
-        qCDebug(chatterinoPubsub) << "Exception caught in OnTLSInit:" << e.what();
+        qCDebug(chatterinoPubsub)
+            << "Exception caught in OnTLSInit:" << e.what();
     }
 
     return ctx;
@@ -1020,12 +1044,14 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
 
         if (error.isEmpty())
         {
-            qCDebug(chatterinoPubsub) << "Successfully listened to nonce" << nonce;
+            qCDebug(chatterinoPubsub)
+                << "Successfully listened to nonce" << nonce;
             // Nothing went wrong
             return;
         }
 
-        qCDebug(chatterinoPubsub) << "PubSub error:" << error << "on nonce" << nonce;
+        qCDebug(chatterinoPubsub)
+            << "PubSub error:" << error << "on nonce" << nonce;
         return;
     }
 }
@@ -1036,7 +1062,8 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
     if (!rj::getSafe(outerData, "topic", topic))
     {
-        qCDebug(chatterinoPubsub) << "Missing required string member `topic` in outerData";
+        qCDebug(chatterinoPubsub)
+            << "Missing required string member `topic` in outerData";
         return;
     }
 
@@ -1054,8 +1081,9 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
     if (!res)
     {
-        qCDebug(chatterinoPubsub) << "Error parsing message '" << payload.c_str()
-                 << "' from PubSub:" << rapidjson::GetParseError_En(res.Code());
+        qCDebug(chatterinoPubsub)
+            << "Error parsing message '" << payload.c_str()
+            << "' from PubSub:" << rapidjson::GetParseError_En(res.Code());
         return;
     }
 
@@ -1083,7 +1111,8 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         }
         else
         {
-            qCDebug(chatterinoPubsub) << "Invalid whisper type:" << whisperType.c_str();
+            qCDebug(chatterinoPubsub)
+                << "Invalid whisper type:" << whisperType.c_str();
             return;
         }
     }
@@ -1098,7 +1127,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         if (!rj::getSafe(data, "moderation_action", moderationAction))
         {
             qCDebug(chatterinoPubsub) << "Missing moderation action in data:"
-                     << rj::stringify(data).c_str();
+                                      << rj::stringify(data).c_str();
             return;
         }
 
@@ -1106,8 +1135,9 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
         if (handlerIt == this->moderationActionHandlers.end())
         {
-            qCDebug(chatterinoPubsub) << "No handler found for moderation action"
-                     << moderationAction.c_str();
+            qCDebug(chatterinoPubsub)
+                << "No handler found for moderation action"
+                << moderationAction.c_str();
             return;
         }
 
@@ -1127,19 +1157,22 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         {
             if (!rj::getSafeObject(msg, "data", msg))
             {
-                qCDebug(chatterinoPubsub) << "No data found for redeemed reward";
+                qCDebug(chatterinoPubsub)
+                    << "No data found for redeemed reward";
                 return;
             }
             if (!rj::getSafeObject(msg, "redemption", msg))
             {
-                qCDebug(chatterinoPubsub) << "No redemption info found for redeemed reward";
+                qCDebug(chatterinoPubsub)
+                    << "No redemption info found for redeemed reward";
                 return;
             }
             this->signals_.pointReward.redeemed.invoke(msg);
         }
         else
         {
-            qCDebug(chatterinoPubsub) << "Invalid point event type:" << pointEventType.c_str();
+            qCDebug(chatterinoPubsub)
+                << "Invalid point event type:" << pointEventType.c_str();
         }
     }
     else

@@ -77,7 +77,8 @@ AbstractIrcServer::AbstractIrcServer()
 
         if (!this->readConnection_->isConnected())
         {
-            qCDebug(chatterinoIrc) << "Trying to reconnect..." << this->falloffCounter_;
+            qCDebug(chatterinoIrc)
+                << "Trying to reconnect..." << this->falloffCounter_;
             this->connect();
         }
     });
@@ -196,8 +197,8 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         chan->destroyed.connect([this, channelName] {
             // fourtf: issues when the server itself is destroyed
 
-            qCDebug(chatterinoIrc) << "[AbstractIrcServer::addChannel]" << channelName
-                     << "was destroyed";
+            qCDebug(chatterinoIrc) << "[AbstractIrcServer::addChannel]"
+                                   << channelName << "was destroyed";
             this->channels.remove(channelName);
 
             if (this->readConnection_)

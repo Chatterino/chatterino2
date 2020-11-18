@@ -9,6 +9,7 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
+#include "qlogging.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -35,7 +36,6 @@
 #include "widgets/splits/SplitHeader.hpp"
 #include "widgets/splits/SplitInput.hpp"
 #include "widgets/splits/SplitOverlay.hpp"
-#include "qlogging.hpp"
 
 #include <QApplication>
 #include <QClipboard>
@@ -640,7 +640,8 @@ void Split::openInStreamlink()
     }
     catch (const Exception &ex)
     {
-        qCWarning(chatterinoWidget) << "Error in doOpenStreamlink:" << ex.what();
+        qCWarning(chatterinoWidget)
+            << "Error in doOpenStreamlink:" << ex.what();
     }
 }
 

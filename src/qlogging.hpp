@@ -29,4 +29,4 @@ Q_DECLARE_LOGGING_CATEGORY(chatterinoWebsocket);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoWidget);
 Q_DECLARE_LOGGING_CATEGORY(chatterinoWindowmanager);
 
-#endif // QLOGGING_HPP
+#endif  // QLOGGING_HPP

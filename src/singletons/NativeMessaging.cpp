@@ -2,9 +2,9 @@
 
 #include "Application.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "qlogging.hpp"
 #include "singletons/Paths.hpp"
 #include "util/PostToThread.hpp"
-#include "qlogging.hpp"
 
 #include <QCoreApplication>
 #include <QFile>
@@ -170,7 +170,8 @@ void NativeMessagingServer::ReceiverThread::run()
         }
         catch (ipc::interprocess_exception &ex)
         {
-            qCDebug(chatterinoNativeMessage) << "received from gui process:" << ex.what();
+            qCDebug(chatterinoNativeMessage)
+                << "received from gui process:" << ex.what();
         }
     }
 }
@@ -204,11 +205,13 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         args.height = root.value("size").toObject().value("height").toInt(-1);
         args.fullscreen = attachFullscreen;
 
-        qCDebug(chatterinoNativeMessage) << args.x << args.width << args.height << args.winId;
+        qCDebug(chatterinoNativeMessage)
+            << args.x << args.width << args.height << args.winId;
 
         if (_type.isNull() || args.winId.isNull())
         {
-            qCDebug(chatterinoNativeMessage) << "NM type, name or winId missing";
+            qCDebug(chatterinoNativeMessage)
+                << "NM type, name or winId missing";
             attach = false;
             attachFullscreen = false;
             return;

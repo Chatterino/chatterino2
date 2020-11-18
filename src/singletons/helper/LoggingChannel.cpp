@@ -1,9 +1,9 @@
 #include "LoggingChannel.hpp"
 
 #include "Application.hpp"
+#include "qlogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
-#include "qlogging.hpp"
 
 #include <QDir>
 

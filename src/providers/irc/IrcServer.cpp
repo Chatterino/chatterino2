@@ -7,9 +7,9 @@
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
+#include "qlogging.hpp"
 #include "singletons/Settings.hpp"
 #include "util/QObjectRef.hpp"
-#include "qlogging.hpp"
 
 namespace chatterino {
 

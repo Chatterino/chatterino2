@@ -14,8 +14,8 @@
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchHelpers.hpp"
-#include "util/PostToThread.hpp"
 #include "qlogging.hpp"
+#include "util/PostToThread.hpp"
 
 // using namespace Communi;
 using namespace std::chrono_literals;

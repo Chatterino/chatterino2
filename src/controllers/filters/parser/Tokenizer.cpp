@@ -71,8 +71,10 @@ void Tokenizer::debug()
 {
     if (this->i_ > 0)
     {
-        qCDebug(chatterinoTokenizer) << "= current" << this->tokens_.at(this->i_ - 1);
-        qCDebug(chatterinoTokenizer) << "= current type" << this->tokenTypes_.at(this->i_ - 1);
+        qCDebug(chatterinoTokenizer)
+            << "= current" << this->tokens_.at(this->i_ - 1);
+        qCDebug(chatterinoTokenizer)
+            << "= current type" << this->tokenTypes_.at(this->i_ - 1);
     }
     else
     {
@@ -81,7 +83,8 @@ void Tokenizer::debug()
     if (this->hasNext())
     {
         qCDebug(chatterinoTokenizer) << "= next" << this->tokens_.at(this->i_);
-        qCDebug(chatterinoTokenizer) << "= next type" << this->tokenTypes_.at(this->i_);
+        qCDebug(chatterinoTokenizer)
+            << "= next type" << this->tokenTypes_.at(this->i_);
     }
     else
     {

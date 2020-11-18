@@ -3,8 +3,8 @@
 #include <boost/asio.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <memory>
-#include "util/RapidjsonHelpers.hpp"
 #include "qlogging.hpp"
+#include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
 
@@ -35,7 +35,8 @@ void runAfter(boost::asio::io_service &ioService, Duration duration,
     timer->async_wait([timer, cb](const boost::system::error_code &ec) {
         if (ec)
         {
-            qCDebug(chatterinoPubsub) << "Error in runAfter:" << ec.message().c_str();
+            qCDebug(chatterinoPubsub)
+                << "Error in runAfter:" << ec.message().c_str();
             return;
         }
 
@@ -53,7 +54,8 @@ void runAfter(std::shared_ptr<boost::asio::steady_timer> timer,
     timer->async_wait([timer, cb](const boost::system::error_code &ec) {
         if (ec)
         {
-            qCDebug(chatterinoPubsub) << "Error in runAfter:" << ec.message().c_str();
+            qCDebug(chatterinoPubsub)
+                << "Error in runAfter:" << ec.message().c_str();
             return;
         }
 

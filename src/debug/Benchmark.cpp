@@ -11,8 +11,8 @@ BenchmarkGuard::BenchmarkGuard(const QString &_name)
 
 BenchmarkGuard::~BenchmarkGuard()
 {
-    qCDebug(chatterinoBenchmark) << this->name_ << float(timer_.nsecsElapsed()) / 1000000.0f
-             << "ms";
+    qCDebug(chatterinoBenchmark)
+        << this->name_ << float(timer_.nsecsElapsed()) / 1000000.0f << "ms";
 }
 
 qreal BenchmarkGuard::getElapsedMs()

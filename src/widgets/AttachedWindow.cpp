@@ -193,7 +193,8 @@ void AttachedWindow::attachToHwnd(void *_attachedPtr)
                     !qfilename.endsWith("brave.exe"))
 
                 {
-                    qCWarning(chatterinoWidget) << "NM Illegal caller" << qfilename;
+                    qCWarning(chatterinoWidget)
+                        << "NM Illegal caller" << qfilename;
                     this->timer_.stop();
                     this->deleteLater();
                     return;

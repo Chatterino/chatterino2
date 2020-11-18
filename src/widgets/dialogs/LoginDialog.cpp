@@ -4,8 +4,8 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "util/Helpers.hpp"
 #include "qlogging.hpp"
+#include "util/Helpers.hpp"
 
 #ifdef USEWINSDK
 #    include <Windows.h>

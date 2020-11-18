@@ -196,8 +196,8 @@ void FfzEmotes::loadChannel(
     std::function<void(boost::optional<EmotePtr>)> modBadgeCallback,
     bool manualRefresh)
 {
-    qCDebug(chatterinoFfzemotes) << "[FFZEmotes] Reload FFZ Channel Emotes for channel"
-             << channelId;
+    qCDebug(chatterinoFfzemotes)
+        << "[FFZEmotes] Reload FFZ Channel Emotes for channel" << channelId;
 
     NetworkRequest("https://api.frankerfacez.com/v1/room/id/" + channelId)
 
@@ -231,16 +231,18 @@ void FfzEmotes::loadChannel(
             else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay
-                qCWarning(chatterinoFfzemotes) << "Fetching FFZ emotes for channel" << channelId
-                           << "failed due to timeout";
+                qCWarning(chatterinoFfzemotes)
+                    << "Fetching FFZ emotes for channel" << channelId
+                    << "failed due to timeout";
                 shared->addMessage(
                     makeSystemMessage("Failed to fetch FrankerFaceZ channel "
                                       "emotes. (timed out)"));
             }
             else
             {
-                qCWarning(chatterinoFfzemotes) << "Error fetching FFZ emotes for channel"
-                           << channelId << ", error" << result.status();
+                qCWarning(chatterinoFfzemotes)
+                    << "Error fetching FFZ emotes for channel" << channelId
+                    << ", error" << result.status();
                 shared->addMessage(
                     makeSystemMessage("Failed to fetch FrankerFaceZ channel "
                                       "emotes. (unknown error)"));
