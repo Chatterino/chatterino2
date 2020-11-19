@@ -22,6 +22,11 @@ DEFINES           += AB_CUSTOM_THEME
 DEFINES           += AB_CUSTOM_SETTINGS
 CONFIG            += AB_NOT_STANDALONE
 
+equals(QT_MAJOR_VERSION, 5):lessThan(QT_MINOR_VERSION, 12) {
+    message("Cannot use Qt $${QT_VERSION}")
+    error("Use Qt 5.12 or newer")
+}
+
 useBreakpad {
     LIBS += -L$$PWD/lib/qBreakpad/handler/build
     include(lib/qBreakpad/qBreakpad.pri)
