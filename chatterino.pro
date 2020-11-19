@@ -8,6 +8,12 @@
 # from lib/boost.pri
 #  - BOOST_DIRECTORY (C:\local\boost\ by default) (Windows only)
 
+MINIMUM_REQUIRED_QT_VERSION = 5.12.0
+
+!versionAtLeast(QT_VERSION, $$MINIMUM_REQUIRED_QT_VERSION) {
+    error("You're trying to compile with Qt $$QT_VERSION, but minimum required Qt version is $$MINIMUM_REQUIRED_QT_VERSION")
+}
+
 QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util
