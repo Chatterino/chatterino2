@@ -27,5 +27,7 @@ public:
      * @return true if this predicate applies, false otherwise
      */
     virtual bool appliesTo(const Message &message) = 0;
+
+    virtual ~MessagePredicate() = default;
 };
 }  // namespace chatterino
