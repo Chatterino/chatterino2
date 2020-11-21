@@ -146,7 +146,7 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
 {
     getHelix()->getStreamByName(
         channelName,
-        [channelName, this](bool live, const auto &stream) {
+        [channelName, this](bool live, const auto &) {
             qCDebug(chatterinoNotification) << "[TwitchChannel" << channelName
                                             << "] Refreshing live status";
 
