@@ -165,7 +165,7 @@ jobs:
         with:
           tag_name: github-actions-nightly
           backup_tag_name: backup-github-actions-nightly
-          release_name: GitHub Actions Nightly Test
+          release_name: Nightly Release
           body: |
               1 ${{ github.eventName }}
               2 ${{ github.sha }}

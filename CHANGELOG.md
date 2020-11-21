@@ -6,7 +6,7 @@
 - Minor: Added placeholder text for message text input box. (#2143, #2149)
 - Minor: Added support for FrankerFaceZ badges. (#2101, part of #1658)
 - Minor: Added a navigation list to the settings and reordered them.
-- Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083)
+- Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
 - Minor: Improved viewer list window.
 - Minor: Added emote completion with `:` to the whispers channel (#2075)
@@ -29,7 +29,7 @@
 - Minor: Improve UX of the "Login expired!" message (#2029)
 - Minor: PageUp and PageDown now scroll in the selected split (#2070, #2081)
 - Minor: Allow highlights to be excluded from `/mentions`. Excluded highlights will not trigger tab highlights either. (#1793, #2036)
-- Minor: Flag all popup dialogs as actual dialogs so they get the relevant window manager hints (#1843)
+- Minor: Flag all popup dialogs as actual dialogs so they get the relevant window manager hints (#1843, #2182, #2185)
 - Minor: Don't show update button for nightly builds on macOS and Linux, this was already the case for Windows (#2163, #2164)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
@@ -47,6 +47,8 @@
 - Bugfix: Fix bug preventing moderator actions when viewing a user card from the search window (#1089)
 - Bugfix: Fix `:` emote completion menu ignoring emote capitalization (#1962)
 - Bugfix: Fix a bug that caused `Ignore page` to fall into an infinity loop with an empty pattern and regex enabled (#2125)
+- Bugfix: Fix a crash casued by FrankerFaceZ responding with invalid emote links (#2191)
+- Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 
 ## 2.2.0
 
