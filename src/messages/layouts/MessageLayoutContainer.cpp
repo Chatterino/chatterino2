@@ -378,13 +378,13 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                 continue;
             }
 
-            for (int i = line.startIndex; i < line.endIndex; i++)
+            for (int ii = line.startIndex; ii < line.endIndex; ii++)
             {
-                int c = this->elements_[i]->getSelectionIndexCount();
+                int jj = this->elements_[ii]->getSelectionIndexCount();
 
-                if (index + c > selection.selectionMin.charIndex)
+                if (index + jj > selection.selectionMin.charIndex)
                 {
-                    x = this->elements_[i]->getXFromIndex(
+                    x = this->elements_[ii]->getXFromIndex(
                         selection.selectionMin.charIndex - index);
 
                     // ends in same line
@@ -394,18 +394,18 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                     {
                         returnAfter = true;
                         index = line.startCharIndex;
-                        for (int i = line.startIndex; i < line.endIndex; i++)
+                        for (int kk = line.startIndex; kk < line.endIndex; kk++)
                         {
-                            int c =
-                                this->elements_[i]->getSelectionIndexCount();
+                            int ll =
+                                this->elements_[kk]->getSelectionIndexCount();
 
-                            if (index + c > selection.selectionMax.charIndex)
+                            if (index + ll > selection.selectionMax.charIndex)
                             {
-                                r = this->elements_[i]->getXFromIndex(
+                                r = this->elements_[kk]->getXFromIndex(
                                     selection.selectionMax.charIndex - index);
                                 break;
                             }
-                            index += c;
+                            index += ll;
                         }
                     }
                     // ends in same line end
@@ -441,7 +441,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
 
                     break;
                 }
-                index += c;
+                index += jj;
             }
 
             QRect rect = line.rect;
