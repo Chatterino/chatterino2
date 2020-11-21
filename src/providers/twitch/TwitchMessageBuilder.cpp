@@ -29,11 +29,13 @@
 
 namespace {
 
+const QString regexHelpString("(\\w+)[.,!?;:]*?$");
+
 // matches a mention with punctuation at the end, like "@username," or "@username!!!" where capture group would return "username"
-const QRegularExpression mentionRegex("^@(\\w+)[.,!?;:]*?$");
+const QRegularExpression mentionRegex("^@" + regexHelpString);
 
 // if findAllUsernames setting is enabled, matches strings like in the examples above, but without @ symbol at the beginning
-const QRegularExpression allUsernamesMentionRegex("^(\\w+)[.,!?;:]*?$");
+const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 
 const QSet<QString> zeroWidthEmotes{
     "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
