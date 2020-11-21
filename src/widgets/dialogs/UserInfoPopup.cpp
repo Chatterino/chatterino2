@@ -424,7 +424,7 @@ void UserInfoPopup::installEvents()
             {
                 currentUser->ignoreByID(
                     this->userId_, this->userName_,
-                    [=](auto result, const auto &message) mutable {
+                    [=](auto result, const auto &) mutable {
                         if (hack.lock())
                         {
                             if (result == IgnoreResult_Failed)
@@ -440,7 +440,7 @@ void UserInfoPopup::installEvents()
             {
                 currentUser->unignoreByID(
                     this->userId_, this->userName_,
-                    [=](auto result, const auto &message) mutable {
+                    [=](auto result, const auto &) mutable {
                         if (hack.lock())
                         {
                             if (result == UnignoreResult_Failed)
