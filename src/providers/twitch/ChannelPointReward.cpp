@@ -20,9 +20,9 @@ QString parseRewardImage(const rapidjson::Value &obj, const char *key,
 
 ChannelPointReward::ChannelPointReward(rapidjson::Value &redemption)
 {
-    rapidjson::Value user;
+    rapidjson::Value cuser;
     if (!(this->hasParsedSuccessfully =
-              rj::getSafeObject(redemption, "user", user)))
+              rj::getSafeObject(redemption, "user", cuser)))
     {
         qCDebug(chatterinoTwitch) << "No user info found for redemption";
         return;
@@ -75,7 +75,7 @@ ChannelPointReward::ChannelPointReward(rapidjson::Value &redemption)
     // because we will get the user info from a corresponding IRC message
     if (!this->isUserInputRequired)
     {
-        this->parseUser(user);
+        this->parseUser(cuser);
     }
 
     rapidjson::Value obj;
@@ -104,23 +104,23 @@ ChannelPointReward::ChannelPointReward(rapidjson::Value &redemption)
     }
 }
 
-void ChannelPointReward::parseUser(rapidjson::Value &user)
+void ChannelPointReward::parseUser(rapidjson::Value &cuser)
 {
-    if (!(this->hasParsedSuccessfully = rj::getSafe(user, "id", this->user.id)))
+    if (!(this->hasParsedSuccessfully = rj::getSafe(cuser, "id", this->user.id)))
     {
         qCDebug(chatterinoTwitch) << "No id found for user in reward";
         return;
     }
 
     if (!(this->hasParsedSuccessfully =
-              rj::getSafe(user, "login", this->user.login)))
+              rj::getSafe(cuser, "login", this->user.login)))
     {
         qCDebug(chatterinoTwitch) << "No login name found for user in reward";
         return;
     }
 
     if (!(this->hasParsedSuccessfully =
-              rj::getSafe(user, "display_name", this->user.displayName)))
+              rj::getSafe(cuser, "display_name", this->user.displayName)))
     {
         qCDebug(chatterinoTwitch) << "No display name found for user in reward";
         return;
