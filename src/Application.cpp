@@ -45,7 +45,7 @@ Application *Application::instance = nullptr;
 // It will create the instances of the major classes, and connect their signals
 // to each other
 
-Application::Application(Settings &_settings, Paths &_paths)
+Application::Application(Settings &, Paths &)
     : themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
