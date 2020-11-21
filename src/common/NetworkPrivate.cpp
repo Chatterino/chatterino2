@@ -11,7 +11,7 @@
 #include <QCryptographicHash>
 #include <QFile>
 #include <QtConcurrent>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 

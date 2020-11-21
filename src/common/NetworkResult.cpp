@@ -3,7 +3,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/error/en.h>
 #include <QJsonDocument>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 

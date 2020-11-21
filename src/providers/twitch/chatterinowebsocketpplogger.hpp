@@ -32,7 +32,7 @@
 #include <websocketpp/common/cpp11.hpp>
 #include <websocketpp/logger/basic.hpp>
 #include <websocketpp/logger/levels.hpp>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace websocketpp {
 namespace log {

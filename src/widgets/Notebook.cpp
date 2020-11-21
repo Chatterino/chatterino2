@@ -1,7 +1,7 @@
 #include "widgets/Notebook.hpp"
 
 #include "Application.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"

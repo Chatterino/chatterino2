@@ -4,7 +4,7 @@
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 #include "util/Helpers.hpp"
 
 #ifdef USEWINSDK

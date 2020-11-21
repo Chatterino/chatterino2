@@ -6,9 +6,9 @@
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/api/Helix.hpp"
-#include "qlogging.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/RapidjsonHelpers.hpp"
 

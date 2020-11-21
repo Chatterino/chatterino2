@@ -4,11 +4,11 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "qlogging.hpp"
 
 namespace chatterino {
 namespace {

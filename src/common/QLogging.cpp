@@ -1,4 +1,4 @@
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 #ifdef DEBUG_OFF
 static constexpr QtMsgType logThreshold = QtWarningMsg;

@@ -2,10 +2,10 @@
 
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
-#include "qlogging.hpp"
 
 #include <QCoreApplication>
 

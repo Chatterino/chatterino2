@@ -1,5 +1,5 @@
 #include "providers/twitch/TwitchHelpers.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 

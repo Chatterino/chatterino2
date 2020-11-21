@@ -1,11 +1,11 @@
 #include "providers/twitch/TwitchAccountManager.hpp"
 
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
-#include "qlogging.hpp"
 
 namespace chatterino {
 

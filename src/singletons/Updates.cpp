@@ -13,7 +13,7 @@
 #include <QMessageBox>
 #include <QProcess>
 #include <QRegularExpression>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {

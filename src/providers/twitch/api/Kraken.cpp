@@ -2,7 +2,7 @@
 
 #include "common/Outcome.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 

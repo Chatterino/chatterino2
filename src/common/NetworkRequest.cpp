@@ -12,7 +12,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QtConcurrent>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 #include <cassert>
 

@@ -3,7 +3,7 @@
 #include "singletons/Paths.hpp"
 
 #include <QDesktopServices>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 

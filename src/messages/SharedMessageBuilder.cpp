@@ -1,11 +1,11 @@
 #include "messages/SharedMessageBuilder.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
-#include "qlogging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StreamerMode.hpp"

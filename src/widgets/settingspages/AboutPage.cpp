@@ -2,7 +2,7 @@
 
 #include "common/Modes.hpp"
 #include "common/Version.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/BasePopup.hpp"

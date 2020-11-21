@@ -8,7 +8,7 @@
 #include <QErrorMessage>
 #include <QFileInfo>
 #include <QProcess>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 #include <functional>
 

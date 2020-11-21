@@ -12,7 +12,7 @@
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
 #include "common/NetworkManager.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"

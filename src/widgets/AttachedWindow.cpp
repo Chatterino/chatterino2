@@ -7,7 +7,7 @@
 
 #include <QTimer>
 #include <QVBoxLayout>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"

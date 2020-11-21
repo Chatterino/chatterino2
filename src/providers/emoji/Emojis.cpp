@@ -10,7 +10,7 @@
 #include <QFile>
 #include <boost/variant.hpp>
 #include <memory>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {

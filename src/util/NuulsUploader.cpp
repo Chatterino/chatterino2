@@ -14,7 +14,7 @@
 #include <QMimeDatabase>
 #include <QMutex>
 #include <QSaveFile>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds

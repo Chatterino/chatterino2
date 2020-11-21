@@ -127,6 +127,7 @@ SOURCES += \
     src/common/UsernameSet.cpp \
     src/common/Version.cpp \
     src/common/WindowDescriptors.cpp \
+    src/common/QLogging.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
@@ -203,7 +204,6 @@ SOURCES += \
     src/providers/twitch/TwitchParseCheerEmotes.cpp \
     src/providers/twitch/TwitchUser.cpp \
     src/RunGui.cpp \
-    src/qlogging.cpp \
     src/singletons/Badges.cpp \
     src/singletons/Emotes.cpp \
     src/singletons/Fonts.cpp \
@@ -343,6 +343,7 @@ HEADERS += \
     src/common/UniqueAccess.hpp \
     src/common/UsernameSet.hpp \
     src/common/Version.hpp \
+    src/common/QLogging.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
     src/controllers/accounts/AccountModel.hpp \
@@ -434,7 +435,6 @@ HEADERS += \
     src/providers/twitch/TwitchUser.hpp \
     src/RunGui.hpp \
     src/providers/twitch/chatterinowebsocketpplogger.hpp \
-    src/qlogging.hpp \
     src/singletons/Badges.hpp \
     src/singletons/Emotes.hpp \
     src/singletons/Fonts.hpp \

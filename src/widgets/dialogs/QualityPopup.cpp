@@ -1,6 +1,6 @@
 #include "QualityPopup.hpp"
 #include "Application.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Window.hpp"

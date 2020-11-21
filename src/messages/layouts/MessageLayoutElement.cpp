@@ -1,11 +1,11 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
-#include "qlogging.hpp"
 #include "singletons/Theme.hpp"
 #include "util/DebugCount.hpp"
 

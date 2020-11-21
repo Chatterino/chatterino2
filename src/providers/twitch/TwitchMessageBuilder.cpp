@@ -25,7 +25,7 @@
 #include <QMediaPlayer>
 #include <QStringRef>
 #include <boost/variant.hpp>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace {
 

@@ -10,7 +10,7 @@
 #include <exception>
 #include <iostream>
 #include <thread>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 #define TWITCH_PUBSUB_URL "wss://pubsub-edge.twitch.tv"
 

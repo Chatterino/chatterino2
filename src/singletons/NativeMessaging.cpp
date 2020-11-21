@@ -2,7 +2,7 @@
 
 #include "Application.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "util/PostToThread.hpp"
 

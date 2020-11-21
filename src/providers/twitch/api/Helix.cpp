@@ -1,7 +1,7 @@
 #include "providers/twitch/api/Helix.hpp"
 
 #include "common/Outcome.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 

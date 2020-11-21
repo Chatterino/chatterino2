@@ -31,7 +31,7 @@
 #include <QJsonValue>
 #include <QThread>
 #include <QTimer>
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {

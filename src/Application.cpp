@@ -3,6 +3,7 @@
 #include <atomic>
 
 #include "common/Args.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
@@ -16,7 +17,6 @@
 #include "providers/irc/Irc2.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "qlogging.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Logging.hpp"

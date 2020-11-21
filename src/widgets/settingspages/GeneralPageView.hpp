@@ -4,7 +4,7 @@
 #include <boost/variant.hpp>
 #include "Application.hpp"
 #include "common/ChatterinoSetting.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/SignalLabel.hpp"
 

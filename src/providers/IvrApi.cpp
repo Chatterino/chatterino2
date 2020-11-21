@@ -1,7 +1,7 @@
 #include "IvrApi.hpp"
 
 #include "common/Outcome.hpp"
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 
 #include <QUrlQuery>
 

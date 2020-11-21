@@ -3,11 +3,11 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "common/QLogging.hpp"
 #include "messages/Message.hpp"
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
-#include "qlogging.hpp"
 #include "singletons/Settings.hpp"
 #include "util/QObjectRef.hpp"
 

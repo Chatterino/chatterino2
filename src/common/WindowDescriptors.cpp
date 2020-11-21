@@ -1,6 +1,6 @@
 #include "common/WindowDescriptors.hpp"
 
-#include "qlogging.hpp"
+#include "common/QLogging.hpp"
 #include "widgets/Window.hpp"
 
 namespace chatterino {
