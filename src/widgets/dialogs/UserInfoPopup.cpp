@@ -650,7 +650,7 @@ void UserInfoPopup::updateUserData()
         // get ignoreHighlights state
         bool isIgnoringHighlights = false;
         const auto &vector = getSettings()->blacklistedUsers.raw();
-        for (int i = 0; i < vector.size(); i++)
+        for (unsigned int i = 0; i < vector.size(); i++)
         {
             if (this->userName_ == vector[i].getPattern())
             {
