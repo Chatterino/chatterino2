@@ -46,7 +46,7 @@ void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto) {
             // TODO: make better xd
             failureCallback();
         })
@@ -125,7 +125,7 @@ void Helix::fetchUsersFollows(
             successCallback(HelixUsersFollowsResponse(root));
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto) {
             // TODO: make better xd
             failureCallback();
         })
@@ -198,7 +198,7 @@ void Helix::fetchStreams(
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto) {
             // TODO: make better xd
             failureCallback();
         })
@@ -288,7 +288,7 @@ void Helix::fetchGames(QStringList gameIds, QStringList gameNames,
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto) {
             // TODO: make better xd
             failureCallback();
         })
