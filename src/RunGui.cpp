@@ -111,9 +111,12 @@ namespace {
         QFile::remove(path);
     }
 
+#ifndef C_DEBUG
     std::chrono::steady_clock::time_point signalsInitTime;
+#endif
     bool restartOnSignal = false;
 
+#ifndef C_DEBUG
     [[noreturn]] void handleSignal(int signum)
     {
         using namespace std::chrono_literals;
@@ -129,6 +132,7 @@ namespace {
 
         _exit(signum);
     }
+#endif
 
     // We want to restart chatterino when it crashes and the setting is set to
     // true.
