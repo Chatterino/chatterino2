@@ -15,6 +15,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Benchmark.hpp"
@@ -892,8 +893,9 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     auto snapshot = this->messages_.getSnapshot();
     if (index >= snapshot.size())
     {
-        qDebug() << "Tried to replace out of bounds message. Index:" << index
-                 << ". Length:" << snapshot.size();
+        qCDebug(chatterinoWidget)
+            << "Tried to replace out of bounds message. Index:" << index
+            << ". Length:" << snapshot.size();
         return;
     }
 

@@ -2,6 +2,7 @@
 
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -76,7 +77,8 @@ AbstractIrcServer::AbstractIrcServer()
 
         if (!this->readConnection_->isConnected())
         {
-            qDebug() << "Trying to reconnect..." << this->falloffCounter_;
+            qCDebug(chatterinoIrc)
+                << "Trying to reconnect..." << this->falloffCounter_;
             this->connect();
         }
     });
@@ -195,8 +197,8 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         chan->destroyed.connect([this, channelName] {
             // fourtf: issues when the server itself is destroyed
 
-            qDebug() << "[AbstractIrcServer::addChannel]" << channelName
-                     << "was destroyed";
+            qCDebug(chatterinoIrc) << "[AbstractIrcServer::addChannel]"
+                                   << channelName << "was destroyed";
             this->channels.remove(channelName);
 
             if (this->readConnection_)

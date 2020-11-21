@@ -133,6 +133,7 @@ SOURCES += \
     src/common/UsernameSet.cpp \
     src/common/Version.cpp \
     src/common/WindowDescriptors.cpp \
+    src/common/QLogging.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
@@ -348,6 +349,7 @@ HEADERS += \
     src/common/UniqueAccess.hpp \
     src/common/UsernameSet.hpp \
     src/common/Version.hpp \
+    src/common/QLogging.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
     src/controllers/accounts/AccountModel.hpp \
@@ -418,6 +420,7 @@ HEADERS += \
     src/providers/IvrApi.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/ChannelPointReward.hpp \
+    src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/api/Helix.hpp \
     src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/EmoteValue.hpp \
@@ -620,6 +623,7 @@ CONFIG(debug, debug|release) {
     message("Building Chatterino2 DEBUG")
 } else {
     message("Building Chatterino2 RELEASE")
+    DEFINES += DEBUG_OFF
 }
 
 message("Injected git values: $$git_commit ($$git_release) $$git_hash")
