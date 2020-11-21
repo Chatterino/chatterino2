@@ -13,7 +13,7 @@ MutedChannelModel::MutedChannelModel(QObject *parent)
 
 // turn a vector item into a model row
 QString MutedChannelModel::getItemFromRow(std::vector<QStandardItem *> &row,
-                                          const QString &original)
+                                          const QString &)
 {
     return QString(row[0]->data(Qt::DisplayRole).toString());
 }
