@@ -8,6 +8,12 @@
 # from lib/boost.pri
 #  - BOOST_DIRECTORY (C:\local\boost\ by default) (Windows only)
 
+CCACHE_BIN = $$system(which ccache)
+!isEmpty(CCACHE_BIN) {
+  load(ccache)
+  CONFIG+=ccache
+}
+
 MINIMUM_REQUIRED_QT_VERSION = 5.12.0
 
 !versionAtLeast(QT_VERSION, $$MINIMUM_REQUIRED_QT_VERSION) {
