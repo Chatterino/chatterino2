@@ -1,8 +1,8 @@
 #include "AboutPage.hpp"
 
 #include "common/Modes.hpp"
-#include "common/Version.hpp"
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
 #include "widgets/BasePopup.hpp"

@@ -1,8 +1,8 @@
 #include "providers/twitch/api/Kraken.hpp"
 
 #include "common/Outcome.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
 #include "common/QLogging.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 
 namespace chatterino {
 

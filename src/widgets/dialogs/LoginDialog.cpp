@@ -3,8 +3,8 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
-#include "controllers/accounts/AccountController.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "util/Helpers.hpp"
 
 #ifdef USEWINSDK
