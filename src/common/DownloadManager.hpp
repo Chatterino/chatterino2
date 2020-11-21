@@ -21,7 +21,7 @@ public:
 
 private:
     QNetworkAccessManager *manager;
-    QNetworkReply *reply;
+    QNetworkReply *downloadReply;
     QFile *file;
 
 private slots:

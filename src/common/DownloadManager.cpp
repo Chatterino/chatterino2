@@ -25,18 +25,18 @@ void DownloadManager::setFile(QString fileURL, const QString &channelName)
         getPaths()->twitchProfileAvatars + "/twitch/" + channelName + ".png";
     QNetworkRequest request;
     request.setUrl(QUrl(fileURL));
-    reply = manager->get(request);
+    downloadReply = manager->get(request);
 
     file = new QFile;
     file->setFileName(saveFilePath);
     file->open(QIODevice::WriteOnly);
 
-    connect(reply, SIGNAL(downloadProgress(qint64, qint64)), this,
+    connect(downloadReply, SIGNAL(downloadProgress(qint64, qint64)), this,
             SLOT(onDownloadProgress(qint64, qint64)));
     connect(manager, SIGNAL(finished(QNetworkReply *)), this,
             SLOT(onFinished(QNetworkReply *)));
-    connect(reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-    connect(reply, SIGNAL(finished()), this, SLOT(onReplyFinished()));
+    connect(downloadReply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    connect(downloadReply, SIGNAL(finished()), this, SLOT(onReplyFinished()));
 }
 
 void DownloadManager::onDownloadProgress(qint64 bytesRead, qint64 bytesTotal)
@@ -68,7 +68,7 @@ void DownloadManager::onFinished(QNetworkReply *reply)
 
 void DownloadManager::onReadyRead()
 {
-    file->write(reply->readAll());
+    file->write(downloadReply->readAll());
 }
 
 void DownloadManager::onReplyFinished()
