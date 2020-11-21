@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Made `Try to find usernames without @ prefix` option still resolve usernames when special characters (commas, dots, (semi)colons, exclamation mark, question mark) are appended to them. (#2212)
 - Minor: Made usercard update user's display name (#2160)
 - Minor: Added placeholder text for message text input box. (#2143, #2149)
 - Minor: Added support for FrankerFaceZ badges. (#2101, part of #1658)
