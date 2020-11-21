@@ -552,7 +552,7 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
         {
             auto getTextLayoutElement = [&](QString text,
                                             std::vector<Segment> segments,
-                                            int width, bool hasTrailingSpace) {
+                                            int width, bool) {
                 std::vector<PajSegment> xd{};
 
                 for (const auto &segment : segments)
