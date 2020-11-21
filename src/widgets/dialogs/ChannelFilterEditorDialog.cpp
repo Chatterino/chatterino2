@@ -95,7 +95,7 @@ ChannelFilterEditorDialog::ValueSpecifier::ValueSpecifier()
     this->layout_ = new QHBoxLayout;
 
     this->typeCombo_->insertItems(
-        0, {"Variable", "Constant Text", "Constant Number"});
+        0, {"Constant Text", "Constant Number", "Variable"});
     this->varCombo_->insertItems(0, filterparser::validIdentifiersMap.values());
 
     this->layout_->addWidget(this->typeCombo_);
