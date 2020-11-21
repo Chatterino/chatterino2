@@ -734,8 +734,6 @@ void SplitContainer::applyFromDescriptorRecursively(
 
         bool vertical = containerNode.vertical_;
 
-        Direction direction = vertical ? Direction::Below : Direction::Right;
-
         node->type_ =
             vertical ? Node::VerticalContainer : Node::HorizontalContainer;
 
