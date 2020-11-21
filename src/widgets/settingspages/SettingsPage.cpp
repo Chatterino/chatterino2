@@ -12,7 +12,6 @@ namespace chatterino {
 bool filterItemsRec(QObject *object, const QString &query)
 {
     bool any{};
-
     for (auto &&child : object->children())
     {
         auto setOpacity = [&](auto *widget, bool condition) {
@@ -21,36 +20,36 @@ bool filterItemsRec(QObject *object, const QString &query)
             widget->update();
         };
 
-        if (auto x = dynamic_cast<SCheckBox *>(child); x)
+        if (auto xx = dynamic_cast<SCheckBox *>(child); xx)
         {
-            setOpacity(x, x->text().contains(query, Qt::CaseInsensitive));
+            setOpacity(xx, xx->text().contains(query, Qt::CaseInsensitive));
         }
-        else if (auto x = dynamic_cast<SLabel *>(child); x)
+        else if (auto yy = dynamic_cast<SLabel *>(child); yy)
         {
-            setOpacity(x, x->text().contains(query, Qt::CaseInsensitive));
+            setOpacity(yy, yy->text().contains(query, Qt::CaseInsensitive));
         }
-        else if (auto x = dynamic_cast<SComboBox *>(child); x)
+        else if (auto zz = dynamic_cast<SComboBox *>(child); zz)
         {
-            setOpacity(x, [=]() {
-                for (int i = 0; i < x->count(); i++)
+            setOpacity(zz, [=]() {
+                for (int i = 0; i < zz->count(); i++)
                 {
-                    if (x->itemText(i).contains(query, Qt::CaseInsensitive))
+                    if (zz->itemText(i).contains(query, Qt::CaseInsensitive))
                         return true;
                 }
                 return false;
             }());
         }
-        else if (auto x = dynamic_cast<QTabWidget *>(child); x)
+        else if (auto aa = dynamic_cast<QTabWidget *>(child); aa)
         {
-            for (int i = 0; i < x->count(); i++)
+            for (int i = 0; i < aa->count(); i++)
             {
                 bool tabAny{};
 
-                if (x->tabText(i).contains(query, Qt::CaseInsensitive))
+                if (aa->tabText(i).contains(query, Qt::CaseInsensitive))
                 {
                     tabAny = true;
                 }
-                auto widget = x->widget(i);
+                auto widget = aa->widget(i);
                 tabAny |= filterItemsRec(widget, query);
 
                 any |= tabAny;
