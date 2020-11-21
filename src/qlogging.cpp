@@ -1,59 +1,37 @@
 #include "qlogging.hpp"
 
 #ifdef DEBUG_OFF
-Q_LOGGING_CATEGORY(chatterinoApp, "chatterino.app", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoArgs, "chatterino.args", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoBenchmark, "chatterino.benchmark", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoBttv, "chatterino.bttv", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoCommon, "chatterino.cache", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoCache, "chatterino.common", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoEmoji, "chatterino.emoji", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoFfzemotes, "chatterino.ffzemotes", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoHelper, "chatterino.helper", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoImage, "chatterino.image", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoIrc, "chatterino.irc", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoIvr, "chatterino.ivr", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoMain, "chatterino.main", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoMessage, "chatterino.message", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoNativeMessage, "chatterino.nativemessage",
-                   QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoNotification, "chatterino.notification",
-                   QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoNuulsuploader, "chatterino.nuulsuploader",
-                   QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoPubsub, "chatterino.pubsub", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoStreamlink, "chatterino.streamlink", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoTokenizer, "chatterino.tokenizer", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoTwitch, "chatterino.twitch", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoUpdate, "chatterino.update", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoWebsocket, "chatterino.websocket", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoWidget, "chatterino.widget", QtWarningMsg);
-Q_LOGGING_CATEGORY(chatterinoWindowmanager, "chatterino.windowmanager",
-                   QtWarningMsg);
+static constexpr QtMsgType logThreshold = QtWarningMsg;
 #else
-Q_LOGGING_CATEGORY(chatterinoApp, "chatterino.app");
-Q_LOGGING_CATEGORY(chatterinoArgs, "chatterino.args");
-Q_LOGGING_CATEGORY(chatterinoBenchmark, "chatterino.benchmark");
-Q_LOGGING_CATEGORY(chatterinoBttv, "chatterino.bttv");
-Q_LOGGING_CATEGORY(chatterinoCommon, "chatterino.cache");
-Q_LOGGING_CATEGORY(chatterinoCache, "chatterino.common");
-Q_LOGGING_CATEGORY(chatterinoEmoji, "chatterino.emoji");
-Q_LOGGING_CATEGORY(chatterinoFfzemotes, "chatterino.ffzemotes");
-Q_LOGGING_CATEGORY(chatterinoHelper, "chatterino.helper");
-Q_LOGGING_CATEGORY(chatterinoImage, "chatterino.image");
-Q_LOGGING_CATEGORY(chatterinoIrc, "chatterino.irc");
-Q_LOGGING_CATEGORY(chatterinoIvr, "chatterino.ivr");
-Q_LOGGING_CATEGORY(chatterinoMain, "chatterino.main");
-Q_LOGGING_CATEGORY(chatterinoMessage, "chatterino.message");
-Q_LOGGING_CATEGORY(chatterinoNativeMessage, "chatterino.nativemessage");
-Q_LOGGING_CATEGORY(chatterinoNotification, "chatterino.notification");
-Q_LOGGING_CATEGORY(chatterinoNuulsuploader, "chatterino.nuulsuploader");
-Q_LOGGING_CATEGORY(chatterinoPubsub, "chatterino.pubsub");
-Q_LOGGING_CATEGORY(chatterinoStreamlink, "chatterino.streamlink");
-Q_LOGGING_CATEGORY(chatterinoTokenizer, "chatterino.tokenizer");
-Q_LOGGING_CATEGORY(chatterinoTwitch, "chatterino.twitch");
-Q_LOGGING_CATEGORY(chatterinoUpdate, "chatterino.update");
-Q_LOGGING_CATEGORY(chatterinoWebsocket, "chatterino.websocket");
-Q_LOGGING_CATEGORY(chatterinoWidget, "chatterino.widget");
-Q_LOGGING_CATEGORY(chatterinoWindowmanager, "chatterino.windowmanager");
+static constexpr QtMsgType logThreshold = QtDebugMsg;
 #endif
+
+Q_LOGGING_CATEGORY(chatterinoApp, "chatterino.app", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoArgs, "chatterino.args", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoBenchmark, "chatterino.benchmark", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoBttv, "chatterino.bttv", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoCommon, "chatterino.cache", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoCache, "chatterino.common", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoEmoji, "chatterino.emoji", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoFfzemotes, "chatterino.ffzemotes", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoHelper, "chatterino.helper", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoImage, "chatterino.image", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoIrc, "chatterino.irc", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoIvr, "chatterino.ivr", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoMain, "chatterino.main", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoMessage, "chatterino.message", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoNativeMessage, "chatterino.nativemessage",
+                   logThreshold);
+Q_LOGGING_CATEGORY(chatterinoNotification, "chatterino.notification",
+                   logThreshold);
+Q_LOGGING_CATEGORY(chatterinoNuulsuploader, "chatterino.nuulsuploader",
+                   logThreshold);
+Q_LOGGING_CATEGORY(chatterinoPubsub, "chatterino.pubsub", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoStreamlink, "chatterino.streamlink", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoTokenizer, "chatterino.tokenizer", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoTwitch, "chatterino.twitch", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoUpdate, "chatterino.update", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoWebsocket, "chatterino.websocket", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoWidget, "chatterino.widget", logThreshold);
+Q_LOGGING_CATEGORY(chatterinoWindowmanager, "chatterino.windowmanager",
+                   logThreshold);
