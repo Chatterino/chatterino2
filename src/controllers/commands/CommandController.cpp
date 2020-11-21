@@ -274,7 +274,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         user->ignore(target,
-                     [channel](auto resultCode, const QString &message) {
+                     [channel](auto, const QString &message) {
                          channel->addMessage(makeSystemMessage(message));
                      });
 
@@ -300,7 +300,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         user->unignore(target,
-                       [channel](auto resultCode, const QString &message) {
+                       [channel](auto, const QString &message) {
                            channel->addMessage(makeSystemMessage(message));
                        });
 
