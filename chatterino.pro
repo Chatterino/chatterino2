@@ -414,6 +414,7 @@ HEADERS += \
     src/providers/IvrApi.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/ChannelPointReward.hpp \
+    src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/api/Helix.hpp \
     src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/EmoteValue.hpp \
@@ -434,7 +435,6 @@ HEADERS += \
     src/providers/twitch/TwitchParseCheerEmotes.hpp \
     src/providers/twitch/TwitchUser.hpp \
     src/RunGui.hpp \
-    src/providers/twitch/chatterinowebsocketpplogger.hpp \
     src/singletons/Badges.hpp \
     src/singletons/Emotes.hpp \
     src/singletons/Fonts.hpp \

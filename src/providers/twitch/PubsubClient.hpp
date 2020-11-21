@@ -1,9 +1,9 @@
 #pragma once
 
+#include "providers/twitch/ChatterinoWebSocketppLogger.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
-#include "providers/twitch/chatterinowebsocketpplogger.hpp"
 
 #include <rapidjson/document.h>
 #include <QString>
