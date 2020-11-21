@@ -228,7 +228,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         this->items_.append(command);
     }
 
-    this->registerCommand("/debug-args", [](const auto &words, auto channel) {
+    this->registerCommand("/debug-args", [](const auto &, auto channel) {
         QString msg = QApplication::instance()->arguments().join(' ');
 
         channel->addMessage(makeSystemMessage(msg));
@@ -236,7 +236,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand("/uptime", [](const auto &words, auto channel) {
+    this->registerCommand("/uptime", [](const auto &, auto channel) {
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
         if (twitchChannel == nullptr)
         {
