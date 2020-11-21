@@ -53,8 +53,8 @@ public:
 private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
 
-    QString clientId;
-    QString oauthToken;
+    QString kclientId;
+    QString koauthToken;
 };
 
 Kraken *getKraken();

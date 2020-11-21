@@ -53,7 +53,7 @@ NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
 
-    if (this->clientId.isEmpty())
+    if (this->kclientId.isEmpty())
     {
         qCDebug(chatterinoTwitch)
             << "Kraken::makeRequest called without a client ID set BabyRage";
@@ -65,25 +65,25 @@ NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
 
     fullUrl.setQuery(urlQuery);
 
-    if (!this->oauthToken.isEmpty())
+    if (!this->koauthToken.isEmpty())
     {
         return NetworkRequest(fullUrl)
             .timeout(5 * 1000)
             .header("Accept", "application/vnd.twitchtv.v5+json")
-            .header("Client-ID", this->clientId)
-            .header("Authorization", "OAuth " + this->oauthToken);
+            .header("Client-ID", this->kclientId)
+            .header("Authorization", "OAuth " + this->koauthToken);
     }
 
     return NetworkRequest(fullUrl)
         .timeout(5 * 1000)
         .header("Accept", "application/vnd.twitchtv.v5+json")
-        .header("Client-ID", this->clientId);
+        .header("Client-ID", this->kclientId);
 }
 
 void Kraken::update(QString clientId, QString oauthToken)
 {
-    this->clientId = clientId;
-    this->oauthToken = oauthToken;
+    this->kclientId = clientId;
+    this->koauthToken = oauthToken;
 }
 
 void Kraken::initialize()
