@@ -22,7 +22,7 @@ void Kraken::getChannel(QString userId,
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto) {
             // TODO: make better xd
             failureCallback();
         })
@@ -42,7 +42,7 @@ void Kraken::getUser(QString userId, ResultCallback<KrakenUser> successCallback,
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto) {
             // TODO: make better xd
             failureCallback();
         })
