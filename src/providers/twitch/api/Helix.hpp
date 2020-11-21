@@ -189,7 +189,7 @@ public:
 private:
     NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
 
-    QString clientId;
+    QString hclientId;
     QString oauthToken;
 };
 

@@ -319,7 +319,7 @@ NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
 
-    if (this->clientId.isEmpty())
+    if (this->hclientId.isEmpty())
     {
         qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without a client ID set BabyRage";
@@ -342,13 +342,13 @@ NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
     return NetworkRequest(fullUrl)
         .timeout(5 * 1000)
         .header("Accept", "application/json")
-        .header("Client-ID", this->clientId)
+        .header("Client-ID", this->hclientId)
         .header("Authorization", "Bearer " + this->oauthToken);
 }
 
 void Helix::update(QString clientId, QString oauthToken)
 {
-    this->clientId = clientId;
+    this->hclientId = clientId;
     this->oauthToken = oauthToken;
 }
 
