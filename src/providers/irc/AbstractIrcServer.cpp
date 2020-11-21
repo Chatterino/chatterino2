@@ -267,14 +267,14 @@ ChannelPtr AbstractIrcServer::getChannelOrEmpty(const QString &dirtyChannelName)
 std::vector<std::weak_ptr<Channel>> AbstractIrcServer::getChannels()
 {
     std::lock_guard lock(this->channelMutex);
-    std::vector<std::weak_ptr<Channel>> channels;
+    std::vector<std::weak_ptr<Channel>> rchannels;
 
     for (auto &&weak : this->channels.values())
     {
-        channels.push_back(weak);
+        rchannels.push_back(weak);
     }
 
-    return channels;
+    return rchannels;
 }
 
 void AbstractIrcServer::onReadConnected(IrcConnection *connection)
