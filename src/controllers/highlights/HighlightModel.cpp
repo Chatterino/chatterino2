@@ -152,7 +152,7 @@ void HighlightModel::afterInit()
     this->insertCustomRow(redeemedRow, 3);
 }
 
-void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
+void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &,
                                       int column, const QVariant &value,
                                       int role, int rowIndex)
 {
