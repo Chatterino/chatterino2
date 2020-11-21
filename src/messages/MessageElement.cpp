@@ -474,7 +474,6 @@ IrcTextElement::IrcTextElement(const QString &fullText,
     {
         std::vector<Segment> segments;
 
-        int pos = 0;
         int lastPos = 0;
 
         auto i = IRC_COLOR_PARSE_REGEX.globalMatch(text);
