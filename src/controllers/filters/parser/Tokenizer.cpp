@@ -8,9 +8,9 @@ Tokenizer::Tokenizer(const QString &text)
     QRegularExpressionMatchIterator i = tokenRegex.globalMatch(text);
     while (i.hasNext())
     {
-        auto text = i.next().captured();
-        this->tokens_ << text;
-        this->tokenTypes_ << this->tokenize(text);
+        auto ptext = i.next().captured();
+        this->tokens_ << ptext;
+        this->tokenTypes_ << this->tokenize(ptext);
     }
 }
 
