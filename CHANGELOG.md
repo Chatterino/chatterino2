@@ -8,6 +8,7 @@
 - Minor: Added a navigation list to the settings and reordered them.
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
+- Minor: Added a link to twitchemotes.com to conext menu when right-clicking Twitch emotes. (#2214)
 - Minor: Improved viewer list window.
 - Minor: Added emote completion with `:` to the whispers channel (#2075)
 - Minor: Made the current channels emotes appear at the top of the emote picker popup. (#2057)
