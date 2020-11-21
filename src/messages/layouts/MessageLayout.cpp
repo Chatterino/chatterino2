@@ -63,7 +63,7 @@ int MessageLayout::getHeight() const
 
 // Layout
 // return true if redraw is required
-bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
+bool MessageLayout::layout(int width, float scale, MessageElementFlags msgflags)
 {
     //    BenchmarkGuard benchmark("MessageLayout::layout()");
 
@@ -85,8 +85,8 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
     }
 
     // check if work mask changed
-    layoutRequired |= this->currentWordFlags_ != flags;
-    this->currentWordFlags_ = flags;  // getSettings()->getWordTypeMask();
+    layoutRequired |= this->currentWordFlags_ != msgflags;
+    this->currentWordFlags_ = msgflags;  // getSettings()->getWordTypeMask();
 
     // check if layout was requested manually
     layoutRequired |= this->flags.has(MessageLayoutFlag::RequiresLayout);
@@ -102,7 +102,7 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
     }
 
     int oldHeight = this->container_->getHeight();
-    this->actuallyLayout(width, flags);
+    this->actuallyLayout(width, msgflags);
     if (widthChanged || this->container_->getHeight() != oldHeight)
     {
         this->deleteBuffer();
