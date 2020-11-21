@@ -62,7 +62,7 @@ protected:
         const QString &channelName) = 0;
 
     virtual void privateMessageReceived(Communi::IrcPrivateMessage *message);
-    virtual void readConnectionMessageReceived(Communi::IrcMessage *message);
+    virtual void readConnectionMessageReceived(Communi::IrcMessage *);
     virtual void writeConnectionMessageReceived(Communi::IrcMessage *message);
 
     virtual void onReadConnected(IrcConnection *connection);
