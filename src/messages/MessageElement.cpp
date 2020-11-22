@@ -109,8 +109,7 @@ EmptyElement::EmptyElement()
 {
 }
 
-void EmptyElement::addToContainer(MessageLayoutContainer &,
-                                  MessageElementFlags)
+void EmptyElement::addToContainer(MessageLayoutContainer &, MessageElementFlags)
 {
 }
 
