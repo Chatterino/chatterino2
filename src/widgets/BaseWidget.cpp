@@ -155,7 +155,7 @@ void BaseWidget::showEvent(QShowEvent *)
     this->themeChangedEvent();
 }
 
-void BaseWidget::scaleChangedEvent(float newDpi)
+void BaseWidget::scaleChangedEvent(float)
 {
 }
 
