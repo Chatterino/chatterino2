@@ -346,10 +346,10 @@ NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
         .header("Authorization", "Bearer " + this->oauthToken);
 }
 
-void Helix::update(QString clientId, QString oauthToken)
+void Helix::update(QString clientId, QString hoauthToken)
 {
     this->hclientId = clientId;
-    this->oauthToken = oauthToken;
+    this->oauthToken = hoauthToken;
 }
 
 void Helix::initialize()
