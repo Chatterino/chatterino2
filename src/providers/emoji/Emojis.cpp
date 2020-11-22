@@ -243,7 +243,7 @@ void Emojis::sortEmojis()
 void Emojis::loadEmojiSet()
 {
     getSettings()->emojiSet.connect([=](const auto &emojiSet) {
-        this->emojis.each([=](const auto &name,
+        this->emojis.each([=](const auto &,
                               std::shared_ptr<EmojiData> &emoji) {
             QString emojiSetToUse = emojiSet;
             // clang-format off
