@@ -1,6 +1,7 @@
 #include "IvrApi.hpp"
 
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 
 #include <QUrlQuery>
 
@@ -23,8 +24,9 @@ void IvrApi::getSubage(QString userName, QString channelName,
             return Success;
         })
         .onError([failureCallback](NetworkResult result) {
-            qDebug() << "Failed IVR API Call!" << result.status()
-                     << QString(result.getData());
+            qCWarning(chatterinoIvr)
+                << "Failed IVR API Call!" << result.status()
+                << QString(result.getData());
             failureCallback();
         })
         .execute();

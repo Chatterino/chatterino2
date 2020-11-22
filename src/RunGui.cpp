@@ -12,6 +12,7 @@
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
 #include "common/NetworkManager.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -144,7 +145,7 @@ namespace {
     // improved in the future.
     void clearCache(const QDir &dir)
     {
-        qDebug() << "[Cache] cleared cache";
+        qCDebug(chatterinoCache) << "[Cache] cleared cache";
 
         QStringList toBeRemoved;
 

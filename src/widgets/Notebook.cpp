@@ -1,6 +1,7 @@
 #include "widgets/Notebook.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -153,7 +154,7 @@ void Notebook::select(QWidget *page)
             }
             else
             {
-                qDebug()
+                qCDebug(chatterinoWidget)
                     << "Notebook: selected child of page doesn't exist anymore";
             }
         }

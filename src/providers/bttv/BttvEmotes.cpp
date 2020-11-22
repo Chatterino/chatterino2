@@ -5,6 +5,7 @@
 
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
@@ -178,15 +179,17 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay
-                qDebug() << "Fetching BTTV emotes for channel" << channelId
-                         << "failed due to timeout";
+                qCWarning(chatterinoBttv)
+                    << "Fetching BTTV emotes for channel" << channelId
+                    << "failed due to timeout";
                 shared->addMessage(makeSystemMessage(
                     "Failed to fetch BetterTTV channel emotes. (timed out)"));
             }
             else
             {
-                qDebug() << "Error fetching BTTV emotes for channel"
-                         << channelId << ", error" << result.status();
+                qCWarning(chatterinoBttv)
+                    << "Error fetching BTTV emotes for channel" << channelId
+                    << ", error" << result.status();
                 shared->addMessage(
                     makeSystemMessage("Failed to fetch BetterTTV channel "
                                       "emotes. (unknown error)"));

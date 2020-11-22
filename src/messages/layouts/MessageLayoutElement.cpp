@@ -1,6 +1,7 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
@@ -422,7 +423,7 @@ void MultiColorTextLayoutElement::paint(QPainter &painter)
 
     for (const auto &segment : this->segments_)
     {
-        // qDebug() << "Draw segment:" << segment.text;
+        qCDebug(chatterinoMessage) << "Draw segment:" << segment.text;
         painter.setPen(segment.color);
         painter.drawText(QRectF(this->getRect().x() + xOffset,
                                 this->getRect().y(), 10000, 10000),

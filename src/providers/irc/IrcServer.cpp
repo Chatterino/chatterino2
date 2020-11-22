@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "common/QLogging.hpp"
 #include "messages/Message.hpp"
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
@@ -187,7 +188,7 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
         }
         else
         {
-            qDebug() << "message ignored :rage:";
+            qCDebug(chatterinoIrc) << "message ignored :rage:";
         }
     }
 }
