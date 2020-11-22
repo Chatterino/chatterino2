@@ -299,7 +299,7 @@ void TwitchAccount::followUser(const QString userID,
     NetworkRequest(requestUrl, NetworkRequestType::Put)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onSuccess([successCallback](auto result) -> Outcome {
+        .onSuccess([successCallback](auto) -> Outcome {
             // TODO: Properly check result of follow request
             successCallback();
 
