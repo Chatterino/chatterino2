@@ -273,10 +273,9 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
-        user->ignore(target,
-                     [channel](auto, const QString &message) {
-                         channel->addMessage(makeSystemMessage(message));
-                     });
+        user->ignore(target, [channel](auto, const QString &message) {
+            channel->addMessage(makeSystemMessage(message));
+        });
 
         return "";
     });
@@ -299,10 +298,9 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
-        user->unignore(target,
-                       [channel](auto, const QString &message) {
-                           channel->addMessage(makeSystemMessage(message));
-                       });
+        user->unignore(target, [channel](auto, const QString &message) {
+            channel->addMessage(makeSystemMessage(message));
+        });
 
         return "";
     });
