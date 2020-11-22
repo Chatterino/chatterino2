@@ -84,7 +84,11 @@ bool supportsIncognitoLinks()
 #endif
 }
 
+#ifdef Q_OS_WIN
 void openLinkIncognito(const QString &link)
+#else
+void openLinkIncognito(const QString &)
+#endif
 {
 #ifdef Q_OS_WIN
     auto command = getCommand(link);
