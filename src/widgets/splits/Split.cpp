@@ -117,6 +117,9 @@ Split::Split(QWidget *parent)
     // F5: reload emotes
     createShortcut(this, "F5", &Split::reloadChannelAndSubscriberEmotes);
 
+    // CTRL+F5: reconnect
+    createShortcut(this, "CTRL+F5", &Split::reconnect);
+
     // F10
     createShortcut(this, "F10", [] {
         auto *popup = new DebugPopup;
@@ -846,6 +849,11 @@ void Split::reloadChannelAndSubscriberEmotes()
         twitchChannel->refreshBTTVChannelEmotes(true);
         twitchChannel->refreshFFZChannelEmotes(true);
     }
+}
+
+void Split::reconnect()
+{
+    this->getChannel()->reconnect();
 }
 
 void Split::dragEnterEvent(QDragEnterEvent *event)
