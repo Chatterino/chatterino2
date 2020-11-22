@@ -334,13 +334,13 @@ void ColorPickerDialog::initSpinBoxes(LayoutCreator<QWidget> &creator)
 
     for (size_t i = 0; i < SpinBox::END; ++i)
     {
-        QObject::connect(
-            this->ui_.picker.spinBoxes[i],
-            QOverload<int>::of(&QSpinBox::valueChanged), [=](int) {
-                this->selectColor(QColor(red->value(), green->value(),
-                                         blue->value(), alpha->value()),
-                                  false);
-            });
+        QObject::connect(this->ui_.picker.spinBoxes[i],
+                         QOverload<int>::of(&QSpinBox::valueChanged), [=](int) {
+                             this->selectColor(
+                                 QColor(red->value(), green->value(),
+                                        blue->value(), alpha->value()),
+                                 false);
+                         });
     }
 }
 
