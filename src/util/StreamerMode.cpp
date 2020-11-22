@@ -12,7 +12,9 @@
 
 namespace chatterino {
 
+#ifdef USEWINSDK
 constexpr int cooldownInS = 10;
+#endif
 
 const QStringList &broadcastingBinaries()
 {
