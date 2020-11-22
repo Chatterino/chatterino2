@@ -401,7 +401,7 @@ void Split::insertTextToInput(const QString &text)
     this->input_->insertText(text);
 }
 
-void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
+void Split::showChangeChannelPopup(const char *, bool empty,
                                    std::function<void(bool)> callback)
 {
     if (this->selectChannelDialog_.hasElement())
