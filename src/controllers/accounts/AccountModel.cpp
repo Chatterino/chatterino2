@@ -26,7 +26,7 @@ void AccountModel::getRowFromItem(const std::shared_ptr<Account> &item,
 }
 
 int AccountModel::beforeInsert(const std::shared_ptr<Account> &item,
-                               std::vector<QStandardItem *> &,
+                               std::vector<QStandardItem *> &, /* row */
                                int proposedIndex)
 {
     if (this->categoryCount_[item->getCategory()]++ == 0)

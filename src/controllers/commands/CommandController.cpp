@@ -228,7 +228,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         this->items_.append(command);
     }
 
-    this->registerCommand("/debug-args", [](const auto &, auto channel) {
+    this->registerCommand("/debug-args", [](const auto & /* words */, auto channel) {
         QString msg = QApplication::instance()->arguments().join(' ');
 
         channel->addMessage(makeSystemMessage(msg));
