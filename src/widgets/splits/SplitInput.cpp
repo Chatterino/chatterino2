@@ -114,7 +114,7 @@ void SplitInput::initLayout()
         this->managedConnections_);
 }
 
-void SplitInput::scaleChangedEvent(float scale)
+void SplitInput::scaleChangedEvent(float)
 {
     // update the icon size of the emote button
     this->updateEmoteButton();
