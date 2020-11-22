@@ -93,8 +93,7 @@ ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
     this->trailingSpace = creator.hasTrailingSpace();
 }
 
-void ImageLayoutElement::addCopyTextToString(QString &str, int,
-                                             int) const
+void ImageLayoutElement::addCopyTextToString(QString &str, int, int) const
 {
     const auto *emoteElement =
         dynamic_cast<EmoteElement *>(&this->getCreator());
@@ -331,8 +330,7 @@ TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator,
 {
 }
 
-void TextIconLayoutElement::addCopyTextToString(QString &, int,
-                                                int) const
+void TextIconLayoutElement::addCopyTextToString(QString &, int, int) const
 {
 }
 
