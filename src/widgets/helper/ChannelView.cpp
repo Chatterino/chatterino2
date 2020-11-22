@@ -865,7 +865,7 @@ void ChannelView::messageAddedAtStart(std::vector<MessagePtr> &messages)
     this->queueLayout();
 }
 
-void ChannelView::messageRemoveFromStart(MessagePtr &message)
+void ChannelView::messageRemoveFromStart(MessagePtr &)
 {
     if (this->paused())
     {
