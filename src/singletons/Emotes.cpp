@@ -9,7 +9,7 @@ Emotes::Emotes()
 {
 }
 
-void Emotes::initialize(Settings &settings, Paths &paths)
+void Emotes::initialize(Settings &, Paths &)
 {
     getApp()->accounts->twitch.currentUserChanged.connect([] {
         getApp()->accounts->twitch.getCurrent()->loadEmotes();
