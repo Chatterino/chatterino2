@@ -365,7 +365,6 @@ void TwitchMessageBuilder::addWords(
         while (doesWordContainATwitchEmote(cursor, word, twitchEmotes,
                                            currentTwitchEmoteIt))
         {
-            auto wordEnd = cursor + word.length();
             const auto &currentTwitchEmote = *currentTwitchEmoteIt;
 
             if (currentTwitchEmote.start == cursor)
