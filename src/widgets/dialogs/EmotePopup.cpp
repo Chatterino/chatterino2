@@ -226,7 +226,7 @@ void EmotePopup::loadEmojis()
     builder->flags.set(MessageFlag::Centered);
     builder->flags.set(MessageFlag::DisableCompactEmotes);
 
-    emojis.each([&builder](const auto &key, const auto &value) {
+    emojis.each([&builder](const auto &, const auto &value) {
         builder
             .emplace<EmoteElement>(value->emote, MessageElementFlag::AlwaysShow)
             ->setLink(
