@@ -66,6 +66,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     form->addRow(new QLabel("Ctrl + P"), new QLabel("Open Settings menu"));
     form->addRow(new QLabel("F5"),
                  new QLabel("Reload subscriber and channel emotes"));
+    form->addRow(new QLabel("Ctrl + F5"), new QLabel("Reconnect channels"));
 
     form->addItem(new QSpacerItem(16, 16));
     form->addRow(new QLabel("PageUp"), new QLabel("Scroll up"));
