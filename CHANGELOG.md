@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added a keyboard shortcut (Ctrl+F5) for "Reconnect" (#2215)
 - Minor: Made usercard update user's display name (#2160)
 - Minor: Added placeholder text for message text input box. (#2143, #2149)
 - Minor: Added support for FrankerFaceZ badges. (#2101, part of #1658)
