@@ -276,7 +276,7 @@ void TwitchAccount::unignoreByID(
 void TwitchAccount::checkFollow(const QString targetUserID,
                                 std::function<void(FollowResult)> onFinished)
 {
-    const auto onResponse = [onFinished](bool following, const auto &record) {
+    const auto onResponse = [onFinished](bool following, const auto &) {
         if (!following)
         {
             onFinished(FollowResult_NotFollowing);
