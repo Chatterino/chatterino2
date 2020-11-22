@@ -107,7 +107,7 @@ void SplitInput::initLayout()
 
     // textEditLength visibility
     getSettings()->showMessageLength.connect(
-        [this](const bool &value, auto) {
+        [this](const bool &, auto) {
             // this->ui_.textEditLength->setHidden(!value);
             this->editTextChanged();
         },
