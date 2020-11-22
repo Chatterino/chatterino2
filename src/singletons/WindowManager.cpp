@@ -286,7 +286,7 @@ void WindowManager::setEmotePopupPos(QPoint pos)
     this->emotePopupPos_ = pos;
 }
 
-void WindowManager::initialize(Settings &settings, Paths &paths)
+void WindowManager::initialize(Settings &settings, Paths &)
 {
     assertInGuiThread();
 
