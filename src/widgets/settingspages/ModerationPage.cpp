@@ -72,7 +72,6 @@ QString fetchLogDirectorySize()
 
 ModerationPage::ModerationPage()
 {
-    auto app = getApp();
     LayoutCreator<ModerationPage> layoutCreator(this);
 
     auto tabs = layoutCreator.emplace<QTabWidget>();
