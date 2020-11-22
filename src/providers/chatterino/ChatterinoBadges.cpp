@@ -13,7 +13,7 @@
 #include <map>
 
 namespace chatterino {
-void ChatterinoBadges::initialize(Settings &settings, Paths &paths)
+void ChatterinoBadges::initialize(Settings &, Paths &)
 {
     this->loadChatterinoBadges();
 }
