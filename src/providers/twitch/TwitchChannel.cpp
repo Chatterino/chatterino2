@@ -85,7 +85,7 @@ namespace {
 
     // parseRecentMessages takes a json object and returns a vector of
     // Communi IrcMessages
-    auto parseRecentMessages(const QJsonObject &jsonRoot, ChannelPtr channel)
+    auto parseRecentMessages(const QJsonObject &jsonRoot, ChannelPtr)
     {
         QJsonArray jsonMessages = jsonRoot.value("messages").toArray();
         std::vector<Communi::IrcMessage *> messages;
