@@ -281,7 +281,7 @@ void SplitHeader::initializeLayout()
             });
         }),
         // dropdown
-        this->dropdownButton_ = makeWidget<Button>([&](auto w) {
+        this->dropdownButton_ = makeWidget<Button>([&](auto) {
             /// XXX: this never gets disconnected
             this->split_->channelChanged.connect([this] {
                 this->dropdownButton_->setMenu(this->createMainMenu());
