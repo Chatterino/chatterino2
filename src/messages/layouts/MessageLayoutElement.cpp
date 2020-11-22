@@ -374,7 +374,7 @@ void TextIconLayoutElement::paintAnimated(QPainter &painter, int yOffset)
 {
 }
 
-int TextIconLayoutElement::getMouseOverIndex(const QPoint &abs) const
+int TextIconLayoutElement::getMouseOverIndex(const QPoint &) const
 {
     return 0;
 }
