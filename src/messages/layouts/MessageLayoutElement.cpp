@@ -331,8 +331,8 @@ TextIconLayoutElement::TextIconLayoutElement(MessageElement &creator,
 {
 }
 
-void TextIconLayoutElement::addCopyTextToString(QString &str, int from,
-                                                int to) const
+void TextIconLayoutElement::addCopyTextToString(QString &, int,
+                                                int) const
 {
 }
 
