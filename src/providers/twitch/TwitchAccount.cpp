@@ -323,7 +323,7 @@ void TwitchAccount::unfollowUser(const QString userID,
                 successCallback();
             }
         })
-        .onSuccess([successCallback](const auto &document) -> Outcome {
+        .onSuccess([successCallback](const auto &) -> Outcome {
             successCallback();
 
             return Success;
