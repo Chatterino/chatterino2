@@ -76,11 +76,11 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
 
     buttons->addStretch();
 
-    QObject::connect(this->model_, &QAbstractTableModel::rowsMoved, this,
-                     [this](const QModelIndex &, int, int,
-                            const QModelIndex &, int row) {
-                         this->selectRow(row);
-                     });
+    QObject::connect(
+        this->model_, &QAbstractTableModel::rowsMoved, this,
+        [this](const QModelIndex &, int, int, const QModelIndex &, int row) {
+            this->selectRow(row);
+        });
 
     // add tableview
     vbox->addWidget(this->tableView_);
