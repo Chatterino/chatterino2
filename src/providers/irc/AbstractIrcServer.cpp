@@ -391,8 +391,7 @@ void AbstractIrcServer::privateMessageReceived(
     (void)message;
 }
 
-void AbstractIrcServer::readConnectionMessageReceived(
-    Communi::IrcMessage *)
+void AbstractIrcServer::readConnectionMessageReceived(Communi::IrcMessage *)
 {
 }
 
