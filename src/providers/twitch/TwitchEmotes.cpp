@@ -74,14 +74,15 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
 
     if (!shared)
     {
-        (*cache)[id] = shared = std::make_shared<Emote>(
-            Emote{EmoteName{name},
-                  ImageSet{
-                      Image::fromUrl(getEmoteLink(id, "1.0"), 1),
-                      Image::fromUrl(getEmoteLink(id, "2.0"), 0.5),
-                      Image::fromUrl(getEmoteLink(id, "3.0"), 0.25),
-                  },
-                  Tooltip{name + "<br>Twitch Emote"}, Url{}});
+        (*cache)[id] = shared = std::make_shared<Emote>(Emote{
+            EmoteName{name},
+            ImageSet{
+                Image::fromUrl(getEmoteLink(id, "1.0"), 1),
+                Image::fromUrl(getEmoteLink(id, "2.0"), 0.5),
+                Image::fromUrl(getEmoteLink(id, "3.0"), 0.25),
+            },
+            Tooltip{name + "<br>Twitch Emote"},
+            Url{QString("https://twitchemotes.com/emotes/%1").arg(id.string)}});
     }
 
     return shared;
