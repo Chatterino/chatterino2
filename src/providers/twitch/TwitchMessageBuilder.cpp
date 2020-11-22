@@ -29,8 +29,13 @@
 
 namespace {
 
+const QString regexHelpString("(\\w+)[.,!?;:]*?$");
+
 // matches a mention with punctuation at the end, like "@username," or "@username!!!" where capture group would return "username"
-const QRegularExpression mentionRegex("^@(\\w+)[.,!?;]*?$");
+const QRegularExpression mentionRegex("^@" + regexHelpString);
+
+// if findAllUsernames setting is enabled, matches strings like in the examples above, but without @ symbol at the beginning
+const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 
 const QSet<QString> zeroWidthEmotes{
     "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
@@ -474,6 +479,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         if (match.hasMatch())
         {
             QString username = match.captured(1);
+
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
                 ->setLink({Link::UserInfo, username});
@@ -488,15 +494,18 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
     if (this->twitchChannel != nullptr && getSettings()->findAllUsernames)
     {
         auto chatters = this->twitchChannel->accessChatters();
-        if (chatters->contains(string))
+        auto match = allUsernamesMentionRegex.match(string);
+        QString username = match.captured(1);
+
+        if (match.hasMatch() && chatters->contains(username))
         {
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
-                ->setLink({Link::UserInfo, string});
+                ->setLink({Link::UserInfo, username});
 
             this->emplace<TextElement>(
                     string, MessageElementFlag::NonBoldUsername, textColor)
-                ->setLink({Link::UserInfo, string});
+                ->setLink({Link::UserInfo, username});
             return;
         }
     }

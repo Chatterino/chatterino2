@@ -386,7 +386,10 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     // reload / reconnect
     if (this->split_->getChannel()->canReconnect())
-        menu->addAction("Reconnect", this, SLOT(reconnect()));
+    {
+        menu->addAction("Reconnect", this, SLOT(reconnect()),
+                        QKeySequence("Ctrl+F5"));
+    }
 
     if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
     {
