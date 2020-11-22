@@ -1437,8 +1437,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 std::weak_ptr<MessageLayout> weakLayout = layout;
                 LinkResolver::getLinkInfo(
                     element->getLink().value, nullptr,
-                    [weakLayout, element](QString tooltipText,
-                                          Link,
+                    [weakLayout, element](QString tooltipText, Link,
                                           ImagePtr thumbnail) {
                         auto shared = weakLayout.lock();
                         if (!shared)
