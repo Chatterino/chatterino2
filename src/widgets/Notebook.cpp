@@ -337,7 +337,7 @@ void Notebook::setShowAddButton(bool value)
     this->addButton_->setHidden(!value);
 }
 
-void Notebook::scaleChangedEvent(float scale)
+void Notebook::scaleChangedEvent(float)
 {
     float h = (NOTEBOOK_TAB_HEIGHT - 1) * this->scale();
 
