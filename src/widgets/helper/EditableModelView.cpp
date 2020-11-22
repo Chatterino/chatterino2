@@ -77,8 +77,8 @@ EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     buttons->addStretch();
 
     QObject::connect(this->model_, &QAbstractTableModel::rowsMoved, this,
-                     [this](const QModelIndex &parent, int start, int end,
-                            const QModelIndex &destination, int row) {
+                     [this](const QModelIndex &, int, int,
+                            const QModelIndex &, int row) {
                          this->selectRow(row);
                      });
 
