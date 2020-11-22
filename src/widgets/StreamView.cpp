@@ -12,7 +12,11 @@
 
 namespace chatterino {
 
+#ifdef USEWEBENGINE
 StreamView::StreamView(ChannelPtr channel, const QUrl &url)
+#else
+StreamView::StreamView(ChannelPtr channel, const QUrl &)
+#endif
 {
     LayoutCreator<StreamView> layoutCreator(this);
 
