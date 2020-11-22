@@ -25,7 +25,7 @@ namespace {
 #ifdef Q_OS_WIN
     qreal deviceDpi(QWidget *widget)
 #else
-qreal deviceDpi(QWidget *)
+    qreal deviceDpi(QWidget *)
 #endif
     {
 #ifdef Q_OS_WIN
