@@ -106,7 +106,8 @@ ChannelPointReward::ChannelPointReward(rapidjson::Value &redemption)
 
 void ChannelPointReward::parseUser(rapidjson::Value &cuser)
 {
-    if (!(this->hasParsedSuccessfully = rj::getSafe(cuser, "id", this->user.id)))
+    if (!(this->hasParsedSuccessfully =
+              rj::getSafe(cuser, "id", this->user.id)))
     {
         qCDebug(chatterinoTwitch) << "No id found for user in reward";
         return;
