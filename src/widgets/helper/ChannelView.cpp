@@ -2043,6 +2043,41 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                                        SettingsDialogPreference::Accounts);
         }
         break;
+        case Link::JumpToChannel: {
+            // Get all currently open pages
+            QSet<SplitContainer *> openPages;
+
+            auto &nb = getApp()->windows->getMainWindow().getNotebook();
+            for (int i = 0; i < nb.getPageCount(); ++i)
+            {
+                openPages.insert(
+                    static_cast<SplitContainer *>(nb.getPageAt(i)));
+            }
+
+            for (auto *sc : openPages)
+            {
+                auto splits = sc->getSplits();
+
+                // Find channel with mention in all opened channels
+                // TODO(zneix): Consider opening a channel if it's closed (?)
+                auto it = std::find_if(
+                    splits.begin(), splits.end(), [link](Split *split) {
+                        return split->getChannel()->getName() == link.value;
+                    });
+
+                if (it != splits.end())
+                {
+                    // Select SplitContainer and Split itself where mention message was sent
+                    // TODO(zneix): Try exploring ways of scrolling to a certain message as well
+                    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+                    nb.select(sc);
+
+                    Split *dankSplit = *it;
+                    sc->setSelected(dankSplit);
+                }
+            }
+        }
+        break;
 
         default:;
     }
