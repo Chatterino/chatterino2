@@ -789,8 +789,14 @@ void TwitchChannel::fetchDisplayName()
                                  Qt::CaseInsensitive) == 0)
             {
                 channel->setDisplayName(user.displayName);
+                channel->setLocalizedName(user.displayName);
             }
-            channel->setLocalizedName(user.displayName);
+            else
+            {
+                channel->setLocalizedName(QString("%1(%2)")
+                                              .arg(channel->getName())
+                                              .arg(user.displayName));
+            }
             channel->displayNameChanged.invoke();
         },
         [] {});
