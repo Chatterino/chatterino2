@@ -30,6 +30,7 @@ enum TokenType {
     CONTAINS = 27,
     STARTS_WITH = 28,
     ENDS_WITH = 29,
+    MATCH = 30,
     BINARY_END = 49,
 
     // unary operator
@@ -51,6 +52,7 @@ enum TokenType {
     STRING = 151,
     INT = 152,
     IDENTIFIER = 153,
+    REGULAR_EXPRESSION = 154,
 
     NONE = 200
 };
@@ -94,6 +96,21 @@ public:
 private:
     QVariant value_;
     TokenType type_;
+};
+
+class RegexExpression : public Expression
+{
+public:
+    RegexExpression(QString regex, bool caseInsensitive);
+
+    QVariant execute(const ContextMap &context) const override;
+    QString debug() const override;
+    QString filterString() const override;
+
+private:
+    QString regexString_;
+    bool caseInsensitive_;
+    QRegularExpression regex_;
 };
 
 using ExpressionList = std::vector<std::unique_ptr<Expression>>;

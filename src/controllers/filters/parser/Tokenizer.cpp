@@ -141,10 +141,18 @@ TokenType Tokenizer::tokenize(const QString &text)
         return TokenType::STARTS_WITH;
     else if (text == "endswith")
         return TokenType::ENDS_WITH;
+    else if (text == "match")
+        return TokenType::MATCH;
     else if (text == "!")
         return TokenType::NOT;
     else
     {
+        if ((text.startsWith("r\"") || text.startsWith("ri\"")) &&
+            text.back() == '"')
+        {
+            return TokenType::REGULAR_EXPRESSION;
+        }
+
         if (text.front() == '"' && text.back() == '"')
             return TokenType::STRING;
 
