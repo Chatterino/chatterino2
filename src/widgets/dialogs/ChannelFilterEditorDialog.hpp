@@ -4,7 +4,7 @@ namespace chatterino {
 class ChannelFilterEditorDialog : public QDialog
 {
 public:
-    ChannelFilterEditorDialog(QWidget *parent = nullptr);
+    ChannelFilterEditorDialog(QWidget *parent);
 
     const QString getFilter() const;
     const QString getTitle() const;
