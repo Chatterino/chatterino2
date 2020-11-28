@@ -51,6 +51,7 @@
 - Bugfix: Fix `:` emote completion menu ignoring emote capitalization (#1962)
 - Bugfix: Fix a bug that caused `Ignore page` to fall into an infinity loop with an empty pattern and regex enabled (#2125)
 - Bugfix: Fix a crash casued by FrankerFaceZ responding with invalid emote links (#2191)
+- Bugfix: Fix a freeze caused by ignored & replaced phrases followed by Twitch Emotes (#2231)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 
 ## 2.2.0
