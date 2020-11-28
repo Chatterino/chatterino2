@@ -356,7 +356,7 @@ void SharedMessageBuilder::addTextOrEmoji(const QString &string_)
 void SharedMessageBuilder::appendChannelName()
 {
     QString channelName("#" + this->channel->getName());
-    Link link(Link::Url, this->channel->getName() + "\n" + this->message().id);
+    Link link(Link::JumpToChannel, this->channel->getName());
 
     this->emplace<TextElement>(channelName, MessageElementFlag::ChannelName,
                                MessageColor::System)

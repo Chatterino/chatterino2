@@ -20,6 +20,7 @@ public:
         AutoModAllow,
         AutoModDeny,
         OpenAccountsPage,
+        JumpToChannel,
     };
 
     Link();
