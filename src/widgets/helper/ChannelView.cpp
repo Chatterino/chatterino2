@@ -2069,7 +2069,6 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                 {
                     // Select SplitContainer and Split itself where mention message was sent
                     // TODO(zneix): Try exploring ways of scrolling to a certain message as well
-                    auto &nb = getApp()->windows->getMainWindow().getNotebook();
                     nb.select(page);
 
                     Split *split = *it;
