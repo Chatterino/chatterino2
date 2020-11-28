@@ -738,6 +738,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             if (index >= pos)
             {
                 index += by;
+                item.end += by;
             }
         }
     };
