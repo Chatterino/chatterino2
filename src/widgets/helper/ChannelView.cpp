@@ -2045,12 +2045,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         break;
         case Link::JumpToChannel: {
             // Get all currently open pages
-            QSet<SplitContainer *> openPages;
+            QList<SplitContainer *> openPages;
 
             auto &nb = getApp()->windows->getMainWindow().getNotebook();
             for (int i = 0; i < nb.getPageCount(); ++i)
             {
-                openPages.insert(
+                openPages.push_back(
                     static_cast<SplitContainer *>(nb.getPageAt(i)));
             }
 
@@ -2074,6 +2074,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
 
                     Split *dankSplit = *it;
                     sc->setSelected(dankSplit);
+                    break;
                 }
             }
         }
