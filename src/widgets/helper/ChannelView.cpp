@@ -2054,11 +2054,11 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                     static_cast<SplitContainer *>(nb.getPageAt(i)));
             }
 
-            for (auto *sc : openPages)
+            for (auto *page : openPages)
             {
-                auto splits = sc->getSplits();
+                auto splits = page->getSplits();
 
-                // Find channel with mention in all opened channels
+                // Search for channel matching link in page/split container
                 // TODO(zneix): Consider opening a channel if it's closed (?)
                 auto it = std::find_if(
                     splits.begin(), splits.end(), [link](Split *split) {
@@ -2070,10 +2070,10 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                     // Select SplitContainer and Split itself where mention message was sent
                     // TODO(zneix): Try exploring ways of scrolling to a certain message as well
                     auto &nb = getApp()->windows->getMainWindow().getNotebook();
-                    nb.select(sc);
+                    nb.select(page);
 
-                    Split *dankSplit = *it;
-                    sc->setSelected(dankSplit);
+                    Split *split = *it;
+                    page->setSelected(split);
                     break;
                 }
             }
