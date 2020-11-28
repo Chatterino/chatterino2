@@ -144,6 +144,7 @@ public slots:
     void showViewerList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
+    void reconnect();
 };
 
 }  // namespace chatterino
