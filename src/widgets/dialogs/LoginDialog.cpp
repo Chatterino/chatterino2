@@ -245,7 +245,8 @@ void AdvancedLoginWidget::refreshButtons()
     }
 }
 
-LoginWidget::LoginWidget()
+LoginWidget::LoginWidget(QWidget *parent)
+    : QDialog(parent)
 {
 #ifdef USEWINSDK
     ::SetWindowPos(HWND(this->winId()), HWND_TOPMOST, 0, 0, 0, 0,
