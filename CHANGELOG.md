@@ -20,7 +20,6 @@
 - Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940)
 - Minor: Added customizable timeout buttons to the user info popup
 - Minor: Deprecate loading of "v1" window layouts. If you haven't updated Chatterino in more than 2 years, there's a chance you will lose your window layout.
-- Minor: Disable checking for updates on unsupported platforms (#1874)
 - Minor: User popup will now automatically display messages as they are received
 - Minor: Changed the English in two rate-limited system messages (#1878)
 - Minor: Added image for streamer mode in the user popup icon.
@@ -36,7 +35,6 @@
 - Minor: Flag all popup dialogs as actual dialogs so they get the relevant window manager hints (#1843, #2182, #2185, #2232, #2234)
 - Minor: Don't show update button for nightly builds on macOS and Linux, this was already the case for Windows (#2163, #2164)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
-- Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
 - Bugfix: Handle symlinks properly when saving commands & settings (#1856, #1908)
@@ -54,6 +52,10 @@
 - Bugfix: Fix a crash casued by FrankerFaceZ responding with invalid emote links (#2191)
 - Bugfix: Fix a freeze caused by ignored & replaced phrases followed by Twitch Emotes (#2231)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
+
+## 2.2.1
+- Minor: Disable checking for updates on unsupported platforms (#1874)
+- Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
 
 ## 2.2.0
 
