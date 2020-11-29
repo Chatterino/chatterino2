@@ -11,7 +11,7 @@
 - Minor: Added placeholder text for message text input box. (#2143, #2149)
 - Minor: Added support for FrankerFaceZ badges. (#2101, part of #1658)
 - Minor: Added a navigation list to the settings and reordered them.
-- Minor: Added a link to twitchemotes.com to conext menu when right-clicking Twitch emotes. (#2214)
+- Minor: Added a link to twitchemotes.com to context menu when right-clicking Twitch emotes. (#2214)
 - Minor: Improved viewer list window.
 - Minor: Added emote completion with `:` to the whispers channel (#2075)
 - Minor: Made the current channels emotes appear at the top of the emote picker popup. (#2057)
@@ -49,7 +49,7 @@
 - Bugfix: Fix bug preventing moderator actions when viewing a user card from the search window (#1089)
 - Bugfix: Fix `:` emote completion menu ignoring emote capitalization (#1962)
 - Bugfix: Fix a bug that caused `Ignore page` to fall into an infinity loop with an empty pattern and regex enabled (#2125)
-- Bugfix: Fix a crash casued by FrankerFaceZ responding with invalid emote links (#2191)
+- Bugfix: Fix a crash caused by FrankerFaceZ responding with invalid emote links (#2191)
 - Bugfix: Fix a freeze caused by ignored & replaced phrases followed by Twitch Emotes (#2231)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 
