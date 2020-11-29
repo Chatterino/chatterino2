@@ -11,7 +11,7 @@
 - Minor: Added placeholder text for message text input box. (#2143, #2149)
 - Minor: Added support for FrankerFaceZ badges. (#2101, part of #1658)
 - Minor: Added a navigation list to the settings and reordered them.
-- Minor: Added a link to twitchemotes.com to conext menu when right-clicking Twitch emotes. (#2214)
+- Minor: Added a link to twitchemotes.com to context menu when right-clicking Twitch emotes. (#2214)
 - Minor: Improved viewer list window.
 - Minor: Added emote completion with `:` to the whispers channel (#2075)
 - Minor: Made the current channels emotes appear at the top of the emote picker popup. (#2057)
