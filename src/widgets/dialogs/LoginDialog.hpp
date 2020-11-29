@@ -64,7 +64,7 @@ public:
 class LoginWidget : public QDialog
 {
 public:
-    LoginWidget();
+    LoginWidget(QWidget *parent);
 
 private:
     struct {
