@@ -53,6 +53,9 @@
 - Bugfix: Fix a freeze caused by ignored & replaced phrases followed by Twitch Emotes (#2231)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 
+## 2.2.2
+- Bugfix: Fix a potential crash related to channel point rewards (279a80b)
+
 ## 2.2.1
 - Minor: Disable checking for updates on unsupported platforms (#1874)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
