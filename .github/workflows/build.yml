@@ -104,7 +104,8 @@ jobs:
                 libgstreamer-plugins-base1.0-0 \
                 build-essential \
                 libgl1-mesa-dev \
-                libxcb-icccm4
+                libxcb-icccm4 \
+                libxcb-image0
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
