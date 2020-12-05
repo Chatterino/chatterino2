@@ -16,8 +16,14 @@ chatterino_dir=$(dirname "$script_dir")
 
 qmake_path=$(command -v qmake)
 
+echo "Running LDD on chatterino binary:"
 ldd ./bin/chatterino
+echo ""
+
+echo "Running make install in the appdir"
 make INSTALL_ROOT=appdir -j"$(nproc)" install ; find appdir/
+echo ""
+
 cp "$chatterino_dir"/resources/icon.png ./appdir/chatterino.png
 
 linuxdeployqt_path="linuxdeployqt-6-x86_64.AppImage"
