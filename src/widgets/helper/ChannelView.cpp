@@ -1463,7 +1463,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                     getSettings()->streamerModeHideLinkThumbnails &&
                     !((element->getThumbnail() == nullptr)
                           ? true
-                          : (element->getThumbnail()->url().string == nullptr));
+                          : element->getThumbnail()->url().string.isEmpty());
                 auto thumb =
                     shouldHideThumbnail
                         ? Image::fromPixmap(getResources().streamerMode)
