@@ -32,11 +32,12 @@ void LinkResolver::getLinkInfo(
                 auto statusCode = root.value("status").toInt();
                 QString response = QString();
                 QString linkString = url;
-                ImagePtr thumbnail =
-                    Image::fromUrl({root.value("thumbnail").toString()});
+                ImagePtr thumbnail = nullptr;
                 if (statusCode == 200)
                 {
                     response = root.value("tooltip").toString();
+                    thumbnail =
+                        Image::fromUrl({root.value("thumbnail").toString()});
                     if (getSettings()->unshortLinks)
                     {
                         linkString = root.value("link").toString();
