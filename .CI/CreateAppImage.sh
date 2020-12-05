@@ -31,6 +31,7 @@ if [ ! -f appimagetool-x86_64.AppImage ]; then
     wget -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
     chmod a+x appimagetool-x86_64.AppImage
 fi
+echo "Run LinuxDeployQT"
 ./"$linuxdeployqt_path" \
     appdir/usr/share/applications/*.desktop \
     -no-translations \
@@ -40,6 +41,8 @@ fi
 
 rm -rf appdir/home
 rm -f appdir/AppRun
+
+echo "Run AppImageTool"
 
 # shellcheck disable=SC2016
 echo '#!/bin/sh
