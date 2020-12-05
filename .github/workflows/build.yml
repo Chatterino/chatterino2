@@ -107,7 +107,8 @@ jobs:
                 libxcb-icccm4 \
                 libxcb-image0 \
                 libxcb-keysyms1 \
-                libxcb-render-util0
+                libxcb-render-util0 \
+                libxcb-xinerama0
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
