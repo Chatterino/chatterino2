@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+<!-- **Before opening a bug report, please check out the help page of the Chatterino wiki for possible common issues. https://wiki.chatterino.com/Help** -->
+
 **Describe the bug**
 <!-- A clear and concise description of what the bug is. -->
 
