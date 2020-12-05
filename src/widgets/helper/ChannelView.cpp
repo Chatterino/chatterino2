@@ -1458,13 +1458,16 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
             else
             {
-                const auto isHideLink =
+                const auto shouldHideThumbnail =
                     isInStreamerMode() &&
                     getSettings()->streamerModeHideLinkThumbnails &&
-                    !(element->getThumbnail()->url().string == nullptr);
+                    !((element->getThumbnail() == nullptr)
+                          ? true
+                          : (element->getThumbnail()->url().string == nullptr));
                 auto thumb =
-                    isHideLink ? Image::fromPixmap(getResources().streamerMode)
-                               : element->getThumbnail();
+                    shouldHideThumbnail
+                        ? Image::fromPixmap(getResources().streamerMode)
+                        : element->getThumbnail();
                 tooltipPreviewImage.setImage(std::move(thumb));
 
                 if (element->getThumbnailType() ==
