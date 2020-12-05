@@ -106,7 +106,8 @@ jobs:
                 libgl1-mesa-dev \
                 libxcb-icccm4 \
                 libxcb-image0 \
-                libxcb-keysyms1
+                libxcb-keysyms1 \
+                libxcb-render-util0
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
