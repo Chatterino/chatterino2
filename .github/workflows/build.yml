@@ -105,7 +105,8 @@ jobs:
                 build-essential \
                 libgl1-mesa-dev \
                 libxcb-icccm4 \
-                libxcb-image0
+                libxcb-image0 \
+                libxcb-keysyms1
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
