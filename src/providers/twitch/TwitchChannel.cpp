@@ -675,7 +675,13 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    NetworkRequest(Env::get().recentMessagesApiUrl.arg(this->getName()))
+    auto baseURL = Env::get().recentMessagesApiUrl.arg(this->getName());
+
+    auto url = QString("%1?limit=%2")
+                   .arg(baseURL)
+                   .arg(getSettings()->twitchMessageHistoryLimit);
+
+    NetworkRequest(url)
         .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
