@@ -53,7 +53,7 @@
 - Bugfix: Fix a bug that caused `Ignore page` to fall into an infinity loop with an empty pattern and regex enabled (#2125)
 - Bugfix: Fix a crash caused by FrankerFaceZ responding with invalid emote links (#2191)
 - Bugfix: Fix a freeze caused by ignored & replaced phrases followed by Twitch Emotes (#2231)
-- Bugfix: Fix a crash bug that occurred when moving splits across windows and closing the "parent tab"
+- Bugfix: Fix a crash bug that occurred when moving splits across windows and closing the "parent tab" (#2249, #2259)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 
 ## 2.2.2
