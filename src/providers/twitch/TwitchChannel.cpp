@@ -137,6 +137,7 @@ TwitchChannel::TwitchChannel(const QString &name,
                              FfzEmotes &ffz)
     : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
+    , nameOptions{name, name}
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
@@ -202,6 +203,7 @@ TwitchChannel::TwitchChannel(const QString &name,
 
 void TwitchChannel::initialize()
 {
+    this->fetchDisplayName();
     this->refreshChatters();
     this->refreshBadges();
 }
@@ -214,6 +216,26 @@ bool TwitchChannel::isEmpty() const
 bool TwitchChannel::canSendMessage() const
 {
     return !this->isEmpty();
+}
+
+const QString &TwitchChannel::getDisplayName() const
+{
+    return this->nameOptions.displayName;
+}
+
+void TwitchChannel::setDisplayName(const QString &name)
+{
+    this->nameOptions.displayName = name;
+}
+
+const QString &TwitchChannel::getLocalizedName() const
+{
+    return this->nameOptions.localizedName;
+}
+
+void TwitchChannel::setLocalizedName(const QString &name)
+{
+    this->nameOptions.localizedName = name;
 }
 
 void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
@@ -759,6 +781,32 @@ void TwitchChannel::refreshChatters()
                 return pair.first;
             })
         .execute();
+}
+
+void TwitchChannel::fetchDisplayName()
+{
+    getHelix()->getUserByName(
+        this->getName(),
+        [weak = weakOf<Channel>(this)](const auto &user) {
+            auto shared = weak.lock();
+            if (!shared)
+                return;
+            auto channel = static_cast<TwitchChannel *>(shared.get());
+            if (QString::compare(user.displayName, channel->getName(),
+                                 Qt::CaseInsensitive) == 0)
+            {
+                channel->setDisplayName(user.displayName);
+                channel->setLocalizedName(user.displayName);
+            }
+            else
+            {
+                channel->setLocalizedName(QString("%1(%2)")
+                                              .arg(channel->getName())
+                                              .arg(user.displayName));
+            }
+            channel->displayNameChanged.invoke();
+        },
+        [] {});
 }
 
 void TwitchChannel::refreshBadges()

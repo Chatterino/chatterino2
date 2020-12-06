@@ -788,7 +788,7 @@ void SplitContainer::refreshTabTitle()
 
     for (const auto &chatWidget : this->splits_)
     {
-        auto channelName = chatWidget->getChannel()->getName();
+        auto channelName = chatWidget->getChannel()->getLocalizedName();
         if (channelName.isEmpty())
         {
             continue;
