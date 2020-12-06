@@ -101,6 +101,8 @@ public:
                           bool editable = false);
     ColorButton *addColorButton(const QString &text, const QColor &color,
                                 pajlada::Settings::Setting<QString> &setting);
+    QSpinBox *addIntInput(const QString &text, IntSetting &setting, int min,
+                          int max, int step);
     void addNavigationSpacing();
 
     template <typename OnClick>

@@ -34,6 +34,7 @@
 - Minor: Allow highlights to be excluded from `/mentions`. Excluded highlights will not trigger tab highlights either. (#1793, #2036)
 - Minor: Flag all popup dialogs as actual dialogs so they get the relevant window manager hints (#1843, #2182, #2185, #2232, #2234)
 - Minor: Don't show update button for nightly builds on macOS and Linux, this was already the case for Windows (#2163, #2164)
+- Minor: Add a setting to limit the amount of historical messages loaded from the Recent Messages API (#2250, #2252)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
@@ -54,9 +55,11 @@
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 
 ## 2.2.2
+
 - Bugfix: Fix a potential crash related to channel point rewards (279a80b)
 
 ## 2.2.1
+
 - Minor: Disable checking for updates on unsupported platforms (#1874)
 - Bugfix: Fix bug preventing users from setting the highlight color of the second entry in the "User" highlights tab (#1898)
 
