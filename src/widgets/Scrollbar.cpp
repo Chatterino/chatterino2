@@ -1,6 +1,7 @@
 #include "widgets/Scrollbar.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -228,11 +229,12 @@ void Scrollbar::setCurrentValue(qreal value)
 
 void Scrollbar::printCurrentState(const QString &prefix) const
 {
-    qDebug() << prefix                                         //
-             << "Current value: " << this->getCurrentValue()   //
-             << ". Maximum: " << this->getMaximum()            //
-             << ". Minimum: " << this->getMinimum()            //
-             << ". Large change: " << this->getLargeChange();  //
+    qCDebug(chatterinoWidget)
+        << prefix                                         //
+        << "Current value: " << this->getCurrentValue()   //
+        << ". Maximum: " << this->getMaximum()            //
+        << ". Minimum: " << this->getMinimum()            //
+        << ". Large change: " << this->getLargeChange();  //
 }
 
 void Scrollbar::paintEvent(QPaintEvent *)

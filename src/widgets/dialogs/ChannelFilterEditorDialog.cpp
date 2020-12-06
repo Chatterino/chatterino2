@@ -94,7 +94,8 @@ ChannelFilterEditorDialog::ValueSpecifier::ValueSpecifier()
     this->valueInput_ = new QLineEdit;
     this->layout_ = new QHBoxLayout;
 
-    this->typeCombo_->insertItems(0, {"Text", "Number", "Variable"});
+    this->typeCombo_->insertItems(
+        0, {"Constant Text", "Constant Number", "Variable"});
     this->varCombo_->insertItems(0, filterparser::validIdentifiersMap.values());
 
     this->layout_->addWidget(this->typeCombo_);
@@ -102,7 +103,7 @@ ChannelFilterEditorDialog::ValueSpecifier::ValueSpecifier()
     this->layout_->addWidget(this->valueInput_, 1);
     this->layout_->setContentsMargins(5, 5, 5, 5);
 
-    QObject::connect(  //
+    QObject::connect(
         this->typeCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
         [this](int index) {
             const auto isNumber = (index == 1);
@@ -182,7 +183,7 @@ ChannelFilterEditorDialog::BinaryOperationSpecifier::BinaryOperationSpecifier(
     this->layout_->addLayout(this->right_->layout());
     this->layout_->setContentsMargins(5, 5, 5, 5);
 
-    QObject::connect(  //
+    QObject::connect(
         this->opCombo_, QOverload<int>::of(&QComboBox::currentIndexChanged),
         [this](int index) {
             // disable if set to "(nothing)"

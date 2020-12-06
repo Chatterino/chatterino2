@@ -69,7 +69,9 @@ private:
             // the cast here should absolutely not be necessary, but gcc still requires it
             this->conn_ =
                 QObject::connect((QObject *)other, &QObject::destroyed, qApp,
-                                 [this](QObject *) { this->set(nullptr); },
+                                 [this](QObject *) {
+                                     this->set(nullptr);
+                                 },
                                  Qt::DirectConnection);
         }
 

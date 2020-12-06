@@ -14,8 +14,10 @@
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/CombinePath.hpp"
 #include "util/Twitch.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 
 #include <QApplication>
@@ -113,8 +115,11 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                         }
                     }
                 } visitor;
-                boost::apply_visitor([&b](auto &&arg) { visitor(arg, b); },
-                                     variant);
+                boost::apply_visitor(
+                    [&b](auto &&arg) {
+                        visitor(arg, b);
+                    },
+                    variant);
             }  // emoji/text
         }
     }
@@ -209,7 +214,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)
-    this->items_.delayedItemsChanged.connect([this] {  //
+    this->items_.delayedItemsChanged.connect([this] {
         this->commandsSetting_->setValue(this->items_.raw());
     });
 
@@ -405,7 +410,9 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
-        auto *userPopup = new UserInfoPopup(getSettings()->autoCloseUserPopup);
+        auto *userPopup = new UserInfoPopup(
+            getSettings()->autoCloseUserPopup,
+            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
         userPopup->setData(words[1], channel);
         userPopup->move(QCursor::pos());
         userPopup->show();

@@ -11,7 +11,7 @@
 
 namespace chatterino {
 
-EditableModelView::EditableModelView(QAbstractTableModel *model)
+EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
     : tableView_(new QTableView(this))
     , model_(model)
 {
@@ -36,8 +36,9 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
     // add
     QPushButton *add = new QPushButton("Add");
     buttons->addWidget(add);
-    QObject::connect(add, &QPushButton::clicked,
-                     [this] { this->addButtonPressed.invoke(); });
+    QObject::connect(add, &QPushButton::clicked, [this] {
+        this->addButtonPressed.invoke();
+    });
 
     // remove
     QPushButton *remove = new QPushButton("Remove");
@@ -56,24 +57,30 @@ EditableModelView::EditableModelView(QAbstractTableModel *model)
             model_->removeRow(row);
     });
 
-    // move up
-    QPushButton *moveUp = new QPushButton("Move up");
-    buttons->addWidget(moveUp);
-    QObject::connect(moveUp, &QPushButton::clicked, this,
-                     [this] { this->moveRow(-1); });
+    if (movable)
+    {
+        // move up
+        QPushButton *moveUp = new QPushButton("Move up");
+        buttons->addWidget(moveUp);
+        QObject::connect(moveUp, &QPushButton::clicked, this, [this] {
+            this->moveRow(-1);
+        });
 
-    // move down
-    QPushButton *moveDown = new QPushButton("Move down");
-    buttons->addWidget(moveDown);
-    QObject::connect(moveDown, &QPushButton::clicked, this,
-                     [this] { this->moveRow(1); });
+        // move down
+        QPushButton *moveDown = new QPushButton("Move down");
+        buttons->addWidget(moveDown);
+        QObject::connect(moveDown, &QPushButton::clicked, this, [this] {
+            this->moveRow(1);
+        });
+    }
 
     buttons->addStretch();
 
     QObject::connect(this->model_, &QAbstractTableModel::rowsMoved, this,
                      [this](const QModelIndex &parent, int start, int end,
-                            const QModelIndex &destination,
-                            int row) { this->selectRow(row); });
+                            const QModelIndex &destination, int row) {
+                         this->selectRow(row);
+                     });
 
     // add tableview
     vbox->addWidget(this->tableView_);

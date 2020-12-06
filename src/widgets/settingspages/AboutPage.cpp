@@ -1,9 +1,11 @@
 #include "AboutPage.hpp"
 
 #include "common/Modes.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
+#include "widgets/BasePopup.hpp"
 #include "widgets/helper/SignalLabel.hpp"
 
 #include <QFormLayout>
@@ -165,7 +167,8 @@ AboutPage::AboutPage()
 
                 if (contributorParts.size() != 4)
                 {
-                    qDebug() << "Missing parts in line" << line;
+                    qCDebug(chatterinoWidget)
+                        << "Missing parts in line" << line;
                     continue;
                 }
 
@@ -230,15 +233,25 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
     auto *a = new QLabel("<a href=\"" + website + "\">" + name + "</a>");
     a->setOpenExternalLinks(true);
     auto *b = new QLabel("<a href=\"" + licenseLink + "\">show license</a>");
-    QObject::connect(b, &QLabel::linkActivated, [licenseLink] {
-        auto *edit = new QTextEdit;
+    QObject::connect(
+        b, &QLabel::linkActivated, [parent = this, name, licenseLink] {
+            auto window =
+                new BasePopup(BaseWindow::Flags::EnableCustomFrame, parent);
+            window->setWindowTitle("Chatterino - License for " + name);
+            window->setAttribute(Qt::WA_DeleteOnClose);
+            auto layout = new QVBoxLayout();
+            auto *edit = new QTextEdit;
 
-        QFile file(licenseLink);
-        file.open(QIODevice::ReadOnly);
-        edit->setText(file.readAll());
-        edit->setReadOnly(true);
-        edit->show();
-    });
+            QFile file(licenseLink);
+            file.open(QIODevice::ReadOnly);
+            edit->setText(file.readAll());
+            edit->setReadOnly(true);
+
+            layout->addWidget(edit);
+
+            window->getLayoutContainer()->setLayout(layout);
+            window->show();
+        });
 
     form->addRow(a, b);
 }

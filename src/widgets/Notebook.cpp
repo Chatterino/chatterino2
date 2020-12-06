@@ -1,6 +1,7 @@
 #include "widgets/Notebook.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -153,7 +154,7 @@ void Notebook::select(QWidget *page)
             }
             else
             {
-                qDebug()
+                qCDebug(chatterinoWidget)
                     << "Notebook: selected child of page doesn't exist anymore";
             }
         }
@@ -181,14 +182,17 @@ void Notebook::select(QWidget *page)
 bool Notebook::containsPage(QWidget *page)
 {
     return std::any_of(this->items_.begin(), this->items_.end(),
-                       [page](const auto &item) { return item.page == page; });
+                       [page](const auto &item) {
+                           return item.page == page;
+                       });
 }
 
 Notebook::Item &Notebook::findItem(QWidget *page)
 {
-    auto it =
-        std::find_if(this->items_.begin(), this->items_.end(),
-                     [page](const auto &item) { return page == item.page; });
+    auto it = std::find_if(this->items_.begin(), this->items_.end(),
+                           [page](const auto &item) {
+                               return page == item.page;
+                           });
     assert(it != this->items_.end());
     return *it;
 }
@@ -617,7 +621,9 @@ SplitNotebook::SplitNotebook(Window *parent)
     : Notebook(parent)
 {
     this->connect(this->getAddButton(), &NotebookButton::leftClicked, [this]() {
-        QTimer::singleShot(80, this, [this] { this->addPage(true); });
+        QTimer::singleShot(80, this, [this] {
+            this->addPage(true);
+        });
     });
 
     // add custom buttons if they are not in the parent window frame
@@ -646,19 +652,24 @@ void SplitNotebook::addCustomButtons()
     settingsBtn->setVisible(!getSettings()->hidePreferencesButton.getValue());
 
     getSettings()->hidePreferencesButton.connect(
-        [settingsBtn](bool hide, auto) { settingsBtn->setVisible(!hide); },
+        [settingsBtn](bool hide, auto) {
+            settingsBtn->setVisible(!hide);
+        },
         this->connections_);
 
     settingsBtn->setIcon(NotebookButton::Settings);
 
-    QObject::connect(settingsBtn, &NotebookButton::leftClicked,
-                     [] { getApp()->windows->showSettingsDialog(); });
+    QObject::connect(settingsBtn, &NotebookButton::leftClicked, [this] {
+        getApp()->windows->showSettingsDialog(this);
+    });
 
     // account
     auto userBtn = this->addCustomButton();
     userBtn->setVisible(!getSettings()->hideUserButton.getValue());
     getSettings()->hideUserButton.connect(
-        [userBtn](bool hide, auto) { userBtn->setVisible(!hide); },
+        [userBtn](bool hide, auto) {
+            userBtn->setVisible(!hide);
+        },
         this->connections_);
 
     userBtn->setIcon(NotebookButton::User);

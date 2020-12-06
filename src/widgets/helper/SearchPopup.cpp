@@ -52,7 +52,8 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
     return channel;
 }
 
-SearchPopup::SearchPopup()
+SearchPopup::SearchPopup(QWidget *parent)
+    : BasePopup({}, parent)
 {
     this->initLayout();
     this->resize(400, 600);
@@ -70,6 +71,7 @@ void SearchPopup::setChannelFilters(FilterSetPtr filters)
 
 void SearchPopup::setChannel(const ChannelPtr &channel)
 {
+    this->channelView_->setSourceChannel(channel);
     this->channelName_ = channel->getName();
     this->snapshot_ = channel->getMessageSnapshot();
     this->search();
@@ -108,7 +110,9 @@ void SearchPopup::initLayout()
                 this->searchInput_ = new QLineEdit(this);
                 layout2->addWidget(this->searchInput_);
                 QObject::connect(this->searchInput_, &QLineEdit::returnPressed,
-                                 [this] { this->search(); });
+                                 [this] {
+                                     this->search();
+                                 });
             }
 
             // SEARCH BUTTON
@@ -116,8 +120,9 @@ void SearchPopup::initLayout()
                 QPushButton *searchButton = new QPushButton(this);
                 searchButton->setText("Search");
                 layout2->addWidget(searchButton);
-                QObject::connect(searchButton, &QPushButton::clicked,
-                                 [this] { this->search(); });
+                QObject::connect(searchButton, &QPushButton::clicked, [this] {
+                    this->search();
+                });
             }
 
             layout1->addLayout(layout2);

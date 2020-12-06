@@ -1,6 +1,7 @@
 #include "IrcMessageHandler.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
@@ -261,11 +262,12 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             builder.triggerHighlights();
         }
 
-        auto highlighted = msg->flags.has(MessageFlag::Highlighted);
+        const auto highlighted = msg->flags.has(MessageFlag::Highlighted);
+        const auto showInMentions = msg->flags.has(MessageFlag::ShowInMentions);
 
         if (!isSub)
         {
-            if (highlighted)
+            if (highlighted && showInMentions)
             {
                 server.mentionsChannel->addMessage(msg);
             }
@@ -360,8 +362,9 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        qDebug() << "[IrcMessageHandler:handleClearChatMessage] Twitch channel"
-                 << chanName << "not found";
+        qCDebug(chatterinoTwitch)
+            << "[IrcMessageHandler:handleClearChatMessage] Twitch channel"
+            << chanName << "not found";
         return;
     }
 
@@ -426,9 +429,10 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        qDebug() << "[IrcMessageHandler:handleClearMessageMessage] Twitch "
-                    "channel"
-                 << chanName << "not found";
+        qCDebug(chatterinoTwitch)
+            << "[IrcMessageHandler:handleClearMessageMessage] Twitch "
+               "channel"
+            << chanName << "not found";
         return;
     }
 
@@ -701,7 +705,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             // channels
             app->twitch.server->forEachChannelAndSpecialChannels(
                 [msg](const auto &c) {
-                    c->addMessage(msg);  //
+                    c->addMessage(msg);
                 });
 
             return;
@@ -711,8 +715,9 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 
         if (channel->isEmpty())
         {
-            qDebug() << "[IrcManager:handleNoticeMessage] Channel"
-                     << channelName << "not found in channel manager";
+            qCDebug(chatterinoTwitch)
+                << "[IrcManager:handleNoticeMessage] Channel" << channelName
+                << "not found in channel manager";
             return;
         }
 

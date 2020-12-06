@@ -12,6 +12,7 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
 #include "singletons/Emotes.hpp"
@@ -38,13 +39,16 @@ namespace detail {
             DebugCount::increase("animated images");
 
             this->gifTimerConnection_ =
-                getApp()->emotes->gifTimer.signal.connect(
-                    [this] { this->advance(); });
+                getApp()->emotes->gifTimer.signal.connect([this] {
+                    this->advance();
+                });
         }
 
-        auto totalLength = std::accumulate(
-            this->items_.begin(), this->items_.end(), 0UL,
-            [](auto init, auto &&frame) { return init + frame.duration; });
+        auto totalLength =
+            std::accumulate(this->items_.begin(), this->items_.end(), 0UL,
+                            [](auto init, auto &&frame) {
+                                return init + frame.duration;
+                            });
 
         if (totalLength == 0)
         {
@@ -127,8 +131,9 @@ namespace detail {
 
         if (reader.imageCount() == 0)
         {
-            qDebug() << "Error while reading image" << url.string << ": '"
-                     << reader.errorString() << "'";
+            qCDebug(chatterinoImage)
+                << "Error while reading image" << url.string << ": '"
+                << reader.errorString() << "'";
             return frames;
         }
 
@@ -146,8 +151,9 @@ namespace detail {
 
         if (frames.size() == 0)
         {
-            qDebug() << "Error while reading image" << url.string << ": '"
-                     << reader.errorString() << "'";
+            qCDebug(chatterinoImage)
+                << "Error while reading image" << url.string << ": '"
+                << reader.errorString() << "'";
         }
 
         return frames;
@@ -222,7 +228,9 @@ Image::~Image()
     // run destructor of Frames in gui thread
     if (!isGuiThread())
     {
-        postToThread([frames = this->frames_.release()]() { delete frames; });
+        postToThread([frames = this->frames_.release()]() {
+            delete frames;
+        });
     }
 }
 

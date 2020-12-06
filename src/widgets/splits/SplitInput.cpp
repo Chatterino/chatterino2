@@ -43,7 +43,9 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     // misc
     this->installKeyPressedEvent();
-    this->ui_.textEdit->focusLost.connect([this] { this->hideColonMenu(); });
+    this->ui_.textEdit->focusLost.connect([this] {
+        this->hideColonMenu();
+    });
     this->scaleChangedEvent(this->scale());
 }
 
@@ -90,8 +92,9 @@ void SplitInput::initLayout()
     }));
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked,
-                     [=] { this->openEmotePopup(); });
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [=] {
+        this->openEmotePopup();
+    });
 
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
@@ -599,7 +602,7 @@ void SplitInput::editTextChanged()
     QString text = this->ui_.textEdit->toPlainText();
 
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
-        this->split_->getChannel()->isTwitchChannel())  //
+        this->split_->getChannel()->isTwitchChannel())
     {
         QString lastUser = app->twitch.server->lastUserThatWhisperedMe.get();
         if (!lastUser.isEmpty())

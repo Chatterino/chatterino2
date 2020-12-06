@@ -390,7 +390,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                     // ends in same line
                     if (selection.selectionMax.messageIndex == messageIndex &&
                         line.endCharIndex >
-                            /*=*/selection.selectionMax.charIndex)  //
+                            /*=*/selection.selectionMax.charIndex)
                     {
                         returnAfter = true;
                         index = line.startCharIndex;

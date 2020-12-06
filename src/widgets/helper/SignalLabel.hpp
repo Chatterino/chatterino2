@@ -18,8 +18,8 @@ public:
 signals:
     void mouseDoubleClick(QMouseEvent *ev);
 
-    void mouseDown();
-    void mouseUp();
+    void leftMouseDown();
+    void leftMouseUp();
     void mouseMove(QMouseEvent *event);
 
 protected:

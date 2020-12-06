@@ -31,6 +31,7 @@
 #include <QJsonValue>
 #include <QThread>
 #include <QTimer>
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -136,6 +137,7 @@ TwitchChannel::TwitchChannel(const QString &name,
                              FfzEmotes &ffz)
     : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
+    , nameOptions{name, name}
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
@@ -148,7 +150,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     , mod_(false)
     , titleRefreshedTime_(QTime::currentTime().addSecs(-TITLE_REFRESH_PERIOD))
 {
-    qDebug() << "[TwitchChannel" << name << "] Opened";
+    qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
     this->liveStatusChanged.connect([this]() {
         if (this->isLive() == 1)
@@ -156,15 +158,18 @@ TwitchChannel::TwitchChannel(const QString &name,
         }
     });
 
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
-                         [=] { this->setMod(false); });
+    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [=] {
+        this->setMod(false);
+    });
 
     // pubsub
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
-                         [=] { this->refreshPubsub(); });
-
+    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [=] {
+        this->refreshPubsub();
+    });
     this->refreshPubsub();
-    this->userStateChanged.connect([this] { this->refreshPubsub(); });
+    this->userStateChanged.connect([this] {
+        this->refreshPubsub();
+    });
 
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
@@ -178,8 +183,10 @@ TwitchChannel::TwitchChannel(const QString &name,
     });
 
     // timers
-    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout,
-                     [=] { this->refreshLiveStatus(); });
+    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [=] {
+        this->refreshLiveStatus();
+    });
+
     this->liveStatusTimer_.start(60 * 1000);
 
     // debugging
@@ -204,6 +211,26 @@ bool TwitchChannel::isEmpty() const
 bool TwitchChannel::canSendMessage() const
 {
     return !this->isEmpty();
+}
+
+const QString &TwitchChannel::getDisplayName() const
+{
+    return this->nameOptions.displayName;
+}
+
+void TwitchChannel::setDisplayName(const QString &name)
+{
+    this->nameOptions.displayName = name;
+}
+
+const QString &TwitchChannel::getLocalizedName() const
+{
+    return this->nameOptions.localizedName;
+}
+
+void TwitchChannel::setLocalizedName(const QString &name)
+{
+    this->nameOptions.localizedName = name;
 }
 
 void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
@@ -296,8 +323,8 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    qDebug() << "[TwitchChannel" << this->getName()
-             << "] Send message:" << message;
+    qCDebug(chatterinoTwitch)
+        << "[TwitchChannel" << this->getName() << "] Send message:" << message;
 
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
@@ -325,7 +352,7 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (messageSent)
     {
-        qDebug() << "sent";
+        qCDebug(chatterinoTwitch) << "sent";
         this->lastSentMessage_ = parsedMessage;
     }
 }
@@ -584,8 +611,8 @@ void TwitchChannel::refreshLiveStatus()
 
     if (roomID.isEmpty())
     {
-        qDebug() << "[TwitchChannel" << this->getName()
-                 << "] Refreshing live status (Missing ID)";
+        qCDebug(chatterinoTwitch) << "[TwitchChannel" << this->getName()
+                                  << "] Refreshing live status (Missing ID)";
         this->setLive(false);
         return;
     }
@@ -665,7 +692,13 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    NetworkRequest(Env::get().recentMessagesApiUrl.arg(this->getName()))
+    auto baseURL = Env::get().recentMessagesApiUrl.arg(this->getName());
+
+    auto url = QString("%1?limit=%2")
+                   .arg(baseURL)
+                   .arg(getSettings()->twitchMessageHistoryLimit);
+
+    NetworkRequest(url)
         .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
@@ -723,19 +756,24 @@ void TwitchChannel::fetchDisplayName()
             if (QString::compare(user.displayName, channel->getName(),
                                  Qt::CaseInsensitive) == 0)
             {
-                channel->addRecentChatter(user.displayName);
+                channel->setDisplayName(user.displayName);
+                channel->setLocalizedName(user.displayName);
             }
             else
             {
-                channel->addRecentChatter(channel->getName());
+                channel->setLocalizedName(QString("%1(%2)")
+                                              .arg(channel->getName())
+                                              .arg(user.displayName));
             }
+            channel->addRecentChatter(channel->getDisplayName());
+            channel->displayNameChanged.invoke();
         },
         [weak = weakOf<Channel>(this)] {
             auto shared = weak.lock();
             if (!shared)
                 return;
             auto channel = static_cast<TwitchChannel *>(shared.get());
-            channel->addRecentChatter(channel->getName());
+            channel->addRecentChatter(channel->getDisplayName());
         });
 }
 
@@ -893,7 +931,8 @@ boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
         int bitAmount = amount.toInt(&ok);
         if (!ok)
         {
-            qDebug() << "Error parsing bit amount in cheerEmote";
+            qCDebug(chatterinoTwitch)
+                << "Error parsing bit amount in cheerEmote";
         }
         for (const auto &emote : set.cheerEmotes)
         {

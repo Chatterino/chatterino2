@@ -23,7 +23,6 @@
 
 #include <QCheckBox>
 #include <QDesktopServices>
-#include <QLabel>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
@@ -105,13 +104,22 @@ namespace {
 
 }  // namespace
 
-UserInfoPopup::UserInfoPopup(bool closeAutomatically)
-    : BaseWindow(
-          closeAutomatically
-              ? FlagsEnum<BaseWindow::Flags>{BaseWindow::EnableCustomFrame,
-                                             BaseWindow::Frameless,
-                                             BaseWindow::FramelessDraggable}
-              : BaseWindow::EnableCustomFrame)
+#ifdef Q_OS_LINUX
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::Dialog,
+                                                BaseWindow::EnableCustomFrame};
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
+    BaseWindow::EnableCustomFrame};
+#else
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::EnableCustomFrame};
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
+    BaseWindow::EnableCustomFrame, BaseWindow::Frameless,
+    BaseWindow::FramelessDraggable};
+#endif
+
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
+    : BaseWindow(closeAutomatically ? userInfoPopupFlagsCloseAutomatically
+                                    : userInfoPopupFlags,
+                 parent)
     , hack_(new bool)
 {
     this->setWindowTitle("Usercard");
@@ -123,7 +131,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
         this->setAttribute(Qt::WA_DeleteOnClose);
 
     // Close the popup when Escape is pressed
-    createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
+    createWindowShortcut(this, "Escape", [this] {
+        this->deleteLater();
+    });
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
@@ -164,10 +174,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED.arg(""))
                 .assign(&this->ui_.createdDateLabel);
-            vbox.emplace<Line>(true);
-            vbox.emplace<Label>("")
-                .assign(&this->ui_.followageSubageLabel)
-                ->setMinimumSize(this->minimumSizeHint());
+            vbox.emplace<Label>("").assign(&this->ui_.followageLabel);
+            vbox.emplace<Label>("").assign(&this->ui_.subageLabel);
         }
     }
 
@@ -207,8 +215,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
                                       "/viewercard/" + this->userName_);
         });
 
-        QObject::connect(refresh.getElement(), &Button::leftClicked,
-                         [this] { this->updateLatestMessages(); });
+        QObject::connect(refresh.getElement(), &Button::leftClicked, [this] {
+            this->updateLatestMessages();
+        });
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/mod " + this->userName_);
         });
@@ -361,7 +370,7 @@ void UserInfoPopup::installEvents()
             auto currentUser = getApp()->accounts->twitch.getCurrent();
 
             const auto reenableFollowCheckbox = [this] {
-                this->ui_.follow->setEnabled(true);  //
+                this->ui_.follow->setEnabled(true);
             };
 
             if (!this->ui_.follow->isEnabled())
@@ -496,7 +505,9 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     this->userStateChanged_.invoke();
 
     this->updateLatestMessages();
-    QTimer::singleShot(1, this, [this] { this->setStayInScreenRect(true); });
+    QTimer::singleShot(1, this, [this] {
+        this->setStayInScreenRect(true);
+    });
 }
 
 void UserInfoPopup::updateLatestMessages()
@@ -580,6 +591,8 @@ void UserInfoPopup::updateUserData()
                 {
                     return;
                 }
+                this->ui_.nameLabel->setText(user.displayName);
+                this->setWindowTitle(TEXT_TITLE.arg(user.displayName));
                 this->ui_.createdDateLabel->setText(
                     TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
             },
@@ -667,34 +680,33 @@ void UserInfoPopup::updateUserData()
                     return;
                 }
 
-                QString labelText;
-
                 if (!subageInfo.followingSince.isEmpty())
                 {
                     QDateTime followedAt = QDateTime::fromString(
                         subageInfo.followingSince, Qt::ISODate);
                     QString followingSince = followedAt.toString("yyyy-MM-dd");
-                    labelText = "Following since " + followingSince;
+                    this->ui_.followageLabel->setText("❤ Following since " +
+                                                      followingSince);
                 }
 
                 if (subageInfo.isSubHidden)
                 {
-                    labelText += "\nSubscribtion status hidden";
+                    this->ui_.subageLabel->setText(
+                        "Subscription status hidden");
                 }
-                if (subageInfo.isSubbed)
+                else if (subageInfo.isSubbed)
                 {
-                    labelText += QString("\nTier %1 - Subscribed for %2 months")
-                                     .arg(subageInfo.subTier)
-                                     .arg(subageInfo.totalSubMonths);
+                    this->ui_.subageLabel->setText(
+                        QString("★ Tier %1 - Subscribed for %2 months")
+                            .arg(subageInfo.subTier)
+                            .arg(subageInfo.totalSubMonths));
                 }
                 else if (subageInfo.totalSubMonths)
                 {
-                    labelText +=
-                        QString("\nPreviously subscribed for %1 months")
-                            .arg(subageInfo.totalSubMonths);
+                    this->ui_.subageLabel->setText(
+                        QString("★ Previously subscribed for %1 months")
+                            .arg(subageInfo.totalSubMonths));
                 }
-
-                this->ui_.followageSubageLabel->setText(labelText);
             },
             [] {});
     };
@@ -818,9 +830,10 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             const auto pair =
                 std::make_pair(Action::Timeout, calculateTimeoutDuration(item));
 
-            QObject::connect(
-                a.getElement(), &EffectLabel2::leftClicked,
-                [this, pair] { this->buttonClicked.invoke(pair); });
+            QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
+                             [this, pair] {
+                                 this->buttonClicked.invoke(pair);
+                             });
 
             //auto addTimeouts = [&](const QString &title_,
             //                       const std::vector<std::pair<QString, int>> &items) {

@@ -8,6 +8,18 @@
 # from lib/boost.pri
 #  - BOOST_DIRECTORY (C:\local\boost\ by default) (Windows only)
 
+CCACHE_BIN = $$system(which ccache)
+!isEmpty(CCACHE_BIN) {
+  load(ccache)
+  CONFIG+=ccache
+}
+
+MINIMUM_REQUIRED_QT_VERSION = 5.12.0
+
+!versionAtLeast(QT_VERSION, $$MINIMUM_REQUIRED_QT_VERSION) {
+    error("You're trying to compile with Qt $$QT_VERSION, but minimum required Qt version is $$MINIMUM_REQUIRED_QT_VERSION")
+}
+
 QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util
@@ -69,6 +81,8 @@ macx {
 CONFIG(debug, debug|release) {
     DEFINES += C_DEBUG
     DEFINES += QT_DEBUG
+} else {
+    DEFINES += NDEBUG
 }
 
 # Submodules
@@ -125,6 +139,7 @@ SOURCES += \
     src/common/UsernameSet.cpp \
     src/common/Version.cpp \
     src/common/WindowDescriptors.cpp \
+    src/common/QLogging.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
@@ -170,6 +185,7 @@ SOURCES += \
     src/providers/chatterino/ChatterinoBadges.cpp \
     src/providers/colors/ColorProvider.cpp \
     src/providers/emoji/Emojis.cpp \
+    src/providers/ffz/FfzBadges.cpp \
     src/providers/ffz/FfzEmotes.cpp \
     src/providers/irc/AbstractIrcServer.cpp \
     src/providers/irc/Irc2.cpp \
@@ -224,6 +240,7 @@ SOURCES += \
     src/util/IncognitoBrowser.cpp \
     src/util/InitUpdateButton.cpp \
     src/util/JsonQuery.cpp \
+    src/util/LayoutHelper.cpp \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamerMode.cpp \
@@ -283,6 +300,7 @@ SOURCES += \
     src/widgets/settingspages/ExternalToolsPage.cpp \
     src/widgets/settingspages/FiltersPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
+    src/widgets/settingspages/GeneralPageView.cpp \
     src/widgets/settingspages/HighlightingPage.cpp \
     src/widgets/settingspages/IgnoresPage.cpp \
     src/widgets/settingspages/KeyboardSettingsPage.cpp \
@@ -337,6 +355,7 @@ HEADERS += \
     src/common/UniqueAccess.hpp \
     src/common/UsernameSet.hpp \
     src/common/Version.hpp \
+    src/common/QLogging.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
     src/controllers/accounts/AccountModel.hpp \
@@ -394,6 +413,7 @@ HEADERS += \
     src/providers/chatterino/ChatterinoBadges.hpp \
     src/providers/colors/ColorProvider.hpp \
     src/providers/emoji/Emojis.hpp \
+    src/providers/ffz/FfzBadges.hpp \
     src/providers/ffz/FfzEmotes.hpp \
     src/providers/irc/AbstractIrcServer.hpp \
     src/providers/irc/Irc2.hpp \
@@ -406,6 +426,7 @@ HEADERS += \
     src/providers/IvrApi.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/ChannelPointReward.hpp \
+    src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/api/Helix.hpp \
     src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/EmoteValue.hpp \
@@ -534,6 +555,7 @@ HEADERS += \
     src/widgets/settingspages/ExternalToolsPage.hpp \
     src/widgets/settingspages/FiltersPage.hpp \
     src/widgets/settingspages/GeneralPage.hpp \
+    src/widgets/settingspages/GeneralPageView.hpp \
     src/widgets/settingspages/HighlightingPage.hpp \
     src/widgets/settingspages/IgnoresPage.hpp \
     src/widgets/settingspages/KeyboardSettingsPage.hpp \
@@ -607,6 +629,7 @@ CONFIG(debug, debug|release) {
     message("Building Chatterino2 DEBUG")
 } else {
     message("Building Chatterino2 RELEASE")
+    DEFINES += DEBUG_OFF
 }
 
 message("Injected git values: $$git_commit ($$git_release) $$git_hash")

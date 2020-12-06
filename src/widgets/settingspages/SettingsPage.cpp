@@ -96,7 +96,7 @@ QCheckBox *SettingsPage::createCheckBox(
     // update when setting changes
     setting.connect(
         [checkbox](const bool &value, auto) {
-            checkbox->setChecked(value);  //
+            checkbox->setChecked(value);
         },
         this->managedConnections_);
 
@@ -120,12 +120,15 @@ QComboBox *SettingsPage::createComboBox(
 
     // update when setting changes
     setting.connect(
-        [combo](const QString &value, auto) { combo->setCurrentText(value); },
+        [combo](const QString &value, auto) {
+            combo->setCurrentText(value);
+        },
         this->managedConnections_);
 
-    QObject::connect(
-        combo, &QComboBox::currentTextChanged,
-        [&setting](const QString &newValue) { setting = newValue; });
+    QObject::connect(combo, &QComboBox::currentTextChanged,
+                     [&setting](const QString &newValue) {
+                         setting = newValue;
+                     });
 
     return combo;
 }
@@ -138,9 +141,10 @@ QLineEdit *SettingsPage::createLineEdit(
     edit->setText(setting);
 
     // update when setting changes
-    QObject::connect(
-        edit, &QLineEdit::textChanged,
-        [&setting](const QString &newValue) { setting = newValue; });
+    QObject::connect(edit, &QLineEdit::textChanged,
+                     [&setting](const QString &newValue) {
+                         setting = newValue;
+                     });
 
     return edit;
 }
@@ -153,9 +157,13 @@ QSpinBox *SettingsPage::createSpinBox(pajlada::Settings::Setting<int> &setting,
     w->setMinimum(min);
     w->setMaximum(max);
 
-    setting.connect([w](const int &value, auto) { w->setValue(value); });
+    setting.connect([w](const int &value, auto) {
+        w->setValue(value);
+    });
     QObject::connect(w, QOverload<int>::of(&QSpinBox::valueChanged),
-                     [&setting](int value) { setting.setValue(value); });
+                     [&setting](int value) {
+                         setting.setValue(value);
+                     });
 
     return w;
 }

@@ -26,7 +26,8 @@ static const QRegularExpression tokenRegex(
     QString("\\\"((\\\\\")|[^\\\"])*\\\"|") +                 // String literal
     QString("[\\w\\.]+|") +                                   // Identifier or reserved keyword
     QString("(<=?|>=?|!=?|==|\\|\\||&&|\\+|-|\\*|\\/|%)+|") + // Operator
-    QString("[\\(\\)]")                                       // Parentheses
+    QString("[\\(\\)]|") +                                    // Parentheses
+    QString("[{},]")                                          // List
 );
 // clang-format on
 

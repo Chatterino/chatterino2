@@ -35,6 +35,12 @@ QString tokenTypeToInfoString(TokenType type)
             return "<left parenthesis>";
         case RP:
             return "<right parenthesis>";
+        case LIST_START:
+            return "<list start>";
+        case LIST_END:
+            return "<list end>";
+        case COMMA:
+            return "<comma>";
         case PLUS:
             return "<plus>";
         case MINUS:
@@ -115,6 +121,62 @@ QString ValueExpression::filterString() const
         default:
             return "";
     }
+}
+
+// ListExpression
+
+ListExpression::ListExpression(ExpressionList list)
+    : list_(std::move(list)){};
+
+QVariant ListExpression::execute(const ContextMap &context) const
+{
+    QList<QVariant> results;
+    bool allStrings = true;
+    for (const auto &exp : this->list_)
+    {
+        auto res = exp->execute(context);
+        if (allStrings && res.type() != QVariant::Type::String)
+        {
+            allStrings = false;
+        }
+        results.append(res);
+    }
+
+    // if everything is a string return a QStringList for case-insensitive comparison
+    if (allStrings)
+    {
+        QStringList strings;
+        strings.reserve(results.size());
+        for (const auto &val : results)
+        {
+            strings << val.toString();
+        }
+        return strings;
+    }
+    else
+    {
+        return results;
+    }
+}
+
+QString ListExpression::debug() const
+{
+    QStringList debugs;
+    for (const auto &exp : this->list_)
+    {
+        debugs.append(exp->debug());
+    }
+    return QString("{%1}").arg(debugs.join(", "));
+}
+
+QString ListExpression::filterString() const
+{
+    QStringList strings;
+    for (const auto &exp : this->list_)
+    {
+        strings.append(QString("(%1)").arg(exp->filterString()));
+    }
+    return QString("{%1}").arg(strings.join(", "));
 }
 
 // BinaryOperation
@@ -212,6 +274,11 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 return left.toMap().contains(right.toString());
             }
 
+            if (left.type() == QVariant::Type::List)
+            {
+                return left.toList().contains(right);
+            }
+
             if (left.canConvert(QMetaType::QString) &&
                 right.canConvert(QMetaType::QString))
             {
@@ -228,6 +295,11 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 return !list.isEmpty() &&
                        list.first().compare(right.toString(),
                                             Qt::CaseInsensitive);
+            }
+
+            if (left.type() == QVariant::Type::List)
+            {
+                return left.toList().startsWith(right);
             }
 
             if (left.canConvert(QMetaType::QString) &&
@@ -247,6 +319,11 @@ QVariant BinaryOperation::execute(const ContextMap &context) const
                 return !list.isEmpty() &&
                        list.last().compare(right.toString(),
                                            Qt::CaseInsensitive);
+            }
+
+            if (left.type() == QVariant::Type::List)
+            {
+                return left.toList().endsWith(right);
             }
 
             if (left.canConvert(QMetaType::QString) &&

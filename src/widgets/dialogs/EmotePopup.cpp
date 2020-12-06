@@ -132,7 +132,9 @@ EmotePopup::EmotePopup(QWidget *parent)
     layout->addWidget(notebook);
     layout->setMargin(0);
 
-    auto clicked = [this](const Link &link) { this->linkClicked.invoke(link); };
+    auto clicked = [this](const Link &link) {
+        this->linkClicked.invoke(link);
+    };
 
     auto makeView = [&](QString tabTitle) {
         auto view = new ChannelView();
@@ -154,9 +156,12 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     this->loadEmojis();
 
-    createWindowShortcut(this, "CTRL+Tab", [=] { notebook->selectNextTab(); });
-    createWindowShortcut(this, "CTRL+Shift+Tab",
-                         [=] { notebook->selectPreviousTab(); });
+    createWindowShortcut(this, "CTRL+Tab", [=] {
+        notebook->selectNextTab();
+    });
+    createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
+        notebook->selectPreviousTab();
+    });
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)

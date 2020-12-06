@@ -1,5 +1,3 @@
-#pragma once
-
 #ifdef __cplusplus
 #    include <irccommand.h>
 #    include <ircconnection.h>
@@ -88,6 +86,7 @@
 #    include <QShortcut>
 #    include <QSizePolicy>
 #    include <QSlider>
+#    include <QSpinBox>
 #    include <QStackedLayout>
 #    include <QStandardPaths>
 #    include <QString>

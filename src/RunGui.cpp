@@ -12,6 +12,7 @@
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
 #include "common/NetworkManager.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -144,7 +145,7 @@ namespace {
     // improved in the future.
     void clearCache(const QDir &dir)
     {
-        qDebug() << "[Cache] cleared cache";
+        qCDebug(chatterinoCache) << "[Cache] cleared cache";
 
         QStringList toBeRemoved;
 
@@ -164,8 +165,9 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     initResources();
     initSignalHandler();
 
-    settings.restartOnCrash.connect(
-        [](const bool &value) { restartOnSignal = value; });
+    settings.restartOnCrash.connect([](const bool &value) {
+        restartOnSignal = value;
+    });
 
     auto thread = std::thread([dir = paths.miscDirectory] {
         {
@@ -186,7 +188,9 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
 
     // Clear the cache 1 minute after start.
     QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory()] {
-        QtConcurrent::run([cachePath]() { clearCache(cachePath); });
+        QtConcurrent::run([cachePath]() {
+            clearCache(cachePath);
+        });
     });
 
     chatterino::NetworkManager::init();

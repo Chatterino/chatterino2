@@ -13,6 +13,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
@@ -49,10 +50,12 @@ namespace {
 using SplitNode = SplitContainer::Node;
 using SplitDirection = SplitContainer::Direction;
 
-void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
+void WindowManager::showSettingsDialog(QWidget *parent,
+                                       SettingsDialogPreference preference)
 {
-    QTimer::singleShot(
-        80, [preference] { SettingsDialog::showDialog(preference); });
+    QTimer::singleShot(80, [parent, preference] {
+        SettingsDialog::showDialog(parent, preference);
+    });
 }
 
 void WindowManager::showAccountSelectPopup(QPoint point)
@@ -83,7 +86,7 @@ WindowManager::WindowManager()
     : windowLayoutFilePath(
           combinePath(getPaths()->settingsDirectory, WINDOW_LAYOUT_FILENAME))
 {
-    qDebug() << "init WindowManager";
+    qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
     auto settings = getSettings();
 
@@ -93,11 +96,12 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
     this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
+    this->wordFlagsListener_.addSetting(settings->showBadgesFfz);
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
     this->wordFlagsListener_.setCB([this] {
-        this->updateWordTypeMask();  //
+        this->updateWordTypeMask();
     });
 
     this->saveTimer = new QTimer;
@@ -105,13 +109,13 @@ WindowManager::WindowManager()
     this->saveTimer->setSingleShot(true);
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getApp()->windows->save();  //
+        getApp()->windows->save();
     });
 
     this->miscUpdateTimer_.start(100);
 
     QObject::connect(&this->miscUpdateTimer_, &QTimer::timeout, [this] {
-        this->miscUpdate.invoke();  //
+        this->miscUpdate.invoke();
     });
 }
 
@@ -156,6 +160,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->showBadgesVanity ? MEF::BadgeVanity : MEF::None);
     flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
                                              : MEF::None);
+    flags.set(settings->showBadgesFfz ? MEF::BadgeFfz : MEF::None);
 
     // username
     flags.set(MEF::Username);
@@ -266,7 +271,7 @@ Window *WindowManager::windowAt(int index)
     {
         return nullptr;
     }
-    qDebug() << "getting window at bad index" << index;
+    qCDebug(chatterinoWindowmanager) << "getting window at bad index" << index;
 
     return this->windows_.at(index);
 }
@@ -285,8 +290,9 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 {
     assertInGuiThread();
 
-    getApp()->themes->repaintVisibleChatWidgets_.connect(
-        [this] { this->repaintVisibleChatWidgets(); });
+    getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
+        this->repaintVisibleChatWidgets();
+    });
 
     assert(!this->initialized_);
 
@@ -305,22 +311,29 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         mainWindow_->getNotebook().addPage(true);
     }
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->layoutChannelViews(); });
+    settings.timestampFormat.connect([this](auto, auto) {
+        this->layoutChannelViews();
+    });
 
-    settings.emoteScale.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.emoteScale.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.alternateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.separateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.collpseMessagesMinLines.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.enableRedeemedHighlight.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.timestampFormat.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.alternateMessages.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.separateMessages.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.collpseMessagesMinLines.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.enableRedeemedHighlight.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
 
     this->initialized_ = true;
 }
@@ -331,7 +344,7 @@ void WindowManager::save()
     {
         return;
     }
-    qDebug() << "[WindowManager] Saving";
+    qCDebug(chatterinoWindowmanager) << "[WindowManager] Saving";
     assertInGuiThread();
     QJsonDocument document;
 

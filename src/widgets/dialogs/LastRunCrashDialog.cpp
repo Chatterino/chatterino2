@@ -40,8 +40,9 @@ LastRunCrashDialog::LastRunCrashDialog()
 
     auto *okButton =
         buttons->addButton("Ignore", QDialogButtonBox::ButtonRole::NoRole);
-    QObject::connect(okButton, &QPushButton::clicked,
-                     [this] { this->accept(); });
+    QObject::connect(okButton, &QPushButton::clicked, [this] {
+        this->accept();
+    });
 
     // Updates
     //    auto updateUpdateLabel = [update]() mutable {
