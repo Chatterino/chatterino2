@@ -20,19 +20,19 @@ using ResultCallback = std::function<void(T...)>;
 
 struct HelixUser {
     QString id;
+    QString login;
     QString createdAt;
     QString displayName;
     QString description;
-    QString login;
     QString profileImageUrl;
     int viewCount;
 
     explicit HelixUser(QJsonObject jsonObject)
         : id(jsonObject.value("id").toString())
+        , login(jsonObject.value("login").toString())
         , createdAt(jsonObject.value("created_at").toString())
         , displayName(jsonObject.value("display_name").toString())
         , description(jsonObject.value("description").toString())
-        , login(jsonObject.value("login").toString())
         , profileImageUrl(jsonObject.value("profile_image_url").toString())
         , viewCount(jsonObject.value("view_count").toInt())
     {
