@@ -4,6 +4,7 @@
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -116,6 +117,9 @@ Split::Split(QWidget *parent)
 
     // F5: reload emotes
     createShortcut(this, "F5", &Split::reloadChannelAndSubscriberEmotes);
+
+    // CTRL+F5: reconnect
+    createShortcut(this, "CTRL+F5", &Split::reconnect);
 
     // F10
     createShortcut(this, "F10", [] {
@@ -643,7 +647,8 @@ void Split::openInStreamlink()
     }
     catch (const Exception &ex)
     {
-        qDebug() << "Error in doOpenStreamlink:" << ex.what();
+        qCWarning(chatterinoWidget)
+            << "Error in doOpenStreamlink:" << ex.what();
     }
 }
 
@@ -850,6 +855,11 @@ void Split::reloadChannelAndSubscriberEmotes()
         twitchChannel->refreshBTTVChannelEmotes(true);
         twitchChannel->refreshFFZChannelEmotes(true);
     }
+}
+
+void Split::reconnect()
+{
+    this->getChannel()->reconnect();
 }
 
 void Split::dragEnterEvent(QDragEnterEvent *event)

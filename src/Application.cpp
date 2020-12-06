@@ -3,6 +3,7 @@
 #include <atomic>
 
 #include "common/Args.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
@@ -339,7 +340,8 @@ void Application::initPubsub()
         }
         else
         {
-            qDebug() << "Couldn't find channel id of point reward";
+            qCDebug(chatterinoApp)
+                << "Couldn't find channel id of point reward";
         }
     });
 

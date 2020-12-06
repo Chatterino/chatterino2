@@ -84,7 +84,7 @@ jobs:
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v2.2.0
+        uses: actions/upload-artifact@v2.2.1
         with:
           name: chatterino-windows-x86-64.zip
           path: build/chatterino-windows-x86-64.zip
@@ -92,7 +92,23 @@ jobs:
       # LINUX
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get update && sudo apt-get -y install libssl-dev libboost-dev libboost-system-dev libboost-filesystem-dev libpulse-dev libxkbcommon-x11-0 libgstreamer-plugins-base1.0-0 build-essential libgl1-mesa-dev
+        run: |
+            sudo apt-get update
+            sudo apt-get -y install \
+                libssl-dev \
+                libboost-dev \
+                libboost-system-dev \
+                libboost-filesystem-dev \
+                libpulse-dev \
+                libxkbcommon-x11-0 \
+                libgstreamer-plugins-base1.0-0 \
+                build-essential \
+                libgl1-mesa-dev \
+                libxcb-icccm4 \
+                libxcb-image0 \
+                libxcb-keysyms1 \
+                libxcb-render-util0 \
+                libxcb-xinerama0
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -112,7 +128,7 @@ jobs:
 
       - name: Upload artifact (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.2.0
+        uses: actions/upload-artifact@v2.2.1
         with:
           name: Chatterino-x86_64.AppImage
           path: build/Chatterino-x86_64.AppImage
@@ -146,7 +162,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v2.2.0
+        uses: actions/upload-artifact@v2.2.1
         with:
           name: chatterino-osx.dmg
           path: build/chatterino-osx.dmg
@@ -175,17 +191,17 @@ jobs:
               6 ${{ github.actor }}
           prerelease: true
 
-      - uses: actions/download-artifact@v2.0.5
+      - uses: actions/download-artifact@v2.0.6
         with:
           name: chatterino-windows-x86-64.zip
           path: windows/
 
-      - uses: actions/download-artifact@v2.0.5
+      - uses: actions/download-artifact@v2.0.6
         with:
           name: Chatterino-x86_64.AppImage
           path: linux/
 
-      - uses: actions/download-artifact@v2.0.5
+      - uses: actions/download-artifact@v2.0.6
         with:
           name: chatterino-osx.dmg
           path: macos/

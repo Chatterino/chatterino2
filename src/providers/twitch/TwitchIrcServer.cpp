@@ -6,6 +6,7 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -55,7 +56,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
     std::shared_ptr<TwitchAccount> account =
         getApp()->accounts->twitch.getCurrent();
 
-    qDebug() << "logging in as" << account->getUserName();
+    qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
 
     QString username = account->getUserName();
     QString oauthToken = account->getOAuthToken();

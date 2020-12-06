@@ -8,6 +8,18 @@
 # from lib/boost.pri
 #  - BOOST_DIRECTORY (C:\local\boost\ by default) (Windows only)
 
+CCACHE_BIN = $$system(which ccache)
+!isEmpty(CCACHE_BIN) {
+  load(ccache)
+  CONFIG+=ccache
+}
+
+MINIMUM_REQUIRED_QT_VERSION = 5.12.0
+
+!versionAtLeast(QT_VERSION, $$MINIMUM_REQUIRED_QT_VERSION) {
+    error("You're trying to compile with Qt $$QT_VERSION, but minimum required Qt version is $$MINIMUM_REQUIRED_QT_VERSION")
+}
+
 QT                += widgets core gui network multimedia svg concurrent
 CONFIG            += communi
 COMMUNI           += core model util
@@ -69,6 +81,8 @@ macx {
 CONFIG(debug, debug|release) {
     DEFINES += C_DEBUG
     DEFINES += QT_DEBUG
+} else {
+    DEFINES += NDEBUG
 }
 
 # Submodules
@@ -125,6 +139,7 @@ SOURCES += \
     src/common/UsernameSet.cpp \
     src/common/Version.cpp \
     src/common/WindowDescriptors.cpp \
+    src/common/QLogging.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
@@ -340,6 +355,7 @@ HEADERS += \
     src/common/UniqueAccess.hpp \
     src/common/UsernameSet.hpp \
     src/common/Version.hpp \
+    src/common/QLogging.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
     src/controllers/accounts/AccountModel.hpp \
@@ -410,6 +426,7 @@ HEADERS += \
     src/providers/IvrApi.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/twitch/ChannelPointReward.hpp \
+    src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/api/Helix.hpp \
     src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/EmoteValue.hpp \
@@ -612,6 +629,7 @@ CONFIG(debug, debug|release) {
     message("Building Chatterino2 DEBUG")
 } else {
     message("Building Chatterino2 RELEASE")
+    DEFINES += DEBUG_OFF
 }
 
 message("Injected git values: $$git_commit ($$git_release) $$git_hash")

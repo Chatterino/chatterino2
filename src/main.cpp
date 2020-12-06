@@ -1,6 +1,5 @@
 #include <QApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QMessageBox>
 #include <QStringList>
 #include <memory>
@@ -9,6 +8,7 @@
 #include "RunGui.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -37,12 +37,13 @@ int main(int argc, char **argv)
     else if (getArgs().printVersion)
     {
         auto version = Version::instance();
-        qInfo().noquote() << QString("%1 (commit %2%3)")
-                                 .arg(version.fullVersion())
-                                 .arg(version.commitHash())
-                                 .arg(Modes::instance().isNightly
-                                          ? ", " + version.dateOfBuild()
-                                          : "");
+        qCInfo(chatterinoMain).noquote()
+            << QString("%1 (commit %2%3)")
+                   .arg(version.fullVersion())
+                   .arg(version.commitHash())
+                   .arg(Modes::instance().isNightly
+                            ? ", " + version.dateOfBuild()
+                            : "");
     }
     else
     {
