@@ -4,15 +4,6 @@ this folder describes what sort of API requests we do, what permissions are requ
 ## Kraken (V5)
 We use a bunch of Kraken (V5) in Chatterino2.
 
-### Get User
-URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-by-id
-
-Migration path: **Unknown**
-
- * We implement this in `providers/twitch/api/Kraken.cpp getUser`  
-   Used in:
-     * `UserInfoPopup` to get the "created at" date of a user
-
 ### Get Channel
 URL: https://dev.twitch.tv/docs/v5/reference/channels#get-channel
 
@@ -95,7 +86,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-users
 
  * We implement this in `providers/twitch/api/Helix.cpp fetchUsers`.  
    Used in:
-     * `UserInfoPopup` to get ID and viewcount of username we clicked
+     * `UserInfoPopup` to get ID, viewCount, displayName, createdAt of username we clicked
      * `CommandController` to power any commands that need to get a user ID
      * `Toasts` to get the profile picture of a streamer who just went live
      * `TwitchAccount` ignore and unignore features to translate user name to user ID
