@@ -96,8 +96,7 @@ protected:
 private:
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
-    void onAccountSelected();
-    void updateTooltipColor();
+    void updateInputPlaceholder();
 
     SplitContainer *container_;
     IndirectChannel channel_;
