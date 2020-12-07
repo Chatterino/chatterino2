@@ -56,6 +56,7 @@
 - Bugfix: Fix a freeze caused by ignored & replaced phrases followed by Twitch Emotes (#2231)
 - Bugfix: Fix a crash bug that occurred when moving splits across windows and closing the "parent tab" (#2249, #2259)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
+- Dev: Migrated `Kraken::getUser` to Helix (#2260)
 
 ## 2.2.2
 
