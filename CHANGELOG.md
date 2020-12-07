@@ -4,6 +4,7 @@
 
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
+- Minor: Added Ctrl + 1/2/3/... and Ctrl+9 shortcuts to Emote Popup (activated with Ctrl+E). They work exactly the same as shortcuts in main window. (#2263)
 - Minor: Made "#channel" in `/mentions` tab a clickable link which takes you to the channel that you were mentioned in. (#2220)
 - Minor: Added a keyboard shortcut (Ctrl+F5) for "Reconnect" (#2215)
 - Minor: Made `Try to find usernames without @ prefix` option still resolve usernames when special characters (commas, dots, (semi)colons, exclamation mark, question mark) are appended to them. (#2212)
