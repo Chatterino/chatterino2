@@ -19,6 +19,38 @@
 
 #include <unordered_set>
 
+namespace {
+using namespace chatterino;
+MessagePtr generateBannedMessage(bool confirmedBan)
+{
+    const auto linkColor = MessageColor(MessageColor::Link);
+    const auto accountsLink = Link(Link::Reconnect, QString());
+    const auto curUser = getApp()->accounts->twitch.getCurrent();
+    const auto bannedText = confirmedBan
+                                ? QString("You were banned from this channel!")
+                                : QString("You were forced off this channel.");
+
+    const auto reconnectPromptText =
+        confirmedBan
+            ? QString(
+                  "If you believe you have been unbanned, try reconnecting.")
+            : QString("Try reconnecting.");
+
+    auto builder = MessageBuilder();
+    builder.message().flags.set(MessageFlag::System);
+
+    builder.emplace<TimestampElement>();
+    builder.emplace<TextElement>(bannedText, MessageElementFlag::Text,
+                                 MessageColor::System);
+    builder
+        .emplace<TextElement>(reconnectPromptText, MessageElementFlag::Text,
+                              linkColor)
+        ->setLink(accountsLink);
+
+    return builder.release();
+}
+
+}  // namespace
 namespace chatterino {
 
 static float relativeSimilarity(const QString &str1, const QString &str2)
@@ -679,6 +711,10 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 
         return {builder.release()};
     }
+    else if (message->content().startsWith("You are permanently banned "))
+    {
+        return {generateBannedMessage(true)};
+    }
     else
     {
         std::vector<MessagePtr> builtMessages;
@@ -762,13 +798,18 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     if (TwitchChannel *twitchChannel =
             dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        if (message->nick() !=
-                getApp()->accounts->twitch.getCurrent()->getUserName() &&
+        const auto selfAccountName =
+            getApp()->accounts->twitch.getCurrent()->getUserName();
+        if (message->nick() != selfAccountName &&
             getSettings()->showParts.getValue())
         {
             twitchChannel->addPartedUser(message->nick());
         }
+
+        if (message->nick() == selfAccountName)
+        {
+            channel->addMessage(generateBannedMessage(false));
+        }
     }
 }
-
 }  // namespace chatterino
