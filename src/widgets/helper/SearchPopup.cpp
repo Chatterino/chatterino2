@@ -81,7 +81,25 @@ void SearchPopup::setChannel(const ChannelPtr &channel)
 
 void SearchPopup::updateWindowTitle()
 {
-    this->setWindowTitle("Searching in " + this->channelName_ + "s history");
+    QString historyName;
+
+    if (this->channelName_ == "/whispers")
+    {
+        historyName = "whispers";
+    }
+    else if (this->channelName_ == "/mentions")
+    {
+        historyName = "mentions";
+    }
+    else if (this->channelName_.isEmpty())
+    {
+        historyName = "<empty>'s";
+    }
+    else
+    {
+        historyName = QString("%1's").arg(this->channelName_);
+    }
+    this->setWindowTitle("Searching in " + historyName + " history");
 }
 
 void SearchPopup::search()
