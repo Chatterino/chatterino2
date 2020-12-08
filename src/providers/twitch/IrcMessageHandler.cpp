@@ -26,9 +26,11 @@ MessagePtr generateBannedMessage(bool confirmedBan)
     const auto linkColor = MessageColor(MessageColor::Link);
     const auto accountsLink = Link(Link::Reconnect, QString());
     const auto curUser = getApp()->accounts->twitch.getCurrent();
-    const auto bannedText = confirmedBan
-                                ? QString("You were banned from this channel!")
-                                : QString("You were forced off this channel.");
+    const auto bannedText =
+        confirmedBan
+            ? QString("You were banned from this channel!")
+            : QString(
+                  "Your connection to this channel was unexpectedly dropped.");
 
     const auto reconnectPromptText =
         confirmedBan
@@ -698,7 +700,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
                                         .arg(curUser->getUserName());
         const auto loginPromptText = QString(" Try adding your account again.");
 
-        auto builder = MessageBuilder();
+        MessageBuilder builder;
         builder.message().flags.set(MessageFlag::System);
 
         builder.emplace<TimestampElement>();
