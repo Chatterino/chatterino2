@@ -2080,6 +2080,10 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             }
         }
         break;
+        case Link::Reconnect: {
+            this->underlyingChannel_.get()->reconnect();
+        }
+        break;
 
         default:;
     }
