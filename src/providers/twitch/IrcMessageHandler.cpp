@@ -700,7 +700,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
                                         .arg(curUser->getUserName());
         const auto loginPromptText = QString(" Try adding your account again.");
 
-        MessageBuilder builder;
+        auto builder = MessageBuilder();
         builder.message().flags.set(MessageFlag::System);
 
         builder.emplace<TimestampElement>();
