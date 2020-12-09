@@ -25,7 +25,6 @@ MessagePtr generateBannedMessage(bool confirmedBan)
 {
     const auto linkColor = MessageColor(MessageColor::Link);
     const auto accountsLink = Link(Link::Reconnect, QString());
-    const auto curUser = getApp()->accounts->twitch.getCurrent();
     const auto bannedText =
         confirmedBan
             ? QString("You were banned from this channel!")
