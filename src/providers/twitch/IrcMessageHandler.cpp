@@ -38,7 +38,7 @@ MessagePtr generateBannedMessage(bool confirmedBan)
                   "If you believe you have been unbanned, try reconnecting.")
             : QString("Try reconnecting.");
 
-    auto builder = MessageBuilder();
+    MessageBuilder builder;
     builder.message().flags.set(MessageFlag::System);
 
     builder.emplace<TimestampElement>();
