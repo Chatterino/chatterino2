@@ -315,6 +315,46 @@ void Helix::getGameById(QString gameId,
         failureCallback);
 }
 
+void Helix::createClip(QString channelId,
+                       ResultCallback<HelixClip> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", channelId);
+
+    this->makeRequest("clips", urlQuery)
+        .type(NetworkRequestType::Post)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            qDebug() << data;
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixClip> clips;
+
+            for (const auto &jsonClip : data.toArray())
+            {
+                clips.emplace_back(jsonClip.toObject());
+            }
+
+            successCallback(clips[0]);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            // clip creation failed LUL
+            qCDebug(chatterinoTwitch)
+                << "Failed to create a clip: " << result.status()
+                << result.getData();
+            failureCallback();
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

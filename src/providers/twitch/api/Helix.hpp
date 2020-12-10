@@ -134,6 +134,17 @@ struct HelixGame {
     }
 };
 
+struct HelixClip {
+    QString id;  // clip slug
+    QString editUrl;
+
+    explicit HelixClip(QJsonObject jsonObject)
+        : id(jsonObject.value("id").toString())
+        , editUrl(jsonObject.value("edit_url").toString())
+    {
+    }
+};
+
 class Helix final : boost::noncopyable
 {
 public:
@@ -183,6 +194,11 @@ public:
 
     void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
                      HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#create-clip
+    void createClip(QString channelId,
+                    ResultCallback<HelixClip> successCallback,
+                    HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

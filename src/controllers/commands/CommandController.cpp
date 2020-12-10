@@ -418,6 +418,38 @@ void CommandController::initialize(Settings &, Paths &paths)
         userPopup->show();
         return "";
     });
+
+    this->registerCommand(
+        "/clip", [](const auto &words, std::shared_ptr<Channel> channel) {
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+            if (!channel->isLive())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Cannot create clip while the channel is offline!"));
+                return "";
+            }
+
+            channel->addMessage(makeSystemMessage("Creating clip..."));
+
+            getHelix()->createClip(
+                twitchChannel->roomId(),
+                [channel](const HelixClip &clip) {
+                    qDebug() << clip.id;
+
+                    channel->addMessage(makeSystemMessage(
+                        QString("Created clip: https://clips.twitch.tv/%1 Edit "
+                                "clip: %2")
+                            .arg(clip.id)
+                            .arg(clip.editUrl)));
+                },
+                [channel] {
+                    channel->addMessage(
+                        makeSystemMessage("Failed to create a clip."));
+                });
+
+            return "";
+        });
 }
 
 void CommandController::save()
