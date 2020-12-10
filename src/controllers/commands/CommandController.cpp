@@ -435,8 +435,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             getHelix()->createClip(
                 twitchChannel->roomId(),
                 [channel](const HelixClip &clip) {
-                    qDebug() << clip.id;
-
                     channel->addMessage(makeSystemMessage(
                         QString("Created clip: https://clips.twitch.tv/%1 Edit "
                                 "clip: %2")
@@ -444,8 +442,28 @@ void CommandController::initialize(Settings &, Paths &paths)
                             .arg(clip.editUrl)));
                 },
                 [channel] {
-                    channel->addMessage(
-                        makeSystemMessage("Failed to create a clip."));
+                    const QString failureText =
+                        "Failed to create a clip. Since this feature is new "
+                        "and it requires extra scopes";
+                    const auto loginPromptText =
+                        QString(" try adding your account again.");
+                    const auto accountsLink =
+                        Link(Link::OpenAccountsPage, QString());
+
+                    MessageBuilder builder;
+                    builder.message().flags.set(MessageFlag::System);
+
+                    builder.emplace<TimestampElement>();
+                    builder.emplace<TextElement>(failureText,
+                                                 MessageElementFlag::Text,
+                                                 MessageColor::System);
+                    builder
+                        .emplace<TextElement>(loginPromptText,
+                                              MessageElementFlag::Text,
+                                              MessageColor::Link)
+                        ->setLink(accountsLink);
+
+                    channel->addMessage(builder.release());
                 });
 
             return "";
