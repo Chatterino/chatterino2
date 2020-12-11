@@ -359,7 +359,10 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     });
 #endif
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    auto *twitchChannel =
+        dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
+
+    if (twitchChannel)
     {
         menu->addAction(OPEN_IN_BROWSER, this->split_, &Split::openInBrowser);
 #ifndef USEWEBENGINE
@@ -373,6 +376,16 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         {
             menu->addAction("Open in custom player", this->split_,
                             &Split::openWithCustomScheme);
+        }
+
+        if (this->split_->getChannel()->isLive())
+        {
+            menu->addAction(
+                "Create a clip", this->split_,
+                [this] {
+                    this->split_->getChannel();
+                },
+                QKeySequence("Alt+X"));
         }
         menu->addSeparator();
     }
@@ -391,7 +404,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                         QKeySequence("Ctrl+F5"));
     }
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    if (twitchChannel)
     {
         menu->addAction("Reload channel emotes", this,
                         SLOT(reloadChannelEmotes()), QKeySequence("F5"));
@@ -418,45 +431,46 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         this->split_->setModerationMode(!this->split_->getModerationMode());
     });
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    if (twitchChannel)
     {
         moreMenu->addAction("Show viewer list", this->split_,
                             &Split::showViewerList);
 
         moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
 
-        auto action = new QAction(this);
-        action->setText("Notify when live");
-        action->setCheckable(true);
+        // notify live action
+        auto nlAction = new QAction(this);
+        nlAction->setText("Notify when live");
+        nlAction->setCheckable(true);
 
-        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-            action->setChecked(getApp()->notifications->isChannelNotified(
-                this->split_->getChannel()->getName(), Platform::Twitch));
-        });
-        action->connect(action, &QAction::triggered, this, [this]() {
+        QObject::connect(
+            moreMenu, &QMenu::aboutToShow, this, [nlAction, this]() {
+                nlAction->setChecked(getApp()->notifications->isChannelNotified(
+                    this->split_->getChannel()->getName(), Platform::Twitch));
+            });
+        nlAction->connect(nlAction, &QAction::triggered, this, [this]() {
             getApp()->notifications->updateChannelNotification(
                 this->split_->getChannel()->getName(), Platform::Twitch);
         });
 
-        moreMenu->addAction(action);
-    }
+        moreMenu->addAction(nlAction);
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
-    {
-        auto action = new QAction(this);
-        action->setText("Mute highlight sound");
-        action->setCheckable(true);
+        // mute highlight action
+        auto mhAction = new QAction(this);
+        mhAction->setText("Mute highlight sound");
+        mhAction->setCheckable(true);
 
-        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
-            action->setChecked(getSettings()->isMutedChannel(
-                this->split_->getChannel()->getName()));
-        });
-        action->connect(action, &QAction::triggered, this, [this]() {
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this,
+                         [mhAction, this]() {
+                             mhAction->setChecked(getSettings()->isMutedChannel(
+                                 this->split_->getChannel()->getName()));
+                         });
+        mhAction->connect(mhAction, &QAction::triggered, this, [this]() {
             getSettings()->toggleMutedChannel(
                 this->split_->getChannel()->getName());
         });
 
-        moreMenu->addAction(action);
+        moreMenu->addAction(mhAction);
     }
 
     moreMenu->addSeparator();
