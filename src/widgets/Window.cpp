@@ -393,7 +393,7 @@ void Window::addShortcuts()
         getApp()->windows->forceLayoutChannelViews();
     });
 
-    createWindowShortcut(this, "CTRL+K", [] {
+    createWindowShortcut(this, "CTRL+K", [this] {
         auto quickSwitcher =
             new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
         quickSwitcher->show();

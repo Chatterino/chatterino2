@@ -335,14 +335,9 @@ void Helix::createClip(QString channelId,
                 return Failure;
             }
 
-            std::vector<HelixClip> clips;
+            HelixClip clip(data.toArray()[0].toObject());
 
-            for (const auto &jsonClip : data.toArray())
-            {
-                clips.emplace_back(jsonClip.toObject());
-            }
-
-            successCallback(clips[0]);
+            successCallback(clip);
             return Success;
         })
         .onError([failureCallback](NetworkResult result) {

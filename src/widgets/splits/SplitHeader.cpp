@@ -441,39 +441,38 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
         moreMenu->addAction("Subscribe", this->split_, &Split::openSubPage);
 
-        // notify live action
-        auto nlAction = new QAction(this);
-        nlAction->setText("Notify when live");
-        nlAction->setCheckable(true);
+        auto action = new QAction(this);
+        action->setText("Notify when live");
+        action->setCheckable(true);
 
-        QObject::connect(
-            moreMenu, &QMenu::aboutToShow, this, [nlAction, this]() {
-                nlAction->setChecked(getApp()->notifications->isChannelNotified(
-                    this->split_->getChannel()->getName(), Platform::Twitch));
-            });
-        nlAction->connect(nlAction, &QAction::triggered, this, [this]() {
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
+            action->setChecked(getApp()->notifications->isChannelNotified(
+                this->split_->getChannel()->getName(), Platform::Twitch));
+        });
+        action->connect(action, &QAction::triggered, this, [this]() {
             getApp()->notifications->updateChannelNotification(
                 this->split_->getChannel()->getName(), Platform::Twitch);
         });
 
-        moreMenu->addAction(nlAction);
+        moreMenu->addAction(action);
+    }
 
-        // mute highlight action
-        auto mhAction = new QAction(this);
-        mhAction->setText("Mute highlight sound");
-        mhAction->setCheckable(true);
+    if (twitchChannel)
+    {
+        auto action = new QAction(this);
+        action->setText("Mute highlight sound");
+        action->setCheckable(true);
 
-        QObject::connect(moreMenu, &QMenu::aboutToShow, this,
-                         [mhAction, this]() {
-                             mhAction->setChecked(getSettings()->isMutedChannel(
-                                 this->split_->getChannel()->getName()));
-                         });
-        mhAction->connect(mhAction, &QAction::triggered, this, [this]() {
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
+            action->setChecked(getSettings()->isMutedChannel(
+                this->split_->getChannel()->getName()));
+        });
+        action->connect(action, &QAction::triggered, this, [this]() {
             getSettings()->toggleMutedChannel(
                 this->split_->getChannel()->getName());
         });
 
-        moreMenu->addAction(mhAction);
+        moreMenu->addAction(action);
     }
 
     moreMenu->addSeparator();
