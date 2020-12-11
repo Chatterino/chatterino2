@@ -419,75 +419,18 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand(
-        "/clip", [](const auto &words, std::shared_ptr<Channel> channel) {
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-
-            if (!channel->isLive())
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Cannot create clip while the channel is offline!"));
-                return "";
-            }
-
-            channel->addMessage(makeSystemMessage("Creating clip..."));
-
-            getHelix()->createClip(
-                twitchChannel->roomId(),
-                [channel](const HelixClip &clip) {
-                    MessageBuilder builder;
-                    builder.message().flags.set(MessageFlag::System);
-
-                    builder.emplace<TimestampElement>();
-                    // text
-                    builder.emplace<TextElement>("Clip created!",
-                                                 MessageElementFlag::Text,
-                                                 MessageColor::System);
-                    // clip link
-                    builder
-                        .emplace<TextElement>("Copy link to clipboard",
-                                              MessageElementFlag::Text,
-                                              MessageColor::Link)
-                        ->setLink(Link(Link::CopyToClipboard,
-                                       "https://clips.twitch.tv/" + clip.id));
-                    // separator text
-                    builder.emplace<TextElement>(
-                        " or ", MessageElementFlag::Text, MessageColor::System);
-                    // edit link
-                    builder
-                        .emplace<TextElement>("edit it in browser.",
-                                              MessageElementFlag::Text,
-                                              MessageColor::Link)
-                        ->setLink(Link(Link::Url, clip.editUrl));
-                    channel->addMessage(builder.release());
-                },
-                [channel] {
-                    const QString failureText =
-                        "Failed to create a clip. Since this feature is new "
-                        "and it requires extra scopes";
-                    const auto loginPromptText =
-                        QString(" try adding your account again.");
-                    const auto accountsLink =
-                        Link(Link::OpenAccountsPage, QString());
-
-                    MessageBuilder builder;
-                    builder.message().flags.set(MessageFlag::System);
-
-                    builder.emplace<TimestampElement>();
-                    builder.emplace<TextElement>(failureText,
-                                                 MessageElementFlag::Text,
-                                                 MessageColor::System);
-                    builder
-                        .emplace<TextElement>(loginPromptText,
-                                              MessageElementFlag::Text,
-                                              MessageColor::Link)
-                        ->setLink(accountsLink);
-
-                    channel->addMessage(builder.release());
-                });
-
+    this->registerCommand("/clip", [](const auto &words, auto channel) {
+        if (!channel->isTwitchChannel())
+        {
             return "";
-        });
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+        twitchChannel->createClip();
+
+        return "";
+    });
 }
 
 void CommandController::save()

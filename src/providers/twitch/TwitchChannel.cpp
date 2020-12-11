@@ -927,6 +927,69 @@ void TwitchChannel::refreshCheerEmotes()
         .execute();
 }
 
+void TwitchChannel::createClip()
+{
+    if (!this->isLive())
+    {
+        this->addMessage(makeSystemMessage(
+            "Cannot create clip while the channel is offline!"));
+        return;
+    }
+
+    this->addMessage(makeSystemMessage("Creating clip..."));
+
+    getHelix()->createClip(
+        this->roomId(),
+        [this](const HelixClip &clip) {
+            MessageBuilder builder;
+            builder.message().flags.set(MessageFlag::System);
+
+            builder.emplace<TimestampElement>();
+            // text
+            builder.emplace<TextElement>("Clip created!",
+                                         MessageElementFlag::Text,
+                                         MessageColor::System);
+            // clip link
+            builder
+                .emplace<TextElement>("Copy link to clipboard",
+                                      MessageElementFlag::Text,
+                                      MessageColor::Link)
+                ->setLink(Link(Link::CopyToClipboard,
+                               "https://clips.twitch.tv/" + clip.id));
+            // separator text
+            builder.emplace<TextElement>(" or ", MessageElementFlag::Text,
+                                         MessageColor::System);
+            // edit link
+            builder
+                .emplace<TextElement>("edit it in browser.",
+                                      MessageElementFlag::Text,
+                                      MessageColor::Link)
+                ->setLink(Link(Link::Url, clip.editUrl));
+            this->addMessage(builder.release());
+        },
+        [this] {
+            const QString failureText =
+                "Failed to create a clip. Since this feature is new "
+                "and it requires extra scopes";
+            const auto loginPromptText =
+                QString(" try adding your account again.");
+            const auto accountsLink = Link(Link::OpenAccountsPage, QString());
+
+            MessageBuilder builder;
+            builder.message().flags.set(MessageFlag::System);
+
+            builder.emplace<TimestampElement>();
+            builder.emplace<TextElement>(failureText, MessageElementFlag::Text,
+                                         MessageColor::System);
+            builder
+                .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                                      MessageColor::Link)
+                ->setLink(accountsLink);
+
+            this->addMessage(builder.release());
+        });
+}
+
 boost::optional<EmotePtr> TwitchChannel::twitchBadge(
     const QString &set, const QString &version) const
 {

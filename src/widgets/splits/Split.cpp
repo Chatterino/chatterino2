@@ -121,6 +121,19 @@ Split::Split(QWidget *parent)
     // CTRL+F5: reconnect
     createShortcut(this, "CTRL+F5", &Split::reconnect);
 
+    // Alt+X: create clip LUL
+    createShortcut(this, "Alt+X", [this] {
+        if (!this->getChannel()->isTwitchChannel())
+        {
+            return;
+        }
+
+        auto *twitchChannel =
+            dynamic_cast<TwitchChannel *>(this->getChannel().get());
+
+        twitchChannel->createClip();
+    });
+
     // F10
     createShortcut(this, "F10", [] {
         auto *popup = new DebugPopup;
