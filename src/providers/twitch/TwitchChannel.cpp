@@ -43,6 +43,7 @@ namespace {
         "haven't re-authenticated yet. ");
     static const QString LOGIN_PROMPT_TEXT("Try adding your account again.");
     static const auto ACCOUNTS_LINK = Link(Link::OpenAccountsPage, QString());
+    static QMutex clipCreationMutex;
 
     // convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT command and converts it to a readable NOTICE message
     // This has historically been done in the Recent Messages API, but this functionality is being moved to Chatterino instead
@@ -935,6 +936,10 @@ void TwitchChannel::refreshCheerEmotes()
 
 void TwitchChannel::createClip()
 {
+    if (!clipCreationMutex.tryLock())
+    {
+        return;
+    }
     if (!this->isLive())
     {
         this->addMessage(makeSystemMessage(
@@ -970,7 +975,9 @@ void TwitchChannel::createClip()
                                       MessageElementFlag::Text,
                                       MessageColor::Link)
                 ->setLink(Link(Link::Url, clip.editUrl));
+
             this->addMessage(builder.release());
+            clipCreationMutex.unlock();
         },
         [this] {
             MessageBuilder builder;
@@ -986,6 +993,7 @@ void TwitchChannel::createClip()
                 ->setLink(ACCOUNTS_LINK);
 
             this->addMessage(builder.release());
+            clipCreationMutex.unlock();
         });
 }
 
