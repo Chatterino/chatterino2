@@ -341,7 +341,6 @@ void Helix::createClip(QString channelId,
             return Success;
         })
         .onError([failureCallback](NetworkResult result) {
-            // clip creation failed LUL
             qCDebug(chatterinoTwitch)
                 << "Failed to create a clip: " << result.status()
                 << result.getData();
