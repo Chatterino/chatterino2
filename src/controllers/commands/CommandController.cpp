@@ -440,16 +440,22 @@ void CommandController::initialize(Settings &, Paths &paths)
 
                     builder.emplace<TimestampElement>();
                     // text
-                    builder.emplace<TextElement>(
-                        "Created clip: ", MessageElementFlag::Text,
-                        MessageColor::System);
+                    builder.emplace<TextElement>("Clip created!",
+                                                 MessageElementFlag::Text,
+                                                 MessageColor::System);
                     // clip link
+                    builder
+                        .emplace<TextElement>("Copy link to clipboard",
+                                              MessageElementFlag::Text,
+                                              MessageColor::Link)
+                        ->setLink(Link(Link::CopyToClipboard,
+                                       "https://clips.twitch.tv/" + clip.id));
+                    // separator text
                     builder.emplace<TextElement>(
-                        "https://clips.twitch.tv/" + clip.id,
-                        MessageElementFlag::Text, MessageColor::Link);
+                        " or ", MessageElementFlag::Text, MessageColor::System);
                     // edit link
                     builder
-                        .emplace<TextElement>(" 🎬 click here to edit it",
+                        .emplace<TextElement>("edit it in browser.",
                                               MessageElementFlag::Text,
                                               MessageColor::Link)
                         ->setLink(Link(Link::Url, clip.editUrl));

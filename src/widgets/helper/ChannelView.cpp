@@ -2079,6 +2079,9 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                 }
             }
         }
+        case Link::CopyToClipboard: {
+            crossPlatformCopy(link.value);
+        }
         break;
 
         default:;
