@@ -382,8 +382,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         {
             menu->addAction(
                 "Create a clip", this->split_,
-                [this] {
-                    this->split_->getChannel();
+                [twitchChannel] {
+                    twitchChannel->createClip();
                 },
                 QKeySequence("Alt+X"));
         }
