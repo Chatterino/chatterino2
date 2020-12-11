@@ -37,13 +37,12 @@ namespace chatterino {
 namespace {
     constexpr int TITLE_REFRESH_PERIOD = 10;
     constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
-    static const QString clipsLink("https://clips.twitch.tv/%1");
-    static const QString failureText =
-        "Failed to create a clip. Since this feature is new "
-        "and it requires extra scopes";
-    static const QString loginPromptText =
-        QString(" try adding your account again.");
-    static const auto accountsLink = Link(Link::OpenAccountsPage, QString());
+    static const QString CLIPS_LINK("https://clips.twitch.tv/%1");
+    static const QString FAILURE_TEXT(
+        "Failed to create a clip - either streamer has clips disabled or you "
+        "haven't re-authenticated yet. ");
+    static const QString LOGIN_PROMPT_TEXT("Try adding your account again.");
+    static const auto ACCOUNTS_LINK = Link(Link::OpenAccountsPage, QString());
 
     // convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT command and converts it to a readable NOTICE message
     // This has historically been done in the Recent Messages API, but this functionality is being moved to Chatterino instead
@@ -961,7 +960,7 @@ void TwitchChannel::createClip()
                 .emplace<TextElement>("Copy link to clipboard",
                                       MessageElementFlag::Text,
                                       MessageColor::Link)
-                ->setLink(Link(Link::CopyToClipboard, clipsLink.arg(clip.id)));
+                ->setLink(Link(Link::CopyToClipboard, CLIPS_LINK.arg(clip.id)));
             // separator text
             builder.emplace<TextElement>(" or ", MessageElementFlag::Text,
                                          MessageColor::System);
@@ -978,12 +977,13 @@ void TwitchChannel::createClip()
             builder.message().flags.set(MessageFlag::System);
 
             builder.emplace<TimestampElement>();
-            builder.emplace<TextElement>(failureText, MessageElementFlag::Text,
+            builder.emplace<TextElement>(FAILURE_TEXT, MessageElementFlag::Text,
                                          MessageColor::System);
             builder
-                .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                .emplace<TextElement>(LOGIN_PROMPT_TEXT,
+                                      MessageElementFlag::Text,
                                       MessageColor::Link)
-                ->setLink(accountsLink);
+                ->setLink(ACCOUNTS_LINK);
 
             this->addMessage(builder.release());
         });
