@@ -324,11 +324,11 @@ void Helix::createClip(QString channelId,
 
     this->makeRequest("clips", urlQuery)
         .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto root = result.parseJson();
             auto data = root.value("data");
 
-            qDebug() << data;
             if (!data.isArray())
             {
                 failureCallback();
