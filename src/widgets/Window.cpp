@@ -308,7 +308,8 @@ void Window::addShortcuts()
         const auto openTab = [this, i] {
             this->notebook_->selectIndex(i);
         };
-        createWindowShortcut(this, QString("CTRL+%1").arg(i + 1), openTab);
+        createWindowShortcut(this, QString("CTRL+%1").arg(i + 1).toUtf8(),
+                             openTab);
     }
 
     createWindowShortcut(this, "CTRL+9", [this] {
