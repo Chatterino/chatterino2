@@ -21,7 +21,8 @@ public:
         AutoModDeny,
         OpenAccountsPage,
         JumpToChannel,
-        CopyToClipboard,
+        Reconnect,
+        CopyToClipboard
     };
 
     Link();

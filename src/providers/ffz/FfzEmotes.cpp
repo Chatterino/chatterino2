@@ -68,7 +68,7 @@ namespace {
 
                 auto emote = Emote();
                 fillInEmoteData(urls, name,
-                                name.string + "<br/>Global FFZ Emote", emote);
+                                name.string + "<br>Global FFZ Emote", emote);
                 emote.homePage =
                     Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
                             .arg(id.string)
@@ -137,8 +137,9 @@ namespace {
 
                 Emote emote;
                 fillInEmoteData(urls, name,
-                                name.string + "<br/>Channel FFZ Emote" +
-                                    "<br />By: " + author.string,
+                                QString("%1<br>Channel FFZ Emote<br>By: %2")
+                                    .arg(name.string)
+                                    .arg(author.string),
                                 emote);
                 emote.homePage =
                     Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
