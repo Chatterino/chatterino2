@@ -38,10 +38,11 @@ namespace {
     constexpr int TITLE_REFRESH_PERIOD = 10;
     constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
     static const QString CLIPS_LINK("https://clips.twitch.tv/%1");
-    static const QString FAILURE_TEXT(
-        "Failed to create a clip - either streamer has clips disabled or you "
-        "haven't re-authenticated yet. ");
-    static const QString LOGIN_PROMPT_TEXT("Try adding your account again.");
+    static const QString FAILURE_TEXT("Failed to create a clip - either the "
+                                      "streamer has clips disabled or you "
+                                      "haven't re-authenticated yet. ");
+    static const QString LOGIN_PROMPT_TEXT(
+        "Click here to add your account again.");
     static const auto ACCOUNTS_LINK = Link(Link::OpenAccountsPage, QString());
     static QMutex clipCreationMutex;
 
