@@ -21,6 +21,7 @@ public:
         AutoModDeny,
         OpenAccountsPage,
         JumpToChannel,
+        Reconnect
     };
 
     Link();
