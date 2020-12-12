@@ -159,12 +159,10 @@ EmotePopup::EmotePopup(QWidget *parent)
     // CTRL + 1-8 to open corresponding tab
     for (auto i = 0; i < 8; i++)
     {
-        char hotkey[7];
-        std::sprintf(hotkey, "CTRL+%d", i + 1);
         const auto openTab = [this, i, notebook] {
             notebook->selectIndex(i);
         };
-        createWindowShortcut(this, hotkey, openTab);
+        createWindowShortcut(this, QString("CTRL+%1").arg(i + 1), openTab);
     }
 
     // Open last tab (first one from right)
