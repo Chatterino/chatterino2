@@ -18,7 +18,7 @@
 #include <QLinearGradient>
 #include <QMimeData>
 #include <QPainter>
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 namespace chatterino {
 namespace {
