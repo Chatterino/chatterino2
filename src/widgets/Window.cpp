@@ -397,6 +397,28 @@ void Window::addShortcuts()
             new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
         quickSwitcher->show();
     });
+
+    createWindowShortcut(this, "CTRL+U", [this] {
+        for (int i = 0; i < this->getNotebook().getPageCount(); ++i)
+        {
+            auto *page =
+                static_cast<SplitContainer *>(this->getNotebook().getPageAt(i));
+
+            //            page->getTab()->setVisible(page->getTab()->isVisible() ? false
+            //                                                                   : true);
+            if (page->getTab()->size().width() == 0)
+            {
+                page->getTab()->resize(page->getTab()->sizeHint());
+                page->getTab()->updateSize();
+            }
+            else
+            {
+                page->getTab()->resize(0, 0);
+            }
+            this->getNotebook().setShowAddButton(
+                this->getNotebook().getShowAddButton() ? false : true);
+        }
+    });
 }
 
 void Window::addMenuBar()
