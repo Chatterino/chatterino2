@@ -137,6 +137,56 @@ int Application::run(QApplication &qtApp)
     this->twitch.server->connect();
 
     this->windows->getMainWindow().show();
+    if (!getSettings()->seenRecentMessagesDisclaimer)
+    {
+        auto reply = QMessageBox::question(
+            &this->windows->getMainWindow(),
+            "Do you want to enable Recent Messages support?",
+            "Recent messages is a service which allows you to see "
+            "messages from before starting Chatterino. If you enable support "
+            "for it Chatterino will send the name of every channel you have "
+            "open for the purposes of showing you the message history. You can "
+            "learn more <a "
+            "href=\"https://recent-messages.robotty.de/\">here</a> or "
+            "<a href=\"https://recent-messages.robotty.de/\">view the privacy "
+            "policy here</a>"
+            "<br/>"
+            "Would you like to enable support?",
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
+
+        if (reply == QMessageBox::Yes)
+        {
+            if (!getSettings()->loadTwitchMessageHistoryOnConnect)
+            {
+                if (auto selected = this->windows->getMainWindow()
+                                        .getNotebook()
+                                        .getSelectedPage())
+                {
+                    if (auto container =
+                            dynamic_cast<SplitContainer *>(selected))
+                    {
+                        for (auto &&split : container->getSplits())
+                        {
+                            if (auto channel = split->getChannel();
+                                !channel->isEmpty())
+                            {
+                                channel->addMessage(makeSystemMessage(
+                                    "You will need to restart chatterino to "
+                                    "see historical messages."));
+                            }
+                        }
+                    }
+                }
+            }
+            getSettings()->loadTwitchMessageHistoryOnConnect = true;
+        }
+        else
+        {
+            getSettings()->loadTwitchMessageHistoryOnConnect = false;
+        }
+        getSettings()->seenRecentMessagesDisclaimer = true;
+        this->save();
+    }
 
     getSettings()->betaUpdates.connect(
         [] {

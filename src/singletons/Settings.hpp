@@ -380,6 +380,9 @@ public:
          {"d", 1},
          {"w", 1}}};
 
+    BoolSetting seenRecentMessagesDisclaimer = {
+        "/misc/seenRecentMessagesDisclaimer", false};
+
 private:
     void updateModerationActions();
 };
