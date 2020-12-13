@@ -9,8 +9,15 @@ namespace {
 HighlightPhrase buildHighlightPhrase(const QString &phrase, bool isRegex,
                                      bool isCaseSensitive)
 {
-    return HighlightPhrase(phrase, false, false, isRegex, isCaseSensitive, "",
-                           QColor());
+    return HighlightPhrase(phrase,           // pattern
+                           false,            // showInMentions
+                           false,            // hasAlert
+                           false,            // hasSound
+                           isRegex,          // isRegex
+                           isCaseSensitive,  // isCaseSensitive
+                           "",               // soundURL
+                           QColor()          // color
+    );
 }
 
 }  // namespace
