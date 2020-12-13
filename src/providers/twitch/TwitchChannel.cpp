@@ -937,14 +937,15 @@ void TwitchChannel::refreshCheerEmotes()
 
 void TwitchChannel::createClip()
 {
-    if (!clipCreationMutex.tryLock())
-    {
-        return;
-    }
     if (!this->isLive())
     {
         this->addMessage(makeSystemMessage(
             "Cannot create clip while the channel is offline!"));
+        return;
+    }
+
+    if (!clipCreationMutex.tryLock())
+    {
         return;
     }
 
