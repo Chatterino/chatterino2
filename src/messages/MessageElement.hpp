@@ -1,10 +1,10 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "messages/ImageSet.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "singletons/Fonts.hpp"
-#include "src/messages/ImageSet.hpp"
 
 #include <QRect>
 #include <QString>
