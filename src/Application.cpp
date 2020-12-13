@@ -148,8 +148,8 @@ int Application::run(QApplication &qtApp)
             "open for the purposes of showing you the message history. You can "
             "learn more <a "
             "href=\"https://recent-messages.robotty.de/\">here</a> or "
-            "<a href=\"https://recent-messages.robotty.de/\">view the privacy "
-            "policy here</a>"
+            "<a href=\"https://recent-messages.robotty.de/privacy\">view the "
+            "privacy policy here</a>"
             "<br/>"
             "Would you like to enable support?",
             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
