@@ -66,7 +66,7 @@ void ChannelChatters::addPartedUser(const QString &user)
 }
 void ChannelChatters::setChatters(UsernameSet &&set)
 {
-    *this->chatters_.access() = set;
+    this->chatters_.access()->merge(std::move(set));
 }
 
 void ChannelChatters::clearChatters()

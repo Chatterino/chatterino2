@@ -50,7 +50,14 @@ std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(const QString &value)
         auto iter = this->items.find(value);
         if (iter != this->items.end())
         {
-            this->items.erase(iter);
+            if (QString::compare(*iter, value, Qt::CaseSensitive) != 0)
+            {
+                this->items.erase(iter);
+            }
+            else
+            {
+                return {iter, false};
+            }
         }
     }
     return this->items.insert(value);
@@ -65,7 +72,14 @@ std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(QString &&value)
         auto iter = this->items.find(value);
         if (iter != this->items.end())
         {
-            this->items.erase(iter);
+            if (QString::compare(*iter, value, Qt::CaseSensitive) != 0)
+            {
+                this->items.erase(iter);
+            }
+            else
+            {
+                return {iter, false};
+            }
         }
     }
     return this->items.insert(std::move(value));
@@ -88,6 +102,24 @@ void UsernameSet::clear()
 {
     this->items.clear();
     this->firstKeyForPrefix.clear();
+}
+
+void UsernameSet::merge(UsernameSet &&set)
+{
+    for (auto it = this->items.begin(); it != this->items.end();)
+    {
+        auto iter = set.items.find(*it);
+        if (iter == set.items.end())
+        {
+            it = this->items.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+    this->items.merge(set.items);
+    this->firstKeyForPrefix.merge(set.firstKeyForPrefix);
 }
 
 //

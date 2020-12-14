@@ -775,10 +775,7 @@ void TwitchChannel::refreshChatters()
                 auto pair = parseChatters(result.parseJson());
                 if (pair.first)
                 {
-                    for (auto chatter : pair.second)
-                    {
-                        this->addRecentChatter(chatter);
-                    }
+                    this->setChatters(std::move(pair.second));
                 }
 
                 return pair.first;

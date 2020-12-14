@@ -78,6 +78,7 @@ public:
 
     bool contains(const QString &value) const;
     void clear();
+    void merge(UsernameSet &&set);
 
 private:
     void insertPrefix(const QString &string);
