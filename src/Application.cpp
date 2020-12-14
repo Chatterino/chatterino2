@@ -3,6 +3,7 @@
 #include <atomic>
 
 #include "common/Args.hpp"
+#include "common/Env.hpp"
 #include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -139,19 +140,22 @@ int Application::run(QApplication &qtApp)
     this->windows->getMainWindow().show();
     if (!getSettings()->seenRecentMessagesDisclaimer)
     {
+        auto recentMessagesUrl = QUrl(Env::get().recentMessagesApiUrl);
         auto reply = QMessageBox::question(
             &this->windows->getMainWindow(),
             "Do you want to enable Recent Messages support?",
-            "Recent messages is a service which allows you to see "
-            "messages from before starting Chatterino. If you enable support "
-            "for it Chatterino will send the name of every channel you have "
-            "open to a remote service for the purposes of showing you the message history. You can "
-            "learn more <a "
-            "href=\"https://recent-messages.robotty.de/\">here</a> or "
-            "<a href=\"https://recent-messages.robotty.de/privacy\">view the "
-            "privacy policy here</a>"
-            "<br/>"
-            "Would you like to enable support?",
+            QString(
+                "Recent messages is a service which allows you to see "
+                "messages from before starting Chatterino. If you enable "
+                "support for it Chatterino will send the name of every channel "
+                "you have open to a remote service for the purposes of showing "
+                "you the message history. You can learn more "
+                "<a href=\"https://%1\">here</a> "
+                "or <a href=\"https://%1/privacy\">view the privacy policy "
+                "here</a>"
+                "<br/>"
+                "Would you like to enable support?")
+                .arg(recentMessagesUrl.host()),
             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
         const auto isConfirmed = (reply == QMessageBox::Yes);
