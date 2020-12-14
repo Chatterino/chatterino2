@@ -183,10 +183,14 @@ TwitchChannel::TwitchChannel(const QString &name,
     });
 
     // timers
+    QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
+        this->refreshChatters();
+    });
+    this->chattersListTimer_.start(5 * 60 * 1000);
+
     QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [=] {
         this->refreshLiveStatus();
     });
-
     this->liveStatusTimer_.start(60 * 1000);
 
     // debugging
@@ -200,6 +204,7 @@ TwitchChannel::TwitchChannel(const QString &name,
 void TwitchChannel::initialize()
 {
     this->fetchDisplayName();
+    this->refreshChatters();
     this->refreshBadges();
 }
 
@@ -710,13 +715,11 @@ void TwitchChannel::loadRecentMessages()
 
             std::vector<MessagePtr> allBuiltMessages;
 
-            auto channel = static_cast<TwitchChannel *>(shared.get());
             for (auto message : messages)
             {
                 for (auto builtMessage :
                      handler.parseMessage(shared.get(), message))
                 {
-                    channel->addRecentChatter(builtMessage->displayName);
                     builtMessage->flags.set(MessageFlag::RecentMessage);
                     allBuiltMessages.emplace_back(builtMessage);
                 }
@@ -744,6 +747,45 @@ void TwitchChannel::refreshPubsub()
     getApp()->twitch2->pubsub->listenToChannelPointRewards(roomId, account);
 }
 
+void TwitchChannel::refreshChatters()
+{
+    // setting?
+    const auto streamStatus = this->accessStreamStatus();
+    const auto viewerCount = static_cast<int>(streamStatus->viewerCount);
+    if (getSettings()->onlyFetchChattersForSmallerStreamers)
+    {
+        if (streamStatus->live &&
+            viewerCount > getSettings()->smallStreamerLimit)
+        {
+            return;
+        }
+    }
+
+    // get viewer list
+    NetworkRequest("https://tmi.twitch.tv/group/user/" + this->getName() +
+                   "/chatters")
+
+        .onSuccess(
+            [this, weak = weakOf<Channel>(this)](auto result) -> Outcome {
+                // channel still exists?
+                auto shared = weak.lock();
+                if (!shared)
+                    return Failure;
+
+                auto pair = parseChatters(result.parseJson());
+                if (pair.first)
+                {
+                    for (auto chatter : pair.second)
+                    {
+                        this->addRecentChatter(chatter);
+                    }
+                }
+
+                return pair.first;
+            })
+        .execute();
+}
+
 void TwitchChannel::fetchDisplayName()
 {
     getHelix()->getUserByName(
@@ -768,13 +810,7 @@ void TwitchChannel::fetchDisplayName()
             channel->addRecentChatter(channel->getDisplayName());
             channel->displayNameChanged.invoke();
         },
-        [weak = weakOf<Channel>(this)] {
-            auto shared = weak.lock();
-            if (!shared)
-                return;
-            auto channel = static_cast<TwitchChannel *>(shared.get());
-            channel->addRecentChatter(channel->getDisplayName());
-        });
+        [] {});
 }
 
 void TwitchChannel::refreshBadges()
