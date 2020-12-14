@@ -145,7 +145,7 @@ int Application::run(QApplication &qtApp)
             "Recent messages is a service which allows you to see "
             "messages from before starting Chatterino. If you enable support "
             "for it Chatterino will send the name of every channel you have "
-            "open for the purposes of showing you the message history. You can "
+            "open to a remote service for the purposes of showing you the message history. You can "
             "learn more <a "
             "href=\"https://recent-messages.robotty.de/\">here</a> or "
             "<a href=\"https://recent-messages.robotty.de/privacy\">view the "
@@ -154,7 +154,8 @@ int Application::run(QApplication &qtApp)
             "Would you like to enable support?",
             QMessageBox::Yes | QMessageBox::No, QMessageBox::Yes);
 
-        if (reply == QMessageBox::Yes)
+        const auto isConfirmed = (reply == QMessageBox::Yes);
+        if (isConfirmed)
         {
             if (!getSettings()->loadTwitchMessageHistoryOnConnect)
             {
@@ -178,12 +179,8 @@ int Application::run(QApplication &qtApp)
                     }
                 }
             }
-            getSettings()->loadTwitchMessageHistoryOnConnect = true;
         }
-        else
-        {
-            getSettings()->loadTwitchMessageHistoryOnConnect = false;
-        }
+        getSettings()->loadTwitchMessageHistoryOnConnect = isConfirmed;
         getSettings()->seenRecentMessagesDisclaimer = true;
         this->save();
     }
