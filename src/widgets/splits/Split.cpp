@@ -137,11 +137,15 @@ Split::Split(QWidget *parent)
 
     this->input_->ui_.textEdit->installEventFilter(parent);
 
+    // update placeheolder text on Twitch account change and channel change
     this->signalHolder_.managedConnect(
         getApp()->accounts->twitch.currentUserChanged, [this] {
-            this->onAccountSelected();
+            this->updateInputPlaceholder();
         });
-    this->onAccountSelected();
+    this->signalHolder_.managedConnect(channelChanged, [this] {
+        this->updateInputPlaceholder();
+    });
+    this->updateInputPlaceholder();
 
     this->view_->mouseDown.connect([this](QMouseEvent *) {
         this->giveFocus(Qt::MouseFocusReason);
@@ -290,7 +294,7 @@ void Split::setContainer(SplitContainer *container)
     this->container_ = container;
 }
 
-void Split::onAccountSelected()
+void Split::updateInputPlaceholder()
 {
     if (!this->getChannel()->isTwitchChannel())
     {
@@ -312,19 +316,6 @@ void Split::onAccountSelected()
     }
 
     this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
-
-    this->updateTooltipColor();
-    this->signalHolder_.managedConnect(this->theme->updated, [this]() {
-        this->updateTooltipColor();
-    });
-}
-
-void Split::updateTooltipColor()
-{
-    QPalette dankPalette;
-    dankPalette.setColor(QPalette::PlaceholderText,
-                         this->theme->messages.textColors.chatPlaceholder);
-    this->input_->ui_.textEdit->setPalette(dankPalette);
 }
 
 IndirectChannel Split::getIndirectChannel()

@@ -127,13 +127,17 @@ void SplitInput::scaleChangedEvent(float scale)
 
 void SplitInput::themeChangedEvent()
 {
-    QPalette palette;
+    QPalette palette, placeholderPalette;
 
-    palette.setColor(QPalette::Foreground, this->theme->splits.input.text);
+    palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
+    placeholderPalette.setColor(
+        QPalette::PlaceholderText,
+        this->theme->messages.textColors.chatPlaceholder);
 
     this->updateEmoteButton();
     this->ui_.textEditLength->setPalette(palette);
 
+    this->ui_.textEdit->setPalette(placeholderPalette);
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
     this->ui_.hbox->setMargin(
