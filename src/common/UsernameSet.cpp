@@ -47,7 +47,7 @@ std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(const QString &value)
 
     if (!value.isLower())
     {
-        auto iter = this->items.find(value.toLower());
+        auto iter = this->items.find(value);
         if (iter != this->items.end())
         {
             this->items.erase(iter);
@@ -62,7 +62,7 @@ std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(QString &&value)
 
     if (!value.isLower())
     {
-        auto iter = this->items.find(value.toLower());
+        auto iter = this->items.find(value);
         if (iter != this->items.end())
         {
             this->items.erase(iter);
