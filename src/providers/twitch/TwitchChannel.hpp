@@ -186,6 +186,7 @@ private:
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
     QTime titleRefreshedTime_;
+
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;
     friend class IrcMessageHandler;
