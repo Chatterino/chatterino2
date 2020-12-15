@@ -43,8 +43,6 @@ std::set<QString>::size_type UsernameSet::size() const
 
 std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(const QString &value)
 {
-    this->insertPrefix(value);
-
     if (!value.isLower())
     {
         auto iter = this->items.find(value);
@@ -60,13 +58,13 @@ std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(const QString &value)
             }
         }
     }
+
+    this->insertPrefix(value);
     return this->items.insert(value);
 }
 
 std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(QString &&value)
 {
-    this->insertPrefix(value);
-
     if (!value.isLower())
     {
         auto iter = this->items.find(value);
@@ -82,6 +80,8 @@ std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(QString &&value)
             }
         }
     }
+
+    this->insertPrefix(value);
     return this->items.insert(std::move(value));
 }
 
@@ -119,7 +119,7 @@ void UsernameSet::merge(UsernameSet &&set)
         }
     }
     this->items.merge(set.items);
-    this->firstKeyForPrefix.merge(set.firstKeyForPrefix);
+    this->firstKeyForPrefix = set.firstKeyForPrefix;
 }
 
 //
