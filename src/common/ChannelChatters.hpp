@@ -17,13 +17,16 @@ public:
     void addRecentChatter(const QString &user);
     void addJoinedUser(const QString &user);
     void addPartedUser(const QString &user);
+    const QColor getUserColor(const QString &user);
     void setChatters(UsernameSet &&set);
+    void setUserColor(const QString &user, const QColor color);
 
 private:
     Channel &channel_;
 
     // maps 2 char prefix to set of names
     UniqueAccess<UsernameSet> chatters_;
+    UniqueAccess<std::map<QString, QColor>> chatterColors_;
 
     // combines multiple joins/parts into one message
     UniqueAccess<QStringList> joinedUsers_;
