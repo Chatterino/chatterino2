@@ -13,7 +13,7 @@ jobs:
 
       # Gives an error if there's no change in the changelog (except using label)
       - name: Changelog check
-        uses: dangoslen/changelog-enforcer@v1.5.1
+        uses: dangoslen/changelog-enforcer@v1.6.0
         with:
           changeLogPath: 'CHANGELOG.md'
           skipLabel: 'no changelog entry needed'
