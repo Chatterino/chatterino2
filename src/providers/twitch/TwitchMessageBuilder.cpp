@@ -479,14 +479,18 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         if (match.hasMatch())
         {
             QString username = match.captured(1);
-            auto userColor = this->twitchChannel->getUserColor(username);
+
+            if (getSettings()->colorUsernames)
+            {
+                textColor = this->twitchChannel->getUserColor(username);
+            }
 
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       userColor, FontStyle::ChatMediumBold)
+                                       textColor, FontStyle::ChatMediumBold)
                 ->setLink({Link::UserInfo, username});
 
             this->emplace<TextElement>(
-                    string, MessageElementFlag::NonBoldUsername, userColor)
+                    string, MessageElementFlag::NonBoldUsername, textColor)
                 ->setLink({Link::UserInfo, username});
             return;
         }
@@ -500,14 +504,17 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
         if (match.hasMatch() && chatters->contains(username))
         {
-            auto userColor = this->twitchChannel->getUserColor(username);
+            if (getSettings()->colorUsernames)
+            {
+                textColor = this->twitchChannel->getUserColor(username);
+            }
 
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
-                                       userColor, FontStyle::ChatMediumBold)
+                                       textColor, FontStyle::ChatMediumBold)
                 ->setLink({Link::UserInfo, username});
 
             this->emplace<TextElement>(
-                    string, MessageElementFlag::NonBoldUsername, userColor)
+                    string, MessageElementFlag::NonBoldUsername, textColor)
                 ->setLink({Link::UserInfo, username});
             return;
         }

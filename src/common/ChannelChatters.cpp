@@ -67,9 +67,9 @@ void ChannelChatters::addPartedUser(const QString &user)
 
 const QColor ChannelChatters::getUserColor(const QString &user)
 {
-    auto chatterColors = this->chatterColors_.access();
+    const auto chatterColors = this->chatterColors_.access();
 
-    auto search = chatterColors->find(user.toLower());
+    const auto search = chatterColors->find(user.toLower());
     if (search == chatterColors->end())
     {
         return QColor(MessageColor::Text);
@@ -85,10 +85,10 @@ void ChannelChatters::setChatters(UsernameSet &&set)
     *this->chatters_.access() = set;
 }
 
-void ChannelChatters::setUserColor(const QString &user, const QColor color)
+void ChannelChatters::setUserColor(const QString &user, const QColor &color)
 {
-    auto chatterColors = this->chatterColors_.access();
-    chatterColors->emplace(user.toLower(), color);
+    const auto chatterColors = this->chatterColors_.access();
+    chatterColors->insert_or_assign(user.toLower(), color);
 }
 
 }  // namespace chatterino

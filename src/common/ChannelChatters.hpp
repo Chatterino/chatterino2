@@ -19,7 +19,7 @@ public:
     void addPartedUser(const QString &user);
     const QColor getUserColor(const QString &user);
     void setChatters(UsernameSet &&set);
-    void setUserColor(const QString &user, const QColor color);
+    void setUserColor(const QString &user, const QColor &color);
 
 private:
     Channel &channel_;
