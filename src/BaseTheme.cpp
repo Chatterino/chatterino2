@@ -65,10 +65,10 @@ void AB_THEME_CLASS::actuallyUpdate(double hue, double multiplier)
 #ifdef Q_OS_LINUX
         this->window.background = lightWin ? "#fff" : QColor(61, 60, 56);
 #else
-        this->window.background = lightWin ? "#fff" : "#111";
+        this->window.background = lightWin ? "#fff" : "#fff";
 #endif
 
-        QColor fg = this->window.text = lightWin ? "#000" : "#eee";
+        QColor fg = this->window.text = lightWin ? "#000" : "#000";
         this->window.borderFocused = lightWin ? "#ccc" : themeColor;
         this->window.borderUnfocused = lightWin ? "#ccc" : themeColorNoSat;
 
@@ -108,22 +108,22 @@ void AB_THEME_CLASS::actuallyUpdate(double hue, double multiplier)
         else
         {
             this->tabs.regular = {
-                QColor("#aaa"),
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {QColor("#444"), QColor("#444"), QColor("#444")}};
+                QColor("#000"),
+                {QColor("#fff"), QColor("#d1d1d1"), QColor("#fff")},
+                {QColor("#fff"), QColor("#d1d1d1"), QColor("#fff")}};
             this->tabs.newMessage = {
-                fg,
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {QColor("#888"), QColor("#888"), QColor("#888")}};
+                QColor("#000"),
+                {QColor("#c5d4eb"), QColor("#a5b1c4"), QColor("#c5d4eb")},
+                {QColor("#c5d4eb"), QColor("#a5b1c4"), QColor("#c5d4eb")}};
             this->tabs.highlighted = {
-                fg,
-                {QColor("#252525"), QColor("#252525"), QColor("#252525")},
-                {highlighted, highlighted, highlighted}};
+                QColor("#fff"),
+                {QColor("#3f72bf"), QColor("#3f72bf"), QColor("#3f72bf")},
+                {QColor("#3f72bf"), QColor("#3f72bf"), QColor("#3f72bf")}};
 
             this->tabs.selected = {
                 QColor("#fff"),
-                {QColor("#555555"), QColor("#555555"), QColor("#555555")},
-                {this->accent, this->accent, this->accent}};
+                {QColor("#3f72bf"), QColor("#3f72bf"), QColor("#3f72bf")},
+                {QColor("#3f72bf"), QColor("#3f72bf"), QColor("#3f72bf")}};
         }
 
         // scrollbar

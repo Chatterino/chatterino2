@@ -315,7 +315,7 @@ void BaseWindow::themeChangedEvent()
             QPalette palette_title;
             palette_title.setColor(
                 QPalette::WindowText,
-                this->theme->isLightTheme() ? "#333" : "#ccc");
+                this->theme->isLightTheme() ? "#333" : "#000");
             this->ui_.titleLabel->setPalette(palette_title);
         }
 

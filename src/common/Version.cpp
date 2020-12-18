@@ -32,6 +32,7 @@ Version::Version()
     }
 
     this->fullVersion_ += this->version_;
+    this->fullVersion_ += " agenttud edition";
 
 #if defined(Q_OS_WIN) || defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
     this->isSupportedOS_ = true;
