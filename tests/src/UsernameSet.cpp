@@ -75,6 +75,12 @@ TEST(UsernameSet, insert)
     EXPECT_TRUE(p.second);
 
     EXPECT_EQ(set.size(), 2);
+
+    // Same uppercase should not result in a change
+    p = set.insert("PAJBOT");
+    EXPECT_FALSE(p.second);
+
+    EXPECT_EQ(set.size(), 2);
 }
 
 TEST(UsernameSet, CollisionTest)
