@@ -80,10 +80,8 @@ const QColor ChannelChatters::getUserColor(const QString &user)
         // Returns an invalid color so we can decide not to override `textColor`
         return QColor();
     }
-    else
-    {
-        return search->second;
-    }
+
+    return search->second;
 }
 
 void ChannelChatters::setUserColor(const QString &user, const QColor &color)
