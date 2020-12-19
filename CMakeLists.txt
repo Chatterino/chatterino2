@@ -37,6 +37,9 @@ if (BUILD_TESTS)
 
     target_link_libraries(chatterino-test PajladaSerialize)
 
+    set_property(TARGET chatterino-test PROPERTY CXX_STANDARD 17)
+    set_property(TARGET chatterino-test PROPERTY CXX_STANDARD_REQUIRED ON)
+
     gtest_discover_tests(chatterino-test)
 else()
     message(FATAL_ERROR "This cmake file is only intended for tests right now. Use qmake to build chatterino2")

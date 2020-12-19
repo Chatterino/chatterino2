@@ -44,18 +44,35 @@ TEST(UsernameSet, insert)
 
     EXPECT_EQ(set.size(), 1);
 
+    // Non-lowercase variant should override full lowercase variant
+    p = set.insert("PAJLADA");
+    EXPECT_TRUE(p.second);
+
+    EXPECT_EQ(set.size(), 1);
+
+    // Lowercase variant should not override non-lowercase variant
+    p = set.insert("pajlada");
+    EXPECT_FALSE(p.second);
+
+    EXPECT_EQ(set.size(), 1);
+
     p = set.insert("pajbot");
     EXPECT_TRUE(p.second);
 
     EXPECT_EQ(set.size(), 2);
 
-    p = set.insert("pajlada");
+    p = set.insert("pajbot");
     EXPECT_FALSE(p.second);
 
     EXPECT_EQ(set.size(), 2);
 
-    p = set.insert("PAJLADA");
-    EXPECT_FALSE(p.second);
+    p = set.insert("Pajbot");
+    EXPECT_TRUE(p.second);
+
+    EXPECT_EQ(set.size(), 2);
+
+    p = set.insert("PAJBOT");
+    EXPECT_TRUE(p.second);
 
     EXPECT_EQ(set.size(), 2);
 }
