@@ -77,7 +77,8 @@ const QColor ChannelChatters::getUserColor(const QString &user)
     const auto search = chatterColors->find(user.toLower());
     if (search == chatterColors->end())
     {
-        return QColor(MessageColor::Text);
+        // Returns an invalid color so we can decide not to override `textColor`
+        return QColor();
     }
     else
     {

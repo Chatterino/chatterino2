@@ -482,7 +482,12 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
             if (getSettings()->colorUsernames)
             {
-                textColor = this->twitchChannel->getUserColor(username);
+                if (auto userColor =
+                        this->twitchChannel->getUserColor(username);
+                    userColor.isValid())
+                {
+                    textColor = userColor;
+                }
             }
 
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
@@ -506,7 +511,12 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         {
             if (getSettings()->colorUsernames)
             {
-                textColor = this->twitchChannel->getUserColor(username);
+                if (auto userColor =
+                        this->twitchChannel->getUserColor(username);
+                    userColor.isValid())
+                {
+                    textColor = userColor;
+                }
             }
 
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
