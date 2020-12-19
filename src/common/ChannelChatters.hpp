@@ -17,8 +17,8 @@ public:
     void addRecentChatter(const QString &user);
     void addJoinedUser(const QString &user);
     void addPartedUser(const QString &user);
-    const QColor getUserColor(const QString &user);
     void setChatters(UsernameSet &&set);
+    const QColor getUserColor(const QString &user);
     void setUserColor(const QString &user, const QColor &color);
 
 private:

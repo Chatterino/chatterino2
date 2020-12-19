@@ -65,6 +65,11 @@ void ChannelChatters::addPartedUser(const QString &user)
     }
 }
 
+void ChannelChatters::setChatters(UsernameSet &&set)
+{
+    *this->chatters_.access() = set;
+}
+
 const QColor ChannelChatters::getUserColor(const QString &user)
 {
     const auto chatterColors = this->chatterColors_.access();
@@ -78,11 +83,6 @@ const QColor ChannelChatters::getUserColor(const QString &user)
     {
         return search->second;
     }
-}
-
-void ChannelChatters::setChatters(UsernameSet &&set)
-{
-    *this->chatters_.access() = set;
 }
 
 void ChannelChatters::setUserColor(const QString &user, const QColor &color)
