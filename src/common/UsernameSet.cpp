@@ -4,6 +4,27 @@
 
 namespace chatterino {
 
+std::pair<UsernameSet::Iterator, bool> findOrErase(
+    std::set<QString, CaseInsensitiveLess> &set, const QString &value)
+{
+    if (!value.isLower())
+    {
+        auto iter = set.find(value);
+        if (iter != set.end())
+        {
+            if (QString::compare(*iter, value, Qt::CaseSensitive) != 0)
+            {
+                set.erase(iter);
+            }
+            else
+            {
+                return {iter, false};
+            }
+        }
+    }
+    return {set.end(), true};
+}
+
 //
 // UsernameSet
 //
@@ -43,20 +64,10 @@ std::set<QString>::size_type UsernameSet::size() const
 
 std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(const QString &value)
 {
-    if (!value.isLower())
+    auto pair = findOrErase(this->items, value);
+    if (!pair.second)
     {
-        auto iter = this->items.find(value);
-        if (iter != this->items.end())
-        {
-            if (QString::compare(*iter, value, Qt::CaseSensitive) != 0)
-            {
-                this->items.erase(iter);
-            }
-            else
-            {
-                return {iter, false};
-            }
-        }
+        return pair;
     }
 
     this->insertPrefix(value);
@@ -65,20 +76,10 @@ std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(const QString &value)
 
 std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(QString &&value)
 {
-    if (!value.isLower())
+    auto pair = findOrErase(this->items, value);
+    if (!pair.second)
     {
-        auto iter = this->items.find(value);
-        if (iter != this->items.end())
-        {
-            if (QString::compare(*iter, value, Qt::CaseSensitive) != 0)
-            {
-                this->items.erase(iter);
-            }
-            else
-            {
-                return {iter, false};
-            }
-        }
+        return pair;
     }
 
     this->insertPrefix(value);
@@ -96,12 +97,6 @@ void UsernameSet::insertPrefix(const QString &value)
 bool UsernameSet::contains(const QString &value) const
 {
     return this->items.count(value) == 1;
-}
-
-void UsernameSet::clear()
-{
-    this->items.clear();
-    this->firstKeyForPrefix.clear();
 }
 
 void UsernameSet::merge(UsernameSet &&set)

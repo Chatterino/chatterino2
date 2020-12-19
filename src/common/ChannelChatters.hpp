@@ -18,7 +18,6 @@ public:
     void addJoinedUser(const QString &user);
     void addPartedUser(const QString &user);
     void setChatters(UsernameSet &&set);
-    void clearChatters();
 
 private:
     Channel &channel_;

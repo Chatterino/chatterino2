@@ -77,7 +77,6 @@ public:
     std::pair<Iterator, bool> insert(QString &&value);
 
     bool contains(const QString &value) const;
-    void clear();
     void merge(UsernameSet &&set);
 
 private:

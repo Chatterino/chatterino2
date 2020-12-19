@@ -69,9 +69,4 @@ void ChannelChatters::setChatters(UsernameSet &&set)
     this->chatters_.access()->merge(std::move(set));
 }
 
-void ChannelChatters::clearChatters()
-{
-    this->chatters_.access()->clear();
-}
-
 }  // namespace chatterino
