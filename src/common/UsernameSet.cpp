@@ -4,26 +4,30 @@
 
 namespace chatterino {
 
-std::pair<UsernameSet::Iterator, bool> findOrErase(
-    std::set<QString, CaseInsensitiveLess> &set, const QString &value)
-{
-    if (!value.isLower())
+namespace {
+    using namespace chatterino;
+
+    std::pair<UsernameSet::Iterator, bool> findOrErase(
+        std::set<QString, CaseInsensitiveLess> &set, const QString &value)
     {
-        auto iter = set.find(value);
-        if (iter != set.end())
+        if (!value.isLower())
         {
-            if (QString::compare(*iter, value, Qt::CaseSensitive) != 0)
+            auto iter = set.find(value);
+            if (iter != set.end())
             {
-                set.erase(iter);
-            }
-            else
-            {
-                return {iter, false};
+                if (QString::compare(*iter, value, Qt::CaseSensitive) != 0)
+                {
+                    set.erase(iter);
+                }
+                else
+                {
+                    return {iter, false};
+                }
             }
         }
+        return {set.end(), true};
     }
-    return {set.end(), true};
-}
+}  // namespace
 
 //
 // UsernameSet
