@@ -945,7 +945,7 @@ void TwitchChannel::createClip()
         return;
     }
 
-    if (QTime().currentTime().msecsTo(this->timeNextClipCreationAllowed_) > 0)
+    if (QTime().currentTime() < this->timeNextClipCreationAllowed_)
     {
         return;
     }
