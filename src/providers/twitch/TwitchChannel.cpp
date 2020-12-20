@@ -804,6 +804,7 @@ void TwitchChannel::fetchDisplayName()
                                               .arg(channel->getName())
                                               .arg(user.displayName));
             }
+            channel->addRecentChatter(channel->getDisplayName());
             channel->displayNameChanged.invoke();
         },
         [] {});
