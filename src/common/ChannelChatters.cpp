@@ -72,7 +72,7 @@ void ChannelChatters::setChatters(UsernameSet &&set)
 
 const QColor ChannelChatters::getUserColor(const QString &user)
 {
-    const auto chatterColors = this->chatterColors_.access();
+    const auto chatterColors = this->chatterColors_.accessConst();
 
     const auto search = chatterColors->find(user.toLower());
     if (search == chatterColors->end())

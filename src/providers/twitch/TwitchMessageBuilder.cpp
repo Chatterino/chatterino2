@@ -600,7 +600,10 @@ void TwitchMessageBuilder::parseUsername()
     //    }
 
     this->message().loginName = this->userName;
-    this->twitchChannel->setUserColor(this->userName, this->usernameColor_);
+    if (this->twitchChannel != nullptr)
+    {
+        this->twitchChannel->setUserColor(this->userName, this->usernameColor_);
+    }
 
     // Update current user color if this is our message
     auto currentUser = getApp()->accounts->twitch.getCurrent();
