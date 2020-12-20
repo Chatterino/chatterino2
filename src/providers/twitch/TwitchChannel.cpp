@@ -43,7 +43,7 @@ namespace {
                                       "haven't re-authenticated yet. ");
     static const QString LOGIN_PROMPT_TEXT(
         "Click here to add your account again.");
-    static const auto ACCOUNTS_LINK = Link(Link::OpenAccountsPage, QString());
+    static const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
     static const int CLIP_CREATION_COOLDOWN = 5000;
 
     // convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT command and converts it to a readable NOTICE message
