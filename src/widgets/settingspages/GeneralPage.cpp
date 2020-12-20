@@ -572,6 +572,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.autoCloseUserPopup);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
+    layout.addCheckbox("Color @usernames", s.colorUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames);
     layout.addDropdown<float>(
