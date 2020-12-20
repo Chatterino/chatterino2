@@ -5,7 +5,6 @@
 namespace chatterino {
 
 namespace {
-    using namespace chatterino;
 
     std::pair<UsernameSet::Iterator, bool> findOrErase(
         std::set<QString, CaseInsensitiveLess> &set, const QString &value)
