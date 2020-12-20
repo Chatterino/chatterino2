@@ -2,6 +2,7 @@
 
 #include "common/NetworkRequest.hpp"
 
+#include <QJsonArray>
 #include <QString>
 #include <QStringList>
 #include <QUrl>

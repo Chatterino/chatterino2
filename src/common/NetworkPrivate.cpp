@@ -10,6 +10,7 @@
 
 #include <QCryptographicHash>
 #include <QFile>
+#include <QNetworkReply>
 #include <QtConcurrent>
 #include "common/QLogging.hpp"
 
