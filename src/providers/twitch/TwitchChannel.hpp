@@ -188,6 +188,7 @@ private:
     QTimer chattersListTimer_;
     QTime titleRefreshedTime_;
     QTime timeNextClipCreationAllowed_{QTime().currentTime()};
+    bool isClipCreationInProgress{false};
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;

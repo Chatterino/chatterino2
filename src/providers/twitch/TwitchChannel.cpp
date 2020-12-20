@@ -45,7 +45,6 @@ namespace {
         "Click here to add your account again.");
     static const auto ACCOUNTS_LINK = Link(Link::OpenAccountsPage, QString());
     static const int CLIP_CREATION_COOLDOWN = 5000;
-    static QMutex clipCreationMutex;
 
     // convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT command and converts it to a readable NOTICE message
     // This has historically been done in the Recent Messages API, but this functionality is being moved to Chatterino instead
@@ -945,16 +944,14 @@ void TwitchChannel::createClip()
         return;
     }
 
-    if (QTime().currentTime() < this->timeNextClipCreationAllowed_)
-    {
-        return;
-    }
-    if (!clipCreationMutex.tryLock())
+    if (QTime().currentTime() < this->timeNextClipCreationAllowed_ ||
+        this->isClipCreationInProgress)
     {
         return;
     }
 
     this->addMessage(makeSystemMessage("Creating clip..."));
+    this->isClipCreationInProgress = true;
 
     getHelix()->createClip(
         this->roomId(),
@@ -986,7 +983,7 @@ void TwitchChannel::createClip()
             this->addMessage(builder.release());
             this->timeNextClipCreationAllowed_ =
                 QTime().currentTime().addMSecs(CLIP_CREATION_COOLDOWN);
-            clipCreationMutex.unlock();
+            this->isClipCreationInProgress = false;
         },
         [this] {
             MessageBuilder builder;
@@ -1004,7 +1001,7 @@ void TwitchChannel::createClip()
             this->addMessage(builder.release());
             this->timeNextClipCreationAllowed_ =
                 QTime().currentTime().addMSecs(CLIP_CREATION_COOLDOWN);
-            clipCreationMutex.unlock();
+            this->isClipCreationInProgress = false;
         });
 }
 
