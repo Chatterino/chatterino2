@@ -14,8 +14,6 @@
 namespace chatterino {
 
 namespace {
-    using namespace chatterino;
-
     QSet<SplitContainer *> openPages()
     {
         QSet<SplitContainer *> pages;
