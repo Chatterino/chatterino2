@@ -480,7 +480,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         {
             QString username = match.captured(1);
 
-            if (getSettings()->colorUsernames)
+            if (this->twitchChannel != nullptr && getSettings()->colorUsernames)
             {
                 if (auto userColor =
                         this->twitchChannel->getUserColor(username);
