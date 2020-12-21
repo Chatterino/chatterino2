@@ -336,12 +336,16 @@ void CommandController::initialize(Settings &, Paths &paths)
                     },
                     [channel, target]() {
                         channel->addMessage(makeSystemMessage(
-                            "An error occurred while following " + target));
+                            QString("User %1 could not be followed, an unknown "
+                                    "error occured!")
+                                .arg(target)));
                     });
             },
             [channel, target] {
-                channel->addMessage(makeSystemMessage(
-                    QString("User %1 could not be followed!").arg(target)));
+                channel->addMessage(
+                    makeSystemMessage(QString("User %1 could not be followed, "
+                                              "no user with that name found!")
+                                          .arg(target)));
             });
 
         return "";
