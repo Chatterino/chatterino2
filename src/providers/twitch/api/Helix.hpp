@@ -184,6 +184,14 @@ public:
     void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
                      HelixFailureCallback failureCallback);
 
+    void followUser(QString userId, QString targetId,
+                    std::function<void()> successCallback,
+                    HelixFailureCallback failureCallback);
+
+    void unfollowUser(QString userId, QString targetlId,
+                      std::function<void()> successCallback,
+                      HelixFailureCallback failureCallback);
+
     void update(QString clientId, QString oauthToken);
 
     static void initialize();
