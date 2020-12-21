@@ -106,6 +106,13 @@ URL: https://dev.twitch.tv/docs/api/reference#get-streams
      * `TwitchChannel` to get live status, game, title, and viewer count of a channel
      * `NotificationController` to provide notifications for channels you might not have open in Chatterino, but are still interested in getting notifications for
 
+### Create Clip
+URL: https://dev.twitch.tv/docs/api/reference#create-clip
+
+ * We implement this in `providers/twitch/api/Helix.cpp createClip`
+   Used in:
+     * `TwitchChannel` to create a clip of a live broadcast
+
 ## TMI
 The TMI api is undocumented.
 
