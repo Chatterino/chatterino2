@@ -145,6 +145,8 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     {
         for (const auto &prevElement : this->elements_)
         {
+            // TODO(leon): Does this behave correctly for non-text elements
+            //             (e.g. emotes)?
             if (!prevElement->getText().isRightToLeft())
                 continue;
 
@@ -167,7 +169,11 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
 
     if (element->hasTrailingSpace())
     {
-        if (!isRtl)
+        // When we add spacing between individual words, we need to make sure to
+        // add it on the correct side.
+        if (isRtl)
+            this->currentX_ -= this->spaceWidth_;
+        else
             this->currentX_ += this->spaceWidth_;
     }
 }
