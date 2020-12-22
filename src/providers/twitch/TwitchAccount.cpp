@@ -290,47 +290,6 @@ void TwitchAccount::checkFollow(const QString targetUserID,
                               [] {});
 }
 
-void TwitchAccount::followUser(const QString userID,
-                               std::function<void()> successCallback)
-{
-    QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                    "/follows/channels/" + userID);
-
-    NetworkRequest(requestUrl, NetworkRequestType::Put)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onSuccess([successCallback](auto result) -> Outcome {
-            // TODO: Properly check result of follow request
-            successCallback();
-
-            return Success;
-        })
-        .execute();
-}
-
-void TwitchAccount::unfollowUser(const QString userID,
-                                 std::function<void()> successCallback)
-{
-    QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                    "/follows/channels/" + userID);
-
-    NetworkRequest(requestUrl, NetworkRequestType::Delete)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([successCallback](NetworkResult result) {
-            if (result.status() >= 200 && result.status() <= 299)
-            {
-                successCallback();
-            }
-        })
-        .onSuccess([successCallback](const auto &document) -> Outcome {
-            successCallback();
-
-            return Success;
-        })
-        .execute();
-}
-
 std::set<TwitchUser> TwitchAccount::getIgnores() const
 {
     std::lock_guard<std::mutex> lock(this->ignoresMutex_);
