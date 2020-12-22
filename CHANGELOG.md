@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unversioned
+- Bugfix: Rudimentary support for right-to-left-languages (#1970)
 
 ## 2.3.0
 
