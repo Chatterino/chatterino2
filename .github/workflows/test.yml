@@ -46,6 +46,7 @@ jobs:
             sudo apt-get update
             sudo apt-get -y install \
                 cmake \
+                rapidjson-dev \
                 libssl-dev \
                 libboost-dev \
                 libboost-system-dev \
