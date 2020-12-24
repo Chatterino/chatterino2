@@ -8,7 +8,7 @@ on:
       - '*.md'
 
 jobs:
-  build:
+  test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
