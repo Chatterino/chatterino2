@@ -1,6 +1,20 @@
 ![alt text](https://fourtf.com/img/chatterino-icon-64.png)
-Chatterino 2 [![GitHub Actions Build (Windows, Ubuntu, MacOS)](https://github.com/Chatterino/chatterino2/workflows/Build/badge.svg?branch=master)](https://github.com/Chatterino/chatterino2/actions?query=workflow%3ABuild+branch%3Amaster) [![Cirrus CI Build (FreeBSD only)](https://api.cirrus-ci.com/github/Chatterino/chatterino2.svg?branch=master)](https://cirrus-ci.com/github/Chatterino/chatterino2/master) [![Chocolatey Package](https://img.shields.io/chocolatey/v/chatterino?include_prereleases)](https://chocolatey.org/packages/chatterino)
+Chatterino 2 [![GitHub Actions Build (Windows, Ubuntu, MacOS)](https://github.com/Mm2PL/chatterino2/workflows/Build/badge.svg?branch=dankerino)](https://github.com/Mm2PL/chatterino2/actions?query=workflow%3ABuild+branch%3Adankerino)
 ============
+
+## Dankerino
+Dankerino is a fork of Chatterino 2.
+
+### Goals of Dankerino
+
+    - Add QOL and features (or fixes) that aren't accepted into the upstream repo.
+
+
+### Non-goals of Dankerino
+
+    - Being something *different* than Chatterino 2. All features from upstream should be present in Dankerino.
+
+## Original Chatterino 2 readme
 
 Chatterino 2 is a chat client for [Twitch.tv](https://twitch.tv).
 The Chatterino 2 wiki can be found [here](https://wiki.chatterino.com).
