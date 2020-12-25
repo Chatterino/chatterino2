@@ -4,7 +4,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - dankerino
     paths-ignore:
       - 'docs/**'
       - '*.md'
@@ -172,7 +172,7 @@ jobs:
   create-release:
     needs: build
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/dankerino')
 
     steps:
       - name: Create release

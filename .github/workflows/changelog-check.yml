@@ -2,7 +2,7 @@ name: Changelog Check
 
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ dankerino ]
     types: [ opened, synchronize, reopened, ready_for_review, labeled, unlabeled ]
 
 jobs:
