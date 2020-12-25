@@ -1,0 +1,29 @@
+From e19204175858c60c12d1fb97c0df2185ac449567 Mon Sep 17 00:00:00 2001
+From: Mm2PL <jakis128@gmail.com>
+Date: Mon, 8 Jun 2020 22:48:21 +0200
+Subject: [PATCH] Create supibot whisper shortcut
+
+---
+ src/widgets/splits/SplitInput.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/widgets/splits/SplitInput.cpp b/src/widgets/splits/SplitInput.cpp
+index 8e4aa0fd..76b9fa6b 100644
+--- a/src/widgets/splits/SplitInput.cpp
++++ b/src/widgets/splits/SplitInput.cpp
+@@ -473,6 +473,12 @@ void SplitInput::editTextChanged()
+             this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+         }
+     }
++    else if (text.startsWith("/$", Qt::CaseInsensitive) &&
++             this->split_->getChannel()->isTwitchChannel())  //
++    {
++        this->ui_.textEdit->setPlainText("/w supibot " + text.mid(1));
++        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
++    }
+     else
+     {
+         this->textChanged.invoke(text);
+-- 
+2.27.0.22.g20514004dd
+

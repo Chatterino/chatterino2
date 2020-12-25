@@ -1,0 +1,29 @@
+From 089a7e1908c8b10b6ea803ca26ddf08e418115a6 Mon Sep 17 00:00:00 2001
+From: Mm2PL <jakis128@gmail.com>
+Date: Tue, 9 Jun 2020 21:43:13 +0200
+Subject: [PATCH] Add shortcut for Mm_sUtilityBot.
+
+---
+ src/widgets/splits/SplitInput.cpp | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/widgets/splits/SplitInput.cpp b/src/widgets/splits/SplitInput.cpp
+index 76b9fa6b..44c170e7 100644
+--- a/src/widgets/splits/SplitInput.cpp
++++ b/src/widgets/splits/SplitInput.cpp
+@@ -479,6 +479,12 @@ void SplitInput::editTextChanged()
+         this->ui_.textEdit->setPlainText("/w supibot " + text.mid(1));
+         this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+     }
++    else if (text.startsWith("/_", Qt::CaseInsensitive) &&
++             this->split_->getChannel()->isTwitchChannel())  //
++    {
++        this->ui_.textEdit->setPlainText("/w mm_sutilitybot " + text.mid(1));
++        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
++    }
+     else
+     {
+         this->textChanged.invoke(text);
+-- 
+2.27.0.22.g20514004dd
+

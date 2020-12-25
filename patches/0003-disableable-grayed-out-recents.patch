@@ -1,0 +1,49 @@
+From c66bb48fb03ff380e26ba2733c28ae49a78c05a9 Mon Sep 17 00:00:00 2001
+From: Mm2PL <jakis128@gmail.com>
+Date: Mon, 23 Nov 2020 19:29:33 +0100
+Subject: [PATCH] Ship it LUL
+
+---
+ src/messages/layouts/MessageLayout.cpp    | 3 ++-
+ src/singletons/Settings.hpp               | 1 +
+ src/widgets/settingspages/GeneralPage.cpp | 1 +
+ 3 files changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/src/messages/layouts/MessageLayout.cpp b/src/messages/layouts/MessageLayout.cpp
+index eb2b8b988..83a4b95f1 100644
+--- a/src/messages/layouts/MessageLayout.cpp
++++ b/src/messages/layouts/MessageLayout.cpp
+@@ -213,7 +213,8 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
+         //                         QBrush(QColor(64, 64, 64, 64)));
+     }
+ 
+-    if (this->message_->flags.has(MessageFlag::RecentMessage))
++    if (this->message_->flags.has(MessageFlag::RecentMessage) &&
++        getSettings()->grayOutRecents)
+     {
+         painter.fillRect(0, y, pixmap->width(), pixmap->height(),
+                          app->themes->messages.disabled);
+diff --git a/src/singletons/Settings.hpp b/src/singletons/Settings.hpp
+index 4d73fc5be..2f936789c 100644
+--- a/src/singletons/Settings.hpp
++++ b/src/singletons/Settings.hpp
+@@ -94,6 +94,7 @@ class Settings : public ABSettings, public ConcurrentSettings
+         "/appearance/messages/collapseMessagesMinLines", 0};
+     BoolSetting alternateMessages = {
+         "/appearance/messages/alternateMessageBackground", false};
++    BoolSetting grayOutRecents = {"/appearance/messages/gratOutRecents", true};
+     FloatSetting boldScale = {"/appearance/boldScale", 63};
+     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
+     BoolSetting showTabLive = {"/appearance/showTabLiveButton", true};
+diff --git a/src/widgets/settingspages/GeneralPage.cpp b/src/widgets/settingspages/GeneralPage.cpp
+index 2f22be690..d5a6f292a 100644
+--- a/src/widgets/settingspages/GeneralPage.cpp
++++ b/src/widgets/settingspages/GeneralPage.cpp
+@@ -226,6 +226,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
+     layout.addTitle("Messages");
+     layout.addCheckbox("Separate with lines", s.separateMessages);
+     layout.addCheckbox("Alternate background color", s.alternateMessages);
++    layout.addCheckbox("Gray-out recent messages", s.grayOutRecents);
+     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
+     layout.addCheckbox("Show last message line", s.showLastMessageIndicator);
+     layout.addDropdown<std::underlying_type<Qt::BrushStyle>::type>(

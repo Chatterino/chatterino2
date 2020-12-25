@@ -1,0 +1,18 @@
+---
+ src/widgets/splits/Split.cpp       | 1 +
+ 1 files changed, 1 insertions(+), 0 deletion(-)
+
+diff --git a/src/widgets/splits/Split.cpp b/src/widgets/splits/Split.cpp
+index d35ca701..6e286fae 100644
+--- a/src/widgets/splits/Split.cpp
++++ b/src/widgets/splits/Split.cpp
+@@ -124,6 +124,7 @@ Split::Split(QWidget *parent)
+     // CreateShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
+     // CreateShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
+     // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
++    createShortcut(this, "Ctrl+L", &Split::clear);
+
+     this->input_->ui_.textEdit->installEventFilter(parent);
+
+--
+2.20.1
