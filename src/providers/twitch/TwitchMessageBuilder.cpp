@@ -480,6 +480,16 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         {
             QString username = match.captured(1);
 
+            if (this->twitchChannel != nullptr && getSettings()->colorUsernames)
+            {
+                if (auto userColor =
+                        this->twitchChannel->getUserColor(username);
+                    userColor.isValid())
+                {
+                    textColor = userColor;
+                }
+            }
+
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
                 ->setLink({Link::UserInfo, username});
@@ -499,6 +509,16 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
         if (match.hasMatch() && chatters->contains(username))
         {
+            if (getSettings()->colorUsernames)
+            {
+                if (auto userColor =
+                        this->twitchChannel->getUserColor(username);
+                    userColor.isValid())
+                {
+                    textColor = userColor;
+                }
+            }
+
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
                 ->setLink({Link::UserInfo, username});
@@ -580,6 +600,10 @@ void TwitchMessageBuilder::parseUsername()
     //    }
 
     this->message().loginName = this->userName;
+    if (this->twitchChannel != nullptr)
+    {
+        this->twitchChannel->setUserColor(this->userName, this->usernameColor_);
+    }
 
     // Update current user color if this is our message
     auto currentUser = getApp()->accounts->twitch.getCurrent();
