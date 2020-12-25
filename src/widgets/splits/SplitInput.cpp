@@ -615,6 +615,18 @@ void SplitInput::editTextChanged()
             this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
         }
     }
+    else if (text.startsWith("/$", Qt::CaseInsensitive) &&
+             this->split_->getChannel()->isTwitchChannel())  //
+    {
+        this->ui_.textEdit->setPlainText("/w supibot " + text.mid(1));
+        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+    }
+    else if (text.startsWith("/_", Qt::CaseInsensitive) &&
+             this->split_->getChannel()->isTwitchChannel())  //
+    {
+        this->ui_.textEdit->setPlainText("/w mm_sutilitybot " + text.mid(1));
+        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+    }
     else
     {
         this->textChanged.invoke(text);

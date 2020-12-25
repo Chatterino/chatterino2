@@ -134,6 +134,7 @@ Split::Split(QWidget *parent)
     // CreateShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
     // CreateShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
     // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
+    createShortcut(this, "Ctrl+L", &Split::clear);
 
     this->input_->ui_.textEdit->installEventFilter(parent);
 

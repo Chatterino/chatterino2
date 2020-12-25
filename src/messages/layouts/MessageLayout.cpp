@@ -213,7 +213,8 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
         //                         QBrush(QColor(64, 64, 64, 64)));
     }
 
-    if (this->message_->flags.has(MessageFlag::RecentMessage))
+    if (this->message_->flags.has(MessageFlag::RecentMessage) &&
+        getSettings()->grayOutRecents)
     {
         painter.fillRect(0, y, pixmap->width(), pixmap->height(),
                          app->themes->messages.disabled);
