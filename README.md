@@ -7,12 +7,12 @@ Dankerino is a fork of Chatterino 2.
 
 ### Goals of Dankerino
 
-    - Add QOL and features (or fixes) that aren't accepted into the upstream repo.
+ - Add QOL and features (or fixes) that aren't accepted into the upstream repo.
 
 
 ### Non-goals of Dankerino
 
-    - Being something *different* than Chatterino 2. All features from upstream should be present in Dankerino.
+ - Being something *different* than Chatterino 2. All features from upstream should be present in Dankerino.
 
 ## Original Chatterino 2 readme
 
