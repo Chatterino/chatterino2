@@ -56,6 +56,10 @@ if (BUILD_TESTS)
     target_link_libraries(chatterino-test PajladaSettings)
     target_include_directories(chatterino-test PUBLIC PajladaSettings)
 
+    find_package(Threads)
+
+    target_link_libraries(chatterino-test Threads::Threads)
+
     set(BUILD_TESTS OFF)
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/lib/serialize PajladaSerialize)
 
