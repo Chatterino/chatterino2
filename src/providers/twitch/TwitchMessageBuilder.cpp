@@ -6,6 +6,7 @@
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
+#include "providers/dankerino/DankerinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -262,6 +263,7 @@ MessagePtr TwitchMessageBuilder::build()
     this->appendTwitchBadges();
 
     this->appendChatterinoBadges();
+    this->appendDankerinoBadges();
     this->appendFfzBadges();
 
     this->appendUsername();
@@ -1135,6 +1137,16 @@ void TwitchMessageBuilder::appendChatterinoBadges()
     {
         this->emplace<BadgeElement>(*badge,
                                     MessageElementFlag::BadgeChatterino);
+    }
+}
+
+void TwitchMessageBuilder::appendDankerinoBadges()
+{
+    if (auto badge = getApp()->dankerinoBadges->getBadge({this->userId_}))
+    {
+        this->emplace<BadgeElement>(*badge,
+                                    MessageElementFlag::BadgeChatterino);
+        // same slot as Chatterino badges
     }
 }
 

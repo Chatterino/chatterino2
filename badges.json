@@ -1,0 +1,26 @@
+{
+  "badges": [
+    {
+      "image1": "https://fourtf.com/chatterino/badges/helper.png",
+      "image2": "https://fourtf.com/chatterino/badges/helper2x.png",
+      "image3": "https://fourtf.com/chatterino/badges/helper3x.png",
+      "tooltip": "Dankerino contributor",
+      "users": [
+        "117691339"
+      ]
+    },
+    {
+      "image1": "https://fourtf.com/chatterino/badges/helper.png",
+      "image2": "https://fourtf.com/chatterino/badges/helper2x.png",
+      "image3": "https://fourtf.com/chatterino/badges/helper3x.png",
+      "tooltip": "(Missing) Chatterino contributor",
+      "users": [
+          "99631238",
+          "27512963",
+          "110240192",
+          "40286300",
+          "57019243"
+      ]
+    }
+  ]
+}
