@@ -4,8 +4,6 @@ project(chatterino)
 
 include_directories(src)
 
-add_subdirectory(lib/settings)
-
 set(chatterino_SOURCES
     src/common/NetworkRequest.cpp
     src/common/NetworkResult.cpp
@@ -34,6 +32,7 @@ set(CMAKE_AUTOMOC ON)
 # set(CMAKE_AUTOMOC ON)
 
 if (BUILD_TESTS)
+    set(BUILD_TESTS OFF)
     message("++ Tests enabled")
     find_package(GTest)
     enable_testing()
@@ -53,10 +52,14 @@ if (BUILD_TESTS)
 
     target_link_libraries(chatterino-test gtest gtest_main)
 
+    add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/lib/settings)
     target_link_libraries(chatterino-test PajladaSettings)
     target_include_directories(chatterino-test PUBLIC PajladaSettings)
 
-    set(BUILD_TESTS OFF)
+    find_package(Threads)
+
+    target_link_libraries(chatterino-test Threads::Threads)
+
     add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/lib/serialize PajladaSerialize)
 
     target_link_libraries(chatterino-test PajladaSerialize)
