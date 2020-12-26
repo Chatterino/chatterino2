@@ -87,8 +87,10 @@ enum class MessageElementFlag : int64_t {
     // - FFZ donator badge
     BadgeFfz = (1LL << 32),
 
+    BadgeDankerino = (1LL << 33),
+
     Badges = BadgeGlobalAuthority | BadgeChannelAuthority | BadgeSubscription |
-             BadgeVanity | BadgeChatterino | BadgeFfz,
+             BadgeVanity | BadgeChatterino | BadgeFfz | BadgeDankerino,
 
     ChannelName = (1LL << 19),
 
@@ -119,6 +121,7 @@ enum class MessageElementFlag : int64_t {
     ZeroWidthEmote = (1LL << 31),
 
     // (1LL << 32) is used by BadgeFfz, it is next to BadgeChatterino
+    // (1LL << 33) is used by BadgeDankerino, it is next to BadgeFfz
 
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |

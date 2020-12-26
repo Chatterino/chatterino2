@@ -1144,9 +1144,7 @@ void TwitchMessageBuilder::appendDankerinoBadges()
 {
     if (auto badge = getApp()->dankerinoBadges->getBadge({this->userId_}))
     {
-        this->emplace<BadgeElement>(*badge,
-                                    MessageElementFlag::BadgeChatterino);
-        // same slot as Chatterino badges
+        this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeDankerino);
     }
 }
 

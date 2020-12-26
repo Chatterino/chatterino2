@@ -34,7 +34,8 @@ boost::optional<EmotePtr> DankerinoBadges::getBadge(const UserId &id)
 
 void DankerinoBadges::loadDankerinoBadges()
 {
-    static QUrl url("https://github.com/Mm2PL/chatterino2/blob/dankerino/badges.json");
+    static QUrl url(
+        "https://github.com/Mm2PL/chatterino2/blob/dankerino/badges.json");
 
     NetworkRequest(url)
         .onSuccess([this](auto result) -> Outcome {
