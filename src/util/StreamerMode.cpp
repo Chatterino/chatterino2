@@ -57,10 +57,11 @@ bool isInStreamerMode()
             time = QDateTime::currentDateTime();
 
             QProcess p;
-            p.start("grep", {"-x", broadcastingBinaries().join("|")},
+            p.start("pgrep", {"-x", broadcastingBinaries().join("|")},
                     QIODevice::NotOpen);
 
-            if (p.waitForFinished(1000))
+            if (p.waitForFinished(1000) &&
+                p.exitStatus() == QProcess::NormalExit)
             {
                 cache = (p.exitCode() == 0);
                 return (p.exitCode() == 0);
