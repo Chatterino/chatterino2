@@ -86,6 +86,7 @@ bool isInStreamerMode()
 
             cache = false;
 #endif
+            return false;
     }
     return false;
 }
