@@ -326,7 +326,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     ComboBox *dankDropdown =
         layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
-            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
+            "Enable Streamer Mode", {"No", "Yes", "Detect OBS"},
             s.enableStreamerMode,
             [](int value) {
                 return value;

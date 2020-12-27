@@ -32,51 +32,61 @@ bool isInStreamerMode()
             return true;
         case StreamerModeSetting::Disabled:
             return false;
-    }
+        case StreamerModeSetting::DetectObs:
+
+#ifdef Q_OS_LINUX
+            QProcess p;
+            // No matter where we're redirecting the output, it still appears in the console for some reason
+            // p.setStandardOutputFile(QProcess::nullDevice());
+            auto exitCode = p.execute("pgrep", {"obs"});
+
+            return (exitCode == 0);
+#endif
 
 #ifdef USEWINSDK
-    if (!IsWindowsVistaOrGreater())
-    {
-        return false;
-    }
-    static bool cache = false;
-    static QDateTime time = QDateTime();
-
-    if (time.isValid() &&
-        time.addSecs(cooldownInS) > QDateTime::currentDateTime())
-    {
-        return cache;
-    }
-
-    time = QDateTime::currentDateTime();
-
-    WTS_PROCESS_INFO *pWPIs = nullptr;
-    DWORD dwProcCount = 0;
-
-    if (WTSEnumerateProcesses(WTS_CURRENT_SERVER_HANDLE, NULL, 1, &pWPIs,
-                              &dwProcCount))
-    {
-        //Go through all processes retrieved
-        for (DWORD i = 0; i < dwProcCount; i++)
-        {
-            QString processName = QString::fromUtf16(
-                reinterpret_cast<char16_t *>(pWPIs[i].pProcessName));
-
-            if (broadcastingBinaries().contains(processName))
+            if (!IsWindowsVistaOrGreater())
             {
-                cache = true;
-                return true;
+                return false;
             }
-        }
-    }
+            static bool cache = false;
+            static QDateTime time = QDateTime();
 
-    if (pWPIs)
-    {
-        WTSFreeMemory(pWPIs);
-    }
+            if (time.isValid() &&
+                time.addSecs(cooldownInS) > QDateTime::currentDateTime())
+            {
+                return cache;
+            }
 
-    cache = false;
+            time = QDateTime::currentDateTime();
+
+            WTS_PROCESS_INFO *pWPIs = nullptr;
+            DWORD dwProcCount = 0;
+
+            if (WTSEnumerateProcesses(WTS_CURRENT_SERVER_HANDLE, NULL, 1,
+                                      &pWPIs, &dwProcCount))
+            {
+                //Go through all processes retrieved
+                for (DWORD i = 0; i < dwProcCount; i++)
+                {
+                    QString processName = QString::fromUtf16(
+                        reinterpret_cast<char16_t *>(pWPIs[i].pProcessName));
+
+                    if (broadcastingBinaries().contains(processName))
+                    {
+                        cache = true;
+                        return true;
+                    }
+                }
+            }
+
+            if (pWPIs)
+            {
+                WTSFreeMemory(pWPIs);
+            }
+
+            cache = false;
 #endif
+    }
     return false;
 }
 
