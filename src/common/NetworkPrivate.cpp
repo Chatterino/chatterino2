@@ -10,23 +10,20 @@
 
 #include <QCryptographicHash>
 #include <QFile>
+#include <QNetworkReply>
 #include <QtConcurrent>
 #include "common/QLogging.hpp"
 
 namespace chatterino {
 
 NetworkData::NetworkData()
-    : timer_(new QTimer())
-    , lifetimeManager_(new QObject)
+    : lifetimeManager_(new QObject)
 {
-    timer_->setSingleShot(true);
-
     DebugCount::increase("NetworkData");
 }
 
 NetworkData::~NetworkData()
 {
-    this->timer_->deleteLater();
     this->lifetimeManager_->deleteLater();
 
     DebugCount::decrease("NetworkData");
@@ -84,13 +81,14 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
     worker->moveToThread(&NetworkManager::workerThread);
 
-    if (data->hasTimeout_)
-    {
-        data->timer_->setSingleShot(true);
-        data->timer_->start();
-    }
-
     auto onUrlRequested = [data, worker]() mutable {
+        if (data->hasTimeout_)
+        {
+            data->timer_ = new QTimer();
+            data->timer_->setSingleShot(true);
+            data->timer_->start(data->timeoutMS_);
+        }
+
         auto reply = [&]() -> QNetworkReply * {
             switch (data->requestType_)
             {
@@ -128,7 +126,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             return;
         }
 
-        if (data->timer_->isActive())
+        if (data->timer_ != nullptr && data->timer_->isActive())
         {
             QObject::connect(
                 data->timer_, &QTimer::timeout, worker, [reply, data]() {
@@ -158,11 +156,18 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             // TODO(pajlada): A reply was received, kill the timeout timer
             if (reply->error() != QNetworkReply::NetworkError::NoError)
             {
+                if (reply->error() ==
+                    QNetworkReply::NetworkError::OperationCanceledError)
+                {
+                    //operation cancelled, most likely timed out
+                    return;
+                }
                 if (data->onError_)
                 {
-                    auto error = reply->error();
-                    postToThread([data, error] {
-                        data->onError_(NetworkResult({}, error));
+                    auto status = reply->attribute(
+                        QNetworkRequest::HttpStatusCodeAttribute);
+                    postToThread([data, code = status.toInt()] {
+                        data->onError_(NetworkResult({}, code));
                     });
                 }
                 return;
@@ -192,6 +197,12 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
             reply->deleteLater();
         };
+
+        if (data->timer_ != nullptr)
+        {
+            QObject::connect(reply, &QNetworkReply::finished, data->timer_,
+                             &QObject::deleteLater);
+        }
 
         QObject::connect(
             reply, &QNetworkReply::finished, worker,
