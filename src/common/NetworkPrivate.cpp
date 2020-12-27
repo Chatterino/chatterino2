@@ -39,7 +39,7 @@ QString NetworkData::getHash()
     {
         QByteArray bytes;
 
-        bytes.append(this->request_.url().toString());
+        bytes.append(this->request_.url().toString().toUtf8());
 
         for (const auto &header : this->request_.rawHeaderList())
         {
