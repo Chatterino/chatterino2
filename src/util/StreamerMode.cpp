@@ -57,7 +57,7 @@ bool isInStreamerMode()
             time = QDateTime::currentDateTime();
 
             QProcess p;
-            p.start("xd", {"-x", broadcastingBinaries().join("|")},
+            p.start("grep", {"-x", broadcastingBinaries().join("|")},
                     QIODevice::NotOpen);
 
             if (p.waitForFinished(1000))
