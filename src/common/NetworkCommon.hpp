@@ -18,6 +18,7 @@ enum class NetworkRequestType {
     Post,
     Put,
     Delete,
+    Patch,
 };
 
 }  // namespace chatterino

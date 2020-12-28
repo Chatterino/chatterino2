@@ -434,6 +434,39 @@ void CommandController::initialize(Settings &, Paths &paths)
         userPopup->show();
         return "";
     });
+
+    // dankerino commands
+    this->registerCommand("/settitle", [](const QStringList &words,
+                                          ChannelPtr channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(
+                makeSystemMessage("This command comes from Dankerino patches. "
+                                  "Usage: /settitle STREAM TITLE."));
+            return "";
+        }
+        if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+        {
+            auto status = twitchChannel->accessStreamStatus();
+            getHelix()->updateChannel(
+                twitchChannel->roomId(), "", "", words.mid(1).join(" "),
+                [channel](NetworkResult dank) {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Updated title.").arg(dank.status())));
+                },
+                [channel] {
+                    channel->addMessage(
+                        makeSystemMessage("Title update failed! Are you "
+                                          "missing the required scope?"));
+                });
+        }
+        else
+        {
+            channel->addMessage(makeSystemMessage(
+                "Unable to set title of non-Twitch channel."));
+        }
+        return "";
+    });
 }
 
 void CommandController::save()

@@ -4,6 +4,7 @@
 
 ### Dankerino
 - Major: Add Dankerino badges
+- Major: Add /settitle (Mm2PL/chatterino2#8)
 
 ### Chatterino
 
