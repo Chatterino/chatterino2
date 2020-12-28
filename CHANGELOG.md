@@ -5,6 +5,7 @@
 - Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377)
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
+- Major: Add /settitle (Change imported from Dankerino. Mm2PL/dankerino#8)
 - Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284)
 - Major: Commands `/ignore` and `/unignore` have been renamed to `/block` and `/unblock` in order to keep consistency with Twitch's terms. (#2370)
 - Minor: Added `/clearmessages` command - does what "Burger menu -> More -> Clear messages" does. (#2485)
