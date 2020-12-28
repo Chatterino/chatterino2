@@ -116,6 +116,19 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                         return NetworkManager::accessManager.post(
                             data->request_, data->payload_);
                     }
+                case NetworkRequestType::Patch:
+                    if (data->multiPartPayload_)
+                    {
+                        assert(data->payload_.isNull());
+
+                        return NetworkManager::accessManager.sendCustomRequest(
+                            data->request_, "PATCH", data->multiPartPayload_);
+                    }
+                    else
+                    {
+                        return NetworkManager::accessManager.sendCustomRequest(
+                            data->request_, "PATCH", data->payload_);
+                    }
             }
             return nullptr;
         }();
