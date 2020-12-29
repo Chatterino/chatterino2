@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QApplication>
 #include <QObject>
 #include <type_traits>
 

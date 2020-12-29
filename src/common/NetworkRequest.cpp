@@ -117,7 +117,7 @@ NetworkRequest NetworkRequest::headerList(const QStringList &headers) &&
 NetworkRequest NetworkRequest::timeout(int ms) &&
 {
     this->data->hasTimeout_ = true;
-    this->data->timer_->setInterval(ms);
+    this->data->timeoutMS_ = ms;
     return std::move(*this);
 }
 

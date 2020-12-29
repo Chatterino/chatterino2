@@ -2,6 +2,7 @@
 
 #include "common/NetworkRequest.hpp"
 
+#include <QJsonArray>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
@@ -194,6 +195,16 @@ public:
 
     void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
                      HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#create-user-follows
+    void followUser(QString userId, QString targetId,
+                    std::function<void()> successCallback,
+                    HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#delete-user-follows
+    void unfollowUser(QString userId, QString targetlId,
+                      std::function<void()> successCallback,
+                      HelixFailureCallback failureCallback);
 
     // https://dev.twitch.tv/docs/api/reference#create-clip
     void createClip(QString channelId,

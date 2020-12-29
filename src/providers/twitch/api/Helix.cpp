@@ -315,6 +315,50 @@ void Helix::getGameById(QString gameId,
         failureCallback);
 }
 
+void Helix::followUser(QString userId, QString targetId,
+                       std::function<void()> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_id", userId);
+    urlQuery.addQueryItem("to_id", targetId);
+
+    this->makeRequest("users/follows", urlQuery)
+        .type(NetworkRequestType::Post)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::unfollowUser(QString userId, QString targetId,
+                         std::function<void()> successCallback,
+                         HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_id", userId);
+    urlQuery.addQueryItem("to_id", targetId);
+
+    this->makeRequest("users/follows", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
 void Helix::createClip(QString channelId,
                        ResultCallback<HelixClip> successCallback,
                        HelixFailureCallback failureCallback)

@@ -313,29 +313,39 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(makeSystemMessage("Usage: /follow [user]"));
             return "";
         }
-        auto app = getApp();
 
-        auto user = app->accounts->twitch.getCurrent();
-        auto target = words.at(1);
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
 
-        if (user->isAnon())
+        if (currentUser->isAnon())
         {
             channel->addMessage(
                 makeSystemMessage("You must be logged in to follow someone"));
             return "";
         }
 
+        auto target = words.at(1);
+
         getHelix()->getUserByName(
             target,
-            [user, channel, target](const auto &targetUser) {
-                user->followUser(targetUser.id, [channel, target]() {
-                    channel->addMessage(makeSystemMessage(
-                        "You successfully followed " + target));
-                });
+            [currentUser, channel, target](const auto &targetUser) {
+                getHelix()->followUser(
+                    currentUser->getUserId(), targetUser.id,
+                    [channel, target]() {
+                        channel->addMessage(makeSystemMessage(
+                            "You successfully followed " + target));
+                    },
+                    [channel, target]() {
+                        channel->addMessage(makeSystemMessage(
+                            QString("User %1 could not be followed, an unknown "
+                                    "error occured!")
+                                .arg(target)));
+                    });
             },
             [channel, target] {
-                channel->addMessage(makeSystemMessage(
-                    "User " + target + " could not be followed!"));
+                channel->addMessage(
+                    makeSystemMessage(QString("User %1 could not be followed, "
+                                              "no user with that name found!")
+                                          .arg(target)));
             });
 
         return "";
@@ -347,29 +357,35 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(makeSystemMessage("Usage: /unfollow [user]"));
             return "";
         }
-        auto app = getApp();
 
-        auto user = app->accounts->twitch.getCurrent();
-        auto target = words.at(1);
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
 
-        if (user->isAnon())
+        if (currentUser->isAnon())
         {
             channel->addMessage(
                 makeSystemMessage("You must be logged in to follow someone"));
             return "";
         }
 
+        auto target = words.at(1);
+
         getHelix()->getUserByName(
             target,
-            [user, channel, target](const auto &targetUser) {
-                user->unfollowUser(targetUser.id, [channel, target]() {
-                    channel->addMessage(makeSystemMessage(
-                        "You successfully unfollowed " + target));
-                });
+            [currentUser, channel, target](const auto &targetUser) {
+                getHelix()->unfollowUser(
+                    currentUser->getUserId(), targetUser.id,
+                    [channel, target]() {
+                        channel->addMessage(makeSystemMessage(
+                            "You successfully unfollowed " + target));
+                    },
+                    [channel, target]() {
+                        channel->addMessage(makeSystemMessage(
+                            "An error occurred while unfollowing " + target));
+                    });
             },
             [channel, target] {
                 channel->addMessage(makeSystemMessage(
-                    "User " + target + " could not be followed!"));
+                    QString("User %1 could not be followed!").arg(target)));
             });
 
         return "";

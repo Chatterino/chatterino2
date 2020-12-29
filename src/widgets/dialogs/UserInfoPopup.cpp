@@ -386,8 +386,11 @@ void UserInfoPopup::installEvents()
             {
                 case Qt::CheckState::Unchecked: {
                     this->ui_.follow->setEnabled(false);
-                    currentUser->unfollowUser(this->userId_,
-                                              reenableFollowCheckbox);
+                    getHelix()->unfollowUser(currentUser->getUserId(),
+                                             this->userId_,
+                                             reenableFollowCheckbox, [] {
+                                                 //
+                                             });
                 }
                 break;
 
@@ -398,8 +401,11 @@ void UserInfoPopup::installEvents()
 
                 case Qt::CheckState::Checked: {
                     this->ui_.follow->setEnabled(false);
-                    currentUser->followUser(this->userId_,
-                                            reenableFollowCheckbox);
+                    getHelix()->followUser(currentUser->getUserId(),
+                                           this->userId_,
+                                           reenableFollowCheckbox, [] {
+                                               //
+                                           });
                 }
                 break;
             }
