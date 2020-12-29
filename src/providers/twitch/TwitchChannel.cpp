@@ -35,16 +35,15 @@
 
 namespace chatterino {
 namespace {
-    constexpr int TITLE_REFRESH_PERIOD = 10;
     constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
-    static const QString CLIPS_LINK("https://clips.twitch.tv/%1");
-    static const QString FAILURE_TEXT("Failed to create a clip - either the "
-                                      "streamer has clips disabled or you "
-                                      "haven't re-authenticated yet. ");
-    static const QString LOGIN_PROMPT_TEXT(
-        "Click here to add your account again.");
-    static const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
-    static const int CLIP_CREATION_COOLDOWN = 5000;
+    constexpr int TITLE_REFRESH_PERIOD = 10;
+    constexpr int CLIP_CREATION_COOLDOWN = 5000;
+    const QString CLIPS_LINK("https://clips.twitch.tv/%1");
+    const QString FAILURE_TEXT(
+        "Failed to create a clip - either the streamer has clips disabled or "
+        "you haven't re-authenticated yet. ");
+    const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
+    const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
     // convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT command and converts it to a readable NOTICE message
     // This has historically been done in the Recent Messages API, but this functionality is being moved to Chatterino instead
