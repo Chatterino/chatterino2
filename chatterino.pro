@@ -273,6 +273,7 @@ SOURCES += \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/dialogs/UserInfoPopup.cpp \
     src/widgets/dialogs/WelcomeDialog.cpp \
+    src/widgets/dialogs/StreamSettingsDialog.cpp \
     src/widgets/helper/Button.cpp \
     src/widgets/helper/ChannelView.cpp \
     src/widgets/helper/ColorButton.cpp \
@@ -527,6 +528,7 @@ HEADERS += \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/dialogs/UserInfoPopup.hpp \
     src/widgets/dialogs/WelcomeDialog.hpp \
+    src/widgets/dialogs/StreamSettingsDialog.hpp \
     src/widgets/helper/Button.hpp \
     src/widgets/helper/ChannelView.hpp \
     src/widgets/helper/ColorButton.hpp \
@@ -583,7 +585,8 @@ RESOURCES += \
 DISTFILES +=
 
 FORMS += \
-    src/widgets/dialogs/IrcConnectionEditor.ui
+    src/widgets/dialogs/IrcConnectionEditor.ui \
+    src/widgets/dialogs/StreamSettingsDialog.ui
 
 # do not use windows min/max macros
 #win32 {

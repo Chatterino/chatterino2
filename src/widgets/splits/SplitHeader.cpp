@@ -368,6 +368,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 #endif
         menu->addAction(OPEN_IN_STREAMLINK, this->split_,
                         &Split::openInStreamlink);
+        menu->addAction(STREAM_SETTINGS_EDITOR, this->split_,
+                        &Split::openStreamSettingsEditor);
 
         if (!getSettings()->customURIScheme.getValue().isEmpty())
         {

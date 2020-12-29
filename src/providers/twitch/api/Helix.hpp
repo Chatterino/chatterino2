@@ -180,6 +180,9 @@ public:
     void fetchGames(QStringList gameIds, QStringList gameNames,
                     ResultCallback<std::vector<HelixGame>> successCallback,
                     HelixFailureCallback failureCallback);
+    void searchGames(QString query,
+                     ResultCallback<std::vector<HelixGame>> successCallback,
+                     HelixFailureCallback failureCallback);
 
     void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
                      HelixFailureCallback failureCallback);

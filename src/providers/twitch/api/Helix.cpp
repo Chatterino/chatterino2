@@ -295,6 +295,40 @@ void Helix::fetchGames(QStringList gameIds, QStringList gameNames,
         .execute();
 }
 
+void Helix::searchGames(QString query,
+                        ResultCallback<std::vector<HelixGame>> successCallback,
+                        HelixFailureCallback failureCallback)
+{
+    auto urlQuery = QUrlQuery();
+    urlQuery.addQueryItem("query", query);
+    this->makeRequest("search/categories", urlQuery)
+        .onSuccess([successCallback,
+                    failureCallback](NetworkResult result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixGame> games;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                games.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(games);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            qCDebug(chatterinoCommon) << "Something failed 4HEad";
+            failureCallback();
+        })
+        .execute();
+}
 void Helix::getGameById(QString gameId,
                         ResultCallback<HelixGame> successCallback,
                         HelixFailureCallback failureCallback)
