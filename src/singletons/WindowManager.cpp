@@ -160,6 +160,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->showBadgesVanity ? MEF::BadgeVanity : MEF::None);
     flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
                                              : MEF::None);
+    flags.set(settings->showBadgesChatterino ? MEF::BadgeDankerino : MEF::None);
     flags.set(settings->showBadgesFfz ? MEF::BadgeFfz : MEF::None);
 
     // username
