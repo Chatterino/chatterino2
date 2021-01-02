@@ -60,6 +60,7 @@
 - Bugfix: Fix a crash caused by FrankerFaceZ responding with invalid emote links (#2191)
 - Bugfix: Fix a freeze caused by ignored & replaced phrases followed by Twitch Emotes (#2231)
 - Bugfix: Fix a crash bug that occurred when moving splits across windows and closing the "parent tab" (#2249, #2259)
+- Bugfix: Fix a crash bug that occurred when the "Limit message height" setting was enabled and a message was being split up into multiple lines. IRC only. (#2329)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
