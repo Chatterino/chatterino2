@@ -623,6 +623,11 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
             // XXX(pajlada): NOT TESTED
             for (int i = 0; i < textLength; i++)
             {
+                if (!container.canAddElements())
+                {
+                    break;
+                }
+
                 auto isSurrogate = text.size() > i + 1 &&
                                    QChar::isHighSurrogate(text[i].unicode());
 
