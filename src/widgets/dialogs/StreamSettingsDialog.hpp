@@ -20,18 +20,29 @@ public:
 protected slots:
     void updateGameSearch();
     void accept();
+    void queueLoadTags();
+
+    void addTag();
+    void removeTag();
 
 private:
+    void reallyLoadTags();
+    void reallyLoadAllTags();
     void reallyUpdateGameSearch();
+    void populateTagsAvailableList();
 
     Ui::StreamSettingsDialog *ui_;
 
     QString originalTitle_;
     QString originalGame_;
+
     QString roomId_;
     QTimer lastUpdateTimer_;
 
-    boost::optional<HelixGame> cachedGame_;
+    std::vector<HelixTag> cachedTags_;
+    bool isLoadingTags = false;
+    bool needUpdateTags = false;
+    QString lastTagsCursor_;
 };
 
 }  // namespace chatterino

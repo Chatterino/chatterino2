@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>389</width>
-    <height>188</height>
+    <width>705</width>
+    <height>592</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,78 +15,157 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QFormLayout" name="formLayout">
-     <item row="0" column="0">
-      <widget class="QLabel" name="titleLabel">
-       <property name="text">
-        <string>Title:</string>
-       </property>
-       <property name="buddy">
-        <cstring>titleEdit</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="titleEdit"/>
-     </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="gameLabel">
-       <property name="text">
-        <string>Game:</string>
-       </property>
-       <property name="buddy">
-        <cstring>gameBox</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="gameBox">
-       <property name="editable">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="tagsButton">
-       <property name="enabled">
-        <bool>false</bool>
-       </property>
-       <property name="text">
-        <string>Edit Tags will be here soon™</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <spacer name="horizontalSpacer">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>0</number>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
-     </property>
-    </spacer>
+     <widget class="QWidget" name="mainTab">
+      <attribute name="title">
+       <string>Main</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QFormLayout" name="formLayout">
+         <item row="0" column="0">
+          <widget class="QLabel" name="titleLabel">
+           <property name="text">
+            <string>Title:</string>
+           </property>
+           <property name="buddy">
+            <cstring>titleEdit</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QLineEdit" name="titleEdit"/>
+         </item>
+         <item row="1" column="0">
+          <widget class="QLabel" name="gameLabel">
+           <property name="text">
+            <string>Game:</string>
+           </property>
+           <property name="buddy">
+            <cstring>gameBox</cstring>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QComboBox" name="gameBox">
+           <property name="editable">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>248</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tagsTab">
+      <attribute name="title">
+       <string>Stream Tags</string>
+      </attribute>
+      <layout class="QFormLayout" name="formLayout_2">
+       <item row="0" column="0" colspan="2">
+        <widget class="QProgressBar" name="tagLoadBar">
+         <property name="enabled">
+          <bool>true</bool>
+         </property>
+         <property name="acceptDrops">
+          <bool>false</bool>
+         </property>
+         <property name="maximum">
+          <number>0</number>
+         </property>
+         <property name="value">
+          <number>-1</number>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+         <property name="textVisible">
+          <bool>false</bool>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="invertedAppearance">
+          <bool>false</bool>
+         </property>
+         <property name="textDirection">
+          <enum>QProgressBar::TopToBottom</enum>
+         </property>
+         <property name="format">
+          <string>Loading</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Search:</string>
+         </property>
+         <property name="buddy">
+          <cstring>tagPicker</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QComboBox" name="tagPicker">
+         <property name="editable">
+          <bool>true</bool>
+         </property>
+         <property name="insertPolicy">
+          <enum>QComboBox::InsertAlphabetically</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="tagAddButton">
+           <property name="text">
+            <string>Add ↓</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="pushButton">
+           <property name="text">
+            <string>Remove</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>Selected:</string>
+         </property>
+         <property name="buddy">
+          <cstring>selectedTagsList</cstring>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QListWidget" name="selectedTagsList"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">
@@ -100,6 +179,15 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>tabWidget</tabstop>
+  <tabstop>tagPicker</tabstop>
+  <tabstop>tagAddButton</tabstop>
+  <tabstop>pushButton</tabstop>
+  <tabstop>selectedTagsList</tabstop>
+  <tabstop>titleEdit</tabstop>
+  <tabstop>gameBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
@@ -109,8 +197,8 @@
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>227</x>
-     <y>451</y>
+     <x>245</x>
+     <y>582</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -125,8 +213,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>295</x>
-     <y>451</y>
+     <x>313</x>
+     <y>582</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -134,9 +222,79 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>tabWidget</sender>
+   <signal>currentChanged(int)</signal>
+   <receiver>StreamSettingsDialog</receiver>
+   <slot>queueLoadTags()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>134</x>
+     <y>23</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>510</x>
+     <y>18</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>pressed()</signal>
+   <receiver>StreamSettingsDialog</receiver>
+   <slot>removeTag()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>683</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>507</x>
+     <y>257</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>StreamSettingsDialog</sender>
+   <signal>tagFetchFinished()</signal>
+   <receiver>tagLoadBar</receiver>
+   <slot>hide()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>81</x>
+     <y>590</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>258</x>
+     <y>51</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tagAddButton</sender>
+   <signal>pressed()</signal>
+   <receiver>StreamSettingsDialog</receiver>
+   <slot>addTag()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>295</x>
+     <y>126</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>45</x>
+     <y>401</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
+  <signal>tagFetchFinished()</signal>
   <slot>updateGameSearch()</slot>
   <slot>submit()</slot>
+  <slot>queueLoadTags()</slot>
+  <slot>addTag()</slot>
+  <slot>removeTag()</slot>
+  <slot>checkShowTags()</slot>
+  <slot>updateDisplayTags()</slot>
  </slots>
 </ui>

@@ -329,6 +329,121 @@ void Helix::searchGames(QString query,
         })
         .execute();
 }
+
+void Helix::updateStreamTags(QString broadcasterId, QStringList tags,
+                             std::function<void()> successCallback,
+                             HelixFailureCallback failureCallback)
+{
+    auto data = QJsonDocument();
+    auto obj = QJsonObject();
+    auto list = QJsonArray();
+    for (QString tagId : tags)
+    {
+        list.append(tagId);
+    }
+    obj.insert("tag_ids", list);
+    data.setObject(obj);
+    qCDebug(chatterinoCommon) << data.toJson();
+
+    auto urlQuery = QUrlQuery();
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+    this->makeRequest("streams/tags", urlQuery)
+        .type(NetworkRequestType::Put)
+        .payload(data.toJson())
+        .header("Content-Type", "application/json")
+        .onSuccess([successCallback,
+                    failureCallback](NetworkResult result) -> Outcome {
+            qCDebug(chatterinoCommon)
+                << "Update tags success: " << result.status();
+            successCallback();
+            return Success;
+        })
+        .onError([successCallback, failureCallback](NetworkResult result) {
+            qCDebug(chatterinoCommon)
+                << "Update tags fail: " << result.status();
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::getStreamTags(QString broadcasterId,
+                          ResultCallback<std::vector<HelixTag>> successCallback,
+                          HelixFailureCallback failureCallback)
+{
+    auto urlQuery = QUrlQuery();
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+    this->makeRequest("streams/tags", urlQuery)
+        .onSuccess([successCallback,
+                    failureCallback](NetworkResult result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixTag> tags;
+
+            for (const auto &jsonTag : data.toArray())
+            {
+                tags.emplace_back(jsonTag.toObject());
+            }
+
+            successCallback(tags);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            qCDebug(chatterinoCommon) << result.status() << result.getData();
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::fetchStreamTags(
+    QString after,
+    ResultCallback<std::vector<HelixTag>, QString> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    auto urlQuery = QUrlQuery();
+    if (!after.isNull() && !after.isEmpty())
+    {
+        urlQuery.addQueryItem("after", after);
+    }
+    urlQuery.addQueryItem("first", "100");
+    this->makeRequest("tags/streams", urlQuery)
+        .onSuccess([successCallback,
+                    failureCallback](NetworkResult result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixTag> tags;
+
+            for (const auto &jsonTag : data.toArray())
+            {
+                tags.emplace_back(jsonTag.toObject());
+            }
+
+            successCallback(
+                tags,
+                root.value("pagination").toObject().value("cursor").toString());
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            qCDebug(chatterinoCommon) << "status: " << result.status()
+                                      << "data: " << result.getData();
+            failureCallback();
+        })
+        .execute();
+}
+
 void Helix::getGameById(QString gameId,
                         ResultCallback<HelixGame> successCallback,
                         HelixFailureCallback failureCallback)
