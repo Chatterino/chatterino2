@@ -374,6 +374,13 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             menu->addAction("Open in custom player", this->split_,
                             &Split::openWithCustomScheme);
         }
+
+        if (this->split_->getChannel()->hasModRights())
+        {
+            menu->addAction(OPEN_MOD_VIEW_IN_BROWSER, this->split_,
+                            &Split::openModViewInBrowser);
+        }
+
         menu->addSeparator();
     }
 
