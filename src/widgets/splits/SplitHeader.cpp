@@ -390,6 +390,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                 clipButton->setVisible(this->split_->getChannel()->isLive());
             });
 
+        if (this->split_->getChannel()->hasModRights())
+        {
+            menu->addAction(OPEN_MOD_VIEW_IN_BROWSER, this->split_,
+                            &Split::openModViewInBrowser);
+        }
+
         menu->addSeparator();
     }
 
