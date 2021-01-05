@@ -181,16 +181,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: github-actions-nightly
-          backup_tag_name: backup-github-actions-nightly
+          tag_name: nightly-build
+          backup_tag_name: backup-nightly-build
           release_name: Nightly Release
           body: |
-              1 ${{ github.eventName }}
-              2 ${{ github.sha }}
-              3 ${{ github.ref }}
-              4 ${{ github.workflow }}
-              5 ${{ github.action }}
-              6 ${{ github.actor }}
+              Nightly Build
           prerelease: true
 
       - uses: actions/download-artifact@v2.0.8
