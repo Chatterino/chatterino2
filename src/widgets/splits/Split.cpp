@@ -6,6 +6,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -75,6 +76,11 @@ namespace {
     }
 }  // namespace
 
+const std::map<QString, std::function<void(QStringList)>> splitActions{
+    {"test", [](QStringList) {
+         qCDebug(chatterinoHotkeys) << "Testing!";
+     }}};
+
 pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
 Qt::KeyboardModifiers Split::modifierStatus = Qt::NoModifier;
 
@@ -128,6 +134,8 @@ Split::Split(QWidget *parent)
         popup->setWindowTitle("Chatterino - Debug popup");
         popup->show();
     });
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
+                                                            splitActions, this);
 
     // xd
     // CreateShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);

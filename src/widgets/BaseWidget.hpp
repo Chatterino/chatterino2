@@ -45,6 +45,8 @@ protected:
 
     Theme *theme;
 
+    std::vector<QShortcut *> shortcuts_;
+
 private:
     float scale_{1.f};
     boost::optional<float> overrideScale_;
