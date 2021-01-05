@@ -193,17 +193,17 @@ jobs:
               6 ${{ github.actor }}
           prerelease: true
 
-      - uses: actions/download-artifact@v2.0.7
+      - uses: actions/download-artifact@v2.0.8
         with:
           name: chatterino-windows-x86-64.zip
           path: windows/
 
-      - uses: actions/download-artifact@v2.0.7
+      - uses: actions/download-artifact@v2.0.8
         with:
           name: Chatterino-x86_64.AppImage
           path: linux/
 
-      - uses: actions/download-artifact@v2.0.7
+      - uses: actions/download-artifact@v2.0.8
         with:
           name: chatterino-osx.dmg
           path: macos/
