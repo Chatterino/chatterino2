@@ -76,11 +76,6 @@ namespace {
     }
 }  // namespace
 
-const std::map<QString, std::function<void(QStringList)>> splitActions{
-    {"test", [](QStringList) {
-         qCDebug(chatterinoHotkeys) << "Testing!";
-     }}};
-
 pajlada::Signals::Signal<Qt::KeyboardModifiers> Split::modifierStatusChanged;
 Qt::KeyboardModifiers Split::modifierStatus = Qt::NoModifier;
 
@@ -134,6 +129,14 @@ Split::Split(QWidget *parent)
         popup->setWindowTitle("Chatterino - Debug popup");
         popup->show();
     });
+    static std::map<QString, std::function<void(QStringList)>> splitActions{
+        {"test",
+         [](QStringList) {
+             qCDebug(chatterinoHotkeys) << "Testing!";
+         }},
+        {"delete", [this](QStringList) {
+             this->deleteFromContainer();
+         }}};  // TODO
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
                                                             splitActions, this);
 

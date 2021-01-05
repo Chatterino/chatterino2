@@ -25,7 +25,7 @@ void HotkeyController::loadHotkeys()
         auto scopeName = pajlada::Settings::Setting<QString>::get(
             "/hotkeys/" + key + "/scope");
         auto keySequence = pajlada::Settings::Setting<QString>::get(
-            "/hotkeys/" + key + "/key_sequence");
+            "/hotkeys/" + key + "/keySequence");
         auto action = pajlada::Settings::Setting<QString>::get("/hotkeys/" +
                                                                key + "/action");
         auto arguments = pajlada::Settings::Setting<std::vector<QString>>::get(
@@ -46,7 +46,7 @@ void HotkeyController::loadHotkeys()
         {
             scope = HotkeyScope::Split;
         }
-        else if (scopeName == "split_input")
+        else if (scopeName == "splitInput")
         {
             scope = HotkeyScope::SplitInput;
         }
