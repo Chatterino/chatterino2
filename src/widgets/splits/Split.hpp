@@ -133,6 +133,7 @@ public slots:
     void popup();
     void clear();
     void openInBrowser();
+    void openModViewInBrowser();
     void openWhispersInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
