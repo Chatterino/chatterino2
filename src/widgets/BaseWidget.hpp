@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QShortcut>
 #include <QWidget>
 #include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
