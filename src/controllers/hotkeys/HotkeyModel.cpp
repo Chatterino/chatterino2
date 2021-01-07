@@ -1,6 +1,5 @@
 #include "HotkeyModel.hpp"
 
-#include "controllers/hotkeys/Hotkey.hpp"
 #include "util/StandardItemHelper.hpp"
 
 namespace chatterino {
@@ -29,11 +28,12 @@ int HotkeyModel::beforeInsert(const std::shared_ptr<Hotkey> &item,
                               std::vector<QStandardItem *> &row,
                               int proposedIndex)
 {
-    if (this->categoryCount_[item->getCategory()]++ == 0)
+    const auto category = item->getCategory();
+    if (this->categoryCount_[category]++ == 0)
     {
         auto newRow = this->createRow();
 
-        setStringItem(newRow[0], item->getCategory(), false, false);
+        setStringItem(newRow[0], category, false, false);
         newRow[0]->setData(QFont("Segoe UI Light", 16), Qt::FontRole);
 
         this->insertCustomRow(std::move(newRow), proposedIndex);

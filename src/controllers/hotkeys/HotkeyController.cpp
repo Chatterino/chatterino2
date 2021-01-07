@@ -59,8 +59,8 @@ void HotkeyController::loadHotkeys()
             qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
             continue;
         }
-        auto hotkey = new Hotkey(scope, QKeySequence(keySequence), action);
-        this->hotkeys_.append(std::shared_ptr<Hotkey>(hotkey));
+        this->hotkeys_.append(
+            std::make_shared<Hotkey>(scope, QKeySequence(keySequence), action));
     }
 }
 
@@ -78,7 +78,7 @@ std::vector<QShortcut *> HotkeyController::shortcutsForScope(
 {
     qCDebug(chatterinoHotkeys) << "Registering hotkeys...";
     std::vector<QShortcut *> output;
-    for (const auto hotkey : this->hotkeys_)
+    for (const auto &hotkey : this->hotkeys_)
     {
         qCDebug(chatterinoHotkeys)
             << "FDM " << hotkey->getCategory() << hotkey->action();

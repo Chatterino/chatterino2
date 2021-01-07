@@ -1,7 +1,5 @@
 #include "Hotkey.hpp"
 
-#include <tuple>
-
 #include "common/QLogging.hpp"
 
 namespace chatterino {
