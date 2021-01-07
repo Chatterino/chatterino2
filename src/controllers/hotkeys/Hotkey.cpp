@@ -4,10 +4,12 @@
 
 namespace chatterino {
 
-Hotkey::Hotkey(HotkeyScope scope, QKeySequence keySequence, QString action)
+Hotkey::Hotkey(HotkeyScope scope, QKeySequence keySequence, QString action,
+               std::vector<QString> arguments)
     : scope_(scope)
     , keySequence_(keySequence)
     , action_(action)
+    , arguments_(arguments)
 {
 }
 
@@ -26,7 +28,7 @@ QString Hotkey::action() const
     return this->action_;
 }
 
-QStringList Hotkey::arguments() const
+std::vector<QString> Hotkey::arguments() const
 {
     return this->arguments_;
 }

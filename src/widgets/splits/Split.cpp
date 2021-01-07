@@ -20,6 +20,7 @@
 #include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
@@ -106,37 +107,99 @@ Split::Split(QWidget *parent)
     this->vbox_->addWidget(this->view_, 1);
     this->vbox_->addWidget(this->input_);
 
-    // Initialize chat widget-wide hotkeys
-    // CTRL+W: Close Split
-    createShortcut(this, "CTRL+W", &Split::deleteFromContainer);
-
-    // CTRL+R: Change Channel
-    createShortcut(this, "CTRL+R", &Split::changeChannel);
-
-    // CTRL+F: Search
-    createShortcut(this, "CTRL+F", &Split::showSearch);
-
-    // F5: reload emotes
-    createShortcut(this, "F5", &Split::reloadChannelAndSubscriberEmotes);
-
-    // CTRL+F5: reconnect
-    createShortcut(this, "CTRL+F5", &Split::reconnect);
-
-    // F10
-    createShortcut(this, "F10", [] {
-        auto *popup = new DebugPopup;
-        popup->setAttribute(Qt::WA_DeleteOnClose);
-        popup->setWindowTitle("Chatterino - Debug popup");
-        popup->show();
-    });
-    static std::map<QString, std::function<void(QStringList)>> splitActions{
+    std::map<QString, std::function<void(std::vector<QString>)>> splitActions{
         {"test",
-         [](QStringList) {
-             qCDebug(chatterinoHotkeys) << "Testing!";
+         [](std::vector<QString> test) {
+             qCDebug(chatterinoHotkeys) << "Testing, attention please!" << test;
          }},
-        {"delete", [this](QStringList) {
+        {"delete",
+         [this](std::vector<QString>) {
              this->deleteFromContainer();
-         }}};  // TODO
+         }},
+        {"changeChannel",
+         [this](std::vector<QString>) {
+             this->changeChannel();
+         }},
+        {"showSearch",
+         [this](std::vector<QString>) {
+             this->showSearch();
+         }},
+        {"reconnect",
+         [this](std::vector<QString>) {
+             this->reconnect();
+         }},
+        {"debug",
+         [](std::vector<QString>) {
+             auto *popup = new DebugPopup;
+             popup->setAttribute(Qt::WA_DeleteOnClose);
+             popup->setWindowTitle("Chatterino - Debug popup");
+             popup->show();
+         }},
+        {"focus",
+         [this](std::vector<QString> arguments) {
+             if (arguments.size() == 0)
+             {
+                 qCDebug(chatterinoHotkeys)
+                     << "Focus hotkey called without arguments!";
+                 return;
+             }
+             SplitContainer *page = this->getContainer();
+             if (page != nullptr)
+             {
+                 auto direction = arguments.at(0);
+                 if (direction == "up")
+                 {
+                     page->selectNextSplit(SplitContainer::Above);
+                 }
+                 else if (direction == "down")
+                 {
+                     page->selectNextSplit(SplitContainer::Below);
+                 }
+                 else if (direction == "left")
+                 {
+                     page->selectNextSplit(SplitContainer::Left);
+                 }
+                 else if (direction == "right")
+                 {
+                     page->selectNextSplit(SplitContainer::Right);
+                 }
+                 else
+                 {
+                     qCDebug(chatterinoHotkeys)
+                         << "Focus in unknown direction.";
+                 }
+             }
+         }},
+        {"scrollToBottom",
+         [this](std::vector<QString>) {
+             this->getChannelView().getScrollBar().scrollToBottom(
+                 getSettings()->enableSmoothScrollingNewMessages.getValue());
+         }},
+        {"scrollPage",
+         [this](std::vector<QString> arguments) {
+             if (arguments.size() == 0)
+             {
+                 qCDebug(chatterinoHotkeys)
+                     << "scrollPage hotkey called without arguments!";
+                 return;
+             }
+             auto direction = arguments.at(0);
+
+             auto &scrollbar = this->getChannelView().getScrollBar();
+             if (direction == "up")
+             {
+                 scrollbar.offset(-scrollbar.getLargeChange());
+             }
+             else if (direction == "down")
+             {
+                 scrollbar.offset(scrollbar.getLargeChange());
+             }
+             else
+             {
+                 qCDebug(chatterinoHotkeys) << "Unknown scroll direction";
+             }
+         }},
+    };  // TODO: move rest
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
                                                             splitActions, this);
 

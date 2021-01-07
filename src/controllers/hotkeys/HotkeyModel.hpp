@@ -2,6 +2,7 @@
 
 #include "common/SignalVectorModel.hpp"
 #include "controllers/hotkeys/Hotkey.hpp"
+#include "util/QStringHash.hpp"
 
 #include <unordered_map>
 

@@ -22,14 +22,15 @@ void HotkeyController::loadHotkeys()
     qCDebug(chatterinoHotkeys) << "Loading hotkeys...";
     for (const auto &key : keys)
     {
-        auto scopeName = pajlada::Settings::Setting<QString>::get(
-            "/hotkeys/" + key + "/scope");
-        auto keySequence = pajlada::Settings::Setting<QString>::get(
-            "/hotkeys/" + key + "/keySequence");
-        auto action = pajlada::Settings::Setting<QString>::get("/hotkeys/" +
-                                                               key + "/action");
+        auto section = "/hotkeys/" + key;
+        auto scopeName =
+            pajlada::Settings::Setting<QString>::get(section + "/scope");
+        auto keySequence =
+            pajlada::Settings::Setting<QString>::get(section + "/keySequence");
+        auto action =
+            pajlada::Settings::Setting<QString>::get(section + "/action");
         auto arguments = pajlada::Settings::Setting<std::vector<QString>>::get(
-            "/hotkeys/" + key + "/arguments");
+            section + "/arguments");
         qCDebug(chatterinoHotkeys)
             << "Hotkey " << scopeName << keySequence << action << arguments;
 
@@ -59,8 +60,8 @@ void HotkeyController::loadHotkeys()
             qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
             continue;
         }
-        this->hotkeys_.append(
-            std::make_shared<Hotkey>(scope, QKeySequence(keySequence), action));
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            scope, QKeySequence(keySequence), action, arguments));
     }
 }
 
@@ -73,7 +74,7 @@ HotkeyModel *HotkeyController::createModel(QObject *parent)
 
 std::vector<QShortcut *> HotkeyController::shortcutsForScope(
     HotkeyScope scope,
-    std::map<QString, std::function<void(QStringList)>> actionMap,
+    std::map<QString, std::function<void(std::vector<QString>)>> actionMap,
     QWidget *parent)
 {
     qCDebug(chatterinoHotkeys) << "Registering hotkeys...";

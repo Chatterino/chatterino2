@@ -1,7 +1,9 @@
 #include "widgets/splits/SplitInput.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Link.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -198,6 +200,70 @@ void SplitInput::installKeyPressedEvent()
 {
     auto app = getApp();
 
+    std::map<QString, std::function<void(std::vector<QString>)>>
+        splitInputActions{
+            {"test",
+             [](std::vector<QString> args) {
+                 qCDebug(chatterinoHotkeys)
+                     << "Testing, attention please!" << args;
+             }},
+            {"jumpCursor",
+             [this](std::vector<QString> arguments) {
+                 if (arguments.size() != 2)
+                 {
+                     qCDebug(chatterinoHotkeys)
+                         << "Invalid jumpCursor arguments. Argument 0: place "
+                            "(\"start\" or \"end\"), argument 1: select "
+                            "(\"withSelection\" or \"withoutSelection\")";
+                 }
+                 QTextCursor cursor = this->ui_.textEdit->textCursor();
+                 auto place = QTextCursor::Start;
+                 auto stringPlace = arguments.at(0);
+                 if (stringPlace == "start")
+                 {
+                     place = QTextCursor::Start;
+                 }
+                 else if (stringPlace == "end")
+                 {
+                     place = QTextCursor::End;
+                 }
+                 else
+                 {
+                     qCDebug(chatterinoHotkeys)
+                         << "Invalid jumpCursor place argument (0)!";
+                     return;
+                 }
+                 auto stringTakeSelection = arguments.at(1);
+                 bool select;
+                 if (stringTakeSelection == "withSelection")
+                 {
+                     select = true;
+                 }
+                 else if (stringTakeSelection == "withoutSelection")
+                 {
+                     select = false;
+                 }
+                 else
+                 {
+                     qCDebug(chatterinoHotkeys)
+                         << "Invalid jumpCursor select argument (1)!";
+                     return;
+                 }
+
+                 cursor.movePosition(
+                     place, select ? QTextCursor::MoveMode::KeepAnchor
+                                   : QTextCursor::MoveMode::MoveAnchor);
+                 this->ui_.textEdit->setTextCursor(cursor);
+             }},
+            {"openEmotesPopup",
+             [this](std::vector<QString>) {
+                 this->openEmotePopup();
+             }},
+        };
+
+    this->shortcuts_ = app->hotkeys->shortcutsForScope(
+        HotkeyScope::SplitInput, splitInputActions, this->ui_.textEdit);
+
     this->ui_.textEdit->keyPressed.connect([this, app](QKeyEvent *event) {
         if (auto popup = this->emoteInputPopup_.get())
         {
@@ -210,6 +276,9 @@ void SplitInput::installKeyPressedEvent()
                 }
             }
         }
+        // Todo(Mm2PL): make custom shortcut handling here,
+        // QShortcuts won't get `activated()` when the key was hit inside a text edit.
+        // Find a way around that
 
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
         {
@@ -308,70 +377,13 @@ void SplitInput::installKeyPressedEvent()
             }
             event->accept();
         }
-        else if (event->key() == Qt::Key_H &&
-                 event->modifiers() == Qt::AltModifier)
-        {
-            // h: vim binding for left
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
-
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Left);
-            }
-        }
-        else if (event->key() == Qt::Key_J &&
-                 event->modifiers() == Qt::AltModifier)
-        {
-            // j: vim binding for down
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
-
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Below);
-            }
-        }
-        else if (event->key() == Qt::Key_K &&
-                 event->modifiers() == Qt::AltModifier)
-        {
-            // k: vim binding for up
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
-
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Above);
-            }
-        }
-        else if (event->key() == Qt::Key_L &&
-                 event->modifiers() == Qt::AltModifier)
-        {
-            // l: vim binding for right
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
-
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Right);
-            }
-        }
         else if (event->key() == Qt::Key_Down)
         {
             if ((event->modifiers() & Qt::ShiftModifier) != 0)
             {
                 return;
             }
-            if (event->modifiers() == Qt::AltModifier)
-            {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Below);
-                }
-            }
-            else
+            if (event->modifiers() != Qt::AltModifier)
             {
                 // If user did not write anything before then just do nothing.
                 if (this->prevMsg_.isEmpty())
@@ -418,30 +430,6 @@ void SplitInput::installKeyPressedEvent()
                 }
             }
         }
-        else if (event->key() == Qt::Key_Left)
-        {
-            if (event->modifiers() == Qt::AltModifier)
-            {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Left);
-                }
-            }
-        }
-        else if (event->key() == Qt::Key_Right)
-        {
-            if (event->modifiers() == Qt::AltModifier)
-            {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Right);
-                }
-            }
-        }
         else if ((event->key() == Qt::Key_C ||
                   event->key() == Qt::Key_Insert) &&
                  event->modifiers() == Qt::ControlModifier)
@@ -452,11 +440,7 @@ void SplitInput::installKeyPressedEvent()
                 event->accept();
             }
         }
-        else if (event->key() == Qt::Key_E &&
-                 event->modifiers() == Qt::ControlModifier)
-        {
-            this->openEmotePopup();
-        }
+        /*
         else if (event->key() == Qt::Key_PageUp)
         {
             auto &scrollbar = this->split_->getChannelView().getScrollBar();
@@ -471,6 +455,7 @@ void SplitInput::installKeyPressedEvent()
 
             event->accept();
         }
+        */
     });
 }
 

@@ -19,7 +19,7 @@ public:
     virtual void initialize(Settings &settings, Paths &paths) override;
     std::vector<QShortcut *> shortcutsForScope(
         HotkeyScope scope,
-        std::map<QString, std::function<void(QStringList)>> actionMap,
+        std::map<QString, std::function<void(std::vector<QString>)>> actionMap,
         QWidget *parent);
 
 private:
