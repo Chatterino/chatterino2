@@ -147,7 +147,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
-    QStringList words = text.split(' ', QString::SkipEmptyParts);
+    QStringList words = text.split(' ', Qt::SkipEmptyParts);
 
     if (words.length() == 0)
     {
@@ -434,6 +434,22 @@ void CommandController::initialize(Settings &, Paths &paths)
         userPopup->show();
         return "";
     });
+
+    this->registerCommand(
+        "/chatters", [](const auto & /*words*/, auto channel) {
+            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /chatters command only works in Twitch Channels"));
+                return "";
+            }
+
+            channel->addMessage(makeSystemMessage(
+                "Chatter count: " +
+                QString::number(twitchChannel->chatterCount())));
+            return "";
+        });
 }
 
 void CommandController::save()
@@ -453,7 +469,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                                        ChannelPtr channel, bool dryRun)
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
-    QStringList words = text.split(' ', QString::SkipEmptyParts);
+    QStringList words = text.split(' ', Qt::SkipEmptyParts);
 
     if (words.length() == 0)
     {

@@ -528,6 +528,11 @@ const QString &TwitchChannel::popoutPlayerUrl()
     return this->popoutPlayerUrl_;
 }
 
+int &TwitchChannel::chatterCount()
+{
+    return this->chatterCount_;
+}
+
 void TwitchChannel::setLive(bool newLiveStatus)
 {
     bool gotNewLiveStatus = false;
@@ -770,9 +775,14 @@ void TwitchChannel::refreshChatters()
                 // channel still exists?
                 auto shared = weak.lock();
                 if (!shared)
+                {
                     return Failure;
+                }
 
-                auto pair = parseChatters(result.parseJson());
+                auto data = result.parseJson();
+                this->chatterCount_ = data.value("chatter_count").toInt();
+
+                auto pair = parseChatters(data);
                 if (pair.first)
                 {
                     this->setChatters(std::move(pair.second));
