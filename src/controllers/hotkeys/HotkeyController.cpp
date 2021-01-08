@@ -17,102 +17,51 @@ void HotkeyController::initialize(Settings &settings, Paths &paths)
 
 void HotkeyController::loadHotkeys()
 {
-    auto value =
-        pajlada::Settings::SettingManager::getInstance()->get("/hotkeys");
-    if (value->IsArray())
-    {
-        auto array = value->GetArray();
-        for (auto &hotkeyValue : array)
-        {
-            qCDebug(chatterinoHotkeys) << "value";
-            if (!hotkeyValue.IsObject())
-            {
-                continue;
-            }
-            auto hotkeyObject = hotkeyValue.GetObject();
-            auto &scopeName = hotkeyObject.FindMember("scope")->value;
-            if (!scopeName.IsString())
-            {
-                qCDebug(chatterinoHotkeys) << "Failed to deserialize hotkey #"
-                                           << this->hotkeys_.raw().size() + 1
-                                           << ": scope is not a String";
-                continue;
-            }
-            auto &keySequence = hotkeyObject.FindMember("keySequence")->value;
-            if (!keySequence.IsString())
-            {
-                qCDebug(chatterinoHotkeys) << "Failed to deserialize hotkey #"
-                                           << this->hotkeys_.raw().size() + 1
-                                           << ": keySequence is not a String";
-                continue;
-            }
-            auto &action = hotkeyObject.FindMember("action")->value;
-            if (!action.IsString())
-            {
-                qCDebug(chatterinoHotkeys) << "Failed to deserialize hotkey #"
-                                           << this->hotkeys_.raw().size() + 1
-                                           << ": action is not a String";
-                continue;
-            }
-            auto &argumentsRaw = hotkeyObject.FindMember("arguments")->value;
-            if (!argumentsRaw.IsArray())
-            {
-                qCDebug(chatterinoHotkeys) << "Failed to deserialize hotkey #"
-                                           << this->hotkeys_.raw().size() + 1
-                                           << ": arguments is not an Array";
-                continue;
-            }
-            HotkeyScope scope;
-            QString scopeNameStr =
-                scopeName.GetString();  // XXX: will read until the first \x00.
-            if (scopeNameStr == "tab")
-            {
-                scope = HotkeyScope::Tab;
-            }
-            else if (scopeNameStr == "split")
-            {
-                scope = HotkeyScope::Split;
-            }
-            else if (scopeNameStr == "splitInput")
-            {
-                scope = HotkeyScope::SplitInput;
-            }
-            else if (scopeNameStr == "window")
-            {
-                scope = HotkeyScope::Window;
-            }
-            else
-            {
-                qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeNameStr;
-                continue;
-            }
-            std::vector<QString> arguments;
-            if (argumentsRaw.IsArray())
-            {
-                int argCounter = 0;
-                for (auto &val : argumentsRaw.GetArray())
-                {
-                    if (!val.IsString())
-                    {
-                        qCDebug(chatterinoHotkeys)
-                            << "Invalid type of arugment at argument #"
-                            << argCounter
-                            << "won't process any arguments after it!";
-                        break;
-                    }
-                    arguments.push_back(val.GetString());
-                    argCounter++;
-                }
-            }
+    auto keys = pajlada::Settings::SettingManager::getObjectKeys("/hotkeys");
 
-            this->hotkeys_.append(std::make_shared<Hotkey>(
-                scope, QKeySequence(QString(keySequence.GetString())),
-                QString(action.GetString()), arguments));
-        }
-    }
-    else
+    qCDebug(chatterinoHotkeys) << "Loading hotkeys...";
+    for (const auto &key : keys)
     {
-        // load defaults here
+        auto section = "/hotkeys/" + key;
+        auto scopeName =
+            pajlada::Settings::Setting<QString>::get(section + "/scope");
+        auto keySequence =
+            pajlada::Settings::Setting<QString>::get(section + "/keySequence");
+        auto action =
+            pajlada::Settings::Setting<QString>::get(section + "/action");
+        auto arguments = pajlada::Settings::Setting<std::vector<QString>>::get(
+            section + "/arguments");
+        qCDebug(chatterinoHotkeys)
+            << "Hotkey " << scopeName << keySequence << action << arguments;
+
+        if (scopeName.isEmpty() || keySequence.isEmpty() || action.isEmpty())
+        {
+            continue;
+        }
+        HotkeyScope scope;
+        if (scopeName == "tab")
+        {
+            scope = HotkeyScope::Tab;
+        }
+        else if (scopeName == "split")
+        {
+            scope = HotkeyScope::Split;
+        }
+        else if (scopeName == "splitInput")
+        {
+            scope = HotkeyScope::SplitInput;
+        }
+        else if (scopeName == "window")
+        {
+            scope = HotkeyScope::Window;
+        }
+        else
+        {
+            qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
+            continue;
+        }
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            scope, QKeySequence(keySequence), action, arguments));
     }
 }
 
