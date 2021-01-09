@@ -319,14 +319,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.emojiSet);
 
     layout.addTitle("Streamer Mode");
-    layout.addDescription("Chatterino can automatically change behavior if it "
-                          "detects that \"OBS Studio\" is running (Automatic "
-                          "mode works only on Windows and Linux).\nSelect "
-                          "which things you want to change while streaming");
+    layout.addDescription(
+        "Chatterino can automatically change behavior if it detects that \"OBS "
+        "Studio\" is running (Automatic mode works only on Windows and "
+        "Linux).\nSelect which things you want to change while streaming");
 
     ComboBox *dankDropdown =
         layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
-            "Enable Streamer Mode", {"No", "Yes", "Automatic (Detect OBS)"},
+            "Enable Streamer Mode",
+            {"Disabled", "Enabled", "Automatic (Detect OBS)"},
             s.enableStreamerMode,
             [](int value) {
                 return value;

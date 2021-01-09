@@ -87,8 +87,10 @@ bool isInStreamerMode()
                                 !channel->isEmpty())
                             {
                                 channel->addMessage(makeSystemMessage(
-                                    "Streamer mode got enabled, due to pgrep "
-                                    "missing. Install it to fix the issue."));
+                                    "Streamer Mode is set to Automatic, but "
+                                    "pgrep is missing. Install it to fix the "
+                                    "issue or set Streamer Mode to Enabled or "
+                                    "Disabled in the Settings."));
                             }
                         }
                     }
@@ -97,8 +99,8 @@ bool isInStreamerMode()
 
             qCWarning(chatterinoStreamerMode) << "pgrep execution timed out!";
 
-            cache = true;
-            return true;
+            cache = false;
+            return false;
 #endif
 
 #ifdef USEWINSDK
@@ -143,7 +145,7 @@ bool isInStreamerMode()
 
             cache = false;
 #endif
-            return true;
+            return false;
     }
     return false;
 }
