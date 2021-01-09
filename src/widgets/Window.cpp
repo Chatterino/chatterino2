@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/Credentials.hpp"
 #include "common/Modes.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
