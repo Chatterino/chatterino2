@@ -78,6 +78,8 @@ protected:
 
     void open(ConnectionType type);
 
+    void addGlobalSystemMessage(QString messageText);
+
     QMap<QString, std::weak_ptr<Channel>> channels;
     std::mutex channelMutex;
 
