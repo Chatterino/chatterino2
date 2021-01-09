@@ -67,6 +67,44 @@ TEST(NetworkRequest, Success)
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 }
 
+TEST(NetworkRequest, FinallyCallbackOnSuccess)
+{
+    const std::vector<int> codes{200, 201, 202, 203, 204, 205, 206};
+
+    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+
+    for (const auto code : codes)
+    {
+        auto url = getStatusURL(code);
+        std::mutex mut;
+        bool requestDone = false;
+        std::condition_variable requestDoneCondition;
+
+        bool finallyCalled = false;
+
+        NetworkRequest(url)
+            .finally(
+                [&mut, &requestDone, &requestDoneCondition, &finallyCalled] {
+                    finallyCalled = true;
+
+                    {
+                        std::unique_lock lck(mut);
+                        requestDone = true;
+                    }
+                    requestDoneCondition.notify_one();
+                })
+            .execute();
+
+        // Wait for the request to finish
+        std::unique_lock lck(mut);
+        requestDoneCondition.wait(lck, [&requestDone] {
+            return requestDone;
+        });
+
+        EXPECT_TRUE(finallyCalled);
+    }
+}
+
 TEST(NetworkRequest, Error)
 {
     const std::vector<int> codes{
@@ -116,6 +154,47 @@ TEST(NetworkRequest, Error)
     }
 
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+}
+
+TEST(NetworkRequest, FinallyCallbackOnError)
+{
+    const std::vector<int> codes{
+        400, 401, 402, 403, 404, 405, 406, 407, 408, 409, 410,
+        411, 412, 413, 414, 418, 500, 501, 502, 503, 504,
+    };
+
+    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+
+    for (const auto code : codes)
+    {
+        auto url = getStatusURL(code);
+        std::mutex mut;
+        bool requestDone = false;
+        std::condition_variable requestDoneCondition;
+
+        bool finallyCalled = false;
+
+        NetworkRequest(url)
+            .finally(
+                [&mut, &requestDone, &requestDoneCondition, &finallyCalled] {
+                    finallyCalled = true;
+
+                    {
+                        std::unique_lock lck(mut);
+                        requestDone = true;
+                    }
+                    requestDoneCondition.notify_one();
+                })
+            .execute();
+
+        // Wait for the request to finish
+        std::unique_lock lck(mut);
+        requestDoneCondition.wait(lck, [&requestDone] {
+            return requestDone;
+        });
+
+        EXPECT_TRUE(finallyCalled);
+    }
 }
 
 TEST(NetworkRequest, TimeoutTimingOut)
