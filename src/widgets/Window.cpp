@@ -5,6 +5,7 @@
 #include "common/Modes.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
@@ -291,112 +292,135 @@ void Window::addDebugStuff()
 
 void Window::addShortcuts()
 {
-    /// Initialize program-wide hotkeys
-    // Open settings
-    createWindowShortcut(this, "CTRL+P", [this] {
-        SettingsDialog::showDialog(this);
-    });
-
-    // Switch tab
-    createWindowShortcut(this, "CTRL+T", [this] {
-        this->notebook_->getOrAddSelectedPage()->appendNewSplit(true);
-    });
-
-    // CTRL + 1-8 to open corresponding tab.
-    for (auto i = 0; i < 8; i++)
-    {
-        const auto openTab = [this, i] {
-            this->notebook_->selectIndex(i);
-        };
-        createWindowShortcut(this, QString("CTRL+%1").arg(i + 1).toUtf8(),
-                             openTab);
-    }
-
-    createWindowShortcut(this, "CTRL+9", [this] {
-        this->notebook_->selectLastTab();
-    });
-
-    createWindowShortcut(this, "CTRL+TAB", [this] {
-        this->notebook_->selectNextTab();
-    });
-    createWindowShortcut(this, "CTRL+SHIFT+TAB", [this] {
-        this->notebook_->selectPreviousTab();
-    });
-
-    createWindowShortcut(this, "CTRL+N", [this] {
-        if (auto page = dynamic_cast<SplitContainer *>(
-                this->notebook_->getSelectedPage()))
-        {
-            if (auto split = page->getSelectedSplit())
-            {
-                split->popup();
-            }
-        }
-    });
-
-    // Zoom in
-    {
-        auto s = new QShortcut(QKeySequence::ZoomIn, this);
-        s->setContext(Qt::WindowShortcut);
-        QObject::connect(s, &QShortcut::activated, this, [] {
-            getSettings()->setClampedUiScale(
-                getSettings()->getClampedUiScale() + 0.1f);
-        });
-    }
-
-    // Zoom out
-    {
-        auto s = new QShortcut(QKeySequence::ZoomOut, this);
-        s->setContext(Qt::WindowShortcut);
-        QObject::connect(s, &QShortcut::activated, this, [] {
-            getSettings()->setClampedUiScale(
-                getSettings()->getClampedUiScale() - 0.1f);
-        });
-    }
-
-    // New tab
-    createWindowShortcut(this, "CTRL+SHIFT+T", [this] {
-        this->notebook_->addPage(true);
-    });
-
-    // Close tab
-    createWindowShortcut(this, "CTRL+SHIFT+W", [this] {
-        this->notebook_->removeCurrentPage();
-    });
-
-    // Reopen last closed split
-    createWindowShortcut(this, "CTRL+G", [this] {
-        if (ClosedSplits::empty())
-        {
-            return;
-        }
-        ClosedSplits::SplitInfo si = ClosedSplits::pop();
-        SplitContainer *splitContainer{nullptr};
-        if (si.tab)
-        {
-            splitContainer = dynamic_cast<SplitContainer *>(si.tab->page);
-        }
-        if (!splitContainer)
-        {
-            splitContainer = this->notebook_->getOrAddSelectedPage();
-        }
-        this->notebook_->select(splitContainer);
-        Split *split = new Split(splitContainer);
-        split->setChannel(
-            getApp()->twitch.server->getOrAddChannel(si.channelName));
-        splitContainer->appendSplit(split);
-    });
-
-    createWindowShortcut(this, "CTRL+H", [] {
-        getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
-        getApp()->windows->forceLayoutChannelViews();
-    });
-
-    createWindowShortcut(this, "CTRL+K", [this] {
-        auto quickSwitcher =
-            new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
-        quickSwitcher->show();
-    });
+    std::map<QString, std::function<void(std::vector<QString>)>> windowActions{
+        {"openSettings",  // Open settings
+         [this](std::vector<QString>) {
+             SettingsDialog::showDialog(this);
+         }},
+        {"newSplit",  // Create a new split
+         [this](std::vector<QString>) {
+             this->notebook_->getOrAddSelectedPage()->appendNewSplit(true);
+         }},
+        {"openTab",  // CTRL + 1-8 to open corresponding tab.
+         [this](std::vector<QString> arguments) {
+             if (arguments.size() == 0)
+             {
+                 qCDebug(chatterinoHotkeys)
+                     << "openTab shortcut called without arguments. Takes only "
+                        "one argument: tab specifier";
+                 return;
+             }
+             auto target = arguments.at(0);
+             if (target == "last")
+             {
+                 this->notebook_->selectLastTab();
+             }
+             else if (target == "next")
+             {
+                 this->notebook_->selectNextTab();
+             }
+             else if (target == "previous")
+             {
+                 this->notebook_->selectPreviousTab();
+             }
+             else
+             {
+                 bool ok;
+                 int result = target.toInt(&ok);
+                 if (ok)
+                 {
+                     this->notebook_->selectIndex(result);
+                 }
+                 else
+                 {
+                     qCDebug(chatterinoHotkeys)
+                         << "Invalid argument for openTab shortcut";
+                 }
+             }
+         }},
+        {"popup",
+         [this](std::vector<QString>) {
+             if (auto page = dynamic_cast<SplitContainer *>(
+                     this->notebook_->getSelectedPage()))
+             {
+                 if (auto split = page->getSelectedSplit())
+                 {
+                     split->popup();
+                 }
+             }
+         }},
+        {"zoom",
+         [](std::vector<QString> arguments) {
+             if (arguments.size() == 0)
+             {
+                 qCDebug(chatterinoHotkeys)
+                     << "zoom shortcut called without arguments. Takes only "
+                        "one argument: \"in\" or \"out\"";
+                 return;
+             }
+             auto change = 0.0f;
+             auto direction = arguments.at(0);
+             if (direction == "in")
+             {
+                 change = 0.1f;
+             }
+             else if (direction == "out")
+             {
+                 change = -0.1f;
+             }
+             else
+             {
+                 qCDebug(chatterinoHotkeys)
+                     << "Invalid zoom direction, use \"in\" or \"out\"";
+                 return;
+             }
+             getSettings()->setClampedUiScale(
+                 getSettings()->getClampedUiScale() + change);
+         }},
+        {"newTab",
+         [this](std::vector<QString>) {
+             this->notebook_->addPage(true);
+         }},
+        {"removeTab",
+         [this](std::vector<QString>) {
+             this->notebook_->removeCurrentPage();
+         }},
+        {"reopenSplit",
+         [this](std::vector<QString>) {
+             if (ClosedSplits::empty())
+             {
+                 return;
+             }
+             ClosedSplits::SplitInfo si = ClosedSplits::pop();
+             SplitContainer *splitContainer{nullptr};
+             if (si.tab)
+             {
+                 splitContainer = dynamic_cast<SplitContainer *>(si.tab->page);
+             }
+             if (!splitContainer)
+             {
+                 splitContainer = this->notebook_->getOrAddSelectedPage();
+             }
+             this->notebook_->select(splitContainer);
+             Split *split = new Split(splitContainer);
+             split->setChannel(
+                 getApp()->twitch.server->getOrAddChannel(si.channelName));
+             splitContainer->appendSplit(split);
+         }},
+        {"toggleLocalR9K",
+         [](std::vector<QString>) {
+             getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
+             getApp()->windows->forceLayoutChannelViews();
+         }},
+        {"openQuickSwitcher",
+         [](std::vector<QString>) {
+             auto quickSwitcher =
+                 new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
+             quickSwitcher->show();
+         }},
+    };
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+        HotkeyScope::Window, windowActions, this);
 }
 
 void Window::addMenuBar()

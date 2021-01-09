@@ -182,6 +182,86 @@ void HotkeyController::resetToDefaults()
             HotkeyScope::UserCard, QKeySequence("Escape"), "delete",
             std::vector<QString>(), "default close user card shortcut"));
     }
+
+    // window
+    {
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Window, QKeySequence("Ctrl+P"), "openSettings",
+            std::vector<QString>(), "default open settings shortcut"));
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Window, QKeySequence("Ctrl+T"), "newSplit",
+            std::vector<QString>(), "default new split shortcut"));
+        for (int i = 1; i < 9; i++)
+        {
+            std::vector<QString> args;
+            args.push_back(QString::number(i));
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Window, QKeySequence(QString("Ctrl+%1").arg(i)),
+                "openTab", args,
+                QString("default select tab #%1 shortcut").arg(i)));
+        }
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Window, QKeySequence("Ctrl+9"), "openTab",
+            std::vector<QString>(), "default select last tab shortcut"));
+
+        {
+            std::vector<QString> args;
+            args.push_back("next");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Window, QKeySequence("Ctrl+Tab"), "openTab", args,
+                "default select next tab shortcut"));
+        }
+
+        {
+            std::vector<QString> args;
+            args.push_back("previous");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Window, QKeySequence("Ctrl+Shift+Tab"), "openTab",
+                args, "default select previous tab shortcut"));
+        }
+
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Window, QKeySequence("Ctrl+N"), "popup",
+            std::vector<QString>(), "default new popup window shortcut"));
+
+        {
+            std::vector<QString> args;
+
+            args.push_back("in");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Window, QKeySequence::ZoomIn, "zoom", args,
+                "default zoom in shortcut"));
+        }
+
+        {
+            std::vector<QString> args;
+
+            args.push_back("out");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Window, QKeySequence::ZoomOut, "zoom", args,
+                "default zoom out shortcut"));
+        }
+
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Window, QKeySequence("Ctrl+Shift+T"), "newTab",
+            std::vector<QString>(), "default new tab shortcut"));
+
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Window, QKeySequence("Ctrl+Shift+W"), "removeTab",
+            std::vector<QString>(), "default remove tab shortcut"));
+
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Window, QKeySequence("Ctrl+G"), "reopenSplit",
+            std::vector<QString>(), "default reopen split shortcut"));
+
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Window, QKeySequence("Ctrl+H"), "toggleLocalR9K",
+            std::vector<QString>(), "default toggle local r9k shortcut"));
+
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Window, QKeySequence("Ctrl+K"), "openQuickSwitcher",
+            std::vector<QString>(), "default open quick switcher shortcut"));
+    }
 }
 
 void HotkeyController::save()
