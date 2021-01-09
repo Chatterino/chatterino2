@@ -135,6 +135,25 @@ void AbstractIrcServer::open(ConnectionType type)
     }
 }
 
+void AbstractIrcServer::addGlobalSystemMessage(QString messageText)
+{
+    std::lock_guard<std::mutex> lock(this->channelMutex);
+
+    MessageBuilder b(systemMessage, messageText);
+    auto message = b.release();
+
+    for (std::weak_ptr<Channel> &weak : this->channels.values())
+    {
+        std::shared_ptr<Channel> chan = weak.lock();
+        if (!chan)
+        {
+            continue;
+        }
+
+        chan->addMessage(message);
+    }
+}
+
 void AbstractIrcServer::disconnect()
 {
     std::lock_guard<std::mutex> locker(this->connectionMutex_);
