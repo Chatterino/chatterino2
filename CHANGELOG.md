@@ -3,7 +3,7 @@
 ## Unversioned
 
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200)
-- Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
+- Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316)
 - Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284)
 - Minor: Added a button to the split context menu to open the moderation view for a channel when the account selected has moderator permissions. (#2321)
 - Minor: Made BetterTTV emote tooltips use authors' display name. (#2267)
