@@ -18,6 +18,11 @@ void HotkeyController::initialize(Settings &settings, Paths &paths)
 void HotkeyController::loadHotkeys()
 {
     auto keys = pajlada::Settings::SettingManager::getObjectKeys("/hotkeys");
+    if (keys.size() == 0)
+    {
+        this->resetToDefaults();
+        return;
+    }
 
     qCDebug(chatterinoHotkeys) << "Loading hotkeys...";
     for (const auto &key : keys)
@@ -60,8 +65,148 @@ void HotkeyController::loadHotkeys()
             qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
             continue;
         }
+        this->hotkeys_.append(
+            std::make_shared<Hotkey>(scope, QKeySequence(keySequence), action,
+                                     arguments, QString::fromStdString(key)));
+    }
+}
+
+void HotkeyController::resetToDefaults()
+{
+    // split
+    {
         this->hotkeys_.append(std::make_shared<Hotkey>(
-            scope, QKeySequence(keySequence), action, arguments));
+            HotkeyScope::Split, QKeySequence("Ctrl+W"), "delete",
+            std::vector<QString>(), "default delete shortcut"));
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Split, QKeySequence("Ctrl+R"), "changeChannel",
+            std::vector<QString>(), "default change channel shortcut"));
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Split, QKeySequence("Ctrl+F"), "showSearch",
+            std::vector<QString>(), "default show search shortcut"));
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Split, QKeySequence("Ctrl+F5"), "reconnect",
+            std::vector<QString>(), "default reconnect shortcut"));
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::Split, QKeySequence("F10"), "debug",
+            std::vector<QString>(), "default debug shortcut"));
+
+        {
+            std::vector<QString> args;
+            args.push_back("left");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Split, QKeySequence("Alt+h"), "focus", args,
+                "default vim focus left shortcut"));
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("down");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Split, QKeySequence("Alt+j"), "focus", args,
+                "default vim focus down shortcut"));
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("up");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Split, QKeySequence("Alt+k"), "focus", args,
+                "default vim focus up shortcut"));
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("right");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Split, QKeySequence("Alt+l"), "focus", args,
+                "default vim focus right shortcut"));
+        }
+
+        {
+            std::vector<QString> args;
+            args.push_back("left");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Split, QKeySequence("Alt+left"), "focus", args,
+                "default focus left shortcut"));
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("down");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Split, QKeySequence("Alt+down"), "focus", args,
+                "default focus down shortcut"));
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("up");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Split, QKeySequence("Alt+up"), "focus", args,
+                "default focus up shortcut"));
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("right");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Split, QKeySequence("Alt+right"), "focus", args,
+                "default focus right shortcut"));
+        }
+
+        {
+            std::vector<QString> args;
+            args.push_back("up");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Split, QKeySequence("PageUp"), "scrollPage", args,
+                "default page up shortcut"));
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("down");
+            this->hotkeys_.append(std::make_shared<Hotkey>(
+                HotkeyScope::Split, QKeySequence("PageDown"), "scrollPage",
+                args, "default page down shortcut"));
+        }
+    }
+
+    // split input
+    {
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::SplitInput, QKeySequence("Ctrl+E"), "openEmotesPopup",
+            std::vector<QString>(), "default emote picker shortcut"));
+    }
+}
+
+void HotkeyController::save()
+{
+    this->saveHotkeys();
+}
+
+void HotkeyController::saveHotkeys()
+{
+    for (auto &hotkey : this->hotkeys_)
+    {
+        auto section = "/hotkeys/" + hotkey->name().toStdString();
+        pajlada::Settings::Setting<QString>::set(section + "/action",
+                                                 hotkey->action());
+        pajlada::Settings::Setting<QString>::set(
+            section + "/keySequence", hotkey->keySequence().toString());
+        QString scopeName;
+        switch (hotkey->scope())
+        {
+            case HotkeyScope::Tab:
+                scopeName = "tab";
+                break;
+            case HotkeyScope::Split:
+                scopeName = "split";
+                break;
+            case HotkeyScope::SplitInput:
+                scopeName = "splitInput";
+                break;
+            case HotkeyScope::Window:
+                scopeName = "window";
+                break;
+        }
+
+        pajlada::Settings::Setting<QString>::set(section + "/scope", scopeName);
+        pajlada::Settings::Setting<std::vector<QString>>::set(
+            section + "/arguments", hotkey->arguments());
     }
 }
 

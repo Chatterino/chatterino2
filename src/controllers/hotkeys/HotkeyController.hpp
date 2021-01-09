@@ -22,9 +22,13 @@ public:
         std::map<QString, std::function<void(std::vector<QString>)>> actionMap,
         QWidget *parent);
 
+    void save() override;
+
 private:
     SignalVector<std::shared_ptr<Hotkey>> hotkeys_;
     void loadHotkeys();
+    void saveHotkeys();
+    void resetToDefaults();
 };
 
 }  // namespace chatterino
