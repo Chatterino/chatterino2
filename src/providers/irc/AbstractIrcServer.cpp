@@ -62,6 +62,8 @@ AbstractIrcServer::AbstractIrcServer()
 
     // listen to reconnect request
     this->readConnection_->reconnectRequested.connect([this] {
+        this->addGlobalSystemMessage(
+            "Server connection timed out, reconnecting");
         this->connect();
     });
     //    this->writeConnection->reconnectRequested.connect([this] {
