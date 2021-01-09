@@ -5,17 +5,23 @@
 namespace chatterino {
 
 Hotkey::Hotkey(HotkeyScope scope, QKeySequence keySequence, QString action,
-               std::vector<QString> arguments)
+               std::vector<QString> arguments, QString name)
     : scope_(scope)
     , keySequence_(keySequence)
     , action_(action)
     , arguments_(arguments)
+    , name_(name)
 {
 }
 
 const QKeySequence &Hotkey::keySequence() const
 {
     return this->keySequence_;
+}
+
+QString Hotkey::name() const
+{
+    return this->name_;
 }
 
 HotkeyScope Hotkey::scope() const

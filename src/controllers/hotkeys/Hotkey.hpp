@@ -10,7 +10,7 @@ class Hotkey
 {
 public:
     Hotkey(HotkeyScope scope, QKeySequence keySequence, QString action,
-           std::vector<QString> arguments);
+           std::vector<QString> arguments, QString name);
     virtual ~Hotkey() = default;
 
     QString toString() const;
@@ -18,6 +18,7 @@ public:
     HotkeyScope scope() const;
     QString action() const;
     std::vector<QString> arguments() const;
+    QString name() const;
     QString getCategory() const;
     Qt::ShortcutContext getContext() const;
 
@@ -26,6 +27,7 @@ private:
     QKeySequence keySequence_;
     QString action_;
     std::vector<QString> arguments_;
+    QString name_;
 };
 
 }  // namespace chatterino
