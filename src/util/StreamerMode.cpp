@@ -68,7 +68,7 @@ bool isInStreamerMode()
                 return (p.exitCode() == 0);
             }
 
-            // Fallback to true and showing a warning
+            // Fallback to false and showing a warning
 
             if (shouldShowWarning)
             {
