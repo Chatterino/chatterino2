@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/Notebook.hpp"
@@ -73,28 +74,10 @@ bool isInStreamerMode()
             {
                 shouldShowWarning = false;
 
-                if (auto selected = getApp()
-                                        ->windows->getMainWindow()
-                                        .getNotebook()
-                                        .getSelectedPage())
-                {
-                    if (auto container =
-                            dynamic_cast<SplitContainer *>(selected))
-                    {
-                        for (auto &&split : container->getSplits())
-                        {
-                            if (auto channel = split->getChannel();
-                                !channel->isEmpty())
-                            {
-                                channel->addMessage(makeSystemMessage(
-                                    "Streamer Mode is set to Automatic, but "
-                                    "pgrep is missing. Install it to fix the "
-                                    "issue or set Streamer Mode to Enabled or "
-                                    "Disabled in the Settings."));
-                            }
-                        }
-                    }
-                }
+                getApp()->twitch2->addGlobalSystemMessage(
+                    "Streamer Mode is set to Automatic, but pgrep is missing. "
+                    "Install it to fix the issue or set Streamer Mode to "
+                    "Enabled or Disabled in the Settings.");
             }
 
             qCWarning(chatterinoStreamerMode) << "pgrep execution timed out!";

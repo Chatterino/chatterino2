@@ -43,6 +43,8 @@ public:
 
     void addFakeMessage(const QString &data);
 
+    void addGlobalSystemMessage(const QString &messageText);
+
     // iteration
     void forEachChannel(std::function<void(ChannelPtr)> func);
 
@@ -77,8 +79,6 @@ protected:
     virtual QString cleanChannelName(const QString &dirtyChannelName);
 
     void open(ConnectionType type);
-
-    void addGlobalSystemMessage(QString messageText);
 
     QMap<QString, std::weak_ptr<Channel>> channels;
     std::mutex channelMutex;
