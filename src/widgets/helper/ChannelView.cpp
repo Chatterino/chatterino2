@@ -789,8 +789,10 @@ void ChannelView::messageAppended(MessagePtr &message,
     {
         this->channelConnections_.push_back(messageRef->destroyed.connect(
             [tc, userName = messageRef->getMessage()->loginName] {
-                if (userName == "")
+                if (userName.isEmpty())
+                {
                     return;
+                }
                 tc->removeUserColor(userName);
             }));
     }
