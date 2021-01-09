@@ -72,10 +72,10 @@ void ChannelChatters::setChatters(UsernameSet &&set)
 
 const QColor ChannelChatters::getUserColor(const QString &user)
 {
-    const auto chatterColors = this->chatterColors_.accessConst();
+    const auto chattersColors = this->chattersColors_.accessConst();
 
-    const auto search = chatterColors->find(user.toLower());
-    if (search == chatterColors->end())
+    const auto search = chattersColors->find(user.toLower());
+    if (search == chattersColors->end())
     {
         // Returns an invalid color so we can decide not to override `textColor`
         return QColor();
@@ -86,8 +86,14 @@ const QColor ChannelChatters::getUserColor(const QString &user)
 
 void ChannelChatters::setUserColor(const QString &user, const QColor &color)
 {
-    const auto chatterColors = this->chatterColors_.access();
-    chatterColors->insert_or_assign(user.toLower(), color);
+    const auto chattersColors = this->chattersColors_.access();
+    chattersColors->insert_or_assign(user, color);
+}
+
+void ChannelChatters::removeUserColor(const QString &user)
+{
+    const auto chattersColors = this->chattersColors_.access();
+    chattersColors->erase(user);
 }
 
 }  // namespace chatterino

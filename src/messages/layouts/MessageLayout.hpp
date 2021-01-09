@@ -63,6 +63,8 @@ public:
     // Misc
     bool isDisabled() const;
 
+    pajlada::Signals::NoArgSignal destroyed;
+
 private:
     // variables
     MessagePtr message_;

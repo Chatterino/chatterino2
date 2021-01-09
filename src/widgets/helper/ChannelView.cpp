@@ -785,6 +785,16 @@ void ChannelView::messageAppended(MessagePtr &message,
     this->lastMessageHasAlternateBackground_ =
         !this->lastMessageHasAlternateBackground_;
 
+    if (auto tc = dynamic_cast<TwitchChannel *>(this->underlyingChannel_.get()))
+    {
+        this->channelConnections_.push_back(messageRef->destroyed.connect(
+            [tc, userName = messageRef->getMessage()->loginName] {
+                if (userName == "")
+                    return;
+                tc->removeUserColor(userName);
+            }));
+    }
+
     if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
     {
         if (this->paused())

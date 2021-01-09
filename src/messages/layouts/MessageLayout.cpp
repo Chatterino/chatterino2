@@ -47,6 +47,7 @@ MessageLayout::MessageLayout(MessagePtr message)
 
 MessageLayout::~MessageLayout()
 {
+    this->destroyed.invoke();
     DebugCount::decrease("message layout");
 }
 
