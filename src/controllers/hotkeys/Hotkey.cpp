@@ -51,6 +51,8 @@ QString Hotkey::getCategory() const
             return "Split input box";
         case HotkeyScope::Split:
             return "Split";
+        case HotkeyScope::UserCard:
+            return "User card";
         default:
             return "Unknown hotkey scope";
     }
@@ -68,6 +70,8 @@ Qt::ShortcutContext Hotkey::getContext() const
             return Qt::WidgetWithChildrenShortcut;
         case HotkeyScope::SplitInput:
             return Qt::WidgetShortcut;
+        case HotkeyScope::UserCard:
+            return Qt::WindowShortcut;
     }
     qCDebug(chatterinoHotkeys)
         << "Using default shortcut context for" << this->getCategory()

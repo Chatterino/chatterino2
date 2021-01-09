@@ -60,6 +60,10 @@ void HotkeyController::loadHotkeys()
         {
             scope = HotkeyScope::Window;
         }
+        else if (scopeName == "userCard")
+        {
+            scope = HotkeyScope::UserCard;
+        }
         else
         {
             qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
@@ -171,6 +175,13 @@ void HotkeyController::resetToDefaults()
             HotkeyScope::SplitInput, QKeySequence("Ctrl+E"), "openEmotesPopup",
             std::vector<QString>(), "default emote picker shortcut"));
     }
+
+    // user card
+    {
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            HotkeyScope::UserCard, QKeySequence("Escape"), "delete",
+            std::vector<QString>(), "default close user card shortcut"));
+    }
 }
 
 void HotkeyController::save()
@@ -201,6 +212,9 @@ void HotkeyController::saveHotkeys()
                 break;
             case HotkeyScope::Window:
                 scopeName = "window";
+                break;
+            case HotkeyScope::UserCard:
+                scopeName = "userCard";
                 break;
         }
 

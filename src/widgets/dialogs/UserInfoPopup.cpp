@@ -3,8 +3,10 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -130,10 +132,21 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
     else
         this->setAttribute(Qt::WA_DeleteOnClose);
 
-    // Close the popup when Escape is pressed
-    createWindowShortcut(this, "Escape", [this] {
-        this->deleteLater();
-    });
+    std::map<QString, std::function<void(std::vector<QString>)>>
+        userCardActions{
+            {"test",
+             [](std::vector<QString> test) {
+                 qCDebug(chatterinoHotkeys)
+                     << "This is a testing shortcut!" << test;
+             }},
+            {"delete",
+             [this](std::vector<QString>) {
+                 this->deleteLater();
+             }},
+        };
+
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+        HotkeyScope::UserCard, userCardActions, this);
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
