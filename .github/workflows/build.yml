@@ -86,7 +86,7 @@ jobs:
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v2.2.2
         with:
           name: chatterino-windows-x86-64.zip
           path: build/chatterino-windows-x86-64.zip
@@ -130,7 +130,7 @@ jobs:
 
       - name: Upload artifact (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v2.2.2
         with:
           name: Chatterino-x86_64.AppImage
           path: build/Chatterino-x86_64.AppImage
@@ -164,7 +164,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v2.2.2
         with:
           name: chatterino-osx.dmg
           path: build/chatterino-osx.dmg
@@ -181,29 +181,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: github-actions-nightly
-          backup_tag_name: backup-github-actions-nightly
+          tag_name: nightly-build
+          backup_tag_name: backup-nightly-build
           release_name: Nightly Release
           body: |
-              1 ${{ github.eventName }}
-              2 ${{ github.sha }}
-              3 ${{ github.ref }}
-              4 ${{ github.workflow }}
-              5 ${{ github.action }}
-              6 ${{ github.actor }}
+              Nightly Build
           prerelease: true
 
-      - uses: actions/download-artifact@v2.0.7
+      - uses: actions/download-artifact@v2.0.8
         with:
           name: chatterino-windows-x86-64.zip
           path: windows/
 
-      - uses: actions/download-artifact@v2.0.7
+      - uses: actions/download-artifact@v2.0.8
         with:
           name: Chatterino-x86_64.AppImage
           path: linux/
 
-      - uses: actions/download-artifact@v2.0.7
+      - uses: actions/download-artifact@v2.0.8
         with:
           name: chatterino-osx.dmg
           path: macos/
