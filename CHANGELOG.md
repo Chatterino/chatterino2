@@ -43,6 +43,7 @@
 - Minor: Tab and split titles now use display/localized channel names (#2189)
 - Minor: Add a setting to limit the amount of historical messages loaded from the Recent Messages API (#2250, #2252)
 - Minor: Made username autocompletion truecase (#1199, #1883)
+- Minor: Update the listing of top-level domains. (#2345)
 - Minor: Properly respect RECONNECT messages from Twitch (#2347)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
@@ -66,6 +67,7 @@
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
+- Dev: Build in CI with multiple Qt versions (#2349)
 
 ## 2.2.2
 
