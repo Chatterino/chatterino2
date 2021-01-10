@@ -216,11 +216,6 @@ jobs:
 
       # TODO: Extract dmg and appimage
 
-      - name: TREE
-        run: |
-            sudo apt update && sudo apt install tree
-            tree .
-
       # - name: Read upload URL into output
       #   id: upload_url
       #   run: |
