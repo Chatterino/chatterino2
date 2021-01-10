@@ -62,6 +62,8 @@ AbstractIrcServer::AbstractIrcServer()
 
     // listen to reconnect request
     this->readConnection_->reconnectRequested.connect([this] {
+        this->addGlobalSystemMessage(
+            "Server connection timed out, reconnecting");
         this->connect();
     });
     //    this->writeConnection->reconnectRequested.connect([this] {
@@ -132,6 +134,25 @@ void AbstractIrcServer::open(ConnectionType type)
     if (type & Read)
     {
         this->readConnection_->open();
+    }
+}
+
+void AbstractIrcServer::addGlobalSystemMessage(const QString &messageText)
+{
+    std::lock_guard<std::mutex> lock(this->channelMutex);
+
+    MessageBuilder b(systemMessage, messageText);
+    auto message = b.release();
+
+    for (std::weak_ptr<Channel> &weak : this->channels.values())
+    {
+        std::shared_ptr<Channel> chan = weak.lock();
+        if (!chan)
+        {
+            continue;
+        }
+
+        chan->addMessage(message);
     }
 }
 

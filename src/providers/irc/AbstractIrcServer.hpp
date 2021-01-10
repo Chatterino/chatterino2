@@ -43,6 +43,8 @@ public:
 
     void addFakeMessage(const QString &data);
 
+    void addGlobalSystemMessage(const QString &messageText);
+
     // iteration
     void forEachChannel(std::function<void(ChannelPtr)> func);
 
