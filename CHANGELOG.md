@@ -12,8 +12,9 @@
 ### Chatterino
 
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200)
-- Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
+- Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342)
 - Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284)
+- Minor: Added a button to the split context menu to open the moderation view for a channel when the account selected has moderator permissions. (#2321)
 - Minor: Made BetterTTV emote tooltips use authors' display name. (#2267)
 - Minor: Added Ctrl + 1/2/3/... and Ctrl+9 shortcuts to Emote Popup (activated with Ctrl+E). They work exactly the same as shortcuts in main window. (#2263)
 - Minor: Added reconnect link to the "You are banned" message. (#2266)
@@ -51,6 +52,8 @@
 - Minor: Tab and split titles now use display/localized channel names (#2189)
 - Minor: Add a setting to limit the amount of historical messages loaded from the Recent Messages API (#2250, #2252)
 - Minor: Made username autocompletion truecase (#1199, #1883)
+- Minor: Update the listing of top-level domains. (#2345)
+- Minor: Properly respect RECONNECT messages from Twitch (#2347)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
@@ -70,9 +73,11 @@
 - Bugfix: Fix a freeze caused by ignored & replaced phrases followed by Twitch Emotes (#2231)
 - Bugfix: Fix a crash bug that occurred when moving splits across windows and closing the "parent tab" (#2249, #2259)
 - Bugfix: Fix a crash bug that occurred when the "Limit message height" setting was enabled and a message was being split up into multiple lines. IRC only. (#2329)
+- Bugfix: Fix anonymous users being pinged by "username" justinfan64537 (#2156, #2352)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
+- Dev: Build in CI with multiple Qt versions (#2349)
 
 ## 2.2.2
 

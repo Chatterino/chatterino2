@@ -321,13 +321,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
-        "Chatterino can automatically change behavior if it "
-        "detects that \"OBS Studio\" is running.\nSelect which "
-        "things you want to change while streaming");
+        "Chatterino can automatically change behavior if it detects that \"OBS "
+        "Studio\" is running (Automatic mode works only on Windows and "
+        "Linux).\nSelect which things you want to change while streaming");
 
     ComboBox *dankDropdown =
         layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
-            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
+            "Enable Streamer Mode",
+            {"Disabled", "Enabled", "Automatic (Detect OBS)"},
             s.enableStreamerMode,
             [](int value) {
                 return value;
@@ -346,6 +347,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
+    layout.addCheckbox("Supress Live Notifications",
+                       s.streamerModeSupressLiveNotifications);
 
     layout.addTitle("Link Previews");
     layout.addDescription(

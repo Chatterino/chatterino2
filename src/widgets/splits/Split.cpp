@@ -632,6 +632,17 @@ void Split::openBrowserPlayer()
     }
 }
 
+void Split::openModViewInBrowser()
+{
+    auto channel = this->getChannel();
+
+    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    {
+        QDesktopServices::openUrl("https://twitch.tv/moderator/" +
+                                  twitchChannel->getName());
+    }
+}
+
 void Split::openInStreamlink()
 {
     try
