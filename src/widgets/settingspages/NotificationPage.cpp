@@ -29,9 +29,9 @@ NotificationPage::NotificationPage()
         {
             auto settings = tabs.appendTab(new QVBoxLayout, "Options");
             {
-                settings.emplace<QLabel>("You can be informed when certain "
-                                         "channels go live. You can be "
-                                         "informed in multiple ways:");
+                settings.emplace<QLabel>(
+                    "You can be informed when certain channels go live. You "
+                    "can be informed in multiple ways:");
 
                 settings.append(this->createCheckBox(
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
