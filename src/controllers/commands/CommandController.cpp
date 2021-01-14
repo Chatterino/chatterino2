@@ -147,7 +147,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
 bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
-    QStringList words = text.split(' ', Qt::SkipEmptyParts);
+    QStringList words = text.split(' ', QString::SkipEmptyParts);
 
     if (words.length() == 0)
     {
@@ -469,7 +469,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                                        ChannelPtr channel, bool dryRun)
 {
     QString text = getApp()->emotes->emojis.replaceShortCodes(textNoEmoji);
-    QStringList words = text.split(' ', Qt::SkipEmptyParts);
+    QStringList words = text.split(' ', QString::SkipEmptyParts);
 
     if (words.length() == 0)
     {
