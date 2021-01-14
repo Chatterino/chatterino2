@@ -257,7 +257,8 @@ void SharedMessageBuilder::parseHighlights()
     std::vector<HighlightPhrase> activeHighlights =
         getSettings()->highlightedMessages.cloneVector();
 
-    if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
+    if (!currentUser->isAnon() && getSettings()->enableSelfHighlight &&
+        currentUsername.size() > 0)
     {
         HighlightPhrase selfHighlight(
             currentUsername, getSettings()->showSelfHighlightInMentions,

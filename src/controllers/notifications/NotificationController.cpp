@@ -173,11 +173,15 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
                 getApp()->toasts->sendChannelNotification(channelName,
                                                           Platform::Twitch);
             }
-            if (getSettings()->notificationPlaySound)
+            if (getSettings()->notificationPlaySound &&
+                !(isInStreamerMode() &&
+                  getSettings()->streamerModeSupressLiveNotifications))
             {
                 getApp()->notifications->playSound();
             }
-            if (getSettings()->notificationFlashTaskbar)
+            if (getSettings()->notificationFlashTaskbar &&
+                !(isInStreamerMode() &&
+                  getSettings()->streamerModeSupressLiveNotifications))
             {
                 getApp()->windows->sendAlert();
             }
