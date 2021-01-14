@@ -209,6 +209,7 @@ public:
                       std::function<void()> successCallback,
                       HelixFailureCallback failureCallback);
 
+    // https://dev.twitch.tv/docs/api/reference/#create-stream-marker
     void createStreamMarker(QString broadcasterId, QString description,
                             ResultCallback<HelixStreamMarker> successCallback,
                             HelixFailureCallback failureCallback);

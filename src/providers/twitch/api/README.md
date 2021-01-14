@@ -107,6 +107,14 @@ Requires `user:edit:follows` scope
      * `widgets/dialogs/UserInfoPopup.cpp` to unfollow a user by unticking follow checkbox in usercard
      * `controllers/commands/CommandController.cpp` in /unfollow command
 
+### Create Stream Marker
+URL: https://dev.twitch.tv/docs/api/reference/#create-stream-marker
+Requires `user:edit:broadcast` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp unfollowUser`
+   Used in:
+     * `controllers/commands/CommandController.cpp` in /marker command
+
 ## TMI
 The TMI api is undocumented.
 
