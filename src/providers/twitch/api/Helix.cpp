@@ -359,6 +359,47 @@ void Helix::unfollowUser(QString userId, QString targetId,
         .execute();
 }
 
+void Helix::createStreamMarker(
+    QString broadcasterId, QString description,
+    ResultCallback<HelixStreamMarker> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    QJsonObject payload;
+
+    if (!description.isEmpty())
+    {
+        payload.insert("descrption", QJsonValue(description));
+    }
+    payload.insert("user_id", QJsonValue(broadcasterId));
+
+    this->makeRequest("streams/markers", QUrlQuery())
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            HelixStreamMarker streamMarker(data.toArray()[0].toObject());
+
+            successCallback(streamMarker);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            qCDebug(chatterinoTwitch)
+                << "Failed to create a stream marker: " << result.status()
+                << result.getData();
+            failureCallback();
+        })
+        .execute();
+};
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

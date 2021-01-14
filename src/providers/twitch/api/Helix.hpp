@@ -135,6 +135,22 @@ struct HelixGame {
     }
 };
 
+struct HelixStreamMarker {
+    QString createdAt;
+    QString description;
+    QString id;
+    QString positionSeconds;
+
+    explicit HelixStreamMarker(QJsonObject jsonObject)
+        : createdAt(jsonObject.value("created_at").toString())
+        , description(jsonObject.value("description").toString())
+        , id(jsonObject.value("id").toString())
+        , positionSeconds(jsonObject.value("position_seconds").toString())
+
+    {
+    }
+};
+
 class Helix final : boost::noncopyable
 {
 public:
@@ -192,6 +208,10 @@ public:
     void unfollowUser(QString userId, QString targetlId,
                       std::function<void()> successCallback,
                       HelixFailureCallback failureCallback);
+
+    void createStreamMarker(QString broadcasterId, QString description,
+                            ResultCallback<HelixStreamMarker> successCallback,
+                            HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

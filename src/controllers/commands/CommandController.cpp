@@ -434,6 +434,30 @@ void CommandController::initialize(Settings &, Paths &paths)
         userPopup->show();
         return "";
     });
+
+    this->registerCommand(
+        "/marker", [](const QStringList &words, auto channel) {
+            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+            auto arguments = words;
+            arguments.removeFirst();
+
+            getHelix()->createStreamMarker(
+                twitchChannel->roomId(), arguments.join(" "),
+                [channel](const HelixStreamMarker &streamMarker) {
+                    qDebug() << streamMarker.createdAt;
+                    qDebug() << streamMarker.description;
+                    qDebug() << streamMarker.id;
+                    qDebug() << streamMarker.positionSeconds;
+
+                    channel->addMessage(makeSystemMessage(
+                        "Created stream marker successfully!"));
+                },
+                [channel] {
+                    channel->addMessage(
+                        makeSystemMessage("Failed to create stream marker!"));
+                });
+            return "";
+        });
 }
 
 void CommandController::save()
