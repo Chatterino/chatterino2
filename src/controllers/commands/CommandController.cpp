@@ -438,16 +438,12 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand(
         "/chatters", [](const auto & /*words*/, auto channel) {
             auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            if (twitchChannel == nullptr)
-            {
-                channel->addMessage(makeSystemMessage(
-                    "The /chatters command only works in Twitch Channels"));
-                return "";
-            }
 
             channel->addMessage(makeSystemMessage(
-                "Chatter count: " +
-                QString::number(twitchChannel->chatterCount())));
+                (twitchChannel == nullptr)
+                    ? "The /chatters command only works in Twitch Channels"
+                    : "Chatter count: " +
+                          QString::number(twitchChannel->chatterCount())));
             return "";
         });
 }
@@ -533,7 +529,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 void CommandController::registerCommand(QString commandName,
                                         CommandFunction commandFunction)
 {
-    assert(this->commands_.contains(commandName) == false);
+    assert(!this->commands_.contains(commandName));
 
     this->commands_[commandName] = commandFunction;
 

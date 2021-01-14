@@ -782,7 +782,7 @@ void TwitchChannel::refreshChatters()
                 auto data = result.parseJson();
                 this->chatterCount_ = data.value("chatter_count").toInt();
 
-                auto pair = parseChatters(data);
+                auto pair = parseChatters(std::move(data));
                 if (pair.first)
                 {
                     this->setChatters(std::move(pair.second));
