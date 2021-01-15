@@ -139,13 +139,13 @@ struct HelixStreamMarker {
     QString createdAt;
     QString description;
     QString id;
-    QString positionSeconds;
+    int positionSeconds;
 
     explicit HelixStreamMarker(QJsonObject jsonObject)
         : createdAt(jsonObject.value("created_at").toString())
         , description(jsonObject.value("description").toString())
         , id(jsonObject.value("id").toString())
-        , positionSeconds(jsonObject.value("position_seconds").toString())
+        , positionSeconds(jsonObject.value("position_seconds").toInt())
 
     {
     }

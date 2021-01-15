@@ -368,7 +368,7 @@ void Helix::createStreamMarker(
 
     if (!description.isEmpty())
     {
-        payload.insert("descrption", QJsonValue(description));
+        payload.insert("description", QJsonValue(description));
     }
     payload.insert("user_id", QJsonValue(broadcasterId));
 

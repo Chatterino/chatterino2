@@ -16,6 +16,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/CombinePath.hpp"
+#include "util/FormatTime.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -435,29 +436,47 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand(
-        "/marker", [](const QStringList &words, auto channel) {
-            auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-            auto arguments = words;
-            arguments.removeFirst();
+    this->registerCommand("/marker", [](const QStringList &words,
+                                        auto channel) {
+        // Avoid Helix calls without Client ID and/or OAuth Token
+        if (getApp()->accounts->twitch.getCurrent()->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You need to be logged in to create stream markers!"));
+        }
 
-            getHelix()->createStreamMarker(
-                twitchChannel->roomId(), arguments.join(" "),
-                [channel](const HelixStreamMarker &streamMarker) {
-                    qDebug() << streamMarker.createdAt;
-                    qDebug() << streamMarker.description;
-                    qDebug() << streamMarker.id;
-                    qDebug() << streamMarker.positionSeconds;
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
-                    channel->addMessage(makeSystemMessage(
-                        "Created stream marker successfully!"));
-                },
-                [channel] {
-                    channel->addMessage(
-                        makeSystemMessage("Failed to create stream marker!"));
-                });
-            return "";
-        });
+        // Exact same message as in webchat
+        if (!twitchChannel->isLive())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You can only add stream markers during live streams. Try "
+                "again when the channel is live streaming."));
+        }
+
+        auto arguments = words;
+        arguments.removeFirst();
+
+        getHelix()->createStreamMarker(
+            // Limit for description is 140 characters, webchat just crops description
+            // if it's >140 characters, so we should do the same I guess
+            twitchChannel->roomId(), arguments.join(" ").left(140),
+            [channel, arguments](const HelixStreamMarker &streamMarker) {
+                channel->addMessage(makeSystemMessage(
+                    QString("Successfully added a stream marker at %1%2")
+                        .arg(formatTime(streamMarker.positionSeconds))
+                        .arg(streamMarker.description.isEmpty()
+                                 ? ""
+                                 : QString(": \"%1\"")
+                                       .arg(streamMarker.description))));
+            },
+            [channel] {
+                channel->addMessage(
+                    makeSystemMessage("Failed to create stream marker!"));
+            });
+        return "";
+    });
 }
 
 void CommandController::save()
