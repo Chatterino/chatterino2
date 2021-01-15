@@ -460,7 +460,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         getHelix()->createStreamMarker(
             // Limit for description is 140 characters, webchat just crops description
-            // if it's >140 characters, so we should do the same I guess
+            // if it's >140 characters, so we're doing the same thing
             twitchChannel->roomId(), arguments.join(" ").left(140),
             [channel, arguments](const HelixStreamMarker &streamMarker) {
                 channel->addMessage(makeSystemMessage(
