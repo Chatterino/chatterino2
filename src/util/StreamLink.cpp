@@ -8,6 +8,7 @@
 #include <QErrorMessage>
 #include <QFileInfo>
 #include <QProcess>
+#include "common/QLogging.hpp"
 
 #include <functional>
 
@@ -62,6 +63,7 @@ namespace {
     void showStreamlinkNotFoundError()
     {
         static QErrorMessage *msg = new QErrorMessage;
+        msg->setWindowTitle("Chatterino - streamlink not found");
 
         if (getSettings()->streamlinkUseCustomPath)
         {
@@ -91,7 +93,7 @@ namespace {
             }
             else
             {
-                qDebug() << "Error occured" << err;
+                qCWarning(chatterinoStreamlink) << "Error occured" << err;
             }
 
             p->deleteLater();
@@ -100,7 +102,7 @@ namespace {
         QObject::connect(
             p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
             [=](int res) {
-                p->deleteLater();  //
+                p->deleteLater();
             });
 
         return p;
@@ -118,7 +120,7 @@ void getStreamQualities(const QString &channelURL,
         [=](int res) {
             if (res != 0)
             {
-                qDebug() << "Got error code" << res;
+                qCWarning(chatterinoStreamlink) << "Got error code" << res;
                 // return;
             }
             QString lastLine = QString(p->readAllStandardOutput());

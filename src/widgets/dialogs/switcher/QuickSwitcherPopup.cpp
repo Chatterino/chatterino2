@@ -14,8 +14,6 @@
 namespace chatterino {
 
 namespace {
-    using namespace chatterino;
-
     QSet<SplitContainer *> openPages()
     {
         QSet<SplitContainer *> pages;
@@ -65,8 +63,6 @@ void QuickSwitcherPopup::initWidgets()
         lineEdit->setPlaceholderText("Jump to a channel or open a new one");
         QObject::connect(this->ui_.searchEdit, &QLineEdit::textChanged, this,
                          &QuickSwitcherPopup::updateSuggestions);
-
-        this->ui_.searchEdit->installEventFilter(this);
     }
 
     {
@@ -74,8 +70,11 @@ void QuickSwitcherPopup::initWidgets()
         listView->setModel(&this->switcherModel_);
 
         QObject::connect(listView.getElement(),
-                         &GenericListView::closeRequested, this,
-                         [this] { this->close(); });
+                         &GenericListView::closeRequested, this, [this] {
+                             this->close();
+                         });
+
+        this->ui_.searchEdit->installEventFilter(listView.getElement());
     }
 }
 
@@ -128,7 +127,9 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
      * Timeout interval 0 means the call will be delayed until all window events
      * have been processed (cf. https://doc.qt.io/qt-5/qtimer.html#interval-prop).
      */
-    QTimer::singleShot(0, [this] { this->adjustSize(); });
+    QTimer::singleShot(0, [this] {
+        this->adjustSize();
+    });
 }
 
 void QuickSwitcherPopup::themeChangedEvent()

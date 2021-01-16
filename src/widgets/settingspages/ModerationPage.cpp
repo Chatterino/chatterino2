@@ -120,21 +120,23 @@ ModerationPage::ModerationPage()
 
         // Show how big (size-wise) the logs are
         auto logsPathSizeLabel = logs.emplace<QLabel>();
-        logsPathSizeLabel->setText(
-            QtConcurrent::run([] { return fetchLogDirectorySize(); }));
+        logsPathSizeLabel->setText(QtConcurrent::run([] {
+            return fetchLogDirectorySize();
+        }));
 
         // Select event
-        QObject::connect(
-            selectDir.getElement(), &QPushButton::clicked, this,
-            [this, logsPathSizeLabel]() mutable {
-                auto dirName = QFileDialog::getExistingDirectory(this);
+        QObject::connect(selectDir.getElement(), &QPushButton::clicked, this,
+                         [this, logsPathSizeLabel]() mutable {
+                             auto dirName =
+                                 QFileDialog::getExistingDirectory(this);
 
-                getSettings()->logPath = dirName;
+                             getSettings()->logPath = dirName;
 
-                // Refresh: Show how big (size-wise) the logs are
-                logsPathSizeLabel->setText(
-                    QtConcurrent::run([] { return fetchLogDirectorySize(); }));
-            });
+                             // Refresh: Show how big (size-wise) the logs are
+                             logsPathSizeLabel->setText(QtConcurrent::run([] {
+                                 return fetchLogDirectorySize();
+                             }));
+                         });
 
         buttons->addSpacing(16);
 
@@ -144,8 +146,9 @@ ModerationPage::ModerationPage()
                              getSettings()->logPath = "";
 
                              // Refresh: Show how big (size-wise) the logs are
-                             logsPathSizeLabel->setText(QtConcurrent::run(
-                                 [] { return fetchLogDirectorySize(); }));
+                             logsPathSizeLabel->setText(QtConcurrent::run([] {
+                                 return fetchLogDirectorySize();
+                             }));
                          });
 
     }  // logs end
@@ -156,7 +159,9 @@ ModerationPage::ModerationPage()
         auto label = modMode.emplace<QLabel>(
             "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
             "Moderation buttons can be bound to chat commands such as \"/ban {user}\", \"/timeout {user} 1000\", \"/w someusername !report {user} was bad in channel {channel}\" or any other custom text commands.<br>"
-            "For deleting messages use /delete {msg-id}.");
+            "For deleting messages use /delete {msg-id}.<br><br>"
+            "More information can be found <a href='http://wiki.chatterino.com/Moderation/#moderation-mode'>here</a>.");
+        label->setOpenExternalLinks(true);
         label->setWordWrap(true);
         label->setStyleSheet("color: #bbb");
         // clang-format on

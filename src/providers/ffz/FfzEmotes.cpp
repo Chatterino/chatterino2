@@ -4,6 +4,7 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -14,7 +15,7 @@ namespace {
     Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
     {
         auto emote = urls.value(emoteScale);
-        if (emote.isUndefined())
+        if (emote.isUndefined() || emote.isNull())
         {
             return {""};
         }
@@ -67,7 +68,7 @@ namespace {
 
                 auto emote = Emote();
                 fillInEmoteData(urls, name,
-                                name.string + "<br/>Global FFZ Emote", emote);
+                                name.string + "<br>Global FFZ Emote", emote);
                 emote.homePage =
                     Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
                             .arg(id.string)
@@ -136,8 +137,9 @@ namespace {
 
                 Emote emote;
                 fillInEmoteData(urls, name,
-                                name.string + "<br/>Channel FFZ Emote" +
-                                    "<br />By: " + author.string,
+                                QString("%1<br>Channel FFZ Emote<br>By: %2")
+                                    .arg(name.string)
+                                    .arg(author.string),
                                 emote);
                 emote.homePage =
                     Url{QString("https://www.frankerfacez.com/emoticon/%1-%2")
@@ -195,8 +197,8 @@ void FfzEmotes::loadChannel(
     std::function<void(boost::optional<EmotePtr>)> modBadgeCallback,
     bool manualRefresh)
 {
-    qDebug() << "[FFZEmotes] Reload FFZ Channel Emotes for channel"
-             << channelId;
+    qCDebug(chatterinoFfzemotes)
+        << "[FFZEmotes] Reload FFZ Channel Emotes for channel" << channelId;
 
     NetworkRequest("https://api.frankerfacez.com/v1/room/id/" + channelId)
 
@@ -230,16 +232,18 @@ void FfzEmotes::loadChannel(
             else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay
-                qDebug() << "Fetching FFZ emotes for channel" << channelId
-                         << "failed due to timeout";
+                qCWarning(chatterinoFfzemotes)
+                    << "Fetching FFZ emotes for channel" << channelId
+                    << "failed due to timeout";
                 shared->addMessage(
                     makeSystemMessage("Failed to fetch FrankerFaceZ channel "
                                       "emotes. (timed out)"));
             }
             else
             {
-                qDebug() << "Error fetching FFZ emotes for channel" << channelId
-                         << ", error" << result.status();
+                qCWarning(chatterinoFfzemotes)
+                    << "Error fetching FFZ emotes for channel" << channelId
+                    << ", error" << result.status();
                 shared->addMessage(
                     makeSystemMessage("Failed to fetch FrankerFaceZ channel "
                                       "emotes. (unknown error)"));

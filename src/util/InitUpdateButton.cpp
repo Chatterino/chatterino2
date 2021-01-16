@@ -58,9 +58,10 @@ void initUpdateButton(Button &button,
 
     updateChange(Updates::instance().getStatus());
 
-    signalHolder.managedConnect(
-        Updates::instance().statusUpdated,
-        [updateChange](auto status) { updateChange(status); });
+    signalHolder.managedConnect(Updates::instance().statusUpdated,
+                                [updateChange](auto status) {
+                                    updateChange(status);
+                                });
 }
 
 }  // namespace chatterino

@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -29,7 +30,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
         this->channelMap[Platform::Twitch].append(channelName);
     }
 
-    this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {  //
+    this->channelMap[Platform::Twitch].delayedItemsChanged.connect([this] {
         this->twitchSetting_.setValue(this->channelMap[Platform::Twitch].raw());
     });
     /*
@@ -37,7 +38,7 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
         this->channelMap[Platform::Mixer].appendItem(channelName);
     }
 
-    this->channelMap[Platform::Mixer].delayedItemsChanged.connect([this] {  //
+    this->channelMap[Platform::Mixer].delayedItemsChanged.connect([this] {
         this->mixerSetting_.setValue(
             this->channelMap[Platform::Mixer]);
     });*/
@@ -46,8 +47,9 @@ void NotificationController::initialize(Settings &settings, Paths &paths)
 
     this->fetchFakeChannels();
 
-    QObject::connect(this->liveStatusTimer_, &QTimer::timeout,
-                     [=] { this->fetchFakeChannels(); });
+    QObject::connect(this->liveStatusTimer_, &QTimer::timeout, [=] {
+        this->fetchFakeChannels();
+    });
     this->liveStatusTimer_->start(60 * 1000);
 }
 
@@ -145,8 +147,8 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
     getHelix()->getStreamByName(
         channelName,
         [channelName, this](bool live, const auto &stream) {
-            qDebug() << "[TwitchChannel" << channelName
-                     << "] Refreshing live status";
+            qCDebug(chatterinoNotification) << "[TwitchChannel" << channelName
+                                            << "] Refreshing live status";
 
             if (!live)
             {
@@ -171,11 +173,15 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
                 getApp()->toasts->sendChannelNotification(channelName,
                                                           Platform::Twitch);
             }
-            if (getSettings()->notificationPlaySound)
+            if (getSettings()->notificationPlaySound &&
+                !(isInStreamerMode() &&
+                  getSettings()->streamerModeSupressLiveNotifications))
             {
                 getApp()->notifications->playSound();
             }
-            if (getSettings()->notificationFlashTaskbar)
+            if (getSettings()->notificationFlashTaskbar &&
+                !(isInStreamerMode() &&
+                  getSettings()->streamerModeSupressLiveNotifications))
             {
                 getApp()->windows->sendAlert();
             }
@@ -184,8 +190,9 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
             fakeTwitchChannels.push_back(channelName);
         },
         [channelName, this] {
-            qDebug() << "[TwitchChannel" << channelName
-                     << "] Refreshing live status (Missing ID)";
+            qCDebug(chatterinoNotification)
+                << "[TwitchChannel" << channelName
+                << "] Refreshing live status (Missing ID)";
             this->removeFakeChannel(channelName);
         });
 }

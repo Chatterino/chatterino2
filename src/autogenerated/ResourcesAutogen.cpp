@@ -5,7 +5,9 @@ namespace chatterino {
 Resources2::Resources2()
 {
     this->avatars.fourtf = QPixmap(":/avatars/fourtf.png");
+    this->avatars.mm2pl = QPixmap(":/avatars/mm2pl.png");
     this->avatars.pajlada = QPixmap(":/avatars/pajlada.png");
+    this->avatars.zneix = QPixmap(":/avatars/zneix.png");
     this->buttons.addSplit = QPixmap(":/buttons/addSplit.png");
     this->buttons.addSplitDark = QPixmap(":/buttons/addSplitDark.png");
     this->buttons.ban = QPixmap(":/buttons/ban.png");
@@ -25,8 +27,12 @@ Resources2::Resources2()
     this->buttons.trashCan = QPixmap(":/buttons/trashCan.png");
     this->buttons.unban = QPixmap(":/buttons/unban.png");
     this->buttons.unmod = QPixmap(":/buttons/unmod.png");
+    this->buttons.unvip = QPixmap(":/buttons/unvip.png");
     this->buttons.update = QPixmap(":/buttons/update.png");
     this->buttons.updateError = QPixmap(":/buttons/updateError.png");
+    this->buttons.viewersDark = QPixmap(":/buttons/viewersDark.png");
+    this->buttons.viewersLight = QPixmap(":/buttons/viewersLight.png");
+    this->buttons.vip = QPixmap(":/buttons/vip.png");
     this->error = QPixmap(":/error.png");
     this->icon = QPixmap(":/icon.png");
     this->pajaDank = QPixmap(":/pajaDank.png");
@@ -39,6 +45,7 @@ Resources2::Resources2()
     this->split.move = QPixmap(":/split/move.png");
     this->split.right = QPixmap(":/split/right.png");
     this->split.up = QPixmap(":/split/up.png");
+    this->streamerMode = QPixmap(":/streamerMode.png");
     this->twitch.admin = QPixmap(":/twitch/admin.png");
     this->twitch.automod = QPixmap(":/twitch/automod.png");
     this->twitch.broadcaster = QPixmap(":/twitch/broadcaster.png");

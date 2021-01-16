@@ -25,6 +25,7 @@ public:
     explicit SplitHeader(Split *_chatWidget);
 
     void setAddButtonVisible(bool value);
+    void setViewersButtonVisible(bool value);
 
     void updateChannelText();
     void updateModerationModeIcon();
@@ -47,6 +48,13 @@ private:
     void initializeModeSignals(EffectLabel &label);
     std::unique_ptr<QMenu> createMainMenu();
     std::unique_ptr<QMenu> createChatModeMenu();
+
+    /**
+     * @brief   Reset the thumbnail data and timer so a new
+     *          thumbnail can be fetched
+     **/
+    void resetThumbnail();
+
     void handleChannelChanged();
 
     Split *const split_{};
@@ -60,6 +68,7 @@ private:
     Label *titleLabel_{};
     EffectLabel *modeButton_{};
     Button *moderationButton_{};
+    Button *viewersButton_{};
     Button *addButton_{};
 
     // states

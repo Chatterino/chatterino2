@@ -17,7 +17,7 @@ struct Selection;
 struct MessageLayoutContainer;
 class MessageLayoutElement;
 
-enum class MessageElementFlag;
+enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 enum class MessageLayoutFlag : uint8_t {

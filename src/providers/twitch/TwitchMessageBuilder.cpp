@@ -6,6 +6,7 @@
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
+#include "providers/ffz/FfzBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
@@ -24,11 +25,17 @@
 #include <QMediaPlayer>
 #include <QStringRef>
 #include <boost/variant.hpp>
+#include "common/QLogging.hpp"
 
 namespace {
 
+const QString regexHelpString("(\\w+)[.,!?;:]*?$");
+
 // matches a mention with punctuation at the end, like "@username," or "@username!!!" where capture group would return "username"
-const QRegularExpression mentionRegex("^@(\\w+)[.,!?;]*?$");
+const QRegularExpression mentionRegex("^@" + regexHelpString);
+
+// if findAllUsernames setting is enabled, matches strings like in the examples above, but without @ symbol at the beginning
+const QRegularExpression allUsernamesMentionRegex("^" + regexHelpString);
 
 const QSet<QString> zeroWidthEmotes{
     "SoSnowy",  "IceCold",   "SantaHat", "TopHat",
@@ -188,6 +195,8 @@ MessagePtr TwitchMessageBuilder::build()
         this->senderIsBroadcaster = true;
     }
 
+    this->message().channelName = this->channel->getName();
+
     this->parseMessageID();
 
     this->parseRoomID();
@@ -220,24 +229,8 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     // timestamp
-    if (this->historicalMessage_)
-    {
-        // This may be architecture dependent(datatype)
-        bool customReceived = false;
-        qint64 ts =
-            this->tags.value("rm-received-ts").toLongLong(&customReceived);
-        if (!customReceived)
-        {
-            ts = this->tags.value("tmi-sent-ts").toLongLong();
-        }
-
-        QDateTime dateTime = QDateTime::fromMSecsSinceEpoch(ts);
-        this->emplace<TimestampElement>(dateTime.time());
-    }
-    else
-    {
-        this->emplace<TimestampElement>();
-    }
+    this->emplace<TimestampElement>(
+        calculateMessageTimestamp(this->ircMessage));
 
     bool addModerationElement = true;
     if (this->senderIsBroadcaster)
@@ -269,6 +262,7 @@ MessagePtr TwitchMessageBuilder::build()
     this->appendTwitchBadges();
 
     this->appendChatterinoBadges();
+    this->appendFfzBadges();
 
     this->appendUsername();
 
@@ -307,7 +301,7 @@ MessagePtr TwitchMessageBuilder::build()
 
     std::sort(twitchEmotes.begin(), twitchEmotes.end(),
               [](const auto &a, const auto &b) {
-                  return a.start < b.start;  //
+                  return a.start < b.start;
               });
     twitchEmotes.erase(std::unique(twitchEmotes.begin(), twitchEmotes.end(),
                                    [](const auto &first, const auto &second) {
@@ -411,7 +405,10 @@ void TwitchMessageBuilder::addWords(
             for (auto &variant : getApp()->emotes->emojis.parse(preText))
             {
                 boost::apply_visitor(
-                    [&](auto &&arg) { this->addTextOrEmoji(arg); }, variant);
+                    [&](auto &&arg) {
+                        this->addTextOrEmoji(arg);
+                    },
+                    variant);
             }
 
             cursor += preText.size();
@@ -427,8 +424,11 @@ void TwitchMessageBuilder::addWords(
         // split words
         for (auto &variant : getApp()->emotes->emojis.parse(word))
         {
-            boost::apply_visitor([&](auto &&arg) { this->addTextOrEmoji(arg); },
-                                 variant);
+            boost::apply_visitor(
+                [&](auto &&arg) {
+                    this->addTextOrEmoji(arg);
+                },
+                variant);
         }
 
         cursor += word.size() + 1;
@@ -479,6 +479,17 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         if (match.hasMatch())
         {
             QString username = match.captured(1);
+
+            if (this->twitchChannel != nullptr && getSettings()->colorUsernames)
+            {
+                if (auto userColor =
+                        this->twitchChannel->getUserColor(username);
+                    userColor.isValid())
+                {
+                    textColor = userColor;
+                }
+            }
+
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
                 ->setLink({Link::UserInfo, username});
@@ -493,15 +504,28 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
     if (this->twitchChannel != nullptr && getSettings()->findAllUsernames)
     {
         auto chatters = this->twitchChannel->accessChatters();
-        if (chatters->contains(string))
+        auto match = allUsernamesMentionRegex.match(string);
+        QString username = match.captured(1);
+
+        if (match.hasMatch() && chatters->contains(username))
         {
+            if (getSettings()->colorUsernames)
+            {
+                if (auto userColor =
+                        this->twitchChannel->getUserColor(username);
+                    userColor.isValid())
+                {
+                    textColor = userColor;
+                }
+            }
+
             this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
-                ->setLink({Link::UserInfo, string});
+                ->setLink({Link::UserInfo, username});
 
             this->emplace<TextElement>(
                     string, MessageElementFlag::NonBoldUsername, textColor)
-                ->setLink({Link::UserInfo, string});
+                ->setLink({Link::UserInfo, username});
             return;
         }
     }
@@ -547,6 +571,7 @@ void TwitchMessageBuilder::parseUsernameColor()
         if (const auto color = iterator.value().toString(); !color.isEmpty())
         {
             this->usernameColor_ = QColor(color);
+            this->message().usernameColor = this->usernameColor_;
             return;
         }
     }
@@ -554,6 +579,7 @@ void TwitchMessageBuilder::parseUsernameColor()
     if (getSettings()->colorizeNicknames && this->tags.contains("user-id"))
     {
         this->usernameColor_ = getRandomColor(this->tags.value("user-id"));
+        this->message().usernameColor = this->usernameColor_;
     }
 }
 
@@ -574,6 +600,10 @@ void TwitchMessageBuilder::parseUsername()
     //    }
 
     this->message().loginName = this->userName;
+    if (this->twitchChannel != nullptr)
+    {
+        this->twitchChannel->setUserColor(this->userName, this->usernameColor_);
+    }
 
     // Update current user color if this is our message
     auto currentUser = getApp()->accounts->twitch.getCurrent();
@@ -716,7 +746,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         {
             if ((*copy).ptr == nullptr)
             {
-                qDebug() << "remem nullptr" << (*copy).name.string;
+                qCDebug(chatterinoTwitch)
+                    << "remem nullptr" << (*copy).name.string;
             }
         }
         std::vector<TwitchEmoteOccurence> v(it, twitchEmotes.end());
@@ -731,6 +762,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             if (index >= pos)
             {
                 index += by;
+                item.end += by;
             }
         }
     };
@@ -753,7 +785,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 {
                     if (emote.second == nullptr)
                     {
-                        qDebug() << "emote null" << emote.first.string;
+                        qCDebug(chatterinoTwitch)
+                            << "emote null" << emote.first.string;
                     }
                     twitchEmotes.push_back(TwitchEmoteOccurence{
                         startIndex + pos,
@@ -770,6 +803,11 @@ void TwitchMessageBuilder::runIgnoreReplaces(
     for (const auto &phrase : *phrases)
     {
         if (phrase.isBlock())
+        {
+            continue;
+        }
+        const auto &pattern = phrase.getPattern();
+        if (pattern.isEmpty())
         {
             continue;
         }
@@ -820,7 +858,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 {
                     if (tup.ptr == nullptr)
                     {
-                        qDebug() << "v nullptr" << tup.name.string;
+                        qCDebug(chatterinoTwitch)
+                            << "v nullptr" << tup.name.string;
                         continue;
                     }
                     QRegularExpression emoteregex(
@@ -845,11 +884,6 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         }
         else
         {
-            const auto &pattern = phrase.getPattern();
-            if (pattern.isEmpty())
-            {
-                continue;
-            }
             int from = 0;
             while ((from = this->originalMessage_.indexOf(
                         pattern, from, phrase.caseSensitivity())) != -1)
@@ -889,7 +923,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                 {
                     if (tup.ptr == nullptr)
                     {
-                        qDebug() << "v nullptr" << tup.name.string;
+                        qCDebug(chatterinoTwitch)
+                            << "v nullptr" << tup.name.string;
                         continue;
                     }
                     QRegularExpression emoteregex(
@@ -959,7 +994,8 @@ void TwitchMessageBuilder::appendTwitchEmote(
             start, end, app->emotes->twitch.getOrCreateEmote(id, name), name};
         if (emoteOccurence.ptr == nullptr)
         {
-            qDebug() << "nullptr" << emoteOccurence.name.string;
+            qCDebug(chatterinoTwitch)
+                << "nullptr" << emoteOccurence.name.string;
         }
         vec.push_back(std::move(emoteOccurence));
     }
@@ -1088,6 +1124,9 @@ void TwitchMessageBuilder::appendTwitchBadges()
         this->emplace<BadgeElement>(badgeEmote.get(), badge.flag_)
             ->setTooltip(tooltip);
     }
+
+    this->message().badges = badges;
+    this->message().badgeInfos = badgeInfos;
 }
 
 void TwitchMessageBuilder::appendChatterinoBadges()
@@ -1096,6 +1135,18 @@ void TwitchMessageBuilder::appendChatterinoBadges()
     {
         this->emplace<BadgeElement>(*badge,
                                     MessageElementFlag::BadgeChatterino);
+    }
+}
+
+void TwitchMessageBuilder::appendFfzBadges()
+{
+    if (auto badge = getApp()->ffzBadges->getBadge({this->userId_}))
+    {
+        if (auto color = getApp()->ffzBadges->getBadgeColor({this->userId_}))
+        {
+            this->emplace<FfzBadgeElement>(*badge, MessageElementFlag::BadgeFfz,
+                                           color.get());
+        }
     }
 }
 
@@ -1185,6 +1236,7 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
 void TwitchMessageBuilder::appendChannelPointRewardMessage(
     const ChannelPointReward &reward, MessageBuilder *builder)
 {
+    builder->emplace<TimestampElement>();
     QString redeemed = "Redeemed";
     if (!reward.isUserInputRequired)
     {

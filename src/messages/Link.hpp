@@ -19,6 +19,9 @@ public:
         UserAction,
         AutoModAllow,
         AutoModDeny,
+        OpenAccountsPage,
+        JumpToChannel,
+        Reconnect
     };
 
     Link();

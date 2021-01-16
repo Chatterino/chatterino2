@@ -4,6 +4,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
+#include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/IrcConnectionEditor.hpp"
 #include "widgets/helper/NotebookTab.hpp"
@@ -25,7 +26,9 @@
 namespace chatterino {
 
 SelectChannelDialog::SelectChannelDialog(QWidget *parent)
-    : BaseWindow(BaseWindow::EnableCustomFrame, parent)
+    : BaseWindow(
+          {BaseWindow::Flags::EnableCustomFrame, BaseWindow::Flags::Dialog},
+          parent)
     , selectedChannel_(Channel::getEmpty())
 {
     this->setWindowTitle("Select a channel to join");
@@ -77,9 +80,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         whispers_lbl->setWordWrap(true);
         whispers_btn->installEventFilter(&this->tabFilter_);
 
-        QObject::connect(
-            whispers_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { whispers_lbl->setVisible(enabled); });
+        QObject::connect(whispers_btn.getElement(), &QRadioButton::toggled,
+                         [=](bool enabled) mutable {
+                             whispers_lbl->setVisible(enabled);
+                         });
 
         // mentions_btn
         auto mentions_btn = vbox.emplace<QRadioButton>("Mentions")
@@ -92,9 +96,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         mentions_lbl->setWordWrap(true);
         mentions_btn->installEventFilter(&this->tabFilter_);
 
-        QObject::connect(
-            mentions_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { mentions_lbl->setVisible(enabled); });
+        QObject::connect(mentions_btn.getElement(), &QRadioButton::toggled,
+                         [=](bool enabled) mutable {
+                             mentions_lbl->setVisible(enabled);
+                         });
 
         // watching_btn
         auto watching_btn = vbox.emplace<QRadioButton>("Watching")
@@ -106,9 +111,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         watching_lbl->setWordWrap(true);
         watching_btn->installEventFilter(&this->tabFilter_);
 
-        QObject::connect(
-            watching_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { watching_lbl->setVisible(enabled); });
+        QObject::connect(watching_btn.getElement(), &QRadioButton::toggled,
+                         [=](bool enabled) mutable {
+                             watching_lbl->setVisible(enabled);
+                         });
 
         vbox->addStretch(1);
 
@@ -201,11 +207,13 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         layout.emplace<QHBoxLayout>().emplace<QDialogButtonBox>(this);
     {
         auto *button_ok = buttons->addButton(QDialogButtonBox::Ok);
-        QObject::connect(button_ok, &QPushButton::clicked,
-                         [=](bool) { this->ok(); });
+        QObject::connect(button_ok, &QPushButton::clicked, [=](bool) {
+            this->ok();
+        });
         auto *button_cancel = buttons->addButton(QDialogButtonBox::Cancel);
-        QObject::connect(button_cancel, &QAbstractButton::clicked,
-                         [=](bool) { this->close(); });
+        QObject::connect(button_cancel, &QAbstractButton::clicked, [=](bool) {
+            this->close();
+        });
     }
 
     this->setMinimumSize(300, 310);
@@ -213,17 +221,24 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     this->ui_.twitch.channel->setFocus();
 
     // Shortcuts
-    auto *shortcut_ok = new QShortcut(QKeySequence("Return"), this);
-    QObject::connect(shortcut_ok, &QShortcut::activated, [=] { this->ok(); });
-    auto *shortcut_cancel = new QShortcut(QKeySequence("Esc"), this);
-    QObject::connect(shortcut_cancel, &QShortcut::activated,
-                     [=] { this->close(); });
+    createWindowShortcut(this, "Return", [=] {
+        this->ok();
+    });
+    createWindowShortcut(this, "Esc", [=] {
+        this->close();
+    });
 
     // restore ui state
     // fourtf: enable when releasing irc
     if (getSettings()->enableExperimentalIrc)
     {
         this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
+        createWindowShortcut(this, "Ctrl+Tab", [=] {
+            this->ui_.notebook->selectNextTab();
+        });
+        createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
+            this->ui_.notebook->selectPreviousTab();
+        });
     }
 
     this->ui_.irc.servers->getTableView()->selectRow(

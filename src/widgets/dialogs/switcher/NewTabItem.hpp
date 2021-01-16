@@ -20,8 +20,8 @@ public:
      */
     virtual void action() override;
 
-    virtual void paint(QPainter *painter, const QRect &rect) const;
-    virtual QSize sizeHint(const QRect &rect) const;
+    virtual void paint(QPainter *painter, const QRect &rect) const override;
+    virtual QSize sizeHint(const QRect &rect) const override;
 
 private:
     static constexpr const char *TEXT_FORMAT = "Open channel \"%1\" in new tab";

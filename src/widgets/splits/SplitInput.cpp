@@ -43,7 +43,9 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     // misc
     this->installKeyPressedEvent();
-    this->ui_.textEdit->focusLost.connect([this] { this->hideColonMenu(); });
+    this->ui_.textEdit->focusLost.connect([this] {
+        this->hideColonMenu();
+    });
     this->scaleChangedEvent(this->scale());
 }
 
@@ -90,8 +92,9 @@ void SplitInput::initLayout()
     }));
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked,
-                     [=] { this->openEmotePopup(); });
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [=] {
+        this->openEmotePopup();
+    });
 
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
@@ -124,13 +127,17 @@ void SplitInput::scaleChangedEvent(float scale)
 
 void SplitInput::themeChangedEvent()
 {
-    QPalette palette;
+    QPalette palette, placeholderPalette;
 
-    palette.setColor(QPalette::Foreground, this->theme->splits.input.text);
+    palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
+    placeholderPalette.setColor(
+        QPalette::PlaceholderText,
+        this->theme->messages.textColors.chatPlaceholder);
 
     this->updateEmoteButton();
     this->ui_.textEditLength->setPalette(palette);
 
+    this->ui_.textEdit->setPalette(placeholderPalette);
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
     this->ui_.hbox->setMargin(
@@ -450,6 +457,20 @@ void SplitInput::installKeyPressedEvent()
         {
             this->openEmotePopup();
         }
+        else if (event->key() == Qt::Key_PageUp)
+        {
+            auto &scrollbar = this->split_->getChannelView().getScrollBar();
+            scrollbar.offset(-scrollbar.getLargeChange());
+
+            event->accept();
+        }
+        else if (event->key() == Qt::Key_PageDown)
+        {
+            auto &scrollbar = this->split_->getChannelView().getScrollBar();
+            scrollbar.offset(scrollbar.getLargeChange());
+
+            event->accept();
+        }
     });
 }
 
@@ -460,8 +481,10 @@ void SplitInput::onCursorPositionChanged()
 
 void SplitInput::updateColonMenu()
 {
+    auto channel = this->split_->getChannel().get();
     if (!getSettings()->emoteCompletionWithColon ||
-        !dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+        (!dynamic_cast<TwitchChannel *>(channel) &&
+         !(channel->getType() == Channel::Type::TwitchWhispers)))
     {
         this->hideColonMenu();
         return;
@@ -583,7 +606,7 @@ void SplitInput::editTextChanged()
     QString text = this->ui_.textEdit->toPlainText();
 
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
-        this->split_->getChannel()->isTwitchChannel())  //
+        this->split_->getChannel()->isTwitchChannel())
     {
         QString lastUser = app->twitch.server->lastUserThatWhisperedMe.get();
         if (!lastUser.isEmpty())

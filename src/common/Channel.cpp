@@ -49,6 +49,11 @@ const QString &Channel::getDisplayName() const
     return this->getName();
 }
 
+const QString &Channel::getLocalizedName() const
+{
+    return this->getName();
+}
+
 bool Channel::isTwitchChannel() const
 {
     return this->type_ >= Type::Twitch && this->type_ < Type::TwitchEnd;
@@ -130,17 +135,17 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
         }
 
         if (s->flags.has(MessageFlag::Timeout) &&
-            s->timeoutUser == message->timeoutUser)  //
+            s->timeoutUser == message->timeoutUser)
         {
             if (message->flags.has(MessageFlag::PubSub) &&
-                !s->flags.has(MessageFlag::PubSub))  //
+                !s->flags.has(MessageFlag::PubSub))
             {
                 this->replaceMessage(s, message);
                 addMessage = false;
                 break;
             }
             if (!message->flags.has(MessageFlag::PubSub) &&
-                s->flags.has(MessageFlag::PubSub))  //
+                s->flags.has(MessageFlag::PubSub))
             {
                 addMessage = timeoutStackStyle == TimeoutStackStyle::DontStack;
                 break;
@@ -221,6 +226,14 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
     if (index >= 0)
     {
         this->messageReplaced.invoke((size_t)index, replacement);
+    }
+}
+
+void Channel::replaceMessage(size_t index, MessagePtr replacement)
+{
+    if (this->messages_.replaceItem(index, replacement))
+    {
+        this->messageReplaced.invoke(index, replacement);
     }
 }
 

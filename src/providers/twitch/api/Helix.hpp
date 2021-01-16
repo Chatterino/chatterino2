@@ -2,6 +2,7 @@
 
 #include "common/NetworkRequest.hpp"
 
+#include <QJsonArray>
 #include <QString>
 #include <QStringList>
 #include <QUrl>
@@ -22,6 +23,7 @@ struct HelixUser {
     QString id;
     QString login;
     QString displayName;
+    QString createdAt;
     QString description;
     QString profileImageUrl;
     int viewCount;
@@ -30,6 +32,7 @@ struct HelixUser {
         : id(jsonObject.value("id").toString())
         , login(jsonObject.value("login").toString())
         , displayName(jsonObject.value("display_name").toString())
+        , createdAt(jsonObject.value("created_at").toString())
         , description(jsonObject.value("description").toString())
         , profileImageUrl(jsonObject.value("profile_image_url").toString())
         , viewCount(jsonObject.value("view_count").toInt())
@@ -181,6 +184,14 @@ public:
 
     void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
                      HelixFailureCallback failureCallback);
+
+    void followUser(QString userId, QString targetId,
+                    std::function<void()> successCallback,
+                    HelixFailureCallback failureCallback);
+
+    void unfollowUser(QString userId, QString targetlId,
+                      std::function<void()> successCallback,
+                      HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

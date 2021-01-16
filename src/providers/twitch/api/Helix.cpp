@@ -1,6 +1,7 @@
 #include "providers/twitch/api/Helix.hpp"
 
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 
@@ -52,12 +53,12 @@ void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
         .execute();
 }
 
-void Helix::getUserByName(QString userId,
+void Helix::getUserByName(QString userName,
                           ResultCallback<HelixUser> successCallback,
                           HelixFailureCallback failureCallback)
 {
     QStringList userIds;
-    QStringList userLogins{userId};
+    QStringList userLogins{userName};
 
     this->fetchUsers(
         userIds, userLogins,
@@ -314,20 +315,64 @@ void Helix::getGameById(QString gameId,
         failureCallback);
 }
 
+void Helix::followUser(QString userId, QString targetId,
+                       std::function<void()> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_id", userId);
+    urlQuery.addQueryItem("to_id", targetId);
+
+    this->makeRequest("users/follows", urlQuery)
+        .type(NetworkRequestType::Post)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::unfollowUser(QString userId, QString targetId,
+                         std::function<void()> successCallback,
+                         HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_id", userId);
+    urlQuery.addQueryItem("to_id", targetId);
+
+    this->makeRequest("users/follows", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
 
     if (this->clientId.isEmpty())
     {
-        qDebug()
+        qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without a client ID set BabyRage";
         // return boost::none;
     }
 
     if (this->oauthToken.isEmpty())
     {
-        qDebug()
+        qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without an oauth token set BabyRage";
         // return boost::none;
     }

@@ -6,6 +6,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "messages/Message.hpp"
+#include "providers/IvrApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
@@ -22,7 +23,6 @@
 
 #include <QCheckBox>
 #include <QDesktopServices>
-#include <QLabel>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
@@ -104,13 +104,22 @@ namespace {
 
 }  // namespace
 
-UserInfoPopup::UserInfoPopup(bool closeAutomatically)
-    : BaseWindow(
-          closeAutomatically
-              ? FlagsEnum<BaseWindow::Flags>{BaseWindow::EnableCustomFrame,
-                                             BaseWindow::Frameless,
-                                             BaseWindow::FramelessDraggable}
-              : BaseWindow::EnableCustomFrame)
+#ifdef Q_OS_LINUX
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::Dialog,
+                                                BaseWindow::EnableCustomFrame};
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
+    BaseWindow::EnableCustomFrame};
+#else
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlags{BaseWindow::EnableCustomFrame};
+FlagsEnum<BaseWindow::Flags> userInfoPopupFlagsCloseAutomatically{
+    BaseWindow::EnableCustomFrame, BaseWindow::Frameless,
+    BaseWindow::FramelessDraggable};
+#endif
+
+UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
+    : BaseWindow(closeAutomatically ? userInfoPopupFlagsCloseAutomatically
+                                    : userInfoPopupFlags,
+                 parent)
     , hack_(new bool)
 {
     this->setWindowTitle("Usercard");
@@ -118,9 +127,13 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
 
     if (closeAutomatically)
         this->setActionOnFocusLoss(BaseWindow::Delete);
+    else
+        this->setAttribute(Qt::WA_DeleteOnClose);
 
     // Close the popup when Escape is pressed
-    createWindowShortcut(this, "Escape", [this] { this->deleteLater(); });
+    createWindowShortcut(this, "Escape", [this] {
+        this->deleteLater();
+    });
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
@@ -138,9 +151,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
                 QUrl("https://twitch.tv/" + this->userName_.toLower()));
         });
 
-        // items on the right
         auto vbox = head.emplace<QVBoxLayout>();
         {
+            // items on the right
             {
                 auto box = vbox.emplace<QHBoxLayout>()
                                .withoutMargin()
@@ -148,18 +161,21 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
                 this->ui_.nameLabel = addCopyableLabel(box);
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
                 box->addStretch(1);
-                this->ui_.userIDLabel = addCopyableLabel(box);
                 auto palette = QPalette();
                 palette.setColor(QPalette::WindowText, QColor("#aaa"));
+                this->ui_.userIDLabel = addCopyableLabel(box);
                 this->ui_.userIDLabel->setPalette(palette);
             }
 
+            // items on the left
             vbox.emplace<Label>(TEXT_VIEWS.arg(""))
                 .assign(&this->ui_.viewCountLabel);
             vbox.emplace<Label>(TEXT_FOLLOWERS.arg(""))
                 .assign(&this->ui_.followerCountLabel);
             vbox.emplace<Label>(TEXT_CREATED.arg(""))
                 .assign(&this->ui_.createdDateLabel);
+            vbox.emplace<Label>("").assign(&this->ui_.followageLabel);
+            vbox.emplace<Label>("").assign(&this->ui_.subageLabel);
         }
     }
 
@@ -184,6 +200,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
         auto unmod = user.emplace<Button>(this);
         unmod->setPixmap(getResources().buttons.unmod);
         unmod->setScaleIndependantSize(30, 30);
+        auto vip = user.emplace<Button>(this);
+        vip->setPixmap(getResources().buttons.vip);
+        vip->setScaleIndependantSize(30, 30);
+        auto unvip = user.emplace<Button>(this);
+        unvip->setPixmap(getResources().buttons.unvip);
+        unvip->setScaleIndependantSize(30, 30);
 
         user->addStretch(1);
 
@@ -193,17 +215,25 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
                                       "/viewercard/" + this->userName_);
         });
 
-        QObject::connect(refresh.getElement(), &Button::leftClicked,
-                         [this] { this->updateLatestMessages(); });
+        QObject::connect(refresh.getElement(), &Button::leftClicked, [this] {
+            this->updateLatestMessages();
+        });
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/mod " + this->userName_);
         });
         QObject::connect(unmod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/unmod " + this->userName_);
         });
+        QObject::connect(vip.getElement(), &Button::leftClicked, [this] {
+            this->channel_->sendMessage("/vip " + this->userName_);
+        });
+        QObject::connect(unvip.getElement(), &Button::leftClicked, [this] {
+            this->channel_->sendMessage("/unvip " + this->userName_);
+        });
 
         // userstate
-        this->userStateChanged_.connect([this, mod, unmod]() mutable {
+        this->userStateChanged_.connect([this, mod, unmod, vip,
+                                         unvip]() mutable {
             TwitchChannel *twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->channel_.get());
 
@@ -221,6 +251,8 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically)
             }
             mod->setVisible(visibilityModButtons);
             unmod->setVisible(visibilityModButtons);
+            vip->setVisible(visibilityModButtons);
+            unvip->setVisible(visibilityModButtons);
         });
     }
 
@@ -338,7 +370,7 @@ void UserInfoPopup::installEvents()
             auto currentUser = getApp()->accounts->twitch.getCurrent();
 
             const auto reenableFollowCheckbox = [this] {
-                this->ui_.follow->setEnabled(true);  //
+                this->ui_.follow->setEnabled(true);
             };
 
             if (!this->ui_.follow->isEnabled())
@@ -354,8 +386,11 @@ void UserInfoPopup::installEvents()
             {
                 case Qt::CheckState::Unchecked: {
                     this->ui_.follow->setEnabled(false);
-                    currentUser->unfollowUser(this->userId_,
-                                              reenableFollowCheckbox);
+                    getHelix()->unfollowUser(currentUser->getUserId(),
+                                             this->userId_,
+                                             reenableFollowCheckbox, [] {
+                                                 //
+                                             });
                 }
                 break;
 
@@ -366,8 +401,11 @@ void UserInfoPopup::installEvents()
 
                 case Qt::CheckState::Checked: {
                     this->ui_.follow->setEnabled(false);
-                    currentUser->followUser(this->userId_,
-                                            reenableFollowCheckbox);
+                    getHelix()->followUser(currentUser->getUserId(),
+                                           this->userId_,
+                                           reenableFollowCheckbox, [] {
+                                               //
+                                           });
                 }
                 break;
             }
@@ -473,7 +511,9 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
     this->userStateChanged_.invoke();
 
     this->updateLatestMessages();
-    QTimer::singleShot(1, this, [this] { this->setStayInScreenRect(true); });
+    QTimer::singleShot(1, this, [this] {
+        this->setStayInScreenRect(true);
+    });
 }
 
 void UserInfoPopup::updateLatestMessages()
@@ -516,6 +556,7 @@ void UserInfoPopup::updateUserData()
     this->ui_.follow->setEnabled(false);
 
     std::weak_ptr<bool> hack = this->hack_;
+    auto currentUser = getApp()->accounts->twitch.getCurrent();
 
     const auto onUserFetchFailed = [this, hack] {
         if (!hack.lock())
@@ -531,39 +572,34 @@ void UserInfoPopup::updateUserData()
 
         this->ui_.nameLabel->setText(this->userName_);
 
-        this->ui_.userIDLabel->setText(QString("ID") +
+        this->ui_.userIDLabel->setText(QString("ID ") +
                                        QString(TEXT_UNAVAILABLE));
         this->ui_.userIDLabel->setProperty("copy-text",
                                            QString(TEXT_UNAVAILABLE));
     };
-    const auto onUserFetched = [this, hack](const auto &user) {
+    const auto onUserFetched = [this, hack,
+                                currentUser](const HelixUser &user) {
         if (!hack.lock())
         {
             return;
         }
 
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-
         this->userId_ = user.id;
 
+        this->ui_.nameLabel->setText(user.displayName);
+        this->setWindowTitle(TEXT_TITLE.arg(user.displayName));
+        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(user.viewCount));
+        this->ui_.createdDateLabel->setText(
+            TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
         this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);
         this->ui_.userIDLabel->setProperty("copy-text", user.id);
 
-        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(user.viewCount));
-        getKraken()->getUser(
-            user.id,
-            [this, hack](const auto &user) {
-                if (!hack.lock())
-                {
-                    return;
-                }
-                this->ui_.createdDateLabel->setText(
-                    TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
-            },
-            [] {
-                // failure
-            });
-        if (!isInStreamerMode())
+        if (isInStreamerMode() &&
+            getSettings()->streamerModeHideUsercardAvatars)
+        {
+            this->ui_.avatarButton->setPixmap(getResources().streamerMode);
+        }
+        else
         {
             this->loadAvatar(user.profileImageUrl);
         }
@@ -629,6 +665,45 @@ void UserInfoPopup::updateUserData()
         this->ui_.ignore->setEnabled(true);
         this->ui_.ignore->setChecked(isIgnoring);
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
+
+        // get followage and subage
+        getIvr()->getSubage(
+            this->userName_, this->channel_->getName(),
+            [this, hack](const IvrSubage &subageInfo) {
+                if (!hack.lock())
+                {
+                    return;
+                }
+
+                if (!subageInfo.followingSince.isEmpty())
+                {
+                    QDateTime followedAt = QDateTime::fromString(
+                        subageInfo.followingSince, Qt::ISODate);
+                    QString followingSince = followedAt.toString("yyyy-MM-dd");
+                    this->ui_.followageLabel->setText("❤ Following since " +
+                                                      followingSince);
+                }
+
+                if (subageInfo.isSubHidden)
+                {
+                    this->ui_.subageLabel->setText(
+                        "Subscription status hidden");
+                }
+                else if (subageInfo.isSubbed)
+                {
+                    this->ui_.subageLabel->setText(
+                        QString("★ Tier %1 - Subscribed for %2 months")
+                            .arg(subageInfo.subTier)
+                            .arg(subageInfo.totalSubMonths));
+                }
+                else if (subageInfo.totalSubMonths)
+                {
+                    this->ui_.subageLabel->setText(
+                        QString("★ Previously subscribed for %1 months")
+                            .arg(subageInfo.totalSubMonths));
+                }
+            },
+            [] {});
     };
 
     getHelix()->getUserByName(this->userName_, onUserFetched,
@@ -750,9 +825,10 @@ UserInfoPopup::TimeoutWidget::TimeoutWidget()
             const auto pair =
                 std::make_pair(Action::Timeout, calculateTimeoutDuration(item));
 
-            QObject::connect(
-                a.getElement(), &EffectLabel2::leftClicked,
-                [this, pair] { this->buttonClicked.invoke(pair); });
+            QObject::connect(a.getElement(), &EffectLabel2::leftClicked,
+                             [this, pair] {
+                                 this->buttonClicked.invoke(pair);
+                             });
 
             //auto addTimeouts = [&](const QString &title_,
             //                       const std::vector<std::pair<QString, int>> &items) {

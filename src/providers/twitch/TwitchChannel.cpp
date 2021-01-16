@@ -31,6 +31,7 @@
 #include <QJsonValue>
 #include <QThread>
 #include <QTimer>
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -71,11 +72,15 @@ namespace {
 
         // rebuild the raw irc message so we can convert it back to an ircmessage again!
         // this could probably be done in a smarter way
+
         auto s = QString(":tmi.twitch.tv NOTICE %1 :%2")
                      .arg(channelName)
                      .arg(noticeMessage);
 
-        return Communi::IrcMessage::fromData(s.toUtf8(), nullptr);
+        auto newMessage = Communi::IrcMessage::fromData(s.toUtf8(), nullptr);
+        newMessage->setTags(message->tags());
+
+        return newMessage;
     }
 
     // parseRecentMessages takes a json object and returns a vector of
@@ -132,6 +137,7 @@ TwitchChannel::TwitchChannel(const QString &name,
                              FfzEmotes &ffz)
     : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
+    , nameOptions{name, name}
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
@@ -144,7 +150,7 @@ TwitchChannel::TwitchChannel(const QString &name,
     , mod_(false)
     , titleRefreshedTime_(QTime::currentTime().addSecs(-TITLE_REFRESH_PERIOD))
 {
-    qDebug() << "[TwitchChannel" << name << "] Opened";
+    qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
     this->liveStatusChanged.connect([this]() {
         if (this->isLive() == 1)
@@ -152,14 +158,18 @@ TwitchChannel::TwitchChannel(const QString &name,
         }
     });
 
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
-                         [=] { this->setMod(false); });
+    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [=] {
+        this->setMod(false);
+    });
 
     // pubsub
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
-                         [=] { this->refreshPubsub(); });
+    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [=] {
+        this->refreshPubsub();
+    });
     this->refreshPubsub();
-    this->userStateChanged.connect([this] { this->refreshPubsub(); });
+    this->userStateChanged.connect([this] {
+        this->refreshPubsub();
+    });
 
     // room id loaded -> refresh live status
     this->roomIdChanged.connect([this]() {
@@ -173,12 +183,14 @@ TwitchChannel::TwitchChannel(const QString &name,
     });
 
     // timers
-    QObject::connect(&this->chattersListTimer_, &QTimer::timeout,
-                     [=] { this->refreshChatters(); });
+    QObject::connect(&this->chattersListTimer_, &QTimer::timeout, [=] {
+        this->refreshChatters();
+    });
     this->chattersListTimer_.start(5 * 60 * 1000);
 
-    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout,
-                     [=] { this->refreshLiveStatus(); });
+    QObject::connect(&this->liveStatusTimer_, &QTimer::timeout, [=] {
+        this->refreshLiveStatus();
+    });
     this->liveStatusTimer_.start(60 * 1000);
 
     // debugging
@@ -191,6 +203,7 @@ TwitchChannel::TwitchChannel(const QString &name,
 
 void TwitchChannel::initialize()
 {
+    this->fetchDisplayName();
     this->refreshChatters();
     this->refreshBadges();
 }
@@ -205,10 +218,30 @@ bool TwitchChannel::canSendMessage() const
     return !this->isEmpty();
 }
 
+const QString &TwitchChannel::getDisplayName() const
+{
+    return this->nameOptions.displayName;
+}
+
+void TwitchChannel::setDisplayName(const QString &name)
+{
+    this->nameOptions.displayName = name;
+}
+
+const QString &TwitchChannel::getLocalizedName() const
+{
+    return this->nameOptions.localizedName;
+}
+
+void TwitchChannel::setLocalizedName(const QString &name)
+{
+    this->nameOptions.localizedName = name;
+}
+
 void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
 {
     BttvEmotes::loadChannel(
-        weakOf<Channel>(this), this->roomId(), this->getName(),
+        weakOf<Channel>(this), this->roomId(), this->getLocalizedName(),
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
                 this->bttvEmotes_.set(
@@ -295,8 +328,8 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    qDebug() << "[TwitchChannel" << this->getName()
-             << "] Send message:" << message;
+    qCDebug(chatterinoTwitch)
+        << "[TwitchChannel" << this->getName() << "] Send message:" << message;
 
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
@@ -324,7 +357,7 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (messageSent)
     {
-        qDebug() << "sent";
+        qCDebug(chatterinoTwitch) << "sent";
         this->lastSentMessage_ = parsedMessage;
     }
 }
@@ -583,8 +616,8 @@ void TwitchChannel::refreshLiveStatus()
 
     if (roomID.isEmpty())
     {
-        qDebug() << "[TwitchChannel" << this->getName()
-                 << "] Refreshing live status (Missing ID)";
+        qCDebug(chatterinoTwitch) << "[TwitchChannel" << this->getName()
+                                  << "] Refreshing live status (Missing ID)";
         this->setLive(false);
         return;
     }
@@ -664,7 +697,13 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    NetworkRequest(Env::get().recentMessagesApiUrl.arg(this->getName()))
+    auto baseURL = Env::get().recentMessagesApiUrl.arg(this->getName());
+
+    auto url = QString("%1?limit=%2")
+                   .arg(baseURL)
+                   .arg(getSettings()->twitchMessageHistoryLimit);
+
+    NetworkRequest(url)
         .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
@@ -742,6 +781,33 @@ void TwitchChannel::refreshChatters()
                 return pair.first;
             })
         .execute();
+}
+
+void TwitchChannel::fetchDisplayName()
+{
+    getHelix()->getUserByName(
+        this->getName(),
+        [weak = weakOf<Channel>(this)](const auto &user) {
+            auto shared = weak.lock();
+            if (!shared)
+                return;
+            auto channel = static_cast<TwitchChannel *>(shared.get());
+            if (QString::compare(user.displayName, channel->getName(),
+                                 Qt::CaseInsensitive) == 0)
+            {
+                channel->setDisplayName(user.displayName);
+                channel->setLocalizedName(user.displayName);
+            }
+            else
+            {
+                channel->setLocalizedName(QString("%1(%2)")
+                                              .arg(channel->getName())
+                                              .arg(user.displayName));
+            }
+            channel->addRecentChatter(channel->getDisplayName());
+            channel->displayNameChanged.invoke();
+        },
+        [] {});
 }
 
 void TwitchChannel::refreshBadges()
@@ -898,7 +964,8 @@ boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
         int bitAmount = amount.toInt(&ok);
         if (!ok)
         {
-            qDebug() << "Error parsing bit amount in cheerEmote";
+            qCDebug(chatterinoTwitch)
+                << "Error parsing bit amount in cheerEmote";
         }
         for (const auto &emote : set.cheerEmotes)
         {

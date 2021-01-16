@@ -1,5 +1,6 @@
 #include "common/WindowDescriptors.hpp"
 
+#include "common/QLogging.hpp"
 #include "widgets/Window.hpp"
 
 namespace chatterino {
@@ -68,6 +69,23 @@ namespace {
         return descriptor;
     }
 
+    const QList<QUuid> loadFilters(QJsonValue val)
+    {
+        QList<QUuid> filterIds;
+
+        if (!val.isUndefined())
+        {
+            const auto array = val.toArray();
+            filterIds.reserve(array.size());
+            for (const auto &id : array)
+            {
+                filterIds.append(QUuid::fromString(id.toString()));
+            }
+        }
+
+        return filterIds;
+    }
+
 }  // namespace
 
 void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
@@ -76,6 +94,7 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
 {
     descriptor.type_ = data.value("type").toString();
     descriptor.server_ = data.value("server").toInt(-1);
+    descriptor.moderationMode_ = root.value("moderationMode").toBool();
     if (data.contains("channel"))
     {
         descriptor.channelName_ = data.value("channel").toString();
@@ -84,6 +103,7 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
     {
         descriptor.channelName_ = data.value("name").toString();
     }
+    descriptor.filters_ = loadFilters(root.value("filters"));
 }
 
 WindowLayout WindowLayout::loadFromFile(const QString &path)
@@ -107,7 +127,7 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
         {
             if (hasSetAMainWindow)
             {
-                qDebug()
+                qCDebug(chatterinoCommon)
                     << "Window Layout file contains more than one Main window "
                        "- demoting to Popup type";
                 type = WindowType::Popup;
@@ -161,8 +181,9 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
             {
                 if (hasSetASelectedTab)
                 {
-                    qDebug() << "Window contains more than one selected tab - "
-                                "demoting to unselected";
+                    qCDebug(chatterinoCommon)
+                        << "Window contains more than one selected tab - "
+                           "demoting to unselected";
                     tab.selected_ = false;
                 }
                 hasSetASelectedTab = true;

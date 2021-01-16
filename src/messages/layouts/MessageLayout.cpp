@@ -115,12 +115,11 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 {
     this->layoutCount_++;
-
     auto messageFlags = this->message_->flags;
 
     if (this->flags.has(MessageLayoutFlag::Expanded) ||
         (flags.has(MessageElementFlag::ModeratorTools) &&
-         !this->message_->flags.has(MessageFlag::Disabled)))  //
+         !this->message_->flags.has(MessageFlag::Disabled)))
     {
         messageFlags.unset(MessageFlag::Collapsed);
     }
@@ -272,6 +271,9 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
                                  Selection & /*selection*/)
 {
+    if (buffer->isNull())
+        return;
+
     auto app = getApp();
     auto settings = getSettings();
 

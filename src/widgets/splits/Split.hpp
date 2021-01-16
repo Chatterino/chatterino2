@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
+#include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QFont>
@@ -53,6 +54,9 @@ public:
     ChannelPtr getChannel();
     void setChannel(IndirectChannel newChannel);
 
+    void setFilters(const QList<QUuid> ids);
+    const QList<QUuid> getFilters() const;
+
     void setModerationMode(bool value);
     bool getModerationMode() const;
 
@@ -92,6 +96,7 @@ protected:
 private:
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
+    void updateInputPlaceholder();
 
     SplitContainer *container_;
     IndirectChannel channel_;
@@ -115,6 +120,7 @@ private:
     pajlada::Signals::Connection roomModeChangedConnection_;
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
+    pajlada::Signals::SignalHolder signalHolder_;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
@@ -127,15 +133,18 @@ public slots:
     void popup();
     void clear();
     void openInBrowser();
+    void openModViewInBrowser();
     void openWhispersInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
     void openWithCustomScheme();
     void copyToClipboard();
+    void setFiltersDialog();
     void showSearch();
     void showViewerList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
+    void reconnect();
 };
 
 }  // namespace chatterino

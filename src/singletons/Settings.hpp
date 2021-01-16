@@ -6,9 +6,11 @@
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
 #include "common/SignalVector.hpp"
+#include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
 
 using TimeoutButton = std::pair<QString, int>;
@@ -19,6 +21,7 @@ class HighlightPhrase;
 class HighlightBlacklistUser;
 class IgnorePhrase;
 class TaggedUser;
+class FilterRecord;
 
 /// Settings which are availlable for reading on all threads.
 class ConcurrentSettings
@@ -31,6 +34,7 @@ public:
     SignalVector<HighlightBlacklistUser> &blacklistedUsers;
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
+    SignalVector<FilterRecordPtr> &filterRecords;
     //SignalVector<TaggedUser> &taggedUsers;
     SignalVector<ModerationAction> &moderationActions;
 
@@ -65,8 +69,8 @@ public:
                                       "h:mm"};
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
-    IntSetting lastMessagePattern = {"/appearance/messages/lastMessagePattern",
-                                     Qt::VerPattern};
+    EnumSetting<Qt::BrushStyle> lastMessagePattern = {
+        "/appearance/messages/lastMessagePattern", Qt::VerPattern};
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
                                        ""};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
@@ -79,7 +83,7 @@ public:
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
-                                     false};
+                                     true};
 
     IntSetting tabDirection = {"/appearance/tabDirection",
                                NotebookTabDirection::Horizontal};
@@ -92,14 +96,15 @@ public:
         "/appearance/messages/alternateMessageBackground", false};
     FloatSetting boldScale = {"/appearance/boldScale", 63};
     BoolSetting showTabCloseButton = {"/appearance/showTabCloseButton", true};
-    BoolSetting showTabLive = {"/appearance/showTabLiveButton", false};
+    BoolSetting showTabLive = {"/appearance/showTabLiveButton", true};
     BoolSetting hidePreferencesButton = {"/appearance/hidePreferencesButton",
                                          false};
     BoolSetting hideUserButton = {"/appearance/hideUserButton", false};
     BoolSetting enableSmoothScrolling = {"/appearance/smoothScrolling", true};
     BoolSetting enableSmoothScrollingNewMessages = {
         "/appearance/smoothScrollingNewMessages", false};
-    BoolSetting boldUsernames = {"/appearance/messages/boldUsernames", false};
+    BoolSetting boldUsernames = {"/appearance/messages/boldUsernames", true};
+    BoolSetting colorUsernames = {"/appearance/messages/colorUsernames", true};
     BoolSetting findAllUsernames = {"/appearance/messages/findAllUsernames",
                                     false};
     // BoolSetting customizable splitheader
@@ -123,6 +128,7 @@ public:
                                           true};
     BoolSetting showBadgesVanity = {"/appearance/badges/vanity", true};
     BoolSetting showBadgesChatterino = {"/appearance/badges/chatterino", true};
+    BoolSetting showBadgesFfz = {"/appearance/badges/ffz", true};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
@@ -177,7 +183,20 @@ public:
     BoolSetting unshortLinks = {"/links/unshortLinks", false};
     BoolSetting lowercaseDomains = {"/links/linkLowercase", true};
 
-    /// Ignored phrases
+    /// Streamer Mode
+    EnumSetting<StreamerModeSetting> enableStreamerMode = {
+        "/streamerMode/enabled", StreamerModeSetting::DetectObs};
+    BoolSetting streamerModeHideUsercardAvatars = {
+        "/streamerMode/hideUsercardAvatars", true};
+    BoolSetting streamerModeHideLinkThumbnails = {
+        "/streamerMode/hideLinkThumbnails", true};
+    BoolSetting streamerModeHideViewerCountAndDuration = {
+        "/streamerMode/hideViewerCountAndDuration", false};
+    BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
+    BoolSetting streamerModeSupressLiveNotifications = {
+        "/streamerMode/supressLiveNotifications", false};
+
+    /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
                                            "***"};
 
@@ -198,6 +217,8 @@ public:
 
     BoolSetting enableSelfHighlight = {
         "/highlighting/selfHighlight/nameIsHighlightKeyword", true};
+    BoolSetting showSelfHighlightInMentions = {
+        "/highlighting/selfHighlight/showSelfHighlightInMentions", true};
     BoolSetting enableSelfHighlightSound = {
         "/highlighting/selfHighlight/enableSound", true};
     BoolSetting enableSelfHighlightTaskbar = {
@@ -244,6 +265,10 @@ public:
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 
     BoolSetting highlightMentions = {"/hightlighting/mentions", true};
+    
+    /// Filtering
+    BoolSetting excludeUserMessagesFromFilter = {
+        "/filtering/excludeUserMessages", false};
 
     /// Logging
     BoolSetting enableLogging = {"/logging/enabled", false};
@@ -307,8 +332,14 @@ public:
 
     IntSetting startUpNotification = {"/misc/startUpNotification", 0};
     QStringSetting currentVersion = {"/misc/currentVersion", ""};
+
     BoolSetting loadTwitchMessageHistoryOnConnect = {
         "/misc/twitch/loadMessageHistoryOnConnect", true};
+    IntSetting twitchMessageHistoryLimit = {
+        "/misc/twitch/messageHistoryLimit",
+        800,
+    };
+
     IntSetting emotesTooltipPreview = {"/misc/emotesTooltipPreview", 1};
     BoolSetting openLinksIncognito = {"/misc/openLinksIncognito", 0};
 
@@ -316,8 +347,6 @@ public:
     BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
     BoolSetting attachExtensionToAnyProcess = {
         "/misc/attachExtensionToAnyProcess", false};
-    BoolSetting hideViewerCountAndDuration = {
-        "/misc/hideViewerCountAndDuration", false};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
 
     /// Debug

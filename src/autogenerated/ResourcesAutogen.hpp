@@ -10,7 +10,9 @@ public:
 
     struct {
         QPixmap fourtf;
+        QPixmap mm2pl;
         QPixmap pajlada;
+        QPixmap zneix;
     } avatars;
     struct {
         QPixmap addSplit;
@@ -32,8 +34,12 @@ public:
         QPixmap trashCan;
         QPixmap unban;
         QPixmap unmod;
+        QPixmap unvip;
         QPixmap update;
         QPixmap updateError;
+        QPixmap viewersDark;
+        QPixmap viewersLight;
+        QPixmap vip;
     } buttons;
     QPixmap error;
     QPixmap icon;
@@ -53,6 +59,7 @@ public:
         QPixmap right;
         QPixmap up;
     } split;
+    QPixmap streamerMode;
     struct {
         QPixmap admin;
         QPixmap automod;

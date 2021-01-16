@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/Shortcut.hpp"
@@ -10,6 +11,7 @@
 #include "widgets/settingspages/AccountsPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
 #include "widgets/settingspages/ExternalToolsPage.hpp"
+#include "widgets/settingspages/FiltersPage.hpp"
 #include "widgets/settingspages/GeneralPage.hpp"
 #include "widgets/settingspages/HighlightingPage.hpp"
 #include "widgets/settingspages/IgnoresPage.hpp"
@@ -22,11 +24,13 @@
 
 namespace chatterino {
 
-SettingsDialog::SettingsDialog()
-    : BaseWindow(BaseWindow::DisableCustomScaling)
+SettingsDialog::SettingsDialog(QWidget *parent)
+    : BaseWindow(
+          {BaseWindow::Flags::DisableCustomScaling, BaseWindow::Flags::Dialog},
+          parent)
 {
     this->setWindowTitle("Chatterino Settings");
-    this->resize(815, 600);
+    this->resize(915, 600);
     this->themeChangedEvent();
     this->scaleChangedEvent(this->scale());
 
@@ -39,6 +43,10 @@ SettingsDialog::SettingsDialog()
         this->ui_.search->setFocus();
         this->ui_.search->selectAll();
     });
+
+    // Disable the ? button in the titlebar until we decide to use it
+    this->setWindowFlags(this->windowFlags() &
+                         ~Qt::WindowContextHelpButtonHint);
 }
 
 void SettingsDialog::initUi()
@@ -160,6 +168,7 @@ void SettingsDialog::addTabs()
     this->addTab([]{return new CommandPage;},          "Commands",       ":/settings/commands.svg");
     this->addTab([]{return new HighlightingPage;},     "Highlights",     ":/settings/notifications.svg");
     this->addTab([]{return new IgnoresPage;},          "Ignores",        ":/settings/ignore.svg");
+    this->addTab([]{return new FiltersPage;},          "Filters",        ":/settings/filters.svg");
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new KeyboardSettingsPage;}, "Keybindings",    ":/settings/keybinds.svg");
     this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg", SettingsTabId::Moderation);
@@ -205,8 +214,9 @@ void SettingsDialog::selectTab(SettingsDialogTab *tab, bool byUser)
     }
 
     tab->setSelected(true);
-    tab->setStyleSheet("background: #222; color: #4FC3F7;"
-                       "/*border: 1px solid #555; border-right: none;*/");
+    tab->setStyleSheet(
+        "background: #222; color: #4FC3F7;"  // Should this be same as accent color?
+        "/*border: 1px solid #555; border-right: none;*/");
     this->selectedTab_ = tab;
     if (byUser)
     {
@@ -234,9 +244,10 @@ SettingsDialogTab *SettingsDialog::tab(SettingsTabId id)
     return nullptr;
 }
 
-void SettingsDialog::showDialog(SettingsDialogPreference preferredTab)
+void SettingsDialog::showDialog(QWidget *parent,
+                                SettingsDialogPreference preferredTab)
 {
-    static SettingsDialog *instance = new SettingsDialog();
+    static SettingsDialog *instance = new SettingsDialog(parent);
     static bool hasShownBefore = false;
     if (hasShownBefore)
         instance->refresh();
@@ -318,6 +329,7 @@ void SettingsDialog::onOkClicked()
 {
     if (!getArgs().dontSaveSettings)
     {
+        getApp()->commands->save();
         pajlada::Settings::SettingManager::gSave();
     }
     this->close();

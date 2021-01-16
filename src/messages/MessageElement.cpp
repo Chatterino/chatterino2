@@ -253,6 +253,24 @@ MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
     return element;
 }
 
+// FFZ Badge
+FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
+                                 MessageElementFlags flags_, QColor &color)
+    : BadgeElement(data, flags_)
+{
+    this->color = color;
+}
+
+MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    auto element =
+        (new ImageWithBackgroundLayoutElement(*this, image, size, this->color))
+            ->setLink(this->getLink());
+
+    return element;
+}
+
 // TEXT
 TextElement::TextElement(const QString &text, MessageElementFlags flags,
                          const MessageColor &color, FontStyle style)
@@ -334,7 +352,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
             // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
 
-            for (int i = 0; i < textLength; i++)  //
+            for (int i = 0; i < textLength; i++)
             {
                 auto isSurrogate = text.size() > i + 1 &&
                                    QChar::isHighSurrogate(text[i].unicode());
@@ -342,7 +360,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
                                              : metrics.width(text[i]);
 
-                if (!container.fitsInLine(width + charWidth))  //
+                if (!container.fitsInLine(width + charWidth))
                 {
                     container.addElementNoLineBreak(getTextLayoutElement(
                         text.mid(wordStart, i - wordStart), width, false));
@@ -603,8 +621,13 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
             // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
 
             // XXX(pajlada): NOT TESTED
-            for (int i = 0; i < textLength; i++)  //
+            for (int i = 0; i < textLength; i++)
             {
+                if (!container.canAddElements())
+                {
+                    break;
+                }
+
                 auto isSurrogate = text.size() > i + 1 &&
                                    QChar::isHighSurrogate(text[i].unicode());
 

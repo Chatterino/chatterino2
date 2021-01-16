@@ -66,14 +66,17 @@ void EmoteInputPopup::initLayout()
 
     listView->setModel(&this->model_);
     QObject::connect(listView.getElement(), &GenericListView::closeRequested,
-                     this, [this] { this->close(); });
+                     this, [this] {
+                         this->close();
+                     });
 }
 
 void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
 {
     std::vector<_Emote> emotes;
-
-    if (auto tc = dynamic_cast<TwitchChannel *>(channel.get()))
+    auto tc = dynamic_cast<TwitchChannel *>(channel.get());
+    auto wc = channel.get()->getType() == Channel::Type::TwitchWhispers;
+    if (tc || wc)
     {
         if (auto user = getApp()->accounts->twitch.getCurrent())
         {
@@ -81,16 +84,19 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
             addEmotes(emotes, twitch->emotes, text, "Twitch Emote");
         }
 
-        // TODO extract "Channel BetterTTV" text into a #define.
-        if (auto bttv = tc->bttvEmotes())
-            addEmotes(emotes, *bttv, text, "Channel BetterTTV");
-        if (auto ffz = tc->ffzEmotes())
-            addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
+        if (tc)
+        {
+            // TODO extract "Channel BetterTTV" text into a #define.
+            if (auto bttv = tc->bttvEmotes())
+                addEmotes(emotes, *bttv, text, "Channel BetterTTV");
+            if (auto ffz = tc->ffzEmotes())
+                addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
 
-        if (auto bttvG = tc->globalBttv().emotes())
-            addEmotes(emotes, *bttvG, text, "Global BetterTTV");
-        if (auto ffzG = tc->globalFfz().emotes())
-            addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
+            if (auto bttvG = tc->globalBttv().emotes())
+                addEmotes(emotes, *bttvG, text, "Global BetterTTV");
+            if (auto ffzG = tc->globalFfz().emotes())
+                addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
+        }
 
         addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
     }
