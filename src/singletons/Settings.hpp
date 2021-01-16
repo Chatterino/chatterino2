@@ -264,6 +264,8 @@ public:
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
 
+    BoolSetting highlightMentions = {"/highlighting/mentions", true};
+
     /// Filtering
     BoolSetting excludeUserMessagesFromFilter = {
         "/filtering/excludeUserMessages", false};
