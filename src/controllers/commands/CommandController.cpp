@@ -443,6 +443,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             {
                 channel->addMessage(makeSystemMessage(
                     "The /chatters command only works in Twitch Channels"));
+                return "";
             }
 
             channel->addMessage(makeSystemMessage(
