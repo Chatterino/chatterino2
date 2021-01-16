@@ -439,13 +439,16 @@ void CommandController::initialize(Settings &, Paths &paths)
         "/chatters", [](const auto & /*words*/, auto channel) {
             auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
-            auto message =
-                (twitchChannel == nullptr)
-                    ? "The /chatters command only works in Twitch Channels"
-                    : "Chatter count: " +
-                          QString::number(twitchChannel->chatterCount());
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /chatters command only works in Twitch Channels"));
+            }
 
-            channel->addMessage(makeSystemMessage(message));
+            channel->addMessage(makeSystemMessage(
+                QString("Chatter count: %1")
+                    .arg(QString::number(twitchChannel->chatterCount()))));
+
             return "";
         });
 }
