@@ -28,7 +28,7 @@
 - Minor: Deprecate loading of "v1" window layouts. If you haven't updated Chatterino in more than 2 years, there's a chance you will lose your window layout.
 - Minor: User popup will now automatically display messages as they are received
 - Minor: Changed the English in two rate-limited system messages (#1878)
-- Minor: Option to disable /mentions tab highlight (#1994)
+- Minor: Added a setting to disable messages sent to /mentions split from making the tab highlight with the red marker (#1994)
 - Minor: Added image for streamer mode in the user popup icon.
 - Minor: Added vip and unvip buttons.
 - Minor: Added settings for displaying where the last message was.
