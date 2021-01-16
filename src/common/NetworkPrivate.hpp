@@ -44,6 +44,7 @@ struct NetworkData {
     NetworkReplyCreatedCallback onReplyCreated_;
     NetworkErrorCallback onError_;
     NetworkSuccessCallback onSuccess_;
+    NetworkFinallyCallback finally_;
 
     NetworkRequestType requestType_ = NetworkRequestType::Get;
 

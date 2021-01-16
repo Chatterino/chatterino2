@@ -42,6 +42,7 @@ public:
     NetworkRequest onReplyCreated(NetworkReplyCreatedCallback cb) &&;
     NetworkRequest onError(NetworkErrorCallback cb) &&;
     NetworkRequest onSuccess(NetworkSuccessCallback cb) &&;
+    NetworkRequest finally(NetworkFinallyCallback cb) &&;
 
     NetworkRequest payload(const QByteArray &payload) &&;
     NetworkRequest cache() &&;
