@@ -288,3 +288,49 @@ TEST(NetworkRequest, TimeoutNotTimingOut)
 
     EXPECT_TRUE(NetworkManager::workerThread.isRunning());
 }
+
+TEST(NetworkRequest, FinallyCallbackOnTimeout)
+{
+    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+
+    auto url = "http://httpbin.org/delay/5";
+
+    std::mutex mut;
+    bool requestDone = false;
+    std::condition_variable requestDoneCondition;
+    bool finallyCalled = false;
+    bool onSuccessCalled = false;
+    bool onErrorCalled = false;
+
+    NetworkRequest(url)
+        .timeout(1000)
+        .onSuccess([&](NetworkResult result) -> Outcome {
+            onSuccessCalled = true;
+            return Success;
+        })
+        .onError([&](NetworkResult result) {
+            onErrorCalled = true;
+            EXPECT_EQ(result.status(), NetworkResult::timedoutStatus);
+        })
+        .finally([&] {
+            finallyCalled = true;
+
+            {
+                std::unique_lock lck(mut);
+                requestDone = true;
+            }
+            requestDoneCondition.notify_one();
+        })
+        .execute();
+
+    // Wait for the request to finish
+    std::unique_lock lck(mut);
+    requestDoneCondition.wait(lck, [&requestDone] {
+        return requestDone;
+    });
+
+    EXPECT_TRUE(finallyCalled);
+    EXPECT_TRUE(onErrorCalled);
+    EXPECT_FALSE(onSuccessCalled);
+    EXPECT_TRUE(NetworkManager::workerThread.isRunning());
+}
