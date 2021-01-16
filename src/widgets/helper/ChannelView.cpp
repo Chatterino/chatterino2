@@ -805,7 +805,10 @@ void ChannelView::messageAppended(MessagePtr &message,
     {
         if (messageFlags->has(MessageFlag::Highlighted) &&
             messageFlags->has(MessageFlag::ShowInMentions) &&
-            !messageFlags->has(MessageFlag::Subscription))
+            !messageFlags->has(MessageFlag::Subscription) &&
+            (getSettings()->highlightMentions ||
+             this->channel_->getType() != Channel::Type::TwitchMentions))
+
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
         }
