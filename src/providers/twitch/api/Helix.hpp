@@ -152,8 +152,21 @@ struct HelixTag {
                                  .toObject()
                                  .value("en-us")
                                  .toString())
+struct HelixClip {
+    QString id;  // clip slug
+    QString editUrl;
+
+    explicit HelixClip(QJsonObject jsonObject)
+        : id(jsonObject.value("id").toString())
+        , editUrl(jsonObject.value("edit_url").toString())
     {
     }
+};
+
+enum class HelixClipError {
+    Unknown,
+    ClipsDisabled,
+    UserNotAuthenticated,
 };
 
 class Helix final : boost::noncopyable
@@ -224,10 +237,12 @@ public:
     void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
                      HelixFailureCallback failureCallback);
 
+    // https://dev.twitch.tv/docs/api/reference#create-user-follows
     void followUser(QString userId, QString targetId,
                     std::function<void()> successCallback,
                     HelixFailureCallback failureCallback);
 
+    // https://dev.twitch.tv/docs/api/reference#delete-user-follows
     void unfollowUser(QString userId, QString targetlId,
                       std::function<void()> successCallback,
                       HelixFailureCallback failureCallback);
@@ -236,6 +251,11 @@ public:
                        QString title,
                        std::function<void(NetworkResult)> successCallback,
                        HelixFailureCallback failureCallback);
+    // https://dev.twitch.tv/docs/api/reference#create-clip
+    void createClip(QString channelId,
+                    ResultCallback<HelixClip> successCallback,
+                    std::function<void(HelixClipError)> failureCallback,
+                    std::function<void()> finallyCallback);
 
     void update(QString clientId, QString oauthToken);
 

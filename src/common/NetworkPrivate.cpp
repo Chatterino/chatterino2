@@ -145,11 +145,19 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                 data->timer_, &QTimer::timeout, worker, [reply, data]() {
                     qCDebug(chatterinoCommon) << "Aborted!";
                     reply->abort();
+
                     if (data->onError_)
                     {
                         postToThread([data] {
                             data->onError_(NetworkResult(
                                 {}, NetworkResult::timedoutStatus));
+                        });
+                    }
+
+                    if (data->finally_)
+                    {
+                        postToThread([data] {
+                            data->finally_();
                         });
                     }
                 });
@@ -172,15 +180,24 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                 if (reply->error() ==
                     QNetworkReply::NetworkError::OperationCanceledError)
                 {
-                    //operation cancelled, most likely timed out
+                    // Operation cancelled, most likely timed out
                     return;
                 }
+
                 if (data->onError_)
                 {
                     auto status = reply->attribute(
                         QNetworkRequest::HttpStatusCodeAttribute);
+                    // TODO: Should this always be run on the GUI thread?
                     postToThread([data, code = status.toInt()] {
                         data->onError_(NetworkResult({}, code));
+                    });
+                }
+
+                if (data->finally_)
+                {
+                    postToThread([data] {
+                        data->finally_();
                     });
                 }
                 return;
@@ -209,6 +226,16 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             // log("finished {}", data->request_.url().toString());
 
             reply->deleteLater();
+
+            if (data->finally_)
+            {
+                if (data->executeConcurrently_)
+                    QtConcurrent::run([finally = std::move(data->finally_)] {
+                        finally();
+                    });
+                else
+                    data->finally_();
+            }
         };
 
         if (data->timer_ != nullptr)
@@ -281,6 +308,30 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
                     }
 
                     data->onSuccess_(result);
+                });
+            }
+        }
+
+        if (data->finally_)
+        {
+            if (data->executeConcurrently_ || isGuiThread())
+            {
+                if (data->hasCaller_ && !data->caller_.get())
+                {
+                    return;
+                }
+
+                data->finally_();
+            }
+            else
+            {
+                postToThread([data]() {
+                    if (data->hasCaller_ && !data->caller_.get())
+                    {
+                        return;
+                    }
+
+                    data->finally_();
                 });
             }
         }
