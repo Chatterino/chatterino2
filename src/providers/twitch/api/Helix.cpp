@@ -440,7 +440,7 @@ void Helix::createStreamMarker(
                 return Failure;
             }
 
-            HelixStreamMarker streamMarker(data.toarray()[0].toobject());
+            HelixStreamMarker streamMarker(data.toArray()[0].toObject());
 
             successCallback(streamMarker);
             return Success;
