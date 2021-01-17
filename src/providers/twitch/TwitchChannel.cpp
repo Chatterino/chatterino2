@@ -35,8 +35,19 @@
 
 namespace chatterino {
 namespace {
-    constexpr int TITLE_REFRESH_PERIOD = 10;
     constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
+    constexpr int TITLE_REFRESH_PERIOD = 10;
+    constexpr int CLIP_CREATION_COOLDOWN = 5000;
+    const QString CLIPS_LINK("https://clips.twitch.tv/%1");
+    const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
+        "Failed to create a clip - the streamer has clips disabled entirely or "
+        "requires a certain subscriber or follower status to create clips.");
+    const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
+        "Failed to create a clip - you need to re-authenticate.");
+    const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT(
+        "Failed to create a clip - an unknown error occurred.");
+    const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
+    const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
     // convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT command and converts it to a readable NOTICE message
     // This has historically been done in the Recent Messages API, but this functionality is being moved to Chatterino instead
@@ -936,6 +947,102 @@ void TwitchChannel::refreshCheerEmotes()
             return Success;
         })
         .execute();
+}
+
+void TwitchChannel::createClip()
+{
+    if (!this->isLive())
+    {
+        this->addMessage(makeSystemMessage(
+            "Cannot create clip while the channel is offline!"));
+        return;
+    }
+
+    if (QTime().currentTime() < this->timeNextClipCreationAllowed_ ||
+        this->isClipCreationInProgress)
+    {
+        return;
+    }
+
+    this->addMessage(makeSystemMessage("Creating clip..."));
+    this->isClipCreationInProgress = true;
+
+    getHelix()->createClip(
+        this->roomId(),
+        // successCallback
+        [this](const HelixClip &clip) {
+            MessageBuilder builder;
+            builder.message().flags.set(MessageFlag::System);
+
+            builder.emplace<TimestampElement>();
+            // text
+            builder.emplace<TextElement>("Clip created!",
+                                         MessageElementFlag::Text,
+                                         MessageColor::System);
+            // clip link
+            builder
+                .emplace<TextElement>("Copy link to clipboard",
+                                      MessageElementFlag::Text,
+                                      MessageColor::Link)
+                ->setLink(Link(Link::CopyToClipboard, CLIPS_LINK.arg(clip.id)));
+            // separator text
+            builder.emplace<TextElement>("or", MessageElementFlag::Text,
+                                         MessageColor::System);
+            // edit link
+            builder
+                .emplace<TextElement>("edit it in browser.",
+                                      MessageElementFlag::Text,
+                                      MessageColor::Link)
+                ->setLink(Link(Link::Url, clip.editUrl));
+
+            this->addMessage(builder.release());
+        },
+        // failureCallback
+        [this](auto error) {
+            MessageBuilder builder;
+            builder.message().flags.set(MessageFlag::System);
+
+            builder.emplace<TimestampElement>();
+
+            switch (error)
+            {
+                case HelixClipError::ClipsDisabled: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_CLIPS_DISABLED_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                }
+                break;
+
+                case HelixClipError::UserNotAuthenticated: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                    builder
+                        .emplace<TextElement>(LOGIN_PROMPT_TEXT,
+                                              MessageElementFlag::Text,
+                                              MessageColor::Link)
+                        ->setLink(ACCOUNTS_LINK);
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixClipError::Unknown:
+                default: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_UNKNOWN_ERROR_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                }
+                break;
+            }
+
+            this->addMessage(builder.release());
+        },
+        // finallyCallback - this will always execute, so clip creation won't ever be stuck
+        [this] {
+            this->timeNextClipCreationAllowed_ =
+                QTime().currentTime().addMSecs(CLIP_CREATION_COOLDOWN);
+            this->isClipCreationInProgress = false;
+        });
 }
 
 boost::optional<EmotePtr> TwitchChannel::twitchBadge(
