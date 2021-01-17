@@ -175,9 +175,10 @@ void TwitchAccount::ignoreByID(
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](NetworkResult result) {
             onFinished(IgnoreResult_Failed,
-                       "An unknown error occurred while trying to ignore user " +
-                           targetName + " (" +
-                           QString::number(result.status()) + ")");
+                       QString("An unknown error occurred while trying to "
+                               "ignore user %1 (%2)")
+                           .arg(targetName)
+                           .arg(QString::number(result.status())));
         })
         .onSuccess([=](auto result) -> Outcome {
             auto document = result.parseRapidJson();
