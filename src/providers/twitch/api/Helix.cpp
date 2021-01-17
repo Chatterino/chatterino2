@@ -361,7 +361,7 @@ void Helix::unfollowUser(QString userId, QString targetId,
 
 void Helix::createClip(QString channelId,
                        ResultCallback<HelixClip> successCallback,
-                       HelixFailureCallback failureCallback,
+                       std::function<void(HelixClipError)> failureCallback,
                        std::function<void()> finallyCallback)
 {
     QUrlQuery urlQuery;
@@ -376,7 +376,7 @@ void Helix::createClip(QString channelId,
 
             if (!data.isArray())
             {
-                failureCallback();
+                failureCallback(HelixClipError::Unknown);
                 return Failure;
             }
 
@@ -386,10 +386,29 @@ void Helix::createClip(QString channelId,
             return Success;
         })
         .onError([failureCallback](NetworkResult result) {
-            qCDebug(chatterinoTwitch)
-                << "Failed to create a clip: " << result.status()
-                << result.getData();
-            failureCallback();
+            // Error code 503: Channel has disabled clips
+            // Error code 503: Channel has made clips only creatable by followers
+            // Error code 401: User does not have the required login scope thing, pls reauthenticate
+            switch (result.status())
+            {
+                case 503: {
+                    // Channel has disabled clip-creation, or channel has made cliops only creatable by followers and the user is not a follower (or subscriber)
+                    failureCallback(HelixClipError::ClipsDisabled);
+                }
+                break;
+                case 401: {
+                    // User does not have the required scope to be able to create clips, user must reauthenticate
+                    failureCallback(HelixClipError::UserNotAuthenticated);
+                }
+                break;
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to create a clip: " << result.status()
+                        << result.getData();
+                    failureCallback(HelixClipError::Unknown);
+                }
+                break;
+            }
         })
         .finally(finallyCallback)
         .execute();

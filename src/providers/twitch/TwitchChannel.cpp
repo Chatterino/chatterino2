@@ -39,9 +39,11 @@ namespace {
     constexpr int TITLE_REFRESH_PERIOD = 10;
     constexpr int CLIP_CREATION_COOLDOWN = 5000;
     const QString CLIPS_LINK("https://clips.twitch.tv/%1");
-    const QString FAILURE_TEXT(
-        "Failed to create a clip - either the streamer has clips disabled or "
-        "you haven't re-authenticated yet. ");
+    const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
+        "Failed to create a clip - the streamer has clips disabled entirely or "
+        "requires a certain subscriber or follower status to create clips.");
+    const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
+        "Failed to create a clip - you need to re-authenticate.");
     const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
     const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
@@ -994,18 +996,40 @@ void TwitchChannel::createClip()
             this->addMessage(builder.release());
         },
         // failureCallback
-        [this] {
+        [this](auto error) {
             MessageBuilder builder;
             builder.message().flags.set(MessageFlag::System);
 
             builder.emplace<TimestampElement>();
-            builder.emplace<TextElement>(FAILURE_TEXT, MessageElementFlag::Text,
-                                         MessageColor::System);
-            builder
-                .emplace<TextElement>(LOGIN_PROMPT_TEXT,
-                                      MessageElementFlag::Text,
-                                      MessageColor::Link)
-                ->setLink(ACCOUNTS_LINK);
+
+            switch (error)
+            {
+                case HelixClipError::ClipsDisabled: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_CLIPS_DISABLED_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                }
+                break;
+
+                case HelixClipError::UserNotAuthenticated: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                    builder
+                        .emplace<TextElement>(LOGIN_PROMPT_TEXT,
+                                              MessageElementFlag::Text,
+                                              MessageColor::Link)
+                        ->setLink(ACCOUNTS_LINK);
+                }
+                break;
+
+                case HelixClipError::Unknown:
+                default: {
+                    // TODO: Implement on unknown error.
+                    // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                }
+                break;
+            }
 
             this->addMessage(builder.release());
         },
