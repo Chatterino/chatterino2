@@ -493,6 +493,20 @@ void CommandController::initialize(Settings &, Paths &paths)
                 channel->addMessage(
                     makeSystemMessage("Failed to create stream marker!"));
             });
+
+        return "";
+    });
+
+    this->registerCommand("/clip", [](const auto &words, auto channel) {
+        if (!channel->isTwitchChannel())
+        {
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+        twitchChannel->createClip();
+
         return "";
     });
 }
