@@ -45,7 +45,7 @@ Args::Args(const QApplication &app)
 
     if (parser.isSet("help"))
     {
-        qCInfo(chatterinoArgs).noquote() << parser.helpText();
+        qInfo().noquote() << parser.helpText();
         ::exit(EXIT_SUCCESS);
     }
 
