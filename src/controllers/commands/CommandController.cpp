@@ -461,6 +461,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         {
             channel->addMessage(makeSystemMessage(
                 "You need to be logged in to create stream markers!"));
+            return "";
         }
 
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
@@ -471,6 +472,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(makeSystemMessage(
                 "You can only add stream markers during live streams. Try "
                 "again when the channel is live streaming."));
+            return "";
         }
 
         auto arguments = words;
