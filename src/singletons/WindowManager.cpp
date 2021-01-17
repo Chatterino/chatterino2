@@ -315,10 +315,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     }
 
     // No main window has been created from loading, create an empty one
-    if (mainWindow_ == nullptr)
+    if (this->mainWindow_ == nullptr)
     {
-        mainWindow_ = &this->createWindow(WindowType::Main);
-        mainWindow_->getNotebook().addPage(true);
+        this->mainWindow_ = &this->createWindow(WindowType::Main);
+        this->mainWindow_->getNotebook().addPage(true);
     }
 
     settings.timestampFormat.connect([this](auto, auto) {
