@@ -359,7 +359,10 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     });
 #endif
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    auto *twitchChannel =
+        dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
+
+    if (twitchChannel)
     {
         menu->addAction(OPEN_IN_BROWSER, this->split_, &Split::openInBrowser);
 #ifndef USEWEBENGINE
@@ -374,6 +377,18 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             menu->addAction("Open in custom player", this->split_,
                             &Split::openWithCustomScheme);
         }
+
+        auto clipButton = menu->addAction(
+            "Create a clip", this->split_,
+            [twitchChannel] {
+                twitchChannel->createClip();
+            },
+            QKeySequence("Alt+X"));
+        clipButton->setVisible(this->split_->getChannel()->isLive());
+        this->managedConnect(
+            twitchChannel->liveStatusChanged, [this, clipButton] {
+                clipButton->setVisible(this->split_->getChannel()->isLive());
+            });
 
         if (this->split_->getChannel()->hasModRights())
         {
@@ -398,7 +413,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                         QKeySequence("Ctrl+F5"));
     }
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    if (twitchChannel)
     {
         menu->addAction("Reload channel emotes", this,
                         SLOT(reloadChannelEmotes()), QKeySequence("F5"));
@@ -442,7 +457,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         moreMenu->addAction(action);
     }
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    if (twitchChannel)
     {
         moreMenu->addAction("Show viewer list", this->split_,
                             &Split::showViewerList);
@@ -465,7 +480,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         moreMenu->addAction(action);
     }
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    if (twitchChannel)
     {
         auto action = new QAction(this);
         action->setText("Mute highlight sound");
