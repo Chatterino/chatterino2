@@ -178,7 +178,7 @@ void TwitchAccount::ignoreByID(
                        QString("An unknown error occurred while trying to "
                                "ignore user %1 (%2)")
                            .arg(targetName)
-                           .arg(QString::number(result.status())));
+                           .arg(result.status()));
         })
         .onSuccess([=](auto result) -> Outcome {
             auto document = result.parseRapidJson();
