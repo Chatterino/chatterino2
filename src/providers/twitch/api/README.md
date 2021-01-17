@@ -108,7 +108,8 @@ Requires `user:edit:follows` scope
      * `controllers/commands/CommandController.cpp` in /unfollow command
 
 ### Create Clip
-URL: https://dev.twitch.tv/docs/api/reference#create-clip
+URL: https://dev.twitch.tv/docs/api/reference#create-clip  
+Requires `clips:edit` scope
 
  * We implement this in `providers/twitch/api/Helix.cpp createClip`
    Used in:
