@@ -385,7 +385,7 @@ void Helix::createClip(QString channelId,
             successCallback(clip);
             return Success;
         })
-        .onError([failureCallback](NetworkResult result) {
+        .onError([failureCallback](auto result) {
             switch (result.status())
             {
                 case 503: {
@@ -410,6 +410,43 @@ void Helix::createClip(QString channelId,
             }
         })
         .finally(finallyCallback)
+        .execute();
+}
+
+void Helix::loadIgnores(
+    QString userId,
+    ResultCallback<std::vector<HelixIgnoreList>> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", userId);
+
+    this->makeRequest("users/blocks", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixIgnoreList> ignores;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                ignores.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(ignores);
+
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
         .execute();
 }
 

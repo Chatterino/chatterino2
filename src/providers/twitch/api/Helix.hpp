@@ -146,6 +146,19 @@ struct HelixClip {
     }
 };
 
+struct HelixIgnoreList {
+    QString userId;
+    QString userName;
+    QString userDisplayName;
+
+    explicit HelixIgnoreList(QJsonObject jsonObject)
+        : userId(jsonObject.value("user_id").toString())
+        , userName(jsonObject.value("user_login").toString())
+        , userDisplayName(jsonObject.value("display_name").toString())
+    {
+    }
+};
+
 enum class HelixClipError {
     Unknown,
     ClipsDisabled,
@@ -217,6 +230,11 @@ public:
                     ResultCallback<HelixClip> successCallback,
                     std::function<void(HelixClipError)> failureCallback,
                     std::function<void()> finallyCallback);
+
+    void loadIgnores(
+        QString userId,
+        ResultCallback<std::vector<HelixIgnoreList>> successCallback,
+        HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 
