@@ -436,20 +436,20 @@ void Helix::createStreamMarker(
 
             if (!data.isArray())
             {
-                failurecallback();
-                return failure;
+                failureCallback();
+                return Failure;
             }
 
-            helixstreammarker streammarker(data.toarray()[0].toobject());
+            HelixStreamMarker streamMarker(data.toarray()[0].toobject());
 
-            successcallback(streammarker);
-            return success;
+            successCallback(streamMarker);
+            return Success;
         })
-        .onerror([failurecallback](networkresult result) {
-            qcdebug(chatterinotwitch)
-                << "failed to create a stream marker: " << result.status()
-                << result.getdata();
-            failurecallback();
+        .onError([failureCallback](NetworkResult result) {
+            qCDebug(chatterinoTwitch)
+                << "Failed to create a stream marker: " << result.status()
+                << result.getData();
+            failureCallback();
         })
         .execute();
 };
