@@ -152,6 +152,10 @@ struct HelixTag {
                                  .toObject()
                                  .value("en-us")
                                  .toString())
+    {
+    }
+};
+
 struct HelixClip {
     QString id;  // clip slug
     QString editUrl;
