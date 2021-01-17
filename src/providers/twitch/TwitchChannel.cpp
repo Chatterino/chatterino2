@@ -984,7 +984,7 @@ void TwitchChannel::createClip()
                                       MessageColor::Link)
                 ->setLink(Link(Link::CopyToClipboard, CLIPS_LINK.arg(clip.id)));
             // separator text
-            builder.emplace<TextElement>(" or ", MessageElementFlag::Text,
+            builder.emplace<TextElement>("or", MessageElementFlag::Text,
                                          MessageColor::System);
             // edit link
             builder
