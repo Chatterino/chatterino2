@@ -209,7 +209,8 @@ public:
     // https://dev.twitch.tv/docs/api/reference#create-clip
     void createClip(QString channelId,
                     ResultCallback<HelixClip> successCallback,
-                    HelixFailureCallback failureCallback);
+                    HelixFailureCallback failureCallback,
+                    std::function<void()> finallyCallback);
 
     void update(QString clientId, QString oauthToken);
 

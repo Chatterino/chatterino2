@@ -361,7 +361,8 @@ void Helix::unfollowUser(QString userId, QString targetId,
 
 void Helix::createClip(QString channelId,
                        ResultCallback<HelixClip> successCallback,
-                       HelixFailureCallback failureCallback)
+                       HelixFailureCallback failureCallback,
+                       std::function<void()> finallyCallback)
 {
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", channelId);
@@ -389,6 +390,9 @@ void Helix::createClip(QString channelId,
                 << "Failed to create a clip: " << result.status()
                 << result.getData();
             failureCallback();
+        })
+        .finally([finallyCallback] {
+            finallyCallback();
         })
         .execute();
 }

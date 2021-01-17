@@ -965,6 +965,7 @@ void TwitchChannel::createClip()
 
     getHelix()->createClip(
         this->roomId(),
+        // successCallback
         [this](const HelixClip &clip) {
             MessageBuilder builder;
             builder.message().flags.set(MessageFlag::System);
@@ -991,10 +992,8 @@ void TwitchChannel::createClip()
                 ->setLink(Link(Link::Url, clip.editUrl));
 
             this->addMessage(builder.release());
-            this->timeNextClipCreationAllowed_ =
-                QTime().currentTime().addMSecs(CLIP_CREATION_COOLDOWN);
-            this->isClipCreationInProgress = false;
         },
+        // failureCallback
         [this] {
             MessageBuilder builder;
             builder.message().flags.set(MessageFlag::System);
@@ -1009,6 +1008,9 @@ void TwitchChannel::createClip()
                 ->setLink(ACCOUNTS_LINK);
 
             this->addMessage(builder.release());
+        },
+        // finallyCallback - this will always execute, so clip creation won't ever be stuck
+        [this] {
             this->timeNextClipCreationAllowed_ =
                 QTime().currentTime().addMSecs(CLIP_CREATION_COOLDOWN);
             this->isClipCreationInProgress = false;
