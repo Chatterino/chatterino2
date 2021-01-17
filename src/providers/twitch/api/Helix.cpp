@@ -416,7 +416,7 @@ void Helix::createClip(QString channelId,
 void Helix::createStreamMarker(
     QString broadcasterId, QString description,
     ResultCallback<HelixStreamMarker> successCallback,
-    HelixFailureCallback failureCallback)
+    std::function<void(HelixStreamMarkerError)> failureCallback)
 {
     QJsonObject payload;
 
@@ -436,7 +436,7 @@ void Helix::createStreamMarker(
 
             if (!data.isArray())
             {
-                failureCallback();
+                failureCallback(HelixStreamMarkerError::Unknown);
                 return Failure;
             }
 
@@ -446,10 +446,29 @@ void Helix::createStreamMarker(
             return Success;
         })
         .onError([failureCallback](NetworkResult result) {
-            qCDebug(chatterinoTwitch)
-                << "Failed to create a stream marker: " << result.status()
-                << result.getData();
-            failureCallback();
+            switch (result.status())
+            {
+                case 403: {
+                    // User isn't a Channel Editor, so he can't create markers
+                    failureCallback(HelixStreamMarkerError::UserNotAuthorized);
+                }
+                break;
+
+                case 401: {
+                    // User does not have the required scope to be able to create stream markers, user must reauthenticate
+                    failureCallback(
+                        HelixStreamMarkerError::UserNotAuthenticated);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to create a stream marker: "
+                        << result.status() << result.getData();
+                    failureCallback(HelixStreamMarkerError::Unknown);
+                }
+                break;
+            }
         })
         .execute();
 };

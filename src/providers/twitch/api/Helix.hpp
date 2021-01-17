@@ -167,6 +167,12 @@ enum class HelixClipError {
     UserNotAuthenticated,
 };
 
+enum class HelixStreamMarkerError {
+    Unknown,
+    UserNotAuthorized,
+    UserNotAuthenticated,
+};
+
 class Helix final : boost::noncopyable
 {
 public:
@@ -234,9 +240,10 @@ public:
                     std::function<void()> finallyCallback);
 
     // https://dev.twitch.tv/docs/api/reference/#create-stream-marker
-    void createStreamMarker(QString broadcasterId, QString description,
-                            ResultCallback<HelixStreamMarker> successCallback,
-                            HelixFailureCallback failureCallback);
+    void createStreamMarker(
+        QString broadcasterId, QString description,
+        ResultCallback<HelixStreamMarker> successCallback,
+        std::function<void(HelixStreamMarkerError)> failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

@@ -491,9 +491,31 @@ void CommandController::initialize(Settings &, Paths &paths)
                                  : QString(": \"%1\"")
                                        .arg(streamMarker.description))));
             },
-            [channel] {
-                channel->addMessage(
-                    makeSystemMessage("Failed to create stream marker!"));
+            [channel](auto error) {
+                QString errorMessage("Failed to create stream marker - ");
+
+                switch (error)
+                {
+                    case HelixStreamMarkerError::UserNotAuthorized: {
+                        errorMessage +=
+                            "you don't have permission to perform that action.";
+                    }
+                    break;
+
+                    case HelixStreamMarkerError::UserNotAuthenticated: {
+                        errorMessage += "you need to re-authenticate.";
+                    }
+                    break;
+
+                    // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                    case HelixStreamMarkerError::Unknown:
+                    default: {
+                        errorMessage += "an unknown error occurred.";
+                    }
+                    break;
+                }
+
+                channel->addMessage(makeSystemMessage(errorMessage));
             });
 
         return "";
