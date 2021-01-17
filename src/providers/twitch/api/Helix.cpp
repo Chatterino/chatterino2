@@ -391,9 +391,7 @@ void Helix::createClip(QString channelId,
                 << result.getData();
             failureCallback();
         })
-        .finally([finallyCallback] {
-            finallyCallback();
-        })
+        .finally(finallyCallback)
         .execute();
 }
 
