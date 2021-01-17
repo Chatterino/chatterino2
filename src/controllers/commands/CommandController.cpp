@@ -454,6 +454,19 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
+    this->registerCommand("/clip", [](const auto &words, auto channel) {
+        if (!channel->isTwitchChannel())
+        {
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+        twitchChannel->createClip();
+
+        return "";
+    });
+
     this->registerCommand("/marker", [](const QStringList &words,
                                         auto channel) {
         // Avoid Helix calls without Client ID and/or OAuth Token
@@ -517,19 +530,6 @@ void CommandController::initialize(Settings &, Paths &paths)
 
                 channel->addMessage(makeSystemMessage(errorMessage));
             });
-
-        return "";
-    });
-
-    this->registerCommand("/clip", [](const auto &words, auto channel) {
-        if (!channel->isTwitchChannel())
-        {
-            return "";
-        }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-
-        twitchChannel->createClip();
 
         return "";
     });
