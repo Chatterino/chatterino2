@@ -469,6 +469,11 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/marker", [](const QStringList &words,
                                         auto channel) {
+        if (!channel->isTwitchChannel())
+        {
+            return "";
+        }
+
         // Avoid Helix calls without Client ID and/or OAuth Token
         if (getApp()->accounts->twitch.getCurrent()->isAnon())
         {
