@@ -337,7 +337,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     [channel, target]() {
                         channel->addMessage(makeSystemMessage(
                             QString("User %1 could not be followed, an unknown "
-                                    "error occured!")
+                                    "error occurred!")
                                 .arg(target)));
                     });
             },

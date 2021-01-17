@@ -175,7 +175,7 @@ void TwitchAccount::ignoreByID(
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](NetworkResult result) {
             onFinished(IgnoreResult_Failed,
-                       "An unknown error occured while trying to ignore user " +
+                       "An unknown error occurred while trying to ignore user " +
                            targetName + " (" +
                            QString::number(result.status()) + ")");
         })
@@ -253,7 +253,7 @@ void TwitchAccount::unignoreByID(
         .onError([=](NetworkResult result) {
             onFinished(
                 UnignoreResult_Failed,
-                "An unknown error occured while trying to unignore user " +
+                "An unknown error occurred while trying to unignore user " +
                     targetName + " (" + QString::number(result.status()) + ")");
         })
         .onSuccess([=](auto result) -> Outcome {
