@@ -73,6 +73,7 @@ public:
     virtual bool canReconnect() const override;
     virtual void reconnect() override;
     void refreshTitle();
+    void createClip();
 
     // Data
     const QString &subscriptionUrl();
@@ -188,6 +189,8 @@ private:
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
     QTime titleRefreshedTime_;
+    QTime timeNextClipCreationAllowed_{QTime().currentTime()};
+    bool isClipCreationInProgress{false};
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;
