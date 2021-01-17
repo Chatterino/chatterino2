@@ -386,9 +386,6 @@ void Helix::createClip(QString channelId,
             return Success;
         })
         .onError([failureCallback](NetworkResult result) {
-            // Error code 503: Channel has disabled clips
-            // Error code 503: Channel has made clips only creatable by followers
-            // Error code 401: User does not have the required login scope thing, pls reauthenticate
             switch (result.status())
             {
                 case 503: {
@@ -396,11 +393,13 @@ void Helix::createClip(QString channelId,
                     failureCallback(HelixClipError::ClipsDisabled);
                 }
                 break;
+
                 case 401: {
                     // User does not have the required scope to be able to create clips, user must reauthenticate
                     failureCallback(HelixClipError::UserNotAuthenticated);
                 }
                 break;
+
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Failed to create a clip: " << result.status()
