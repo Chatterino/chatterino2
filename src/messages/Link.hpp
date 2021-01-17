@@ -22,7 +22,7 @@ public:
         OpenAccountsPage,
         JumpToChannel,
         Reconnect,
-        CopyToClipboard
+        CopyToClipboard,
     };
 
     Link();
