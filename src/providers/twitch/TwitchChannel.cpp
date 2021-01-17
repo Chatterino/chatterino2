@@ -44,6 +44,8 @@ namespace {
         "requires a certain subscriber or follower status to create clips.");
     const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
         "Failed to create a clip - you need to re-authenticate.");
+    const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT(
+        "Failed to create a clip - an unknown error occurred.");
     const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
     const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
@@ -1023,10 +1025,12 @@ void TwitchChannel::createClip()
                 }
                 break;
 
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
                 case HelixClipError::Unknown:
                 default: {
-                    // TODO: Implement on unknown error.
-                    // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_UNKNOWN_ERROR_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
                 }
                 break;
             }
