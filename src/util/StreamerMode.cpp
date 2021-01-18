@@ -45,7 +45,7 @@ bool isInStreamerMode()
             return false;
         case StreamerModeSetting::DetectObs:
 
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) || defined(Q_OS_MACOS)
 
             static bool cache = false;
             static QDateTime time = QDateTime();
