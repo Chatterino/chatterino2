@@ -103,7 +103,7 @@ void FiltersPage::tableCellClicked(const QModelIndex &clicked,
         {
             popup.setIcon(QMessageBox::Icon::Warning);
             popup.setWindowTitle("Invalid filter");
-            popup.setText(QString("Parsing errors occured:"));
+            popup.setText(QString("Parsing errors occurred:"));
             popup.setInformativeText(f.errors().join("\n"));
         }
 
