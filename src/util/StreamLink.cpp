@@ -93,7 +93,7 @@ namespace {
             }
             else
             {
-                qCWarning(chatterinoStreamlink) << "Error occured" << err;
+                qCWarning(chatterinoStreamlink) << "Error occurred" << err;
             }
 
             p->deleteLater();

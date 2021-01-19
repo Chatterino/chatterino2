@@ -163,12 +163,6 @@ TwitchChannel::TwitchChannel(const QString &name,
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
-    this->liveStatusChanged.connect([this]() {
-        if (this->isLive() == 1)
-        {
-        }
-    });
-
     this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [=] {
         this->setMod(false);
     });
