@@ -7,6 +7,7 @@
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "messages/Message.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
@@ -428,34 +429,43 @@ void UserInfoPopup::installEvents()
             auto currentUser = getApp()->accounts->twitch.getCurrent();
             if (this->ui_.ignore->isChecked())
             {
-                currentUser->ignoreByID(
-                    this->userId_, this->userName_,
-                    [=](auto result, const auto &message) mutable {
+                getHelix()->blockUser(
+                    this->userId_,
+                    [this, hack, currentUser] {
+                        this->channel_->addMessage(
+                            makeSystemMessage("ignore success"));
                         if (hack.lock())
                         {
-                            if (result == IgnoreResult_Failed)
-                            {
-                                *ignoreNext = true;
-                                this->ui_.ignore->setChecked(false);
-                            }
                             this->ui_.ignore->setEnabled(true);
                         }
+                        currentUser->addToIgnores(this->userId_,
+                                                  this->userName_);
+                    },
+                    [this, ignoreNext] {
+                        this->channel_->addMessage(
+                            makeSystemMessage("ignore fail"));
+                        *ignoreNext = true;
+                        this->ui_.ignore->setChecked(false);
                     });
             }
             else
             {
-                currentUser->unignoreByID(
-                    this->userId_, this->userName_,
-                    [=](auto result, const auto &message) mutable {
+                getHelix()->unblockUser(
+                    this->userId_,
+                    [this, hack, currentUser] {
+                        this->channel_->addMessage(
+                            makeSystemMessage("unignore success"));
                         if (hack.lock())
                         {
-                            if (result == UnignoreResult_Failed)
-                            {
-                                *ignoreNext = true;
-                                this->ui_.ignore->setChecked(true);
-                            }
                             this->ui_.ignore->setEnabled(true);
                         }
+                        currentUser->removeFromIgnores(this->userId_);
+                    },
+                    [this, ignoreNext] {
+                        this->channel_->addMessage(
+                            makeSystemMessage("unignore fail"));
+                        *ignoreNext = true;
+                        this->ui_.ignore->setEnabled(true);
                     });
             }
         });

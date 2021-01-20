@@ -261,22 +261,43 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(makeSystemMessage("Usage: /ignore [user]"));
             return "";
         }
-        auto app = getApp();
 
-        auto user = app->accounts->twitch.getCurrent();
-        auto target = words.at(1);
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
 
-        if (user->isAnon())
+        if (currentUser->isAnon())
         {
             channel->addMessage(
-                makeSystemMessage("You must be logged in to ignore someone"));
+                makeSystemMessage("You must be logged in to ignore someone!"));
             return "";
         }
 
-        user->ignore(target,
-                     [channel](auto resultCode, const QString &message) {
-                         channel->addMessage(makeSystemMessage(message));
-                     });
+        auto target = words.at(1);
+
+        getHelix()->getUserByName(
+            target,
+            [currentUser, channel, target](const HelixUser &targetUser) {
+                getHelix()->blockUser(
+                    targetUser.id,
+                    [channel, target, targetUser] {
+                        getApp()->accounts->twitch.getCurrent()->addToIgnores(
+                            targetUser.id, targetUser.login);
+                        channel->addMessage(makeSystemMessage(
+                            QString("You successfully ignored user %1")
+                                .arg(target)));
+                    },
+                    [channel, target] {
+                        channel->addMessage(makeSystemMessage(
+                            QString("User %1 couldn't be ignored, some kind of "
+                                    "GOW error occured!")
+                                .arg(target)));
+                    });
+            },
+            [channel, target] {
+                channel->addMessage(
+                    makeSystemMessage(QString("User %1 couldn't be ignored, no "
+                                              "user with that name found!")
+                                          .arg(target)));
+            });
 
         return "";
     });
@@ -287,22 +308,44 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(makeSystemMessage("Usage: /unignore [user]"));
             return "";
         }
-        auto app = getApp();
 
-        auto user = app->accounts->twitch.getCurrent();
-        auto target = words.at(1);
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
 
-        if (user->isAnon())
+        if (currentUser->isAnon())
         {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to ignore someone"));
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to unignore someone!"));
             return "";
         }
 
-        user->unignore(target,
-                       [channel](auto resultCode, const QString &message) {
-                           channel->addMessage(makeSystemMessage(message));
-                       });
+        auto target = words.at(1);
+
+        getHelix()->getUserByName(
+            target,
+            [currentUser, channel, target](const auto &targetUser) {
+                getHelix()->unblockUser(
+                    targetUser.id,
+                    [channel, target, targetUser] {
+                        getApp()
+                            ->accounts->twitch.getCurrent()
+                            ->removeFromIgnores(targetUser.id);
+                        channel->addMessage(makeSystemMessage(
+                            QString("You successfully unignored user %1")
+                                .arg(target)));
+                    },
+                    [channel, target] {
+                        channel->addMessage(makeSystemMessage(
+                            QString("User %1 couldn't be unignored, some kind "
+                                    "of GOW error occured!")
+                                .arg(target)));
+                    });
+            },
+            [channel, target] {
+                channel->addMessage(
+                    makeSystemMessage(QString("User %1 couldn't be unignored, "
+                                              "no user with that name found!")
+                                          .arg(target)));
+            });
 
         return "";
     });
@@ -319,7 +362,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (currentUser->isAnon())
         {
             channel->addMessage(
-                makeSystemMessage("You must be logged in to follow someone"));
+                makeSystemMessage("You must be logged in to follow someone!"));
             return "";
         }
 
@@ -362,8 +405,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         if (currentUser->isAnon())
         {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to follow someone"));
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to unfollow someone!"));
             return "";
         }
 

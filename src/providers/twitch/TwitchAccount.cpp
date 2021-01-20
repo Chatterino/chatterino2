@@ -7,7 +7,9 @@
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "providers/twitch/TwitchUser.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -89,6 +91,24 @@ bool TwitchAccount::isAnon() const
     return this->isAnon_;
 }
 
+//void TwitchAccount::loadIgnores()
+//{
+//    getHelix()->loadIgnores(
+//        getApp()->accounts->twitch.getCurrent()->userId_,
+//        [this](std::vector<HelixIgnore> ignores) {
+//            std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+//            this->ignores_.clear();
+
+//            for (const HelixIgnore &ignore : ignores)
+//            {
+//                this->ignores_.push_back(ignore);
+//            }
+//        },
+//        [] {
+//            qDebug() << "Fetching ignores failed!";
+//        });
+//}
+
 void TwitchAccount::loadIgnores()
 {
     QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
@@ -149,129 +169,27 @@ void TwitchAccount::loadIgnores()
         .execute();
 }
 
-void TwitchAccount::ignore(
-    const QString &targetName,
-    std::function<void(IgnoreResult, const QString &)> onFinished)
+void TwitchAccount::addToIgnores(const QString id, const QString userName)
 {
-    const auto onUserFetched = [this, targetName,
-                                onFinished](const auto &user) {
-        this->ignoreByID(user.id, targetName, onFinished);
-    };
-
-    const auto onUserFetchFailed = [] {};
-
-    getHelix()->getUserByName(targetName, onUserFetched, onUserFetchFailed);
+    TwitchUser ignoredUser;
+    ignoredUser.id = id;
+    ignoredUser.name = userName;
+    auto res = this->ignores_.insert(ignoredUser);
+    if (!res.second)
+    {
+        const TwitchUser &existingUser = *(res.first);
+        existingUser.update(ignoredUser);
+    }
 }
 
-void TwitchAccount::ignoreByID(
-    const QString &targetUserID, const QString &targetName,
-    std::function<void(IgnoreResult, const QString &)> onFinished)
+void TwitchAccount::removeFromIgnores(const QString id)
 {
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                "/blocks/" + targetUserID);
-
-    NetworkRequest(url, NetworkRequestType::Put)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
-            onFinished(IgnoreResult_Failed,
-                       QString("An unknown error occurred while trying to "
-                               "ignore user %1 (%2)")
-                           .arg(targetName)
-                           .arg(result.status()));
-        })
-        .onSuccess([=](auto result) -> Outcome {
-            auto document = result.parseRapidJson();
-            if (!document.IsObject())
-            {
-                onFinished(IgnoreResult_Failed,
-                           "Bad JSON data while ignoring user " + targetName);
-                return Failure;
-            }
-
-            auto userIt = document.FindMember("user");
-            if (userIt == document.MemberEnd())
-            {
-                onFinished(IgnoreResult_Failed,
-                           "Bad JSON data while ignoring user (missing user) " +
-                               targetName);
-                return Failure;
-            }
-
-            TwitchUser ignoredUser;
-            if (!rj::getSafe(userIt->value, ignoredUser))
-            {
-                onFinished(IgnoreResult_Failed,
-                           "Bad JSON data while ignoring user (invalid user) " +
-                               targetName);
-                return Failure;
-            }
-            {
-                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-
-                auto res = this->ignores_.insert(ignoredUser);
-                if (!res.second)
-                {
-                    const TwitchUser &existingUser = *(res.first);
-                    existingUser.update(ignoredUser);
-                    onFinished(IgnoreResult_AlreadyIgnored,
-                               "User " + targetName + " is already ignored");
-                    return Failure;
-                }
-            }
-            onFinished(IgnoreResult_Success,
-                       "Successfully ignored user " + targetName);
-
-            return Success;
-        })
-        .execute();
-}
-
-void TwitchAccount::unignore(
-    const QString &targetName,
-    std::function<void(UnignoreResult, const QString &message)> onFinished)
-{
-    const auto onUserFetched = [this, targetName,
-                                onFinished](const auto &user) {
-        this->unignoreByID(user.id, targetName, onFinished);
-    };
-
-    const auto onUserFetchFailed = [] {};
-
-    getHelix()->getUserByName(targetName, onUserFetched, onUserFetchFailed);
-}
-
-void TwitchAccount::unignoreByID(
-    const QString &targetUserID, const QString &targetName,
-    std::function<void(UnignoreResult, const QString &message)> onFinished)
-{
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                "/blocks/" + targetUserID);
-
-    NetworkRequest(url, NetworkRequestType::Delete)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
-            onFinished(
-                UnignoreResult_Failed,
-                "An unknown error occurred while trying to unignore user " +
-                    targetName + " (" + QString::number(result.status()) + ")");
-        })
-        .onSuccess([=](auto result) -> Outcome {
-            auto document = result.parseRapidJson();
-            TwitchUser ignoredUser;
-            ignoredUser.id = targetUserID;
-            {
-                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-
-                this->ignores_.erase(ignoredUser);
-            }
-            onFinished(UnignoreResult_Success,
-                       "Successfully unignored user " + targetName);
-
-            return Success;
-        })
-        .execute();
+    TwitchUser ignoredUser;
+    ignoredUser.id = id;
+    {
+        std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+        this->ignores_.erase(ignoredUser);
+    }
 }
 
 void TwitchAccount::checkFollow(const QString targetUserID,
