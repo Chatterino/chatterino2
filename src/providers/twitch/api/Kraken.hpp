@@ -26,11 +26,6 @@ struct KrakenChannel {
 class Kraken final : boost::noncopyable
 {
 public:
-    // https://dev.twitch.tv/docs/v5/reference/users#follow-channel
-    void getChannel(QString userId,
-                    ResultCallback<KrakenChannel> resultCallback,
-                    KrakenFailureCallback failureCallback);
-
     void update(QString clientId, QString oauthToken);
 
     static void initialize();

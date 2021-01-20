@@ -4,15 +4,6 @@ this folder describes what sort of API requests we do, what permissions are requ
 ## Kraken (V5)
 We use a bunch of Kraken (V5) in Chatterino2.
 
-### Get Channel
-URL: https://dev.twitch.tv/docs/v5/reference/channels#get-channel
-
-Migration path: **Unknown**
-
- * We implement this in `providers/twitch/api/Kraken.cpp getChannel`  
-   Used in:
-     * `TwitchChannel::refreshTitle` to check the current stream title/game of offline channels
-
 ### Get Cheermotes
 URL: https://dev.twitch.tv/docs/v5/reference/bits#get-cheermotes
 
