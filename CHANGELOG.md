@@ -71,6 +71,7 @@
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
+- Dev: Migrated `Kraken::getChannel` to Helix. (#2381)
 - Dev: Build in CI with multiple Qt versions (#2349)
 
 ## 2.2.2
