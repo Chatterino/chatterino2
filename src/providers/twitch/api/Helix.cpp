@@ -413,6 +413,35 @@ void Helix::createClip(QString channelId,
         .execute();
 }
 
+void Helix::getChannel(QString broadcasterId,
+                       ResultCallback<HelixChannel> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+
+    this->makeRequest("channels", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            HelixChannel channel(data.toArray()[0].toObject());
+
+            successCallback(channel);
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            failureCallback();
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

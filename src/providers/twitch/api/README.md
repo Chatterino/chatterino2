@@ -115,6 +115,13 @@ Requires `clips:edit` scope
    Used in:
      * `TwitchChannel` to create a clip of a live broadcast
 
+### Get Channel
+URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
+
+  * We implement this in `providers/twitch/api/Helix.cpp getChannel`
+    Used in:
+      * `TwitchChannel` to refresh stream title
+
 ## TMI
 The TMI api is undocumented.
 
