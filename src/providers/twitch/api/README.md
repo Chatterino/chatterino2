@@ -109,9 +109,9 @@ Requires `clips:edit` scope
 ### Get Channel
 URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
 
-  * We implement this in `providers/twitch/api/Helix.cpp getChannel`
-    Used in:
-      * `TwitchChannel` to refresh stream title
+ * We implement this in `providers/twitch/api/Helix.cpp getChannel`
+   Used in:
+     * `TwitchChannel` to refresh stream title
 
 ## TMI
 The TMI api is undocumented.
