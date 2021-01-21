@@ -97,7 +97,7 @@ BasicLoginWidget::BasicLoginWidget()
     this->ui_.unableToOpenBrowserHelper.setWordWrap(true);
     this->ui_.unableToOpenBrowserHelper.hide();
     this->ui_.unableToOpenBrowserHelper.setText(
-        "An error occured while attempting to open <a href='" + logInLink +
+        "An error occurred while attempting to open <a href='" + logInLink +
         "'>the log in link (" + logInLink + ")</a> " +
         " - open it manually in your browser and proceed from there.");
     this->ui_.unableToOpenBrowserHelper.setOpenExternalLinks(true);

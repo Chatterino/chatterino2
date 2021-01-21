@@ -380,23 +380,19 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                             &Split::openWithCustomScheme);
         }
 
-        auto clipButton = menu->addAction(
-            "Create a clip", this->split_,
-            [twitchChannel] {
-                twitchChannel->createClip();
-            },
-            QKeySequence("Alt+X"));
-        clipButton->setVisible(this->split_->getChannel()->isLive());
-        this->managedConnect(
-            twitchChannel->liveStatusChanged, [this, clipButton] {
-                clipButton->setVisible(this->split_->getChannel()->isLive());
-            });
-
         if (this->split_->getChannel()->hasModRights())
         {
             menu->addAction(OPEN_MOD_VIEW_IN_BROWSER, this->split_,
                             &Split::openModViewInBrowser);
         }
+
+        menu->addAction(
+                "Create a clip", this->split_,
+                [twitchChannel] {
+                    twitchChannel->createClip();
+                },
+                QKeySequence("Alt+X"))
+            ->setVisible(twitchChannel->isLive());
 
         menu->addSeparator();
     }
