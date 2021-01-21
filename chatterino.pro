@@ -59,6 +59,8 @@ linux {
 }
 
 macx {
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
+
     INCLUDEPATH += /usr/local/include
     INCLUDEPATH += /usr/local/opt/openssl/include
     LIBS += -L/usr/local/opt/openssl/lib
