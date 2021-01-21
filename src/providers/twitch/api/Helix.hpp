@@ -146,6 +146,25 @@ struct HelixClip {
     }
 };
 
+struct HelixChannel {
+    QString userId;
+    QString name;
+    QString language;
+    QString gameId;
+    QString gameName;
+    QString title;
+
+    explicit HelixChannel(QJsonObject jsonObject)
+        : userId(jsonObject.value("broadcaster_id").toString())
+        , name(jsonObject.value("broadcaster_name").toString())
+        , language(jsonObject.value("broadcaster_language").toString())
+        , gameId(jsonObject.value("game_id").toString())
+        , gameName(jsonObject.value("game_name").toString())
+        , title(jsonObject.value("title").toString())
+    {
+    }
+};
+
 //struct HelixIgnore {
 //    QString userId;
 //    QString userName;
@@ -230,6 +249,11 @@ public:
                     ResultCallback<HelixClip> successCallback,
                     std::function<void(HelixClipError)> failureCallback,
                     std::function<void()> finallyCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#get-channel-information
+    void getChannel(QString broadcasterId,
+                    ResultCallback<HelixChannel> successCallback,
+                    HelixFailureCallback failureCallback);
 
     //    // https://dev.twitch.tv/docs/api/reference#get-user-block-list
     //    void loadIgnores(QString userId,
