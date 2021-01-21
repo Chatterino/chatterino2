@@ -73,6 +73,7 @@
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
 - Dev: Migrated `Kraken::getChannel` to Helix. (#2381)
 - Dev: Build in CI with multiple Qt versions (#2349)
+- Dev: Updated minimum required macOS version to 10.15 (#2386)
 
 ## 2.2.2
 
