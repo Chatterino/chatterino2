@@ -46,6 +46,7 @@ private:
     pajlada::Signals::Connection refreshConnection_;
 
     std::shared_ptr<bool> hack_;
+    std::mutex checkAfkRateLimiter_;
 
     struct {
         Button *avatarButton = nullptr;

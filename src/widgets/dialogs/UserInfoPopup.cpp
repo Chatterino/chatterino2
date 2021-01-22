@@ -237,62 +237,45 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
             this->channel_->sendMessage("/unvip " + this->userName_);
         });
 
-        auto mutex = std::mutex();
-        QObject::connect(
-            checkAfk.getElement(), &Button::leftClicked, [this, &mutex] {
-                bool wasLockedBefore = mutex.try_lock();
-                if (wasLockedBefore)
-                {
-                    return;
-                }
-                //checkAfk->getLabel().setText("Please wait...");
-                auto url = QUrl("https://supinic.com/api/bot/afk/check");
-                auto query = QUrlQuery();
-                query.addQueryItem("username", this->userName_);
+        QObject::connect(checkAfk.getElement(), &Button::leftClicked, [this] {
+            bool ok = this->checkAfkRateLimiter_.try_lock();
+            if (!ok)
+            {
+                return;
+            }
+            //checkAfk->getLabel().setText("Please wait...");
+            auto url = QUrl("https://supinic.com/api/bot/afk/check");
+            auto query = QUrlQuery();
+            query.addQueryItem("username", this->userName_);
 
-                url.setQuery(query);
-                NetworkRequest(url)
-                    .onSuccess([&mutex, this](NetworkResult result) -> Outcome {
-                        mutex.unlock();
-                        auto json = result.parseJson();
-                        auto afk =
-                            json.value("data").toObject().value("status");
-                        if (afk.isNull())
+            url.setQuery(query);
+            NetworkRequest(url)
+                .onSuccess([this](NetworkResult result) -> Outcome {
+                    this->checkAfkRateLimiter_.unlock();
+                    auto json = result.parseJson();
+                    auto afk = json.value("data").toObject().value("status");
+                    if (afk.isNull())
+                    {
+                        // user isn't afk
+                        auto builder = MessageBuilder(
+                            systemMessage,
+                            QString("User %1 is not AFK").arg(this->userName_));
+                        builder.message().id = this->userId_;
+                        builder.message().loginName = this->userName_;
+                        builder.message().displayName = this->userName_;
+
+                        this->channel_->addMessage(builder.release());
+                    }
+                    else
+                    {
+                        auto status = afk.toObject();
+                        if (status.value("twitchID").isNull())
                         {
-                            // user isn't afk
-                            auto builder = MessageBuilder(
-                                systemMessage, QString("User %1 is not AFK")
-                                                   .arg(this->userName_));
-                            builder.message().id = this->userId_;
-                            builder.message().loginName = this->userName_;
-                            builder.message().displayName = this->userName_;
-
-                            this->channel_->addMessage(builder.release());
-                        }
-                        else
-                        {
-                            auto status = afk.toObject();
-                            if (status.value("twitchID").isNull())
-                            {
-                                auto builder = MessageBuilder(
-                                    systemMessage,
-                                    QString(
-                                        "User %1 is not known to Supibot on "
-                                        "Twitch but they are AFK (%2) from "
-                                        "another platform with the message %3")
-                                        .arg(this->userName_)
-                                        .arg(status.value("status").toString())
-                                        .arg(status.value("text").toString()));
-                                builder.message().id = this->userId_;
-                                builder.message().loginName = this->userName_;
-                                builder.message().displayName = this->userName_;
-
-                                this->channel_->addMessage(builder.release());
-                                return Success;
-                            }
                             auto builder = MessageBuilder(
                                 systemMessage,
-                                QString("User %1 is AFK (%2): %3")
+                                QString("User %1 is not known to Supibot on "
+                                        "Twitch but they are AFK (%2) from "
+                                        "another platform with the message %3")
                                     .arg(this->userName_)
                                     .arg(status.value("status").toString())
                                     .arg(status.value("text").toString()));
@@ -301,21 +284,33 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                             builder.message().displayName = this->userName_;
 
                             this->channel_->addMessage(builder.release());
+                            return Success;
                         }
-                        return Success;
-                    })
-                    .onError([&mutex, this](NetworkResult result) {
-                        mutex.unlock();
                         auto builder = MessageBuilder(
                             systemMessage,
-                            QString(
-                                "Failed to check AFK status for user %1: %2")
+                            QString("User %1 is AFK (%2): %3")
                                 .arg(this->userName_)
-                                .arg(result.status()));
+                                .arg(status.value("status").toString())
+                                .arg(status.value("text").toString()));
+                        builder.message().id = this->userId_;
+                        builder.message().loginName = this->userName_;
+                        builder.message().displayName = this->userName_;
+
                         this->channel_->addMessage(builder.release());
-                    })
-                    .execute();
-            });
+                    }
+                    return Success;
+                })
+                .onError([this](NetworkResult result) {
+                    this->checkAfkRateLimiter_.unlock();
+                    auto builder = MessageBuilder(
+                        systemMessage,
+                        QString("Failed to check AFK status for user %1: %2")
+                            .arg(this->userName_)
+                            .arg(result.status()));
+                    this->channel_->addMessage(builder.release());
+                })
+                .execute();
+        });
 
         // userstate
         this->userStateChanged_.connect([this, mod, unmod, vip,
