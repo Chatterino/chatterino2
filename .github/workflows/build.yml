@@ -43,7 +43,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         if: ${{ matrix.qt-version == 'default' }}
         with:
-          # mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           extra: --external 7z
 
@@ -51,7 +51,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         if: ${{ matrix.qt-version != 'default' }}
         with:
-          # mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           extra: --external 7z
           version: ${{ matrix.qt-version }}
@@ -159,7 +159,6 @@ jobs:
             mkdir build
             cd build
             /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
-            sed -ie 's/-framework\\\ /-framework /g' Makefile
             make -j8
         shell: bash
 
