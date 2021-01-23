@@ -1,7 +1,8 @@
 #pragma once
 
 #include <QApplication>
-#include <QJsonArray>
+#include <boost/optional.hpp>
+#include "common/WindowDescriptors.hpp"
 
 namespace chatterino {
 
@@ -15,7 +16,10 @@ public:
     bool crashRecovery{};
     bool shouldRunBrowserExtensionHost{};
     bool dontSaveSettings{};
-    QJsonArray channelsToJoin{};
+    boost::optional<WindowLayout> customChannelLayout;
+
+private:
+    void applyCustomChannelLayout(const QString &argValue);
 };
 
 void initArgs(const QApplication &app);
