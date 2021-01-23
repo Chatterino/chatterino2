@@ -28,7 +28,10 @@ private:
     SignalVector<std::shared_ptr<Hotkey>> hotkeys_;
     void loadHotkeys();
     void saveHotkeys();
-    void resetToDefaults();
+    void resetToDefaults(std::set<QString> &addedHotkeys);
+    void tryAddDefault(std::set<QString> &addedHotkeys, HotkeyScope scope,
+                       QKeySequence keySequence, QString action,
+                       std::vector<QString> args, QString name);
 };
 
 }  // namespace chatterino
