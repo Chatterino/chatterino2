@@ -23,6 +23,8 @@ enum class SettingsDialogPreference;
 class WindowManager final : public Singleton
 {
 public:
+    static const QString WINDOW_LAYOUT_FILENAME;
+
     WindowManager();
 
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
