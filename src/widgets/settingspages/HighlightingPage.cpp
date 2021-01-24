@@ -99,7 +99,7 @@ HighlightingPage::HighlightingPage()
                         .getElement();
 
                 view->addRegexHelpLink();
-                view->getTableView()->horizontalHeader()->hideSection(4);
+                view->getTableView()->horizontalHeader()->hideSection(5);
 
                 // Case-sensitivity doesn't make sense for user names so it is
                 // set to "false" by default & the column is hidden
