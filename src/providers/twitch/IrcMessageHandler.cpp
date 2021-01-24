@@ -13,8 +13,8 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/IrcHelpers.hpp"
 #include "util/FormatTime.hpp"
+#include "util/IrcHelpers.hpp"
 
 #include <IrcMessage>
 
