@@ -10,6 +10,7 @@ enum class HotkeyScope {
     Split,
     SplitInput,
     Window,
-    UserCard
+    UserCard,
+    Settings
 };
 }  // namespace chatterino

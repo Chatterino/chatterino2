@@ -53,6 +53,8 @@ QString Hotkey::getCategory() const
             return "Split";
         case HotkeyScope::UserCard:
             return "User card";
+        case HotkeyScope::Settings:
+            return "Settings dialog";
         default:
             return "Unknown hotkey scope";
     }
@@ -72,6 +74,8 @@ Qt::ShortcutContext Hotkey::getContext() const
             return Qt::WidgetShortcut;
         case HotkeyScope::UserCard:
             return Qt::WindowShortcut;
+        case HotkeyScope::Settings:
+            return Qt::WidgetShortcut;
     }
     qCDebug(chatterinoHotkeys)
         << "Using default shortcut context for" << this->getCategory()

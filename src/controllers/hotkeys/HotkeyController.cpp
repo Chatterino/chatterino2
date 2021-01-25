@@ -73,6 +73,10 @@ void HotkeyController::loadHotkeys()
         {
             scope = HotkeyScope::UserCard;
         }
+        else if (scopeName == "settings")
+        {
+            scope = HotkeyScope::Settings;
+        }
         else
         {
             qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
@@ -298,6 +302,14 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
                             std::vector<QString>(),
                             "default open quick switcher shortcut");
     }
+
+    // settings
+    {
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Settings,
+                            QKeySequence("Ctrl+F"), "search",
+                            std::vector<QString>(),
+                            "default search in settings shortcut");
+    }
 }
 
 void HotkeyController::save()
@@ -332,6 +344,12 @@ void HotkeyController::saveHotkeys()
             case HotkeyScope::UserCard:
                 scopeName = "userCard";
                 break;
+            case HotkeyScope::Settings:
+                scopeName = "settings";
+                break;
+            default:
+                qCDebug(chatterinoHotkeys)
+                    << "Failed to serialize scope to name";
         }
 
         pajlada::Settings::Setting<QString>::set(section + "/scope", scopeName);
