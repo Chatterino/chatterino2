@@ -805,7 +805,10 @@ void ChannelView::messageAppended(MessagePtr &message,
     {
         if (messageFlags->has(MessageFlag::Highlighted) &&
             messageFlags->has(MessageFlag::ShowInMentions) &&
-            !messageFlags->has(MessageFlag::Subscription))
+            !messageFlags->has(MessageFlag::Subscription) &&
+            (getSettings()->highlightMentions ||
+             this->channel_->getType() != Channel::Type::TwitchMentions))
+
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
         }
@@ -1482,6 +1485,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->setText(element->getTooltip());
         tooltipWidget->adjustSize();
+        tooltipWidget->setWindowFlag(Qt::WindowStaysOnTopHint, true);
         tooltipWidget->show();
         tooltipWidget->raise();
     }
@@ -2078,6 +2082,10 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                     break;
                 }
             }
+        }
+        break;
+        case Link::CopyToClipboard: {
+            crossPlatformCopy(link.value);
         }
         break;
         case Link::Reconnect: {

@@ -4,15 +4,6 @@ this folder describes what sort of API requests we do, what permissions are requ
 ## Kraken (V5)
 We use a bunch of Kraken (V5) in Chatterino2.
 
-### Get Channel
-URL: https://dev.twitch.tv/docs/v5/reference/channels#get-channel
-
-Migration path: **Unknown**
-
- * We implement this in `providers/twitch/api/Kraken.cpp getChannel`  
-   Used in:
-     * `TwitchChannel::refreshTitle` to check the current stream title/game of offline channels
-
 ### Get Cheermotes
 URL: https://dev.twitch.tv/docs/v5/reference/bits#get-cheermotes
 
@@ -90,7 +81,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-streams
      * `NotificationController` to provide notifications for channels you might not have open in Chatterino, but are still interested in getting notifications for
 
 ### Follow User
-URL: https://dev.twitch.tv/docs/api/reference#create-user-follows
+URL: https://dev.twitch.tv/docs/api/reference#create-user-follows  
 Requires `user:edit:follows` scope
 
  * We implement this in `providers/twitch/api/Helix.cpp followUser`
@@ -99,13 +90,28 @@ Requires `user:edit:follows` scope
      * `controllers/commands/CommandController.cpp` in /follow command
 
 ### Unfollow User
-URL: https://dev.twitch.tv/docs/api/reference#delete-user-follows
+URL: https://dev.twitch.tv/docs/api/reference#delete-user-follows  
 Requires `user:edit:follows` scope
 
  * We implement this in `providers/twitch/api/Helix.cpp unfollowUser`
    Used in:
      * `widgets/dialogs/UserInfoPopup.cpp` to unfollow a user by unticking follow checkbox in usercard
      * `controllers/commands/CommandController.cpp` in /unfollow command
+
+### Create Clip
+URL: https://dev.twitch.tv/docs/api/reference#create-clip  
+Requires `clips:edit` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp createClip`
+   Used in:
+     * `TwitchChannel` to create a clip of a live broadcast
+
+### Get Channel
+URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
+
+ * We implement this in `providers/twitch/api/Helix.cpp getChannel`
+   Used in:
+     * `TwitchChannel` to refresh stream title
 
 ## TMI
 The TMI api is undocumented.

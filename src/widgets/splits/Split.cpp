@@ -202,6 +202,18 @@ Split::Split(QWidget *parent)
     };  // TODO: move rest
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
                                                             splitActions, this);
+    // Alt+X: create clip LUL
+    createShortcut(this, "Alt+X", [this] {
+        if (!this->getChannel()->isTwitchChannel())
+        {
+            return;
+        }
+
+        auto *twitchChannel =
+            dynamic_cast<TwitchChannel *>(this->getChannel().get());
+
+        twitchChannel->createClip();
+    });
 
     // xd
     // CreateShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);

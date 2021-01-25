@@ -337,7 +337,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                     [channel, target]() {
                         channel->addMessage(makeSystemMessage(
                             QString("User %1 could not be followed, an unknown "
-                                    "error occured!")
+                                    "error occurred!")
                                 .arg(target)));
                     });
             },
@@ -434,6 +434,37 @@ void CommandController::initialize(Settings &, Paths &paths)
         userPopup->show();
         return "";
     });
+
+    this->registerCommand(
+        "/chatters", [](const auto & /*words*/, auto channel) {
+            auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+            if (twitchChannel == nullptr)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "The /chatters command only works in Twitch Channels"));
+                return "";
+            }
+
+            channel->addMessage(makeSystemMessage(
+                QString("Chatter count: %1")
+                    .arg(QString::number(twitchChannel->chatterCount()))));
+
+            return "";
+        });
+
+    this->registerCommand("/clip", [](const auto &words, auto channel) {
+        if (!channel->isTwitchChannel())
+        {
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+        twitchChannel->createClip();
+
+        return "";
+    });
 }
 
 void CommandController::save()
@@ -517,7 +548,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 void CommandController::registerCommand(QString commandName,
                                         CommandFunction commandFunction)
 {
-    assert(this->commands_.contains(commandName) == false);
+    assert(!this->commands_.contains(commandName));
 
     this->commands_[commandName] = commandFunction;
 

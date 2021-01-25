@@ -19,6 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
+        qt-version: [default, 5.12.10]
       fail-fast: false
 
     steps:
@@ -31,19 +32,29 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ../Qt
-          key: ${{ runner.os }}-QtCache-20201005
+          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-20210109
 
       # LINUX
       - name: Install p7zip (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get update && sudo apt-get -y install p7zip-full
 
-      - name: Install Qt
+      - name: Install Qt (Default version)
         uses: jurplel/install-qt-action@v2
+        if: ${{ matrix.qt-version == 'default' }}
         with:
-          # mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           extra: --external 7z
+
+      - name: Install Qt (Specific version)
+        uses: jurplel/install-qt-action@v2
+        if: ${{ matrix.qt-version != 'default' }}
+        with:
+          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          extra: --external 7z
+          version: ${{ matrix.qt-version }}
 
       # WINDOWS
       - name: Cache conan
@@ -88,7 +99,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v2.2.2
         with:
-          name: chatterino-windows-x86-64.zip
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
           path: build/chatterino-windows-x86-64.zip
 
       # LINUX
@@ -132,7 +143,7 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v2.2.2
         with:
-          name: Chatterino-x86_64.AppImage
+          name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       # MACOS
@@ -148,7 +159,6 @@ jobs:
             mkdir build
             cd build
             /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
-            sed -ie 's/-framework\\\ /-framework /g' Makefile
             make -j8
         shell: bash
 
@@ -166,7 +176,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v2.2.2
         with:
-          name: chatterino-osx.dmg
+          name: chatterino-osx-${{ matrix.qt-version }}.dmg
           path: build/chatterino-osx.dmg
 
   create-release:
@@ -190,25 +200,20 @@ jobs:
 
       - uses: actions/download-artifact@v2.0.8
         with:
-          name: chatterino-windows-x86-64.zip
+          name: chatterino-windows-x86-64-default.zip
           path: windows/
 
       - uses: actions/download-artifact@v2.0.8
         with:
-          name: Chatterino-x86_64.AppImage
+          name: Chatterino-x86_64-default.AppImage
           path: linux/
 
       - uses: actions/download-artifact@v2.0.8
         with:
-          name: chatterino-osx.dmg
+          name: chatterino-osx-default.dmg
           path: macos/
 
       # TODO: Extract dmg and appimage
-
-      - name: TREE
-        run: |
-            sudo apt update && sudo apt install tree
-            tree .
 
       # - name: Read upload URL into output
       #   id: upload_url

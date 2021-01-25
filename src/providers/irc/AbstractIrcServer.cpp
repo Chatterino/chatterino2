@@ -137,7 +137,7 @@ void AbstractIrcServer::open(ConnectionType type)
     }
 }
 
-void AbstractIrcServer::addGlobalSystemMessage(QString messageText)
+void AbstractIrcServer::addGlobalSystemMessage(const QString &messageText)
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 

@@ -194,6 +194,8 @@ public:
     BoolSetting streamerModeHideViewerCountAndDuration = {
         "/streamerMode/hideViewerCountAndDuration", false};
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
+    BoolSetting streamerModeSupressLiveNotifications = {
+        "/streamerMode/supressLiveNotifications", false};
 
     /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
@@ -262,6 +264,8 @@ public:
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
+
+    BoolSetting highlightMentions = {"/highlighting/mentions", true};
 
     /// Filtering
     BoolSetting excludeUserMessagesFromFilter = {
