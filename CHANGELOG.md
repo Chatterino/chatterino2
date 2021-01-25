@@ -25,7 +25,7 @@
 - Minor: Made the current channels emotes appear at the top of the emote picker popup. (#2057)
 - Minor: Added viewer list button to twitch channel header. (#1978)
 - Minor: Added followage and subage information to usercard. (#2023)
-- Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940)
+- Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940, #2368)
 - Minor: Added customizable timeout buttons to the user info popup
 - Minor: Deprecate loading of "v1" window layouts. If you haven't updated Chatterino in more than 2 years, there's a chance you will lose your window layout.
 - Minor: User popup will now automatically display messages as they are received
@@ -68,11 +68,14 @@
 - Bugfix: Fix a crash bug that occurred when moving splits across windows and closing the "parent tab" (#2249, #2259)
 - Bugfix: Fix a crash bug that occurred when the "Limit message height" setting was enabled and a message was being split up into multiple lines. IRC only. (#2329)
 - Bugfix: Fix anonymous users being pinged by "username" justinfan64537 (#2156, #2352)
+- Bugfix: Fixed hidden tooltips when always on top is active (#2384)
+- Bugfix: Fix CLI arguments (`--help`, `--version`, `--channels`) not being respected (#2368, #2190)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
 - Dev: Migrated `Kraken::getChannel` to Helix. (#2381)
 - Dev: Build in CI with multiple Qt versions (#2349)
+- Dev: Updated minimum required macOS version to 10.14 (#2386)
 
 ## 2.2.2
 
