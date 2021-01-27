@@ -14,8 +14,14 @@ public:
     bool printVersion{};
     bool crashRecovery{};
     bool shouldRunBrowserExtensionHost{};
-    bool dontSaveSettings{};
+    // Shows a single chat. Used on windows to embed in another application.
+    bool isFramelessEmbed{};
     QJsonArray channelsToJoin{};
+    boost::optional<unsigned long long> parentWindowId{};
+
+    // Not settings directly
+    bool dontSaveSettings{};
+    bool dontLoadMainWindow{};
 };
 
 void initArgs(const QApplication &app);

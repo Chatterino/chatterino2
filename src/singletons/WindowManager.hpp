@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
@@ -19,11 +20,13 @@ using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 enum class WindowType;
 
 enum class SettingsDialogPreference;
+class FramelessEmbedWindow;
 
 class WindowManager final : public Singleton
 {
 public:
     WindowManager();
+    ~WindowManager() override;
 
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
     static void encodeFilters(Split *split, QJsonArray &arr);
@@ -50,9 +53,6 @@ public:
     Window &getMainWindow();
     Window &getSelectedWindow();
     Window &createWindow(WindowType type, bool show = true);
-
-    int windowCount();
-    Window *windowAt(int index);
 
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
@@ -110,6 +110,7 @@ private:
 
     std::vector<Window *> windows_;
 
+    std::unique_ptr<FramelessEmbedWindow> framelessEmbedWindow_{};
     Window *mainWindow_{};
     Window *selectedWindow_{};
 

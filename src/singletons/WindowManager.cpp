@@ -26,6 +26,7 @@
 #include "util/Clamp.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
+#include "widgets/FramelessEmbedWindow.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -117,6 +118,8 @@ WindowManager::WindowManager()
         this->miscUpdate.invoke();
     });
 }
+
+WindowManager::~WindowManager() = default;
 
 MessageElementFlags WindowManager::getWordFlags()
 {
@@ -257,24 +260,6 @@ Window &WindowManager::createWindow(WindowType type, bool show)
     return *window;
 }
 
-int WindowManager::windowCount()
-{
-    return this->windows_.size();
-}
-
-Window *WindowManager::windowAt(int index)
-{
-    assertInGuiThread();
-
-    if (index < 0 || (size_t)index >= this->windows_.size())
-    {
-        return nullptr;
-    }
-    qDebug() << "getting window at bad index" << index;
-
-    return this->windows_.at(index);
-}
-
 QPoint WindowManager::emotePopupPos()
 {
     return this->emotePopupPos_;
@@ -303,9 +288,17 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
         this->applyWindowLayout(windowLayout);
     }
 
+    if (getArgs().isFramelessEmbed)
+    {
+        this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
+        this->framelessEmbedWindow_->show();
+    }
+
     // No main window has been created from loading, create an empty one
     if (mainWindow_ == nullptr)
     {
+        // this is a hack since right now we always need a main window
+
         mainWindow_ = &this->createWindow(WindowType::Main);
         mainWindow_->getNotebook().addPage(true);
     }
@@ -613,6 +606,11 @@ WindowLayout WindowManager::loadWindowLayoutFromFile() const
 
 void WindowManager::applyWindowLayout(const WindowLayout &layout)
 {
+    if (getArgs().dontLoadMainWindow)
+    {
+        return;
+    }
+
     // Set emote popup position
     this->emotePopupPos_ = layout.emotePopupPos_;
 
