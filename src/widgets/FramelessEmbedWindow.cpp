@@ -60,7 +60,6 @@ bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
 
     return BaseWidget::nativeEvent(eventType, message, result);
 }
-#endif
 
 void FramelessEmbedWindow::showEvent(QShowEvent *)
 {
@@ -96,5 +95,6 @@ void FramelessEmbedWindow::showEvent(QShowEvent *)
                       reinterpret_cast<LPARAM>(&cds));
     }
 }
+#endif
 
 }  // namespace chatterino
