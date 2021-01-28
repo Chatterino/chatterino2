@@ -11,29 +11,6 @@ Migration path: **Not checked**
 
  * We implement this API in `providers/twitch/TwitchChannel.cpp` to resolve a chats available cheer emotes. This helps us parse incoming messages like `pajaCheer1000`
 
-### Get User Block List
-URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-block-list
-
-Migration path: **Unknown**
-
- * We use this in `providers/twitch/TwitchAccount.cpp loadIgnores`
-
-### Block User
-URL: https://dev.twitch.tv/docs/v5/reference/users#block-user  
-Requires `user_blocks_edit` scope
-
-Migration path: **Unknown**
-
- * We use this in `providers/twitch/TwitchAccount.cpp ignoreByID`
-
-### Unblock User
-URL: https://dev.twitch.tv/docs/v5/reference/users#unblock-user  
-Requires `user_blocks_edit` scope
-
-Migration path: **Unknown**
-
- * We use this in `providers/twitch/TwitchAccount.cpp unignoreByID`
-
 ### Get User Emotes
 URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-emotes  
 Requires `user_subscriptions` scope
@@ -112,6 +89,34 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
  * We implement this in `providers/twitch/api/Helix.cpp getChannel`
    Used in:
      * `TwitchChannel` to refresh stream title
+
+### Get User Block List
+URL: https://dev.twitch.tv/docs/api/reference#get-user-block-list
+Requires `user:read:blocked_users` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp loadIgnores`
+   Used in:
+     * `providers/twitch/TwitchAccount.cpp loadIgnores` to load list of blocked (ignored) users by current user
+
+### Block User
+URL: https://dev.twitch.tv/docs/api/reference#block-user
+Requires `user:manage:blocked_users` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp blockUser`
+   Used in:
+     * `widgets/dialogs/UserInfoPopup.cpp` to ignore a user via checkbox in the usercard
+     * `controllers/commands/CommandController.cpp` to ignore a user via "/ignore" command
+
+### Unblock User
+URL: https://dev.twitch.tv/docs/api/reference#unblock-user
+Requires `user:manage:blocked_users` scope
+
+Migration path: **Unknown**
+
+ * We implement this in `providers/twitch/api/Helix.cpp unblockUser`
+   Used in:
+     * `widgets/dialogs/UserInfoPopup.cpp` to unignore a user via checkbox in the usercard
+     * `controllers/commands/CommandController.cpp` to unignore a user via "/unignore" command
 
 ## TMI
 The TMI api is undocumented.
