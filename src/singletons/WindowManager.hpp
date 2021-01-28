@@ -110,7 +110,7 @@ private:
 
     std::vector<Window *> windows_;
 
-    std::unique_ptr<FramelessEmbedWindow> framelessEmbedWindow_{};
+    std::unique_ptr<FramelessEmbedWindow> framelessEmbedWindow_;
     Window *mainWindow_{};
     Window *selectedWindow_{};
 
