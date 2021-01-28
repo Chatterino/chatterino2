@@ -279,8 +279,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 getHelix()->blockUser(
                     targetUser.id,
                     [channel, target, targetUser] {
-                        getApp()->accounts->twitch.getCurrent()->addToIgnores(
-                            targetUser.id, targetUser.login);
+                        getApp()->accounts->twitch.getCurrent()->loadIgnores();
                         channel->addMessage(makeSystemMessage(
                             QString("You successfully ignored user %1")
                                 .arg(target)));
@@ -326,9 +325,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 getHelix()->unblockUser(
                     targetUser.id,
                     [channel, target, targetUser] {
-                        getApp()
-                            ->accounts->twitch.getCurrent()
-                            ->removeFromIgnores(targetUser.id);
+                        getApp()->accounts->twitch.getCurrent()->loadIgnores();
                         channel->addMessage(makeSystemMessage(
                             QString("You successfully unignored user %1")
                                 .arg(target)));

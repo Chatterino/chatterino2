@@ -165,18 +165,18 @@ struct HelixChannel {
     }
 };
 
-//struct HelixIgnore {
-//    QString userId;
-//    QString userName;
-//    QString displayName;
+struct HelixIgnore {
+    QString userId;
+    QString userName;
+    QString displayName;
 
-//    explicit HelixIgnore(QJsonObject jsonObject)
-//        : userId(jsonObject.value("user_id").toString())
-//        , userName(jsonObject.value("user_login").toString())
-//        , displayName(jsonObject.value("display_name").toString())
-//    {
-//    }
-//};
+    explicit HelixIgnore(QJsonObject jsonObject)
+        : userId(jsonObject.value("user_id").toString())
+        , userName(jsonObject.value("user_login").toString())
+        , displayName(jsonObject.value("display_name").toString())
+    {
+    }
+};
 
 enum class HelixClipError {
     Unknown,
@@ -255,10 +255,10 @@ public:
                     ResultCallback<HelixChannel> successCallback,
                     HelixFailureCallback failureCallback);
 
-    //    // https://dev.twitch.tv/docs/api/reference#get-user-block-list
-    //    void loadIgnores(QString userId,
-    //                     ResultCallback<std::vector<HelixIgnore>> successCallback,
-    //                     HelixFailureCallback failureCallback);
+    // https://dev.twitch.tv/docs/api/reference#get-user-block-list
+    void loadIgnores(QString userId,
+                     ResultCallback<std::vector<HelixIgnore>> successCallback,
+                     HelixFailureCallback failureCallback);
 
     // https://dev.twitch.tv/docs/api/reference#block-user
     void blockUser(QString targetUserId, std::function<void()> successCallback,

@@ -78,8 +78,6 @@ public:
                      std::function<void(FollowResult)> onFinished);
 
     std::set<TwitchUser> getIgnores() const;
-    void addToIgnores(const QString id, const QString userName);
-    void removeFromIgnores(const QString id);
 
     void loadEmotes();
     AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;

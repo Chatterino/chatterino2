@@ -91,105 +91,24 @@ bool TwitchAccount::isAnon() const
     return this->isAnon_;
 }
 
-//void TwitchAccount::loadIgnores()
-//{
-//    getHelix()->loadIgnores(
-//        getApp()->accounts->twitch.getCurrent()->userId_,
-//        [this](std::vector<HelixIgnore> ignores) {
-//            std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-//            this->ignores_.clear();
-
-//            for (const HelixIgnore &ignore : ignores)
-//            {
-//                this->ignores_.push_back(ignore);
-//            }
-//        },
-//        [] {
-//            qDebug() << "Fetching ignores failed!";
-//        });
-//}
-
 void TwitchAccount::loadIgnores()
 {
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                "/blocks");
+    getHelix()->loadIgnores(
+        getApp()->accounts->twitch.getCurrent()->userId_,
+        [this](std::vector<HelixIgnore> ignores) {
+            std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+            this->ignores_.clear();
 
-    NetworkRequest(url)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onSuccess([=](auto result) -> Outcome {
-            auto document = result.parseRapidJson();
-            if (!document.IsObject())
+            for (const HelixIgnore &ignore : ignores)
             {
-                return Failure;
+                TwitchUser ignoredUser;
+                ignoredUser.fromHelixIgnore(ignore);
+                this->ignores_.insert(ignoredUser);
             }
-
-            auto blocksIt = document.FindMember("blocks");
-            if (blocksIt == document.MemberEnd())
-            {
-                return Failure;
-            }
-            const auto &blocks = blocksIt->value;
-
-            if (!blocks.IsArray())
-            {
-                return Failure;
-            }
-
-            {
-                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-                this->ignores_.clear();
-
-                for (const auto &block : blocks.GetArray())
-                {
-                    if (!block.IsObject())
-                    {
-                        continue;
-                    }
-                    auto userIt = block.FindMember("user");
-                    if (userIt == block.MemberEnd())
-                    {
-                        continue;
-                    }
-                    TwitchUser ignoredUser;
-                    if (!rj::getSafe(userIt->value, ignoredUser))
-                    {
-                        qCWarning(chatterinoTwitch)
-                            << "Error parsing twitch user JSON"
-                            << rj::stringify(userIt->value).c_str();
-                        continue;
-                    }
-
-                    this->ignores_.insert(ignoredUser);
-                }
-            }
-
-            return Success;
-        })
-        .execute();
-}
-
-void TwitchAccount::addToIgnores(const QString id, const QString userName)
-{
-    TwitchUser ignoredUser;
-    ignoredUser.id = id;
-    ignoredUser.name = userName;
-    auto res = this->ignores_.insert(ignoredUser);
-    if (!res.second)
-    {
-        const TwitchUser &existingUser = *(res.first);
-        existingUser.update(ignoredUser);
-    }
-}
-
-void TwitchAccount::removeFromIgnores(const QString id)
-{
-    TwitchUser ignoredUser;
-    ignoredUser.id = id;
-    {
-        std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-        this->ignores_.erase(ignoredUser);
-    }
+        },
+        [] {
+            qDebug() << "Fetching ignores failed!";
+        });
 }
 
 void TwitchAccount::checkFollow(const QString targetUserID,

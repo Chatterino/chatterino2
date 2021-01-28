@@ -442,41 +442,41 @@ void Helix::getChannel(QString broadcasterId,
         .execute();
 }
 
-//void Helix::loadIgnores(
-//    QString userId, ResultCallback<std::vector<HelixIgnore>> successCallback,
-//    HelixFailureCallback failureCallback)
-//{
-//    QUrlQuery urlQuery;
-//    urlQuery.addQueryItem("broadcaster_id", userId);
+void Helix::loadIgnores(
+    QString userId, ResultCallback<std::vector<HelixIgnore>> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", userId);
 
-//    this->makeRequest("users/blocks", urlQuery)
-//        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-//            auto root = result.parseJson();
-//            auto data = root.value("data");
+    this->makeRequest("users/blocks", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
 
-//            if (!data.isArray())
-//            {
-//                failureCallback();
-//                return Failure;
-//            }
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
 
-//            std::vector<HelixIgnore> ignores;
+            std::vector<HelixIgnore> ignores;
 
-//            for (const auto &jsonStream : data.toArray())
-//            {
-//                ignores.emplace_back(jsonStream.toObject());
-//            }
+            for (const auto &jsonStream : data.toArray())
+            {
+                ignores.emplace_back(jsonStream.toObject());
+            }
 
-//            successCallback(ignores);
+            successCallback(ignores);
 
-//            return Success;
-//        })
-//        .onError([failureCallback](auto result) {
-//            // TODO: make better xd
-//            failureCallback();
-//        })
-//        .execute();
-//}
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
 
 void Helix::blockUser(QString targetUserId,
                       std::function<void()> successCallback,
