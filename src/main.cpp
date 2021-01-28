@@ -1,6 +1,5 @@
 #include <QApplication>
 #include <QCommandLineParser>
-#include <QDebug>
 #include <QMessageBox>
 #include <QStringList>
 #include <memory>
@@ -9,6 +8,7 @@
 #include "RunGui.hpp"
 #include "common/Args.hpp"
 #include "common/Modes.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -26,6 +26,33 @@ int main(int argc, char **argv)
     QCoreApplication::setApplicationName("chatterino");
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("https://www.chatterino.com");
+
+    Paths *paths{};
+
+    try
+    {
+        paths = new Paths;
+    }
+    catch (std::runtime_error &error)
+    {
+        QMessageBox box;
+        if (Modes::instance().isPortable)
+        {
+            box.setText(
+                error.what() +
+                QStringLiteral(
+                    "\n\nInfo: Portable mode requires the application to "
+                    "be in a writeable location. If you don't want "
+                    "portable mode reinstall the application. "
+                    "https://chatterino.com."));
+        }
+        else
+        {
+            box.setText(error.what());
+        }
+        box.exec();
+        return 1;
+    }
 
     initArgs(a);
 
@@ -49,33 +76,6 @@ int main(int argc, char **argv)
         IvrApi::initialize();
         Helix::initialize();
         Kraken::initialize();
-
-        Paths *paths{};
-
-        try
-        {
-            paths = new Paths;
-        }
-        catch (std::runtime_error &error)
-        {
-            QMessageBox box;
-            if (Modes::instance().isPortable)
-            {
-                box.setText(
-                    error.what() +
-                    QStringLiteral(
-                        "\n\nInfo: Portable mode requires the application to "
-                        "be in a writeable location. If you don't want "
-                        "portable mode reinstall the application. "
-                        "https://chatterino.com."));
-            }
-            else
-            {
-                box.setText(error.what());
-            }
-            box.exec();
-            return 1;
-        }
 
         Settings settings(paths->settingsDirectory);
 

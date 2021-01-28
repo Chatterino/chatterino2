@@ -86,6 +86,7 @@
 #    include <QShortcut>
 #    include <QSizePolicy>
 #    include <QSlider>
+#    include <QSpinBox>
 #    include <QStackedLayout>
 #    include <QStandardPaths>
 #    include <QString>

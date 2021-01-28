@@ -13,6 +13,7 @@
 
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
@@ -37,8 +38,6 @@
 namespace chatterino {
 namespace {
 
-    const QString WINDOW_LAYOUT_FILENAME(QStringLiteral("window-layout.json"));
-
     boost::optional<bool> &shouldMoveOutOfBoundsWindow()
     {
         static boost::optional<bool> x;
@@ -46,6 +45,9 @@ namespace {
     }
 
 }  // namespace
+
+const QString WindowManager::WINDOW_LAYOUT_FILENAME(
+    QStringLiteral("window-layout.json"));
 
 using SplitNode = SplitContainer::Node;
 using SplitDirection = SplitContainer::Direction;
@@ -83,10 +85,10 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 }
 
 WindowManager::WindowManager()
-    : windowLayoutFilePath(
-          combinePath(getPaths()->settingsDirectory, WINDOW_LAYOUT_FILENAME))
+    : windowLayoutFilePath(combinePath(getPaths()->settingsDirectory,
+                                       WindowManager::WINDOW_LAYOUT_FILENAME))
 {
-    qDebug() << "init WindowManager";
+    qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
     auto settings = getSettings();
 
@@ -281,7 +283,16 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     assert(!this->initialized_);
 
     {
-        auto windowLayout = this->loadWindowLayoutFromFile();
+        WindowLayout windowLayout;
+
+        if (getArgs().customChannelLayout)
+        {
+            windowLayout = getArgs().customChannelLayout.value();
+        }
+        else
+        {
+            windowLayout = this->loadWindowLayoutFromFile();
+        }
 
         this->emotePopupPos_ = windowLayout.emotePopupPos_;
 
@@ -295,12 +306,12 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     }
 
     // No main window has been created from loading, create an empty one
-    if (mainWindow_ == nullptr)
+    if (this->mainWindow_ == nullptr)
     {
-        // this is a hack since right now we always need a main window
+        // TODO: don't create main window if it's a frameless embed
 
-        mainWindow_ = &this->createWindow(WindowType::Main);
-        mainWindow_->getNotebook().addPage(true);
+        this->mainWindow_ = &this->createWindow(WindowType::Main);
+        this->mainWindow_->getNotebook().addPage(true);
     }
 
     settings.timestampFormat.connect([this](auto, auto) {
@@ -336,7 +347,7 @@ void WindowManager::save()
     {
         return;
     }
-    qDebug() << "[WindowManager] Saving";
+    qCDebug(chatterinoWindowmanager) << "[WindowManager] Saving";
     assertInGuiThread();
     QJsonDocument document;
 

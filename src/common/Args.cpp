@@ -3,10 +3,12 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
-#include <QJsonArray>
-#include <QJsonDocument>
-#include <QJsonObject>
 #include <QStringList>
+#include "common/QLogging.hpp"
+#include "singletons/Paths.hpp"
+#include "singletons/WindowManager.hpp"
+#include "util/CombinePath.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 
@@ -42,13 +44,13 @@ Args::Args(const QApplication &app)
 
     if (!parser.parse(app.arguments()))
     {
-        qDebug() << "Warning: Unhandled options:"
-                 << parser.unknownOptionNames();
+        qCWarning(chatterinoArgs)
+            << "Unhandled options:" << parser.unknownOptionNames();
     }
 
     if (parser.isSet("help"))
     {
-        qDebug().noquote() << parser.helpText();
+        qInfo().noquote() << parser.helpText();
         ::exit(EXIT_SUCCESS);
     }
 
@@ -59,37 +61,73 @@ Args::Args(const QApplication &app)
 
     if (parser.isSet("c"))
     {
-        QJsonArray channelArray;
-        QStringList channelArgList = parser.value("c").split(";");
-        for (QString channelArg : channelArgList)
+        this->applyCustomChannelLayout(parser.value("c"));
+    }
+
+    this->printVersion = parser.isSet("v");
+    this->crashRecovery = parser.isSet("crash-recovery");
+}
+
+void Args::applyCustomChannelLayout(const QString &argValue)
+{
+    WindowLayout layout;
+    WindowDescriptor window;
+
+    /*
+     * There is only one window that is loaded from the --channels
+     * argument so that is what we use as the main window.
+     */
+    window.type_ = WindowType::Main;
+
+    // Load main window layout from config file so we can use the same geometry
+    const QRect configMainLayout = [] {
+        const QString windowLayoutFile =
+            combinePath(getPaths()->settingsDirectory,
+                        WindowManager::WINDOW_LAYOUT_FILENAME);
+
+        const WindowLayout configLayout =
+            WindowLayout::loadFromFile(windowLayoutFile);
+
+        for (const WindowDescriptor &window : configLayout.windows_)
         {
-            // Twitch is default platform
-            QString platform = "t";
-            QString channelName = channelArg;
+            if (window.type_ != WindowType::Main)
+                continue;
 
-            const QRegExp regExp("(.):(.*)");
-            if (regExp.indexIn(channelArg) != -1)
-            {
-                platform = regExp.cap(1);
-                channelName = regExp.cap(2);
-            }
-
-            // Twitch (default)
-            if (platform == "t")
-            {
-                // TODO: try not to parse JSON
-                QString channelObjectString =
-                    "{\"splits2\": { \"data\": { \"name\": \"" + channelName +
-                    "\", \"type\": \"twitch\" }, \"type\": \"split\" }}";
-                channelArray.push_back(
-                    QJsonDocument::fromJson(channelObjectString.toUtf8())
-                        .object());
-            }
+            return window.geometry_;
         }
-        if (channelArray.size() > 0)
+
+        return QRect(-1, -1, -1, -1);
+    }();
+
+    window.geometry_ = std::move(configMainLayout);
+
+    QStringList channelArgList = argValue.split(";");
+    for (const QString &channelArg : channelArgList)
+    {
+        if (channelArg.isEmpty())
+            continue;
+
+        // Twitch is default platform
+        QString platform = "t";
+        QString channelName = channelArg;
+
+        const QRegExp regExp("(.):(.*)");
+        if (regExp.indexIn(channelArg) != -1)
         {
-            this->dontSaveSettings = true;
-            this->channelsToJoin = channelArray;
+            platform = regExp.cap(1);
+            channelName = regExp.cap(2);
+        }
+
+        // Twitch (default)
+        if (platform == "t")
+        {
+            TabDescriptor tab;
+
+            // Set first tab as selected
+            tab.selected_ = window.tabs_.empty();
+            tab.rootNode_ = SplitNodeDescriptor{"twitch", channelName};
+
+            window.tabs_.emplace_back(std::move(tab));
         }
     }
 
@@ -106,6 +144,15 @@ Args::Args(const QApplication &app)
         this->isFramelessEmbed = true;
         this->dontSaveSettings = true;
         this->dontLoadMainWindow = true;
+    }
+
+    // Only respect --channels if we could actually parse any channels
+    if (!window.tabs_.empty())
+    {
+        this->dontSaveSettings = true;
+
+        layout.windows_.emplace_back(std::move(window));
+        this->customChannelLayout = std::move(layout);
     }
 }
 

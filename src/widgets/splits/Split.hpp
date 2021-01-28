@@ -96,8 +96,7 @@ protected:
 private:
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
-    void onAccountSelected();
-    void updateTooltipColor();
+    void updateInputPlaceholder();
 
     SplitContainer *container_;
     IndirectChannel channel_;
@@ -134,6 +133,7 @@ public slots:
     void popup();
     void clear();
     void openInBrowser();
+    void openModViewInBrowser();
     void openWhispersInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
@@ -144,6 +144,7 @@ public slots:
     void showViewerList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
+    void reconnect();
 };
 
 }  // namespace chatterino

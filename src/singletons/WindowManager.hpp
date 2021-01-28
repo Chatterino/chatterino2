@@ -25,6 +25,8 @@ class FramelessEmbedWindow;
 class WindowManager final : public Singleton
 {
 public:
+    static const QString WINDOW_LAYOUT_FILENAME;
+
     WindowManager();
     ~WindowManager() override;
 

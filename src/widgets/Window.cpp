@@ -305,12 +305,11 @@ void Window::addShortcuts()
     // CTRL + 1-8 to open corresponding tab.
     for (auto i = 0; i < 8; i++)
     {
-        char hotkey[7];
-        std::sprintf(hotkey, "CTRL+%d", i + 1);
         const auto openTab = [this, i] {
             this->notebook_->selectIndex(i);
         };
-        createWindowShortcut(this, hotkey, openTab);
+        createWindowShortcut(this, QString("CTRL+%1").arg(i + 1).toUtf8(),
+                             openTab);
     }
 
     createWindowShortcut(this, "CTRL+9", [this] {

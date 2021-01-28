@@ -320,13 +320,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
-        "Chatterino can automatically change behavior if it "
-        "detects that \"OBS Studio\" is running.\nSelect which "
-        "things you want to change while streaming");
+        "Chatterino can automatically change behavior if it detects that \"OBS "
+        "Studio\" is running (Automatic mode works only on Windows and "
+        "Linux).\nSelect which things you want to change while streaming");
 
     ComboBox *dankDropdown =
         layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
-            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
+            "Enable Streamer Mode",
+            {"Disabled", "Enabled", "Automatic (Detect OBS)"},
             s.enableStreamerMode,
             [](int value) {
                 return value;
@@ -345,6 +346,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
+    layout.addCheckbox("Supress Live Notifications",
+                       s.streamerModeSupressLiveNotifications);
 
     layout.addTitle("Link Previews");
     layout.addDescription(
@@ -572,6 +575,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.autoCloseUserPopup);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
+    layout.addCheckbox("Color @usernames", s.colorUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames);
     layout.addDropdown<float>(
@@ -600,6 +604,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.highlightInlineWhispers);
     layout.addCheckbox("Load message history on connect",
                        s.loadTwitchMessageHistoryOnConnect);
+    // TODO: Change phrasing to use better english once we can tag settings, right now it's kept as history instead of historical so that the setting shows up when the user searches for history
+    layout.addIntInput("Max number of history messages to load on connect",
+                       s.twitchMessageHistoryLimit, 10, 800, 10);
 
     layout.addCheckbox("Enable experimental IRC support (requires restart)",
                        s.enableExperimentalIrc);
@@ -618,6 +625,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Ask for confirmation when uploading an image",
                        s.askOnImageUpload);
+    layout.addCheckbox("Messages in /mentions highlights tab",
+                       s.highlightMentions);
 
     layout.addStretch();
 

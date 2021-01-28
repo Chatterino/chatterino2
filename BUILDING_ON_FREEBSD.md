@@ -1,6 +1,6 @@
 # FreeBSD
 
-Note on Qt version compatibility: If you are installing Qt from a package manager, please ensure the version you are installing is at least **Qt 5.10 or newer**.
+Note on Qt version compatibility: If you are installing Qt from a package manager, please ensure the version you are installing is at least **Qt 5.12 or newer**.
 
 ## FreeBSD 12.1-RELEASE
 

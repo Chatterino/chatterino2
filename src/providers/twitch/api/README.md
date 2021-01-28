@@ -4,41 +4,6 @@ this folder describes what sort of API requests we do, what permissions are requ
 ## Kraken (V5)
 We use a bunch of Kraken (V5) in Chatterino2.
 
-### Get User
-URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-by-id
-
-Migration path: **Unknown**
-
- * We implement this in `providers/twitch/api/Kraken.cpp getUser`  
-   Used in:
-     * `UserInfoPopup` to get the "created at" date of a user
-
-### Get Channel
-URL: https://dev.twitch.tv/docs/v5/reference/channels#get-channel
-
-Migration path: **Unknown**
-
- * We implement this in `providers/twitch/api/Kraken.cpp getChannel`  
-   Used in:
-     * `TwitchChannel::refreshTitle` to check the current stream title/game of offline channels
-
-### Follow Channel
-URL: https://dev.twitch.tv/docs/v5/reference/users#follow-channel  
-Requires `user_follows_edit` scope
-
-Migration path: **Unknown**
-
- * We implement this API in `providers/twitch/TwitchAccount.cpp followUser`
-
-### Unfollow Channel
-URL: https://dev.twitch.tv/docs/v5/reference/users#unfollow-channel  
-Requires `user_follows_edit` scope
-
-Migration path: **Unknown**
-
- * We implement this API in `providers/twitch/TwitchAccount.cpp unfollowUser`
-
-
 ### Get Cheermotes
 URL: https://dev.twitch.tv/docs/v5/reference/bits#get-cheermotes
 
@@ -95,7 +60,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-users
 
  * We implement this in `providers/twitch/api/Helix.cpp fetchUsers`.  
    Used in:
-     * `UserInfoPopup` to get ID and viewcount of username we clicked
+     * `UserInfoPopup` to get ID, viewCount, displayName, createdAt of username we clicked
      * `CommandController` to power any commands that need to get a user ID
      * `Toasts` to get the profile picture of a streamer who just went live
      * `TwitchAccount` ignore and unignore features to translate user name to user ID
@@ -114,6 +79,39 @@ URL: https://dev.twitch.tv/docs/api/reference#get-streams
    Used in:
      * `TwitchChannel` to get live status, game, title, and viewer count of a channel
      * `NotificationController` to provide notifications for channels you might not have open in Chatterino, but are still interested in getting notifications for
+
+### Follow User
+URL: https://dev.twitch.tv/docs/api/reference#create-user-follows  
+Requires `user:edit:follows` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp followUser`
+   Used in:
+     * `widgets/dialogs/UserInfoPopup.cpp` to follow a user by ticking follow checkbox in usercard
+     * `controllers/commands/CommandController.cpp` in /follow command
+
+### Unfollow User
+URL: https://dev.twitch.tv/docs/api/reference#delete-user-follows  
+Requires `user:edit:follows` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp unfollowUser`
+   Used in:
+     * `widgets/dialogs/UserInfoPopup.cpp` to unfollow a user by unticking follow checkbox in usercard
+     * `controllers/commands/CommandController.cpp` in /unfollow command
+
+### Create Clip
+URL: https://dev.twitch.tv/docs/api/reference#create-clip  
+Requires `clips:edit` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp createClip`
+   Used in:
+     * `TwitchChannel` to create a clip of a live broadcast
+
+### Get Channel
+URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
+
+ * We implement this in `providers/twitch/api/Helix.cpp getChannel`
+   Used in:
+     * `TwitchChannel` to refresh stream title
 
 ## TMI
 The TMI api is undocumented.

@@ -386,8 +386,11 @@ void UserInfoPopup::installEvents()
             {
                 case Qt::CheckState::Unchecked: {
                     this->ui_.follow->setEnabled(false);
-                    currentUser->unfollowUser(this->userId_,
-                                              reenableFollowCheckbox);
+                    getHelix()->unfollowUser(currentUser->getUserId(),
+                                             this->userId_,
+                                             reenableFollowCheckbox, [] {
+                                                 //
+                                             });
                 }
                 break;
 
@@ -398,8 +401,11 @@ void UserInfoPopup::installEvents()
 
                 case Qt::CheckState::Checked: {
                     this->ui_.follow->setEnabled(false);
-                    currentUser->followUser(this->userId_,
-                                            reenableFollowCheckbox);
+                    getHelix()->followUser(currentUser->getUserId(),
+                                           this->userId_,
+                                           reenableFollowCheckbox, [] {
+                                               //
+                                           });
                 }
                 break;
             }
@@ -580,25 +586,14 @@ void UserInfoPopup::updateUserData()
 
         this->userId_ = user.id;
 
+        this->ui_.nameLabel->setText(user.displayName);
+        this->setWindowTitle(TEXT_TITLE.arg(user.displayName));
+        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(user.viewCount));
+        this->ui_.createdDateLabel->setText(
+            TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
         this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);
         this->ui_.userIDLabel->setProperty("copy-text", user.id);
 
-        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(user.viewCount));
-        getKraken()->getUser(
-            user.id,
-            [this, hack](const auto &user) {
-                if (!hack.lock())
-                {
-                    return;
-                }
-                this->ui_.nameLabel->setText(user.displayName);
-                this->setWindowTitle(TEXT_TITLE.arg(user.displayName));
-                this->ui_.createdDateLabel->setText(
-                    TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
-            },
-            [] {
-                // failure
-            });
         if (isInStreamerMode() &&
             getSettings()->streamerModeHideUsercardAvatars)
         {

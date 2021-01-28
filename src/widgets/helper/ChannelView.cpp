@@ -15,6 +15,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Benchmark.hpp"
@@ -102,7 +103,11 @@ namespace {
                                 });
         };
 
-        if (creatorFlags.has(MessageElementFlag::BttvEmote))
+        if (creatorFlags.has(MessageElementFlag::TwitchEmote))
+        {
+            addPageLink("TwitchEmotes");
+        }
+        else if (creatorFlags.has(MessageElementFlag::BttvEmote))
         {
             addPageLink("BTTV");
         }
@@ -605,7 +610,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                     }
                     else
                     {
-                        overridingFlags = message->flags;
+                        overridingFlags = MessageFlags(message->flags);
                         overridingFlags.get().set(MessageFlag::DoNotLog);
                     }
 
@@ -800,7 +805,10 @@ void ChannelView::messageAppended(MessagePtr &message,
     {
         if (messageFlags->has(MessageFlag::Highlighted) &&
             messageFlags->has(MessageFlag::ShowInMentions) &&
-            !messageFlags->has(MessageFlag::Subscription))
+            !messageFlags->has(MessageFlag::Subscription) &&
+            (getSettings()->highlightMentions ||
+             this->channel_->getType() != Channel::Type::TwitchMentions))
+
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
         }
@@ -892,8 +900,9 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     auto snapshot = this->messages_.getSnapshot();
     if (index >= snapshot.size())
     {
-        qDebug() << "Tried to replace out of bounds message. Index:" << index
-                 << ". Length:" << snapshot.size();
+        qCDebug(chatterinoWidget)
+            << "Tried to replace out of bounds message. Index:" << index
+            << ". Length:" << snapshot.size();
         return;
     }
 
@@ -1452,13 +1461,15 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
             else
             {
-                const auto isHideLink =
+                const auto shouldHideThumbnail =
                     isInStreamerMode() &&
                     getSettings()->streamerModeHideLinkThumbnails &&
-                    (!element->getThumbnail()->url().string.isEmpty());
+                    element->getThumbnail() != nullptr &&
+                    !element->getThumbnail()->url().string.isEmpty();
                 auto thumb =
-                    isHideLink ? Image::fromPixmap(getResources().streamerMode)
-                               : element->getThumbnail();
+                    shouldHideThumbnail
+                        ? Image::fromPixmap(getResources().streamerMode)
+                        : element->getThumbnail();
                 tooltipPreviewImage.setImage(std::move(thumb));
 
                 if (element->getThumbnailType() ==
@@ -1474,6 +1485,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->setText(element->getTooltip());
         tooltipWidget->adjustSize();
+        tooltipWidget->setWindowFlag(Qt::WindowStaysOnTopHint, true);
         tooltipWidget->show();
         tooltipWidget->raise();
     }
@@ -2035,6 +2047,49 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::OpenAccountsPage: {
             SettingsDialog::showDialog(this,
                                        SettingsDialogPreference::Accounts);
+        }
+        break;
+        case Link::JumpToChannel: {
+            // Get all currently open pages
+            QList<SplitContainer *> openPages;
+
+            auto &nb = getApp()->windows->getMainWindow().getNotebook();
+            for (int i = 0; i < nb.getPageCount(); ++i)
+            {
+                openPages.push_back(
+                    static_cast<SplitContainer *>(nb.getPageAt(i)));
+            }
+
+            for (auto *page : openPages)
+            {
+                auto splits = page->getSplits();
+
+                // Search for channel matching link in page/split container
+                // TODO(zneix): Consider opening a channel if it's closed (?)
+                auto it = std::find_if(
+                    splits.begin(), splits.end(), [link](Split *split) {
+                        return split->getChannel()->getName() == link.value;
+                    });
+
+                if (it != splits.end())
+                {
+                    // Select SplitContainer and Split itself where mention message was sent
+                    // TODO(zneix): Try exploring ways of scrolling to a certain message as well
+                    nb.select(page);
+
+                    Split *split = *it;
+                    page->setSelected(split);
+                    break;
+                }
+            }
+        }
+        break;
+        case Link::CopyToClipboard: {
+            crossPlatformCopy(link.value);
+        }
+        break;
+        case Link::Reconnect: {
+            this->underlyingChannel_.get()->reconnect();
         }
         break;
 

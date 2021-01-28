@@ -1,6 +1,7 @@
 #include "IrcMessageHandler.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/Message.hpp"
@@ -18,6 +19,39 @@
 
 #include <unordered_set>
 
+namespace {
+using namespace chatterino;
+MessagePtr generateBannedMessage(bool confirmedBan)
+{
+    const auto linkColor = MessageColor(MessageColor::Link);
+    const auto accountsLink = Link(Link::Reconnect, QString());
+    const auto bannedText =
+        confirmedBan
+            ? QString("You were banned from this channel!")
+            : QString(
+                  "Your connection to this channel was unexpectedly dropped.");
+
+    const auto reconnectPromptText =
+        confirmedBan
+            ? QString(
+                  "If you believe you have been unbanned, try reconnecting.")
+            : QString("Try reconnecting.");
+
+    MessageBuilder builder;
+    builder.message().flags.set(MessageFlag::System);
+
+    builder.emplace<TimestampElement>();
+    builder.emplace<TextElement>(bannedText, MessageElementFlag::Text,
+                                 MessageColor::System);
+    builder
+        .emplace<TextElement>(reconnectPromptText, MessageElementFlag::Text,
+                              linkColor)
+        ->setLink(accountsLink);
+
+    return builder.release();
+}
+
+}  // namespace
 namespace chatterino {
 
 static float relativeSimilarity(const QString &str1, const QString &str2)
@@ -361,8 +395,9 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        qDebug() << "[IrcMessageHandler:handleClearChatMessage] Twitch channel"
-                 << chanName << "not found";
+        qCDebug(chatterinoTwitch)
+            << "[IrcMessageHandler:handleClearChatMessage] Twitch channel"
+            << chanName << "not found";
         return;
     }
 
@@ -427,9 +462,10 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     if (chan->isEmpty())
     {
-        qDebug() << "[IrcMessageHandler:handleClearMessageMessage] Twitch "
-                    "channel"
-                 << chanName << "not found";
+        qCDebug(chatterinoTwitch)
+            << "[IrcMessageHandler:handleClearMessageMessage] Twitch "
+               "channel"
+            << chanName << "not found";
         return;
     }
 
@@ -676,6 +712,10 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 
         return {builder.release()};
     }
+    else if (message->content().startsWith("You are permanently banned "))
+    {
+        return {generateBannedMessage(true)};
+    }
     else
     {
         std::vector<MessagePtr> builtMessages;
@@ -712,8 +752,9 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 
         if (channel->isEmpty())
         {
-            qDebug() << "[IrcManager:handleNoticeMessage] Channel"
-                     << channelName << "not found in channel manager";
+            qCDebug(chatterinoTwitch)
+                << "[IrcManager:handleNoticeMessage] Channel" << channelName
+                << "not found in channel manager";
             return;
         }
 
@@ -758,13 +799,18 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     if (TwitchChannel *twitchChannel =
             dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        if (message->nick() !=
-                getApp()->accounts->twitch.getCurrent()->getUserName() &&
+        const auto selfAccountName =
+            getApp()->accounts->twitch.getCurrent()->getUserName();
+        if (message->nick() != selfAccountName &&
             getSettings()->showParts.getValue())
         {
             twitchChannel->addPartedUser(message->nick());
         }
+
+        if (message->nick() == selfAccountName)
+        {
+            channel->addMessage(generateBannedMessage(false));
+        }
     }
 }
-
 }  // namespace chatterino

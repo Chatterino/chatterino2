@@ -211,19 +211,19 @@ void SplitContainer::addSplit(Split *split)
 
     this->refreshTab();
 
-    split->getChannelView().tabHighlightRequested.connect(
-        [this](HighlightState state) {
-            if (this->tab_ != nullptr)
-            {
-                this->tab_->setHighlightState(state);
-            }
-        });
+    this->managedConnect(split->getChannelView().tabHighlightRequested,
+                         [this](HighlightState state) {
+                             if (this->tab_ != nullptr)
+                             {
+                                 this->tab_->setHighlightState(state);
+                             }
+                         });
 
-    split->getChannelView().liveStatusChanged.connect([this]() {
+    this->managedConnect(split->getChannelView().liveStatusChanged, [this]() {
         this->refreshTabLiveStatus();
     });
 
-    split->focused.connect([this, split] {
+    this->managedConnect(split->focused, [this, split] {
         this->setSelected(split);
     });
 
@@ -788,7 +788,7 @@ void SplitContainer::refreshTabTitle()
 
     for (const auto &chatWidget : this->splits_)
     {
-        auto channelName = chatWidget->getChannel()->getName();
+        auto channelName = chatWidget->getChannel()->getLocalizedName();
         if (channelName.isEmpty())
         {
             continue;

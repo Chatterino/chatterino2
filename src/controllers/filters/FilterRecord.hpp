@@ -8,6 +8,7 @@
 
 #include <QRegularExpression>
 #include <QString>
+#include <QUuid>
 #include <pajlada/serialize.hpp>
 
 #include <memory>

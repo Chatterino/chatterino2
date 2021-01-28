@@ -1,7 +1,8 @@
 #pragma once
 
 #include <QApplication>
-#include <QJsonArray>
+#include <boost/optional.hpp>
+#include "common/WindowDescriptors.hpp"
 
 namespace chatterino {
 
@@ -22,6 +23,10 @@ public:
     // Not settings directly
     bool dontSaveSettings{};
     bool dontLoadMainWindow{};
+    boost::optional<WindowLayout> customChannelLayout;
+
+private:
+    void applyCustomChannelLayout(const QString &argValue);
 };
 
 void initArgs(const QApplication &app);

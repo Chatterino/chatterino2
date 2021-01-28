@@ -4,6 +4,7 @@
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -117,6 +118,22 @@ Split::Split(QWidget *parent)
     // F5: reload emotes
     createShortcut(this, "F5", &Split::reloadChannelAndSubscriberEmotes);
 
+    // CTRL+F5: reconnect
+    createShortcut(this, "CTRL+F5", &Split::reconnect);
+
+    // Alt+X: create clip LUL
+    createShortcut(this, "Alt+X", [this] {
+        if (!this->getChannel()->isTwitchChannel())
+        {
+            return;
+        }
+
+        auto *twitchChannel =
+            dynamic_cast<TwitchChannel *>(this->getChannel().get());
+
+        twitchChannel->createClip();
+    });
+
     // F10
     createShortcut(this, "F10", [] {
         auto *popup = new DebugPopup;
@@ -133,11 +150,15 @@ Split::Split(QWidget *parent)
 
     this->input_->ui_.textEdit->installEventFilter(parent);
 
+    // update placeheolder text on Twitch account change and channel change
     this->signalHolder_.managedConnect(
         getApp()->accounts->twitch.currentUserChanged, [this] {
-            this->onAccountSelected();
+            this->updateInputPlaceholder();
         });
-    this->onAccountSelected();
+    this->signalHolder_.managedConnect(channelChanged, [this] {
+        this->updateInputPlaceholder();
+    });
+    this->updateInputPlaceholder();
 
     this->view_->mouseDown.connect([this](QMouseEvent *) {
         this->giveFocus(Qt::MouseFocusReason);
@@ -286,7 +307,7 @@ void Split::setContainer(SplitContainer *container)
     this->container_ = container;
 }
 
-void Split::onAccountSelected()
+void Split::updateInputPlaceholder()
 {
     if (!this->getChannel()->isTwitchChannel())
     {
@@ -308,19 +329,6 @@ void Split::onAccountSelected()
     }
 
     this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
-
-    this->updateTooltipColor();
-    this->signalHolder_.managedConnect(this->theme->updated, [this]() {
-        this->updateTooltipColor();
-    });
-}
-
-void Split::updateTooltipColor()
-{
-    QPalette dankPalette;
-    dankPalette.setColor(QPalette::PlaceholderText,
-                         this->theme->messages.textColors.chatPlaceholder);
-    this->input_->ui_.textEdit->setPalette(dankPalette);
 }
 
 IndirectChannel Split::getIndirectChannel()
@@ -376,6 +384,10 @@ void Split::setChannel(IndirectChannel newChannel)
     {
         this->header_->setViewersButtonVisible(false);
     }
+
+    this->channel_.get()->displayNameChanged.connect([this] {
+        this->container_->refreshTab();
+    });
 
     this->channelChanged.invoke();
 
@@ -631,6 +643,17 @@ void Split::openBrowserPlayer()
     }
 }
 
+void Split::openModViewInBrowser()
+{
+    auto channel = this->getChannel();
+
+    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    {
+        QDesktopServices::openUrl("https://twitch.tv/moderator/" +
+                                  twitchChannel->getName());
+    }
+}
+
 void Split::openInStreamlink()
 {
     try
@@ -639,7 +662,8 @@ void Split::openInStreamlink()
     }
     catch (const Exception &ex)
     {
-        qDebug() << "Error in doOpenStreamlink:" << ex.what();
+        qCWarning(chatterinoWidget)
+            << "Error in doOpenStreamlink:" << ex.what();
     }
 }
 
@@ -846,6 +870,11 @@ void Split::reloadChannelAndSubscriberEmotes()
         twitchChannel->refreshBTTVChannelEmotes(true);
         twitchChannel->refreshFFZChannelEmotes(true);
     }
+}
+
+void Split::reconnect()
+{
+    this->getChannel()->reconnect();
 }
 
 void Split::dragEnterEvent(QDragEnterEvent *event)

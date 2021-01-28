@@ -2,6 +2,7 @@
 
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -61,6 +62,8 @@ AbstractIrcServer::AbstractIrcServer()
 
     // listen to reconnect request
     this->readConnection_->reconnectRequested.connect([this] {
+        this->addGlobalSystemMessage(
+            "Server connection timed out, reconnecting");
         this->connect();
     });
     //    this->writeConnection->reconnectRequested.connect([this] {
@@ -76,7 +79,8 @@ AbstractIrcServer::AbstractIrcServer()
 
         if (!this->readConnection_->isConnected())
         {
-            qDebug() << "Trying to reconnect..." << this->falloffCounter_;
+            qCDebug(chatterinoIrc)
+                << "Trying to reconnect..." << this->falloffCounter_;
             this->connect();
         }
     });
@@ -130,6 +134,25 @@ void AbstractIrcServer::open(ConnectionType type)
     if (type & Read)
     {
         this->readConnection_->open();
+    }
+}
+
+void AbstractIrcServer::addGlobalSystemMessage(const QString &messageText)
+{
+    std::lock_guard<std::mutex> lock(this->channelMutex);
+
+    MessageBuilder b(systemMessage, messageText);
+    auto message = b.release();
+
+    for (std::weak_ptr<Channel> &weak : this->channels.values())
+    {
+        std::shared_ptr<Channel> chan = weak.lock();
+        if (!chan)
+        {
+            continue;
+        }
+
+        chan->addMessage(message);
     }
 }
 
@@ -195,8 +218,8 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         chan->destroyed.connect([this, channelName] {
             // fourtf: issues when the server itself is destroyed
 
-            qDebug() << "[AbstractIrcServer::addChannel]" << channelName
-                     << "was destroyed";
+            qCDebug(chatterinoIrc) << "[AbstractIrcServer::addChannel]"
+                                   << channelName << "was destroyed";
             this->channels.remove(channelName);
 
             if (this->readConnection_)

@@ -3,6 +3,7 @@
 #include <atomic>
 
 #include "common/Args.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
@@ -48,10 +49,10 @@ Application::Application(Settings &_settings, Paths &_paths)
     : themes(&this->emplace<Theme>())
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
+    , accounts(&this->emplace<AccountController>())
     , windows(&this->emplace<WindowManager>())
     , toasts(&this->emplace<Toasts>())
 
-    , accounts(&this->emplace<AccountController>())
     , commands(&this->emplace<CommandController>())
     , notifications(&this->emplace<NotificationController>())
     , twitch2(&this->emplace<TwitchIrcServer>())
@@ -349,7 +350,8 @@ void Application::initPubsub()
         }
         else
         {
-            qDebug() << "Couldn't find channel id of point reward";
+            qCDebug(chatterinoApp)
+                << "Couldn't find channel id of point reward";
         }
     });
 

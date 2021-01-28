@@ -1,6 +1,7 @@
 #include "providers/twitch/api/Helix.hpp"
 
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 
 namespace chatterino {
 
@@ -314,20 +315,147 @@ void Helix::getGameById(QString gameId,
         failureCallback);
 }
 
+void Helix::followUser(QString userId, QString targetId,
+                       std::function<void()> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_id", userId);
+    urlQuery.addQueryItem("to_id", targetId);
+
+    this->makeRequest("users/follows", urlQuery)
+        .type(NetworkRequestType::Post)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::unfollowUser(QString userId, QString targetId,
+                         std::function<void()> successCallback,
+                         HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_id", userId);
+    urlQuery.addQueryItem("to_id", targetId);
+
+    this->makeRequest("users/follows", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::createClip(QString channelId,
+                       ResultCallback<HelixClip> successCallback,
+                       std::function<void(HelixClipError)> failureCallback,
+                       std::function<void()> finallyCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", channelId);
+
+    this->makeRequest("clips", urlQuery)
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback(HelixClipError::Unknown);
+                return Failure;
+            }
+
+            HelixClip clip(data.toArray()[0].toObject());
+
+            successCallback(clip);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            switch (result.status())
+            {
+                case 503: {
+                    // Channel has disabled clip-creation, or channel has made cliops only creatable by followers and the user is not a follower (or subscriber)
+                    failureCallback(HelixClipError::ClipsDisabled);
+                }
+                break;
+
+                case 401: {
+                    // User does not have the required scope to be able to create clips, user must reauthenticate
+                    failureCallback(HelixClipError::UserNotAuthenticated);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to create a clip: " << result.status()
+                        << result.getData();
+                    failureCallback(HelixClipError::Unknown);
+                }
+                break;
+            }
+        })
+        .finally(finallyCallback)
+        .execute();
+}
+
+void Helix::getChannel(QString broadcasterId,
+                       ResultCallback<HelixChannel> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+
+    this->makeRequest("channels", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            HelixChannel channel(data.toArray()[0].toObject());
+
+            successCallback(channel);
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            failureCallback();
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
 
     if (this->clientId.isEmpty())
     {
-        qDebug()
+        qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without a client ID set BabyRage";
         // return boost::none;
     }
 
     if (this->oauthToken.isEmpty())
     {
-        qDebug()
+        qCDebug(chatterinoTwitch)
             << "Helix::makeRequest called without an oauth token set BabyRage";
         // return boost::none;
     }

@@ -4,6 +4,7 @@
 #include <boost/variant.hpp>
 #include "Application.hpp"
 #include "common/ChatterinoSetting.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/SignalLabel.hpp"
 
@@ -100,6 +101,8 @@ public:
                           bool editable = false);
     ColorButton *addColorButton(const QString &text, const QColor &color,
                                 pajlada::Settings::Setting<QString> &setting);
+    QSpinBox *addIntInput(const QString &text, IntSetting &setting, int min,
+                          int max, int step);
     void addNavigationSpacing();
 
     template <typename OnClick>
@@ -190,7 +193,7 @@ public:
 protected:
     void resizeEvent(QResizeEvent *ev) override
     {
-        qDebug() << ev->size();
+        qCDebug(chatterinoWidget) << ev->size();
     }
 
 private:
