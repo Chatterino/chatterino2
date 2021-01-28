@@ -631,6 +631,29 @@ SplitNotebook::SplitNotebook(Window *parent)
     {
         this->addCustomButtons();
     }
+
+    this->signalHolder_.managedConnect(
+        getApp()->windows->selectSplit, [this](Split *split) {
+            for (auto &&item : this->items())
+            {
+                if (auto sc = dynamic_cast<SplitContainer *>(item.page))
+                {
+                    auto &&splits = sc->getSplits();
+                    if (std::find(splits.begin(), splits.end(), split) !=
+                        splits.end())
+                    {
+                        this->select(item.page);
+                        split->setFocus();
+                        break;
+                    }
+                }
+            }
+        });
+
+    this->signalHolder_.managedConnect(getApp()->windows->selectSplitContainer,
+                                       [this](SplitContainer *sc) {
+                                           this->select(sc);
+                                       });
 }
 
 void SplitNotebook::showEvent(QShowEvent *)

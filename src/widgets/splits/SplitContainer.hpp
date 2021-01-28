@@ -254,6 +254,9 @@ private:
     NotebookTab *tab_;
     std::vector<Split *> splits_;
 
+    std::unordered_map<Split *, pajlada::Signals::SignalHolder>
+        connectionsPerSplit_;
+
     bool isDragging_ = false;
 };
 

@@ -262,6 +262,16 @@ Window &WindowManager::createWindow(WindowType type, bool show)
     return *window;
 }
 
+void WindowManager::select(Split *split)
+{
+    this->selectSplit.invoke(split);
+}
+
+void WindowManager::select(SplitContainer *container)
+{
+    this->selectSplitContainer.invoke(container);
+}
+
 QPoint WindowManager::emotePopupPos()
 {
     return this->emotePopupPos_;

@@ -56,6 +56,9 @@ public:
     Window &getSelectedWindow();
     Window &createWindow(WindowType type, bool show = true);
 
+    void select(Split *split);
+    void select(SplitContainer *container);
+
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
 
@@ -91,6 +94,9 @@ public:
     // This signal fires every 100ms and can be used to trigger random things that require a recheck.
     // It is currently being used by the "Tooltip Preview Image" system to recheck if an image is ready to be rendered.
     pajlada::Signals::NoArgSignal miscUpdate;
+
+    pajlada::Signals::Signal<Split *> selectSplit;
+    pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
 
 private:
     void encodeNodeRecursively(SplitContainer::Node *node, QJsonObject &obj);
