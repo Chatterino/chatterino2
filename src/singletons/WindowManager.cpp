@@ -308,10 +308,14 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     // No main window has been created from loading, create an empty one
     if (this->mainWindow_ == nullptr)
     {
-        // TODO: don't create main window if it's a frameless embed
-
         this->mainWindow_ = &this->createWindow(WindowType::Main);
         this->mainWindow_->getNotebook().addPage(true);
+
+        // TODO: don't create main window if it's a frameless embed
+        if (getArgs().isFramelessEmbed)
+        {
+            this->mainWindow_->hide();
+        }
     }
 
     settings.timestampFormat.connect([this](auto, auto) {

@@ -66,6 +66,15 @@ Args::Args(const QApplication &app)
 
     this->printVersion = parser.isSet("v");
     this->crashRecovery = parser.isSet("crash-recovery");
+
+    if (parser.isSet(parentWindowIdOption))
+    {
+        this->isFramelessEmbed = true;
+        this->dontSaveSettings = true;
+        this->dontLoadMainWindow = true;
+
+        this->parentWindowId = parser.value(parentWindowIdOption).toULongLong();
+    }
 }
 
 void Args::applyCustomChannelLayout(const QString &argValue)
@@ -129,21 +138,6 @@ void Args::applyCustomChannelLayout(const QString &argValue)
 
             window.tabs_.emplace_back(std::move(tab));
         }
-    }
-
-    this->printVersion = parser.isSet("v");
-    this->crashRecovery = parser.isSet("crash-recovery");
-
-    this->parentWindowId =
-        parser.isSet(parentWindowIdOption)
-            ? parser.value(parentWindowIdOption).toULongLong()
-            : 0;
-
-    if (parser.isSet(parentWindowIdOption))
-    {
-        this->isFramelessEmbed = true;
-        this->dontSaveSettings = true;
-        this->dontLoadMainWindow = true;
     }
 
     // Only respect --channels if we could actually parse any channels
