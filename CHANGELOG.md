@@ -71,11 +71,12 @@
 - Bugfix: Fixed hidden tooltips when always on top is active (#2384)
 - Bugfix: Fix CLI arguments (`--help`, `--version`, `--channels`) not being respected (#2368, #2190)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
+- Dev: Updated minimum required macOS version to 10.14 (#2386)
+- Dev: Build in CI with multiple Qt versions (#2349)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
 - Dev: Migrated `Kraken::getChannel` to Helix. (#2381)
-- Dev: Build in CI with multiple Qt versions (#2349)
-- Dev: Updated minimum required macOS version to 10.14 (#2386)
+- Dev: Migrated `TwitchAccount::(un)ignoreUser` to Helix and made `TwitchAccount::loadIgnores` use Helix call. (#2370)
 
 ## 2.2.2
 
