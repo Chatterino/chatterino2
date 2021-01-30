@@ -85,7 +85,12 @@ Qt::ShortcutContext Hotkey::getContext() const
 
 QString Hotkey::toString() const
 {
-    return this->getCategory();
+    return this->keySequence().toString(QKeySequence::NativeText);
+}
+
+QString Hotkey::toPortableString() const
+{
+    return this->keySequence().toString(QKeySequence::PortableText);
 }
 
 }  // namespace chatterino
