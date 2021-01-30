@@ -76,6 +76,7 @@
 - Dev: Migrated `Kraken::getChannel` to Helix. (#2381)
 - Dev: Build in CI with multiple Qt versions (#2349)
 - Dev: Updated minimum required macOS version to 10.14 (#2386)
+- Dev: Removed unused `humanize` library
 
 ## 2.2.2
 
