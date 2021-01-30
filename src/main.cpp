@@ -27,6 +27,33 @@ int main(int argc, char **argv)
     QCoreApplication::setApplicationVersion(CHATTERINO_VERSION);
     QCoreApplication::setOrganizationDomain("https://www.chatterino.com");
 
+    Paths *paths{};
+
+    try
+    {
+        paths = new Paths;
+    }
+    catch (std::runtime_error &error)
+    {
+        QMessageBox box;
+        if (Modes::instance().isPortable)
+        {
+            box.setText(
+                error.what() +
+                QStringLiteral(
+                    "\n\nInfo: Portable mode requires the application to "
+                    "be in a writeable location. If you don't want "
+                    "portable mode reinstall the application. "
+                    "https://chatterino.com."));
+        }
+        else
+        {
+            box.setText(error.what());
+        }
+        box.exec();
+        return 1;
+    }
+
     initArgs(a);
 
     // run in gui mode or browser extension host mode
@@ -37,46 +64,18 @@ int main(int argc, char **argv)
     else if (getArgs().printVersion)
     {
         auto version = Version::instance();
-        qCInfo(chatterinoMain).noquote()
-            << QString("%1 (commit %2%3)")
-                   .arg(version.fullVersion())
-                   .arg(version.commitHash())
-                   .arg(Modes::instance().isNightly
-                            ? ", " + version.dateOfBuild()
-                            : "");
+        qInfo().noquote() << QString("%1 (commit %2%3)")
+                                 .arg(version.fullVersion())
+                                 .arg(version.commitHash())
+                                 .arg(Modes::instance().isNightly
+                                          ? ", " + version.dateOfBuild()
+                                          : "");
     }
     else
     {
         IvrApi::initialize();
         Helix::initialize();
         Kraken::initialize();
-
-        Paths *paths{};
-
-        try
-        {
-            paths = new Paths;
-        }
-        catch (std::runtime_error &error)
-        {
-            QMessageBox box;
-            if (Modes::instance().isPortable)
-            {
-                box.setText(
-                    error.what() +
-                    QStringLiteral(
-                        "\n\nInfo: Portable mode requires the application to "
-                        "be in a writeable location. If you don't want "
-                        "portable mode reinstall the application. "
-                        "https://chatterino.com."));
-            }
-            else
-            {
-                box.setText(error.what());
-            }
-            box.exec();
-            return 1;
-        }
 
         Settings settings(paths->settingsDirectory);
 

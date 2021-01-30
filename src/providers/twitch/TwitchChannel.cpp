@@ -599,25 +599,26 @@ void TwitchChannel::refreshTitle()
     }
     this->titleRefreshedTime_ = QTime::currentTime();
 
-    const auto onSuccess = [this,
-                            weak = weakOf<Channel>(this)](const auto &channel) {
-        ChannelPtr shared = weak.lock();
-        if (!shared)
-        {
-            return;
-        }
+    getHelix()->getChannel(
+        roomID,
+        [this, weak = weakOf<Channel>(this)](HelixChannel channel) {
+            ChannelPtr shared = weak.lock();
 
-        {
-            auto status = this->streamStatus_.access();
-            status->title = channel.status;
-        }
+            if (!shared)
+            {
+                return;
+            }
 
-        this->liveStatusChanged.invoke();
-    };
+            {
+                auto status = this->streamStatus_.access();
+                status->title = channel.title;
+            }
 
-    const auto onFailure = [] {};
-
-    getKraken()->getChannel(roomID, onSuccess, onFailure);
+            this->liveStatusChanged.invoke();
+        },
+        [] {
+            // failure
+        });
 }
 
 void TwitchChannel::refreshLiveStatus()
