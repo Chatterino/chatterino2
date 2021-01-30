@@ -89,7 +89,6 @@ CONFIG(debug, debug|release) {
 
 # Submodules
 include(lib/warnings.pri)
-include(lib/humanize.pri)
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
 include(lib/wintoast.pri)
