@@ -717,7 +717,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     {
         return {generateBannedMessage(true)};
     }
-    else if (message->content().startsWith("You are timed out for "))
+    else if (message->tags()["msg-id"].toString() == "msg_timedout")
     {
         std::vector<MessagePtr> builtMessages;
 
