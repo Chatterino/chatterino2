@@ -13,6 +13,7 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/FormatTime.hpp"
 #include "util/IrcHelpers.hpp"
 
 #include <IrcMessage>
@@ -715,6 +716,19 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     else if (message->content().startsWith("You are permanently banned "))
     {
         return {generateBannedMessage(true)};
+    }
+    else if (message->tags()["msg-id"] == "msg_timedout")
+    {
+        std::vector<MessagePtr> builtMessages;
+
+        QString formattedMessage = "You are timed out for ";
+        formattedMessage.append(
+            formatTime(message->content().split(" ").value(5)));
+
+        builtMessages.emplace_back(makeSystemMessage(
+            formattedMessage.append("."), calculateMessageTimestamp(message)));
+
+        return builtMessages;
     }
     else
     {
