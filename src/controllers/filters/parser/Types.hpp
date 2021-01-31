@@ -2,6 +2,8 @@
 
 #include "messages/Message.hpp"
 
+#include <QRegularExpression>
+
 namespace filterparser {
 
 using MessagePtr = std::shared_ptr<const chatterino::Message>;
