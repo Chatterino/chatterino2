@@ -77,6 +77,10 @@ void HotkeyController::loadHotkeys()
         {
             scope = HotkeyScope::Settings;
         }
+        else if (scopeName == "emotePopup")
+        {
+            scope = HotkeyScope::EmotePopup;
+        }
         else
         {
             qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
@@ -310,6 +314,45 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
                             std::vector<QString>(),
                             "default search in settings shortcut");
     }
+
+    // emote popup
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            std::vector<QString> args;
+            args.push_back(QString::number(i));
+            this->tryAddDefault(
+                addedHotkeys, HotkeyScope::EmotePopup,
+                QKeySequence(QString("Ctrl+%1").arg(i + 1)), "openTab", args,
+                QString("default emote popup select tab #%1 shortcut")
+                    .arg(i + 1));
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("last");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::EmotePopup,
+                                QKeySequence("Ctrl+9"), "openTab",
+                                std::vector<QString>(),
+                                "default emote popup select last tab shortcut");
+        }
+
+        {
+            std::vector<QString> args;
+            args.push_back("next");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::EmotePopup,
+                                QKeySequence("Ctrl+Tab"), "openTab", args,
+                                "default emote popup select next tab shortcut");
+        }
+
+        {
+            std::vector<QString> args;
+            args.push_back("previous");
+            this->tryAddDefault(
+                addedHotkeys, HotkeyScope::EmotePopup,
+                QKeySequence("Ctrl+Shift+Tab"), "openTab", args,
+                "default emote popup select previous tab shortcut");
+        }
+    }
 }
 
 void HotkeyController::save()
@@ -346,6 +389,9 @@ void HotkeyController::saveHotkeys()
                 break;
             case HotkeyScope::Settings:
                 scopeName = "settings";
+                break;
+            case HotkeyScope::EmotePopup:
+                scopeName = "emotePopup";
                 break;
             default:
                 qCDebug(chatterinoHotkeys)

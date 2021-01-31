@@ -2,7 +2,9 @@
 
 #include "Application.hpp"
 #include "common/CompletionModel.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -10,7 +12,6 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Shortcut.hpp"
-#include "widgets/Notebook.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QHBoxLayout>
@@ -128,8 +129,8 @@ EmotePopup::EmotePopup(QWidget *parent)
     auto layout = new QVBoxLayout(this);
     this->getLayoutContainer()->setLayout(layout);
 
-    auto notebook = new Notebook(this);
-    layout->addWidget(notebook);
+    this->notebook_ = new Notebook(this);
+    layout->addWidget(this->notebook_);
     layout->setMargin(0);
 
     auto clicked = [this](const Link &link) {
@@ -143,7 +144,7 @@ EmotePopup::EmotePopup(QWidget *parent)
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
             MessageElementFlag::EmoteImages});
         view->setEnableScrollingToBottom(false);
-        notebook->addPage(view, tabTitle);
+        this->notebook_->addPage(view, tabTitle);
         view->linkClicked.connect(clicked);
 
         return view;
@@ -156,28 +157,53 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     this->loadEmojis();
 
-    // CTRL + 1-8 to open corresponding tab
-    for (auto i = 0; i < 8; i++)
-    {
-        const auto openTab = [this, i, notebook] {
-            notebook->selectIndex(i);
+    std::map<QString, std::function<void(std::vector<QString>)>>
+        emotePopupActions{
+            {"openTab",  // CTRL + 1-8 to open corresponding tab.
+             [this](std::vector<QString> arguments) {
+                 if (arguments.size() == 0)
+                 {
+                     qCDebug(chatterinoHotkeys)
+                         << "openTab shortcut called without arguments. Takes "
+                            "only "
+                            "one argument: tab specifier";
+                     return;
+                 }
+                 auto target = arguments.at(0);
+                 if (target == "last")
+                 {
+                     this->notebook_->selectLastTab();
+                 }
+                 else if (target == "next")
+                 {
+                     this->notebook_->selectNextTab();
+                 }
+                 else if (target == "previous")
+                 {
+                     this->notebook_->selectPreviousTab();
+                 }
+                 else
+                 {
+                     bool ok;
+                     int result = target.toInt(&ok);
+                     if (ok)
+                     {
+                         this->notebook_->selectIndex(result);
+                     }
+                     else
+                     {
+                         qCDebug(chatterinoHotkeys)
+                             << "Invalid argument for openTab shortcut";
+                     }
+                 }
+             }},
+            {"delete",
+             [this](std::vector<QString>) {
+                 this->close();
+             }},
         };
-        createWindowShortcut(this, QString("CTRL+%1").arg(i + 1).toUtf8(),
-                             openTab);
-    }
-
-    // Open last tab (first one from right)
-    createWindowShortcut(this, "CTRL+9", [=] {
-        notebook->selectLastTab();
-    });
-
-    // Cycle through tabs
-    createWindowShortcut(this, "CTRL+Tab", [=] {
-        notebook->selectNextTab();
-    });
-    createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
-        notebook->selectPreviousTab();
-    });
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+        HotkeyScope::EmotePopup, emotePopupActions, this);
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)

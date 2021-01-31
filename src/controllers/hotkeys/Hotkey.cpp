@@ -55,6 +55,8 @@ QString Hotkey::getCategory() const
             return "User card";
         case HotkeyScope::Settings:
             return "Settings dialog";
+        case HotkeyScope::EmotePopup:
+            return "Emote popup";
         default:
             return "Unknown hotkey scope";
     }
@@ -76,6 +78,8 @@ Qt::ShortcutContext Hotkey::getContext() const
             return Qt::WindowShortcut;
         case HotkeyScope::Settings:
             return Qt::WidgetShortcut;
+        case HotkeyScope::EmotePopup:
+            return Qt::WindowShortcut;
     }
     qCDebug(chatterinoHotkeys)
         << "Using default shortcut context for" << this->getCategory()
