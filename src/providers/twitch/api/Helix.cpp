@@ -315,6 +315,193 @@ void Helix::getGameById(QString gameId,
         failureCallback);
 }
 
+void Helix::followUser(QString userId, QString targetId,
+                       std::function<void()> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_id", userId);
+    urlQuery.addQueryItem("to_id", targetId);
+
+    this->makeRequest("users/follows", urlQuery)
+        .type(NetworkRequestType::Post)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::unfollowUser(QString userId, QString targetId,
+                         std::function<void()> successCallback,
+                         HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("from_id", userId);
+    urlQuery.addQueryItem("to_id", targetId);
+
+    this->makeRequest("users/follows", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::createClip(QString channelId,
+                       ResultCallback<HelixClip> successCallback,
+                       std::function<void(HelixClipError)> failureCallback,
+                       std::function<void()> finallyCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", channelId);
+
+    this->makeRequest("clips", urlQuery)
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback(HelixClipError::Unknown);
+                return Failure;
+            }
+
+            HelixClip clip(data.toArray()[0].toObject());
+
+            successCallback(clip);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            switch (result.status())
+            {
+                case 503: {
+                    // Channel has disabled clip-creation, or channel has made cliops only creatable by followers and the user is not a follower (or subscriber)
+                    failureCallback(HelixClipError::ClipsDisabled);
+                }
+                break;
+
+                case 401: {
+                    // User does not have the required scope to be able to create clips, user must reauthenticate
+                    failureCallback(HelixClipError::UserNotAuthenticated);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to create a clip: " << result.status()
+                        << result.getData();
+                    failureCallback(HelixClipError::Unknown);
+                }
+                break;
+            }
+        })
+        .finally(finallyCallback)
+        .execute();
+}
+
+void Helix::getChannel(QString broadcasterId,
+                       ResultCallback<HelixChannel> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+
+    this->makeRequest("channels", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            HelixChannel channel(data.toArray()[0].toObject());
+
+            successCallback(channel);
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::createStreamMarker(
+    QString broadcasterId, QString description,
+    ResultCallback<HelixStreamMarker> successCallback,
+    std::function<void(HelixStreamMarkerError)> failureCallback)
+{
+    QJsonObject payload;
+
+    if (!description.isEmpty())
+    {
+        payload.insert("description", QJsonValue(description));
+    }
+    payload.insert("user_id", QJsonValue(broadcasterId));
+
+    this->makeRequest("streams/markers", QUrlQuery())
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback(HelixStreamMarkerError::Unknown);
+                return Failure;
+            }
+
+            HelixStreamMarker streamMarker(data.toArray()[0].toObject());
+
+            successCallback(streamMarker);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            switch (result.status())
+            {
+                case 403: {
+                    // User isn't a Channel Editor, so he can't create markers
+                    failureCallback(HelixStreamMarkerError::UserNotAuthorized);
+                }
+                break;
+
+                case 401: {
+                    // User does not have the required scope to be able to create stream markers, user must reauthenticate
+                    failureCallback(
+                        HelixStreamMarkerError::UserNotAuthenticated);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to create a stream marker: "
+                        << result.status() << result.getData();
+                    failureCallback(HelixStreamMarkerError::Unknown);
+                }
+                break;
+            }
+        })
+        .execute();
+};
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

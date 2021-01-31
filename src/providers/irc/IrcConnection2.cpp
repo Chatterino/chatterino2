@@ -57,15 +57,20 @@ IrcConnection::IrcConnection(QObject *parent)
                          }
                      });
 
-    QObject::connect(this, &Communi::IrcConnection::messageReceived,
-                     [this](Communi::IrcMessage *) {
-                         this->recentlyReceivedMessage_ = true;
+    QObject::connect(
+        this, &Communi::IrcConnection::messageReceived,
+        [this](Communi::IrcMessage *message) {
+            this->recentlyReceivedMessage_ = true;
 
-                         if (this->reconnectTimer_.isActive())
-                         {
-                             this->reconnectTimer_.stop();
-                         }
-                     });
+            if (this->reconnectTimer_.isActive())
+            {
+                this->reconnectTimer_.stop();
+
+                // The reconnect timer had started, that means we were waiting for a pong.
+                // Since we received a message, this means that any pong response is meaningless, so we can just stop waiting for the pong and send another ping soon:tm:
+                this->waitingForPong_ = false;
+            }
+        });
 }
 
 }  // namespace chatterino

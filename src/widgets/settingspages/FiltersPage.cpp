@@ -2,7 +2,9 @@
 
 #include "controllers/filters/FilterModel.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/dialogs/ChannelFilterEditorDialog.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -40,7 +42,8 @@ FiltersPage::FiltersPage()
     });
 
     view->addButtonPressed.connect([] {
-        ChannelFilterEditorDialog d;
+        ChannelFilterEditorDialog d(
+            static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
         if (d.exec() == QDialog::Accepted)
         {
             getSettings()->filterRecords.append(
@@ -100,7 +103,7 @@ void FiltersPage::tableCellClicked(const QModelIndex &clicked,
         {
             popup.setIcon(QMessageBox::Icon::Warning);
             popup.setWindowTitle("Invalid filter");
-            popup.setText(QString("Parsing errors occured:"));
+            popup.setText(QString("Parsing errors occurred:"));
             popup.setInformativeText(f.errors().join("\n"));
         }
 

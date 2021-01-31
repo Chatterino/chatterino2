@@ -35,8 +35,19 @@
 
 namespace chatterino {
 namespace {
-    constexpr int TITLE_REFRESH_PERIOD = 10;
     constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
+    constexpr int TITLE_REFRESH_PERIOD = 10;
+    constexpr int CLIP_CREATION_COOLDOWN = 5000;
+    const QString CLIPS_LINK("https://clips.twitch.tv/%1");
+    const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
+        "Failed to create a clip - the streamer has clips disabled entirely or "
+        "requires a certain subscriber or follower status to create clips.");
+    const QString CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT(
+        "Failed to create a clip - you need to re-authenticate.");
+    const QString CLIPS_FAILURE_UNKNOWN_ERROR_TEXT(
+        "Failed to create a clip - an unknown error occurred.");
+    const QString LOGIN_PROMPT_TEXT("Click here to add your account again.");
+    const Link ACCOUNTS_LINK(Link::OpenAccountsPage, QString());
 
     // convertClearchatToNotice takes a Communi::IrcMessage that is a CLEARCHAT command and converts it to a readable NOTICE message
     // This has historically been done in the Recent Messages API, but this functionality is being moved to Chatterino instead
@@ -137,6 +148,7 @@ TwitchChannel::TwitchChannel(const QString &name,
                              FfzEmotes &ffz)
     : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
+    , nameOptions{name, name}
     , subscriptionUrl_("https://www.twitch.tv/subs/" + name)
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
@@ -150,12 +162,6 @@ TwitchChannel::TwitchChannel(const QString &name,
     , titleRefreshedTime_(QTime::currentTime().addSecs(-TITLE_REFRESH_PERIOD))
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
-
-    this->liveStatusChanged.connect([this]() {
-        if (this->isLive() == 1)
-        {
-        }
-    });
 
     this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [=] {
         this->setMod(false);
@@ -202,6 +208,7 @@ TwitchChannel::TwitchChannel(const QString &name,
 
 void TwitchChannel::initialize()
 {
+    this->fetchDisplayName();
     this->refreshChatters();
     this->refreshBadges();
 }
@@ -216,10 +223,30 @@ bool TwitchChannel::canSendMessage() const
     return !this->isEmpty();
 }
 
+const QString &TwitchChannel::getDisplayName() const
+{
+    return this->nameOptions.displayName;
+}
+
+void TwitchChannel::setDisplayName(const QString &name)
+{
+    this->nameOptions.displayName = name;
+}
+
+const QString &TwitchChannel::getLocalizedName() const
+{
+    return this->nameOptions.localizedName;
+}
+
+void TwitchChannel::setLocalizedName(const QString &name)
+{
+    this->nameOptions.localizedName = name;
+}
+
 void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
 {
     BttvEmotes::loadChannel(
-        weakOf<Channel>(this), this->roomId(), this->getName(),
+        weakOf<Channel>(this), this->roomId(), this->getLocalizedName(),
         [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
             if (auto shared = weak.lock())
                 this->bttvEmotes_.set(
@@ -506,6 +533,11 @@ const QString &TwitchChannel::popoutPlayerUrl()
     return this->popoutPlayerUrl_;
 }
 
+int TwitchChannel::chatterCount()
+{
+    return this->chatterCount_;
+}
+
 void TwitchChannel::setLive(bool newLiveStatus)
 {
     bool gotNewLiveStatus = false;
@@ -567,25 +599,26 @@ void TwitchChannel::refreshTitle()
     }
     this->titleRefreshedTime_ = QTime::currentTime();
 
-    const auto onSuccess = [this,
-                            weak = weakOf<Channel>(this)](const auto &channel) {
-        ChannelPtr shared = weak.lock();
-        if (!shared)
-        {
-            return;
-        }
+    getHelix()->getChannel(
+        roomID,
+        [this, weak = weakOf<Channel>(this)](HelixChannel channel) {
+            ChannelPtr shared = weak.lock();
 
-        {
-            auto status = this->streamStatus_.access();
-            status->title = channel.status;
-        }
+            if (!shared)
+            {
+                return;
+            }
 
-        this->liveStatusChanged.invoke();
-    };
+            {
+                auto status = this->streamStatus_.access();
+                status->title = channel.title;
+            }
 
-    const auto onFailure = [] {};
-
-    getKraken()->getChannel(roomID, onSuccess, onFailure);
+            this->liveStatusChanged.invoke();
+        },
+        [] {
+            // failure
+        });
 }
 
 void TwitchChannel::refreshLiveStatus()
@@ -675,7 +708,13 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    NetworkRequest(Env::get().recentMessagesApiUrl.arg(this->getName()))
+    auto baseURL = Env::get().recentMessagesApiUrl.arg(this->getName());
+
+    auto url = QString("%1?limit=%2")
+                   .arg(baseURL)
+                   .arg(getSettings()->twitchMessageHistoryLimit);
+
+    NetworkRequest(url)
         .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
@@ -742,9 +781,14 @@ void TwitchChannel::refreshChatters()
                 // channel still exists?
                 auto shared = weak.lock();
                 if (!shared)
+                {
                     return Failure;
+                }
 
-                auto pair = parseChatters(result.parseJson());
+                auto data = result.parseJson();
+                this->chatterCount_ = data.value("chatter_count").toInt();
+
+                auto pair = parseChatters(std::move(data));
                 if (pair.first)
                 {
                     this->setChatters(std::move(pair.second));
@@ -753,6 +797,33 @@ void TwitchChannel::refreshChatters()
                 return pair.first;
             })
         .execute();
+}
+
+void TwitchChannel::fetchDisplayName()
+{
+    getHelix()->getUserByName(
+        this->getName(),
+        [weak = weakOf<Channel>(this)](const auto &user) {
+            auto shared = weak.lock();
+            if (!shared)
+                return;
+            auto channel = static_cast<TwitchChannel *>(shared.get());
+            if (QString::compare(user.displayName, channel->getName(),
+                                 Qt::CaseInsensitive) == 0)
+            {
+                channel->setDisplayName(user.displayName);
+                channel->setLocalizedName(user.displayName);
+            }
+            else
+            {
+                channel->setLocalizedName(QString("%1(%2)")
+                                              .arg(channel->getName())
+                                              .arg(user.displayName));
+            }
+            channel->addRecentChatter(channel->getDisplayName());
+            channel->displayNameChanged.invoke();
+        },
+        [] {});
 }
 
 void TwitchChannel::refreshBadges()
@@ -871,6 +942,102 @@ void TwitchChannel::refreshCheerEmotes()
             return Success;
         })
         .execute();
+}
+
+void TwitchChannel::createClip()
+{
+    if (!this->isLive())
+    {
+        this->addMessage(makeSystemMessage(
+            "Cannot create clip while the channel is offline!"));
+        return;
+    }
+
+    if (QTime().currentTime() < this->timeNextClipCreationAllowed_ ||
+        this->isClipCreationInProgress)
+    {
+        return;
+    }
+
+    this->addMessage(makeSystemMessage("Creating clip..."));
+    this->isClipCreationInProgress = true;
+
+    getHelix()->createClip(
+        this->roomId(),
+        // successCallback
+        [this](const HelixClip &clip) {
+            MessageBuilder builder;
+            builder.message().flags.set(MessageFlag::System);
+
+            builder.emplace<TimestampElement>();
+            // text
+            builder.emplace<TextElement>("Clip created!",
+                                         MessageElementFlag::Text,
+                                         MessageColor::System);
+            // clip link
+            builder
+                .emplace<TextElement>("Copy link to clipboard",
+                                      MessageElementFlag::Text,
+                                      MessageColor::Link)
+                ->setLink(Link(Link::CopyToClipboard, CLIPS_LINK.arg(clip.id)));
+            // separator text
+            builder.emplace<TextElement>("or", MessageElementFlag::Text,
+                                         MessageColor::System);
+            // edit link
+            builder
+                .emplace<TextElement>("edit it in browser.",
+                                      MessageElementFlag::Text,
+                                      MessageColor::Link)
+                ->setLink(Link(Link::Url, clip.editUrl));
+
+            this->addMessage(builder.release());
+        },
+        // failureCallback
+        [this](auto error) {
+            MessageBuilder builder;
+            builder.message().flags.set(MessageFlag::System);
+
+            builder.emplace<TimestampElement>();
+
+            switch (error)
+            {
+                case HelixClipError::ClipsDisabled: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_CLIPS_DISABLED_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                }
+                break;
+
+                case HelixClipError::UserNotAuthenticated: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                    builder
+                        .emplace<TextElement>(LOGIN_PROMPT_TEXT,
+                                              MessageElementFlag::Text,
+                                              MessageColor::Link)
+                        ->setLink(ACCOUNTS_LINK);
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixClipError::Unknown:
+                default: {
+                    builder.emplace<TextElement>(
+                        CLIPS_FAILURE_UNKNOWN_ERROR_TEXT,
+                        MessageElementFlag::Text, MessageColor::System);
+                }
+                break;
+            }
+
+            this->addMessage(builder.release());
+        },
+        // finallyCallback - this will always execute, so clip creation won't ever be stuck
+        [this] {
+            this->timeNextClipCreationAllowed_ =
+                QTime().currentTime().addMSecs(CLIP_CREATION_COOLDOWN);
+            this->isClipCreationInProgress = false;
+        });
 }
 
 boost::optional<EmotePtr> TwitchChannel::twitchBadge(

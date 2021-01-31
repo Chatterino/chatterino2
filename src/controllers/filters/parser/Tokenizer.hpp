@@ -2,6 +2,10 @@
 
 #include "controllers/filters/parser/Types.hpp"
 
+#include <QMap>
+#include <QRegularExpression>
+#include <QString>
+
 namespace filterparser {
 
 static const QMap<QString, QString> validIdentifiersMap = {

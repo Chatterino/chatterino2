@@ -64,9 +64,30 @@ void ChannelChatters::addPartedUser(const QString &user)
         });
     }
 }
+
 void ChannelChatters::setChatters(UsernameSet &&set)
 {
-    *this->chatters_.access() = set;
+    this->chatters_.access()->merge(std::move(set));
+}
+
+const QColor ChannelChatters::getUserColor(const QString &user)
+{
+    const auto chatterColors = this->chatterColors_.accessConst();
+
+    const auto search = chatterColors->find(user.toLower());
+    if (search == chatterColors->end())
+    {
+        // Returns an invalid color so we can decide not to override `textColor`
+        return QColor();
+    }
+
+    return search->second;
+}
+
+void ChannelChatters::setUserColor(const QString &user, const QColor &color)
+{
+    const auto chatterColors = this->chatterColors_.access();
+    chatterColors->insert_or_assign(user.toLower(), color);
 }
 
 }  // namespace chatterino

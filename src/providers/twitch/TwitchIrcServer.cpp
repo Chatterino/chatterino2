@@ -165,6 +165,12 @@ void TwitchIrcServer::readConnectionMessageReceived(
     {
         handler.handleWhisperMessage(message);
     }
+    else if (command == "RECONNECT")
+    {
+        this->addGlobalSystemMessage(
+            "Twitch Servers requested us to reconnect, reconnecting");
+        this->connect();
+    }
 }
 
 void TwitchIrcServer::writeConnectionMessageReceived(
@@ -206,6 +212,12 @@ void TwitchIrcServer::writeConnectionMessageReceived(
 
         handler.handleNoticeMessage(
             static_cast<Communi::IrcNoticeMessage *>(message));
+    }
+    else if (command == "RECONNECT")
+    {
+        this->addGlobalSystemMessage(
+            "Twitch Servers requested us to reconnect, reconnecting");
+        this->connect();
     }
 }
 

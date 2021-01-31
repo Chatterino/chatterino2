@@ -79,6 +79,12 @@ NetworkRequest NetworkRequest::onSuccess(NetworkSuccessCallback cb) &&
     return std::move(*this);
 }
 
+NetworkRequest NetworkRequest::finally(NetworkFinallyCallback cb) &&
+{
+    this->data->finally_ = cb;
+    return std::move(*this);
+}
+
 NetworkRequest NetworkRequest::header(const char *headerName,
                                       const char *value) &&
 {
@@ -117,7 +123,7 @@ NetworkRequest NetworkRequest::headerList(const QStringList &headers) &&
 NetworkRequest NetworkRequest::timeout(int ms) &&
 {
     this->data->hasTimeout_ = true;
-    this->data->timer_->setInterval(ms);
+    this->data->timeoutMS_ = ms;
     return std::move(*this);
 }
 

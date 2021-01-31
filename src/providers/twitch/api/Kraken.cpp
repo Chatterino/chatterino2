@@ -8,47 +8,6 @@ namespace chatterino {
 
 static Kraken *instance = nullptr;
 
-void Kraken::getChannel(QString userId,
-                        ResultCallback<KrakenChannel> successCallback,
-                        KrakenFailureCallback failureCallback)
-{
-    assert(!userId.isEmpty());
-
-    this->makeRequest("channels/" + userId, {})
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-            auto root = result.parseJson();
-
-            successCallback(root);
-
-            return Success;
-        })
-        .onError([failureCallback](auto result) {
-            // TODO: make better xd
-            failureCallback();
-        })
-        .execute();
-}
-
-void Kraken::getUser(QString userId, ResultCallback<KrakenUser> successCallback,
-                     KrakenFailureCallback failureCallback)
-{
-    assert(!userId.isEmpty());
-
-    this->makeRequest("users/" + userId, {})
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-            auto root = result.parseJson();
-
-            successCallback(root);
-
-            return Success;
-        })
-        .onError([failureCallback](auto result) {
-            // TODO: make better xd
-            failureCallback();
-        })
-        .execute();
-}
-
 NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
