@@ -231,14 +231,14 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(
             addedHotkeys, HotkeyScope::Window, QKeySequence("Ctrl+T"),
             "newSplit", std::vector<QString>(), "default new split shortcut");
-        for (int i = 1; i < 9; i++)
+        for (int i = 0; i < 9; i++)
         {
             std::vector<QString> args;
             args.push_back(QString::number(i));
             this->tryAddDefault(
                 addedHotkeys, HotkeyScope::Window,
-                QKeySequence(QString("Ctrl+%1").arg(i)), "openTab", args,
-                QString("default select tab #%1 shortcut").arg(i));
+                QKeySequence(QString("Ctrl+%1").arg(i + 1)), "openTab", args,
+                QString("default select tab #%1 shortcut").arg(i + 1));
         }
         this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
                             QKeySequence("Ctrl+9"), "openTab",
