@@ -255,6 +255,16 @@ ExpressionPtr FilterParser::parseValue()
             return std::make_unique<ValueExpression>(this->tokenizer_.next(),
                                                      type);
         }
+        else if (type == TokenType::REGULAR_EXPRESSION)
+        {
+            auto before = this->tokenizer_.next();
+            // remove quote marks and r/ri
+            bool caseInsensitive = before.startsWith("ri");
+            auto val = before.mid(caseInsensitive ? 3 : 2);
+            val.chop(1);
+            val = val.replace("\\\"", "\"");
+            return std::make_unique<RegexExpression>(val, caseInsensitive);
+        }
         else if (type == TokenType::LP)
         {
             return this->parseParentheses();
