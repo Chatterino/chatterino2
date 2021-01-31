@@ -13,8 +13,7 @@ namespace chatterino {
 class SwitchSplitItem : public AbstractSwitcherItem
 {
 public:
-    SwitchSplitItem(Split *split);
-    SwitchSplitItem(SplitContainer *container);
+    SwitchSplitItem(SplitContainer *container, Split *split = nullptr);
 
     virtual void action() override;
 
@@ -22,8 +21,8 @@ public:
     virtual QSize sizeHint(const QRect &rect) const override;
 
 private:
-    Split *split_{};
     SplitContainer *container_{};
+    Split *split_{};
 };
 
 }  // namespace chatterino

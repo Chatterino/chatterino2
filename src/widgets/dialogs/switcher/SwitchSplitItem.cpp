@@ -7,16 +7,12 @@
 
 namespace chatterino {
 
-SwitchSplitItem::SwitchSplitItem(Split *split)
-    : AbstractSwitcherItem(QIcon(":switcher/switch.svg"))
-    , split_(split)
-{
-}
-
-SwitchSplitItem::SwitchSplitItem(SplitContainer *container)
+SwitchSplitItem::SwitchSplitItem(SplitContainer *container, Split *split)
     : AbstractSwitcherItem(QIcon(":switcher/switch.svg"))
     , container_(container)
+    , split_(split)
 {
+    assert(this->container_ != nullptr);
 }
 
 void SwitchSplitItem::action()
