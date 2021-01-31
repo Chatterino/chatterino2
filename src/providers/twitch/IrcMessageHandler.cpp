@@ -723,7 +723,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 
         QString formattedMessage = "You are timed out for ";
         formattedMessage.append(
-            formatTime(message->content().split(" ")[5].toInt()));
+            formatTime(message->content().split(" ").value(5)));
 
         builtMessages.emplace_back(makeSystemMessage(
             formattedMessage.append("."), calculateMessageTimestamp(message)));
