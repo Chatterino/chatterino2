@@ -1485,6 +1485,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         tooltipWidget->setWordWrap(isLinkValid);
         tooltipWidget->setText(element->getTooltip());
         tooltipWidget->adjustSize();
+        tooltipWidget->setWindowFlag(Qt::WindowStaysOnTopHint, true);
         tooltipWidget->show();
         tooltipWidget->raise();
     }

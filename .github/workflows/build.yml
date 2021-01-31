@@ -159,7 +159,6 @@ jobs:
             mkdir build
             cd build
             /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
-            sed -ie 's/-framework\\\ /-framework /g' Makefile
             make -j8
         shell: bash
 

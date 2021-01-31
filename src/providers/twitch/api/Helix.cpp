@@ -634,6 +634,66 @@ void Helix::getChannel(QString broadcasterId,
         .execute();
 }
 
+void Helix::createStreamMarker(
+    QString broadcasterId, QString description,
+    ResultCallback<HelixStreamMarker> successCallback,
+    std::function<void(HelixStreamMarkerError)> failureCallback)
+{
+    QJsonObject payload;
+
+    if (!description.isEmpty())
+    {
+        payload.insert("description", QJsonValue(description));
+    }
+    payload.insert("user_id", QJsonValue(broadcasterId));
+
+    this->makeRequest("streams/markers", QUrlQuery())
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback(HelixStreamMarkerError::Unknown);
+                return Failure;
+            }
+
+            HelixStreamMarker streamMarker(data.toArray()[0].toObject());
+
+            successCallback(streamMarker);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            switch (result.status())
+            {
+                case 403: {
+                    // User isn't a Channel Editor, so he can't create markers
+                    failureCallback(HelixStreamMarkerError::UserNotAuthorized);
+                }
+                break;
+
+                case 401: {
+                    // User does not have the required scope to be able to create stream markers, user must reauthenticate
+                    failureCallback(
+                        HelixStreamMarkerError::UserNotAuthenticated);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to create a stream marker: "
+                        << result.status() << result.getData();
+                    failureCallback(HelixStreamMarkerError::Unknown);
+                }
+                break;
+            }
+        })
+        .execute();
+};
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

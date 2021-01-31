@@ -37,8 +37,6 @@
 namespace chatterino {
 namespace {
 
-    const QString WINDOW_LAYOUT_FILENAME(QStringLiteral("window-layout.json"));
-
     boost::optional<bool> &shouldMoveOutOfBoundsWindow()
     {
         static boost::optional<bool> x;
@@ -46,6 +44,9 @@ namespace {
     }
 
 }  // namespace
+
+const QString WindowManager::WINDOW_LAYOUT_FILENAME(
+    QStringLiteral("window-layout.json"));
 
 using SplitNode = SplitContainer::Node;
 using SplitDirection = SplitContainer::Direction;
@@ -83,8 +84,8 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 }
 
 WindowManager::WindowManager()
-    : windowLayoutFilePath(
-          combinePath(getPaths()->settingsDirectory, WINDOW_LAYOUT_FILENAME))
+    : windowLayoutFilePath(combinePath(getPaths()->settingsDirectory,
+                                       WindowManager::WINDOW_LAYOUT_FILENAME))
 {
     qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
@@ -298,7 +299,16 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     assert(!this->initialized_);
 
     {
-        auto windowLayout = this->loadWindowLayoutFromFile();
+        WindowLayout windowLayout;
+
+        if (getArgs().customChannelLayout)
+        {
+            windowLayout = getArgs().customChannelLayout.value();
+        }
+        else
+        {
+            windowLayout = this->loadWindowLayoutFromFile();
+        }
 
         this->emotePopupPos_ = windowLayout.emotePopupPos_;
 
@@ -306,10 +316,10 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
     }
 
     // No main window has been created from loading, create an empty one
-    if (mainWindow_ == nullptr)
+    if (this->mainWindow_ == nullptr)
     {
-        mainWindow_ = &this->createWindow(WindowType::Main);
-        mainWindow_->getNotebook().addPage(true);
+        this->mainWindow_ = &this->createWindow(WindowType::Main);
+        this->mainWindow_->getNotebook().addPage(true);
     }
 
     settings.timestampFormat.connect([this](auto, auto) {

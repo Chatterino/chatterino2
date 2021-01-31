@@ -38,6 +38,7 @@ mfmarlow | https://github.com/mfmarlow | | Contributor
 dnsge | https://github.com/dnsge | | Contributor
 zneix | https://github.com/zneix | :/avatars/zneix.png | Contributor
 y0dax | https://github.com/y0dax | | Contributor
+Iulian Onofrei | https://github.com/revolter | :/avatars/revolter.jpg | Contributor
 
 # If you are a contributor add yourself above this line
 
