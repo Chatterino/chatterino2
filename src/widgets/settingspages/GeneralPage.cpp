@@ -219,7 +219,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
-    layout.addCheckbox("Show your name in input box (requires restart)", s.showNameInInput);
+    layout.addCheckbox("Show placeholder in text input box (requires restart)", s.showTextInputPlaceholder);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
     layout.addCheckbox("Allow sending duplicate messages",
                        s.allowDuplicateMessages);
