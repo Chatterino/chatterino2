@@ -74,7 +74,8 @@ public:
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
                                        ""};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
-    BoolSetting showTextInputPlaceholder = {"/appearance/showTextInputPlaceholder", true};
+    BoolSetting showTextInputPlaceholder = {
+        "/appearance/showTextInputPlaceholder", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
