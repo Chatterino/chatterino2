@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unversioned
+- Minor: Add setting for chat placeholder text. (Mm2PL/dankerino#19)
 
 <<<<<<< HEAD
 ### Dankerino
