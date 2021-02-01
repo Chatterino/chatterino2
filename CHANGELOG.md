@@ -4,6 +4,7 @@
 
 <<<<<<< HEAD
 ### Dankerino
+- Minor: Add setting for chat placeholder text. (Mm2PL/dankerino#19)
 - Major: Add Dankerino badges
 - Major: Add /settitle (Mm2PL/chatterino2#8)
 - Major: Add /setgame (Mm2PL/chatterino2#9)

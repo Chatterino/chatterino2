@@ -151,16 +151,18 @@ Split::Split(QWidget *parent)
     createShortcut(this, "Ctrl+L", &Split::clear);
 
     this->input_->ui_.textEdit->installEventFilter(parent);
-
-    // update placeheolder text on Twitch account change and channel change
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [this] {
+    if (getSettings()->showTextInputPlaceholder)
+    {
+        // update placeheolder text on Twitch account change and channel change
+        this->signalHolder_.managedConnect(
+            getApp()->accounts->twitch.currentUserChanged, [this] {
+                this->updateInputPlaceholder();
+            });
+        this->signalHolder_.managedConnect(channelChanged, [this] {
             this->updateInputPlaceholder();
         });
-    this->signalHolder_.managedConnect(channelChanged, [this] {
         this->updateInputPlaceholder();
-    });
-    this->updateInputPlaceholder();
+    }
 
     this->view_->mouseDown.connect([this](QMouseEvent *) {
         this->giveFocus(Qt::MouseFocusReason);
