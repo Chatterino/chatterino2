@@ -94,7 +94,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
             if (split->getChannel()->getName().contains(text,
                                                         Qt::CaseInsensitive))
             {
-                auto item = std::make_unique<SwitchSplitItem>(split);
+                auto item = std::make_unique<SwitchSplitItem>(sc, split);
                 this->switcherModel_.addItem(std::move(item));
 
                 // We want to continue the outer loop so we need a goto
