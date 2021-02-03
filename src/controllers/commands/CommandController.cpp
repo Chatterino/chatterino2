@@ -16,6 +16,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/CombinePath.hpp"
+#include "util/FormatTime.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -502,6 +503,78 @@ void CommandController::initialize(Settings &, Paths &paths)
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         twitchChannel->createClip();
+
+        return "";
+    });
+
+    this->registerCommand("/marker", [](const QStringList &words,
+                                        auto channel) {
+        if (!channel->isTwitchChannel())
+        {
+            return "";
+        }
+
+        // Avoid Helix calls without Client ID and/or OAuth Token
+        if (getApp()->accounts->twitch.getCurrent()->isAnon())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You need to be logged in to create stream markers!"));
+            return "";
+        }
+
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+
+        // Exact same message as in webchat
+        if (!twitchChannel->isLive())
+        {
+            channel->addMessage(makeSystemMessage(
+                "You can only add stream markers during live streams. Try "
+                "again when the channel is live streaming."));
+            return "";
+        }
+
+        auto arguments = words;
+        arguments.removeFirst();
+
+        getHelix()->createStreamMarker(
+            // Limit for description is 140 characters, webchat just crops description
+            // if it's >140 characters, so we're doing the same thing
+            twitchChannel->roomId(), arguments.join(" ").left(140),
+            [channel, arguments](const HelixStreamMarker &streamMarker) {
+                channel->addMessage(makeSystemMessage(
+                    QString("Successfully added a stream marker at %1%2")
+                        .arg(formatTime(streamMarker.positionSeconds))
+                        .arg(streamMarker.description.isEmpty()
+                                 ? ""
+                                 : QString(": \"%1\"")
+                                       .arg(streamMarker.description))));
+            },
+            [channel](auto error) {
+                QString errorMessage("Failed to create stream marker - ");
+
+                switch (error)
+                {
+                    case HelixStreamMarkerError::UserNotAuthorized: {
+                        errorMessage +=
+                            "you don't have permission to perform that action.";
+                    }
+                    break;
+
+                    case HelixStreamMarkerError::UserNotAuthenticated: {
+                        errorMessage += "you need to re-authenticate.";
+                    }
+                    break;
+
+                    // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                    case HelixStreamMarkerError::Unknown:
+                    default: {
+                        errorMessage += "an unknown error occurred.";
+                    }
+                    break;
+                }
+
+                channel->addMessage(makeSystemMessage(errorMessage));
+            });
 
         return "";
     });

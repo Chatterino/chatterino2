@@ -165,6 +165,21 @@ struct HelixChannel {
     }
 };
 
+struct HelixStreamMarker {
+    QString createdAt;
+    QString description;
+    QString id;
+    int positionSeconds;
+
+    explicit HelixStreamMarker(QJsonObject jsonObject)
+        : createdAt(jsonObject.value("created_at").toString())
+        , description(jsonObject.value("description").toString())
+        , id(jsonObject.value("id").toString())
+        , positionSeconds(jsonObject.value("position_seconds").toInt())
+    {
+    }
+};
+
 struct HelixIgnore {
     QString userId;
     QString userName;
@@ -181,6 +196,12 @@ struct HelixIgnore {
 enum class HelixClipError {
     Unknown,
     ClipsDisabled,
+    UserNotAuthenticated,
+};
+
+enum class HelixStreamMarkerError {
+    Unknown,
+    UserNotAuthorized,
     UserNotAuthenticated,
 };
 
@@ -254,6 +275,12 @@ public:
     void getChannel(QString broadcasterId,
                     ResultCallback<HelixChannel> successCallback,
                     HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference/#create-stream-marker
+    void createStreamMarker(
+        QString broadcasterId, QString description,
+        ResultCallback<HelixStreamMarker> successCallback,
+        std::function<void(HelixStreamMarkerError)> failureCallback);
 
     // https://dev.twitch.tv/docs/api/reference#get-user-block-list
     void loadIgnores(QString userId,

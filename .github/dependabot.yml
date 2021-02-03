@@ -7,8 +7,9 @@ updates:
     labels:
       - "ci"
   - package-ecosystem: "gitsubmodule"
-    directory: "/3rdParty"
+    directory: "/"
     schedule:
       interval: "daily"
     labels:
+      - "ci"
       - "submodules"

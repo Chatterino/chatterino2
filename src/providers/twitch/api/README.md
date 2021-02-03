@@ -61,7 +61,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-streams
 URL: https://dev.twitch.tv/docs/api/reference#create-user-follows  
 Requires `user:edit:follows` scope
 
- * We implement this in `providers/twitch/api/Helix.cpp followUser`
+ * We implement this in `providers/twitch/api/Helix.cpp followUser`  
    Used in:
      * `widgets/dialogs/UserInfoPopup.cpp` to follow a user by ticking follow checkbox in usercard
      * `controllers/commands/CommandController.cpp` in /follow command
@@ -70,7 +70,7 @@ Requires `user:edit:follows` scope
 URL: https://dev.twitch.tv/docs/api/reference#delete-user-follows  
 Requires `user:edit:follows` scope
 
- * We implement this in `providers/twitch/api/Helix.cpp unfollowUser`
+ * We implement this in `providers/twitch/api/Helix.cpp unfollowUser`  
    Used in:
      * `widgets/dialogs/UserInfoPopup.cpp` to unfollow a user by unticking follow checkbox in usercard
      * `controllers/commands/CommandController.cpp` in /unfollow command
@@ -79,7 +79,7 @@ Requires `user:edit:follows` scope
 URL: https://dev.twitch.tv/docs/api/reference#create-clip  
 Requires `clips:edit` scope
 
- * We implement this in `providers/twitch/api/Helix.cpp createClip`
+ * We implement this in `providers/twitch/api/Helix.cpp createClip`  
    Used in:
      * `TwitchChannel` to create a clip of a live broadcast
 
@@ -89,6 +89,14 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
  * We implement this in `providers/twitch/api/Helix.cpp getChannel`
    Used in:
      * `TwitchChannel` to refresh stream title
+
+### Create Stream Marker
+URL: https://dev.twitch.tv/docs/api/reference/#create-stream-marker  
+Requires `user:edit:broadcast` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp createStreamMarker`  
+   Used in:
+     * `controllers/commands/CommandController.cpp` in /marker command
 
 ### Get User Block List
 URL: https://dev.twitch.tv/docs/api/reference#get-user-block-list
