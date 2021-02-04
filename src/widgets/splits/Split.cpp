@@ -199,21 +199,118 @@ Split::Split(QWidget *parent)
                  qCDebug(chatterinoHotkeys) << "Unknown scroll direction";
              }
          }},
+        {"pickFilters",
+         [this](std::vector<QString>) {
+             this->setFiltersDialog();
+         }},
+        {"startWatching",
+         [this](std::vector<QString>) {
+             this->startWatching();
+         }},
+        {"openInBrowser",
+         [this](std::vector<QString>) {
+             if (this->getChannel()->getType() == Channel::Type::TwitchWhispers)
+             {
+                 this->openWhispersInBrowser();
+             }
+             else
+             {
+                 this->openInBrowser();
+             }
+         }},
+        {"openInStreamlink",
+         [this](std::vector<QString>) {
+             this->openInStreamlink();
+         }},
+        {"openInCustomPlayer",
+         [this](std::vector<QString>) {
+             this->openWithCustomScheme();
+         }},
+        {"openModView",
+         [this](std::vector<QString>) {
+             this->openModViewInBrowser();
+         }},
+        {"createClip",
+         [this](std::vector<QString>) {  // Alt+X: create clip LUL
+             if (!this->getChannel()->isTwitchChannel())
+             {
+                 return;
+             }
+
+             auto *twitchChannel =
+                 dynamic_cast<TwitchChannel *>(this->getChannel().get());
+
+             twitchChannel->createClip();
+         }},
+        {"reloadEmotes",
+         [this](std::vector<QString> arguments) {
+             auto reloadChannel = true;
+             auto reloadSubscriber = true;
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "channel")
+                 {
+                     reloadSubscriber = false;
+                 }
+                 else if (arg == "subscriber")
+                 {
+                     reloadChannel = false;
+                 }
+             }
+
+             if (reloadChannel)
+             {
+                 this->header_->reloadChannelEmotes();
+             }
+             if (reloadSubscriber)
+             {
+                 this->header_->reloadSubscriberEmotes();
+             }
+         }},
+        {"setModerationMode",
+         [this](std::vector<QString> arguments) {
+             auto mode = 2;
+             // 0 is off
+             // 1 is on
+             // 2 is toggle
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "off")
+                 {
+                     mode = 0;
+                 }
+                 else if (arg == "on")
+                 {
+                     mode = 1;
+                 }
+                 else
+                 {
+                     mode = 2;
+                 }
+             }
+
+             if (mode == 0)
+             {
+                 this->setModerationMode(false);
+             }
+             else if (mode == 1)
+             {
+                 this->setModerationMode(true);
+             }
+             else
+             {
+                 this->setModerationMode(!this->getModerationMode());
+             }
+         }},
+        {"openViewerList",
+         [this](std::vector<QString>) {
+             this->showViewerList();
+         }},
     };  // TODO: move rest
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
                                                             splitActions, this);
-    // Alt+X: create clip LUL
-    createShortcut(this, "Alt+X", [this] {
-        if (!this->getChannel()->isTwitchChannel())
-        {
-            return;
-        }
-
-        auto *twitchChannel =
-            dynamic_cast<TwitchChannel *>(this->getChannel().get());
-
-        twitchChannel->createClip();
-    });
 
     // xd
     // CreateShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
@@ -901,6 +998,22 @@ void Split::copyToClipboard()
     crossPlatformCopy(this->view_->getSelectedText());
 }
 
+void Split::startWatching()
+{
+#ifdef USEWEBENGINE
+    ChannelPtr _channel = this->getChannel();
+    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
+
+    if (tc != nullptr)
+    {
+        StreamView *view = new StreamView(
+            _channel,
+            "https://player.twitch.tv/?parent=twitch.tv&channel=" + tc->name);
+        view->setAttribute(Qt::WA_DeleteOnClose, true);
+        view->show();
+    }
+#endif
+}
 void Split::setFiltersDialog()
 {
     SelectChannelFiltersDialog d(this->getFilters(), this);

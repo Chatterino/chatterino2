@@ -139,6 +139,7 @@ public slots:
     void openInStreamlink();
     void openWithCustomScheme();
     void copyToClipboard();
+    void startWatching();
     void setFiltersDialog();
     void showSearch();
     void showViewerList();
