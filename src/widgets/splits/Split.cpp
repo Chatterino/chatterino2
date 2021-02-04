@@ -308,6 +308,10 @@ Split::Split(QWidget *parent)
          [this](std::vector<QString>) {
              this->showViewerList();
          }},
+        {"clearMessages",
+         [this](std::vector<QString>) {
+             this->clear();
+         }},
     };  // TODO: move rest
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
                                                             splitActions, this);
