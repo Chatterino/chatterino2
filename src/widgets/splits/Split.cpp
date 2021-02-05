@@ -272,6 +272,10 @@ Split::Split(QWidget *parent)
          }},
         {"setModerationMode",
          [this](std::vector<QString> arguments) {
+             if (!this->getChannel()->isTwitchChannel())
+             {
+                 return;
+             }
              auto mode = 2;
              // 0 is off
              // 1 is on
@@ -328,6 +332,10 @@ Split::Split(QWidget *parent)
          }},
         {"setChannelNotification",
          [this](std::vector<QString> arguments) {
+             if (!this->getChannel()->isTwitchChannel())
+             {
+                 return;
+             }
              auto mode = 2;
              // 0 is off
              // 1 is on
