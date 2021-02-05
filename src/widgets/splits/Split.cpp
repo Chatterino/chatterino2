@@ -6,6 +6,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
@@ -311,6 +312,18 @@ Split::Split(QWidget *parent)
         {"clearMessages",
          [this](std::vector<QString>) {
              this->clear();
+         }},
+        {"runCommand",
+         [this](std::vector<QString> arguments) {
+             if (arguments.size() == 0)
+             {
+                 qCDebug(chatterinoHotkeys)
+                     << "runCommand hotkey called without arguments!";
+                 return;
+             }
+             QString command = getApp()->commands->execCommand(
+                 arguments.at(0).replace('\n', ' '), this->getChannel(), false);
+             this->getChannel()->sendMessage(command);
          }},
     };  // TODO: move rest
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
