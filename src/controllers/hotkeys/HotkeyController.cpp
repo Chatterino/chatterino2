@@ -132,6 +132,11 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("F10"), "debug",
                             std::vector<QString>(), "default debug shortcut");
 
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
+                            QKeySequence("Alt+x"), "createClip",
+                            std::vector<QString>(),
+                            "default create clip shortcut");
+
         {
             std::vector<QString> args;
             args.push_back("left");
