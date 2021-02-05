@@ -93,7 +93,7 @@ void HotkeyController::loadHotkeys()
             continue;
         }
         auto scope = hotkeyScopeFromName(scopeName);
-        if (!scope.has_value())
+        if (!scope)
         {
             continue;
         }
