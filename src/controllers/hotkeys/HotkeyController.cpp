@@ -6,6 +6,46 @@
 #include <QShortcut>
 
 namespace chatterino {
+namespace {
+    boost::optional<HotkeyScope> hotkeyScopeFromName(QString scopeName)
+    {
+        HotkeyScope scope;
+        if (scopeName == "tab")
+        {
+            scope = HotkeyScope::Tab;
+        }
+        else if (scopeName == "split")
+        {
+            scope = HotkeyScope::Split;
+        }
+        else if (scopeName == "splitInput")
+        {
+            scope = HotkeyScope::SplitInput;
+        }
+        else if (scopeName == "window")
+        {
+            scope = HotkeyScope::Window;
+        }
+        else if (scopeName == "userCard")
+        {
+            scope = HotkeyScope::UserCard;
+        }
+        else if (scopeName == "settings")
+        {
+            scope = HotkeyScope::Settings;
+        }
+        else if (scopeName == "emotePopup")
+        {
+            scope = HotkeyScope::EmotePopup;
+        }
+        else
+        {
+            qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
+            return {};
+        }
+        return scope;
+    }
+}  // namespace
 HotkeyController::HotkeyController()
 {
     this->loadHotkeys();
@@ -52,42 +92,13 @@ void HotkeyController::loadHotkeys()
         {
             continue;
         }
-        HotkeyScope scope;
-        if (scopeName == "tab")
+        auto scope = hotkeyScopeFromName(scopeName);
+        if (!scope.has_value())
         {
-            scope = HotkeyScope::Tab;
-        }
-        else if (scopeName == "split")
-        {
-            scope = HotkeyScope::Split;
-        }
-        else if (scopeName == "splitInput")
-        {
-            scope = HotkeyScope::SplitInput;
-        }
-        else if (scopeName == "window")
-        {
-            scope = HotkeyScope::Window;
-        }
-        else if (scopeName == "userCard")
-        {
-            scope = HotkeyScope::UserCard;
-        }
-        else if (scopeName == "settings")
-        {
-            scope = HotkeyScope::Settings;
-        }
-        else if (scopeName == "emotePopup")
-        {
-            scope = HotkeyScope::EmotePopup;
-        }
-        else
-        {
-            qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
             continue;
         }
         this->hotkeys_.append(
-            std::make_shared<Hotkey>(scope, QKeySequence(keySequence), action,
+            std::make_shared<Hotkey>(*scope, QKeySequence(keySequence), action,
                                      arguments, QString::fromStdString(key)));
     }
 }
