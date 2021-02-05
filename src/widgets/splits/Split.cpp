@@ -8,6 +8,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/notifications/NotificationController.hpp"
 #include "providers/twitch/EmoteValue.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -324,6 +325,45 @@ Split::Split(QWidget *parent)
              QString command = getApp()->commands->execCommand(
                  arguments.at(0).replace('\n', ' '), this->getChannel(), false);
              this->getChannel()->sendMessage(command);
+         }},
+        {"setChannelNotification",
+         [this](std::vector<QString> arguments) {
+             auto mode = 2;
+             // 0 is off
+             // 1 is on
+             // 2 is toggle
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "off")
+                 {
+                     mode = 0;
+                 }
+                 else if (arg == "on")
+                 {
+                     mode = 1;
+                 }
+                 else
+                 {
+                     mode = 2;
+                 }
+             }
+
+             if (mode == 0)
+             {
+                 getApp()->notifications->removeChannelNotification(
+                     this->getChannel()->getName(), Platform::Twitch);
+             }
+             else if (mode == 1)
+             {
+                 getApp()->notifications->addChannelNotification(
+                     this->getChannel()->getName(), Platform::Twitch);
+             }
+             else
+             {
+                 getApp()->notifications->updateChannelNotification(
+                     this->getChannel()->getName(), Platform::Twitch);
+             }
          }},
     };  // TODO: move rest
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
