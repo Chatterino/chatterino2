@@ -298,7 +298,7 @@ void SplitInput::installKeyPressedEvent()
     this->shortcuts_ = app->hotkeys->shortcutsForScope(HotkeyScope::SplitInput,
                                                        splitInputActions, this);
 
-    this->ui_.textEdit->keyPressed.connect([this, app](QKeyEvent *event) {
+    this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
         if (auto popup = this->emoteInputPopup_.get())
         {
             if (popup->isVisible())
@@ -412,22 +412,6 @@ void SplitInput::installKeyPressedEvent()
                 event->accept();
             }
         }
-        /*
-        else if (event->key() == Qt::Key_PageUp)
-        {
-            auto &scrollbar = this->split_->getChannelView().getScrollBar();
-            scrollbar.offset(-scrollbar.getLargeChange());
-
-            event->accept();
-        }
-        else if (event->key() == Qt::Key_PageDown)
-        {
-            auto &scrollbar = this->split_->getChannelView().getScrollBar();
-            scrollbar.offset(scrollbar.getLargeChange());
-
-            event->accept();
-        }
-        */
     });
 }
 
