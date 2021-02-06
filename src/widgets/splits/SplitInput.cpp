@@ -259,6 +259,39 @@ void SplitInput::installKeyPressedEvent()
              [this](std::vector<QString>) {
                  this->openEmotePopup();
              }},
+            {"sendMessage",
+             [this](std::vector<QString> arguments) {
+                 auto c = this->split_->getChannel();
+                 if (c == nullptr)
+                     return;
+
+                 QString message = ui_.textEdit->toPlainText();
+
+                 message = message.replace('\n', ' ');
+                 QString sendMessage =
+                     getApp()->commands->execCommand(message, c, false);
+
+                 c->sendMessage(sendMessage);
+                 // don't add duplicate messages and empty message to message history
+                 if ((this->prevMsg_.isEmpty() ||
+                      !this->prevMsg_.endsWith(message)) &&
+                     !message.trimmed().isEmpty())
+                 {
+                     this->prevMsg_.append(message);
+                 }
+                 bool shouldClearInput = true;
+                 if (arguments.size() != 0 && arguments.at(0) == "keepInput")
+                 {
+                     shouldClearInput = false;
+                 }
+
+                 if (shouldClearInput)
+                 {
+                     this->currMsg_ = QString();
+                     this->ui_.textEdit->setPlainText(QString());
+                 }
+                 this->prevIndex_ = this->prevMsg_.size();
+             }},
         };
 
     this->shortcuts_ = app->hotkeys->shortcutsForScope(HotkeyScope::SplitInput,
@@ -277,35 +310,7 @@ void SplitInput::installKeyPressedEvent()
             }
         }
 
-        if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
-        {
-            auto c = this->split_->getChannel();
-            if (c == nullptr)
-                return;
-
-            QString message = ui_.textEdit->toPlainText();
-
-            message = message.replace('\n', ' ');
-            QString sendMessage = app->commands->execCommand(message, c, false);
-
-            c->sendMessage(sendMessage);
-            // don't add duplicate messages and empty message to message history
-            if ((this->prevMsg_.isEmpty() ||
-                 !this->prevMsg_.endsWith(message)) &&
-                !message.trimmed().isEmpty())
-            {
-                this->prevMsg_.append(message);
-            }
-
-            event->accept();
-            if (!(event->modifiers() & Qt::ControlModifier))
-            {
-                this->currMsg_ = QString();
-                this->ui_.textEdit->setPlainText(QString());
-            }
-            this->prevIndex_ = this->prevMsg_.size();
-        }
-        else if (event->key() == Qt::Key_Up)
+        if (event->key() == Qt::Key_Up)
         {
             if ((event->modifiers() & Qt::ShiftModifier) != 0)
             {
