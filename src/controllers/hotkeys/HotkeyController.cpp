@@ -210,15 +210,15 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
             std::vector<QString> args;
             args.push_back("up");
             this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
-                                QKeySequence("PageUp"), "scrollPage", args,
-                                "default page up shortcut");
+                                QKeySequence("PgUp"), "scrollPage", args,
+                                "default scroll page up shortcut");
         }
         {
             std::vector<QString> args;
             args.push_back("down");
             this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
-                                QKeySequence("PageDown"), "scrollPage", args,
-                                "default page down shortcut");
+                                QKeySequence("PgDown"), "scrollPage", args,
+                                "default scroll page down shortcut");
         }
     }
 
