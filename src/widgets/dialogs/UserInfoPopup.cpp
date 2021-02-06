@@ -416,59 +416,64 @@ void UserInfoPopup::installEvents()
     std::shared_ptr<bool> ignoreNext = std::make_shared<bool>(false);
 
     // ignore
-    QObject::connect(this->ui_.ignore, &QCheckBox::stateChanged,
-                     [this, ignoreNext, hack](int) mutable {
-                         if (*ignoreNext)
-                         {
-                             *ignoreNext = false;
-                             return;
-                         }
+    QObject::connect(
+        this->ui_.ignore, &QCheckBox::stateChanged,
+        [this, ignoreNext, hack](int) mutable {
+            if (*ignoreNext)
+            {
+                *ignoreNext = false;
+                return;
+            }
 
-                         this->ui_.ignore->setEnabled(false);
+            this->ui_.ignore->setEnabled(false);
 
-                         auto currentUser =
-                             getApp()->accounts->twitch.getCurrent();
-                         if (this->ui_.ignore->isChecked())
-                         {
-                             getHelix()->blockUser(
-                                 this->userId_,
-                                 [this, hack, currentUser] {
-                                     this->channel_->addMessage(
-                                         makeSystemMessage("ignore success"));
-                                     if (hack.lock())
-                                     {
-                                         this->ui_.ignore->setEnabled(true);
-                                     }
-                                     currentUser->loadIgnores();
-                                 },
-                                 [this, ignoreNext] {
-                                     this->channel_->addMessage(
-                                         makeSystemMessage("ignore fail"));
-                                     *ignoreNext = true;
-                                     this->ui_.ignore->setChecked(false);
-                                 });
-                         }
-                         else
-                         {
-                             getHelix()->unblockUser(
-                                 this->userId_,
-                                 [this, hack, currentUser] {
-                                     this->channel_->addMessage(
-                                         makeSystemMessage("unignore success"));
-                                     if (hack.lock())
-                                     {
-                                         this->ui_.ignore->setEnabled(true);
-                                     }
-                                     currentUser->loadIgnores();
-                                 },
-                                 [this, ignoreNext] {
-                                     this->channel_->addMessage(
-                                         makeSystemMessage("unignore fail"));
-                                     *ignoreNext = true;
-                                     this->ui_.ignore->setEnabled(true);
-                                 });
-                         }
-                     });
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+            if (this->ui_.ignore->isChecked())
+            {
+                getHelix()->blockUser(
+                    this->userId_,
+                    [this, hack, currentUser] {
+                        this->channel_->addMessage(makeSystemMessage(
+                            QString("You successfully ignored user %1")
+                                .arg(this->userName_)));
+                        if (hack.lock())
+                        {
+                            this->ui_.ignore->setEnabled(true);
+                        }
+                        currentUser->loadIgnores();
+                    },
+                    [this, ignoreNext] {
+                        this->channel_->addMessage(makeSystemMessage(
+                            QString("User %1 couldn't be ignored, an unknown "
+                                    "error occurred!")
+                                .arg(this->userName_)));
+                        *ignoreNext = true;
+                        this->ui_.ignore->setChecked(false);
+                    });
+            }
+            else
+            {
+                getHelix()->unblockUser(
+                    this->userId_,
+                    [this, hack, currentUser] {
+                        this->channel_->addMessage(makeSystemMessage(
+                            QString("You successfully unignored user %1")
+                                .arg(this->userName_)));
+                        if (hack.lock())
+                        {
+                            this->ui_.ignore->setEnabled(true);
+                        }
+                        currentUser->loadIgnores();
+                    },
+                    [this, ignoreNext] {
+                        this->channel_->addMessage(makeSystemMessage(
+                            QString("User %1 couldn't be unignored, an unknown "
+                                    "error occurred!")));
+                        *ignoreNext = true;
+                        this->ui_.ignore->setEnabled(true);
+                    });
+            }
+        });
 
     // ignore highlights
     QObject::connect(

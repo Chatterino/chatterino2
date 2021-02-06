@@ -287,8 +287,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                     },
                     [channel, target] {
                         channel->addMessage(makeSystemMessage(
-                            QString("User %1 couldn't be ignored, some kind of "
-                                    "GOW error occured!")
+                            QString("User %1 couldn't be ignored, an unknown "
+                                    "error occurred!")
                                 .arg(target)));
                     });
             },
@@ -333,8 +333,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                     },
                     [channel, target] {
                         channel->addMessage(makeSystemMessage(
-                            QString("User %1 couldn't be unignored, some kind "
-                                    "of GOW error occured!")
+                            QString("User %1 couldn't be unignored, an unknown "
+                                    "error occurred!")
                                 .arg(target)));
                     });
             },
