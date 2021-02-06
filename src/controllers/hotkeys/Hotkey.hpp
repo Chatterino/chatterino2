@@ -30,15 +30,6 @@ public:
     QString toPortableString() const;
 
     /**
-     * @brief Returns the programmating key sequence of the hotkey
-     *
-     * The actual key codes required for the hotkey to trigger specifically on e.g CTRL+F5
-     *
-     * TODO: Does this need to be public?
-     */
-    const QKeySequence &keySequence() const;
-
-    /**
      * @brief Returns the scope where this hotkey is active
      *
      * See enum HotkeyScope for more information about the various hotkey scopes
@@ -73,21 +64,29 @@ public:
      */
     QString getCategory() const;
 
-    /**
-     * @brief Returns the programmatic context of the hotkey to help Qt decide how to apply the hotkey
-     *
-     * The returned value is based off the hotkeys given scope
-     *
-     * TODO: Does this need to be public?
-     */
-    Qt::ShortcutContext getContext() const;
-
+protected:
 private:
     HotkeyScope scope_;
     QKeySequence keySequence_;
     QString action_;
     std::vector<QString> arguments_;
     QString name_;
+
+    /**
+     * @brief Returns the programmating key sequence of the hotkey
+     *
+     * The actual key codes required for the hotkey to trigger specifically on e.g CTRL+F5
+     */
+    const QKeySequence &keySequence() const;
+
+    /**
+     * @brief Returns the programmatic context of the hotkey to help Qt decide how to apply the hotkey
+     *
+     * The returned value is based off the hotkeys given scope
+     */
+    Qt::ShortcutContext getContext() const;
+
+    friend class HotkeyController;
 };
 
 }  // namespace chatterino
