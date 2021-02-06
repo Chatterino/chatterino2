@@ -321,6 +321,15 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
                 QKeySequence("Shift+End"), "jumpCursor", args,
                 "default go to end of input with selection shortcut");
         }
+
+        this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                            QKeySequence("Up"), "previousMessage",
+                            std::vector<QString>(),
+                            "default previous message shortcut");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                            QKeySequence("Down"), "nextMessage",
+                            std::vector<QString>(),
+                            "default next message shortcut");
     }
 
     // user card
