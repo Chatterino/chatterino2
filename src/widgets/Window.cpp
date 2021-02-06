@@ -27,12 +27,10 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#ifdef C_DEBUG
-#    include <rapidjson/document.h>
-#    include "providers/twitch/PubsubClient.hpp"
-#    include "util/SampleCheerMessages.hpp"
-#    include "util/SampleLinks.hpp"
-#endif
+#include <rapidjson/document.h>
+#include "providers/twitch/PubsubClient.hpp"
+#include "util/SampleCheerMessages.hpp"
+#include "util/SampleLinks.hpp"
 
 #include <QApplication>
 #include <QDesktopServices>
@@ -51,7 +49,6 @@ Window::Window(WindowType type)
     , notebook_(new SplitNotebook(this))
 {
     this->addCustomTitlebarButtons();
-    this->addDebugStuff();
     this->addShortcuts();
     this->addLayout();
 
@@ -178,9 +175,9 @@ void Window::addCustomTitlebarButtons()
     this->userLabel_->setMinimumWidth(20 * scale());
 }
 
-void Window::addDebugStuff()
+void Window::addDebugStuff(
+    std::map<QString, std::function<void(std::vector<QString>)>> &actions)
 {
-#ifdef C_DEBUG
     std::vector<QString> cheerMessages, subMessages, miscMessages, linkMessages,
         emoteTestMessages;
 
@@ -237,58 +234,57 @@ void Window::addDebugStuff()
 	emoteTestMessages.emplace_back(R"(@badge-info=subscriber/34;badges=moderator/1,subscriber/24;color=#FF0000;display-name=테스트계정420;emotes=41:6-13,15-22;flags=;id=a3196c7e-be4c-4b49-9c5a-8b8302b50c2a;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1590922213730;turbo=0;user-id=117166826;user-type=mod :testaccount_420!testaccount_420@testaccount_420.tmi.twitch.tv PRIVMSG #pajlada :-tags Kreygasm,Kreygasm (no space))");
     // clang-format on
 
-    createWindowShortcut(this, "F6", [=] {
-        const auto &messages = miscMessages;
-        static int index = 0;
-        auto app = getApp();
-        const auto &msg = messages[index++ % messages.size()];
-        app->twitch.server->addFakeMessage(msg);
-    });
+    actions.insert({"addMiscMessage", [=](std::vector<QString>) {
+                        const auto &messages = miscMessages;
+                        static int index = 0;
+                        auto app = getApp();
+                        const auto &msg = messages[index++ % messages.size()];
+                        app->twitch.server->addFakeMessage(msg);
+                    }});
 
-    createWindowShortcut(this, "F7", [=] {
-        const auto &messages = cheerMessages;
-        static int index = 0;
-        const auto &msg = messages[index++ % messages.size()];
-        getApp()->twitch.server->addFakeMessage(msg);
-    });
+    actions.insert({"addCheerMessage", [=](std::vector<QString>) {
+                        const auto &messages = cheerMessages;
+                        static int index = 0;
+                        const auto &msg = messages[index++ % messages.size()];
+                        getApp()->twitch.server->addFakeMessage(msg);
+                    }});
 
-    createWindowShortcut(this, "F8", [=] {
-        const auto &messages = linkMessages;
-        static int index = 0;
-        auto app = getApp();
-        const auto &msg = messages[index++ % messages.size()];
-        app->twitch.server->addFakeMessage(msg);
-    });
+    actions.insert({"addLinkMessage", [=](std::vector<QString>) {
+                        const auto &messages = linkMessages;
+                        static int index = 0;
+                        auto app = getApp();
+                        const auto &msg = messages[index++ % messages.size()];
+                        app->twitch.server->addFakeMessage(msg);
+                    }});
 
-    createWindowShortcut(this, "F9", [=] {
-        rapidjson::Document doc;
-        auto app = getApp();
-        static bool alt = true;
-        if (alt)
-        {
-            doc.Parse(channelRewardMessage);
-            app->twitch.server->addFakeMessage(channelRewardIRCMessage);
-            app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
-                doc["data"]["message"]["data"]["redemption"]);
-            alt = !alt;
-        }
-        else
-        {
-            doc.Parse(channelRewardMessage2);
-            app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
-                doc["data"]["message"]["data"]["redemption"]);
-            alt = !alt;
-        }
-    });
+    actions.insert(
+        {"addRewardMessage", [=](std::vector<QString>) {
+             rapidjson::Document doc;
+             auto app = getApp();
+             static bool alt = true;
+             if (alt)
+             {
+                 doc.Parse(channelRewardMessage);
+                 app->twitch.server->addFakeMessage(channelRewardIRCMessage);
+                 app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
+                     doc["data"]["message"]["data"]["redemption"]);
+                 alt = !alt;
+             }
+             else
+             {
+                 doc.Parse(channelRewardMessage2);
+                 app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
+                     doc["data"]["message"]["data"]["redemption"]);
+                 alt = !alt;
+             }
+         }});
 
-    createWindowShortcut(this, "F11", [=] {
-        const auto &messages = emoteTestMessages;
-        static int index = 0;
-        const auto &msg = messages[index++ % messages.size()];
-        getApp()->twitch.server->addFakeMessage(msg);
-    });
-
-#endif
+    actions.insert({"addEmoteMessage", [=](std::vector<QString>) {
+                        const auto &messages = emoteTestMessages;
+                        static int index = 0;
+                        const auto &msg = messages[index++ % messages.size()];
+                        getApp()->twitch.server->addFakeMessage(msg);
+                    }});
 }  // namespace chatterino
 
 void Window::addShortcuts()
@@ -420,6 +416,7 @@ void Window::addShortcuts()
              quickSwitcher->show();
          }},
     };
+    this->addDebugStuff(windowActions);
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::Window, windowActions, this);
 }

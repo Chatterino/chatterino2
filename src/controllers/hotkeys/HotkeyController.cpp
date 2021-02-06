@@ -423,6 +423,28 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("Ctrl+K"), "openQuickSwitcher",
                             std::vector<QString>(),
                             "default open quick switcher shortcut");
+#ifdef C_DEBUG
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence("F6"), "addMiscMessage",
+                            std::vector<QString>(),
+                            "default debug add misc message shortcut");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence("F7"), "addCheerMessage",
+                            std::vector<QString>(),
+                            "default debug add cheer message shortcut");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence("F8"), "addLinkMessage",
+                            std::vector<QString>(),
+                            "default debug add link message shortcut");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence("F9"), "addRewardMessage",
+                            std::vector<QString>(),
+                            "default debug add reward message shortcut");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence("F10"), "addEmoteMessage",
+                            std::vector<QString>(),
+                            "default debug add emote message shortcut");
+#endif
     }
 
     // settings
