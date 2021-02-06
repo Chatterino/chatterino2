@@ -220,6 +220,10 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
                                 QKeySequence("PgDown"), "scrollPage", args,
                                 "default scroll page down shortcut");
         }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
+                            QKeySequence("Ctrl+End"), "scrollToBottom",
+                            std::vector<QString>(),
+                            "default scroll to bottom shortcut");
     }
 
     // split input
@@ -229,53 +233,93 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
                             std::vector<QString>(),
                             "default emote picker shortcut");
 
-        this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                            QKeySequence("Enter"), "sendMessage",
-                            std::vector<QString>(),
-                            "default send message shortcut");
+        // all variations of send message :)
         {
-            std::vector<QString> args;
-            args.push_back("keepInput");
             this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                                QKeySequence("Ctrl+Enter"), "sendMessage", args,
-                                "default send message and keep text shortcut");
-        }
-        this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                            QKeySequence("Return"), "sendMessage",
-                            std::vector<QString>(),
-                            "default send message shortcut 2");
-        {
-            std::vector<QString> args;
-            args.push_back("keepInput");
-            this->tryAddDefault(
-                addedHotkeys, HotkeyScope::SplitInput,
-                QKeySequence("Ctrl+Return"), "sendMessage", args,
-                "default send message and keep text shortcut 2");
+                                QKeySequence("Enter"), "sendMessage",
+                                std::vector<QString>(),
+                                "default send message shortcut");
+            {
+                std::vector<QString> args;
+                args.push_back("keepInput");
+                this->tryAddDefault(
+                    addedHotkeys, HotkeyScope::SplitInput,
+                    QKeySequence("Ctrl+Enter"), "sendMessage", args,
+                    "default send message and keep text shortcut");
+            }
+            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                                QKeySequence("Return"), "sendMessage",
+                                std::vector<QString>(),
+                                "default send message shortcut 2");
+            {
+                std::vector<QString> args;
+                args.push_back("keepInput");
+                this->tryAddDefault(
+                    addedHotkeys, HotkeyScope::SplitInput,
+                    QKeySequence("Ctrl+Return"), "sendMessage", args,
+                    "default send message and keep text shortcut 2");
+            }
+
+            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                                QKeySequence("Shift+Enter"), "sendMessage",
+                                std::vector<QString>(),
+                                "default send message shortcut 3");
+            {
+                std::vector<QString> args;
+                args.push_back("keepInput");
+                this->tryAddDefault(
+                    addedHotkeys, HotkeyScope::SplitInput,
+                    QKeySequence("Ctrl+Shift+Enter"), "sendMessage", args,
+                    "default send message and keep text shortcut 3");
+            }
+            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                                QKeySequence("Shift+Return"), "sendMessage",
+                                std::vector<QString>(),
+                                "default send message shortcut 4");
+            {
+                std::vector<QString> args;
+                args.push_back("keepInput");
+                this->tryAddDefault(
+                    addedHotkeys, HotkeyScope::SplitInput,
+                    QKeySequence("Ctrl+Shift+Return"), "sendMessage", args,
+                    "default send message and keep text shortcut 4");
+            }
         }
 
-        this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                            QKeySequence("Shift+Enter"), "sendMessage",
-                            std::vector<QString>(),
-                            "default send message shortcut 3");
         {
             std::vector<QString> args;
-            args.push_back("keepInput");
-            this->tryAddDefault(
-                addedHotkeys, HotkeyScope::SplitInput,
-                QKeySequence("Ctrl+Shift+Enter"), "sendMessage", args,
-                "default send message and keep text shortcut 3");
+            args.push_back("start");
+            args.push_back("withoutSelection");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                                QKeySequence("Home"), "jumpCursor", args,
+                                "default go to start of input shortcut");
         }
-        this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                            QKeySequence("Shift+Return"), "sendMessage",
-                            std::vector<QString>(),
-                            "default send message shortcut 4");
         {
             std::vector<QString> args;
-            args.push_back("keepInput");
+            args.push_back("end");
+            args.push_back("withoutSelection");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                                QKeySequence("End"), "jumpCursor", args,
+                                "default go to end of input shortcut");
+        }
+
+        {
+            std::vector<QString> args;
+            args.push_back("start");
+            args.push_back("withSelection");
             this->tryAddDefault(
                 addedHotkeys, HotkeyScope::SplitInput,
-                QKeySequence("Ctrl+Shift+Return"), "sendMessage", args,
-                "default send message and keep text shortcut 4");
+                QKeySequence("Shift+Home"), "jumpCursor", args,
+                "default go to start of input with selection shortcut");
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("end");
+            args.push_back("withSelection");
+            this->tryAddDefault(
+                addedHotkeys, HotkeyScope::SplitInput,
+                QKeySequence("Shift+End"), "jumpCursor", args,
+                "default go to end of input with selection shortcut");
         }
     }
 

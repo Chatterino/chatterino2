@@ -215,6 +215,7 @@ void SplitInput::installKeyPressedEvent()
                          << "Invalid jumpCursor arguments. Argument 0: place "
                             "(\"start\" or \"end\"), argument 1: select "
                             "(\"withSelection\" or \"withoutSelection\")";
+                     return;
                  }
                  QTextCursor cursor = this->ui_.textEdit->textCursor();
                  auto place = QTextCursor::Start;
@@ -347,37 +348,6 @@ void SplitInput::installKeyPressedEvent()
                     event->accept();
                 }
             }
-        }
-        else if (event->key() == Qt::Key_Home)
-        {
-            QTextCursor cursor = this->ui_.textEdit->textCursor();
-            cursor.movePosition(
-                QTextCursor::Start,
-                event->modifiers() & Qt::KeyboardModifier::ShiftModifier
-                    ? QTextCursor::MoveMode::KeepAnchor
-                    : QTextCursor::MoveMode::MoveAnchor);
-            this->ui_.textEdit->setTextCursor(cursor);
-
-            event->accept();
-        }
-        else if (event->key() == Qt::Key_End)
-        {
-            if (event->modifiers() == Qt::ControlModifier)
-            {
-                this->split_->getChannelView().getScrollBar().scrollToBottom(
-                    getSettings()->enableSmoothScrollingNewMessages.getValue());
-            }
-            else
-            {
-                QTextCursor cursor = this->ui_.textEdit->textCursor();
-                cursor.movePosition(
-                    QTextCursor::End,
-                    event->modifiers() & Qt::KeyboardModifier::ShiftModifier
-                        ? QTextCursor::MoveMode::KeepAnchor
-                        : QTextCursor::MoveMode::MoveAnchor);
-                this->ui_.textEdit->setTextCursor(cursor);
-            }
-            event->accept();
         }
         else if (event->key() == Qt::Key_Down)
         {
