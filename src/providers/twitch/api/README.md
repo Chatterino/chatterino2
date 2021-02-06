@@ -119,8 +119,6 @@ Requires `user:manage:blocked_users` scope
 URL: https://dev.twitch.tv/docs/api/reference#unblock-user
 Requires `user:manage:blocked_users` scope
 
-Migration path: **Unknown**
-
  * We implement this in `providers/twitch/api/Helix.cpp unblockUser`
    Used in:
      * `widgets/dialogs/UserInfoPopup.cpp` to unignore a user via checkbox in the usercard
