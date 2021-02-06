@@ -461,7 +461,6 @@ void UserInfoPopup::installEvents()
                                      currentUser->loadIgnores();
                                  },
                                  [this, ignoreNext] {
-                                     ;
                                      this->channel_->addMessage(
                                          makeSystemMessage("unignore fail"));
                                      *ignoreNext = true;
