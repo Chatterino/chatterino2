@@ -285,7 +285,7 @@ void Window::addDebugStuff(
                         const auto &msg = messages[index++ % messages.size()];
                         getApp()->twitch.server->addFakeMessage(msg);
                     }});
-}  // namespace chatterino
+}
 
 void Window::addShortcuts()
 {
@@ -303,7 +303,8 @@ void Window::addShortcuts()
              if (arguments.size() == 0)
              {
                  qCDebug(chatterinoHotkeys)
-                     << "openTab shortcut called without arguments. Takes only "
+                     << "openTab shortcut called without arguments. "
+                        "Takes only "
                         "one argument: tab specifier";
                  return;
              }
@@ -351,7 +352,8 @@ void Window::addShortcuts()
              if (arguments.size() == 0)
              {
                  qCDebug(chatterinoHotkeys)
-                     << "zoom shortcut called without arguments. Takes only "
+                     << "zoom shortcut called without arguments. Takes "
+                        "only "
                         "one argument: \"in\" or \"out\"";
                  return;
              }
