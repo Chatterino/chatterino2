@@ -26,6 +26,7 @@ ResizingTextEdit::ResizingTextEdit()
     });
 
     this->setFocusPolicy(Qt::ClickFocus);
+    this->installEventFilter(this);
 }
 
 QSize ResizingTextEdit::sizeHint() const
@@ -87,6 +88,17 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
     return lastWord;
 }
 
+bool ResizingTextEdit::eventFilter(QObject *, QEvent *event)
+{
+    // makes QShortcuts work in the ResizingTextEdit
+    if (event->type() != QEvent::ShortcutOverride)
+    {
+        return false;
+    }
+    auto ev = static_cast<QKeyEvent *>(event);
+    ev->ignore();
+    return true;
+}
 void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 {
     event->ignore();

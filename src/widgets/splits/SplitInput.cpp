@@ -261,8 +261,8 @@ void SplitInput::installKeyPressedEvent()
              }},
         };
 
-    this->shortcuts_ = app->hotkeys->shortcutsForScope(
-        HotkeyScope::SplitInput, splitInputActions, this->ui_.textEdit);
+    this->shortcuts_ = app->hotkeys->shortcutsForScope(HotkeyScope::SplitInput,
+                                                       splitInputActions, this);
 
     this->ui_.textEdit->keyPressed.connect([this, app](QKeyEvent *event) {
         if (auto popup = this->emoteInputPopup_.get())
@@ -276,9 +276,6 @@ void SplitInput::installKeyPressedEvent()
                 }
             }
         }
-        // Todo(Mm2PL): make custom shortcut handling here,
-        // QShortcuts won't get `activated()` when the key was hit inside a text edit.
-        // Find a way around that
 
         if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
         {
