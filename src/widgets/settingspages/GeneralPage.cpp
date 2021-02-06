@@ -257,9 +257,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Highlight messages redeemed with Channel Points",
                        s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
-        "Timestamp format (a = am/pm)",
+        "Timestamp format (a = am/pm, zzz = milliseconds)",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
-         "h:mm:ss a", "hh:mm:ss a"},
+         "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
+         "hh:mm:ss.zzz", "hh:mm:ss.zzz a"},
         s.timestampFormat,
         [](auto val) {
             return getSettings()->showTimestamps.getValue()
