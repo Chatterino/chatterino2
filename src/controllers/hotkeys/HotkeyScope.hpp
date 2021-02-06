@@ -12,6 +12,7 @@ enum class HotkeyScope {
     Window,
     UserCard,
     Settings,
-    EmotePopup
+    EmotePopup,
+    SelectChannelPopup
 };
 }  // namespace chatterino

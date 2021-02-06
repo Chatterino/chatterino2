@@ -57,6 +57,8 @@ QString Hotkey::getCategory() const
             return "Settings dialog";
         case HotkeyScope::EmotePopup:
             return "Emote popup";
+        case HotkeyScope::SelectChannelPopup:
+            return "Select channel popup";
         default:
             return "Unknown hotkey scope";
     }
@@ -79,6 +81,8 @@ Qt::ShortcutContext Hotkey::getContext() const
         case HotkeyScope::Settings:
             return Qt::WidgetShortcut;
         case HotkeyScope::EmotePopup:
+            return Qt::WindowShortcut;
+        case HotkeyScope::SelectChannelPopup:
             return Qt::WindowShortcut;
     }
     qCDebug(chatterinoHotkeys)

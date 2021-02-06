@@ -38,6 +38,10 @@ namespace {
         {
             scope = HotkeyScope::EmotePopup;
         }
+        else if (scopeName == "selectChannelPopup")
+        {
+            scope = HotkeyScope::SelectChannelPopup;
+        }
         else
         {
             qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
@@ -493,6 +497,54 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
                 "default emote popup select previous tab shortcut");
         }
     }
+
+    // select channel popup
+    {
+        for (int i = 0; i < 9; i++)
+        {
+            std::vector<QString> args;
+            args.push_back(QString::number(i));
+            this->tryAddDefault(
+                addedHotkeys, HotkeyScope::SelectChannelPopup,
+                QKeySequence(QString("Ctrl+%1").arg(i + 1)), "openTab", args,
+                QString("default select channel popup select tab #%1 shortcut")
+                    .arg(i + 1));
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("last");
+            this->tryAddDefault(
+                addedHotkeys, HotkeyScope::EmotePopup, QKeySequence("Ctrl+9"),
+                "openTab", std::vector<QString>(),
+                "default select channel popup select last tab shortcut");
+        }
+
+        {
+            std::vector<QString> args;
+            args.push_back("next");
+            this->tryAddDefault(
+                addedHotkeys, HotkeyScope::SelectChannelPopup,
+                QKeySequence("Ctrl+Tab"), "openTab", args,
+                "default select channel popup select next tab shortcut");
+        }
+
+        {
+            std::vector<QString> args;
+            args.push_back("previous");
+            this->tryAddDefault(
+                addedHotkeys, HotkeyScope::SelectChannelPopup,
+                QKeySequence("Ctrl+Shift+Tab"), "openTab", args,
+                "default select channel popup select previous tab shortcut");
+        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::SelectChannelPopup,
+                            QKeySequence("Return"), "accept",
+                            std::vector<QString>(),
+                            "default select channel popup accept shortcut");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::SelectChannelPopup,
+                            QKeySequence("Escape"), "reject",
+                            std::vector<QString>(),
+                            "default select channel popup reject shortcut");
+    }
 }
 
 void HotkeyController::save()
@@ -532,6 +584,9 @@ void HotkeyController::saveHotkeys()
                 break;
             case HotkeyScope::EmotePopup:
                 scopeName = "emotePopup";
+                break;
+            case HotkeyScope::SelectChannelPopup:
+                scopeName = "selectChannelPopup";
                 break;
             default:
                 qCDebug(chatterinoHotkeys)

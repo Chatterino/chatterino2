@@ -1,6 +1,8 @@
 #include "SelectChannelDialog.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
@@ -220,26 +222,64 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     this->ui_.notebook->selectIndex(TAB_TWITCH);
     this->ui_.twitch.channel->setFocus();
 
+    std::map<QString, std::function<void(std::vector<QString>)>> actions{
+        {"accept",
+         [this](std::vector<QString>) {
+             this->ok();
+         }},
+        {"reject",
+         [this](std::vector<QString>) {
+             this->close();
+         }},
+    };
     // Shortcuts
-    createWindowShortcut(this, "Return", [=] {
-        this->ok();
-    });
-    createWindowShortcut(this, "Esc", [=] {
-        this->close();
-    });
 
     // restore ui state
     // fourtf: enable when releasing irc
     if (getSettings()->enableExperimentalIrc)
     {
         this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
-        createWindowShortcut(this, "Ctrl+Tab", [=] {
-            this->ui_.notebook->selectNextTab();
-        });
-        createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
-            this->ui_.notebook->selectPreviousTab();
-        });
+        actions.insert(
+            {"openTab", [this](std::vector<QString> arguments) {
+                 if (arguments.size() == 0)
+                 {
+                     qCDebug(chatterinoHotkeys)
+                         << "openTab shortcut called without arguments. "
+                            "Takes only "
+                            "one argument: tab specifier";
+                     return;
+                 }
+                 auto target = arguments.at(0);
+                 if (target == "last")
+                 {
+                     this->ui_.notebook->selectLastTab();
+                 }
+                 else if (target == "next")
+                 {
+                     this->ui_.notebook->selectNextTab();
+                 }
+                 else if (target == "previous")
+                 {
+                     this->ui_.notebook->selectPreviousTab();
+                 }
+                 else
+                 {
+                     bool ok;
+                     int result = target.toInt(&ok);
+                     if (ok)
+                     {
+                         this->ui_.notebook->selectIndex(result);
+                     }
+                     else
+                     {
+                         qCDebug(chatterinoHotkeys)
+                             << "Invalid argument for openTab shortcut";
+                     }
+                 }
+             }});
     }
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+        HotkeyScope::SelectChannelPopup, actions, this);
 
     this->ui_.irc.servers->getTableView()->selectRow(
         getSettings()->lastSelectIrcConn);
