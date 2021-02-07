@@ -22,6 +22,8 @@ class Window : public BaseWindow
 public:
     explicit Window(WindowType type);
 
+    bool areTabsHidden();
+
     WindowType getType();
     SplitNotebook &getNotebook();
 
@@ -38,6 +40,8 @@ private:
     void addLayout();
     void onAccountSelected();
     void addMenuBar();
+
+    bool areTabsHidden_{false};
 
     WindowType type_;
 
