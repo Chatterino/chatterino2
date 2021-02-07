@@ -193,6 +193,24 @@ struct HelixBlock {
     }
 };
 
+struct HelixCheermote {
+    QString id;
+    QString tiers;
+    QString color;
+    QString type;
+
+    int minBits;
+
+    explicit HelixCheermote(QJsonObject jsonObject)
+        : id(jsonObject.value("id").toString())
+        , tiers(jsonObject.value("tiers").toString())
+        , color(jsonObject.value("color").toString())
+        , type(jsonObject.value("type").toString())
+        , minBits(jsonObject.value("min_bits").toInt())
+    {
+    }
+};
+
 enum class HelixClipError {
     Unknown,
     ClipsDisabled,
@@ -320,6 +338,11 @@ public:
         QString userID, QString msgID, QString action,
         std::function<void()> successCallback,
         std::function<void(HelixAutoModMessageError)> failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference/#get-cheermotes
+    void getCheermotes(QString broadcasterId,
+                       ResultCallback<HelixCheermote> successCallback,
+                       HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

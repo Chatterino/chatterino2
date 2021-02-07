@@ -910,6 +910,25 @@ void TwitchChannel::refreshBadges()
 
 void TwitchChannel::refreshCheerEmotes()
 {
+    //    getHelix()->getCheermotes(
+    //        this->roomId(),
+    //        [this, weak = weakOf<Channel>(this)](
+    //            const HelixCheermote cheermote) -> Outcome {
+    //            auto shared = weak.lock();
+
+    //            if (!shared)
+    //            {
+    //                return Failure;
+    //            }
+
+    //            std::vector<CheerEmoteSet> emoteSets;
+
+    //            return Success;
+    //        },
+    //        [] {
+    //            // Failure
+    //            return Failure;
+    //        });
     QString url("https://api.twitch.tv/kraken/bits/actions?channel_id=" +
                 this->roomId());
     NetworkRequest::twitchRequest(url)

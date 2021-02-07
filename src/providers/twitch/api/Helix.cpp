@@ -661,6 +661,34 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
         .execute();
 }
 
+void Helix::getCheermotes(QString broadcasterId,
+                          ResultCallback<HelixCheermote> successCallback,
+                          HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+
+    this->makeRequest("bits/cheermotes", urlQuery)
+        .onSuccess([successCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+            qDebug() << data;
+
+            HelixCheermote cheermote(data.toObject());
+
+            successCallback(cheermote);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            // TODO: make better xd
+            qDebug() << "xd fail";
+            qDebug() << result.getData() << result.status();
+            failureCallback();
+        })
+        .execute();
+}
+
 void Helix::manageAutoModMessages(
     QString userID, QString msgID, QString action,
     std::function<void()> successCallback,
