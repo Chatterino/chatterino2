@@ -104,6 +104,7 @@ public:
     BoolSetting enableSmoothScrollingNewMessages = {
         "/appearance/smoothScrollingNewMessages", false};
     BoolSetting boldUsernames = {"/appearance/messages/boldUsernames", true};
+    BoolSetting colorUsernames = {"/appearance/messages/colorUsernames", true};
     BoolSetting findAllUsernames = {"/appearance/messages/findAllUsernames",
                                     false};
     // BoolSetting customizable splitheader
@@ -192,6 +193,8 @@ public:
     BoolSetting streamerModeHideViewerCountAndDuration = {
         "/streamerMode/hideViewerCountAndDuration", false};
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
+    BoolSetting streamerModeSupressLiveNotifications = {
+        "/streamerMode/supressLiveNotifications", false};
 
     /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
@@ -260,6 +263,8 @@ public:
     QStringSetting highlightColor = {"/highlighting/color", ""};
 
     BoolSetting longAlerts = {"/highlighting/alerts", false};
+
+    BoolSetting highlightMentions = {"/highlighting/mentions", true};
 
     /// Filtering
     BoolSetting excludeUserMessagesFromFilter = {

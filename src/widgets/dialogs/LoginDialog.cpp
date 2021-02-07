@@ -5,6 +5,7 @@
 #include "common/NetworkRequest.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 
 #ifdef USEWINSDK
@@ -22,7 +23,7 @@ namespace chatterino {
 
 namespace {
 
-    void LogInWithCredentials(const QString &userID, const QString &username,
+    void logInWithCredentials(const QString &userID, const QString &username,
                               const QString &clientID,
                               const QString &oauthToken)
     {
@@ -57,16 +58,12 @@ namespace {
             messageBox.setWindowTitle(
                 "Chatterino - invalid account credentials");
             messageBox.setIcon(QMessageBox::Critical);
-            messageBox.setText(errors.join("<br />"));
+            messageBox.setText(errors.join("<br>"));
             messageBox.setStandardButtons(QMessageBox::Ok);
             messageBox.exec();
             return;
         }
 
-        //    QMessageBox messageBox;
-        //    messageBox.setIcon(QMessageBox::Information);
-        //    messageBox.setText("Successfully logged in with user <b>" +
-        //    qS(username) + "</b>!");
         std::string basePath = "/accounts/uid" + userID.toStdString();
         pajlada::Settings::Setting<QString>::set(basePath + "/username",
                                                  username);
@@ -77,9 +74,6 @@ namespace {
                                                  oauthToken);
 
         getApp()->accounts->twitch.reloadUsers();
-
-        //    messageBox.exec();
-
         getApp()->accounts->twitch.currentUsername = username;
     }
 
@@ -97,9 +91,10 @@ BasicLoginWidget::BasicLoginWidget()
     this->ui_.unableToOpenBrowserHelper.setWordWrap(true);
     this->ui_.unableToOpenBrowserHelper.hide();
     this->ui_.unableToOpenBrowserHelper.setText(
-        "An error occured while attempting to open <a href='" + logInLink +
-        "'>the log in link (" + logInLink + ")</a> " +
-        " - open it manually in your browser and proceed from there.");
+        QString("An error occurred while attempting to open <a href=\"%1\">the "
+                "log in link (%1)</a> - open it manually in your browser and "
+                "proceed from there.")
+            .arg(logInLink));
     this->ui_.unableToOpenBrowserHelper.setOpenExternalLinks(true);
 
     this->ui_.horizontalLayout.addWidget(&this->ui_.loginButton);
@@ -110,8 +105,7 @@ BasicLoginWidget::BasicLoginWidget()
 
     connect(&this->ui_.loginButton, &QPushButton::clicked, [this, logInLink]() {
         qCDebug(chatterinoWidget) << "open login in browser";
-        auto res = QDesktopServices::openUrl(QUrl(logInLink));
-        if (!res)
+        if (!QDesktopServices::openUrl(QUrl(logInLink)))
         {
             qCWarning(chatterinoWidget) << "open login in browser failed";
             this->ui_.unableToOpenBrowserHelper.show();
@@ -119,10 +113,7 @@ BasicLoginWidget::BasicLoginWidget()
     });
 
     connect(&this->ui_.pasteCodeButton, &QPushButton::clicked, [this]() {
-        QClipboard *clipboard = QGuiApplication::clipboard();
-        QString clipboardString = clipboard->text();
-        QStringList parameters = clipboardString.split(';');
-
+        QStringList parameters = getClipboardText().split(";");
         QString oauthToken, clientID, username, userID;
 
         for (const auto &param : parameters)
@@ -157,9 +148,10 @@ BasicLoginWidget::BasicLoginWidget()
             }
         }
 
-        LogInWithCredentials(userID, username, clientID, oauthToken);
+        logInWithCredentials(userID, username, clientID, oauthToken);
 
-        clipboard->clear();
+        // Removing clipboard content to prevent accidental paste of credentials into somewhere
+        crossPlatformCopy("");
         this->window()->close();
     });
 }
@@ -169,9 +161,12 @@ AdvancedLoginWidget::AdvancedLoginWidget()
     this->setLayout(&this->ui_.layout);
 
     this->ui_.instructionsLabel.setText(
-        "1. Fill in your username\n2. Fill in your user ID or press "
-        "the 'Get user ID from username' button\n3. Fill in your "
-        "Client ID\n4. Fill in your OAuth Token\n5. Press Add User");
+        "1. Fill in your username"
+        "\n2. Fill in your user ID or press the 'Get user ID from username' "
+        "button"
+        "\n3. Fill in your Client ID"
+        "\n4. Fill in your OAuth Token"
+        "\n5. Press Add User");
     this->ui_.instructionsLabel.setWordWrap(true);
 
     this->ui_.layout.addWidget(&this->ui_.instructionsLabel);
@@ -226,7 +221,7 @@ AdvancedLoginWidget::AdvancedLoginWidget()
                 QString clientID = this->ui_.clientIDInput.text();
                 QString oauthToken = this->ui_.oauthTokenInput.text();
 
-                LogInWithCredentials(userID, username, clientID, oauthToken);
+                logInWithCredentials(userID, username, clientID, oauthToken);
             });
 }
 

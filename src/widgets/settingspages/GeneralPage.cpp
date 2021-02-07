@@ -257,9 +257,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Highlight messages redeemed with Channel Points",
                        s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
-        "Timestamp format (a = am/pm)",
+        "Timestamp format (a = am/pm, zzz = milliseconds)",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
-         "h:mm:ss a", "hh:mm:ss a"},
+         "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
+         "hh:mm:ss.zzz", "hh:mm:ss.zzz a"},
         s.timestampFormat,
         [](auto val) {
             return getSettings()->showTimestamps.getValue()
@@ -320,13 +321,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
-        "Chatterino can automatically change behavior if it "
-        "detects that \"OBS Studio\" is running.\nSelect which "
-        "things you want to change while streaming");
+        "Chatterino can automatically change behavior if it detects that \"OBS "
+        "Studio\" is running.\nSelect which things you want to change while "
+        "streaming");
 
     ComboBox *dankDropdown =
         layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
-            "Enable Streamer Mode", {"No", "Yes", "Detect OBS (Windows only)"},
+            "Enable Streamer Mode",
+            {"Disabled", "Enabled", "Automatic (Detect OBS)"},
             s.enableStreamerMode,
             [](int value) {
                 return value;
@@ -345,6 +347,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
+    layout.addCheckbox("Supress Live Notifications",
+                       s.streamerModeSupressLiveNotifications);
 
     layout.addTitle("Link Previews");
     layout.addDescription(
@@ -572,6 +576,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.autoCloseUserPopup);
     layout.addCheckbox("Lowercase domains (anti-phishing)", s.lowercaseDomains);
     layout.addCheckbox("Bold @usernames", s.boldUsernames);
+    layout.addCheckbox("Color @usernames", s.colorUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames);
     layout.addDropdown<float>(
@@ -621,6 +626,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Ask for confirmation when uploading an image",
                        s.askOnImageUpload);
+    layout.addCheckbox("Messages in /mentions highlights tab",
+                       s.highlightMentions);
 
     layout.addStretch();
 

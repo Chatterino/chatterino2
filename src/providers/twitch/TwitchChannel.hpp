@@ -73,11 +73,13 @@ public:
     virtual bool canReconnect() const override;
     virtual void reconnect() override;
     void refreshTitle();
+    void createClip();
 
     // Data
     const QString &subscriptionUrl();
     const QString &channelUrl();
     const QString &popoutPlayerUrl();
+    int chatterCount();
     virtual bool isLive() const override;
     QString roomId() const;
     AccessGuard<const RoomModes> accessRoomModes() const;
@@ -155,6 +157,7 @@ private:
     const QString subscriptionUrl_;
     const QString channelUrl_;
     const QString popoutPlayerUrl_;
+    int chatterCount_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
 
@@ -186,6 +189,8 @@ private:
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
     QTime titleRefreshedTime_;
+    QTime timeNextClipCreationAllowed_{QTime().currentTime()};
+    bool isClipCreationInProgress{false};
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;

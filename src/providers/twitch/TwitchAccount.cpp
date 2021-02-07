@@ -175,9 +175,10 @@ void TwitchAccount::ignoreByID(
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
         .onError([=](NetworkResult result) {
             onFinished(IgnoreResult_Failed,
-                       "An unknown error occured while trying to ignore user " +
-                           targetName + " (" +
-                           QString::number(result.status()) + ")");
+                       QString("An unknown error occurred while trying to "
+                               "ignore user %1 (%2)")
+                           .arg(targetName)
+                           .arg(result.status()));
         })
         .onSuccess([=](auto result) -> Outcome {
             auto document = result.parseRapidJson();
@@ -253,7 +254,7 @@ void TwitchAccount::unignoreByID(
         .onError([=](NetworkResult result) {
             onFinished(
                 UnignoreResult_Failed,
-                "An unknown error occured while trying to unignore user " +
+                "An unknown error occurred while trying to unignore user " +
                     targetName + " (" + QString::number(result.status()) + ")");
         })
         .onSuccess([=](auto result) -> Outcome {
@@ -288,47 +289,6 @@ void TwitchAccount::checkFollow(const QString targetUserID,
 
     getHelix()->getUserFollow(this->getUserId(), targetUserID, onResponse,
                               [] {});
-}
-
-void TwitchAccount::followUser(const QString userID,
-                               std::function<void()> successCallback)
-{
-    QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                    "/follows/channels/" + userID);
-
-    NetworkRequest(requestUrl, NetworkRequestType::Put)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onSuccess([successCallback](auto result) -> Outcome {
-            // TODO: Properly check result of follow request
-            successCallback();
-
-            return Success;
-        })
-        .execute();
-}
-
-void TwitchAccount::unfollowUser(const QString userID,
-                                 std::function<void()> successCallback)
-{
-    QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                    "/follows/channels/" + userID);
-
-    NetworkRequest(requestUrl, NetworkRequestType::Delete)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([successCallback](NetworkResult result) {
-            if (result.status() >= 200 && result.status() <= 299)
-            {
-                successCallback();
-            }
-        })
-        .onSuccess([successCallback](const auto &document) -> Outcome {
-            successCallback();
-
-            return Success;
-        })
-        .execute();
 }
 
 std::set<TwitchUser> TwitchAccount::getIgnores() const

@@ -1,8 +1,10 @@
 <RCC>
   <qresource prefix="/">
     <file>avatars/fourtf.png</file>
+    <file>avatars/matthewde.jpg</file>
     <file>avatars/mm2pl.png</file>
     <file>avatars/pajlada.png</file>
+    <file>avatars/revolter.jpg</file>
     <file>avatars/zneix.png</file>
     <file>buttons/addSplit.png</file>
     <file>buttons/addSplitDark.png</file>

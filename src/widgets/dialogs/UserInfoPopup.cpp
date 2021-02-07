@@ -12,6 +12,7 @@
 #include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Clipboard.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Shortcut.hpp"
@@ -47,8 +48,8 @@ namespace {
             [label = label.getElement()] {
                 auto copyText = label->property("copy-text").toString();
 
-                qApp->clipboard()->setText(copyText.isEmpty() ? label->getText()
-                                                              : copyText);
+                crossPlatformCopy(copyText.isEmpty() ? label->getText()
+                                                     : copyText);
             });
 
         return label.getElement();
@@ -386,8 +387,11 @@ void UserInfoPopup::installEvents()
             {
                 case Qt::CheckState::Unchecked: {
                     this->ui_.follow->setEnabled(false);
-                    currentUser->unfollowUser(this->userId_,
-                                              reenableFollowCheckbox);
+                    getHelix()->unfollowUser(currentUser->getUserId(),
+                                             this->userId_,
+                                             reenableFollowCheckbox, [] {
+                                                 //
+                                             });
                 }
                 break;
 
@@ -398,8 +402,11 @@ void UserInfoPopup::installEvents()
 
                 case Qt::CheckState::Checked: {
                     this->ui_.follow->setEnabled(false);
-                    currentUser->followUser(this->userId_,
-                                            reenableFollowCheckbox);
+                    getHelix()->followUser(currentUser->getUserId(),
+                                           this->userId_,
+                                           reenableFollowCheckbox, [] {
+                                               //
+                                           });
                 }
                 break;
             }

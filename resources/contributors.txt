@@ -14,7 +14,7 @@ pajlada | https://pajlada.se | :/avatars/pajlada.png | Collaborator, co-develope
 
 Cranken | https://github.com/Cranken | | Contributor
 hemirt | https://github.com/hemirt | | Contributor
-LajamerrMittisdine | https://github.com/LajamerrMittisdine | | Contributor
+LajamerrMittesdine | https://github.com/LajamerrMittesdine | | Contributor
 coral | https://github.com/coral |  | Contributor, design
 apa420 | https://github.com/apa420 |  | Contributor
 DatGuy1 | https://github.com/DatGuy1 |  | Contributor
@@ -38,6 +38,8 @@ mfmarlow | https://github.com/mfmarlow | | Contributor
 dnsge | https://github.com/dnsge | | Contributor
 zneix | https://github.com/zneix | :/avatars/zneix.png | Contributor
 y0dax | https://github.com/y0dax | | Contributor
+Iulian Onofrei | https://github.com/revolter | :/avatars/revolter.jpg | Contributor
+matthewde | https://github.com/m4tthewde | :/avatars/matthewde.jpg | Contributor
 
 # If you are a contributor add yourself above this line
 

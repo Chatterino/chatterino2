@@ -2,8 +2,13 @@
 
 ## Unversioned
 
-- Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200)
-- Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001)
+- Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377)
+- Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
+- Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
+- Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284)
+- Minor: Added `/marker` command - similar to webchat, it creates a stream marker. (#2360)
+- Minor: Added `/chatters` command showing chatter count. (#2344)
+- Minor: Added a button to the split context menu to open the moderation view for a channel when the account selected has moderator permissions. (#2321)
 - Minor: Made BetterTTV emote tooltips use authors' display name. (#2267)
 - Minor: Added Ctrl + 1/2/3/... and Ctrl+9 shortcuts to Emote Popup (activated with Ctrl+E). They work exactly the same as shortcuts in main window. (#2263)
 - Minor: Added reconnect link to the "You are banned" message. (#2266)
@@ -12,7 +17,7 @@
 - Minor: Added a keyboard shortcut (Ctrl+F5) for "Reconnect" (#2215)
 - Minor: Made `Try to find usernames without @ prefix` option still resolve usernames when special characters (commas, dots, (semi)colons, exclamation mark, question mark) are appended to them. (#2212)
 - Minor: Made usercard update user's display name (#2160)
-- Minor: Added placeholder text for message text input box. (#2143, #2149)
+- Minor: Added placeholder text for message text input box. (#2143, #2149, #2264)
 - Minor: Added support for FrankerFaceZ badges. (#2101, part of #1658)
 - Minor: Added a navigation list to the settings and reordered them.
 - Minor: Added a link to twitchemotes.com to context menu when right-clicking Twitch emotes. (#2214)
@@ -21,11 +26,12 @@
 - Minor: Made the current channels emotes appear at the top of the emote picker popup. (#2057)
 - Minor: Added viewer list button to twitch channel header. (#1978)
 - Minor: Added followage and subage information to usercard. (#2023)
-- Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940)
+- Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940, #2368)
 - Minor: Added customizable timeout buttons to the user info popup
 - Minor: Deprecate loading of "v1" window layouts. If you haven't updated Chatterino in more than 2 years, there's a chance you will lose your window layout.
 - Minor: User popup will now automatically display messages as they are received
 - Minor: Changed the English in two rate-limited system messages (#1878)
+- Minor: Added a setting to disable messages sent to /mentions split from making the tab highlight with the red marker (#1994)
 - Minor: Added image for streamer mode in the user popup icon.
 - Minor: Added vip and unvip buttons.
 - Minor: Added settings for displaying where the last message was.
@@ -40,6 +46,10 @@
 - Minor: Don't show update button for nightly builds on macOS and Linux, this was already the case for Windows (#2163, #2164)
 - Minor: Tab and split titles now use display/localized channel names (#2189)
 - Minor: Add a setting to limit the amount of historical messages loaded from the Recent Messages API (#2250, #2252)
+- Minor: Made username autocompletion truecase (#1199, #1883)
+- Minor: Update the listing of top-level domains. (#2345)
+- Minor: Properly respect RECONNECT messages from Twitch (#2347)
+- Minor: Added human-readable formatting to remaining timeout duration. (#2398)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
@@ -58,8 +68,17 @@
 - Bugfix: Fix a crash caused by FrankerFaceZ responding with invalid emote links (#2191)
 - Bugfix: Fix a freeze caused by ignored & replaced phrases followed by Twitch Emotes (#2231)
 - Bugfix: Fix a crash bug that occurred when moving splits across windows and closing the "parent tab" (#2249, #2259)
+- Bugfix: Fix a crash bug that occurred when the "Limit message height" setting was enabled and a message was being split up into multiple lines. IRC only. (#2329)
+- Bugfix: Fix anonymous users being pinged by "username" justinfan64537 (#2156, #2352)
+- Bugfix: Fixed hidden tooltips when always on top is active (#2384)
+- Bugfix: Fix CLI arguments (`--help`, `--version`, `--channels`) not being respected (#2368, #2190)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
+- Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
+- Dev: Migrated `Kraken::getChannel` to Helix. (#2381)
+- Dev: Build in CI with multiple Qt versions (#2349)
+- Dev: Updated minimum required macOS version to 10.14 (#2386)
+- Dev: Removed unused `humanize` library (#2422)
 
 ## 2.2.2
 
