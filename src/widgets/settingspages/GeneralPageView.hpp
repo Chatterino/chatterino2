@@ -193,7 +193,6 @@ public:
 protected:
     void resizeEvent(QResizeEvent *ev) override
     {
-        qCDebug(chatterinoWidget) << ev->size();
     }
 
 private:
