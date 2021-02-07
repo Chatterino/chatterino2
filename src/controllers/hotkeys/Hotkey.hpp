@@ -64,7 +64,6 @@ public:
      */
     QString getCategory() const;
 
-protected:
 private:
     HotkeyScope scope_;
     QKeySequence keySequence_;
