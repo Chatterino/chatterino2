@@ -6,7 +6,9 @@
 namespace chatterino {
 
 template <typename WidgetType, typename Func>
-inline void createShortcut(WidgetType *w, const char *key, Func func)
+[[deprecated("Use the actions/hotkeys system through HotkeyController")]]  //
+inline void
+    createShortcut(WidgetType *w, const char *key, Func func)
 {
     auto s = new QShortcut(QKeySequence(key), w);
     s->setContext(Qt::WidgetWithChildrenShortcut);
@@ -14,7 +16,9 @@ inline void createShortcut(WidgetType *w, const char *key, Func func)
 }
 
 template <typename WidgetType, typename Func>
-inline void createWindowShortcut(WidgetType *w, const char *key, Func func)
+[[deprecated("Use the actions/hotkeys system through HotkeyController")]]  //
+inline void
+    createWindowShortcut(WidgetType *w, const char *key, Func func)
 {
     auto s = new QShortcut(QKeySequence(key), w);
     s->setContext(Qt::WindowShortcut);
