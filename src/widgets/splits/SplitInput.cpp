@@ -375,6 +375,9 @@ void SplitInput::installKeyPressedEvent()
             }
         }
 
+        // One of the last remaining of it's kind, the copy shortcut.
+        // For some bizarre reason Qt doesn't want this key be rebound.
+        // TODO(Mm2PL): Revisit in Qt6, maybe something changed?
         if ((event->key() == Qt::Key_C || event->key() == Qt::Key_Insert) &&
             event->modifiers() == Qt::ControlModifier)
         {
