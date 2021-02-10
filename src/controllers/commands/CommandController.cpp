@@ -17,6 +17,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/CombinePath.hpp"
 #include "util/FormatTime.hpp"
+#include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -535,6 +536,32 @@ void CommandController::initialize(Settings &, Paths &paths)
 
                 channel->addMessage(makeSystemMessage(errorMessage));
             });
+
+        return "";
+    });
+
+    this->registerCommand("/streamlink", [](const QStringList &words,
+                                            ChannelPtr channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: /streamlink [channel], use \"channel\" to open current "
+                "channel in streamlink."));
+            return "";
+        }
+
+        if (!channel->isTwitchChannel())
+        {
+            return "";
+        }
+
+        QString channelName =
+            (words[1] == "channel") ? channel->getName() : words[1];
+        qDebug() << channelName;
+
+        channel->addMessage(makeSystemMessage(
+            QString("Opening %1 in streamlink...").arg(channelName)));
+        openStreamlinkForChannel(channelName);
 
         return "";
     });
