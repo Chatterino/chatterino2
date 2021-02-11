@@ -260,7 +260,11 @@ void Emojis::sortEmojis()
 
 void Emojis::loadEmojiSet()
 {
+#ifndef CHATTERINO_TEST
     getSettings()->emojiSet.connect([=](const auto &emojiSet) {
+#else
+    const QString emojiSet = "twitter";
+#endif
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
             QString emojiSetToUse = emojiSet;
@@ -318,7 +322,9 @@ void Emojis::loadEmojiSet()
                 EmoteName{emoji->value}, ImageSet{Image::fromUrl({url}, 0.35)},
                 Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
         });
+#ifndef CHATTERINO_TEST
     });
+#endif
 }
 
 std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
@@ -344,6 +350,12 @@ std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(
         }
 
         const auto &possibleEmojis = it.value();
+
+        for (const auto &p : possibleEmojis)
+        {
+            printf("xd\n");
+            qDebug() << "possible emoji:" << p->value;
+        }
 
         int remainingCharacters = text.length() - i - 1;
 
@@ -436,10 +448,14 @@ QString Emojis::replaceShortCodes(const QString &text)
 
         if (emojiIt == this->emojiShortCodeToEmoji_.constEnd())
         {
+            printf("No match for %s\n", matchString.toStdString().c_str());
             continue;
         }
 
         auto emojiData = emojiIt.value();
+
+        printf("Found match for %s: '%s'\n", qUtf8Printable(matchString),
+               qUtf8Printable(emojiData->unifiedCode));
 
         ret.replace(offset + match.capturedStart(), match.capturedLength(),
                     emojiData->value);
