@@ -51,6 +51,7 @@
 - Minor: Properly respect RECONNECT messages from Twitch (#2347)
 - Minor: Hide "Case-sensitive" column for user highlights. (#2404)
 - Minor: Added human-readable formatting to remaining timeout duration. (#2398)
+- Minor: Added `/streamlink` command. Usage: `/streamlink <channel>`. You can also use the command without arguments in any twitch channel to open it in streamlink. (#2443)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
