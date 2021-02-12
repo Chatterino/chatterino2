@@ -15,7 +15,6 @@ project(chatterino2-dependencies VERSION 1)
 
 # Options with same default value on all platforms
 option(BUILD_HUMANIZE "Build Humanize IRC framework" ON)
-option(BUILD_LIBCOMMUNI "Build LibCommuni IRC framework" OFF)
 option(BUILD_QTKEYCHAIN "Build QtKeychain" ON)
 option(BUILD_RAPIDJSON "Build RapidJSON library" ON)
 option(BUILD_SERIALIZE "Build Serialize library" ON)
@@ -84,22 +83,15 @@ endif ()
 if (BUILD_LIBCOMMUNI)
     ExternalProject_Add(
             LibCommuni
-            BUILD_IN_SOURCE 1
-            #DOWNLOAD_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/libcommuni ${CMAKE_BINARY_DIR}/Source/LibCommuni
-            #UPDATE_COMMAND ""
-            GIT_REPOSITORY https://github.com/communi/libcommuni.git
+            GIT_REPOSITORY https://github.com/AnotherFoxGuy/libcommuni-cmake.git
             GIT_SHALLOW TRUE
             GIT_PROGRESS TRUE
-            #PATCH_COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/libcommuni-patch.pro ${CMAKE_BINARY_DIR}/Source/LibCommuni/libcommuni.pro
-            #SOURCE_DIR "${CMAKE_SOURCE_DIR}/libcommuni"
-            CONFIGURE_COMMAND qmake
-            CONFIG+=$<UPPER_CASE:$<CONFIG>>
-            IRC_INSTALL_BINS=${DEPENDENCIES_OUTPUT_DIR}/bin
-            IRC_INSTALL_HEADERS=${DEPENDENCIES_OUTPUT_DIR}/include
-            IRC_INSTALL_LIBS=${DEPENDENCIES_OUTPUT_DIR}/lib
-            IRC_INSTALL_FEATURES=${DEPENDENCIES_OUTPUT_DIR}/features
-            BUILD_COMMAND $<IF:$<BOOL:WIN32>,nmake,make>
-            INSTALL_COMMAND $<IF:$<BOOL:WIN32>,nmake,make> install
+            CMAKE_ARGS
+            -DCMAKE_INSTALL_PREFIX=${DEPENDENCIES_OUTPUT_DIR}
+            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
+            -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
+            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
     )
 endif ()
 
