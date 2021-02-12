@@ -1,13 +1,14 @@
 [requires]
-openssl/1.1.1d
 boost/1.75.0
 communi/3.6.0@test/test
-serialize/0.1@test/test
+gtest/1.10.0
+openssl/1.1.1d
 QtKeychain/0.12.90@test/test
+rapidjson/cci.20200410
+serialize/0.1@test/test
+settings/0.1@test/test
 signals/0.1@test/test
 WebSocketpp/0.8.1@test/test
-rapidjson/cci.20200410
-settings/0.1@test/test
 
 [generators]
 cmake
