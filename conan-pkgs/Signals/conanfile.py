@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 
 
-class LibCommuniConan(ConanFile):
+class SignalsConan(ConanFile):
     name = "signals"
     version = "0.1"
     license = "MIT"
@@ -17,7 +17,7 @@ class LibCommuniConan(ConanFile):
         git.checkout("baf5bb04bd13b090e405e0447c89a811f7e23ddc")
 
     def package(self):
-        self.copy("include/*.hpp")
+        self.copy("*.hpp", "include", "include")
 
     def package_id(self):
         self.info.header_only()
