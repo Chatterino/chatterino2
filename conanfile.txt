@@ -4,6 +4,7 @@ boost/1.71.0
 
 [generators]
 qmake
+cmake_find_package
 
 [options]
 openssl:shared=True

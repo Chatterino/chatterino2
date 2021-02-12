@@ -27,6 +27,7 @@ ui_*.h
 Makefile*
 *build-*/
 /build/
+/_build/
 
 # QtCreator
 
@@ -78,3 +79,7 @@ Thumbs.db
 
 # Other editors/IDEs
 .vscode
+
+.idea/
+
+dependencies/
