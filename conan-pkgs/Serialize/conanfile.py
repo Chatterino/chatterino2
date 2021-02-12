@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 
 
-class LibCommuniConan(ConanFile):
+class SerializeConan(ConanFile):
     name = "serialize"
     version = "0.1"
     license = "MIT"
@@ -18,7 +18,7 @@ class LibCommuniConan(ConanFile):
         git.checkout("130ffc3ec722284ca454a1e70c5478a75f380144")
 
     def package(self):
-        self.copy("include/*.hpp")
+        self.copy("*.hpp", "include", "include")
 
     def package_id(self):
         self.info.header_only()

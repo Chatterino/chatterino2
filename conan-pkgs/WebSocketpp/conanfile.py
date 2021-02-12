@@ -1,7 +1,7 @@
 from conans import ConanFile, CMake, tools
 
 
-class LibCommuniConan(ConanFile):
+class WebSocketppConan(ConanFile):
     name = "WebSocketpp"
     version = "0.8.1"
     license = "MIT"

@@ -1,23 +1,29 @@
 from conans import ConanFile, CMake, tools
 
 
-class QtKeychainConan(ConanFile):
-    name = "QtKeychain"
-    version = "0.12.90"
+class SettingsConan(ConanFile):
+    name = "settings"
+    version = "0.1"
     license = "MIT"
     author = "Edgar Edgar@AnotherFoxGuy.com"
     url = "https://github.com/Chatterino/chatterino2"
-    description = "QtKeychain is a Qt API to store passwords and other secret data securely"
+    description = "pajlada's C++ Settings library"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake"
 
+    def requirements(self):
+        self.requires.add('rapidjson/cci.20200410')
+        self.requires.add('boost/[1.x.x]')
+
     def source(self):
         git = tools.Git()
-        git.clone("https://github.com/Chatterino/qtkeychain.git")
-        git.checkout("308ea7e709113dc277be1653fe2044bb20236836")
+        git.clone("https://github.com/AnotherFoxGuy/settings.git")
+        git.checkout("cmake-fix", "recursive")
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions['CONAN_EXPORTED'] = 'ON'
+        cmake.definitions['BUILD_TESTS'] = 'OFF'
         cmake.configure()
         cmake.build()
 
