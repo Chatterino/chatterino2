@@ -43,7 +43,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         if: ${{ matrix.qt-version == 'default' }}
         with:
-          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          aqtversion: '==1.1.0'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           extra: --external 7z
 
@@ -51,7 +51,7 @@ jobs:
         uses: jurplel/install-qt-action@v2
         if: ${{ matrix.qt-version != 'default' }}
         with:
-          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          aqtversion: '==1.1.0'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           extra: --external 7z
           version: ${{ matrix.qt-version }}
