@@ -16,4 +16,4 @@ cmake
 openssl:shared=True
 
 [imports]
-bin, *.dll -> ./Chatterino2 @ keep_path=False
+bin, *.dll -> ./bin @ keep_path=False
