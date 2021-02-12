@@ -1,10 +1,14 @@
 [requires]
 openssl/1.1.1d
-boost/1.71.0
+boost/1.75.0
+communi/3.6.0@test/test
+serialize/0.1@test/test
+QtKeychain/0.12.90@test/test
+signals/0.1@test/test
+WebSocketpp/0.8.1@test/test
 
 [generators]
-qmake
-cmake_find_package
+cmake
 
 [options]
 openssl:shared=True
