@@ -1,12 +1,11 @@
-
 find_path(IrcCore_INCLUDE_DIR irc.h PATH_SUFFIXES IrcCore)
-find_library(IrcCore_LIBRARY IrcCore)
+find_library(IrcCore_LIBRARY Core)
 
 find_path(IrcModel_INCLUDE_DIR IrcModel.h PATH_SUFFIXES IrcModel)
-find_library(IrcModel_LIBRARY IrcModel)
+find_library(IrcModel_LIBRARY Model)
 
 find_path(IrcUtil_INCLUDE_DIR ircutil.h PATH_SUFFIXES IrcUtil)
-find_library(IrcUtil_LIBRARY IrcUtil)
+find_library(IrcUtil_LIBRARY Util)
 
 set(LibCommuni_INCLUDE_DIRS ${IrcCore_INCLUDE_DIR} ${IrcModel_INCLUDE_DIR} ${IrcUtil_INCLUDE_DIR})
 set(LibCommuni_LIBRARIES ${IrcCore_LIBRARY} ${IrcModel_LIBRARY} ${IrcUtil_LIBRARY})
@@ -24,6 +23,6 @@ if (LibCommuni_FOUND)
             )
 endif ()
 
-mark_as_advanced( LibCommuni_INCLUDE_DIRS LibCommuni_LIBRARIES
+mark_as_advanced(LibCommuni_INCLUDE_DIRS LibCommuni_LIBRARIES
         IrcCore_LIBRARY IrcModel_LIBRARY IrcUtil_LIBRARY
         IrcCore_INCLUDE_DIR IrcModel_INCLUDE_DIR IrcUtil_INCLUDE_DIR)
