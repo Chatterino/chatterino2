@@ -91,9 +91,6 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     std::lock_guard<std::mutex> guard(this->itemsMutex_);
     this->items_.clear();
 
-    if (prefix.length() < 2)
-        return;
-
     if (auto channel = dynamic_cast<TwitchChannel *>(&this->channel_))
     {
         // account emotes
