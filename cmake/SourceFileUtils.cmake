@@ -24,7 +24,7 @@
 # This function expands filenames specified with multiple extensions into separate filenames for
 # each provided extension. For example
 #
-#   path/to/file.{h,cpp}
+#   path/to/file.{hpp,cpp}
 #   path/to/definitions.h
 #
 # is transformed into
@@ -42,9 +42,8 @@
 function(expand_file_extensions RESULT)
 
     foreach (entry IN LISTS ARGN)
-
         # Check for file extension pattern
-        string(REGEX MATCH "\\.{((hxx|cxx),)+(hxx|cxx)}$" EXT_PATTERN ${entry})
+        string(REGEX MATCH "\\.{((hpp|cpp),)+(hpp|cpp)}$" EXT_PATTERN ${entry})
         if (NOT EXT_PATTERN)
             list(APPEND EXPANDED_SOURCES ${entry})
         else ()
@@ -55,7 +54,7 @@ function(expand_file_extensions RESULT)
             # Obtain basename without extension pattern (e.g. "path/to/file")
             string(SUBSTRING ${entry} 0 ${BASE_LEN} BASENAME)
 
-            # Convert extension pattern to list (e.g. ".{hxx,cpp}" -> "hxx;cpp")
+            # Convert extension pattern to list (e.g. ".{hpp,cpp}" -> "hpp;cpp")
             math(EXPR EXT_LEN "${EXT_LEN}-3")
             string(SUBSTRING ${EXT_PATTERN} 2 ${EXT_LEN} EXT_PATTERN)
             string(REPLACE "," ";" EXT_PATTERN ${EXT_PATTERN})
