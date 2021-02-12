@@ -120,7 +120,9 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         }();
 
         // check if there is something to complete
-        if (currentCompletionPrefix.size() <= 1)
+        if (currentCompletionPrefix.size() <= 1 ||
+            (currentCompletionPrefix.startsWith("@") &&
+             currentCompletionPrefix.size() <= 2))
         {
             return;
         }
