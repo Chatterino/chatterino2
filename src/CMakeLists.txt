@@ -26,6 +26,7 @@ target_link_libraries(${PROJECT_NAME}
         Qt5::Concurrent
         CONAN_PKG::boost
         CONAN_PKG::QtKeychain
+        CONAN_PKG::rapidjson
         CONAN_PKG::openssl
         CONAN_PKG::communi
         CONAN_PKG::serialize

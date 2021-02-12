@@ -6,6 +6,8 @@ serialize/0.1@test/test
 QtKeychain/0.12.90@test/test
 signals/0.1@test/test
 WebSocketpp/0.8.1@test/test
+rapidjson/cci.20200410
+settings/0.1@test/test
 
 [generators]
 cmake
