@@ -1,7 +1,7 @@
 #include "Credentials.hpp"
 
 #include "debug/AssertInGuiThread.hpp"
-#include "keychain.h"
+#include "qt5keychain/keychain.h"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
