@@ -4,7 +4,6 @@
 #include <boost/variant.hpp>
 #include "Application.hpp"
 #include "common/ChatterinoSetting.hpp"
-#include "common/QLogging.hpp"
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/SignalLabel.hpp"
 
@@ -193,7 +192,6 @@ public:
 protected:
     void resizeEvent(QResizeEvent *ev) override
     {
-        qCDebug(chatterinoWidget) << ev->size();
     }
 
 private:

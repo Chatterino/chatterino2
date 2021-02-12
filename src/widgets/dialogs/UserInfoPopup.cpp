@@ -12,6 +12,7 @@
 #include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Clipboard.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Shortcut.hpp"
@@ -47,8 +48,8 @@ namespace {
             [label = label.getElement()] {
                 auto copyText = label->property("copy-text").toString();
 
-                qApp->clipboard()->setText(copyText.isEmpty() ? label->getText()
-                                                              : copyText);
+                crossPlatformCopy(copyText.isEmpty() ? label->getText()
+                                                     : copyText);
             });
 
         return label.getElement();
