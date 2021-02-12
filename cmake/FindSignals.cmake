@@ -1,6 +1,6 @@
 include(FindPackageHandleStandardArgs)
 
-find_path(Signals_INCLUDE_DIR signals/signal.hpp PATH_SUFFIXES pajlada)
+find_path(Signals_INCLUDE_DIR pajlada/signals/signal.hpp)
 
 find_package_handle_standard_args(Signals REQUIRED_VARS Signals_INCLUDE_DIR)
 

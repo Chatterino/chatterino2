@@ -1,0 +1,13 @@
+[requires]
+openssl/1.1.1d
+boost/1.75.0
+
+[generators]
+qmake
+cmake_find_package
+
+[options]
+openssl:shared=True
+
+[imports]
+bin, *.dll -> ./bin @ keep_path=False
