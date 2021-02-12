@@ -219,43 +219,45 @@ generate_source_groups(${SOURCE_FILES})
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO UNICODE USEWINSDK AB_CUSTOM_THEME AB_CUSTOM_SETTINGS IRC_STATIC IRC_NAMESPACE=Communi) #
+target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO UNICODE USEWINSDK AB_CUSTOM_THEME AB_CUSTOM_SETTINGS IRC_STATIC IRC_NAMESPACE=Communi)
 target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_GIT_HASH=\"XD\" CHATTERINO_GIT_RELEASE=\"XD\" CHATTERINO_GIT_COMMIT=\"XD\")
 
 include(WinToast)
 
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
 target_link_libraries(${PROJECT_NAME}
-        Qt5::Gui
-        Qt5::Widgets
-        Qt5::Network
-        Qt5::Multimedia
-        Qt5::Svg
         Qt5::Concurrent
+        Qt5::Gui
+        Qt5::Multimedia
+        Qt5::Network
+        Qt5::Svg
+        Qt5::Widgets
         WinToast
         )
 
 if (USE_PACKAGE_MANAGER)
     target_link_libraries(${PROJECT_NAME}
             CONAN_PKG::boost
+            CONAN_PKG::communi
+            CONAN_PKG::openssl
             CONAN_PKG::QtKeychain
             CONAN_PKG::rapidjson
-            CONAN_PKG::openssl
-            CONAN_PKG::communi
             CONAN_PKG::serialize
             CONAN_PKG::settings
             CONAN_PKG::signals
             CONAN_PKG::WebSocketpp
             )
 else ()
-    target_include_directories(${PROJECT_NAME} PRIVATE . "${RapidJSON_INCLUDE_DIRS}")
+    target_include_directories(${PROJECT_NAME} PRIVATE ${RapidJSON_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME}
             Boost::Boost
-            OpenSSL::OpenSSL
             LibCommuni::LibCommuni
+            OpenSSL::OpenSSL
+            qt5keychain
             Serialize::Serialize
             Settings::Settings
             Signals::Signals
-            qt5keychain
             websocketpp::websocketpp
             )
 endif ()

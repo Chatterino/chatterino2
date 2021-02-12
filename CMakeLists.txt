@@ -3,6 +3,10 @@ include(FeatureSummary)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_BINARY_DIR})
 
+project(Chatterino2)
+
+option(BUILD_APP "Build Chatterino2" ON)
+option(BUILD_TESTS "Build the tests for Chatterino2" OFF)
 option(USE_PACKAGE_MANAGER "Use conan for managing packages" OFF)
 
 set(CMAKE_AUTOMOC ON)
@@ -21,9 +25,7 @@ if (WIN32)
     SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${RUNTIME_OUTPUT_DIRECTORY})
     SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${RUNTIME_OUTPUT_DIRECTORY})
     SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${RUNTIME_OUTPUT_DIRECTORY})
-endif()
-
-project(Chatterino2)
+endif ()
 
 if (USE_PACKAGE_MANAGER)
     include(pmm)
@@ -41,6 +43,10 @@ else (USE_PACKAGE_MANAGER)
     find_package(Settings REQUIRED)
     find_package(Serialize REQUIRED)
     find_package(Websocketpp REQUIRED)
+
+    if (BUILD_TESTS)
+        find_package(GTest REQUIRED)
+    endif ()
 endif (USE_PACKAGE_MANAGER)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -48,8 +54,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui Network Multimedia Svg Concurrent)
 
-add_subdirectory(src)
-#add_subdirectory(tests)
-
+if (BUILD_APP)
+    add_subdirectory(src)
+endif ()
+if (BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif ()
 
 feature_summary(WHAT ALL)
