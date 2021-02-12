@@ -1,0 +1,60 @@
+include(GoogleTest)
+
+project(chatterino-tests)
+
+set(main_dir ${CMAKE_SOURCE_DIR}/src)
+
+include_directories(${main_dir})
+
+set(chatterino_SOURCES
+        ${main_dir}/common/NetworkRequest.cpp
+        ${main_dir}/common/NetworkResult.cpp
+        ${main_dir}/common/NetworkPrivate.cpp
+        ${main_dir}/common/NetworkManager.cpp
+        ${main_dir}/common/QLogging.cpp
+        ${main_dir}/common/Modes.cpp
+        ${main_dir}/common/ChatterinoSetting.cpp
+        ${main_dir}/util/DebugCount.cpp
+        ${main_dir}/singletons/Paths.cpp
+        ${main_dir}/BaseSettings.cpp
+        ${main_dir}/common/UsernameSet.cpp
+        ${main_dir}/controllers/highlights/HighlightPhrase.cpp
+        )
+
+message("++ Tests enabled")
+
+add_executable(${PROJECT_NAME}
+        ${chatterino_SOURCES}
+        src/main.cpp
+        src/NetworkRequest.cpp
+        src/UsernameSet.cpp
+        src/HighlightPhrase.cpp
+        )
+
+target_link_libraries(${PROJECT_NAME}
+        Qt5::Core
+        Qt5::Widgets
+        Qt5::Network
+        Qt5::Concurrent
+        )
+
+if (USE_PACKAGE_MANAGER)
+    target_link_libraries(${PROJECT_NAME}
+            CONAN_PKG::gtest
+            CONAN_PKG::serialize
+            CONAN_PKG::settings
+            CONAN_PKG::signals
+            )
+else ()
+    target_link_libraries(${PROJECT_NAME}
+            gtest gtest_main
+            Serialize::Serialize
+            Settings::Settings
+            Signals::Signals
+            )
+endif ()
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO UNICODE USEWINSDK AB_CUSTOM_THEME AB_CUSTOM_SETTINGS IRC_STATIC IRC_NAMESPACE=Communi)
+target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_GIT_HASH=\"XD\" CHATTERINO_GIT_RELEASE=\"XD\" CHATTERINO_GIT_COMMIT=\"XD\")
+
+gtest_discover_tests(${PROJECT_NAME})
