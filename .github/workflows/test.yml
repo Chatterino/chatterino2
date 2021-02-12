@@ -22,7 +22,7 @@ jobs:
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.4
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-20201005
