@@ -381,14 +381,10 @@ QString Emojis::replaceShortCodes(const QString &text)
 
         if (emojiIt == this->emojiShortCodeToEmoji_.constEnd())
         {
-            printf("No match for %s\n", matchString.toStdString().c_str());
             continue;
         }
 
         auto emojiData = emojiIt.value();
-
-        printf("Found match for %s: '%s'\n", qUtf8Printable(matchString),
-               qUtf8Printable(emojiData->unifiedCode));
 
         ret.replace(offset + match.capturedStart(), match.capturedLength(),
                     emojiData->value);
