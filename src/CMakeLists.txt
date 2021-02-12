@@ -17,6 +17,8 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_GIT_HASH=\"XD\" CH
 
 target_include_directories(${PROJECT_NAME} PRIVATE . "${RapidJSON_INCLUDE_DIRS}")
 
+include(WinToast)
+
 target_link_libraries(${PROJECT_NAME}
         Qt5::Gui
         Qt5::Widgets
@@ -30,8 +32,10 @@ target_link_libraries(${PROJECT_NAME}
         CONAN_PKG::openssl
         CONAN_PKG::communi
         CONAN_PKG::serialize
+        CONAN_PKG::settings
         CONAN_PKG::signals
         CONAN_PKG::WebSocketpp
+        WinToast
         )
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
