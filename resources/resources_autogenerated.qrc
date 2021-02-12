@@ -41,7 +41,6 @@
     <file>com.chatterino.chatterino.desktop</file>
     <file>contributors.txt</file>
     <file>emoji.json</file>
-    <file>emojidata.txt</file>
     <file>error.png</file>
     <file>examples/moving.gif</file>
     <file>examples/splitting.gif</file>
