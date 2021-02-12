@@ -49,6 +49,7 @@
 - Minor: Made username autocompletion truecase (#1199, #1883)
 - Minor: Update the listing of top-level domains. (#2345)
 - Minor: Properly respect RECONNECT messages from Twitch (#2347)
+- Minor: Hide "Case-sensitive" column for user highlights. (#2404)
 - Minor: Added human-readable formatting to remaining timeout duration. (#2398)
 - Minor: Added `/streamlink` command. Usage: `/streamlink <channel>`. You can also use the command without arguments in any twitch channel to open it in streamlink. (#2443)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
