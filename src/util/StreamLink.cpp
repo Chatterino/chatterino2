@@ -187,8 +187,7 @@ void openStreamlink(const QString &channelURL, const QString &quality,
         arguments << quality;
     }
 
-    bool res = QProcess::startDetached(getStreamlinkProgram() + " " +
-                                       QString(arguments.join(' ')));
+    bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
 
     if (!res)
     {
