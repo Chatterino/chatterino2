@@ -544,23 +544,26 @@ void CommandController::initialize(Settings &, Paths &paths)
         "/streamlink", [](const QStringList &words, ChannelPtr channel) {
             if (words.size() < 2)
             {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: /streamlink <channel>, use \"channel\" literally "
-                    "to open current channel in streamlink."));
+                if (!channel->isTwitchChannel() || channel->isEmpty())
+                {
+                    channel->addMessage(makeSystemMessage(
+                        "Usage: /streamlink <channel>. You can also use the "
+                        "command without arguments in any twitch channel to "
+                        "open it in streamlink."));
+                }
+                else
+                {
+                    channel->addMessage(
+                        makeSystemMessage(QString("Opening %1 in streamlink...")
+                                              .arg(channel->getName())));
+                    openStreamlinkForChannel(channel->getName());
+                }
                 return "";
             }
-
-            if (!channel->isTwitchChannel())
-            {
-                return "";
-            }
-
-            QString channelName =
-                (words[1] == "channel") ? channel->getName() : words[1];
 
             channel->addMessage(makeSystemMessage(
-                QString("Opening %1 in streamlink...").arg(channelName)));
-            openStreamlinkForChannel(channelName);
+                QString("Opening %1 in streamlink...").arg(words[1])));
+            openStreamlinkForChannel(words[1]);
 
             return "";
         });
