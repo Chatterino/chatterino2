@@ -1,5 +1,3 @@
-
-CMAKE_PREFIX_PATH
 # Building on Windows
 
 **Note that installing all the development prerequisites and libraries will require about 30 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**

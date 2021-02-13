@@ -13,9 +13,6 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 SET(RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/")
 SET(LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/")
 SET(ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/")
@@ -45,18 +42,23 @@ else (USE_PACKAGE_MANAGER)
     find_package(Boost REQUIRED)
     find_package(OpenSSL REQUIRED)
 
-    find_package(LibCommuni REQUIRED)
-    find_package(Qt5keychain REQUIRED)
-    find_package(Rapidjson REQUIRED)
+    find_package(Serialize REQUIRED)
     find_package(Signals REQUIRED)
     find_package(Settings REQUIRED)
-    find_package(Serialize REQUIRED)
-    find_package(Websocketpp REQUIRED)
 
+    if (BUILD_APP)
+        find_package(LibCommuni REQUIRED)
+        find_package(Qt5keychain REQUIRED)
+        find_package(Rapidjson REQUIRED)
+        find_package(Websocketpp REQUIRED)
+    endif ()
     if (BUILD_TESTS)
         find_package(GTest REQUIRED)
     endif ()
 endif (USE_PACKAGE_MANAGER)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 if (BUILD_APP)
