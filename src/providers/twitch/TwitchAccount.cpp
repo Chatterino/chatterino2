@@ -111,6 +111,42 @@ void TwitchAccount::loadBlocks()
         });
 }
 
+void TwitchAccount::blockUser(QString userId, std::function<void()> onSuccess,
+                              std::function<void()> onFailure)
+{
+    getHelix()->blockUser(
+        userId,
+        [this, userId, onSuccess] {
+            TwitchUser blockedUser;
+            blockedUser.id = userId;
+            {
+                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+
+                this->ignores_.insert(blockedUser);
+            }
+            onSuccess();
+        },
+        onFailure);
+}
+
+void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
+                                std::function<void()> onFailure)
+{
+    getHelix()->unblockUser(
+        userId,
+        [this, userId, onSuccess] {
+            TwitchUser ignoredUser;
+            ignoredUser.id = userId;
+            {
+                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+
+                this->ignores_.erase(ignoredUser);
+            }
+            onSuccess();
+        },
+        onFailure);
+}
+
 void TwitchAccount::checkFollow(const QString targetUserID,
                                 std::function<void(FollowResult)> onFinished)
 {

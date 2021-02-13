@@ -73,6 +73,10 @@ public:
     bool isAnon() const;
 
     void loadBlocks();
+    void blockUser(QString userId, std::function<void()> onSuccess,
+                   std::function<void()> onFailure);
+    void unblockUser(QString userId, std::function<void()> onSuccess,
+                     std::function<void()> onFailure);
 
     void checkFollow(const QString targetUserID,
                      std::function<void(FollowResult)> onFinished);

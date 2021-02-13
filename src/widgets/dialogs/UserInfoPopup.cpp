@@ -437,13 +437,12 @@ void UserInfoPopup::installEvents()
                 case Qt::CheckState::Unchecked: {
                     this->ui_.follow->setEnabled(false);
 
-                    getHelix()->unblockUser(
+                    getApp()->accounts->twitch.getCurrent()->unblockUser(
                         this->userId_,
                         [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addMessage(makeSystemMessage(
                                 QString("You successfully unblocked user %1")
                                     .arg(this->userName_)));
-                            currentUser->loadBlocks();
                             reenableBlockCheckbox();
                         },
                         [this, reenableBlockCheckbox] {
@@ -464,13 +463,12 @@ void UserInfoPopup::installEvents()
                 case Qt::CheckState::Checked: {
                     this->ui_.follow->setEnabled(false);
 
-                    getHelix()->blockUser(
+                    getApp()->accounts->twitch.getCurrent()->blockUser(
                         this->userId_,
                         [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addMessage(makeSystemMessage(
                                 QString("You successfully blocked user %1")
                                     .arg(this->userName_)));
-                            currentUser->loadBlocks();
                             reenableBlockCheckbox();
                         },
                         [this, reenableBlockCheckbox] {

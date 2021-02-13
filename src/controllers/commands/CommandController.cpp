@@ -278,10 +278,9 @@ void CommandController::initialize(Settings &, Paths &paths)
         getHelix()->getUserByName(
             target,
             [currentUser, channel, target](const HelixUser &targetUser) {
-                getHelix()->blockUser(
+                getApp()->accounts->twitch.getCurrent()->blockUser(
                     targetUser.id,
                     [channel, target, targetUser] {
-                        getApp()->accounts->twitch.getCurrent()->loadBlocks();
                         channel->addMessage(makeSystemMessage(
                             QString("You successfully blocked user %1")
                                 .arg(target)));
@@ -324,10 +323,9 @@ void CommandController::initialize(Settings &, Paths &paths)
         getHelix()->getUserByName(
             target,
             [currentUser, channel, target](const auto &targetUser) {
-                getHelix()->unblockUser(
+                getApp()->accounts->twitch.getCurrent()->unblockUser(
                     targetUser.id,
                     [channel, target, targetUser] {
-                        getApp()->accounts->twitch.getCurrent()->loadBlocks();
                         channel->addMessage(makeSystemMessage(
                             QString("You successfully unblocked user %1")
                                 .arg(target)));
@@ -495,7 +493,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
-    this->registerCommand("/clip", [](const auto &words, auto channel) {
+    this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
         if (!channel->isTwitchChannel())
         {
             return "";
