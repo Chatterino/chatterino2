@@ -2,9 +2,9 @@ include(SourceFileUtils)
 
 project(chatterino)
 
-IF (MSVC)
-    ADD_DEFINITIONS("/EHsc")
-ENDIF (MSVC)
+if (MSVC)
+    add_definitions("/EHsc")
+endif (MSVC)
 
 set(SOURCE_FILES main.cpp
         Application.{hpp,cpp}
@@ -222,8 +222,6 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO UNICODE USEWINSDK AB_CUSTOM_THEME AB_CUSTOM_SETTINGS IRC_STATIC IRC_NAMESPACE=Communi)
 target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_GIT_HASH=\"XD\" CHATTERINO_GIT_RELEASE=\"XD\" CHATTERINO_GIT_COMMIT=\"XD\")
 
-include(WinToast)
-
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(${PROJECT_NAME}
@@ -233,8 +231,11 @@ target_link_libraries(${PROJECT_NAME}
         Qt5::Network
         Qt5::Svg
         Qt5::Widgets
-        WinToast
         )
+
+if (WinToast_FOUND)
+    target_link_libraries(${PROJECT_NAME} WinToast)
+endif ()
 
 if (USE_PACKAGE_MANAGER)
     target_link_libraries(${PROJECT_NAME}

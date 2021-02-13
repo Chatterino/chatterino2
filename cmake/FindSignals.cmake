@@ -1,8 +1,8 @@
 include(FindPackageHandleStandardArgs)
 
-find_path(Signals_INCLUDE_DIR pajlada/signals/signal.hpp)
+find_path(Signals_INCLUDE_DIR pajlada/signals/signal.hpp HINTS ${CMAKE_SOURCE_DIR}/lib/signals/include)
 
-find_package_handle_standard_args(Signals REQUIRED_VARS Signals_INCLUDE_DIR)
+find_package_handle_standard_args(Signals DEFAULT_MSG Signals_INCLUDE_DIR)
 
 if (Signals_FOUND)
     add_library(Signals::Signals INTERFACE IMPORTED)

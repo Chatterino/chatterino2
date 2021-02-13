@@ -14,12 +14,10 @@ project(chatterino2-dependencies VERSION 1)
 # ------------------------------------------------------------------------------------------------#
 
 # Options with same default value on all platforms
+option(BUILD_LIBCOMMUNI "Build LibCommuni" ON)
 option(BUILD_QTKEYCHAIN "Build QtKeychain" ON)
-option(BUILD_RAPIDJSON "Build RapidJSON library" ON)
-option(BUILD_SERIALIZE "Build Serialize library" ON)
 option(BUILD_SETTINGS "Build Settings library" ON)
-option(BUILD_SIGNALS "Build Signals library" ON)
-option(BUILD_WEBSOCKETPP "Build WebSocketpp library" ON)
+option(BUILD_GOOGLETEST "Build GoogleTest library" OFF)
 
 # ------------------------------------------------------------------------------------------------#
 # General setup and initialization
@@ -99,60 +97,6 @@ if (BUILD_QTKEYCHAIN)
     )
 endif ()
 
-
-# ------------------------------------------------------------------------------------------------#
-#  RapidJSON
-# ------------------------------------------------------------------------------------------------#
-if (BUILD_RAPIDJSON)
-    ExternalProject_Add(
-            RapidJSON
-            DOWNLOAD_COMMAND ""
-            SOURCE_DIR "${CMAKE_SOURCE_DIR}/rapidjson"
-            CMAKE_ARGS
-            -DCMAKE_INSTALL_PREFIX=${DEPENDENCIES_OUTPUT_DIR}
-            -DINCLUDE_INSTALL_DIR=${DEPENDENCIES_OUTPUT_DIR}/include # rapidjson will add "rapidjson" subdirectory
-            -DRAPIDJSON_BUILD_DOC=NO
-            -DRAPIDJSON_BUILD_EXAMPLES=NO
-            -DRAPIDJSON_BUILD_TESTS=NO
-            -DRAPIDJSON_BUILD_THIRDPARTY_GTEST=NO
-            -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}
-            -DCMAKE_CXX_FLAGS=${CMAKE_CXX_FLAGS}
-            -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
-            -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-    )
-endif ()
-
-# ------------------------------------------------------------------------------------------------#
-#  Serialize
-# ------------------------------------------------------------------------------------------------#
-
-if (BUILD_SERIALIZE)
-    ExternalProject_Add(
-            Serialize
-            DOWNLOAD_COMMAND ""
-            SOURCE_DIR "${CMAKE_SOURCE_DIR}/serialize"
-            CONFIGURE_COMMAND ""
-            BUILD_COMMAND ""
-            INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/serialize/include ${DEPENDENCIES_OUTPUT_DIR}/include
-    )
-endif ()
-
-# ------------------------------------------------------------------------------------------------#
-#  Signals
-# ------------------------------------------------------------------------------------------------#
-
-if (BUILD_SIGNALS)
-    ExternalProject_Add(
-            Signals
-            DOWNLOAD_COMMAND ""
-            SOURCE_DIR "${CMAKE_SOURCE_DIR}/signals"
-            CONFIGURE_COMMAND ""
-            BUILD_COMMAND ""
-            INSTALL_COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/signals/include ${DEPENDENCIES_OUTPUT_DIR}/include
-    )
-endif ()
-
-
 # ------------------------------------------------------------------------------------------------#
 #  Settings
 # ------------------------------------------------------------------------------------------------#
@@ -175,14 +119,14 @@ if (BUILD_SETTINGS)
 endif ()
 
 # ------------------------------------------------------------------------------------------------#
-#  WebSocketpp
+#  GoogleTest
 # ------------------------------------------------------------------------------------------------#
 
-if (BUILD_WEBSOCKETPP)
+if (BUILD_GOOGLETEST)
     ExternalProject_Add(
-            WebSocketpp
-            GIT_REPOSITORY https://github.com/ziocleto/websocketpp.git
-            GIT_TAG 1e0138c7ccedc6be859d28270ccd6195f235a94e
+            GoogleTest
+            GIT_REPOSITORY https://github.com/google/googletest.git
+            GIT_TAG release-1.10.0
             GIT_SHALLOW TRUE
             GIT_PROGRESS TRUE
             CMAKE_ARGS
@@ -193,5 +137,4 @@ if (BUILD_WEBSOCKETPP)
             -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
     )
 endif ()
-
 

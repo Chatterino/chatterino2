@@ -1,8 +1,8 @@
 include(FindPackageHandleStandardArgs)
 
-find_path(Serialize_INCLUDE_DIR pajlada/serialize.hpp)
+find_path(Serialize_INCLUDE_DIR pajlada/serialize.hpp HINTS ${CMAKE_SOURCE_DIR}/lib/serialize/include)
 
-find_package_handle_standard_args(Serialize REQUIRED_VARS Serialize_INCLUDE_DIR)
+find_package_handle_standard_args(Serialize DEFAULT_MSG Serialize_INCLUDE_DIR)
 
 if (Serialize_FOUND)
     add_library(Serialize::Serialize INTERFACE IMPORTED)
