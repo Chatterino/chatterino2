@@ -80,6 +80,6 @@ jobs:
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            ctest
+            ./chatterino-test --platform minimal
         working-directory: build-test
         shell: bash
