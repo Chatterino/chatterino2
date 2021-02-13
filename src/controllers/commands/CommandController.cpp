@@ -231,6 +231,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     }
 
     /// Deprecated commands
+
     this->registerCommand("/logs", [](const auto & /*words*/, auto channel) {
         channel->addMessage(makeSystemMessage(
             "Online logs functionality has been removed. If you're a "
