@@ -79,6 +79,8 @@ jobs:
 
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
+        env:
+          QT_DEBUG_PLUGINS: 1
         run: |
             ls -la "$Qt5_DIR"
             ls -la "$QT_PLUGIN_PATH"
