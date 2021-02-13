@@ -230,15 +230,39 @@ void CommandController::initialize(Settings &, Paths &paths)
         this->items_.append(command);
     }
 
-    this->registerCommand("/debug-args", [](const auto &words, auto channel) {
-        QString msg = QApplication::instance()->arguments().join(' ');
-
-        channel->addMessage(makeSystemMessage(msg));
-
+    /// Deprecated commands
+    this->registerCommand("/logs", [](const auto & /*words*/, auto channel) {
+        channel->addMessage(makeSystemMessage(
+            "Online logs functionality has been removed. If you're a "
+            "moderator, you can use the /user command"));
         return "";
     });
 
-    this->registerCommand("/uptime", [](const auto &words, auto channel) {
+    this->registerCommand("/ignore", [](const auto & /*words*/, auto channel) {
+        channel->addMessage(
+            makeSystemMessage("Ignore command has been renamed to /block"));
+        return "";
+    });
+
+    this->registerCommand(
+        "/unignore", [](const auto & /*words*/, auto channel) {
+            channel->addMessage(makeSystemMessage(
+                "Unignore command has been renamed to /block"));
+            return "";
+        });
+
+    /// Supported commands
+
+    this->registerCommand(
+        "/debug-args", [](const auto & /*words*/, auto channel) {
+            QString msg = QApplication::instance()->arguments().join(' ');
+
+            channel->addMessage(makeSystemMessage(msg));
+
+            return "";
+        });
+
+    this->registerCommand("/uptime", [](const auto & /*words*/, auto channel) {
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
         if (twitchChannel == nullptr)
         {
@@ -428,13 +452,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                     QString("User %1 could not be followed!").arg(target)));
             });
 
-        return "";
-    });
-
-    this->registerCommand("/logs", [](const auto & /*words*/, auto channel) {
-        channel->addMessage(makeSystemMessage(
-            "Online logs functionality has been removed. If you're a "
-            "moderator, you can use the /user command"));
         return "";
     });
 
