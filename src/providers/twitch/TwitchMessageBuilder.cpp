@@ -143,8 +143,7 @@ bool TwitchMessageBuilder::isIgnored() const
     {
         auto sourceUserID = this->tags.value("user-id").toString();
 
-        for (const auto &user :
-             app->accounts->twitch.getCurrent()->getBlocks())
+        for (const auto &user : app->accounts->twitch.getCurrent()->getBlocks())
         {
             if (sourceUserID == user.id)
             {
