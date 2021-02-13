@@ -18,6 +18,9 @@ class QtKeychainConan(ConanFile):
 
     def build(self):
         cmake = CMake(self)
+        cmake.definitions['BUILD_TRANSLATIONS'] = 'OFF'
+        cmake.definitions['BUILD_TEST_APPLICATION'] = 'OFF'
+        cmake.definitions['QTKEYCHAIN_STATIC'] = 'ON'
         cmake.configure()
         cmake.build()
 
