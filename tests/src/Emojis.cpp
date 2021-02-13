@@ -36,6 +36,13 @@ TEST(Emojis, ShortcodeParsing)
     {
         auto output = emojis.replaceShortCodes(test.input);
 
+        auto matches = output == test.expectedOutput;
+        if (!matches && !output.endsWith(QChar(0xFE0F)))
+        {
+            // Try to append 0xFE0F if needed
+            output = output.append(QChar(0xFE0F));
+        }
+
         EXPECT_EQ(output, test.expectedOutput)
             << "Input " << test.input.toStdString() << " failed";
     }
