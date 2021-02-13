@@ -61,20 +61,20 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v2.1.4
         with:
-          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
+          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile-qmake.txt') }}
           path: ~/.conan
 
       - name: Cache conan packages
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v2.1.4
         with:
-          key: ${{ runner.os }}-conan-pkg-${{ hashFiles('**/conanfile.txt') }}
+          key: ${{ runner.os }}-conan-pkg-${{ hashFiles('**/conanfile-qmake.txt') }}
           path: C:/.conan/
 
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
-            choco install conan -y
+            choco install conan jom -y
 
             refreshenv
         shell: cmd
@@ -85,10 +85,9 @@ jobs:
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
-            "C:\Program Files\Conan\conan\conan.exe" install ..
+            "C:\Program Files\Conan\conan\conan.exe" install ..\conanfile-qmake.txt
             qmake ..
-            set cl=/MP
-            nmake /S /NOLOGO
+            jom
             windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
             cp release/chatterino.exe Chatterino2/
             echo nightly > Chatterino2/modes

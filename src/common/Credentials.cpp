@@ -1,11 +1,17 @@
 #include "Credentials.hpp"
 
 #include "debug/AssertInGuiThread.hpp"
-#include "qt5keychain/keychain.h"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/Overloaded.hpp"
+
+#ifdef CMAKE_BUILD
+#include "qt5keychain/keychain.h"
+#else
+#include "keychain.h"
+#endif
+
 
 #include <QSaveFile>
 #include <boost/variant.hpp>
