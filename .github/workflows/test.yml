@@ -80,6 +80,8 @@ jobs:
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
+            ls -la "$Qt5_DIR"
+            ls -la "$QT_PLUGIN_PATH"
             ./chatterino-test
         working-directory: build-test
         shell: bash
