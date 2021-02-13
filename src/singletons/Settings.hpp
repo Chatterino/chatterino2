@@ -171,7 +171,7 @@ public:
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
 
-    QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
+    QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
 
