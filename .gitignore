@@ -26,7 +26,7 @@ qrc_*.cpp
 ui_*.h
 Makefile*
 *build-*/
-/build/
+[bB]uild
 /_build/
 
 # QtCreator
@@ -79,7 +79,27 @@ Thumbs.db
 
 # Other editors/IDEs
 .vscode
+.idea
+dependencies
 
-.idea/
+### CMake ###
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
 
-dependencies/
+### CMake Patch ###
+# External projects
+*-prefix/
+Stamp
+tmp
+Source
+Dependencies_*
