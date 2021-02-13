@@ -92,3 +92,6 @@ jobs:
             ./chatterino-test --platform minimal
         working-directory: build-test
         shell: bash
+
+      - name: Clean conan pkgs
+        run: cmake -P cmake/pmm.cmake /Conan /Clean
