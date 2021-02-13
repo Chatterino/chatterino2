@@ -84,6 +84,6 @@ jobs:
         run: |
             ls -la "$Qt5_DIR"
             ls -la "$QT_PLUGIN_PATH"
-            ./chatterino-test
+            ./chatterino-test --platform minimal
         working-directory: build-test
         shell: bash
