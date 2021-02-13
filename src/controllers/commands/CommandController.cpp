@@ -256,10 +256,10 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand("/ignore", [](const auto &words, auto channel) {
+    this->registerCommand("/block", [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /ignore [user]"));
+            channel->addMessage(makeSystemMessage("Usage: /block [user]"));
             return "";
         }
 
@@ -268,7 +268,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (currentUser->isAnon())
         {
             channel->addMessage(
-                makeSystemMessage("You must be logged in to ignore someone!"));
+                makeSystemMessage("You must be logged in to block someone!"));
             return "";
         }
 
@@ -280,21 +280,21 @@ void CommandController::initialize(Settings &, Paths &paths)
                 getHelix()->blockUser(
                     targetUser.id,
                     [channel, target, targetUser] {
-                        getApp()->accounts->twitch.getCurrent()->loadIgnores();
+                        getApp()->accounts->twitch.getCurrent()->loadBlocks();
                         channel->addMessage(makeSystemMessage(
-                            QString("You successfully ignored user %1")
+                            QString("You successfully blocked user %1")
                                 .arg(target)));
                     },
                     [channel, target] {
                         channel->addMessage(makeSystemMessage(
-                            QString("User %1 couldn't be ignored, an unknown "
+                            QString("User %1 couldn't be blocked, an unknown "
                                     "error occurred!")
                                 .arg(target)));
                     });
             },
             [channel, target] {
                 channel->addMessage(
-                    makeSystemMessage(QString("User %1 couldn't be ignored, no "
+                    makeSystemMessage(QString("User %1 couldn't be blocked, no "
                                               "user with that name found!")
                                           .arg(target)));
             });
@@ -302,10 +302,10 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand("/unignore", [](const auto &words, auto channel) {
+    this->registerCommand("/unblock", [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /unignore [user]"));
+            channel->addMessage(makeSystemMessage("Usage: /unblock [user]"));
             return "";
         }
 
@@ -313,8 +313,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         if (currentUser->isAnon())
         {
-            channel->addMessage(makeSystemMessage(
-                "You must be logged in to unignore someone!"));
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to unblock someone!"));
             return "";
         }
 
@@ -326,21 +326,21 @@ void CommandController::initialize(Settings &, Paths &paths)
                 getHelix()->unblockUser(
                     targetUser.id,
                     [channel, target, targetUser] {
-                        getApp()->accounts->twitch.getCurrent()->loadIgnores();
+                        getApp()->accounts->twitch.getCurrent()->loadBlocks();
                         channel->addMessage(makeSystemMessage(
-                            QString("You successfully unignored user %1")
+                            QString("You successfully unblocked user %1")
                                 .arg(target)));
                     },
                     [channel, target] {
                         channel->addMessage(makeSystemMessage(
-                            QString("User %1 couldn't be unignored, an unknown "
+                            QString("User %1 couldn't be unblocked, an unknown "
                                     "error occurred!")
                                 .arg(target)));
                     });
             },
             [channel, target] {
                 channel->addMessage(
-                    makeSystemMessage(QString("User %1 couldn't be unignored, "
+                    makeSystemMessage(QString("User %1 couldn't be unblocked, "
                                               "no user with that name found!")
                                           .arg(target)));
             });

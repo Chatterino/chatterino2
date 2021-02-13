@@ -24,7 +24,7 @@ struct TwitchUser {
         this->displayName = other.displayName;
     }
 
-    void fromHelixIgnore(const HelixIgnore &ignore)
+    void fromHelixBlock(const HelixBlock &ignore)
     {
         this->id = ignore.userId;
         this->name = ignore.userName;

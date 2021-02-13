@@ -189,7 +189,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         user->addStretch(1);
 
         user.emplace<QCheckBox>("Follow").assign(&this->ui_.follow);
-        user.emplace<QCheckBox>("Ignore").assign(&this->ui_.ignore);
+        user.emplace<QCheckBox>("Block").assign(&this->ui_.block);
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
         auto usercard = user.emplace<EffectLabel2>(this);
@@ -415,20 +415,20 @@ void UserInfoPopup::installEvents()
 
     std::shared_ptr<bool> ignoreNext = std::make_shared<bool>(false);
 
-    // ignore
+    // block
     // TODO(zneix): Eliminate calling blockUser() upon opening a usercard of blocked user
     QObject::connect(
-        this->ui_.ignore, &QCheckBox::stateChanged,
+        this->ui_.block, &QCheckBox::stateChanged,
         [this](int newState) mutable {
             auto currentUser = getApp()->accounts->twitch.getCurrent();
 
-            const auto reenableFollowCheckbox = [this] {
-                this->ui_.follow->setEnabled(true);
+            const auto reenableBlockCheckbox = [this] {
+                this->ui_.block->setEnabled(true);
             };
 
-            if (!this->ui_.ignore->isEnabled())
+            if (!this->ui_.block->isEnabled())
             {
-                reenableFollowCheckbox();
+                reenableBlockCheckbox();
                 return;
             }
 
@@ -439,19 +439,19 @@ void UserInfoPopup::installEvents()
 
                     getHelix()->unblockUser(
                         this->userId_,
-                        [this, reenableFollowCheckbox, currentUser] {
+                        [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addMessage(makeSystemMessage(
-                                QString("You successfully unignored user %1")
+                                QString("You successfully unblocked user %1")
                                     .arg(this->userName_)));
-                            currentUser->loadIgnores();
-                            reenableFollowCheckbox();
+                            currentUser->loadBlocks();
+                            reenableBlockCheckbox();
                         },
-                        [this, reenableFollowCheckbox] {
+                        [this, reenableBlockCheckbox] {
                             this->channel_->addMessage(
                                 makeSystemMessage(QString(
-                                    "User %1 couldn't be unignored, an unknown "
+                                    "User %1 couldn't be unblocked, an unknown "
                                     "error occurred!")));
-                            reenableFollowCheckbox();
+                            reenableBlockCheckbox();
                         });
                 }
                 break;
@@ -466,20 +466,20 @@ void UserInfoPopup::installEvents()
 
                     getHelix()->blockUser(
                         this->userId_,
-                        [this, reenableFollowCheckbox, currentUser] {
+                        [this, reenableBlockCheckbox, currentUser] {
                             this->channel_->addMessage(makeSystemMessage(
-                                QString("You successfully ignored user %1")
+                                QString("You successfully blocked user %1")
                                     .arg(this->userName_)));
-                            currentUser->loadIgnores();
-                            reenableFollowCheckbox();
+                            currentUser->loadBlocks();
+                            reenableBlockCheckbox();
                         },
-                        [this, reenableFollowCheckbox] {
+                        [this, reenableBlockCheckbox] {
                             this->channel_->addMessage(makeSystemMessage(
                                 QString(
-                                    "User %1 couldn't be ignored, an unknown "
+                                    "User %1 couldn't be blocked, an unknown "
                                     "error occurred!")
                                     .arg(this->userName_)));
-                            reenableFollowCheckbox();
+                            reenableBlockCheckbox();
                         });
                 }
                 break;
@@ -659,9 +659,9 @@ void UserInfoPopup::updateUserData()
 
         // get ignore state
         bool isIgnoring = false;
-        for (const auto &ignoredUser : currentUser->getIgnores())
+        for (const auto &blockedUser : currentUser->getBlocks())
         {
-            if (user.id == ignoredUser.id)
+            if (user.id == blockedUser.id)
             {
                 isIgnoring = true;
                 break;
@@ -688,8 +688,8 @@ void UserInfoPopup::updateUserData()
         {
             this->ui_.ignoreHighlights->setEnabled(true);
         }
-        this->ui_.ignore->setEnabled(true);
-        this->ui_.ignore->setChecked(isIgnoring);
+        this->ui_.block->setEnabled(true);
+        this->ui_.block->setChecked(isIgnoring);
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
 
         // get followage and subage
@@ -736,7 +736,7 @@ void UserInfoPopup::updateUserData()
                               onUserFetchFailed);
 
     this->ui_.follow->setEnabled(false);
-    this->ui_.ignore->setEnabled(false);
+    this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
 }
 

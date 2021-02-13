@@ -91,23 +91,23 @@ bool TwitchAccount::isAnon() const
     return this->isAnon_;
 }
 
-void TwitchAccount::loadIgnores()
+void TwitchAccount::loadBlocks()
 {
-    getHelix()->loadIgnores(
+    getHelix()->loadBlocks(
         getApp()->accounts->twitch.getCurrent()->userId_,
-        [this](std::vector<HelixIgnore> ignores) {
+        [this](std::vector<HelixBlock> blocks) {
             std::lock_guard<std::mutex> lock(this->ignoresMutex_);
             this->ignores_.clear();
 
-            for (const HelixIgnore &ignore : ignores)
+            for (const HelixBlock &block : blocks)
             {
-                TwitchUser ignoredUser;
-                ignoredUser.fromHelixIgnore(ignore);
-                this->ignores_.insert(ignoredUser);
+                TwitchUser blockedUser;
+                blockedUser.fromHelixBlock(block);
+                this->ignores_.insert(blockedUser);
             }
         },
         [] {
-            qDebug() << "Fetching ignores failed!";
+            qDebug() << "Fetching blocks failed!";
         });
 }
 
@@ -128,7 +128,7 @@ void TwitchAccount::checkFollow(const QString targetUserID,
                               [] {});
 }
 
-std::set<TwitchUser> TwitchAccount::getIgnores() const
+std::set<TwitchUser> TwitchAccount::getBlocks() const
 {
     std::lock_guard<std::mutex> lock(this->ignoresMutex_);
 

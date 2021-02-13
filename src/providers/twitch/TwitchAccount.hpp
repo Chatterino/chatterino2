@@ -72,12 +72,12 @@ public:
 
     bool isAnon() const;
 
-    void loadIgnores();
+    void loadBlocks();
 
     void checkFollow(const QString targetUserID,
                      std::function<void(FollowResult)> onFinished);
 
-    std::set<TwitchUser> getIgnores() const;
+    std::set<TwitchUser> getBlocks() const;
 
     void loadEmotes();
     AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;

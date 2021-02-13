@@ -180,12 +180,12 @@ struct HelixStreamMarker {
     }
 };
 
-struct HelixIgnore {
+struct HelixBlock {
     QString userId;
     QString userName;
     QString displayName;
 
-    explicit HelixIgnore(QJsonObject jsonObject)
+    explicit HelixBlock(QJsonObject jsonObject)
         : userId(jsonObject.value("user_id").toString())
         , userName(jsonObject.value("user_login").toString())
         , displayName(jsonObject.value("display_name").toString())
@@ -283,9 +283,9 @@ public:
         std::function<void(HelixStreamMarkerError)> failureCallback);
 
     // https://dev.twitch.tv/docs/api/reference#get-user-block-list
-    void loadIgnores(QString userId,
-                     ResultCallback<std::vector<HelixIgnore>> successCallback,
-                     HelixFailureCallback failureCallback);
+    void loadBlocks(QString userId,
+                    ResultCallback<std::vector<HelixBlock>> successCallback,
+                    HelixFailureCallback failureCallback);
 
     // https://dev.twitch.tv/docs/api/reference#block-user
     void blockUser(QString targetUserId, std::function<void()> successCallback,

@@ -200,10 +200,10 @@ public:
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
                                            "***"};
 
-    /// Ingored Users
-    BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
+    /// Blocked Users
+    BoolSetting enableTwitchBlockedUsers = {"/ignore/enableTwitchBlockedUsers",
                                             true};
-    IntSetting showIgnoredUsersMessages = {"/ignore/showIgnoredUsers", 0};
+    IntSetting showBlockedUsersMessages = {"/ignore/showBlockedUsers", 0};
 
     /// Moderation
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};

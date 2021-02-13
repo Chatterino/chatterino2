@@ -502,9 +502,9 @@ void Helix::createStreamMarker(
         .execute();
 };
 
-void Helix::loadIgnores(
-    QString userId, ResultCallback<std::vector<HelixIgnore>> successCallback,
-    HelixFailureCallback failureCallback)
+void Helix::loadBlocks(QString userId,
+                       ResultCallback<std::vector<HelixBlock>> successCallback,
+                       HelixFailureCallback failureCallback)
 {
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", userId);
@@ -520,7 +520,7 @@ void Helix::loadIgnores(
                 return Failure;
             }
 
-            std::vector<HelixIgnore> ignores;
+            std::vector<HelixBlock> ignores;
 
             for (const auto &jsonStream : data.toArray())
             {
@@ -531,7 +531,7 @@ void Helix::loadIgnores(
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
