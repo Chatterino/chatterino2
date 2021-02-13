@@ -25,3 +25,6 @@
 [submodule "lib/websocketpp"]
 	path = lib/websocketpp
 	url = https://github.com/ziocleto/websocketpp
+[submodule "conan-pkgs/libcommuni"]
+	path = conan-pkgs/libcommuni
+	url = https://github.com/AnotherFoxGuy/libcommuni-cmake.git
