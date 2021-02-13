@@ -1,0 +1,13 @@
+[requires]
+qt/5.15.2
+
+[generators]
+virtualbuildenv
+
+[options]
+qt:widgets=True
+qt:gui=True
+# qt:network=True
+qt:qtmultimedia=True
+qt:qtsvg=True
+# qt:concurrent=True

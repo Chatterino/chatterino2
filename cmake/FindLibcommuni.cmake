@@ -12,7 +12,7 @@ set(LibCommuni_LIBRARIES ${IrcCore_LIBRARY} ${IrcModel_LIBRARY} ${IrcUtil_LIBRAR
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(LibCommuni
-        REQUIRED_VARS IrcCore_LIBRARY IrcModel_LIBRARY IrcUtil_LIBRARY IrcCore_INCLUDE_DIR IrcModel_INCLUDE_DIR IrcUtil_INCLUDE_DIR
+        DEFAULT_MSG IrcCore_LIBRARY IrcModel_LIBRARY IrcUtil_LIBRARY IrcCore_INCLUDE_DIR IrcModel_INCLUDE_DIR IrcUtil_INCLUDE_DIR
         )
 
 if (LibCommuni_FOUND)

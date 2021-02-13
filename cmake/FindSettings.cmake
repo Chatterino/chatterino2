@@ -3,7 +3,7 @@ include(FindPackageHandleStandardArgs)
 find_path(Settings_INCLUDE_DIR pajlada/settings.hpp)
 find_library(Settings_LIBRARY PajladaSettings)
 
-find_package_handle_standard_args(Settings REQUIRED_VARS Settings_INCLUDE_DIR Settings_LIBRARY)
+find_package_handle_standard_args(Settings DEFAULT_MSG Settings_INCLUDE_DIR Settings_LIBRARY)
 
 if (Settings_FOUND)
     add_library(Settings::Settings INTERFACE IMPORTED)
