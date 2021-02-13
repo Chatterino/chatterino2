@@ -29,7 +29,7 @@ jobs:
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.4
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-20210109
@@ -59,14 +59,14 @@ jobs:
       # WINDOWS
       - name: Cache conan
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.4
         with:
           key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
           path: ~/.conan
 
       - name: Cache conan packages
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v1
+        uses: actions/cache@v2.1.4
         with:
           key: ${{ runner.os }}-conan-pkg-${{ hashFiles('**/conanfile.txt') }}
           path: C:/.conan/

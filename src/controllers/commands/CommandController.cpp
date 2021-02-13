@@ -17,6 +17,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/CombinePath.hpp"
 #include "util/FormatTime.hpp"
+#include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
@@ -578,6 +579,34 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
+    this->registerCommand(
+        "/streamlink", [](const QStringList &words, ChannelPtr channel) {
+            if (words.size() < 2)
+            {
+                if (!channel->isTwitchChannel() || channel->isEmpty())
+                {
+                    channel->addMessage(makeSystemMessage(
+                        "Usage: /streamlink <channel>. You can also use the "
+                        "command without arguments in any twitch channel to "
+                        "open it in streamlink."));
+                }
+                else
+                {
+                    channel->addMessage(
+                        makeSystemMessage(QString("Opening %1 in streamlink...")
+                                              .arg(channel->getName())));
+                    openStreamlinkForChannel(channel->getName());
+                }
+                return "";
+            }
+
+            channel->addMessage(makeSystemMessage(
+                QString("Opening %1 in streamlink...").arg(words[1])));
+            openStreamlinkForChannel(words[1]);
+
+            return "";
+        });
 }
 
 void CommandController::save()
