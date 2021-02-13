@@ -27,6 +27,12 @@ jobs:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-20201005
 
+      - name: Cache conan
+        uses: actions/cache@v2.1.4
+        with:
+          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
+          path: ~/.conan
+
       # LINUX
       - name: Install p7zip (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -43,6 +49,7 @@ jobs:
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
+            curl "https://raw.githubusercontent.com/AnotherFoxGuy/ci-scripts/main/install-conan.sh" | sudo bash
             sudo apt-get update
             sudo apt-get -y install \
                 cmake \
@@ -65,15 +72,17 @@ jobs:
 
       - name: Create build directory (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: |
-            mkdir build-test
+        run: mkdir build-test
         shell: bash
+
+      - name: Add conan pkgs
+        run: cmake -P conan-pkgs/add_conan_pkgs.cmake
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            cmake -DBUILD_TESTS=On -DCMAKE_BUILD_TYPE=Release ..
-            cmake --build . --config Release
+            cmake -DUSE_PACKAGE_MANAGER=ON -DBUILD_TESTS=ON -DBUILD_APP=OFF ..
+            make -j
         working-directory: build-test
         shell: bash
 
