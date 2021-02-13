@@ -236,6 +236,13 @@ namespace detail {
 // IMAGE2
 Image::~Image()
 {
+    if (this->empty_)
+    {
+        // No data in this image, don't bother trying to release it
+        // The reason we do this check is that we keep a few (or one) static empty image around that are deconstructed at the end of the programs lifecycle, and we want to prevent the isGuiThread call to be called after the QApplication has been exited
+        return;
+    }
+
     // run destructor of Frames in gui thread
     if (!isGuiThread())
     {
