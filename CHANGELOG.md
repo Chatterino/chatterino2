@@ -6,6 +6,7 @@
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
 - Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284)
+- Major: Commands `/ignore` and `/unignore` have been renamed to `/block` and `/unblock` in order to keep consistency with Twitch's terms. (#2370)
 - Minor: Added `/marker` command - similar to webchat, it creates a stream marker. (#2360)
 - Minor: Added `/chatters` command showing chatter count. (#2344)
 - Minor: Added a button to the split context menu to open the moderation view for a channel when the account selected has moderator permissions. (#2321)
