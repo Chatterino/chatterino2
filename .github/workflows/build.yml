@@ -18,7 +18,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, ubuntu-20.04, macos-latest]
         qt-version: [default, 5.12.10]
         build-system: [qmake, cmake]
       fail-fast: false
@@ -62,31 +62,29 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v2.1.4
         with:
-          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile-qmake.txt') }}
+          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
           path: ~/.conan
 
       - name: Cache conan packages
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v2.1.4
         with:
-          key: ${{ runner.os }}-conan-pkg-${{ hashFiles('**/conanfile-qmake.txt') }}
+          key: ${{ runner.os }}-conan-pkg-${{ hashFiles('**/conanfile.txt') }}
           path: C:/.conan/
 
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
-        run: |
-            choco install conan jom -y
-
-            refreshenv
+        run: choco install conan jom -y
         shell: cmd
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'qmake'
         run: |
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            SET PATH=%PATH%;C:\Program Files\Conan\conan\
             mkdir build
             cd build
-            "C:\Program Files\Conan\conan\conan.exe" install ..\conanfile-qmake.txt
+            conan install ..\conanfile-qmake.txt
             qmake ..
             jom
             windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
@@ -99,15 +97,14 @@ jobs:
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'cmake'
         run: |
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            SET PATH=%PATH%;C:\Program Files\Conan\conan\
             mkdir build
             cd build
-            "C:\Program Files\Conan\conan\conan.exe" install ..\conanfile-qmake.txt
-            cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
-            nmake
-            windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
-            cp release/chatterino.exe Chatterino2/
-            echo nightly > Chatterino2/modes
-            7z a chatterino-windows-x86-64.zip Chatterino2/
+            cmake -G"NMake Makefiles JOM" -DCMAKE_BUILD_TYPE=Release -DUSE_PACKAGE_MANAGER=ON ..
+            jom
+            jom copy_dll
+            echo nightly > bin/modes
+            7z a chatterino-windows-x86-64.zip bin/
         shell: cmd
 
       - name: Upload artifact (Windows)
@@ -124,6 +121,8 @@ jobs:
             sudo apt-get update
             sudo apt-get -y install \
                 cmake \
+                virtualenv \
+                rapidjson-dev \
                 libssl-dev \
                 libboost-dev \
                 libboost-system-dev \
@@ -153,7 +152,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            cmake -DCMAKE_INSTALL_PREFIX=/usr ..
+            cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DUSE_PACKAGE_MANAGER=ON ..
             make -j8
         shell: bash
 
@@ -192,7 +191,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            cmake ..
+            cmake -DCMAKE_BUILD_TYPE=Release -DUSE_PACKAGE_MANAGER=ON ..
             make -j8
         shell: bash
 
