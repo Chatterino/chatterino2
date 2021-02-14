@@ -230,15 +230,135 @@ void CommandController::initialize(Settings &, Paths &paths)
         this->items_.append(command);
     }
 
-    this->registerCommand("/debug-args", [](const auto &words, auto channel) {
-        QString msg = QApplication::instance()->arguments().join(' ');
+    /// Deprecated commands
 
-        channel->addMessage(makeSystemMessage(msg));
+    auto blockLambda = [](const auto &words, auto channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage("Usage: /block [user]"));
+            return "";
+        }
 
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to block someone!"));
+            return "";
+        }
+
+        auto target = words.at(1);
+
+        getHelix()->getUserByName(
+            target,
+            [currentUser, channel, target](const HelixUser &targetUser) {
+                getApp()->accounts->twitch.getCurrent()->blockUser(
+                    targetUser.id,
+                    [channel, target, targetUser] {
+                        channel->addMessage(makeSystemMessage(
+                            QString("You successfully blocked user %1")
+                                .arg(target)));
+                    },
+                    [channel, target] {
+                        channel->addMessage(makeSystemMessage(
+                            QString("User %1 couldn't be blocked, an unknown "
+                                    "error occurred!")
+                                .arg(target)));
+                    });
+            },
+            [channel, target] {
+                channel->addMessage(
+                    makeSystemMessage(QString("User %1 couldn't be blocked, no "
+                                              "user with that name found!")
+                                          .arg(target)));
+            });
+
+        return "";
+    };
+
+    auto unblockLambda = [](const auto &words, auto channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage("Usage: /unblock [user]"));
+            return "";
+        }
+
+        auto currentUser = getApp()->accounts->twitch.getCurrent();
+
+        if (currentUser->isAnon())
+        {
+            channel->addMessage(
+                makeSystemMessage("You must be logged in to unblock someone!"));
+            return "";
+        }
+
+        auto target = words.at(1);
+
+        getHelix()->getUserByName(
+            target,
+            [currentUser, channel, target](const auto &targetUser) {
+                getApp()->accounts->twitch.getCurrent()->unblockUser(
+                    targetUser.id,
+                    [channel, target, targetUser] {
+                        channel->addMessage(makeSystemMessage(
+                            QString("You successfully unblocked user %1")
+                                .arg(target)));
+                    },
+                    [channel, target] {
+                        channel->addMessage(makeSystemMessage(
+                            QString("User %1 couldn't be unblocked, an unknown "
+                                    "error occurred!")
+                                .arg(target)));
+                    });
+            },
+            [channel, target] {
+                channel->addMessage(
+                    makeSystemMessage(QString("User %1 couldn't be unblocked, "
+                                              "no user with that name found!")
+                                          .arg(target)));
+            });
+
+        return "";
+    };
+
+    this->registerCommand("/logs", [](const auto & /*words*/, auto channel) {
+        channel->addMessage(makeSystemMessage(
+            "Online logs functionality has been removed. If you're a "
+            "moderator, you can use the /user command"));
         return "";
     });
 
-    this->registerCommand("/uptime", [](const auto &words, auto channel) {
+    this->registerCommand(
+        "/ignore", [blockLambda](const auto &words, auto channel) {
+            channel->addMessage(makeSystemMessage(
+                "Ignore command has been renamed to /block, please use it from "
+                "now on as /ignore is going to be removed soon."));
+            blockLambda(words, channel);
+            return "";
+        });
+
+    this->registerCommand(
+        "/unignore", [unblockLambda](const auto &words, auto channel) {
+            channel->addMessage(makeSystemMessage(
+                "Unignore command has been renamed to /unblock, please use it "
+                "from now on as /unignore is going to be removed soon."));
+            unblockLambda(words, channel);
+            return "";
+        });
+
+    /// Supported commands
+
+    this->registerCommand(
+        "/debug-args", [](const auto & /*words*/, auto channel) {
+            QString msg = QApplication::instance()->arguments().join(' ');
+
+            channel->addMessage(makeSystemMessage(msg));
+
+            return "";
+        });
+
+    this->registerCommand("/uptime", [](const auto & /*words*/, auto channel) {
         auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
         if (twitchChannel == nullptr)
         {
@@ -257,57 +377,9 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand("/ignore", [](const auto &words, auto channel) {
-        if (words.size() < 2)
-        {
-            channel->addMessage(makeSystemMessage("Usage: /ignore [user]"));
-            return "";
-        }
-        auto app = getApp();
+    this->registerCommand("/block", blockLambda);
 
-        auto user = app->accounts->twitch.getCurrent();
-        auto target = words.at(1);
-
-        if (user->isAnon())
-        {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to ignore someone"));
-            return "";
-        }
-
-        user->ignore(target,
-                     [channel](auto resultCode, const QString &message) {
-                         channel->addMessage(makeSystemMessage(message));
-                     });
-
-        return "";
-    });
-
-    this->registerCommand("/unignore", [](const auto &words, auto channel) {
-        if (words.size() < 2)
-        {
-            channel->addMessage(makeSystemMessage("Usage: /unignore [user]"));
-            return "";
-        }
-        auto app = getApp();
-
-        auto user = app->accounts->twitch.getCurrent();
-        auto target = words.at(1);
-
-        if (user->isAnon())
-        {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to ignore someone"));
-            return "";
-        }
-
-        user->unignore(target,
-                       [channel](auto resultCode, const QString &message) {
-                           channel->addMessage(makeSystemMessage(message));
-                       });
-
-        return "";
-    });
+    this->registerCommand("/unblock", unblockLambda);
 
     this->registerCommand("/follow", [](const auto &words, auto channel) {
         if (words.size() < 2)
@@ -321,7 +393,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (currentUser->isAnon())
         {
             channel->addMessage(
-                makeSystemMessage("You must be logged in to follow someone"));
+                makeSystemMessage("You must be logged in to follow someone!"));
             return "";
         }
 
@@ -364,8 +436,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         if (currentUser->isAnon())
         {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to follow someone"));
+            channel->addMessage(makeSystemMessage(
+                "You must be logged in to unfollow someone!"));
             return "";
         }
 
@@ -390,13 +462,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                     QString("User %1 could not be followed!").arg(target)));
             });
 
-        return "";
-    });
-
-    this->registerCommand("/logs", [](const auto & /*words*/, auto channel) {
-        channel->addMessage(makeSystemMessage(
-            "Online logs functionality has been removed. If you're a "
-            "moderator, you can use the /user command"));
         return "";
     });
 
@@ -455,7 +520,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
-    this->registerCommand("/clip", [](const auto &words, auto channel) {
+    this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
         if (!channel->isTwitchChannel())
         {
             return "";

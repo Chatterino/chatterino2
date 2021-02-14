@@ -11,29 +11,6 @@ Migration path: **Not checked**
 
  * We implement this API in `providers/twitch/TwitchChannel.cpp` to resolve a chats available cheer emotes. This helps us parse incoming messages like `pajaCheer1000`
 
-### Get User Block List
-URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-block-list
-
-Migration path: **Unknown**
-
- * We use this in `providers/twitch/TwitchAccount.cpp loadIgnores`
-
-### Block User
-URL: https://dev.twitch.tv/docs/v5/reference/users#block-user  
-Requires `user_blocks_edit` scope
-
-Migration path: **Unknown**
-
- * We use this in `providers/twitch/TwitchAccount.cpp ignoreByID`
-
-### Unblock User
-URL: https://dev.twitch.tv/docs/v5/reference/users#unblock-user  
-Requires `user_blocks_edit` scope
-
-Migration path: **Unknown**
-
- * We use this in `providers/twitch/TwitchAccount.cpp unignoreByID`
-
 ### Get User Emotes
 URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-emotes  
 Requires `user_subscriptions` scope
@@ -63,7 +40,7 @@ URL: https://dev.twitch.tv/docs/api/reference#get-users
      * `UserInfoPopup` to get ID, viewCount, displayName, createdAt of username we clicked
      * `CommandController` to power any commands that need to get a user ID
      * `Toasts` to get the profile picture of a streamer who just went live
-     * `TwitchAccount` ignore and unignore features to translate user name to user ID
+     * `TwitchAccount` block and unblock features to translate user name to user ID
 
 ### Get Users Follows
 URL: https://dev.twitch.tv/docs/api/reference#get-users-follows
@@ -120,6 +97,32 @@ Requires `user:edit:broadcast` scope
  * We implement this in `providers/twitch/api/Helix.cpp createStreamMarker`  
    Used in:
      * `controllers/commands/CommandController.cpp` in /marker command
+
+### Get User Block List
+URL: https://dev.twitch.tv/docs/api/reference#get-user-block-list
+Requires `user:read:blocked_users` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp loadBlocks`
+   Used in:
+     * `providers/twitch/TwitchAccount.cpp loadBlocks` to load list of blocked (blocked) users by current user
+
+### Block User
+URL: https://dev.twitch.tv/docs/api/reference#block-user
+Requires `user:manage:blocked_users` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp blockUser`
+   Used in:
+     * `widgets/dialogs/UserInfoPopup.cpp` to block a user via checkbox in the usercard
+     * `controllers/commands/CommandController.cpp` to block a user via "/block" command
+
+### Unblock User
+URL: https://dev.twitch.tv/docs/api/reference#unblock-user
+Requires `user:manage:blocked_users` scope
+
+ * We implement this in `providers/twitch/api/Helix.cpp unblockUser`
+   Used in:
+     * `widgets/dialogs/UserInfoPopup.cpp` to unblock a user via checkbox in the usercard
+     * `controllers/commands/CommandController.cpp` to unblock a user via "/unblock" command
 
 ## TMI
 The TMI api is undocumented.

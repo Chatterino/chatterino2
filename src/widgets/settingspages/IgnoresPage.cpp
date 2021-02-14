@@ -19,7 +19,7 @@
 #include <QVBoxLayout>
 
 // clang-format off
-#define INFO "/ignore <user> in chat ignores a user.\n/unignore <user> in chat unignores a user.\nYou can also click on a user to open the usercard."
+#define INFO "/block <user> in chat blocks a user.\n/block <user> in chat unblocks a user.\nYou can also click on a user to open the usercard."
 // clang-format on
 
 namespace chatterino {
@@ -73,18 +73,18 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
 {
     auto label = users.emplace<QLabel>(INFO);
     label->setWordWrap(true);
-    users.append(page.createCheckBox("Enable twitch ignored users",
-                                     getSettings()->enableTwitchIgnoredUsers));
+    users.append(page.createCheckBox("Enable twitch blocked users",
+                                     getSettings()->enableTwitchBlockedUsers));
 
     auto anyways = users.emplace<QHBoxLayout>().withoutMargin();
     {
-        anyways.emplace<QLabel>("Show messages from ignored users anyways:");
+        anyways.emplace<QLabel>("Show messages from blocked users:");
 
         auto combo = anyways.emplace<QComboBox>().getElement();
         combo->addItems(
             {"Never", "If you are Moderator", "If you are Broadcaster"});
 
-        auto &setting = getSettings()->showIgnoredUsersMessages;
+        auto &setting = getSettings()->showBlockedUsersMessages;
 
         setting.connect([combo](const int value) {
             combo->setCurrentIndex(value);
@@ -102,12 +102,12 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
 
     /*auto addremove = users.emplace<QHBoxLayout>().withoutMargin();
     {
-        auto add = addremove.emplace<QPushButton>("Ignore user");
-        auto remove = addremove.emplace<QPushButton>("Unignore User");
+        auto add = addremove.emplace<QPushButton>("Block user");
+        auto remove = addremove.emplace<QPushButton>("Unblock User");
         addremove->addStretch(1);
     }*/
 
-    users.emplace<QLabel>("List of ignored users:");
+    users.emplace<QLabel>("List of blocked users:");
     users.emplace<QListView>()->setModel(&userModel);
 }
 
@@ -123,9 +123,9 @@ void IgnoresPage::onShow()
     }
 
     QStringList users;
-    for (const auto &ignoredUser : user->getIgnores())
+    for (const auto &blockedUser : user->getBlocks())
     {
-        users << ignoredUser.name;
+        users << blockedUser.name;
     }
     users.sort(Qt::CaseInsensitive);
     this->userListModel_.setStringList(users);
