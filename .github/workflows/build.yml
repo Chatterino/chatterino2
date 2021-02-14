@@ -14,6 +14,7 @@ jobs:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
         qt-version: [5.15.2, 5.12.10]
+        build-system: [qmake, cmake]
       fail-fast: false
 
     steps:
@@ -65,7 +66,7 @@ jobs:
         shell: cmd
 
       - name: Build (Windows)
-        if: startsWith(matrix.os, 'windows')
+        if: startsWith(matrix.os, 'windows') && matrix.build-system == 'qmake'
         run: |
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
@@ -73,6 +74,21 @@ jobs:
             "C:\Program Files\Conan\conan\conan.exe" install ..\conanfile-qmake.txt
             qmake ..
             jom
+            windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+            cp release/chatterino.exe Chatterino2/
+            echo nightly > Chatterino2/modes
+            7z a chatterino-windows-x86-64.zip Chatterino2/
+        shell: cmd
+
+      - name: Build with CMake (Windows)
+        if: startsWith(matrix.os, 'windows') && matrix.build-system == 'cmake'
+        run: |
+            call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            mkdir build
+            cd build
+            "C:\Program Files\Conan\conan\conan.exe" install ..\conanfile-qmake.txt
+            cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release ..
+            nmake
             windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
             cp release/chatterino.exe Chatterino2/
             echo nightly > Chatterino2/modes
@@ -89,7 +105,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v2.2.2
         with:
-          name: chatterino-windows-x86-64-${{ matrix.qt-version }}.zip
+          name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ matrix.build-system }}.zip
           path: build/chatterino-windows-x86-64.zip
 
       # LINUX
@@ -98,6 +114,7 @@ jobs:
         run: |
             sudo apt-get update
             sudo apt-get -y install \
+                cmake \
                 libssl-dev \
                 libboost-dev \
                 libxcb-randr0-dev \
@@ -115,11 +132,20 @@ jobs:
                 libxcb-xinerama0
 
       - name: Build (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
+        if: startsWith(matrix.os, 'ubuntu') && matrix.build-system == 'qmake'
         run: |
             mkdir build
             cd build
             qmake PREFIX=/usr ..
+            make -j8
+        shell: bash
+
+      - name: Build with CMake (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu') && matrix.build-system == 'cmake'
+        run: |
+            mkdir build
+            cd build
+            cmake -DCMAKE_INSTALL_PREFIX=/usr ..
             make -j8
         shell: bash
 
@@ -134,22 +160,31 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v2.2.2
         with:
-          name: Chatterino-x86_64-${{ matrix.qt-version }}.AppImage
+          name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       # MACOS
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-            brew install boost openssl rapidjson p7zip create-dmg
+            brew install boost openssl rapidjson p7zip create-dmg cmake
         shell: bash
 
       - name: Build (MacOS)
-        if: startsWith(matrix.os, 'macos')
+        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'qmake'
         run: |
             mkdir build
             cd build
             $Qt5_DIR/bin/qmake .. DEFINES+=$dateOfBuild
+            make -j8
+        shell: bash
+
+      - name: Build with CMake (MacOS)
+        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'cmake'
+        run: |
+            mkdir build
+            cd build
+            cmake ..
             make -j8
         shell: bash
 
@@ -167,7 +202,7 @@ jobs:
         if: startsWith(matrix.os, 'macos')
         uses: actions/upload-artifact@v2.2.2
         with:
-          name: chatterino-osx-${{ matrix.qt-version }}.dmg
+          name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
           path: build/chatterino-osx.dmg
 
   create-release:
@@ -191,17 +226,17 @@ jobs:
 
       - uses: actions/download-artifact@v2.0.8
         with:
-          name: chatterino-windows-x86-64-5.15.2.zip
+          name: chatterino-windows-x86-64-5.15.2-qmake.zip
           path: windows/
 
       - uses: actions/download-artifact@v2.0.8
         with:
-          name: Chatterino-x86_64-5.15.2.AppImage
+          name: Chatterino-x86_64-5.15.2-qmake.AppImage
           path: linux/
 
       - uses: actions/download-artifact@v2.0.8
         with:
-          name: chatterino-osx-5.15.2.dmg
+          name: chatterino-osx-5.15.2-qmake.dmg
           path: macos/
 
       # TODO: Extract dmg and appimage
