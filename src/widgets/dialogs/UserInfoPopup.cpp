@@ -435,7 +435,7 @@ void UserInfoPopup::installEvents()
             switch (newState)
             {
                 case Qt::CheckState::Unchecked: {
-                    this->ui_.follow->setEnabled(false);
+                    this->ui_.block->setEnabled(false);
 
                     getApp()->accounts->twitch.getCurrent()->unblockUser(
                         this->userId_,
@@ -461,7 +461,7 @@ void UserInfoPopup::installEvents()
                 break;
 
                 case Qt::CheckState::Checked: {
-                    this->ui_.follow->setEnabled(false);
+                    this->ui_.block->setEnabled(false);
 
                     getApp()->accounts->twitch.getCurrent()->blockUser(
                         this->userId_,
