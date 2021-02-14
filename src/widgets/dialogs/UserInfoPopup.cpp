@@ -416,7 +416,6 @@ void UserInfoPopup::installEvents()
     std::shared_ptr<bool> ignoreNext = std::make_shared<bool>(false);
 
     // block
-    // TODO(zneix): Eliminate calling blockUser() upon opening a usercard of blocked user
     QObject::connect(
         this->ui_.block, &QCheckBox::stateChanged,
         [this](int newState) mutable {
@@ -686,8 +685,8 @@ void UserInfoPopup::updateUserData()
         {
             this->ui_.ignoreHighlights->setEnabled(true);
         }
-        this->ui_.block->setEnabled(true);
         this->ui_.block->setChecked(isIgnoring);
+        this->ui_.block->setEnabled(true);
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
 
         // get followage and subage
