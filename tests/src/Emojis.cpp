@@ -19,16 +19,22 @@ TEST(Emojis, ShortcodeParsing)
 
     std::vector<TestCase> tests{
         {
-            .input = "foo :penguin: bar",
-            .expectedOutput = "foo 🐧 bar",
+            // input
+            "foo :penguin: bar",
+            // expected output
+            "foo 🐧 bar",
         },
         {
-            .input = "foo :nonexistantcode: bar",
-            .expectedOutput = "foo :nonexistantcode: bar",
+            // input
+            "foo :nonexistantcode: bar",
+            // expected output
+            "foo :nonexistantcode: bar",
         },
         {
-            .input = ":male-doctor:",
-            .expectedOutput = "👨‍⚕️",
+            // input
+            ":male-doctor:",
+            // expected output
+            "👨‍⚕️",
         },
     };
 
