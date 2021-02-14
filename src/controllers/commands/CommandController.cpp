@@ -232,57 +232,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     /// Deprecated commands
 
-    this->registerCommand("/logs", [](const auto & /*words*/, auto channel) {
-        channel->addMessage(makeSystemMessage(
-            "Online logs functionality has been removed. If you're a "
-            "moderator, you can use the /user command"));
-        return "";
-    });
-
-    this->registerCommand("/ignore", [](const auto & /*words*/, auto channel) {
-        channel->addMessage(
-            makeSystemMessage("Ignore command has been renamed to /block"));
-        return "";
-    });
-
-    this->registerCommand(
-        "/unignore", [](const auto & /*words*/, auto channel) {
-            channel->addMessage(makeSystemMessage(
-                "Unignore command has been renamed to /block"));
-            return "";
-        });
-
-    /// Supported commands
-
-    this->registerCommand(
-        "/debug-args", [](const auto & /*words*/, auto channel) {
-            QString msg = QApplication::instance()->arguments().join(' ');
-
-            channel->addMessage(makeSystemMessage(msg));
-
-            return "";
-        });
-
-    this->registerCommand("/uptime", [](const auto & /*words*/, auto channel) {
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-        if (twitchChannel == nullptr)
-        {
-            channel->addMessage(makeSystemMessage(
-                "The /uptime command only works in Twitch Channels"));
-            return "";
-        }
-
-        const auto &streamStatus = twitchChannel->accessStreamStatus();
-
-        QString messageText =
-            streamStatus->live ? streamStatus->uptime : "Channel is not live.";
-
-        channel->addMessage(makeSystemMessage(messageText));
-
-        return "";
-    });
-
-    this->registerCommand("/block", [](const auto &words, auto channel) {
+    auto blockLambda = [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage("Usage: /block [user]"));
@@ -325,9 +275,9 @@ void CommandController::initialize(Settings &, Paths &paths)
             });
 
         return "";
-    });
+    };
 
-    this->registerCommand("/unblock", [](const auto &words, auto channel) {
+    auto unblockLambda = [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
             channel->addMessage(makeSystemMessage("Usage: /unblock [user]"));
@@ -370,7 +320,66 @@ void CommandController::initialize(Settings &, Paths &paths)
             });
 
         return "";
+    };
+
+    this->registerCommand("/logs", [](const auto & /*words*/, auto channel) {
+        channel->addMessage(makeSystemMessage(
+            "Online logs functionality has been removed. If you're a "
+            "moderator, you can use the /user command"));
+        return "";
     });
+
+    this->registerCommand(
+        "/ignore", [blockLambda](const auto &words, auto channel) {
+            channel->addMessage(makeSystemMessage(
+                "Ignore command has been renamed to /block, please use it from "
+                "now on as /ignore is going to be removed soon."));
+            blockLambda(words, channel);
+            return "";
+        });
+
+    this->registerCommand(
+        "/unignore", [unblockLambda](const auto &words, auto channel) {
+            channel->addMessage(makeSystemMessage(
+                "Unignore command has been renamed to /unblock, please use it "
+                "from now on as /unignore is going to be removed soon."));
+            unblockLambda(words, channel);
+            return "";
+        });
+
+    /// Supported commands
+
+    this->registerCommand(
+        "/debug-args", [](const auto & /*words*/, auto channel) {
+            QString msg = QApplication::instance()->arguments().join(' ');
+
+            channel->addMessage(makeSystemMessage(msg));
+
+            return "";
+        });
+
+    this->registerCommand("/uptime", [](const auto & /*words*/, auto channel) {
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "The /uptime command only works in Twitch Channels"));
+            return "";
+        }
+
+        const auto &streamStatus = twitchChannel->accessStreamStatus();
+
+        QString messageText =
+            streamStatus->live ? streamStatus->uptime : "Channel is not live.";
+
+        channel->addMessage(makeSystemMessage(messageText));
+
+        return "";
+    });
+
+    this->registerCommand("/block", blockLambda);
+
+    this->registerCommand("/unblock", unblockLambda);
 
     this->registerCommand("/follow", [](const auto &words, auto channel) {
         if (words.size() < 2)
