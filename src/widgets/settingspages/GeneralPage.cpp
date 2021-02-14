@@ -315,8 +315,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false);
     layout.addDropdown("Emoji style",
-                       {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
-                        "Apple", "Google", "Messenger"},
+                       {
+                           "Twitter",
+                           "Facebook",
+                           "Apple",
+                           "Google",
+                       },
                        s.emojiSet);
 
     layout.addTitle("Streamer Mode");
