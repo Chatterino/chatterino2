@@ -1,6 +1,6 @@
 include(GoogleTest)
 
-project(chatterino-tests)
+project(chatterino-test)
 
 set(main_dir ${CMAKE_SOURCE_DIR}/src)
 
@@ -62,8 +62,10 @@ else ()
             )
 endif ()
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO CHATTERINO_TEST UNICODE USEWINSDK AB_CUSTOM_THEME AB_CUSTOM_SETTINGS IRC_STATIC IRC_NAMESPACE=Communi)
+target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO CHATTERINO_TEST UNICODE AB_CUSTOM_THEME AB_CUSTOM_SETTINGS IRC_STATIC IRC_NAMESPACE=Communi)
 target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_GIT_HASH=\"XD\" CHATTERINO_GIT_RELEASE=\"XD\" CHATTERINO_GIT_COMMIT=\"XD\")
-
+if (WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE USEWINSDK)
+endif ()
 
 #gtest_discover_tests(${PROJECT_NAME})

@@ -35,7 +35,7 @@ endif()
 
 if (USE_PACKAGE_MANAGER)
     include(pmm)
-    pmm(CONAN)
+    pmm(CONAN REMOTES anotherfoxguy-artifactory https://anotherfoxguy.jfrog.io/artifactory/api/conan/chatterino)
 else (USE_PACKAGE_MANAGER)
     set(CMAKE_PREFIX_PATH "${CMAKE_SOURCE_DIR}/dependencies" CACHE PATH "Path to the dependencies")
 

@@ -49,10 +49,10 @@ jobs:
       - name: Install dependencies (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            curl "https://raw.githubusercontent.com/AnotherFoxGuy/ci-scripts/main/install-conan.sh" | sudo bash
             sudo apt-get update
             sudo apt-get -y install \
                 cmake \
+                virtualenv \
                 rapidjson-dev \
                 libssl-dev \
                 libboost-dev \
@@ -75,9 +75,6 @@ jobs:
         run: mkdir build-test
         shell: bash
 
-      - name: Add conan pkgs
-        run: cmake -P conan-pkgs/add_conan_pkgs.cmake
-
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
@@ -88,8 +85,7 @@ jobs:
 
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: |
-            ./chatterino-test --platform minimal
+        run: ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash
 

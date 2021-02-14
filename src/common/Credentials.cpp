@@ -7,12 +7,10 @@
 #include "util/Overloaded.hpp"
 
 #ifdef CMAKE_BUILD
-#include "qt5keychain/keychain.h"
+#    include "qt5keychain/keychain.h"
 #else
-#include "keychain.h"
+#    include "keychain.h"
 #endif
-
-
 #include <QSaveFile>
 #include <boost/variant.hpp>
 
