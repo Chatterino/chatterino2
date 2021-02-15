@@ -1,5 +1,5 @@
 freebsd {
-    INCLUDEPATH += /usr/local/include
+    INCLUDEPATH += /usr/local/include/qt5keychain
     LIBS += -lqt5keychain
 } else {
     unix:!android:!macx:!ios {
