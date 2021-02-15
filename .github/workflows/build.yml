@@ -35,6 +35,13 @@ jobs:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-20210109
 
+      - name: Cache conan
+        if: matrix.build-system == 'cmake'
+        uses: actions/cache@v2.1.4
+        with:
+          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
+          path: ~/.conan
+
       # LINUX
       - name: Install p7zip (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -58,12 +65,6 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
-      - name: Cache conan
-        if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v2.1.4
-        with:
-          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
-          path: ~/.conan
 
       - name: Cache conan packages
         if: startsWith(matrix.os, 'windows')
@@ -153,7 +154,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            cmake -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DUSE_PACKAGE_MANAGER=ON ..
+            cmake -DCMAKE_INSTALL_PREFIX=appdir/usr/ -DCMAKE_BUILD_TYPE=Release -DUSE_PACKAGE_MANAGER=ON ..
             make -j8
         shell: bash
 
