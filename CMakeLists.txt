@@ -27,11 +27,55 @@ if (WIN32)
     SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${RUNTIME_OUTPUT_DIRECTORY})
 endif ()
 
+find_program(CCACHE_PROGRAM ccache)
+if (CCACHE_PROGRAM)
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")
+    message("Using ${CCACHE_PROGRAM} for speeding up build")
+endif ()
+
+find_package(Git)
+
+if (GIT_EXECUTABLE)
+    execute_process(
+            COMMAND ${GIT_EXECUTABLE} rev-parse --is-inside-work-tree
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            RESULT_VARIABLE GIT_REPOSITORY_NOT_FOUND
+            ERROR_QUIET
+    )
+endif ()
+
+if (GIT_EXECUTABLE AND NOT GIT_REPOSITORY_NOT_FOUND)
+    execute_process(
+            COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_HASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    execute_process(
+            COMMAND ${GIT_EXECUTABLE} rev-parse HEAD
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_COMMIT
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+    execute_process(
+            COMMAND ${GIT_EXECUTABLE} describe
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            OUTPUT_VARIABLE GIT_RELEASE
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+else ()
+    set(GIT_HASH "GIT-REPOSITORY-NOT-FOUND")
+    set(GIT_COMMIT "GIT-REPOSITORY-NOT-FOUND")
+    set(GIT_RELEASE "GIT-REPOSITORY-NOT-FOUND")
+endif ()
+
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui Network Multimedia Svg Concurrent)
 
 if (WIN32)
     find_package(WinToast REQUIRED)
-endif()
+endif ()
 
 if (USE_PACKAGE_MANAGER)
     include(pmm)
@@ -60,7 +104,6 @@ endif (USE_PACKAGE_MANAGER)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-
 if (BUILD_APP)
     add_subdirectory(src)
 endif ()
@@ -68,5 +111,7 @@ if (BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
 endif ()
+
+message("Injected git values: ${GIT_COMMIT} (${GIT_RELEASE}) ${GIT_HASH}")
 
 feature_summary(WHAT ALL)
