@@ -7,7 +7,7 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     exit 1
 fi
 
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/qt512/lib/"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/qt512/lib/:$(pwd)/bin"
 export PATH="/opt/qt512/bin:$PATH"
 
 script_path=$(readlink -f "$0")

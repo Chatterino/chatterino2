@@ -10,7 +10,6 @@ settings/0.1@chatterino/local
 signals/0.1@chatterino/local
 WebSocketpp/0.8.1@chatterino/local
 
-
 [generators]
 cmake
 
@@ -19,3 +18,4 @@ openssl:shared=True
 
 [imports]
 bin, *.dll -> ./bin @ keep_path=False
+lib, *.so* -> ./bin @ keep_path=False
