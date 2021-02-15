@@ -273,4 +273,19 @@ if (MSVC)
             COMMAND windeployqt $<TARGET_FILE:${PROJECT_NAME}> --release --no-compiler-runtime --no-translations --no-opengl-sw --dir ${RUNTIME_OUTPUT_DIRECTORY}
             WORKING_DIRECTORY ${RUNTIME_OUTPUT_DIRECTORY}
             )
+elseif (UNIX)
+    install(TARGETS ${PROJECT_NAME}
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib/static
+            )
+
+    install(FILES ${CMAKE_SOURCE_DIR}/resources/com.chatterino.chatterino.desktop
+            DESTINATION share/applications
+            )
+
+    install(FILES ${CMAKE_SOURCE_DIR}/resources/icon.png
+            RENAME com.chatterino.chatterino.png
+            DESTINATION share/icons/hicolor/256x256/apps
+            )
 endif ()
