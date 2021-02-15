@@ -116,6 +116,7 @@ jobs:
                 rapidjson-dev \
                 libssl-dev \
                 libboost-dev \
+                libxcb-randr0-dev \
                 libboost-system-dev \
                 libboost-filesystem-dev \
                 libpulse-dev \
