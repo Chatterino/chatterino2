@@ -7,6 +7,18 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     exit 1
 fi
 
+linuxdeployqt_path="linuxdeployqt-6-x86_64.AppImage"
+linuxdeployqt_url="https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage"
+
+if [ ! -f "$linuxdeployqt_path" ]; then
+    wget -nv "$linuxdeployqt_url"
+    chmod a+x "$linuxdeployqt_path"
+fi
+if [ ! -f appimagetool-x86_64.AppImage ]; then
+    wget -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
+    chmod a+x appimagetool-x86_64.AppImage
+fi
+
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/qt512/lib/:$(pwd)/bin"
 export PATH="/opt/qt512/bin:$PATH"
 
@@ -26,17 +38,6 @@ echo ""
 
 cp "$chatterino_dir"/resources/icon.png ./appdir/chatterino.png
 
-linuxdeployqt_path="linuxdeployqt-6-x86_64.AppImage"
-linuxdeployqt_url="https://github.com/probonopd/linuxdeployqt/releases/download/6/linuxdeployqt-6-x86_64.AppImage"
-
-if [ ! -f "$linuxdeployqt_path" ]; then
-    wget -nv "$linuxdeployqt_url"
-    chmod a+x "$linuxdeployqt_path"
-fi
-if [ ! -f appimagetool-x86_64.AppImage ]; then
-    wget -nv "https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage"
-    chmod a+x appimagetool-x86_64.AppImage
-fi
 echo "Run LinuxDeployQT"
 ./"$linuxdeployqt_path" \
     appdir/usr/share/applications/*.desktop \
