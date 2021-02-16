@@ -1,9 +1,10 @@
 cmake_minimum_required(VERSION 3.8)
+cmake_policy(SET CMP0087 NEW)
 include(FeatureSummary)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_BINARY_DIR})
 
-project(Chatterino2)
+project(Chatterino2 VERSION 2.2.3)
 
 option(BUILD_APP "Build Chatterino2" ON)
 option(BUILD_TESTS "Build the tests for Chatterino2" OFF)
@@ -18,6 +19,7 @@ SET(LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/")
 SET(ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/")
 SET(EXECUTABLE_OUTPUT_PATH ${RUNTIME_OUTPUT_DIRECTORY})
 SET(LIBRARY_OUTPUT_PATH ${RUNTIME_OUTPUT_DIRECTORY})
+SET(CHATTERINO2_VERSION ${PROJECT_VERSION})
 
 if (WIN32)
     # fix executable paths for windows
@@ -68,7 +70,7 @@ if (GIT_EXECUTABLE AND NOT GIT_REPOSITORY_NOT_FOUND)
 else ()
     set(GIT_HASH "GIT-REPOSITORY-NOT-FOUND")
     set(GIT_COMMIT "GIT-REPOSITORY-NOT-FOUND")
-    set(GIT_RELEASE "GIT-REPOSITORY-NOT-FOUND")
+    set(GIT_RELEASE "${PROJECT_VERSION}")
 endif ()
 
 find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui Network Multimedia Svg Concurrent)
