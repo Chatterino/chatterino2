@@ -268,11 +268,59 @@ endif ()
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
 
+# ------------------------------------------------------------------------------------------------#
+# Cpack
+# ------------------------------------------------------------------------------------------------#
+
+set(CPACK_PACKAGE_NAME "Chatterino")
+set(CPACK_PACKAGE_DESCRIPTION "Chatterino 2")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Chatterino is a chat client for twitch chat. It aims to be an improved/extended version of the twitch web chat")
+set(CPACK_PACKAGE_VERSION ${CHATTERINO2_VERSION})
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/resources/license.rtf")
+set(CPACK_PACKAGE_EXECUTABLES "chatterino" "Chatterino 2")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CHATTERINO2_VERSION}")
+
+set(CPACK_GENERATOR ZIP)
+
 if (MSVC)
+    find_program(WINDEPLOYQT_PROGRAM windeployqt)
+    get_filename_component(QT_BIN_DIR ${WINDEPLOYQT_PROGRAM} DIRECTORY CACHE)
+    set(WINDEPLOYQT_COMAND ${WINDEPLOYQT_PROGRAM} $<TARGET_FILE:${PROJECT_NAME}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
+
+    # Fix for windeployqt not being able to find qt5keychain
+    if (USE_PACKAGE_MANAGER AND EXISTS ${RUNTIME_OUTPUT_DIRECTORY}/qt5keychain.dll AND NOT EXISTS ${QT_BIN_DIR}/qt5keychain.dll)
+        message("Copying ${RUNTIME_OUTPUT_DIRECTORY}/qt5keychain.dll to ${QT_BIN_DIR}")
+        file(COPY ${RUNTIME_OUTPUT_DIRECTORY}/qt5keychain.dll DESTINATION ${QT_BIN_DIR})
+    endif ()
+
     add_custom_target(copy_dll
-            COMMAND windeployqt $<TARGET_FILE:${PROJECT_NAME}> --release --no-compiler-runtime --no-translations --no-opengl-sw --dir ${RUNTIME_OUTPUT_DIRECTORY}
+            COMMAND ${WINDEPLOYQT_COMAND}
             WORKING_DIRECTORY ${RUNTIME_OUTPUT_DIRECTORY}
             )
+
+    install(TARGETS ${PROJECT_NAME}
+            RUNTIME DESTINATION .
+            )
+
+    install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+
+    #For Windows Desktop shortcuts
+    set(CPACK_CREATE_DESKTOP_LINKS "chatterino" "Chatterino 2")
+
+    # Windows Add or Remove Program properties
+    set(CPACK_WIX_PROGRAM_MENU_FOLDER "Chatterino 2")
+    set(CPACK_WIX_PROPERTY_ARPCOMMENTS "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}")
+    set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT "https://chatterino.com/")
+    set(CPACK_WIX_PROPERTY_URLUPDATEINFO "https://chatterino.com/")
+
+    set(CPACK_WIX_PRODUCT_ICON "${CMAKE_SOURCE_DIR}/resources/icon.ico")
+
+    set(CPACK_WIX_LICENSE_RTF "${CPACK_RESOURCE_FILE_LICENSE}")
+    set(CPACK_WIX_UPGRADE_GUID "f33967d1-0bdd-4a4b-ba1a-d859bce8927a")
+
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "Chatterino2")
+    set(CPACK_GENERATOR ${CPACK_GENERATOR};WIX)
+    set(CPACK_MODULE_PATH "")
 elseif (UNIX)
     install(TARGETS ${PROJECT_NAME}
             RUNTIME DESTINATION bin
@@ -289,3 +337,5 @@ elseif (UNIX)
             DESTINATION share/icons/hicolor/256x256/apps
             )
 endif ()
+
+include(CPack)
