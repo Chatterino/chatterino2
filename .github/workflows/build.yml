@@ -78,11 +78,14 @@ jobs:
         run: choco install conan jom -y
         shell: cmd
 
+      - name: Add Conan to path
+        if: startsWith(matrix.os, 'windows')
+        run: echo "C:\Program Files\Conan\conan\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'qmake'
         run: |
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-            SET PATH=%PATH%;C:\Program Files\Conan\conan\
             mkdir build
             cd build
             conan install ..\conanfile-qmake.txt
@@ -98,7 +101,6 @@ jobs:
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'cmake'
         run: |
             call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
-            SET PATH=%PATH%;C:\Program Files\Conan\conan\
             mkdir build
             cd build
             cmake -G"NMake Makefiles JOM" -DCMAKE_BUILD_TYPE=Release -DUSE_PACKAGE_MANAGER=ON ..
@@ -213,6 +215,10 @@ jobs:
         with:
           name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
           path: build/chatterino-osx.dmg
+
+      - name: Clean conan packages
+        if: matrix.build-system == 'cmake'
+        run: cmake -P cmake/pmm.cmake /Conan /Clean
 
   create-release:
     needs: build
