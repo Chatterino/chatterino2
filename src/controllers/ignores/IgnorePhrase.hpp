@@ -157,10 +157,12 @@ struct Serialize<chatterino::IgnorePhrase> {
 
 template <>
 struct Deserialize<chatterino::IgnorePhrase> {
-    static chatterino::IgnorePhrase get(const rapidjson::Value &value)
+    static chatterino::IgnorePhrase get(const rapidjson::Value &value,
+                                        bool *error = nullptr)
     {
         if (!value.IsObject())
         {
+            PAJLADA_REPORT_ERROR(error)
             return chatterino::IgnorePhrase(
                 QString(), false, false,
                 ::chatterino::getSettings()->ignoredPhraseReplace.getValue(),

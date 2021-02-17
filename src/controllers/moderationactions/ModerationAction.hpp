@@ -51,10 +51,12 @@ struct Serialize<chatterino::ModerationAction> {
 
 template <>
 struct Deserialize<chatterino::ModerationAction> {
-    static chatterino::ModerationAction get(const rapidjson::Value &value)
+    static chatterino::ModerationAction get(const rapidjson::Value &value,
+                                            bool *error = nullptr)
     {
         if (!value.IsObject())
         {
+            PAJLADA_REPORT_ERROR(error)
             return chatterino::ModerationAction(QString());
         }
 
