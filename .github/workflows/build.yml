@@ -39,7 +39,7 @@ jobs:
         if: matrix.build-system == 'cmake'
         uses: actions/cache@v2.1.4
         with:
-          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
+          key: ${{ runner.os }}-conan-${{ matrix.qt-version }}-${{ hashFiles('**/conanfile.txt') }}
           path: ~/.conan
 
       # LINUX
