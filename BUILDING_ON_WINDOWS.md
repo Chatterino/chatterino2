@@ -19,9 +19,9 @@ Notes:
      -  Visit the downloads list [on Bintray](https://dl.bintray.com/boostorg/release/).
 	 -  Select the latest version from the list and navigate into the `binaries/` directory.
 	 -  Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `x64` for 64-bit systems).
-	    Visual Studio versions map as follows: `14.2` in the filename corresponds to MSVC 2019, `14.1` to 2017, `14.0` to 2015, `12.0` to 2013, `11` to 2012, `10` to 2010, `9` to 2008 and `8` to 2005. _Only Visual Studio 2015 and later are supported. Please upgrade should you have an older installation._
+	    Visual Studio versions map as follows: `14.2` in the filename corresponds to MSVC 2019, `14.1` to 2017, `14.0` to 2015. _Anything prior to Visual Studio 2015 is unsupported. Please upgrade should you have an older installation._
 		
-		**Convenience link for Visual Studio 2019: [Boost 1.74.0-MSVC-14.2](https://dl.bintray.com/boostorg/release/1.74.0/binaries/boost_1_74_0-msvc-14.2-64.exe)**
+		**Convenience link for Visual Studio 2019: [Boost 1.75.0-MSVC-14.2](https://dl.bintray.com/boostorg/release/1.75.0/binaries/boost_1_75_0-msvc-14.2-64.exe)**
 2. When prompted where to install Boost, set the location to `C:\local\boost`.
 3. After the installation finishes, rename the `C:\local\boost\lib64-msvc-14.2` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
 
@@ -46,17 +46,17 @@ Note: This installation will take about 1.5 GB of disk space.
 Note: This installation will take about 200 MB of disk space.
 
 ## Qt
-1. Visit the [Qt download page](https://www.qt.io/download).
-2. Select "Open source" at the bottom of this page
-3. Then select "Download"
+1. Visit the [Qt Open Source Page](https://www.qt.io/download-open-source).
+2. Scroll down to the bottom
+3. Then select "Download the Qt Online Installer"
 
 Notes:
-  - Installing the latest Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.12 or later**.
+  - Installing the latest **stable** Qt version is advised for new installations, but if you want to use your existing installation please ensure you are running **Qt 5.12 or later**.
 
 ### When prompted which components to install:
 
 1. Unfold the tree element that says "Qt"
-2. Unfold the top most tree element (latest Qt version, e.g. `Qt 5.15.2`)
+2. Unfold the top most tree element (latest stable Qt version, e.g. `Qt 5.15.2`)
 3. Under this version, select the following entries:
      -  `MSVC 2019 64-bit` (or alternative version if you are using that)
      -  `Qt WebEngine` (optional)
