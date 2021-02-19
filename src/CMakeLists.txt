@@ -229,6 +229,7 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE CMAKE_BUILD CHATTERINO UNICOD
 target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_GIT_HASH=\"${GIT_HASH}\" CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\" CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\")
 if (WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE USEWINSDK)
+    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 endif ()
 
 if (MSVC)
@@ -357,6 +358,7 @@ elseif (APPLE)
     set(CPACK_PACKAGE_FILE_NAME "chatterino-x86-64")
     install(TARGETS ${PROJECT_NAME}
             RUNTIME DESTINATION bin
+            BUNDLE	DESTINATION bin
             LIBRARY DESTINATION lib
             ARCHIVE DESTINATION lib/static
             )
