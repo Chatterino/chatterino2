@@ -2,10 +2,6 @@ include(SourceFileUtils)
 
 project(chatterino)
 
-if (MSVC)
-    add_definitions("/EHsc")
-endif (MSVC)
-
 set(SOURCE_FILES main.cpp
         Application.{hpp,cpp}
         BaseSettings.{hpp,cpp}
@@ -211,6 +207,16 @@ set(SOURCE_FILES main.cpp
         widgets/dialogs/IrcConnectionEditor.ui
         )
 
+if (WIN32)
+    # clang-cl doesn't support resource files
+    if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        list(APPEND SOURCE_FILES "${CMAKE_SOURCE_DIR}/resources/windows.rc")
+    endif ()
+
+elseif (APPLE)
+    list(APPEND SOURCE_FILES "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")
+endif ()
+
 # Expand file extensions (i.e. path/to/file.{h,cpp} becomes path/to/file.h;path/to/file.cpp)
 expand_file_extensions(SOURCE_FILES ${SOURCE_FILES})
 
@@ -223,6 +229,14 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE CMAKE_BUILD CHATTERINO UNICOD
 target_compile_definitions(${PROJECT_NAME} PRIVATE CHATTERINO_GIT_HASH=\"${GIT_HASH}\" CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\" CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\")
 if (WIN32)
     target_compile_definitions(${PROJECT_NAME} PRIVATE USEWINSDK)
+endif ()
+
+if (MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /EHsc)
+endif ()
+
+if (APPLE)
+    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
 endif ()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
@@ -278,7 +292,6 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Chatterino is a chat client for twitch ch
 set(CPACK_PACKAGE_VERSION ${CHATTERINO2_VERSION})
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/resources/license.rtf")
 set(CPACK_PACKAGE_EXECUTABLES "chatterino" "Chatterino 2")
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CHATTERINO2_VERSION}")
 
 set(CPACK_GENERATOR ZIP)
 
@@ -304,6 +317,8 @@ if (MSVC)
 
     install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMAND} --dir \${CMAKE_INSTALL_PREFIX})")
 
+    set(CPACK_PACKAGE_FILE_NAME "chatterino-windows-x86-64")
+
     #For Windows Desktop shortcuts
     set(CPACK_CREATE_DESKTOP_LINKS "chatterino" "Chatterino 2")
 
@@ -322,6 +337,8 @@ if (MSVC)
     set(CPACK_GENERATOR ${CPACK_GENERATOR};WIX)
     set(CPACK_MODULE_PATH "")
 elseif (UNIX)
+    set(CPACK_PACKAGE_FILE_NAME "Chatterino-x86_64")
+
     install(TARGETS ${PROJECT_NAME}
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib
@@ -336,6 +353,15 @@ elseif (UNIX)
             RENAME com.chatterino.chatterino.png
             DESTINATION share/icons/hicolor/256x256/apps
             )
+elseif (APPLE)
+    set(CPACK_PACKAGE_FILE_NAME "chatterino-x86-64")
+    install(TARGETS ${PROJECT_NAME}
+            RUNTIME DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib/static
+            )
+
+    set(CPACK_GENERATOR ${CPACK_GENERATOR};DRAGNDROP)
 endif ()
 
 include(CPack)
