@@ -5,7 +5,7 @@ gtest/1.10.0
 openssl/1.1.1d
 QtKeychain/0.12.90@chatterino/local
 rapidjson/cci.20200410
-serialize/0.1@chatterino/local
+serialize/0.2@chatterino/local
 settings/0.1@chatterino/local
 signals/0.1@chatterino/local
 WebSocketpp/0.8.1@chatterino/local

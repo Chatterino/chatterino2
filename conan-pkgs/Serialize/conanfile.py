@@ -3,7 +3,7 @@ from conans import ConanFile, CMake, tools
 
 class SerializeConan(ConanFile):
     name = "serialize"
-    version = "0.1"
+    version = "0.2"
     license = "MIT"
     author = "Edgar Edgar@AnotherFoxGuy.com"
     url = "https://github.com/Chatterino/chatterino2"
@@ -15,7 +15,7 @@ class SerializeConan(ConanFile):
     def source(self):
         git = tools.Git()
         git.clone("https://github.com/pajlada/serialize.git")
-        git.checkout("130ffc3ec722284ca454a1e70c5478a75f380144")
+        git.checkout("7d37cbfd5ac3bfbe046118e1cec3d32ba4696469")
 
     def package(self):
         self.copy("*.hpp", "include", "include")
