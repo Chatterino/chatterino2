@@ -200,13 +200,20 @@ jobs:
         shell: bash
 
       - name: Package (MacOS)
-        if: startsWith(matrix.os, 'macos')
+        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'qmake'
         run: |
             ls -la
             pwd
             ls -la build || true
             cd build
             sh ./../.CI/CreateDMG.sh
+        shell: bash
+
+      - name: Package (MacOS)
+        if: startsWith(matrix.os, 'macos') && matrix.build-system == 'cmake'
+        run: |
+          cd build
+          make package
         shell: bash
 
       - name: Upload artifact (MacOS)
