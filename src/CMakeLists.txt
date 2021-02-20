@@ -280,7 +280,7 @@ else ()
             OpenSSL::OpenSSL
             qt5keychain
             Pajlada::Serialize
-            Settings::Settings
+            Pajlada::Settings
             Pajlada::Signals
             websocketpp::websocketpp
             )
