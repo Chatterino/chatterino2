@@ -278,7 +278,7 @@ else ()
             qt5keychain
             Pajlada::Serialize
             Settings::Settings
-            Signals::Signals
+            Pajlada::Signals
             websocketpp::websocketpp
             )
 endif ()
