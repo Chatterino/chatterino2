@@ -90,7 +90,7 @@ else (USE_PACKAGE_MANAGER)
 
     find_package(PajladaSerialize REQUIRED)
     find_package(PajladaSignals REQUIRED)
-    find_package(Settings REQUIRED)
+    find_package(PajladaSettings REQUIRED)
 
     if (BUILD_APP)
         find_package(LibCommuni REQUIRED)
