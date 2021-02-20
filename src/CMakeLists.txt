@@ -337,7 +337,17 @@ if (MSVC)
     set(CPACK_PACKAGE_INSTALL_DIRECTORY "Chatterino2")
     set(CPACK_GENERATOR ${CPACK_GENERATOR};WIX)
     set(CPACK_MODULE_PATH "")
-elseif (UNIX)
+elseif (APPLE)
+    set(CPACK_PACKAGE_FILE_NAME "chatterino-x86-64")
+    install(TARGETS ${PROJECT_NAME}
+            RUNTIME DESTINATION bin
+            BUNDLE DESTINATION bin
+            LIBRARY DESTINATION lib
+            ARCHIVE DESTINATION lib/static
+            )
+
+    set(CPACK_GENERATOR ${CPACK_GENERATOR};DragNDrop)
+else ()
     set(CPACK_PACKAGE_FILE_NAME "Chatterino-x86_64")
 
     install(TARGETS ${PROJECT_NAME}
@@ -354,16 +364,6 @@ elseif (UNIX)
             RENAME com.chatterino.chatterino.png
             DESTINATION share/icons/hicolor/256x256/apps
             )
-elseif (APPLE)
-    set(CPACK_PACKAGE_FILE_NAME "chatterino-x86-64")
-    install(TARGETS ${PROJECT_NAME}
-            RUNTIME DESTINATION bin
-            BUNDLE	DESTINATION bin
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib/static
-            )
-
-    set(CPACK_GENERATOR ${CPACK_GENERATOR};DRAGNDROP)
 endif ()
 
 include(CPack)
