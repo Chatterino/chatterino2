@@ -245,6 +245,7 @@ endif ()
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(${PROJECT_NAME}
+        PRIVATE
         Qt5::Concurrent
         Qt5::Gui
         Qt5::Multimedia
@@ -259,6 +260,7 @@ endif ()
 
 if (USE_PACKAGE_MANAGER)
     target_link_libraries(${PROJECT_NAME}
+            PRIVATE
             CONAN_PKG::boost
             CONAN_PKG::communi
             CONAN_PKG::openssl
@@ -272,6 +274,7 @@ if (USE_PACKAGE_MANAGER)
 else ()
     target_include_directories(${PROJECT_NAME} PRIVATE ${RapidJSON_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME}
+            PRIVATE
             Boost::Boost
             LibCommuni::LibCommuni
             OpenSSL::OpenSSL
