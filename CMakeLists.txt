@@ -88,7 +88,7 @@ else (USE_PACKAGE_MANAGER)
     find_package(Boost REQUIRED)
     find_package(OpenSSL REQUIRED)
 
-    find_package(Serialize REQUIRED)
+    find_package(PajladaSerialize REQUIRED)
     find_package(Signals REQUIRED)
     find_package(Settings REQUIRED)
 

@@ -276,7 +276,7 @@ else ()
             LibCommuni::LibCommuni
             OpenSSL::OpenSSL
             qt5keychain
-            Serialize::Serialize
+            Pajlada::Serialize
             Settings::Settings
             Signals::Signals
             websocketpp::websocketpp
