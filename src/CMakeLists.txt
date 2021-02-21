@@ -302,6 +302,12 @@ else ()
             websocketpp::websocketpp
             Threads::Threads
             )
+        if (LIBRT)
+            target_link_libraries(${PROJECT_NAME}
+                PRIVATE
+                ${LIBRT}
+                )
+        endif ()
 endif ()
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
