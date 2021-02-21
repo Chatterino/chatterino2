@@ -127,6 +127,7 @@ else (USE_PACKAGE_MANAGER)
                 message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/qtkeychain/CMakeLists.txt")
             endif()
 
+            option(QTKEYCHAIN_STATIC "" ON)
             add_subdirectory("${QT5KEYCHAIN_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
             if (NOT TARGET qt5keychain)
                 message(FATAL_ERROR "qt5keychain target was not created :@")
