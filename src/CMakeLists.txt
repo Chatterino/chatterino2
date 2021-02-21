@@ -317,11 +317,11 @@ target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
 # ------------------------------------------------------------------------------------------------#
 
 set(CPACK_PACKAGE_NAME "Chatterino")
-set(CPACK_PACKAGE_DESCRIPTION "Chatterino 2")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Chatterino is a chat client for twitch chat. It aims to be an improved/extended version of the twitch web chat")
+set(CPACK_PACKAGE_DESCRIPTION "Chatterino is a chat client for twitch chat. It aims to be an improved/extended version of the twitch web chat")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Chatterino is a chat client for twitch chat")
 set(CPACK_PACKAGE_VERSION ${CHATTERINO2_VERSION})
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/resources/license.rtf")
-set(CPACK_PACKAGE_EXECUTABLES "chatterino" "Chatterino 2")
+set(CPACK_PACKAGE_EXECUTABLES "chatterino" "Chatterino")
 
 set(CPACK_GENERATOR ZIP)
 
