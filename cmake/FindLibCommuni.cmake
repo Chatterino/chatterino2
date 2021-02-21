@@ -1,7 +1,7 @@
 find_path(IrcCore_INCLUDE_DIR irc.h PATH_SUFFIXES IrcCore)
 find_library(IrcCore_LIBRARY Core)
 
-find_path(IrcModel_INCLUDE_DIR IrcModel.h PATH_SUFFIXES IrcModel)
+find_path(IrcModel_INCLUDE_DIR ircmodel.h PATH_SUFFIXES IrcModel)
 find_library(IrcModel_LIBRARY Model)
 
 find_path(IrcUtil_INCLUDE_DIR ircutil.h PATH_SUFFIXES IrcUtil)
