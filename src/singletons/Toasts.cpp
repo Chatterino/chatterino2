@@ -40,7 +40,7 @@ bool Toasts::isEnabled()
     return WinToastLib::WinToast::isCompatible() &&
            getSettings()->notificationToast &&
            !(isInStreamerMode() &&
-             getSettings()->streamerModeSupressLiveNotifications);
+             getSettings()->streamerModeSuppressLiveNotifications);
 #else
     return false;
 #endif
