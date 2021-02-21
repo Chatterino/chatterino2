@@ -300,6 +300,7 @@ else ()
             Pajlada::Settings
             Pajlada::Signals
             websocketpp::websocketpp
+            Threads::Threads
             )
 endif ()
 

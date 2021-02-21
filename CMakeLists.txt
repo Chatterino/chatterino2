@@ -91,6 +91,9 @@ else (USE_PACKAGE_MANAGER)
     find_package(Boost REQUIRED)
     find_package(OpenSSL REQUIRED)
 
+    # XXX: Will this fail on e.g. Windows or macOS?
+    find_package(Threads REQUIRED)
+
     find_package(PajladaSerialize REQUIRED)
     find_package(PajladaSignals REQUIRED)
     if (USE_SYSTEM_PAJLADA_SETTINGS)
