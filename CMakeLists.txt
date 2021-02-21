@@ -4,10 +4,10 @@ include(FeatureSummary)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake ${CMAKE_BINARY_DIR})
 
-project(Chatterino2 VERSION 2.2.3)
+project(chatterino VERSION 2.2.3)
 
-option(BUILD_APP "Build Chatterino2" ON)
-option(BUILD_TESTS "Build the tests for Chatterino2" OFF)
+option(BUILD_APP "Build Chatterino" ON)
+option(BUILD_TESTS "Build the tests for Chatterino" OFF)
 option(USE_PACKAGE_MANAGER "Use conan for managing packages" OFF)
 option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
