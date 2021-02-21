@@ -27,12 +27,6 @@ jobs:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-20201005
 
-      - name: Cache conan
-        uses: actions/cache@v2.1.4
-        with:
-          key: ${{ runner.os }}-conan-root-${{ hashFiles('**/conanfile.txt') }}
-          path: ~/.conan
-
       # LINUX
       - name: Install p7zip (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
@@ -52,7 +46,6 @@ jobs:
             sudo apt-get update
             sudo apt-get -y install \
                 cmake \
-                virtualenv \
                 rapidjson-dev \
                 libssl-dev \
                 libboost-dev \
@@ -72,19 +65,21 @@ jobs:
 
       - name: Create build directory (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: mkdir build-test
+        run: |
+            mkdir build-test
         shell: bash
 
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            cmake -DBUILD_TESTS=ON -DBUILD_APP=OFF ..
-            make -j
+            cmake -DBUILD_TESTS=On -DBUILD_APP=OFF ..
+            cmake --build . --config Release
         working-directory: build-test
         shell: bash
 
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        run: ./bin/chatterino-test --platform minimal
+        run: |
+            ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash
