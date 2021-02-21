@@ -59,6 +59,7 @@ else ()
             Pajlada::Serialize
             Pajlada::Settings
             Pajlada::Signals
+            Threads::Threads
             )
 endif ()
 
