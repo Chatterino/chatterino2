@@ -1,0 +1,19 @@
+---
+name: Lint
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  lint:
+    container: node:current-alpine
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - name: Lint Markdown files
+        run: npx prettier@^1.18.2 --check '**/*.md'
