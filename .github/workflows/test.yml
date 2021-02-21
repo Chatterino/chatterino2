@@ -78,7 +78,7 @@ jobs:
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            cmake -DUSE_PACKAGE_MANAGER=ON -DBUILD_TESTS=ON -DBUILD_APP=OFF ..
+            cmake -DBUILD_TESTS=ON -DBUILD_APP=OFF ..
             make -j
         working-directory: build-test
         shell: bash
@@ -88,6 +88,3 @@ jobs:
         run: ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash
-
-      - name: Clean conan pkgs
-        run: cmake -P cmake/pmm.cmake /Conan /Clean
