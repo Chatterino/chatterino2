@@ -94,6 +94,8 @@ else (USE_PACKAGE_MANAGER)
     # XXX: Will this fail on e.g. Windows or macOS?
     find_package(Threads REQUIRED)
 
+    find_library(LIBRT rt)
+
     find_package(PajladaSerialize REQUIRED)
     find_package(PajladaSignals REQUIRED)
     if (USE_SYSTEM_PAJLADA_SETTINGS)
