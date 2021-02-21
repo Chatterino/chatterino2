@@ -193,8 +193,8 @@ public:
     BoolSetting streamerModeHideViewerCountAndDuration = {
         "/streamerMode/hideViewerCountAndDuration", false};
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
-    BoolSetting streamerModeSupressLiveNotifications = {
-        "/streamerMode/supressLiveNotifications", false};
+    BoolSetting streamerModeSuppressLiveNotifications = {
+        "/streamerMode/suppressLiveNotifications", false};
 
     /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
