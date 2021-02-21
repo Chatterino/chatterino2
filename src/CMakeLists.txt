@@ -271,7 +271,9 @@ target_link_libraries(${PROJECT_NAME}
         )
 
 if (WinToast_FOUND)
-    target_link_libraries(${PROJECT_NAME} WinToast)
+    target_link_libraries(${PROJECT_NAME}
+        PRIVATE
+        WinToast)
 endif ()
 
 if (USE_PACKAGE_MANAGER)
