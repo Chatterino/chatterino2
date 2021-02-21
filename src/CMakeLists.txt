@@ -275,7 +275,7 @@ else ()
     target_include_directories(${PROJECT_NAME} PRIVATE ${RapidJSON_INCLUDE_DIRS})
     target_link_libraries(${PROJECT_NAME}
             PRIVATE
-            Boost::Boost
+            Boost::boost
             LibCommuni::LibCommuni
             OpenSSL::OpenSSL
             qt5keychain
