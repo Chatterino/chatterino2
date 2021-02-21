@@ -56,9 +56,9 @@ if (USE_PACKAGE_MANAGER)
 else ()
     target_link_libraries(${PROJECT_NAME}
             gtest gtest_main
-            Serialize::Serialize
-            Settings::Settings
-            Signals::Signals
+            Pajlada::Serialize
+            Pajlada::Settings
+            Pajlada::Signals
             )
 endif ()
 
