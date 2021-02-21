@@ -277,7 +277,8 @@ else ()
             PRIVATE
             Boost::boost
             LibCommuni::LibCommuni
-            OpenSSL::OpenSSL
+            OpenSSL::SSL
+            OpenSSL::Crypto
             qt5keychain
             Pajlada::Serialize
             Pajlada::Settings
