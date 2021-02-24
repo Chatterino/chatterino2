@@ -303,6 +303,7 @@ else ()
             Pajlada::Signals
             websocketpp::websocketpp
             Threads::Threads
+            RapidJSON::RapidJSON
             )
         if (LIBRT)
             target_link_libraries(${PROJECT_NAME}

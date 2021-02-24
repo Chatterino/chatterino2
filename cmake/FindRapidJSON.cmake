@@ -2,11 +2,11 @@ include(FindPackageHandleStandardArgs)
 
 find_path(RapidJSON_INCLUDE_DIRS rapidjson/rapidjson.h HINTS ${CMAKE_SOURCE_DIR}/lib/rapidjson/include)
 
-find_package_handle_standard_args(Rapidjson DEFAULT_MSG RapidJSON_INCLUDE_DIRS)
+find_package_handle_standard_args(RapidJSON DEFAULT_MSG RapidJSON_INCLUDE_DIRS)
 
-if (Rapidjson_FOUND)
-    add_library(Rapidjson::Rapidjson INTERFACE IMPORTED)
-    set_target_properties(Rapidjson::Rapidjson PROPERTIES
+if (RapidJSON_FOUND)
+    add_library(RapidJSON::RapidJSON INTERFACE IMPORTED)
+    set_target_properties(RapidJSON::RapidJSON PROPERTIES
             INTERFACE_INCLUDE_DIRECTORIES "${RapidJSON_INCLUDE_DIRS}"
             )
 endif ()
