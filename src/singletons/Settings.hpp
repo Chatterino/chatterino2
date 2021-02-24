@@ -196,17 +196,17 @@ public:
     BoolSetting streamerModeHideViewerCountAndDuration = {
         "/streamerMode/hideViewerCountAndDuration", false};
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
-    BoolSetting streamerModeSupressLiveNotifications = {
+    BoolSetting streamerModeSuppressLiveNotifications = {
         "/streamerMode/supressLiveNotifications", false};
 
     /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
                                            "***"};
 
-    /// Ingored Users
-    BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
+    /// Blocked Users
+    BoolSetting enableTwitchBlockedUsers = {"/ignore/enableTwitchBlockedUsers",
                                             true};
-    IntSetting showIgnoredUsersMessages = {"/ignore/showIgnoredUsers", 0};
+    IntSetting showBlockedUsersMessages = {"/ignore/showBlockedUsers", 0};
 
     /// Moderation
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};

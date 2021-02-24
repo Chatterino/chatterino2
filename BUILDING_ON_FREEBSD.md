@@ -9,9 +9,7 @@ high that this also works on older FreeBSD releases, architectures and
 FreeBSD 13.0-CURRENT.
 
 1. Install build dependencies from package sources (or build from the
-   ports tree): `# pkg install qt5-core qt5-multimedia qt5-svg
-   qt5-qmake qt5-buildtools gstreamer-plugins-good boost-libs
-   rapidjson`
+   ports tree): `# pkg install qt5-core qt5-multimedia qt5-svg qt5-qmake qt5-buildtools gstreamer-plugins-good boost-libs rapidjson`
 1. go into project directory
 1. create build folder `$ mkdir build && cd build`
 1. `$ qmake .. && make`

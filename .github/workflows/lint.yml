@@ -1,0 +1,21 @@
+---
+name: Lint
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - name: Lint Markdown files
+        uses: actionsx/prettier@v2
+        with:
+          # prettier CLI arguments.
+          args: --check '**/*.md'
