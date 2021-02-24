@@ -100,6 +100,7 @@ jobs:
             nmake /S /NOLOGO
             windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
             tree .
+            tree ..
             dir
             dir release
             dir Chatterino2
