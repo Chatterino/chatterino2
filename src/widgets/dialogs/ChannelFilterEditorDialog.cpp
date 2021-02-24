@@ -21,7 +21,7 @@ ChannelFilterEditorDialog::ChannelFilterEditorDialog(QWidget *parent)
     auto vbox = new QVBoxLayout(this);
     auto filterVbox = new QVBoxLayout;
     auto buttonBox = new QHBoxLayout;
-    auto okButton = new QPushButton("OK");
+    auto okButton = new QPushButton("Ok");
     auto cancelButton = new QPushButton("Cancel");
 
     okButton->setDefault(true);
@@ -35,8 +35,8 @@ ChannelFilterEditorDialog::ChannelFilterEditorDialog(QWidget *parent)
 
     buttonBox->addWidget(helpLabel);
     buttonBox->addStretch(1);
-    buttonBox->addWidget(cancelButton);
     buttonBox->addWidget(okButton);
+    buttonBox->addWidget(cancelButton);
 
     QObject::connect(okButton, &QAbstractButton::clicked, [this] {
         this->accept();
