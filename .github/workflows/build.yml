@@ -92,11 +92,11 @@ jobs:
             cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_PACKAGE_MANAGER=ON ..
             set cl=/MP
             nmake /S /NOLOGO
-            windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
             tree .
             tree ..
             dir
             dir release
+            windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
             dir Chatterino2
             cp release/chatterino.exe Chatterino2/
             echo nightly > Chatterino2/modes
