@@ -1,7 +1,5 @@
 include(SourceFileUtils)
 
-project(chatterino)
-
 set(SOURCE_FILES main.cpp
         Application.{hpp,cpp}
         BaseSettings.{hpp,cpp}
@@ -333,7 +331,7 @@ set_target_properties(${PROJECT_NAME}
 set(CPACK_PACKAGE_NAME "Chatterino")
 set(CPACK_PACKAGE_DESCRIPTION "Chatterino is a chat client for twitch chat. It aims to be an improved/extended version of the twitch web chat")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Chatterino is a chat client for twitch chat")
-set(CPACK_PACKAGE_VERSION ${CHATTERINO2_VERSION})
+set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/resources/license.rtf")
 set(CPACK_PACKAGE_EXECUTABLES "chatterino" "Chatterino")
 
