@@ -80,7 +80,16 @@ else ()
     set(GIT_RELEASE "${PROJECT_VERSION}")
 endif ()
 
-find_package(Qt5 REQUIRED COMPONENTS Core Widgets Gui Network Multimedia Svg Concurrent)
+find_package(Qt5 REQUIRED
+    COMPONENTS
+    Core
+    Widgets
+    Gui
+    Network
+    Multimedia
+    Svg
+    Concurrent
+    )
 
 if (WIN32)
     find_package(WinToast REQUIRED)
