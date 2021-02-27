@@ -21,6 +21,14 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-latest]
         qt-version: [5.15.2, 5.12.10]
         build-system: [qmake, cmake]
+        exclude:
+          - os: windows-latest
+            qt-version: 5.12.10
+            build-system: cmake
+        include:
+          - os: windows-2016
+            qt-version: 5.12.10
+            build-system: cmake
       fail-fast: false
 
     steps:
