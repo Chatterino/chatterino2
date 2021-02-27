@@ -32,6 +32,18 @@ jobs:
       fail-fast: false
 
     steps:
+      - name: Set environment variables for windows-latest
+        if: matrix.os == 'windows-latest'
+        run: |
+            echo "vs_version=2019" >> $GITHUB_ENV
+        shell: bash
+
+      - name: Set environment variables for windows-2016
+        if: matrix.os == 'windows-2016'
+        run: |
+            echo "vs_version=2017" >> $GITHUB_ENV
+        shell: bash
+
       - uses: actions/checkout@v2.3.4
         with:
           submodules: true
@@ -84,7 +96,7 @@ jobs:
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'qmake'
         run: |
-            call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            call "%programfiles(x86)%\Microsoft Visual Studio\%vs_version%\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
             conan install ..\conanfile-qmake.txt
@@ -100,7 +112,7 @@ jobs:
       - name: Build with CMake (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'cmake'
         run: |
-            call "%programfiles(x86)%\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+            call "%programfiles(x86)%\Microsoft Visual Studio\%vs_version%\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
             cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_PACKAGE_MANAGER=ON ..
