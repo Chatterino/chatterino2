@@ -7,6 +7,7 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_BINARY_DIR}" # Necessary for conan QtKeychain builds without PMM
     )
 
+# TODO: Look into whether the version could be fetched from git instead
 project(chatterino VERSION 2.2.3)
 
 option(BUILD_APP "Build Chatterino" ON)
@@ -84,7 +85,6 @@ else (USE_PACKAGE_MANAGER)
     find_package(Boost REQUIRED)
     find_package(OpenSSL REQUIRED)
 
-    # XXX: Will this fail on e.g. Windows or macOS?
     find_package(Threads REQUIRED)
 
     find_library(LIBRT rt)
