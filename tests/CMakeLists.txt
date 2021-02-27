@@ -39,6 +39,14 @@ add_executable(${PROJECT_NAME}
         src/Emojis.cpp
         )
 
+# Enable autogeneration of Qts MOC/RCC/UIC
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    AUTOMOC ON
+    AUTORCC ON
+    AUTOUIC ON
+    )
+
 target_link_libraries(${PROJECT_NAME}
         Qt5::Core
         Qt5::Widgets

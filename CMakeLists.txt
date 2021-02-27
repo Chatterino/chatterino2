@@ -16,10 +16,6 @@ option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
 option(USE_SYSTEM_QT5KEYCHAIN "Use system Qt5Keychain library" OFF)
 
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOUIC ON)
-
 find_program(CCACHE_PROGRAM ccache)
 if (CCACHE_PROGRAM)
     set(CMAKE_CXX_COMPILER_LAUNCHER "${CCACHE_PROGRAM}")

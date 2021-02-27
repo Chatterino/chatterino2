@@ -225,6 +225,14 @@ generate_source_groups(${SOURCE_FILES})
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
+# Enable autogeneration of Qts MOC/RCC/UIC
+set_target_properties(${PROJECT_NAME}
+    PROPERTIES
+    AUTOMOC ON
+    AUTORCC ON
+    AUTOUIC ON
+    )
+
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     CHATTERINO
     UNICODE
