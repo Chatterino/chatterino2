@@ -1,6 +1,6 @@
 [submodule "lib/libcommuni"]
 	path = lib/libcommuni
-	url = https://github.com/communi/libcommuni
+	url = https://github.com/Chatterino/libcommuni
 [submodule "lib/qBreakpad"]
 	path = lib/qBreakpad
 	url = https://github.com/jiakuan/qBreakpad.git
@@ -28,6 +28,3 @@
 [submodule "conan-pkgs/libcommuni"]
 	path = conan-pkgs/libcommuni
 	url = https://github.com/AnotherFoxGuy/libcommuni-cmake.git
-[submodule "lib/libcommuni-cmake"]
-	path = lib/libcommuni-cmake
-	url = https://github.com/pajlada/libcommuni.git
