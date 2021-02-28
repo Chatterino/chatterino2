@@ -170,7 +170,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            cmake -DCMAKE_INSTALL_PREFIX=appdir/usr/ -DCMAKE_BUILD_TYPE=Release -DUSE_BOOST_FILESYSTEM=On ..
+            cmake -DCMAKE_INSTALL_PREFIX=appdir/usr/ -DCMAKE_BUILD_TYPE=Release -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On ..
             make -j8
         shell: bash
 
