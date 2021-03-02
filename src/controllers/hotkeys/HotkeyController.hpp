@@ -36,6 +36,7 @@ private:
     void tryAddDefault(std::set<QString> &addedHotkeys, HotkeyScope scope,
                        QKeySequence keySequence, QString action,
                        std::vector<QString> args, QString name);
+    friend class KeyboardSettingsPage;
 };
 
 }  // namespace chatterino

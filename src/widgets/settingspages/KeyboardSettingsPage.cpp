@@ -30,7 +30,17 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
     view->addButtonPressed.connect([] {
-        qCDebug(chatterinoHotkeys) << "xd";
+        EditHotkeyDialog dialog(std::make_shared<Hotkey>(
+            HotkeyScope::Split, QKeySequence("Alt+/"), "showSearch",
+            std::vector<QString>(), "Example hotkey"));
+        bool wasAccepted = dialog.exec() == 1;
+
+        if (wasAccepted)
+        {
+            auto newHotkey = dialog.afterEdit();
+            getApp()->hotkeys->hotkeys_.append(newHotkey);
+            getApp()->hotkeys->save();
+        }
     });
     QTimer::singleShot(1, [view] {
         view->getTableView()->resizeColumnsToContents();
