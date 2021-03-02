@@ -632,6 +632,48 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             return "";
         });
+
+    this->registerCommand("/streamermode", [](const QStringList &words,
+                                              ChannelPtr channel) {
+        EnumSetting streamerMode = getSettings()->enableStreamerMode;
+
+        if (words.size() < 2)
+        {
+            // Toggle between on/off
+            int value = streamerMode.getValue() == 1 ? 0 : 1;
+            streamerMode.setValue(value);
+            channel->addMessage(
+                makeSystemMessage(QString("Streamer mode %1.")
+                                      .arg(value ? "enabled" : "disabled")));
+            return "";
+        }
+
+        if (words[1] == "off")
+        {
+            streamerMode.setValue(0);
+            channel->addMessage(makeSystemMessage("Streamer mode disabled."));
+        }
+        else if (words[1] == "on")
+        {
+            streamerMode.setValue(1);
+            channel->addMessage(makeSystemMessage("Streamer mode enabled."));
+        }
+        else if (words[1] == "auto")
+        {
+            streamerMode.setValue(2);
+            channel->addMessage(
+                makeSystemMessage("Streamer mode now set to automatic."));
+        }
+        else
+        {
+            channel->addMessage(
+                makeSystemMessage("Usage: /streamermode <on/off/auto>. You can "
+                                  "also use the command without arguments to "
+                                  "toggle the setting between on/off."));
+        }
+
+        return "";
+    });
 }
 
 void CommandController::save()
