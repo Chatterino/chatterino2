@@ -61,7 +61,7 @@ void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
     {
         auto newHotkey = dialog.afterEdit();
         getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
-        getApp()->hotkeys->save()
+        getApp()->hotkeys->save();
     }
 }
 
