@@ -5,7 +5,7 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "util/LayoutCreator.hpp"
-#include "widgets/helper/EditableModelView.hpp"
+#include "widgets/dialogs/EditHotkeyDialog.hpp"
 
 #include <QFormLayout>
 #include <QLabel>
@@ -40,6 +40,29 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     });
 
     view->getTableView()->setStyleSheet("background: #333");
+
+    QObject::connect(view->getTableView(), &QTableView::clicked,
+                     [this, view](const QModelIndex &clicked) {
+                         this->tableCellClicked(clicked, view);
+                     });
+}
+
+void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
+                                            EditableModelView *view)
+{
+    qDebug() << "table cell clicked!" << clicked.column() << clicked.row();
+
+    auto hotkey = getApp()->hotkeys->getHotkeyByName(
+        clicked.siblingAtColumn(0).data(Qt::EditRole).toString());
+    EditHotkeyDialog dialog(hotkey);
+    bool wasAccepted = dialog.exec() == 1;
+
+    if (wasAccepted)
+    {
+        auto newHotkey = dialog.afterEdit();
+        getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
+        getApp()->hotkeys->save()
+    }
 }
 
 }  // namespace chatterino

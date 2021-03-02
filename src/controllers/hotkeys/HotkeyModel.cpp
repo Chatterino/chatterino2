@@ -27,15 +27,15 @@ void HotkeyModel::getRowFromItem(const std::shared_ptr<Hotkey> &item,
     setStringItem(row[0], item->name(), false);
     row[0]->setData(QFont("Segoe UI", 10), Qt::FontRole);
 
-    setStringItem(row[1], item->toPortableString(), true);
+    setStringItem(row[1], item->toPortableString(), false);
     row[1]->setData(QFont("Segoe UI", 10), Qt::FontRole);
 
-    setStringItem(row[2], item->action(), true);
+    setStringItem(row[2], item->action(), false);
     row[2]->setData(QFont("Segoe UI", 10), Qt::FontRole);
 
     if (item->arguments().size() == 0)
     {
-        setStringItem(row[3], "", true);
+        setStringItem(row[3], "", false);
     }
     else
     {
@@ -45,7 +45,7 @@ void HotkeyModel::getRowFromItem(const std::shared_ptr<Hotkey> &item,
             text.append(arg + ", ");
         }
         text.chop(2);  // remove last ", "
-        setStringItem(row[3], text, true);
+        setStringItem(row[3], text, false);
     }
     row[3]->setData(QFont("Segoe UI", 10), Qt::FontRole);
 }

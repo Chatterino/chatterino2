@@ -64,19 +64,19 @@ public:
      */
     QString getCategory() const;
 
-private:
-    HotkeyScope scope_;
-    QKeySequence keySequence_;
-    QString action_;
-    std::vector<QString> arguments_;
-    QString name_;
-
     /**
      * @brief Returns the programmating key sequence of the hotkey
      *
      * The actual key codes required for the hotkey to trigger specifically on e.g CTRL+F5
      */
     const QKeySequence &keySequence() const;
+
+private:
+    HotkeyScope scope_;
+    QKeySequence keySequence_;
+    QString action_;
+    std::vector<QString> arguments_;
+    QString name_;
 
     /**
      * @brief Returns the programmatic context of the hotkey to help Qt decide how to apply the hotkey

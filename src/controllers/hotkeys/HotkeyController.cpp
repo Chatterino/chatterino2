@@ -6,50 +6,84 @@
 #include <QShortcut>
 
 namespace chatterino {
-namespace {
-    boost::optional<HotkeyScope> hotkeyScopeFromName(QString scopeName)
+boost::optional<HotkeyScope> HotkeyController::hotkeyScopeFromName(
+    QString scopeName)
+{
+    HotkeyScope scope;
+    if (scopeName == "tab")
     {
-        HotkeyScope scope;
-        if (scopeName == "tab")
-        {
-            scope = HotkeyScope::Tab;
-        }
-        else if (scopeName == "split")
-        {
-            scope = HotkeyScope::Split;
-        }
-        else if (scopeName == "splitInput")
-        {
-            scope = HotkeyScope::SplitInput;
-        }
-        else if (scopeName == "window")
-        {
-            scope = HotkeyScope::Window;
-        }
-        else if (scopeName == "userCard")
-        {
-            scope = HotkeyScope::UserCard;
-        }
-        else if (scopeName == "settings")
-        {
-            scope = HotkeyScope::Settings;
-        }
-        else if (scopeName == "emotePopup")
-        {
-            scope = HotkeyScope::EmotePopup;
-        }
-        else if (scopeName == "selectChannelPopup")
-        {
-            scope = HotkeyScope::SelectChannelPopup;
-        }
-        else
-        {
-            qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
-            return {};
-        }
-        return scope;
+        scope = HotkeyScope::Tab;
     }
-}  // namespace
+    else if (scopeName == "split")
+    {
+        scope = HotkeyScope::Split;
+    }
+    else if (scopeName == "splitInput")
+    {
+        scope = HotkeyScope::SplitInput;
+    }
+    else if (scopeName == "window")
+    {
+        scope = HotkeyScope::Window;
+    }
+    else if (scopeName == "userCard")
+    {
+        scope = HotkeyScope::UserCard;
+    }
+    else if (scopeName == "settings")
+    {
+        scope = HotkeyScope::Settings;
+    }
+    else if (scopeName == "emotePopup")
+    {
+        scope = HotkeyScope::EmotePopup;
+    }
+    else if (scopeName == "selectChannelPopup")
+    {
+        scope = HotkeyScope::SelectChannelPopup;
+    }
+    else
+    {
+        qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
+        return {};
+    }
+    return scope;
+}
+
+QString HotkeyController::hotkeyScopeToName(HotkeyScope scope)
+{
+    QString scopeName;
+    switch (scope)
+    {
+        case HotkeyScope::Tab:
+            scopeName = "tab";
+            break;
+        case HotkeyScope::Split:
+            scopeName = "split";
+            break;
+        case HotkeyScope::SplitInput:
+            scopeName = "splitInput";
+            break;
+        case HotkeyScope::Window:
+            scopeName = "window";
+            break;
+        case HotkeyScope::UserCard:
+            scopeName = "userCard";
+            break;
+        case HotkeyScope::Settings:
+            scopeName = "settings";
+            break;
+        case HotkeyScope::EmotePopup:
+            scopeName = "emotePopup";
+            break;
+        case HotkeyScope::SelectChannelPopup:
+            scopeName = "selectChannelPopup";
+            break;
+        default:
+            qCDebug(chatterinoHotkeys) << "Failed to serialize scope to name";
+    }
+    return scopeName;
+}
 HotkeyController::HotkeyController()
 {
     this->loadHotkeys();
@@ -96,7 +130,7 @@ void HotkeyController::loadHotkeys()
         {
             continue;
         }
-        auto scope = hotkeyScopeFromName(scopeName);
+        auto scope = HotkeyController::hotkeyScopeFromName(scopeName);
         if (!scope)
         {
             continue;
@@ -561,38 +595,8 @@ void HotkeyController::saveHotkeys()
                                                  hotkey->action());
         pajlada::Settings::Setting<QString>::set(
             section + "/keySequence", hotkey->keySequence().toString());
-        QString scopeName;
-        switch (hotkey->scope())
-        {
-            case HotkeyScope::Tab:
-                scopeName = "tab";
-                break;
-            case HotkeyScope::Split:
-                scopeName = "split";
-                break;
-            case HotkeyScope::SplitInput:
-                scopeName = "splitInput";
-                break;
-            case HotkeyScope::Window:
-                scopeName = "window";
-                break;
-            case HotkeyScope::UserCard:
-                scopeName = "userCard";
-                break;
-            case HotkeyScope::Settings:
-                scopeName = "settings";
-                break;
-            case HotkeyScope::EmotePopup:
-                scopeName = "emotePopup";
-                break;
-            case HotkeyScope::SelectChannelPopup:
-                scopeName = "selectChannelPopup";
-                break;
-            default:
-                qCDebug(chatterinoHotkeys)
-                    << "Failed to serialize scope to name";
-        }
 
+        auto scopeName = HotkeyController::hotkeyScopeToName(hotkey->scope());
         pajlada::Settings::Setting<QString>::set(section + "/scope", scopeName);
         pajlada::Settings::Setting<std::vector<QString>>::set(
             section + "/arguments", hotkey->arguments());
@@ -640,4 +644,31 @@ std::vector<QShortcut *> HotkeyController::shortcutsForScope(
     return output;
 }
 
+std::shared_ptr<Hotkey> HotkeyController::getHotkeyByName(QString name)
+{
+    for (auto &hotkey : this->hotkeys_)
+    {
+        if (hotkey->name() == name)
+        {
+            return hotkey;
+        }
+    }
+    return nullptr;
+}
+
+void HotkeyController::replaceHotkey(QString oldName,
+                                     std::shared_ptr<Hotkey> newHotkey)
+{
+    int i = 0;
+    for (auto &hotkey : this->hotkeys_)
+    {
+        if (hotkey->name() == oldName)
+        {
+            this->hotkeys_.removeAt(i);
+            break;
+        }
+        i++;
+    }
+    this->hotkeys_.append(newHotkey);
+}
 }  // namespace chatterino

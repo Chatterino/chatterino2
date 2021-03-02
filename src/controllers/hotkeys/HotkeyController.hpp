@@ -23,6 +23,10 @@ public:
         QWidget *parent);
 
     void save() override;
+    std::shared_ptr<Hotkey> getHotkeyByName(QString name);
+    void replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
+    static boost::optional<HotkeyScope> hotkeyScopeFromName(QString scopeName);
+    static QString hotkeyScopeToName(HotkeyScope scope);
 
 private:
     SignalVector<std::shared_ptr<Hotkey>> hotkeys_;

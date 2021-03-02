@@ -260,6 +260,7 @@ SOURCES += \
     src/widgets/BaseWindow.cpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.cpp \
     src/widgets/dialogs/ColorPickerDialog.cpp \
+    src/widgets/dialogs/EditHotkeyDialog.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
     src/widgets/dialogs/IrcConnectionEditor.cpp \
     src/widgets/dialogs/LastRunCrashDialog.cpp \
@@ -515,6 +516,7 @@ HEADERS += \
     src/widgets/BaseWindow.hpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.hpp \
     src/widgets/dialogs/ColorPickerDialog.hpp \
+    src/widgets/dialogs/EditHotkeyDialog.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
     src/widgets/dialogs/IrcConnectionEditor.hpp \
     src/widgets/dialogs/LastRunCrashDialog.hpp \
@@ -590,7 +592,8 @@ RESOURCES += \
 DISTFILES +=
 
 FORMS += \
-    src/widgets/dialogs/IrcConnectionEditor.ui
+    src/widgets/dialogs/IrcConnectionEditor.ui \
+    src/widgets/dialogs/EditHotkeyDialog.ui  
 
 # do not use windows min/max macros
 #win32 {
