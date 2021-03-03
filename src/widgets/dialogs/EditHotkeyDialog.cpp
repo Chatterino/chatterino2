@@ -16,7 +16,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     this->ui_->keyComboEdit->setText(hotkey->keySequence().toString());
     this->ui_->nameEdit->setText(hotkey->name());
 
-    bool isFirst = false;
+    bool isFirst = true;
     QString argsText;
     for (const auto arg : hotkey->arguments())
     {
@@ -25,6 +25,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
             argsText += '\n';
         }
         argsText += arg;
+        isFirst = false;
     }
     this->ui_->argumentsEdit->setPlainText(argsText);
 }
