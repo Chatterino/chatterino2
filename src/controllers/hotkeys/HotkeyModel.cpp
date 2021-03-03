@@ -42,6 +42,12 @@ int HotkeyModel::beforeInsert(const std::shared_ptr<Hotkey> &item,
         setStringItem(newRow[0], category, false, false);
         newRow[0]->setData(QFont("Segoe UI Light", 16), Qt::FontRole);
 
+        // make sure category headers aren't editable
+        for (unsigned long i = 1; i < newRow.size(); i++)
+        {
+            setStringItem(newRow[i], "", false, false);
+        }
+
         this->insertCustomRow(std::move(newRow), proposedIndex);
 
         return proposedIndex + 1;
