@@ -5,7 +5,7 @@
 namespace chatterino {
 
 HotkeyModel::HotkeyModel(QObject *parent)
-    : SignalVectorModel<std::shared_ptr<Hotkey>>(4, parent)
+    : SignalVectorModel<std::shared_ptr<Hotkey>>(3, parent)
 {
 }
 
@@ -13,11 +13,7 @@ HotkeyModel::HotkeyModel(QObject *parent)
 std::shared_ptr<Hotkey> HotkeyModel::getItemFromRow(
     std::vector<QStandardItem *> &row, const std::shared_ptr<Hotkey> &original)
 {
-    auto keySeq = QKeySequence(row[1]->data(Qt::EditRole).toString());
-    auto action = row[2]->data(Qt::EditRole).toString();
-    auto args = row[3]->data(Qt::EditRole).toString();
-    return std::make_shared<Hotkey>(original->scope(), keySeq, action,
-                                    original->arguments(), original->name());
+    return original;
 }
 
 // turns a row in the model into a vector item
@@ -32,22 +28,6 @@ void HotkeyModel::getRowFromItem(const std::shared_ptr<Hotkey> &item,
 
     setStringItem(row[2], item->action(), false);
     row[2]->setData(QFont("Segoe UI", 10), Qt::FontRole);
-
-    if (item->arguments().size() == 0)
-    {
-        setStringItem(row[3], "", false);
-    }
-    else
-    {
-        QString text;
-        for (auto &arg : item->arguments())
-        {
-            text.append(arg + ", ");
-        }
-        text.chop(2);  // remove last ", "
-        setStringItem(row[3], text, false);
-    }
-    row[3]->setData(QFont("Segoe UI", 10), Qt::FontRole);
 }
 
 int HotkeyModel::beforeInsert(const std::shared_ptr<Hotkey> &item,

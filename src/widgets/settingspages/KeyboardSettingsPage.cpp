@@ -52,7 +52,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
     view->getTableView()->setStyleSheet("background: #333");
 
-    QObject::connect(view->getTableView(), &QTableView::clicked,
+    QObject::connect(view->getTableView(), &QTableView::doubleClicked,
                      [this, view](const QModelIndex &clicked) {
                          this->tableCellClicked(clicked, view);
                      });
@@ -65,6 +65,10 @@ void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
 
     auto hotkey = getApp()->hotkeys->getHotkeyByName(
         clicked.siblingAtColumn(0).data(Qt::EditRole).toString());
+    if (!hotkey)
+    {
+        return;  // clicked on header or invalid hotkey
+    }
     EditHotkeyDialog dialog(hotkey);
     bool wasAccepted = dialog.exec() == 1;
 
