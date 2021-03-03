@@ -25,7 +25,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
                                       app->hotkeys->createModel(nullptr), false)
                                   .getElement();
 
-    view->setTitles({"Name", "Key Combo", "Action", "Arguments"});
+    view->setTitles({"Name", "Key Combo"});
     view->getTableView()->horizontalHeader()->setVisible(true);
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
@@ -45,9 +45,6 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     });
     QTimer::singleShot(1, [view] {
         view->getTableView()->resizeColumnsToContents();
-        view->getTableView()->setColumnWidth(0, 175);
-        view->getTableView()->setColumnWidth(1, 80);
-        view->getTableView()->setColumnWidth(2, 100);
     });
 
     view->getTableView()->setStyleSheet("background: #333");

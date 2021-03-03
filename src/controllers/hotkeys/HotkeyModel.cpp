@@ -5,7 +5,7 @@
 namespace chatterino {
 
 HotkeyModel::HotkeyModel(QObject *parent)
-    : SignalVectorModel<std::shared_ptr<Hotkey>>(3, parent)
+    : SignalVectorModel<std::shared_ptr<Hotkey>>(2, parent)
 {
 }
 
@@ -25,9 +25,6 @@ void HotkeyModel::getRowFromItem(const std::shared_ptr<Hotkey> &item,
 
     setStringItem(row[1], item->toPortableString(), false);
     row[1]->setData(QFont("Segoe UI", 10), Qt::FontRole);
-
-    setStringItem(row[2], item->action(), false);
-    row[2]->setData(QFont("Segoe UI", 10), Qt::FontRole);
 }
 
 int HotkeyModel::beforeInsert(const std::shared_ptr<Hotkey> &item,
