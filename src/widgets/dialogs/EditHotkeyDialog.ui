@@ -21,18 +21,24 @@
        <property name="text">
         <string>Hotkey name:</string>
        </property>
+       <property name="buddy">
+        <cstring>nameEdit</cstring>
+       </property>
       </widget>
      </item>
      <item row="0" column="1">
       <widget class="QLineEdit" name="nameEdit">
        <property name="text">
-        <string>Focus Widget Below</string>
+        <string/>
        </property>
        <property name="frame">
         <bool>true</bool>
        </property>
        <property name="readOnly">
         <bool>false</bool>
+       </property>
+       <property name="placeholderText">
+        <string>A description of what the hotkey does.</string>
        </property>
       </widget>
      </item>
@@ -41,6 +47,9 @@
        <property name="text">
         <string>Hotkey scope:</string>
        </property>
+       <property name="buddy">
+        <cstring>scopeEdit</cstring>
+       </property>
       </widget>
      </item>
      <item row="2" column="0">
@@ -48,22 +57,31 @@
        <property name="text">
         <string>Hotkey action:</string>
        </property>
+       <property name="buddy">
+        <cstring>actionEdit</cstring>
+       </property>
       </widget>
      </item>
      <item row="2" column="1">
       <widget class="QLineEdit" name="actionEdit">
        <property name="text">
-        <string>focus</string>
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>What is the action?</string>
        </property>
       </widget>
      </item>
      <item row="1" column="1">
       <widget class="QLineEdit" name="scopeEdit">
        <property name="text">
-        <string>split</string>
+        <string/>
        </property>
        <property name="readOnly">
         <bool>false</bool>
+       </property>
+       <property name="placeholderText">
+        <string>Where the action takes place?</string>
        </property>
       </widget>
      </item>
@@ -72,19 +90,28 @@
        <property name="text">
         <string>Key combo:</string>
        </property>
+       <property name="buddy">
+        <cstring>keyComboEdit</cstring>
+       </property>
       </widget>
      </item>
      <item row="3" column="1">
       <widget class="QLineEdit" name="keyComboEdit">
        <property name="text">
-        <string>Alt+J</string>
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>Alt+A</string>
        </property>
       </widget>
      </item>
      <item row="4" column="1">
       <widget class="QPlainTextEdit" name="argumentsEdit">
        <property name="plainText">
-        <string>down</string>
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>Newline separated arguments for the action</string>
        </property>
       </widget>
      </item>
@@ -92,6 +119,9 @@
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Arguments:</string>
+       </property>
+       <property name="buddy">
+        <cstring>argumentsEdit</cstring>
        </property>
       </widget>
      </item>
@@ -109,6 +139,13 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>nameEdit</tabstop>
+  <tabstop>scopeEdit</tabstop>
+  <tabstop>actionEdit</tabstop>
+  <tabstop>keyComboEdit</tabstop>
+  <tabstop>argumentsEdit</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
