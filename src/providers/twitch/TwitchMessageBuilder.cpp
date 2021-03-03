@@ -366,6 +366,12 @@ void TwitchMessageBuilder::addWords(
 
     for (auto word : words)
     {
+        if (word.isEmpty())
+        {
+            cursor++;
+            continue;
+        }
+
         while (doesWordContainATwitchEmote(cursor, word, twitchEmotes,
                                            currentTwitchEmoteIt))
         {
