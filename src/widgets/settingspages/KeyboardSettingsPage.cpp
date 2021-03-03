@@ -41,6 +41,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
             getApp()->hotkeys->hotkeys_.append(newHotkey);
             getApp()->hotkeys->save();
         }
+        // TODO: display errors
     });
     QTimer::singleShot(1, [view] {
         view->getTableView()->resizeColumnsToContents();
@@ -73,6 +74,7 @@ void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
         getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
         getApp()->hotkeys->save();
     }
+    // TODO: display errors
 }
 
 }  // namespace chatterino

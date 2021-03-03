@@ -6,6 +6,7 @@
 #include <QShortcut>
 
 namespace chatterino {
+// TODO: can this be moved to HotkeyScope?
 boost::optional<HotkeyScope> HotkeyController::hotkeyScopeFromName(
     QString scopeName)
 {
@@ -588,6 +589,7 @@ void HotkeyController::save()
 
 void HotkeyController::saveHotkeys()
 {
+    // TODO: deleting hotkeys doesn't save the deletion
     for (auto &hotkey : this->hotkeys_)
     {
         auto section = "/hotkeys/" + hotkey->name().toStdString();
