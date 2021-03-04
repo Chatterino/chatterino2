@@ -589,7 +589,20 @@ void HotkeyController::save()
 
 void HotkeyController::saveHotkeys()
 {
-    // TODO: deleting hotkeys doesn't save the deletion
+    auto defaultHotkeysAdded =
+        pajlada::Settings::Setting<std::vector<QString>>::get(
+            "/hotkeys/addedDefaults");
+
+    // make sure that hotkeys are deleted
+    pajlada::Settings::SettingManager::getInstance()->set(
+        "/hotkeys", rapidjson::Value(rapidjson::kObjectType));
+
+    // re-add /hotkeys/addedDefaults as previous set call deleted that key
+    pajlada::Settings::Setting<std::vector<QString>>::set(
+        "/hotkeys/addedDefaults",
+        std::vector<QString>(defaultHotkeysAdded.begin(),
+                             defaultHotkeysAdded.end()));
+
     for (auto &hotkey : this->hotkeys_)
     {
         auto section = "/hotkeys/" + hotkey->name().toStdString();
