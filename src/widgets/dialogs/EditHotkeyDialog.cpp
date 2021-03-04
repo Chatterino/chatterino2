@@ -13,7 +13,8 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     this->ui_->scopeEdit->setText(
         HotkeyController::hotkeyScopeToName(hotkey->scope()));
     this->ui_->actionEdit->setText(hotkey->action());
-    this->ui_->keyComboEdit->setText(hotkey->keySequence().toString());
+    this->ui_->keyComboEdit->setKeySequence(
+        QKeySequence::fromString(hotkey->keySequence().toString()));
     this->ui_->nameEdit->setText(hotkey->name());
 
     bool isFirst = true;
@@ -54,7 +55,7 @@ std::shared_ptr<Hotkey> EditHotkeyDialog::afterEdit()
         return this->data_;
     }
     return std::make_shared<Hotkey>(
-        *scope, QKeySequence::fromString(this->ui_->keyComboEdit->text()),
+        *scope, this->ui_->keyComboEdit->keySequence(),
         this->ui_->actionEdit->text(), arguments, this->ui_->nameEdit->text());
 }
 }  // namespace chatterino
