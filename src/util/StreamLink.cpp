@@ -3,6 +3,7 @@
 #include "Application.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
+#include "util/SplitCommand.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 
 #include <QErrorMessage>
@@ -177,7 +178,7 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     arguments.removeAll(QString());
 
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
-    arguments << QProcess::splitCommand(additionalOptions);
+    arguments << splitCommand(additionalOptions);
 
     bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
 
