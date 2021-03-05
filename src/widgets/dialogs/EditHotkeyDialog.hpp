@@ -17,9 +17,14 @@ public:
     ~EditHotkeyDialog();
 
     std::shared_ptr<Hotkey> data();
-    std::shared_ptr<Hotkey> afterEdit();
+    //std::shared_ptr<Hotkey> afterEdit();
+
+protected slots:
+    void afterEdit();
 
 private:
+    void showEditError(QString errorText);
+
     Ui::EditHotkeyDialog *ui_;
     std::shared_ptr<Hotkey> data_;
 };

@@ -15,6 +15,24 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
+    <widget class="QLabel" name="warningLabel">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+       <kerning>true</kerning>
+      </font>
+     </property>
+     <property name="text">
+      <string>Something went wrong, you should never
+see this message :)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
       <widget class="QLabel" name="nameLabel">
@@ -145,11 +163,11 @@
    <sender>buttons</sender>
    <signal>accepted()</signal>
    <receiver>EditHotkeyDialog</receiver>
-   <slot>accept()</slot>
+   <slot>afterEdit()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
+     <x>257</x>
+     <y>290</y>
     </hint>
     <hint type="destinationlabel">
      <x>157</x>
@@ -164,8 +182,8 @@
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>316</x>
-     <y>260</y>
+     <x>325</x>
+     <y>290</y>
     </hint>
     <hint type="destinationlabel">
      <x>286</x>
@@ -174,4 +192,7 @@
    </hints>
   </connection>
  </connections>
+ <slots>
+  <slot>afterEdit()</slot>
+ </slots>
 </ui>

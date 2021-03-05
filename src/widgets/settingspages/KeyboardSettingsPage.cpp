@@ -35,14 +35,12 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
     view->addButtonPressed.connect([] {
-        EditHotkeyDialog dialog(std::make_shared<Hotkey>(
-            HotkeyScope::Split, QKeySequence("Alt+/"), "showSearch",
-            std::vector<QString>(), "Example hotkey"));
+        EditHotkeyDialog dialog(nullptr);
         bool wasAccepted = dialog.exec() == 1;
 
         if (wasAccepted)
         {
-            auto newHotkey = dialog.afterEdit();
+            auto newHotkey = dialog.data();
             getApp()->hotkeys->hotkeys_.append(newHotkey);
             getApp()->hotkeys->save();
         }
@@ -76,7 +74,7 @@ void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
 
     if (wasAccepted)
     {
-        auto newHotkey = dialog.afterEdit();
+        auto newHotkey = dialog.data();
         getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
         getApp()->hotkeys->save();
     }
