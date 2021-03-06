@@ -65,6 +65,9 @@ see this message :)</string>
        <property name="text">
         <string>Hotkey scope:</string>
        </property>
+       <property name="buddy">
+        <cstring>scopePicker</cstring>
+       </property>
       </widget>
      </item>
      <item row="2" column="0">
@@ -139,8 +142,10 @@ see this message :)</string>
  </widget>
  <tabstops>
   <tabstop>nameEdit</tabstop>
+  <tabstop>scopePicker</tabstop>
   <tabstop>actionEdit</tabstop>
   <tabstop>keyComboEdit</tabstop>
+  <tabstop>argumentsEdit</tabstop>
  </tabstops>
  <resources/>
  <connections>
