@@ -149,9 +149,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            $Qt5_DIR/bin/qmake --version
-            /usr/local/opt/qt/bin/qmake --version
-            /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
+            $Qt5_DIR/bin/qmake .. DEFINES+=$dateOfBuild
             make -j8
         shell: bash
 
