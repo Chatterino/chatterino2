@@ -18,21 +18,24 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     auto *app = getApp();
 
     LayoutCreator<KeyboardSettingsPage> layoutCreator(this);
-    auto layout = layoutCreator.emplace<QVBoxLayout>().withoutMargin();
+    auto layout = layoutCreator.emplace<QVBoxLayout>();
     layout.emplace<QLabel>(  // temporary
         "After editing: please restart chatterino. "
         "Currently hotkeys don't reload automatically. \nIf something doesn't "
         "work: make sure that you only have one hotkey bound to a keycombo, "
         "check your logs.");
 
-    EditableModelView *view = layout
-                                  .emplace<EditableModelView>(
-                                      app->hotkeys->createModel(nullptr), false)
-                                  .getElement();
+    EditableModelView *view =
+        layout.emplace<EditableModelView>(app->hotkeys->createModel(nullptr))
+            .getElement();
 
     view->setTitles({"Name", "Key Combo"});
     view->getTableView()->horizontalHeader()->setVisible(true);
-    view->getTableView()->horizontalHeader()->setStretchLastSection(true);
+    view->getTableView()->horizontalHeader()->setStretchLastSection(false);
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        QHeaderView::ResizeToContents);
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        1, QHeaderView::Stretch);
 
     view->addButtonPressed.connect([] {
         EditHotkeyDialog dialog(nullptr);
@@ -46,11 +49,6 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         }
         // TODO: display errors
     });
-    QTimer::singleShot(1, [view] {
-        view->getTableView()->resizeColumnsToContents();
-    });
-
-    view->getTableView()->setStyleSheet("background: #333");
 
     QObject::connect(view->getTableView(), &QTableView::doubleClicked,
                      [this, view](const QModelIndex &clicked) {
