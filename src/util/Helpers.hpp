@@ -13,4 +13,6 @@ QString formatRichNamedLink(const QString &url, const QString &name,
 
 QString shortenString(const QString &str, unsigned maxWidth = 50);
 
+QString localizeNumbers(const int &number);
+
 }  // namespace chatterino
