@@ -78,7 +78,6 @@ void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
         getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
         getApp()->hotkeys->save();
     }
-    // TODO: display errors
 }
 
 }  // namespace chatterino
