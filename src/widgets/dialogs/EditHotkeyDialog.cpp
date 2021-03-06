@@ -40,6 +40,10 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
         }
         this->ui_->argumentsEdit->setPlainText(argsText);
     }
+    else
+    {
+        this->setWindowTitle("Add hotkey");
+    }
     this->ui_->warningLabel->hide();
 }
 
