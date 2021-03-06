@@ -25,8 +25,23 @@ public:
     void save() override;
     std::shared_ptr<Hotkey> getHotkeyByName(QString name);
     void replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
-    static boost::optional<HotkeyScope> hotkeyScopeFromName(QString scopeName);
-    static QString hotkeyScopeToName(HotkeyScope scope);
+    boost::optional<HotkeyScope> hotkeyScopeFromName(QString scopeName);
+    QString hotkeyScopeToName(HotkeyScope scope);
+
+    const std::vector<QString> hotkeyScopeNames = {
+        "tab",      "split",    "splitInput", "window",
+        "userCard", "settings", "emotePopup", "selectChannelPopup"};
+
+    const std::vector<QString> hotkeyScopeDisplayNames = {
+        "Tab",
+        "Split",
+        "Split input box",
+        "Window",
+        "User card",
+        "Settings dialog",
+        "Emote popup",
+        "Select channel popup"  //
+    };
 
 private:
     SignalVector<std::shared_ptr<Hotkey>> hotkeys_;

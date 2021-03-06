@@ -6,85 +6,33 @@
 #include <QShortcut>
 
 namespace chatterino {
+
 // TODO: can this be moved to HotkeyScope?
 boost::optional<HotkeyScope> HotkeyController::hotkeyScopeFromName(
     QString scopeName)
 {
     HotkeyScope scope;
-    if (scopeName == "tab")
+    int index = 0;
+    for (auto ref : this->hotkeyScopeNames)
     {
-        scope = HotkeyScope::Tab;
+        if (ref == scopeName)
+        {
+            return HotkeyScope(index);
+        }
+        index++;
     }
-    else if (scopeName == "split")
-    {
-        scope = HotkeyScope::Split;
-    }
-    else if (scopeName == "splitInput")
-    {
-        scope = HotkeyScope::SplitInput;
-    }
-    else if (scopeName == "window")
-    {
-        scope = HotkeyScope::Window;
-    }
-    else if (scopeName == "userCard")
-    {
-        scope = HotkeyScope::UserCard;
-    }
-    else if (scopeName == "settings")
-    {
-        scope = HotkeyScope::Settings;
-    }
-    else if (scopeName == "emotePopup")
-    {
-        scope = HotkeyScope::EmotePopup;
-    }
-    else if (scopeName == "selectChannelPopup")
-    {
-        scope = HotkeyScope::SelectChannelPopup;
-    }
-    else
-    {
-        qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
-        return {};
-    }
-    return scope;
+    qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
+    return {};
 }
 
 QString HotkeyController::hotkeyScopeToName(HotkeyScope scope)
 {
-    QString scopeName;
-    switch (scope)
-    {
-        case HotkeyScope::Tab:
-            scopeName = "tab";
-            break;
-        case HotkeyScope::Split:
-            scopeName = "split";
-            break;
-        case HotkeyScope::SplitInput:
-            scopeName = "splitInput";
-            break;
-        case HotkeyScope::Window:
-            scopeName = "window";
-            break;
-        case HotkeyScope::UserCard:
-            scopeName = "userCard";
-            break;
-        case HotkeyScope::Settings:
-            scopeName = "settings";
-            break;
-        case HotkeyScope::EmotePopup:
-            scopeName = "emotePopup";
-            break;
-        case HotkeyScope::SelectChannelPopup:
-            scopeName = "selectChannelPopup";
-            break;
-        default:
-            qCDebug(chatterinoHotkeys) << "Failed to serialize scope to name";
-    }
-    return scopeName;
+    unsigned long scopeId = (unsigned long)(scope);
+    return 0 <= scopeId && scopeId <= this->hotkeyScopeNames.size()
+               ? this->hotkeyScopeNames.at(scopeId)
+               : "";
 }
+
 HotkeyController::HotkeyController()
 {
     this->loadHotkeys();

@@ -65,9 +65,6 @@ see this message :)</string>
        <property name="text">
         <string>Hotkey scope:</string>
        </property>
-       <property name="buddy">
-        <cstring>scopeEdit</cstring>
-       </property>
       </widget>
      </item>
      <item row="2" column="0">
@@ -90,19 +87,6 @@ see this message :)</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="scopeEdit">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="readOnly">
-        <bool>false</bool>
-       </property>
-       <property name="placeholderText">
-        <string>Where the action takes place?</string>
-       </property>
-      </widget>
-     </item>
      <item row="3" column="0">
       <widget class="QLabel" name="keyComboLabel">
        <property name="text">
@@ -113,7 +97,10 @@ see this message :)</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="1">
+     <item row="3" column="1">
+      <widget class="QKeySequenceEdit" name="keyComboEdit"/>
+     </item>
+     <item row="4" column="1">
       <widget class="QPlainTextEdit" name="argumentsEdit">
        <property name="plainText">
         <string/>
@@ -123,7 +110,7 @@ see this message :)</string>
        </property>
       </widget>
      </item>
-     <item row="5" column="0">
+     <item row="4" column="0">
       <widget class="QLabel" name="label">
        <property name="text">
         <string>Arguments:</string>
@@ -133,8 +120,8 @@ see this message :)</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
-      <widget class="QKeySequenceEdit" name="keyComboEdit"/>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="scopePicker"/>
      </item>
     </layout>
    </item>
@@ -152,10 +139,8 @@ see this message :)</string>
  </widget>
  <tabstops>
   <tabstop>nameEdit</tabstop>
-  <tabstop>scopeEdit</tabstop>
   <tabstop>actionEdit</tabstop>
   <tabstop>keyComboEdit</tabstop>
-  <tabstop>argumentsEdit</tabstop>
  </tabstops>
  <resources/>
  <connections>

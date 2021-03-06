@@ -27,6 +27,8 @@ private:
 
     Ui::EditHotkeyDialog *ui_;
     std::shared_ptr<Hotkey> data_;
+
+    bool shownSingleKeyWarning = false;
 };
 
 }  // namespace chatterino

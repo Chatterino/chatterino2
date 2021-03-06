@@ -1,5 +1,6 @@
 #include "EditHotkeyDialog.hpp"
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "ui_EditHotkeyDialog.h"
 
@@ -11,10 +12,16 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     , data_(hotkey)
 {
     this->ui_->setupUi(this);
+    const auto app = getApp();
+    for (unsigned long i = 0; i < app->hotkeys->hotkeyScopeNames.size(); i++)
+    {
+        this->ui_->scopePicker->addItem(
+            app->hotkeys->hotkeyScopeDisplayNames.at(i),
+            app->hotkeys->hotkeyScopeNames.at(i));
+    }
     if (hotkey)
     {
-        this->ui_->scopeEdit->setText(
-            HotkeyController::hotkeyScopeToName(hotkey->scope()));
+        this->ui_->scopePicker->setCurrentIndex((size_t)hotkey->scope());
         this->ui_->actionEdit->setText(hotkey->action());
         this->ui_->keyComboEdit->setKeySequence(
             QKeySequence::fromString(hotkey->keySequence().toString()));
@@ -53,8 +60,8 @@ void EditHotkeyDialog::afterEdit()
     {
         arguments.push_back(arg);
     }
-    auto scope =
-        HotkeyController::hotkeyScopeFromName(this->ui_->scopeEdit->text());
+    auto scope = getApp()->hotkeys->hotkeyScopeFromName(
+        this->ui_->scopePicker->currentData().toString());
     if (!scope)
     {
         this->showEditError("Invalid Hotkey Scope.");
@@ -68,6 +75,20 @@ void EditHotkeyDialog::afterEdit()
         !(this->data_ && this->data_->name() == nameText))
     {
         this->showEditError("Hotkey with this name already exists.");
+        return;
+    }
+
+    auto firstKeyInt = this->ui_->keyComboEdit->keySequence()[0];
+    bool hasModifier = ((firstKeyInt & Qt::CTRL) == Qt::CTRL) ||
+                       ((firstKeyInt & Qt::ALT) == Qt::ALT) ||
+                       ((firstKeyInt & Qt::META) == Qt::META);
+    if (!hasModifier && !this->shownSingleKeyWarning)
+    {
+        this->showEditError(
+            "Warning: hotkeys without modifiers can lead to not being "
+            "\nable to use the key for the normal purpose.\nSubmit again to do "
+            "it anyway.");
+        this->shownSingleKeyWarning = true;
         return;
     }
     this->data_ = std::make_shared<Hotkey>(

@@ -1,4 +1,6 @@
 #include "Hotkey.hpp"
+#include "Application.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 
 #include "common/QLogging.hpp"
 
@@ -41,27 +43,8 @@ std::vector<QString> Hotkey::arguments() const
 
 QString Hotkey::getCategory() const
 {
-    switch (this->scope_)
-    {
-        case HotkeyScope::Tab:
-            return "Tab";
-        case HotkeyScope::Window:
-            return "Window";
-        case HotkeyScope::SplitInput:
-            return "Split input box";
-        case HotkeyScope::Split:
-            return "Split";
-        case HotkeyScope::UserCard:
-            return "User card";
-        case HotkeyScope::Settings:
-            return "Settings dialog";
-        case HotkeyScope::EmotePopup:
-            return "Emote popup";
-        case HotkeyScope::SelectChannelPopup:
-            return "Select channel popup";
-        default:
-            return "Unknown hotkey scope";
-    }
+    return getApp()->hotkeys->hotkeyScopeDisplayNames.at(
+        (unsigned long)(this->scope_));
 }
 
 Qt::ShortcutContext Hotkey::getContext() const
