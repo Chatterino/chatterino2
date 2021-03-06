@@ -141,7 +141,7 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-            brew install boost openssl rapidjson qt p7zip create-dmg
+            brew install boost openssl rapidjson p7zip create-dmg
         shell: bash
 
       - name: Build (MacOS)
@@ -149,8 +149,8 @@ jobs:
         run: |
             mkdir build
             cd build
-            /usr/local/opt/qt/bin/qmake --version
             $Qt5_DIR/bin/qmake --version
+            /usr/local/opt/qt/bin/qmake --version
             /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
             make -j8
         shell: bash
