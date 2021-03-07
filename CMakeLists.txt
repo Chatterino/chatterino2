@@ -6,7 +6,6 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
     )
 
-# TODO: Look into whether the version could be fetched from git instead
 project(chatterino VERSION 2.2.3)
 
 option(BUILD_APP "Build Chatterino" ON)
