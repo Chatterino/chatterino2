@@ -226,10 +226,6 @@ jobs:
           name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
           path: build/chatterino-osx.dmg
 
-      - name: Clean conan packages
-        if: matrix.build-system == 'cmake'
-        run: cmake -P cmake/pmm.cmake /Conan /Clean
-
   create-release:
     needs: build
     runs-on: ubuntu-latest
