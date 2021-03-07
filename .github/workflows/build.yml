@@ -68,7 +68,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v2.1.4
         with:
-          key: ${{ runner.os }}-conan-pkg-${{ hashFiles('**/conanfile.txt') }}
+          key: ${{ runner.os }}-conan-${{ hashFiles('**/conanfile.txt') }}-20210307
           path: C:/.conan/
 
       - name: Install dependencies (Windows)
