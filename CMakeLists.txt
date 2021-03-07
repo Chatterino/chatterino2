@@ -11,7 +11,6 @@ project(chatterino VERSION 2.2.3)
 
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
-option(USE_PACKAGE_MANAGER "Use conan for managing packages" OFF)
 option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
 option(USE_SYSTEM_QT5KEYCHAIN "Use system Qt5Keychain library" OFF)
