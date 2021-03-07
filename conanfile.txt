@@ -1,8 +1,8 @@
 [requires]
+openssl/1.1.1d
 boost/1.75.0
 communi/3.6.0@chatterino/local
 gtest/1.10.0
-openssl/1.1.1d
 QtKeychain/0.12.90@chatterino/local
 rapidjson/cci.20200410
 serialize/0.2@chatterino/local
