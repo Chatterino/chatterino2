@@ -126,6 +126,7 @@ set(SOURCE_FILES main.cpp
         util/LayoutHelper.{hpp,cpp}
         util/NuulsUploader.{hpp,cpp}
         util/RapidjsonHelpers.{hpp,cpp}
+        util/SplitCommand.{hpp,cpp}
         util/StreamLink.{hpp,cpp}
         util/StreamerMode.{hpp,cpp}
         util/Twitch.{hpp,cpp}
