@@ -573,67 +573,24 @@ set_target_properties(${PROJECT_NAME}
     RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
     )
 
-# ------------------------------------------------------------------------------------------------#
-# Cpack
-# ------------------------------------------------------------------------------------------------#
-
-set(CPACK_PACKAGE_NAME "Chatterino")
-set(CPACK_PACKAGE_DESCRIPTION "Chatterino is a chat client for twitch chat. It aims to be an improved/extended version of the twitch web chat")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Chatterino is a chat client for twitch chat")
-set(CPACK_PACKAGE_VERSION ${PROJECT_VERSION})
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/resources/license.rtf")
-set(CPACK_PACKAGE_EXECUTABLES "chatterino" "Chatterino")
-
-set(CPACK_GENERATOR ZIP)
-
 if (MSVC)
     get_target_property(Qt5_Core_Location Qt5::Core LOCATION)
     get_filename_component(QT_BIN_DIR ${Qt5_Core_Location} DIRECTORY)
-    set(WINDEPLOYQT_COMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${PROJECT_NAME}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
-
-    add_custom_target(copy_dll
-            COMMAND ${WINDEPLOYQT_COMAND}
-            WORKING_DIRECTORY ${RUNTIME_OUTPUT_DIRECTORY}
-            )
+    set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${PROJECT_NAME}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
 
     install(TARGETS ${PROJECT_NAME}
             RUNTIME DESTINATION .
             )
 
-    install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMAND} --dir \${CMAKE_INSTALL_PREFIX})")
-
-    set(CPACK_PACKAGE_FILE_NAME "chatterino-windows-x86-64")
-
-    #For Windows Desktop shortcuts
-    set(CPACK_CREATE_DESKTOP_LINKS "chatterino" "Chatterino 2")
-
-    # Windows Add or Remove Program properties
-    set(CPACK_WIX_PROGRAM_MENU_FOLDER "Chatterino 2")
-    set(CPACK_WIX_PROPERTY_ARPCOMMENTS "${CPACK_PACKAGE_DESCRIPTION_SUMMARY}")
-    set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT "https://chatterino.com/")
-    set(CPACK_WIX_PROPERTY_URLUPDATEINFO "https://chatterino.com/")
-
-    set(CPACK_WIX_PRODUCT_ICON "${CMAKE_SOURCE_DIR}/resources/icon.ico")
-
-    set(CPACK_WIX_LICENSE_RTF "${CPACK_RESOURCE_FILE_LICENSE}")
-    set(CPACK_WIX_UPGRADE_GUID "f33967d1-0bdd-4a4b-ba1a-d859bce8927a")
-
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY "Chatterino2")
-    set(CPACK_GENERATOR ${CPACK_GENERATOR};WIX)
-    set(CPACK_MODULE_PATH "")
+    install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
 elseif (APPLE)
-    set(CPACK_PACKAGE_FILE_NAME "chatterino-x86-64")
     install(TARGETS ${PROJECT_NAME}
             RUNTIME DESTINATION bin
             BUNDLE DESTINATION bin
             LIBRARY DESTINATION lib
             ARCHIVE DESTINATION lib/static
             )
-
-    set(CPACK_GENERATOR ${CPACK_GENERATOR};DragNDrop)
 else ()
-    set(CPACK_PACKAGE_FILE_NAME "Chatterino-x86_64")
-
     install(TARGETS ${PROJECT_NAME}
             RUNTIME DESTINATION bin
             LIBRARY DESTINATION lib
@@ -649,5 +606,3 @@ else ()
             DESTINATION share/icons/hicolor/256x256/apps
             )
 endif ()
-
-include(CPack)
