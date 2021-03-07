@@ -4,7 +4,6 @@ include(FeatureSummary)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
-    "${CMAKE_BINARY_DIR}" # Necessary for conan QtKeychain builds without PMM
     )
 
 # TODO: Look into whether the version could be fetched from git instead
