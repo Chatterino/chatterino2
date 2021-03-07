@@ -488,7 +488,9 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE
     CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
     )
 if (WIN32)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE USEWINSDK)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        USEWINSDK
+        )
     set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
 endif ()
 
