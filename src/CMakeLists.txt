@@ -347,15 +347,9 @@ set(CPACK_PACKAGE_EXECUTABLES "chatterino" "Chatterino")
 set(CPACK_GENERATOR ZIP)
 
 if (MSVC)
-    find_program(WINDEPLOYQT_PROGRAM windeployqt)
-    get_filename_component(QT_BIN_DIR ${WINDEPLOYQT_PROGRAM} DIRECTORY CACHE)
-    set(WINDEPLOYQT_COMAND ${WINDEPLOYQT_PROGRAM} $<TARGET_FILE:${PROJECT_NAME}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
-
-    # Fix for windeployqt not being able to find qt5keychain
-    if (USE_PACKAGE_MANAGER AND EXISTS ${RUNTIME_OUTPUT_DIRECTORY}/qt5keychain.dll AND NOT EXISTS ${QT_BIN_DIR}/qt5keychain.dll)
-        message("Copying ${RUNTIME_OUTPUT_DIRECTORY}/qt5keychain.dll to ${QT_BIN_DIR}")
-        file(COPY ${RUNTIME_OUTPUT_DIRECTORY}/qt5keychain.dll DESTINATION ${QT_BIN_DIR})
-    endif ()
+    get_target_property(Qt5_Core_Location Qt5::Core LOCATION)
+    get_filename_component(QT_BIN_DIR ${Qt5_Core_Location} DIRECTORY)
+    set(WINDEPLOYQT_COMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${PROJECT_NAME}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
 
     add_custom_target(copy_dll
             COMMAND ${WINDEPLOYQT_COMAND}
