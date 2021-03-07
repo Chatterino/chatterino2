@@ -99,9 +99,10 @@ jobs:
             call "%programfiles(x86)%\Microsoft Visual Studio\%vs_version%\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
-            conan install ..\conanfile-qmake.txt
+            conan install ..
             qmake ..
             set cl=/MP
+            set CL=/MP
             nmake /S /NOLOGO
             windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
             cp release/chatterino.exe Chatterino2/
@@ -115,8 +116,10 @@ jobs:
             call "%programfiles(x86)%\Microsoft Visual Studio\%vs_version%\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
-            cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_PACKAGE_MANAGER=ON ..
+            conan install ..
+            cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..
             set cl=/MP
+            set CL=/MP
             nmake /S /NOLOGO
             windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
             cp bin/chatterino.exe Chatterino2/

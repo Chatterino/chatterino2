@@ -1,16 +1,9 @@
 [requires]
 openssl/1.1.1d
 boost/1.75.0
-communi/3.6.0@chatterino/local
-gtest/1.10.0
-QtKeychain/0.12.90@chatterino/local
-rapidjson/cci.20200410
-serialize/0.2@chatterino/local
-settings/0.1@chatterino/local
-signals/0.1@chatterino/local
-WebSocketpp/0.8.1@chatterino/local
 
 [generators]
+qmake
 cmake
 
 [options]
