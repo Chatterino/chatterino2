@@ -247,6 +247,7 @@ SOURCES += \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
+    src/util/SplitCommand.cpp \
     src/util/Twitch.cpp \
     src/util/WindowsHelper.cpp \
     src/widgets/AccountSwitchPopup.cpp \

@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macos-latest]
-        qt-version: [default, 5.12.10]
+        qt-version: [5.15.2, 5.12.10]
       fail-fast: false
 
     steps:
@@ -39,17 +39,8 @@ jobs:
         if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get update && sudo apt-get -y install p7zip-full
 
-      - name: Install Qt (Default version)
+      - name: Install Qt
         uses: jurplel/install-qt-action@v2
-        if: ${{ matrix.qt-version == 'default' }}
-        with:
-          aqtversion: '==1.1.1'
-          cached: ${{ steps.cache-qt.outputs.cache-hit }}
-          extra: --external 7z
-
-      - name: Install Qt (Specific version)
-        uses: jurplel/install-qt-action@v2
-        if: ${{ matrix.qt-version != 'default' }}
         with:
           aqtversion: '==1.1.1'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
@@ -151,7 +142,7 @@ jobs:
       - name: Install dependencies (MacOS)
         if: startsWith(matrix.os, 'macos')
         run: |
-            brew install boost openssl rapidjson qt p7zip create-dmg
+            brew install boost openssl rapidjson p7zip create-dmg
         shell: bash
 
       - name: Build (MacOS)
@@ -159,7 +150,7 @@ jobs:
         run: |
             mkdir build
             cd build
-            /usr/local/opt/qt/bin/qmake .. DEFINES+=$dateOfBuild
+            $Qt5_DIR/bin/qmake .. DEFINES+=$dateOfBuild
             make -j8
         shell: bash
 
@@ -201,17 +192,17 @@ jobs:
 
       - uses: actions/download-artifact@v2.0.8
         with:
-          name: chatterino-windows-x86-64-default.zip
+          name: chatterino-windows-x86-64-5.15.2.zip
           path: windows/
 
       - uses: actions/download-artifact@v2.0.8
         with:
-          name: Chatterino-x86_64-default.AppImage
+          name: Chatterino-x86_64-5.15.2.AppImage
           path: linux/
 
       - uses: actions/download-artifact@v2.0.8
         with:
-          name: chatterino-osx-default.dmg
+          name: chatterino-osx-5.15.2.dmg
           path: macos/
 
       # TODO: Extract dmg and appimage

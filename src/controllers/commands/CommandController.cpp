@@ -17,6 +17,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/CombinePath.hpp"
 #include "util/FormatTime.hpp"
+#include "util/Helpers.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
@@ -595,7 +596,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             channel->addMessage(makeSystemMessage(
                 QString("Chatter count: %1")
-                    .arg(QString::number(twitchChannel->chatterCount()))));
+                    .arg(localizeNumbers(twitchChannel->chatterCount()))));
 
             return "";
         });

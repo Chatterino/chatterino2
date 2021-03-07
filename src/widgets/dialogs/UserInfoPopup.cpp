@@ -16,6 +16,7 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Clipboard.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Shortcut.hpp"
@@ -692,7 +693,8 @@ void UserInfoPopup::updateUserData()
 
         this->ui_.nameLabel->setText(user.displayName);
         this->setWindowTitle(TEXT_TITLE.arg(user.displayName));
-        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(user.viewCount));
+        this->ui_.viewCountLabel->setText(
+            TEXT_VIEWS.arg(localizeNumbers(user.viewCount)));
         this->ui_.createdDateLabel->setText(
             TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
         this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);
@@ -716,7 +718,7 @@ void UserInfoPopup::updateUserData()
                     return;
                 }
                 this->ui_.followerCountLabel->setText(
-                    TEXT_FOLLOWERS.arg(followers.total));
+                    TEXT_FOLLOWERS.arg(localizeNumbers(followers.total)));
             },
             [] {
                 // on failure
