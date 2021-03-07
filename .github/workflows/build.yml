@@ -225,7 +225,6 @@ jobs:
             ls -la
             pwd
             ls -la build || true
-            tree build
             cd build
             sh ./../.CI/CreateDMG.sh
         shell: bash
