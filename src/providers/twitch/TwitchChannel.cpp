@@ -911,7 +911,7 @@ void TwitchChannel::refreshCheerEmotes()
 
                     // Combine the prefix (e.g. BibleThump) with the tier (1, 100 etc.)
                     auto emoteTooltip =
-                        set.prefix + tier.id + "<br/>Twitch Cheer Emote";
+                        set.prefix + tier.id + "<br>Twitch Cheer Emote";
                     cheerEmote.animatedEmote = std::make_shared<Emote>(
                         Emote{EmoteName{"cheer emote"},
                               ImageSet{
