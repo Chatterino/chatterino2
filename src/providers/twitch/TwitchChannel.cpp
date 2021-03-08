@@ -917,7 +917,7 @@ void TwitchChannel::refreshCheerEmotes()
                                   tier.images["dark"]["animated"]["2"],
                                   tier.images["dark"]["animated"]["4"],
                               },
-                              Tooltip{}, Url{}});
+                              Tooltip{emoteTooltip}, Url{}});
                     cheerEmote.staticEmote = std::make_shared<Emote>(
                         Emote{EmoteName{"cheer emote"},
                               ImageSet{
@@ -925,7 +925,7 @@ void TwitchChannel::refreshCheerEmotes()
                                   tier.images["dark"]["static"]["2"],
                                   tier.images["dark"]["static"]["4"],
                               },
-                              Tooltip{}, Url{}});
+                              Tooltip{emoteTooltip}, Url{}});
 
                     cheerEmoteSet.cheerEmotes.emplace_back(cheerEmote);
                 }
