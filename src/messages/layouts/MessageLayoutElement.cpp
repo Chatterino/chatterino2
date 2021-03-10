@@ -270,7 +270,7 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
     for (auto i = 0; i < this->getText().size(); i++)
     {
         auto &&text = this->getText();
-        auto width = metrics.width(this->getText()[i]);
+        auto width = metrics.horizontalAdvance(this->getText()[i]);
 
         if (x + width > abs.x())
         {
