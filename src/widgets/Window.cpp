@@ -417,6 +417,10 @@ void Window::addShortcuts()
                  new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
              quickSwitcher->show();
          }},
+        {"quit",
+         [](std::vector<QString>) {
+             QApplication::exit();
+         }},
     };
     this->addDebugStuff(windowActions);
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
