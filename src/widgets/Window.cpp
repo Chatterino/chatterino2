@@ -421,6 +421,49 @@ void Window::addShortcuts()
          [](std::vector<QString>) {
              QApplication::exit();
          }},
+        {"moveTab",
+         [this](std::vector<QString> arguments) {
+             if (arguments.size() == 0)
+             {
+                 qCDebug(chatterinoHotkeys)
+                     << "moveTab shortcut called without arguments. "
+                        "Takes only one argument: new index (number, \"next\" "
+                        "or \"previous\")";
+                 return;
+             }
+             int newIndex = -1;
+
+             auto target = arguments.at(0);
+             qCDebug(chatterinoHotkeys) << target;
+             if (target == "next")
+             {
+                 newIndex = this->notebook_->getSelectedIndex() + 1;
+             }
+             else if (target == "previous")
+             {
+                 newIndex = this->notebook_->getSelectedIndex() - 1;
+             }
+             else
+             {
+                 bool ok;
+                 int result = target.toInt(&ok);
+                 if (!ok)
+                 {
+                     qCDebug(chatterinoHotkeys)
+                         << "Invalid argument for moveTab shortcut";
+                     return;
+                 }
+                 newIndex = result;
+             }
+             if (newIndex >= this->notebook_->getPageCount() || 0 > newIndex)
+             {
+                 qCDebug(chatterinoHotkeys)
+                     << "Invalid index for moveTab shortcut:" << newIndex;
+                 return;
+             }
+             this->notebook_->rearrangePage(this->notebook_->getSelectedPage(),
+                                            newIndex);
+         }},
     };
     this->addDebugStuff(windowActions);
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
