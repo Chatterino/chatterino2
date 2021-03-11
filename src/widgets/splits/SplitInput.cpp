@@ -360,6 +360,21 @@ void SplitInput::installKeyPressedEvent()
              [this](std::vector<QString>) {
                  this->ui_.textEdit->redo();
              }},
+            {"copy",
+             [this](std::vector<QString>) {
+                 this->ui_.textEdit->copy();
+             }},
+            {"copyFromChat",
+             [this](std::vector<QString>) {
+                 if (this->split_->view_->hasSelection())
+                 {
+                     this->split_->copyToClipboard();
+                 }
+             }},
+            {"paste",
+             [this](std::vector<QString>) {
+                 this->ui_.textEdit->paste();
+             }},
         };
 
     this->shortcuts_ = app->hotkeys->shortcutsForScope(HotkeyScope::SplitInput,
