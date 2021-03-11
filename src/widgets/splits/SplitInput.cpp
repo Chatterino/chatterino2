@@ -202,11 +202,6 @@ void SplitInput::installKeyPressedEvent()
 
     std::map<QString, std::function<void(std::vector<QString>)>>
         splitInputActions{
-            {"test",
-             [](std::vector<QString> args) {
-                 qCDebug(chatterinoHotkeys)
-                     << "Testing, attention please!" << args;
-             }},
             {"jumpCursor",
              [this](std::vector<QString> arguments) {
                  if (arguments.size() != 2)
