@@ -357,6 +357,14 @@ void SplitInput::installKeyPressedEvent()
                      this->ui_.textEdit->setTextCursor(cursor);
                  }
              }},
+            {"undo",
+             [this](std::vector<QString>) {
+                 this->ui_.textEdit->undo();
+             }},
+            {"redo",
+             [this](std::vector<QString>) {
+                 this->ui_.textEdit->redo();
+             }},
         };
 
     this->shortcuts_ = app->hotkeys->shortcutsForScope(HotkeyScope::SplitInput,
