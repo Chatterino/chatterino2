@@ -375,6 +375,11 @@ void SplitInput::installKeyPressedEvent()
              [this](std::vector<QString>) {
                  this->ui_.textEdit->paste();
              }},
+            {"clear",
+             [this](std::vector<QString>) {
+                 this->ui_.textEdit->setText("");
+                 this->ui_.textEdit->moveCursor(QTextCursor::Start);
+             }},
         };
 
     this->shortcuts_ = app->hotkeys->shortcutsForScope(HotkeyScope::SplitInput,
