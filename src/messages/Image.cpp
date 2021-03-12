@@ -15,10 +15,15 @@
 #include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "debug/Benchmark.hpp"
-#include "singletons/Emotes.hpp"
+#ifndef CHATTERINO_TEST
+#    include "singletons/Emotes.hpp"
+#endif
 #include "singletons/WindowManager.hpp"
+#include "singletons/helper/GifTimer.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
+
+#include <queue>
 
 namespace chatterino {
 namespace detail {
@@ -38,10 +43,12 @@ namespace detail {
         {
             DebugCount::increase("animated images");
 
+#ifndef CHATTERINO_TEST
             this->gifTimerConnection_ =
                 getApp()->emotes->gifTimer.signal.connect([this] {
                     this->advance();
                 });
+#endif
         }
 
         auto totalLength =
@@ -56,9 +63,11 @@ namespace detail {
         }
         else
         {
+#ifndef CHATTERINO_TEST
             this->durationOffset_ = std::min<int>(
                 int(getApp()->emotes->gifTimer.position() % totalLength),
                 60000);
+#endif
         }
         this->processOffset();
     }
@@ -182,7 +191,9 @@ namespace detail {
             }
         }
 
+#ifndef CHATTERINO_TEST
         getApp()->windows->forceLayoutChannelViews();
+#endif
         loadedEventQueued = false;
     }
 
@@ -225,6 +236,13 @@ namespace detail {
 // IMAGE2
 Image::~Image()
 {
+    if (this->empty_)
+    {
+        // No data in this image, don't bother trying to release it
+        // The reason we do this check is that we keep a few (or one) static empty image around that are deconstructed at the end of the programs lifecycle, and we want to prevent the isGuiThread call to be called after the QApplication has been exited
+        return;
+    }
+
     // run destructor of Frames in gui thread
     if (!isGuiThread())
     {

@@ -89,7 +89,6 @@ CONFIG(debug, debug|release) {
 
 # Submodules
 include(lib/warnings.pri)
-include(lib/humanize.pri)
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
 include(lib/wintoast.pri)
@@ -250,6 +249,7 @@ SOURCES += \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
+    src/util/SplitCommand.cpp \
     src/util/Twitch.cpp \
     src/util/WindowsHelper.cpp \
     src/widgets/AccountSwitchPopup.cpp \

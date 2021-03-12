@@ -257,9 +257,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Highlight messages redeemed with Channel Points",
                        s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
-        "Timestamp format (a = am/pm)",
+        "Timestamp format (a = am/pm, zzz = milliseconds)",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
-         "h:mm:ss a", "hh:mm:ss a"},
+         "h:mm:ss a", "hh:mm:ss a", "h:mm:ss.zzz", "h:mm:ss.zzz a",
+         "hh:mm:ss.zzz", "hh:mm:ss.zzz a"},
         s.timestampFormat,
         [](auto val) {
             return getSettings()->showTimestamps.getValue()
@@ -314,15 +315,19 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false);
     layout.addDropdown("Emoji style",
-                       {"EmojiOne 2", "EmojiOne 3", "Twitter", "Facebook",
-                        "Apple", "Google", "Messenger"},
+                       {
+                           "Twitter",
+                           "Facebook",
+                           "Apple",
+                           "Google",
+                       },
                        s.emojiSet);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
         "Chatterino can automatically change behavior if it detects that \"OBS "
-        "Studio\" is running (Automatic mode works only on Windows and "
-        "Linux).\nSelect which things you want to change while streaming");
+        "Studio\" is running.\nSelect which things you want to change while "
+        "streaming");
 
     ComboBox *dankDropdown =
         layout.addDropdown<std::underlying_type<StreamerModeSetting>::type>(
@@ -346,8 +351,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Hide viewer count and stream length while hovering over split header",
         s.streamerModeHideViewerCountAndDuration);
     layout.addCheckbox("Mute mention sounds", s.streamerModeMuteMentions);
-    layout.addCheckbox("Supress Live Notifications",
-                       s.streamerModeSupressLiveNotifications);
+    layout.addCheckbox("Suppress Live Notifications",
+                       s.streamerModeSuppressLiveNotifications);
 
     layout.addTitle("Link Previews");
     layout.addDescription(

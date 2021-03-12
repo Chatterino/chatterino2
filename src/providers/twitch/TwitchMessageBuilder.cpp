@@ -138,18 +138,17 @@ bool TwitchMessageBuilder::isIgnored() const
 
     auto app = getApp();
 
-    if (getSettings()->enableTwitchIgnoredUsers &&
+    if (getSettings()->enableTwitchBlockedUsers &&
         this->tags.contains("user-id"))
     {
         auto sourceUserID = this->tags.value("user-id").toString();
 
-        for (const auto &user :
-             app->accounts->twitch.getCurrent()->getIgnores())
+        for (const auto &user : app->accounts->twitch.getCurrent()->getBlocks())
         {
             if (sourceUserID == user.id)
             {
                 switch (static_cast<ShowIgnoredUsersMessages>(
-                    getSettings()->showIgnoredUsersMessages.getValue()))
+                    getSettings()->showBlockedUsersMessages.getValue()))
                 {
                     case ShowIgnoredUsersMessages::IfModerator:
                         if (this->channel->isMod() ||
@@ -367,6 +366,12 @@ void TwitchMessageBuilder::addWords(
 
     for (auto word : words)
     {
+        if (word.isEmpty())
+        {
+            cursor++;
+            continue;
+        }
+
         while (doesWordContainATwitchEmote(cursor, word, twitchEmotes,
                                            currentTwitchEmoteIt))
         {

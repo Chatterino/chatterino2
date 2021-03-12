@@ -172,7 +172,7 @@ public:
     BoolSetting animateEmotes = {"/emotes/enableGifAnimations", true};
     FloatSetting emoteScale = {"/emotes/scale", 1.f};
 
-    QStringSetting emojiSet = {"/emotes/emojiSet", "EmojiOne 2"};
+    QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
 
@@ -194,17 +194,17 @@ public:
     BoolSetting streamerModeHideViewerCountAndDuration = {
         "/streamerMode/hideViewerCountAndDuration", false};
     BoolSetting streamerModeMuteMentions = {"/streamerMode/muteMentions", true};
-    BoolSetting streamerModeSupressLiveNotifications = {
+    BoolSetting streamerModeSuppressLiveNotifications = {
         "/streamerMode/supressLiveNotifications", false};
 
     /// Ignored Phrases
     QStringSetting ignoredPhraseReplace = {"/ignore/ignoredPhraseReplace",
                                            "***"};
 
-    /// Ingored Users
-    BoolSetting enableTwitchIgnoredUsers = {"/ignore/enableTwitchIgnoredUsers",
+    /// Blocked Users
+    BoolSetting enableTwitchBlockedUsers = {"/ignore/enableTwitchBlockedUsers",
                                             true};
-    IntSetting showIgnoredUsersMessages = {"/ignore/showIgnoredUsers", 0};
+    IntSetting showBlockedUsersMessages = {"/ignore/showBlockedUsers", 0};
 
     /// Moderation
     QStringSetting timeoutAction = {"/moderation/timeoutAction", "Disable"};

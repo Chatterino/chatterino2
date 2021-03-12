@@ -9,11 +9,14 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Clipboard.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
 #include "util/Shortcut.hpp"
@@ -49,8 +52,8 @@ namespace {
             [label = label.getElement()] {
                 auto copyText = label->property("copy-text").toString();
 
-                qApp->clipboard()->setText(copyText.isEmpty() ? label->getText()
-                                                              : copyText);
+                crossPlatformCopy(copyText.isEmpty() ? label->getText()
+                                                     : copyText);
             });
 
         return label.getElement();
@@ -200,7 +203,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         user->addStretch(1);
 
         user.emplace<QCheckBox>("Follow").assign(&this->ui_.follow);
-        user.emplace<QCheckBox>("Ignore").assign(&this->ui_.ignore);
+        user.emplace<QCheckBox>("Block").assign(&this->ui_.block);
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
         auto usercard = user.emplace<EffectLabel2>(this);
@@ -426,50 +429,71 @@ void UserInfoPopup::installEvents()
 
     std::shared_ptr<bool> ignoreNext = std::make_shared<bool>(false);
 
-    // ignore
+    // block
     QObject::connect(
-        this->ui_.ignore, &QCheckBox::stateChanged,
-        [this, ignoreNext, hack](int) mutable {
-            if (*ignoreNext)
+        this->ui_.block, &QCheckBox::stateChanged,
+        [this](int newState) mutable {
+            auto currentUser = getApp()->accounts->twitch.getCurrent();
+
+            const auto reenableBlockCheckbox = [this] {
+                this->ui_.block->setEnabled(true);
+            };
+
+            if (!this->ui_.block->isEnabled())
             {
-                *ignoreNext = false;
+                reenableBlockCheckbox();
                 return;
             }
 
-            this->ui_.ignore->setEnabled(false);
+            switch (newState)
+            {
+                case Qt::CheckState::Unchecked: {
+                    this->ui_.block->setEnabled(false);
 
-            auto currentUser = getApp()->accounts->twitch.getCurrent();
-            if (this->ui_.ignore->isChecked())
-            {
-                currentUser->ignoreByID(
-                    this->userId_, this->userName_,
-                    [=](auto result, const auto &message) mutable {
-                        if (hack.lock())
-                        {
-                            if (result == IgnoreResult_Failed)
-                            {
-                                *ignoreNext = true;
-                                this->ui_.ignore->setChecked(false);
-                            }
-                            this->ui_.ignore->setEnabled(true);
-                        }
-                    });
-            }
-            else
-            {
-                currentUser->unignoreByID(
-                    this->userId_, this->userName_,
-                    [=](auto result, const auto &message) mutable {
-                        if (hack.lock())
-                        {
-                            if (result == UnignoreResult_Failed)
-                            {
-                                *ignoreNext = true;
-                                this->ui_.ignore->setChecked(true);
-                            }
-                            this->ui_.ignore->setEnabled(true);
-                        }
-                    });
+                    getApp()->accounts->twitch.getCurrent()->unblockUser(
+                        this->userId_,
+                        [this, reenableBlockCheckbox, currentUser] {
+                            this->channel_->addMessage(makeSystemMessage(
+                                QString("You successfully unblocked user %1")
+                                    .arg(this->userName_)));
+                            reenableBlockCheckbox();
+                        },
+                        [this, reenableBlockCheckbox] {
+                            this->channel_->addMessage(
+                                makeSystemMessage(QString(
+                                    "User %1 couldn't be unblocked, an unknown "
+                                    "error occurred!")));
+                            reenableBlockCheckbox();
+                        });
+                }
+                break;
+
+                case Qt::CheckState::PartiallyChecked: {
+                    // We deliberately ignore this state
+                }
+                break;
+
+                case Qt::CheckState::Checked: {
+                    this->ui_.block->setEnabled(false);
+
+                    getApp()->accounts->twitch.getCurrent()->blockUser(
+                        this->userId_,
+                        [this, reenableBlockCheckbox, currentUser] {
+                            this->channel_->addMessage(makeSystemMessage(
+                                QString("You successfully blocked user %1")
+                                    .arg(this->userName_)));
+                            reenableBlockCheckbox();
+                        },
+                        [this, reenableBlockCheckbox] {
+                            this->channel_->addMessage(makeSystemMessage(
+                                QString(
+                                    "User %1 couldn't be blocked, an unknown "
+                                    "error occurred!")
+                                    .arg(this->userName_)));
+                            reenableBlockCheckbox();
+                        });
+                }
+                break;
             }
         });
 
@@ -601,7 +625,8 @@ void UserInfoPopup::updateUserData()
 
         this->ui_.nameLabel->setText(user.displayName);
         this->setWindowTitle(TEXT_TITLE.arg(user.displayName));
-        this->ui_.viewCountLabel->setText(TEXT_VIEWS.arg(user.viewCount));
+        this->ui_.viewCountLabel->setText(
+            TEXT_VIEWS.arg(localizeNumbers(user.viewCount)));
         this->ui_.createdDateLabel->setText(
             TEXT_CREATED.arg(user.createdAt.section("T", 0, 0)));
         this->ui_.userIDLabel->setText(TEXT_USER_ID + user.id);
@@ -625,7 +650,7 @@ void UserInfoPopup::updateUserData()
                     return;
                 }
                 this->ui_.followerCountLabel->setText(
-                    TEXT_FOLLOWERS.arg(followers.total));
+                    TEXT_FOLLOWERS.arg(localizeNumbers(followers.total)));
             },
             [] {
                 // on failure
@@ -646,9 +671,9 @@ void UserInfoPopup::updateUserData()
 
         // get ignore state
         bool isIgnoring = false;
-        for (const auto &ignoredUser : currentUser->getIgnores())
+        for (const auto &blockedUser : currentUser->getBlocks())
         {
-            if (user.id == ignoredUser.id)
+            if (user.id == blockedUser.id)
             {
                 isIgnoring = true;
                 break;
@@ -675,8 +700,8 @@ void UserInfoPopup::updateUserData()
         {
             this->ui_.ignoreHighlights->setEnabled(true);
         }
-        this->ui_.ignore->setEnabled(true);
-        this->ui_.ignore->setChecked(isIgnoring);
+        this->ui_.block->setChecked(isIgnoring);
+        this->ui_.block->setEnabled(true);
         this->ui_.ignoreHighlights->setChecked(isIgnoringHighlights);
 
         // get followage and subage
@@ -723,7 +748,7 @@ void UserInfoPopup::updateUserData()
                               onUserFetchFailed);
 
     this->ui_.follow->setEnabled(false);
-    this->ui_.ignore->setEnabled(false);
+    this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
 }
 
