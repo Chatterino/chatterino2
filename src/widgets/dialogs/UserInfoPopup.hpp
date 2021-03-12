@@ -30,7 +30,6 @@ protected:
 private:
     void installEvents();
     void updateUserData();
-    void updateLatestMessages();
 
     void loadAvatar(const QUrl &url);
     bool isMod_;
