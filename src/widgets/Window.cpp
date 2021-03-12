@@ -464,6 +464,65 @@ void Window::addShortcuts()
              this->notebook_->rearrangePage(this->notebook_->getSelectedPage(),
                                             newIndex);
          }},
+        {"setStreamerMode",
+         [this](std::vector<QString> arguments) {
+             auto mode = 2;
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "off")
+                 {
+                     mode = 0;
+                 }
+                 else if (arg == "on")
+                 {
+                     mode = 1;
+                 }
+                 else if (arg == "toggle")
+                 {
+                     mode = 2;
+                 }
+                 else if (arg == "auto")
+                 {
+                     mode = 3;
+                 }
+                 else
+                 {
+                     qCDebug(chatterinoHotkeys)
+                         << "Invalid argument for setStreamerMode hotkey: "
+                         << arg;
+                 }
+             }
+
+             if (mode == 0)
+             {
+                 getSettings()->enableStreamerMode.setValue(
+                     StreamerModeSetting::Disabled);
+             }
+             else if (mode == 1)
+             {
+                 getSettings()->enableStreamerMode.setValue(
+                     StreamerModeSetting::Enabled);
+             }
+             else if (mode == 2)
+             {
+                 if (isInStreamerMode())
+                 {
+                     getSettings()->enableStreamerMode.setValue(
+                         StreamerModeSetting::Disabled);
+                 }
+                 else
+                 {
+                     getSettings()->enableStreamerMode.setValue(
+                         StreamerModeSetting::Enabled);
+                 }
+             }
+             else if (mode == 3)
+             {
+                 getSettings()->enableStreamerMode.setValue(
+                     StreamerModeSetting::DetectObs);
+             }
+         }},
     };
     this->addDebugStuff(windowActions);
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
