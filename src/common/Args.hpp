@@ -17,6 +17,7 @@ public:
     bool shouldRunBrowserExtensionHost{};
     bool dontSaveSettings{};
     boost::optional<WindowLayout> customChannelLayout;
+    bool verbose{};
 
 private:
     void applyCustomChannelLayout(const QString &argValue);
