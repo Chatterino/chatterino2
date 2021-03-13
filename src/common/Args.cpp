@@ -27,7 +27,7 @@ Args::Args(const QApplication &app)
     parentWindowOption.setFlags(QCommandLineOption::HiddenFromHelp);
 
     parser.addOptions({
-        {{"v", "version"}, "Displays version information."},
+        {{"V", "version"}, "Displays version information."},
         crashRecoveryOption,
         parentWindowOption,
     });
