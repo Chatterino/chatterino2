@@ -30,7 +30,7 @@
 - Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940, #2368)
 - Minor: Added customizable timeout buttons to the user info popup
 - Minor: Deprecate loading of "v1" window layouts. If you haven't updated Chatterino in more than 2 years, there's a chance you will lose your window layout.
-- Minor: User popup will now automatically display messages as they are received
+- Minor: User popup will now automatically display messages as they are received. (#1982, #2514)
 - Minor: Changed the English in two rate-limited system messages (#1878)
 - Minor: Added a setting to disable messages sent to /mentions split from making the tab highlight with the red marker (#1994)
 - Minor: Added image for streamer mode in the user popup icon.
@@ -79,6 +79,7 @@
 - Bugfix: Fix anonymous users being pinged by "username" justinfan64537 (#2156, #2352)
 - Bugfix: Fixed hidden tooltips when always on top is active (#2384)
 - Bugfix: Fix CLI arguments (`--help`, `--version`, `--channels`) not being respected (#2368, #2190)
+- Bugfix: Fix Twitch cheer emotes not displaying tooltips when hovered (#2434)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
