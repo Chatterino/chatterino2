@@ -15,6 +15,7 @@
 #include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
+#include "util/AttachToConsole.hpp"
 #include "util/IncognitoBrowser.hpp"
 
 using namespace chatterino;
@@ -63,6 +64,8 @@ int main(int argc, char **argv)
     }
     else if (getArgs().printVersion)
     {
+        attachToConsole();
+
         auto version = Version::instance();
         qInfo().noquote() << QString("%1 (commit %2%3)")
                                  .arg(version.fullVersion())
@@ -73,6 +76,11 @@ int main(int argc, char **argv)
     }
     else
     {
+        if (getArgs().verbose)
+        {
+            attachToConsole();
+        }
+
         IvrApi::initialize();
         Helix::initialize();
         Kraken::initialize();
