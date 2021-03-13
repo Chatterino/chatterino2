@@ -119,11 +119,11 @@ int NotebookTab::normalTabWidth()
 
     if (this->hasXButton())
     {
-        width = (metrics.width(this->getTitle()) + int(32 * scale));
+        width = (metrics.horizontalAdvance(this->getTitle()) + int(32 * scale));
     }
     else
     {
-        width = (metrics.width(this->getTitle()) + int(16 * scale));
+        width = (metrics.horizontalAdvance(this->getTitle()) + int(16 * scale));
     }
 
     if (this->height() > 150 * scale)
@@ -390,7 +390,7 @@ void NotebookTab::paintEvent(QPaintEvent *)
         textRect.setRight(textRect.right() - this->height() / 2);
     }
 
-    int width = metrics.width(this->getTitle());
+    int width = metrics.horizontalAdvance(this->getTitle());
     Qt::Alignment alignment = width > textRect.width()
                                   ? Qt::AlignLeft | Qt::AlignVCenter
                                   : Qt::AlignHCenter | Qt::AlignVCenter;
