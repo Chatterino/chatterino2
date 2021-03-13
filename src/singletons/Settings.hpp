@@ -70,9 +70,9 @@ public:
     BoolSetting showLastMessageIndicator = {
         "/appearance/messages/showLastMessageIndicator", false};
     EnumSetting<Qt::BrushStyle> lastMessagePattern = {
-        "/appearance/messages/lastMessagePattern", Qt::VerPattern};
+        "/appearance/messages/lastMessagePattern", Qt::SolidPattern};
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
-                                       ""};
+                                       "#7f2026"};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
