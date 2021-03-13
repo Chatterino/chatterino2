@@ -3,6 +3,8 @@
 #include "common/Channel.hpp"
 #include "common/UniqueAccess.hpp"
 #include "common/UsernameSet.hpp"
+#include "util/QStringHash.hpp"
+
 #include "lrucache/lrucache.hpp"
 
 namespace chatterino {
