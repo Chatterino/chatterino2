@@ -465,7 +465,7 @@ void Window::addShortcuts()
                                             newIndex);
          }},
         {"setStreamerMode",
-         [this](std::vector<QString> arguments) {
+         [](std::vector<QString> arguments) {
              auto mode = 2;
              if (arguments.size() != 0)
              {
