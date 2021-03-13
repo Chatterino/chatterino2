@@ -25,6 +25,3 @@
 [submodule "lib/websocketpp"]
 	path = lib/websocketpp
 	url = https://github.com/ziocleto/websocketpp
-[submodule "lib/lru_cache"]
-	path = lib/lru_cache
-	url = https://github.com/nitnelave/lru_cache
