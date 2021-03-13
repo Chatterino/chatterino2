@@ -68,11 +68,9 @@ namespace {
 
         if (getSettings()->streamlinkUseCustomPath)
         {
-            msg->showMessage(
-                "Unable to find Streamlink executable\nMake sure your custom "
-                "path "
-                "is pointing "
-                "to the DIRECTORY where the streamlink executable is located");
+            msg->showMessage("Unable to find Streamlink executable\nMake sure "
+                             "your custom path is pointing to the DIRECTORY "
+                             "where the streamlink executable is located");
         }
         else
         {
@@ -101,8 +99,10 @@ namespace {
         });
 
         QObject::connect(
-            p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-            [=](int res) {
+            p,
+            static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+                &QProcess::finished),
+            [=](int /*exitCode*/, QProcess::ExitStatus /*exitStatus*/) {
                 p->deleteLater();
             });
 
@@ -117,11 +117,13 @@ void getStreamQualities(const QString &channelURL,
     auto p = createStreamlinkProcess();
 
     QObject::connect(
-        p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-        [=](int res) {
-            if (res != 0)
+        p,
+        static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+            &QProcess::finished),
+        [=](int exitCode, QProcess::ExitStatus /*exitStatus*/) {
+            if (exitCode != 0)
             {
-                qCWarning(chatterinoStreamlink) << "Got error code" << res;
+                qCWarning(chatterinoStreamlink) << "Got error code" << exitCode;
                 // return;
             }
             QString lastLine = QString(p->readAllStandardOutput());
