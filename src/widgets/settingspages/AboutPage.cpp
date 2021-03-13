@@ -124,6 +124,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "QtKeychain",
                        "https://github.com/frankosterfeld/qtkeychain",
                        ":/licenses/qtkeychain.txt");
+            addLicense(form.getElement(), "lrucache",
+                       "https://github.com/lamerman/cpp-lru-cache",
+                       ":/licenses/lrucache.txt");
         }
 
         auto attributions = layout.emplace<QGroupBox>("Attributions...");
