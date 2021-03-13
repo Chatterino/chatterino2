@@ -195,8 +195,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
             .assign(&this->ui_.ignoreHighlights);
         auto usercard = user.emplace<EffectLabel2>(this);
         usercard->getLabel().setText("Usercard");
-        auto refresh = user.emplace<EffectLabel2>(this);
-        refresh->getLabel().setText("Refresh");
         auto mod = user.emplace<Button>(this);
         mod->setPixmap(getResources().buttons.mod);
         mod->setScaleIndependantSize(30, 30);
@@ -218,9 +216,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                       "/viewercard/" + this->userName_);
         });
 
-        QObject::connect(refresh.getElement(), &Button::leftClicked, [this] {
-            this->updateLatestMessages();
-        });
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
             this->channel_->sendMessage("/mod " + this->userName_);
         });
