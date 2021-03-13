@@ -40,6 +40,13 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->overrideBackgroundColor_ = QColor("#111111");
     this->scaleChangedEvent(this->scale());  // execute twice to width of item
 
+    // Disable the ? button in the titlebar until we decide to use it
+    this->setWindowFlags(this->windowFlags() &
+                         ~Qt::WindowContextHelpButtonHint);
+    this->addShortcuts();
+}
+void SettingsDialog::addShortcuts()
+{
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::Settings,
         std::map<QString, std::function<void(std::vector<QString>)>>{
@@ -49,10 +56,6 @@ SettingsDialog::SettingsDialog(QWidget *parent)
                  this->ui_.search->selectAll();
              }}},
         this);
-
-    // Disable the ? button in the titlebar until we decide to use it
-    this->setWindowFlags(this->windowFlags() &
-                         ~Qt::WindowContextHelpButtonHint);
 }
 
 void SettingsDialog::initUi()

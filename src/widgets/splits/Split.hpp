@@ -97,6 +97,7 @@ private:
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
     void updateInputPlaceholder();
+    void addShortcuts();
 
     SplitContainer *container_;
     IndirectChannel channel_;

@@ -109,6 +109,146 @@ Split::Split(QWidget *parent)
     this->vbox_->addWidget(this->view_, 1);
     this->vbox_->addWidget(this->input_);
 
+    // xd
+    // CreateShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
+    // CreateShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
+    // CreateShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
+    // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
+
+    this->input_->ui_.textEdit->installEventFilter(parent);
+
+    // update placeheolder text on Twitch account change and channel change
+    this->signalHolder_.managedConnect(
+        getApp()->accounts->twitch.currentUserChanged, [this] {
+            this->updateInputPlaceholder();
+        });
+    this->signalHolder_.managedConnect(channelChanged, [this] {
+        this->updateInputPlaceholder();
+    });
+    this->updateInputPlaceholder();
+
+    this->view_->mouseDown.connect([this](QMouseEvent *) {
+        this->giveFocus(Qt::MouseFocusReason);
+    });
+    this->view_->selectionChanged.connect([this]() {
+        if (view_->hasSelection())
+        {
+            this->input_->clearSelection();
+        }
+    });
+
+    this->view_->joinToChannel.connect([this](QString twitchChannel) {
+        this->container_->appendNewSplit(false)->setChannel(
+            getApp()->twitch.server->getOrAddChannel(twitchChannel));
+    });
+
+    this->input_->textChanged.connect([=](const QString &newText) {
+        if (getSettings()->showEmptyInput)
+        {
+            return;
+        }
+
+        if (newText.length() == 0)
+        {
+            this->input_->hide();
+        }
+        else if (this->input_->isHidden())
+        {
+            this->input_->show();
+        }
+    });
+
+    getSettings()->showEmptyInput.connect(
+        [this](const bool &showEmptyInput, auto) {
+            if (!showEmptyInput && this->input_->getInputText().length() == 0)
+            {
+                this->input_->hide();
+            }
+            else
+            {
+                this->input_->show();
+            }
+        },
+        this->managedConnections_);
+
+    this->header_->updateModerationModeIcon();
+    this->overlay_->hide();
+
+    this->setSizePolicy(QSizePolicy::MinimumExpanding,
+                        QSizePolicy::MinimumExpanding);
+
+    this->managedConnect(modifierStatusChanged, [this](Qt::KeyboardModifiers
+                                                           status) {
+        if ((status ==
+             showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
+            this->isMouseOver_)
+        {
+            this->overlay_->show();
+        }
+        else
+        {
+            this->overlay_->hide();
+        }
+
+        if (getSettings()->pauseChatModifier.getEnum() != Qt::NoModifier &&
+            status == getSettings()->pauseChatModifier.getEnum())
+        {
+            this->view_->pause(PauseReason::KeyboardModifier);
+        }
+        else
+        {
+            this->view_->unpause(PauseReason::KeyboardModifier);
+        }
+    });
+
+    this->input_->ui_.textEdit->focused.connect([this] {
+        this->focused.invoke();
+    });
+    this->input_->ui_.textEdit->focusLost.connect([this] {
+        this->focusLost.invoke();
+    });
+    this->input_->ui_.textEdit->imagePasted.connect(
+        [this](const QMimeData *source) {
+            if (!getSettings()->imageUploaderEnabled)
+                return;
+
+            if (getSettings()->askOnImageUpload.getValue())
+            {
+                QMessageBox msgBox;
+                msgBox.setText("Image upload");
+                msgBox.setInformativeText(
+                    "You are uploading an image to a 3rd party service not in "
+                    "control of the chatterino team. You may not be able to "
+                    "remove the image from the site. Are you okay with this?");
+                msgBox.addButton(QMessageBox::Cancel);
+                msgBox.addButton(QMessageBox::Yes);
+                msgBox.addButton("Yes, don't ask again", QMessageBox::YesRole);
+
+                msgBox.setDefaultButton(QMessageBox::Yes);
+
+                auto picked = msgBox.exec();
+                if (picked == QMessageBox::Cancel)
+                {
+                    return;
+                }
+                else if (picked == 0)  // don't ask again button
+                {
+                    getSettings()->askOnImageUpload.setValue(false);
+                }
+            }
+            upload(source, this->getChannel(), *this->input_->ui_.textEdit);
+        });
+
+    getSettings()->imageUploaderEnabled.connect(
+        [this](const bool &val) {
+            this->setAcceptDrops(val);
+        },
+        this->managedConnections_);
+    this->addShortcuts();
+}
+
+void Split::addShortcuts()
+{
     std::map<QString, std::function<void(std::vector<QString>)>> splitActions{
         {"test",
          [](std::vector<QString> test) {
@@ -376,142 +516,6 @@ Split::Split(QWidget *parent)
     };  // TODO: move rest
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
                                                             splitActions, this);
-
-    // xd
-    // CreateShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
-    // CreateShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
-    // CreateShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
-    // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
-
-    this->input_->ui_.textEdit->installEventFilter(parent);
-
-    // update placeheolder text on Twitch account change and channel change
-    this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged, [this] {
-            this->updateInputPlaceholder();
-        });
-    this->signalHolder_.managedConnect(channelChanged, [this] {
-        this->updateInputPlaceholder();
-    });
-    this->updateInputPlaceholder();
-
-    this->view_->mouseDown.connect([this](QMouseEvent *) {
-        this->giveFocus(Qt::MouseFocusReason);
-    });
-    this->view_->selectionChanged.connect([this]() {
-        if (view_->hasSelection())
-        {
-            this->input_->clearSelection();
-        }
-    });
-
-    this->view_->joinToChannel.connect([this](QString twitchChannel) {
-        this->container_->appendNewSplit(false)->setChannel(
-            getApp()->twitch.server->getOrAddChannel(twitchChannel));
-    });
-
-    this->input_->textChanged.connect([=](const QString &newText) {
-        if (getSettings()->showEmptyInput)
-        {
-            return;
-        }
-
-        if (newText.length() == 0)
-        {
-            this->input_->hide();
-        }
-        else if (this->input_->isHidden())
-        {
-            this->input_->show();
-        }
-    });
-
-    getSettings()->showEmptyInput.connect(
-        [this](const bool &showEmptyInput, auto) {
-            if (!showEmptyInput && this->input_->getInputText().length() == 0)
-            {
-                this->input_->hide();
-            }
-            else
-            {
-                this->input_->show();
-            }
-        },
-        this->managedConnections_);
-
-    this->header_->updateModerationModeIcon();
-    this->overlay_->hide();
-
-    this->setSizePolicy(QSizePolicy::MinimumExpanding,
-                        QSizePolicy::MinimumExpanding);
-
-    this->managedConnect(modifierStatusChanged, [this](Qt::KeyboardModifiers
-                                                           status) {
-        if ((status ==
-             showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
-            this->isMouseOver_)
-        {
-            this->overlay_->show();
-        }
-        else
-        {
-            this->overlay_->hide();
-        }
-
-        if (getSettings()->pauseChatModifier.getEnum() != Qt::NoModifier &&
-            status == getSettings()->pauseChatModifier.getEnum())
-        {
-            this->view_->pause(PauseReason::KeyboardModifier);
-        }
-        else
-        {
-            this->view_->unpause(PauseReason::KeyboardModifier);
-        }
-    });
-
-    this->input_->ui_.textEdit->focused.connect([this] {
-        this->focused.invoke();
-    });
-    this->input_->ui_.textEdit->focusLost.connect([this] {
-        this->focusLost.invoke();
-    });
-    this->input_->ui_.textEdit->imagePasted.connect(
-        [this](const QMimeData *source) {
-            if (!getSettings()->imageUploaderEnabled)
-                return;
-
-            if (getSettings()->askOnImageUpload.getValue())
-            {
-                QMessageBox msgBox;
-                msgBox.setText("Image upload");
-                msgBox.setInformativeText(
-                    "You are uploading an image to a 3rd party service not in "
-                    "control of the chatterino team. You may not be able to "
-                    "remove the image from the site. Are you okay with this?");
-                msgBox.addButton(QMessageBox::Cancel);
-                msgBox.addButton(QMessageBox::Yes);
-                msgBox.addButton("Yes, don't ask again", QMessageBox::YesRole);
-
-                msgBox.setDefaultButton(QMessageBox::Yes);
-
-                auto picked = msgBox.exec();
-                if (picked == QMessageBox::Cancel)
-                {
-                    return;
-                }
-                else if (picked == 0)  // don't ask again button
-                {
-                    getSettings()->askOnImageUpload.setValue(false);
-                }
-            }
-            upload(source, this->getChannel(), *this->input_->ui_.textEdit);
-        });
-
-    getSettings()->imageUploaderEnabled.connect(
-        [this](const bool &val) {
-            this->setAcceptDrops(val);
-        },
-        this->managedConnections_);
 }
 
 Split::~Split()

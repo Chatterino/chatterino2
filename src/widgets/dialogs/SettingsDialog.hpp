@@ -58,6 +58,7 @@ private:
 
     void onOkClicked();
     void onCancelClicked();
+    void addShortcuts();
 
     struct {
         QWidget *tabContainerContainer{};

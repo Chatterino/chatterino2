@@ -385,6 +385,7 @@ void SplitInput::installKeyPressedEvent()
     this->shortcuts_ = app->hotkeys->shortcutsForScope(HotkeyScope::SplitInput,
                                                        splitInputActions, this);
 
+    this->ui_.textEdit->keyPressed.disconnectAll();
     this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
         if (auto popup = this->emoteInputPopup_.get())
         {
