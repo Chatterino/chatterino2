@@ -120,8 +120,8 @@ void getStreamQualities(const QString &channelURL,
         p,
         static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
             &QProcess::finished),
-        [=](int exitCode, QProcess::ExitStatus exitStatus) {
-            if (exitStatus != QProcess::NormalExit)
+        [=](int exitCode, QProcess::ExitStatus /*exitStatus*/) {
+            if (exitCode != 0)
             {
                 qCWarning(chatterinoStreamlink) << "Got error code" << exitCode;
                 // return;
