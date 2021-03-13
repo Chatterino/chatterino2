@@ -211,10 +211,9 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         user->addStretch(1);
 
         QObject::connect(usercard.getElement(), &Button::leftClicked, [this] {
-            QDesktopServices::openUrl(
-                QString("https://www.twitch.tv/popout/%1/viewercard/%2")
-                    .arg(this->channel_->getName())
-                    .arg(this->userName_));
+            QDesktopServices::openUrl("https://www.twitch.tv/popout/" +
+                                      this->channel_->getName() +
+                                      "/viewercard/" + this->userName_);
         });
 
         QObject::connect(mod.getElement(), &Button::leftClicked, [this] {
@@ -530,9 +529,45 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 
     this->userStateChanged_.invoke();
 
+    this->updateLatestMessages();
     QTimer::singleShot(1, this, [this] {
         this->setStayInScreenRect(true);
     });
+}
+
+void UserInfoPopup::updateLatestMessages()
+{
+    auto filteredChannel = filterMessages(this->userName_, this->channel_);
+    this->ui_.latestMessages->setChannel(filteredChannel);
+    this->ui_.latestMessages->setSourceChannel(this->channel_);
+
+    const bool hasMessages = filteredChannel->hasMessages();
+    this->ui_.latestMessages->setVisible(hasMessages);
+    this->ui_.noMessagesLabel->setVisible(!hasMessages);
+
+    // shrink dialog in case ChannelView goes from visible to hidden
+    this->adjustSize();
+
+    this->refreshConnection_
+        .disconnect();  // remove once https://github.com/pajlada/signals/pull/10 gets merged
+
+    this->refreshConnection_ = this->channel_->messageAppended.connect(
+        [this, hasMessages](auto message, auto) {
+            if (!checkMessageUserName(this->userName_, message))
+                return;
+
+            if (hasMessages)
+            {
+                // display message in ChannelView
+                this->ui_.latestMessages->channel()->addMessage(message);
+            }
+            else
+            {
+                // The ChannelView is currently hidden, so manually refresh
+                // and display the latest messages
+                this->updateLatestMessages();
+            }
+        });
 }
 
 void UserInfoPopup::updateUserData()
