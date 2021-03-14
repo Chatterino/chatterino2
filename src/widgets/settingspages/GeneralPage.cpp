@@ -230,33 +230,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Alternate background color", s.alternateMessages);
     layout.addCheckbox("Gray-out recent messages", s.grayOutRecents);
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
-    layout.addCheckbox("Show last message line", s.showLastMessageIndicator);
-    layout.addDropdown<std::underlying_type<Qt::BrushStyle>::type>(
-        "Last message line style", {"Dotted", "Solid"}, s.lastMessagePattern,
-        [](int value) {
-            switch (value)
-            {
-                case Qt::VerPattern:
-                    return 0;
-                case Qt::SolidPattern:
-                default:
-                    return 1;
-            }
-        },
-        [](DropdownArgs args) {
-            switch (args.index)
-            {
-                case 0:
-                    return Qt::VerPattern;
-                case 1:
-                default:
-                    return Qt::SolidPattern;
-            }
-        },
-        false);
-    layout.addColorButton("Last message line color",
-                          QColor(getSettings()->lastMessageColor.getValue()),
-                          getSettings()->lastMessageColor);
     layout.addCheckbox("Highlight messages redeemed with Channel Points",
                        s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
@@ -286,6 +259,36 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 0);
         });
+    layout.addSeperator();
+    layout.addCheckbox("Draw a line below the most recent message before "
+                       "switching applications.",
+                       s.showLastMessageIndicator);
+    layout.addDropdown<std::underlying_type<Qt::BrushStyle>::type>(
+        "Line style", {"Dotted", "Solid"}, s.lastMessagePattern,
+        [](int value) {
+            switch (value)
+            {
+                case Qt::VerPattern:
+                    return 0;
+                case Qt::SolidPattern:
+                default:
+                    return 1;
+            }
+        },
+        [](DropdownArgs args) {
+            switch (args.index)
+            {
+                case 0:
+                    return Qt::VerPattern;
+                case 1:
+                default:
+                    return Qt::SolidPattern;
+            }
+        },
+        false);
+    layout.addColorButton("Line color",
+                          QColor(getSettings()->lastMessageColor.getValue()),
+                          getSettings()->lastMessageColor);
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
