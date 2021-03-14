@@ -66,6 +66,39 @@ Window::Window(WindowType type)
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
+
+        getSettings()->tabDirection.connect([this](int val) {
+            this->notebook_->setTabDirection(NotebookTabDirection(val));
+        });
+
+        actionShow_ = new QAction("Show", this);
+        actionExit_ = new QAction("Exit", this);
+        trayContextMenu_ = new QMenu(this);
+
+        trayContextMenu_->addAction(actionShow_);
+        trayContextMenu_->addSeparator();
+        trayContextMenu_->addAction(actionExit_);
+
+        trayIcon_ = new QSystemTrayIcon(this);
+        trayIcon_->setVisible(false);
+        trayIcon_->setIcon(QIcon(":/icon.ico"));
+        trayIcon_->setToolTip(Version::instance().fullVersion());
+        trayIcon_->setContextMenu(trayContextMenu_);
+
+        connect(actionShow_, &QAction::triggered, this, [] {
+            getApp()->windows->setVisibilityAll(true);
+        });
+        connect(actionExit_, &QAction::triggered, this, [] {
+            QApplication::exit();
+        });
+
+        connect(trayIcon_, &QSystemTrayIcon::activated, this, [](auto reason) {
+            if (reason == QSystemTrayIcon::ActivationReason::Trigger)
+            {
+                getApp()->windows->setVisibilityAll(
+                    !getApp()->windows->getMainWindow().isVisible());
+            }
+        });
     }
     else
     {
@@ -95,6 +128,11 @@ SplitNotebook &Window::getNotebook()
     return *this->notebook_;
 }
 
+QSystemTrayIcon *Window::getTrayIcon()
+{
+    return trayIcon_;
+}
+
 bool Window::event(QEvent *event)
 {
     switch (event->type())
@@ -122,27 +160,49 @@ bool Window::event(QEvent *event)
             }
         }
         break;
-
+#if !defined(Q_OS_WINDOWS)
+        // We handle this in the custom minimize button on Windows
+        case QEvent::WindowStateChange:
+            if (this->type_ == WindowType::Main && isMinimized())
+            {
+                handleMinimizeEvent(event);
+            }
+            break;
+#endif
         default:;
     }
 
     return BaseWindow::event(event);
 }
 
-void Window::closeEvent(QCloseEvent *)
+bool Window::isMainWindow()
 {
-    if (this->type_ == WindowType::Main)
+    return this->type_ == WindowType::Main;
+}
+
+void Window::closeEvent(QCloseEvent *e)
+{
+    auto action = getSettings()->closeTrayAction.getEnum();
+    if (this->type_ == WindowType::Main &&
+        action != TrayAction::CloseChatterino)
     {
-        auto app = getApp();
-        app->windows->save();
-        app->windows->closeAll();
+        handleCloseEvent(e);
     }
-
-    this->closed.invoke();
-
-    if (this->type_ == WindowType::Main)
+    else
     {
-        QApplication::exit();
+        if (this->type_ == WindowType::Main)
+        {
+            auto app = getApp();
+            app->windows->save();
+            app->windows->closeAll();
+        }
+
+        this->closed.invoke();
+
+        if (this->type_ == WindowType::Main)
+        {
+            QApplication::exit();
+        }
     }
 }
 

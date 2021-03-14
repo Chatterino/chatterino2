@@ -169,11 +169,18 @@ void BaseWindow::init()
                 TitleBarButton *_exitButton = new TitleBarButton;
                 _exitButton->setButtonStyle(TitleBarButtonStyle::Close);
 
-                QObject::connect(_minButton, &TitleBarButton::leftClicked, this,
-                                 [this] {
-                                     this->setWindowState(Qt::WindowMinimized |
-                                                          this->windowState());
-                                 });
+                QObject::connect(
+                    _minButton, &TitleBarButton::leftClicked, this, [this] {
+                        if (this->isMainWindow())
+                        {
+                            handleMinimizeEvent(nullptr);
+                        }
+                        else
+                        {
+                            this->setWindowState(Qt::WindowMinimized |
+                                                 this->windowState());
+                        }
+                    });
                 QObject::connect(_maxButton, &TitleBarButton::leftClicked, this,
                                  [this, _maxButton] {
                                      this->setWindowState(
@@ -298,6 +305,11 @@ bool BaseWindow::supportsCustomWindowFrame()
 #endif
 }
 
+FlagsEnum<BaseWindow::Flags> const &BaseWindow::getFlags()
+{
+    return flags_;
+}
+
 void BaseWindow::themeChangedEvent()
 {
     if (this->hasCustomWindowFrame())
@@ -361,6 +373,16 @@ void BaseWindow::wheelEvent(QWheelEvent *event)
                 getSettings()->getClampedUiScale() - 0.1);
         }
     }
+}
+
+bool BaseWindow::shouldHandleTrayEvent(bool visible)
+{
+    return isVisible() != visible;
+}
+
+bool BaseWindow::isMainWindow()
+{
+    return false;
 }
 
 void BaseWindow::onFocusLost()
@@ -712,6 +734,95 @@ void BaseWindow::updateScale()
     for (auto child : this->findChildren<BaseWidget *>())
     {
         child->setScale(scale);
+    }
+}
+
+void BaseWindow::handleMinimizeEvent(QEvent *event)
+{
+    auto showMessage = [&] {
+        QMessageBox msgBox(QMessageBox::Question, "Chatterino",
+                           "What should we do when you press the "
+                           "minimize button? Minimizing to the taskbar "
+                           "is the default behavior.",
+                           QMessageBox::NoButton, this);
+        auto *taskbar =
+            msgBox.addButton("Minimize to task bar", QMessageBox::YesRole);
+        auto *tray =
+            msgBox.addButton("Minimize to tray", QMessageBox::ApplyRole);
+
+        msgBox.setWindowModality(Qt::ApplicationModal);
+        msgBox.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+        msgBox.setWindowFlag(
+            Qt::Popup,
+            true);  // Prevents users from being able to minimize the message box on linux (KDE)
+        msgBox.exec();
+
+        auto *result = static_cast<QPushButton *>(msgBox.clickedButton());
+        if (result == taskbar)
+        {
+            return TrayAction::MinimizeToTaskBar;
+        }
+        return TrayAction::MinimizeToTray;
+    };
+
+    auto action = getSettings()->minizeTrayAction.getEnum();
+    if (action == TrayAction::AskMe)
+    {
+        action = showMessage();
+        getSettings()->minizeTrayAction.setValue(action);
+    }
+
+    if (action == TrayAction::MinimizeToTaskBar)
+    {
+        this->setWindowState(Qt::WindowMinimized | this->windowState());
+    }
+    else if (action == TrayAction::MinimizeToTray)
+    {
+        getApp()->windows->setVisibilityAll(false);
+        if (event)
+            event->ignore();
+    }
+}
+
+void BaseWindow::handleCloseEvent(QEvent *event)
+{
+    auto action = getSettings()->closeTrayAction.getEnum();
+    auto showMessage = [&] {
+        QMessageBox msgBox(
+            QMessageBox::Question, "Chatterino",
+            "What should we do when you press the close button? Closing "
+            "Chatterino is the default behavior.",
+            QMessageBox::NoButton, this);
+        auto *close =
+            msgBox.addButton("Close Chatterino", QMessageBox::YesRole);
+        auto *tray =
+            msgBox.addButton("Minimize to tray", QMessageBox::ApplyRole);
+
+        msgBox.setWindowFlag(Qt::WindowContextHelpButtonHint, false);
+        msgBox.setWindowFlag(
+            Qt::Popup,
+            true);  // Prevents users from being able to minimize the message box on linux (KDE)
+        msgBox.exec();
+
+        auto *result = static_cast<QPushButton *>(msgBox.clickedButton());
+        if (result == close)
+        {
+            return TrayAction::CloseChatterino;
+        }
+        return TrayAction::MinimizeToTray;
+    };
+
+    if (action == TrayAction::AskMe)
+    {
+        action = showMessage();
+        getSettings()->closeTrayAction.setValue(action);
+    }
+
+    if (action == TrayAction::MinimizeToTray)
+    {
+        getApp()->windows->setVisibilityAll(false);
+        if (event)
+            event->ignore();
     }
 }
 

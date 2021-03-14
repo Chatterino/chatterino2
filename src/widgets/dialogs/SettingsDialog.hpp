@@ -40,6 +40,8 @@ public:
                            SettingsDialogPreference preferredTab =
                                SettingsDialogPreference::NoPreference);
 
+    bool shouldHandleTrayEvent(bool visible) override;
+
 protected:
     virtual void scaleChangedEvent(float newDpi) override;
     virtual void themeChangedEvent() override;
@@ -73,6 +75,7 @@ private:
     std::vector<SettingsDialogTab *> tabs_;
     SettingsDialogTab *selectedTab_{};
     SettingsDialogTab *lastSelectedByUser_{};
+    bool wasVisible_ = false;
 
     friend class SettingsDialogTab;
 };

@@ -642,6 +642,29 @@ void WindowManager::closeAll()
     }
 }
 
+void WindowManager::setVisibilityAll(bool visible)
+{
+    assertInGuiThread();
+    getMainWindow().getTrayIcon()->setVisible(!visible);
+
+    for (Window *window : windows_)
+    {
+        if (!window->getFlags().has(BaseWindow::IgnoreTrayEvent))
+        {
+            if (window->shouldHandleTrayEvent(visible))
+            {
+                window->setVisible(visible);
+                if (visible)
+                {
+                    window->activateWindow();
+                    window->raise();
+                    window->showNormal();
+                }
+            }
+        }
+    }
+}
+
 int WindowManager::getGeneration() const
 {
     return this->generation_;
