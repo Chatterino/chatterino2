@@ -131,6 +131,7 @@ public:
                                           true};
     BoolSetting showBadgesVanity = {"/appearance/badges/vanity", true};
     BoolSetting showBadgesChatterino = {"/appearance/badges/chatterino", true};
+    BoolSetting showBadgesDankerino = {"/appearance/badges/dankerino", true};
     BoolSetting showBadgesFfz = {"/appearance/badges/ffz", true};
 
     /// Behaviour
