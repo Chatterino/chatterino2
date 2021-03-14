@@ -254,10 +254,6 @@ Split::Split(QWidget *parent)
 void Split::addShortcuts()
 {
     std::map<QString, std::function<void(std::vector<QString>)>> splitActions{
-        {"test",
-         [](std::vector<QString> test) {
-             qCDebug(chatterinoHotkeys) << "Testing, attention please!" << test;
-         }},
         {"delete",
          [this](std::vector<QString>) {
              this->deleteFromContainer();
@@ -517,7 +513,7 @@ void Split::addShortcuts()
                      this->getChannel()->getName(), Platform::Twitch);
              }
          }},
-    };  // TODO: move rest
+    };
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
                                                             splitActions, this);
 }
