@@ -157,6 +157,11 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     this->loadEmojis();
     this->addShortcuts();
+    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+                                       [this]() {
+                                           this->clearShortcuts();
+                                           this->addShortcuts();
+                                       });
 }
 void EmotePopup::addShortcuts()
 {
