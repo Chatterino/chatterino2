@@ -149,10 +149,54 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
             head.emplace<Button>(nullptr).assign(&this->ui_.avatarButton);
         avatar->setScaleIndependantSize(100, 100);
         avatar->setDim(Button::Dim::None);
-        QObject::connect(avatar.getElement(), &Button::leftClicked, [this] {
-            QDesktopServices::openUrl(
-                QUrl("https://twitch.tv/" + this->userName_.toLower()));
-        });
+        QObject::connect(
+            avatar.getElement(), &Button::clicked,
+            [this](Qt::MouseButton button) {
+                switch (button)
+                {
+                    case Qt::LeftButton: {
+                        QDesktopServices::openUrl(QUrl(
+                            "https://twitch.tv/" + this->userName_.toLower()));
+                    }
+                    break;
+
+                    case Qt::RightButton: {
+                        // don't raise open context menu if there's no avatar (probably in cases when invalid user's usercard was opened)
+                        if (this->avatarUrl_.isEmpty())
+                        {
+                            return;
+                        }
+
+                        static QMenu *previousMenu = nullptr;
+                        if (previousMenu != nullptr)
+                        {
+                            previousMenu->deleteLater();
+                            previousMenu = nullptr;
+                        }
+
+                        auto menu = new QMenu;
+                        previousMenu = menu;
+
+                        // add context menu actions
+                        menu->addAction(
+                            "Open avatar in browser",
+                            [avatarUrl = this->avatarUrl_] {
+                                QDesktopServices::openUrl(QUrl(avatarUrl));
+                            });
+
+                        menu->addAction("Copy avatar link",
+                                        [avatarUrl = this->avatarUrl_] {
+                                            crossPlatformCopy(avatarUrl);
+                                        });
+
+                        menu->popup(QCursor::pos());
+                        menu->raise();
+                    }
+                    break;
+
+                    default:;
+                }
+            });
 
         auto vbox = head.emplace<QVBoxLayout>();
         {
@@ -604,6 +648,7 @@ void UserInfoPopup::updateUserData()
         }
 
         this->userId_ = user.id;
+        this->avatarUrl_ = user.profileImageUrl;
 
         this->ui_.nameLabel->setText(user.displayName);
         this->setWindowTitle(TEXT_TITLE.arg(user.displayName));

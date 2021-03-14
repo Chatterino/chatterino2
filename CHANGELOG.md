@@ -56,6 +56,7 @@
 - Minor: Remove EmojiOne 2 and 3 due to license restrictions. (#1555)
 - Minor: Added `/streamlink` command. Usage: `/streamlink <channel>`. You can also use the command without arguments in any twitch channel to open it in streamlink. (#2443, #2495)
 - Minor: Humanized all numbers visible to end-users. (#2488)
+- Minor: Added a context menu to avatar in usercard. It opens on right-clicking the avatar in usercard. (#2517)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
