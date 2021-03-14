@@ -557,6 +557,7 @@ target_link_libraries(${PROJECT_NAME}
     websocketpp::websocketpp
     Threads::Threads
     RapidJSON::RapidJSON
+    LRUCache
     )
 if (LIBRT)
     target_link_libraries(${PROJECT_NAME}
