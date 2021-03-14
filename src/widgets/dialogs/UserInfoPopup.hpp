@@ -38,6 +38,7 @@ private:
 
     QString userName_;
     QString userId_;
+    QString avatarUrl_;
     ChannelPtr channel_;
 
     pajlada::Signals::NoArgSignal userStateChanged_;
