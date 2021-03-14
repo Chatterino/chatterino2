@@ -251,6 +251,8 @@ set(SOURCE_FILES main.cpp
         singletons/helper/LoggingChannel.cpp
         singletons/helper/LoggingChannel.hpp
 
+        util/AttachToConsole.cpp
+        util/AttachToConsole.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
         util/DebugCount.cpp
