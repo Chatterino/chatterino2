@@ -36,6 +36,11 @@ QString HotkeyController::hotkeyScopeToName(HotkeyScope scope)
 HotkeyController::HotkeyController()
 {
     this->loadHotkeys();
+    this->signalHolder_.managedConnect(
+        this->hotkeys_.delayedItemsChanged, [this]() {
+            qCDebug(chatterinoHotkeys) << "Reloading hotkeys!";
+            this->onItemsUpdated.invoke();
+        });
 }
 
 void HotkeyController::initialize(Settings &settings, Paths &paths)
@@ -634,4 +639,5 @@ void HotkeyController::replaceHotkey(QString oldName,
     }
     this->hotkeys_.append(newHotkey);
 }
+
 }  // namespace chatterino

@@ -45,10 +45,16 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     // misc
     this->installKeyPressedEvent();
+    this->addShortcuts();
     this->ui_.textEdit->focusLost.connect([this] {
         this->hideColonMenu();
     });
     this->scaleChangedEvent(this->scale());
+    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+                                       [this]() {
+                                           this->clearShortcuts();
+                                           this->addShortcuts();
+                                       });
 }
 
 void SplitInput::initLayout()
@@ -196,7 +202,7 @@ void SplitInput::openEmotePopup()
     this->emotePopup_->activateWindow();
 }
 
-void SplitInput::installKeyPressedEvent()
+void SplitInput::addShortcuts()
 {
     auto app = getApp();
 
@@ -384,7 +390,9 @@ void SplitInput::installKeyPressedEvent()
 
     this->shortcuts_ = app->hotkeys->shortcutsForScope(HotkeyScope::SplitInput,
                                                        splitInputActions, this);
-
+}
+void SplitInput::installKeyPressedEvent()
+{
     this->ui_.textEdit->keyPressed.disconnectAll();
     this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
         if (auto popup = this->emoteInputPopup_.get())

@@ -156,7 +156,10 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->viewEmojis_ = makeView("Emojis");
 
     this->loadEmojis();
-
+    this->addShortcuts();
+}
+void EmotePopup::addShortcuts()
+{
     std::map<QString, std::function<void(std::vector<QString>)>>
         emotePopupActions{
             {"openTab",  // CTRL + 1-8 to open corresponding tab.

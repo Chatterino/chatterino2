@@ -43,6 +43,7 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
+    void addShortcuts() override;
     void initLayout();
     void installKeyPressedEvent();
     void onCursorPositionChanged();

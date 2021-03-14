@@ -44,7 +44,13 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->setWindowFlags(this->windowFlags() &
                          ~Qt::WindowContextHelpButtonHint);
     this->addShortcuts();
+    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+                                       [this]() {
+                                           this->clearShortcuts();
+                                           this->addShortcuts();
+                                       });
 }
+
 void SettingsDialog::addShortcuts()
 {
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(

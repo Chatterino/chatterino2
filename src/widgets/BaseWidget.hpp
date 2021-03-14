@@ -41,12 +41,18 @@ protected:
 
     virtual void scaleChangedEvent(float newScale);
     virtual void themeChangedEvent();
+    virtual void addShortcuts()
+    {
+        qDebug() << "Default add shortcuts used";
+    };
 
     void setScale(float value);
 
     Theme *theme;
 
     std::vector<QShortcut *> shortcuts_;
+    void clearShortcuts();
+    pajlada::Signals::SignalHolder signalHolder_;
 
 private:
     float scale_{1.f};
@@ -54,8 +60,6 @@ private:
     QSize scaleIndependantSize_;
 
     std::vector<BaseWidget *> widgets_;
-
-    pajlada::Signals::SignalHolder signalHolder_;
 
     friend class BaseWindow;
 };

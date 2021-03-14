@@ -245,6 +245,10 @@ Split::Split(QWidget *parent)
         },
         this->managedConnections_);
     this->addShortcuts();
+    this->managedConnect(getApp()->hotkeys->onItemsUpdated, [this]() {
+        this->clearShortcuts();
+        this->addShortcuts();
+    });
 }
 
 void Split::addShortcuts()

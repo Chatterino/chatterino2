@@ -73,6 +73,12 @@ Window::Window(WindowType type)
     {
         this->resize(int(300 * this->scale()), int(500 * this->scale()));
     }
+
+    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+                                       [this]() {
+                                           this->clearShortcuts();
+                                           this->addShortcuts();
+                                       });
 }
 
 WindowType Window::getType()

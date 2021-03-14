@@ -1,4 +1,7 @@
 #pragma once
+#include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
+
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "controllers/hotkeys/HotkeyScope.hpp"
@@ -42,9 +45,12 @@ public:
         "Emote popup",
         "Select channel popup"  //
     };
+    pajlada::Signals::NoArgSignal onItemsUpdated;
 
 private:
     SignalVector<std::shared_ptr<Hotkey>> hotkeys_;
+    pajlada::Signals::SignalHolder signalHolder_;
+
     void loadHotkeys();
     void saveHotkeys();
     void resetToDefaults(std::set<QString> &addedHotkeys);

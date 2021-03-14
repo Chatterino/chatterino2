@@ -106,5 +106,7 @@ private:
     void initColorPicker(LayoutCreator<QWidget> &creator);
     void initSpinBoxes(LayoutCreator<QWidget> &creator);
     void initHtmlColor(LayoutCreator<QWidget> &creator);
+
+    void addShortcuts() override;
 };
 }  // namespace chatterino
