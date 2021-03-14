@@ -45,7 +45,6 @@ KeyboardSettingsPage::KeyboardSettingsPage()
             getApp()->hotkeys->hotkeys_.append(newHotkey);
             getApp()->hotkeys->save();
         }
-        // TODO: display errors
     });
 
     QObject::connect(view->getTableView(), &QTableView::doubleClicked,
