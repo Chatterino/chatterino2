@@ -86,6 +86,12 @@ jobs:
             7z a chatterino-windows-x86-64.zip Chatterino2/
         shell: cmd
 
+      - name: Ensure build succeeded (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+            cd build
+            ls release/chatterino.exe
+
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
         uses: actions/upload-artifact@v2.2.2
