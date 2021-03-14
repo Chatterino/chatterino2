@@ -173,8 +173,7 @@ void EmotePopup::addShortcuts()
                  {
                      qCDebug(chatterinoHotkeys)
                          << "openTab shortcut called without arguments. Takes "
-                            "only "
-                            "one argument: tab specifier";
+                            "only one argument: tab specifier";
                      return;
                  }
                  auto target = arguments.at(0);
