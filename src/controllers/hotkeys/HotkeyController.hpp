@@ -46,6 +46,7 @@ public:
         "Select channel popup"  //
     };
     pajlada::Signals::NoArgSignal onItemsUpdated;
+    std::map<HotkeyScope, std::set<QString>> savedActions;
 
 private:
     SignalVector<std::shared_ptr<Hotkey>> hotkeys_;

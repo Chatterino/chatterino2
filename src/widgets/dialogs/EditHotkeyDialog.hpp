@@ -20,6 +20,7 @@ public:
 
 protected slots:
     void afterEdit();
+    void updatePossibleActions();
 
 private:
     void showEditError(QString errorText);

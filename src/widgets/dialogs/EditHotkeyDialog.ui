@@ -76,17 +76,7 @@ see this message :)</string>
         <string>Hotkey action:</string>
        </property>
        <property name="buddy">
-        <cstring>actionEdit</cstring>
-       </property>
-      </widget>
-     </item>
-     <item row="2" column="1">
-      <widget class="QLineEdit" name="actionEdit">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="placeholderText">
-        <string>What is the action?</string>
+        <cstring>actionPicker</cstring>
        </property>
       </widget>
      </item>
@@ -126,6 +116,13 @@ see this message :)</string>
      <item row="1" column="1">
       <widget class="QComboBox" name="scopePicker"/>
      </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="actionPicker">
+       <property name="editable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
@@ -143,7 +140,7 @@ see this message :)</string>
  <tabstops>
   <tabstop>nameEdit</tabstop>
   <tabstop>scopePicker</tabstop>
-  <tabstop>actionEdit</tabstop>
+  <tabstop>actionPicker</tabstop>
   <tabstop>keyComboEdit</tabstop>
   <tabstop>argumentsEdit</tabstop>
  </tabstops>
@@ -181,8 +178,25 @@ see this message :)</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>scopePicker</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>EditHotkeyDialog</receiver>
+   <slot>updatePossibleActions()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>246</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>75</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>afterEdit()</slot>
+  <slot>updatePossibleActions()</slot>
  </slots>
 </ui>

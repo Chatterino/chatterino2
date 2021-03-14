@@ -22,7 +22,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     if (hotkey)
     {
         this->ui_->scopePicker->setCurrentIndex((size_t)hotkey->scope());
-        this->ui_->actionEdit->setText(hotkey->action());
+        this->ui_->actionPicker->setCurrentText(hotkey->action());
         this->ui_->keyComboEdit->setKeySequence(
             QKeySequence::fromString(hotkey->keySequence().toString()));
         this->ui_->nameEdit->setText(hotkey->name());
@@ -97,9 +97,38 @@ void EditHotkeyDialog::afterEdit()
     }
     this->data_ = std::make_shared<Hotkey>(
         *scope, this->ui_->keyComboEdit->keySequence(),
-        this->ui_->actionEdit->text(), arguments, nameText);
+        this->ui_->actionPicker->currentText(), arguments, nameText);
     this->accept();
 }
+
+void EditHotkeyDialog::updatePossibleActions()
+{
+    const auto &hotkeys = getApp()->hotkeys;
+    this->ui_->actionPicker->clear();
+    auto scope = hotkeys->hotkeyScopeFromName(
+        this->ui_->scopePicker->currentData().toString());
+    if (!scope)
+    {
+        this->showEditError("Invalid Hotkey Scope.");
+
+        return;
+    }
+    qCDebug(chatterinoHotkeys) << "update possible actions for" << (int)*scope;
+    auto actions = hotkeys->savedActions.find(*scope);
+    if (actions != hotkeys->savedActions.end())
+    {
+        for (const auto action : actions->second)
+        {
+            this->ui_->actionPicker->addItem(action);
+        }
+        qCDebug(chatterinoHotkeys) << actions->second.size();
+    }
+    else
+    {
+        qCDebug(chatterinoHotkeys) << "key missing!!!!";
+    }
+}
+
 void EditHotkeyDialog::showEditError(QString errorText)
 {
     this->ui_->warningLabel->setText(errorText);
