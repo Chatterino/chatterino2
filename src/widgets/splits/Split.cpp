@@ -281,7 +281,7 @@ void Split::addShortcuts()
          [this](std::vector<QString> arguments) {
              if (arguments.size() == 0)
              {
-                 qCDebug(chatterinoHotkeys)
+                 qCWarning(chatterinoHotkeys)
                      << "Focus hotkey called without arguments!";
                  return;
              }
@@ -307,7 +307,7 @@ void Split::addShortcuts()
                  }
                  else
                  {
-                     qCDebug(chatterinoHotkeys)
+                     qCWarning(chatterinoHotkeys)
                          << "Focus in unknown direction.";
                  }
              }
@@ -321,7 +321,7 @@ void Split::addShortcuts()
          [this](std::vector<QString> arguments) {
              if (arguments.size() == 0)
              {
-                 qCDebug(chatterinoHotkeys)
+                 qCWarning(chatterinoHotkeys)
                      << "scrollPage hotkey called without arguments!";
                  return;
              }
@@ -338,7 +338,7 @@ void Split::addShortcuts()
              }
              else
              {
-                 qCDebug(chatterinoHotkeys) << "Unknown scroll direction";
+                 qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
              }
          }},
         {"pickFilters",
@@ -462,7 +462,7 @@ void Split::addShortcuts()
          [this](std::vector<QString> arguments) {
              if (arguments.size() == 0)
              {
-                 qCDebug(chatterinoHotkeys)
+                 qCWarning(chatterinoHotkeys)
                      << "runCommand hotkey called without arguments!";
                  return;
              }

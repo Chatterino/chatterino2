@@ -171,7 +171,7 @@ void EmotePopup::addShortcuts()
              [this](std::vector<QString> arguments) {
                  if (arguments.size() == 0)
                  {
-                     qCDebug(chatterinoHotkeys)
+                     qCWarning(chatterinoHotkeys)
                          << "openTab shortcut called without arguments. Takes "
                             "only one argument: tab specifier";
                      return;
@@ -199,7 +199,7 @@ void EmotePopup::addShortcuts()
                      }
                      else
                      {
-                         qCDebug(chatterinoHotkeys)
+                         qCWarning(chatterinoHotkeys)
                              << "Invalid argument for openTab shortcut";
                      }
                  }

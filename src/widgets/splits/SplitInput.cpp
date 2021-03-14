@@ -212,7 +212,7 @@ void SplitInput::addShortcuts()
              [this](std::vector<QString> arguments) {
                  if (arguments.size() != 2)
                  {
-                     qCDebug(chatterinoHotkeys)
+                     qCWarning(chatterinoHotkeys)
                          << "Invalid jumpCursor arguments. Argument 0: place "
                             "(\"start\" or \"end\"), argument 1: select "
                             "(\"withSelection\" or \"withoutSelection\")";
@@ -231,7 +231,7 @@ void SplitInput::addShortcuts()
                  }
                  else
                  {
-                     qCDebug(chatterinoHotkeys)
+                     qCWarning(chatterinoHotkeys)
                          << "Invalid jumpCursor place argument (0)!";
                      return;
                  }
@@ -247,7 +247,7 @@ void SplitInput::addShortcuts()
                  }
                  else
                  {
-                     qCDebug(chatterinoHotkeys)
+                     qCWarning(chatterinoHotkeys)
                          << "Invalid jumpCursor select argument (1)!";
                      return;
                  }

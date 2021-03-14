@@ -308,7 +308,7 @@ void Window::addShortcuts()
          [this](std::vector<QString> arguments) {
              if (arguments.size() == 0)
              {
-                 qCDebug(chatterinoHotkeys)
+                 qCWarning(chatterinoHotkeys)
                      << "openTab shortcut called without arguments. "
                         "Takes only "
                         "one argument: tab specifier";
@@ -337,7 +337,7 @@ void Window::addShortcuts()
                  }
                  else
                  {
-                     qCDebug(chatterinoHotkeys)
+                     qCWarning(chatterinoHotkeys)
                          << "Invalid argument for openTab shortcut";
                  }
              }
@@ -357,7 +357,7 @@ void Window::addShortcuts()
          [](std::vector<QString> arguments) {
              if (arguments.size() == 0)
              {
-                 qCDebug(chatterinoHotkeys)
+                 qCWarning(chatterinoHotkeys)
                      << "zoom shortcut called without arguments. Takes "
                         "only "
                         "one argument: \"in\" or \"out\"";
@@ -375,7 +375,7 @@ void Window::addShortcuts()
              }
              else
              {
-                 qCDebug(chatterinoHotkeys)
+                 qCWarning(chatterinoHotkeys)
                      << "Invalid zoom direction, use \"in\" or \"out\"";
                  return;
              }
@@ -431,7 +431,7 @@ void Window::addShortcuts()
          [this](std::vector<QString> arguments) {
              if (arguments.size() == 0)
              {
-                 qCDebug(chatterinoHotkeys)
+                 qCWarning(chatterinoHotkeys)
                      << "moveTab shortcut called without arguments. "
                         "Takes only one argument: new index (number, \"next\" "
                         "or \"previous\")";
@@ -455,7 +455,7 @@ void Window::addShortcuts()
                  int result = target.toInt(&ok);
                  if (!ok)
                  {
-                     qCDebug(chatterinoHotkeys)
+                     qCWarning(chatterinoHotkeys)
                          << "Invalid argument for moveTab shortcut";
                      return;
                  }
@@ -463,7 +463,7 @@ void Window::addShortcuts()
              }
              if (newIndex >= this->notebook_->getPageCount() || 0 > newIndex)
              {
-                 qCDebug(chatterinoHotkeys)
+                 qCWarning(chatterinoHotkeys)
                      << "Invalid index for moveTab shortcut:" << newIndex;
                  return;
              }
@@ -494,7 +494,7 @@ void Window::addShortcuts()
                  }
                  else
                  {
-                     qCDebug(chatterinoHotkeys)
+                     qCWarning(chatterinoHotkeys)
                          << "Invalid argument for setStreamerMode hotkey: "
                          << arg;
                  }
