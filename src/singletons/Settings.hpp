@@ -8,7 +8,6 @@
 #include "common/SignalVector.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
-#include "controllers/hotkeys/Hotkey.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/StreamerMode.hpp"
