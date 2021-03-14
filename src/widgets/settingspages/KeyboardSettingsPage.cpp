@@ -19,11 +19,9 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
     LayoutCreator<KeyboardSettingsPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>();
-    layout.emplace<QLabel>(  // temporary
-        "After editing: please restart chatterino. "
-        "Currently hotkeys don't reload automatically. \nIf something doesn't "
-        "work: make sure that you only have one hotkey bound to a keycombo, "
-        "check your logs.");
+    layout.emplace<QLabel>(
+        "If your hotkey doesn't work, please check the logs for any warnings "
+        "about it.");
 
     EditableModelView *view =
         layout.emplace<EditableModelView>(app->hotkeys->createModel(nullptr))
