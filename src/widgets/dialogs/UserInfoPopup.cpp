@@ -178,13 +178,16 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                         previousMenu = menu;
 
                         // add context menu actions
-                        menu->addAction("Open avatar in browser", [this] {
-                            QDesktopServices::openUrl(QUrl(this->avatarUrl_));
-                        });
+                        menu->addAction(
+                            "Open avatar in browser",
+                            [avatarUrl = this->avatarUrl_] {
+                                QDesktopServices::openUrl(QUrl(avatarUrl));
+                            });
 
-                        menu->addAction("Copy avatar link", [this] {
-                            crossPlatformCopy(this->avatarUrl_);
-                        });
+                        menu->addAction("Copy avatar link",
+                                        [avatarUrl = this->avatarUrl_] {
+                                            crossPlatformCopy(avatarUrl);
+                                        });
 
                         menu->popup(QCursor::pos());
                         menu->raise();
