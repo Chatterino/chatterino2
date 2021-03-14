@@ -17,7 +17,6 @@ public:
     ~EditHotkeyDialog();
 
     std::shared_ptr<Hotkey> data();
-    //std::shared_ptr<Hotkey> afterEdit();
 
 protected slots:
     void afterEdit();
