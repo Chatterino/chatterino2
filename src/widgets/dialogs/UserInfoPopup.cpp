@@ -137,11 +137,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
     std::map<QString, std::function<void(std::vector<QString>)>>
         userCardActions{
-            {"test",
-             [](std::vector<QString> test) {
-                 qCDebug(chatterinoHotkeys)
-                     << "This is a testing shortcut!" << test;
-             }},
             {"delete",
              [this](std::vector<QString>) {
                  this->deleteLater();
