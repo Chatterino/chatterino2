@@ -34,6 +34,8 @@ KeyboardSettingsPage::KeyboardSettingsPage()
         QHeaderView::ResizeToContents);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
+    view->getTableView()->horizontalHeader()->setSectionHidden(2, true);
+    view->getTableView()->sortByColumn(2, Qt::AscendingOrder);
 
     view->addButtonPressed.connect([] {
         EditHotkeyDialog dialog(nullptr);
