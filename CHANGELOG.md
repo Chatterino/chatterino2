@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377)
+- Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377, #2528)
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
 - Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284)
