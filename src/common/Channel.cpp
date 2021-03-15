@@ -56,7 +56,7 @@ const QString &Channel::getLocalizedName() const
 
 bool Channel::isTwitchChannel() const
 {
-    return this->type_ >= Type::Twitch && this->type_ < Type::TwitchEnd;
+    return this->type_ == Type::Twitch;
 }
 
 bool Channel::isEmpty() const
