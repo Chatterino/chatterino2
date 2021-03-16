@@ -265,6 +265,10 @@ void Channel::sendMessage(const QString &message)
 {
 }
 
+void Channel::replyMessage(const QString &msgid, const QString &message)
+{
+}
+
 bool Channel::isMod() const
 {
     return false;

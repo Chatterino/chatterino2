@@ -414,6 +414,16 @@ void Split::insertTextToInput(const QString &text)
     this->input_->insertText(text);
 }
 
+QString Split::getInputText()
+{
+    return this->input_->getInputText();
+}
+
+void Split::clearInputText()
+{
+    this->input_->clearText();
+}
+
 void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
                                    std::function<void(bool)> callback)
 {

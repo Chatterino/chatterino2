@@ -66,6 +66,8 @@ public:
     virtual bool isEmpty() const override;
     virtual bool canSendMessage() const override;
     virtual void sendMessage(const QString &message) override;
+    virtual void replyMessage(const QString &msgid, const QString &message) override;
+    bool sendMessageTreatment(const QString &message, QString &parsedMessage);
     virtual bool isMod() const override;
     bool isVip() const;
     bool isStaff() const;

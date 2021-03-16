@@ -104,5 +104,6 @@
     <file>twitch/turbo.png</file>
     <file>twitch/verified.png</file>
     <file>twitch/vip.png</file>
+    <file>buttons/reply.png</file>
   </qresource>
 </RCC>

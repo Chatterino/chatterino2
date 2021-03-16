@@ -318,7 +318,37 @@ boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
     return it->second;
 }
 
+void TwitchChannel::replyMessage(const QString &msgid, const QString &message)
+{
+    QString parsedMessage;
+    if(sendMessageTreatment(message, parsedMessage)){
+        bool messageSent = false;
+        this->replyMessageSignal.invoke(this->getName(), msgid, parsedMessage, messageSent);
+
+        if (messageSent)
+        {
+            qCDebug(chatterinoTwitch) << "sent reply: " + parsedMessage;
+            this->lastSentMessage_ = parsedMessage;
+        }
+    }
+}
+
 void TwitchChannel::sendMessage(const QString &message)
+{
+    QString parsedMessage;
+    if(sendMessageTreatment(message, parsedMessage)){
+        bool messageSent = false;
+        this->sendMessageSignal.invoke(this->getName(), parsedMessage, messageSent);
+
+        if (messageSent)
+        {
+            qCDebug(chatterinoTwitch) << "sent: " + parsedMessage;
+            this->lastSentMessage_ = parsedMessage;
+        }
+    }
+}
+
+bool TwitchChannel::sendMessageTreatment(const QString &message, QString &parsedMessage)
 {
     auto app = getApp();
 
@@ -329,20 +359,20 @@ void TwitchChannel::sendMessage(const QString &message)
         this->addMessage(
             makeSystemMessage("You need to log in to send messages. You can "
                               "link your Twitch account in the settings."));
-        return;
+        return false;
     }
 
     qCDebug(chatterinoTwitch)
         << "[TwitchChannel" << this->getName() << "] Send message:" << message;
 
     // Do last message processing
-    QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
+    parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
     parsedMessage = parsedMessage.trimmed();
 
     if (parsedMessage.isEmpty())
     {
-        return;
+        return false;
     }
 
     if (!this->hasHighRateLimit())
@@ -356,14 +386,7 @@ void TwitchChannel::sendMessage(const QString &message)
         }
     }
 
-    bool messageSent = false;
-    this->sendMessageSignal.invoke(this->getName(), parsedMessage, messageSent);
-
-    if (messageSent)
-    {
-        qCDebug(chatterinoTwitch) << "sent";
-        this->lastSentMessage_ = parsedMessage;
-    }
+    return true;
 }
 
 bool TwitchChannel::isMod() const

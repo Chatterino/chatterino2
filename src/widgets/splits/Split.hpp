@@ -61,6 +61,8 @@ public:
     bool getModerationMode() const;
 
     void insertTextToInput(const QString &text);
+    QString getInputText();
+    void clearInputText();
 
     void showChangeChannelPopup(const char *dialogTitle, bool empty,
                                 std::function<void(bool)> callback);

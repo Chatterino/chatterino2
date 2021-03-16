@@ -30,6 +30,7 @@ public:
     void disconnect();
 
     void sendMessage(const QString &channelName, const QString &message);
+    void replyMessage(const QString &messageId, const QString &channelName, const QString &message);
     void sendRawMessage(const QString &rawMessage);
 
     // channels

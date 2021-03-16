@@ -258,6 +258,8 @@ MessagePtr TwitchMessageBuilder::build()
         this->emplace<TwitchModerationElement>();
     }
 
+    this->emplace<ReplyElement>();
+
     this->appendTwitchBadges();
 
     this->appendChatterinoBadges();

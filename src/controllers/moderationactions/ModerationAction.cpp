@@ -77,6 +77,10 @@ ModerationAction::ModerationAction(const QString &action)
     {
         this->imageToLoad_ = 2;
     }
+    else if(action.startsWith("/reply "))
+    {
+        this->imageToLoad_ = 3;
+    }
     else
     {
         QString xD = action;
@@ -108,6 +112,8 @@ const boost::optional<ImagePtr> &ModerationAction::getImage() const
             this->image_ = Image::fromPixmap(getResources().buttons.ban);
         else if (this->imageToLoad_ == 2)
             this->image_ = Image::fromPixmap(getResources().buttons.trashCan);
+        else if(this->imageToLoad_ == 3)
+            this->image_ = Image::fromPixmap(getResources().buttons.reply);
     }
 
     return this->image_;

@@ -30,6 +30,7 @@ public:
     void clearSelection();
     QString getInputText() const;
     void insertText(const QString &text);
+    void clearText();
 
     pajlada::Signals::Signal<const QString &> textChanged;
 

@@ -23,6 +23,7 @@ public:
         JumpToChannel,
         Reconnect,
         CopyToClipboard,
+        Reply,
     };
 
     Link();

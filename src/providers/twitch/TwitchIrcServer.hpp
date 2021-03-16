@@ -66,8 +66,11 @@ protected:
     virtual bool hasSeparateWriteConnection() const override;
 
 private:
+    void onMessageReplyRequested(TwitchChannel *channel,
+                                 const QString &msgid, const QString &message, bool &sent);
     void onMessageSendRequested(TwitchChannel *channel, const QString &message,
                                 bool &sent);
+    bool messageChecks(TwitchChannel *channel);
 
     std::mutex lastMessageMutex_;
     std::queue<std::chrono::steady_clock::time_point> lastMessagePleb_;

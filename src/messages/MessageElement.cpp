@@ -421,6 +421,28 @@ TextElement *TimestampElement::formatTime(const QTime &time)
                            MessageColor::System, FontStyle::ChatMedium);
 }
 
+ReplyElement::ReplyElement()
+    :MessageElement(MessageElementFlag::Misc)
+{
+
+}
+
+void ReplyElement::addToContainer(MessageLayoutContainer &container,
+                                  MessageElementFlags flag)
+{
+    QSize size(int(container.getScale() * 16),
+               int(container.getScale() * 16));
+
+    auto action = getCSettings().replyAction;
+
+    if (auto image = action.getImage())
+    {
+        container.addElement(
+            (new ImageLayoutElement(*this, image.get(), size))
+                ->setLink(Link(Link::Reply, "")));
+    }
+}
+
 // TWITCH MODERATION
 TwitchModerationElement::TwitchModerationElement()
     : MessageElement(MessageElementFlag::ModeratorTools)

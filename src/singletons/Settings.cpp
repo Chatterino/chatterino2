@@ -23,6 +23,7 @@ ConcurrentSettings::ConcurrentSettings()
     , mutedChannels(*new SignalVector<QString>())
     , filterRecords(*new SignalVector<FilterRecordPtr>())
     , moderationActions(*new SignalVector<ModerationAction>)
+    , replyAction(*new ReplyAction())
 {
     persist(this->highlightedMessages, "/highlighting/highlights");
     persist(this->blacklistedUsers, "/highlighting/blacklist");

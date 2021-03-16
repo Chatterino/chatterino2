@@ -97,6 +97,11 @@ std::shared_ptr<Channel> TwitchIrcServer::createChannel(
             this->onMessageSendRequested(channel, msg, sent);
         });
 
+    channel->replyMessageSignal.connect(
+        [this, channel = channel.get()](auto &chan, auto &msgid, auto &msg, bool &sent) {
+            this->onMessageReplyRequested(channel, msgid, msg, sent);
+        });
+
     return std::shared_ptr<Channel>(channel);
 }
 
@@ -329,11 +334,33 @@ bool TwitchIrcServer::hasSeparateWriteConnection() const
     // return getSettings()->twitchSeperateWriteConnection;
 }
 
+void TwitchIrcServer::onMessageReplyRequested(TwitchChannel *channel,
+                                             const QString &msgid, const QString &message, bool &sent)
+{
+    sent = false;
+
+    if(messageChecks(channel))
+    {
+        this->replyMessage(msgid, channel->getName(), message);
+        sent = true;
+    }
+}
+
 void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
                                              const QString &message, bool &sent)
 {
     sent = false;
 
+    if(messageChecks(channel))
+    {
+        this->sendMessage(channel->getName(), message);
+        sent = true;
+    }
+}
+
+// Avoid repetition on the above methods
+bool TwitchIrcServer::messageChecks(TwitchChannel *channel)
+{
     {
         std::lock_guard<std::mutex> guard(this->lastMessageMutex_);
 
@@ -358,7 +385,7 @@ void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
 
                 this->lastErrorTimeSpeed_ = now;
             }
-            return;
+            return false;
         }
 
         // remove messages older than 30 seconds
@@ -379,14 +406,13 @@ void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
 
                 this->lastErrorTimeAmount_ = now;
             }
-            return;
+            return false;
         }
 
         lastMessage.push(now);
     }
 
-    this->sendMessage(channel->getName(), message);
-    sent = true;
+    return true;
 }
 
 const BttvEmotes &TwitchIrcServer::getBttvEmotes() const

@@ -2020,6 +2020,16 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         }
         break;
 
+        case Link::Reply:{
+            if (auto split = dynamic_cast<Split *>(this->parentWidget()))
+            {
+                QString replyMessage = split->getInputText();
+                this->underlyingChannel_->replyMessage(layout->getMessage()->id, replyMessage);
+                split->clearInputText();
+            }
+        }
+        break;
+
         case Link::UserAction: {
             QString value = link.value;
 

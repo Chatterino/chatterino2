@@ -9,6 +9,7 @@
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
+#include "controllers/reply/ReplyAction.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
@@ -37,6 +38,7 @@ public:
     SignalVector<FilterRecordPtr> &filterRecords;
     //SignalVector<TaggedUser> &taggedUsers;
     SignalVector<ModerationAction> &moderationActions;
+    ReplyAction &replyAction;
 
     bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);

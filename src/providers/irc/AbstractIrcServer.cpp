@@ -173,6 +173,13 @@ void AbstractIrcServer::sendMessage(const QString &channelName,
     this->sendRawMessage("PRIVMSG #" + channelName + " :" + message);
 }
 
+void AbstractIrcServer::replyMessage(const QString &messageId,
+                                     const QString &channelName,
+                                    const QString &message)
+{
+    this->sendRawMessage("@reply-parent-msg-id=" + messageId + " PRIVMSG #" + channelName + " :" + message);
+}
+
 void AbstractIrcServer::sendRawMessage(const QString &rawMessage)
 {
     std::lock_guard<std::mutex> locker(this->connectionMutex_);

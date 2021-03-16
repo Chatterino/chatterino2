@@ -598,6 +598,11 @@ void SplitInput::insertText(const QString &text)
     this->ui_.textEdit->insertPlainText(text);
 }
 
+void SplitInput::clearText()
+{
+    this->ui_.textEdit->setText(QString());
+}
+
 void SplitInput::editTextChanged()
 {
     auto app = getApp();
