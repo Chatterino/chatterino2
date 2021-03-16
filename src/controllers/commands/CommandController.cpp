@@ -523,7 +523,9 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
 
     this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
-        if (!channel->isTwitchChannel())
+        if (const auto type = channel->getType();
+            type != Channel::Type::Twitch &&
+            type != Channel::Type::TwitchWatching)
         {
             return "";
         }
