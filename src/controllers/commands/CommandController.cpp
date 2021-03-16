@@ -643,6 +643,8 @@ void CommandController::initialize(Settings &, Paths &paths)
             getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
 
         currentPage->getSelectedSplit()->getChannelView().clearMessages();
+        return "";
+    });
 
     this->registerCommand("/settitle", [](const QStringList &words,
                                           ChannelPtr channel) {
