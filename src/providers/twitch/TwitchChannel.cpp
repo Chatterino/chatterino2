@@ -321,9 +321,11 @@ boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
 void TwitchChannel::replyMessage(const QString &msgid, const QString &message)
 {
     QString parsedMessage;
-    if(sendMessageTreatment(message, parsedMessage)){
+    if(sendMessageTreatment(message, parsedMessage))
+    {
         bool messageSent = false;
-        this->replyMessageSignal.invoke(this->getName(), msgid, parsedMessage, messageSent);
+        this->replyMessageSignal.invoke(this->getName(), msgid, parsedMessage,
+                                        messageSent);
 
         if (messageSent)
         {
@@ -336,9 +338,11 @@ void TwitchChannel::replyMessage(const QString &msgid, const QString &message)
 void TwitchChannel::sendMessage(const QString &message)
 {
     QString parsedMessage;
-    if(sendMessageTreatment(message, parsedMessage)){
+    if(sendMessageTreatment(message, parsedMessage))
+    {
         bool messageSent = false;
-        this->sendMessageSignal.invoke(this->getName(), parsedMessage, messageSent);
+        this->sendMessageSignal.invoke(this->getName(), parsedMessage,
+                                       messageSent);
 
         if (messageSent)
         {
@@ -348,7 +352,8 @@ void TwitchChannel::sendMessage(const QString &message)
     }
 }
 
-bool TwitchChannel::sendMessageTreatment(const QString &message, QString &parsedMessage)
+bool TwitchChannel::sendMessageTreatment(const QString &message,
+                                         QString &parsedMessage)
 {
     auto app = getApp();
 

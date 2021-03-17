@@ -162,6 +162,7 @@ SOURCES += \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
     src/controllers/pings/MutedChannelModel.cpp \
+    src/controllers/reply/ReplyAction.cpp \
     src/controllers/taggedusers/TaggedUser.cpp \
     src/controllers/taggedusers/TaggedUsersModel.cpp \
     src/debug/Benchmark.cpp \
@@ -385,6 +386,7 @@ HEADERS += \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
     src/controllers/pings/MutedChannelModel.hpp \
+    src/controllers/reply/ReplyAction.hpp \
     src/controllers/taggedusers/TaggedUser.hpp \
     src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/debug/AssertInGuiThread.hpp \

@@ -47,7 +47,8 @@ public:
     // SIGNALS
     pajlada::Signals::Signal<const QString &, const QString &, bool &>
         sendMessageSignal;
-    pajlada::Signals::Signal<const QString &, const QString &, const QString &, bool &>
+    pajlada::Signals::Signal<const QString &, const QString &, const QString &,
+                             bool &>
         replyMessageSignal;
     pajlada::Signals::Signal<MessagePtr &> messageRemovedFromStart;
     pajlada::Signals::Signal<MessagePtr &, boost::optional<MessageFlags>>

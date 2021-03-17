@@ -23,4 +23,4 @@ private:
     int imageToLoad_{};
 };
 
-}
+} // namespace chatterino
