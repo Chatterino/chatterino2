@@ -202,7 +202,6 @@ void TwitchAccount::loadEmotes()
                 return;
             }
 
-            qDebug() << data.emoteSets.keys();
             for (const auto &emoteSetKey : data.emoteSets.keys())
             {
                 auto emoteSet = std::make_shared<EmoteSet>();
