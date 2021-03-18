@@ -91,7 +91,6 @@ public:
     void autoModDeny(const QString msgID);
 
 private:
-    void parseEmotes(const rapidjson::Document &document);
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
 
     QString oauthClient_;
