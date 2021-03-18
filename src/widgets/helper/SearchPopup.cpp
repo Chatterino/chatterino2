@@ -155,6 +155,8 @@ void SearchPopup::initLayout()
 
         this->setLayout(layout1);
     }
+
+    this->searchInput_->setFocus();
 }
 
 std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
