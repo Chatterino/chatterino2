@@ -386,6 +386,10 @@ void SplitInput::addShortcuts()
                  this->ui_.textEdit->setText("");
                  this->ui_.textEdit->moveCursor(QTextCursor::Start);
              }},
+            {"selectAll",
+             [this](std::vector<QString>) {
+                 this->ui_.textEdit->selectAll();
+             }},
         };
 
     this->shortcuts_ = app->hotkeys->shortcutsForScope(HotkeyScope::SplitInput,
