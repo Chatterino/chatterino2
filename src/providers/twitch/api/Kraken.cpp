@@ -25,7 +25,7 @@ void Kraken::getUserEmotes(TwitchAccount *account,
             return Success;
         })
         .onError([failureCallback](NetworkResult /*result*/) {
-            // TODO: Do (not) make better xd
+            // TODO: make better xd
             failureCallback();
         })
         .execute();

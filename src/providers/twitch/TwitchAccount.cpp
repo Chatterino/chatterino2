@@ -186,8 +186,6 @@ void TwitchAccount::loadEmotes()
     getKraken()->getUserEmotes(
         this,
         [this](KrakenEmoteSets data) {
-            // parse emotes
-
             // clear emote data
             auto emoteData = this->emotes_.access();
             emoteData->emoteSets.clear();
@@ -240,9 +238,8 @@ void TwitchAccount::loadEmotes()
                 emoteData->emoteSets.emplace_back(emoteSet);
             }
         },
-        // request failed
         [] {
-            //
+            // request failed
         });
 }
 
@@ -310,43 +307,34 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
 
     NetworkRequest(Env::get().twitchEmoteSetResolverUrl.arg(emoteSet->key))
         .cache()
-        .onError([](NetworkResult result) {
-            qCWarning(chatterinoTwitch) << "Error code" << result.status()
-                                        << "while loading emote set data";
-        })
-        .onSuccess([emoteSet](auto result) -> Outcome {
-            auto root = result.parseRapidJson();
-            if (!root.IsObject())
+        .onSuccess([emoteSet](NetworkResult result) -> Outcome {
+            auto rootOld = result.parseRapidJson();
+            auto root = result.parseJson();
+            if (root.isEmpty())
             {
                 return Failure;
             }
 
-            std::string emoteSetID;
-            QString channelName;
-            QString type;
-            if (!rj::getSafe(root, "channel_name", channelName))
-            {
-                return Failure;
-            }
+            TwitchEmoteSetResolverResponse response(root);
 
-            if (!rj::getSafe(root, "type", type))
-            {
-                return Failure;
-            }
-
-            qCDebug(chatterinoTwitch)
-                << "Loaded twitch emote set data for" << emoteSet->key;
-
-            auto name = channelName;
+            auto name = response.channelName;
             name.detach();
             name[0] = name[0].toUpper();
 
             emoteSet->text = name;
+            emoteSet->type = response.type;
+            emoteSet->channelName = response.channelName;
 
-            emoteSet->type = type;
-            emoteSet->channelName = channelName;
+            qCDebug(chatterinoTwitch)
+                << QString("Loaded twitch emote set data for %1")
+                       .arg(emoteSet->key);
 
             return Success;
+        })
+        .onError([](NetworkResult result) {
+            qCWarning(chatterinoTwitch)
+                << QString("Error code %1 while loading emote set data")
+                       .arg(result.status());
         })
         .execute();
 }
