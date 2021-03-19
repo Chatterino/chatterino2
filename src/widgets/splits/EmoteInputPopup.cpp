@@ -27,7 +27,9 @@ namespace {
         for (auto &&emote : map)
             if (emote.first.string.contains(text, Qt::CaseInsensitive))
                 out.push_back(
-                    {emote.second, emote.second->name.string, providerName});
+                    {emote.second,
+                     TwitchEmotes::cleanUpEmoteCode(emote.second->name),
+                     providerName});
     }
 
     void addEmojis(std::vector<_Emote> &out, const EmojiMap &map,
