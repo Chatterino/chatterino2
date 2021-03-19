@@ -229,6 +229,12 @@ void FfzEmotes::loadChannel(
                     shared->addMessage(makeSystemMessage(
                         "This channel has no FrankerFaceZ channel emotes."));
             }
+            else if (result.status() == 404)
+            {
+                // FFZ emotes not found
+                shared->addMessage(makeSystemMessage(
+                        "Could not fetch FrankerFaceZ channel emotes."));
+            }
             else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay

@@ -182,6 +182,11 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                     shared->addMessage(makeSystemMessage(
                         "This channel has no BetterTTV channel emotes."));
             }
+            else if (result.status() == 404)
+            {
+                shared->addMessage(makeSystemMessage(
+                        "Could not fetch BetterTTV channel emotes."));
+            }
             else if (result.status() == NetworkResult::timedoutStatus)
             {
                 // TODO: Auto retry in case of a timeout, with a delay
