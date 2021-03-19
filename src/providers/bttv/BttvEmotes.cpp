@@ -184,8 +184,9 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             }
             else if (result.status() == 404)
             {
+                // BTTV emotes not found
                 shared->addMessage(makeSystemMessage(
-                        "Could not fetch BetterTTV channel emotes."));
+                    "Could not fetch BetterTTV channel emotes."));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {

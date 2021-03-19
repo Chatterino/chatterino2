@@ -233,7 +233,7 @@ void FfzEmotes::loadChannel(
             {
                 // FFZ emotes not found
                 shared->addMessage(makeSystemMessage(
-                        "Could not fetch FrankerFaceZ channel emotes."));
+                    "Could not fetch FrankerFaceZ channel emotes."));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {
