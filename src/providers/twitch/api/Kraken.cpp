@@ -12,8 +12,7 @@ void Kraken::getUserEmotes(TwitchAccount *account,
                            ResultCallback<KrakenEmoteSets> successCallback,
                            KrakenFailureCallback failureCallback)
 {
-    this->makeRequest(QString("users/%1/emotes").arg(account->getUserId()),
-                      QUrlQuery())
+    this->makeRequest(QString("users/%1/emotes").arg(account->getUserId()), {})
         .authorizeTwitchV5(account->getOAuthClient(), account->getOAuthToken())
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto data = result.parseJson();
