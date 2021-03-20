@@ -75,7 +75,7 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
     if (!shared)
     {
         (*cache)[id] = shared = std::make_shared<Emote>(Emote{
-            EmoteName{name},
+            EmoteName{TwitchEmotes::cleanUpEmoteCode(EmoteName{name})},
             ImageSet{
                 Image::fromUrl(getEmoteLink(id, "1.0"), 1),
                 Image::fromUrl(getEmoteLink(id, "2.0"), 0.5),
