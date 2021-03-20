@@ -1258,20 +1258,6 @@ void SplitContainer::Node::layout(bool addSpacing, float _scale,
                     resizeRects.push_back(
                         ResizeRect(r.toRect(), child.get(), isVertical));
                 }
-
-                // normalize flex
-                if (isVertical)
-                {
-                    child->flexV_ =
-                        child->flexV_ / totalFlex * this->children_.size();
-                    child->flexH_ = 1;
-                }
-                else
-                {
-                    child->flexH_ =
-                        child->flexH_ / totalFlex * this->children_.size();
-                    child->flexV_ = 1;
-                }
             }
         }
         break;
