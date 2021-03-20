@@ -327,8 +327,8 @@ void BaseWindow::themeChangedEvent()
     else
     {
         QPalette palette;
-        palette.setColor(QPalette::Background, this->theme->window.background);
-        palette.setColor(QPalette::Foreground, this->theme->window.text);
+        palette.setColor(QPalette::Window, this->theme->window.background);
+        palette.setColor(QPalette::WindowText, this->theme->window.text);
         this->setPalette(palette);
     }
 }

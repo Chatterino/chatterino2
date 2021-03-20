@@ -719,16 +719,18 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     }
     else if (message->tags()["msg-id"] == "msg_timedout")
     {
-        std::vector<MessagePtr> builtMessages;
+        std::vector<MessagePtr> builtMessage;
 
-        QString formattedMessage = "You are timed out for ";
-        formattedMessage.append(
-            formatTime(message->content().split(" ").value(5)));
+        QString remainingTime =
+            formatTime(message->content().split(" ").value(5));
+        QString formattedMessage =
+            QString("You are timed out for %1.")
+                .arg(remainingTime.isEmpty() ? "0s" : remainingTime);
 
-        builtMessages.emplace_back(makeSystemMessage(
-            formattedMessage.append("."), calculateMessageTimestamp(message)));
+        builtMessage.emplace_back(makeSystemMessage(
+            formattedMessage, calculateMessageTimestamp(message)));
 
-        return builtMessages;
+        return builtMessage;
     }
     else
     {

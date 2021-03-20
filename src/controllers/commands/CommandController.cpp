@@ -17,10 +17,12 @@
 #include "singletons/WindowManager.hpp"
 #include "util/CombinePath.hpp"
 #include "util/FormatTime.hpp"
+#include "util/Helpers.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QApplication>
 #include <QFile>
@@ -515,13 +517,15 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             channel->addMessage(makeSystemMessage(
                 QString("Chatter count: %1")
-                    .arg(QString::number(twitchChannel->chatterCount()))));
+                    .arg(localizeNumbers(twitchChannel->chatterCount()))));
 
             return "";
         });
 
     this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
-        if (!channel->isTwitchChannel())
+        if (const auto type = channel->getType();
+            type != Channel::Type::Twitch &&
+            type != Channel::Type::TwitchWatching)
         {
             return "";
         }
@@ -632,6 +636,16 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             return "";
         });
+
+    this->registerCommand("/clearmessages", [](const auto & /*words*/,
+                                               ChannelPtr channel) {
+        auto *currentPage = dynamic_cast<SplitContainer *>(
+            getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+
+        currentPage->getSelectedSplit()->getChannelView().clearMessages();
+
+        return "";
+    });
 
     this->registerCommand("/streamermode", [](const QStringList &words,
                                               ChannelPtr channel) {
