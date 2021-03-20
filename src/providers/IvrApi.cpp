@@ -15,7 +15,8 @@ void IvrApi::getSubage(QString userName, QString channelName,
 {
     assert(!userName.isEmpty() && !channelName.isEmpty());
 
-    this->makeRequest("twitch/subage/" + userName + "/" + channelName, {})
+    this->makeRequest(
+            QString("twitch/subage/%1/%2").arg(userName).arg(channelName), {})
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto root = result.parseJson();
 
@@ -23,7 +24,33 @@ void IvrApi::getSubage(QString userName, QString channelName,
 
             return Success;
         })
-        .onError([failureCallback](NetworkResult result) {
+        .onError([failureCallback](auto result) {
+            qCWarning(chatterinoIvr)
+                << "Failed IVR API Call!" << result.status()
+                << QString(result.getData());
+            failureCallback();
+        })
+        .execute();
+}
+
+void IvrApi::getBulkEmoteSets(QString emoteSetList,
+                              ResultCallback<QJsonArray> successCallback,
+                              IvrFailureCallback failureCallback)
+{
+    assert(!emoteSetList.isEmpty());
+
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("set_id", emoteSetList);
+
+    this->makeRequest("twitch/emoteset", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJsonArray();
+
+            successCallback(root);
+
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
             qCWarning(chatterinoIvr)
                 << "Failed IVR API Call!" << result.status()
                 << QString(result.getData());

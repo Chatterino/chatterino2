@@ -84,6 +84,7 @@ public:
     std::set<TwitchUser> getBlocks() const;
 
     void loadEmotes();
+    void loadUserstateEmotes(QStringList emoteSetKeys);
     AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
@@ -102,6 +103,7 @@ private:
     Atomic<QColor> color_;
 
     mutable std::mutex ignoresMutex_;
+    QElapsedTimer userstateEmotesTimer_;
     std::set<TwitchUser> ignores_;
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
