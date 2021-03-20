@@ -175,18 +175,12 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             auto shared = channel.lock();
             if (!shared)
                 return;
-            if (result.status() == 203)
+            if (result.status() == 203 || result.status() == 404)
             {
                 // User does not have any BTTV emotes
                 if (manualRefresh)
                     shared->addMessage(makeSystemMessage(
                         "This channel has no BetterTTV channel emotes."));
-            }
-            else if (result.status() == 404)
-            {
-                // BTTV emotes not found
-                shared->addMessage(makeSystemMessage(
-                    "Could not fetch BetterTTV channel emotes."));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {

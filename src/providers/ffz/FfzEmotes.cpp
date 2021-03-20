@@ -222,18 +222,12 @@ void FfzEmotes::loadChannel(
             auto shared = channel.lock();
             if (!shared)
                 return;
-            if (result.status() == 203)
+            if (result.status() == 203 || result.status() == 404)
             {
                 // User does not have any FFZ emotes
                 if (manualRefresh)
                     shared->addMessage(makeSystemMessage(
                         "This channel has no FrankerFaceZ channel emotes."));
-            }
-            else if (result.status() == 404)
-            {
-                // FFZ emotes not found
-                shared->addMessage(makeSystemMessage(
-                    "Could not fetch FrankerFaceZ channel emotes."));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {
