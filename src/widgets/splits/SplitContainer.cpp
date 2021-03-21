@@ -412,6 +412,11 @@ Split *SplitContainer::getTopRightSplit(Node &node)
 
 void SplitContainer::layout()
 {
+    if (this->disableLayouting_)
+    {
+        return;
+    }
+
     // update top right split
     auto topRight = this->getTopRightSplit(this->baseNode_);
     if (this->topRight_)
@@ -702,7 +707,10 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 {
     assert(this->baseNode_.type_ == Node::EmptyRoot);
 
+    this->disableLayouting_ = true;
     this->applyFromDescriptorRecursively(rootNode, &this->baseNode_);
+    this->disableLayouting_ = false;
+    this->layout();
 }
 
 void SplitContainer::applyFromDescriptorRecursively(
