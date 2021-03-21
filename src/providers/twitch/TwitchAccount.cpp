@@ -247,6 +247,12 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
         }
     }
 
+    // return if there are no new emote sets
+    if (newEmoteSetKeys.isEmpty())
+    {
+        return;
+    }
+
     getIvr()->getBulkEmoteSets(
         newEmoteSetKeys.join(","),
         [this](QJsonArray emoteSetArray) {
