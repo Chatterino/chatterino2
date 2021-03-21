@@ -8,6 +8,7 @@
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "providers/IvrApi.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -16,6 +17,9 @@
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
+namespace {
+    constexpr int USERSTATE_EMOTES_REFRESH_PERIOD = 10 * 60 * 1000;
+}  // namespace
 
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
@@ -240,6 +244,94 @@ void TwitchAccount::loadEmotes()
         },
         [] {
             // request failed
+        });
+}
+
+void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
+{
+    // do not attempt to load emotes too often
+    if (!this->userstateEmotesTimer_.isValid())
+    {
+        this->userstateEmotesTimer_.start();
+    }
+    else if (this->userstateEmotesTimer_.elapsed() <
+             USERSTATE_EMOTES_REFRESH_PERIOD)
+    {
+        return;
+    }
+    this->userstateEmotesTimer_.restart();
+
+    auto emoteData = this->emotes_.access();
+    auto userEmoteSets = emoteData->emoteSets;
+
+    QStringList newEmoteSetKeys, currentEmoteSetKeys;
+    // get list of already fetched emote sets
+    for (const auto &userEmoteSet : userEmoteSets)
+    {
+        currentEmoteSetKeys.push_back(userEmoteSet->key);
+    }
+    // filter out emote sets from userstate message, which are not in fetched emote set list
+    for (const auto &emoteSetKey : emoteSetKeys)
+    {
+        if (!currentEmoteSetKeys.contains(emoteSetKey))
+        {
+            newEmoteSetKeys.push_back(emoteSetKey);
+        }
+    }
+
+    // return if there are no new emote sets
+    if (newEmoteSetKeys.isEmpty())
+    {
+        return;
+    }
+
+    getIvr()->getBulkEmoteSets(
+        newEmoteSetKeys.join(","),
+        [this](QJsonArray emoteSetArray) {
+            auto emoteData = this->emotes_.access();
+            for (auto emoteSet : emoteSetArray)
+            {
+                auto newUserEmoteSet = std::make_shared<EmoteSet>();
+
+                IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
+
+                newUserEmoteSet->key = ivrEmoteSet.setId;
+
+                auto name = ivrEmoteSet.login;
+                name.detach();
+                name[0] = name[0].toUpper();
+
+                newUserEmoteSet->text = name;
+                newUserEmoteSet->type = QString();
+                newUserEmoteSet->channelName = ivrEmoteSet.login;
+
+                for (const auto &emote : ivrEmoteSet.emotes)
+                {
+                    IvrEmote ivrEmote(emote.toObject());
+
+                    auto id = EmoteId{ivrEmote.id};
+                    auto code = EmoteName{ivrEmote.code};
+                    auto cleanCode =
+                        EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
+                    newUserEmoteSet->emotes.emplace_back(
+                        TwitchEmote{id, cleanCode});
+
+                    emoteData->allEmoteNames.push_back(cleanCode);
+
+                    auto twitchEmote =
+                        getApp()->emotes->twitch.getOrCreateEmote(id, code);
+                    emoteData->emotes.emplace(code, twitchEmote);
+                }
+                std::sort(newUserEmoteSet->emotes.begin(),
+                          newUserEmoteSet->emotes.end(),
+                          [](const TwitchEmote &l, const TwitchEmote &r) {
+                              return l.name.string < r.name.string;
+                          });
+                emoteData->emoteSets.emplace_back(newUserEmoteSet);
+            }
+        },
+        [] {
+            // fetching emotes failed, ivr API might be down
         });
 }
 
