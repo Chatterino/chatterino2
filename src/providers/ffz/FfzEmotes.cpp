@@ -222,7 +222,7 @@ void FfzEmotes::loadChannel(
             auto shared = channel.lock();
             if (!shared)
                 return;
-            if (result.status() == 203 || result.status() == 404)
+            if (result.status() == 404)
             {
                 // User does not have any FFZ emotes
                 if (manualRefresh)
