@@ -200,21 +200,21 @@ void TwitchAccount::loadEmotes()
                 return;
             }
 
-            for (const auto &emoteSetKey : data.emoteSets.keys())
+            for (auto emoteSetIt = data.emoteSets.begin();
+                 emoteSetIt != data.emoteSets.end(); ++emoteSetIt)
             {
                 auto emoteSet = std::make_shared<EmoteSet>();
 
-                emoteSet->key = emoteSetKey;
+                emoteSet->key = emoteSetIt.key();
                 this->loadEmoteSetData(emoteSet);
 
-                for (const auto emoteArrObj :
-                     data.emoteSets.value(emoteSetKey).toArray())
+                for (const auto emoteArrObj : emoteSetIt.value().toArray())
                 {
                     if (!emoteArrObj.isObject())
                     {
                         qCWarning(chatterinoTwitch)
                             << QString("Emote value from set %1 was invalid")
-                                   .arg(emoteSetKey);
+                                   .arg(emoteSet->key);
                     }
                     KrakenEmote krakenEmote(emoteArrObj.toObject());
 
