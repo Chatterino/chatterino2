@@ -455,7 +455,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addDescription("All local files like settings and cache files are "
                           "store in this directory.");
     layout.addButton("Open AppData directory", [] {
+#ifdef Q_OS_DARWIN
+        QDesktopServices::openUrl("file://" + getPaths()->rootAppDataDirectory);
+#else
         QDesktopServices::openUrl(getPaths()->rootAppDataDirectory);
+#endif
     });
 
     layout.addSubtitle("Temporary files (Cache)");
