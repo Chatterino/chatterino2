@@ -175,7 +175,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             auto shared = channel.lock();
             if (!shared)
                 return;
-            if (result.status() == 203 || result.status() == 404)
+            if (result.status() == 404)
             {
                 // User does not have any BTTV emotes
                 if (manualRefresh)
