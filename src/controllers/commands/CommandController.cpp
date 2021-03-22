@@ -27,12 +27,14 @@
 #include <QApplication>
 #include <QFile>
 #include <QRegularExpression>
+#include <QUrl>
 
 #define TWITCH_DEFAULT_COMMANDS                                               \
     "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", "/unban", \
         "/timeout", "/untimeout", "/slow", "/slowoff", "/r9kbeta",            \
         "/r9kbetaoff", "/emoteonly", "/emoteonlyoff", "/clear",               \
-        "/subscribers", "/subscribersoff", "/followers", "/followersoff"
+        "/subscribers", "/subscribersoff", "/followers", "/followersoff",     \
+        "/popout"
 
 namespace {
 using namespace chatterino;
@@ -636,6 +638,36 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             return "";
         });
+
+    this->registerCommand("/popout", [](const QStringList &words,
+                                        ChannelPtr channel) {
+        if (words.size() < 2)
+        {
+            if (!channel->isTwitchChannel() || channel->isEmpty())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /popout <channel>. You can also use the "
+                    "command without arguments in any twitch channel to "
+                    "open it's popout chat.."));
+            }
+            else
+            {
+                channel->addMessage(
+                    makeSystemMessage(QString("Opening popout chat for %1...")
+                                          .arg(channel->getName())));
+                QDesktopServices::openUrl(QUrl("https://www.twitch.tv/popout/" +
+                                               channel->getName() +
+                                               "/chat?popout="));
+            }
+            return "";
+        }
+        channel->addMessage(makeSystemMessage(
+            QString("Opening popout chat for %1...").arg(words[1])));
+        QDesktopServices::openUrl(
+            QUrl("https://www.twitch.tv/popout/" + words[1] + "/chat?popout="));
+
+        return "";
+    });
 
     this->registerCommand("/clearmessages", [](const auto & /*words*/,
                                                ChannelPtr channel) {
