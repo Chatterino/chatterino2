@@ -33,8 +33,7 @@
     "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", "/unban", \
         "/timeout", "/untimeout", "/slow", "/slowoff", "/r9kbeta",            \
         "/r9kbetaoff", "/emoteonly", "/emoteonlyoff", "/clear",               \
-        "/subscribers", "/subscribersoff", "/followers", "/followersoff",     \
-        "/popout"
+        "/subscribers", "/subscribersoff", "/followers", "/followersoff"
 
 namespace {
 using namespace chatterino;
