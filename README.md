@@ -25,7 +25,7 @@ Dankerino is a fork of Chatterino 2.
 
 Chatterino 2 is a chat client for [Twitch.tv](https://twitch.tv).
 The Chatterino 2 wiki can be found [here](https://wiki.chatterino.com).
-Contribution guidelines can be found [here](https://wiki.chatterino.com/contributing).
+Contribution guidelines can be found [here](https://wiki.chatterino.com/Contributing%20for%20Developers).
 
 ## Download
 

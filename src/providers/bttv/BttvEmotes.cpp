@@ -15,6 +15,9 @@
 namespace chatterino {
 namespace {
 
+    const QString CHANNEL_HAS_NO_EMOTES(
+        "This channel has no BetterTTV channel emotes.");
+
     QString emoteLinkFormat("https://betterttv.com/emotes/%1");
 
     Url getEmoteLink(QString urlTemplate, const EmoteId &id,
@@ -164,23 +167,37 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                     manualRefresh](auto result) -> Outcome {
             auto pair =
                 parseChannelEmotes(result.parseJson(), channelDisplayName);
+            bool hasEmotes = false;
             if (pair.first)
+            {
+                hasEmotes = !pair.second.empty();
                 callback(std::move(pair.second));
+            }
             if (auto shared = channel.lock(); manualRefresh)
-                shared->addMessage(
-                    makeSystemMessage("BetterTTV channel emotes reloaded."));
+            {
+                if (hasEmotes)
+                {
+                    shared->addMessage(makeSystemMessage(
+                        "BetterTTV channel emotes reloaded."));
+                }
+                else
+                {
+                    shared->addMessage(
+                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                }
+            }
             return pair.first;
         })
         .onError([channelId, channel, manualRefresh](auto result) {
             auto shared = channel.lock();
             if (!shared)
                 return;
-            if (result.status() == 203)
+            if (result.status() == 404)
             {
                 // User does not have any BTTV emotes
                 if (manualRefresh)
-                    shared->addMessage(makeSystemMessage(
-                        "This channel has no BetterTTV channel emotes."));
+                    shared->addMessage(
+                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {

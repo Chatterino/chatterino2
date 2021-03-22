@@ -4,14 +4,8 @@ name: Build
 on:
   push:
     branches:
-      - dankerino
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
+      - master
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
 
 jobs:
   build:
