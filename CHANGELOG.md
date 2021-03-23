@@ -2,7 +2,6 @@
 
 ## Unversioned
 
-- Minor: Added "/popout" command - opens current splits web chat if no arguments are provided, if arguments are provided it will open provided channel. Usage /popout <channel> (#2556)
 - Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377, #2528)
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
@@ -60,6 +59,7 @@
 - Minor: Added `/streamlink` command. Usage: `/streamlink <channel>`. You can also use the command without arguments in any twitch channel to open it in streamlink. (#2443, #2495)
 - Minor: Humanized all numbers visible to end-users. (#2488)
 - Minor: Added a context menu to avatar in usercard. It opens on right-clicking the avatar in usercard. (#2517)
+- Minor: Added "/popout" command - opens current splits web chat if no arguments are provided, if arguments are provided it will open provided channel. Usage /popout <channel> (#2556)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
