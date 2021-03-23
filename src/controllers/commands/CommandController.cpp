@@ -642,7 +642,9 @@ void CommandController::initialize(Settings &, Paths &paths)
                                         ChannelPtr channel) {
         if (words.size() < 2)
         {
-            if (!channel->isTwitchChannel() || channel->isEmpty())
+            if (const auto type = channel->getType();
+                type != Channel::Type::Twitch &&
+                type != Channel::Type::TwitchWatching)
             {
                 channel->addMessage(makeSystemMessage(
                     "Usage: /popout <channel>. You can also use the "
