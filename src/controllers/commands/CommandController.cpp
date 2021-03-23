@@ -663,7 +663,8 @@ void CommandController::initialize(Settings &, Paths &paths)
         channel->addMessage(makeSystemMessage(
             QString("Opening popout chat for %1...").arg(words[1])));
         QDesktopServices::openUrl(
-            QUrl("https://www.twitch.tv/popout/" + words[1] + "/chat?popout="));
+            QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
+                     .arg(words[1])));
 
         return "";
     });
