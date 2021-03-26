@@ -43,8 +43,8 @@ void MessageLayoutContainer::begin(int width, float scale, MessageFlags flags)
     auto mediumFontMetrics =
         getApp()->fonts->getFontMetrics(FontStyle::ChatMedium, scale);
     this->textLineHeight_ = mediumFontMetrics.height();
-    this->spaceWidth_ = mediumFontMetrics.width(' ');
-    this->dotdotdotWidth_ = mediumFontMetrics.width("...");
+    this->spaceWidth_ = mediumFontMetrics.horizontalAdvance(' ');
+    this->dotdotdotWidth_ = mediumFontMetrics.horizontalAdvance("...");
     this->canAddMessages_ = true;
     this->isCollapsed_ = false;
 }

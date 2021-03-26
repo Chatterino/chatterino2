@@ -36,7 +36,7 @@
 namespace chatterino {
 namespace {
     constexpr char MAGIC_MESSAGE_SUFFIX[] = u8" \U000E0000";
-    constexpr int TITLE_REFRESH_PERIOD = 10;
+    constexpr int TITLE_REFRESH_PERIOD = 10000;
     constexpr int CLIP_CREATION_COOLDOWN = 5000;
     const QString CLIPS_LINK("https://clips.twitch.tv/%1");
     const QString CLIPS_FAILURE_CLIPS_DISABLED_TEXT(
@@ -159,7 +159,6 @@ TwitchChannel::TwitchChannel(const QString &name,
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , mod_(false)
-    , titleRefreshedTime_(QTime::currentTime().addSecs(-TITLE_REFRESH_PERIOD))
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
@@ -587,20 +586,20 @@ void TwitchChannel::setLive(bool newLiveStatus)
 
 void TwitchChannel::refreshTitle()
 {
-    auto roomID = this->roomId();
-    if (roomID.isEmpty())
+    // timer has never started, proceed and start it
+    if (!this->titleRefreshedTimer_.isValid())
+    {
+        this->titleRefreshedTimer_.start();
+    }
+    else if (this->roomId().isEmpty() ||
+             this->titleRefreshedTimer_.elapsed() < TITLE_REFRESH_PERIOD)
     {
         return;
     }
-
-    if (this->titleRefreshedTime_.elapsed() < TITLE_REFRESH_PERIOD * 1000)
-    {
-        return;
-    }
-    this->titleRefreshedTime_ = QTime::currentTime();
+    this->titleRefreshedTimer_.restart();
 
     getHelix()->getChannel(
-        roomID,
+        this->roomId(),
         [this, weak = weakOf<Channel>(this)](HelixChannel channel) {
             ChannelPtr shared = weak.lock();
 
@@ -909,6 +908,9 @@ void TwitchChannel::refreshCheerEmotes()
                     // We will continue to do so for now since we haven't had to
                     // solve that anywhere else
 
+                    // Combine the prefix (e.g. BibleThump) with the tier (1, 100 etc.)
+                    auto emoteTooltip =
+                        set.prefix + tier.id + "<br>Twitch Cheer Emote";
                     cheerEmote.animatedEmote = std::make_shared<Emote>(
                         Emote{EmoteName{"cheer emote"},
                               ImageSet{
@@ -916,7 +918,7 @@ void TwitchChannel::refreshCheerEmotes()
                                   tier.images["dark"]["animated"]["2"],
                                   tier.images["dark"]["animated"]["4"],
                               },
-                              Tooltip{}, Url{}});
+                              Tooltip{emoteTooltip}, Url{}});
                     cheerEmote.staticEmote = std::make_shared<Emote>(
                         Emote{EmoteName{"cheer emote"},
                               ImageSet{
@@ -924,7 +926,7 @@ void TwitchChannel::refreshCheerEmotes()
                                   tier.images["dark"]["static"]["2"],
                                   tier.images["dark"]["static"]["4"],
                               },
-                              Tooltip{}, Url{}});
+                              Tooltip{emoteTooltip}, Url{}});
 
                     cheerEmoteSet.cheerEmotes.emplace_back(cheerEmote);
                 }
@@ -953,8 +955,13 @@ void TwitchChannel::createClip()
         return;
     }
 
-    if (QTime().currentTime() < this->timeNextClipCreationAllowed_ ||
-        this->isClipCreationInProgress)
+    // timer has never started, proceed and start it
+    if (!this->clipCreationTimer_.isValid())
+    {
+        this->clipCreationTimer_.start();
+    }
+    else if (this->clipCreationTimer_.elapsed() < CLIP_CREATION_COOLDOWN ||
+             this->isClipCreationInProgress)
     {
         return;
     }
@@ -1034,8 +1041,7 @@ void TwitchChannel::createClip()
         },
         // finallyCallback - this will always execute, so clip creation won't ever be stuck
         [this] {
-            this->timeNextClipCreationAllowed_ =
-                QTime().currentTime().addMSecs(CLIP_CREATION_COOLDOWN);
+            this->clipCreationTimer_.restart();
             this->isClipCreationInProgress = false;
         });
 }

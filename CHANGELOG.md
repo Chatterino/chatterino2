@@ -2,11 +2,13 @@
 
 ## Unversioned
 
-- Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377)
+- Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377, #2528)
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
 - Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284)
 - Major: Commands `/ignore` and `/unignore` have been renamed to `/block` and `/unblock` in order to keep consistency with Twitch's terms. (#2370)
+- Major: Added support for bit emotes - the ones you unlock after cheering to streamer. (#2550)
+- Minor: Added `/clearmessages` command - does what "Burger menu -> More -> Clear messages" does. (#2485)
 - Minor: Added `/marker` command - similar to webchat, it creates a stream marker. (#2360)
 - Minor: Added `/chatters` command showing chatter count. (#2344)
 - Minor: Added a button to the split context menu to open the moderation view for a channel when the account selected has moderator permissions. (#2321)
@@ -30,7 +32,7 @@
 - Minor: Added an option to only open channels specified in command line with `-c` parameter. You can also use `--help` to display short help message (#1940, #2368)
 - Minor: Added customizable timeout buttons to the user info popup
 - Minor: Deprecate loading of "v1" window layouts. If you haven't updated Chatterino in more than 2 years, there's a chance you will lose your window layout.
-- Minor: User popup will now automatically display messages as they are received
+- Minor: User popup will now automatically display messages as they are received. (#1982, #2514)
 - Minor: Changed the English in two rate-limited system messages (#1878)
 - Minor: Added a setting to disable messages sent to /mentions split from making the tab highlight with the red marker (#1994)
 - Minor: Added image for streamer mode in the user popup icon.
@@ -56,6 +58,7 @@
 - Minor: Remove EmojiOne 2 and 3 due to license restrictions. (#1555)
 - Minor: Added `/streamlink` command. Usage: `/streamlink <channel>`. You can also use the command without arguments in any twitch channel to open it in streamlink. (#2443, #2495)
 - Minor: Humanized all numbers visible to end-users. (#2488)
+- Minor: Added a context menu to avatar in usercard. It opens on right-clicking the avatar in usercard. (#2517)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
@@ -69,7 +72,7 @@
 - Bugfix: Fixed previous link info not updating after `Link information` setting is enabled (#2054)
 - Bugfix: Fix Tab key not working in the Ctrl+K Quick Switcher (#2065)
 - Bugfix: Fix bug preventing moderator actions when viewing a user card from the search window (#1089)
-- Bugfix: Fix `:` emote completion menu ignoring emote capitalization (#1962)
+- Bugfix: Fix `:` emote completion menu ignoring emote capitalization and inconsistent emote names. (#1962, #2543)
 - Bugfix: Fix a bug that caused `Ignore page` to fall into an infinity loop with an empty pattern and regex enabled (#2125)
 - Bugfix: Fix a crash caused by FrankerFaceZ responding with invalid emote links (#2191)
 - Bugfix: Fix a freeze caused by ignored & replaced phrases followed by Twitch Emotes (#2231)
@@ -78,6 +81,9 @@
 - Bugfix: Fix anonymous users being pinged by "username" justinfan64537 (#2156, #2352)
 - Bugfix: Fixed hidden tooltips when always on top is active (#2384)
 - Bugfix: Fix CLI arguments (`--help`, `--version`, `--channels`) not being respected (#2368, #2190)
+- Bugfix: Fix Twitch cheer emotes not displaying tooltips when hovered (#2434, #2503)
+- Bugfix: Fix BTTV/FFZ channel emotes saying unknown error when no emotes found (#2542)
+- Bugfix: Fix directory not opening when clicking "Open AppData Directory" setting button on macOS (#2531, #2537)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)

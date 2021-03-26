@@ -514,6 +514,10 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
             tc->setMod(_mod == "1");
         }
     }
+
+    // handle emotes
+    app->accounts->twitch.getCurrent()->loadUserstateEmotes(
+        message->tag("emote-sets").toString().split(","));
 }
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)

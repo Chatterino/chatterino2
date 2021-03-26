@@ -123,7 +123,9 @@ Split::Split(QWidget *parent)
 
     // Alt+X: create clip LUL
     createShortcut(this, "Alt+X", [this] {
-        if (!this->getChannel()->isTwitchChannel())
+        if (const auto type = this->getChannel()->getType();
+            type != Channel::Type::Twitch &&
+            type != Channel::Type::TwitchWatching)
         {
             return;
         }

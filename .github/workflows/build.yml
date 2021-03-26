@@ -5,13 +5,7 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
 
 jobs:
   build:
@@ -85,6 +79,12 @@ jobs:
             echo nightly > Chatterino2/modes
             7z a chatterino-windows-x86-64.zip Chatterino2/
         shell: cmd
+
+      - name: Ensure build succeeded (Windows)
+        if: startsWith(matrix.os, 'windows')
+        run: |
+            cd build
+            ls release/chatterino.exe
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
