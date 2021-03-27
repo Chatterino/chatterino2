@@ -84,6 +84,7 @@
 - Bugfix: Fix Twitch cheer emotes not displaying tooltips when hovered (#2434, #2503)
 - Bugfix: Fix BTTV/FFZ channel emotes saying unknown error when no emotes found (#2542)
 - Bugfix: Fix directory not opening when clicking "Open AppData Directory" setting button on macOS (#2531, #2537)
+- Bugfix: Fix quickswitcher not respecting order of tabs when filtering (#2519, #2561)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
