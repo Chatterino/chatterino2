@@ -11,6 +11,10 @@ Contribution guidelines can be found [here](https://wiki.chatterino.com/Contribu
 Current releases are available at [https://chatterino.com](https://chatterino.com).
 Windows users can also install Chatterino [from Chocolatey](https://chocolatey.org/packages/chatterino).
 
+## Automated installation
+
+You can view a guide on how to automatically install and deploy Chatterino [here](../master/ENTERPRISE_DEPLOYMENT.MD)
+
 ## Nightly build
 
 You can download the latest Chatterino 2 build over [here](https://github.com/Chatterino/chatterino2/releases/tag/nightly-build)
