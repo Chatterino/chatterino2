@@ -115,7 +115,7 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         run: |
             cd build
-            ls release/chatterino.exe
+            ls Chatterino2/chatterino.exe
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
