@@ -453,7 +453,9 @@ if (WIN32)
     endif ()
 
 elseif (APPLE)
-    list(APPEND SOURCE_FILES "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")
+    set(MACOS_BUNDLE_ICON_FILE "${CMAKE_SOURCE_DIR}/resources/chatterino.icns")
+    list(APPEND SOURCE_FILES "${MACOS_BUNDLE_ICON_FILE}")
+    set_source_files_properties(${MACOS_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
 endif ()
 
 # Generate source groups for use in IDEs
@@ -502,6 +504,16 @@ endif ()
 
 if (APPLE)
     set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
+    set_target_properties(${PROJECT_NAME}
+        PROPERTIES
+        MACOSX_BUNDLE_BUNDLE_NAME "Chatterino"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.chatterino"
+        MACOSX_BUNDLE_INFO_STRING "Chat client for Twitch"
+        MACOSX_BUNDLE_LONG_VERSION_STRING "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_ICON_FILE chatterino.icns
+        )
 endif ()
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
