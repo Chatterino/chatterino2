@@ -6,6 +6,7 @@
     <file>avatars/pajlada.png</file>
     <file>avatars/revolter.jpg</file>
     <file>avatars/zneix.png</file>
+    <file>avatars/kararty.png</file>
     <file>buttons/addSplit.png</file>
     <file>buttons/addSplitDark.png</file>
     <file>buttons/ban.png</file>
@@ -49,6 +50,7 @@
     <file>licenses/boost_boost.txt</file>
     <file>licenses/emoji-data-source.txt</file>
     <file>licenses/libcommuni_BSD3.txt</file>
+    <file>licenses/lrucache.txt</file>
     <file>licenses/openssl.txt</file>
     <file>licenses/pajlada_settings.txt</file>
     <file>licenses/pajlada_signals.txt</file>

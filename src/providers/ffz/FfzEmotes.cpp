@@ -12,6 +12,10 @@
 
 namespace chatterino {
 namespace {
+
+    const QString CHANNEL_HAS_NO_EMOTES(
+        "This channel has no FrankerFaceZ channel emotes.");
+
     Url getEmoteLink(const QJsonObject &urls, const QString &emoteScale)
     {
         auto emote = urls.value(emoteScale);
@@ -210,11 +214,23 @@ void FfzEmotes::loadChannel(
             auto emoteMap = parseChannelEmotes(json);
             auto modBadge = parseModBadge(json);
 
+            bool hasEmotes = !emoteMap.empty();
+
             emoteCallback(std::move(emoteMap));
             modBadgeCallback(std::move(modBadge));
             if (auto shared = channel.lock(); manualRefresh)
-                shared->addMessage(
-                    makeSystemMessage("FrankerFaceZ channel emotes reloaded."));
+            {
+                if (hasEmotes)
+                {
+                    shared->addMessage(makeSystemMessage(
+                        "FrankerFaceZ channel emotes reloaded."));
+                }
+                else
+                {
+                    shared->addMessage(
+                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
+                }
+            }
 
             return Success;
         })
@@ -222,12 +238,12 @@ void FfzEmotes::loadChannel(
             auto shared = channel.lock();
             if (!shared)
                 return;
-            if (result.status() == 203)
+            if (result.status() == 404)
             {
                 // User does not have any FFZ emotes
                 if (manualRefresh)
-                    shared->addMessage(makeSystemMessage(
-                        "This channel has no FrankerFaceZ channel emotes."));
+                    shared->addMessage(
+                        makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {

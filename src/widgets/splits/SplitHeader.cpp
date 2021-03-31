@@ -874,12 +874,12 @@ void SplitHeader::themeChangedEvent()
 
     if (this->split_->hasFocus())
     {
-        palette.setColor(QPalette::Foreground,
+        palette.setColor(QPalette::WindowText,
                          this->theme->splits.header.focusedText);
     }
     else
     {
-        palette.setColor(QPalette::Foreground, this->theme->splits.header.text);
+        palette.setColor(QPalette::WindowText, this->theme->splits.header.text);
     }
     this->titleLabel_->setPalette(palette);
 

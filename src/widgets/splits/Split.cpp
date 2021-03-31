@@ -109,6 +109,7 @@ Split::Split(QWidget *parent)
     this->vbox_->addWidget(this->view_, 1);
     this->vbox_->addWidget(this->input_);
 
+
     // xd
     // CreateShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
     // CreateShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
@@ -393,7 +394,9 @@ void Split::addShortcuts()
             {"createClip",
              [this](std::vector<QString>) -> QString {
                  // Alt+X: create clip LUL
-                 if (!this->getChannel()->isTwitchChannel())
+                 if (const auto type = this->getChannel()->getType();
+                     type != Channel::Type::Twitch &&
+                     type != Channel::Type::TwitchWatching)
                  {
                      return "Cannot create clip it non-twitch channel.";
                  }

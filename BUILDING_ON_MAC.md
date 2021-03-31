@@ -14,6 +14,8 @@
 8. Create build folder `mkdir build && cd build`
 9. `qmake .. && make`
 
+_If you want to use cmake instead of qmake, just replace the above qmake command with cmake_
+
 If the Project does not build at this point, you might need to add additional Paths/Libs, because brew does not install openssl and boost in the common path. You can get their path using
 
 `brew info openssl`

@@ -13,6 +13,7 @@
 
 #include <IrcConnection>
 #include <QColor>
+#include <QElapsedTimer>
 #include <QRegularExpression>
 #include <boost/optional.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -188,8 +189,8 @@ private:
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
-    QTime titleRefreshedTime_;
-    QTime timeNextClipCreationAllowed_{QTime().currentTime()};
+    QElapsedTimer titleRefreshedTimer_;
+    QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};
 
     friend class TwitchIrcServer;

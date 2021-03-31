@@ -22,6 +22,7 @@
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QApplication>
 #include <QFile>
@@ -522,7 +523,9 @@ void CommandController::initialize(Settings &, Paths &paths)
         });
 
     this->registerCommand("/clip", [](const auto & /*words*/, auto channel) {
-        if (!channel->isTwitchChannel())
+        if (const auto type = channel->getType();
+            type != Channel::Type::Twitch &&
+            type != Channel::Type::TwitchWatching)
         {
             return "";
         }
@@ -633,6 +636,16 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             return "";
         });
+
+    this->registerCommand("/clearmessages", [](const auto & /*words*/,
+                                               ChannelPtr channel) {
+        auto *currentPage = dynamic_cast<SplitContainer *>(
+            getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
+
+        currentPage->getSelectedSplit()->getChannelView().clearMessages();
+
+        return "";
+    });
 }
 
 void CommandController::save()

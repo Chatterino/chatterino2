@@ -320,7 +320,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
             // fourtf: add again
             //            if (word.width == -1) {
-            word.width = metrics.width(word.text);
+            word.width = metrics.horizontalAdvance(word.text);
             //            }
 
             // see if the text fits in the current line
@@ -357,8 +357,9 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 auto isSurrogate = text.size() > i + 1 &&
                                    QChar::isHighSurrogate(text[i].unicode());
 
-                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
-                                             : metrics.width(text[i]);
+                auto charWidth = isSurrogate
+                                     ? metrics.horizontalAdvance(text.mid(i, 2))
+                                     : metrics.horizontalAdvance(text[i]);
 
                 if (!container.fitsInLine(width + charWidth))
                 {
@@ -585,7 +586,7 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
 
             // fourtf: add again
             //            if (word.width == -1) {
-            word.width = metrics.width(word.text);
+            word.width = metrics.horizontalAdvance(word.text);
             //            }
 
             // see if the text fits in the current line
@@ -632,8 +633,9 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
                 auto isSurrogate = text.size() > i + 1 &&
                                    QChar::isHighSurrogate(text[i].unicode());
 
-                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
-                                             : metrics.width(text[i]);
+                auto charWidth = isSurrogate
+                                     ? metrics.horizontalAdvance(text.mid(i, 2))
+                                     : metrics.horizontalAdvance(text[i]);
 
                 if (!container.fitsInLine(width + charWidth))
                 {

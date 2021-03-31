@@ -12,7 +12,7 @@ class SignalLabel : public QLabel
     Q_OBJECT
 
 public:
-    explicit SignalLabel(QWidget *parent = nullptr, Qt::WindowFlags f = 0);
+    explicit SignalLabel(QWidget *parent = nullptr, Qt::WindowFlags f = {});
     virtual ~SignalLabel() override = default;
 
 signals:
