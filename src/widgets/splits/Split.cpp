@@ -109,7 +109,6 @@ Split::Split(QWidget *parent)
     this->vbox_->addWidget(this->view_, 1);
     this->vbox_->addWidget(this->input_);
 
-
     // xd
     // CreateShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
     // CreateShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
