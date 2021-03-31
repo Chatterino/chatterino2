@@ -7,7 +7,6 @@
 
 namespace chatterino {
 
-// TODO: can this be moved to HotkeyScope?
 boost::optional<HotkeyScope> HotkeyController::hotkeyScopeFromName(
     QString scopeName)
 {
