@@ -81,6 +81,21 @@ void EditHotkeyDialog::afterEdit()
         this->showEditError("Hotkey with this name already exists.");
         return;
     }
+    if (nameText == "")
+    {
+        this->showEditError("Hotkey name is missing");
+        return;
+    }
+    if (this->ui_->keyComboEdit->keySequence().count() == 0)
+    {
+        this->showEditError("Key Sequence is missing");
+        return;
+    }
+    if (this->ui_->actionPicker->currentText() == "")
+    {
+        this->showEditError("Action name cannot be empty");
+        return;
+    }
 
     auto firstKeyInt = this->ui_->keyComboEdit->keySequence()[0];
     bool hasModifier = ((firstKeyInt & Qt::CTRL) == Qt::CTRL) ||
