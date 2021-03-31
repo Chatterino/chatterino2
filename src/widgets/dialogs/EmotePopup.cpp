@@ -165,16 +165,17 @@ EmotePopup::EmotePopup(QWidget *parent)
 }
 void EmotePopup::addShortcuts()
 {
-    std::map<QString, std::function<void(std::vector<QString>)>>
+    std::map<QString, std::function<QString(std::vector<QString>)>>
         emotePopupActions{
             {"openTab",  // CTRL + 1-8 to open corresponding tab.
-             [this](std::vector<QString> arguments) {
+             [this](std::vector<QString> arguments) -> QString {
                  if (arguments.size() == 0)
                  {
                      qCWarning(chatterinoHotkeys)
                          << "openTab shortcut called without arguments. Takes "
                             "only one argument: tab specifier";
-                     return;
+                     return "openTab shortcut called without arguments. "
+                            "Takes only one argument: tab specifier";
                  }
                  auto target = arguments.at(0);
                  if (target == "last")
@@ -201,12 +202,17 @@ void EmotePopup::addShortcuts()
                      {
                          qCWarning(chatterinoHotkeys)
                              << "Invalid argument for openTab shortcut";
+                         return QString("Invalid argument for openTab "
+                                        "shortcut: \"%1\"")
+                             .arg(target);
                      }
                  }
+                 return "";
              }},
             {"delete",
-             [this](std::vector<QString>) {
+             [this](std::vector<QString>) -> QString {
                  this->close();
+                 return "";
              }},
         };
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(

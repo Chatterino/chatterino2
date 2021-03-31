@@ -34,7 +34,8 @@ protected:
 private:
     void addCustomTitlebarButtons();
     void addDebugStuff(
-        std::map<QString, std::function<void(std::vector<QString>)>> &actions);
+        std::map<QString, std::function<QString(std::vector<QString>)>>
+            &actions);
     virtual void addShortcuts() override;
     void addLayout();
     void onAccountSelected();

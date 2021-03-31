@@ -579,7 +579,7 @@ HotkeyModel *HotkeyController::createModel(QObject *parent)
 
 std::vector<QShortcut *> HotkeyController::shortcutsForScope(
     HotkeyScope scope,
-    std::map<QString, std::function<void(std::vector<QString>)>> actionMap,
+    std::map<QString, std::function<QString(std::vector<QString>)>> actionMap,
     QWidget *parent)
 {
     if (this->savedActions.find(scope) == this->savedActions.end())
@@ -611,14 +611,30 @@ std::vector<QShortcut *> HotkeyController::shortcutsForScope(
         s->setContext(hotkey->getContext());
         auto functionPointer = target->second;
         QObject::connect(s, &QShortcut::activated, parent,
-                         [functionPointer, hotkey]() {
+                         [functionPointer, hotkey, this]() {
                              qCDebug(chatterinoHotkeys)
                                  << "Shortcut pressed: " << hotkey->action();
-                             functionPointer(hotkey->arguments());
+                             QString output =
+                                 functionPointer(hotkey->arguments());
+                             if (!output.isEmpty())
+                             {
+                                 this->showHotkeyError(hotkey, output);
+                             }
                          });
         output.push_back(s);
     }
     return output;
+}
+void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> hotkey,
+                                       QString warning)
+{
+    auto msgBox = new QMessageBox(
+        QMessageBox::Icon::Warning, "Hotkey error",
+        QString(
+            "There was an error while executing your hotkey named \"%1\": \n%2")
+            .arg(hotkey->name(), warning),
+        QMessageBox::Ok);
+    msgBox->exec();
 }
 
 std::shared_ptr<Hotkey> HotkeyController::getHotkeyByName(QString name)

@@ -222,14 +222,16 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     this->ui_.notebook->selectIndex(TAB_TWITCH);
     this->ui_.twitch.channel->setFocus();
 
-    std::map<QString, std::function<void(std::vector<QString>)>> actions{
+    std::map<QString, std::function<QString(std::vector<QString>)>> actions{
         {"accept",
-         [this](std::vector<QString>) {
+         [this](std::vector<QString>) -> QString {
              this->ok();
+             return "";
          }},
         {"reject",
-         [this](std::vector<QString>) {
+         [this](std::vector<QString>) -> QString {
              this->close();
+             return "";
          }},
     };
     // Shortcuts
@@ -240,14 +242,15 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     {
         this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
         actions.insert(
-            {"openTab", [this](std::vector<QString> arguments) {
+            {"openTab", [this](std::vector<QString> arguments) -> QString {
                  if (arguments.size() == 0)
                  {
                      qCWarning(chatterinoHotkeys)
                          << "openTab shortcut called without arguments. "
                             "Takes only "
                             "one argument: tab specifier";
-                     return;
+                     return "openTab shortcut called without arguments. "
+                            "Takes only one argument: tab specifier";
                  }
                  auto target = arguments.at(0);
                  if (target == "last")
@@ -274,8 +277,12 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                      {
                          qCWarning(chatterinoHotkeys)
                              << "Invalid argument for openTab shortcut";
+                         return QString("Invalid argument for openTab "
+                                        "shortcut: \"%1\"")
+                             .arg(target);
                      }
                  }
+                 return "";
              }});
     }
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(

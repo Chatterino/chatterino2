@@ -135,11 +135,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
     else
         this->setAttribute(Qt::WA_DeleteOnClose);
 
-    std::map<QString, std::function<void(std::vector<QString>)>>
+    std::map<QString, std::function<QString(std::vector<QString>)>>
         userCardActions{
             {"delete",
-             [this](std::vector<QString>) {
+             [this](std::vector<QString>) -> QString {
                  this->deleteLater();
+                 return "";
              }},
         };
 

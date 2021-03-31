@@ -22,7 +22,8 @@ public:
     virtual void initialize(Settings &settings, Paths &paths) override;
     std::vector<QShortcut *> shortcutsForScope(
         HotkeyScope scope,
-        std::map<QString, std::function<void(std::vector<QString>)>> actionMap,
+        std::map<QString, std::function<QString(std::vector<QString>)>>
+            actionMap,
         QWidget *parent);
 
     void save() override;
@@ -58,6 +59,7 @@ private:
     void tryAddDefault(std::set<QString> &addedHotkeys, HotkeyScope scope,
                        QKeySequence keySequence, QString action,
                        std::vector<QString> args, QString name);
+    void showHotkeyError(std::shared_ptr<Hotkey> hotkey, QString warning);
     friend class KeyboardSettingsPage;
 };
 
