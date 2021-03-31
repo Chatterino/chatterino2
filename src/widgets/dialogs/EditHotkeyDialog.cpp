@@ -110,6 +110,7 @@ void EditHotkeyDialog::afterEdit()
         this->shownSingleKeyWarning = true;
         return;
     }
+
     this->data_ = std::make_shared<Hotkey>(
         *scope, this->ui_->keyComboEdit->keySequence(),
         this->ui_->actionPicker->currentText(), arguments, nameText);
