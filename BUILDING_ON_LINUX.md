@@ -17,7 +17,7 @@ _most likely works the same for other Debian-like distros_
 
 ### Manually
 
-1. `sudo pacman -S qt5-base qt5-multimedia qt5-svg gst-plugins-ugly gst-plugins-good boost rapidjson pkgconf openssl cmake`
+1. `sudo pacman -S qt5-base qt5-multimedia qt5-svg qt5-tools gst-plugins-ugly gst-plugins-good boost rapidjson pkgconf openssl cmake`
 1. go into project directory
 1. create build folder `mkdir build && cd build`
 
