@@ -150,6 +150,9 @@ set(SOURCE_FILES main.cpp
         providers/bttv/LoadBttvChannelEmote.cpp
         providers/bttv/LoadBttvChannelEmote.hpp
 
+        providers/dankerino/DankerinoBadges.cpp
+        providers/dankerino/DankerinoBadges.hpp
+
         providers/chatterino/ChatterinoBadges.cpp
         providers/chatterino/ChatterinoBadges.hpp
 
@@ -352,6 +355,8 @@ set(SOURCE_FILES main.cpp
         widgets/dialogs/switcher/QuickSwitcherPopup.hpp
         widgets/dialogs/switcher/SwitchSplitItem.cpp
         widgets/dialogs/switcher/SwitchSplitItem.hpp
+        widgets/dialogs/StreamSettingsDialog.cpp
+        widgets/dialogs/StreamSettingsDialog.hpp
 
         widgets/helper/Button.cpp
         widgets/helper/Button.hpp
