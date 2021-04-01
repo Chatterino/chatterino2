@@ -6,8 +6,25 @@ Note on Qt version compatibility: If you are installing Qt from a package manage
 
 _most likely works the same for other Debian-like distros_
 
-1. Install dependencies (and the C++ IDE Qt Creator) `sudo apt install qtcreator qtmultimedia5-dev libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev libboost-filesystem-dev cmake`
-1. Open `chatterino.pro` with QT Creator and build
+1. Install dependencies `sudo apt install qttools5-dev qtmultimedia5-dev libqt5svg5-dev libboost-dev libssl-dev libboost-system-dev libboost-filesystem-dev cmake g++`
+
+### Through Qt Creator
+
+1. Install C++ IDE Qt Creator `sudo apt install qtcreator`
+1. Open `chatterino.pro` with Qt Creator and select build
+
+### Manually
+
+1. go into project directory
+1. create build folder `mkdir build && cd build`
+
+### Using QMake
+
+1. `qmake .. && make`
+
+### Using CMake
+
+1. `cmake .. && make`
 
 ## Arch Linux
 
