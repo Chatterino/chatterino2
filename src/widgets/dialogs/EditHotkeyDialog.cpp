@@ -60,9 +60,15 @@ std::shared_ptr<Hotkey> EditHotkeyDialog::data()
 void EditHotkeyDialog::afterEdit()
 {
     std::vector<QString> arguments;
-    for (const auto arg : this->ui_->argumentsEdit->toPlainText().split("\n"))
+
+    auto argTemp = this->ui_->argumentsEdit->toPlainText().split("\n");
+    // if the arguments input is empty then make sure arguments are empty.
+    if (!(argTemp.size() == 1 && argTemp.at(0) == ""))
     {
-        arguments.push_back(arg);
+        for (const auto arg : argTemp)
+        {
+            arguments.push_back(arg);
+        }
     }
     auto scope = getApp()->hotkeys->hotkeyScopeFromName(
         this->ui_->scopePicker->currentData().toString());
