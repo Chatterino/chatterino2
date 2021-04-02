@@ -350,7 +350,8 @@ void Window::addShortcuts()
                          qCWarning(chatterinoHotkeys)
                              << "Invalid argument for openTab shortcut";
                          return QString("Invalid argument for openTab "
-                                        "shortcut: \"%1\"")
+                                        "shortcut: \"%1\". Use \"last\", "
+                                        "\"next\", \"previous\" or an integer.")
                              .arg(target);
                      }
                  }
@@ -394,7 +395,7 @@ void Window::addShortcuts()
                  {
                      qCWarning(chatterinoHotkeys)
                          << "Invalid zoom direction, use \"in\" or \"out\"";
-                     return "Invalid zoom direction, use \"in\" or \"out\"";
+                     return "Invalid zoom direction. Use \"in\" or \"out\".";
                  }
                  getSettings()->setClampedUiScale(
                      getSettings()->getClampedUiScale() + change);
@@ -487,7 +488,11 @@ void Window::addShortcuts()
                      {
                          qCWarning(chatterinoHotkeys)
                              << "Invalid argument for moveTab shortcut";
-                         return "Invalid argument for moveTab shortcut";
+                         return QString(
+                                    "Invalid argument for moveTab shortcut: "
+                                    "%1. Use \"next\" or \"previous\" or an "
+                                    "integer.")
+                             .arg(target);
                      }
                      newIndex = result;
                  }
@@ -496,7 +501,7 @@ void Window::addShortcuts()
                  {
                      qCWarning(chatterinoHotkeys)
                          << "Invalid index for moveTab shortcut:" << newIndex;
-                     return QString("Invalid index for moveTab shortcut: %1")
+                     return QString("Invalid index for moveTab shortcut: %1.")
                          .arg(newIndex);
                  }
                  this->notebook_->rearrangePage(
@@ -530,6 +535,10 @@ void Window::addShortcuts()
                          qCWarning(chatterinoHotkeys)
                              << "Invalid argument for setStreamerMode hotkey: "
                              << arg;
+                         return QString("Invalid argument for setStreamerMode "
+                                        "hotkey: %1. Use \"on\", \"off\", "
+                                        "\"toggle\" or \"auto\".")
+                             .arg(arg);
                      }
                  }
 

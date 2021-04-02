@@ -278,7 +278,8 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                          qCWarning(chatterinoHotkeys)
                              << "Invalid argument for openTab shortcut";
                          return QString("Invalid argument for openTab "
-                                        "shortcut: \"%1\"")
+                                        "shortcut: \"%1\". Use \"last\", "
+                                        "\"next\", \"previous\" or an integer.")
                              .arg(target);
                      }
                  }
