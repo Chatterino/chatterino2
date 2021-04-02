@@ -46,6 +46,10 @@ _most likely works the same for other Debian-like distros_
 
 1. `cmake .. && make`
 
+### Optional dependencies
+
+1. `sudo pacman -S pulseaudio-qt` _(optional: for audio output)_
+
 ## Fedora 28 and above
 
 _most likely works the same for other Red Hat-like distros. Substitue `dnf` with `yum`._
