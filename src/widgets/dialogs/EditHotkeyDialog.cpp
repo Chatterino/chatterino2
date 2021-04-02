@@ -21,7 +21,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     }
     if (hotkey)
     {
-        this->ui_->scopePicker->setCurrentIndex((size_t)hotkey->scope());
+        this->ui_->scopePicker->setCurrentIndex(size_t(hotkey->scope()));
         this->ui_->actionPicker->setCurrentText(hotkey->action());
         this->ui_->keyComboEdit->setKeySequence(
             QKeySequence::fromString(hotkey->keySequence().toString()));
