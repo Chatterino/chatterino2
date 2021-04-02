@@ -43,6 +43,9 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     else
     {
         this->setWindowTitle("Add hotkey");
+        this->ui_->scopePicker->setCurrentIndex(
+            size_t(HotkeyScope::SplitInput));
+        this->ui_->argumentsEdit->setPlainText("");
     }
     this->ui_->warningLabel->hide();
 }
