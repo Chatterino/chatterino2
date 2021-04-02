@@ -18,11 +18,11 @@ _most likely works the same for other Debian-like distros_
 1. go into project directory
 1. create build folder `mkdir build && cd build`
 
-### Using QMake
+#### Using QMake
 
 1. `qmake .. && make`
 
-### Using CMake
+#### Using CMake
 
 1. `cmake .. && make`
 
@@ -38,11 +38,11 @@ _most likely works the same for other Debian-like distros_
 1. go into project directory
 1. create build folder `mkdir build && cd build`
 
-### Using QMake
+#### Using QMake
 
 1. `qmake .. && make`
 
-### Using CMake
+#### Using CMake
 
 1. `cmake .. && make`
 
