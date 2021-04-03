@@ -18,6 +18,8 @@ You can download the latest Chatterino 2 build over [here](https://github.com/Ch
 You might also need to install the [VC++ 2017 Redistributable](https://aka.ms/vs/15/release/vc_redist.x64.exe) from Microsoft if you do not have it installed already.  
 If you still receive an error about `MSVCR120.dll missing`, then you should install the [VC++ 2013 Restributable](https://download.microsoft.com/download/2/E/6/2E61CFA4-993B-4DD4-91DA-3737CD5CD6E3/vcredist_x64.exe).
 
+You can follow a video tutorial on how to download and install the Nightly build of Chatterino [here](https://youtu.be/AdRwK2osHWU)
+
 ## Building
 
 To get source code with required submodules run:
