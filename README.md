@@ -4,7 +4,7 @@ Chatterino 2 [![GitHub Actions Build (Windows, Ubuntu, MacOS)](https://github.co
 
 Chatterino 2 is a chat client for [Twitch.tv](https://twitch.tv).
 The Chatterino 2 wiki can be found [here](https://wiki.chatterino.com).
-Contribution guidelines can be found [here](https://wiki.chatterino.com/contributing).
+Contribution guidelines can be found [here](https://wiki.chatterino.com/Contributing%20for%20Developers).
 
 ## Download
 

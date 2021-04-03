@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -d bin/chatterino.app ] && [ ! -d chatterino.app ]; then
+    >&2 echo "Moving bin/chatterino.app down one directory"
+    mv bin/chatterino.app chatterino.app
+fi
+
 echo "Running MACDEPLOYQT"
 $Qt5_DIR/bin/macdeployqt chatterino.app
 echo "Creating python3 virtual environment"
