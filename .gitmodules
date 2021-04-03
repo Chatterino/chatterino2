@@ -1,6 +1,6 @@
 [submodule "lib/libcommuni"]
 	path = lib/libcommuni
-	url = https://github.com/communi/libcommuni
+	url = https://github.com/Chatterino/libcommuni
 [submodule "lib/qBreakpad"]
 	path = lib/qBreakpad
 	url = https://github.com/jiakuan/qBreakpad.git
