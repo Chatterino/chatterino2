@@ -105,7 +105,9 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
   - `TwitchChannel` to refresh stream title
 
 ### Update Channel
+
 URL: https://dev.twitch.tv/docs/api/reference#modify-channel-information
+Requires `channel:manage:broadcast` scope
 
 - We implement this in `providers/twitch/api/Helix.cpp updateChannel`
   Used in:
