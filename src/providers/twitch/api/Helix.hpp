@@ -304,10 +304,6 @@ public:
                       std::function<void()> successCallback,
                       HelixFailureCallback failureCallback);
 
-    void updateChannel(QString broadcasterId, QString gameId, QString language,
-                       QString title,
-                       std::function<void(NetworkResult)> successCallback,
-                       HelixFailureCallback failureCallback);
     // https://dev.twitch.tv/docs/api/reference#create-clip
     void createClip(QString channelId,
                     ResultCallback<HelixClip> successCallback,
@@ -338,6 +334,12 @@ public:
     void unblockUser(QString targetUserId,
                      std::function<void()> successCallback,
                      HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#modify-channel-information
+    void updateChannel(QString broadcasterId, QString gameId, QString language,
+                       QString title,
+                       std::function<void(NetworkResult)> successCallback,
+                       HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

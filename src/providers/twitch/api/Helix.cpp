@@ -508,49 +508,6 @@ void Helix::unfollowUser(QString userId, QString targetId,
         .execute();
 }
 
-void Helix::updateChannel(QString broadcasterId, QString gameId,
-                          QString language, QString title,
-                          std::function<void(NetworkResult)> successCallback,
-                          HelixFailureCallback failureCallback)
-{
-    QUrlQuery urlQuery;
-    auto data = QJsonDocument();
-    auto obj = QJsonObject();
-    if (!gameId.isEmpty())
-    {
-        obj.insert("game_id", gameId);
-    }
-    if (!language.isEmpty())
-    {
-        obj.insert("broadcaster_language", language);
-    }
-    if (!title.isEmpty())
-    {
-        obj.insert("title", title);
-    }
-
-    if (title.isEmpty() && gameId.isEmpty() && language.isEmpty())
-    {
-        qCDebug(chatterinoCommon) << "Tried to update channel with no changes!";
-        return;
-    }
-
-    data.setObject(obj);
-    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
-    this->makeRequest("channels", urlQuery)
-        .type(NetworkRequestType::Patch)
-        .header("Content-Type", "application/json")
-        .payload(data.toJson())
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-            successCallback(result);
-            return Success;
-        })
-        .onError([failureCallback](NetworkResult result) {
-            failureCallback();
-        })
-        .execute();
-}
-
 void Helix::createClip(QString channelId,
                        ResultCallback<HelixClip> successCallback,
                        std::function<void(HelixClipError)> failureCallback,
@@ -770,6 +727,48 @@ void Helix::unblockUser(QString targetUserId,
         .execute();
 }
 
+void Helix::updateChannel(QString broadcasterId, QString gameId,
+                          QString language, QString title,
+                          std::function<void(NetworkResult)> successCallback,
+                          HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    auto data = QJsonDocument();
+    auto obj = QJsonObject();
+    if (!gameId.isEmpty())
+    {
+        obj.insert("game_id", gameId);
+    }
+    if (!language.isEmpty())
+    {
+        obj.insert("broadcaster_language", language);
+    }
+    if (!title.isEmpty())
+    {
+        obj.insert("title", title);
+    }
+
+    if (title.isEmpty() && gameId.isEmpty() && language.isEmpty())
+    {
+        qCDebug(chatterinoCommon) << "Tried to update channel with no changes!";
+        return;
+    }
+
+    data.setObject(obj);
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+    this->makeRequest("channels", urlQuery)
+        .type(NetworkRequestType::Patch)
+        .header("Content-Type", "application/json")
+        .payload(data.toJson())
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            successCallback(result);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            failureCallback();
+        })
+        .execute();
+}
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
