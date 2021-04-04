@@ -33,18 +33,18 @@ public:
     QString hotkeyScopeToName(HotkeyScope scope);
 
     const std::vector<QString> hotkeyScopeNames = {
-        "tab",      "split",    "splitInput", "window",
-        "userCard", "settings", "emotePopup", "selectChannelPopup"};
+        "emotePopup", "selectChannelPopup", "settings", "split", "splitInput",
+        "tab",        "userCard",           "window"};
 
     const std::vector<QString> hotkeyScopeDisplayNames = {
-        "Tab",
+        "Emote popup",  //
+        "Select channel popup",
+        "Settings dialog",
         "Split",
         "Split input box",
-        "Window",
+        "Tab",
         "User card",
-        "Settings dialog",
-        "Emote popup",
-        "Select channel popup"  //
+        "Window",
     };
     pajlada::Signals::NoArgSignal onItemsUpdated;
     std::map<HotkeyScope, std::set<QString>> savedActions;

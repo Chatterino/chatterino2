@@ -6,13 +6,13 @@ enum class HotkeyScope {
     // The HotkeyScope enum describes where the hotkeys's action takes place.
     // Each HotkeyScope represents a widget that has customizable hotkeys. This
     // is needed because more than one widget can have the same or similar action.
-    Tab,
+    EmotePopup,
+    SelectChannelPopup,
+    Settings,
     Split,
     SplitInput,
-    Window,
+    Tab,
     UserCard,
-    Settings,
-    EmotePopup,
-    SelectChannelPopup
+    Window,
 };
 }  // namespace chatterino
