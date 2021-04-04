@@ -702,7 +702,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                             twitchChannel->roomId(), games.at(0).id, "", "",
                             [channel, games](NetworkResult) {
                                 channel->addMessage(makeSystemMessage(
-                                    QString("Updated game to: %1")
+                                    QString("Updated game to %1")
                                         .arg(games.at(0).name)));
                             },
                             [channel] {
