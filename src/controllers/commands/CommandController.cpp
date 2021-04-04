@@ -651,17 +651,18 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage: /settitle STREAM TITLE."));
+                makeSystemMessage("Usage: /settitle <stream title>."));
             return "";
         }
         if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
         {
             auto status = twitchChannel->accessStreamStatus();
+            auto title = words.mid(1).join(" ");
             getHelix()->updateChannel(
-                twitchChannel->roomId(), "", "", words.mid(1).join(" "),
-                [channel](NetworkResult dank) {
+                twitchChannel->roomId(), "", "", title,
+                [channel, title](NetworkResult) {
                     channel->addMessage(makeSystemMessage(
-                        QString("Updated title.").arg(dank.status())));
+                        QString("Updated title to %1").arg(title)));
                 },
                 [channel] {
                     channel->addMessage(
@@ -681,8 +682,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("This command comes from Dankerino patches. "
-                                  "Usage: /setgame STREAM GAME."));
+                makeSystemMessage("Usage: /setgame <stream game>."));
             return "";
         }
         if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -700,10 +700,10 @@ void CommandController::initialize(Settings &, Paths &paths)
                         auto status = twitchChannel->accessStreamStatus();
                         getHelix()->updateChannel(
                             twitchChannel->roomId(), games.at(0).id, "", "",
-                            [channel](NetworkResult dank) {
-                                channel->addMessage(
-                                    makeSystemMessage(QString("Updated game.")
-                                                          .arg(dank.status())));
+                            [channel, games](NetworkResult) {
+                                channel->addMessage(makeSystemMessage(
+                                    QString("Updated game to: %1")
+                                        .arg(games.at(0).name)));
                             },
                             [channel] {
                                 channel->addMessage(makeSystemMessage(
