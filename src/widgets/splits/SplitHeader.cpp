@@ -314,12 +314,14 @@ void SplitHeader::initializeLayout()
                              }
                          });
 
-    getSettings()->customURIScheme.connect([this] {
-        if (const auto drop = this->dropdownButton_)
-        {
-            drop->setMenu(this->createMainMenu());
-        }
-    });
+    getSettings()->customURIScheme.connect(
+        [this] {
+            if (const auto drop = this->dropdownButton_)
+            {
+                drop->setMenu(this->createMainMenu());
+            }
+        },
+        this->managedConnections_);
 
     layout->setMargin(0);
     layout->setSpacing(0);
