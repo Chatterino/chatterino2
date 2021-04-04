@@ -113,6 +113,9 @@ const QColor &Button::getBorderColor() const
 
 void Button::setMenu(std::unique_ptr<QMenu> menu)
 {
+    if (this->menu_)
+        this->menu_.release()->deleteLater();
+
     this->menu_ = std::move(menu);
 
     this->menu_->installEventFilter(
