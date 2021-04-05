@@ -31,8 +31,14 @@ QString HotkeyController::hotkeyScopeToName(HotkeyScope scope)
                ? this->hotkeyScopeNames.at(scopeId)
                : "";
 }
+bool hotkeySortCompare_(const std::shared_ptr<Hotkey> &a,
+                        const std::shared_ptr<Hotkey> &b)
+{
+    return (a->scope() < b->scope());
+}
 
 HotkeyController::HotkeyController()
+    : hotkeys_(hotkeySortCompare_)
 {
     this->loadHotkeys();
     this->signalHolder_.managedConnect(

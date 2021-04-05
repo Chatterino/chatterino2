@@ -6,7 +6,7 @@
 namespace chatterino {
 
 HotkeyModel::HotkeyModel(QObject *parent)
-    : SignalVectorModel<std::shared_ptr<Hotkey>>(3, parent)
+    : SignalVectorModel<std::shared_ptr<Hotkey>>(2, parent)
 {
 }
 
