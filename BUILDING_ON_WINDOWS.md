@@ -123,3 +123,12 @@ To produce all supplement files for a standalone build, follow these steps (adju
 6.  The `releases` directory will now be populated with all the required files to make the chatterino build standalone.
 
 You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist package must be present, as usual - see the [README](README.md)).
+
+## Building with CMake
+
+Open up your terminal with the Visual Studio environment variables, then:
+
+1. `mkdir build`
+2. `cd build`
+3. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..`
+4. `nmake`

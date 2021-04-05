@@ -104,6 +104,16 @@ URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
   Used in:
   - `TwitchChannel` to refresh stream title
 
+### Update Channel
+
+URL: https://dev.twitch.tv/docs/api/reference#modify-channel-information
+Requires `channel:manage:broadcast` scope
+
+- We implement this in `providers/twitch/api/Helix.cpp updateChannel`
+  Used in:
+  - `/setgame` to update the game in the current channel
+  - `/settitle` to update the title in the current channel
+
 ### Create Stream Marker
 
 URL: https://dev.twitch.tv/docs/api/reference/#create-stream-marker  

@@ -296,6 +296,12 @@ public:
                      std::function<void()> successCallback,
                      HelixFailureCallback failureCallback);
 
+    // https://dev.twitch.tv/docs/api/reference#modify-channel-information
+    void updateChannel(QString broadcasterId, QString gameId, QString language,
+                       QString title,
+                       std::function<void(NetworkResult)> successCallback,
+                       HelixFailureCallback failureCallback);
+
     void update(QString clientId, QString oauthToken);
 
     static void initialize();

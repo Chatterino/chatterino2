@@ -3,9 +3,6 @@ name: Test
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
 
 jobs:
   test:
@@ -72,7 +69,7 @@ jobs:
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            cmake -DBUILD_TESTS=On -DCMAKE_BUILD_TYPE=Release ..
+            cmake -DBUILD_TESTS=On -DBUILD_APP=OFF ..
             cmake --build . --config Release
         working-directory: build-test
         shell: bash
@@ -80,6 +77,6 @@ jobs:
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            ./chatterino-test --platform minimal
+            ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash
