@@ -320,7 +320,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
             // fourtf: add again
             //            if (word.width == -1) {
-            word.width = metrics.width(word.text);
+            word.width = metrics.horizontalAdvance(word.text);
             //            }
 
             // see if the text fits in the current line
@@ -357,8 +357,9 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
                 auto isSurrogate = text.size() > i + 1 &&
                                    QChar::isHighSurrogate(text[i].unicode());
 
-                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
-                                             : metrics.width(text[i]);
+                auto charWidth = isSurrogate
+                                     ? metrics.horizontalAdvance(text.mid(i, 2))
+                                     : metrics.horizontalAdvance(text[i]);
 
                 if (!container.fitsInLine(width + charWidth))
                 {
@@ -585,7 +586,7 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
 
             // fourtf: add again
             //            if (word.width == -1) {
-            word.width = metrics.width(word.text);
+            word.width = metrics.horizontalAdvance(word.text);
             //            }
 
             // see if the text fits in the current line
@@ -611,7 +612,7 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
                 }
             }
 
-            // we done goofed, we need to wrap the text
+            // The word does not fit on a new line, we need to wrap it
             QString text = word.text;
             std::vector<Segment> segments = word.segments;
             int textLength = text.length();
@@ -625,24 +626,25 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
             {
                 if (!container.canAddElements())
                 {
+                    // The container does not allow any more elements to be added, stop here
                     break;
                 }
 
                 auto isSurrogate = text.size() > i + 1 &&
                                    QChar::isHighSurrogate(text[i].unicode());
 
-                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
-                                             : metrics.width(text[i]);
+                auto charWidth = isSurrogate
+                                     ? metrics.horizontalAdvance(text.mid(i, 2))
+                                     : metrics.horizontalAdvance(text[i]);
 
                 if (!container.fitsInLine(width + charWidth))
                 {
                     std::vector<Segment> pieceSegments;
                     int charactersLeft = i - wordStart;
-                    assert(charactersLeft > 0);
+
                     for (auto segmentIt = segments.begin();
                          segmentIt != segments.end();)
                     {
-                        assert(charactersLeft > 0);
                         auto &segment = *segmentIt;
                         if (charactersLeft >= segment.text.length())
                         {

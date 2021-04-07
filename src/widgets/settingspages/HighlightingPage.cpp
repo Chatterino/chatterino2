@@ -99,8 +99,10 @@ HighlightingPage::HighlightingPage()
                         .getElement();
 
                 view->addRegexHelpLink();
-                view->getTableView()->horizontalHeader()->hideSection(4);
-
+                view->getTableView()->horizontalHeader()->hideSection(
+                    HighlightModel::Column::UseRegex);
+                view->getTableView()->horizontalHeader()->hideSection(
+                    HighlightModel::Column::CaseSensitive);
                 // Case-sensitivity doesn't make sense for user names so it is
                 // set to "false" by default & the column is hidden
                 view->setTitles({"Username", "Show in\nMentions",

@@ -14,6 +14,12 @@
 
 namespace chatterino {
 namespace {
+
+    auto toneNames = std::map<QString, QString>{
+        {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
+        {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
+    };
+
     void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
                     const rapidjson::Value &unparsedEmoji,
                     QString shortCode = QString())
@@ -24,9 +30,7 @@ namespace {
             bool apple;
             bool google;
             bool twitter;
-            bool emojione;
             bool facebook;
-            bool messenger;
         } capabilities;
 
         if (!shortCode.isEmpty())
@@ -49,9 +53,7 @@ namespace {
         rj::getSafe(unparsedEmoji, "has_img_apple", capabilities.apple);
         rj::getSafe(unparsedEmoji, "has_img_google", capabilities.google);
         rj::getSafe(unparsedEmoji, "has_img_twitter", capabilities.twitter);
-        rj::getSafe(unparsedEmoji, "has_img_emojione", capabilities.emojione);
         rj::getSafe(unparsedEmoji, "has_img_facebook", capabilities.facebook);
-        rj::getSafe(unparsedEmoji, "has_img_messenger", capabilities.messenger);
 
         if (capabilities.apple)
         {
@@ -65,17 +67,9 @@ namespace {
         {
             emojiData->capabilities.insert("Twitter");
         }
-        if (capabilities.emojione)
-        {
-            emojiData->capabilities.insert("EmojiOne 3");
-        }
         if (capabilities.facebook)
         {
             emojiData->capabilities.insert("Facebook");
-        }
-        if (capabilities.messenger)
-        {
-            emojiData->capabilities.insert("Messenger");
         }
 
         QStringList unicodeCharacters;
@@ -103,13 +97,37 @@ namespace {
 
         emojiData->value = QString::fromUcs4(unicodeBytes, numUnicodeBytes);
     }
+
+    // getToneNames takes a tones and returns their names in the same order
+    // The format of the tones is: "1F3FB-1F3FB" or "1F3FB"
+    // The output of the tone names is: "tone1-tone1" or "tone1"
+    QString getToneNames(const QString &tones)
+    {
+        auto toneParts = tones.split('-');
+        QStringList toneNameResults;
+        for (const auto &tonePart : toneParts)
+        {
+            auto toneNameIt = toneNames.find(tonePart);
+            if (toneNameIt == toneNames.end())
+            {
+                qDebug() << "Tone with key" << tonePart
+                         << "does not exist in tone names map";
+                continue;
+            }
+
+            toneNameResults.append(toneNameIt->second);
+        }
+
+        assert(!toneNameResults.isEmpty());
+
+        return toneNameResults.join('-');
+    }
+
 }  // namespace
 
 void Emojis::load()
 {
     this->loadEmojis();
-
-    this->loadEmojiOne2Capabilities();
 
     this->sortEmojis();
 
@@ -118,11 +136,7 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
-    auto toneNames = std::map<std::string, QString>{
-        {"1F3FB", "tone1"}, {"1F3FC", "tone2"}, {"1F3FD", "tone3"},
-        {"1F3FE", "tone4"}, {"1F3FF", "tone5"},
-    };
-
+    // Current version: https://github.com/iamcal/emoji-data/blob/v6.0.0/emoji.json (Emoji version 13 (2020))
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
     QTextStream s1(&file);
@@ -158,22 +172,13 @@ void Emojis::loadEmojis()
             for (const auto &skinVariation :
                  unparsedEmoji["skin_variations"].GetObject())
             {
-                std::string tone = skinVariation.name.GetString();
+                auto toneName = getToneNames(skinVariation.name.GetString());
                 const auto &variation = skinVariation.value;
 
                 auto variationEmojiData = std::make_shared<EmojiData>();
 
-                auto toneNameIt = toneNames.find(tone);
-                if (toneNameIt == toneNames.end())
-                {
-                    qCDebug(chatterinoEmoji)
-                        << "Tone with key" << tone.c_str()
-                        << "does not exist in tone names map";
-                    continue;
-                }
-
                 parseEmoji(variationEmojiData, variation,
-                           emojiData->shortCodes[0] + "_" + toneNameIt->second);
+                           emojiData->shortCodes[0] + "_" + toneName);
 
                 this->emojiShortCodeToEmoji_.insert(
                     variationEmojiData->shortCodes[0], variationEmojiData);
@@ -185,41 +190,6 @@ void Emojis::loadEmojis()
                 this->emojis.insert(variationEmojiData->unifiedCode,
                                     variationEmojiData);
             }
-        }
-    }
-}
-
-void Emojis::loadEmojiOne2Capabilities()
-{
-    QFile file(":/emojidata.txt");
-    file.open(QFile::ReadOnly);
-    QTextStream in(&file);
-
-    while (!in.atEnd())
-    {
-        // Line example: sunglasses 1f60e
-        QString line = in.readLine();
-
-        if (line.at(0) == '#')
-        {
-            // Ignore lines starting with # (comments)
-            continue;
-        }
-
-        QStringList parts = line.split(' ');
-        if (parts.length() < 2)
-        {
-            continue;
-        }
-
-        QString shortCode = parts[0];
-
-        auto emojiIt = this->emojiShortCodeToEmoji_.find(shortCode);
-        if (emojiIt != this->emojiShortCodeToEmoji_.end())
-        {
-            std::shared_ptr<EmojiData> emoji = *emojiIt;
-            emoji->capabilities.insert("EmojiOne 2");
-            continue;
         }
     }
 }
@@ -242,45 +212,45 @@ void Emojis::sortEmojis()
 
 void Emojis::loadEmojiSet()
 {
+#ifndef CHATTERINO_TEST
     getSettings()->emojiSet.connect([=](const auto &emojiSet) {
+#else
+    const QString emojiSet = "twitter";
+#endif
         this->emojis.each([=](const auto &name,
                               std::shared_ptr<EmojiData> &emoji) {
             QString emojiSetToUse = emojiSet;
             // clang-format off
             static std::map<QString, QString> emojiSets = {
-                {"EmojiOne 2", "https://cdnjs.cloudflare.com/ajax/libs/emojione/2.2.6/assets/png/"},
-                // {"EmojiOne 3", "https://cdn.jsdelivr.net/npm/emoji-datasource-emojione@4.0.4/img/emojione/64/"},
+                // JSDELIVR
                 // {"Twitter", "https://cdn.jsdelivr.net/npm/emoji-datasource-twitter@4.0.4/img/twitter/64/"},
                 // {"Facebook", "https://cdn.jsdelivr.net/npm/emoji-datasource-facebook@4.0.4/img/facebook/64/"},
-                // {"Apple", "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@4.0.4/img/apple/64/"},
+                // {"Apple", "https://cdn.jsdelivr.net/npm/emoji-datasource-apple@5.0.1/img/apple/64/"},
                 // {"Google", "https://cdn.jsdelivr.net/npm/emoji-datasource-google@4.0.4/img/google/64/"},
                 // {"Messenger", "https://cdn.jsdelivr.net/npm/emoji-datasource-messenger@4.0.4/img/messenger/64/"},
 
-                {"EmojiOne 3", "https://pajbot.com/static/emoji/img/emojione/64/"},
-                {"Twitter", "https://pajbot.com/static/emoji/img/twitter/64/"},
-                {"Facebook", "https://pajbot.com/static/emoji/img/facebook/64/"},
-                {"Apple", "https://pajbot.com/static/emoji/img/apple/64/"},
-                {"Google", "https://pajbot.com/static/emoji/img/google/64/"},
-                {"Messenger", "https://pajbot.com/static/emoji/img/messenger/64/"},
+                // OBRODAI
+                {"Twitter", "https://pajbot.com/static/emoji-v2/img/twitter/64/"},
+                {"Facebook", "https://pajbot.com/static/emoji-v2/img/facebook/64/"},
+                {"Apple", "https://pajbot.com/static/emoji-v2/img/apple/64/"},
+                {"Google", "https://pajbot.com/static/emoji-v2/img/google/64/"},
+
+                // Cloudflare+B2 bucket
+                // {"Twitter", "https://chatterino2-emoji-cdn.pajlada.se/file/c2-emojis/emojis-v1/twitter/64/"},
+                // {"Facebook", "https://chatterino2-emoji-cdn.pajlada.se/file/c2-emojis/emojis-v1/facebook/64/"},
+                // {"Apple", "https://chatterino2-emoji-cdn.pajlada.se/file/c2-emojis/emojis-v1/apple/64/"},
+                // {"Google", "https://chatterino2-emoji-cdn.pajlada.se/file/c2-emojis/emojis-v1/google/64/"},
             };
             // clang-format on
 
             if (emoji->capabilities.count(emojiSetToUse) == 0)
             {
-                emojiSetToUse = "EmojiOne 3";
+                emojiSetToUse = "Twitter";
             }
 
-            QString code = emoji->unifiedCode;
-            if (emojiSetToUse == "EmojiOne 2")
-            {
-                if (!emoji->nonQualifiedCode.isEmpty())
-                {
-                    code = emoji->nonQualifiedCode;
-                }
-            }
-            code = code.toLower();
-            QString urlPrefix = "https://cdnjs.cloudflare.com/ajax/libs/"
-                                "emojione/2.2.6/assets/png/";
+            QString code = emoji->unifiedCode.toLower();
+            QString urlPrefix =
+                "https://pajbot.com/static/emoji-v2/img/twitter/64/";
             auto it = emojiSets.find(emojiSetToUse);
             if (it != emojiSets.end())
             {
@@ -291,7 +261,9 @@ void Emojis::loadEmojiSet()
                 EmoteName{emoji->value}, ImageSet{Image::fromUrl({url}, 0.35)},
                 Tooltip{":" + emoji->shortCodes[0] + ":<br/>Emoji"}, Url{}});
         });
+#ifndef CHATTERINO_TEST
     });
+#endif
 }
 
 std::vector<boost::variant<EmotePtr, QString>> Emojis::parse(

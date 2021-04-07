@@ -46,7 +46,7 @@ void Helix::fetchUsers(QStringList userIds, QStringList userLogins,
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
@@ -125,7 +125,7 @@ void Helix::fetchUsersFollows(
             successCallback(HelixUsersFollowsResponse(root));
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
@@ -198,7 +198,7 @@ void Helix::fetchStreams(
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
@@ -288,7 +288,7 @@ void Helix::fetchGames(QStringList gameIds, QStringList gameNames,
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
@@ -326,11 +326,11 @@ void Helix::followUser(QString userId, QString targetId,
 
     this->makeRequest("users/follows", urlQuery)
         .type(NetworkRequestType::Post)
-        .onSuccess([successCallback](auto result) -> Outcome {
+        .onSuccess([successCallback](auto /*result*/) -> Outcome {
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
@@ -348,11 +348,11 @@ void Helix::unfollowUser(QString userId, QString targetId,
 
     this->makeRequest("users/follows", urlQuery)
         .type(NetworkRequestType::Delete)
-        .onSuccess([successCallback](auto result) -> Outcome {
+        .onSuccess([successCallback](auto /*result*/) -> Outcome {
             successCallback();
             return Success;
         })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](auto /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
@@ -385,7 +385,7 @@ void Helix::createClip(QString channelId,
             successCallback(clip);
             return Success;
         })
-        .onError([failureCallback](NetworkResult result) {
+        .onError([failureCallback](auto result) {
             switch (result.status())
             {
                 case 503: {
@@ -502,6 +502,124 @@ void Helix::createStreamMarker(
         .execute();
 };
 
+void Helix::loadBlocks(QString userId,
+                       ResultCallback<std::vector<HelixBlock>> successCallback,
+                       HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", userId);
+
+    this->makeRequest("users/blocks", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixBlock> ignores;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                ignores.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(ignores);
+
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::blockUser(QString targetUserId,
+                      std::function<void()> successCallback,
+                      HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("target_user_id", targetUserId);
+
+    this->makeRequest("users/blocks", urlQuery)
+        .type(NetworkRequestType::Put)
+        .onSuccess([successCallback](auto /*result*/) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::unblockUser(QString targetUserId,
+                        std::function<void()> successCallback,
+                        HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("target_user_id", targetUserId);
+
+    this->makeRequest("users/blocks", urlQuery)
+        .type(NetworkRequestType::Delete)
+        .onSuccess([successCallback](auto /*result*/) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
+void Helix::updateChannel(QString broadcasterId, QString gameId,
+                          QString language, QString title,
+                          std::function<void(NetworkResult)> successCallback,
+                          HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    auto data = QJsonDocument();
+    auto obj = QJsonObject();
+    if (!gameId.isEmpty())
+    {
+        obj.insert("game_id", gameId);
+    }
+    if (!language.isEmpty())
+    {
+        obj.insert("broadcaster_language", language);
+    }
+    if (!title.isEmpty())
+    {
+        obj.insert("title", title);
+    }
+
+    if (title.isEmpty() && gameId.isEmpty() && language.isEmpty())
+    {
+        qCDebug(chatterinoCommon) << "Tried to update channel with no changes!";
+        return;
+    }
+
+    data.setObject(obj);
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+    this->makeRequest("channels", urlQuery)
+        .type(NetworkRequestType::Patch)
+        .header("Content-Type", "application/json")
+        .payload(data.toJson())
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            successCallback(result);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            failureCallback();
+        })
+        .execute();
+}
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

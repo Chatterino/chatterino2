@@ -17,21 +17,35 @@
 
 namespace chatterino {
 
-enum IgnoreResult {
-    IgnoreResult_Success,
-    IgnoreResult_AlreadyIgnored,
-    IgnoreResult_Failed,
-};
-
-enum UnignoreResult {
-    UnignoreResult_Success,
-    UnignoreResult_Failed,
-};
-
 enum FollowResult {
     FollowResult_Following,
     FollowResult_NotFollowing,
     FollowResult_Failed,
+};
+
+struct TwitchEmoteSetResolverResponse {
+    const QString channelName;
+    const QString channelId;
+    const QString type;
+    const int tier;
+    const bool isCustom;
+    // Example response:
+    //    {
+    //      "channel_name": "zneix",
+    //      "channel_id": "99631238",
+    //      "type": "",
+    //      "tier": 1,
+    //      "custom": false
+    //    }
+
+    TwitchEmoteSetResolverResponse(QJsonObject jsonObject)
+        : channelName(jsonObject.value("channel_name").toString())
+        , channelId(jsonObject.value("channel_id").toString())
+        , type(jsonObject.value("type").toString())
+        , tier(jsonObject.value("tier").toInt())
+        , isCustom(jsonObject.value("custom").toBool())
+    {
+    }
 };
 
 class TwitchAccount : public Account
@@ -83,25 +97,19 @@ public:
 
     bool isAnon() const;
 
-    void loadIgnores();
-    void ignore(const QString &targetName,
-                std::function<void(IgnoreResult, const QString &)> onFinished);
-    void ignoreByID(
-        const QString &targetUserID, const QString &targetName,
-        std::function<void(IgnoreResult, const QString &)> onFinished);
-    void unignore(
-        const QString &targetName,
-        std::function<void(UnignoreResult, const QString &)> onFinished);
-    void unignoreByID(
-        const QString &targetUserID, const QString &targetName,
-        std::function<void(UnignoreResult, const QString &message)> onFinished);
+    void loadBlocks();
+    void blockUser(QString userId, std::function<void()> onSuccess,
+                   std::function<void()> onFailure);
+    void unblockUser(QString userId, std::function<void()> onSuccess,
+                     std::function<void()> onFailure);
 
     void checkFollow(const QString targetUserID,
                      std::function<void(FollowResult)> onFinished);
 
-    std::set<TwitchUser> getIgnores() const;
+    std::set<TwitchUser> getBlocks() const;
 
     void loadEmotes();
+    void loadUserstateEmotes(QStringList emoteSetKeys);
     AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
@@ -109,7 +117,6 @@ public:
     void autoModDeny(const QString msgID);
 
 private:
-    void parseEmotes(const rapidjson::Document &document);
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
 
     QString oauthClient_;
@@ -120,6 +127,7 @@ private:
     Atomic<QColor> color_;
 
     mutable std::mutex ignoresMutex_;
+    QElapsedTimer userstateEmotesTimer_;
     std::set<TwitchUser> ignores_;
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;

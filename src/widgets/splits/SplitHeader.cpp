@@ -10,6 +10,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/TooltipPreviewImage.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/LayoutHelper.hpp"
 #include "util/StreamerMode.hpp"
@@ -47,7 +48,7 @@ namespace {
                 text += "r9k, ";
             if (modes->slowMode)
                 text +=
-                    QString("slow(%1), ").arg(QString::number(modes->slowMode));
+                    QString("slow(%1), ").arg(localizeNumbers(modes->slowMode));
             if (modes->emoteOnly)
                 text += "emote, ";
             if (modes->submode)
@@ -57,7 +58,7 @@ namespace {
                 if (modes->followerOnly != 0)
                 {
                     text += QString("follow(%1m), ")
-                                .arg(QString::number(modes->followerOnly));
+                                .arg(localizeNumbers(modes->followerOnly));
                 }
                 else
                 {
@@ -131,7 +132,7 @@ namespace {
             return QString("%1 for %2 with %3 viewers")
                 .arg(s.rerun ? "Vod-casting" : "Live")
                 .arg(s.uptime)
-                .arg(QString::number(s.viewerCount));
+                .arg(localizeNumbers(s.viewerCount));
         }();
 
         return QString("<p style=\"text-align: center;\">" +  //
@@ -163,7 +164,7 @@ namespace {
         if (settings.headerUptime)
             title += " - " + s.uptime;
         if (settings.headerViewerCount)
-            title += " - " + QString::number(s.viewerCount);
+            title += " - " + localizeNumbers(s.viewerCount);
         if (settings.headerGame && !s.game.isEmpty())
             title += " - " + s.game;
         if (settings.headerStreamTitle && !s.title.isEmpty())
@@ -283,7 +284,7 @@ void SplitHeader::initializeLayout()
         // dropdown
         this->dropdownButton_ = makeWidget<Button>([&](auto w) {
             /// XXX: this never gets disconnected
-            this->split_->channelChanged.connect([this] {
+            QObject::connect(w, &Button::leftMousePress, this, [this] {
                 this->dropdownButton_->setMenu(this->createMainMenu());
             });
         }),
@@ -885,12 +886,12 @@ void SplitHeader::themeChangedEvent()
 
     if (this->split_->hasFocus())
     {
-        palette.setColor(QPalette::Foreground,
+        palette.setColor(QPalette::WindowText,
                          this->theme->splits.header.focusedText);
     }
     else
     {
-        palette.setColor(QPalette::Foreground, this->theme->splits.header.text);
+        palette.setColor(QPalette::WindowText, this->theme->splits.header.text);
     }
     this->titleLabel_->setPalette(palette);
 

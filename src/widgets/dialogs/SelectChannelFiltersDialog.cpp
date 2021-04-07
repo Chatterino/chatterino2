@@ -11,15 +11,15 @@ SelectChannelFiltersDialog::SelectChannelFiltersDialog(
     auto vbox = new QVBoxLayout(this);
     auto itemVbox = new QVBoxLayout;
     auto buttonBox = new QHBoxLayout;
-    auto okButton = new QPushButton("OK");
+    auto okButton = new QPushButton("Ok");
     auto cancelButton = new QPushButton("Cancel");
 
     vbox->addLayout(itemVbox);
     vbox->addLayout(buttonBox);
 
     buttonBox->addStretch(1);
-    buttonBox->addWidget(cancelButton);
     buttonBox->addWidget(okButton);
+    buttonBox->addWidget(cancelButton);
 
     QObject::connect(okButton, &QAbstractButton::clicked, [this] {
         this->accept();
