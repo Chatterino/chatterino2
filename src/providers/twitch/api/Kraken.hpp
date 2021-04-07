@@ -18,7 +18,7 @@ using ResultCallback = std::function<void(T...)>;
 struct KrakenEmoteSets {
     const QJsonObject emoteSets;
 
-    KrakenEmoteSets(QJsonObject jsonObject)
+    KrakenEmoteSets(const QJsonObject &jsonObject)
         : emoteSets(jsonObject.value("emoticon_sets").toObject())
     {
     }
@@ -28,7 +28,7 @@ struct KrakenEmote {
     const QString code;
     const QString id;
 
-    KrakenEmote(QJsonObject jsonObject)
+    KrakenEmote(const QJsonObject &jsonObject)
         : code(jsonObject.value("code").toString())
         , id(QString::number(jsonObject.value("id").toInt()))
     {
@@ -48,7 +48,7 @@ public:
     static void initialize();
 
 private:
-    NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
+    NetworkRequest makeRequest(const QString &url, const QUrlQuery &urlQuery);
 
     QString clientId;
     QString oauthToken;

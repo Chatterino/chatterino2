@@ -28,7 +28,8 @@ IrcMessageBuilder::IrcMessageBuilder(Channel *_channel,
                                      const Communi::IrcMessage *_ircMessage,
                                      const MessageParseArgs &_args,
                                      QString content, bool isAction)
-    : SharedMessageBuilder(_channel, _ircMessage, _args, content, isAction)
+    : SharedMessageBuilder(_channel, _ircMessage, _args, std::move(content),
+                           isAction)
 {
     assert(false);
     this->usernameColor_ = getApp()->themes->messages.textColors.system;

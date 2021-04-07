@@ -237,7 +237,7 @@ void Channel::replaceMessage(size_t index, MessagePtr replacement)
     }
 }
 
-void Channel::deleteMessage(QString messageID)
+void Channel::deleteMessage(const QString &messageID)
 {
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
     int snapshotLength = snapshot.size();
@@ -320,7 +320,7 @@ void Channel::onConnected()
 // Indirect channel
 //
 IndirectChannel::Data::Data(ChannelPtr _channel, Channel::Type _type)
-    : channel(_channel)
+    : channel(std::move(_channel))
     , type(_type)
 {
 }
@@ -339,7 +339,7 @@ void IndirectChannel::reset(ChannelPtr channel)
 {
     assert(this->data_->type != Channel::Type::Direct);
 
-    this->data_->channel = channel;
+    this->data_->channel = std::move(channel);
     this->data_->changed.invoke();
 }
 

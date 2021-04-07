@@ -30,7 +30,7 @@ Scrollbar::Scrollbar(ChannelView *parent)
     setMouseTracking(true);
 }
 
-void Scrollbar::addHighlight(ScrollbarHighlight highlight)
+void Scrollbar::addHighlight(const ScrollbarHighlight &highlight)
 {
     ScrollbarHighlight deleted;
     this->highlights_.pushBack(highlight, deleted);
@@ -42,7 +42,8 @@ void Scrollbar::addHighlightsAtStart(
     this->highlights_.pushFront(_highlights);
 }
 
-void Scrollbar::replaceHighlight(size_t index, ScrollbarHighlight replacement)
+void Scrollbar::replaceHighlight(size_t index,
+                                 const ScrollbarHighlight &replacement)
 {
     this->highlights_.replaceItem(index, replacement);
 }

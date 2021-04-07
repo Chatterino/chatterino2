@@ -3,7 +3,7 @@
 namespace chatterino {
 
 EmoteInputItem::EmoteInputItem(const EmotePtr &emote, const QString &text,
-                               ActionCallback action)
+                               const ActionCallback &action)
     : emote_(emote)
     , text_(text)
     , action_(action)

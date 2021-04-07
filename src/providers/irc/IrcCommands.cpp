@@ -37,7 +37,7 @@ Outcome invokeIrcCommand(const QString &commandName, const QString &allParams,
         return params.mid(i + 1).join(' ');
     };
 
-    auto sendRaw = [&](QString str) {
+    auto sendRaw = [&](const QString &str) {
         channel.server()->sendRawMessage(str);
     };
 

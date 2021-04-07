@@ -9,7 +9,8 @@ namespace chatterino {
 
 SettingsDialogTab::SettingsDialogTab(SettingsDialog *_dialog,
                                      std::function<SettingsPage *()> _lazyPage,
-                                     const QString &name, QString imageFileName,
+                                     const QString &name,
+                                     const QString &imageFileName,
                                      SettingsTabId id)
     : BaseWidget(_dialog)
     , dialog_(_dialog)

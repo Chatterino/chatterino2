@@ -197,7 +197,7 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
         });
 }
 
-void NotificationController::removeFakeChannel(const QString channelName)
+void NotificationController::removeFakeChannel(const QString &channelName)
 {
     auto i = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
                        channelName);

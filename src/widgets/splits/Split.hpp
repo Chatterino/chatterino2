@@ -54,7 +54,7 @@ public:
     ChannelPtr getChannel();
     void setChannel(IndirectChannel newChannel);
 
-    void setFilters(const QList<QUuid> ids);
+    void setFilters(const QList<QUuid> &ids);
     const QList<QUuid> getFilters() const;
 
     void setModerationMode(bool value);
@@ -63,7 +63,7 @@ public:
     void insertTextToInput(const QString &text);
 
     void showChangeChannelPopup(const char *dialogTitle, bool empty,
-                                std::function<void(bool)> callback);
+                                const std::function<void(bool)> &callback);
     void giveFocus(Qt::FocusReason reason);
     bool hasFocus() const;
     void updateGifEmotes();

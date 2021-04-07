@@ -59,7 +59,8 @@ void IvrApi::getBulkEmoteSets(QString emoteSetList,
         .execute();
 }
 
-NetworkRequest IvrApi::makeRequest(QString url, QUrlQuery urlQuery)
+NetworkRequest IvrApi::makeRequest(const QString &url,
+                                   const QUrlQuery &urlQuery)
 {
     assert(!url.startsWith("/"));
 

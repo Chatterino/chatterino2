@@ -246,7 +246,7 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
         auto dialog = new ColorPickerDialog(initial, this);
         dialog->setAttribute(Qt::WA_DeleteOnClose);
         dialog->show();
-        dialog->closed.connect([=](QColor selected) {
+        dialog->closed.connect([=](const QColor &selected) {
             if (selected.isValid())
             {
                 view->getModel()->setData(clicked, selected,

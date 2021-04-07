@@ -22,7 +22,7 @@ namespace {
 
     void parseEmoji(const std::shared_ptr<EmojiData> &emojiData,
                     const rapidjson::Value &unparsedEmoji,
-                    QString shortCode = QString())
+                    const QString &shortCode = QString())
     {
         static uint unicodeBytes[4];
 

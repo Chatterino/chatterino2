@@ -18,7 +18,8 @@ DownloadManager::~DownloadManager()
     manager->deleteLater();
 }
 
-void DownloadManager::setFile(QString fileURL, const QString &channelName)
+void DownloadManager::setFile(const QString &fileURL,
+                              const QString &channelName)
 {
     QString saveFilePath;
     saveFilePath =

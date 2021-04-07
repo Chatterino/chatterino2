@@ -12,7 +12,7 @@ namespace chatterino {
 namespace {
 
     // returns a new resized image or the old one if the size didn't change
-    auto resizePixmap(const QPixmap &current, const QPixmap resized,
+    auto resizePixmap(const QPixmap &current, const QPixmap &resized,
                       const QSize &size) -> QPixmap
     {
         if (resized.size() == size)
@@ -38,7 +38,7 @@ Button::Button(BaseWidget *parent)
 
 void Button::setMouseEffectColor(boost::optional<QColor> color)
 {
-    this->mouseEffectColor_ = color;
+    this->mouseEffectColor_ = std::move(color);
 }
 
 void Button::setPixmap(const QPixmap &_pixmap)

@@ -61,7 +61,8 @@ namespace {
     }
     void addEmoteSets(
         std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> sets,
-        Channel &globalChannel, Channel &subChannel, QString currentChannelName)
+        Channel &globalChannel, Channel &subChannel,
+        const QString &currentChannelName)
     {
         QMap<QString, QPair<bool, std::vector<MessagePtr>>> mapOfSets;
 
@@ -102,7 +103,7 @@ namespace {
         // That contain title or emotes.
         // Put current channel emotes at the top
         auto currentChannelPair = mapOfSets[currentChannelName];
-        for (auto message : currentChannelPair.second)
+        for (const auto &message : currentChannelPair.second)
         {
             subChannel.addMessage(message);
         }
@@ -111,7 +112,7 @@ namespace {
         foreach (auto pair, mapOfSets)
         {
             auto &channel = pair.first ? globalChannel : subChannel;
-            for (auto message : pair.second)
+            for (const auto &message : pair.second)
             {
                 channel.addMessage(message);
             }
@@ -136,7 +137,7 @@ EmotePopup::EmotePopup(QWidget *parent)
         this->linkClicked.invoke(link);
     };
 
-    auto makeView = [&](QString tabTitle) {
+    auto makeView = [&](const QString &tabTitle) {
         auto view = new ChannelView();
 
         view->setOverrideFlags(MessageElementFlags{

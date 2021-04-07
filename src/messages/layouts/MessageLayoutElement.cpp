@@ -88,7 +88,7 @@ FlagsEnum<MessageElementFlag> MessageLayoutElement::getFlags() const
 ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
                                        const QSize &size)
     : MessageLayoutElement(creator, size)
-    , image_(image)
+    , image_(std::move(image))
 {
     this->trailingSpace = creator.hasTrailingSpace();
 }

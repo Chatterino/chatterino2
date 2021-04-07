@@ -97,7 +97,7 @@ namespace {
 
     const auto borderColor = QColor(255, 255, 255, 80);
 
-    int calculateTimeoutDuration(TimeoutButton timeout)
+    int calculateTimeoutDuration(const TimeoutButton &timeout)
     {
         static const QMap<QString, int> durations{
             {"s", 1}, {"m", 60}, {"h", 3600}, {"d", 86400}, {"w", 604800},

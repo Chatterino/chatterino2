@@ -26,7 +26,7 @@ const std::shared_ptr<QColor> ColorProvider::color(ColorType type) const
 void ColorProvider::updateColor(ColorType type, QColor color)
 {
     auto colorPtr = this->typeColorMap_.at(type);
-    *colorPtr = color;
+    *colorPtr = std::move(color);
 }
 
 QSet<QColor> ColorProvider::recentColors() const
@@ -37,12 +37,12 @@ QSet<QColor> ColorProvider::recentColors() const
      * Currently, only colors used in highlight phrases are considered. This
      * may change at any point in the future.
      */
-    for (auto phrase : getSettings()->highlightedMessages)
+    for (const auto &phrase : getSettings()->highlightedMessages)
     {
         retVal.insert(*phrase.getColor());
     }
 
-    for (auto userHl : getSettings()->highlightedUsers)
+    for (const auto &userHl : getSettings()->highlightedUsers)
     {
         retVal.insert(*userHl.getColor());
     }

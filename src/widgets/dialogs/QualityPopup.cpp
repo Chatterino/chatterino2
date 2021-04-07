@@ -7,7 +7,8 @@
 
 namespace chatterino {
 
-QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
+QualityPopup::QualityPopup(const QString &_channelName,
+                           const QStringList &options)
     : BasePopup({},
                 static_cast<QWidget *>(&(getApp()->windows->getMainWindow())))
     , channelName_(_channelName)
@@ -33,7 +34,8 @@ QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
     this->setLayout(&this->ui_.vbox);
 }
 
-void QualityPopup::showDialog(const QString &channelName, QStringList options)
+void QualityPopup::showDialog(const QString &channelName,
+                              const QStringList &options)
 {
     QualityPopup *instance = new QualityPopup(channelName, options);
 

@@ -21,7 +21,7 @@
 
 namespace {
 
-boost::optional<QByteArray> convertToPng(QImage image)
+boost::optional<QByteArray> convertToPng(const QImage &image)
 {
     QByteArray imageData;
     QBuffer buf(&imageData);
@@ -44,8 +44,8 @@ static auto uploadMutex = QMutex();
 static std::queue<RawImageData> uploadQueue;
 
 // logging information on successful uploads to a json file
-void logToFile(const QString originalFilePath, QString imageLink,
-               QString deletionLink, ChannelPtr channel)
+void logToFile(const QString &originalFilePath, const QString &imageLink,
+               const QString &deletionLink, ChannelPtr channel)
 {
     const QString logFileName =
         combinePath((getSettings()->logPath.getValue().isEmpty()
@@ -94,7 +94,7 @@ void logToFile(const QString originalFilePath, QString imageLink,
 }
 
 // extracting link to either image or its deletion from response body
-QString getJSONValue(QJsonValue responseJson, QString jsonPattern)
+QString getJSONValue(QJsonValue responseJson, const QString &jsonPattern)
 {
     for (const QString &key : jsonPattern.split("."))
     {
@@ -103,7 +103,7 @@ QString getJSONValue(QJsonValue responseJson, QString jsonPattern)
     return responseJson.toString();
 }
 
-QString getLinkFromResponse(NetworkResult response, QString pattern)
+QString getLinkFromResponse(const NetworkResult &response, QString pattern)
 {
     QRegExp regExp("\\{(.+)\\}");
     regExp.setMinimal(true);
@@ -115,7 +115,7 @@ QString getLinkFromResponse(NetworkResult response, QString pattern)
     return pattern;
 }
 
-void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
+void uploadImageToNuuls(const RawImageData &imageData, ChannelPtr channel,
                         ResizingTextEdit &textEdit)
 {
     const static char *const boundary = "thisistheboudaryasd";
@@ -151,7 +151,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
         .headerList(extraHeaders)
         .multiPart(payload)
         .onSuccess([&textEdit, channel,
-                    originalFilePath](NetworkResult result) -> Outcome {
+                    originalFilePath](const NetworkResult &result) -> Outcome {
             QString link = getSettings()->imageUploaderLink.getValue().isEmpty()
                                ? result.getData()
                                : getLinkFromResponse(
@@ -200,7 +200,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
 
             return Success;
         })
-        .onError([channel](NetworkResult result) -> bool {
+        .onError([channel](const NetworkResult &result) -> bool {
             channel->addMessage(makeSystemMessage(
                 QString("An error happened while uploading your image: %1")
                     .arg(result.status())));

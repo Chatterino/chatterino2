@@ -24,13 +24,13 @@
 
 namespace chatterino {
 
-qint64 dirSize(QString dirPath)
+qint64 dirSize(const QString &dirPath)
 {
     qint64 size = 0;
     QDir dir(dirPath);
     // calculate total size of current directories' files
     QDir::Filters fileFilters = QDir::Files | QDir::System | QDir::Hidden;
-    for (QString filePath : dir.entryList(fileFilters))
+    for (const QString &filePath : dir.entryList(fileFilters))
     {
         QFileInfo fi(dir, filePath);
         size += fi.size();
@@ -38,7 +38,7 @@ qint64 dirSize(QString dirPath)
     // add size of child directories recursively
     QDir::Filters dirFilters =
         QDir::Dirs | QDir::NoDotAndDotDot | QDir::System | QDir::Hidden;
-    for (QString childDirPath : dir.entryList(dirFilters))
+    for (const QString &childDirPath : dir.entryList(dirFilters))
         size += dirSize(dirPath + QDir::separator() + childDirPath);
     return size;
 }
@@ -261,7 +261,7 @@ void ModerationPage::addModerationButtonSettings(
 
     // build one line for each customizable button
     auto i = 0;
-    for (const auto tButton : getSettings()->timeoutButtons.getValue())
+    for (const auto &tButton : getSettings()->timeoutButtons.getValue())
     {
         const auto buttonNumber = QString::number(i);
         auto timeout = timeoutLayout.emplace<QHBoxLayout>().withoutMargin();

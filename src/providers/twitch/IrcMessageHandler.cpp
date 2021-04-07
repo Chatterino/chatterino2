@@ -149,11 +149,11 @@ void IrcMessageHandler::setSimilarityFlags(MessagePtr msg, ChannelPtr chan)
     }
 }
 
-static QMap<QString, QString> parseBadges(QString badgesString)
+static QMap<QString, QString> parseBadges(const QString &badgesString)
 {
     QMap<QString, QString> badges;
 
-    for (auto badgeData : badgesString.split(','))
+    for (const auto &badgeData : badgesString.split(','))
     {
         auto parts = badgeData.split('/');
         if (parts.length() != 2)
@@ -261,7 +261,7 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
             // Need to wait for pubsub reward notification
             auto clone = _message->clone();
             channel->channelPointRewardAdded.connect(
-                [=, &server](ChannelPointReward reward) {
+                [=, &server](const ChannelPointReward &reward) {
                     if (reward.id == rewardId)
                     {
                         this->addMessage(clone, target, content, server, isSub,

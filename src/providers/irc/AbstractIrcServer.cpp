@@ -417,7 +417,8 @@ void AbstractIrcServer::readConnectionMessageReceived(
 {
 }
 
-void AbstractIrcServer::forEachChannel(std::function<void(ChannelPtr)> func)
+void AbstractIrcServer::forEachChannel(
+    const std::function<void(ChannelPtr)> &func)
 {
     std::lock_guard<std::mutex> lock(this->channelMutex);
 

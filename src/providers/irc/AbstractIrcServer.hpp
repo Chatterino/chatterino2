@@ -46,7 +46,7 @@ public:
     void addGlobalSystemMessage(const QString &messageText);
 
     // iteration
-    void forEachChannel(std::function<void(ChannelPtr)> func);
+    void forEachChannel(const std::function<void(ChannelPtr)> &func);
 
 protected:
     AbstractIrcServer();

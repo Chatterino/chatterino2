@@ -38,7 +38,7 @@ struct TwitchEmoteSetResolverResponse {
     //      "custom": false
     //    }
 
-    TwitchEmoteSetResolverResponse(QJsonObject jsonObject)
+    TwitchEmoteSetResolverResponse(const QJsonObject &jsonObject)
         : channelName(jsonObject.value("channel_name").toString())
         , channelId(jsonObject.value("channel_id").toString())
         , type(jsonObject.value("type").toString())
@@ -98,23 +98,23 @@ public:
     bool isAnon() const;
 
     void loadBlocks();
-    void blockUser(QString userId, std::function<void()> onSuccess,
+    void blockUser(const QString &userId, std::function<void()> onSuccess,
                    std::function<void()> onFailure);
-    void unblockUser(QString userId, std::function<void()> onSuccess,
+    void unblockUser(const QString &userId, std::function<void()> onSuccess,
                      std::function<void()> onFailure);
 
-    void checkFollow(const QString targetUserID,
+    void checkFollow(const QString &targetUserID,
                      std::function<void(FollowResult)> onFinished);
 
     std::set<TwitchUser> getBlocks() const;
 
     void loadEmotes();
-    void loadUserstateEmotes(QStringList emoteSetKeys);
+    void loadUserstateEmotes(const QStringList &emoteSetKeys);
     AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
-    void autoModAllow(const QString msgID);
-    void autoModDeny(const QString msgID);
+    void autoModAllow(const QString &msgID);
+    void autoModDeny(const QString &msgID);
 
 private:
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);

@@ -12,7 +12,7 @@ class EmoteInputItem : public GenericListItem
 
 public:
     EmoteInputItem(const EmotePtr &emote, const QString &text,
-                   ActionCallback action);
+                   const ActionCallback &action);
 
     // GenericListItem interface
 public:

@@ -415,7 +415,7 @@ void Split::insertTextToInput(const QString &text)
 }
 
 void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
-                                   std::function<void(bool)> callback)
+                                   const std::function<void(bool)> &callback)
 {
     if (this->selectChannelDialog_.hasElement())
     {
@@ -707,7 +707,7 @@ void Split::showViewerList()
     auto chattersList = new QListWidget();
     auto resultList = new QListWidget();
 
-    auto formatListItemText = [](QString text) {
+    auto formatListItemText = [](const QString &text) {
         auto item = new QListWidgetItem();
         item->setText(text);
         item->setFont(getApp()->fonts->getFont(FontStyle::ChatMedium, 1.0));
@@ -786,7 +786,7 @@ void Split::showViewerList()
         viewerDock->setMinimumWidth(300);
     });
 
-    auto listDoubleClick = [=](QString userName) {
+    auto listDoubleClick = [=](const QString &userName) {
         if (!labels.contains(userName) && !userName.isEmpty())
         {
             this->view_->showUserInfoPopup(userName);
@@ -841,7 +841,7 @@ void Split::setFiltersDialog()
     }
 }
 
-void Split::setFilters(const QList<QUuid> ids)
+void Split::setFilters(const QList<QUuid> &ids)
 {
     this->view_->setFilters(ids);
     this->header_->updateChannelText();

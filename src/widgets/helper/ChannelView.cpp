@@ -550,7 +550,7 @@ bool ChannelView::getEnableScrollingToBottom() const
 
 void ChannelView::setOverrideFlags(boost::optional<MessageElementFlags> value)
 {
-    this->overrideFlags_ = value;
+    this->overrideFlags_ = std::move(value);
 }
 
 const boost::optional<MessageElementFlags> &ChannelView::getOverrideFlags()
@@ -647,7 +647,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     this->channelConnections_.push_back(this->channel_->messageAppended.connect(
         [this](MessagePtr &message,
                boost::optional<MessageFlags> overridingFlags) {
-            this->messageAppended(message, overridingFlags);
+            this->messageAppended(message, std::move(overridingFlags));
         }));
 
     this->channelConnections_.push_back(
@@ -753,7 +753,7 @@ ChannelPtr ChannelView::sourceChannel() const
 
 void ChannelView::setSourceChannel(ChannelPtr sourceChannel)
 {
-    this->sourceChannel_ = sourceChannel;
+    this->sourceChannel_ = std::move(sourceChannel);
 }
 
 bool ChannelView::hasSourceChannel() const
@@ -1444,8 +1444,8 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
                 std::weak_ptr<MessageLayout> weakLayout = layout;
                 LinkResolver::getLinkInfo(
                     element->getLink().value, nullptr,
-                    [weakLayout, element](QString tooltipText,
-                                          Link originalLink,
+                    [weakLayout, element](const QString &tooltipText,
+                                          const Link &originalLink,
                                           ImagePtr thumbnail) {
                         auto shared = weakLayout.lock();
                         if (!shared)
@@ -1764,7 +1764,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
         }
         break;
         case Qt::RightButton: {
-            auto insertText = [=](QString text) {
+            auto insertText = [=](const QString &text) {
                 if (auto split = dynamic_cast<Split *>(this->parentWidget()))
                 {
                     split->insertTextToInput(text);

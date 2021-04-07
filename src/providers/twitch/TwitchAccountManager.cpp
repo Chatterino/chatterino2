@@ -178,7 +178,7 @@ bool TwitchAccountManager::removeUser(TwitchAccount *account)
 {
     static const QString accountFormat("/accounts/uid%1");
 
-    auto userID(account->getUserId());
+    const auto &userID(account->getUserId());
     if (!userID.isEmpty())
     {
         pajlada::Settings::SettingManager::removeSetting(

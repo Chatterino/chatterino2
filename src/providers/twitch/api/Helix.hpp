@@ -28,7 +28,7 @@ struct HelixUser {
     QString profileImageUrl;
     int viewCount;
 
-    explicit HelixUser(QJsonObject jsonObject)
+    explicit HelixUser(const QJsonObject &jsonObject)
         : id(jsonObject.value("id").toString())
         , login(jsonObject.value("login").toString())
         , displayName(jsonObject.value("display_name").toString())
@@ -56,7 +56,7 @@ struct HelixUsersFollowsRecord {
     {
     }
 
-    explicit HelixUsersFollowsRecord(QJsonObject jsonObject)
+    explicit HelixUsersFollowsRecord(const QJsonObject &jsonObject)
         : fromId(jsonObject.value("from_id").toString())
         , fromName(jsonObject.value("from_name").toString())
         , toId(jsonObject.value("to_id").toString())
@@ -69,7 +69,7 @@ struct HelixUsersFollowsRecord {
 struct HelixUsersFollowsResponse {
     int total;
     std::vector<HelixUsersFollowsRecord> data;
-    explicit HelixUsersFollowsResponse(QJsonObject jsonObject)
+    explicit HelixUsersFollowsResponse(const QJsonObject &jsonObject)
         : total(jsonObject.value("total").toInt())
     {
         const auto &jsonData = jsonObject.value("data").toArray();
@@ -107,7 +107,7 @@ struct HelixStream {
     {
     }
 
-    explicit HelixStream(QJsonObject jsonObject)
+    explicit HelixStream(const QJsonObject &jsonObject)
         : id(jsonObject.value("id").toString())
         , userId(jsonObject.value("user_id").toString())
         , userName(jsonObject.value("user_name").toString())
@@ -127,7 +127,7 @@ struct HelixGame {
     QString name;
     QString boxArtUrl;
 
-    explicit HelixGame(QJsonObject jsonObject)
+    explicit HelixGame(const QJsonObject &jsonObject)
         : id(jsonObject.value("id").toString())
         , name(jsonObject.value("name").toString())
         , boxArtUrl(jsonObject.value("box_art_url").toString())
@@ -139,7 +139,7 @@ struct HelixClip {
     QString id;  // clip slug
     QString editUrl;
 
-    explicit HelixClip(QJsonObject jsonObject)
+    explicit HelixClip(const QJsonObject &jsonObject)
         : id(jsonObject.value("id").toString())
         , editUrl(jsonObject.value("edit_url").toString())
     {
@@ -154,7 +154,7 @@ struct HelixChannel {
     QString gameName;
     QString title;
 
-    explicit HelixChannel(QJsonObject jsonObject)
+    explicit HelixChannel(const QJsonObject &jsonObject)
         : userId(jsonObject.value("broadcaster_id").toString())
         , name(jsonObject.value("broadcaster_name").toString())
         , language(jsonObject.value("broadcaster_language").toString())
@@ -171,7 +171,7 @@ struct HelixStreamMarker {
     QString id;
     int positionSeconds;
 
-    explicit HelixStreamMarker(QJsonObject jsonObject)
+    explicit HelixStreamMarker(const QJsonObject &jsonObject)
         : createdAt(jsonObject.value("created_at").toString())
         , description(jsonObject.value("description").toString())
         , id(jsonObject.value("id").toString())
@@ -185,7 +185,7 @@ struct HelixBlock {
     QString userName;
     QString displayName;
 
-    explicit HelixBlock(QJsonObject jsonObject)
+    explicit HelixBlock(const QJsonObject &jsonObject)
         : userId(jsonObject.value("user_id").toString())
         , userName(jsonObject.value("user_login").toString())
         , displayName(jsonObject.value("display_name").toString())
@@ -307,7 +307,7 @@ public:
     static void initialize();
 
 private:
-    NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
+    NetworkRequest makeRequest(const QString &url, const QUrlQuery &urlQuery);
 
     QString clientId;
     QString oauthToken;

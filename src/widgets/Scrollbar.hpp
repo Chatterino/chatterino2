@@ -20,10 +20,10 @@ class Scrollbar : public BaseWidget
 public:
     Scrollbar(ChannelView *parent = nullptr);
 
-    void addHighlight(ScrollbarHighlight highlight);
+    void addHighlight(const ScrollbarHighlight &highlight);
     void addHighlightsAtStart(
         const std::vector<ScrollbarHighlight> &highlights_);
-    void replaceHighlight(size_t index, ScrollbarHighlight replacement);
+    void replaceHighlight(size_t index, const ScrollbarHighlight &replacement);
 
     void pauseHighlights();
     void unpauseHighlights();

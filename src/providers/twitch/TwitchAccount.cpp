@@ -64,7 +64,7 @@ QColor TwitchAccount::color()
 
 void TwitchAccount::setColor(QColor color)
 {
-    this->color_.set(color);
+    this->color_.set(std::move(color));
 }
 
 bool TwitchAccount::setOAuthClient(const QString &newClientID)
@@ -100,7 +100,7 @@ void TwitchAccount::loadBlocks()
 {
     getHelix()->loadBlocks(
         getApp()->accounts->twitch.getCurrent()->userId_,
-        [this](std::vector<HelixBlock> blocks) {
+        [this](const std::vector<HelixBlock> &blocks) {
             std::lock_guard<std::mutex> lock(this->ignoresMutex_);
             this->ignores_.clear();
 
@@ -116,7 +116,8 @@ void TwitchAccount::loadBlocks()
         });
 }
 
-void TwitchAccount::blockUser(QString userId, std::function<void()> onSuccess,
+void TwitchAccount::blockUser(const QString &userId,
+                              std::function<void()> onSuccess,
                               std::function<void()> onFailure)
 {
     getHelix()->blockUser(
@@ -131,10 +132,11 @@ void TwitchAccount::blockUser(QString userId, std::function<void()> onSuccess,
             }
             onSuccess();
         },
-        onFailure);
+        std::move(onFailure));
 }
 
-void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
+void TwitchAccount::unblockUser(const QString &userId,
+                                std::function<void()> onSuccess,
                                 std::function<void()> onFailure)
 {
     getHelix()->unblockUser(
@@ -149,10 +151,10 @@ void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
             }
             onSuccess();
         },
-        onFailure);
+        std::move(onFailure));
 }
 
-void TwitchAccount::checkFollow(const QString targetUserID,
+void TwitchAccount::checkFollow(const QString &targetUserID,
                                 std::function<void(FollowResult)> onFinished)
 {
     const auto onResponse = [onFinished](bool following, const auto &record) {
@@ -189,7 +191,7 @@ void TwitchAccount::loadEmotes()
 
     getKraken()->getUserEmotes(
         this,
-        [this](KrakenEmoteSets data) {
+        [this](const KrakenEmoteSets &data) {
             // clear emote data
             auto emoteData = this->emotes_.access();
             emoteData->emoteSets.clear();
@@ -247,7 +249,7 @@ void TwitchAccount::loadEmotes()
         });
 }
 
-void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
+void TwitchAccount::loadUserstateEmotes(const QStringList &emoteSetKeys)
 {
     // do not attempt to load emotes too often
     if (!this->userstateEmotesTimer_.isValid())
@@ -287,7 +289,7 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
 
     getIvr()->getBulkEmoteSets(
         newEmoteSetKeys.join(","),
-        [this](QJsonArray emoteSetArray) {
+        [this](const QJsonArray &emoteSetArray) {
             auto emoteData = this->emotes_.access();
             for (auto emoteSet : emoteSetArray)
             {
@@ -342,7 +344,7 @@ AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
 }
 
 // AutoModActions
-void TwitchAccount::autoModAllow(const QString msgID)
+void TwitchAccount::autoModAllow(const QString &msgID)
 {
     QString url("https://api.twitch.tv/kraken/chat/twitchbot/approve");
 
@@ -354,14 +356,14 @@ void TwitchAccount::autoModAllow(const QString msgID)
         .payload(qba)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
+        .onError([=](const NetworkResult &result) {
             qCWarning(chatterinoTwitch)
                 << "[TwitchAccounts::autoModAllow] Error" << result.status();
         })
         .execute();
 }
 
-void TwitchAccount::autoModDeny(const QString msgID)
+void TwitchAccount::autoModDeny(const QString &msgID)
 {
     QString url("https://api.twitch.tv/kraken/chat/twitchbot/deny");
 
@@ -373,7 +375,7 @@ void TwitchAccount::autoModDeny(const QString msgID)
         .payload(qba)
 
         .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
+        .onError([=](const NetworkResult &result) {
             qCWarning(chatterinoTwitch)
                 << "[TwitchAccounts::autoModDeny] Error" << result.status();
         })
@@ -399,7 +401,7 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
 
     NetworkRequest(Env::get().twitchEmoteSetResolverUrl.arg(emoteSet->key))
         .cache()
-        .onSuccess([emoteSet](NetworkResult result) -> Outcome {
+        .onSuccess([emoteSet](const NetworkResult &result) -> Outcome {
             auto rootOld = result.parseRapidJson();
             auto root = result.parseJson();
             if (root.isEmpty())
@@ -423,7 +425,7 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
 
             return Success;
         })
-        .onError([](NetworkResult result) {
+        .onError([](const NetworkResult &result) {
             qCWarning(chatterinoTwitch)
                 << QString("Error code %1 while loading emote set data")
                        .arg(result.status());

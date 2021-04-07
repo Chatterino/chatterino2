@@ -25,7 +25,7 @@ class SettingsDialogTab : public BaseWidget
 public:
     SettingsDialogTab(SettingsDialog *dialog_,
                       std::function<SettingsPage *()> page_,
-                      const QString &name, QString imageFileName,
+                      const QString &name, const QString &imageFileName,
                       SettingsTabId id);
 
     void setSelected(bool selected_);

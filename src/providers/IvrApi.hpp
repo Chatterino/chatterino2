@@ -81,7 +81,7 @@ public:
     static void initialize();
 
 private:
-    NetworkRequest makeRequest(QString url, QUrlQuery urlQuery);
+    NetworkRequest makeRequest(const QString &url, const QUrlQuery &urlQuery);
 };
 
 IvrApi *getIvr();

@@ -17,7 +17,7 @@ class DownloadManager : public QObject
 public:
     explicit DownloadManager(QObject *parent = nullptr);
     virtual ~DownloadManager();
-    void setFile(QString fileURL, const QString &channelName);
+    void setFile(const QString &fileURL, const QString &channelName);
 
 private:
     QNetworkAccessManager *manager;

@@ -30,7 +30,8 @@ void Kraken::getUserEmotes(TwitchAccount *account,
         .execute();
 }
 
-NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
+NetworkRequest Kraken::makeRequest(const QString &url,
+                                   const QUrlQuery &urlQuery)
 {
     assert(!url.startsWith("/"));
 
@@ -63,8 +64,8 @@ NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
 
 void Kraken::update(QString clientId, QString oauthToken)
 {
-    this->clientId = clientId;
-    this->oauthToken = oauthToken;
+    this->clientId = std::move(clientId);
+    this->oauthToken = std::move(oauthToken);
 }
 
 void Kraken::initialize()

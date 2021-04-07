@@ -95,7 +95,7 @@ Irc::Irc()
             auto server = std::make_unique<IrcServer>(args.item, ab->second);
 
             // set server of abandoned channels
-            for (auto weak : ab->second)
+            for (const auto &weak : ab->second)
                 if (auto shared = weak.lock())
                     if (auto ircChannel =
                             dynamic_cast<IrcChannel *>(shared.get()))
@@ -121,7 +121,7 @@ Irc::Irc()
             auto abandoned = server->second->getChannels();
 
             // set server of abandoned servers to nullptr
-            for (auto weak : abandoned)
+            for (const auto &weak : abandoned)
                 if (auto shared = weak.lock())
                     if (auto ircChannel =
                             dynamic_cast<IrcChannel *>(shared.get()))

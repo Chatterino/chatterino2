@@ -57,7 +57,7 @@ namespace {
                         return 0;
                 }
             },
-            [](DropdownArgs args) {
+            [](const DropdownArgs &args) {
                 switch (args.index)
                 {
                     case 1:
@@ -272,7 +272,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                     return 1;
             }
         },
-        [](DropdownArgs args) {
+        [](const DropdownArgs &args) {
             switch (args.index)
             {
                 case 0:
@@ -340,7 +340,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             [](int value) {
                 return value;
             },
-            [](DropdownArgs args) {
+            [](const DropdownArgs &args) {
                 return static_cast<StreamerModeSetting>(args.index);
             },
             false);
