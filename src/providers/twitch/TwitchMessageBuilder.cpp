@@ -495,13 +495,21 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
                 }
             }
 
-            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+            auto prefixedUsername = '@' + username;
+            this->emplace<TextElement>(prefixedUsername, MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
-                ->setLink({Link::UserInfo, username});
+                ->setLink({Link::UserInfo, username})
+                ->setTrailingSpace(false);
 
             this->emplace<TextElement>(
-                    string, MessageElementFlag::NonBoldUsername, textColor)
-                ->setLink({Link::UserInfo, username});
+                    prefixedUsername, MessageElementFlag::NonBoldUsername, textColor)
+                ->setLink({Link::UserInfo, username})
+                ->setTrailingSpace(false);
+
+            auto originalTextColor = MessageColor(MessageColor::Text);
+            this->emplace<TextElement>(string.remove(prefixedUsername),
+                   MessageElementFlag::Text, originalTextColor);
+
             return;
         }
     }
