@@ -24,7 +24,7 @@ namespace {
                     const rapidjson::Value &unparsedEmoji,
                     QString shortCode = QString())
     {
-        static uint unicodeBytes[4];
+        std::array<uint32_t, 7> unicodeBytes;
 
         struct {
             bool apple;
@@ -91,11 +91,12 @@ namespace {
 
         for (const QString &unicodeCharacter : unicodeCharacters)
         {
-            unicodeBytes[numUnicodeBytes++] =
+            unicodeBytes.at(numUnicodeBytes++) =
                 QString(unicodeCharacter).toUInt(nullptr, 16);
         }
 
-        emojiData->value = QString::fromUcs4(unicodeBytes, numUnicodeBytes);
+        emojiData->value =
+            QString::fromUcs4(unicodeBytes.data(), numUnicodeBytes);
     }
 
     // getToneNames takes a tones and returns their names in the same order
