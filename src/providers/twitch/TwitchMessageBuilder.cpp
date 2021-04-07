@@ -532,13 +532,20 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
                 }
             }
 
-            this->emplace<TextElement>(string, MessageElementFlag::BoldUsername,
+            this->emplace<TextElement>(username, MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
-                ->setLink({Link::UserInfo, username});
+                ->setLink({Link::UserInfo, username})
+                ->setTrailingSpace(false);
 
             this->emplace<TextElement>(
-                    string, MessageElementFlag::NonBoldUsername, textColor)
-                ->setLink({Link::UserInfo, username});
+                    username, MessageElementFlag::NonBoldUsername, textColor)
+                ->setLink({Link::UserInfo, username})
+                ->setTrailingSpace(false);
+
+            auto originalTextColor = MessageColor(MessageColor::Text);
+            this->emplace<TextElement>(string.remove(username),
+                   MessageElementFlag::Text, originalTextColor);
+
             return;
         }
     }
