@@ -496,19 +496,22 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
             }
 
             auto prefixedUsername = '@' + username;
-            this->emplace<TextElement>(prefixedUsername, MessageElementFlag::BoldUsername,
+            this->emplace<TextElement>(prefixedUsername,
+                                       MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
                 ->setLink({Link::UserInfo, username})
                 ->setTrailingSpace(false);
 
-            this->emplace<TextElement>(
-                    prefixedUsername, MessageElementFlag::NonBoldUsername, textColor)
+            this->emplace<TextElement>(prefixedUsername,
+                                       MessageElementFlag::NonBoldUsername,
+                                       textColor)
                 ->setLink({Link::UserInfo, username})
                 ->setTrailingSpace(false);
 
             auto originalTextColor = MessageColor(MessageColor::Text);
             this->emplace<TextElement>(string.remove(prefixedUsername),
-                   MessageElementFlag::Text, originalTextColor);
+                                       MessageElementFlag::Text,
+                                       originalTextColor);
 
             return;
         }
@@ -532,7 +535,8 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
                 }
             }
 
-            this->emplace<TextElement>(username, MessageElementFlag::BoldUsername,
+            this->emplace<TextElement>(username,
+                                       MessageElementFlag::BoldUsername,
                                        textColor, FontStyle::ChatMediumBold)
                 ->setLink({Link::UserInfo, username})
                 ->setTrailingSpace(false);
@@ -544,7 +548,8 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
             auto originalTextColor = MessageColor(MessageColor::Text);
             this->emplace<TextElement>(string.remove(username),
-                   MessageElementFlag::Text, originalTextColor);
+                                       MessageElementFlag::Text,
+                                       originalTextColor);
 
             return;
         }
