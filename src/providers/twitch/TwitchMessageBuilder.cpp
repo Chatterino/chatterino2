@@ -484,6 +484,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
         if (match.hasMatch())
         {
             QString username = match.captured(1);
+            auto originalTextColor = textColor;
 
             if (this->twitchChannel != nullptr && getSettings()->colorUsernames)
             {
@@ -508,7 +509,6 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
                 ->setLink({Link::UserInfo, username})
                 ->setTrailingSpace(false);
 
-            auto originalTextColor = MessageColor(MessageColor::Text);
             this->emplace<TextElement>(string.remove(prefixedUsername),
                                        MessageElementFlag::Text,
                                        originalTextColor);
@@ -525,6 +525,8 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
         if (match.hasMatch() && chatters->contains(username))
         {
+            auto originalTextColor = textColor;
+
             if (getSettings()->colorUsernames)
             {
                 if (auto userColor =
@@ -546,7 +548,6 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
                 ->setLink({Link::UserInfo, username})
                 ->setTrailingSpace(false);
 
-            auto originalTextColor = MessageColor(MessageColor::Text);
             this->emplace<TextElement>(string.remove(username),
                                        MessageElementFlag::Text,
                                        originalTextColor);
