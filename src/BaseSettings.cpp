@@ -13,7 +13,7 @@ AB_SETTINGS_CLASS *AB_SETTINGS_CLASS::instance = nullptr;
 void _actuallyRegisterSetting(
     std::weak_ptr<pajlada::Settings::SettingData> setting)
 {
-    _settings.push_back(setting);
+    _settings.push_back(std::move(setting));
 }
 
 AB_SETTINGS_CLASS::AB_SETTINGS_CLASS(const QString &settingsDirectory)

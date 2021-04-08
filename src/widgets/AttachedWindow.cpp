@@ -143,7 +143,7 @@ void AttachedWindow::detach(const QString &winId)
 
 void AttachedWindow::setChannel(ChannelPtr channel)
 {
-    this->ui_.split->setChannel(channel);
+    this->ui_.split->setChannel(std::move(channel));
 }
 
 void AttachedWindow::showEvent(QShowEvent *)
