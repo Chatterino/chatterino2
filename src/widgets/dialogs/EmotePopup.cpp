@@ -11,8 +11,8 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
-#include "widgets/helper/ChannelView.hpp"
 #include "widgets/Scrollbar.hpp"
+#include "widgets/helper/ChannelView.hpp"
 
 #include <QHBoxLayout>
 #include <QShortcut>
@@ -182,11 +182,15 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     // Scroll with Page Up / Page Down
     createWindowShortcut(this, "PgUp", [=] {
-        auto &scrollbar = dynamic_cast<ChannelView *>(notebook->getSelectedPage())->getScrollBar();
+        auto &scrollbar =
+            dynamic_cast<ChannelView *>(notebook->getSelectedPage())
+                ->getScrollBar();
         scrollbar.offset(-scrollbar.getLargeChange());
     });
     createWindowShortcut(this, "PgDown", [=] {
-        auto &scrollbar = dynamic_cast<ChannelView *>(notebook->getSelectedPage())->getScrollBar();
+        auto &scrollbar =
+            dynamic_cast<ChannelView *>(notebook->getSelectedPage())
+                ->getScrollBar();
         scrollbar.offset(scrollbar.getLargeChange());
     });
 }
