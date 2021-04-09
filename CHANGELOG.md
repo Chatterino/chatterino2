@@ -44,7 +44,7 @@
 - Minor: Show channels live now enabled by default
 - Minor: Bold usernames enabled by default
 - Minor: Improve UX of the "Login expired!" message (#2029)
-- Minor: PageUp and PageDown now scroll in the selected split (#2070, #2081)
+- Minor: PageUp and PageDown now scroll in the selected split and in the emote popup (#2070, #2081, #2410, #2607)
 - Minor: Allow highlights to be excluded from `/mentions`. Excluded highlights will not trigger tab highlights either. (#1793, #2036)
 - Minor: Flag all popup dialogs as actual dialogs so they get the relevant window manager hints (#1843, #2182, #2185, #2232, #2234)
 - Minor: Don't show update button for nightly builds on macOS and Linux, this was already the case for Windows (#2163, #2164)
