@@ -49,6 +49,9 @@ public:
     bool getAllowUserTabManagement() const;
     void setAllowUserTabManagement(bool value);
 
+    bool getShowTabs() const;
+    void setShowTabs(bool value);
+
     bool getShowAddButton() const;
     void setShowAddButton(bool value);
 
@@ -84,6 +87,7 @@ private:
     std::vector<NotebookButton *> customButtons_;
 
     bool allowUserTabManagement_ = false;
+    bool showTabs_ = true;
     bool showAddButton_ = false;
     int lineOffset_ = 20;
     NotebookTabDirection tabDirection_ = NotebookTabDirection::Horizontal;

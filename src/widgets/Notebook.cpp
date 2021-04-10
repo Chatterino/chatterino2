@@ -325,6 +325,22 @@ void Notebook::setAllowUserTabManagement(bool value)
     this->allowUserTabManagement_ = value;
 }
 
+bool Notebook::getShowTabs() const
+{
+    return this->showTabs_;
+}
+
+void Notebook::setShowTabs(bool value)
+{
+    this->showTabs_ = value;
+
+    this->performLayout();
+    for (auto &item : this->items_)
+    {
+        item.tab->setHidden(!value);
+    }
+}
+
 bool Notebook::getShowAddButton() const
 {
     return this->showAddButton_;
@@ -379,68 +395,71 @@ void Notebook::performLayout(bool animated)
             x += tabHeight;
         }
 
-        // layout tabs
-        /// Notebook tabs need to know if they are in the last row.
-        auto firstInBottomRow =
-            this->items_.size() ? &this->items_.front() : nullptr;
-
-        for (auto &item : this->items_)
+        if (this->showTabs_)
         {
-            /// Break line if element doesn't fit.
-            auto isFirst = &item == &this->items_.front();
-            auto isLast = &item == &this->items_.back();
+            // layout tabs
+            /// Notebook tabs need to know if they are in the last row.
+            auto firstInBottomRow =
+                this->items_.size() ? &this->items_.front() : nullptr;
 
-            auto fitsInLine = ((isLast ? addButtonWidth : 0) + x +
-                               item.tab->width()) <= width();
-
-            if (!isFirst && !fitsInLine)
+            for (auto &item : this->items_)
             {
-                y += item.tab->height();
-                x = left;
-                firstInBottomRow = &item;
+                /// Break line if element doesn't fit.
+                auto isFirst = &item == &this->items_.front();
+                auto isLast = &item == &this->items_.back();
+
+                auto fitsInLine = ((isLast ? addButtonWidth : 0) + x +
+                                   item.tab->width()) <= width();
+
+                if (!isFirst && !fitsInLine)
+                {
+                    y += item.tab->height();
+                    x = left;
+                    firstInBottomRow = &item;
+                }
+
+                /// Layout tab
+                item.tab->growWidth(0);
+                item.tab->moveAnimated(QPoint(x, y), animated);
+                x += item.tab->width() + std::max<int>(1, int(scale * 1));
             }
 
-            /// Layout tab
-            item.tab->growWidth(0);
-            item.tab->moveAnimated(QPoint(x, y), animated);
-            x += item.tab->width() + std::max<int>(1, int(scale * 1));
-        }
-
-        /// Update which tabs are in the last row
-        auto inLastRow = false;
-        for (const auto &item : this->items_)
-        {
-            if (&item == firstInBottomRow)
+            /// Update which tabs are in the last row
+            auto inLastRow = false;
+            for (const auto &item : this->items_)
             {
-                inLastRow = true;
+                if (&item == firstInBottomRow)
+                {
+                    inLastRow = true;
+                }
+                item.tab->setInLastRow(inLastRow);
             }
-            item.tab->setInLastRow(inLastRow);
-        }
 
-        // move misc buttons
-        if (this->showAddButton_)
-        {
-            this->addButton_->move(x, y);
-        }
+            // move misc buttons
+            if (this->showAddButton_)
+            {
+                this->addButton_->move(x, y);
+            }
 
-        if (this->lineOffset_ != y + tabHeight)
-        {
-            this->lineOffset_ = y + tabHeight;
-            this->update();
-        }
+            if (this->lineOffset_ != y + tabHeight)
+            {
+                this->lineOffset_ = y + tabHeight;
+                this->update();
+            }
 
-        /// Increment for the line at the bottom
-        y += int(2 * scale);
+            /// Increment for the line at the bottom
+            y += int(2 * scale);
 
-        // raise elements
-        for (auto &i : this->items_)
-        {
-            i.tab->raise();
-        }
+            // raise elements
+            for (auto &i : this->items_)
+            {
+                i.tab->raise();
+            }
 
-        if (this->showAddButton_)
-        {
-            this->addButton_->raise();
+            if (this->showAddButton_)
+            {
+                this->addButton_->raise();
+            }
         }
 
         // set page bounds
@@ -477,70 +496,73 @@ void Notebook::performLayout(bool animated)
         int top = y;
         x = left;
 
-        int verticalRowSpace = (this->height() - top) / tabHeight;
-        if (verticalRowSpace == 0)  // window hasn't properly rendered yet
-            return;
-        int count = this->items_.size() + (this->showAddButton_ ? 1 : 0);
-        int columnCount = ceil((float)count / verticalRowSpace);
-
-        for (int col = 0; col < columnCount; col++)
+        if (this->showTabs_)
         {
-            auto largestWidth = 0;
-            int colStart = col * verticalRowSpace;
-            int colEnd =
-                std::min((col + 1) * verticalRowSpace, this->items_.size());
+            int verticalRowSpace = (this->height() - top) / tabHeight;
+            if (verticalRowSpace == 0)  // window hasn't properly rendered yet
+                return;
+            int count = this->items_.size() + (this->showAddButton_ ? 1 : 0);
+            int columnCount = ceil((float)count / verticalRowSpace);
 
-            for (int i = colStart; i < colEnd; i++)
+            for (int col = 0; col < columnCount; col++)
             {
-                largestWidth = std::max(
-                    this->items_.at(i).tab->normalTabWidth(), largestWidth);
+                auto largestWidth = 0;
+                int colStart = col * verticalRowSpace;
+                int colEnd =
+                    std::min((col + 1) * verticalRowSpace, this->items_.size());
+
+                for (int i = colStart; i < colEnd; i++)
+                {
+                    largestWidth = std::max(
+                        this->items_.at(i).tab->normalTabWidth(), largestWidth);
+                }
+
+                if (col == columnCount - 1 && this->showAddButton_ &&
+                    largestWidth == 0)
+                {
+                    largestWidth = this->addButton_->width();
+                }
+
+                if (largestWidth + x < buttonWidth && col == columnCount - 1)
+                    largestWidth = buttonWidth - x;
+
+                for (int i = colStart; i < colEnd; i++)
+                {
+                    auto item = this->items_.at(i);
+
+                    /// Layout tab
+                    item.tab->growWidth(largestWidth);
+                    item.tab->moveAnimated(QPoint(x, y), animated);
+                    y += tabHeight;
+                }
+
+                if (col == columnCount - 1 && this->showAddButton_)
+                {
+                    this->addButton_->move(x, y);
+                }
+
+                x += largestWidth + lineThickness;
+                y = top;
             }
 
-            if (col == columnCount - 1 && this->showAddButton_ &&
-                largestWidth == 0)
+            x = std::max(x, buttonWidth);
+
+            if (this->lineOffset_ != x - lineThickness)
             {
-                largestWidth = this->addButton_->width();
+                this->lineOffset_ = x - lineThickness;
+                this->update();
             }
 
-            if (largestWidth + x < buttonWidth && col == columnCount - 1)
-                largestWidth = buttonWidth - x;
-
-            for (int i = colStart; i < colEnd; i++)
+            // raise elements
+            for (auto &i : this->items_)
             {
-                auto item = this->items_.at(i);
-
-                /// Layout tab
-                item.tab->growWidth(largestWidth);
-                item.tab->moveAnimated(QPoint(x, y), animated);
-                y += tabHeight;
+                i.tab->raise();
             }
 
-            if (col == columnCount - 1 && this->showAddButton_)
+            if (this->showAddButton_)
             {
-                this->addButton_->move(x, y);
+                this->addButton_->raise();
             }
-
-            x += largestWidth + lineThickness;
-            y = top;
-        }
-
-        x = std::max(x, buttonWidth);
-
-        if (this->lineOffset_ != x - lineThickness)
-        {
-            this->lineOffset_ = x - lineThickness;
-            this->update();
-        }
-
-        // raise elements
-        for (auto &i : this->items_)
-        {
-            i.tab->raise();
-        }
-
-        if (this->showAddButton_)
-        {
-            this->addButton_->raise();
         }
 
         // set page bounds
@@ -690,7 +712,7 @@ SplitContainer *SplitNotebook::addPage(bool select)
     auto tab = Notebook::addPage(container, QString(), select);
     container->setTab(tab);
     tab->setParent(this);
-    tab->show();
+    tab->setVisible(this->getShowTabs());
     return container;
 }
 

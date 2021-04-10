@@ -357,10 +357,6 @@ void Window::addShortcuts()
     // New tab
     createWindowShortcut(this, "CTRL+SHIFT+T", [this] {
         auto *newPage = this->notebook_->addPage(true);
-        if (this->areTabsHidden_)
-        {
-            newPage->resize(0, 0);
-        }
     });
 
     // Close tab
@@ -403,35 +399,8 @@ void Window::addShortcuts()
     });
 
     createWindowShortcut(this, "CTRL+U", [this] {
-        for (int i = 0; i < this->getNotebook().getPageCount(); ++i)
-        {
-            auto *page =
-                static_cast<SplitContainer *>(this->getNotebook().getPageAt(i));
-
-            // tabs are hidden - unhide them
-            if (this->areTabsHidden_)
-            {
-                page->getTab()->setVisible(true);
-                //                page->getTab()->resize(page->getTab()->sizeHint());
-                page->getTab()->updateSize();
-            }
-            // tabs are visible - hide them
-            else
-            {
-                page->getTab()->setVisible(false);
-                //                page->getTab()->resize(0, 0);
-            }
-        }
-        this->getNotebook().setShowAddButton(this->areTabsHidden_ ? true
-                                                                  : false);
-
-        this->areTabsHidden_ = this->areTabsHidden_ ? false : true;
+        this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
     });
-}
-
-bool Window::areTabsHidden()
-{
-    return this->areTabsHidden_;
 }
 
 void Window::addMenuBar()
