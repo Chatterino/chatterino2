@@ -38,7 +38,7 @@ Button::Button(BaseWidget *parent)
 
 void Button::setMouseEffectColor(boost::optional<QColor> color)
 {
-    this->mouseEffectColor_ = color;
+    this->mouseEffectColor_ = std::move(color);
 }
 
 void Button::setPixmap(const QPixmap &_pixmap)
