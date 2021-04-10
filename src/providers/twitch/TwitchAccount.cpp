@@ -64,7 +64,7 @@ QColor TwitchAccount::color()
 
 void TwitchAccount::setColor(QColor color)
 {
-    this->color_.set(color);
+    this->color_.set(std::move(color));
 }
 
 bool TwitchAccount::setOAuthClient(const QString &newClientID)
@@ -131,7 +131,7 @@ void TwitchAccount::blockUser(QString userId, std::function<void()> onSuccess,
             }
             onSuccess();
         },
-        onFailure);
+        std::move(onFailure));
 }
 
 void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
@@ -149,7 +149,7 @@ void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
             }
             onSuccess();
         },
-        onFailure);
+        std::move(onFailure));
 }
 
 void TwitchAccount::checkFollow(const QString targetUserID,
