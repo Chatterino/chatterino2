@@ -25,3 +25,6 @@
 [submodule "lib/websocketpp"]
 	path = lib/websocketpp
 	url = https://github.com/ziocleto/websocketpp
+[submodule "cmake/sanitizers-cmake"]
+	path = cmake/sanitizers-cmake
+	url = https://github.com/arsenm/sanitizers-cmake
