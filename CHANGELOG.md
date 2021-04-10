@@ -44,7 +44,7 @@
 - Minor: Show channels live now enabled by default
 - Minor: Bold usernames enabled by default
 - Minor: Improve UX of the "Login expired!" message (#2029)
-- Minor: PageUp and PageDown now scroll in the selected split (#2070, #2081)
+- Minor: PageUp and PageDown now scroll in the selected split and in the emote popup (#2070, #2081, #2410, #2607)
 - Minor: Allow highlights to be excluded from `/mentions`. Excluded highlights will not trigger tab highlights either. (#1793, #2036)
 - Minor: Flag all popup dialogs as actual dialogs so they get the relevant window manager hints (#1843, #2182, #2185, #2232, #2234)
 - Minor: Don't show update button for nightly builds on macOS and Linux, this was already the case for Windows (#2163, #2164)
@@ -87,6 +87,7 @@
 - Bugfix: Fix directory not opening when clicking "Open AppData Directory" setting button on macOS (#2531, #2537)
 - Bugfix: Fix quickswitcher not respecting order of tabs when filtering (#2519, #2561)
 - Bugfix: Fix GNOME not associating Chatterino's window with its desktop entry (#1863, #2587)
+- Bugfix: Fix buffer overflow in emoji parsing. (#2602)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
