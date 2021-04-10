@@ -152,6 +152,14 @@ Requires `user:manage:blocked_users` scope
   - `widgets/dialogs/UserInfoPopup.cpp` to unblock a user via checkbox in the usercard
   - `controllers/commands/CommandController.cpp` to unblock a user via "/unblock" command
 
+### Search Categories
+
+URL: https://dev.twitch.tv/docs/api/reference#search-categories
+
+- We implement this in `providers/twitch/api/Helix.cpp searchGames`
+  Used in:
+  - `controllers/commands/CommandController.cpp` in `/setgame` command to fuzzy search for game titles
+
 ## TMI
 
 The TMI api is undocumented.
