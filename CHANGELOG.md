@@ -5,7 +5,7 @@
 - Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377, #2528)
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
-- Major: Add `/settitle` and `/setgame` commands, originally made for Mm2PL/Dankerino. (#2534)
+- Major: Add `/settitle` and `/setgame` commands, originally made for Mm2PL/Dankerino. (#2534, #2609)
 - Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284)
 - Major: Commands `/ignore` and `/unignore` have been renamed to `/block` and `/unblock` in order to keep consistency with Twitch's terms. (#2370)
 - Major: Added support for bit emotes - the ones you unlock after cheering to streamer. (#2550)
@@ -44,7 +44,7 @@
 - Minor: Show channels live now enabled by default
 - Minor: Bold usernames enabled by default
 - Minor: Improve UX of the "Login expired!" message (#2029)
-- Minor: PageUp and PageDown now scroll in the selected split (#2070, #2081)
+- Minor: PageUp and PageDown now scroll in the selected split and in the emote popup (#2070, #2081, #2410, #2607)
 - Minor: Allow highlights to be excluded from `/mentions`. Excluded highlights will not trigger tab highlights either. (#1793, #2036)
 - Minor: Flag all popup dialogs as actual dialogs so they get the relevant window manager hints (#1843, #2182, #2185, #2232, #2234)
 - Minor: Don't show update button for nightly builds on macOS and Linux, this was already the case for Windows (#2163, #2164)
@@ -87,6 +87,7 @@
 - Bugfix: Fix directory not opening when clicking "Open AppData Directory" setting button on macOS (#2531, #2537)
 - Bugfix: Fix quickswitcher not respecting order of tabs when filtering (#2519, #2561)
 - Bugfix: Fix GNOME not associating Chatterino's window with its desktop entry (#1863, #2587)
+- Bugfix: Fix buffer overflow in emoji parsing. (#2602)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)

@@ -320,13 +320,13 @@ void Channel::onConnected()
 // Indirect channel
 //
 IndirectChannel::Data::Data(ChannelPtr _channel, Channel::Type _type)
-    : channel(_channel)
+    : channel(std::move(_channel))
     , type(_type)
 {
 }
 
 IndirectChannel::IndirectChannel(ChannelPtr channel, Channel::Type type)
-    : data_(std::make_unique<Data>(channel, type))
+    : data_(std::make_unique<Data>(std::move(channel), type))
 {
 }
 
@@ -339,7 +339,7 @@ void IndirectChannel::reset(ChannelPtr channel)
 {
     assert(this->data_->type != Channel::Type::Direct);
 
-    this->data_->channel = channel;
+    this->data_->channel = std::move(channel);
     this->data_->changed.invoke();
 }
 
