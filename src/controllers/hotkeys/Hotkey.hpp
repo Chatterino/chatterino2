@@ -58,9 +58,10 @@ public:
     QString name() const;
 
     /**
-     * @brief Returns the text representation of the hotkeys scope
+     * @brief Returns the user-friendly text representation of the hotkeys scope
      *
-     * TODO: Should we solidify the wording of Scope and Category?
+     * Suitable for showing in the GUI.
+     * e.g. Split input box for HotkeyScope::SplitInput
      */
     QString getCategory() const;
 

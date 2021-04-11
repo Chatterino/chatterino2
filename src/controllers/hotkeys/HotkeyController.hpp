@@ -32,6 +32,7 @@ public:
     boost::optional<HotkeyScope> hotkeyScopeFromName(QString scopeName);
     QString hotkeyScopeToName(HotkeyScope scope);
 
+    // TODO: Make these maps so it's easier to understand and maintain
     const std::vector<QString> hotkeyScopeNames = {
         "emotePopup", "selectChannelPopup", "settings", "split", "splitInput",
         "tab",        "userCard",           "window"};
