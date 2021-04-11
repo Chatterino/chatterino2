@@ -83,6 +83,7 @@
 - Bugfix: Fix anonymous users being pinged by "username" justinfan64537 (#2156, #2352)
 - Bugfix: Fixed hidden tooltips when always on top is active (#2384)
 - Bugfix: Fix CLI arguments (`--help`, `--version`, `--channels`) not being respected (#2368, #2190)
+- Bugfix: Fixed search field not being focused on popup open (#2540)
 - Bugfix: Fix Twitch cheer emotes not displaying tooltips when hovered (#2434, #2503)
 - Bugfix: Fix BTTV/FFZ channel emotes saying unknown error when no emotes found (#2542)
 - Bugfix: Fix directory not opening when clicking "Open AppData Directory" setting button on macOS (#2531, #2537)
