@@ -41,6 +41,7 @@ public:
     bool isHighlightedUser(const QString &username);
     bool isBlacklistedUser(const QString &username);
     bool isMutedChannel(const QString &channelName);
+    bool isIgnoredMessage(const QString &message);
     bool toggleMutedChannel(const QString &channelName);
 
 private:

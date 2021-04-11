@@ -74,6 +74,19 @@ bool ConcurrentSettings::isMutedChannel(const QString &channelName)
     return false;
 }
 
+bool ConcurrentSettings::isIgnoredMessage(const QString &message)
+{
+    auto items = this->ignoredMessages.readOnly();
+    for (const auto &ignored_message : *items)
+    {
+        if (message == ignored_message.getPattern())
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ConcurrentSettings::mute(const QString &channelName)
 {
     mutedChannels.append(channelName);

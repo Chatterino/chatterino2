@@ -139,3 +139,4 @@
 - Settings open faster
 - Dev: Fully remove Twitch Chatroom support
 - Dev: Handle conversion of historical CLEARCHAT messages to NOTICE messages in Chatterino instead of relying on the Recent Messages API to handle it for us. (#1804)
+- Minor: Add option to right click an emote in chat and add it directly to the block list (block enabled by default).

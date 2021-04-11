@@ -104,11 +104,33 @@ namespace {
                                 });
         };
 
-        // Ignore messages with this emote (useful for weeb emotes)
-        menu.addAction("Ignore this emote", [name = emote.getCopyString()] {
-            getSettings()->ignoredMessages.append(
-                IgnorePhrase(name, false, true, "", true));
-        });
+        // Ignore messages containing this emote
+        if (!getSettings()->isIgnoredMessage(emote.getCopyString()))
+        {
+            menu.addAction("Ignore this emote", [name = emote.getCopyString()] {
+                getSettings()->ignoredMessages.append(
+                    IgnorePhrase(name, false, true, "", true));
+            });
+        }
+        else
+        {
+            menu.addAction(
+                "Unignore this emote", [name = emote.getCopyString()] {
+                    auto &ignored_messages =
+                        *getSettings()->ignoredMessages.readOnly();
+                    const auto it = std::find_if(
+                        ignored_messages.cbegin(), ignored_messages.cend(),
+                        [&](const IgnorePhrase &phrase) {
+                            return name == phrase.getPattern();
+                        });
+                    if (it != ignored_messages.cend())
+                    {
+                        const int index = static_cast<int>(
+                            std::distance(ignored_messages.cbegin(), it));
+                        getSettings()->ignoredMessages.removeAt(index);
+                    }
+                });
+        }
 
         if (creatorFlags.has(MessageElementFlag::TwitchEmote))
         {
