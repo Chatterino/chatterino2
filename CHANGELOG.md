@@ -6,7 +6,7 @@
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
 - Major: Add `/settitle` and `/setgame` commands, originally made for Mm2PL/Dankerino. (#2534, #2609)
-- Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284)
+- Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284, #2597)
 - Major: Commands `/ignore` and `/unignore` have been renamed to `/block` and `/unblock` in order to keep consistency with Twitch's terms. (#2370)
 - Major: Added support for bit emotes - the ones you unlock after cheering to streamer. (#2550)
 - Minor: Added `/clearmessages` command - does what "Burger menu -> More -> Clear messages" does. (#2485)
