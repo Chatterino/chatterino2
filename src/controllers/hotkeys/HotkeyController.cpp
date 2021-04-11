@@ -10,15 +10,12 @@ namespace chatterino {
 boost::optional<HotkeyScope> HotkeyController::hotkeyScopeFromName(
     QString scopeName)
 {
-    HotkeyScope scope;
-    int index = 0;
     for (auto ref : this->hotkeyScopeNames)
     {
-        if (ref == scopeName)
+        if (ref.second == scopeName)
         {
-            return HotkeyScope(index);
+            return ref.first;
         }
-        index++;
     }
     qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
     return {};
@@ -28,7 +25,7 @@ QString HotkeyController::hotkeyScopeToName(HotkeyScope scope)
 {
     unsigned long scopeId = (unsigned long)(scope);
     return 0 <= scopeId && scopeId <= this->hotkeyScopeNames.size()
-               ? this->hotkeyScopeNames.at(scopeId)
+               ? this->hotkeyScopeNames.find(scope)->second
                : "";
 }
 bool hotkeySortCompare_(const std::shared_ptr<Hotkey> &a,

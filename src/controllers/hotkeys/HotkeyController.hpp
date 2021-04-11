@@ -32,20 +32,25 @@ public:
     boost::optional<HotkeyScope> hotkeyScopeFromName(QString scopeName);
     QString hotkeyScopeToName(HotkeyScope scope);
 
-    // TODO: Make these maps so it's easier to understand and maintain
-    const std::vector<QString> hotkeyScopeNames = {
-        "emotePopup", "selectChannelPopup", "settings", "split", "splitInput",
-        "tab",        "userCard",           "window"};
+    const std::map<HotkeyScope, QString> hotkeyScopeNames = {
+        {HotkeyScope::EmotePopup, "emotePopup"},
+        {HotkeyScope::SelectChannelPopup, "selectChannelPopup"},
+        {HotkeyScope::Settings, "settings"},
+        {HotkeyScope::Split, "split"},
+        {HotkeyScope::SplitInput, "splitInput"},
+        {HotkeyScope::Tab, "tab"},
+        {HotkeyScope::UserCard, "userCard"},
+        {HotkeyScope::Window, "window"}};
 
-    const std::vector<QString> hotkeyScopeDisplayNames = {
-        "Emote popup",  //
-        "Select channel popup",
-        "Settings dialog",
-        "Split",
-        "Split input box",
-        "Tab",
-        "User card",
-        "Window",
+    const std::map<HotkeyScope, QString> hotkeyScopeDisplayNames = {
+        {HotkeyScope::EmotePopup, "Emote popup"},
+        {HotkeyScope::SelectChannelPopup, "Select channel popup"},
+        {HotkeyScope::Settings, "Settings dialog"},
+        {HotkeyScope::Split, "Split"},
+        {HotkeyScope::SplitInput, "Split input box"},
+        {HotkeyScope::Tab, "Tab"},
+        {HotkeyScope::UserCard, "User card"},
+        {HotkeyScope::Window, "Window"},
     };
     pajlada::Signals::NoArgSignal onItemsUpdated;
     std::map<HotkeyScope, std::set<QString>> savedActions;

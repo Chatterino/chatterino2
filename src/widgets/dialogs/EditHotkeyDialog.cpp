@@ -13,11 +13,11 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
 {
     this->ui_->setupUi(this);
     const auto app = getApp();
-    for (unsigned long i = 0; i < app->hotkeys->hotkeyScopeNames.size(); i++)
+    for (const auto pair : app->hotkeys->hotkeyScopeNames)
     {
         this->ui_->scopePicker->addItem(
-            app->hotkeys->hotkeyScopeDisplayNames.at(i),
-            app->hotkeys->hotkeyScopeNames.at(i));
+            app->hotkeys->hotkeyScopeDisplayNames.find(pair.first)->second,
+            pair.second);
     }
     if (hotkey)
     {

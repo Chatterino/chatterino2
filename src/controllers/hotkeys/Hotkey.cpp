@@ -43,8 +43,9 @@ std::vector<QString> Hotkey::arguments() const
 
 QString Hotkey::getCategory() const
 {
-    return getApp()->hotkeys->hotkeyScopeDisplayNames.at(
-        (unsigned long)(this->scope_));
+    return getApp()
+        ->hotkeys->hotkeyScopeDisplayNames.find(this->scope_)
+        ->second;
 }
 
 Qt::ShortcutContext Hotkey::getContext() const
