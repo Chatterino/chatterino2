@@ -58,7 +58,7 @@ void Helix::getUserByName(QString userName,
                           HelixFailureCallback failureCallback)
 {
     QStringList userIds;
-    QStringList userLogins{userName};
+    QStringList userLogins{std::move(userName)};
 
     this->fetchUsers(
         userIds, userLogins,
@@ -78,7 +78,7 @@ void Helix::getUserById(QString userId,
                         ResultCallback<HelixUser> successCallback,
                         HelixFailureCallback failureCallback)
 {
-    QStringList userIds{userId};
+    QStringList userIds{std::move(userId)};
     QStringList userLogins;
 
     this->fetchUsers(
@@ -136,7 +136,8 @@ void Helix::getUserFollowers(
     QString userId, ResultCallback<HelixUsersFollowsResponse> successCallback,
     HelixFailureCallback failureCallback)
 {
-    this->fetchUsersFollows("", userId, successCallback, failureCallback);
+    this->fetchUsersFollows("", std::move(userId), std::move(successCallback),
+                            std::move(failureCallback));
 }
 
 void Helix::getUserFollow(
@@ -145,7 +146,7 @@ void Helix::getUserFollow(
     HelixFailureCallback failureCallback)
 {
     this->fetchUsersFollows(
-        userId, targetId,
+        std::move(userId), std::move(targetId),
         [successCallback](const auto &response) {
             if (response.data.empty())
             {
@@ -155,7 +156,7 @@ void Helix::getUserFollow(
 
             successCallback(true, response.data[0]);
         },
-        failureCallback);
+        std::move(failureCallback));
 }
 
 void Helix::fetchStreams(
@@ -209,7 +210,7 @@ void Helix::getStreamById(QString userId,
                           ResultCallback<bool, HelixStream> successCallback,
                           HelixFailureCallback failureCallback)
 {
-    QStringList userIds{userId};
+    QStringList userIds{std::move(userId)};
     QStringList userLogins;
 
     this->fetchStreams(
@@ -230,7 +231,7 @@ void Helix::getStreamByName(QString userName,
                             HelixFailureCallback failureCallback)
 {
     QStringList userIds;
-    QStringList userLogins{userName};
+    QStringList userLogins{std::move(userName)};
 
     this->fetchStreams(
         userIds, userLogins,
@@ -295,11 +296,47 @@ void Helix::fetchGames(QStringList gameIds, QStringList gameNames,
         .execute();
 }
 
+void Helix::searchGames(QString gameName,
+                        ResultCallback<std::vector<HelixGame>> successCallback,
+                        HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("query", gameName);
+
+    this->makeRequest("search/categories", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixGame> games;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                games.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(games);
+
+            return Success;
+        })
+        .onError([failureCallback](auto /*result*/) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
 void Helix::getGameById(QString gameId,
                         ResultCallback<HelixGame> successCallback,
                         HelixFailureCallback failureCallback)
 {
-    QStringList gameIds{gameId};
+    QStringList gameIds{std::move(gameId)};
     QStringList gameNames;
 
     this->fetchGames(
@@ -409,7 +446,7 @@ void Helix::createClip(QString channelId,
                 break;
             }
         })
-        .finally(finallyCallback)
+        .finally(std::move(finallyCallback))
         .execute();
 }
 
@@ -578,6 +615,48 @@ void Helix::unblockUser(QString targetUserId,
         .execute();
 }
 
+void Helix::updateChannel(QString broadcasterId, QString gameId,
+                          QString language, QString title,
+                          std::function<void(NetworkResult)> successCallback,
+                          HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    auto data = QJsonDocument();
+    auto obj = QJsonObject();
+    if (!gameId.isEmpty())
+    {
+        obj.insert("game_id", gameId);
+    }
+    if (!language.isEmpty())
+    {
+        obj.insert("broadcaster_language", language);
+    }
+    if (!title.isEmpty())
+    {
+        obj.insert("title", title);
+    }
+
+    if (title.isEmpty() && gameId.isEmpty() && language.isEmpty())
+    {
+        qCDebug(chatterinoCommon) << "Tried to update channel with no changes!";
+        return;
+    }
+
+    data.setObject(obj);
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+    this->makeRequest("channels", urlQuery)
+        .type(NetworkRequestType::Patch)
+        .header("Content-Type", "application/json")
+        .payload(data.toJson())
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            successCallback(result);
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult result) {
+            failureCallback();
+        })
+        .execute();
+}
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
@@ -611,8 +690,8 @@ NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 
 void Helix::update(QString clientId, QString oauthToken)
 {
-    this->clientId = clientId;
-    this->oauthToken = oauthToken;
+    this->clientId = std::move(clientId);
+    this->oauthToken = std::move(oauthToken);
 }
 
 void Helix::initialize()

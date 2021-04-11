@@ -1,6 +1,6 @@
 [submodule "lib/libcommuni"]
 	path = lib/libcommuni
-	url = https://github.com/communi/libcommuni
+	url = https://github.com/Chatterino/libcommuni
 [submodule "lib/qBreakpad"]
 	path = lib/qBreakpad
 	url = https://github.com/jiakuan/qBreakpad.git
@@ -25,3 +25,6 @@
 [submodule "lib/websocketpp"]
 	path = lib/websocketpp
 	url = https://github.com/ziocleto/websocketpp
+[submodule "cmake/sanitizers-cmake"]
+	path = cmake/sanitizers-cmake
+	url = https://github.com/arsenm/sanitizers-cmake

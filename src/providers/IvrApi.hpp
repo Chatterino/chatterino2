@@ -29,6 +29,41 @@ struct IvrSubage {
     }
 };
 
+struct IvrEmoteSet {
+    const QString setId;
+    const QString displayName;
+    const QString login;
+    const QString id;
+    const QString tier;
+    const QJsonArray emotes;
+
+    IvrEmoteSet(QJsonObject root)
+        : setId(root.value("setID").toString())
+        , displayName(root.value("channelName").toString())
+        , login(root.value("channelLogin").toString())
+        , id(root.value("channelID").toString())
+        , tier(root.value("tier").toString())
+        , emotes(root.value("emotes").toArray())
+
+    {
+    }
+};
+
+struct IvrEmote {
+    const QString code;
+    const QString id;
+    const QString setId;
+    const QString url;
+
+    IvrEmote(QJsonObject root)
+        : code(root.value("token").toString())
+        , id(root.value("id").toString())
+        , setId(root.value("setID").toString())
+        , url(root.value("url_3x").toString())
+    {
+    }
+};
+
 class IvrApi final : boost::noncopyable
 {
 public:
@@ -36,6 +71,12 @@ public:
     void getSubage(QString userName, QString channelName,
                    ResultCallback<IvrSubage> resultCallback,
                    IvrFailureCallback failureCallback);
+
+    // https://api.ivr.fi/docs#tag/Twitch/paths/~1twitch~1emoteset~1{setid}/get
+    // however, we use undocumented endpoint, which takes ?set_id=1,2,3,4,... as query parameter
+    void getBulkEmoteSets(QString emoteSetList,
+                          ResultCallback<QJsonArray> successCallback,
+                          IvrFailureCallback failureCallback);
 
     static void initialize();
 
