@@ -88,6 +88,7 @@
 - Bugfix: Fix quickswitcher not respecting order of tabs when filtering (#2519, #2561)
 - Bugfix: Fix GNOME not associating Chatterino's window with its desktop entry (#1863, #2587)
 - Bugfix: Fix buffer overflow in emoji parsing. (#2602)
+- Bugfix: Fix windows being brought back to life after the settings dialog was closed. (#1892)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)
