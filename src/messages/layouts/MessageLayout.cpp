@@ -39,7 +39,7 @@ namespace {
 }  // namespace
 
 MessageLayout::MessageLayout(MessagePtr message)
-    : message_(message)
+    : message_(std::move(message))
     , container_(std::make_shared<MessageLayoutContainer>())
 {
     DebugCount::increase("message layout");

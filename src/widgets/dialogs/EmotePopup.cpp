@@ -11,6 +11,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QHBoxLayout>
@@ -177,6 +178,20 @@ EmotePopup::EmotePopup(QWidget *parent)
     });
     createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
         notebook->selectPreviousTab();
+    });
+
+    // Scroll with Page Up / Page Down
+    createWindowShortcut(this, "PgUp", [=] {
+        auto &scrollbar =
+            dynamic_cast<ChannelView *>(notebook->getSelectedPage())
+                ->getScrollBar();
+        scrollbar.offset(-scrollbar.getLargeChange());
+    });
+    createWindowShortcut(this, "PgDown", [=] {
+        auto &scrollbar =
+            dynamic_cast<ChannelView *>(notebook->getSelectedPage())
+                ->getScrollBar();
+        scrollbar.offset(scrollbar.getLargeChange());
     });
 }
 

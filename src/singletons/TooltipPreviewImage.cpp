@@ -33,7 +33,7 @@ TooltipPreviewImage::TooltipPreviewImage()
 
 void TooltipPreviewImage::setImage(ImagePtr image)
 {
-    this->image_ = image;
+    this->image_ = std::move(image);
 
     this->refreshTooltipWidgetPixmap();
 }

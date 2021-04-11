@@ -291,6 +291,11 @@ public:
         ResultCallback<std::vector<HelixTag>, QString> successCallback,
         HelixFailureCallback failureCallback);
 
+    // https://dev.twitch.tv/docs/api/reference#search-categories
+    void searchGames(QString gameName,
+                     ResultCallback<std::vector<HelixGame>> successCallback,
+                     HelixFailureCallback failureCallback);
+
     void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
                      HelixFailureCallback failureCallback);
 
