@@ -45,6 +45,7 @@ add_executable(${PROJECT_NAME}
     ${chatterino_SOURCES}
     ${test_SOURCES}
     )
+add_sanitizers(${PROJECT_NAME})
 
 # Enable autogeneration of Qts MOC/RCC/UIC
 set_target_properties(${PROJECT_NAME}
