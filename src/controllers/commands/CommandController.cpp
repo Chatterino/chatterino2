@@ -687,15 +687,15 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
         if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
         {
-            getHelix()->fetchGames(
-                QStringList(), {words.mid(1).join(" ")},
+            getHelix()->searchGames(
+                words.mid(1).join(" "),
                 [channel, twitchChannel](std::vector<HelixGame> games) {
-                    if (games.size() == 0)
+                    if (games.empty())
                     {
                         channel->addMessage(
                             makeSystemMessage("Game not found."));
                     }
-                    else  // 0 or 1 games
+                    else  // 1 or more games
                     {
                         auto status = twitchChannel->accessStreamStatus();
                         getHelix()->updateChannel(
