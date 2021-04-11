@@ -104,13 +104,11 @@ namespace {
                                 });
         };
 
-	// Ignore messages with this emote (useful for weeb emotes)
-	menu.addAction("Ignore this emote",
-		       [name = emote.getCopyString()] {
-			   getSettings()->ignoredMessages.append
-			       (IgnorePhrase(name, false, true,
-					     "", true));
-		       });
+        // Ignore messages with this emote (useful for weeb emotes)
+        menu.addAction("Ignore this emote", [name = emote.getCopyString()] {
+            getSettings()->ignoredMessages.append(
+                IgnorePhrase(name, false, true, "", true));
+        });
 
         if (creatorFlags.has(MessageElementFlag::TwitchEmote))
         {
