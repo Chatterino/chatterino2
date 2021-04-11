@@ -18,6 +18,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/ignores/IgnorePhrase.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
@@ -102,6 +103,14 @@ namespace {
                                     QDesktopServices::openUrl(QUrl(url.string));
                                 });
         };
+
+	// Ignore messages with this emote (useful for weeb emotes)
+	menu.addAction("Ignore this emote",
+		       [name = emote.getCopyString()] {
+			   getSettings()->ignoredMessages.append
+			       (IgnorePhrase(name, false, true,
+					     "", true));
+		       });
 
         if (creatorFlags.has(MessageElementFlag::TwitchEmote))
         {
