@@ -106,7 +106,7 @@ void Args::applyCustomChannelLayout(const QString &argValue)
         return QRect(-1, -1, -1, -1);
     }();
 
-    window.geometry_ = std::move(configMainLayout);
+    window.geometry_ = configMainLayout;
 
     QStringList channelArgList = argValue.split(";");
     for (const QString &channelArg : channelArgList)

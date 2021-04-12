@@ -284,7 +284,7 @@ void SplitHeader::initializeLayout()
         // dropdown
         this->dropdownButton_ = makeWidget<Button>([&](auto w) {
             /// XXX: this never gets disconnected
-            this->split_->channelChanged.connect([this] {
+            QObject::connect(w, &Button::leftMousePress, this, [this] {
                 this->dropdownButton_->setMenu(this->createMainMenu());
             });
         }),

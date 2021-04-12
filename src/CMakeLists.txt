@@ -1,5 +1,3 @@
-include(SourceFileUtils)
-
 set(SOURCE_FILES main.cpp
         Application.cpp
         Application.hpp
@@ -469,9 +467,10 @@ elseif (APPLE)
 endif ()
 
 # Generate source groups for use in IDEs
-generate_source_groups(${SOURCE_FILES})
+source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+add_sanitizers(${PROJECT_NAME})
 
 target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
 

@@ -4,6 +4,7 @@ include(FeatureSummary)
 
 list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake"
+    "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
 project(chatterino VERSION 2.2.3)
@@ -43,6 +44,8 @@ find_package(Qt5 REQUIRED
 if (WIN32)
     find_package(WinToast REQUIRED)
 endif ()
+
+find_package(Sanitizers)
 
 # Find boost on the system
 find_package(Boost REQUIRED)

@@ -12,6 +12,8 @@
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Shortcut.hpp"
+#include "widgets/Notebook.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QHBoxLayout>
@@ -218,6 +220,20 @@ void EmotePopup::addShortcuts()
         };
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::EmotePopup, emotePopupActions, this);
+
+    // Scroll with Page Up / Page Down
+    createWindowShortcut(this, "PgUp", [this] {
+        auto &scrollbar =
+            dynamic_cast<ChannelView *>(this->notebook_->getSelectedPage())
+                ->getScrollBar();
+        scrollbar.offset(-scrollbar.getLargeChange());
+    });
+    createWindowShortcut(this, "PgDown", [this] {
+        auto &scrollbar =
+            dynamic_cast<ChannelView *>(this->notebook_->getSelectedPage())
+                ->getScrollBar();
+        scrollbar.offset(scrollbar.getLargeChange());
+    });
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)
