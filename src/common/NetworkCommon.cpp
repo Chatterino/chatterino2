@@ -15,19 +15,16 @@ std::vector<std::pair<QByteArray, QByteArray>> parseHeaderList(
 
     for (const auto &headerPair : headerPairs)
     {
-        // Split the header pair into a list of parts
-        // We expect the first part to be the header name, and the second part to be the header value
-        auto headerParts = headerPair.trimmed().split(":");
+        const auto headerName =
+            headerPair.section(":", 0, 0).trimmed().toUtf8();
+        const auto headerValue = headerPair.section(":", 1).trimmed().toUtf8();
 
-        if (headerParts.size() != 2)
+        if (headerName.isEmpty() || headerValue.isEmpty())
         {
-            // The header part either didn't contain a : or contained too many :, making it an invalid header pair
+            // The header part either didn't contain a : or the name/value was empty
             // Skip the value
             continue;
         }
-
-        const auto headerName = headerParts[0].trimmed().toUtf8();
-        const auto headerValue = headerParts[1].trimmed().toUtf8();
 
         res.emplace_back(headerName, headerValue);
     }
