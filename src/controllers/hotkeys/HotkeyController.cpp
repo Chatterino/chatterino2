@@ -486,6 +486,20 @@ void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
                 QKeySequence("Ctrl+Shift+Tab"), "openTab", args,
                 "default emote popup select previous tab shortcut");
         }
+        {
+            std::vector<QString> args;
+            args.push_back("up");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::EmotePopup,
+                                QKeySequence("PgUp"), "scrollPage", args,
+                                "default emote popup scroll up shortcut");
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("down");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::EmotePopup,
+                                QKeySequence("PgDown"), "scrollPage", args,
+                                "default emote popup scroll down shortcut");
+        }
     }
 
     // select channel popup

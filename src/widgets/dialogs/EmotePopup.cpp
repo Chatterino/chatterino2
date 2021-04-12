@@ -217,23 +217,36 @@ void EmotePopup::addShortcuts()
                  this->close();
                  return "";
              }},
+            {"scrollPage",
+             [this](std::vector<QString> arguments) -> QString {
+                 if (arguments.size() == 0)
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "scrollPage hotkey called without arguments!";
+                     return "scrollPage hotkey called without arguments!";
+                 }
+                 auto direction = arguments.at(0);
+                 auto channelView = dynamic_cast<ChannelView *>(
+                     this->notebook_->getSelectedPage());
+
+                 auto &scrollbar = channelView->getScrollBar();
+                 if (direction == "up")
+                 {
+                     scrollbar.offset(-scrollbar.getLargeChange());
+                 }
+                 else if (direction == "down")
+                 {
+                     scrollbar.offset(scrollbar.getLargeChange());
+                 }
+                 else
+                 {
+                     qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
+                 }
+                 return "";
+             }},
         };
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::EmotePopup, emotePopupActions, this);
-
-    // Scroll with Page Up / Page Down
-    createWindowShortcut(this, "PgUp", [this] {
-        auto &scrollbar =
-            dynamic_cast<ChannelView *>(this->notebook_->getSelectedPage())
-                ->getScrollBar();
-        scrollbar.offset(-scrollbar.getLargeChange());
-    });
-    createWindowShortcut(this, "PgDown", [this] {
-        auto &scrollbar =
-            dynamic_cast<ChannelView *>(this->notebook_->getSelectedPage())
-                ->getScrollBar();
-        scrollbar.offset(scrollbar.getLargeChange());
-    });
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)
