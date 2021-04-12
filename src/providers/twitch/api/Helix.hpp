@@ -272,9 +272,6 @@ public:
     void fetchGames(QStringList gameIds, QStringList gameNames,
                     ResultCallback<std::vector<HelixGame>> successCallback,
                     HelixFailureCallback failureCallback);
-    void searchGames(QString query,
-                     ResultCallback<std::vector<HelixGame>> successCallback,
-                     HelixFailureCallback failureCallback);
 
     void updateStreamTags(QString broadcasterId, QStringList tags,
                           std::function<void()> successCallback,
