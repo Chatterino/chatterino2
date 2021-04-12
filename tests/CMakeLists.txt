@@ -9,6 +9,7 @@ set(chatterino_SOURCES
 
     ${CMAKE_SOURCE_DIR}/src/common/ChatterinoSetting.cpp
     ${CMAKE_SOURCE_DIR}/src/common/Modes.cpp
+    ${CMAKE_SOURCE_DIR}/src/common/NetworkCommon.cpp
     ${CMAKE_SOURCE_DIR}/src/common/NetworkManager.cpp
     ${CMAKE_SOURCE_DIR}/src/common/NetworkPrivate.cpp
     ${CMAKE_SOURCE_DIR}/src/common/NetworkRequest.cpp

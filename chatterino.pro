@@ -134,6 +134,7 @@ SOURCES += \
     src/common/Env.cpp \
     src/common/LinkParser.cpp \
     src/common/Modes.cpp \
+    src/common/NetworkCommon.cpp \
     src/common/NetworkManager.cpp \
     src/common/NetworkPrivate.cpp \
     src/common/NetworkRequest.cpp \

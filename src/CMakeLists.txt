@@ -30,6 +30,8 @@ set(SOURCE_FILES main.cpp
         common/LinkParser.hpp
         common/Modes.cpp
         common/Modes.hpp
+        common/NetworkCommon.cpp
+        common/NetworkCommon.hpp
         common/NetworkManager.cpp
         common/NetworkManager.hpp
         common/NetworkPrivate.cpp
