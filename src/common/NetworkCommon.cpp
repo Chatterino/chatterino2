@@ -4,10 +4,10 @@
 
 namespace chatterino {
 
-std::vector<std::pair<QString, QString>> parseHeaderList(
+std::vector<std::pair<QByteArray, QByteArray>> parseHeaderList(
     const QString &headerListString)
 {
-    std::vector<std::pair<QString, QString>> res;
+    std::vector<std::pair<QByteArray, QByteArray>> res;
 
     // Split the string into a list of header pairs
     // e.g. "Authorization:secretkey;NextHeader:boo" turning into ["Authorization:secretkey","NextHeader:boo"]

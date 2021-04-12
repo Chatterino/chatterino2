@@ -31,7 +31,7 @@ enum class NetworkRequestType {
 // We return a vector of pairs, where the first value is the header name and the second value is the header value
 //
 // e.g. "Authorization:secretkey;NextHeader:boo" will return [{"Authorization", "secretkey"}, {"NextHeader", "boo"}]
-std::vector<std::pair<QString, QString>> parseHeaderList(
+std::vector<std::pair<QByteArray, QByteArray>> parseHeaderList(
     const QString &headerListString);
 
 }  // namespace chatterino
