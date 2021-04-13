@@ -328,6 +328,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            "Google",
                        },
                        s.emojiSet);
+    layout.addCheckbox("Remove spaces around emotes",
+                       s.removeSpacesBetweenEmotes);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(

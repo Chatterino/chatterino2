@@ -3,9 +3,11 @@ Chatterino 2 [![GitHub Actions Build (Windows, Ubuntu, MacOS)](https://github.co
 ============
 
 ## Dankerino
+
 Dankerino is a fork of Chatterino 2.
 
 ### Features of Dankerino
+
  - Editing stream settings straight from the client, with both commands (`/setgame`, `/settitle`) and graphical user interface.
  - Shortcuts for whispering Supibot `/$`.
  - Actually acknowledge Chatterino 2 and Dankerino contributors.

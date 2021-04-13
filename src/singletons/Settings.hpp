@@ -121,6 +121,8 @@ public:
                                           -0.5f};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
+    BoolSetting removeSpacesBetweenEmotes = {
+        "/appearance/removeSpacesBetweenEmotes", false};
 
     // Badges
     BoolSetting showBadgesGlobalAuthority = {

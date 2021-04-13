@@ -382,6 +382,15 @@ void TwitchMessageBuilder::addWords(
 
             if (currentTwitchEmote.start == cursor)
             {
+                {
+                    auto &prevElem = this->message().elements.back();
+                    if (getSettings()->removeSpacesBetweenEmotes &&
+                        prevElem->getFlags().hasAny(
+                            MessageElementFlag::EmoteImages))
+                    {
+                        prevElem->setTrailingSpace(false);
+                    }
+                }
                 // This emote exists right at the start of the word!
                 this->emplace<EmoteElement>(currentTwitchEmote.ptr,
                                             MessageElementFlag::TwitchEmote);
@@ -450,6 +459,7 @@ void TwitchMessageBuilder::addTextOrEmoji(EmotePtr emote)
 void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 {
     auto string = QString(string_);
+    auto &prevElem = this->message().elements.back();
 
     if (this->hasBits_ && this->tryParseCheermote(string))
     {
@@ -465,6 +475,11 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
     if (this->tryAppendEmote({string}))
     {
         // Successfully appended an emote
+        if (getSettings()->removeSpacesBetweenEmotes && prevElem &&
+            prevElem->getFlags().hasAny(MessageElementFlag::EmoteImages))
+        {
+            prevElem->setTrailingSpace(false);
+        }
         return;
     }
 
