@@ -63,29 +63,32 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       # WINDOWS
-
       - name: Cache conan packages
         if: startsWith(matrix.os, 'windows')
         uses: actions/cache@v2.1.4
         with:
-          key: ${{ runner.os }}-conan-${{ hashFiles('**/conanfile.txt') }}-20210307
+          key: ${{ runner.os }}-conan-${{ hashFiles('**/conanfile.txt') }}-20210412
           path: C:/.conan/
 
+      - name: Add Conan to path
+        if: startsWith(matrix.os, 'windows')
+        run: echo "C:\Program Files\Conan\conan\" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        
       - name: Install dependencies (Windows)
         if: startsWith(matrix.os, 'windows')
         run: |
             choco install conan -y
-
-            refreshenv
-        shell: cmd
+        
+      - name: Enable Developer Command Prompt
+        if: startsWith(matrix.os, 'windows')
+        uses: ilammy/msvc-dev-cmd@v1.7.0
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'qmake'
         run: |
-            call "%programfiles(x86)%\Microsoft Visual Studio\%vs_version%\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
-            "C:\Program Files\Conan\conan\conan.exe" install ..
+            conan install ..
             qmake ..
             set cl=/MP
             nmake /S /NOLOGO
@@ -93,15 +96,13 @@ jobs:
             cp release/chatterino.exe Chatterino2/
             echo nightly > Chatterino2/modes
             7z a chatterino-windows-x86-64.zip Chatterino2/
-        shell: cmd
-
+            
       - name: Build with CMake (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'cmake'
         run: |
-            call "%programfiles(x86)%\Microsoft Visual Studio\%vs_version%\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
             mkdir build
             cd build
-            "C:\Program Files\Conan\conan\conan.exe" install ..
+            conan install ..
             cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..
             set cl=/MP
             nmake /S /NOLOGO
@@ -109,17 +110,10 @@ jobs:
             cp bin/chatterino.exe Chatterino2/
             echo nightly > Chatterino2/modes
             7z a chatterino-windows-x86-64.zip Chatterino2/
-        shell: cmd
-
-      - name: Ensure build succeeded (Windows)
-        if: startsWith(matrix.os, 'windows')
-        run: |
-            cd build
-            ls Chatterino2/chatterino.exe
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v2.2.2
+        uses: actions/upload-artifact@v2.2.3
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ matrix.build-system }}.zip
           path: build/chatterino-windows-x86-64.zip
@@ -176,7 +170,7 @@ jobs:
 
       - name: Upload artifact (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.2.2
+        uses: actions/upload-artifact@v2.2.3
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
           path: build/Chatterino-x86_64.AppImage
@@ -221,7 +215,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v2.2.2
+        uses: actions/upload-artifact@v2.2.3
         with:
           name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
           path: build/chatterino-osx.dmg
@@ -245,32 +239,32 @@ jobs:
               Nightly Build
           prerelease: true
 
-      - uses: actions/download-artifact@v2.0.8
+      - uses: actions/download-artifact@v2.0.9
         with:
           name: chatterino-windows-x86-64-5.15.2-qmake.zip
           path: windows/
 
-      - uses: actions/download-artifact@v2.0.8
+      - uses: actions/download-artifact@v2.0.9
         with:
           name: chatterino-windows-x86-64-5.15.2-cmake.zip
           path: windows-cmake/
 
-      - uses: actions/download-artifact@v2.0.8
+      - uses: actions/download-artifact@v2.0.9
         with:
           name: Chatterino-x86_64-5.15.2-qmake.AppImage
           path: linux/
 
-      - uses: actions/download-artifact@v2.0.8
+      - uses: actions/download-artifact@v2.0.9
         with:
           name: Chatterino-x86_64-5.15.2-cmake.AppImage
           path: linux-cmake/
 
-      - uses: actions/download-artifact@v2.0.8
+      - uses: actions/download-artifact@v2.0.9
         with:
           name: chatterino-osx-5.15.2-qmake.dmg
           path: macos/
 
-      - uses: actions/download-artifact@v2.0.8
+      - uses: actions/download-artifact@v2.0.9
         with:
           name: chatterino-osx-5.15.2-cmake.dmg
           path: macos-cmake/

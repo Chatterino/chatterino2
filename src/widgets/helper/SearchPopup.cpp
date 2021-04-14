@@ -66,7 +66,7 @@ SearchPopup::SearchPopup(QWidget *parent)
 
 void SearchPopup::setChannelFilters(FilterSetPtr filters)
 {
-    this->channelFilters_ = filters;
+    this->channelFilters_ = std::move(filters);
 }
 
 void SearchPopup::setChannel(const ChannelPtr &channel)
@@ -155,6 +155,8 @@ void SearchPopup::initLayout()
 
         this->setLayout(layout1);
     }
+
+    this->searchInput_->setFocus();
 }
 
 std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(

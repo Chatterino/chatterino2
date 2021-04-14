@@ -252,6 +252,11 @@ public:
                     ResultCallback<std::vector<HelixGame>> successCallback,
                     HelixFailureCallback failureCallback);
 
+    // https://dev.twitch.tv/docs/api/reference#search-categories
+    void searchGames(QString gameName,
+                     ResultCallback<std::vector<HelixGame>> successCallback,
+                     HelixFailureCallback failureCallback);
+
     void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
                      HelixFailureCallback failureCallback);
 
@@ -295,6 +300,12 @@ public:
     void unblockUser(QString targetUserId,
                      std::function<void()> successCallback,
                      HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#modify-channel-information
+    void updateChannel(QString broadcasterId, QString gameId, QString language,
+                       QString title,
+                       std::function<void(NetworkResult)> successCallback,
+                       HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 
