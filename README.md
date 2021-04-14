@@ -8,20 +8,21 @@ Dankerino is a fork of Chatterino 2.
 
 ### Features of Dankerino
 
- - Editing stream settings straight from the client, with both commands (`/setgame`, `/settitle`) and graphical user interface.
- - Shortcuts for whispering Supibot `/$`.
- - Actually acknowledge Chatterino 2 and Dankerino contributors.
+- Editing stream settings straight from the client, with both commands (`/setgame`, `/settitle`) and graphical user interface.
+- Shortcuts for whispering Supibot `/$`.
+- Actually acknowledge Chatterino 2 and Dankerino contributors.
 
 ### Screenshots
+
 ![Example of editing stream settings](./images_dankerino/example_stream_settings.png)
 
 ### Goals of Dankerino
 
- - Add QOL and features (or fixes) that aren't accepted into the upstream repo.
+- Add QOL and features (or fixes) that aren't accepted into the upstream repo.
 
 ### Non-goals of Dankerino
 
- - Being something *different* than Chatterino 2. All features from upstream should be present in Dankerino.
+- Being something _different_ than Chatterino 2. All features from upstream should be present in Dankerino.
 
 ## Original Chatterino 2 readme
 
