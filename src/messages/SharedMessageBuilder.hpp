@@ -36,6 +36,7 @@ protected:
     virtual void parse();
 
     virtual void parseUsernameColor();
+    void setRandomUsernameColor();
 
     virtual void parseUsername();
 
