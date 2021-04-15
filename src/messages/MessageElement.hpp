@@ -60,6 +60,7 @@ enum class MessageElementFlag : int64_t {
     BadgeGlobalAuthority = (1LL << 14),
 
     // Slot 2: Twitch
+    // - VIP badge
     // - Moderator badge
     // - Broadcaster badge
     BadgeChannelAuthority = (1LL << 15),

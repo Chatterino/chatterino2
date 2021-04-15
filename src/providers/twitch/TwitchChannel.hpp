@@ -100,6 +100,7 @@ public:
 
     // Badges
     boost::optional<EmotePtr> ffzCustomModBadge() const;
+    boost::optional<EmotePtr> ffzCustomVipBadge() const;
     boost::optional<EmotePtr> twitchBadge(const QString &set,
                                           const QString &version) const;
 
@@ -171,6 +172,7 @@ protected:
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;
+    Atomic<boost::optional<EmotePtr>> ffzCustomVipBadge_;
 
 private:
     // Badges

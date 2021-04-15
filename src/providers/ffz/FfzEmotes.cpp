@@ -86,6 +86,36 @@ namespace {
         return {Success, std::move(emotes)};
     }
 
+    boost::optional<EmotePtr> parseVipBadge(const QJsonObject &jsonRoot)
+    {
+        boost::optional<EmotePtr> vipBadge;
+
+        auto room = jsonRoot.value("room").toObject();
+        auto vipUrls = room.value("vip_badge").toObject();
+        if (!vipUrls.isEmpty())
+        {
+            auto vipBadge1x = getEmoteLink(vipUrls, "1");
+            auto vipBadge2x = getEmoteLink(vipUrls, "2");
+            auto vipBadge3x = getEmoteLink(vipUrls, "4");
+
+            auto vipBadgeImageSet = ImageSet{
+                Image::fromUrl(vipBadge1x, 1),
+                vipBadge2x.string.isEmpty() ? Image::getEmpty()
+                                            : Image::fromUrl(vipBadge2x, 0.5),
+                vipBadge3x.string.isEmpty() ? Image::getEmpty()
+                                            : Image::fromUrl(vipBadge3x, 0.25),
+            };
+
+            vipBadge = std::make_shared<Emote>(Emote{
+                {""},
+                vipBadgeImageSet,
+                Tooltip{"VIP"},
+                vipBadge1x,
+            });
+        }
+        return vipBadge;
+    }
+
     boost::optional<EmotePtr> parseModBadge(const QJsonObject &jsonRoot)
     {
         boost::optional<EmotePtr> modBadge;
@@ -199,6 +229,7 @@ void FfzEmotes::loadChannel(
     std::weak_ptr<Channel> channel, const QString &channelId,
     std::function<void(EmoteMap &&)> emoteCallback,
     std::function<void(boost::optional<EmotePtr>)> modBadgeCallback,
+    std::function<void(boost::optional<EmotePtr>)> vipBadgeCallback,
     bool manualRefresh)
 {
     qCDebug(chatterinoFfzemotes)
@@ -208,16 +239,19 @@ void FfzEmotes::loadChannel(
 
         .timeout(20000)
         .onSuccess([emoteCallback = std::move(emoteCallback),
-                    modBadgeCallback = std::move(modBadgeCallback), channel,
+                    modBadgeCallback = std::move(modBadgeCallback),
+                    vipBadgeCallback = std::move(vipBadgeCallback), channel,
                     manualRefresh](auto result) -> Outcome {
             auto json = result.parseJson();
             auto emoteMap = parseChannelEmotes(json);
             auto modBadge = parseModBadge(json);
+            auto vipBadge = parseVipBadge(json);
 
             bool hasEmotes = !emoteMap.empty();
 
             emoteCallback(std::move(emoteMap));
             modBadgeCallback(std::move(modBadge));
+            vipBadgeCallback(std::move(vipBadge));
             if (auto shared = channel.lock(); manualRefresh)
             {
                 if (hasEmotes)
