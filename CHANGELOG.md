@@ -14,6 +14,7 @@
 - Minor: Optionally remove spaces between emotes (Mm2PL/dankerino#53)
 - Minor: Split colorizing usernames on IRC and Twitch into two settings (Mm2PL/dankerino#56)
 - Minor: Add option to lowercase usernames (Mm2PL/dankerino#57)
+- Minor: Add support for joining parallel universes (Mm2PL/dankerino#58)
 
 ### Chatterino
 

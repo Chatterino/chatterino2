@@ -385,7 +385,15 @@ void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
         lastMessage.push(now);
     }
 
-    this->sendMessage(channel->getName(), message);
+    if (channel->getName().startsWith("$"))
+    {
+        this->sendRawMessage("PRIVMSG " + channel->getName().mid(1) + " :" +
+                             message);
+    }
+    else
+    {
+        this->sendMessage(channel->getName(), message);
+    }
     sent = true;
 }
 

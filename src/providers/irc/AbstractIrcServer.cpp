@@ -214,24 +214,38 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
     }
 
     this->channels.insert(channelName, chan);
-    this->connections_.emplace_back(
-        chan->destroyed.connect([this, channelName] {
-            // fourtf: issues when the server itself is destroyed
+    this->connections_.emplace_back(chan->destroyed.connect([this,
+                                                             channelName] {
+        // fourtf: issues when the server itself is destroyed
 
-            qCDebug(chatterinoIrc) << "[AbstractIrcServer::addChannel]"
-                                   << channelName << "was destroyed";
-            this->channels.remove(channelName);
+        qCDebug(chatterinoIrc) << "[AbstractIrcServer::addChannel]"
+                               << channelName << "was destroyed";
+        this->channels.remove(channelName);
 
-            if (this->readConnection_)
+        if (this->readConnection_)
+        {
+            if (channelName.at(0) == "$")
+            {
+                this->readConnection_->sendRaw("PART " + channelName.mid(1));
+            }
+            else
             {
                 this->readConnection_->sendRaw("PART #" + channelName);
             }
+        }
 
-            if (this->writeConnection_ && this->hasSeparateWriteConnection())
+        if (this->writeConnection_ && this->hasSeparateWriteConnection())
+        {
+            if (channelName.at(0) == "$")
+            {
+                this->writeConnection_->sendRaw("PART " + channelName.mid(1));
+            }
+            else
             {
                 this->writeConnection_->sendRaw("PART #" + channelName);
             }
-        }));
+        }
+    }));
 
     // join irc channel
     {
@@ -241,7 +255,15 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         {
             if (this->readConnection_->isConnected())
             {
-                this->readConnection_->sendRaw("JOIN #" + channelName);
+                if (channelName.at(0) == "$")
+                {
+                    this->readConnection_->sendRaw("JOIN " +
+                                                   channelName.mid(1));
+                }
+                else
+                {
+                    this->readConnection_->sendRaw("JOIN #" + channelName);
+                }
             }
         }
 
@@ -249,7 +271,15 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         {
             if (this->readConnection_->isConnected())
             {
-                this->writeConnection_->sendRaw("JOIN #" + channelName);
+                if (channelName.at(0) == "$")
+                {
+                    this->writeConnection_->sendRaw("JOIN " +
+                                                    channelName.mid(1));
+                }
+                else
+                {
+                    this->writeConnection_->sendRaw("JOIN #" + channelName);
+                }
             }
         }
     }
@@ -309,7 +339,14 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
     {
         if (auto channel = weak.lock())
         {
-            connection->sendRaw("JOIN #" + channel->getName());
+            if (channel->getName().at(0) == "$")
+            {
+                connection->sendRaw("JOIN " + channel->getName().mid(1));
+            }
+            else
+            {
+                connection->sendRaw("JOIN #" + channel->getName());
+            }
         }
     }
 
