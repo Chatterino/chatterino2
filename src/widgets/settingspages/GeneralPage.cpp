@@ -587,6 +587,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
+    layout.addCheckbox("Lowercase usernames", s.lowercaseUsernames);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
     layout.addCheckbox("Automatically close user popup when it loses focus",

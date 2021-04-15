@@ -13,6 +13,7 @@
 - Major: Add support for Supibot AFKs in user cards (Mm2PL/dankerino#17)
 - Minor: Optionally remove spaces between emotes (Mm2PL/dankerino#53)
 - Minor: Split colorizing usernames on IRC and Twitch into two settings (Mm2PL/dankerino#56)
+- Minor: Add option to lowercase usernames (Mm2PL/dankerino#57)
 
 ### Chatterino
 

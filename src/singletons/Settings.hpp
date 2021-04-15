@@ -168,6 +168,7 @@ public:
     BoolSetting autorun = {"/behaviour/autorun", false};
     BoolSetting mentionUsersWithComma = {"/behaviour/mentionUsersWithComma",
                                          true};
+    BoolSetting lowercaseUsernames = {"/behaviour/lowercaseUsernames", false};
 
     /// Commands
     BoolSetting allowCommandsAtEnd = {"/commands/allowCommandsAtEnd", false};

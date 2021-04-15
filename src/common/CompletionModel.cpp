@@ -123,8 +123,17 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
                 for (const auto &name :
                      usernames->subrange(Prefix(usernamePrefix)))
                 {
-                    addString("@" + name + usernamePostfix,
-                              TaggedString::Type::Username);
+                    if (getSettings()->lowercaseUsernames)
+                    {
+                        addString(
+                            QString("@" + name + usernamePostfix).toLower(),
+                            TaggedString::Type::Username);
+                    }
+                    else
+                    {
+                        addString("@" + name + usernamePostfix,
+                                  TaggedString::Type::Username);
+                    }
                 }
             }
             else if (!getSettings()->userCompletionOnlyWithAt)
@@ -132,8 +141,16 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
                 for (const auto &name :
                      usernames->subrange(Prefix(usernamePrefix)))
                 {
-                    addString(name + usernamePostfix,
-                              TaggedString::Type::Username);
+                    if (getSettings()->lowercaseUsernames)
+                    {
+                        addString(QString(name + usernamePostfix).toLower(),
+                                  TaggedString::Type::Username);
+                    }
+                    else
+                    {
+                        addString(name + usernamePostfix,
+                                  TaggedString::Type::Username);
+                    }
                 }
             }
         }
