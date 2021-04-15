@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unversioned
+- Minor: Added confirmation when unfollowing/following or unblocking/blocking a user in the usercard (#2629)
 
 ## 2.3.0
 

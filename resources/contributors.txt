@@ -25,6 +25,7 @@ nuuls | https://github.com/nuuls |  | Contributor
 Chronophylos | https://github.com/Chronophylos |  | Contributor
 Ckath | https://github.com/Ckath |  | Contributor
 matijakevic | https://github.com/matijakevic |  | Contributor
+Auro | https://github.com/mrauro |  | Contributor
 nforro | https://github.com/nforro |  | Contributor
 vanolpfan | https://github.com/vanolpfan |  | Contributor
 23rd | https://github.com/23rd |  | Contributor
