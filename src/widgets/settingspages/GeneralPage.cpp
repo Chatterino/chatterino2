@@ -630,6 +630,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.enableExperimentalIrc);
     layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
+    layout.addCheckbox("Colorize usernames on IRC", s.colorizeNicknamesOnIrc);
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle,

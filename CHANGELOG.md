@@ -12,6 +12,7 @@
 - Major: Edit stream tags in GUI (Mm2PL/chatterino#12)
 - Major: Add support for Supibot AFKs in user cards (Mm2PL/dankerino#17)
 - Minor: Optionally remove spaces between emotes (Mm2PL/dankerino#53)
+- Minor: Split colorizing usernames on IRC and Twitch into two settings (Mm2PL/dankerino#56)
 
 ### Chatterino
 

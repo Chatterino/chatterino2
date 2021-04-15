@@ -86,6 +86,8 @@ public:
         "/appearance/messages/hideModerationActions", false};
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
                                      true};
+    BoolSetting colorizeNicknamesOnIrc = {
+        "/appearance/messages/colorizeNicknamesOnIrc", true};
 
     IntSetting tabDirection = {"/appearance/tabDirection",
                                NotebookTabDirection::Horizontal};

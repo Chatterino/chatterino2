@@ -103,8 +103,12 @@ void SharedMessageBuilder::parseUsernameColor()
 {
     if (getSettings()->colorizeNicknames)
     {
-        this->usernameColor_ = getRandomColor(this->ircMessage->nick());
+        this->setRandomUsernameColor();
     }
+}
+void SharedMessageBuilder::setRandomUsernameColor()
+{
+    this->usernameColor_ = getRandomColor(this->ircMessage->nick());
 }
 
 void SharedMessageBuilder::parseUsername()
