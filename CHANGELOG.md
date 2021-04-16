@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Added `in:<channels>` search filter to find messages sent in specific channels. (#2299, #2634)
+
 ## 2.3.0
 
 - Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377, #2528)
