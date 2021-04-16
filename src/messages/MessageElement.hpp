@@ -276,6 +276,16 @@ protected:
                                                  const QSize &size) override;
 };
 
+class VipBadgeElement : public BadgeElement
+{
+public:
+    VipBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
+
+protected:
+    MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
+                                                 const QSize &size) override;
+};
+
 class FfzBadgeElement : public BadgeElement
 {
 public:

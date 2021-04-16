@@ -1132,7 +1132,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
         {
             if (auto customVipBadge = this->twitchChannel->ffzCustomVipBadge())
             {
-                this->emplace<ModBadgeElement>(
+                this->emplace<VipBadgeElement>(
                         customVipBadge.get(),
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customVipBadge)->tooltip.string);
