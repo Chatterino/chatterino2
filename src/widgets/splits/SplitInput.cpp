@@ -376,15 +376,36 @@ void SplitInput::addShortcuts()
                  return "";
              }},
             {"copy",
-             [this](std::vector<QString>) -> QString {
-                 this->ui_.textEdit->copy();
-                 return "";
-             }},
-            {"copyFromChat",
-             [this](std::vector<QString>) -> QString {
-                 if (this->split_->view_->hasSelection())
+             [this](std::vector<QString> arguments) -> QString {
+                 qCWarning(chatterinoHotkeys) << "Hello from copy shortcut!";
+                 auto copyFromSplit = false;
+                 if (arguments.size() == 0)
+                 {
+                     return "copy action takes only one argument: the source "
+                            "of the copy \"split\", \"splitInput\" or "
+                            "\"auto\". If the source is \"split\", only text "
+                            "from the chat will be copied. If it is "
+                            "\"splitInput\", text from the input box will be "
+                            "copied. Automatic will pick whichever has a "
+                            "selection";
+                 }
+                 const auto &cursor = this->ui_.textEdit->textCursor();
+                 if (cursor.hasSelection())
+                 {
+                     copyFromSplit = false;
+                 }
+                 else
+                 {
+                     copyFromSplit = true;
+                 }
+
+                 if (copyFromSplit)
                  {
                      this->split_->copyToClipboard();
+                 }
+                 else
+                 {
+                     this->ui_.textEdit->copy();
                  }
                  return "";
              }},
