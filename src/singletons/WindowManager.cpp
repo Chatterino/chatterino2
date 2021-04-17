@@ -502,9 +502,6 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             QJsonArray filters;
             encodeFilters(node->getSplit(), filters);
             obj.insert("filters", filters);
-
-            obj.insert("flexh", node->getHorizontalFlex());
-            obj.insert("flexv", node->getVerticalFlex());
         }
         break;
         case SplitNode::HorizontalContainer:
@@ -524,6 +521,9 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
         }
         break;
     }
+
+    obj.insert("flexh", node->getHorizontalFlex());
+    obj.insert("flexv", node->getVerticalFlex());
 }
 
 void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
