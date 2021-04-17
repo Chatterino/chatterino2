@@ -771,6 +771,25 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
+    {
+        // check if user command exists
+        const auto it = this->userCommands_.find(commandName);
+        if (it != this->userCommands_.end())
+        {
+            text = getApp()->emotes->emojis.replaceShortCodes(
+                this->execCustomCommand(words, it.value(), dryRun));
+
+            words = text.split(' ', QString::SkipEmptyParts);
+
+            if (words.length() == 0)
+            {
+                return text;
+            }
+
+            commandName = words[0];
+        }
+    }
+
     // works only in a valid twitch channel
     if (!dryRun && twitchChannel != nullptr)
     {
@@ -779,15 +798,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         if (it != this->commands_.end())
         {
             return it.value()(words, channel);
-        }
-    }
-
-    {
-        // check if user command exists
-        const auto it = this->userCommands_.find(commandName);
-        if (it != this->userCommands_.end())
-        {
-            return this->execCustomCommand(words, it.value(), dryRun);
         }
     }
 

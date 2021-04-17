@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Allow for built-in Chatterino commands to be used in custom commands. (#2632)
 - Bugfix: Fix crash that could occur when the user changed the "Custom stream player URI Scheme" setting if the user had closed down and splits in the application runtime. (#2592)
 
 ## 2.3.0
