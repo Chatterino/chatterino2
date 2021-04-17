@@ -64,13 +64,18 @@ protected:
     NotebookButton *getAddButton();
     NotebookButton *addCustomButton();
 
-private:
     struct Item {
         NotebookTab *tab{};
         QWidget *page{};
         QWidget *selectedWidget{};
     };
 
+    const QList<Item> items()
+    {
+        return items_;
+    }
+
+private:
     bool containsPage(QWidget *page);
     Item &findItem(QWidget *page);
 

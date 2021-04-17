@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
@@ -19,6 +20,7 @@ using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 enum class WindowType;
 
 enum class SettingsDialogPreference;
+class FramelessEmbedWindow;
 
 class WindowManager final : public Singleton
 {
@@ -26,6 +28,7 @@ public:
     static const QString WINDOW_LAYOUT_FILENAME;
 
     WindowManager();
+    ~WindowManager() override;
 
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
     static void encodeFilters(Split *split, QJsonArray &arr);
@@ -53,8 +56,8 @@ public:
     Window &getSelectedWindow();
     Window &createWindow(WindowType type, bool show = true);
 
-    int windowCount();
-    Window *windowAt(int index);
+    void select(Split *split);
+    void select(SplitContainer *container);
 
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
@@ -92,6 +95,9 @@ public:
     // It is currently being used by the "Tooltip Preview Image" system to recheck if an image is ready to be rendered.
     pajlada::Signals::NoArgSignal miscUpdate;
 
+    pajlada::Signals::Signal<Split *> selectSplit;
+    pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
+
 private:
     void encodeNodeRecursively(SplitContainer::Node *node, QJsonObject &obj);
 
@@ -112,6 +118,7 @@ private:
 
     std::vector<Window *> windows_;
 
+    std::unique_ptr<FramelessEmbedWindow> framelessEmbedWindow_;
     Window *mainWindow_{};
     Window *selectedWindow_{};
 
