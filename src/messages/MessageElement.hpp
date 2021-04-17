@@ -60,6 +60,7 @@ enum class MessageElementFlag : int64_t {
     BadgeGlobalAuthority = (1LL << 14),
 
     // Slot 2: Twitch
+    // - VIP badge
     // - Moderator badge
     // - Broadcaster badge
     BadgeChannelAuthority = (1LL << 15),
@@ -269,6 +270,16 @@ class ModBadgeElement : public BadgeElement
 {
 public:
     ModBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
+
+protected:
+    MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
+                                                 const QSize &size) override;
+};
+
+class VipBadgeElement : public BadgeElement
+{
+public:
+    VipBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
 
 protected:
     MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
