@@ -3,9 +3,6 @@ name: Test
 
 on:
   pull_request:
-    paths-ignore:
-      - 'docs/**'
-      - '*.md'
 
 jobs:
   test:
@@ -22,7 +19,7 @@ jobs:
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2
+        uses: actions/cache@v2.1.5
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-20201005
@@ -35,7 +32,7 @@ jobs:
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
         with:
-          mirror: 'http://mirrors.ocf.berkeley.edu/qt/'
+          aqtversion: '==1.1.1'
           cached: ${{ steps.cache-qt.outputs.cache-hit }}
           extra: --external 7z
 
@@ -72,14 +69,14 @@ jobs:
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            cmake -DBUILD_TESTS=On ..
-            cmake --build .
+            cmake -DBUILD_TESTS=On -DBUILD_APP=OFF ..
+            cmake --build . --config Release
         working-directory: build-test
         shell: bash
 
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            ctest
+            ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash

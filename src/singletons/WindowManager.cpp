@@ -11,6 +11,7 @@
 #include <boost/optional.hpp>
 #include <chrono>
 
+#include <QMessageBox>
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "common/QLogging.hpp"
@@ -55,9 +56,18 @@ using SplitDirection = SplitContainer::Direction;
 void WindowManager::showSettingsDialog(QWidget *parent,
                                        SettingsDialogPreference preference)
 {
-    QTimer::singleShot(80, [parent, preference] {
-        SettingsDialog::showDialog(parent, preference);
-    });
+    if (getArgs().dontSaveSettings)
+    {
+        QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
+                              "Settings cannot be edited when running with "
+                              "commandline arguments such as '-c'.");
+    }
+    else
+    {
+        QTimer::singleShot(80, [parent, preference] {
+            SettingsDialog::showDialog(parent, preference);
+        });
+    }
 }
 
 void WindowManager::showAccountSelectPopup(QPoint point)
@@ -499,9 +509,6 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             QJsonArray filters;
             encodeFilters(node->getSplit(), filters);
             obj.insert("filters", filters);
-
-            obj.insert("flexh", node->getHorizontalFlex());
-            obj.insert("flexv", node->getVerticalFlex());
         }
         break;
         case SplitNode::HorizontalContainer:
@@ -521,6 +528,9 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
         }
         break;
     }
+
+    obj.insert("flexh", node->getHorizontalFlex());
+    obj.insert("flexv", node->getVerticalFlex());
 }
 
 void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)

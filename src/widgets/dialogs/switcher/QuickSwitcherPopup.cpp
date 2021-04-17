@@ -14,14 +14,14 @@
 namespace chatterino {
 
 namespace {
-    QSet<SplitContainer *> openPages()
+    QList<SplitContainer *> openPages()
     {
-        QSet<SplitContainer *> pages;
+        QList<SplitContainer *> pages;
 
         auto &nb = getApp()->windows->getMainWindow().getNotebook();
         for (int i = 0; i < nb.getPageCount(); ++i)
         {
-            pages.insert(static_cast<SplitContainer *>(nb.getPageAt(i)));
+            pages.append(static_cast<SplitContainer *>(nb.getPageAt(i)));
         }
 
         return pages;

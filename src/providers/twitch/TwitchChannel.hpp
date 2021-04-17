@@ -13,6 +13,7 @@
 
 #include <IrcConnection>
 #include <QColor>
+#include <QElapsedTimer>
 #include <QRegularExpression>
 #include <boost/optional.hpp>
 #include <pajlada/signals/signalholder.hpp>
@@ -99,6 +100,7 @@ public:
 
     // Badges
     boost::optional<EmotePtr> ffzCustomModBadge() const;
+    boost::optional<EmotePtr> ffzCustomVipBadge() const;
     boost::optional<EmotePtr> twitchBadge(const QString &set,
                                           const QString &version) const;
 
@@ -170,6 +172,7 @@ protected:
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;
+    Atomic<boost::optional<EmotePtr>> ffzCustomVipBadge_;
 
 private:
     // Badges
@@ -188,8 +191,8 @@ private:
     QObject lifetimeGuard_;
     QTimer liveStatusTimer_;
     QTimer chattersListTimer_;
-    QTime titleRefreshedTime_;
-    QTime timeNextClipCreationAllowed_{QTime().currentTime()};
+    QElapsedTimer titleRefreshedTimer_;
+    QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};
 
     friend class TwitchIrcServer;

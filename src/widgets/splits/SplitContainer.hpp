@@ -250,6 +250,7 @@ private:
     Node baseNode_;
     Split *selected_{};
     Split *topRight_{};
+    bool disableLayouting_{};
 
     NotebookTab *tab_;
     std::vector<Split *> splits_;

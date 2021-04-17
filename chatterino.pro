@@ -89,13 +89,13 @@ CONFIG(debug, debug|release) {
 
 # Submodules
 include(lib/warnings.pri)
-include(lib/humanize.pri)
 include(lib/libcommuni.pri)
 include(lib/websocketpp.pri)
 include(lib/wintoast.pri)
 include(lib/signals.pri)
 include(lib/settings.pri)
 include(lib/serialize.pri)
+include(lib/lrucache.pri)
 include(lib/winsdk.pri)
 include(lib/rapidjson.pri)
 include(lib/qtkeychain.pri)
@@ -134,6 +134,7 @@ SOURCES += \
     src/common/Env.cpp \
     src/common/LinkParser.cpp \
     src/common/Modes.cpp \
+    src/common/NetworkCommon.cpp \
     src/common/NetworkManager.cpp \
     src/common/NetworkPrivate.cpp \
     src/common/NetworkRequest.cpp \
@@ -179,6 +180,7 @@ SOURCES += \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
     src/messages/search/AuthorPredicate.cpp \
+    src/messages/search/ChannelPredicate.cpp \
     src/messages/search/LinkPredicate.cpp \
     src/messages/search/SubstringPredicate.cpp \
     src/messages/SharedMessageBuilder.cpp \
@@ -233,6 +235,7 @@ SOURCES += \
     src/singletons/TooltipPreviewImage.cpp \
     src/singletons/Updates.cpp \
     src/singletons/WindowManager.cpp \
+    src/util/AttachToConsole.cpp \
     src/util/Clipboard.cpp \
     src/util/DebugCount.cpp \
     src/util/FormatTime.cpp \
@@ -247,6 +250,7 @@ SOURCES += \
     src/util/RapidjsonHelpers.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
+    src/util/SplitCommand.cpp \
     src/util/Twitch.cpp \
     src/util/WindowsHelper.cpp \
     src/widgets/AccountSwitchPopup.cpp \
@@ -405,6 +409,7 @@ HEADERS += \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
     src/messages/search/AuthorPredicate.hpp \
+    src/messages/search/ChannelPredicate.hpp \
     src/messages/search/LinkPredicate.hpp \
     src/messages/search/MessagePredicate.hpp \
     src/messages/search/SubstringPredicate.hpp \
@@ -465,6 +470,7 @@ HEADERS += \
     src/singletons/TooltipPreviewImage.hpp \
     src/singletons/Updates.hpp \
     src/singletons/WindowManager.hpp \
+    src/util/AttachToConsole.hpp \
     src/util/Clamp.hpp \
     src/util/Clipboard.hpp \
     src/util/CombinePath.hpp \

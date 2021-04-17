@@ -88,7 +88,7 @@ FlagsEnum<MessageElementFlag> MessageLayoutElement::getFlags() const
 ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
                                        const QSize &size)
     : MessageLayoutElement(creator, size)
-    , image_(image)
+    , image_(std::move(image))
 {
     this->trailingSpace = creator.hasTrailingSpace();
 }
@@ -270,7 +270,7 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
     for (auto i = 0; i < this->getText().size(); i++)
     {
         auto &&text = this->getText();
-        auto width = metrics.width(this->getText()[i]);
+        auto width = metrics.horizontalAdvance(this->getText()[i]);
 
         if (x + width > abs.x())
         {
@@ -309,7 +309,7 @@ int TextLayoutElement::getXFromIndex(int index)
         int x = 0;
         for (int i = 0; i < index; i++)
         {
-            x += metrics.width(this->getText()[i]);
+            x += metrics.horizontalAdvance(this->getText()[i]);
         }
         return x + this->getRect().left();
     }
@@ -429,7 +429,7 @@ void MultiColorTextLayoutElement::paint(QPainter &painter)
                                 this->getRect().y(), 10000, 10000),
                          segment.text,
                          QTextOption(Qt::AlignLeft | Qt::AlignTop));
-        xOffset += metrics.width(segment.text);
+        xOffset += metrics.horizontalAdvance(segment.text);
     }
 }
 

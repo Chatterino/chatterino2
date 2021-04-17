@@ -7,6 +7,7 @@
 #include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/AttachToConsole.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/Window.hpp"
 
@@ -29,11 +30,18 @@ Args::Args(const QApplication &app)
                                             "window-id");
     parentWindowIdOption.setFlags(QCommandLineOption::HiddenFromHelp);
 
+    // Verbose
+    QCommandLineOption verboseOption({{"v", "verbose"},
+                                      "Attaches to the Console on windows, "
+                                      "allowing you to see debug output."});
+    crashRecoveryOption.setFlags(QCommandLineOption::HiddenFromHelp);
+
     parser.addOptions({
-        {{"v", "version"}, "Displays version information."},
+        {{"V", "version"}, "Displays version information."},
         crashRecoveryOption,
         parentWindowOption,
         parentWindowIdOption,
+        verboseOption,
     });
     parser.addOption(QCommandLineOption(
         {"c", "channels"},
@@ -50,6 +58,7 @@ Args::Args(const QApplication &app)
 
     if (parser.isSet("help"))
     {
+        attachToConsole();
         qInfo().noquote() << parser.helpText();
         ::exit(EXIT_SUCCESS);
     }
@@ -64,7 +73,9 @@ Args::Args(const QApplication &app)
         this->applyCustomChannelLayout(parser.value("c"));
     }
 
-    this->printVersion = parser.isSet("v");
+    this->verbose = parser.isSet(verboseOption);
+
+    this->printVersion = parser.isSet("V");
     this->crashRecovery = parser.isSet("crash-recovery");
 
     if (parser.isSet(parentWindowIdOption))
@@ -108,7 +119,7 @@ void Args::applyCustomChannelLayout(const QString &argValue)
         return QRect(-1, -1, -1, -1);
     }();
 
-    window.geometry_ = std::move(configMainLayout);
+    window.geometry_ = configMainLayout;
 
     QStringList channelArgList = argValue.split(";");
     for (const QString &channelArg : channelArgList)

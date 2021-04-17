@@ -38,6 +38,7 @@ private:
 
     QString userName_;
     QString userId_;
+    QString avatarUrl_;
     ChannelPtr channel_;
 
     pajlada::Signals::NoArgSignal userStateChanged_;
@@ -59,7 +60,7 @@ private:
         Label *subageLabel = nullptr;
 
         QCheckBox *follow = nullptr;
-        QCheckBox *ignore = nullptr;
+        QCheckBox *block = nullptr;
         QCheckBox *ignoreHighlights = nullptr;
 
         Label *noMessagesLabel = nullptr;

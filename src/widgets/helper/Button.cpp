@@ -38,7 +38,7 @@ Button::Button(BaseWidget *parent)
 
 void Button::setMouseEffectColor(boost::optional<QColor> color)
 {
-    this->mouseEffectColor_ = color;
+    this->mouseEffectColor_ = std::move(color);
 }
 
 void Button::setPixmap(const QPixmap &_pixmap)
@@ -113,6 +113,9 @@ const QColor &Button::getBorderColor() const
 
 void Button::setMenu(std::unique_ptr<QMenu> menu)
 {
+    if (this->menu_)
+        this->menu_.release()->deleteLater();
+
     this->menu_ = std::move(menu);
 
     this->menu_->installEventFilter(

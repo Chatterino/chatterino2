@@ -130,10 +130,13 @@ struct Serialize<chatterino::HighlightPhrase> {
 
 template <>
 struct Deserialize<chatterino::HighlightPhrase> {
-    static chatterino::HighlightPhrase get(const rapidjson::Value &value)
+    static chatterino::HighlightPhrase get(const rapidjson::Value &value,
+                                           bool *error = nullptr)
     {
         if (!value.IsObject())
         {
+            PAJLADA_REPORT_ERROR(error)
+
             return constructError();
         }
 

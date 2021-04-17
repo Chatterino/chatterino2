@@ -26,7 +26,7 @@ const std::shared_ptr<QColor> ColorProvider::color(ColorType type) const
 void ColorProvider::updateColor(ColorType type, QColor color)
 {
     auto colorPtr = this->typeColorMap_.at(type);
-    *colorPtr = color;
+    *colorPtr = std::move(color);
 }
 
 QSet<QColor> ColorProvider::recentColors() const

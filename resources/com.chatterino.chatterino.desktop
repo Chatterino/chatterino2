@@ -7,3 +7,4 @@ Exec=chatterino
 Icon=chatterino
 Terminal=false
 Categories=Network;InstantMessaging;
+StartupWMClass=chatterino

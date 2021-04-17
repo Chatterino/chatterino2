@@ -1,5 +1,6 @@
 #include "Helpers.hpp"
 
+#include <QLocale>
 #include <QUuid>
 
 namespace chatterino {
@@ -33,6 +34,17 @@ QString shortenString(const QString &str, unsigned maxWidth)
     }
 
     return shortened;
+}
+
+QString localizeNumbers(const int &number)
+{
+    QLocale locale;
+    return locale.toString(number);
+}
+
+QString kFormatNumbers(const int &number)
+{
+    return QString("%1K").arg(number / 1000);
 }
 
 }  // namespace chatterino

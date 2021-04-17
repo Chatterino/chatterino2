@@ -8,6 +8,28 @@ namespace chatterino {
 
 static Kraken *instance = nullptr;
 
+void Kraken::getUserEmotes(TwitchAccount *account,
+                           ResultCallback<KrakenEmoteSets> successCallback,
+                           KrakenFailureCallback failureCallback)
+{
+    this->makeRequest(QString("users/%1/emotes").arg(account->getUserId()), {})
+        .authorizeTwitchV5(account->getOAuthClient(), account->getOAuthToken())
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto data = result.parseJson();
+
+            KrakenEmoteSets emoteSets(data);
+
+            successCallback(emoteSets);
+
+            return Success;
+        })
+        .onError([failureCallback](NetworkResult /*result*/) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
 NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
@@ -41,8 +63,8 @@ NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
 
 void Kraken::update(QString clientId, QString oauthToken)
 {
-    this->clientId = clientId;
-    this->oauthToken = oauthToken;
+    this->clientId = std::move(clientId);
+    this->oauthToken = std::move(oauthToken);
 }
 
 void Kraken::initialize()

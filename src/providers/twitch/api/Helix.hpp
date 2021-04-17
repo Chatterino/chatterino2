@@ -165,9 +165,43 @@ struct HelixChannel {
     }
 };
 
+struct HelixStreamMarker {
+    QString createdAt;
+    QString description;
+    QString id;
+    int positionSeconds;
+
+    explicit HelixStreamMarker(QJsonObject jsonObject)
+        : createdAt(jsonObject.value("created_at").toString())
+        , description(jsonObject.value("description").toString())
+        , id(jsonObject.value("id").toString())
+        , positionSeconds(jsonObject.value("position_seconds").toInt())
+    {
+    }
+};
+
+struct HelixBlock {
+    QString userId;
+    QString userName;
+    QString displayName;
+
+    explicit HelixBlock(QJsonObject jsonObject)
+        : userId(jsonObject.value("user_id").toString())
+        , userName(jsonObject.value("user_login").toString())
+        , displayName(jsonObject.value("display_name").toString())
+    {
+    }
+};
+
 enum class HelixClipError {
     Unknown,
     ClipsDisabled,
+    UserNotAuthenticated,
+};
+
+enum class HelixStreamMarkerError {
+    Unknown,
+    UserNotAuthorized,
     UserNotAuthenticated,
 };
 
@@ -218,6 +252,11 @@ public:
                     ResultCallback<std::vector<HelixGame>> successCallback,
                     HelixFailureCallback failureCallback);
 
+    // https://dev.twitch.tv/docs/api/reference#search-categories
+    void searchGames(QString gameName,
+                     ResultCallback<std::vector<HelixGame>> successCallback,
+                     HelixFailureCallback failureCallback);
+
     void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
                      HelixFailureCallback failureCallback);
 
@@ -241,6 +280,32 @@ public:
     void getChannel(QString broadcasterId,
                     ResultCallback<HelixChannel> successCallback,
                     HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference/#create-stream-marker
+    void createStreamMarker(
+        QString broadcasterId, QString description,
+        ResultCallback<HelixStreamMarker> successCallback,
+        std::function<void(HelixStreamMarkerError)> failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#get-user-block-list
+    void loadBlocks(QString userId,
+                    ResultCallback<std::vector<HelixBlock>> successCallback,
+                    HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#block-user
+    void blockUser(QString targetUserId, std::function<void()> successCallback,
+                   HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#unblock-user
+    void unblockUser(QString targetUserId,
+                     std::function<void()> successCallback,
+                     HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#modify-channel-information
+    void updateChannel(QString broadcasterId, QString gameId, QString language,
+                       QString title,
+                       std::function<void(NetworkResult)> successCallback,
+                       HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

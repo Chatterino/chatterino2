@@ -27,7 +27,7 @@ static const QMap<QString, QString> validIdentifiersMap = {
 
 // clang-format off
 static const QRegularExpression tokenRegex(
-    QString("\\\"((\\\\\")|[^\\\"])*\\\"|") +                 // String literal
+    QString("((r|ri)?\\\")((\\\\\")|[^\\\"])*\\\"|") +        // String/Regex literal
     QString("[\\w\\.]+|") +                                   // Identifier or reserved keyword
     QString("(<=?|>=?|!=?|==|\\|\\||&&|\\+|-|\\*|\\/|%)+|") + // Operator
     QString("[\\(\\)]|") +                                    // Parentheses

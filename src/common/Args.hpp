@@ -24,6 +24,7 @@ public:
     bool dontSaveSettings{};
     bool dontLoadMainWindow{};
     boost::optional<WindowLayout> customChannelLayout;
+    bool verbose{};
 
 private:
     void applyCustomChannelLayout(const QString &argValue);
