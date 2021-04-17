@@ -28,11 +28,13 @@
 #include <QFile>
 #include <QRegularExpression>
 
-#define TWITCH_DEFAULT_COMMANDS                                               \
-    "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", "/unban", \
-        "/timeout", "/untimeout", "/slow", "/slowoff", "/r9kbeta",            \
-        "/r9kbetaoff", "/emoteonly", "/emoteonlyoff", "/clear",               \
-        "/subscribers", "/subscribersoff", "/followers", "/followersoff"
+#define TWITCH_DEFAULT_COMMANDS                                              \
+    "/help", "/w", "/me", "/disconnect", "/mods", "/vips", "/color",         \
+        "/commercial", "/mod", "/unmod", "/vip", "/unvip", "/ban", "/unban", \
+        "/timeout", "/untimeout", "/slow", "/slowoff", "/r9kbeta",           \
+        "/r9kbetaoff", "/emoteonly", "/emoteonlyoff", "/clear",              \
+        "/subscribers", "/subscribersoff", "/followers", "/followersoff",    \
+        "/host", "/unhost", "/raid", "/unraid"
 
 namespace {
 using namespace chatterino;
