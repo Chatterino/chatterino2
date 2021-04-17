@@ -94,23 +94,25 @@ namespace {
         qDebug() << badgeUrls;
         if (!badgeUrls.isEmpty())
         {
-            auto modBadge1x = getEmoteLink(badgeUrls, "1");
-            auto modBadge2x = getEmoteLink(badgeUrls, "2");
-            auto modBadge3x = getEmoteLink(badgeUrls, "4");
+            auto authorityBadge1x = getEmoteLink(badgeUrls, "1");
+            auto authorityBadge2x = getEmoteLink(badgeUrls, "2");
+            auto authorityBadge3x = getEmoteLink(badgeUrls, "4");
 
-            auto modBadgeImageSet = ImageSet{
-                Image::fromUrl(modBadge1x, 1),
-                modBadge2x.string.isEmpty() ? Image::getEmpty()
-                                            : Image::fromUrl(modBadge2x, 0.5),
-                modBadge3x.string.isEmpty() ? Image::getEmpty()
-                                            : Image::fromUrl(modBadge3x, 0.25),
+            auto authorityBadgeImageSet = ImageSet{
+                Image::fromUrl(authorityBadge1x, 1),
+                authorityBadge2x.string.isEmpty()
+                    ? Image::getEmpty()
+                    : Image::fromUrl(authorityBadge2x, 0.5),
+                authorityBadge3x.string.isEmpty()
+                    ? Image::getEmpty()
+                    : Image::fromUrl(authorityBadge3x, 0.25),
             };
 
             authorityBadge = std::make_shared<Emote>(Emote{
                 {""},
-                modBadgeImageSet,
+                authorityBadgeImageSet,
                 Tooltip{tooltip},
-                modBadge1x,
+                authorityBadge1x,
             });
         }
         return authorityBadge;
