@@ -247,12 +247,8 @@ void SplitInput::installKeyPressedEvent()
             }
             if (event->modifiers() == Qt::AltModifier)
             {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Above);
-                }
+                this->split_->actionRequested.invoke(
+                    Split::Action::SelectSplitAbove);
             }
             else
             {
@@ -312,49 +308,37 @@ void SplitInput::installKeyPressedEvent()
                  event->modifiers() == Qt::AltModifier)
         {
             // h: vim binding for left
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
+            this->split_->actionRequested.invoke(
+                Split::Action::SelectSplitLeft);
 
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Left);
-            }
+            event->accept();
         }
         else if (event->key() == Qt::Key_J &&
                  event->modifiers() == Qt::AltModifier)
         {
             // j: vim binding for down
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
+            this->split_->actionRequested.invoke(
+                Split::Action::SelectSplitBelow);
 
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Below);
-            }
+            event->accept();
         }
         else if (event->key() == Qt::Key_K &&
                  event->modifiers() == Qt::AltModifier)
         {
             // k: vim binding for up
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
+            this->split_->actionRequested.invoke(
+                Split::Action::SelectSplitAbove);
 
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Above);
-            }
+            event->accept();
         }
         else if (event->key() == Qt::Key_L &&
                  event->modifiers() == Qt::AltModifier)
         {
             // l: vim binding for right
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
+            this->split_->actionRequested.invoke(
+                Split::Action::SelectSplitRight);
 
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Right);
-            }
+            event->accept();
         }
         else if (event->key() == Qt::Key_Down)
         {
@@ -364,12 +348,8 @@ void SplitInput::installKeyPressedEvent()
             }
             if (event->modifiers() == Qt::AltModifier)
             {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Below);
-                }
+                this->split_->actionRequested.invoke(
+                    Split::Action::SelectSplitBelow);
             }
             else
             {
@@ -422,24 +402,16 @@ void SplitInput::installKeyPressedEvent()
         {
             if (event->modifiers() == Qt::AltModifier)
             {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Left);
-                }
+                this->split_->actionRequested.invoke(
+                    Split::Action::SelectSplitLeft);
             }
         }
         else if (event->key() == Qt::Key_Right)
         {
             if (event->modifiers() == Qt::AltModifier)
             {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Right);
-                }
+                this->split_->actionRequested.invoke(
+                    Split::Action::SelectSplitRight);
             }
         }
         else if ((event->key() == Qt::Key_C ||

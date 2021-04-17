@@ -54,7 +54,8 @@ public:
     NetworkRequest header(const char *headerName, const char *value) &&;
     NetworkRequest header(const char *headerName, const QByteArray &value) &&;
     NetworkRequest header(const char *headerName, const QString &value) &&;
-    NetworkRequest headerList(const QStringList &headers) &&;
+    NetworkRequest headerList(
+        const std::vector<std::pair<QByteArray, QByteArray>> &headers) &&;
     NetworkRequest timeout(int ms) &&;
     NetworkRequest concurrent() &&;
     NetworkRequest authorizeTwitchV5(const QString &clientID,

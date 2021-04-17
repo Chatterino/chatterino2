@@ -26,6 +26,9 @@ Args::Args(const QApplication &app)
     // Added to ignore the parent-window option passed during native messaging
     QCommandLineOption parentWindowOption("parent-window");
     parentWindowOption.setFlags(QCommandLineOption::HiddenFromHelp);
+    QCommandLineOption parentWindowIdOption("x-attach-split-to-window", "",
+                                            "window-id");
+    parentWindowIdOption.setFlags(QCommandLineOption::HiddenFromHelp);
 
     // Verbose
     QCommandLineOption verboseOption({{"v", "verbose"},
@@ -37,6 +40,7 @@ Args::Args(const QApplication &app)
         {{"V", "version"}, "Displays version information."},
         crashRecoveryOption,
         parentWindowOption,
+        parentWindowIdOption,
         verboseOption,
     });
     parser.addOption(QCommandLineOption(
@@ -73,6 +77,15 @@ Args::Args(const QApplication &app)
 
     this->printVersion = parser.isSet("V");
     this->crashRecovery = parser.isSet("crash-recovery");
+
+    if (parser.isSet(parentWindowIdOption))
+    {
+        this->isFramelessEmbed = true;
+        this->dontSaveSettings = true;
+        this->dontLoadMainWindow = true;
+
+        this->parentWindowId = parser.value(parentWindowIdOption).toULongLong();
+    }
 }
 
 void Args::applyCustomChannelLayout(const QString &argValue)

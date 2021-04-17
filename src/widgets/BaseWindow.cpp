@@ -244,7 +244,10 @@ void BaseWindow::init()
         getSettings()->windowTopMost.connect(
             [this](bool topMost, auto) {
                 this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
-                this->show();
+                if (this->isVisible())
+                {
+                    this->show();
+                }
             },
             this->managedConnections_);
     }

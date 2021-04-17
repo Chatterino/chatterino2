@@ -2,11 +2,19 @@
 
 ## Unversioned
 
+- Major: Added custom FrankerFaceZ VIP Badges. (#2628)
+- Minor: Added `in:<channels>` search filter to find messages sent in specific channels. (#2299, #2634)
+- Minor: Allow for built-in Chatterino commands to be used in custom commands. (#2632)
+- Bugfix: Size of splits not saved properly (#2362, #2548)
+- Bugfix: Fix crash that could occur when the user changed the "Custom stream player URI Scheme" setting if the user had closed down and splits in the application runtime. (#2592)
+
+## 2.3.0
+
 - Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377, #2528)
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
-- Major: Add `/settitle` and `/setgame` commands, originally made for Mm2PL/Dankerino. (#2534)
-- Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284)
+- Major: Add `/settitle` and `/setgame` commands, originally made for Mm2PL/Dankerino. (#2534, #2609)
+- Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284, #2597)
 - Major: Commands `/ignore` and `/unignore` have been renamed to `/block` and `/unblock` in order to keep consistency with Twitch's terms. (#2370)
 - Major: Added support for bit emotes - the ones you unlock after cheering to streamer. (#2550)
 - Minor: Added `/clearmessages` command - does what "Burger menu -> More -> Clear messages" does. (#2485)
@@ -53,6 +61,7 @@
 - Minor: Made username autocompletion truecase (#1199, #1883)
 - Minor: Update the listing of top-level domains. (#2345)
 - Minor: Properly respect RECONNECT messages from Twitch (#2347)
+- Minor: Added command line option to attach chatterino to another window.
 - Minor: Hide "Case-sensitive" column for user highlights. (#2404)
 - Minor: Added human-readable formatting to remaining timeout duration. (#2398)
 - Minor: Update emojis version to 13 (2020). (#1555)
@@ -60,6 +69,7 @@
 - Minor: Added `/streamlink` command. Usage: `/streamlink <channel>`. You can also use the command without arguments in any twitch channel to open it in streamlink. (#2443, #2495)
 - Minor: Humanized all numbers visible to end-users. (#2488)
 - Minor: Added a context menu to avatar in usercard. It opens on right-clicking the avatar in usercard. (#2517)
+- Minor: Handle messages that users can share after unlocking a new bits badge. (#2611)
 - Bugfix: Fix crash occurring when pressing Escape in the Color Picker Dialog (#1843)
 - Bugfix: Fix bug where the "check user follow state" event could trigger a network request requesting the user to follow or unfollow a user. By itself its quite harmless as it just repeats to Twitch the same follow state we had, so no follows should have been lost by this but it meant there was a rogue network request that was fired that could cause a crash (#1906)
 - Bugfix: /usercard command will now respect the "Automatically close user popup" setting (#1918)
@@ -82,12 +92,14 @@
 - Bugfix: Fix anonymous users being pinged by "username" justinfan64537 (#2156, #2352)
 - Bugfix: Fixed hidden tooltips when always on top is active (#2384)
 - Bugfix: Fix CLI arguments (`--help`, `--version`, `--channels`) not being respected (#2368, #2190)
+- Bugfix: Fixed search field not being focused on popup open (#2540)
 - Bugfix: Fix Twitch cheer emotes not displaying tooltips when hovered (#2434, #2503)
 - Bugfix: Fix BTTV/FFZ channel emotes saying unknown error when no emotes found (#2542)
 - Bugfix: Fix directory not opening when clicking "Open AppData Directory" setting button on macOS (#2531, #2537)
 - Bugfix: Fix quickswitcher not respecting order of tabs when filtering (#2519, #2561)
 - Bugfix: Fix GNOME not associating Chatterino's window with its desktop entry (#1863, #2587)
 - Bugfix: Fix buffer overflow in emoji parsing. (#2602)
+- Bugfix: Fix windows being brought back to life after the settings dialog was closed. (#1892, #2613)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)

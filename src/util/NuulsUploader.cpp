@@ -128,8 +128,8 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
         getSettings()->imageUploaderFormField.getValue().isEmpty()
             ? getSettings()->imageUploaderFormField.getDefaultValue()
             : getSettings()->imageUploaderFormField);
-    QStringList extraHeaders(
-        getSettings()->imageUploaderHeaders.getValue().split(";"));
+    auto extraHeaders =
+        parseHeaderList(getSettings()->imageUploaderHeaders.getValue());
     QString originalFilePath = imageData.filePath;
 
     QHttpMultiPart *payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);

@@ -269,6 +269,12 @@ void TwitchChannel::refreshFFZChannelEmotes(bool manualRefresh)
                 this->ffzCustomModBadge_.set(std::move(modBadge));
             }
         },
+        [this, weak = weakOf<Channel>(this)](auto &&vipBadge) {
+            if (auto shared = weak.lock())
+            {
+                this->ffzCustomVipBadge_.set(std::move(vipBadge));
+            }
+        },
         manualRefresh);
 }
 
@@ -1065,6 +1071,11 @@ boost::optional<EmotePtr> TwitchChannel::twitchBadge(
 boost::optional<EmotePtr> TwitchChannel::ffzCustomModBadge() const
 {
     return this->ffzCustomModBadge_.get();
+}
+
+boost::optional<EmotePtr> TwitchChannel::ffzCustomVipBadge() const
+{
+    return this->ffzCustomVipBadge_.get();
 }
 
 boost::optional<CheerEmote> TwitchChannel::cheerEmote(const QString &string)
