@@ -253,6 +253,22 @@ MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
     return element;
 }
 
+// VIP BADGE
+VipBadgeElement::VipBadgeElement(const EmotePtr &data,
+                                 MessageElementFlags flags_)
+    : BadgeElement(data, flags_)
+{
+}
+
+MessageLayoutElement *VipBadgeElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    auto element =
+        (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
+
+    return element;
+}
+
 // FFZ Badge
 FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
                                  MessageElementFlags flags_, QColor &color)

@@ -134,6 +134,7 @@ SOURCES += \
     src/common/Env.cpp \
     src/common/LinkParser.cpp \
     src/common/Modes.cpp \
+    src/common/NetworkCommon.cpp \
     src/common/NetworkManager.cpp \
     src/common/NetworkPrivate.cpp \
     src/common/NetworkRequest.cpp \
@@ -179,6 +180,7 @@ SOURCES += \
     src/messages/MessageContainer.cpp \
     src/messages/MessageElement.cpp \
     src/messages/search/AuthorPredicate.cpp \
+    src/messages/search/ChannelPredicate.cpp \
     src/messages/search/LinkPredicate.cpp \
     src/messages/search/SubstringPredicate.cpp \
     src/messages/SharedMessageBuilder.cpp \
@@ -408,6 +410,7 @@ HEADERS += \
     src/messages/MessageElement.hpp \
     src/messages/MessageParseArgs.hpp \
     src/messages/search/AuthorPredicate.hpp \
+    src/messages/search/ChannelPredicate.hpp \
     src/messages/search/LinkPredicate.hpp \
     src/messages/search/MessagePredicate.hpp \
     src/messages/search/SubstringPredicate.hpp \

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <functional>
+#include <vector>
+
+#include <QString>
 
 class QNetworkReply;
 
@@ -21,5 +24,14 @@ enum class NetworkRequestType {
     Delete,
     Patch,
 };
+
+// parseHeaderList takes a list of headers in string form,
+// where each header pair is separated by semicolons (;) and the header name and value is divided by a colon (:)
+//
+// We return a vector of pairs, where the first value is the header name and the second value is the header value
+//
+// e.g. "Authorization:secretkey;NextHeader:boo" will return [{"Authorization", "secretkey"}, {"NextHeader", "boo"}]
+std::vector<std::pair<QByteArray, QByteArray>> parseHeaderList(
+    const QString &headerListString);
 
 }  // namespace chatterino

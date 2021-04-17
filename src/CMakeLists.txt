@@ -30,6 +30,8 @@ set(SOURCE_FILES main.cpp
         common/LinkParser.hpp
         common/Modes.cpp
         common/Modes.hpp
+        common/NetworkCommon.cpp
+        common/NetworkCommon.hpp
         common/NetworkManager.cpp
         common/NetworkManager.hpp
         common/NetworkPrivate.cpp
@@ -133,6 +135,8 @@ set(SOURCE_FILES main.cpp
         messages/layouts/MessageLayoutElement.hpp
         messages/search/AuthorPredicate.cpp
         messages/search/AuthorPredicate.hpp
+        messages/search/ChannelPredicate.cpp
+        messages/search/ChannelPredicate.hpp
         messages/search/LinkPredicate.cpp
         messages/search/LinkPredicate.hpp
         messages/search/SubstringPredicate.cpp
