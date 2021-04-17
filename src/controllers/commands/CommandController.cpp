@@ -34,7 +34,7 @@
         "/timeout", "/untimeout", "/slow", "/slowoff", "/r9kbeta",           \
         "/r9kbetaoff", "/emoteonly", "/emoteonlyoff", "/clear",              \
         "/subscribers", "/subscribersoff", "/followers", "/followersoff",    \
-        "/host", "/unhost", "/raid", "/unraid", "/marker"
+        "/host", "/unhost", "/raid", "/unraid"
 
 namespace {
 using namespace chatterino;
