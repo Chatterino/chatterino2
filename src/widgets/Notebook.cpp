@@ -339,6 +339,8 @@ void Notebook::setShowTabs(bool value)
     {
         item.tab->setHidden(!value);
     }
+
+    this->setShowAddButton(value);
 }
 
 bool Notebook::getShowAddButton() const
