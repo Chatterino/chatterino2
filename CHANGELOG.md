@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Major: Added ability to toggle visibility of Channel Tabs - with keyboard shortcut (default: Ctrl+U). (#2600)
+
 ## 2.3.0
 
 - Major: Added custom FrankerFaceZ VIP Badges. (#2628)
