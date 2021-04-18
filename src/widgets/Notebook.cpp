@@ -529,14 +529,19 @@ void Notebook::performLayout(bool animated)
         int top = y;
         x = left;
 
+        //        if (this->showTabs_)
+        //        {
+        int verticalRowSpace = (this->height() - top) / tabHeight;
+        if (verticalRowSpace == 0)  // window hasn't properly rendered yet
+        {
+            return;
+        }
+        int count = this->items_.size() + (this->showAddButton_ ? 1 : 0);
+        int columnCount = ceil((float)count / verticalRowSpace);
+
+        // only add width of all the tabs if they are not hidden
         if (this->showTabs_)
         {
-            int verticalRowSpace = (this->height() - top) / tabHeight;
-            if (verticalRowSpace == 0)  // window hasn't properly rendered yet
-                return;
-            int count = this->items_.size() + (this->showAddButton_ ? 1 : 0);
-            int columnCount = ceil((float)count / verticalRowSpace);
-
             for (int col = 0; col < columnCount; col++)
             {
                 auto largestWidth = 0;
@@ -577,26 +582,27 @@ void Notebook::performLayout(bool animated)
                 x += largestWidth + lineThickness;
                 y = top;
             }
-
-            x = std::max(x, buttonWidth);
-
-            if (this->lineOffset_ != x - lineThickness)
-            {
-                this->lineOffset_ = x - lineThickness;
-                this->update();
-            }
-
-            // raise elements
-            for (auto &i : this->items_)
-            {
-                i.tab->raise();
-            }
-
-            if (this->showAddButton_)
-            {
-                this->addButton_->raise();
-            }
         }
+
+        x = std::max(x, buttonWidth);
+
+        if (this->lineOffset_ != x - lineThickness)
+        {
+            this->lineOffset_ = x - lineThickness;
+            this->update();
+        }
+
+        // raise elements
+        for (auto &i : this->items_)
+        {
+            i.tab->raise();
+        }
+
+        if (this->showAddButton_)
+        {
+            this->addButton_->raise();
+        }
+        //        }
 
         // set page bounds
         if (this->selectedPage_ != nullptr)
