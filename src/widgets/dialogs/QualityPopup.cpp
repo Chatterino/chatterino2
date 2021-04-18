@@ -1,4 +1,5 @@
 #include "QualityPopup.hpp"
+#include <qnamespace.h>
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/WindowManager.hpp"
@@ -44,6 +45,18 @@ void QualityPopup::showDialog(const QString &channelName, QStringList options)
     instance->activateWindow();
     instance->raise();
     instance->setFocus();
+}
+
+void QualityPopup::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+    {
+        this->okButtonClicked();
+    }
+    else if (event->key() == Qt::Key_Escape)
+    {
+        this->cancelButtonClicked();
+    }
 }
 
 void QualityPopup::okButtonClicked()
