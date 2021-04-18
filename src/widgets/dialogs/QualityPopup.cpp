@@ -2,6 +2,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Window.hpp"
 
@@ -30,6 +31,10 @@ QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
     this->ui_.vbox.addWidget(&this->ui_.selector);
     this->ui_.vbox.addWidget(&this->ui_.buttonBox);
 
+    createWindowShortcut(this, "Return", [=] {
+        this->okButtonClicked();
+    });
+
     this->setLayout(&this->ui_.vbox);
 }
 
@@ -44,18 +49,6 @@ void QualityPopup::showDialog(const QString &channelName, QStringList options)
     instance->activateWindow();
     instance->raise();
     instance->setFocus();
-}
-
-void QualityPopup::keyPressEvent(QKeyEvent *event)
-{
-    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
-    {
-        this->okButtonClicked();
-    }
-    else if (event->key() == Qt::Key_Escape)
-    {
-        this->cancelButtonClicked();
-    }
 }
 
 void QualityPopup::okButtonClicked()

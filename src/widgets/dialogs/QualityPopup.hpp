@@ -28,9 +28,6 @@ private:
     } ui_;
 
     QString channelName_;
-
-protected:
-    void keyPressEvent(QKeyEvent *event);
 };
 
 }  // namespace chatterino
