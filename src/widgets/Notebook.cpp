@@ -341,6 +341,37 @@ void Notebook::setShowTabs(bool value)
     }
 
     this->setShowAddButton(value);
+
+    // show a popup upon hiding tabs
+    if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
+    {
+        QMessageBox msgBox;
+        msgBox.setText("Hide tabs");
+        msgBox.setInformativeText(
+            "You've just hidden your tabs.\nYou can (un)hide those with "
+            "either keyboard shortcut (Default: Ctrl+U) or select an option "
+            "in split header's menu.");
+        msgBox.addButton(QMessageBox::Ok);
+        msgBox.addButton("Don't show again", QMessageBox::YesRole);
+
+        msgBox.setDefaultButton(QMessageBox::Ok);
+
+        auto picked = msgBox.exec();
+
+        switch (picked)
+        {
+            case QMessageBox::Ok: {
+                return;
+            }
+            break;
+
+            case QMessageBox::YesRole:
+            default: {
+                getSettings()->informOnTabVisibilityToggle.setValue(false);
+            }
+            break;
+        }
+    }
 }
 
 bool Notebook::getShowAddButton() const

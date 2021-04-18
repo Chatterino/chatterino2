@@ -637,6 +637,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
     layout.addCheckbox("Ask for confirmation when uploading an image",
                        s.askOnImageUpload);
+    layout.addCheckbox("Show a popup on hiding tabs",
+                       s.informOnTabVisibilityToggle);
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
 
