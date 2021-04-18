@@ -2,6 +2,8 @@
 
 #include "widgets/BaseWidget.hpp"
 
+#include "widgets/Window.hpp"
+
 #include <QMenu>
 #include <QPoint>
 #include <memory>
@@ -87,6 +89,7 @@ public slots:
     void reloadChannelEmotes();
     void reloadSubscriberEmotes();
     void reconnect();
+    void toggleTabVisibility();
 };
 
 }  // namespace chatterino

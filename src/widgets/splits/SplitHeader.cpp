@@ -16,6 +16,7 @@
 #include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/CommonTexts.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -404,6 +405,10 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                         &Split::openWhispersInBrowser);
         menu->addSeparator();
     }
+
+    // hide / unhide tabs
+    menu->addAction(QString("Toggle visibility of tabs"), this,
+                    SLOT(toggleTabVisibility()), QKeySequence("Ctrl+U"));
 
     // reload / reconnect
     if (this->split_->getChannel()->canReconnect())
@@ -935,6 +940,12 @@ void SplitHeader::reloadSubscriberEmotes()
 void SplitHeader::reconnect()
 {
     this->split_->getChannel()->reconnect();
+}
+
+void SplitHeader::toggleTabVisibility()
+{
+    SplitNotebook &notebook = getApp()->windows->getMainWindow().getNotebook();
+    notebook.setShowTabs(!notebook.getShowTabs());
 }
 
 }  // namespace chatterino
