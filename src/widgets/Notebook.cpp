@@ -352,24 +352,16 @@ void Notebook::setShowTabs(bool value)
             "either keyboard shortcut (Default: Ctrl+U) or select an option "
             "in split header's menu.");
         msgBox.addButton(QMessageBox::Ok);
-        msgBox.addButton("Don't show again", QMessageBox::YesRole);
+        auto *dsaButton =
+            msgBox.addButton("Don't show again", QMessageBox::YesRole);
 
         msgBox.setDefaultButton(QMessageBox::Ok);
 
-        auto picked = msgBox.exec();
+        msgBox.exec();
 
-        switch (picked)
+        if (msgBox.clickedButton() == dsaButton)
         {
-            case QMessageBox::Ok: {
-                return;
-            }
-            break;
-
-            case QMessageBox::YesRole:
-            default: {
-                getSettings()->informOnTabVisibilityToggle.setValue(false);
-            }
-            break;
+            getSettings()->informOnTabVisibilityToggle.setValue(false);
         }
     }
 }
