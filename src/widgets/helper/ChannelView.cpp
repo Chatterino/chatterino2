@@ -1098,8 +1098,10 @@ void ChannelView::drawMessages(QPainter &painter)
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
-    if (event->orientation() != Qt::Vertical)
+    if (event->angleDelta().x())
+    {
         return;
+    }
 
     if (event->modifiers() & Qt::ControlModifier)
     {
@@ -1112,7 +1114,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
         float mouseMultiplier = getSettings()->mouseScrollMultiplier;
 
         qreal desired = this->scrollBar_->getDesiredValue();
-        qreal delta = event->delta() * qreal(1.5) * mouseMultiplier;
+        qreal delta = event->angleDelta().y() * qreal(1.5) * mouseMultiplier;
 
         auto snapshot = this->getMessagesSnapshot();
         int snapshotLength = int(snapshot.size());
