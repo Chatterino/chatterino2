@@ -529,8 +529,8 @@ void Notebook::performLayout(bool animated)
         int top = y;
         x = left;
 
-        //        if (this->showTabs_)
-        //        {
+        // zneix: if we were to remove buttons when tabs are hidden
+        // stuff below to "set page bounds" part should be in conditional statement
         int verticalRowSpace = (this->height() - top) / tabHeight;
         if (verticalRowSpace == 0)  // window hasn't properly rendered yet
         {
@@ -602,7 +602,6 @@ void Notebook::performLayout(bool animated)
         {
             this->addButton_->raise();
         }
-        //        }
 
         // set page bounds
         if (this->selectedPage_ != nullptr)
