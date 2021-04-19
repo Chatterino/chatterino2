@@ -1098,7 +1098,7 @@ void ChannelView::drawMessages(QPainter &painter)
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
-    if (event->angleDelta().x())
+    if (!event->angleDelta().y())
     {
         return;
     }
