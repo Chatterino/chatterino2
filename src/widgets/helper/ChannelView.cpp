@@ -105,23 +105,27 @@ namespace {
         };
 
         // Ignore messages containing this emote
-        if (!getSettings()->isIgnoredMessage(emote.getCopyString()))
+        QString emoteName(emote.getCopyString());
+        QString emoteIgnoreRegex("(\\s|^)%1(\\s|$)");
+        if (!getSettings()->isIgnoredMessage(emoteIgnoreRegex.arg(emoteName)))
         {
-            menu.addAction("Ignore this emote", [name = emote.getCopyString()] {
+            menu.addAction("Ignore this emote", [emoteName, emoteIgnoreRegex] {
                 getSettings()->ignoredMessages.append(
-                    IgnorePhrase(name, false, true, "", true));
+                    IgnorePhrase(emoteIgnoreRegex.arg(emoteName), true, true,
+                                 QString(), true));
             });
         }
         else
         {
             menu.addAction(
-                "Unignore this emote", [name = emote.getCopyString()] {
+                "Unignore this emote", [emoteName, emoteIgnoreRegex] {
                     auto &ignored_messages =
                         *getSettings()->ignoredMessages.readOnly();
                     const auto it = std::find_if(
                         ignored_messages.cbegin(), ignored_messages.cend(),
                         [&](const IgnorePhrase &phrase) {
-                            return name == phrase.getPattern();
+                            return emoteIgnoreRegex.arg(emoteName) ==
+                                   phrase.getPattern();
                         });
                     if (it != ignored_messages.cend())
                     {
