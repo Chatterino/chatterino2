@@ -356,7 +356,7 @@ void Window::addShortcuts()
 
     // New tab
     createWindowShortcut(this, "CTRL+SHIFT+T", [this] {
-        auto *newPage = this->notebook_->addPage(true);
+        newPage = this->notebook_->addPage(true);
     });
 
     // Close tab
