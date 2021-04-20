@@ -423,12 +423,6 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         durationInSeconds = v.toString();
     }
 
-    v = message->tag("ban-reason");
-    if (v.isValid())
-    {
-        reason = v.toString();
-    }
-
     auto timeoutMsg =
         MessageBuilder(timeoutMessage, username, durationInSeconds, reason,
                        false, calculateMessageTimestamp(message))
