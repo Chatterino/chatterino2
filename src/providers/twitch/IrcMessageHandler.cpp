@@ -416,7 +416,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
 
     // get username, duration and message of the timed out user
     QString username = message->parameter(1);
-    QString durationInSeconds, reason;
+    QString durationInSeconds;
     QVariant v = message->tag("ban-duration");
     if (v.isValid())
     {
@@ -424,8 +424,8 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     }
 
     auto timeoutMsg =
-        MessageBuilder(timeoutMessage, username, durationInSeconds, reason,
-                       false, calculateMessageTimestamp(message))
+        MessageBuilder(timeoutMessage, username, durationInSeconds, false,
+                       calculateMessageTimestamp(message))
             .release();
     chan->addOrReplaceTimeout(timeoutMsg);
 
