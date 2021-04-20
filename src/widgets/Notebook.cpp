@@ -347,11 +347,11 @@ void Notebook::setShowTabs(bool value)
     {
         QMessageBox msgBox;
         msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
-        msgBox.setText("Hide tabs");
+        msgBox.setText("You've just hidden your tabs");
         msgBox.setInformativeText(
-            "You've just hidden your tabs.\nYou can (un)hide those with "
-            "either keyboard shortcut (Default: Ctrl+U) or select an option "
-            "in split header's menu.");
+            "You can toggle tabs by using the keyboard shortcut (Ctrl + U by "
+            "default) or clicking \"Toggle visibility of tabs\" in the split "
+            "menu.");
         msgBox.addButton(QMessageBox::Ok);
         auto *dsaButton =
             msgBox.addButton("Don't show again", QMessageBox::YesRole);
