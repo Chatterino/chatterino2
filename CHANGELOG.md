@@ -4,6 +4,7 @@
 
 - Minor: Added image links to the badge context menu. (#2667)
 - Minor: Added a setting to hide Twitch Predictions badges. (#2668)
+- Minor: Optionally remove spaces between emotes, originally made for Mm2PL/Dankerino. (#2651)
 - Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
 - Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
 
@@ -21,7 +22,6 @@
 - Major: Color mentions to match the mentioned users. You can disable this by unchecking "Color @usernames" under `Settings -> General -> Advanced (misc.)`. (#1963, #2284, #2597)
 - Major: Commands `/ignore` and `/unignore` have been renamed to `/block` and `/unblock` in order to keep consistency with Twitch's terms. (#2370)
 - Major: Added support for bit emotes - the ones you unlock after cheering to streamer. (#2550)
-- Minor: Optionally remove spaces between emotes, originally made for Mm2PL/Dankerino. (#2651)
 - Minor: Added `/clearmessages` command - does what "Burger menu -> More -> Clear messages" does. (#2485)
 - Minor: Added `/marker` command - similar to webchat, it creates a stream marker. (#2360)
 - Minor: Added `/chatters` command showing chatter count. (#2344)
