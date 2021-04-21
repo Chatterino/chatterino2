@@ -118,8 +118,6 @@ public:
                                           -0.5f};
     // BoolSetting useCustomWindowFrame = {"/appearance/useCustomWindowFrame",
     // false};
-    BoolSetting removeSpacesBetweenEmotes = {
-        "/appearance/removeSpacesBetweenEmotes", false};
 
     // Badges
     BoolSetting showBadgesGlobalAuthority = {
@@ -178,6 +176,8 @@ public:
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
+    BoolSetting removeSpacesBetweenEmotes = {
+        "/emotes/removeSpacesBetweenEmotes", false};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
