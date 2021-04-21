@@ -307,6 +307,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToFloat(args.value, 1.f);
         });
 
+    layout.addCheckbox("Remove spaces between emotes",
+                       s.removeSpacesBetweenEmotes);
     layout.addDropdown<int>(
         "Show info on hover", {"Don't show", "Always show", "Hold shift"},
         s.emotesTooltipPreview,
@@ -325,8 +327,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            "Google",
                        },
                        s.emojiSet);
-    layout.addCheckbox("Remove spaces around emotes",
-                       s.removeSpacesBetweenEmotes);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
