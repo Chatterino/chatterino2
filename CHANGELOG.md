@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unversioned
+
 - Minor: Added visual indicator to message length if over 500 characters long (#2659)
 
 ## 2.3.0
