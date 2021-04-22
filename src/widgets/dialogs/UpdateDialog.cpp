@@ -35,9 +35,10 @@ UpdateDialog::UpdateDialog()
     });
 
     this->updateStatusChanged(Updates::instance().getStatus());
-    this->connections_.managedConnect(
-        Updates::instance().statusUpdated,
-        [this](auto status) { this->updateStatusChanged(status); });
+    this->connections_.managedConnect(Updates::instance().statusUpdated,
+                                      [this](auto status) {
+                                          this->updateStatusChanged(status);
+                                      });
 
     this->setScaleIndependantHeight(150);
     this->setScaleIndependantWidth(500);

@@ -11,6 +11,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QHBoxLayout>
@@ -132,7 +133,9 @@ EmotePopup::EmotePopup(QWidget *parent)
     layout->addWidget(notebook);
     layout->setMargin(0);
 
-    auto clicked = [this](const Link &link) { this->linkClicked.invoke(link); };
+    auto clicked = [this](const Link &link) {
+        this->linkClicked.invoke(link);
+    };
 
     auto makeView = [&](QString tabTitle) {
         auto view = new ChannelView();
@@ -154,9 +157,42 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     this->loadEmojis();
 
-    createWindowShortcut(this, "CTRL+Tab", [=] { notebook->selectNextTab(); });
-    createWindowShortcut(this, "CTRL+Shift+Tab",
-                         [=] { notebook->selectPreviousTab(); });
+    // CTRL + 1-8 to open corresponding tab
+    for (auto i = 0; i < 8; i++)
+    {
+        const auto openTab = [this, i, notebook] {
+            notebook->selectIndex(i);
+        };
+        createWindowShortcut(this, QString("CTRL+%1").arg(i + 1).toUtf8(),
+                             openTab);
+    }
+
+    // Open last tab (first one from right)
+    createWindowShortcut(this, "CTRL+9", [=] {
+        notebook->selectLastTab();
+    });
+
+    // Cycle through tabs
+    createWindowShortcut(this, "CTRL+Tab", [=] {
+        notebook->selectNextTab();
+    });
+    createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
+        notebook->selectPreviousTab();
+    });
+
+    // Scroll with Page Up / Page Down
+    createWindowShortcut(this, "PgUp", [=] {
+        auto &scrollbar =
+            dynamic_cast<ChannelView *>(notebook->getSelectedPage())
+                ->getScrollBar();
+        scrollbar.offset(-scrollbar.getLargeChange());
+    });
+    createWindowShortcut(this, "PgDown", [=] {
+        auto &scrollbar =
+            dynamic_cast<ChannelView *>(notebook->getSelectedPage())
+                ->getScrollBar();
+        scrollbar.offset(scrollbar.getLargeChange());
+    });
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)

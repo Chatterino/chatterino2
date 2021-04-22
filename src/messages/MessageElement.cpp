@@ -253,6 +253,40 @@ MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
     return element;
 }
 
+// VIP BADGE
+VipBadgeElement::VipBadgeElement(const EmotePtr &data,
+                                 MessageElementFlags flags_)
+    : BadgeElement(data, flags_)
+{
+}
+
+MessageLayoutElement *VipBadgeElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    auto element =
+        (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
+
+    return element;
+}
+
+// FFZ Badge
+FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
+                                 MessageElementFlags flags_, QColor &color)
+    : BadgeElement(data, flags_)
+{
+    this->color = color;
+}
+
+MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    auto element =
+        (new ImageWithBackgroundLayoutElement(*this, image, size, this->color))
+            ->setLink(this->getLink());
+
+    return element;
+}
+
 // TEXT
 TextElement::TextElement(const QString &text, MessageElementFlags flags,
                          const MessageColor &color, FontStyle style)
@@ -302,7 +336,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
             // fourtf: add again
             //            if (word.width == -1) {
-            word.width = metrics.width(word.text);
+            word.width = metrics.horizontalAdvance(word.text);
             //            }
 
             // see if the text fits in the current line
@@ -334,15 +368,16 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
             // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
 
-            for (int i = 0; i < textLength; i++)  //
+            for (int i = 0; i < textLength; i++)
             {
                 auto isSurrogate = text.size() > i + 1 &&
                                    QChar::isHighSurrogate(text[i].unicode());
 
-                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
-                                             : metrics.width(text[i]);
+                auto charWidth = isSurrogate
+                                     ? metrics.horizontalAdvance(text.mid(i, 2))
+                                     : metrics.horizontalAdvance(text[i]);
 
-                if (!container.fitsInLine(width + charWidth))  //
+                if (!container.fitsInLine(width + charWidth))
                 {
                     container.addElementNoLineBreak(getTextLayoutElement(
                         text.mid(wordStart, i - wordStart), width, false));
@@ -567,7 +602,7 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
 
             // fourtf: add again
             //            if (word.width == -1) {
-            word.width = metrics.width(word.text);
+            word.width = metrics.horizontalAdvance(word.text);
             //            }
 
             // see if the text fits in the current line
@@ -593,7 +628,7 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
                 }
             }
 
-            // we done goofed, we need to wrap the text
+            // The word does not fit on a new line, we need to wrap it
             QString text = word.text;
             std::vector<Segment> segments = word.segments;
             int textLength = text.length();
@@ -603,23 +638,29 @@ void IrcTextElement::addToContainer(MessageLayoutContainer &container,
             // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
 
             // XXX(pajlada): NOT TESTED
-            for (int i = 0; i < textLength; i++)  //
+            for (int i = 0; i < textLength; i++)
             {
+                if (!container.canAddElements())
+                {
+                    // The container does not allow any more elements to be added, stop here
+                    break;
+                }
+
                 auto isSurrogate = text.size() > i + 1 &&
                                    QChar::isHighSurrogate(text[i].unicode());
 
-                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
-                                             : metrics.width(text[i]);
+                auto charWidth = isSurrogate
+                                     ? metrics.horizontalAdvance(text.mid(i, 2))
+                                     : metrics.horizontalAdvance(text[i]);
 
                 if (!container.fitsInLine(width + charWidth))
                 {
                     std::vector<Segment> pieceSegments;
                     int charactersLeft = i - wordStart;
-                    assert(charactersLeft > 0);
+
                     for (auto segmentIt = segments.begin();
                          segmentIt != segments.end();)
                     {
-                        assert(charactersLeft > 0);
                         auto &segment = *segmentIt;
                         if (charactersLeft >= segment.text.length())
                         {

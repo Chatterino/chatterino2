@@ -2,10 +2,12 @@
 name: Bug report
 about: Report something not working correctly that should be fixed
 title: ''
-labels: bug, needs triage
+labels: bug
 assignees: ''
 
 ---
+
+<!-- **Before opening a bug report, please check out the help page of the Chatterino wiki for possible common issues. https://wiki.chatterino.com/Help** -->
 
 **Describe the bug**
 <!-- A clear and concise description of what the bug is. -->

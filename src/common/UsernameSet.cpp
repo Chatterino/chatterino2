@@ -4,6 +4,30 @@
 
 namespace chatterino {
 
+namespace {
+
+    std::pair<UsernameSet::Iterator, bool> findOrErase(
+        std::set<QString, CaseInsensitiveLess> &set, const QString &value)
+    {
+        if (!value.isLower())
+        {
+            auto iter = set.find(value);
+            if (iter != set.end())
+            {
+                if (QString::compare(*iter, value, Qt::CaseSensitive) != 0)
+                {
+                    set.erase(iter);
+                }
+                else
+                {
+                    return {iter, false};
+                }
+            }
+        }
+        return {set.end(), true};
+    }
+}  // namespace
+
 //
 // UsernameSet
 //
@@ -43,15 +67,25 @@ std::set<QString>::size_type UsernameSet::size() const
 
 std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(const QString &value)
 {
-    this->insertPrefix(value);
+    auto pair = findOrErase(this->items, value);
+    if (!pair.second)
+    {
+        return pair;
+    }
 
+    this->insertPrefix(value);
     return this->items.insert(value);
 }
 
 std::pair<UsernameSet::Iterator, bool> UsernameSet::insert(QString &&value)
 {
-    this->insertPrefix(value);
+    auto pair = findOrErase(this->items, value);
+    if (!pair.second)
+    {
+        return pair;
+    }
 
+    this->insertPrefix(value);
     return this->items.insert(std::move(value));
 }
 
@@ -66,6 +100,24 @@ void UsernameSet::insertPrefix(const QString &value)
 bool UsernameSet::contains(const QString &value) const
 {
     return this->items.count(value) == 1;
+}
+
+void UsernameSet::merge(UsernameSet &&set)
+{
+    for (auto it = this->items.begin(); it != this->items.end();)
+    {
+        auto iter = set.items.find(*it);
+        if (iter == set.items.end())
+        {
+            it = this->items.erase(it);
+        }
+        else
+        {
+            ++it;
+        }
+    }
+    this->items.merge(set.items);
+    this->firstKeyForPrefix = set.firstKeyForPrefix;
 }
 
 //

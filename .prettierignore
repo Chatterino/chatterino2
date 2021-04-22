@@ -1,0 +1,5 @@
+# Ignore submodule files
+lib/*/
+conan-pkgs/*/
+
+.github/

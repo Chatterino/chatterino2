@@ -49,6 +49,11 @@ const QString &Channel::getDisplayName() const
     return this->getName();
 }
 
+const QString &Channel::getLocalizedName() const
+{
+    return this->getName();
+}
+
 bool Channel::isTwitchChannel() const
 {
     return this->type_ >= Type::Twitch && this->type_ < Type::TwitchEnd;
@@ -130,17 +135,17 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
         }
 
         if (s->flags.has(MessageFlag::Timeout) &&
-            s->timeoutUser == message->timeoutUser)  //
+            s->timeoutUser == message->timeoutUser)
         {
             if (message->flags.has(MessageFlag::PubSub) &&
-                !s->flags.has(MessageFlag::PubSub))  //
+                !s->flags.has(MessageFlag::PubSub))
             {
                 this->replaceMessage(s, message);
                 addMessage = false;
                 break;
             }
             if (!message->flags.has(MessageFlag::PubSub) &&
-                s->flags.has(MessageFlag::PubSub))  //
+                s->flags.has(MessageFlag::PubSub))
             {
                 addMessage = timeoutStackStyle == TimeoutStackStyle::DontStack;
                 break;
@@ -315,13 +320,13 @@ void Channel::onConnected()
 // Indirect channel
 //
 IndirectChannel::Data::Data(ChannelPtr _channel, Channel::Type _type)
-    : channel(_channel)
+    : channel(std::move(_channel))
     , type(_type)
 {
 }
 
 IndirectChannel::IndirectChannel(ChannelPtr channel, Channel::Type type)
-    : data_(std::make_unique<Data>(channel, type))
+    : data_(std::make_unique<Data>(std::move(channel), type))
 {
 }
 
@@ -334,7 +339,7 @@ void IndirectChannel::reset(ChannelPtr channel)
 {
     assert(this->data_->type != Channel::Type::Direct);
 
-    this->data_->channel = channel;
+    this->data_->channel = std::move(channel);
     this->data_->changed.invoke();
 }
 

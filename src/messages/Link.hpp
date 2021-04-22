@@ -20,6 +20,9 @@ public:
         AutoModAllow,
         AutoModDeny,
         OpenAccountsPage,
+        JumpToChannel,
+        Reconnect,
+        CopyToClipboard,
     };
 
     Link();

@@ -1,4 +1,5 @@
 #include "controllers/filters/parser/Tokenizer.hpp"
+#include "common/QLogging.hpp"
 
 namespace filterparser {
 
@@ -70,21 +71,24 @@ void Tokenizer::debug()
 {
     if (this->i_ > 0)
     {
-        qDebug() << "= current" << this->tokens_.at(this->i_ - 1);
-        qDebug() << "= current type" << this->tokenTypes_.at(this->i_ - 1);
+        qCDebug(chatterinoTokenizer)
+            << "= current" << this->tokens_.at(this->i_ - 1);
+        qCDebug(chatterinoTokenizer)
+            << "= current type" << this->tokenTypes_.at(this->i_ - 1);
     }
     else
     {
-        qDebug() << "= no current";
+        qCDebug(chatterinoTokenizer) << "= no current";
     }
     if (this->hasNext())
     {
-        qDebug() << "= next" << this->tokens_.at(this->i_);
-        qDebug() << "= next type" << this->tokenTypes_.at(this->i_);
+        qCDebug(chatterinoTokenizer) << "= next" << this->tokens_.at(this->i_);
+        qCDebug(chatterinoTokenizer)
+            << "= next type" << this->tokenTypes_.at(this->i_);
     }
     else
     {
-        qDebug() << "= no next";
+        qCDebug(chatterinoTokenizer) << "= no next";
     }
 }
 
@@ -103,6 +107,12 @@ TokenType Tokenizer::tokenize(const QString &text)
         return TokenType::LP;
     else if (text == ")")
         return TokenType::RP;
+    else if (text == "{")
+        return TokenType::LIST_START;
+    else if (text == "}")
+        return TokenType::LIST_END;
+    else if (text == ",")
+        return TokenType::COMMA;
     else if (text == "+")
         return TokenType::PLUS;
     else if (text == "-")
@@ -131,10 +141,18 @@ TokenType Tokenizer::tokenize(const QString &text)
         return TokenType::STARTS_WITH;
     else if (text == "endswith")
         return TokenType::ENDS_WITH;
+    else if (text == "match")
+        return TokenType::MATCH;
     else if (text == "!")
         return TokenType::NOT;
     else
     {
+        if ((text.startsWith("r\"") || text.startsWith("ri\"")) &&
+            text.back() == '"')
+        {
+            return TokenType::REGULAR_EXPRESSION;
+        }
+
         if (text.front() == '"' && text.back() == '"')
             return TokenType::STRING;
 

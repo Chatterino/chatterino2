@@ -32,7 +32,7 @@ using MessageFlags = FlagsEnum<MessageFlag>;
 class MessageLayout;
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;
 
-enum class MessageElementFlag;
+enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 class Scrollbar;
@@ -182,9 +182,9 @@ private:
 
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
-    ChannelPtr channel_;
-    ChannelPtr underlyingChannel_;
-    ChannelPtr sourceChannel_;
+    ChannelPtr channel_ = nullptr;
+    ChannelPtr underlyingChannel_ = nullptr;
+    ChannelPtr sourceChannel_ = nullptr;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;

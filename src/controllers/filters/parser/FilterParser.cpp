@@ -255,9 +255,23 @@ ExpressionPtr FilterParser::parseValue()
             return std::make_unique<ValueExpression>(this->tokenizer_.next(),
                                                      type);
         }
+        else if (type == TokenType::REGULAR_EXPRESSION)
+        {
+            auto before = this->tokenizer_.next();
+            // remove quote marks and r/ri
+            bool caseInsensitive = before.startsWith("ri");
+            auto val = before.mid(caseInsensitive ? 3 : 2);
+            val.chop(1);
+            val = val.replace("\\\"", "\"");
+            return std::make_unique<RegexExpression>(val, caseInsensitive);
+        }
         else if (type == TokenType::LP)
         {
             return this->parseParentheses();
+        }
+        else if (type == TokenType::LIST_START)
+        {
+            return this->parseList();
         }
         else
         {
@@ -273,6 +287,48 @@ ExpressionPtr FilterParser::parseValue()
     }
 
     return std::make_unique<ValueExpression>(0, TokenType::INT);
+}
+
+ExpressionPtr FilterParser::parseList()
+{
+    // Don't call .next() before calling this method
+    assert(this->tokenizer_.nextTokenType() == TokenType::LIST_START);
+    this->tokenizer_.next();
+
+    ExpressionList list;
+    bool first = true;
+
+    while (this->tokenizer_.hasNext())
+    {
+        if (this->tokenizer_.nextTokenType() == TokenType::LIST_END)
+        {
+            this->tokenizer_.next();
+            return std::make_unique<ListExpression>(std::move(list));
+        }
+        else if (this->tokenizer_.nextTokenType() == TokenType::COMMA && !first)
+        {
+            this->tokenizer_.next();
+            list.push_back(this->parseValue());
+            first = false;
+        }
+        else if (first)
+        {
+            list.push_back(this->parseValue());
+            first = false;
+        }
+        else
+        {
+            break;
+        }
+    }
+
+    const auto message =
+        this->tokenizer_.hasNext()
+            ? QString("Missing closing list braces: got %1")
+                  .arg(this->tokenizer_.preview())
+            : "Missing closing list braces at end of statement";
+    this->errorLog(message);
+    return std::make_unique<ListExpression>(ExpressionList());
 }
 
 void FilterParser::errorLog(const QString &text, bool expand)

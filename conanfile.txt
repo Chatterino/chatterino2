@@ -1,12 +1,15 @@
 [requires]
 openssl/1.1.1d
-boost/1.71.0
+boost/1.75.0
 
 [generators]
 qmake
+cmake
 
 [options]
 openssl:shared=True
 
 [imports]
+bin, *.dll -> ./bin @ keep_path=False
 bin, *.dll -> ./Chatterino2 @ keep_path=False
+lib, *.so* -> ./bin @ keep_path=False

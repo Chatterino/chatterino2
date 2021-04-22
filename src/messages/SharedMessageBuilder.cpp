@@ -1,6 +1,7 @@
 #include "messages/SharedMessageBuilder.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
@@ -88,8 +89,9 @@ bool SharedMessageBuilder::isIgnored() const
     {
         if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
         {
-            qDebug() << "Blocking message because it contains ignored phrase"
-                     << phrase.getPattern();
+            qCDebug(chatterinoMessage)
+                << "Blocking message because it contains ignored phrase"
+                << phrase.getPattern();
             return true;
         }
     }
@@ -202,11 +204,17 @@ void SharedMessageBuilder::parseHighlights()
         {
             continue;
         }
-        qDebug() << "Highlight because user" << this->ircMessage->nick()
-                 << "sent a message";
+        qCDebug(chatterinoMessage)
+            << "Highlight because user" << this->ircMessage->nick()
+            << "sent a message";
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = userHighlight.getColor();
+
+        if (userHighlight.showInMentions())
+        {
+            this->message().flags.set(MessageFlag::ShowInMentions);
+        }
 
         if (userHighlight.hasAlert())
         {
@@ -249,10 +257,12 @@ void SharedMessageBuilder::parseHighlights()
     std::vector<HighlightPhrase> activeHighlights =
         getSettings()->highlightedMessages.cloneVector();
 
-    if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
+    if (!currentUser->isAnon() && getSettings()->enableSelfHighlight &&
+        currentUsername.size() > 0)
     {
         HighlightPhrase selfHighlight(
-            currentUsername, getSettings()->enableSelfHighlightTaskbar,
+            currentUsername, getSettings()->showSelfHighlightInMentions,
+            getSettings()->enableSelfHighlightTaskbar,
             getSettings()->enableSelfHighlightSound, false, false,
             getSettings()->selfHighlightSoundUrl.getValue(),
             ColorProvider::instance().color(ColorType::SelfHighlight));
@@ -269,6 +279,11 @@ void SharedMessageBuilder::parseHighlights()
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = highlight.getColor();
+
+        if (highlight.showInMentions())
+        {
+            this->message().flags.set(MessageFlag::ShowInMentions);
+        }
 
         if (highlight.hasAlert())
         {
@@ -342,10 +357,10 @@ void SharedMessageBuilder::addTextOrEmoji(const QString &string_)
 void SharedMessageBuilder::appendChannelName()
 {
     QString channelName("#" + this->channel->getName());
-    Link link(Link::Url, this->channel->getName() + "\n" + this->message().id);
+    Link link(Link::JumpToChannel, this->channel->getName());
 
     this->emplace<TextElement>(channelName, MessageElementFlag::ChannelName,
-                               MessageColor::System)  //
+                               MessageColor::System)
         ->setLink(link);
 }
 

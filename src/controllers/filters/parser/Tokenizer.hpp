@@ -2,6 +2,10 @@
 
 #include "controllers/filters/parser/Types.hpp"
 
+#include <QMap>
+#include <QRegularExpression>
+#include <QString>
+
 namespace filterparser {
 
 static const QMap<QString, QString> validIdentifiersMap = {
@@ -23,10 +27,11 @@ static const QMap<QString, QString> validIdentifiersMap = {
 
 // clang-format off
 static const QRegularExpression tokenRegex(
-    QString("\\\"((\\\\\")|[^\\\"])*\\\"|") +                 // String literal
+    QString("((r|ri)?\\\")((\\\\\")|[^\\\"])*\\\"|") +        // String/Regex literal
     QString("[\\w\\.]+|") +                                   // Identifier or reserved keyword
     QString("(<=?|>=?|!=?|==|\\|\\||&&|\\+|-|\\*|\\/|%)+|") + // Operator
-    QString("[\\(\\)]")                                       // Parentheses
+    QString("[\\(\\)]|") +                                    // Parentheses
+    QString("[{},]")                                          // List
 );
 // clang-format on
 

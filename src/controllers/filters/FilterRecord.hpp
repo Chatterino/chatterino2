@@ -8,6 +8,7 @@
 
 #include <QRegularExpression>
 #include <QString>
+#include <QUuid>
 #include <pajlada/serialize.hpp>
 
 #include <memory>
@@ -101,10 +102,12 @@ struct Serialize<chatterino::FilterRecordPtr> {
 
 template <>
 struct Deserialize<chatterino::FilterRecordPtr> {
-    static chatterino::FilterRecordPtr get(const rapidjson::Value &value)
+    static chatterino::FilterRecordPtr get(const rapidjson::Value &value,
+                                           bool *error = nullptr)
     {
         if (!value.IsObject())
         {
+            PAJLADA_REPORT_ERROR(error)
             return std::make_shared<chatterino::FilterRecord>(QString(),
                                                               QString());
         }

@@ -43,7 +43,9 @@ SplitInput::SplitInput(Split *_chatWidget)
 
     // misc
     this->installKeyPressedEvent();
-    this->ui_.textEdit->focusLost.connect([this] { this->hideColonMenu(); });
+    this->ui_.textEdit->focusLost.connect([this] {
+        this->hideColonMenu();
+    });
     this->scaleChangedEvent(this->scale());
 }
 
@@ -90,8 +92,9 @@ void SplitInput::initLayout()
     }));
 
     // open emote popup
-    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked,
-                     [=] { this->openEmotePopup(); });
+    QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [=] {
+        this->openEmotePopup();
+    });
 
     // clear channelview selection when selecting in the input
     QObject::connect(this->ui_.textEdit, &QTextEdit::copyAvailable,
@@ -124,13 +127,17 @@ void SplitInput::scaleChangedEvent(float scale)
 
 void SplitInput::themeChangedEvent()
 {
-    QPalette palette;
+    QPalette palette, placeholderPalette;
 
-    palette.setColor(QPalette::Foreground, this->theme->splits.input.text);
+    palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
+    placeholderPalette.setColor(
+        QPalette::PlaceholderText,
+        this->theme->messages.textColors.chatPlaceholder);
 
     this->updateEmoteButton();
     this->ui_.textEditLength->setPalette(palette);
 
+    this->ui_.textEdit->setPalette(placeholderPalette);
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
     this->ui_.hbox->setMargin(
@@ -240,12 +247,8 @@ void SplitInput::installKeyPressedEvent()
             }
             if (event->modifiers() == Qt::AltModifier)
             {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Above);
-                }
+                this->split_->actionRequested.invoke(
+                    Split::Action::SelectSplitAbove);
             }
             else
             {
@@ -305,49 +308,37 @@ void SplitInput::installKeyPressedEvent()
                  event->modifiers() == Qt::AltModifier)
         {
             // h: vim binding for left
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
+            this->split_->actionRequested.invoke(
+                Split::Action::SelectSplitLeft);
 
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Left);
-            }
+            event->accept();
         }
         else if (event->key() == Qt::Key_J &&
                  event->modifiers() == Qt::AltModifier)
         {
             // j: vim binding for down
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
+            this->split_->actionRequested.invoke(
+                Split::Action::SelectSplitBelow);
 
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Below);
-            }
+            event->accept();
         }
         else if (event->key() == Qt::Key_K &&
                  event->modifiers() == Qt::AltModifier)
         {
             // k: vim binding for up
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
+            this->split_->actionRequested.invoke(
+                Split::Action::SelectSplitAbove);
 
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Above);
-            }
+            event->accept();
         }
         else if (event->key() == Qt::Key_L &&
                  event->modifiers() == Qt::AltModifier)
         {
             // l: vim binding for right
-            SplitContainer *page = this->split_->getContainer();
-            event->accept();
+            this->split_->actionRequested.invoke(
+                Split::Action::SelectSplitRight);
 
-            if (page != nullptr)
-            {
-                page->selectNextSplit(SplitContainer::Right);
-            }
+            event->accept();
         }
         else if (event->key() == Qt::Key_Down)
         {
@@ -357,12 +348,8 @@ void SplitInput::installKeyPressedEvent()
             }
             if (event->modifiers() == Qt::AltModifier)
             {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Below);
-                }
+                this->split_->actionRequested.invoke(
+                    Split::Action::SelectSplitBelow);
             }
             else
             {
@@ -415,24 +402,16 @@ void SplitInput::installKeyPressedEvent()
         {
             if (event->modifiers() == Qt::AltModifier)
             {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Left);
-                }
+                this->split_->actionRequested.invoke(
+                    Split::Action::SelectSplitLeft);
             }
         }
         else if (event->key() == Qt::Key_Right)
         {
             if (event->modifiers() == Qt::AltModifier)
             {
-                SplitContainer *page = this->split_->getContainer();
-
-                if (page != nullptr)
-                {
-                    page->selectNextSplit(SplitContainer::Right);
-                }
+                this->split_->actionRequested.invoke(
+                    Split::Action::SelectSplitRight);
             }
         }
         else if ((event->key() == Qt::Key_C ||
@@ -599,7 +578,7 @@ void SplitInput::editTextChanged()
     QString text = this->ui_.textEdit->toPlainText();
 
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
-        this->split_->getChannel()->isTwitchChannel())  //
+        this->split_->getChannel()->isTwitchChannel())
     {
         QString lastUser = app->twitch.server->lastUserThatWhisperedMe.get();
         if (!lastUser.isEmpty())
