@@ -305,6 +305,8 @@ set(SOURCE_FILES main.cpp
         widgets/BaseWidget.hpp
         widgets/BaseWindow.cpp
         widgets/BaseWindow.hpp
+        widgets/FramelessEmbedWindow.cpp
+        widgets/FramelessEmbedWindow.hpp
         widgets/Label.cpp
         widgets/Label.hpp
         widgets/Notebook.cpp

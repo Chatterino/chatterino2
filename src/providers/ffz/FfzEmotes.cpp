@@ -91,7 +91,6 @@ namespace {
     {
         boost::optional<EmotePtr> authorityBadge;
 
-        qDebug() << badgeUrls;
         if (!badgeUrls.isEmpty())
         {
             auto authorityBadge1x = getEmoteLink(badgeUrls, "1");

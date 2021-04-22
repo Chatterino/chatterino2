@@ -76,6 +76,7 @@
 - Minor: Made username autocompletion truecase (#1199, #1883)
 - Minor: Update the listing of top-level domains. (#2345)
 - Minor: Properly respect RECONNECT messages from Twitch (#2347)
+- Minor: Added command line option to attach chatterino to another window.
 - Minor: Hide "Case-sensitive" column for user highlights. (#2404)
 - Minor: Added human-readable formatting to remaining timeout duration. (#2398)
 - Minor: Update emojis version to 13 (2020). (#1555)
