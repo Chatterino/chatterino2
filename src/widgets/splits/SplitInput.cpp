@@ -604,6 +604,14 @@ void SplitInput::editTextChanged()
     if (text.length() > 0 && getSettings()->showMessageLength)
     {
         labelText = QString::number(text.length());
+        if (text.length() > 500)
+        {
+            this->ui_.textEditLength->setStyleSheet("color: red");
+        }
+        else
+        {
+            this->ui_.textEditLength->setStyleSheet("");
+        }
     }
     else
     {
