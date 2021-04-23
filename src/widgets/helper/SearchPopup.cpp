@@ -10,6 +10,7 @@
 #include "messages/search/AuthorPredicate.hpp"
 #include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
+#include "messages/search/MessageFlagsPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -169,6 +170,7 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     auto words = input.split(' ', QString::SkipEmptyParts);
     QStringList authors;
     QStringList channels;
+    QStringList flags;
 
     for (auto it = words.begin(); it != words.end();)
     {
@@ -192,6 +194,10 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
             {
                 channels.append(value);
             }
+            else if (name == "is")
+            {
+                flags.append(value);
+            }
             else
             {
                 remove = false;
@@ -211,6 +217,9 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
 
     if (!channels.empty())
         predicates.push_back(std::make_unique<ChannelPredicate>(channels));
+
+    if (!flags.empty())
+        predicates.push_back(std::make_unique<MessageFlagsPredicate>(flags));
 
     if (!words.empty())
         predicates.push_back(
