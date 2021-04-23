@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Added a setting to hide Twitch Predictions badges. (#2668)
+
 ## 2.3.0
 
 - Major: Added custom FrankerFaceZ VIP Badges. (#2628)
