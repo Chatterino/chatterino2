@@ -682,4 +682,16 @@ void HotkeyController::replaceHotkey(QString oldName,
     this->hotkeys_.append(newHotkey);
 }
 
+bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey)
+{
+    for (const auto shared : this->hotkeys_)
+    {
+        if (shared->scope() == hotkey->scope() &&
+            shared->keySequence() == hotkey->keySequence())
+        {
+            return true;
+        }
+    }
+    return false;
+}
 }  // namespace chatterino

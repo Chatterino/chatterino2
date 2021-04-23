@@ -110,7 +110,11 @@ void EditHotkeyDialog::afterEdit()
     bool hasModifier = ((firstKeyInt & Qt::CTRL) == Qt::CTRL) ||
                        ((firstKeyInt & Qt::ALT) == Qt::ALT) ||
                        ((firstKeyInt & Qt::META) == Qt::META);
-    if (!hasModifier && !this->shownSingleKeyWarning)
+    bool isKeyExcempt = ((firstKeyInt & Qt::Key_Escape) == Qt::Key_Escape) ||
+                        ((firstKeyInt & Qt::Key_Enter) == Qt::Key_Enter) ||
+                        ((firstKeyInt & Qt::Key_Return) == Qt::Key_Return);
+
+    if (!isKeyExcempt && !hasModifier && !this->shownSingleKeyWarning)
     {
         this->showEditError(
             "Warning: hotkeys without modifiers can lead to not being "
@@ -119,10 +123,16 @@ void EditHotkeyDialog::afterEdit()
         this->shownSingleKeyWarning = true;
         return;
     }
-
-    this->data_ = std::make_shared<Hotkey>(
+    auto hotkey = std::make_shared<Hotkey>(
         *scope, this->ui_->keyComboEdit->keySequence(),
         this->ui_->actionPicker->currentText(), arguments, nameText);
+    if (getApp()->hotkeys->isDuplicate(hotkey))
+    {
+        this->showEditError("Key combo needs to be unique in the scope.");
+        return;
+    }
+
+    this->data_ = hotkey;
     this->accept();
 }
 
