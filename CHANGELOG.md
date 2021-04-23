@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Added `is:<flags>` search filter to find messages of specific types. (#2653, #2671)
+
 ## 2.3.0
 
 - Major: Added custom FrankerFaceZ VIP Badges. (#2628)
