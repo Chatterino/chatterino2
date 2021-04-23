@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
+
 ## 2.3.0
 
 - Major: Added custom FrankerFaceZ VIP Badges. (#2628)
