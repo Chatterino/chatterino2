@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Added image link to the badge context menu. (#2667)
+
 ## 2.3.0
 
 - Major: Added custom FrankerFaceZ VIP Badges. (#2628)
