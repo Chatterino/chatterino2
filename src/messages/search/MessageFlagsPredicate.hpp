@@ -11,13 +11,20 @@ using MessageFlags = FlagsEnum<MessageFlag>;
  * @brief MessagePredicate checking for message flags.
  *
  * This predicate will only allow messages with a list of flags.
- * specified by user friendly names for the flags.
+ * Specified by user-friendly names for the flags.
  */
 class MessageFlagsPredicate : public MessagePredicate
 {
 public:
     /**
      * @brief Create a MessageFlagsPredicate with a list of flags to search for.
+     *
+     * The flags can be specified by user-friendly names.
+     * "deleted" and "disabled" are used for the "Disabled" flag.
+     * "sub" and "subscription" are used for the "Subscription" flag.
+     * "timeout" is used for the "Timeout" flag.
+     * "highlighted" is used for the "Highlighted" flag.
+     * "system" is used for the "System" flag.
      *
      * @param flags a list of names for the flags a message should have
      */

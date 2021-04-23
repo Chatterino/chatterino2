@@ -10,7 +10,7 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QStringList &flags)
     {
         for (const auto &flag : entry.split(',', QString::SkipEmptyParts))
         {
-            if (flag == "deleted")
+            if (flag == "deleted" || flag == "disabled")
             {
                 this->flags_.set(MessageFlag::Disabled);
             }
