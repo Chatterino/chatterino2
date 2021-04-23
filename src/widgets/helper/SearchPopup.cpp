@@ -170,7 +170,6 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     auto words = input.split(' ', QString::SkipEmptyParts);
     QStringList authors;
     QStringList channels;
-    QStringList flags;
 
     for (auto it = words.begin(); it != words.end();)
     {
@@ -196,7 +195,8 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
             }
             else if (name == "is")
             {
-                flags.append(value);
+                predicates.push_back(
+                    std::make_unique<MessageFlagsPredicate>(value));
             }
             else
             {
@@ -217,9 +217,6 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
 
     if (!channels.empty())
         predicates.push_back(std::make_unique<ChannelPredicate>(channels));
-
-    if (!flags.empty())
-        predicates.push_back(std::make_unique<MessageFlagsPredicate>(flags));
 
     if (!words.empty())
         predicates.push_back(

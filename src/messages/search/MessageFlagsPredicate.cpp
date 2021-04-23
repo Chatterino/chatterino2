@@ -2,34 +2,31 @@
 
 namespace chatterino {
 
-MessageFlagsPredicate::MessageFlagsPredicate(const QStringList &flags)
+MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
     : flags_()
 {
     // Check if any comma-seperated values were passed and transform those
-    for (const auto &entry : flags)
+    for (const auto &flag : flags.split(',', QString::SkipEmptyParts))
     {
-        for (const auto &flag : entry.split(',', QString::SkipEmptyParts))
+        if (flag == "deleted" || flag == "disabled")
         {
-            if (flag == "deleted" || flag == "disabled")
-            {
-                this->flags_.set(MessageFlag::Disabled);
-            }
-            else if (flag == "sub" || flag == "subscription")
-            {
-                this->flags_.set(MessageFlag::Subscription);
-            }
-            else if (flag == "timeout")
-            {
-                this->flags_.set(MessageFlag::Timeout);
-            }
-            else if (flag == "highlighted")
-            {
-                this->flags_.set(MessageFlag::Highlighted);
-            }
-            else if (flag == "system")
-            {
-                this->flags_.set(MessageFlag::System);
-            }
+            this->flags_.set(MessageFlag::Disabled);
+        }
+        else if (flag == "sub" || flag == "subscription")
+        {
+            this->flags_.set(MessageFlag::Subscription);
+        }
+        else if (flag == "timeout")
+        {
+            this->flags_.set(MessageFlag::Timeout);
+        }
+        else if (flag == "highlighted")
+        {
+            this->flags_.set(MessageFlag::Highlighted);
+        }
+        else if (flag == "system")
+        {
+            this->flags_.set(MessageFlag::System);
         }
     }
 }

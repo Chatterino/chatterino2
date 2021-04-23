@@ -26,9 +26,9 @@ public:
      * "highlighted" is used for the "Highlighted" flag.
      * "system" is used for the "System" flag.
      *
-     * @param flags a list of names for the flags a message should have
+     * @param flags a string comma seperated list of names for the flags a message should have
      */
-    MessageFlagsPredicate(const QStringList &flags);
+    MessageFlagsPredicate(const QString &flags);
 
     /**
      * @brief Checks whether the message has any of the flags passed
