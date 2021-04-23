@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Added image link to the badge context menu. (#2667)
+- Minor: Added image links to the badge context menu. (#2667)
 
 ## 2.3.0
 
