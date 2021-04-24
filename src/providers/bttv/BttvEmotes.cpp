@@ -220,12 +220,15 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             }
             else if (result.status() == NetworkResult::timedoutStatus)
             {
-                // TODO: Auto retry in case of a timeout, with a delay
                 qCWarning(chatterinoBttv)
                     << "Fetching BTTV emotes for channel" << channelId
-                    << "failed due to timeout";
-                shared->addMessage(makeSystemMessage(
-                    "Failed to fetch BetterTTV channel emotes. (timed out)"));
+                    << "failed due to timeout after" << retryCount
+                    << "retries";
+
+                const QString sysMessage =
+                        QString("Failed to fetch BetterTTV channel emotes. (timed out, retrying %1/%2)")
+                        .arg(QString::number(retryCount + 1), QString::number(MAX_BTTV_RETRY_COUNT));
+                shared->addMessage(makeSystemMessage(sysMessage));
             }
             else
             {
