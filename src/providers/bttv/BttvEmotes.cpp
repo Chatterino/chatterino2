@@ -18,6 +18,8 @@ namespace {
     const QString CHANNEL_HAS_NO_EMOTES(
         "This channel has no BetterTTV channel emotes.");
 
+    const int MAX_BTTV_RETRY_COUNT = 5;
+
     QString emoteLinkFormat("https://betterttv.com/emotes/%1");
 
     Url getEmoteLink(QString urlTemplate, const EmoteId &id,
