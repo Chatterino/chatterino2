@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
+
 ## 2.3.0
 
 - Major: Added custom FrankerFaceZ VIP Badges. (#2628)
