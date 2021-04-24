@@ -207,7 +207,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
             }
             return pair.first;
         })
-        .onError([channelId, channel, manualRefresh](auto result) {
+        .onError([channelId, channel, channelDisplayName, callback, manualRefresh, retryCount](auto result) {
             auto shared = channel.lock();
             if (!shared)
                 return;
@@ -229,6 +229,8 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                         QString("Failed to fetch BetterTTV channel emotes. (timed out, retrying %1/%2)")
                         .arg(QString::number(retryCount + 1), QString::number(MAX_BTTV_RETRY_COUNT));
                 shared->addMessage(makeSystemMessage(sysMessage));
+
+                loadChannel(channel, channelId, channelDisplayName, callback, manualRefresh, retryCount + 1);
             }
             else
             {
