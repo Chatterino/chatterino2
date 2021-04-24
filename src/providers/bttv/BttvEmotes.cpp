@@ -179,7 +179,7 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
         shared->addMessage(makeSystemMessage(sysMessage));
     }
 
-    const int timeout = 2 ^ retryCount * 1000;
+    const int timeout = pow(2, retryCount + 1) * 1000;
 
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(timeout)
