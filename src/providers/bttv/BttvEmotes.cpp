@@ -179,8 +179,10 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
         shared->addMessage(makeSystemMessage(sysMessage));
     }
 
+    const int timeout = 2 ^ retryCount * 1000;
+
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
-        .timeout(3000)
+        .timeout(timeout)
         .onSuccess([callback = std::move(callback), channel,
                     &channelDisplayName,
                     manualRefresh](auto result) -> Outcome {
