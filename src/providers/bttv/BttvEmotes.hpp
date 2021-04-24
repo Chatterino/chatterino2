@@ -29,7 +29,8 @@ public:
                             const QString &channelId,
                             const QString &channelDisplayName,
                             std::function<void(EmoteMap &&)> callback,
-                            bool manualRefresh);
+                            bool manualRefresh,
+                            int retryCount = 0);
 
 private:
     Atomic<std::shared_ptr<const EmoteMap>> global_;

@@ -158,7 +158,8 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                              const QString &channelId,
                              const QString &channelDisplayName,
                              std::function<void(EmoteMap &&)> callback,
-                             bool manualRefresh)
+                             bool manualRefresh,
+                             int retryCount)
 {
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(3000)
