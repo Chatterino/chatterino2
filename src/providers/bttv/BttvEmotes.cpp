@@ -163,6 +163,22 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                              bool manualRefresh,
                              int retryCount)
 {
+    if (retryCount == MAX_BTTV_RETRY_COUNT)
+    {
+        auto shared = channel.lock();
+        if (!shared)
+            return;
+        qCWarning(chatterinoBttv)
+            << "Fetching BTTV emotes for channel" << channelId
+            << "failed after " << MAX_BTTV_RETRY_COUNT
+            << "retries. Will not continue.";
+
+        const QString sysMessage =
+                QString("Failed to fetch BetterTTV channel emotes. (timed out, max retry %1/%2)")
+                .arg(QString::number(retryCount + 1), QString::number(MAX_BTTV_RETRY_COUNT));
+        shared->addMessage(makeSystemMessage(sysMessage));
+    }
+
     NetworkRequest(QString(bttvChannelEmoteApiUrl) + channelId)
         .timeout(3000)
         .onSuccess([callback = std::move(callback), channel,
