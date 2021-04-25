@@ -101,12 +101,6 @@ Split::Split(QWidget *parent)
     this->vbox_->addWidget(this->view_, 1);
     this->vbox_->addWidget(this->input_);
 
-    // xd
-    // CreateShortcut(this, "ALT+SHIFT+RIGHT", &Split::doIncFlexX);
-    // CreateShortcut(this, "ALT+SHIFT+LEFT", &Split::doDecFlexX);
-    // CreateShortcut(this, "ALT+SHIFT+UP", &Split::doIncFlexY);
-    // CreateShortcut(this, "ALT+SHIFT+DOWN", &Split::doDecFlexY);
-
     this->input_->ui_.textEdit->installEventFilter(parent);
 
     // update placeheolder text on Twitch account change and channel change
