@@ -16,7 +16,7 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
         {
             this->flags_.set(MessageFlag::Subscription);
         }
-        else if (flag == "timeout")
+        else if (flag == "timeout" || flag == "ban")
         {
             this->flags_.set(MessageFlag::Timeout);
         }
