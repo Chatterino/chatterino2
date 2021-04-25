@@ -448,7 +448,6 @@ void TwitchMessageBuilder::addTextOrEmoji(EmotePtr emote)
 void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 {
     auto string = QString(string_);
-    auto &prevElem = this->message().elements.back();
 
     if (this->hasBits_ && this->tryParseCheermote(string))
     {
