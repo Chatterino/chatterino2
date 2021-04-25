@@ -138,6 +138,8 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         QPoint(this->currentX_ + xOffset,
                this->currentY_ - element->getRect().height() + yOffset));
 
+    element->setLine(this->line_);
+
     // add element
     this->elements_.push_back(std::unique_ptr<MessageLayoutElement>(element));
 
