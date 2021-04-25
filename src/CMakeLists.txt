@@ -26,6 +26,8 @@ set(SOURCE_FILES main.cpp
         common/DownloadManager.hpp
         common/Env.cpp
         common/Env.hpp
+        common/GlobalBadges.cpp
+        common/GlobalBadges.hpp
         common/LinkParser.cpp
         common/LinkParser.hpp
         common/Modes.cpp
@@ -72,6 +74,10 @@ set(SOURCE_FILES main.cpp
         controllers/filters/parser/Types.cpp
         controllers/filters/parser/Types.hpp
 
+        controllers/highlights/BadgeHighlightModel.cpp
+        controllers/highlights/BadgeHighlightModel.hpp
+        controllers/highlights/HighlightBadge.cpp
+        controllers/highlights/HighlightBadge.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
         controllers/highlights/HighlightModel.cpp
@@ -259,6 +265,8 @@ set(SOURCE_FILES main.cpp
         util/Clipboard.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
+        util/DisplayBadge.cpp
+        util/DisplayBadge.hpp
         util/FormatTime.cpp
         util/FormatTime.hpp
         util/FunctionEventFilter.cpp
@@ -317,6 +325,8 @@ set(SOURCE_FILES main.cpp
         widgets/Window.cpp
         widgets/Window.hpp
 
+        widgets/dialogs/BadgePickerDialog.cpp
+        widgets/dialogs/BadgePickerDialog.hpp
         widgets/dialogs/ChannelFilterEditorDialog.cpp
         widgets/dialogs/ChannelFilterEditorDialog.hpp
         widgets/dialogs/ColorPickerDialog.cpp
