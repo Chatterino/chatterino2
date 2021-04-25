@@ -3,6 +3,8 @@
 ## Unversioned
 
 - Minor: Added image links to the badge context menu. (#2667)
+- Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
+- Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
 
 ## 2.3.0
 
