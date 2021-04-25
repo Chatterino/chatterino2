@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added a setting to hide Twitch Predictions badges. (#2668)
 - Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
 - Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
 
