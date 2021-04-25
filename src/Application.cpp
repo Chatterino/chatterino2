@@ -164,6 +164,10 @@ int Application::run(QApplication &qtApp)
         this->windows->forceLayoutChannelViews();
     });
 
+    getSettings()->removeSpacesBetweenEmotes.connect([this] {
+        this->windows->forceLayoutChannelViews();
+    });
+
     return qtApp.exec();
 }
 

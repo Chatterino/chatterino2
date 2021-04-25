@@ -176,6 +176,8 @@ public:
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
+    BoolSetting removeSpacesBetweenEmotes = {
+        "/emotes/removeSpacesBetweenEmotes", false};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
