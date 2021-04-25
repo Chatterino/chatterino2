@@ -122,6 +122,8 @@ public:
     // Badges
     BoolSetting showBadgesGlobalAuthority = {
         "/appearance/badges/GlobalAuthority", true};
+    BoolSetting showBadgesPredictions = {"/appearance/badges/predictions",
+                                         true};
     BoolSetting showBadgesChannelAuthority = {
         "/appearance/badges/ChannelAuthority", true};
     BoolSetting showBadgesSubscription = {"/appearance/badges/subscription",

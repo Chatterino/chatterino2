@@ -148,8 +148,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag,
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
                                const QString &durationInSeconds,
-                               const QString &reason, bool multipleTimes,
-                               const QTime &time)
+                               bool multipleTimes, const QTime &time)
     : MessageBuilder()
 {
     QString fullText;
@@ -178,12 +177,6 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
         text.append("has been permanently banned");
     }
 
-    if (reason.length() > 0)
-    {
-        text.append(": \"");
-        text.append(parseTagString(reason));
-        text.append("\"");
-    }
     text.append(".");
 
     if (multipleTimes)
