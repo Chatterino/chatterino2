@@ -44,58 +44,65 @@ enum class MessageElementFlag : int64_t {
     ChannelPointReward = (1LL << 8),
     ChannelPointRewardImage = ChannelPointReward | TwitchEmoteImage,
 
-    FfzEmoteImage = (1LL << 10),
-    FfzEmoteText = (1LL << 11),
+    FfzEmoteImage = (1LL << 9),
+    FfzEmoteText = (1LL << 10),
     FfzEmote = FfzEmoteImage | FfzEmoteText,
     EmoteImages = TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage,
     EmoteText = TwitchEmoteText | BttvEmoteText | FfzEmoteText,
 
-    BitsStatic = (1LL << 12),
-    BitsAnimated = (1LL << 13),
+    BitsStatic = (1LL << 11),
+    BitsAnimated = (1LL << 12),
 
     // Slot 1: Twitch
     // - Staff badge
     // - Admin badge
     // - Global Moderator badge
-    BadgeGlobalAuthority = (1LL << 14),
+    BadgeGlobalAuthority = (1LL << 13),
 
     // Slot 2: Twitch
+    // - Predictions badge
+    BadgePredictions = (1LL << 14),
+
+    // Slot 3: Twitch
     // - VIP badge
     // - Moderator badge
     // - Broadcaster badge
     BadgeChannelAuthority = (1LL << 15),
 
-    // Slot 3: Twitch
+    // Slot 4: Twitch
     // - Subscription badges
     BadgeSubscription = (1LL << 16),
 
-    // Slot 4: Twitch
+    // Slot 5: Twitch
     // - Turbo badge
     // - Prime badge
     // - Bit badges
     // - Game badges
     BadgeVanity = (1LL << 17),
 
-    // Slot 5: Chatterino
+    // Slot 6: Chatterino
     // - Chatterino developer badge
+    // - Chatterino contributor badge
     // - Chatterino donator badge
     // - Chatterino top donator badge
+    // - Chatterino special pepe badge
+    // - Chatterino gnome badge
     BadgeChatterino = (1LL << 18),
 
-    // Slot 6: FrankerFaceZ
+    // Slot 7: FrankerFaceZ
     // - FFZ developer badge
     // - FFZ bot badge
     // - FFZ donator badge
-    BadgeFfz = (1LL << 32),
+    BadgeFfz = (1LL << 19),
 
-    Badges = BadgeGlobalAuthority | BadgeChannelAuthority | BadgeSubscription |
-             BadgeVanity | BadgeChatterino | BadgeFfz,
+    Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
+             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeFfz,
 
-    ChannelName = (1LL << 19),
+    ChannelName = (1LL << 20),
 
-    BitsAmount = (1LL << 20),
+    BitsAmount = (1LL << 21),
 
-    ModeratorTools = (1LL << 21),
+    ModeratorTools = (1LL << 22),
 
     EmojiImage = (1LL << 23),
     EmojiText = (1LL << 24),
@@ -118,8 +125,6 @@ enum class MessageElementFlag : int64_t {
     // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
     // e.g. BTTV's SoSnowy during christmas season
     ZeroWidthEmote = (1LL << 31),
-
-    // (1LL << 32) is used by BadgeFfz, it is next to BadgeChatterino
 
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
