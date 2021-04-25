@@ -86,34 +86,35 @@ namespace {
         return {Success, std::move(emotes)};
     }
 
-    boost::optional<EmotePtr> parseModBadge(const QJsonObject &jsonRoot)
+    boost::optional<EmotePtr> parseAuthorityBadge(const QJsonObject &badgeUrls,
+                                                  const QString tooltip)
     {
-        boost::optional<EmotePtr> modBadge;
+        boost::optional<EmotePtr> authorityBadge;
 
-        auto room = jsonRoot.value("room").toObject();
-        auto modUrls = room.value("mod_urls").toObject();
-        if (!modUrls.isEmpty())
+        if (!badgeUrls.isEmpty())
         {
-            auto modBadge1x = getEmoteLink(modUrls, "1");
-            auto modBadge2x = getEmoteLink(modUrls, "2");
-            auto modBadge3x = getEmoteLink(modUrls, "4");
+            auto authorityBadge1x = getEmoteLink(badgeUrls, "1");
+            auto authorityBadge2x = getEmoteLink(badgeUrls, "2");
+            auto authorityBadge3x = getEmoteLink(badgeUrls, "4");
 
-            auto modBadgeImageSet = ImageSet{
-                Image::fromUrl(modBadge1x, 1),
-                modBadge2x.string.isEmpty() ? Image::getEmpty()
-                                            : Image::fromUrl(modBadge2x, 0.5),
-                modBadge3x.string.isEmpty() ? Image::getEmpty()
-                                            : Image::fromUrl(modBadge3x, 0.25),
+            auto authorityBadgeImageSet = ImageSet{
+                Image::fromUrl(authorityBadge1x, 1),
+                authorityBadge2x.string.isEmpty()
+                    ? Image::getEmpty()
+                    : Image::fromUrl(authorityBadge2x, 0.5),
+                authorityBadge3x.string.isEmpty()
+                    ? Image::getEmpty()
+                    : Image::fromUrl(authorityBadge3x, 0.25),
             };
 
-            modBadge = std::make_shared<Emote>(Emote{
+            authorityBadge = std::make_shared<Emote>(Emote{
                 {""},
-                modBadgeImageSet,
-                Tooltip{"Moderator"},
-                modBadge1x,
+                authorityBadgeImageSet,
+                Tooltip{tooltip},
+                authorityBadge1x,
             });
         }
-        return modBadge;
+        return authorityBadge;
     }
 
     EmoteMap parseChannelEmotes(const QJsonObject &jsonRoot)
@@ -199,6 +200,7 @@ void FfzEmotes::loadChannel(
     std::weak_ptr<Channel> channel, const QString &channelId,
     std::function<void(EmoteMap &&)> emoteCallback,
     std::function<void(boost::optional<EmotePtr>)> modBadgeCallback,
+    std::function<void(boost::optional<EmotePtr>)> vipBadgeCallback,
     bool manualRefresh)
 {
     qCDebug(chatterinoFfzemotes)
@@ -208,16 +210,23 @@ void FfzEmotes::loadChannel(
 
         .timeout(20000)
         .onSuccess([emoteCallback = std::move(emoteCallback),
-                    modBadgeCallback = std::move(modBadgeCallback), channel,
+                    modBadgeCallback = std::move(modBadgeCallback),
+                    vipBadgeCallback = std::move(vipBadgeCallback), channel,
                     manualRefresh](auto result) -> Outcome {
             auto json = result.parseJson();
             auto emoteMap = parseChannelEmotes(json);
-            auto modBadge = parseModBadge(json);
+            auto modBadge = parseAuthorityBadge(
+                json.value("room").toObject().value("mod_urls").toObject(),
+                "Moderator");
+            auto vipBadge = parseAuthorityBadge(
+                json.value("room").toObject().value("vip_badge").toObject(),
+                "VIP");
 
             bool hasEmotes = !emoteMap.empty();
 
             emoteCallback(std::move(emoteMap));
             modBadgeCallback(std::move(modBadge));
+            vipBadgeCallback(std::move(vipBadge));
             if (auto shared = channel.lock(); manualRefresh)
             {
                 if (hasEmotes)

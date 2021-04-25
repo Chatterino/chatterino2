@@ -78,7 +78,8 @@ void Application::initialize(Settings &settings, Paths &paths)
     isAppInitialized = true;
 
     // Show changelog
-    if (getSettings()->currentVersion.getValue() != "" &&
+    if (!getArgs().isFramelessEmbed &&
+        getSettings()->currentVersion.getValue() != "" &&
         getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
     {
         auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
@@ -92,11 +93,14 @@ void Application::initialize(Settings &settings, Paths &paths)
         }
     }
 
-    getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
-
-    if (getSettings()->enableExperimentalIrc)
+    if (!getArgs().isFramelessEmbed)
     {
-        Irc::instance().load();
+        getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
+
+        if (getSettings()->enableExperimentalIrc)
+        {
+            Irc::instance().load();
+        }
     }
 
     for (auto &singleton : this->singletons_)
@@ -105,7 +109,7 @@ void Application::initialize(Settings &settings, Paths &paths)
     }
 
     // add crash message
-    if (getArgs().crashRecovery)
+    if (!getArgs().isFramelessEmbed && getArgs().crashRecovery)
     {
         if (auto selected =
                 this->windows->getMainWindow().getNotebook().getSelectedPage())
@@ -128,7 +132,10 @@ void Application::initialize(Settings &settings, Paths &paths)
 
     this->windows->updateWordTypeMask();
 
-    this->initNm(paths);
+    if (!getArgs().isFramelessEmbed)
+    {
+        this->initNm(paths);
+    }
     this->initPubsub();
 }
 
@@ -138,7 +145,10 @@ int Application::run(QApplication &qtApp)
 
     this->twitch.server->connect();
 
-    this->windows->getMainWindow().show();
+    if (!getArgs().isFramelessEmbed)
+    {
+        this->windows->getMainWindow().show();
+    }
 
     getSettings()->betaUpdates.connect(
         [] {

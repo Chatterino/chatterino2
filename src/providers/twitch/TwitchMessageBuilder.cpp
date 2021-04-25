@@ -1128,6 +1128,18 @@ void TwitchMessageBuilder::appendTwitchBadges()
                 continue;
             }
         }
+        else if (badge.key_ == "vip")
+        {
+            if (auto customVipBadge = this->twitchChannel->ffzCustomVipBadge())
+            {
+                this->emplace<VipBadgeElement>(
+                        customVipBadge.get(),
+                        MessageElementFlag::BadgeChannelAuthority)
+                    ->setTooltip((*customVipBadge)->tooltip.string);
+                // early out, since we have to add a custom badge element here
+                continue;
+            }
+        }
         else if (badge.flag_ == MessageElementFlag::BadgeSubscription)
         {
             auto badgeInfoIt = badgeInfos.find(badge.key_);

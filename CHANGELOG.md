@@ -3,6 +3,16 @@
 ## Unversioned
 
 - Major: Added customizable shortcuts. (#2340)
+- Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
+- Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
+
+## 2.3.0
+
+- Major: Added custom FrankerFaceZ VIP Badges. (#2628)
+- Minor: Added `in:<channels>` search filter to find messages sent in specific channels. (#2299, #2634)
+- Minor: Allow for built-in Chatterino commands to be used in custom commands. (#2632)
+- Bugfix: Size of splits not saved properly (#2362, #2548)
+- Bugfix: Fix crash that could occur when the user changed the "Custom stream player URI Scheme" setting if the user had closed down and splits in the application runtime. (#2592)
 - Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377, #2528)
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
@@ -54,6 +64,7 @@
 - Minor: Made username autocompletion truecase (#1199, #1883)
 - Minor: Update the listing of top-level domains. (#2345)
 - Minor: Properly respect RECONNECT messages from Twitch (#2347)
+- Minor: Added command line option to attach chatterino to another window.
 - Minor: Hide "Case-sensitive" column for user highlights. (#2404)
 - Minor: Added human-readable formatting to remaining timeout duration. (#2398)
 - Minor: Update emojis version to 13 (2020). (#1555)
