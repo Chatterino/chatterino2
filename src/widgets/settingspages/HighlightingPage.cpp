@@ -68,7 +68,8 @@ HighlightingPage::HighlightingPage()
                                     &getSettings()->highlightedMessages))
                         .getElement();
                 view->addRegexHelpLink();
-                view->setTitles({"Pattern", "Flash\ntaskbar", "Play\nsound",
+                view->setTitles({"Pattern", "Show in\nMentions",
+                                 "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex", "Case-\nsensitive",
                                  "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -85,7 +86,7 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getSettings()->highlightedMessages.append(HighlightPhrase{
-                        "my phrase", true, false, false, false, "",
+                        "my phrase", true, true, false, false, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
                 });
@@ -112,11 +113,14 @@ HighlightingPage::HighlightingPage()
                         .getElement();
 
                 view->addRegexHelpLink();
-                view->getTableView()->horizontalHeader()->hideSection(4);
-
+                view->getTableView()->horizontalHeader()->hideSection(
+                    HighlightModel::Column::UseRegex);
+                view->getTableView()->horizontalHeader()->hideSection(
+                    HighlightModel::Column::CaseSensitive);
                 // Case-sensitivity doesn't make sense for user names so it is
                 // set to "false" by default & the column is hidden
-                view->setTitles({"Username", "Flash\ntaskbar", "Play\nsound",
+                view->setTitles({"Username", "Show in\nMentions",
+                                 "Flash\ntaskbar", "Play\nsound",
                                  "Enable\nregex", "Case-\nsensitive",
                                  "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -133,7 +137,7 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getSettings()->highlightedUsers.append(HighlightPhrase{
-                        "highlighted user", true, false, false, false, "",
+                        "highlighted user", true, true, false, false, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
                 });

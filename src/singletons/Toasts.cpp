@@ -38,7 +38,9 @@ bool Toasts::isEnabled()
 {
 #ifdef Q_OS_WIN
     return WinToastLib::WinToast::isCompatible() &&
-           getSettings()->notificationToast;
+           getSettings()->notificationToast &&
+           !(isInStreamerMode() &&
+             getSettings()->streamerModeSuppressLiveNotifications);
 #else
     return false;
 #endif

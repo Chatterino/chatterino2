@@ -9,7 +9,7 @@ namespace chatterino {
 
 // commandmodel
 HighlightModel::HighlightModel(QObject *parent)
-    : SignalVectorModel<HighlightPhrase>(7, parent)
+    : SignalVectorModel<HighlightPhrase>(Column::COUNT, parent)
 {
 }
 
@@ -25,6 +25,7 @@ HighlightPhrase HighlightModel::getItemFromRow(
 
     return HighlightPhrase{
         row[Column::Pattern]->data(Qt::DisplayRole).toString(),
+        row[Column::ShowInMentions]->data(Qt::CheckStateRole).toBool(),
         row[Column::FlashTaskbar]->data(Qt::CheckStateRole).toBool(),
         row[Column::PlaySound]->data(Qt::CheckStateRole).toBool(),
         row[Column::UseRegex]->data(Qt::CheckStateRole).toBool(),
@@ -38,6 +39,7 @@ void HighlightModel::getRowFromItem(const HighlightPhrase &item,
                                     std::vector<QStandardItem *> &row)
 {
     setStringItem(row[Column::Pattern], item.getPattern());
+    setBoolItem(row[Column::ShowInMentions], item.showInMentions());
     setBoolItem(row[Column::FlashTaskbar], item.hasAlert());
     setBoolItem(row[Column::PlaySound], item.hasSound());
     setBoolItem(row[Column::UseRegex], item.isRegex());
@@ -54,14 +56,17 @@ void HighlightModel::afterInit()
                 getSettings()->enableSelfHighlight.getValue(), true, false);
     usernameRow[Column::Pattern]->setData("Your username (automatic)",
                                           Qt::DisplayRole);
+    setBoolItem(usernameRow[Column::ShowInMentions],
+                getSettings()->showSelfHighlightInMentions.getValue(), true,
+                false);
     setBoolItem(usernameRow[Column::FlashTaskbar],
                 getSettings()->enableSelfHighlightTaskbar.getValue(), true,
                 false);
     setBoolItem(usernameRow[Column::PlaySound],
                 getSettings()->enableSelfHighlightSound.getValue(), true,
                 false);
-    usernameRow[Column::UseRegex]->setFlags(0);
-    usernameRow[Column::CaseSensitive]->setFlags(0);
+    usernameRow[Column::UseRegex]->setFlags({});
+    usernameRow[Column::CaseSensitive]->setFlags({});
 
     QUrl selfSound = QUrl(getSettings()->selfHighlightSoundUrl.getValue());
     setFilePathItem(usernameRow[Column::SoundPath], selfSound, false);
@@ -69,21 +74,22 @@ void HighlightModel::afterInit()
     auto selfColor = ColorProvider::instance().color(ColorType::SelfHighlight);
     setColorItem(usernameRow[Column::Color], *selfColor, false);
 
-    this->insertCustomRow(usernameRow, 0);
+    this->insertCustomRow(usernameRow, {});
 
     // Highlight settings for whispers
     std::vector<QStandardItem *> whisperRow = this->createRow();
     setBoolItem(whisperRow[Column::Pattern],
                 getSettings()->enableWhisperHighlight.getValue(), true, false);
     whisperRow[Column::Pattern]->setData("Whispers", Qt::DisplayRole);
+    whisperRow[Column::ShowInMentions]->setFlags({});  // We have /whispers
     setBoolItem(whisperRow[Column::FlashTaskbar],
                 getSettings()->enableWhisperHighlightTaskbar.getValue(), true,
                 false);
     setBoolItem(whisperRow[Column::PlaySound],
                 getSettings()->enableWhisperHighlightSound.getValue(), true,
                 false);
-    whisperRow[Column::UseRegex]->setFlags(0);
-    whisperRow[Column::CaseSensitive]->setFlags(0);
+    whisperRow[Column::UseRegex]->setFlags({});
+    whisperRow[Column::CaseSensitive]->setFlags({});
 
     QUrl whisperSound =
         QUrl(getSettings()->whisperHighlightSoundUrl.getValue());
@@ -100,13 +106,14 @@ void HighlightModel::afterInit()
     setBoolItem(subRow[Column::Pattern],
                 getSettings()->enableSubHighlight.getValue(), true, false);
     subRow[Column::Pattern]->setData("Subscriptions", Qt::DisplayRole);
+    subRow[Column::ShowInMentions]->setFlags({});
     setBoolItem(subRow[Column::FlashTaskbar],
                 getSettings()->enableSubHighlightTaskbar.getValue(), true,
                 false);
     setBoolItem(subRow[Column::PlaySound],
                 getSettings()->enableSubHighlightSound.getValue(), true, false);
-    subRow[Column::UseRegex]->setFlags(0);
-    subRow[Column::CaseSensitive]->setFlags(0);
+    subRow[Column::UseRegex]->setFlags({});
+    subRow[Column::CaseSensitive]->setFlags({});
 
     QUrl subSound = QUrl(getSettings()->subHighlightSoundUrl.getValue());
     setFilePathItem(subRow[Column::SoundPath], subSound, false);
@@ -122,16 +129,17 @@ void HighlightModel::afterInit()
                 getSettings()->enableRedeemedHighlight.getValue(), true, false);
     redeemedRow[Column::Pattern]->setData(
         "Highlights redeemed with Channel Points", Qt::DisplayRole);
+    redeemedRow[Column::ShowInMentions]->setFlags({});
     //    setBoolItem(redeemedRow[Column::FlashTaskbar],
     //                getSettings()->enableRedeemedHighlightTaskbar.getValue(), true,
     //                false);
     //    setBoolItem(redeemedRow[Column::PlaySound],
     //                getSettings()->enableRedeemedHighlightSound.getValue(), true,
     //                false);
-    redeemedRow[Column::FlashTaskbar]->setFlags(0);
-    redeemedRow[Column::PlaySound]->setFlags(0);
-    redeemedRow[Column::UseRegex]->setFlags(0);
-    redeemedRow[Column::CaseSensitive]->setFlags(0);
+    redeemedRow[Column::FlashTaskbar]->setFlags({});
+    redeemedRow[Column::PlaySound]->setFlags({});
+    redeemedRow[Column::UseRegex]->setFlags({});
+    redeemedRow[Column::CaseSensitive]->setFlags({});
 
     QUrl RedeemedSound =
         QUrl(getSettings()->redeemedHighlightSoundUrl.getValue());
@@ -169,6 +177,17 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 3)
                 {
                     getSettings()->enableRedeemedHighlight.setValue(
+                        value.toBool());
+                }
+            }
+        }
+        break;
+        case Column::ShowInMentions: {
+            if (role == Qt::CheckStateRole)
+            {
+                if (rowIndex == 0)
+                {
+                    getSettings()->showSelfHighlightInMentions.setValue(
                         value.toBool());
                 }
             }

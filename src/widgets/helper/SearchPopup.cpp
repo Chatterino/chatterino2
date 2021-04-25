@@ -8,6 +8,7 @@
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
 #include "messages/search/AuthorPredicate.hpp"
+#include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
 #include "util/Shortcut.hpp"
@@ -52,7 +53,8 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
     return channel;
 }
 
-SearchPopup::SearchPopup()
+SearchPopup::SearchPopup(QWidget *parent)
+    : BasePopup({}, parent)
 {
     this->initLayout();
     this->resize(400, 600);
@@ -65,11 +67,12 @@ SearchPopup::SearchPopup()
 
 void SearchPopup::setChannelFilters(FilterSetPtr filters)
 {
-    this->channelFilters_ = filters;
+    this->channelFilters_ = std::move(filters);
 }
 
 void SearchPopup::setChannel(const ChannelPtr &channel)
 {
+    this->channelView_->setSourceChannel(channel);
     this->channelName_ = channel->getName();
     this->snapshot_ = channel->getMessageSnapshot();
     this->search();
@@ -79,7 +82,25 @@ void SearchPopup::setChannel(const ChannelPtr &channel)
 
 void SearchPopup::updateWindowTitle()
 {
-    this->setWindowTitle("Searching in " + this->channelName_ + "s history");
+    QString historyName;
+
+    if (this->channelName_ == "/whispers")
+    {
+        historyName = "whispers";
+    }
+    else if (this->channelName_ == "/mentions")
+    {
+        historyName = "mentions";
+    }
+    else if (this->channelName_.isEmpty())
+    {
+        historyName = "<empty>'s";
+    }
+    else
+    {
+        historyName = QString("%1's").arg(this->channelName_);
+    }
+    this->setWindowTitle("Searching in " + historyName + " history");
 }
 
 void SearchPopup::search()
@@ -108,7 +129,9 @@ void SearchPopup::initLayout()
                 this->searchInput_ = new QLineEdit(this);
                 layout2->addWidget(this->searchInput_);
                 QObject::connect(this->searchInput_, &QLineEdit::returnPressed,
-                                 [this] { this->search(); });
+                                 [this] {
+                                     this->search();
+                                 });
             }
 
             // SEARCH BUTTON
@@ -116,8 +139,9 @@ void SearchPopup::initLayout()
                 QPushButton *searchButton = new QPushButton(this);
                 searchButton->setText("Search");
                 layout2->addWidget(searchButton);
-                QObject::connect(searchButton, &QPushButton::clicked,
-                                 [this] { this->search(); });
+                QObject::connect(searchButton, &QPushButton::clicked, [this] {
+                    this->search();
+                });
             }
 
             layout1->addLayout(layout2);
@@ -132,6 +156,8 @@ void SearchPopup::initLayout()
 
         this->setLayout(layout1);
     }
+
+    this->searchInput_->setFocus();
 }
 
 std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
@@ -139,9 +165,10 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
 {
     static QRegularExpression predicateRegex(R"(^(\w+):([\w,]+)$)");
 
-    auto predicates = std::vector<std::unique_ptr<MessagePredicate>>();
+    std::vector<std::unique_ptr<MessagePredicate>> predicates;
     auto words = input.split(' ', QString::SkipEmptyParts);
-    auto authors = QStringList();
+    QStringList authors;
+    QStringList channels;
 
     for (auto it = words.begin(); it != words.end();)
     {
@@ -161,6 +188,10 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
             {
                 predicates.push_back(std::make_unique<LinkPredicate>());
             }
+            else if (name == "in")
+            {
+                channels.append(value);
+            }
             else
             {
                 remove = false;
@@ -177,6 +208,9 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
 
     if (!authors.empty())
         predicates.push_back(std::make_unique<AuthorPredicate>(authors));
+
+    if (!channels.empty())
+        predicates.push_back(std::make_unique<ChannelPredicate>(channels));
 
     if (!words.empty())
         predicates.push_back(

@@ -43,8 +43,8 @@ void MessageLayoutContainer::begin(int width, float scale, MessageFlags flags)
     auto mediumFontMetrics =
         getApp()->fonts->getFontMetrics(FontStyle::ChatMedium, scale);
     this->textLineHeight_ = mediumFontMetrics.height();
-    this->spaceWidth_ = mediumFontMetrics.width(' ');
-    this->dotdotdotWidth_ = mediumFontMetrics.width("...");
+    this->spaceWidth_ = mediumFontMetrics.horizontalAdvance(' ');
+    this->dotdotdotWidth_ = mediumFontMetrics.horizontalAdvance("...");
     this->canAddMessages_ = true;
     this->isCollapsed_ = false;
 }
@@ -390,7 +390,7 @@ void MessageLayoutContainer::paintSelection(QPainter &painter, int messageIndex,
                     // ends in same line
                     if (selection.selectionMax.messageIndex == messageIndex &&
                         line.endCharIndex >
-                            /*=*/selection.selectionMax.charIndex)  //
+                            /*=*/selection.selectionMax.charIndex)
                     {
                         returnAfter = true;
                         index = line.startCharIndex;

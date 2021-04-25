@@ -14,6 +14,7 @@
 #include <QMimeDatabase>
 #include <QMutex>
 #include <QSaveFile>
+#include "common/QLogging.hpp"
 
 #define UPLOAD_DELAY 2000
 // Delay between uploads in milliseconds
@@ -127,8 +128,8 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
         getSettings()->imageUploaderFormField.getValue().isEmpty()
             ? getSettings()->imageUploaderFormField.getDefaultValue()
             : getSettings()->imageUploaderFormField);
-    QStringList extraHeaders(
-        getSettings()->imageUploaderHeaders.getValue().split(";"));
+    auto extraHeaders =
+        parseHeaderList(getSettings()->imageUploaderHeaders.getValue());
     QString originalFilePath = imageData.filePath;
 
     QHttpMultiPart *payload = new QHttpMultiPart(QHttpMultiPart::FormDataType);
@@ -160,7 +161,7 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
                     ? ""
                     : getLinkFromResponse(
                           result, getSettings()->imageUploaderDeletionLink);
-            qDebug() << link << deletionLink;
+            qCDebug(chatterinoNuulsuploader) << link << deletionLink;
             textEdit.insertPlainText(link + " ");
             if (uploadQueue.empty())
             {

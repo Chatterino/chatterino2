@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
+#include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QFont>
@@ -37,7 +38,6 @@ class Split : public BaseWidget, pajlada::Signals::SignalHolder
     Q_OBJECT
 
 public:
-    explicit Split(SplitContainer *parent);
     explicit Split(QWidget *parent);
 
     ~Split() override;
@@ -47,7 +47,6 @@ public:
     pajlada::Signals::NoArgSignal focusLost;
 
     ChannelView &getChannelView();
-    SplitContainer *getContainer();
 
     IndirectChannel getIndirectChannel();
     ChannelPtr getChannel();
@@ -79,6 +78,24 @@ public:
         modifierStatusChanged;
     static Qt::KeyboardModifiers modifierStatus;
 
+    enum class Action {
+        RefreshTab,
+        ResetMouseStatus,
+        AppendNewSplit,
+        Delete,
+
+        SelectSplitLeft,
+        SelectSplitRight,
+        SelectSplitAbove,
+        SelectSplitBelow,
+    };
+
+    pajlada::Signals::Signal<Action> actionRequested;
+    pajlada::Signals::Signal<ChannelPtr> openSplitRequested;
+
+    // args: (SplitContainer::Direction dir, Split* parent)
+    pajlada::Signals::Signal<int, Split *> insertSplitRequested;
+
 protected:
     void paintEvent(QPaintEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -95,8 +112,8 @@ protected:
 private:
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
+    void updateInputPlaceholder();
 
-    SplitContainer *container_;
     IndirectChannel channel_;
 
     bool moderationMode_{};
@@ -118,6 +135,7 @@ private:
     pajlada::Signals::Connection roomModeChangedConnection_;
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
+    pajlada::Signals::SignalHolder signalHolder_;
 
     std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
@@ -130,6 +148,7 @@ public slots:
     void popup();
     void clear();
     void openInBrowser();
+    void openModViewInBrowser();
     void openWhispersInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
@@ -140,6 +159,7 @@ public slots:
     void showViewerList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
+    void reconnect();
 };
 
 }  // namespace chatterino

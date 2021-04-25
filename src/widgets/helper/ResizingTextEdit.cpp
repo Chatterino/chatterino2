@@ -21,8 +21,9 @@ ResizingTextEdit::ResizingTextEdit()
 
     // Whenever the setting for emote completion changes, force a
     // refresh on the completion model the next time "Tab" is pressed
-    getSettings()->prefixOnlyEmoteCompletion.connect(
-        [this] { this->completionInProgress_ = false; });
+    getSettings()->prefixOnlyEmoteCompletion.connect([this] {
+        this->completionInProgress_ = false;
+    });
 
     this->setFocusPolicy(Qt::ClickFocus);
 }
@@ -94,7 +95,8 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     bool doComplete =
         (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Backtab) &&
-        (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier;
+        (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier &&
+        !event->isAccepted();
 
     if (doComplete)
     {

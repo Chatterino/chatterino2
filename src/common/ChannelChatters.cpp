@@ -7,6 +7,7 @@ namespace chatterino {
 
 ChannelChatters::ChannelChatters(Channel &channel)
     : channel_(channel)
+    , chatterColors_(ChannelChatters::maxChatterColorCount)
 {
 }
 
@@ -64,9 +65,31 @@ void ChannelChatters::addPartedUser(const QString &user)
         });
     }
 }
+
 void ChannelChatters::setChatters(UsernameSet &&set)
 {
-    *this->chatters_.access() = set;
+    this->chatters_.access()->merge(std::move(set));
+}
+
+const QColor ChannelChatters::getUserColor(const QString &user)
+{
+    const auto chatterColors = this->chatterColors_.access();
+
+    auto lowerUser = user.toLower();
+
+    if (!chatterColors->exists(lowerUser))
+    {
+        // Returns an invalid color so we can decide not to override `textColor`
+        return QColor();
+    }
+
+    return QColor::fromRgb(chatterColors->get(lowerUser));
+}
+
+void ChannelChatters::setUserColor(const QString &user, const QColor &color)
+{
+    const auto chatterColors = this->chatterColors_.access();
+    chatterColors->put(user.toLower(), color.rgb());
 }
 
 }  // namespace chatterino

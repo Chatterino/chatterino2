@@ -2,6 +2,8 @@
 
 #include "messages/Message.hpp"
 
+#include <QRegularExpression>
+
 namespace filterparser {
 
 using MessagePtr = std::shared_ptr<const chatterino::Message>;
@@ -14,19 +16,23 @@ enum TokenType {
     OR = 2,
     LP = 3,
     RP = 4,
-    CONTROL_END = 9,
+    LIST_START = 5,
+    LIST_END = 6,
+    COMMA = 7,
+    CONTROL_END = 19,
 
     // binary operator
-    BINARY_START = 10,
-    EQ = 11,
-    NEQ = 12,
-    LT = 13,
-    GT = 14,
-    LTE = 15,
-    GTE = 16,
-    CONTAINS = 17,
-    STARTS_WITH = 18,
-    ENDS_WITH = 19,
+    BINARY_START = 20,
+    EQ = 21,
+    NEQ = 22,
+    LT = 23,
+    GT = 24,
+    LTE = 25,
+    GTE = 26,
+    CONTAINS = 27,
+    STARTS_WITH = 28,
+    ENDS_WITH = 29,
+    MATCH = 30,
     BINARY_END = 49,
 
     // unary operator
@@ -48,6 +54,7 @@ enum TokenType {
     STRING = 151,
     INT = 152,
     IDENTIFIER = 153,
+    REGULAR_EXPRESSION = 154,
 
     NONE = 200
 };
@@ -91,6 +98,36 @@ public:
 private:
     QVariant value_;
     TokenType type_;
+};
+
+class RegexExpression : public Expression
+{
+public:
+    RegexExpression(QString regex, bool caseInsensitive);
+
+    QVariant execute(const ContextMap &context) const override;
+    QString debug() const override;
+    QString filterString() const override;
+
+private:
+    QString regexString_;
+    bool caseInsensitive_;
+    QRegularExpression regex_;
+};
+
+using ExpressionList = std::vector<std::unique_ptr<Expression>>;
+
+class ListExpression : public Expression
+{
+public:
+    ListExpression(ExpressionList list);
+
+    QVariant execute(const ContextMap &context) const override;
+    QString debug() const override;
+    QString filterString() const override;
+
+private:
+    ExpressionList list_;
 };
 
 class BinaryOperation : public Expression

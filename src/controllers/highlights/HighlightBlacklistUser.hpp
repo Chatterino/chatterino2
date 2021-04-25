@@ -85,13 +85,15 @@ struct Serialize<chatterino::HighlightBlacklistUser> {
 
 template <>
 struct Deserialize<chatterino::HighlightBlacklistUser> {
-    static chatterino::HighlightBlacklistUser get(const rapidjson::Value &value)
+    static chatterino::HighlightBlacklistUser get(const rapidjson::Value &value,
+                                                  bool *error = nullptr)
     {
         QString pattern;
         bool isRegex = false;
 
         if (!value.IsObject())
         {
+            PAJLADA_REPORT_ERROR(error)
             return chatterino::HighlightBlacklistUser(pattern, isRegex);
         }
 

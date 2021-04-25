@@ -58,8 +58,9 @@ Window::Window(WindowType type)
 #endif
 
     this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged,
-        [this] { this->onAccountSelected(); });
+        getApp()->accounts->twitch.currentUserChanged, [this] {
+            this->onAccountSelected();
+        });
     this->onAccountSelected();
 
     if (type == WindowType::Main)
@@ -158,8 +159,9 @@ void Window::addCustomTitlebarButtons()
         return;
 
     // settings
-    this->addTitleBarButton(TitleBarButtonStyle::Settings,
-                            [] { getApp()->windows->showSettingsDialog(); });
+    this->addTitleBarButton(TitleBarButtonStyle::Settings, [this] {
+        getApp()->windows->showSettingsDialog(this);
+    });
 
     // updates
     auto update = this->addTitleBarButton(TitleBarButtonStyle::None, [] {});
@@ -291,7 +293,9 @@ void Window::addShortcuts()
 {
     /// Initialize program-wide hotkeys
     // Open settings
-    createWindowShortcut(this, "CTRL+P", [] { SettingsDialog::showDialog(); });
+    createWindowShortcut(this, "CTRL+P", [this] {
+        SettingsDialog::showDialog(this);
+    });
 
     // Switch tab
     createWindowShortcut(this, "CTRL+T", [this] {
@@ -301,19 +305,23 @@ void Window::addShortcuts()
     // CTRL + 1-8 to open corresponding tab.
     for (auto i = 0; i < 8; i++)
     {
-        char hotkey[7];
-        std::sprintf(hotkey, "CTRL+%d", i + 1);
-        const auto openTab = [this, i] { this->notebook_->selectIndex(i); };
-        createWindowShortcut(this, hotkey, openTab);
+        const auto openTab = [this, i] {
+            this->notebook_->selectIndex(i);
+        };
+        createWindowShortcut(this, QString("CTRL+%1").arg(i + 1).toUtf8(),
+                             openTab);
     }
 
-    createWindowShortcut(this, "CTRL+9",
-                         [this] { this->notebook_->selectLastTab(); });
+    createWindowShortcut(this, "CTRL+9", [this] {
+        this->notebook_->selectLastTab();
+    });
 
-    createWindowShortcut(this, "CTRL+TAB",
-                         [this] { this->notebook_->selectNextTab(); });
-    createWindowShortcut(this, "CTRL+SHIFT+TAB",
-                         [this] { this->notebook_->selectPreviousTab(); });
+    createWindowShortcut(this, "CTRL+TAB", [this] {
+        this->notebook_->selectNextTab();
+    });
+    createWindowShortcut(this, "CTRL+SHIFT+TAB", [this] {
+        this->notebook_->selectPreviousTab();
+    });
 
     createWindowShortcut(this, "CTRL+N", [this] {
         if (auto page = dynamic_cast<SplitContainer *>(
@@ -347,12 +355,14 @@ void Window::addShortcuts()
     }
 
     // New tab
-    createWindowShortcut(this, "CTRL+SHIFT+T",
-                         [this] { this->notebook_->addPage(true); });
+    createWindowShortcut(this, "CTRL+SHIFT+T", [this] {
+        this->notebook_->addPage(true);
+    });
 
     // Close tab
-    createWindowShortcut(this, "CTRL+SHIFT+W",
-                         [this] { this->notebook_->removeCurrentPage(); });
+    createWindowShortcut(this, "CTRL+SHIFT+W", [this] {
+        this->notebook_->removeCurrentPage();
+    });
 
     // Reopen last closed split
     createWindowShortcut(this, "CTRL+G", [this] {
@@ -398,21 +408,24 @@ void Window::addMenuBar()
     QMenu *menu = mainMenu->addMenu(QString());
     QAction *prefs = menu->addAction(QString());
     prefs->setMenuRole(QAction::PreferencesRole);
-    connect(prefs, &QAction::triggered, this,
-            [] { SettingsDialog::showDialog(); });
+    connect(prefs, &QAction::triggered, this, [this] {
+        SettingsDialog::showDialog(this);
+    });
 
     // Window menu.
     QMenu *windowMenu = mainMenu->addMenu(QString("Window"));
 
     QAction *nextTab = windowMenu->addAction(QString("Select next tab"));
     nextTab->setShortcuts({QKeySequence("Meta+Tab")});
-    connect(nextTab, &QAction::triggered, this,
-            [=] { this->notebook_->selectNextTab(); });
+    connect(nextTab, &QAction::triggered, this, [=] {
+        this->notebook_->selectNextTab();
+    });
 
     QAction *prevTab = windowMenu->addAction(QString("Select previous tab"));
     prevTab->setShortcuts({QKeySequence("Meta+Shift+Tab")});
-    connect(prevTab, &QAction::triggered, this,
-            [=] { this->notebook_->selectPreviousTab(); });
+    connect(prevTab, &QAction::triggered, this, [=] {
+        this->notebook_->selectPreviousTab();
+    });
 }
 
 void Window::onAccountSelected()

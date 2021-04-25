@@ -61,6 +61,7 @@ public:
             QColor caret;
             QColor link;
             QColor system;
+            QColor chatPlaceholder;
         } textColors;
 
         struct {

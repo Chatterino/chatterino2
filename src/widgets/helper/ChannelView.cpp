@@ -15,6 +15,7 @@
 
 #include "Application.hpp"
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Benchmark.hpp"
@@ -24,6 +25,7 @@
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
+#include "providers/LinkResolver.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Resources.hpp"
@@ -38,6 +40,7 @@
 #include "util/Twitch.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/TooltipWidget.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -70,9 +73,10 @@ namespace {
         auto addImageLink = [&](const ImagePtr &image, char scale) {
             if (!image->isEmpty())
             {
-                copyMenu->addAction(
-                    QString(scale) + "x link",
-                    [url = image->url()] { crossPlatformCopy(url.string); });
+                copyMenu->addAction(QString(scale) + "x link",
+                                    [url = image->url()] {
+                                        crossPlatformCopy(url.string);
+                                    });
                 openMenu->addAction(
                     QString(scale) + "x link", [url = image->url()] {
                         QDesktopServices::openUrl(QUrl(url.string));
@@ -89,16 +93,21 @@ namespace {
             copyMenu->addSeparator();
             openMenu->addSeparator();
 
-            copyMenu->addAction(
-                "Copy " + name + " emote link",
-                [url = emote.homePage] { crossPlatformCopy(url.string); });
-            openMenu->addAction(
-                "Open " + name + " emote link", [url = emote.homePage] {
-                    QDesktopServices::openUrl(QUrl(url.string));  //
-                });
+            copyMenu->addAction("Copy " + name + " emote link",
+                                [url = emote.homePage] {
+                                    crossPlatformCopy(url.string);
+                                });
+            openMenu->addAction("Open " + name + " emote link",
+                                [url = emote.homePage] {
+                                    QDesktopServices::openUrl(QUrl(url.string));
+                                });
         };
 
-        if (creatorFlags.has(MessageElementFlag::BttvEmote))
+        if (creatorFlags.has(MessageElementFlag::TwitchEmote))
+        {
+            addPageLink("TwitchEmotes");
+        }
+        else if (creatorFlags.has(MessageElementFlag::BttvEmote))
         {
             addPageLink("BTTV");
         }
@@ -111,8 +120,6 @@ namespace {
 
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
-    , sourceChannel_(nullptr)
-    , underlyingChannel_(nullptr)
     , scrollBar_(new Scrollbar(this))
 {
     this->setMouseTracking(true);
@@ -135,8 +142,9 @@ ChannelView::ChannelView(BaseWidget *parent)
     });
 
     auto shortcut = new QShortcut(QKeySequence::StandardKey::Copy, this);
-    QObject::connect(shortcut, &QShortcut::activated,
-                     [this] { crossPlatformCopy(this->getSelectedText()); });
+    QObject::connect(shortcut, &QShortcut::activated, [this] {
+        crossPlatformCopy(this->getSelectedText());
+    });
 
     this->clickTimer_ = new QTimer(this);
     this->clickTimer_->setSingleShot(true);
@@ -182,10 +190,14 @@ void ChannelView::initializeSignals()
         }));
 
     getSettings()->showLastMessageIndicator.connect(
-        [this](auto, auto) { this->update(); }, this->connections_);
+        [this](auto, auto) {
+            this->update();
+        },
+        this->connections_);
 
-    connections_.push_back(getApp()->windows->gifRepaintRequested.connect(
-        [&] { this->queueUpdate(); }));
+    connections_.push_back(getApp()->windows->gifRepaintRequested.connect([&] {
+        this->queueUpdate();
+    }));
 
     connections_.push_back(
         getApp()->windows->layoutRequested.connect([&](Channel *channel) {
@@ -196,8 +208,9 @@ void ChannelView::initializeSignals()
             }
         }));
 
-    connections_.push_back(
-        getApp()->fonts->fontChanged.connect([this] { this->queueLayout(); }));
+    connections_.push_back(getApp()->fonts->fontChanged.connect([this] {
+        this->queueLayout();
+    }));
 }
 
 bool ChannelView::pausable() const
@@ -273,7 +286,9 @@ void ChannelView::updatePauses()
         this->queueLayout();
     }
     else if (std::any_of(this->pauses_.begin(), this->pauses_.end(),
-                         [](auto &&value) { return !value.second; }))
+                         [](auto &&value) {
+                             return !value.second;
+                         }))
     {
         /// Some of the pauses are infinite
         this->pauseEnd_ = boost::none;
@@ -283,9 +298,10 @@ void ChannelView::updatePauses()
     {
         /// Get the maximum pause
         auto pauseEnd =
-            std::max_element(
-                this->pauses_.begin(), this->pauses_.end(),
-                [](auto &&a, auto &&b) { return a.second > b.second; })
+            std::max_element(this->pauses_.begin(), this->pauses_.end(),
+                             [](auto &&a, auto &&b) {
+                                 return a.second > b.second;
+                             })
                 ->second.get();
 
         if (pauseEnd != this->pauseEnd_)
@@ -534,7 +550,7 @@ bool ChannelView::getEnableScrollingToBottom() const
 
 void ChannelView::setOverrideFlags(boost::optional<MessageElementFlags> value)
 {
-    this->overrideFlags_ = value;
+    this->overrideFlags_ = std::move(value);
 }
 
 const boost::optional<MessageElementFlags> &ChannelView::getOverrideFlags()
@@ -594,7 +610,8 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                     }
                     else
                     {
-                        overridingFlags = MessageFlags(MessageFlag::DoNotLog);
+                        overridingFlags = MessageFlags(message->flags);
+                        overridingFlags.get().set(MessageFlag::DoNotLog);
                     }
 
                     this->channel_->addMessage(message, overridingFlags);
@@ -605,11 +622,11 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
         underlyingChannel->messagesAddedAtStart.connect(
             [this](std::vector<MessagePtr> &messages) {
                 std::vector<MessagePtr> filtered;
-                std::copy_if(  //
-                    messages.begin(), messages.end(),
-                    std::back_inserter(filtered), [this](MessagePtr msg) {
-                        return this->shouldIncludeMessage(msg);
-                    });
+                std::copy_if(messages.begin(), messages.end(),
+                             std::back_inserter(filtered),
+                             [this](MessagePtr msg) {
+                                 return this->shouldIncludeMessage(msg);
+                             });
 
                 if (!filtered.empty())
                     this->channel_->addMessagesAtStart(filtered);
@@ -630,7 +647,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     this->channelConnections_.push_back(this->channel_->messageAppended.connect(
         [this](MessagePtr &message,
                boost::optional<MessageFlags> overridingFlags) {
-            this->messageAppended(message, overridingFlags);
+            this->messageAppended(message, std::move(overridingFlags));
         }));
 
     this->channelConnections_.push_back(
@@ -689,7 +706,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     if (auto tc = dynamic_cast<TwitchChannel *>(underlyingChannel.get()))
     {
         this->connections_.push_back(tc->liveStatusChanged.connect([this]() {
-            this->liveStatusChanged.invoke();  //
+            this->liveStatusChanged.invoke();
         }));
     }
 }
@@ -736,7 +753,7 @@ ChannelPtr ChannelView::sourceChannel() const
 
 void ChannelView::setSourceChannel(ChannelPtr sourceChannel)
 {
-    this->sourceChannel_ = sourceChannel;
+    this->sourceChannel_ = std::move(sourceChannel);
 }
 
 bool ChannelView::hasSourceChannel() const
@@ -768,6 +785,18 @@ void ChannelView::messageAppended(MessagePtr &message,
     this->lastMessageHasAlternateBackground_ =
         !this->lastMessageHasAlternateBackground_;
 
+    if (!this->scrollBar_->isAtBottom() &&
+        this->scrollBar_->getCurrentValueAnimation().state() ==
+            QPropertyAnimation::Running)
+    {
+        QEventLoop loop;
+
+        connect(&this->scrollBar_->getCurrentValueAnimation(),
+                &QAbstractAnimation::stateChanged, &loop, &QEventLoop::quit);
+
+        loop.exec();
+    }
+
     if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
     {
         if (this->paused())
@@ -787,7 +816,11 @@ void ChannelView::messageAppended(MessagePtr &message,
     if (!messageFlags->has(MessageFlag::DoNotTriggerNotification))
     {
         if (messageFlags->has(MessageFlag::Highlighted) &&
-            !messageFlags->has(MessageFlag::Subscription))
+            messageFlags->has(MessageFlag::ShowInMentions) &&
+            !messageFlags->has(MessageFlag::Subscription) &&
+            (getSettings()->highlightMentions ||
+             this->channel_->getType() != Channel::Type::TwitchMentions))
+
         {
             this->tabHighlightRequested.invoke(HighlightState::Highlighted);
         }
@@ -879,8 +912,9 @@ void ChannelView::messageReplaced(size_t index, MessagePtr &replacement)
     auto snapshot = this->messages_.getSnapshot();
     if (index >= snapshot.size())
     {
-        qDebug() << "Tried to replace out of bounds message. Index:" << index
-                 << ". Length:" << snapshot.size();
+        qCDebug(chatterinoWidget)
+            << "Tried to replace out of bounds message. Index:" << index
+            << ". Length:" << snapshot.size();
         return;
     }
 
@@ -1377,13 +1411,13 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         }
     }
 
-    const auto &tooltip = hoverLayoutElement->getCreator().getTooltip();
+    auto element = &hoverLayoutElement->getCreator();
     bool isLinkValid = hoverLayoutElement->getLink().isValid();
-    auto emoteElement =
-        dynamic_cast<const EmoteElement *>(&hoverLayoutElement->getCreator());
+    auto emoteElement = dynamic_cast<const EmoteElement *>(element);
 
-    if (tooltip.isEmpty() || (isLinkValid && emoteElement == nullptr &&
-                              !getSettings()->linkInfoTooltip))
+    if (element->getTooltip().isEmpty() ||
+        (isLinkValid && emoteElement == nullptr &&
+         !getSettings()->linkInfoTooltip))
     {
         tooltipWidget->hide();
     }
@@ -1391,8 +1425,7 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
     {
         auto &tooltipPreviewImage = TooltipPreviewImage::instance();
         tooltipPreviewImage.setImageScale(0, 0);
-        auto badgeElement = dynamic_cast<const BadgeElement *>(
-            &hoverLayoutElement->getCreator());
+        auto badgeElement = dynamic_cast<const BadgeElement *>(element);
 
         if ((badgeElement || emoteElement) &&
             getSettings()->emotesTooltipPreview.getValue())
@@ -1418,7 +1451,21 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
         }
         else
         {
-            auto element = &hoverLayoutElement->getCreator();
+            if (element->getTooltip() == "No link info loaded")
+            {
+                std::weak_ptr<MessageLayout> weakLayout = layout;
+                LinkResolver::getLinkInfo(
+                    element->getLink().value, nullptr,
+                    [weakLayout, element](QString tooltipText,
+                                          Link originalLink,
+                                          ImagePtr thumbnail) {
+                        auto shared = weakLayout.lock();
+                        if (!shared)
+                            return;
+                        element->setTooltip(tooltipText);
+                        element->setThumbnail(thumbnail);
+                    });
+            }
             auto thumbnailSize = getSettings()->thumbnailSize;
             if (!thumbnailSize)
             {
@@ -1426,13 +1473,15 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
             }
             else
             {
-                const auto isHideLink =
+                const auto shouldHideThumbnail =
                     isInStreamerMode() &&
                     getSettings()->streamerModeHideLinkThumbnails &&
-                    (!element->getThumbnail()->url().string.isEmpty());
+                    element->getThumbnail() != nullptr &&
+                    !element->getThumbnail()->url().string.isEmpty();
                 auto thumb =
-                    isHideLink ? Image::fromPixmap(getResources().streamerMode)
-                               : element->getThumbnail();
+                    shouldHideThumbnail
+                        ? Image::fromPixmap(getResources().streamerMode)
+                        : element->getThumbnail();
                 tooltipPreviewImage.setImage(std::move(thumb));
 
                 if (element->getThumbnailType() ==
@@ -1446,8 +1495,9 @@ void ChannelView::mouseMoveEvent(QMouseEvent *event)
 
         tooltipWidget->moveTo(this, event->globalPos());
         tooltipWidget->setWordWrap(isLinkValid);
-        tooltipWidget->setText(tooltip);
+        tooltipWidget->setText(element->getTooltip());
         tooltipWidget->adjustSize();
+        tooltipWidget->setWindowFlag(Qt::WindowStaysOnTopHint, true);
         tooltipWidget->show();
         tooltipWidget->raise();
     }
@@ -1799,15 +1849,19 @@ void ChannelView::addContextMenuItems(
         QString url = hoveredElement->getLink().value;
 
         // open link
-        menu->addAction("Open link",
-                        [url] { QDesktopServices::openUrl(QUrl(url)); });
+        menu->addAction("Open link", [url] {
+            QDesktopServices::openUrl(QUrl(url));
+        });
         // open link default
         if (supportsIncognitoLinks())
         {
-            menu->addAction("Open link incognito",
-                            [url] { openLinkIncognito(url); });
+            menu->addAction("Open link incognito", [url] {
+                openLinkIncognito(url);
+            });
         }
-        menu->addAction("Copy link", [url] { crossPlatformCopy(url); });
+        menu->addAction("Copy link", [url] {
+            crossPlatformCopy(url);
+        });
 
         menu->addSeparator();
     }
@@ -1815,8 +1869,9 @@ void ChannelView::addContextMenuItems(
     // Copy actions
     if (!this->selection_.isEmpty())
     {
-        menu->addAction("Copy selection",
-                        [this] { crossPlatformCopy(this->getSelectedText()); });
+        menu->addAction("Copy selection", [this] {
+            crossPlatformCopy(this->getSelectedText());
+        });
     }
 
     menu->addAction("Copy message", [layout] {
@@ -1935,7 +1990,14 @@ void ChannelView::hideEvent(QHideEvent *)
 
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
-    auto *userPopup = new UserInfoPopup(getSettings()->autoCloseUserPopup);
+    QWidget *userCardParent = this;
+#ifdef Q_OS_MACOS
+    // Order of closing/opening/killing widgets when the "Automatically close user info popups" setting is enabled is special on macOS, so user info popups should always use the main window as its parent
+    userCardParent =
+        static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
+#endif
+    auto *userPopup =
+        new UserInfoPopup(getSettings()->autoCloseUserPopup, userCardParent);
     userPopup->setData(userName, this->hasSourceChannel()
                                      ? this->sourceChannel_
                                      : this->underlyingChannel_);
@@ -1995,7 +2057,51 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         break;
 
         case Link::OpenAccountsPage: {
-            SettingsDialog::showDialog(SettingsDialogPreference::Accounts);
+            SettingsDialog::showDialog(this,
+                                       SettingsDialogPreference::Accounts);
+        }
+        break;
+        case Link::JumpToChannel: {
+            // Get all currently open pages
+            QList<SplitContainer *> openPages;
+
+            auto &nb = getApp()->windows->getMainWindow().getNotebook();
+            for (int i = 0; i < nb.getPageCount(); ++i)
+            {
+                openPages.push_back(
+                    static_cast<SplitContainer *>(nb.getPageAt(i)));
+            }
+
+            for (auto *page : openPages)
+            {
+                auto splits = page->getSplits();
+
+                // Search for channel matching link in page/split container
+                // TODO(zneix): Consider opening a channel if it's closed (?)
+                auto it = std::find_if(
+                    splits.begin(), splits.end(), [link](Split *split) {
+                        return split->getChannel()->getName() == link.value;
+                    });
+
+                if (it != splits.end())
+                {
+                    // Select SplitContainer and Split itself where mention message was sent
+                    // TODO(zneix): Try exploring ways of scrolling to a certain message as well
+                    nb.select(page);
+
+                    Split *split = *it;
+                    page->setSelected(split);
+                    break;
+                }
+            }
+        }
+        break;
+        case Link::CopyToClipboard: {
+            crossPlatformCopy(link.value);
+        }
+        break;
+        case Link::Reconnect: {
+            this->underlyingChannel_.get()->reconnect();
         }
         break;
 

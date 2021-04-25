@@ -1,47 +1,29 @@
 #include "providers/twitch/api/Kraken.hpp"
 
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 
 namespace chatterino {
 
 static Kraken *instance = nullptr;
 
-void Kraken::getChannel(QString userId,
-                        ResultCallback<KrakenChannel> successCallback,
-                        KrakenFailureCallback failureCallback)
+void Kraken::getUserEmotes(TwitchAccount *account,
+                           ResultCallback<KrakenEmoteSets> successCallback,
+                           KrakenFailureCallback failureCallback)
 {
-    assert(!userId.isEmpty());
-
-    this->makeRequest("channels/" + userId, {})
+    this->makeRequest(QString("users/%1/emotes").arg(account->getUserId()), {})
+        .authorizeTwitchV5(account->getOAuthClient(), account->getOAuthToken())
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-            auto root = result.parseJson();
+            auto data = result.parseJson();
 
-            successCallback(root);
+            KrakenEmoteSets emoteSets(data);
+
+            successCallback(emoteSets);
 
             return Success;
         })
-        .onError([failureCallback](auto result) {
-            // TODO: make better xd
-            failureCallback();
-        })
-        .execute();
-}
-
-void Kraken::getUser(QString userId, ResultCallback<KrakenUser> successCallback,
-                     KrakenFailureCallback failureCallback)
-{
-    assert(!userId.isEmpty());
-
-    this->makeRequest("users/" + userId, {})
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-            auto root = result.parseJson();
-
-            successCallback(root);
-
-            return Success;
-        })
-        .onError([failureCallback](auto result) {
+        .onError([failureCallback](NetworkResult /*result*/) {
             // TODO: make better xd
             failureCallback();
         })
@@ -54,7 +36,7 @@ NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
 
     if (this->clientId.isEmpty())
     {
-        qDebug()
+        qCDebug(chatterinoTwitch)
             << "Kraken::makeRequest called without a client ID set BabyRage";
     }
 
@@ -81,8 +63,8 @@ NetworkRequest Kraken::makeRequest(QString url, QUrlQuery urlQuery)
 
 void Kraken::update(QString clientId, QString oauthToken)
 {
-    this->clientId = clientId;
-    this->oauthToken = oauthToken;
+    this->clientId = std::move(clientId);
+    this->oauthToken = std::move(oauthToken);
 }
 
 void Kraken::initialize()

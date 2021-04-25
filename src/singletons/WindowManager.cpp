@@ -11,8 +11,10 @@
 #include <boost/optional.hpp>
 #include <chrono>
 
+#include <QMessageBox>
 #include "Application.hpp"
 #include "common/Args.hpp"
+#include "common/QLogging.hpp"
 #include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageElement.hpp"
 #include "providers/irc/Irc2.hpp"
@@ -26,6 +28,7 @@
 #include "util/Clamp.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
+#include "widgets/FramelessEmbedWindow.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -36,8 +39,6 @@
 namespace chatterino {
 namespace {
 
-    const QString WINDOW_LAYOUT_FILENAME(QStringLiteral("window-layout.json"));
-
     boost::optional<bool> &shouldMoveOutOfBoundsWindow()
     {
         static boost::optional<bool> x;
@@ -46,13 +47,27 @@ namespace {
 
 }  // namespace
 
+const QString WindowManager::WINDOW_LAYOUT_FILENAME(
+    QStringLiteral("window-layout.json"));
+
 using SplitNode = SplitContainer::Node;
 using SplitDirection = SplitContainer::Direction;
 
-void WindowManager::showSettingsDialog(SettingsDialogPreference preference)
+void WindowManager::showSettingsDialog(QWidget *parent,
+                                       SettingsDialogPreference preference)
 {
-    QTimer::singleShot(
-        80, [preference] { SettingsDialog::showDialog(preference); });
+    if (getArgs().dontSaveSettings)
+    {
+        QMessageBox::critical(parent, "Chatterino - Editing Settings Forbidden",
+                              "Settings cannot be edited when running with "
+                              "commandline arguments such as '-c'.");
+    }
+    else
+    {
+        QTimer::singleShot(80, [parent, preference] {
+            SettingsDialog::showDialog(parent, preference);
+        });
+    }
 }
 
 void WindowManager::showAccountSelectPopup(QPoint point)
@@ -80,10 +95,10 @@ void WindowManager::showAccountSelectPopup(QPoint point)
 }
 
 WindowManager::WindowManager()
-    : windowLayoutFilePath(
-          combinePath(getPaths()->settingsDirectory, WINDOW_LAYOUT_FILENAME))
+    : windowLayoutFilePath(combinePath(getPaths()->settingsDirectory,
+                                       WindowManager::WINDOW_LAYOUT_FILENAME))
 {
-    qDebug() << "init WindowManager";
+    qCDebug(chatterinoWindowmanager) << "init WindowManager";
 
     auto settings = getSettings();
 
@@ -93,11 +108,12 @@ WindowManager::WindowManager()
     this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
     this->wordFlagsListener_.addSetting(settings->showBadgesChatterino);
+    this->wordFlagsListener_.addSetting(settings->showBadgesFfz);
     this->wordFlagsListener_.addSetting(settings->enableEmoteImages);
     this->wordFlagsListener_.addSetting(settings->boldUsernames);
     this->wordFlagsListener_.addSetting(settings->lowercaseDomains);
     this->wordFlagsListener_.setCB([this] {
-        this->updateWordTypeMask();  //
+        this->updateWordTypeMask();
     });
 
     this->saveTimer = new QTimer;
@@ -105,15 +121,17 @@ WindowManager::WindowManager()
     this->saveTimer->setSingleShot(true);
 
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
-        getApp()->windows->save();  //
+        getApp()->windows->save();
     });
 
     this->miscUpdateTimer_.start(100);
 
     QObject::connect(&this->miscUpdateTimer_, &QTimer::timeout, [this] {
-        this->miscUpdate.invoke();  //
+        this->miscUpdate.invoke();
     });
 }
+
+WindowManager::~WindowManager() = default;
 
 MessageElementFlags WindowManager::getWordFlags()
 {
@@ -156,6 +174,7 @@ void WindowManager::updateWordTypeMask()
     flags.set(settings->showBadgesVanity ? MEF::BadgeVanity : MEF::None);
     flags.set(settings->showBadgesChatterino ? MEF::BadgeChatterino
                                              : MEF::None);
+    flags.set(settings->showBadgesFfz ? MEF::BadgeFfz : MEF::None);
 
     // username
     flags.set(MEF::Username);
@@ -253,22 +272,14 @@ Window &WindowManager::createWindow(WindowType type, bool show)
     return *window;
 }
 
-int WindowManager::windowCount()
+void WindowManager::select(Split *split)
 {
-    return this->windows_.size();
+    this->selectSplit.invoke(split);
 }
 
-Window *WindowManager::windowAt(int index)
+void WindowManager::select(SplitContainer *container)
 {
-    assertInGuiThread();
-
-    if (index < 0 || (size_t)index >= this->windows_.size())
-    {
-        return nullptr;
-    }
-    qDebug() << "getting window at bad index" << index;
-
-    return this->windows_.at(index);
+    this->selectSplitContainer.invoke(container);
 }
 
 QPoint WindowManager::emotePopupPos()
@@ -285,42 +296,71 @@ void WindowManager::initialize(Settings &settings, Paths &paths)
 {
     assertInGuiThread();
 
-    getApp()->themes->repaintVisibleChatWidgets_.connect(
-        [this] { this->repaintVisibleChatWidgets(); });
+    getApp()->themes->repaintVisibleChatWidgets_.connect([this] {
+        this->repaintVisibleChatWidgets();
+    });
 
     assert(!this->initialized_);
 
     {
-        auto windowLayout = this->loadWindowLayoutFromFile();
+        WindowLayout windowLayout;
+
+        if (getArgs().customChannelLayout)
+        {
+            windowLayout = getArgs().customChannelLayout.value();
+        }
+        else
+        {
+            windowLayout = this->loadWindowLayoutFromFile();
+        }
 
         this->emotePopupPos_ = windowLayout.emotePopupPos_;
 
         this->applyWindowLayout(windowLayout);
     }
 
-    // No main window has been created from loading, create an empty one
-    if (mainWindow_ == nullptr)
+    if (getArgs().isFramelessEmbed)
     {
-        mainWindow_ = &this->createWindow(WindowType::Main);
-        mainWindow_->getNotebook().addPage(true);
+        this->framelessEmbedWindow_.reset(new FramelessEmbedWindow);
+        this->framelessEmbedWindow_->show();
     }
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->layoutChannelViews(); });
+    // No main window has been created from loading, create an empty one
+    if (this->mainWindow_ == nullptr)
+    {
+        this->mainWindow_ = &this->createWindow(WindowType::Main);
+        this->mainWindow_->getNotebook().addPage(true);
 
-    settings.emoteScale.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
+        // TODO: don't create main window if it's a frameless embed
+        if (getArgs().isFramelessEmbed)
+        {
+            this->mainWindow_->hide();
+        }
+    }
 
-    settings.timestampFormat.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.alternateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.separateMessages.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.collpseMessagesMinLines.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
-    settings.enableRedeemedHighlight.connect(
-        [this](auto, auto) { this->forceLayoutChannelViews(); });
+    settings.timestampFormat.connect([this](auto, auto) {
+        this->layoutChannelViews();
+    });
+
+    settings.emoteScale.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+
+    settings.timestampFormat.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.alternateMessages.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.separateMessages.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.collpseMessagesMinLines.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
+    settings.enableRedeemedHighlight.connect([this](auto, auto) {
+        this->forceLayoutChannelViews();
+    });
 
     this->initialized_ = true;
 }
@@ -331,7 +371,7 @@ void WindowManager::save()
     {
         return;
     }
-    qDebug() << "[WindowManager] Saving";
+    qCDebug(chatterinoWindowmanager) << "[WindowManager] Saving";
     assertInGuiThread();
     QJsonDocument document;
 
@@ -469,9 +509,6 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             QJsonArray filters;
             encodeFilters(node->getSplit(), filters);
             obj.insert("filters", filters);
-
-            obj.insert("flexh", node->getHorizontalFlex());
-            obj.insert("flexv", node->getVerticalFlex());
         }
         break;
         case SplitNode::HorizontalContainer:
@@ -491,6 +528,9 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
         }
         break;
     }
+
+    obj.insert("flexh", node->getHorizontalFlex());
+    obj.insert("flexv", node->getVerticalFlex());
 }
 
 void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
@@ -601,6 +641,11 @@ WindowLayout WindowManager::loadWindowLayoutFromFile() const
 
 void WindowManager::applyWindowLayout(const WindowLayout &layout)
 {
+    if (getArgs().dontLoadMainWindow)
+    {
+        return;
+    }
+
     // Set emote popup position
     this->emotePopupPos_ = layout.emotePopupPos_;
 

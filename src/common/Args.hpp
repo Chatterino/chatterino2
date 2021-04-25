@@ -1,7 +1,8 @@
 #pragma once
 
 #include <QApplication>
-#include <QJsonArray>
+#include <boost/optional.hpp>
+#include "common/WindowDescriptors.hpp"
 
 namespace chatterino {
 
@@ -14,8 +15,18 @@ public:
     bool printVersion{};
     bool crashRecovery{};
     bool shouldRunBrowserExtensionHost{};
+    // Shows a single chat. Used on windows to embed in another application.
+    bool isFramelessEmbed{};
+    boost::optional<unsigned long long> parentWindowId{};
+
+    // Not settings directly
     bool dontSaveSettings{};
-    QJsonArray channelsToJoin{};
+    bool dontLoadMainWindow{};
+    boost::optional<WindowLayout> customChannelLayout;
+    bool verbose{};
+
+private:
+    void applyCustomChannelLayout(const QString &argValue);
 };
 
 void initArgs(const QApplication &app);

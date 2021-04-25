@@ -27,7 +27,7 @@ public:
      * You can connect to the ::closed signal of this instance to get notified
      * when the dialog is closed.
      */
-    ColorPickerDialog(const QColor &initial, QWidget *parent = nullptr);
+    ColorPickerDialog(const QColor &initial, QWidget *parent);
 
     ~ColorPickerDialog();
 
@@ -42,7 +42,7 @@ public:
      */
     QColor selectedColor() const;
 
-    pajlada::Signals::NoArgSignal closed;
+    pajlada::Signals::Signal<QColor> closed;
 
 protected:
     void closeEvent(QCloseEvent *);

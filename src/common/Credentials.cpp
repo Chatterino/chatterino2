@@ -1,12 +1,16 @@
 #include "Credentials.hpp"
 
 #include "debug/AssertInGuiThread.hpp"
-#include "keychain.h"
 #include "singletons/Paths.hpp"
 #include "singletons/Settings.hpp"
 #include "util/CombinePath.hpp"
 #include "util/Overloaded.hpp"
 
+#ifdef CMAKE_BUILD
+#    include "qt5keychain/keychain.h"
+#else
+#    include "keychain.h"
+#endif
 #include <QSaveFile>
 #include <boost/variant.hpp>
 
@@ -113,7 +117,9 @@ namespace {
                 job->setKey(set.name);
                 job->setTextData(set.credential);
                 QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                 [](auto) { runNextJob(); });
+                                 [](auto) {
+                                     runNextJob();
+                                 });
                 job->start();
             }
             else  // erase job
@@ -123,7 +129,9 @@ namespace {
                 job->setAutoDelete(true);
                 job->setKey(erase.name);
                 QObject::connect(job, &QKeychain::Job::finished, qApp,
-                                 [](auto) { runNextJob(); });
+                                 [](auto) {
+                                     runNextJob();
+                                 });
                 job->start();
             }
 

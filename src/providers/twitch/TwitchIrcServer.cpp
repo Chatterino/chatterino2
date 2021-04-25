@@ -6,6 +6,7 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -38,8 +39,11 @@ TwitchIrcServer::TwitchIrcServer()
 
 void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
 {
-    getApp()->accounts->twitch.currentUserChanged.connect(
-        [this]() { postToThread([this] { this->connect(); }); });
+    getApp()->accounts->twitch.currentUserChanged.connect([this]() {
+        postToThread([this] {
+            this->connect();
+        });
+    });
 
     this->twitchBadges.loadTwitchBadges();
     this->bttv.loadEmotes();
@@ -52,7 +56,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
     std::shared_ptr<TwitchAccount> account =
         getApp()->accounts->twitch.getCurrent();
 
-    qDebug() << "logging in as" << account->getUserName();
+    qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
 
     QString username = account->getUserName();
     QString oauthToken = account->getOAuthToken();
@@ -161,6 +165,12 @@ void TwitchIrcServer::readConnectionMessageReceived(
     {
         handler.handleWhisperMessage(message);
     }
+    else if (command == "RECONNECT")
+    {
+        this->addGlobalSystemMessage(
+            "Twitch Servers requested us to reconnect, reconnecting");
+        this->connect();
+    }
 }
 
 void TwitchIrcServer::writeConnectionMessageReceived(
@@ -202,6 +212,12 @@ void TwitchIrcServer::writeConnectionMessageReceived(
 
         handler.handleNoticeMessage(
             static_cast<Communi::IrcNoticeMessage *>(message));
+    }
+    else if (command == "RECONNECT")
+    {
+        this->addGlobalSystemMessage(
+            "Twitch Servers requested us to reconnect, reconnecting");
+        this->connect();
     }
 }
 

@@ -71,7 +71,7 @@ ExternalToolsPage::ExternalToolsPage()
 
         getSettings()->streamlinkUseCustomPath.connect(
             [=](const auto &value, auto) {
-                customPath->setEnabled(value);  //
+                customPath->setEnabled(value);
             },
             this->managedConnections_);
     }
