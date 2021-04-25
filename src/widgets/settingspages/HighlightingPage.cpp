@@ -304,9 +304,7 @@ void HighlightingPage::openColorDialog(const QModelIndex &clicked,
     auto dialog = new ColorPickerDialog(initial, this);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
-    dialog->closed.connect([=] {
-        QColor selected = dialog->selectedColor();
-
+    dialog->closed.connect([=](auto selected) {
         if (selected.isValid())
         {
             view->getModel()->setData(clicked, selected, Qt::DecorationRole);
