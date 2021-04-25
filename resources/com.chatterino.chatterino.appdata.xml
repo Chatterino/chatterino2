@@ -18,7 +18,7 @@
     </description>
     <screenshots>
         <screenshot type="default">
-            <image>https://chatterino.com/img/screenshot-3.png</image>
+            <image>https://i.imgur.com/CFLDARZ.png</image>
         </screenshot>
     </screenshots>
     <keywords>
@@ -31,4 +31,7 @@
     <provides>
         <binary>chatterino</binary>
     </provides>
+    <releases>
+        <release version="2.3.0" date="2021-04-18"/>
+    </releases>
 </component>
