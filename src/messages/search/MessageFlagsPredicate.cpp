@@ -1,4 +1,3 @@
-
 #include "messages/search/MessageFlagsPredicate.hpp"
 
 namespace chatterino {
