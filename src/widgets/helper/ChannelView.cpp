@@ -785,6 +785,18 @@ void ChannelView::messageAppended(MessagePtr &message,
     this->lastMessageHasAlternateBackground_ =
         !this->lastMessageHasAlternateBackground_;
 
+    if (!this->scrollBar_->isAtBottom() &&
+        this->scrollBar_->getCurrentValueAnimation().state() ==
+            QPropertyAnimation::Running)
+    {
+        QEventLoop loop;
+
+        connect(&this->scrollBar_->getCurrentValueAnimation(),
+                &QAbstractAnimation::stateChanged, &loop, &QEventLoop::quit);
+
+        loop.exec();
+    }
+
     if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
     {
         if (this->paused())
@@ -1814,6 +1826,13 @@ void ChannelView::addContextMenuItems(
 
     auto menu = new QMenu;
     previousMenu = menu;
+
+    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
+    {
+        auto badgeElement = dynamic_cast<const BadgeElement *>(&creator);
+        addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
+                                 *menu);
+    }
 
     // Emote actions
     if (creatorFlags.hasAny(

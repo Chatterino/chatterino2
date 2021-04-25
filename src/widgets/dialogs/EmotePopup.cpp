@@ -27,35 +27,36 @@ namespace {
         builder->flags.set(MessageFlag::Centered);
         return builder.release();
     }
-    auto makeEmoteMessage(const EmoteMap &map)
+    auto makeEmoteMessage(const EmoteMap &map,
+                          const MessageElementFlag &emoteFlag)
     {
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);
         builder->flags.set(MessageFlag::DisableCompactEmotes);
 
-        if (!map.empty())
-        {
-            std::vector<std::pair<EmoteName, EmotePtr>> vec(map.begin(),
-                                                            map.end());
-            std::sort(vec.begin(), vec.end(),
-                      [](const std::pair<EmoteName, EmotePtr> &l,
-                         const std::pair<EmoteName, EmotePtr> &r) {
-                          return CompletionModel::compareStrings(
-                              l.first.string, r.first.string);
-                      });
-            for (const auto &emote : vec)
-            {
-                builder
-                    .emplace<EmoteElement>(emote.second,
-                                           MessageElementFlag::AlwaysShow)
-                    ->setLink(Link(Link::InsertText, emote.first.string));
-            }
-        }
-        else
+        if (map.empty())
         {
             builder.emplace<TextElement>("no emotes available",
                                          MessageElementFlag::Text,
                                          MessageColor::System);
+            return builder.release();
+        }
+
+        std::vector<std::pair<EmoteName, EmotePtr>> vec(map.begin(), map.end());
+        std::sort(vec.begin(), vec.end(),
+                  [](const std::pair<EmoteName, EmotePtr> &l,
+                     const std::pair<EmoteName, EmotePtr> &r) {
+                      return CompletionModel::compareStrings(l.first.string,
+                                                             r.first.string);
+                  });
+        for (const auto &emote : vec)
+        {
+            builder
+                .emplace<EmoteElement>(
+                    emote.second,
+                    MessageElementFlags{MessageElementFlag::AlwaysShow,
+                                        emoteFlag})
+                ->setLink(Link(Link::InsertText, emote.first.string));
         }
 
         return builder.release();
@@ -92,7 +93,8 @@ namespace {
                     .emplace<EmoteElement>(
                         getApp()->emotes->twitch.getOrCreateEmote(emote.id,
                                                                   emote.name),
-                        MessageElementFlag::AlwaysShow)
+                        MessageElementFlags{MessageElementFlag::AlwaysShow,
+                                            MessageElementFlag::TwitchEmote})
                     ->setLink(Link(Link::InsertText, emote.name.string));
             }
 
@@ -206,9 +208,10 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         return;
 
     auto addEmotes = [&](Channel &channel, const EmoteMap &map,
-                         const QString &title) {
+                         const QString &title,
+                         const MessageElementFlag &emoteFlag) {
         channel.addMessage(makeTitleMessage(title));
-        channel.addMessage(makeEmoteMessage(map));
+        channel.addMessage(makeEmoteMessage(map, emoteFlag));
     };
 
     auto subChannel = std::make_shared<Channel>("", Channel::Type::None);
@@ -222,13 +225,15 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
 
     // global
     addEmotes(*globalChannel, *twitchChannel->globalBttv().emotes(),
-              "BetterTTV");
+              "BetterTTV", MessageElementFlag::BttvEmote);
     addEmotes(*globalChannel, *twitchChannel->globalFfz().emotes(),
-              "FrankerFaceZ");
+              "FrankerFaceZ", MessageElementFlag::FfzEmote);
 
     // channel
-    addEmotes(*channelChannel, *twitchChannel->bttvEmotes(), "BetterTTV");
-    addEmotes(*channelChannel, *twitchChannel->ffzEmotes(), "FrankerFaceZ");
+    addEmotes(*channelChannel, *twitchChannel->bttvEmotes(), "BetterTTV",
+              MessageElementFlag::BttvEmote);
+    addEmotes(*channelChannel, *twitchChannel->ffzEmotes(), "FrankerFaceZ",
+              MessageElementFlag::FfzEmote);
 
     this->globalEmotesView_->setChannel(globalChannel);
     this->subEmotesView_->setChannel(subChannel);
@@ -259,7 +264,10 @@ void EmotePopup::loadEmojis()
 
     emojis.each([&builder](const auto &key, const auto &value) {
         builder
-            .emplace<EmoteElement>(value->emote, MessageElementFlag::AlwaysShow)
+            .emplace<EmoteElement>(
+                value->emote,
+                MessageElementFlags{MessageElementFlag::AlwaysShow,
+                                    MessageElementFlag::EmojiAll})
             ->setLink(
                 Link(Link::Type::InsertText, ":" + value->shortCodes[0] + ":"));
     });
