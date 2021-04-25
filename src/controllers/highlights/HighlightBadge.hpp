@@ -85,10 +85,12 @@ struct Serialize<chatterino::HighlightBadge> {
 
 template <>
 struct Deserialize<chatterino::HighlightBadge> {
-    static chatterino::HighlightBadge get(const rapidjson::Value &value)
+    static chatterino::HighlightBadge get(const rapidjson::Value &value,
+                                          bool *error)
     {
         if (!value.IsObject())
         {
+            PAJLADA_REPORT_ERROR(error);
             return chatterino::HighlightBadge(QString(), QString(), QString(),
                                               false, false, "", QColor());
         }
