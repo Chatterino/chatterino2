@@ -1827,6 +1827,13 @@ void ChannelView::addContextMenuItems(
     auto menu = new QMenu;
     previousMenu = menu;
 
+    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
+    {
+        auto badgeElement = dynamic_cast<const BadgeElement *>(&creator);
+        addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
+                                 *menu);
+    }
+
     // Emote actions
     if (creatorFlags.hasAny(
             {MessageElementFlag::EmoteImages, MessageElementFlag::EmojiImage}))
