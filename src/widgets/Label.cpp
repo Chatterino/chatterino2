@@ -5,13 +5,13 @@
 namespace chatterino {
 
 Label::Label(QString text, FontStyle style)
-    : Label(nullptr, text, style)
+    : Label(nullptr, std::move(text), style)
 {
 }
 
 Label::Label(BaseWidget *parent, QString text, FontStyle style)
     : BaseWidget(parent)
-    , text_(text)
+    , text_(std::move(text))
     , fontStyle_(style)
 {
     this->connections_.managedConnect(getFonts()->fontChanged, [this] {

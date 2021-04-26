@@ -57,7 +57,7 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
     , isRegex_(isRegex)
     , isCaseSensitive_(isCaseSensitive)
     , soundUrl_(soundUrl)
-    , color_(color)
+    , color_(std::move(color))
     , regex_(isRegex_
                  ? pattern
                  : REGEX_START_BOUNDARY + QRegularExpression::escape(pattern) +

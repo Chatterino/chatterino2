@@ -33,7 +33,7 @@ Note: This installation will take about 1.5 GB of disk space.
 
 ### For our websocket library, we need OpenSSL 1.1
 
-1. Download OpenSSL for windows, version `1.1.1i`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1i.exe)**
+1. Download OpenSSL for windows, version `1.1.1j`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1j.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
@@ -123,3 +123,12 @@ To produce all supplement files for a standalone build, follow these steps (adju
 6.  The `releases` directory will now be populated with all the required files to make the chatterino build standalone.
 
 You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist package must be present, as usual - see the [README](README.md)).
+
+## Building with CMake
+
+Open up your terminal with the Visual Studio environment variables, then:
+
+1. `mkdir build`
+2. `cd build`
+3. `cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..`
+4. `nmake`

@@ -19,7 +19,7 @@ jobs:
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2.1.4
+        uses: actions/cache@v2.1.5
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-20201005
@@ -69,7 +69,7 @@ jobs:
       - name: Build (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            cmake -DBUILD_TESTS=On -DCMAKE_BUILD_TYPE=Release ..
+            cmake -DBUILD_TESTS=On -DBUILD_APP=OFF ..
             cmake --build . --config Release
         working-directory: build-test
         shell: bash
@@ -77,6 +77,6 @@ jobs:
       - name: Test (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-            ./chatterino-test --platform minimal
+            ./bin/chatterino-test --platform minimal
         working-directory: build-test
         shell: bash

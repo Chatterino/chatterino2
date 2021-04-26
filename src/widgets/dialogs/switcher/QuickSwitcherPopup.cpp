@@ -14,14 +14,14 @@
 namespace chatterino {
 
 namespace {
-    QSet<SplitContainer *> openPages()
+    QList<SplitContainer *> openPages()
     {
-        QSet<SplitContainer *> pages;
+        QList<SplitContainer *> pages;
 
         auto &nb = getApp()->windows->getMainWindow().getNotebook();
         for (int i = 0; i < nb.getPageCount(); ++i)
         {
-            pages.insert(static_cast<SplitContainer *>(nb.getPageAt(i)));
+            pages.append(static_cast<SplitContainer *>(nb.getPageAt(i)));
         }
 
         return pages;
@@ -94,7 +94,7 @@ void QuickSwitcherPopup::updateSuggestions(const QString &text)
             if (split->getChannel()->getName().contains(text,
                                                         Qt::CaseInsensitive))
             {
-                auto item = std::make_unique<SwitchSplitItem>(split);
+                auto item = std::make_unique<SwitchSplitItem>(sc, split);
                 this->switcherModel_.addItem(std::move(item));
 
                 // We want to continue the outer loop so we need a goto

@@ -47,6 +47,16 @@ bool MessageLayoutElement::hasTrailingSpace() const
     return this->trailingSpace;
 }
 
+int MessageLayoutElement::getLine() const
+{
+    return this->line_;
+}
+
+void MessageLayoutElement::setLine(int line)
+{
+    this->line_ = line;
+}
+
 MessageLayoutElement *MessageLayoutElement::setTrailingSpace(bool value)
 {
     this->trailingSpace = value;
@@ -88,7 +98,7 @@ FlagsEnum<MessageElementFlag> MessageLayoutElement::getFlags() const
 ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
                                        const QSize &size)
     : MessageLayoutElement(creator, size)
-    , image_(image)
+    , image_(std::move(image))
 {
     this->trailingSpace = creator.hasTrailingSpace();
 }

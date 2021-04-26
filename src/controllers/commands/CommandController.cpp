@@ -29,14 +29,42 @@
 #include <QRegularExpression>
 #include <QUrl>
 
-#define TWITCH_DEFAULT_COMMANDS                                               \
-    "/help", "/w", "/me", "/disconnect", "/mods", "/color", "/ban", "/unban", \
-        "/timeout", "/untimeout", "/slow", "/slowoff", "/r9kbeta",            \
-        "/r9kbetaoff", "/emoteonly", "/emoteonlyoff", "/clear",               \
-        "/subscribers", "/subscribersoff", "/followers", "/followersoff"
-
 namespace {
 using namespace chatterino;
+
+static const QStringList twitchDefaultCommands{
+    "/help",
+    "/w",
+    "/me",
+    "/disconnect",
+    "/mods",
+    "/vips",
+    "/color",
+    "/commercial",
+    "/mod",
+    "/unmod",
+    "/vip",
+    "/unvip",
+    "/ban",
+    "/unban",
+    "/timeout",
+    "/untimeout",
+    "/slow",
+    "/slowoff",
+    "/r9kbeta",
+    "/r9kbetaoff",
+    "/emoteonly",
+    "/emoteonlyoff",
+    "/clear",
+    "/subscribers",
+    "/subscribersoff",
+    "/followers",
+    "/followersoff",
+    "/host",
+    "/unhost",
+    "/raid",
+    "/unraid",
+};
 
 static const QStringList whisperCommands{"/w", ".w"};
 
@@ -176,7 +204,7 @@ namespace chatterino {
 
 void CommandController::initialize(Settings &, Paths &paths)
 {
-    this->commandAutoCompletions_ = QStringList{TWITCH_DEFAULT_COMMANDS};
+    this->commandAutoCompletions_ = twitchDefaultCommands;
 
     // Update commands map when the vector of commands has been updated
     auto addFirstMatchToMap = [this](auto args) {
@@ -677,7 +705,85 @@ void CommandController::initialize(Settings &, Paths &paths)
             getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
 
         currentPage->getSelectedSplit()->getChannelView().clearMessages();
+        return "";
+    });
 
+    this->registerCommand("/settitle", [](const QStringList &words,
+                                          ChannelPtr channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(
+                makeSystemMessage("Usage: /settitle <stream title>."));
+            return "";
+        }
+        if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+        {
+            auto status = twitchChannel->accessStreamStatus();
+            auto title = words.mid(1).join(" ");
+            getHelix()->updateChannel(
+                twitchChannel->roomId(), "", "", title,
+                [channel, title](NetworkResult) {
+                    channel->addMessage(makeSystemMessage(
+                        QString("Updated title to %1").arg(title)));
+                },
+                [channel] {
+                    channel->addMessage(
+                        makeSystemMessage("Title update failed! Are you "
+                                          "missing the required scope?"));
+                });
+        }
+        else
+        {
+            channel->addMessage(makeSystemMessage(
+                "Unable to set title of non-Twitch channel."));
+        }
+        return "";
+    });
+    this->registerCommand("/setgame", [](const QStringList &words,
+                                         ChannelPtr channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(
+                makeSystemMessage("Usage: /setgame <stream game>."));
+            return "";
+        }
+        if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+        {
+            getHelix()->searchGames(
+                words.mid(1).join(" "),
+                [channel, twitchChannel](std::vector<HelixGame> games) {
+                    if (games.empty())
+                    {
+                        channel->addMessage(
+                            makeSystemMessage("Game not found."));
+                    }
+                    else  // 1 or more games
+                    {
+                        auto status = twitchChannel->accessStreamStatus();
+                        getHelix()->updateChannel(
+                            twitchChannel->roomId(), games.at(0).id, "", "",
+                            [channel, games](NetworkResult) {
+                                channel->addMessage(makeSystemMessage(
+                                    QString("Updated game to %1")
+                                        .arg(games.at(0).name)));
+                            },
+                            [channel] {
+                                channel->addMessage(makeSystemMessage(
+                                    "Game update failed! Are you "
+                                    "missing the required scope?"));
+                            });
+                    }
+                },
+                [channel] {
+                    channel->addMessage(
+                        makeSystemMessage("Failed to look up game."));
+                });
+        }
+        else
+        {
+            channel->addMessage(
+                makeSystemMessage("Unable to set game of non-Twitch channel."));
+        }
         return "";
     });
 }
@@ -725,6 +831,25 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
+    {
+        // check if user command exists
+        const auto it = this->userCommands_.find(commandName);
+        if (it != this->userCommands_.end())
+        {
+            text = getApp()->emotes->emojis.replaceShortCodes(
+                this->execCustomCommand(words, it.value(), dryRun));
+
+            words = text.split(' ', QString::SkipEmptyParts);
+
+            if (words.length() == 0)
+            {
+                return text;
+            }
+
+            commandName = words[0];
+        }
+    }
+
     // works only in a valid twitch channel
     if (!dryRun && twitchChannel != nullptr)
     {
@@ -733,15 +858,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         if (it != this->commands_.end())
         {
             return it.value()(words, channel);
-        }
-    }
-
-    {
-        // check if user command exists
-        const auto it = this->userCommands_.find(commandName);
-        if (it != this->userCommands_.end())
-        {
-            return this->execCustomCommand(words, it.value(), dryRun);
         }
     }
 

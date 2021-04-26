@@ -26,7 +26,7 @@ StreamView::StreamView(ChannelPtr channel, const QUrl &url)
 
     auto chat = layoutCreator.emplace<ChannelView>();
     chat->setFixedWidth(300);
-    chat->setChannel(channel);
+    chat->setChannel(std::move(channel));
 
     this->layout()->setSpacing(0);
     this->layout()->setMargin(0);

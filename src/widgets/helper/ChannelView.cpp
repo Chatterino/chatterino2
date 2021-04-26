@@ -550,7 +550,7 @@ bool ChannelView::getEnableScrollingToBottom() const
 
 void ChannelView::setOverrideFlags(boost::optional<MessageElementFlags> value)
 {
-    this->overrideFlags_ = value;
+    this->overrideFlags_ = std::move(value);
 }
 
 const boost::optional<MessageElementFlags> &ChannelView::getOverrideFlags()
@@ -647,7 +647,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     this->channelConnections_.push_back(this->channel_->messageAppended.connect(
         [this](MessagePtr &message,
                boost::optional<MessageFlags> overridingFlags) {
-            this->messageAppended(message, overridingFlags);
+            this->messageAppended(message, std::move(overridingFlags));
         }));
 
     this->channelConnections_.push_back(
@@ -753,7 +753,7 @@ ChannelPtr ChannelView::sourceChannel() const
 
 void ChannelView::setSourceChannel(ChannelPtr sourceChannel)
 {
-    this->sourceChannel_ = sourceChannel;
+    this->sourceChannel_ = std::move(sourceChannel);
 }
 
 bool ChannelView::hasSourceChannel() const
@@ -784,6 +784,18 @@ void ChannelView::messageAppended(MessagePtr &message,
     }
     this->lastMessageHasAlternateBackground_ =
         !this->lastMessageHasAlternateBackground_;
+
+    if (!this->scrollBar_->isAtBottom() &&
+        this->scrollBar_->getCurrentValueAnimation().state() ==
+            QPropertyAnimation::Running)
+    {
+        QEventLoop loop;
+
+        connect(&this->scrollBar_->getCurrentValueAnimation(),
+                &QAbstractAnimation::stateChanged, &loop, &QEventLoop::quit);
+
+        loop.exec();
+    }
 
     if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
     {
@@ -1814,6 +1826,13 @@ void ChannelView::addContextMenuItems(
 
     auto menu = new QMenu;
     previousMenu = menu;
+
+    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
+    {
+        auto badgeElement = dynamic_cast<const BadgeElement *>(&creator);
+        addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
+                                 *menu);
+    }
 
     // Emote actions
     if (creatorFlags.hasAny(

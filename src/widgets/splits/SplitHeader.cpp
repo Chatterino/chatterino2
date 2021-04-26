@@ -284,7 +284,7 @@ void SplitHeader::initializeLayout()
         // dropdown
         this->dropdownButton_ = makeWidget<Button>([&](auto w) {
             /// XXX: this never gets disconnected
-            this->split_->channelChanged.connect([this] {
+            QObject::connect(w, &Button::leftMousePress, this, [this] {
                 this->dropdownButton_->setMenu(this->createMainMenu());
             });
         }),
@@ -314,12 +314,14 @@ void SplitHeader::initializeLayout()
                              }
                          });
 
-    getSettings()->customURIScheme.connect([this] {
-        if (const auto drop = this->dropdownButton_)
-        {
-            drop->setMenu(this->createMainMenu());
-        }
-    });
+    getSettings()->customURIScheme.connect(
+        [this] {
+            if (const auto drop = this->dropdownButton_)
+            {
+                drop->setMenu(this->createMainMenu());
+            }
+        },
+        this->managedConnections_);
 
     layout->setMargin(0);
     layout->setSpacing(0);
