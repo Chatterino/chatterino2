@@ -912,8 +912,8 @@ void TwitchChannel::refreshCheerEmotes()
 {
     //    getHelix()->getCheermotes(
     //        this->roomId(),
-    //        [this, weak = weakOf<Channel>(this)](
-    //            const HelixCheermote cheermote) -> Outcome {
+    //        [weak = weakOf<Channel>(this)](
+    //            const std::vector<HelixCheermote> cheermotes) -> Outcome {
     //            auto shared = weak.lock();
 
     //            if (!shared)
@@ -929,6 +929,8 @@ void TwitchChannel::refreshCheerEmotes()
     //            // Failure
     //            return Failure;
     //        });
+
+    /// KRAKEN (read as "shit") CODE
     QString url("https://api.twitch.tv/kraken/bits/actions?channel_id=" +
                 this->roomId());
     NetworkRequest::twitchRequest(url)

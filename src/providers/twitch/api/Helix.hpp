@@ -340,9 +340,10 @@ public:
         std::function<void(HelixAutoModMessageError)> failureCallback);
 
     // https://dev.twitch.tv/docs/api/reference/#get-cheermotes
-    void getCheermotes(QString broadcasterId,
-                       ResultCallback<HelixCheermote> successCallback,
-                       HelixFailureCallback failureCallback);
+    void getCheermotes(
+        QString broadcasterId,
+        ResultCallback<std::vector<HelixCheermote>> successCallback,
+        HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 
