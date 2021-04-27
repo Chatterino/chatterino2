@@ -582,8 +582,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
         "bitsbadgetier",  // bits badge upgrade
         "ritual",         // new viewer ritual
     };
-    qDebug() << specialMessageTypes.contains(msgType) << msgType
-             << specialMessageTypes;
+
     if (specialMessageTypes.contains(msgType))
     {
         // Messages are not required, so they might be empty
