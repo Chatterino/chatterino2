@@ -51,7 +51,7 @@ using AccessGuard = AccessGuardLocker<T, std::unique_lock<std::shared_mutex>>;
 
 template <typename T>
 using SharedAccessGuard =
-    AccessGuardLocker<T, std::shared_lock<std::shared_mutex>>;
+    AccessGuardLocker<const T, std::shared_lock<std::shared_mutex>>;
 
 template <typename T>
 class UniqueAccess
