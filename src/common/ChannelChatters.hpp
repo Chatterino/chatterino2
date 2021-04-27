@@ -15,7 +15,7 @@ public:
     ChannelChatters(Channel &channel);
     virtual ~ChannelChatters() = default;  // add vtable
 
-    AccessGuard<const UsernameSet> accessChatters() const;
+    SharedAccessGuard<const UsernameSet> accessChatters() const;
 
     void addRecentChatter(const QString &user);
     void addJoinedUser(const QString &user);

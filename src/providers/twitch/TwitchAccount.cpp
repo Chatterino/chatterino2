@@ -335,7 +335,7 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
         });
 }
 
-AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
+SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
     TwitchAccount::accessEmotes() const
 {
     return this->emotes_.accessConst();

@@ -1,39 +1,34 @@
 #pragma once
 
 #include <mutex>
+#include <shared_mutex>
 #include <type_traits>
 
 namespace chatterino {
 
-template <typename T>
-class AccessGuard
+template <typename T, typename LockType>
+class AccessGuardLocker
 {
 public:
-    AccessGuard(T &element, std::mutex &mutex)
+    AccessGuardLocker(T &element, std::shared_mutex &mutex)
         : element_(&element)
-        , mutex_(&mutex)
+        , lock_(mutex)
     {
-        this->mutex_->lock();
     }
 
-    AccessGuard(AccessGuard<T> &&other)
+    AccessGuardLocker(AccessGuardLocker<T, LockType> &&other)
         : element_(other.element_)
-        , mutex_(other.mutex_)
+        , lock_(std::move(other.lock_))
     {
-        other.isValid_ = false;
     }
 
-    AccessGuard<T> &operator=(AccessGuard<T> &&other)
+    AccessGuardLocker<T, LockType> &operator=(
+        AccessGuardLocker<T, LockType> &&other)
     {
-        other.isValid_ = false;
         this->element_ = other.element_;
-        this->mutex_ = other.element_;
-    }
+        this->lock_ = std::move(other.lock_);
 
-    ~AccessGuard()
-    {
-        if (this->isValid_)
-            this->mutex_->unlock();
+        return *this;
     }
 
     T *operator->() const
@@ -48,9 +43,15 @@ public:
 
 private:
     T *element_{};
-    std::mutex *mutex_{};
-    bool isValid_{true};
+    LockType lock_;
 };
+
+template <typename T>
+using AccessGuard = AccessGuardLocker<T, std::unique_lock<std::shared_mutex>>;
+
+template <typename T>
+using SharedAccessGuard =
+    AccessGuardLocker<T, std::shared_lock<std::shared_mutex>>;
 
 template <typename T>
 class UniqueAccess
@@ -90,14 +91,14 @@ public:
 
     template <typename X = T,
               typename = std::enable_if_t<!std::is_const<X>::value>>
-    AccessGuard<const X> accessConst() const
+    SharedAccessGuard<const X> accessConst() const
     {
-        return AccessGuard<const T>(this->element_, this->mutex_);
+        return SharedAccessGuard<const T>(this->element_, this->mutex_);
     }
 
 private:
     mutable T element_;
-    mutable std::mutex mutex_;
+    mutable std::shared_mutex mutex_;
 };
 
 }  // namespace chatterino

@@ -110,7 +110,7 @@ public:
 
     void loadEmotes();
     void loadUserstateEmotes(QStringList emoteSetKeys);
-    AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
+    SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
     void autoModAllow(const QString msgID);
