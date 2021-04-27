@@ -93,6 +93,37 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         return;
     }
 
+    // This lambda contains the logic for when to step one 'space width' back for compact x emotes
+    auto shouldRemoveSpaceBetweenEmotes = [this]() -> bool {
+        if (this->elements_.empty())
+        {
+            // No previous element found
+            return false;
+        }
+
+        const auto &lastElement = this->elements_.back();
+
+        if (!lastElement)
+        {
+            return false;
+        }
+
+        if (!lastElement->hasTrailingSpace())
+        {
+            // Last element did not have a trailing space, so we don't need to do anything.
+            return false;
+        }
+
+        if (lastElement->getLine() != this->line_)
+        {
+            // Last element was not on the same line as us
+            return false;
+        }
+
+        // Returns true if the last element was an emote image
+        return lastElement->getFlags().has(MessageElementFlag::EmoteImages);
+    };
+
     // top margin
     if (this->elements_.size() == 0)
     {
@@ -133,10 +164,20 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         yOffset -= (this->margin.top * this->scale_);
     }
 
+    if (getSettings()->removeSpacesBetweenEmotes &&
+        element->getFlags().hasAny({MessageElementFlag::EmoteImages}) &&
+        shouldRemoveSpaceBetweenEmotes())
+    {
+        // Move cursor one 'space width' to the left to combine hug the previous emote
+        this->currentX_ -= this->spaceWidth_;
+    }
+
     // set move element
     element->setPosition(
         QPoint(this->currentX_ + xOffset,
                this->currentY_ - element->getRect().height() + yOffset));
+
+    element->setLine(this->line_);
 
     // add element
     this->elements_.push_back(std::unique_ptr<MessageLayoutElement>(element));

@@ -2,6 +2,19 @@
 
 ## Unversioned
 
+### Dankerino
+
+- Minor: Dankerino 'Remove spaces around emotes' setting was internally
+  replaced by Chatterino one. The config key was changed but the transition is
+  automatic (Mm2PL/Dankerino#65)
+
+### Chatterino
+- Minor: Added image links to the badge context menu. (#2667)
+- Minor: Added a setting to hide Twitch Predictions badges. (#2668)
+- Minor: Optionally remove spaces between emotes, originally made for Mm2PL/Dankerino. (#2651)
+- Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
+- Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
+
 ## 2.3.0
 
 ### Dankerino
