@@ -211,6 +211,9 @@ void Window::addDebugStuff()
     // resub without message
     subMessages.emplace_back(R"(@badges=subscriber/12;color=#CC00C2;display-name=cspice;emotes=;id=6fc4c3e0-ca61-454a-84b8-5669dee69fc9;login=cspice;mod=0;msg-id=resub;msg-param-months=12;msg-param-sub-plan-name=Channel\sSubscription\s(forsenlol):\s$9.99\sSub;msg-param-sub-plan=2000;room-id=22484632;subscriber=1;system-msg=cspice\sjust\ssubscribed\swith\sa\sTier\s2\ssub.\scspice\ssubscribed\sfor\s12\smonths\sin\sa\srow!;tmi-sent-ts=1528192510808;turbo=0;user-id=47894662;user-type= :tmi.twitch.tv USERNOTICE #pajlada)");
 
+    // viewer ritual message
+    subMessages.emplace_back(R"(@badge-info=;badges=premium/1;color=#4922B2;display-name=winter_styx;emotes=81274:0-5;flags=;id=ad2266af-253c-409b-9131-9bc657773a7a;login=winter_styx;mod=0;msg-id=ritual;msg-param-ritual-name=new_chatter;room-id=143917159;subscriber=0;system-msg=@winter_styx\sis\snew\shere.\sSay\shello!;tmi-sent-ts=1619428046297;user-id=642858998;user-type= :tmi.twitch.tv USERNOTICE #indiefoxx :VoHiYo)");
+
     // display name renders strangely
     miscMessages.emplace_back(R"(@badges=;color=#00AD2B;display-name=Iamme420\s;emotes=;id=d47a1e4b-a3c6-4b9e-9bf1-51b8f3dbc76e;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1529670347537;turbo=0;user-id=56422869;user-type= :iamme420!iamme420@iamme420.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");
     miscMessages.emplace_back(R"(@badge-info=founder/47;badges=moderator/1,founder/0,premium/1;color=#00FF80;display-name=gempir;emotes=;flags=;id=d4514490-202e-43cb-b429-ef01a9d9c2fe;mod=1;room-id=11148817;subscriber=0;tmi-sent-ts=1575198233854;turbo=0;user-id=77829817;user-type=mod :gempir!gempir@gempir.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");

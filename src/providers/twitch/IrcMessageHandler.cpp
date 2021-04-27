@@ -574,11 +574,19 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
         content = parameters[1];
     }
 
-    if (msgType == "sub" || msgType == "resub" || msgType == "subgift" ||
-        msgType == "bitsbadgetier")
+    // Messages in list below are the ones that might contain special user's message
+    QStringList specialMessageTypes{
+        "sub",            //
+        "subgift",        //
+        "resub",          // resub messages
+        "bitsbadgetier",  // bits badge upgrade
+        "ritual",         // new viewer ritual
+    };
+    qDebug() << specialMessageTypes.contains(msgType) << msgType
+             << specialMessageTypes;
+    if (specialMessageTypes.contains(msgType))
     {
-        // Sub-specific and bits badge upgrade specific message.
-        // It's only allowed for "resub" messages.
+        // Messages are not required, so they might be empty
         if (!content.isEmpty())
         {
             MessageParseArgs args;
@@ -596,6 +604,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
 
     if (it != tags.end())
     {
+        // By default, we return value of system-msg tag
         QString messageText = it.value().toString();
 
         if (msgType == "bitsbadgetier")
