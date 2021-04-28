@@ -37,6 +37,11 @@ void TextInputDialog::setText(const QString &text)
     this->lineEdit_.setText(text);
 }
 
+void TextInputDialog::setPlaceholder(const QString &text)
+{
+    this->lineEdit_.setPlaceholderText(text);
+}
+
 void TextInputDialog::okButtonClicked()
 {
     this->accept();

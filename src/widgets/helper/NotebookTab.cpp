@@ -78,6 +78,8 @@ void NotebookTab::showRenameDialog()
     TextInputDialog d(this);
 
     d.setWindowTitle("Choose tab title (Empty for default)");
+    d.setPlaceholder(this->getCustomTitle().isEmpty() ? this->getDefaultTitle()
+                                                      : this->getCustomTitle());
     d.setText(this->getCustomTitle());
     d.highlightText();
 

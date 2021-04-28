@@ -18,6 +18,7 @@ public:
 
     QString getText() const;
     void setText(const QString &text);
+    void setPlaceholder(const QString &text);
 
     void highlightText();
 
