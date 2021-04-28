@@ -310,8 +310,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToFloat(args.value, 1.f);
         });
 
-    layout.addCheckbox("Remove spaces between emotes",
-                       s.removeSpacesBetweenEmotes);
     layout.addDropdown<int>(
         "Show info on hover", {"Don't show", "Always show", "Hold shift"},
         s.emotesTooltipPreview,
