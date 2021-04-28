@@ -189,9 +189,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
         this->currentX_ += element->getRect().width();
     }
 
-    if (element->hasTrailingSpace() &&
-        !(getSettings()->removeSpacesBetweenEmotes &&
-          element->getFlags().hasAny(MessageElementFlag::EmoteImages)))
+    if (element->hasTrailingSpace())
     {
         this->currentX_ += this->spaceWidth_;
     }
