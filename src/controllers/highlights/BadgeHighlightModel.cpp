@@ -1,7 +1,6 @@
 #include "BadgeHighlightModel.hpp"
 
 #include "Application.hpp"
-#include "common/GlobalBadges.hpp"
 #include "messages/Emote.hpp"
 #include "singletons/Settings.hpp"
 #include "util/StandardItemHelper.hpp"
@@ -12,7 +11,6 @@ namespace chatterino {
 BadgeHighlightModel::BadgeHighlightModel(QObject *parent)
     : SignalVectorModel<HighlightBadge>(5, parent)
 {
-    GlobalBadges::instance();
 }
 
 // turn vector item into model row
@@ -50,7 +48,7 @@ void BadgeHighlightModel::getRowFromItem(const HighlightBadge &item,
     setFilePathItem(row[Column::SoundPath], item.getSoundUrl());
     setColorItem(row[Column::Color], *item.getColor());
 
-    GlobalBadges::instance()->getBadgeIcon(
+    TwitchBadges::instance()->getBadgeIcon(
         item.identifier(),
         [item, row](QString /*identifier*/, const QIconPtr pixmap) {
             row[Column::Badge]->setData(QVariant(*pixmap), Qt::DecorationRole);

@@ -11,13 +11,25 @@
 
 namespace chatterino {
 
+TwitchBadges::TwitchBadges()
+{
+    this->loadTwitchBadges();
+}
+
 void TwitchBadges::loadTwitchBadges()
 {
+    std::lock_guard<std::mutex> lock(
+        this->loadingMutex_);  //todo: verify no deadlock
+
+    if (this->loading_)
+        return;
+
+    this->loading_ = true;
+
     static QString url(
         "https://badges.twitch.tv/v1/badges/global/display?language=en");
 
     NetworkRequest(url)
-
         .onSuccess([this](auto result) -> Outcome {
             {
                 auto root = result.parseJson();
@@ -58,10 +70,25 @@ void TwitchBadges::loadTwitchBadges()
                     }
                 }
             }
-            this->loaded.invoke();
+            this->loaded();
             return Success;
         })
         .execute();
+}
+
+void TwitchBadges::loaded()
+{
+    {
+        std::lock_guard<std::mutex> lock(this->loadingMutex_);
+        this->loading_ = false;
+    }
+    std::lock_guard<std::mutex> lock(this->queueMutex_);
+    while (!this->callbackQueue_.empty())
+    {
+        auto callback = this->callbackQueue_.front();
+        this->callbackQueue_.pop();
+        this->getBadgeIcon(callback.first, callback.second);
+    }
 }
 
 boost::optional<EmotePtr> TwitchBadges::badge(const QString &set,
@@ -78,6 +105,92 @@ boost::optional<EmotePtr> TwitchBadges::badge(const QString &set,
         }
     }
     return boost::none;
+}
+
+void TwitchBadges::getBadgeIcon(const QString &identifier,
+                                BadgeIconCallback callback)
+{
+    {
+        std::lock_guard<std::mutex> lock(this->loadingMutex_);
+        if (this->loading_)
+        {
+            std::lock_guard<std::mutex> lock(this->queueMutex_);
+            this->callbackQueue_.push({identifier, std::move(callback)});
+            return;
+        }
+    }
+
+    if (this->badgesMap_.contains(identifier))
+    {
+        callback(identifier, this->badgesMap_[identifier]);
+    }
+    else
+    {
+        auto parts = identifier.split(".");
+        if (const auto badge = this->badge(parts.at(0), parts.at(1)))
+        {
+            this->loadEmoteImage(identifier, (*badge)->images.getImage3(),
+                                 std::move(callback));
+        }
+    }
+}
+
+void TwitchBadges::getBadgeIcon(const DisplayBadge &badge,
+                                BadgeIconCallback callback)
+{
+    this->getBadgeIcon(badge.identifier(), std::move(callback));
+}
+
+void TwitchBadges::getBadgeIcons(const QList<DisplayBadge> &badges,
+                                 BadgeIconCallback callback)
+{
+    for (const auto &item : badges)
+    {
+        this->getBadgeIcon(item, callback);
+    }
+}
+
+void TwitchBadges::loadEmoteImage(const QString &identifier, ImagePtr image,
+                                  BadgeIconCallback &&callback)
+{
+    NetworkRequest(image->url().string)
+        .concurrent()
+        .cache()
+        .onSuccess([this, identifier, callback](auto result) -> Outcome {
+            std::lock_guard<std::mutex> lock(this->mapMutex_);
+            auto data = result.getData();
+
+            // const cast since we are only reading from it
+            QBuffer buffer(const_cast<QByteArray *>(&data));
+            buffer.open(QIODevice::ReadOnly);
+            QImageReader reader(&buffer);
+
+            QImage image;
+            if (reader.imageCount() == 0 || !reader.read(&image))
+            {
+                return Failure;
+            }
+
+            auto icon = std::make_shared<QIcon>(QPixmap::fromImage(image));
+
+            this->badgesMap_[identifier] = icon;
+            callback(identifier, icon);
+
+            return Success;
+        })
+        .execute();
+}
+
+TwitchBadges *TwitchBadges::instance_;
+
+TwitchBadges *TwitchBadges::instance()
+{
+    if (TwitchBadges::instance_ == nullptr)
+    {
+        TwitchBadges::instance_ = new TwitchBadges();
+    }
+
+    return TwitchBadges::instance_;
 }
 
 }  // namespace chatterino

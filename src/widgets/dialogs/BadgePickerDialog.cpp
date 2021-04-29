@@ -2,7 +2,7 @@
 #include <QSizePolicy>
 #include "singletons/Resources.hpp"
 
-#include "common/GlobalBadges.hpp"
+#include "providers/twitch/TwitchBadges.hpp"
 
 namespace chatterino {
 
@@ -59,7 +59,7 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
     updateBadge(0);
 
     // Set icons.
-    GlobalBadges::instance()->getBadgeIcons(
+    TwitchBadges::instance()->getBadgeIcons(
         badges,
         [&dropdown = this->dropdown_](QString identifier, const QIconPtr icon) {
             if (!dropdown)

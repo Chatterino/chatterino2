@@ -132,7 +132,6 @@ SOURCES += \
     src/common/Credentials.cpp \
     src/common/DownloadManager.cpp \
     src/common/Env.cpp \
-    src/common/GlobalBadges.cpp \
     src/common/LinkParser.cpp \
     src/common/Modes.cpp \
     src/common/NetworkCommon.cpp \
@@ -350,7 +349,6 @@ HEADERS += \
     src/common/DownloadManager.hpp \
     src/common/Env.hpp \
     src/common/FlagsEnum.hpp \
-    src/common/GlobalBadges.hpp \
     src/common/IrcColors.hpp \
     src/common/LinkParser.hpp \
     src/common/Modes.hpp \
