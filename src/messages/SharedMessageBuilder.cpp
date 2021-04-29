@@ -347,17 +347,22 @@ void SharedMessageBuilder::parseHighlights()
 
     auto badges = parseBadges(this->tags);
     auto badgeHighlights = getCSettings().highlightedBadges.readOnly();
-    for (const Badge &badge : badges)
+    bool badgeHighlightSet = false;
+    for (const HighlightBadge &highlight : *badgeHighlights)
     {
-        for (const HighlightBadge &highlight : *badgeHighlights)
+        for (const Badge &badge : badges)
         {
             if (!highlight.isMatch(badge))
             {
                 continue;
             }
 
-            this->message().flags.set(MessageFlag::Highlighted);
-            this->message().highlightColor = highlight.getColor();
+            if (!badgeHighlightSet)
+            {
+                this->message().flags.set(MessageFlag::Highlighted);
+                this->message().highlightColor = highlight.getColor();
+                badgeHighlightSet = true;
+            }
 
             if (highlight.hasAlert())
             {
