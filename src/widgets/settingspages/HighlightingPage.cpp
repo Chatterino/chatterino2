@@ -30,15 +30,16 @@
 namespace chatterino {
 
 namespace {
+    // Add additional badges for highlights here
     QList<DisplayBadge> availableBadges = {
-        {"Broadcaster", "broadcaster", "1"},
-        {"Admin", "admin", "1"},
-        {"Staff", "staff", "1"},
-        {"Moderator", "moderator", "1"},
-        {"Verified", "partner", "1"},
-        {"VIP", "vip", "1"},
+        {"Broadcaster", "broadcaster"},
+        {"Admin", "admin"},
+        {"Staff", "staff"},
+        {"Moderator", "moderator"},
+        {"Verified", "partner"},
+        {"VIP", "vip"},
     };
-}
+}  // namespace
 
 HighlightingPage::HighlightingPage()
 {
@@ -186,11 +187,10 @@ HighlightingPage::HighlightingPage()
                         {
                             return;
                         }
-                        getSettings()->highlightedBadges.append(
-                            HighlightBadge{s->badgeName(), s->badgeVersion(),
-                                           s->displayName(), false, false, "",
-                                           ColorProvider::instance().color(
-                                               ColorType::SelfHighlight)});
+                        getSettings()->highlightedBadges.append(HighlightBadge{
+                            s->badgeName(), s->displayName(), false, false, "",
+                            ColorProvider::instance().color(
+                                ColorType::SelfHighlight)});
                     }
                 });
 

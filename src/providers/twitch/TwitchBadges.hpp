@@ -28,10 +28,13 @@ class TwitchBadges
 public:
     static TwitchBadges *instance();
 
+    // Get badge from name and version
     boost::optional<EmotePtr> badge(const QString &set,
                                     const QString &version) const;
+    // Get first matching badge with name, regardless of version
+    boost::optional<EmotePtr> badge(const QString &set) const;
 
-    void getBadgeIcon(const QString &identifier, BadgeIconCallback callback);
+    void getBadgeIcon(const QString &name, BadgeIconCallback callback);
     void getBadgeIcon(const DisplayBadge &badge, BadgeIconCallback callback);
     void getBadgeIcons(const QList<DisplayBadge> &badges,
                        BadgeIconCallback callback);
@@ -42,7 +45,7 @@ private:
     TwitchBadges();
     void loadTwitchBadges();
     void loaded();
-    void loadEmoteImage(const QString &identifier, ImagePtr image,
+    void loadEmoteImage(const QString &name, ImagePtr image,
                         BadgeIconCallback &&callback);
 
     QMap<QString, QIconPtr> badgesMap_;

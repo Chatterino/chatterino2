@@ -27,7 +27,6 @@ HighlightBadge BadgeHighlightModel::getItemFromRow(
 
     return HighlightBadge{
         original.badgeName(),
-        original.badgeVersion(),
         row[Column::Badge]->data(Qt::DisplayRole).toString(),
         row[Column::FlashTaskbar]->data(Qt::CheckStateRole).toBool(),
         row[Column::PlaySound]->data(Qt::CheckStateRole).toBool(),
@@ -49,8 +48,7 @@ void BadgeHighlightModel::getRowFromItem(const HighlightBadge &item,
     setColorItem(row[Column::Color], *item.getColor());
 
     TwitchBadges::instance()->getBadgeIcon(
-        item.identifier(),
-        [item, row](QString /*identifier*/, const QIconPtr pixmap) {
+        item.badgeName(), [item, row](QString /*name*/, const QIconPtr pixmap) {
             row[Column::Badge]->setData(QVariant(*pixmap), Qt::DecorationRole);
         });
 }

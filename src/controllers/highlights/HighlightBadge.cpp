@@ -7,21 +7,17 @@ QColor HighlightBadge::FALLBACK_HIGHLIGHT_COLOR = QColor(127, 63, 73, 127);
 
 bool HighlightBadge::operator==(const HighlightBadge &other) const
 {
-    return std::tie(this->badgeName_, this->badgeVersion_, this->displayName_,
-                    this->hasSound_, this->hasAlert_, this->soundUrl_,
-                    this->color_) ==
-           std::tie(other.badgeName_, other.badgeVersion_, other.displayName_,
-                    other.hasSound_, other.hasAlert_, other.soundUrl_,
-                    other.color_);
+    return std::tie(this->badgeName_, this->displayName_, this->hasSound_,
+                    this->hasAlert_, this->soundUrl_, this->color_) ==
+           std::tie(other.badgeName_, other.displayName_, other.hasSound_,
+                    other.hasAlert_, other.soundUrl_, other.color_);
 }
 
 HighlightBadge::HighlightBadge(const QString &badgeName,
-                               const QString &badgeVersion,
                                const QString &displayName, bool hasAlert,
                                bool hasSound, const QString &soundUrl,
                                QColor color)
     : badgeName_(badgeName)
-    , badgeVersion_(badgeVersion)
     , displayName_(displayName)
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
@@ -31,12 +27,10 @@ HighlightBadge::HighlightBadge(const QString &badgeName,
 }
 
 HighlightBadge::HighlightBadge(const QString &badgeName,
-                               const QString &badgeVersion,
                                const QString &displayName, bool hasAlert,
                                bool hasSound, const QString &soundUrl,
                                std::shared_ptr<QColor> color)
     : badgeName_(badgeName)
-    , badgeVersion_(badgeVersion)
     , displayName_(displayName)
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
@@ -48,11 +42,6 @@ HighlightBadge::HighlightBadge(const QString &badgeName,
 const QString &HighlightBadge::badgeName() const
 {
     return this->badgeName_;
-}
-
-const QString &HighlightBadge::badgeVersion() const
-{
-    return this->badgeVersion_;
 }
 
 const QString &HighlightBadge::displayName() const
@@ -72,13 +61,7 @@ bool HighlightBadge::hasSound() const
 
 bool HighlightBadge::isMatch(const Badge &badge) const
 {
-    return this->badgeName_.compare(badge.key_, Qt::CaseInsensitive) == 0 &&
-           this->badgeVersion_.compare(badge.value_, Qt::CaseInsensitive) == 0;
-}
-
-QString HighlightBadge::identifier() const
-{
-    return this->badgeName_ + "." + this->badgeVersion_;
+    return this->badgeName_.compare(badge.key_, Qt::CaseInsensitive) == 0;
 }
 
 bool HighlightBadge::hasCustomSound() const

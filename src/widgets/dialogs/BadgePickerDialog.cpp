@@ -41,7 +41,7 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
     // Add items.
     for (const auto &item : badges)
     {
-        this->dropdown_->addItem(item.displayName(), item.identifier());
+        this->dropdown_->addItem(item.displayName(), item.badgeName());
     }
 
     const auto updateBadge = [=](int index) {
