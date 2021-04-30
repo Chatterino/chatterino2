@@ -18,8 +18,7 @@ TwitchBadges::TwitchBadges()
 
 void TwitchBadges::loadTwitchBadges()
 {
-    std::lock_guard<std::mutex> lock(
-        this->loadingMutex_);  //todo: verify no deadlock
+    std::lock_guard<std::mutex> lock(this->loadingMutex_);
 
     if (this->loading_)
         return;
@@ -139,7 +138,16 @@ void TwitchBadges::getBadgeIcon(const QString &name, BadgeIconCallback callback)
     }
     else
     {
-        if (const auto badge = this->badge(name))
+        // Split string in format "name1/version1,name2/version2" to "name1", "version1"
+        // If not in list+version form, name will remain the same
+        auto targetBadge = name.split(",").at(0).split("/");
+
+        const auto badge =
+            targetBadge.size() == 2
+                ? this->badge(targetBadge.at(0), targetBadge.at(1))
+                : this->badge(targetBadge.at(0));
+
+        if (badge)
         {
             this->loadEmoteImage(name, (*badge)->images.getImage3(),
                                  std::move(callback));

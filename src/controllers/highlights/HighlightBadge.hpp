@@ -48,12 +48,18 @@ public:
     static QColor FALLBACK_HIGHLIGHT_COLOR;
 
 private:
+    bool compare(const QString &id, const Badge &badge) const;
+
     QString badgeName_;
     QString displayName_;
     bool hasAlert_;
     bool hasSound_;
     QUrl soundUrl_;
     std::shared_ptr<QColor> color_;
+
+    bool isMulti_;
+    bool hasVersions_;
+    QStringList badges_;
 };
 };  // namespace chatterino
 

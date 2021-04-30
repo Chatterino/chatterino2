@@ -17,13 +17,9 @@ HighlightBadge::HighlightBadge(const QString &badgeName,
                                const QString &displayName, bool hasAlert,
                                bool hasSound, const QString &soundUrl,
                                QColor color)
-    : badgeName_(badgeName)
-    , displayName_(displayName)
-    , hasAlert_(hasAlert)
-    , hasSound_(hasSound)
-    , soundUrl_(soundUrl)
+    : HighlightBadge(badgeName, displayName, hasAlert, hasSound, soundUrl,
+                     std::make_shared<QColor>(color))
 {
-    this->color_ = std::make_shared<QColor>(color);
 }
 
 HighlightBadge::HighlightBadge(const QString &badgeName,
@@ -37,6 +33,13 @@ HighlightBadge::HighlightBadge(const QString &badgeName,
     , soundUrl_(soundUrl)
     , color_(color)
 {
+    // check badgeName at initialization to reduce cost per isMatch call
+    this->hasVersions_ = badgeName.contains("/");
+    this->isMulti_ = badgeName.contains(",");
+    if (this->isMulti_)
+    {
+        this->badges_ = badgeName.split(",");
+    }
 }
 
 const QString &HighlightBadge::badgeName() const
@@ -61,7 +64,42 @@ bool HighlightBadge::hasSound() const
 
 bool HighlightBadge::isMatch(const Badge &badge) const
 {
-    return this->badgeName_.compare(badge.key_, Qt::CaseInsensitive) == 0;
+    if (this->isMulti_)
+    {
+        for (const auto &id : this->badges_)
+        {
+            if (this->compare(id, badge))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    else
+    {
+        return this->compare(this->badgeName_, badge);
+    }
+}
+
+bool HighlightBadge::compare(const QString &id, const Badge &badge) const
+{
+    if (this->hasVersions_)
+    {
+        auto parts = id.split("/");
+        if (parts.size() == 2)
+        {
+            return parts.at(0).compare(badge.key_, Qt::CaseInsensitive) == 0 &&
+                   parts.at(1).compare(badge.value_, Qt::CaseInsensitive) == 0;
+        }
+        else
+        {
+            return parts.at(0).compare(badge.key_, Qt::CaseInsensitive) == 0;
+        }
+    }
+    else
+    {
+        return id.compare(badge.key_, Qt::CaseInsensitive) == 0;
+    }
 }
 
 bool HighlightBadge::hasCustomSound() const
