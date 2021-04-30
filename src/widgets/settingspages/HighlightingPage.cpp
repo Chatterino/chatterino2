@@ -38,8 +38,8 @@ namespace {
         {"Moderator", "moderator"},
         {"Verified", "partner"},
         {"VIP", "vip"},
-        {"Predicted One", "predictions/blue-1,predictions/pink-1"},
-        {"Predicted Two", "predictions/pink-2,predictions/blue-2"},
+        {"Predicted Blue", "predictions/blue-1,predictions/blue-2"},
+        {"Predicted Pink", "predictions/pink-2,predictions/pink-1"},
     };
 }  // namespace
 
