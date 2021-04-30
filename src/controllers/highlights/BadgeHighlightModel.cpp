@@ -41,7 +41,7 @@ void BadgeHighlightModel::getRowFromItem(const HighlightBadge &item,
     using QIconPtr = std::shared_ptr<QIcon>;
     using Column = BadgeHighlightModel::Column;
 
-    setStringItem(row[Column::Badge], item.displayName());
+    setStringItem(row[Column::Badge], item.displayName(), false, true);
     setBoolItem(row[Column::FlashTaskbar], item.hasAlert());
     setBoolItem(row[Column::PlaySound], item.hasSound());
     setFilePathItem(row[Column::SoundPath], item.getSoundUrl());
