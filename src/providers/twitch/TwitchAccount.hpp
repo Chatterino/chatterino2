@@ -106,7 +106,8 @@ public:
     void checkFollow(const QString targetUserID,
                      std::function<void(FollowResult)> onFinished);
 
-    std::set<TwitchUser> getBlocks() const;
+    AccessGuard<const std::set<QString>> accessBlockedUserIds() const;
+    AccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 
     void loadEmotes();
     void loadUserstateEmotes(QStringList emoteSetKeys);
@@ -128,7 +129,8 @@ private:
 
     mutable std::mutex ignoresMutex_;
     QElapsedTimer userstateEmotesTimer_;
-    std::set<TwitchUser> ignores_;
+    UniqueAccess<std::set<TwitchUser>> ignores_;
+    UniqueAccess<std::set<QString>> ignoresUserIds_;
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;

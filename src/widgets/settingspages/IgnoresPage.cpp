@@ -123,7 +123,10 @@ void IgnoresPage::onShow()
     }
 
     QStringList users;
-    for (const auto &blockedUser : user->getBlocks())
+
+    auto blocks = app->accounts->twitch.getCurrent()->accessBlocks();
+
+    for (const auto &blockedUser : *blocks)
     {
         users << blockedUser.name;
     }
