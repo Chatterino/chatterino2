@@ -10,6 +10,7 @@
 - Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
 - Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
 - Bugfix: Clicking on split header focuses its split. (#2720)
+- Bugfix: Handle new user messages ("rituals") properly. (#2703)
 
 ## 2.3.0
 
