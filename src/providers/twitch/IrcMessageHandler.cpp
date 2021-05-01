@@ -575,7 +575,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
     }
 
     // Message types below are the ones that might contain special user's message
-    static const QStringList specialMessageTypes{
+    static const QSet specialMessageTypes{
         "sub",            //
         "subgift",        //
         "resub",          // resub messages
