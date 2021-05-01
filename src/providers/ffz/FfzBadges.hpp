@@ -4,7 +4,7 @@
 #include <common/Singleton.hpp>
 
 #include "common/Aliases.hpp"
-#include "utils/QStringHash.hpp"
+#include "util/QStringHash.hpp"
 
 #include <map>
 #include <shared_mutex>
