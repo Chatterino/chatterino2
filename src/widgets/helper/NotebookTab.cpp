@@ -88,7 +88,7 @@ void NotebookTab::showRenameDialog()
     vbox->addStretch(1);
 
     auto okButton = new QPushButton("OK");
-    auto cancelButton = new QPushButton("Canel");
+    auto cancelButton = new QPushButton("Cancel");
 
     auto buttonBox = new QHBoxLayout;
     buttonBox->addStretch(1);
