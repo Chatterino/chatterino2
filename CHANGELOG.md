@@ -3,6 +3,11 @@
 ## Unversioned
 
 - Minor: Added `is:<flags>` search filter to find messages of specific types. (#2653, #2671)
+- Minor: Added image links to the badge context menu. (#2667)
+- Minor: Added a setting to hide Twitch Predictions badges. (#2668)
+- Minor: Optionally remove spaces between emotes, originally made for Mm2PL/Dankerino. (#2651)
+- Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
+- Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
 
 ## 2.3.0
 

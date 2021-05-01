@@ -44,8 +44,7 @@ public:
     MessageBuilder(TimeoutMessageTag, const QString &systemMessageText,
                    int times, const QTime &time = QTime::currentTime());
     MessageBuilder(TimeoutMessageTag, const QString &username,
-                   const QString &durationInSeconds, const QString &reason,
-                   bool multipleTimes,
+                   const QString &durationInSeconds, bool multipleTimes,
                    const QTime &time = QTime::currentTime());
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);

@@ -122,6 +122,8 @@ public:
     // Badges
     BoolSetting showBadgesGlobalAuthority = {
         "/appearance/badges/GlobalAuthority", true};
+    BoolSetting showBadgesPredictions = {"/appearance/badges/predictions",
+                                         true};
     BoolSetting showBadgesChannelAuthority = {
         "/appearance/badges/ChannelAuthority", true};
     BoolSetting showBadgesSubscription = {"/appearance/badges/subscription",
@@ -174,6 +176,8 @@ public:
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
+    BoolSetting removeSpacesBetweenEmotes = {
+        "/emotes/removeSpacesBetweenEmotes", false};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};

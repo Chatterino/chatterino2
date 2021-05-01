@@ -28,16 +28,42 @@
 #include <QFile>
 #include <QRegularExpression>
 
-#define TWITCH_DEFAULT_COMMANDS                                              \
-    "/help", "/w", "/me", "/disconnect", "/mods", "/vips", "/color",         \
-        "/commercial", "/mod", "/unmod", "/vip", "/unvip", "/ban", "/unban", \
-        "/timeout", "/untimeout", "/slow", "/slowoff", "/r9kbeta",           \
-        "/r9kbetaoff", "/emoteonly", "/emoteonlyoff", "/clear",              \
-        "/subscribers", "/subscribersoff", "/followers", "/followersoff",    \
-        "/host", "/unhost", "/raid", "/unraid"
-
 namespace {
 using namespace chatterino;
+
+static const QStringList twitchDefaultCommands{
+    "/help",
+    "/w",
+    "/me",
+    "/disconnect",
+    "/mods",
+    "/vips",
+    "/color",
+    "/commercial",
+    "/mod",
+    "/unmod",
+    "/vip",
+    "/unvip",
+    "/ban",
+    "/unban",
+    "/timeout",
+    "/untimeout",
+    "/slow",
+    "/slowoff",
+    "/r9kbeta",
+    "/r9kbetaoff",
+    "/emoteonly",
+    "/emoteonlyoff",
+    "/clear",
+    "/subscribers",
+    "/subscribersoff",
+    "/followers",
+    "/followersoff",
+    "/host",
+    "/unhost",
+    "/raid",
+    "/unraid",
+};
 
 static const QStringList whisperCommands{"/w", ".w"};
 
@@ -177,7 +203,7 @@ namespace chatterino {
 
 void CommandController::initialize(Settings &, Paths &paths)
 {
-    this->commandAutoCompletions_ = QStringList{TWITCH_DEFAULT_COMMANDS};
+    this->commandAutoCompletions_ = twitchDefaultCommands;
 
     // Update commands map when the vector of commands has been updated
     auto addFirstMatchToMap = [this](auto args) {
