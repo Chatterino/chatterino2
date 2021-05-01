@@ -307,6 +307,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToFloat(args.value, 1.f);
         });
 
+    layout.addCheckbox("Remove spaces between emotes",
+                       s.removeSpacesBetweenEmotes);
     layout.addDropdown<int>(
         "Show info on hover", {"Don't show", "Always show", "Hold shift"},
         s.emotesTooltipPreview,
@@ -545,16 +547,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
 
     layout.addSubtitle("Visible badges");
-    layout.addCheckbox("Authority (staff, admin)",
-                       getSettings()->showBadgesGlobalAuthority);
+    layout.addCheckbox("Authority (staff, admin)", s.showBadgesGlobalAuthority);
+    layout.addCheckbox("Predictions", s.showBadgesPredictions);
     layout.addCheckbox("Channel (broadcaster, moderator)",
-                       getSettings()->showBadgesChannelAuthority);
-    layout.addCheckbox("Subscriber ", getSettings()->showBadgesSubscription);
-    layout.addCheckbox("Vanity (prime, bits, subgifter)",
-                       getSettings()->showBadgesVanity);
-    layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
+                       s.showBadgesChannelAuthority);
+    layout.addCheckbox("Subscriber ", s.showBadgesSubscription);
+    layout.addCheckbox("Vanity (prime, bits, subgifter)", s.showBadgesVanity);
+    layout.addCheckbox("Chatterino", s.showBadgesChatterino);
     layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
-                       getSettings()->showBadgesFfz);
+                       s.showBadgesFfz);
 
     layout.addSubtitle("Miscellaneous");
 

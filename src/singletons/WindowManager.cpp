@@ -104,6 +104,7 @@ WindowManager::WindowManager()
 
     this->wordFlagsListener_.addSetting(settings->showTimestamps);
     this->wordFlagsListener_.addSetting(settings->showBadgesGlobalAuthority);
+    this->wordFlagsListener_.addSetting(settings->showBadgesPredictions);
     this->wordFlagsListener_.addSetting(settings->showBadgesChannelAuthority);
     this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
@@ -167,6 +168,8 @@ void WindowManager::updateWordTypeMask()
     // badges
     flags.set(settings->showBadgesGlobalAuthority ? MEF::BadgeGlobalAuthority
                                                   : MEF::None);
+    flags.set(settings->showBadgesPredictions ? MEF::BadgePredictions
+                                              : MEF::None);
     flags.set(settings->showBadgesChannelAuthority ? MEF::BadgeChannelAuthority
                                                    : MEF::None);
     flags.set(settings->showBadgesSubscription ? MEF::BadgeSubscription

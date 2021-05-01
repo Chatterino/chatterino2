@@ -785,6 +785,18 @@ void ChannelView::messageAppended(MessagePtr &message,
     this->lastMessageHasAlternateBackground_ =
         !this->lastMessageHasAlternateBackground_;
 
+    if (!this->scrollBar_->isAtBottom() &&
+        this->scrollBar_->getCurrentValueAnimation().state() ==
+            QPropertyAnimation::Running)
+    {
+        QEventLoop loop;
+
+        connect(&this->scrollBar_->getCurrentValueAnimation(),
+                &QAbstractAnimation::stateChanged, &loop, &QEventLoop::quit);
+
+        loop.exec();
+    }
+
     if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
     {
         if (this->paused())
@@ -1098,8 +1110,10 @@ void ChannelView::drawMessages(QPainter &painter)
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
-    if (event->orientation() != Qt::Vertical)
+    if (!event->angleDelta().y())
+    {
         return;
+    }
 
     if (event->modifiers() & Qt::ControlModifier)
     {
@@ -1112,7 +1126,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
         float mouseMultiplier = getSettings()->mouseScrollMultiplier;
 
         qreal desired = this->scrollBar_->getDesiredValue();
-        qreal delta = event->delta() * qreal(1.5) * mouseMultiplier;
+        qreal delta = event->angleDelta().y() * qreal(1.5) * mouseMultiplier;
 
         auto snapshot = this->getMessagesSnapshot();
         int snapshotLength = int(snapshot.size());
@@ -1814,6 +1828,13 @@ void ChannelView::addContextMenuItems(
 
     auto menu = new QMenu;
     previousMenu = menu;
+
+    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
+    {
+        auto badgeElement = dynamic_cast<const BadgeElement *>(&creator);
+        addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
+                                 *menu);
+    }
 
     // Emote actions
     if (creatorFlags.hasAny(
