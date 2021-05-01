@@ -6,24 +6,23 @@
 
 namespace chatterino {
 
-template <typename T, typename LockType>
-class AccessGuardLocker
+template <typename T, typename LockType = std::unique_lock<std::shared_mutex>>
+class AccessGuard
 {
 public:
-    AccessGuardLocker(T &element, std::shared_mutex &mutex)
+    AccessGuard(T &element, std::shared_mutex &mutex)
         : element_(&element)
         , lock_(mutex)
     {
     }
 
-    AccessGuardLocker(AccessGuardLocker<T, LockType> &&other)
+    AccessGuard(AccessGuard<T, LockType> &&other)
         : element_(other.element_)
         , lock_(std::move(other.lock_))
     {
     }
 
-    AccessGuardLocker<T, LockType> &operator=(
-        AccessGuardLocker<T, LockType> &&other)
+    AccessGuard<T, LockType> &operator=(AccessGuard<T, LockType> &&other)
     {
         this->element_ = other.element_;
         this->lock_ = std::move(other.lock_);
@@ -47,11 +46,8 @@ private:
 };
 
 template <typename T>
-using AccessGuard = AccessGuardLocker<T, std::unique_lock<std::shared_mutex>>;
-
-template <typename T>
 using SharedAccessGuard =
-    AccessGuardLocker<const T, std::shared_lock<std::shared_mutex>>;
+    AccessGuard<const T, std::shared_lock<std::shared_mutex>>;
 
 template <typename T>
 class UniqueAccess
