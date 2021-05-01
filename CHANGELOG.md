@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added visual indicator to message length if over 500 characters long (#2659)
 - Minor: Added `is:<flags>` search filter to find messages of specific types. (#2653, #2671)
 - Minor: Added image links to the badge context menu. (#2667)
 - Minor: Added a setting to hide Twitch Predictions badges. (#2668)
