@@ -720,6 +720,7 @@ void TwitchChannel::loadRecentMessages()
                    .arg(getSettings()->twitchMessageHistoryLimit);
 
     NetworkRequest(url)
+        .concurrent()
         .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
