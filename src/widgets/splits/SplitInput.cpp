@@ -24,6 +24,7 @@
 #include <QPainter>
 
 namespace chatterino {
+const int TWITCH_MESSAGE_LIMIT = 500;
 
 SplitInput::SplitInput(Split *_chatWidget)
     : BaseWidget(_chatWidget)
@@ -604,7 +605,7 @@ void SplitInput::editTextChanged()
     if (text.length() > 0 && getSettings()->showMessageLength)
     {
         labelText = QString::number(text.length());
-        if (text.length() > 500)
+        if (text.length() > TWITCH_MESSAGE_LIMIT)
         {
             this->ui_.textEditLength->setStyleSheet("color: red");
         }
