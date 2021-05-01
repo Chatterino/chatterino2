@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <vector>
 #include "common/Aliases.hpp"
+#include "util/QStringHash.hpp"
 
 namespace chatterino {
 
