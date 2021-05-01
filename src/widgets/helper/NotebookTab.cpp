@@ -74,7 +74,7 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
 void NotebookTab::showRenameDialog()
 {
-    auto dank = new QDialog(this);
+    auto dialog = new QDialog(this);
 
     auto vbox = new QVBoxLayout;
 
@@ -96,29 +96,29 @@ void NotebookTab::showRenameDialog()
     buttonBox->addWidget(cancelButton);
 
     vbox->addLayout(buttonBox);
-    dank->setLayout(vbox);
+    dialog->setLayout(vbox);
 
-    QObject::connect(okButton, &QPushButton::clicked, [dank] {
-        dank->accept();
-        dank->close();
+    QObject::connect(okButton, &QPushButton::clicked, [dialog] {
+        dialog->accept();
+        dialog->close();
     });
 
-    QObject::connect(cancelButton, &QPushButton::clicked, [dank] {
-        dank->reject();
-        dank->close();
+    QObject::connect(cancelButton, &QPushButton::clicked, [dialog] {
+        dialog->reject();
+        dialog->close();
     });
 
-    dank->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    dank->setMinimumSize(dank->minimumSizeHint().width() + 50,
-                         dank->minimumSizeHint().height() + 10);
+    dialog->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    dialog->setMinimumSize(dialog->minimumSizeHint().width() + 50,
+                           dialog->minimumSizeHint().height() + 10);
 
-    dank->setWindowFlags(
-        (dank->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
+    dialog->setWindowFlags(
+        (dialog->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
         Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
 
-    dank->setWindowTitle("Rename Tab");
+    dialog->setWindowTitle("Rename Tab");
 
-    if (dank->exec() == QDialog::Accepted)
+    if (dialog->exec() == QDialog::Accepted)
     {
         QString newTitle = lineEdit->text();
         this->setCustomTitle(newTitle);
