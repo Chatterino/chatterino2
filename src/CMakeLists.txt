@@ -340,8 +340,6 @@ set(SOURCE_FILES main.cpp
         widgets/dialogs/SelectChannelFiltersDialog.hpp
         widgets/dialogs/SettingsDialog.cpp
         widgets/dialogs/SettingsDialog.hpp
-        widgets/dialogs/TextInputDialog.cpp
-        widgets/dialogs/TextInputDialog.hpp
         widgets/dialogs/UpdateDialog.cpp
         widgets/dialogs/UpdateDialog.hpp
         widgets/dialogs/UserInfoPopup.cpp

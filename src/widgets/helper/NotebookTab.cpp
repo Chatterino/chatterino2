@@ -10,7 +10,6 @@
 #include "util/Helpers.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
-#include "widgets/dialogs/TextInputDialog.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <QApplication>
@@ -75,17 +74,53 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
 void NotebookTab::showRenameDialog()
 {
-    TextInputDialog d(this);
+    auto dank = new QDialog(this);
 
-    d.setWindowTitle("Rename Tab");
-    d.setLabelText("Name:");
-    d.setPlaceholder(this->getDefaultTitle());
-    d.setText(this->getCustomTitle());
-    d.highlightText();
+    auto vbox = new QVBoxLayout;
 
-    if (d.exec() == QDialog::Accepted)
+    auto lineEdit = new QLineEdit;
+    lineEdit->setText(this->getCustomTitle());
+    lineEdit->setPlaceholderText(this->getDefaultTitle());
+    lineEdit->selectAll();
+
+    vbox->addWidget(new QLabel("Name:"));
+    vbox->addWidget(lineEdit);
+    vbox->addStretch(1);
+
+    auto okButton = new QPushButton("OK");
+    auto cancelButton = new QPushButton("Canel");
+
+    auto buttonBox = new QHBoxLayout;
+    buttonBox->addStretch(1);
+    buttonBox->addWidget(okButton);
+    buttonBox->addWidget(cancelButton);
+
+    vbox->addLayout(buttonBox);
+    dank->setLayout(vbox);
+
+    QObject::connect(okButton, &QPushButton::clicked, [dank] {
+        dank->accept();
+        dank->close();
+    });
+
+    QObject::connect(cancelButton, &QPushButton::clicked, [dank] {
+        dank->reject();
+        dank->close();
+    });
+
+    dank->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    dank->setMinimumSize(dank->minimumSizeHint().width() + 50,
+                         dank->minimumSizeHint().height() + 10);
+
+    dank->setWindowFlags(
+        (dank->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
+        Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+
+    dank->setWindowTitle("Rename Tab");
+
+    if (dank->exec() == QDialog::Accepted)
     {
-        QString newTitle = d.getText();
+        QString newTitle = lineEdit->text();
         this->setCustomTitle(newTitle);
     }
 }
