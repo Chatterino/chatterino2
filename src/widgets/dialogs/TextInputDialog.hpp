@@ -17,6 +17,7 @@ public:
     TextInputDialog(QWidget *parent = nullptr);
 
     QString getText() const;
+    void setLabelText(const QString &text);
     void setText(const QString &text);
     void setPlaceholder(const QString &text);
 
@@ -24,7 +25,9 @@ public:
 
 private:
     QVBoxLayout vbox_;
+    QHBoxLayout lineEditBox_;
     QLineEdit lineEdit_;
+    QLabel lineEditLabel_;
     QHBoxLayout buttonBox_;
     QPushButton okButton_;
     QPushButton cancelButton_;

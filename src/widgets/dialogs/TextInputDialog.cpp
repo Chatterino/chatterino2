@@ -9,11 +9,17 @@ TextInputDialog::TextInputDialog(QWidget *parent)
     , okButton_("OK")
     , cancelButton_("Cancel")
 {
-    this->vbox_.addWidget(&lineEdit_);
+    // Label and its lineEdit
+    this->vbox_.addLayout(&lineEditBox_);
+    this->lineEditBox_.addWidget(&lineEditLabel_);
+    this->lineEditBox_.addWidget(&lineEdit_);
+
+    // Both buttons
     this->vbox_.addLayout(&buttonBox_);
     this->buttonBox_.addStretch(1);
     this->buttonBox_.addWidget(&okButton_);
     this->buttonBox_.addWidget(&cancelButton_);
+    this->buttonBox_.addStretch(1);
 
     QObject::connect(&this->okButton_, SIGNAL(clicked()), this,
                      SLOT(okButtonClicked()));
@@ -30,6 +36,11 @@ TextInputDialog::TextInputDialog(QWidget *parent)
 QString TextInputDialog::getText() const
 {
     return this->lineEdit_.text();
+}
+
+void TextInputDialog::setLabelText(const QString &text)
+{
+    this->lineEditLabel_.setText(text);
 }
 
 void TextInputDialog::setText(const QString &text)

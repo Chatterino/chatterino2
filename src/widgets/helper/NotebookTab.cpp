@@ -54,16 +54,16 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->setMouseTracking(true);
 
-    this->menu_.addAction("Rename", [this]() {
+    this->menu_.addAction("Rename Tab", [this]() {
         this->showRenameDialog();
     });
 
-    this->menu_.addAction("Close", [=]() {
+    this->menu_.addAction("Close Tab", [=]() {
         this->notebook_->removePage(this->page);
     });
 
     highlightNewMessagesAction_ =
-        new QAction("Enable highlights on new messages", &this->menu_);
+        new QAction("Mark Tab as Unread on New Messages", &this->menu_);
     highlightNewMessagesAction_->setCheckable(true);
     highlightNewMessagesAction_->setChecked(highlightEnabled_);
     QObject::connect(highlightNewMessagesAction_, &QAction::triggered,
@@ -77,7 +77,8 @@ void NotebookTab::showRenameDialog()
 {
     TextInputDialog d(this);
 
-    d.setWindowTitle("Choose tab title (Empty for default)");
+    d.setWindowTitle("Rename Tab");
+    d.setLabelText("Name:");
     d.setPlaceholder(this->getDefaultTitle());
     d.setText(this->getCustomTitle());
     d.highlightText();
