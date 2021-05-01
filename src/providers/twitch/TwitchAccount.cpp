@@ -176,12 +176,14 @@ void TwitchAccount::checkFollow(const QString targetUserID,
                               [] {});
 }
 
-AccessGuard<const std::set<TwitchUser>> TwitchAccount::accessBlocks() const
+SharedAccessGuard<const std::set<TwitchUser>> TwitchAccount::accessBlocks()
+    const
 {
     return this->ignores_.accessConst();
 }
 
-AccessGuard<const std::set<QString>> TwitchAccount::accessBlockedUserIds() const
+SharedAccessGuard<const std::set<QString>> TwitchAccount::accessBlockedUserIds()
+    const
 {
     return this->ignoresUserIds_.accessConst();
 }
@@ -345,7 +347,7 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
         });
 }
 
-AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
+SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
     TwitchAccount::accessEmotes() const
 {
     return this->emotes_.accessConst();
