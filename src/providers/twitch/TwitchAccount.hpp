@@ -106,12 +106,12 @@ public:
     void checkFollow(const QString targetUserID,
                      std::function<void(FollowResult)> onFinished);
 
-    AccessGuard<const std::set<QString>> accessBlockedUserIds() const;
-    AccessGuard<const std::set<TwitchUser>> accessBlocks() const;
+    SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;
+    SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 
     void loadEmotes();
     void loadUserstateEmotes(QStringList emoteSetKeys);
-    AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
+    SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
     void autoModAllow(const QString msgID);
