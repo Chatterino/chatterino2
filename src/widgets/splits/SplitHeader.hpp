@@ -2,8 +2,6 @@
 
 #include "widgets/BaseWidget.hpp"
 
-#include "widgets/Window.hpp"
-
 #include <QMenu>
 #include <QPoint>
 #include <memory>
