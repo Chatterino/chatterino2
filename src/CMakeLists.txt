@@ -139,6 +139,8 @@ set(SOURCE_FILES main.cpp
         messages/search/ChannelPredicate.hpp
         messages/search/LinkPredicate.cpp
         messages/search/LinkPredicate.hpp
+        messages/search/MessageFlagsPredicate.cpp
+        messages/search/MessageFlagsPredicate.hpp
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
 

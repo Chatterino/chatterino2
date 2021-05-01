@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added `is:<flags>` search filter to find messages of specific types. (#2653, #2671)
 - Minor: Added image links to the badge context menu. (#2667)
 - Minor: Added a setting to hide Twitch Predictions badges. (#2668)
 - Minor: Optionally remove spaces between emotes, originally made for Mm2PL/Dankerino. (#2651)
