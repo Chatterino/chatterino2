@@ -9,6 +9,8 @@
 #include <QTableView>
 #include <QVBoxLayout>
 
+#include <QLabel>
+
 namespace chatterino {
 
 EditableModelView::EditableModelView(QAbstractTableModel *model, bool movable)
