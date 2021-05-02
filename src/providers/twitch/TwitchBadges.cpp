@@ -206,8 +206,6 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
                 this->badgesMap_[name] = icon;
             }
 
-            this->saveBadge(name, icon);
-
             callback(name, icon);
 
             return Success;
