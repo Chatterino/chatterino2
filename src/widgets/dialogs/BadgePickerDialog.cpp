@@ -13,7 +13,7 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
     this->dropdown_ = new QComboBox;
     auto vbox = new QVBoxLayout(this);
     auto buttonBox =
-        new QDialogButtonBox(QDialogButtonBox::Ok || QDialogButtonBox::Cancel);
+        new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
     vbox->addWidget(this->dropdown_);
     vbox->addWidget(buttonBox);
