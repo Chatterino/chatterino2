@@ -340,30 +340,35 @@ void HighlightingPage::tableCellClicked(const QModelIndex &clicked,
                                         EditableModelView *view,
                                         HighlightTab tab)
 {
-    if (tab == HighlightTab::Messages || tab == HighlightTab::Users)
+    switch (tab)
     {
-        using Column = HighlightModel::Column;
-        if (clicked.column() == Column::SoundPath)
-        {
-            this->openSoundDialog(clicked, view, Column::SoundPath);
+        case HighlightTab::Messages:
+        case HighlightTab::Users: {
+            using Column = HighlightModel::Column;
+            if (clicked.column() == Column::SoundPath)
+            {
+                this->openSoundDialog(clicked, view, Column::SoundPath);
+            }
+            else if (clicked.column() == Column::Color &&
+                     clicked.row() != HighlightModel::WHISPER_ROW)
+            {
+                this->openColorDialog(clicked, view, tab);
+            }
         }
-        else if (clicked.column() == Column::Color &&
-                 clicked.row() != HighlightModel::WHISPER_ROW)
-        {
-            this->openColorDialog(clicked, view, tab);
+        break;
+
+        case HighlightTab::Badges: {
+            using Column = BadgeHighlightModel::Column;
+            if (clicked.column() == Column::SoundPath)
+            {
+                this->openSoundDialog(clicked, view, Column::SoundPath);
+            }
+            else if (clicked.column() == Column::Color)
+            {
+                this->openColorDialog(clicked, view, tab);
+            }
         }
-    }
-    else if (tab == HighlightTab::Badges)
-    {
-        using Column = BadgeHighlightModel::Column;
-        if (clicked.column() == Column::SoundPath)
-        {
-            this->openSoundDialog(clicked, view, Column::SoundPath);
-        }
-        else if (clicked.column() == Column::Color)
-        {
-            this->openColorDialog(clicked, view, tab);
-        }
+        break;
     }
 }
 
