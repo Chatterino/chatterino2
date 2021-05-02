@@ -7,6 +7,11 @@
 #include "singletons/WindowManager.hpp"
 #include "widgets/helper/SignalLabel.hpp"
 
+#include <QCheckBox>
+#include <QComboBox>
+#include <QPushButton>
+#include <QSpinBox>
+
 class QScrollArea;
 
 namespace chatterino {
