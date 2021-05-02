@@ -11,6 +11,8 @@
 
 #include "pajlada/signals/signal.hpp"
 
+#include <shared_mutex>
+
 namespace chatterino {
 
 struct Emote;
@@ -48,13 +50,14 @@ private:
     void loadEmoteImage(const QString &name, ImagePtr image,
                         BadgeIconCallback &&callback);
 
+    std::shared_mutex badgesMutex_;
     QMap<QString, QIconPtr> badgesMap_;
+
+    std::mutex queueMutex_;
     std::queue<QPair<QString, BadgeIconCallback>> callbackQueue_;
 
-    bool loading_ = false;
-    std::mutex loadingMutex_;
-    std::mutex queueMutex_;
-    std::mutex mapMutex_;
+    std::shared_mutex loadedMutex_;
+    bool loaded_ = false;
 
     UniqueAccess<
         std::unordered_map<QString, std::unordered_map<QString, EmotePtr>>>

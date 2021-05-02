@@ -7,6 +7,7 @@
 
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 
 namespace chatterino {
@@ -18,12 +19,7 @@ TwitchBadges::TwitchBadges()
 
 void TwitchBadges::loadTwitchBadges()
 {
-    std::lock_guard<std::mutex> lock(this->loadingMutex_);
-
-    if (this->loading_)
-        return;
-
-    this->loading_ = true;
+    assert(this->loaded_ == false);
 
     static QString url(
         "https://badges.twitch.tv/v1/badges/global/display?language=en");
@@ -72,16 +68,26 @@ void TwitchBadges::loadTwitchBadges()
             this->loaded();
             return Success;
         })
+        .onError([this](auto res) {
+            qCDebug(chatterinoTwitch)
+                << "Error loading Twitch Badges:" << res.status();
+            // Despite erroring out, we still want to reach the same point
+            // Loaded should still be set to true to not build up an endless queue, and the quuee should still be flushed.
+            this->loaded();
+        })
         .execute();
 }
 
 void TwitchBadges::loaded()
 {
-    {
-        std::lock_guard<std::mutex> lock(this->loadingMutex_);
-        this->loading_ = false;
-    }
-    std::lock_guard<std::mutex> lock(this->queueMutex_);
+    std::unique_lock loadedLock(this->loadedMutex_);
+
+    assert(this->loaded_ == false);
+
+    this->loaded_ = true;
+
+    // Flush callback queue
+    std::unique_lock queueLock(this->queueMutex_);
     while (!this->callbackQueue_.empty())
     {
         auto callback = this->callbackQueue_.front();
@@ -123,35 +129,38 @@ boost::optional<EmotePtr> TwitchBadges::badge(const QString &set) const
 void TwitchBadges::getBadgeIcon(const QString &name, BadgeIconCallback callback)
 {
     {
-        std::lock_guard<std::mutex> lock(this->loadingMutex_);
-        if (this->loading_)
+        std::shared_lock loadedLock(this->loadedMutex_);
+
+        if (!this->loaded_)
         {
-            std::lock_guard<std::mutex> lock(this->queueMutex_);
+            // Badges have not been loaded yet, store callback in a queue
+            std::unique_lock queueLock(this->queueMutex_);
             this->callbackQueue_.push({name, std::move(callback)});
             return;
         }
     }
 
-    if (this->badgesMap_.contains(name))
     {
-        callback(name, this->badgesMap_[name]);
-    }
-    else
-    {
-        // Split string in format "name1/version1,name2/version2" to "name1", "version1"
-        // If not in list+version form, name will remain the same
-        auto targetBadge = name.split(",").at(0).split("/");
-
-        const auto badge =
-            targetBadge.size() == 2
-                ? this->badge(targetBadge.at(0), targetBadge.at(1))
-                : this->badge(targetBadge.at(0));
-
-        if (badge)
+        std::shared_lock badgeLock(this->badgesMutex_);
+        if (this->badgesMap_.contains(name))
         {
-            this->loadEmoteImage(name, (*badge)->images.getImage3(),
-                                 std::move(callback));
+            callback(name, this->badgesMap_[name]);
+            return;
         }
+    }
+
+    // Split string in format "name1/version1,name2/version2" to "name1", "version1"
+    // If not in list+version form, name will remain the same
+    auto targetBadge = name.split(",").at(0).split("/");
+
+    const auto badge = targetBadge.size() == 2
+                           ? this->badge(targetBadge.at(0), targetBadge.at(1))
+                           : this->badge(targetBadge.at(0));
+
+    if (badge)
+    {
+        this->loadEmoteImage(name, (*badge)->images.getImage3(),
+                             std::move(callback));
     }
 }
 
@@ -177,7 +186,6 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
         .concurrent()
         .cache()
         .onSuccess([this, name, callback](auto result) -> Outcome {
-            std::lock_guard<std::mutex> lock(this->mapMutex_);
             auto data = result.getData();
 
             // const cast since we are only reading from it
@@ -193,7 +201,13 @@ void TwitchBadges::loadEmoteImage(const QString &name, ImagePtr image,
 
             auto icon = std::make_shared<QIcon>(QPixmap::fromImage(image));
 
-            this->badgesMap_[name] = icon;
+            {
+                std::unique_lock lock(this->badgesMutex_);
+                this->badgesMap_[name] = icon;
+            }
+
+            this->saveBadge(name, icon);
+
             callback(name, icon);
 
             return Success;
