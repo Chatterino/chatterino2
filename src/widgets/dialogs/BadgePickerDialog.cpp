@@ -12,22 +12,17 @@ BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
 {
     this->dropdown_ = new QComboBox;
     auto vbox = new QVBoxLayout(this);
-    auto buttonBox = new QHBoxLayout;
-    auto okButton = new QPushButton("OK");
-    auto cancelButton = new QPushButton("Cancel");
+    auto buttonBox =
+        new QDialogButtonBox(QDialogButtonBox::Ok || QDialogButtonBox::Cancel);
 
     vbox->addWidget(this->dropdown_);
-    vbox->addLayout(buttonBox);
+    vbox->addWidget(buttonBox);
 
-    buttonBox->addStretch(1);
-    buttonBox->addWidget(cancelButton);
-    buttonBox->addWidget(okButton);
-
-    QObject::connect(okButton, &QAbstractButton::clicked, [this] {
+    QObject::connect(buttonBox, &QDialogButtonBox::accepted, [this] {
         this->accept();
         this->close();
     });
-    QObject::connect(cancelButton, &QAbstractButton::clicked, [this] {
+    QObject::connect(buttonBox, &QDialogButtonBox::rejected, [this] {
         this->reject();
         this->close();
     });
