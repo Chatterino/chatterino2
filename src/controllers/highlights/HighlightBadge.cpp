@@ -1,4 +1,5 @@
 #include "HighlightBadge.hpp"
+
 #include "singletons/Resources.hpp"
 
 namespace chatterino {
