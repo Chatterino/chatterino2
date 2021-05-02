@@ -345,6 +345,7 @@ void SharedMessageBuilder::parseHighlights()
         }
     }
 
+    // Highlight because of badge
     auto badges = parseBadges(this->tags);
     auto badgeHighlights = getCSettings().highlightedBadges.readOnly();
     bool badgeHighlightSet = false;
