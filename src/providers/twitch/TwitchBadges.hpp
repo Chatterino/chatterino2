@@ -11,6 +11,7 @@
 
 #include "pajlada/signals/signal.hpp"
 
+#include <memory>
 #include <shared_mutex>
 
 namespace chatterino {
