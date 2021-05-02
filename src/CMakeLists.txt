@@ -476,7 +476,9 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 add_sanitizers(${PROJECT_NAME})
 
-target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
+if (USE_PRECOMPILED_HEADERS)
+    target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
+endif ()
 
 # Enable autogeneration of Qts MOC/RCC/UIC
 set_target_properties(${PROJECT_NAME}
