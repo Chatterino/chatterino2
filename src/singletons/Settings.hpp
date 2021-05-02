@@ -7,6 +7,7 @@
 #include "common/Channel.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/filters/FilterRecord.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
@@ -31,6 +32,7 @@ public:
 
     SignalVector<HighlightPhrase> &highlightedMessages;
     SignalVector<HighlightPhrase> &highlightedUsers;
+    SignalVector<HighlightBadge> &highlightedBadges;
     SignalVector<HighlightBlacklistUser> &blacklistedUsers;
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;

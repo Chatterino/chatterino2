@@ -1083,8 +1083,8 @@ boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
         return channelBadge;
     }
 
-    if (auto globalBadge = this->twitchChannel->globalTwitchBadges().badge(
-            badge.key_, badge.value_))
+    if (auto globalBadge =
+            TwitchBadges::instance()->badge(badge.key_, badge.value_))
     {
         return globalBadge;
     }

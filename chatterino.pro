@@ -149,6 +149,8 @@ SOURCES += \
     src/controllers/commands/Command.cpp \
     src/controllers/commands/CommandController.cpp \
     src/controllers/commands/CommandModel.cpp \
+    src/controllers/highlights/BadgeHighlightModel.cpp \
+    src/controllers/highlights/HighlightBadge.cpp \
     src/controllers/filters/FilterModel.cpp \
     src/controllers/filters/parser/FilterParser.cpp \
     src/controllers/filters/parser/Tokenizer.cpp \
@@ -239,6 +241,7 @@ SOURCES += \
     src/util/AttachToConsole.cpp \
     src/util/Clipboard.cpp \
     src/util/DebugCount.cpp \
+    src/util/DisplayBadge.cpp \
     src/util/FormatTime.cpp \
     src/util/FunctionEventFilter.cpp \
     src/util/FuzzyConvert.cpp \
@@ -261,6 +264,7 @@ SOURCES += \
     src/widgets/BaseWidget.cpp \
     src/widgets/BaseWindow.cpp \
     src/widgets/FramelessEmbedWindow.cpp \
+    src/widgets/dialogs/BadgePickerDialog.cpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.cpp \
     src/widgets/dialogs/ColorPickerDialog.cpp \
     src/widgets/dialogs/EmotePopup.cpp \
@@ -369,6 +373,8 @@ HEADERS += \
     src/controllers/commands/Command.hpp \
     src/controllers/commands/CommandController.hpp \
     src/controllers/commands/CommandModel.hpp \
+    src/controllers/highlights/BadgeHighlightModel.hpp \
+    src/controllers/highlights/HighlightBadge.hpp \
     src/controllers/filters/FilterModel.hpp \
     src/controllers/filters/FilterRecord.hpp \
     src/controllers/filters/FilterSet.hpp \
@@ -477,6 +483,7 @@ HEADERS += \
     src/util/CombinePath.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
+    src/util/DisplayBadge.hpp \
     src/util/DistanceBetweenPoints.hpp \
     src/util/FormatTime.hpp \
     src/util/FunctionEventFilter.hpp \
@@ -515,6 +522,7 @@ HEADERS += \
     src/widgets/BaseWidget.hpp \
     src/widgets/BaseWindow.hpp \
     src/widgets/FramelessEmbedWindow.hpp \
+    src/widgets/dialogs/BadgePickerDialog.hpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.hpp \
     src/widgets/dialogs/ColorPickerDialog.hpp \
     src/widgets/dialogs/EmotePopup.hpp \
