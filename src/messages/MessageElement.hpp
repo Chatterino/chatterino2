@@ -99,8 +99,9 @@ enum class MessageElementFlag : int64_t {
     // - Dankerino contributor badge
     BadgeDankerino = (1LL << 33),
 
-    Badges = BadgeGlobalAuthority | BadgeChannelAuthority | BadgeSubscription |
-             BadgeVanity | BadgeChatterino | BadgeFfz | BadgeDankerino,
+    Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
+             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeFfz |
+             BadgeDankerino,
 
     ChannelName = (1LL << 20),
 

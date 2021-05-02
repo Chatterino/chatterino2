@@ -778,13 +778,11 @@ void UserInfoPopup::updateUserData()
 
         // get ignore state
         bool isIgnoring = false;
-        for (const auto &blockedUser : currentUser->getBlocks())
+
+        if (auto blocks = currentUser->accessBlockedUserIds();
+            blocks->find(user.id) != blocks->end())
         {
-            if (user.id == blockedUser.id)
-            {
-                isIgnoring = true;
-                break;
-            }
+            isIgnoring = true;
         }
 
         // get ignoreHighlights state

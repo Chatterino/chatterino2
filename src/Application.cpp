@@ -9,6 +9,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
@@ -380,6 +381,8 @@ void Application::initPubsub()
 Application *getApp()
 {
     assert(Application::instance != nullptr);
+
+    assertInGuiThread();
 
     return Application::instance;
 }

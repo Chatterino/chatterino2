@@ -139,6 +139,8 @@ set(SOURCE_FILES main.cpp
         messages/search/ChannelPredicate.hpp
         messages/search/LinkPredicate.cpp
         messages/search/LinkPredicate.hpp
+        messages/search/MessageFlagsPredicate.cpp
+        messages/search/MessageFlagsPredicate.hpp
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
 
@@ -343,8 +345,6 @@ set(SOURCE_FILES main.cpp
         widgets/dialogs/SelectChannelFiltersDialog.hpp
         widgets/dialogs/SettingsDialog.cpp
         widgets/dialogs/SettingsDialog.hpp
-        widgets/dialogs/TextInputDialog.cpp
-        widgets/dialogs/TextInputDialog.hpp
         widgets/dialogs/UpdateDialog.cpp
         widgets/dialogs/UpdateDialog.hpp
         widgets/dialogs/UserInfoPopup.cpp
