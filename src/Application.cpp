@@ -9,6 +9,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
@@ -161,6 +162,10 @@ int Application::run(QApplication &qtApp)
         this->windows->forceLayoutChannelViews();
     });
     getSettings()->highlightedUsers.delayedItemsChanged.connect([this] {
+        this->windows->forceLayoutChannelViews();
+    });
+
+    getSettings()->removeSpacesBetweenEmotes.connect([this] {
         this->windows->forceLayoutChannelViews();
     });
 
@@ -374,6 +379,8 @@ void Application::initPubsub()
 Application *getApp()
 {
     assert(Application::instance != nullptr);
+
+    assertInGuiThread();
 
     return Application::instance;
 }

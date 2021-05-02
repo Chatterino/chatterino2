@@ -19,7 +19,7 @@
 #include <QVBoxLayout>
 
 // clang-format off
-#define INFO "/block <user> in chat blocks a user.\n/block <user> in chat unblocks a user.\nYou can also click on a user to open the usercard."
+#define INFO "/block <user> in chat blocks a user.\n/unblock <user> in chat unblocks a user.\nYou can also click on a user to open the usercard."
 // clang-format on
 
 namespace chatterino {
@@ -123,7 +123,10 @@ void IgnoresPage::onShow()
     }
 
     QStringList users;
-    for (const auto &blockedUser : user->getBlocks())
+
+    auto blocks = app->accounts->twitch.getCurrent()->accessBlocks();
+
+    for (const auto &blockedUser : *blocks)
     {
         users << blockedUser.name;
     }

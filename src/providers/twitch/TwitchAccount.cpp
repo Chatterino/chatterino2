@@ -101,14 +101,17 @@ void TwitchAccount::loadBlocks()
     getHelix()->loadBlocks(
         getApp()->accounts->twitch.getCurrent()->userId_,
         [this](std::vector<HelixBlock> blocks) {
-            std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-            this->ignores_.clear();
+            auto ignores = this->ignores_.access();
+            auto userIds = this->ignoresUserIds_.access();
+            ignores->clear();
+            userIds->clear();
 
             for (const HelixBlock &block : blocks)
             {
                 TwitchUser blockedUser;
                 blockedUser.fromHelixBlock(block);
-                this->ignores_.insert(blockedUser);
+                ignores->insert(blockedUser);
+                userIds->insert(blockedUser.id);
             }
         },
         [] {
@@ -125,9 +128,11 @@ void TwitchAccount::blockUser(QString userId, std::function<void()> onSuccess,
             TwitchUser blockedUser;
             blockedUser.id = userId;
             {
-                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+                auto ignores = this->ignores_.access();
+                auto userIds = this->ignoresUserIds_.access();
 
-                this->ignores_.insert(blockedUser);
+                ignores->insert(blockedUser);
+                userIds->insert(blockedUser.id);
             }
             onSuccess();
         },
@@ -143,9 +148,11 @@ void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
             TwitchUser ignoredUser;
             ignoredUser.id = userId;
             {
-                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+                auto ignores = this->ignores_.access();
+                auto userIds = this->ignoresUserIds_.access();
 
-                this->ignores_.erase(ignoredUser);
+                ignores->erase(ignoredUser);
+                userIds->erase(ignoredUser.id);
             }
             onSuccess();
         },
@@ -169,11 +176,16 @@ void TwitchAccount::checkFollow(const QString targetUserID,
                               [] {});
 }
 
-std::set<TwitchUser> TwitchAccount::getBlocks() const
+SharedAccessGuard<const std::set<TwitchUser>> TwitchAccount::accessBlocks()
+    const
 {
-    std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+    return this->ignores_.accessConst();
+}
 
-    return this->ignores_;
+SharedAccessGuard<const std::set<QString>> TwitchAccount::accessBlockedUserIds()
+    const
+{
+    return this->ignoresUserIds_.accessConst();
 }
 
 void TwitchAccount::loadEmotes()
@@ -335,7 +347,7 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
         });
 }
 
-AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
+SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
     TwitchAccount::accessEmotes() const
 {
     return this->emotes_.accessConst();

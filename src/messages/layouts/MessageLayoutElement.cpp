@@ -47,6 +47,16 @@ bool MessageLayoutElement::hasTrailingSpace() const
     return this->trailingSpace;
 }
 
+int MessageLayoutElement::getLine() const
+{
+    return this->line_;
+}
+
+void MessageLayoutElement::setLine(int line)
+{
+    this->line_ = line;
+}
+
 MessageLayoutElement *MessageLayoutElement::setTrailingSpace(bool value)
 {
     this->trailingSpace = value;

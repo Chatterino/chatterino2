@@ -143,28 +143,28 @@ bool TwitchMessageBuilder::isIgnored() const
     {
         auto sourceUserID = this->tags.value("user-id").toString();
 
-        for (const auto &user : app->accounts->twitch.getCurrent()->getBlocks())
-        {
-            if (sourceUserID == user.id)
-            {
-                switch (static_cast<ShowIgnoredUsersMessages>(
-                    getSettings()->showBlockedUsersMessages.getValue()))
-                {
-                    case ShowIgnoredUsersMessages::IfModerator:
-                        if (this->channel->isMod() ||
-                            this->channel->isBroadcaster())
-                            return false;
-                        break;
-                    case ShowIgnoredUsersMessages::IfBroadcaster:
-                        if (this->channel->isBroadcaster())
-                            return false;
-                        break;
-                    case ShowIgnoredUsersMessages::Never:
-                        break;
-                }
+        auto blocks =
+            app->accounts->twitch.getCurrent()->accessBlockedUserIds();
 
-                return true;
+        if (auto it = blocks->find(sourceUserID); it != blocks->end())
+        {
+            switch (static_cast<ShowIgnoredUsersMessages>(
+                getSettings()->showBlockedUsersMessages.getValue()))
+            {
+                case ShowIgnoredUsersMessages::IfModerator:
+                    if (this->channel->isMod() ||
+                        this->channel->isBroadcaster())
+                        return false;
+                    break;
+                case ShowIgnoredUsersMessages::IfBroadcaster:
+                    if (this->channel->isBroadcaster())
+                        return false;
+                    break;
+                case ShowIgnoredUsersMessages::Never:
+                    break;
             }
+
+            return true;
         }
     }
 

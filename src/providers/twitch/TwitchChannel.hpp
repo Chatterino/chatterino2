@@ -83,8 +83,8 @@ public:
     int chatterCount();
     virtual bool isLive() const override;
     QString roomId() const;
-    AccessGuard<const RoomModes> accessRoomModes() const;
-    AccessGuard<const StreamStatus> accessStreamStatus() const;
+    SharedAccessGuard<const RoomModes> accessRoomModes() const;
+    SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
 
     // Emotes
     const BttvEmotes &globalBttv() const;

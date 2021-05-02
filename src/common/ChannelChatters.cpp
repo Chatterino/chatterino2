@@ -11,7 +11,7 @@ ChannelChatters::ChannelChatters(Channel &channel)
 {
 }
 
-AccessGuard<const UsernameSet> ChannelChatters::accessChatters() const
+SharedAccessGuard<const UsernameSet> ChannelChatters::accessChatters() const
 {
     return this->chatters_.accessConst();
 }

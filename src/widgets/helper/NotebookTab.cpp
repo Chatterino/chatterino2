@@ -10,7 +10,6 @@
 #include "util/Helpers.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
-#include "widgets/dialogs/TextInputDialog.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
 #include <QApplication>
@@ -54,16 +53,16 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->setMouseTracking(true);
 
-    this->menu_.addAction("Rename", [this]() {
+    this->menu_.addAction("Rename Tab", [this]() {
         this->showRenameDialog();
     });
 
-    this->menu_.addAction("Close", [=]() {
+    this->menu_.addAction("Close Tab", [=]() {
         this->notebook_->removePage(this->page);
     });
 
     highlightNewMessagesAction_ =
-        new QAction("Enable highlights on new messages", &this->menu_);
+        new QAction("Mark Tab as Unread on New Messages", &this->menu_);
     highlightNewMessagesAction_->setCheckable(true);
     highlightNewMessagesAction_->setChecked(highlightEnabled_);
     QObject::connect(highlightNewMessagesAction_, &QAction::triggered,
@@ -75,15 +74,48 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
 void NotebookTab::showRenameDialog()
 {
-    TextInputDialog d(this);
+    auto dialog = new QDialog(this);
 
-    d.setWindowTitle("Choose tab title (Empty for default)");
-    d.setText(this->getCustomTitle());
-    d.highlightText();
+    auto vbox = new QVBoxLayout;
 
-    if (d.exec() == QDialog::Accepted)
+    auto lineEdit = new QLineEdit;
+    lineEdit->setText(this->getCustomTitle());
+    lineEdit->setPlaceholderText(this->getDefaultTitle());
+    lineEdit->selectAll();
+
+    vbox->addWidget(new QLabel("Name:"));
+    vbox->addWidget(lineEdit);
+    vbox->addStretch(1);
+
+    auto buttonBox =
+        new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+    vbox->addWidget(buttonBox);
+    dialog->setLayout(vbox);
+
+    QObject::connect(buttonBox, &QDialogButtonBox::accepted, [dialog] {
+        dialog->accept();
+        dialog->close();
+    });
+
+    QObject::connect(buttonBox, &QDialogButtonBox::rejected, [dialog] {
+        dialog->reject();
+        dialog->close();
+    });
+
+    dialog->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    dialog->setMinimumSize(dialog->minimumSizeHint().width() + 50,
+                           dialog->minimumSizeHint().height() + 10);
+
+    dialog->setWindowFlags(
+        (dialog->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
+        Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+
+    dialog->setWindowTitle("Rename Tab");
+
+    if (dialog->exec() == QDialog::Accepted)
     {
-        QString newTitle = d.getText();
+        QString newTitle = lineEdit->text();
         this->setCustomTitle(newTitle);
     }
 }
@@ -600,7 +632,7 @@ void NotebookTab::mouseMoveEvent(QMouseEvent *event)
 void NotebookTab::wheelEvent(QWheelEvent *event)
 {
     const auto defaultMouseDelta = 120;
-    const auto delta = event->delta();
+    const auto verticalDelta = event->angleDelta().y();
     const auto selectTab = [this](int delta) {
         delta > 0 ? this->notebook_->selectPreviousTab()
                   : this->notebook_->selectNextTab();
@@ -608,9 +640,9 @@ void NotebookTab::wheelEvent(QWheelEvent *event)
     // If it's true
     // Then the user uses the trackpad or perhaps the most accurate mouse
     // Which has small delta.
-    if (std::abs(delta) < defaultMouseDelta)
+    if (std::abs(verticalDelta) < defaultMouseDelta)
     {
-        this->mouseWheelDelta_ += delta;
+        this->mouseWheelDelta_ += verticalDelta;
         if (std::abs(this->mouseWheelDelta_) >= defaultMouseDelta)
         {
             selectTab(this->mouseWheelDelta_);
@@ -619,7 +651,7 @@ void NotebookTab::wheelEvent(QWheelEvent *event)
     }
     else
     {
-        selectTab(delta);
+        selectTab(verticalDelta);
     }
 }
 
