@@ -31,7 +31,12 @@ QString HotkeyController::hotkeyScopeToName(HotkeyScope scope)
 bool hotkeySortCompare_(const std::shared_ptr<Hotkey> &a,
                         const std::shared_ptr<Hotkey> &b)
 {
-    return (a->scope() < b->scope());
+    if (a->scope() == b->scope())
+    {
+        return a->name() < b->name();
+    }
+
+    return a->scope() < b->scope();
 }
 
 HotkeyController::HotkeyController()
