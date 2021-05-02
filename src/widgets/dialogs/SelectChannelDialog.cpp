@@ -20,6 +20,9 @@
 #include "providers/irc/Irc2.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
+#include <QHeaderView>
+#include <QPushButton>
+
 #define TAB_TWITCH 0
 #define TAB_IRC 1
 
