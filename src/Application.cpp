@@ -36,6 +36,8 @@
 #include "widgets/Window.hpp"
 #include "widgets/splits/Split.hpp"
 
+#include <QDesktopServices>
+
 namespace chatterino {
 
 static std::atomic<bool> isAppInitialized{false};
