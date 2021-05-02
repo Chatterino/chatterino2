@@ -1,5 +1,5 @@
 ---
-name: Report your problem
+name: Make a Report
 about: Report something that's missing, that you have trouble with or that stopped working.
 title: ''
 labels: issue-report
