@@ -26,8 +26,6 @@ set(SOURCE_FILES main.cpp
         common/DownloadManager.hpp
         common/Env.cpp
         common/Env.hpp
-        common/GlobalBadges.cpp
-        common/GlobalBadges.hpp
         common/LinkParser.cpp
         common/LinkParser.hpp
         common/Modes.cpp
