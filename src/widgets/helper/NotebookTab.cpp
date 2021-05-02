@@ -87,23 +87,18 @@ void NotebookTab::showRenameDialog()
     vbox->addWidget(lineEdit);
     vbox->addStretch(1);
 
-    auto okButton = new QPushButton("OK");
-    auto cancelButton = new QPushButton("Cancel");
+    auto buttonBox =
+        new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-    auto buttonBox = new QHBoxLayout;
-    buttonBox->addStretch(1);
-    buttonBox->addWidget(okButton);
-    buttonBox->addWidget(cancelButton);
-
-    vbox->addLayout(buttonBox);
+    vbox->addWidget(buttonBox);
     dialog->setLayout(vbox);
 
-    QObject::connect(okButton, &QPushButton::clicked, [dialog] {
+    QObject::connect(buttonBox, &QDialogButtonBox::accepted, [dialog] {
         dialog->accept();
         dialog->close();
     });
 
-    QObject::connect(cancelButton, &QPushButton::clicked, [dialog] {
+    QObject::connect(buttonBox, &QDialogButtonBox::rejected, [dialog] {
         dialog->reject();
         dialog->close();
     });
