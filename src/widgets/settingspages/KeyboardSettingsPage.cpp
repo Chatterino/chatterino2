@@ -23,9 +23,9 @@ KeyboardSettingsPage::KeyboardSettingsPage()
                            "receive a popup message when using it.\n"
                            "Some actions of hotkeys don't have any feedback.");
 
+    auto model = app->hotkeys->createModel(nullptr);
     EditableModelView *view =
-        layout.emplace<EditableModelView>(app->hotkeys->createModel(nullptr))
-            .getElement();
+        layout.emplace<EditableModelView>(model).getElement();
 
     view->setTitles({"Name", "Key Combo"});
     view->getTableView()->horizontalHeader()->setVisible(true);
@@ -35,15 +35,22 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
 
-    view->addButtonPressed.connect([] {
+    view->addButtonPressed.connect([view, model] {
         EditHotkeyDialog dialog(nullptr);
         bool wasAccepted = dialog.exec() == 1;
 
         if (wasAccepted)
         {
             auto newHotkey = dialog.data();
-            getApp()->hotkeys->hotkeys_.append(newHotkey);
+            int vectorIndex = getApp()->hotkeys->hotkeys_.append(newHotkey);
             getApp()->hotkeys->save();
+
+            // Select and scroll to newly added hotkey
+            auto modelRow = model->getModelIndexFromVectorIndex(vectorIndex);
+            auto modelIndex = model->index(modelIndex, 0);
+            view->selectRow(modelRow);
+            view->getTableView()->scrollTo(modelIndex,
+                                           QAbstractItemView::PositionAtCenter);
         }
     });
 
