@@ -7,6 +7,8 @@
 
 #include "lrucache/lrucache.hpp"
 
+#include <QRgb>
+
 namespace chatterino {
 
 class ChannelChatters
