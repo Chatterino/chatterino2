@@ -10,6 +10,9 @@
 #include "singletons/WindowManager.hpp"
 #include "util/StreamerMode.hpp"
 
+#include <QFileInfo>
+#include <QMediaPlayer>
+
 namespace chatterino {
 
 namespace {
