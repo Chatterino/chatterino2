@@ -10,6 +10,7 @@
 - Minor: Optionally remove spaces between emotes, originally made for Mm2PL/Dankerino. (#2651)
 - Minor: Improved UX of `Rename Tab` dialog. (#2713)
 - Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
+- Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
 - Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
 - Bugfix: Clicking on split header focuses its split. (#2720)
 - Bugfix: Handle new user messages ("rituals") properly. (#2703)
