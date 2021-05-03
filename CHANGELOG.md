@@ -2,6 +2,9 @@
 
 ## Unversioned
 
+## 2.3.1
+
+- Major: Fixed crashing with the extension (#2704)
 - Major: Added the ability to highlight messages based on user badges. (#1704)
 - Minor: Added visual indicator to message length if over 500 characters long (#2659)
 - Minor: Added `is:<flags>` search filter to find messages of specific types. (#2653, #2671)
