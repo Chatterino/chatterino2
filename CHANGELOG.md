@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unversioned
+
 - Bugfix: Automod messages now work properly again. (#2682)
 
 ## 2.3.1
