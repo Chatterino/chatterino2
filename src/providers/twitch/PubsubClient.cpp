@@ -532,7 +532,6 @@ PubSub::PubSub()
 
     this->moderationActionHandlers["automod_rejected"] =
         [this](const auto &data, const auto &roomID) {
-            qCDebug(chatterinoPubsub) << "automod_rejected";
             // Display the automod message and prompt the allow/deny
             AutomodAction action(data, roomID);
 
@@ -586,8 +585,6 @@ PubSub::PubSub()
 
     this->channelTermsActionHandlers["add_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
-            qCDebug(chatterinoPubsub)
-                << "channelTermsActionHandlers add_permitted_term";
             // This term got a pass through automod
             AutomodUserAction action(data, roomID);
             getCreatedByUser(data, action.source);
@@ -616,8 +613,6 @@ PubSub::PubSub()
 
     this->channelTermsActionHandlers["add_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
-            qCDebug(chatterinoPubsub)
-                << "channelTermsActionHandlers add_blocked_term";
             // A term has been added
             AutomodUserAction action(data, roomID);
             getCreatedByUser(data, action.source);
@@ -646,8 +641,6 @@ PubSub::PubSub()
 
     this->moderationActionHandlers["delete_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
-            qCDebug(chatterinoPubsub)
-                << "moderationActionHandlers delete_permitted_term";
             // This term got deleted
             AutomodUserAction action(data, roomID);
             getCreatedByUser(data, action.source);
@@ -677,8 +670,6 @@ PubSub::PubSub()
         };
     this->channelTermsActionHandlers["delete_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
-            qCDebug(chatterinoPubsub)
-                << "channelTermsActionHandlers delete_permitted_term";
             // This term got deleted
             AutomodUserAction action(data, roomID);
             getCreatedByUser(data, action.source);
@@ -707,8 +698,6 @@ PubSub::PubSub()
 
     this->moderationActionHandlers["delete_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
-            qCDebug(chatterinoPubsub)
-                << "moderationActionHandlers delete_blocked_term";
             // This term got deleted
             AutomodUserAction action(data, roomID);
 
@@ -739,8 +728,6 @@ PubSub::PubSub()
         };
     this->channelTermsActionHandlers["delete_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
-            qCDebug(chatterinoPubsub)
-                << "channelTermsActionHandlers delete_blocked_term";
             // This term got deleted
             AutomodUserAction action(data, roomID);
 
@@ -773,7 +760,6 @@ PubSub::PubSub()
     //
     //this->moderationActionHandlers["modified_automod_properties"] =
     //    [this](const auto &data, const auto &roomID) {
-    //        qCDebug(chatterinoPubsub) << "modified_automod_properties";
     //        // The automod settings got modified
     //        AutomodUserAction action(data, roomID);
     //        getCreatedByUser(data, action.source);
@@ -785,7 +771,6 @@ PubSub::PubSub()
                                                                       &data,
                                                                   const auto
                                                                       &roomID) {
-        qCDebug(chatterinoPubsub) << "denied_automod_message";
         // This message got denied by a moderator
         // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
     };
@@ -793,7 +778,6 @@ PubSub::PubSub()
     this->moderationActionHandlers
         ["approved_automod_message"] = [](const auto &data,
                                           const auto &roomID) {
-        qCDebug(chatterinoPubsub) << "approved_automod_message";
         // This message got approved by a moderator
         // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
     };
