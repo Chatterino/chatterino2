@@ -47,7 +47,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
             // Select and scroll to newly added hotkey
             auto modelRow = model->getModelIndexFromVectorIndex(vectorIndex);
-            auto modelIndex = model->index(modelIndex, 0);
+            auto modelIndex = model->index(modelRow, 0);
             view->selectRow(modelRow);
             view->getTableView()->scrollTo(modelIndex,
                                            QAbstractItemView::PositionAtCenter);
