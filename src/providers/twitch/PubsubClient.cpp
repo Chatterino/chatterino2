@@ -583,6 +583,27 @@ PubSub::PubSub()
             }
         };
 
+    this->moderationActionHandlers["automod_message_rejected"] =
+        [this](const auto &data, const auto &roomID) {
+            AutomodInfoAction action(data, roomID);
+            action.type = AutomodInfoAction::OnHold;
+            this->signals_.moderation.automodInfoMessage.invoke(action);
+        };
+
+    this->moderationActionHandlers["automod_message_denied"] =
+        [this](const auto &data, const auto &roomID) {
+            AutomodInfoAction action(data, roomID);
+            action.type = AutomodInfoAction::Denied;
+            this->signals_.moderation.automodInfoMessage.invoke(action);
+        };
+
+    this->moderationActionHandlers["automod_message_approved"] =
+        [this](const auto &data, const auto &roomID) {
+            AutomodInfoAction action(data, roomID);
+            action.type = AutomodInfoAction::Approved;
+            this->signals_.moderation.automodInfoMessage.invoke(action);
+        };
+
     this->channelTermsActionHandlers["add_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
             // This term got a pass through automod
