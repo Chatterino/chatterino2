@@ -179,6 +179,10 @@ private:
                                                        const QString &)>>
         moderationActionHandlers;
 
+    std::unordered_map<std::string, std::function<void(const rapidjson::Value &,
+                                                       const QString &)>>
+        channelTermsActionHandlers;
+
     void onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);
     void onConnectionOpen(websocketpp::connection_hdl hdl);
     void onConnectionClose(websocketpp::connection_hdl hdl);

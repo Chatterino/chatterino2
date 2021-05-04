@@ -532,6 +532,7 @@ PubSub::PubSub()
 
     this->moderationActionHandlers["automod_rejected"] =
         [this](const auto &data, const auto &roomID) {
+            qCDebug(chatterinoPubsub) << "automod_rejected";
             // Display the automod message and prompt the allow/deny
             AutomodAction action(data, roomID);
 
@@ -583,23 +584,23 @@ PubSub::PubSub()
             }
         };
 
-    this->moderationActionHandlers["add_permitted_term"] =
+    this->channelTermsActionHandlers["add_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
+            qCDebug(chatterinoPubsub)
+                << "channelTermsActionHandlers add_permitted_term";
             // This term got a pass through automod
             AutomodUserAction action(data, roomID);
             getCreatedByUser(data, action.source);
 
             try
             {
-                const auto &args = getArgs(data);
                 action.type = AutomodUserAction::AddPermitted;
-
-                if (args.Size() < 1)
+                if (!rj::getSafe(data, "text", action.message))
                 {
                     return;
                 }
 
-                if (!rj::getSafe(args[0], action.message))
+                if (!rj::getSafe(data, "requester_login", action.source.name))
                 {
                     return;
                 }
@@ -609,27 +610,27 @@ PubSub::PubSub()
             catch (const std::runtime_error &ex)
             {
                 qCDebug(chatterinoPubsub)
-                    << "Error parsing moderation action:" << ex.what();
+                    << "Error parsing channel terms action:" << ex.what();
             }
         };
 
-    this->moderationActionHandlers["add_blocked_term"] =
+    this->channelTermsActionHandlers["add_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
+            qCDebug(chatterinoPubsub)
+                << "channelTermsActionHandlers add_blocked_term";
             // A term has been added
             AutomodUserAction action(data, roomID);
             getCreatedByUser(data, action.source);
 
             try
             {
-                const auto &args = getArgs(data);
                 action.type = AutomodUserAction::AddBlocked;
-
-                if (args.Size() < 1)
+                if (!rj::getSafe(data, "text", action.message))
                 {
                     return;
                 }
 
-                if (!rj::getSafe(args[0], action.message))
+                if (!rj::getSafe(data, "requester_login", action.source.name))
                 {
                     return;
                 }
@@ -639,12 +640,14 @@ PubSub::PubSub()
             catch (const std::runtime_error &ex)
             {
                 qCDebug(chatterinoPubsub)
-                    << "Error parsing moderation action:" << ex.what();
+                    << "Error parsing channel terms action:" << ex.what();
             }
         };
 
     this->moderationActionHandlers["delete_permitted_term"] =
         [this](const auto &data, const auto &roomID) {
+            qCDebug(chatterinoPubsub)
+                << "moderationActionHandlers delete_permitted_term";
             // This term got deleted
             AutomodUserAction action(data, roomID);
             getCreatedByUser(data, action.source);
@@ -672,9 +675,40 @@ PubSub::PubSub()
                     << "Error parsing moderation action:" << ex.what();
             }
         };
+    this->channelTermsActionHandlers["delete_permitted_term"] =
+        [this](const auto &data, const auto &roomID) {
+            qCDebug(chatterinoPubsub)
+                << "channelTermsActionHandlers delete_permitted_term";
+            // This term got deleted
+            AutomodUserAction action(data, roomID);
+            getCreatedByUser(data, action.source);
+
+            try
+            {
+                action.type = AutomodUserAction::RemovePermitted;
+                if (!rj::getSafe(data, "text", action.message))
+                {
+                    return;
+                }
+
+                if (!rj::getSafe(data, "requester_login", action.source.name))
+                {
+                    return;
+                }
+
+                this->signals_.moderation.automodUserMessage.invoke(action);
+            }
+            catch (const std::runtime_error &ex)
+            {
+                qCDebug(chatterinoPubsub)
+                    << "Error parsing channel terms action:" << ex.what();
+            }
+        };
 
     this->moderationActionHandlers["delete_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
+            qCDebug(chatterinoPubsub)
+                << "moderationActionHandlers delete_blocked_term";
             // This term got deleted
             AutomodUserAction action(data, roomID);
 
@@ -703,20 +737,55 @@ PubSub::PubSub()
                     << "Error parsing moderation action:" << ex.what();
             }
         };
-
-    this->moderationActionHandlers["modified_automod_properties"] =
+    this->channelTermsActionHandlers["delete_blocked_term"] =
         [this](const auto &data, const auto &roomID) {
-            // The automod settings got modified
+            qCDebug(chatterinoPubsub)
+                << "channelTermsActionHandlers delete_blocked_term";
+            // This term got deleted
             AutomodUserAction action(data, roomID);
+
             getCreatedByUser(data, action.source);
-            action.type = AutomodUserAction::Properties;
-            this->signals_.moderation.automodUserMessage.invoke(action);
+
+            try
+            {
+                action.type = AutomodUserAction::RemoveBlocked;
+                if (!rj::getSafe(data, "text", action.message))
+                {
+                    return;
+                }
+
+                if (!rj::getSafe(data, "requester_login", action.source.name))
+                {
+                    return;
+                }
+
+                this->signals_.moderation.automodUserMessage.invoke(action);
+            }
+            catch (const std::runtime_error &ex)
+            {
+                qCDebug(chatterinoPubsub)
+                    << "Error parsing channel terms action:" << ex.what();
+            }
         };
+
+    // We don't get this one anymore or anything similiar
+    // We need some new topic so we can listen
+    //
+    //this->moderationActionHandlers["modified_automod_properties"] =
+    //    [this](const auto &data, const auto &roomID) {
+    //        qCDebug(chatterinoPubsub) << "modified_automod_properties";
+    //        // The automod settings got modified
+    //        AutomodUserAction action(data, roomID);
+    //        getCreatedByUser(data, action.source);
+    //        action.type = AutomodUserAction::Properties;
+    //        this->signals_.moderation.automodUserMessage.invoke(action);
+    //    };
 
     this->moderationActionHandlers["denied_automod_message"] = [](const auto
                                                                       &data,
                                                                   const auto
                                                                       &roomID) {
+        qCDebug(chatterinoPubsub) << "denied_automod_message";
         // This message got denied by a moderator
         // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
     };
@@ -724,6 +793,7 @@ PubSub::PubSub()
     this->moderationActionHandlers
         ["approved_automod_message"] = [](const auto &data,
                                           const auto &roomID) {
+        qCDebug(chatterinoPubsub) << "approved_automod_message";
         // This message got approved by a moderator
         // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
     };
@@ -1059,6 +1129,7 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
 void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 {
     QString topic;
+    qCDebug(chatterinoPubsub) << rj::stringify(outerData).c_str();
 
     if (!rj::getSafe(outerData, "topic", topic))
     {
@@ -1122,27 +1193,63 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         assert(topicParts.length() == 3);
         const auto &data = msg["data"];
 
-        std::string moderationAction;
+        std::string moderationEventType;
 
-        if (!rj::getSafe(data, "moderation_action", moderationAction))
+        if (!rj::getSafe(msg, "type", moderationEventType))
         {
-            qCDebug(chatterinoPubsub) << "Missing moderation action in data:"
-                                      << rj::stringify(data).c_str();
+            qCDebug(chatterinoPubsub) << "Bad moderator event data";
             return;
         }
-
-        auto handlerIt = this->moderationActionHandlers.find(moderationAction);
-
-        if (handlerIt == this->moderationActionHandlers.end())
+        if (moderationEventType == "moderation_action")
         {
-            qCDebug(chatterinoPubsub)
-                << "No handler found for moderation action"
-                << moderationAction.c_str();
-            return;
-        }
+            std::string moderationAction;
 
-        // Invoke handler function
-        handlerIt->second(data, topicParts[2]);
+            if (!rj::getSafe(data, "moderation_action", moderationAction))
+            {
+                qCDebug(chatterinoPubsub)
+                    << "Missing moderation action in data:"
+                    << rj::stringify(data).c_str();
+                return;
+            }
+
+            auto handlerIt =
+                this->moderationActionHandlers.find(moderationAction);
+
+            if (handlerIt == this->moderationActionHandlers.end())
+            {
+                qCDebug(chatterinoPubsub)
+                    << "No handler found for moderation action"
+                    << moderationAction.c_str();
+                return;
+            }
+            // Invoke handler function
+            handlerIt->second(data, topicParts[2]);
+        }
+        else if (moderationEventType == "channel_terms_action")
+        {
+            std::string channelTermsAction;
+
+            if (!rj::getSafe(data, "type", channelTermsAction))
+            {
+                qCDebug(chatterinoPubsub)
+                    << "Missing channel terms action in data:"
+                    << rj::stringify(data).c_str();
+                return;
+            }
+
+            auto handlerIt =
+                this->channelTermsActionHandlers.find(channelTermsAction);
+
+            if (handlerIt == this->channelTermsActionHandlers.end())
+            {
+                qCDebug(chatterinoPubsub)
+                    << "No handler found for channel terms action"
+                    << channelTermsAction.c_str();
+                return;
+            }
+            // Invoke handler function
+            handlerIt->second(data, topicParts[2]);
+        }
     }
     else if (topic.startsWith("community-points-channel-v1."))
     {
