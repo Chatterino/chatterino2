@@ -31,6 +31,34 @@ namespace {
         }
     }
 
+    QStringList parseTagList(const QVariantMap &tags, const QString &key)
+    {
+        auto iterator = tags.find(key);
+        if (iterator == tags.end())
+            return QStringList{};
+
+        return iterator.value().toString().split(
+            ',', QString::SplitBehavior::SkipEmptyParts);
+    }
+
+    std::vector<Badge> parseBadges(const QVariantMap &tags)
+    {
+        std::vector<Badge> badges;
+
+        for (QString badge : parseTagList(tags, "badges"))
+        {
+            QStringList parts = badge.split('/');
+            if (parts.size() != 2)
+            {
+                continue;
+            }
+
+            badges.emplace_back(parts[0], parts[1]);
+        }
+
+        return badges;
+    }
+
 }  // namespace
 
 SharedMessageBuilder::SharedMessageBuilder(
@@ -314,6 +342,53 @@ void SharedMessageBuilder::parseHighlights()
              * applied.
              */
             break;
+        }
+    }
+
+    // Highlight because of badge
+    auto badges = parseBadges(this->tags);
+    auto badgeHighlights = getCSettings().highlightedBadges.readOnly();
+    bool badgeHighlightSet = false;
+    for (const HighlightBadge &highlight : *badgeHighlights)
+    {
+        for (const Badge &badge : badges)
+        {
+            if (!highlight.isMatch(badge))
+            {
+                continue;
+            }
+
+            if (!badgeHighlightSet)
+            {
+                this->message().flags.set(MessageFlag::Highlighted);
+                this->message().highlightColor = highlight.getColor();
+                badgeHighlightSet = true;
+            }
+
+            if (highlight.hasAlert())
+            {
+                this->highlightAlert_ = true;
+            }
+
+            // Only set highlightSound_ if it hasn't been set by badge
+            // highlights already.
+            if (highlight.hasSound() && !this->highlightSound_)
+            {
+                this->highlightSound_ = true;
+                // Use custom sound if set, otherwise use fallback sound
+                this->highlightSoundUrl_ = highlight.hasCustomSound()
+                                               ? highlight.getSoundUrl()
+                                               : getFallbackHighlightSound();
+            }
+
+            if (this->highlightAlert_ && this->highlightSound_)
+            {
+                /*
+                 * Break once no further attributes (taskbar, sound) can be
+                 * applied.
+                 */
+                break;
+            }
         }
     }
 }
