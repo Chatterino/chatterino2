@@ -1,8 +1,11 @@
 #include "GeneralPage.hpp"
 
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/writer.h>
 #include <QFontDialog>
 #include <QLabel>
 #include <QScrollArea>
+#include <pajlada/settings/settingdata.hpp>
 
 #include "Application.hpp"
 #include "common/Version.hpp"
@@ -640,6 +643,40 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.askOnImageUpload);
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
+
+    layout.addSubtitle("Miscellaneous");
+
+    {
+        auto box = new QHBoxLayout;
+
+        box->addWidget(layout.makeButton("Export Settings", [this]() {
+            QString filePath = QFileDialog::getSaveFileName(this);
+            rapidjson::Document out;
+            out.CopyFrom(
+                pajlada::Settings::SettingManager::getInstance()->document,
+                out.GetAllocator());
+            out.EraseMember("accounts");
+
+            std::ofstream fh(filePath.toStdString(),
+                             std::ios::binary | std::ios::out);
+            if (!fh)
+            {
+                return;
+            }
+
+            rapidjson::StringBuffer buffer;
+            rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+            out.Accept(writer);
+
+            fh.write(buffer.GetString(), buffer.GetSize());
+        }));
+        box->addWidget(layout.makeButton("Import Settings", [this]() {
+            QString filePath = QFileDialog::getOpenFileName(this);
+        }));
+        box->addStretch(1);
+
+        layout.addLayout(box);
+    }
 
     layout.addStretch();
 
