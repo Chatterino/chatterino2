@@ -1,5 +1,6 @@
 #include "singletons/WindowManager.hpp"
 
+#include <QDate>
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QJsonArray>
@@ -124,6 +125,18 @@ WindowManager::WindowManager()
     QObject::connect(this->saveTimer, &QTimer::timeout, [] {
         getApp()->windows->save();
     });
+
+    this->midnightTimer = new QTimer;
+    this->midnightTimer->setTimerType(Qt::VeryCoarseTimer);
+
+    this->midnightTimer->setSingleShot(true);
+
+    QObject::connect(this->midnightTimer, &QTimer::timeout, [] {
+        getApp()->twitch2->addGlobalSystemMessage(
+            QDate::currentDate().toString(Qt::SystemLocaleLongDate));
+        this->midnightTimer->start(getNextMidnight());
+    });
+    this->midnightTimer->start(getNextMidnight());
 
     this->miscUpdateTimer_.start(100);
 
@@ -745,6 +758,17 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
             break;
         }
     }
+}
+
+int WindowManager::getNextMidnight()
+{
+    const int msecsPerDay = 24 * 60 * 60 * 1000;
+    int msecs = QTime::currentTime().msecsTo(QTime(0, 0));
+    if (msecs < 0)
+    {
+        msecs += msecsPerDay;
+    }
+    return msecs;
 }
 
 }  // namespace chatterino

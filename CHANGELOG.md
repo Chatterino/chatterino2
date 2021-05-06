@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Added a message that displays a new date on new day. (#1016)
+
 ## 2.3.1
 
 - Major: Fixed crashing with the extension (#2704)
