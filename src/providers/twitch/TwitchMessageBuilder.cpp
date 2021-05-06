@@ -1116,7 +1116,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
             const auto &cheerAmount = badge.value_;
             tooltip = QString("Twitch cheer %0").arg(cheerAmount);
         }
-        else if (badge.key_ == "moderator")
+        else if (badge.key_ == "moderator" && getSettings()->useCustomFfzBadges)
         {
             if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
             {
@@ -1128,7 +1128,7 @@ void TwitchMessageBuilder::appendTwitchBadges()
                 continue;
             }
         }
-        else if (badge.key_ == "vip")
+        else if (badge.key_ == "vip" && getSettings()->useCustomFfzBadges)
         {
             if (auto customVipBadge = this->twitchChannel->ffzCustomVipBadge())
             {
