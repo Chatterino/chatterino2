@@ -5,7 +5,6 @@
 #include "controllers/notifications/NotificationModel.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Toasts.hpp"
-#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
@@ -36,105 +35,12 @@ NotificationPage::NotificationPage()
 
                 settings.append(this->createCheckBox(
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
-//        auto notification = layout.emplace<QGroupBox>("Notification layout")
-//                                .setLayoutType<QVBoxLayout>();
-//
-//        notification.append(this->createCheckBox(
-//            "Flash taskbar", getSettings()->notificationFlashTaskbar));
-//        auto soundSettings =
-//            notification.emplace<QHBoxLayout>().withoutMargin();
-//        soundSettings.append(this->createCheckBox(
-//            "Play sound", getSettings()->notificationSound));
-//
-//        auto selectFile =
-//            soundSettings.emplace<QPushButton>("Select custom sound file");
-//        auto soundReset = soundSettings.emplace<QPushButton>("Reset");
-//        auto filePath = soundSettings.emplace<QLabel>();
-//
-//        soundSettings->addStretch();
-//
-//        QObject::connect(selectFile.getElement(), &QPushButton::clicked, this,
-//                         [this] {
-//                             auto fileName = QFileDialog::getOpenFileName(
-//                                 this, tr("Open Sound"), "",
-//                                 tr("Audio Files (*.mp3 *.wav)"));
-//                             getSettings()->notificationSoundUrl = fileName;
-//                         });
-//
-//        QObject::connect(soundReset.getElement(), &QPushButton::clicked,
-//                         [] { getSettings()->notificationSoundUrl = ""; });
-//
-//        // Url at the end
-//        getSettings()->notificationSoundUrl.connect(
-//            [filePath](const QString &soundUrl, auto) mutable {
-//                QString pathOriginal = soundUrl;
-//
-//                QString pathShortened = "<a href=\"file:///" + pathOriginal +
-//                                        "\"><span style=\"color: white;\">" +
-//                                        shortenString(pathOriginal, 50) +
-//                                        "</span></a>";
-//
-//                filePath->setText(pathShortened);
-//                filePath->setToolTip(pathOriginal);
-//            });
-//
-//        filePath->setTextFormat(Qt::RichText);
-//        filePath->setTextInteractionFlags(Qt::TextBrowserInteraction |
-//                                          Qt::LinksAccessibleByKeyboard);
-//        filePath->setOpenExternalLinks(true);
-//        layout.emplace<QLabel>("Add channels which you want to be notified for "
-//                               "when they go live.");
-//        auto notification = layout.emplace<QGroupBox>("Notification settings")
-//                                .setLayoutType<QVBoxLayout>();
-//
-//        notification.append(this->createCheckBox(
-//            "Flash taskbar", getSettings()->notificationFlashTaskbar));
-//        auto soundSettings =
-//            notification.emplace<QHBoxLayout>().withoutMargin();
-//        soundSettings.append(this->createCheckBox(
-//            "Play sound", getSettings()->notificationSound));
-//
-//        auto selectFile =
-//            soundSettings.emplace<QPushButton>("Select custom sound file");
-//        auto soundReset = soundSettings.emplace<QPushButton>("Reset");
-//        auto filePath = soundSettings.emplace<QLabel>();
-//
-//        soundSettings->addStretch();
-//
-//        QObject::connect(selectFile.getElement(), &QPushButton::clicked, this,
-//                         [this] {
-//                             auto fileName = QFileDialog::getOpenFileName(
-//                                 this, tr("Open Sound"), "",
-//                                 tr("Audio Files (*.mp3 *.wav)"));
-//                             getSettings()->notificationSoundUrl = fileName;
-//                         });
-//
-//        QObject::connect(soundReset.getElement(), &QPushButton::clicked,
-//                         [] { getSettings()->notificationSoundUrl = ""; });
-//
-//        // Url at the end
-//        getSettings()->notificationSoundUrl.connect(
-//            [filePath](const QString &soundUrl, auto) mutable {
-//                QString pathOriginal = soundUrl;
-//
-//                QString pathShortened = "<a href=\"file:///" + pathOriginal +
-//                                        "\"><span style=\"color: white;\">" +
-//                                        shortenString(pathOriginal, 50) +
-//                                        "</span></a>";
-//
-//                filePath->setText(pathShortened);
-//                filePath->setToolTip(pathOriginal);
-//            });
-//
-//        filePath->setTextFormat(Qt::RichText);
-//        filePath->setTextInteractionFlags(Qt::TextBrowserInteraction |
-//                                          Qt::LinksAccessibleByKeyboard);
-//        filePath->setOpenExternalLinks(true);
+                settings.append(this->createCheckBox(
+                    "Play sound", getSettings()->notificationPlaySound));
 #ifdef Q_OS_WIN
-                notification.append(this->createCheckBox(
+                settings.append(this->createCheckBox(
                     "Show notification", getSettings()->notificationToast));
-                auto openIn =
-                    notification.emplace<QHBoxLayout>().withoutMargin();
+                auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
                 {
                     openIn
                         .emplace<QLabel>(
@@ -143,7 +49,7 @@ NotificationPage::NotificationPage()
                                         QSizePolicy::Preferred);
 
                     // implementation of custom combobox done
-                    // because addComboBox only can handle strings-layout
+                    // because addComboBox only can handle strings-settings
                     // int setting for the ToastReaction is desired
                     openIn
                         .append(this->createToastReactionComboBox(
@@ -154,17 +60,35 @@ NotificationPage::NotificationPage()
                 openIn->setContentsMargins(40, 0, 0, 0);
                 openIn->setSizeConstraint(QLayout::SetMaximumSize);
 #endif
-            }
-            layout->addSpacing(16);
+                auto customSound =
+                    layout.emplace<QHBoxLayout>().withoutMargin();
+                {
+                    customSound.append(this->createCheckBox(
+                        "Custom sound",
+                        getSettings()->notificationCustomSound));
+                    auto selectFile = customSound.emplace<QPushButton>(
+                        "Select custom sound file");
+                    QObject::connect(
+                        selectFile.getElement(), &QPushButton::clicked, this,
+                        [this] {
+                            auto fileName = QFileDialog::getOpenFileName(
+                                this, tr("Open Sound"), "",
+                                tr("Audio Files (*.mp3 *.wav)"));
+                            getSettings()->notificationPathSound = fileName;
+                        });
+                }
 
+                settings->addStretch(1);
+            }
+            auto twitchChannels =
+                tabs.appendTab(new QVBoxLayout, "Selected Channels");
             {
-                auto channels =
-                    layout
-                        .emplace<QGroupBox>(
-                            "Channels you want to be notified about")
-                        .setLayoutType<QVBoxLayout>();
+                twitchChannels.emplace<QLabel>(
+                    "These are the channels for which you will be informed "
+                    "when they go live:");
+
                 EditableModelView *view =
-                    channels
+                    twitchChannels
                         .emplace<EditableModelView>(
                             getApp()->notifications->createModel(
                                 nullptr, Platform::Twitch))
@@ -188,69 +112,7 @@ NotificationPage::NotificationPage()
                 });
             }
         }
-        QComboBox *NotificationPage::createToastReactionComboBox(
-            std::vector<pajlada::Signals::ScopedConnection> managedConnections)
-        {
-            QComboBox *toastReactionOptions = new QComboBox();
-
-            for (int i = 0; i <= static_cast<int>(ToastReaction::DontOpen); i++)
-            {
-                toastReactionOptions->insertItem(
-                    i, Toasts::findStringFromReaction(
-                           static_cast<ToastReaction>(i)));
-            }
-
-            // update when setting changes
-            pajlada::Settings::Setting<int> setting =
-                getSettings()->openFromToast;
-            setting.connect(
-                [toastReactionOptions](const int &index, auto) {
-                    toastReactionOptions->setCurrentIndex(index);
-                },
-                managedConnections);
-
-            QObject::connect(
-                toastReactionOptions,
-                QOverload<int>::of(&QComboBox::currentIndexChanged),
-                [](const int &newValue) {
-                    getSettings()->openFromToast.setValue(newValue);
-                });
-
-            return toastReactionOptions;
-        }
-<<<<<<< HEAD
-    }  // namespace chatterino
-=======
-        openIn->setContentsMargins(40, 0, 0, 0);
-        openIn->setSizeConstraint(QLayout::SetMaximumSize);
-#endif
-}
-layout->addSpacing(16);
-
-{
-    auto channels =
-        layout.emplace<QGroupBox>("Channels").setLayoutType<QVBoxLayout>();
-    EditableModelView *view =
-        channels
-            .emplace<EditableModelView>(
-                getApp()->notifications->createModel(nullptr, Platform::Twitch))
-            .getElement();
-    view->setTitles({"Twitch channels"});
-
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        QHeaderView::Fixed);
-    view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        0, QHeaderView::Stretch);
-
-    QTimer::singleShot(1, [view] {
-        view->getTableView()->resizeColumnsToContents();
-        view->getTableView()->setColumnWidth(0, 200);
-    });
-
-    view->addButtonPressed.connect([] {
-        getApp()->notifications->channelMap[Platform::Twitch].append("channel");
-    });
-}
+    }
 }
 QComboBox *NotificationPage::createToastReactionComboBox(
     std::vector<pajlada::Signals::ScopedConnection> managedConnections)
@@ -280,4 +142,3 @@ QComboBox *NotificationPage::createToastReactionComboBox(
     return toastReactionOptions;
 }
 }  // namespace chatterino
->>>>>>> 3478c8d3 (Cleaned up)

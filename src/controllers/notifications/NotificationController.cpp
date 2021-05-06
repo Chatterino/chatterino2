@@ -104,9 +104,9 @@ void NotificationController::playSound()
     static QUrl currentPlayerUrl;
 
     QUrl highlightSoundUrl =
-        !getSettings()->notificationSoundUrl.getValue().isEmpty()
+        getSettings()->notificationCustomSound
             ? QUrl::fromLocalFile(
-                  getSettings()->notificationSoundUrl.getValue())
+                  getSettings()->notificationPathSound.getValue())
             : QUrl("qrc:/sounds/ping2.wav");
 
     if (currentPlayerUrl != highlightSoundUrl)

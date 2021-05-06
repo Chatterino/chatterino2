@@ -128,9 +128,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         live_lbl->setWordWrap(true);
         live_btn->installEventFilter(&this->tabFilter_);
 
-        QObject::connect(
-            live_btn.getElement(), &QRadioButton::toggled,
-            [=](bool enabled) mutable { live_lbl->setVisible(enabled); });
+        QObject::connect(live_btn.getElement(), &QRadioButton::toggled,
+                         [=](bool enabled) mutable {
+                             live_lbl->setVisible(enabled);
+                         });
 
         vbox->addStretch(1);
 

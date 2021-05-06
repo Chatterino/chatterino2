@@ -294,8 +294,12 @@ public:
     /// Notifications
     BoolSetting notificationFlashTaskbar = {"/notifications/enableFlashTaskbar",
                                             false};
-    BoolSetting notificationSound = {"/notifications/enablePlaySound", false};
-    QStringSetting notificationSoundUrl = {"/notifications/soundUrl", ""};
+    BoolSetting notificationPlaySound = {"/notifications/enablePlaySound",
+                                         false};
+    BoolSetting notificationCustomSound = {"/notifications/customPlaySound",
+                                           false};
+    QStringSetting notificationPathSound = {"/notifications/highlightSoundPath",
+                                            "qrc:/sounds/ping3.wav"};
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};

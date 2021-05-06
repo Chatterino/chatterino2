@@ -44,4 +44,10 @@ SBHighlight Message::getScrollBarHighlight() const
     }
     return SBHighlight();
 }
+
+// Static
+namespace {
+
+}  // namespace
+
 }  // namespace chatterino

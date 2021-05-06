@@ -4,7 +4,6 @@
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/StandardItemHelper.hpp"
-#include "widgets/TooltipWidget.hpp"
 
 namespace chatterino {
 
