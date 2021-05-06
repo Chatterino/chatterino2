@@ -5,3 +5,13 @@ on:
       # Should match semver for mainline releases (not including -beta)
       - v2.[0-9]+.[0-9]+
 
+
+# Steps:
+
+# 1. Take version number from tag
+# 2. Get DMG from DO namespace
+# 3. Calculate sha256 hash using DMG
+# 4. Run brew install
+# 5. Run brew uninstall & validate data dir is removed
+# 6. Run brew audit
+# 7. Run brew style --fix
