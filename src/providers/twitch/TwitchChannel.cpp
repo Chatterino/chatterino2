@@ -573,7 +573,15 @@ void TwitchChannel::setLive(bool newLiveStatus)
                 MessageBuilder builder2;
                 TwitchMessageBuilder::liveMessage(this->getDisplayName(),
                                                   &builder2);
-                this->addMessage(builder2.release());
+                getApp()->twitch2->liveChannel->addMessage(builder2.release());
+
+                // Notify on all channels with a ping sound
+                if (getSettings()->notificationOnAnyChannel &&
+                    !(isInStreamerMode() &&
+                      getSettings()->streamerModeSuppressLiveNotifications))
+                {
+                    getApp()->notifications->playSound();
+                }
             }
             else
             {

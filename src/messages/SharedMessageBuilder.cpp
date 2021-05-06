@@ -182,7 +182,6 @@ void SharedMessageBuilder::parseHighlights()
         // Don't check for any other highlight phrases.
         return;
     }
-
     // XXX: Non-common term in SharedMessageBuilder
     auto currentUser = app->accounts->twitch.getCurrent();
 

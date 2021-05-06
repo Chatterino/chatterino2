@@ -1306,8 +1306,12 @@ void TwitchMessageBuilder::liveMessage(const QString &channelName,
                                        MessageBuilder *builder)
 {
     builder->emplace<TimestampElement>();
-    builder->emplace<TextElement>(channelName + " is live!",
-                                  MessageElementFlag::Text, MessageColor::Text);
+    builder
+        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                               MessageColor::Text, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+    builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                  MessageColor::Text);
 }
 
 void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,

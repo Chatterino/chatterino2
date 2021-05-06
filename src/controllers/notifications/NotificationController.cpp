@@ -6,6 +6,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/notifications/NotificationModel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Toasts.hpp"
 #include "singletons/WindowManager.hpp"
@@ -173,12 +174,10 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
                 getApp()->toasts->sendChannelNotification(channelName,
                                                           Platform::Twitch);
             }
-            qDebug("Got to if");
             if (getSettings()->notificationPlaySound &&
                 !(isInStreamerMode() &&
                   getSettings()->streamerModeSuppressLiveNotifications))
             {
-                qDebug("Played sound for notification");
                 getApp()->notifications->playSound();
             }
             if (getSettings()->notificationFlashTaskbar &&
@@ -187,6 +186,9 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
             {
                 getApp()->windows->sendAlert();
             }
+            MessageBuilder builder;
+            TwitchMessageBuilder::liveMessage(channelName, &builder);
+            getApp()->twitch2->liveChannel->addMessage(builder.release());
 
             // Indicate that we have pushed notifications for this stream
             fakeTwitchChannels.push_back(channelName);
