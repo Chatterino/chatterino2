@@ -1,1 +1,7 @@
 name: 'Publish Homebrew Cask on Release'
+on:
+  push:
+    tags:
+      # Should match semver like v2.31.87-beta
+      - v2.[0-9]+.[0-9]+**
+
