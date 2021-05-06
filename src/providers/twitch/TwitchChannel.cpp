@@ -563,15 +563,17 @@ void TwitchChannel::setLive(bool newLiveStatus)
                         getApp()->windows->sendAlert();
                     }
                 }
-                auto live =
-                    makeSystemMessage(this->getDisplayName() + " is live");
-                this->addMessage(live);
+                MessageBuilder builder;
+                TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
+                                                        &builder);
+                this->addMessage(builder.release());
             }
             else
             {
-                auto offline =
-                    makeSystemMessage(this->getDisplayName() + " is offline");
-                this->addMessage(offline);
+                MessageBuilder builder;
+                TwitchMessageBuilder::offlineSystemMessage(
+                    this->getDisplayName(), &builder);
+                this->addMessage(builder.release());
             }
             guard->live = newLiveStatus;
         }

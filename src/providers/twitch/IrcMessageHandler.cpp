@@ -804,6 +804,22 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
                 "Usage: \"/delete <msg-id>\" - can't take more "
                 "than one argument"));
         }
+        else if (tags == "host_on")
+        {
+            QStringList tmp = msg->messageText.split(QLatin1Char(' '));
+            if (tmp.size() != 3)
+            {
+                return;
+            }
+            if (tmp[2].size() < 1)
+            {
+                return;
+            }
+            tmp[2].chop(1);
+            MessageBuilder builder;
+            TwitchMessageBuilder::hostingSystemMessage(tmp[2], &builder);
+            channel->addMessage(builder.release());
+        }
         else
         {
             channel->addMessage(msg);
