@@ -131,7 +131,7 @@ WindowManager::WindowManager()
 
     this->midnightTimer->setSingleShot(true);
 
-    QObject::connect(this->midnightTimer, &QTimer::timeout, [] {
+    QObject::connect(this->midnightTimer, &QTimer::timeout, [this] {
         getApp()->twitch2->addGlobalSystemMessage(
             QDate::currentDate().toString(Qt::SystemLocaleLongDate));
         this->midnightTimer->start(getNextMidnight());
