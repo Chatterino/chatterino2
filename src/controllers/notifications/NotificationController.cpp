@@ -173,13 +173,13 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
                 getApp()->toasts->sendChannelNotification(channelName,
                                                           Platform::Twitch);
             }
+            qDebug("Got to if");
             if (getSettings()->notificationPlaySound &&
                 !(isInStreamerMode() &&
                   getSettings()->streamerModeSuppressLiveNotifications))
-            //if (getSettings()->enableLiveHighlightSound)
-            //if (getSettings()->notificationSound)
             {
-                this->playSound();
+                qDebug("Played sound for notification");
+                getApp()->notifications->playSound();
             }
             if (getSettings()->notificationFlashTaskbar &&
                 !(isInStreamerMode() &&

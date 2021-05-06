@@ -300,6 +300,7 @@ public:
                                            false};
     QStringSetting notificationPathSound = {"/notifications/highlightSoundPath",
                                             "qrc:/sounds/ping3.wav"};
+
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",
                                 static_cast<int>(ToastReaction::OpenInBrowser)};
