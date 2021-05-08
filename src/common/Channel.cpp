@@ -80,15 +80,6 @@ void Channel::addMessage(MessagePtr message,
     auto app = getApp();
     MessagePtr deleted;
 
-    if (lastDate_ != QDate::currentDate())
-    {
-        lastDate_ = QDate::currentDate();
-        MessageBuilder builder;
-        auto msg = makeSystemMessage(
-            QDate::currentDate().toString(Qt::SystemLocaleLongDate),
-            QTime::currentTime());
-        this->addMessage(builder.release());
-    }
     // FOURTF: change this when adding more providers
     if (this->isTwitchChannel() &&
         (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog)))

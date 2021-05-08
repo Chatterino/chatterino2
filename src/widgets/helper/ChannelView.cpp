@@ -1,6 +1,7 @@
 #include "ChannelView.hpp"
 
 #include <QClipboard>
+#include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QGraphicsBlurEffect>
@@ -22,6 +23,7 @@
 #include "messages/Emote.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
@@ -121,6 +123,7 @@ namespace {
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
     , scrollBar_(new Scrollbar(this))
+    , lastDate_(QDate::currentDate())
 {
     this->setMouseTracking(true);
 
@@ -602,6 +605,15 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                    boost::optional<MessageFlags> overridingFlags) {
                 if (this->shouldIncludeMessage(message))
                 {
+                    if (this->lastDate_ != QDate::currentDate())
+                    {
+                        this->lastDate_ = QDate::currentDate();
+                        auto msg =
+                            makeSystemMessage(QDate::currentDate().toString(
+                                                  Qt::SystemLocaleLongDate),
+                                              QTime::currentTime());
+                        this->channel_->addMessage(msg);
+                    }
                     // When the message was received in the underlyingChannel,
                     // logging will be handled. Prevent duplications.
                     if (overridingFlags)
