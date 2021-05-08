@@ -604,16 +604,6 @@ std::vector<QShortcut *> HotkeyController::shortcutsForScope(
     std::map<QString, std::function<QString(std::vector<QString>)>> actionMap,
     QWidget *parent)
 {
-    if (this->savedActions.find(scope) == this->savedActions.end())
-    {
-        qCDebug(chatterinoHotkeys) << "Add saved actions for" << (int)scope;
-        std::set<QString> actions;
-        for (const auto &pair : actionMap)
-        {
-            actions.insert(pair.first);
-        }
-        this->savedActions.insert({scope, actions});
-    }
     std::vector<QShortcut *> output;
     for (const auto &hotkey : this->hotkeys_)
     {
