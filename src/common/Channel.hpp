@@ -102,6 +102,7 @@ protected:
 
 private:
     const QString name_;
+    QDate lastDate_;
     LimitedQueue<MessagePtr> messages_;
     Type type_;
     QTimer clearCompletionModelTimer_;
