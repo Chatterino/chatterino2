@@ -812,7 +812,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
                 return;
             }
             auto &channelName = parts[2];
-            if (channelName.size() < 1)
+            if (channelName.size() < 2)
             {
                 return;
             }
