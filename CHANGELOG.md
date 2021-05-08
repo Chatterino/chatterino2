@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Bugfix: Strip newlines from stream titles to prevent text going off of split header (#TODO)
+- Bugfix: Strip newlines from stream titles to prevent text going off of split header (#2755)
 
 ## 2.3.1
 
