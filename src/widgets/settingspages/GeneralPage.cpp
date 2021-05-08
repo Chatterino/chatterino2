@@ -18,6 +18,9 @@
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
 
+#include <QDesktopServices>
+#include <QFileDialog>
+
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
     "glknmaideaikkmemifbfkhnomoknepka"

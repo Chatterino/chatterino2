@@ -3,6 +3,8 @@
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 
+#include <QJsonDocument>
+
 namespace chatterino {
 
 static Helix *instance = nullptr;

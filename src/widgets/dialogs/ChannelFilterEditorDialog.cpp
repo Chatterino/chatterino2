@@ -2,6 +2,9 @@
 
 #include "controllers/filters/parser/FilterParser.hpp"
 
+#include <QLabel>
+#include <QPushButton>
+
 namespace chatterino {
 
 namespace {

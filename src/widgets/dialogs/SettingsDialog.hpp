@@ -10,6 +10,8 @@
 #include <pajlada/settings/setting.hpp>
 #include "widgets/helper/SettingsDialogTab.hpp"
 
+#include <QFrame>
+
 class QLineEdit;
 
 namespace chatterino {

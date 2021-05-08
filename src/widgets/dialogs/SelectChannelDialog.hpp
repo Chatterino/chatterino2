@@ -9,6 +9,8 @@
 #include <QLabel>
 #include <QRadioButton>
 
+#include <QLineEdit>
+
 namespace chatterino {
 
 class Notebook;
