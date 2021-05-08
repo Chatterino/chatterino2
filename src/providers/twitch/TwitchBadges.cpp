@@ -1,5 +1,8 @@
 #include "TwitchBadges.hpp"
 
+#include <QBuffer>
+#include <QIcon>
+#include <QImageReader>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
