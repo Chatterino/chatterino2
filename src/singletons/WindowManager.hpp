@@ -126,7 +126,6 @@ private:
     pajlada::SettingListener wordFlagsListener_;
 
     QTimer *saveTimer;
-    QTimer *midnightTimer;
     QTimer miscUpdateTimer_;
 };
 

@@ -1,6 +1,5 @@
 #include "singletons/WindowManager.hpp"
 
-#include <QDate>
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QJsonArray>
