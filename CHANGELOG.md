@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added a setting to disable custom FrankerFaceZ VIP/mod badges. (#2693, #2759)
 - Minor: Hosting messages are now clickable. (#2655)
 - Minor: Messages held by automod are now shown to the user. (#2626)
 - Bugfix: Automod messages now work properly again. (#2682)
