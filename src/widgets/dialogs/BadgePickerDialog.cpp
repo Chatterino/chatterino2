@@ -4,6 +4,9 @@
 
 #include "providers/twitch/TwitchBadges.hpp"
 
+#include <QDialogButtonBox>
+#include <QVBoxLayout>
+
 namespace chatterino {
 
 BadgePickerDialog::BadgePickerDialog(QList<DisplayBadge> badges,
