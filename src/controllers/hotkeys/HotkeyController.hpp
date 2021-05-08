@@ -39,7 +39,6 @@ public:
         {HotkeyScope::Settings, "settings"},
         {HotkeyScope::Split, "split"},
         {HotkeyScope::SplitInput, "splitInput"},
-        {HotkeyScope::Tab, "tab"},
         {HotkeyScope::UserCard, "userCard"},
         {HotkeyScope::Window, "window"}};
 
@@ -49,7 +48,6 @@ public:
         {HotkeyScope::Settings, "Settings dialog"},
         {HotkeyScope::Split, "Split"},
         {HotkeyScope::SplitInput, "Split input box"},
-        {HotkeyScope::Tab, "Tab"},
         {HotkeyScope::UserCard, "User card"},
         {HotkeyScope::Window, "Window"},
     };

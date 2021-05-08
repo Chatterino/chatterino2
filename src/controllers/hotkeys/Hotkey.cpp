@@ -52,8 +52,6 @@ Qt::ShortcutContext Hotkey::getContext() const
 {
     switch (this->scope_)
     {
-        case HotkeyScope::Tab:
-            return Qt::WidgetWithChildrenShortcut;
         case HotkeyScope::Window:
             return Qt::WindowShortcut;
         case HotkeyScope::Split:

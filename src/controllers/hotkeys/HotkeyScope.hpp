@@ -11,7 +11,6 @@ enum class HotkeyScope {
     Settings,
     Split,
     SplitInput,
-    Tab,  // TODO: remove unused
     UserCard,
     Window,
 };
