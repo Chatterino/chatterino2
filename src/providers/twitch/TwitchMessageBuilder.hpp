@@ -52,6 +52,12 @@ public:
 
     static void appendChannelPointRewardMessage(
         const ChannelPointReward &reward, MessageBuilder *builder);
+    static void liveSystemMessage(const QString &channelName,
+                                  MessageBuilder *builder);
+    static void offlineSystemMessage(const QString &channelName,
+                                     MessageBuilder *builder);
+    static void hostingSystemMessage(const QString &channelName,
+                                     MessageBuilder *builder);
 
 private:
     void parseUsernameColor() override;

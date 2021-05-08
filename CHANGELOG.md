@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Hosting messages are now clickable. (#2655)
 - Minor: Messages held by automod are now shown to the user. (#2626)
 - Bugfix: Automod messages now work properly again. (#2682)
 - Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
