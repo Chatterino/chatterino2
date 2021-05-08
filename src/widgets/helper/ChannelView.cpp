@@ -605,9 +605,9 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                    boost::optional<MessageFlags> overridingFlags) {
                 if (this->shouldIncludeMessage(message))
                 {
-                    if (this->lastDate_ != QDate::currentDate())
+                    if (this->channel_->lastDate_ != QDate::currentDate())
                     {
-                        this->lastDate_ = QDate::currentDate();
+                        this->channel_->lastDate_ = QDate::currentDate();
                         auto msg =
                             makeSystemMessage(QDate::currentDate().toString(
                                                   Qt::SystemLocaleLongDate),

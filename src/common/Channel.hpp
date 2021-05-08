@@ -96,6 +96,7 @@ public:
     static std::shared_ptr<Channel> getEmpty();
 
     CompletionModel completionModel;
+    QDate lastDate_;
 
 protected:
     virtual void onConnected();
