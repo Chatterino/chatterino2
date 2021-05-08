@@ -1,6 +1,7 @@
 #include "EditHotkeyDialog.hpp"
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/ActionNames.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "ui_EditHotkeyDialog.h"
 
@@ -13,20 +14,27 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
 {
     this->ui_->setupUi(this);
     const auto app = getApp();
+    // dynamically add scope names to the scope picker
     for (const auto pair : app->hotkeys->hotkeyScopeNames)
     {
         this->ui_->scopePicker->addItem(
             app->hotkeys->hotkeyScopeDisplayNames.find(pair.first)->second,
             pair.second);
     }
+
     if (hotkey)
     {
+        // editting a hotkey
+
+        // update pickers/input boxes to values from Hotkey object
         this->ui_->scopePicker->setCurrentIndex(size_t(hotkey->scope()));
-        this->ui_->actionPicker->setCurrentText(hotkey->action());
         this->ui_->keyComboEdit->setKeySequence(
             QKeySequence::fromString(hotkey->keySequence().toString()));
         this->ui_->nameEdit->setText(hotkey->name());
+        this->ui_->actionPicker->setCurrentText(hotkey->action());
+        this->updatePossibleActions();  // make sure the action names are available
 
+        // update arguments
         bool isFirst = true;
         QString argsText;
         for (const auto arg : hotkey->arguments())
@@ -42,6 +50,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     }
     else
     {
+        // adding a new hotkey
         this->setWindowTitle("Add hotkey");
         this->ui_->scopePicker->setCurrentIndex(
             size_t(HotkeyScope::SplitInput));
@@ -123,9 +132,18 @@ void EditHotkeyDialog::afterEdit()
         this->shownSingleKeyWarning = true;
         return;
     }
-    auto hotkey = std::make_shared<Hotkey>(
-        *scope, this->ui_->keyComboEdit->keySequence(),
-        this->ui_->actionPicker->currentText(), arguments, nameText);
+
+    // use raw name from item data if possible, otherwise fallback to what the user has entered.
+    auto actionTemp = this->ui_->actionPicker->currentData();
+    QString action = this->ui_->actionPicker->currentText();
+    if (actionTemp.isValid())
+    {
+        action = actionTemp.toString();
+    }
+
+    auto hotkey =
+        std::make_shared<Hotkey>(*scope, this->ui_->keyComboEdit->keySequence(),
+                                 action, arguments, nameText);
     if (getApp()->hotkeys->isDuplicate(hotkey))
     {
         this->showEditError("Key combo needs to be unique in the scope.");
@@ -149,12 +167,21 @@ void EditHotkeyDialog::updatePossibleActions()
         return;
     }
     qCDebug(chatterinoHotkeys) << "update possible actions for" << (int)*scope;
-    auto actions = hotkeys->savedActions.find(*scope);
-    if (actions != hotkeys->savedActions.end())
+    auto actions = actionNames.find(*scope);
+    if (actions != actionNames.end())
     {
+        const auto currentText = this->ui_->actionPicker->currentText();
+        int index = 0;
         for (const auto action : actions->second)
         {
-            this->ui_->actionPicker->addItem(action);
+            this->ui_->actionPicker->addItem(action.second.displayName,
+                                             action.first);
+            if (action.first == currentText)
+            {
+                // update action raw name to display name
+                this->ui_->actionPicker->setCurrentIndex(index);
+            }
+            index++;
         }
         qCDebug(chatterinoHotkeys) << actions->second.size();
     }

@@ -386,6 +386,7 @@ HEADERS += \
     src/controllers/highlights/UserHighlightModel.hpp \
     src/controllers/hotkeys/Hotkey.hpp \
     src/controllers/hotkeys/HotkeyController.hpp \
+    src/controllers/hotkeys/ActionNames.hpp \
     src/controllers/hotkeys/HotkeyModel.hpp \
     src/controllers/hotkeys/HotkeyScope.hpp \
     src/controllers/ignores/IgnoreController.hpp \

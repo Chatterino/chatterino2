@@ -85,6 +85,7 @@ set(SOURCE_FILES main.cpp
         controllers/hotkeys/Hotkey.hpp
         controllers/hotkeys/HotkeyController.cpp
         controllers/hotkeys/HotkeyController.hpp
+        controllers/hotkeys/ActionNames.hpp
         controllers/hotkeys/HotkeyModel.cpp
         controllers/hotkeys/HotkeyModel.hpp
         controllers/hotkeys/HotkeyScope.hpp
