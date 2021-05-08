@@ -170,6 +170,10 @@ namespace {
         if (settings.headerStreamTitle && !s.title.isEmpty())
             title += " - " + s.title;
 
+        // Strip out phantom newlines/trailing whitespace to prevent formatting issues
+        if (title.endsWith('\n'))
+            title.replace(QRegExp("[\n\\s]+$"), "");
+
         return title;
     }
     auto distance(QPoint a, QPoint b)
