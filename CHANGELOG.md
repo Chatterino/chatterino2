@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Strip newlines from stream titles to prevent text going off of split header (#TODO)
+
 ## 2.3.1
 
 - Major: Fixed crashing with the extension (#2704)
