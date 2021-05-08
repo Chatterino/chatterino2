@@ -336,7 +336,7 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
         break;
 
         case AutomodUserAction::RemovePermitted: {
-            text = QString("%1 removed %2 as a permitted term term on AutoMod.")
+            text = QString("%1 removed %2 as a permitted term on AutoMod.")
                        .arg(action.source.name)
                        .arg(action.message);
         }
