@@ -183,7 +183,6 @@ void EditHotkeyDialog::updatePossibleActions()
             }
             index++;
         }
-        qCDebug(chatterinoHotkeys) << actions->second.size();
     }
     else
     {
