@@ -806,18 +806,19 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         }
         else if (tags == "host_on")
         {
-            QStringList tmp = msg->messageText.split(QLatin1Char(' '));
-            if (tmp.size() != 3)
+            QStringList parts = msg->messageText.split(QLatin1Char(' '));
+            if (parts.size() != 3)
             {
                 return;
             }
-            if (tmp[2].size() < 1)
+            auto &channelName = parts[2];
+            if (channelName.size() < 1)
             {
                 return;
             }
-            tmp[2].chop(1);
+            channelName.chop(1);
             MessageBuilder builder;
-            TwitchMessageBuilder::hostingSystemMessage(tmp[2], &builder);
+            TwitchMessageBuilder::hostingSystemMessage(channelName, &builder);
             channel->addMessage(builder.release());
         }
         else
