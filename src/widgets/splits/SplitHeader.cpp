@@ -168,10 +168,9 @@ namespace {
         if (settings.headerGame && !s.game.isEmpty())
             title += " - " + s.game;
         if (settings.headerStreamTitle && !s.title.isEmpty())
-            title += " - " + s.title;
-
-        // Strip out phantom newlines/trailing whitespace to prevent formatting issues
-        title.replace(QRegExp("[\n\\s]+$"), "");
+        {
+            title += " - " + s.title.simplified();
+        }
 
         return title;
     }
