@@ -440,16 +440,21 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
              event_key->key() == Qt::Key_Down) &&
             event_key->modifiers() == Qt::NoModifier)
         {
+            // Tab has been pressed, focus next entry in list
+
             if (widget == this->dialog->ui_.twitch.channelName)
             {
+                // Special case for when current selection is the "Channel" entry's edit box since the Edit box actually has the focus
                 this->dialog->ui_.twitch.whispers->setFocus();
                 return true;
             }
             else if (widget == this->dialog->ui_.twitch.live)
             {
+                // Special case for when current selection is "Live" (the last entry in the list), next wrap is Channel, but we need to select its edit box
                 this->dialog->ui_.twitch.channel->setFocus();
                 return true;
             }
+
             widget->nextInFocusChain()->setFocus();
             return true;
         }
@@ -459,8 +464,11 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
                  ((event_key->key() == Qt::Key_Up) &&
                   event_key->modifiers() == Qt::NoModifier))
         {
+            // Shift+Tab has been pressed, focus previous entry in list
+
             if (widget == this->dialog->ui_.twitch.channelName)
             {
+                // Special case for when current selection is the "Channel" entry's edit box since the Edit box actually has the focus
                 this->dialog->ui_.twitch.live->setFocus();
                 return true;
             }
