@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QMap>
 #include <QString>
 #include <boost/optional.hpp>
 #include <unordered_map>
@@ -12,6 +13,7 @@
 #include "pajlada/signals/signal.hpp"
 
 #include <memory>
+#include <queue>
 #include <shared_mutex>
 
 namespace chatterino {
