@@ -102,7 +102,7 @@ protected:
 
 private:
     const QString name_;
-    QDate lastDate_;
+    QDate lastDate_ = QDate::currentDate();
     LimitedQueue<MessagePtr> messages_;
     Type type_;
     QTimer clearCompletionModelTimer_;
