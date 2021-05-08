@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
+
 ## 2.3.1
 
 - Major: Fixed crashing with the extension (#2704)

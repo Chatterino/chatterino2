@@ -724,6 +724,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 
         auto builder = MessageBuilder();
         builder.message().flags.set(MessageFlag::System);
+        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
 
         builder.emplace<TimestampElement>();
         builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
