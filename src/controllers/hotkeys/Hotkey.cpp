@@ -63,7 +63,7 @@ Qt::ShortcutContext Hotkey::getContext() const
         case HotkeyScope::UserCard:
             return Qt::WindowShortcut;
         case HotkeyScope::Settings:
-            return Qt::WidgetShortcut;
+            return Qt::WidgetWithChildrenShortcut;
         case HotkeyScope::EmotePopup:
             return Qt::WindowShortcut;
         case HotkeyScope::SelectChannelPopup:
