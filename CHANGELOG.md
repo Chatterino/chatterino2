@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Bugfix: Automod messages now work properly again. (#2682)
 - Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
 
 ## 2.3.1
