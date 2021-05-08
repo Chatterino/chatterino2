@@ -994,13 +994,8 @@ MessageElementFlags ChannelView::getFlags() const
         {
             flags.set(MessageElementFlag::ModeratorTools);
         }
-        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel)
-        {
-            flags.set(MessageElementFlag::ChannelName);
-            flags.unset(MessageElementFlag::ChannelPointReward);
-        }
-        if (this->channel_ == app->twitch.server->mentionsChannel ||
-            this->channel_ == app->twitch.server->liveChannel)
+        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel ||
+            this->underlyingChannel_ == app->twitch.server->liveChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
