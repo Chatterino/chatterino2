@@ -4,6 +4,7 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/LimitedQueue.hpp"
 
+#include <QDate>
 #include <QString>
 #include <QTimer>
 #include <boost/optional.hpp>
@@ -97,6 +98,7 @@ public:
     static std::shared_ptr<Channel> getEmpty();
 
     CompletionModel completionModel;
+    QDate lastDate_;
 
 protected:
     virtual void onConnected();

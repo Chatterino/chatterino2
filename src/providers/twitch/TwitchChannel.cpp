@@ -744,6 +744,24 @@ void TwitchChannel::loadRecentMessages()
 
             for (auto message : messages)
             {
+                if (message->tags().contains("rm-received-ts"))
+                {
+                    QDate msgDate = QDateTime::fromMSecsSinceEpoch(
+                                        message->tags()
+                                            .value("rm-received-ts")
+                                            .toLongLong())
+                                        .date();
+                    if (msgDate != shared.get()->lastDate_)
+                    {
+                        shared.get()->lastDate_ = msgDate;
+                        auto msg = makeSystemMessage(
+                            msgDate.toString(Qt::SystemLocaleLongDate),
+                            QTime(0, 0));
+                        msg->flags.set(MessageFlag::RecentMessage);
+                        allBuiltMessages.emplace_back(msg);
+                    }
+                }
+
                 for (auto builtMessage :
                      handler.parseMessage(shared.get(), message))
                 {

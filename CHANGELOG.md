@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Major: New split for channels going live! /live. (#1797)
+- Minor: Added a message that displays a new date on new day. (#1016)
 - Minor: Hosting messages are now clickable. (#2655)
 - Minor: Messages held by automod are now shown to the user. (#2626)
 - Bugfix: Strip newlines from stream titles to prevent text going off of split header (#2755)
