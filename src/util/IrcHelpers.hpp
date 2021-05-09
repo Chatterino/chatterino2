@@ -1,5 +1,6 @@
 #pragma once
 
+#include <IrcMessage>
 #include <QString>
 
 namespace chatterino {

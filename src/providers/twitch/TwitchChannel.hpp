@@ -87,7 +87,6 @@ public:
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
 
     // Emotes
-    const TwitchBadges &globalTwitchBadges() const;
     const BttvEmotes &globalBttv() const;
     const FfzEmotes &globalFfz() const;
     boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
@@ -128,9 +127,8 @@ private:
     } nameOptions;
 
 protected:
-    explicit TwitchChannel(const QString &channelName,
-                           TwitchBadges &globalTwitchBadges,
-                           BttvEmotes &globalBttv, FfzEmotes &globalFfz);
+    explicit TwitchChannel(const QString &channelName, BttvEmotes &globalBttv,
+                           FfzEmotes &globalFfz);
 
 private:
     // Methods
@@ -162,9 +160,6 @@ private:
     int chatterCount_;
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
-
-    // Emotes
-    TwitchBadges &globalTwitchBadges_;
 
 protected:
     BttvEmotes &globalBttv_;

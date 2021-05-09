@@ -143,8 +143,7 @@ namespace {
     }
 }  // namespace
 
-TwitchChannel::TwitchChannel(const QString &name,
-                             TwitchBadges &globalTwitchBadges, BttvEmotes &bttv,
+TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
                              FfzEmotes &ffz)
     : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
@@ -153,7 +152,6 @@ TwitchChannel::TwitchChannel(const QString &name,
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
                        name)
-    , globalTwitchBadges_(globalTwitchBadges)
     , globalBttv_(bttv)
     , globalFfz_(ffz)
     , bttvEmotes_(std::make_shared<EmoteMap>())
@@ -478,11 +476,6 @@ SharedAccessGuard<const TwitchChannel::StreamStatus>
     return this->streamStatus_.accessConst();
 }
 
-const TwitchBadges &TwitchChannel::globalTwitchBadges() const
-{
-    return this->globalTwitchBadges_;
-}
-
 const BttvEmotes &TwitchChannel::globalBttv() const
 {
     return this->globalBttv_;
@@ -570,15 +563,17 @@ void TwitchChannel::setLive(bool newLiveStatus)
                         getApp()->windows->sendAlert();
                     }
                 }
-                auto live =
-                    makeSystemMessage(this->getDisplayName() + " is live");
-                this->addMessage(live);
+                MessageBuilder builder;
+                TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
+                                                        &builder);
+                this->addMessage(builder.release());
             }
             else
             {
-                auto offline =
-                    makeSystemMessage(this->getDisplayName() + " is offline");
-                this->addMessage(offline);
+                MessageBuilder builder;
+                TwitchMessageBuilder::offlineSystemMessage(
+                    this->getDisplayName(), &builder);
+                this->addMessage(builder.release());
             }
             guard->live = newLiveStatus;
         }

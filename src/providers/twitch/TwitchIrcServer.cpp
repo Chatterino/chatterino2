@@ -17,6 +17,8 @@
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "util/PostToThread.hpp"
 
+#include <QMetaEnum>
+
 // using namespace Communi;
 using namespace std::chrono_literals;
 
@@ -45,7 +47,6 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
         });
     });
 
-    this->twitchBadges.loadTwitchBadges();
     this->bttv.loadEmotes();
     this->ffz.loadEmotes();
 }
@@ -88,8 +89,8 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
 std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     const QString &channelName)
 {
-    auto channel = std::shared_ptr<TwitchChannel>(new TwitchChannel(
-        channelName, this->twitchBadges, this->bttv, this->ffz));
+    auto channel = std::shared_ptr<TwitchChannel>(
+        new TwitchChannel(channelName, this->bttv, this->ffz));
     channel->initialize();
 
     channel->sendMessageSignal.connect(

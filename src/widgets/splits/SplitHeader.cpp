@@ -168,7 +168,9 @@ namespace {
         if (settings.headerGame && !s.game.isEmpty())
             title += " - " + s.game;
         if (settings.headerStreamTitle && !s.title.isEmpty())
-            title += " - " + s.title;
+        {
+            title += " - " + s.title.simplified();
+        }
 
         return title;
     }

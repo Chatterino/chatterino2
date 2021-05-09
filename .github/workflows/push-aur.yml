@@ -19,4 +19,4 @@ jobs:
           commit_username: chatterino2-ci
           commit_email: chatterino2-ci@pajlada.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
-          dry_run: ${{ github.ref != 'refs/heads/master' }}
+          dry_run: true

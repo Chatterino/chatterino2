@@ -37,6 +37,8 @@
 #include "widgets/Window.hpp"
 #include "widgets/splits/Split.hpp"
 
+#include <QDesktopServices>
+
 namespace chatterino {
 
 static std::atomic<bool> isAppInitialized{false};
@@ -316,7 +318,7 @@ void Application::initPubsub()
             }
 
             postToThread([chan, action] {
-                auto p = makeAutomodMessage(action);
+                const auto p = makeAutomodMessage(action);
                 chan->addMessage(p.first);
                 chan->addMessage(p.second);
             });
@@ -338,6 +340,22 @@ void Application::initPubsub()
                 chan->addMessage(msg);
             });
             chan->deleteMessage(msg->id);
+        });
+
+    this->twitch.pubsub->signals_.moderation.automodInfoMessage.connect(
+        [&](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            postToThread([chan, action] {
+                const auto p = makeAutomodInfoMessage(action);
+                chan->addMessage(p);
+            });
         });
 
     this->twitch.pubsub->signals_.pointReward.redeemed.connect([&](auto &data) {

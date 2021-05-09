@@ -2,8 +2,11 @@
 
 #include "singletons/NativeMessaging.hpp"
 
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QStringList>
 #include <QTimer>
+
 #include <fstream>
 #include <iostream>
 #include <memory>
