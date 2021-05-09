@@ -4,6 +4,7 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/LimitedQueue.hpp"
 
+#include <QDate>
 #include <QString>
 #include <QTimer>
 #include <boost/optional.hpp>
