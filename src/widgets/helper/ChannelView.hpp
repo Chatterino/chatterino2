@@ -188,7 +188,6 @@ private:
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
-    QDate lastDate_;
 
     FilterSetPtr channelFilters_;
 

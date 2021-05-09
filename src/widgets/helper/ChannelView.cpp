@@ -123,7 +123,6 @@ namespace {
 ChannelView::ChannelView(BaseWidget *parent)
     : BaseWidget(parent)
     , scrollBar_(new Scrollbar(this))
-    , lastDate_(QDate::currentDate())
 {
     this->setMouseTracking(true);
 
