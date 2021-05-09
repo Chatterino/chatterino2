@@ -1302,4 +1302,58 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
 }
 
+void TwitchMessageBuilder::liveMessage(const QString &channelName,
+                                       MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder
+        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                               MessageColor::Text, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+    builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                  MessageColor::Text);
+}
+
+void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
+                                             MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder
+        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+    builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                  MessageColor::System);
+}
+
+void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
+                                                MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder
+        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+    builder->emplace<TextElement>("is now offline.", MessageElementFlag::Text,
+                                  MessageColor::System);
+}
+
+void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
+                                                MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->emplace<TextElement>("Now hosting", MessageElementFlag::Text,
+                                  MessageColor::System);
+    builder
+        ->emplace<TextElement>(channelName + ".", MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+}
+
 }  // namespace chatterino

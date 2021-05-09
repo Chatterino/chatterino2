@@ -11,6 +11,8 @@
 #include "singletons/Settings.hpp"
 #include "util/QObjectRef.hpp"
 
+#include <QMetaEnum>
+
 namespace chatterino {
 
 IrcServer::IrcServer(const IrcServerData &data)

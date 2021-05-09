@@ -1005,7 +1005,8 @@ MessageElementFlags ChannelView::getFlags() const
         {
             flags.set(MessageElementFlag::ModeratorTools);
         }
-        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel)
+        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel ||
+            this->underlyingChannel_ == app->twitch.server->liveChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);

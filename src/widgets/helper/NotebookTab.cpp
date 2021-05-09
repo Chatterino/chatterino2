@@ -14,6 +14,9 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QDialogButtonBox>
+#include <QLabel>
+#include <QLineEdit>
 #include <QLinearGradient>
 #include <QMimeData>
 #include <QPainter>

@@ -724,6 +724,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 
         auto builder = MessageBuilder();
         builder.message().flags.set(MessageFlag::System);
+        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
 
         builder.emplace<TimestampElement>();
         builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
@@ -802,6 +803,23 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             channel->addMessage(makeSystemMessage(
                 "Usage: \"/delete <msg-id>\" - can't take more "
                 "than one argument"));
+        }
+        else if (tags == "host_on")
+        {
+            QStringList parts = msg->messageText.split(QLatin1Char(' '));
+            if (parts.size() != 3)
+            {
+                return;
+            }
+            auto &channelName = parts[2];
+            if (channelName.size() < 2)
+            {
+                return;
+            }
+            channelName.chop(1);
+            MessageBuilder builder;
+            TwitchMessageBuilder::hostingSystemMessage(channelName, &builder);
+            channel->addMessage(builder.release());
         }
         else
         {

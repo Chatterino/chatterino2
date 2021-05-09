@@ -10,6 +10,8 @@
 #include <shared_mutex>
 #include <vector>
 
+#include <QColor>
+
 namespace chatterino {
 
 struct Emote;

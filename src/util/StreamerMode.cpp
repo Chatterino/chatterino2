@@ -19,6 +19,8 @@
 #    pragma comment(lib, "Wtsapi32.lib")
 #endif
 
+#include <QProcess>
+
 namespace chatterino {
 
 constexpr int cooldownInS = 10;

@@ -2,7 +2,9 @@
 
 #include "util/DisplayBadge.hpp"
 
+#include <QComboBox>
 #include <QDialog>
+#include <boost/optional.hpp>
 
 namespace chatterino {
 

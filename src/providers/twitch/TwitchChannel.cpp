@@ -563,15 +563,32 @@ void TwitchChannel::setLive(bool newLiveStatus)
                         getApp()->windows->sendAlert();
                     }
                 }
-                auto live =
-                    makeSystemMessage(this->getDisplayName() + " is live");
-                this->addMessage(live);
+                // Channel live message
+                MessageBuilder builder;
+                TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
+                                                        &builder);
+                this->addMessage(builder.release());
+
+                // Message in /live channel
+                MessageBuilder builder2;
+                TwitchMessageBuilder::liveMessage(this->getDisplayName(),
+                                                  &builder2);
+                getApp()->twitch2->liveChannel->addMessage(builder2.release());
+
+                // Notify on all channels with a ping sound
+                if (getSettings()->notificationOnAnyChannel &&
+                    !(isInStreamerMode() &&
+                      getSettings()->streamerModeSuppressLiveNotifications))
+                {
+                    getApp()->notifications->playSound();
+                }
             }
             else
             {
-                auto offline =
-                    makeSystemMessage(this->getDisplayName() + " is offline");
-                this->addMessage(offline);
+                MessageBuilder builder;
+                TwitchMessageBuilder::offlineSystemMessage(
+                    this->getDisplayName(), &builder);
+                this->addMessage(builder.release());
             }
             guard->live = newLiveStatus;
         }

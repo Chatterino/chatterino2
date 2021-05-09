@@ -1,6 +1,10 @@
 #pragma once
 
+#include <QJsonObject>
+#include <QList>
+#include <QRect>
 #include <QString>
+#include <QUuid>
 
 #include <optional>
 #include <variant>

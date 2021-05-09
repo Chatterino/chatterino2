@@ -1,5 +1,8 @@
 #include "TwitchBadges.hpp"
 
+#include <QBuffer>
+#include <QIcon>
+#include <QImageReader>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
@@ -88,6 +91,10 @@ void TwitchBadges::loaded()
 
     // Flush callback queue
     std::unique_lock queueLock(this->queueMutex_);
+
+    // Once we have gained unique access of the queue, we can release our unique access of the loaded mutex allowing future calls to read locked_
+    loadedLock.unlock();
+
     while (!this->callbackQueue_.empty())
     {
         auto callback = this->callbackQueue_.front();
