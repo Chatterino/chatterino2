@@ -3,7 +3,7 @@
 ## Unversioned
 
 - Major: New split for channels going live! /live. (#1797)
-- Minor: Tabbing in `Select a channel to open` is now consistent.
+- Minor: Tabbing in `Select a channel to open` is now consistent. (#1797)
 - Minor: Hosting messages are now clickable. (#2655)
 - Minor: Messages held by automod are now shown to the user. (#2626)
 - Bugfix: Strip newlines from stream titles to prevent text going off of split header (#2755)
