@@ -36,6 +36,7 @@ public:
         TwitchWhispers,
         TwitchWatching,
         TwitchMentions,
+        TwitchLive,
         TwitchEnd,
         Irc,
         Misc

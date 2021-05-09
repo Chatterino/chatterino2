@@ -2,12 +2,14 @@
 
 ## Unversioned
 
+- Major: New split for channels going live! /live. (#1797)
 - Minor: Hosting messages are now clickable. (#2655)
 - Minor: Messages held by automod are now shown to the user. (#2626)
 - Bugfix: Strip newlines from stream titles to prevent text going off of split header (#2755)
 - Bugfix: Automod messages now work properly again. (#2682)
 - Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
 - Bugfix: Fix a deadlock that would occur during user badge loading. (#1704, #2756)
+- Bugfix: Tabbing in `Select a channel to open` is now consistent. (#1797)
 
 ## 2.3.1
 
