@@ -3,6 +3,8 @@
 #include "common/NetworkRequest.hpp"
 #include "messages/Link.hpp"
 
+#include <boost/noncopyable.hpp>
+
 #include <functional>
 
 namespace chatterino {

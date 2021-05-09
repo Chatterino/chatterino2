@@ -14,6 +14,7 @@ option(BUILD_TESTS "Build the tests for Chatterino" OFF)
 option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
 option(USE_SYSTEM_QT5KEYCHAIN "Use system Qt5Keychain library" OFF)
+option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
 
 option(USE_CONAN "Use conan" OFF)
 

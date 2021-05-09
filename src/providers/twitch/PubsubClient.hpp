@@ -132,6 +132,7 @@ public:
 
             Signal<AutomodAction> automodMessage;
             Signal<AutomodUserAction> automodUserMessage;
+            Signal<AutomodInfoAction> automodInfoMessage;
         } moderation;
 
         struct {

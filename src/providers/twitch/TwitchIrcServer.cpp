@@ -17,6 +17,8 @@
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "util/PostToThread.hpp"
 
+#include <QMetaEnum>
+
 // using namespace Communi;
 using namespace std::chrono_literals;
 

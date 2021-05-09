@@ -3,6 +3,10 @@
 #include "common/QLogging.hpp"
 #include "widgets/Window.hpp"
 
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+
 namespace chatterino {
 
 namespace {
