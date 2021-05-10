@@ -63,7 +63,7 @@ void HotkeyController::loadHotkeys()
                                  defaultHotkeysAdded.end());
 
     auto keys = pajlada::Settings::SettingManager::getObjectKeys("/hotkeys");
-    this->resetToDefaults(set);
+    this->addDefaults(set);
     pajlada::Settings::Setting<std::vector<QString>>::set(
         "/hotkeys/addedDefaults", std::vector<QString>(set.begin(), set.end()));
 
@@ -102,6 +102,22 @@ void HotkeyController::loadHotkeys()
     }
 }
 
+void HotkeyController::resetToDefaults()
+{
+    std::set<QString> addedSet;
+    pajlada::Settings::Setting<std::vector<QString>>::set(
+        "/hotkeys/addedDefaults",
+        std::vector<QString>(addedSet.begin(), addedSet.end()));
+    auto size = this->hotkeys_.raw().size();
+    for (unsigned long i = 0; i < size; i++)
+    {
+        this->hotkeys_.removeAt(0);
+    }
+
+    // add defaults back
+    this->saveHotkeys();
+    this->loadHotkeys();
+}
 void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
                                      HotkeyScope scope,
                                      QKeySequence keySequence, QString action,
@@ -119,7 +135,7 @@ void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
     addedHotkeys.insert(name);
 }
 
-void HotkeyController::resetToDefaults(std::set<QString> &addedHotkeys)
+void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
 {
     // split
     {

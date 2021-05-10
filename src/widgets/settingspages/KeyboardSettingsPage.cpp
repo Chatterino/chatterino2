@@ -58,6 +58,21 @@ KeyboardSettingsPage::KeyboardSettingsPage()
                      [this, view](const QModelIndex &clicked) {
                          this->tableCellClicked(clicked, view);
                      });
+
+    QPushButton *resetEverything = new QPushButton("Reset EVERYTHING");
+    QObject::connect(resetEverything, &QPushButton::clicked, [this]() {
+        auto reply = QMessageBox::question(
+            this, "Reset hotkeys",
+            "Are you sure you want to reset hotkeys? "
+            "This action is permanent and CANNOT BE UNDONE!",
+            QMessageBox::Yes | QMessageBox::Cancel);
+
+        if (reply == QMessageBox::Yes)
+        {
+            getApp()->hotkeys->resetToDefaults();
+        }
+    });
+    view->addCustomButton(resetEverything);
 }
 
 void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,

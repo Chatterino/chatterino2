@@ -59,7 +59,8 @@ private:
 
     void loadHotkeys();
     void saveHotkeys();
-    void resetToDefaults(std::set<QString> &addedHotkeys);
+    void addDefaults(std::set<QString> &addedHotkeys);
+    void resetToDefaults();
     void tryAddDefault(std::set<QString> &addedHotkeys, HotkeyScope scope,
                        QKeySequence keySequence, QString action,
                        std::vector<QString> args, QString name);
