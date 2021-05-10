@@ -92,8 +92,8 @@ void EditHotkeyDialog::afterEdit()
     QString nameText = this->ui_->nameEdit->text();
 
     // check if another hotkey with this name exists, accounts for editing a hotkey
-    if (getApp()->hotkeys->getHotkeyByName(nameText) &&
-        !(this->data_ && this->data_->name() == nameText))
+    bool isEditing = bool(this->data_) && this->data_->name() == nameText;
+    if (!isEditing && getApp()->hotkeys->getHotkeyByName(nameText))
     {
         this->showEditError("Hotkey with this name already exists.");
         return;
@@ -143,7 +143,6 @@ void EditHotkeyDialog::afterEdit()
     auto hotkey =
         std::make_shared<Hotkey>(*scope, this->ui_->keyComboEdit->keySequence(),
                                  action, arguments, nameText);
-    bool isEditing = bool(this->data_) && this->data_->name() == hotkey->name();
     if (!isEditing && getApp()->hotkeys->isDuplicate(hotkey))
     {
         this->showEditError("Keybinding needs to be unique in the category.");
