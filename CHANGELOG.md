@@ -15,12 +15,15 @@
 - Minor: Optionally remove spaces between emotes, originally made for Mm2PL/Dankerino. (#2651)
 - Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
 - Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
+- Major: New split for channels going live! /live. (#1797)
+- Minor: Added a message that displays a new date on new day. (#1016)
 - Minor: Hosting messages are now clickable. (#2655)
 - Minor: Messages held by automod are now shown to the user. (#2626)
 - Bugfix: Strip newlines from stream titles to prevent text going off of split header (#2755)
 - Bugfix: Automod messages now work properly again. (#2682)
 - Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
 - Bugfix: Fix a deadlock that would occur during user badge loading. (#1704, #2756)
+- Bugfix: Tabbing in `Select a channel to open` is now consistent. (#1797)
 
 ## 2.3.1
 

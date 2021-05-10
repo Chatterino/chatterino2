@@ -563,10 +563,25 @@ void TwitchChannel::setLive(bool newLiveStatus)
                         getApp()->windows->sendAlert();
                     }
                 }
+                // Channel live message
                 MessageBuilder builder;
                 TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
                                                         &builder);
                 this->addMessage(builder.release());
+
+                // Message in /live channel
+                MessageBuilder builder2;
+                TwitchMessageBuilder::liveMessage(this->getDisplayName(),
+                                                  &builder2);
+                getApp()->twitch2->liveChannel->addMessage(builder2.release());
+
+                // Notify on all channels with a ping sound
+                if (getSettings()->notificationOnAnyChannel &&
+                    !(isInStreamerMode() &&
+                      getSettings()->streamerModeSuppressLiveNotifications))
+                {
+                    getApp()->notifications->playSound();
+                }
             }
             else
             {
@@ -729,6 +744,24 @@ void TwitchChannel::loadRecentMessages()
 
             for (auto message : messages)
             {
+                if (message->tags().contains("rm-received-ts"))
+                {
+                    QDate msgDate = QDateTime::fromMSecsSinceEpoch(
+                                        message->tags()
+                                            .value("rm-received-ts")
+                                            .toLongLong())
+                                        .date();
+                    if (msgDate != shared.get()->lastDate_)
+                    {
+                        shared.get()->lastDate_ = msgDate;
+                        auto msg = makeSystemMessage(
+                            msgDate.toString(Qt::SystemLocaleLongDate),
+                            QTime(0, 0));
+                        msg->flags.set(MessageFlag::RecentMessage);
+                        allBuiltMessages.emplace_back(msg);
+                    }
+                }
+
                 for (auto builtMessage :
                      handler.parseMessage(shared.get(), message))
                 {

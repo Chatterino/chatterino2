@@ -52,6 +52,12 @@ public:
 
     static void appendChannelPointRewardMessage(
         const ChannelPointReward &reward, MessageBuilder *builder);
+
+    // Message in the /live chat for channel going live
+    static void liveMessage(const QString &channelName,
+                            MessageBuilder *builder);
+
+    // Messages in normal chat for channel stuff
     static void liveSystemMessage(const QString &channelName,
                                   MessageBuilder *builder);
     static void offlineSystemMessage(const QString &channelName,

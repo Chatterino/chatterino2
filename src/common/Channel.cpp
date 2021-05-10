@@ -24,6 +24,7 @@ namespace chatterino {
 //
 Channel::Channel(const QString &name, Type type)
     : completionModel(*this)
+    , lastDate_(QDate::currentDate())
     , name_(name)
     , type_(type)
 {
