@@ -27,7 +27,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     EditableModelView *view =
         layout.emplace<EditableModelView>(model).getElement();
 
-    view->setTitles({"Name", "Key Combo"});
+    view->setTitles({"Hotkey name", "Keybinding"});
     view->getTableView()->horizontalHeader()->setVisible(true);
     view->getTableView()->horizontalHeader()->setStretchLastSection(false);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(

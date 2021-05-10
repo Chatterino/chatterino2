@@ -125,9 +125,9 @@ void EditHotkeyDialog::afterEdit()
     if (!isKeyExcempt && !hasModifier && !this->shownSingleKeyWarning)
     {
         this->showEditError(
-            "Warning: hotkeys without modifiers can lead to not being "
-            "\nable to use the key for the normal purpose.\nSubmit again to do "
-            "it anyway.");
+            "Warning: using keybindings without modifiers can lead to not "
+            "being\nable to use the key for the normal purpose.\nPress the "
+            "submit button again to do it anyway.");
         this->shownSingleKeyWarning = true;
         return;
     }
@@ -145,7 +145,7 @@ void EditHotkeyDialog::afterEdit()
                                  action, arguments, nameText);
     if (getApp()->hotkeys->isDuplicate(hotkey))
     {
-        this->showEditError("Key combo needs to be unique in the scope.");
+        this->showEditError("Keybinding needs to be unique in the category.");
         return;
     }
 
