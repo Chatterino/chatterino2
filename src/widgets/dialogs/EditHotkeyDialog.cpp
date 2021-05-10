@@ -143,7 +143,8 @@ void EditHotkeyDialog::afterEdit()
     auto hotkey =
         std::make_shared<Hotkey>(*scope, this->ui_->keyComboEdit->keySequence(),
                                  action, arguments, nameText);
-    if (getApp()->hotkeys->isDuplicate(hotkey))
+    bool isEditing = bool(this->data_) && this->data_->name() == hotkey->name();
+    if (!isEditing && getApp()->hotkeys->isDuplicate(hotkey))
     {
         this->showEditError("Keybinding needs to be unique in the category.");
         return;
