@@ -143,28 +143,28 @@ bool TwitchMessageBuilder::isIgnored() const
     {
         auto sourceUserID = this->tags.value("user-id").toString();
 
-        for (const auto &user : app->accounts->twitch.getCurrent()->getBlocks())
-        {
-            if (sourceUserID == user.id)
-            {
-                switch (static_cast<ShowIgnoredUsersMessages>(
-                    getSettings()->showBlockedUsersMessages.getValue()))
-                {
-                    case ShowIgnoredUsersMessages::IfModerator:
-                        if (this->channel->isMod() ||
-                            this->channel->isBroadcaster())
-                            return false;
-                        break;
-                    case ShowIgnoredUsersMessages::IfBroadcaster:
-                        if (this->channel->isBroadcaster())
-                            return false;
-                        break;
-                    case ShowIgnoredUsersMessages::Never:
-                        break;
-                }
+        auto blocks =
+            app->accounts->twitch.getCurrent()->accessBlockedUserIds();
 
-                return true;
+        if (auto it = blocks->find(sourceUserID); it != blocks->end())
+        {
+            switch (static_cast<ShowIgnoredUsersMessages>(
+                getSettings()->showBlockedUsersMessages.getValue()))
+            {
+                case ShowIgnoredUsersMessages::IfModerator:
+                    if (this->channel->isMod() ||
+                        this->channel->isBroadcaster())
+                        return false;
+                    break;
+                case ShowIgnoredUsersMessages::IfBroadcaster:
+                    if (this->channel->isBroadcaster())
+                        return false;
+                    break;
+                case ShowIgnoredUsersMessages::Never:
+                    break;
             }
+
+            return true;
         }
     }
 
@@ -1083,8 +1083,8 @@ boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
         return channelBadge;
     }
 
-    if (auto globalBadge = this->twitchChannel->globalTwitchBadges().badge(
-            badge.key_, badge.value_))
+    if (auto globalBadge =
+            TwitchBadges::instance()->badge(badge.key_, badge.value_))
     {
         return globalBadge;
     }
@@ -1300,6 +1300,60 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     }
 
     builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
+}
+
+void TwitchMessageBuilder::liveMessage(const QString &channelName,
+                                       MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder
+        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                               MessageColor::Text, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+    builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                  MessageColor::Text);
+}
+
+void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
+                                             MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder
+        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+    builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                  MessageColor::System);
+}
+
+void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
+                                                MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder
+        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+    builder->emplace<TextElement>("is now offline.", MessageElementFlag::Text,
+                                  MessageColor::System);
+}
+
+void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
+                                                MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->emplace<TextElement>("Now hosting", MessageElementFlag::Text,
+                                  MessageColor::System);
+    builder
+        ->emplace<TextElement>(channelName + ".", MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
 }
 
 }  // namespace chatterino

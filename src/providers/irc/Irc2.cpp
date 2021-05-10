@@ -11,6 +11,8 @@
 #include <QSaveFile>
 #include <QtConcurrent>
 
+#include <unordered_set>
+
 namespace chatterino {
 
 namespace {

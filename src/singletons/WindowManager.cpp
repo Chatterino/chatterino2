@@ -104,6 +104,7 @@ WindowManager::WindowManager()
 
     this->wordFlagsListener_.addSetting(settings->showTimestamps);
     this->wordFlagsListener_.addSetting(settings->showBadgesGlobalAuthority);
+    this->wordFlagsListener_.addSetting(settings->showBadgesPredictions);
     this->wordFlagsListener_.addSetting(settings->showBadgesChannelAuthority);
     this->wordFlagsListener_.addSetting(settings->showBadgesSubscription);
     this->wordFlagsListener_.addSetting(settings->showBadgesVanity);
@@ -167,6 +168,8 @@ void WindowManager::updateWordTypeMask()
     // badges
     flags.set(settings->showBadgesGlobalAuthority ? MEF::BadgeGlobalAuthority
                                                   : MEF::None);
+    flags.set(settings->showBadgesPredictions ? MEF::BadgePredictions
+                                              : MEF::None);
     flags.set(settings->showBadgesChannelAuthority ? MEF::BadgeChannelAuthority
                                                    : MEF::None);
     flags.set(settings->showBadgesSubscription ? MEF::BadgeSubscription
@@ -556,6 +559,10 @@ void WindowManager::encodeChannel(IndirectChannel channel, QJsonObject &obj)
             obj.insert("type", "whispers");
         }
         break;
+        case Channel::Type::TwitchLive: {
+            obj.insert("type", "live");
+        }
+        break;
         case Channel::Type::Irc: {
             if (auto ircChannel =
                     dynamic_cast<IrcChannel *>(channel.get().get()))
@@ -604,6 +611,10 @@ IndirectChannel WindowManager::decodeChannel(const SplitDescriptor &descriptor)
     else if (descriptor.type_ == "whispers")
     {
         return app->twitch.server->whispersChannel;
+    }
+    else if (descriptor.type_ == "live")
+    {
+        return app->twitch.server->liveChannel;
     }
     else if (descriptor.type_ == "irc")
     {

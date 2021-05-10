@@ -133,4 +133,13 @@ struct AutomodUserAction : PubSubAction {
     QString message;
 };
 
+struct AutomodInfoAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+    enum {
+        OnHold,
+        Denied,
+        Approved,
+    } type;
+};
+
 }  // namespace chatterino

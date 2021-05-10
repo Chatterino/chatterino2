@@ -72,6 +72,10 @@ set(SOURCE_FILES main.cpp
         controllers/filters/parser/Types.cpp
         controllers/filters/parser/Types.hpp
 
+        controllers/highlights/BadgeHighlightModel.cpp
+        controllers/highlights/BadgeHighlightModel.hpp
+        controllers/highlights/HighlightBadge.cpp
+        controllers/highlights/HighlightBadge.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
         controllers/highlights/HighlightModel.cpp
@@ -148,6 +152,8 @@ set(SOURCE_FILES main.cpp
         messages/search/ChannelPredicate.hpp
         messages/search/LinkPredicate.cpp
         messages/search/LinkPredicate.hpp
+        messages/search/MessageFlagsPredicate.cpp
+        messages/search/MessageFlagsPredicate.hpp
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
 
@@ -268,6 +274,8 @@ set(SOURCE_FILES main.cpp
         util/Clipboard.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
+        util/DisplayBadge.cpp
+        util/DisplayBadge.hpp
         util/FormatTime.cpp
         util/FormatTime.hpp
         util/FunctionEventFilter.cpp
@@ -326,6 +334,8 @@ set(SOURCE_FILES main.cpp
         widgets/Window.cpp
         widgets/Window.hpp
 
+        widgets/dialogs/BadgePickerDialog.cpp
+        widgets/dialogs/BadgePickerDialog.hpp
         widgets/dialogs/ChannelFilterEditorDialog.cpp
         widgets/dialogs/ChannelFilterEditorDialog.hpp
         widgets/dialogs/ColorPickerDialog.cpp
@@ -351,8 +361,6 @@ set(SOURCE_FILES main.cpp
         widgets/dialogs/SelectChannelFiltersDialog.hpp
         widgets/dialogs/SettingsDialog.cpp
         widgets/dialogs/SettingsDialog.hpp
-        widgets/dialogs/TextInputDialog.cpp
-        widgets/dialogs/TextInputDialog.hpp
         widgets/dialogs/UpdateDialog.cpp
         widgets/dialogs/UpdateDialog.hpp
         widgets/dialogs/UserInfoPopup.cpp
@@ -479,7 +487,9 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 add_sanitizers(${PROJECT_NAME})
 
-target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
+if (USE_PRECOMPILED_HEADERS)
+    target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
+endif ()
 
 # Enable autogeneration of Qts MOC/RCC/UIC
 set_target_properties(${PROJECT_NAME}

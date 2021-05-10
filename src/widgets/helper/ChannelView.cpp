@@ -1,6 +1,7 @@
 #include "ChannelView.hpp"
 
 #include <QClipboard>
+#include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QGraphicsBlurEffect>
@@ -22,6 +23,7 @@
 #include "messages/Emote.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
@@ -602,6 +604,15 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                    boost::optional<MessageFlags> overridingFlags) {
                 if (this->shouldIncludeMessage(message))
                 {
+                    if (this->channel_->lastDate_ != QDate::currentDate())
+                    {
+                        this->channel_->lastDate_ = QDate::currentDate();
+                        auto msg =
+                            makeSystemMessage(QDate::currentDate().toString(
+                                                  Qt::SystemLocaleLongDate),
+                                              QTime(0, 0));
+                        this->channel_->addMessage(msg);
+                    }
                     // When the message was received in the underlyingChannel,
                     // logging will be handled. Prevent duplications.
                     if (overridingFlags)
@@ -994,7 +1005,8 @@ MessageElementFlags ChannelView::getFlags() const
         {
             flags.set(MessageElementFlag::ModeratorTools);
         }
-        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel)
+        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel ||
+            this->underlyingChannel_ == app->twitch.server->liveChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
@@ -1110,8 +1122,10 @@ void ChannelView::drawMessages(QPainter &painter)
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
-    if (event->orientation() != Qt::Vertical)
+    if (!event->angleDelta().y())
+    {
         return;
+    }
 
     if (event->modifiers() & Qt::ControlModifier)
     {
@@ -1124,7 +1138,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
         float mouseMultiplier = getSettings()->mouseScrollMultiplier;
 
         qreal desired = this->scrollBar_->getDesiredValue();
-        qreal delta = event->delta() * qreal(1.5) * mouseMultiplier;
+        qreal delta = event->angleDelta().y() * qreal(1.5) * mouseMultiplier;
 
         auto snapshot = this->getMessagesSnapshot();
         int snapshotLength = int(snapshot.size());
@@ -1826,6 +1840,13 @@ void ChannelView::addContextMenuItems(
 
     auto menu = new QMenu;
     previousMenu = menu;
+
+    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
+    {
+        auto badgeElement = dynamic_cast<const BadgeElement *>(&creator);
+        addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
+                                 *menu);
+    }
 
     // Emote actions
     if (creatorFlags.hasAny(

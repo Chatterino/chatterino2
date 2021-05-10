@@ -149,6 +149,8 @@ SOURCES += \
     src/controllers/commands/Command.cpp \
     src/controllers/commands/CommandController.cpp \
     src/controllers/commands/CommandModel.cpp \
+    src/controllers/highlights/BadgeHighlightModel.cpp \
+    src/controllers/highlights/HighlightBadge.cpp \
     src/controllers/filters/FilterModel.cpp \
     src/controllers/filters/parser/FilterParser.cpp \
     src/controllers/filters/parser/Tokenizer.cpp \
@@ -185,6 +187,7 @@ SOURCES += \
     src/messages/search/AuthorPredicate.cpp \
     src/messages/search/ChannelPredicate.cpp \
     src/messages/search/LinkPredicate.cpp \
+    src/messages/search/MessageFlagsPredicate.cpp \
     src/messages/search/SubstringPredicate.cpp \
     src/messages/SharedMessageBuilder.cpp \
     src/providers/bttv/BttvEmotes.cpp \
@@ -241,6 +244,7 @@ SOURCES += \
     src/util/AttachToConsole.cpp \
     src/util/Clipboard.cpp \
     src/util/DebugCount.cpp \
+    src/util/DisplayBadge.cpp \
     src/util/FormatTime.cpp \
     src/util/FunctionEventFilter.cpp \
     src/util/FuzzyConvert.cpp \
@@ -263,6 +267,7 @@ SOURCES += \
     src/widgets/BaseWidget.cpp \
     src/widgets/BaseWindow.cpp \
     src/widgets/FramelessEmbedWindow.cpp \
+    src/widgets/dialogs/BadgePickerDialog.cpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.cpp \
     src/widgets/dialogs/ColorPickerDialog.cpp \
     src/widgets/dialogs/EditHotkeyDialog.cpp \
@@ -279,7 +284,6 @@ SOURCES += \
     src/widgets/dialogs/switcher/NewTabItem.cpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.cpp \
     src/widgets/dialogs/switcher/SwitchSplitItem.cpp \
-    src/widgets/dialogs/TextInputDialog.cpp \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/dialogs/UserInfoPopup.cpp \
     src/widgets/dialogs/WelcomeDialog.cpp \
@@ -373,6 +377,8 @@ HEADERS += \
     src/controllers/commands/Command.hpp \
     src/controllers/commands/CommandController.hpp \
     src/controllers/commands/CommandModel.hpp \
+    src/controllers/highlights/BadgeHighlightModel.hpp \
+    src/controllers/highlights/HighlightBadge.hpp \
     src/controllers/filters/FilterModel.hpp \
     src/controllers/filters/FilterRecord.hpp \
     src/controllers/filters/FilterSet.hpp \
@@ -420,6 +426,7 @@ HEADERS += \
     src/messages/search/AuthorPredicate.hpp \
     src/messages/search/ChannelPredicate.hpp \
     src/messages/search/LinkPredicate.hpp \
+    src/messages/search/MessageFlagsPredicate.hpp \
     src/messages/search/MessagePredicate.hpp \
     src/messages/search/SubstringPredicate.hpp \
     src/messages/Selection.hpp \
@@ -485,6 +492,7 @@ HEADERS += \
     src/util/CombinePath.hpp \
     src/util/ConcurrentMap.hpp \
     src/util/DebugCount.hpp \
+    src/util/DisplayBadge.hpp \
     src/util/DistanceBetweenPoints.hpp \
     src/util/FormatTime.hpp \
     src/util/FunctionEventFilter.hpp \
@@ -523,6 +531,7 @@ HEADERS += \
     src/widgets/BaseWidget.hpp \
     src/widgets/BaseWindow.hpp \
     src/widgets/FramelessEmbedWindow.hpp \
+    src/widgets/dialogs/BadgePickerDialog.hpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.hpp \
     src/widgets/dialogs/ColorPickerDialog.hpp \
     src/widgets/dialogs/EditHotkeyDialog.hpp \
@@ -541,7 +550,6 @@ HEADERS += \
     src/widgets/dialogs/switcher/QuickSwitcherModel.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.hpp \
     src/widgets/dialogs/switcher/SwitchSplitItem.hpp \
-    src/widgets/dialogs/TextInputDialog.hpp \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/dialogs/UserInfoPopup.hpp \
     src/widgets/dialogs/WelcomeDialog.hpp \

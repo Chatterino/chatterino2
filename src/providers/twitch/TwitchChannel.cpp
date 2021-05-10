@@ -143,8 +143,7 @@ namespace {
     }
 }  // namespace
 
-TwitchChannel::TwitchChannel(const QString &name,
-                             TwitchBadges &globalTwitchBadges, BttvEmotes &bttv,
+TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
                              FfzEmotes &ffz)
     : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
@@ -153,7 +152,6 @@ TwitchChannel::TwitchChannel(const QString &name,
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
                        name)
-    , globalTwitchBadges_(globalTwitchBadges)
     , globalBttv_(bttv)
     , globalFfz_(ffz)
     , bttvEmotes_(std::make_shared<EmoteMap>())
@@ -454,8 +452,8 @@ void TwitchChannel::setRoomId(const QString &id)
     }
 }
 
-AccessGuard<const TwitchChannel::RoomModes> TwitchChannel::accessRoomModes()
-    const
+SharedAccessGuard<const TwitchChannel::RoomModes>
+    TwitchChannel::accessRoomModes() const
 {
     return this->roomModes_.accessConst();
 }
@@ -472,15 +470,10 @@ bool TwitchChannel::isLive() const
     return this->streamStatus_.access()->live;
 }
 
-AccessGuard<const TwitchChannel::StreamStatus>
+SharedAccessGuard<const TwitchChannel::StreamStatus>
     TwitchChannel::accessStreamStatus() const
 {
     return this->streamStatus_.accessConst();
-}
-
-const TwitchBadges &TwitchChannel::globalTwitchBadges() const
-{
-    return this->globalTwitchBadges_;
 }
 
 const BttvEmotes &TwitchChannel::globalBttv() const
@@ -570,15 +563,32 @@ void TwitchChannel::setLive(bool newLiveStatus)
                         getApp()->windows->sendAlert();
                     }
                 }
-                auto live =
-                    makeSystemMessage(this->getDisplayName() + " is live");
-                this->addMessage(live);
+                // Channel live message
+                MessageBuilder builder;
+                TwitchMessageBuilder::liveSystemMessage(this->getDisplayName(),
+                                                        &builder);
+                this->addMessage(builder.release());
+
+                // Message in /live channel
+                MessageBuilder builder2;
+                TwitchMessageBuilder::liveMessage(this->getDisplayName(),
+                                                  &builder2);
+                getApp()->twitch2->liveChannel->addMessage(builder2.release());
+
+                // Notify on all channels with a ping sound
+                if (getSettings()->notificationOnAnyChannel &&
+                    !(isInStreamerMode() &&
+                      getSettings()->streamerModeSuppressLiveNotifications))
+                {
+                    getApp()->notifications->playSound();
+                }
             }
             else
             {
-                auto offline =
-                    makeSystemMessage(this->getDisplayName() + " is offline");
-                this->addMessage(offline);
+                MessageBuilder builder;
+                TwitchMessageBuilder::offlineSystemMessage(
+                    this->getDisplayName(), &builder);
+                this->addMessage(builder.release());
             }
             guard->live = newLiveStatus;
         }
@@ -720,6 +730,7 @@ void TwitchChannel::loadRecentMessages()
                    .arg(getSettings()->twitchMessageHistoryLimit);
 
     NetworkRequest(url)
+        .concurrent()
         .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
@@ -733,6 +744,24 @@ void TwitchChannel::loadRecentMessages()
 
             for (auto message : messages)
             {
+                if (message->tags().contains("rm-received-ts"))
+                {
+                    QDate msgDate = QDateTime::fromMSecsSinceEpoch(
+                                        message->tags()
+                                            .value("rm-received-ts")
+                                            .toLongLong())
+                                        .date();
+                    if (msgDate != shared.get()->lastDate_)
+                    {
+                        shared.get()->lastDate_ = msgDate;
+                        auto msg = makeSystemMessage(
+                            msgDate.toString(Qt::SystemLocaleLongDate),
+                            QTime(0, 0));
+                        msg->flags.set(MessageFlag::RecentMessage);
+                        allBuiltMessages.emplace_back(msg);
+                    }
+                }
+
                 for (auto builtMessage :
                      handler.parseMessage(shared.get(), message))
                 {

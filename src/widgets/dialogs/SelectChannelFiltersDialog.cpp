@@ -2,6 +2,11 @@
 
 #include "singletons/Settings.hpp"
 
+#include <QCheckBox>
+#include <QLabel>
+#include <QPushButton>
+#include <QVBoxLayout>
+
 namespace chatterino {
 
 SelectChannelFiltersDialog::SelectChannelFiltersDialog(

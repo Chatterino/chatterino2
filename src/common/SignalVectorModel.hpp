@@ -3,6 +3,7 @@
 #include "common/SignalVector.hpp"
 
 #include <QAbstractTableModel>
+#include <QMimeData>
 #include <QStandardItem>
 #include <boost/optional.hpp>
 

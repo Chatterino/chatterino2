@@ -7,6 +7,7 @@
 #include "common/Channel.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/filters/FilterRecord.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
@@ -31,6 +32,7 @@ public:
 
     SignalVector<HighlightPhrase> &highlightedMessages;
     SignalVector<HighlightPhrase> &highlightedUsers;
+    SignalVector<HighlightBadge> &highlightedBadges;
     SignalVector<HighlightBlacklistUser> &blacklistedUsers;
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
@@ -122,6 +124,8 @@ public:
     // Badges
     BoolSetting showBadgesGlobalAuthority = {
         "/appearance/badges/GlobalAuthority", true};
+    BoolSetting showBadgesPredictions = {"/appearance/badges/predictions",
+                                         true};
     BoolSetting showBadgesChannelAuthority = {
         "/appearance/badges/ChannelAuthority", true};
     BoolSetting showBadgesSubscription = {"/appearance/badges/subscription",
@@ -174,6 +178,8 @@ public:
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
+    BoolSetting removeSpacesBetweenEmotes = {
+        "/emotes/removeSpacesBetweenEmotes", false};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -294,6 +300,8 @@ public:
                                            false};
     QStringSetting notificationPathSound = {"/notifications/highlightSoundPath",
                                             "qrc:/sounds/ping3.wav"};
+    BoolSetting notificationOnAnyChannel = {"/notifications/onAnyChannel",
+                                            false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",

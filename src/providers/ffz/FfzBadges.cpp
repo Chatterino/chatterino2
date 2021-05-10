@@ -4,13 +4,12 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QThread>
+#include <QUrl>
+#include <map>
+#include <shared_mutex>
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
-
-#include <QUrl>
-
-#include <map>
 
 namespace chatterino {
 
@@ -21,6 +20,8 @@ void FfzBadges::initialize(Settings &settings, Paths &paths)
 
 boost::optional<EmotePtr> FfzBadges::getBadge(const UserId &id)
 {
+    std::shared_lock lock(this->mutex_);
+
     auto it = this->badgeMap.find(id.string);
     if (it != this->badgeMap.end())
     {
@@ -30,6 +31,8 @@ boost::optional<EmotePtr> FfzBadges::getBadge(const UserId &id)
 }
 boost::optional<QColor> FfzBadges::getBadgeColor(const UserId &id)
 {
+    std::shared_lock lock(this->mutex_);
+
     auto badgeIt = this->badgeMap.find(id.string);
     if (badgeIt != this->badgeMap.end())
     {
@@ -49,6 +52,8 @@ void FfzBadges::loadFfzBadges()
 
     NetworkRequest(url)
         .onSuccess([this](auto result) -> Outcome {
+            std::unique_lock lock(this->mutex_);
+
             auto jsonRoot = result.parseJson();
             int index = 0;
             for (const auto &jsonBadge_ : jsonRoot.value("badges").toArray())

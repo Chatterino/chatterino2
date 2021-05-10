@@ -8,6 +8,8 @@
 
 #include <functional>
 
+#include <QLineEdit>
+
 namespace chatterino {
 
 class GenericListView;

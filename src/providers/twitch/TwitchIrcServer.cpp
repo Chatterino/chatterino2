@@ -17,6 +17,8 @@
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "util/PostToThread.hpp"
 
+#include <QMetaEnum>
+
 // using namespace Communi;
 using namespace std::chrono_literals;
 
@@ -26,6 +28,7 @@ TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
+    , liveChannel(new Channel("/live", Channel::Type::TwitchLive))
 {
     this->initializeIrc();
 
@@ -45,7 +48,6 @@ void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
         });
     });
 
-    this->twitchBadges.loadTwitchBadges();
     this->bttv.loadEmotes();
     this->ffz.loadEmotes();
 }
@@ -88,8 +90,8 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
 std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     const QString &channelName)
 {
-    auto channel = std::shared_ptr<TwitchChannel>(new TwitchChannel(
-        channelName, this->twitchBadges, this->bttv, this->ffz));
+    auto channel = std::shared_ptr<TwitchChannel>(
+        new TwitchChannel(channelName, this->bttv, this->ffz));
     channel->initialize();
 
     channel->sendMessageSignal.connect(
@@ -256,6 +258,11 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
         return this->mentionsChannel;
     }
 
+    if (channelName == "/live")
+    {
+        return this->liveChannel;
+    }
+
     if (channelName == "$$$")
     {
         static auto channel =
@@ -288,6 +295,7 @@ void TwitchIrcServer::forEachChannelAndSpecialChannels(
 
     func(this->whispersChannel);
     func(this->mentionsChannel);
+    func(this->liveChannel);
 }
 
 std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
