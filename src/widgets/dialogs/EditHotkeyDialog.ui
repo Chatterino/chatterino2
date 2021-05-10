@@ -70,6 +70,9 @@ see this message :)</string>
        </property>
       </widget>
      </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="scopePicker"/>
+     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="actionLabel">
        <property name="text">
@@ -77,6 +80,13 @@ see this message :)</string>
        </property>
        <property name="buddy">
         <cstring>actionPicker</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="actionPicker">
+       <property name="editable">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -93,18 +103,8 @@ see this message :)</string>
      <item row="3" column="1">
       <widget class="QKeySequenceEdit" name="keyComboEdit"/>
      </item>
-     <item row="4" column="1">
-      <widget class="QPlainTextEdit" name="argumentsEdit">
-       <property name="plainText">
-        <string/>
-       </property>
-       <property name="placeholderText">
-        <string>Newline separated arguments for the action</string>
-       </property>
-      </widget>
-     </item>
      <item row="4" column="0">
-      <widget class="QLabel" name="label">
+      <widget class="QLabel" name="argumentsLabel">
        <property name="text">
         <string>Arguments:</string>
        </property>
@@ -113,13 +113,13 @@ see this message :)</string>
        </property>
       </widget>
      </item>
-     <item row="1" column="1">
-      <widget class="QComboBox" name="scopePicker"/>
-     </item>
-     <item row="2" column="1">
-      <widget class="QComboBox" name="actionPicker">
-       <property name="editable">
-        <bool>false</bool>
+     <item row="4" column="1">
+      <widget class="QPlainTextEdit" name="argumentsEdit">
+       <property name="plainText">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>Newline separated arguments for the action</string>
        </property>
       </widget>
      </item>
@@ -194,9 +194,26 @@ see this message :)</string>
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>actionPicker</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>EditHotkeyDialog</receiver>
+   <slot>updateArgumentsInput()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>148</x>
+     <y>119</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>74</x>
+     <y>201</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>afterEdit()</slot>
   <slot>updatePossibleActions()</slot>
+  <slot>updateArgumentsInput()</slot>
  </slots>
 </ui>

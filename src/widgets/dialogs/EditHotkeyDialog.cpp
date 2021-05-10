@@ -31,7 +31,6 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
         this->ui_->keyComboEdit->setKeySequence(
             QKeySequence::fromString(hotkey->keySequence().toString()));
         this->ui_->nameEdit->setText(hotkey->name());
-        this->ui_->actionPicker->setCurrentText(hotkey->action());
         this->updatePossibleActions();  // make sure the action names are available
 
         // update arguments
@@ -157,7 +156,6 @@ void EditHotkeyDialog::afterEdit()
 void EditHotkeyDialog::updatePossibleActions()
 {
     const auto &hotkeys = getApp()->hotkeys;
-    this->ui_->actionPicker->clear();
     auto scope = hotkeys->hotkeyScopeFromName(
         this->ui_->scopePicker->currentData().toString());
     if (!scope)
@@ -166,11 +164,12 @@ void EditHotkeyDialog::updatePossibleActions()
 
         return;
     }
+    const auto currentText = this->data_->action();
+    this->ui_->actionPicker->clear();
     qCDebug(chatterinoHotkeys) << "update possible actions for" << (int)*scope;
     auto actions = actionNames.find(*scope);
     if (actions != actionNames.end())
     {
-        const auto currentText = this->ui_->actionPicker->currentText();
         int index = 0;
         for (const auto action : actions->second)
         {
@@ -187,6 +186,58 @@ void EditHotkeyDialog::updatePossibleActions()
     else
     {
         qCDebug(chatterinoHotkeys) << "key missing!!!!";
+    }
+}
+void EditHotkeyDialog::updateArgumentsInput()
+{
+    auto currentText = this->ui_->actionPicker->currentData().toString();
+    if (currentText.isEmpty())
+    {
+        this->ui_->argumentsEdit->setEnabled(true);
+        return;
+    }
+    const auto &hotkeys = getApp()->hotkeys;
+    auto scope = hotkeys->hotkeyScopeFromName(
+        this->ui_->scopePicker->currentData().toString());
+    if (!scope)
+    {
+        this->showEditError("Invalid Hotkey Scope.");
+
+        return;
+    }
+    auto allActions = actionNames.find(*scope);
+    if (allActions != actionNames.end())
+    {
+        const auto &actionsMap = allActions->second;
+        auto definition = actionsMap.find(currentText);
+        if (definition == actionsMap.end())
+        {
+            auto text = QString("Newline separated arguments for the action\n"
+                                " - Unable to find action named \"%1\"")
+                            .arg(currentText);
+            this->ui_->argumentsEdit->setPlaceholderText(text);
+            return;
+        }
+        const HotkeyDefinition &def = definition->second;
+        auto text = QString("Newline separated arguments for the action\n");
+        if (def.minCountArguments != 0)
+        {
+            this->ui_->argumentsEdit->setEnabled(true);
+            text += QString(" - %1 required arguments\n")
+                        .arg(def.minCountArguments);
+
+            if (def.maxCountArguments != 0)
+            {
+                text += QString(" - %2 optional arguments")
+                            .arg(def.maxCountArguments - def.minCountArguments);
+            }
+        }
+        else
+        {
+            this->ui_->argumentsEdit->setEnabled(false);
+            text += "This action requires no arguments";
+        }
+        this->ui_->argumentsEdit->setPlaceholderText(text);
     }
 }
 
