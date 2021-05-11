@@ -218,7 +218,7 @@ void EditHotkeyDialog::updateArgumentsInput()
             this->ui_->argumentsEdit->setPlaceholderText(text);
             return;
         }
-        const HotkeyDefinition &def = definition->second;
+        const ActionDefinition &def = definition->second;
         auto text = QString("Newline separated arguments for the action\n");
         if (def.minCountArguments != 0)
         {
