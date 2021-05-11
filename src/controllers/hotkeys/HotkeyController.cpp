@@ -282,11 +282,63 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             std::vector<QString>(), "default next message");
     }
 
-    // user card
+    // popup window
     {
-        this->tryAddDefault(addedHotkeys, HotkeyScope::UserCard,
-                            QKeySequence("Escape"), "delete",
-                            std::vector<QString>(), "default close user card");
+        this->tryAddDefault(
+            addedHotkeys, HotkeyScope::PopupWindow, QKeySequence("Escape"),
+            "delete", std::vector<QString>(), "default close popup window");
+        for (int i = 0; i < 8; i++)
+        {
+            std::vector<QString> args;
+            args.push_back(QString::number(i));
+            this->tryAddDefault(
+                addedHotkeys, HotkeyScope::PopupWindow,
+                QKeySequence(QString("Ctrl+%1").arg(i + 1)), "openTab", args,
+                QString("default popup select tab #%1").arg(i + 1));
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("last");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                                QKeySequence("Ctrl+9"), "openTab", args,
+                                "default popup select last tab");
+        }
+
+        {
+            std::vector<QString> args;
+            args.push_back("next");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                                QKeySequence("Ctrl+Tab"), "openTab", args,
+                                "default popup select next tab");
+        }
+
+        {
+            std::vector<QString> args;
+            args.push_back("previous");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                                QKeySequence("Ctrl+Shift+Tab"), "openTab", args,
+                                "default popup select previous tab");
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("up");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                                QKeySequence("PgUp"), "scrollPage", args,
+                                "default popup scroll up");
+        }
+        {
+            std::vector<QString> args;
+            args.push_back("down");
+            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                                QKeySequence("PgDown"), "scrollPage", args,
+                                "default popup scroll down");
+        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Return"), "accept",
+                            std::vector<QString>(), "default popup accept");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Escape"), "reject",
+                            std::vector<QString>(), "default popup reject");
     }
 
     // window
@@ -297,7 +349,7 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
                             QKeySequence("Ctrl+T"), "newSplit",
                             std::vector<QString>(), "default new split");
-        for (int i = 0; i < 9; i++)
+        for (int i = 0; i < 8; i++)
         {
             std::vector<QString> args;
             args.push_back(QString::number(i));
@@ -376,104 +428,6 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
             addedHotkeys, HotkeyScope::Settings, QKeySequence("Ctrl+F"),
             "search", std::vector<QString>(), "default search in settings");
     }
-
-    // emote popup
-    {
-        for (int i = 0; i < 9; i++)
-        {
-            std::vector<QString> args;
-            args.push_back(QString::number(i));
-            this->tryAddDefault(
-                addedHotkeys, HotkeyScope::EmotePopup,
-                QKeySequence(QString("Ctrl+%1").arg(i + 1)), "openTab", args,
-                QString("default emote popup select tab #%1").arg(i + 1));
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("last");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::EmotePopup,
-                                QKeySequence("Ctrl+9"), "openTab",
-                                std::vector<QString>(),
-                                "default emote popup select last tab");
-        }
-
-        {
-            std::vector<QString> args;
-            args.push_back("next");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::EmotePopup,
-                                QKeySequence("Ctrl+Tab"), "openTab", args,
-                                "default emote popup select next tab");
-        }
-
-        {
-            std::vector<QString> args;
-            args.push_back("previous");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::EmotePopup,
-                                QKeySequence("Ctrl+Shift+Tab"), "openTab", args,
-                                "default emote popup select previous tab");
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("up");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::EmotePopup,
-                                QKeySequence("PgUp"), "scrollPage", args,
-                                "default emote popup scroll up");
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("down");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::EmotePopup,
-                                QKeySequence("PgDown"), "scrollPage", args,
-                                "default emote popup scroll down");
-        }
-    }
-
-    // select channel popup
-    {
-        for (int i = 0; i < 9; i++)
-        {
-            std::vector<QString> args;
-            args.push_back(QString::number(i));
-            this->tryAddDefault(
-                addedHotkeys, HotkeyScope::SelectChannelPopup,
-                QKeySequence(QString("Ctrl+%1").arg(i + 1)), "openTab", args,
-                QString("default select channel popup select tab #%1")
-                    .arg(i + 1));
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("last");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::EmotePopup,
-                                QKeySequence("Ctrl+9"), "openTab",
-                                std::vector<QString>(),
-                                "default select channel popup select last tab");
-        }
-
-        {
-            std::vector<QString> args;
-            args.push_back("next");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::SelectChannelPopup,
-                                QKeySequence("Ctrl+Tab"), "openTab", args,
-                                "default select channel popup select next tab");
-        }
-
-        {
-            std::vector<QString> args;
-            args.push_back("previous");
-            this->tryAddDefault(
-                addedHotkeys, HotkeyScope::SelectChannelPopup,
-                QKeySequence("Ctrl+Shift+Tab"), "openTab", args,
-                "default select channel popup select previous tab");
-        }
-        this->tryAddDefault(addedHotkeys, HotkeyScope::SelectChannelPopup,
-                            QKeySequence("Return"), "accept",
-                            std::vector<QString>(),
-                            "default select channel popup accept");
-        this->tryAddDefault(addedHotkeys, HotkeyScope::SelectChannelPopup,
-                            QKeySequence("Escape"), "reject",
-                            std::vector<QString>(),
-                            "default select channel popup reject");
-    }
 }
 
 void HotkeyController::save()
@@ -535,7 +489,7 @@ std::vector<QShortcut *> HotkeyController::shortcutsForScope(
         if (target == actionMap.end())
         {
             qCDebug(chatterinoHotkeys)
-                << "Unknown hotkey action: " << hotkey->action() << "in scope "
+                << "Unimplemeneted hotkey action:" << hotkey->action() << "in "
                 << hotkey->getCategory();
             continue;
         }

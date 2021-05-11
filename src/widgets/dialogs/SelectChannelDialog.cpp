@@ -304,7 +304,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
              }});
     }
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
-        HotkeyScope::SelectChannelPopup, actions, this);
+        HotkeyScope::PopupWindow, actions, this);
 
     this->ui_.irc.servers->getTableView()->selectRow(
         getSettings()->lastSelectIrcConn);

@@ -145,7 +145,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         };
 
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
-        HotkeyScope::UserCard, userCardActions, this);
+        HotkeyScope::PopupWindow, userCardActions, this);
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();

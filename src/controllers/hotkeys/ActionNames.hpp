@@ -8,16 +8,13 @@ struct HotkeyDefinition {
 };
 
 const std::map<HotkeyScope, std::map<QString, HotkeyDefinition>> actionNames{
-    {HotkeyScope::EmotePopup,
+    {HotkeyScope::PopupWindow,
      {
+         {"reject", HotkeyDefinition{"Confirmable popups: Cancel"}},
+         {"accept", HotkeyDefinition{"Confirmable popups: Confirm"}},
          {"delete", HotkeyDefinition{"Close"}},
          {"openTab", HotkeyDefinition{"Select Tab", 1}},
          {"scrollPage", HotkeyDefinition{"Scroll", 1}},
-     }},
-    {HotkeyScope::SelectChannelPopup,
-     {
-         {"accept", HotkeyDefinition{"Confirm"}},
-         {"reject", HotkeyDefinition{"Cancel"}},
      }},
     {HotkeyScope::Settings,
      {
@@ -64,10 +61,6 @@ const std::map<HotkeyScope, std::map<QString, HotkeyDefinition>> actionNames{
          {"sendMessage", HotkeyDefinition{"Send message"}},
          {"undo", HotkeyDefinition{"Undo"}},
 
-     }},
-    {HotkeyScope::UserCard,
-     {
-         {"delete", HotkeyDefinition{"Close"}},
      }},
     {HotkeyScope::Window,
      {

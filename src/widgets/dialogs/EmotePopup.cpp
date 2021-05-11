@@ -248,7 +248,7 @@ void EmotePopup::addShortcuts()
              }},
         };
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
-        HotkeyScope::EmotePopup, emotePopupActions, this);
+        HotkeyScope::PopupWindow, emotePopupActions, this);
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)

@@ -34,21 +34,17 @@ public:
     bool isDuplicate(std::shared_ptr<Hotkey> hotkey);
 
     const std::map<HotkeyScope, QString> hotkeyScopeNames = {
-        {HotkeyScope::EmotePopup, "emotePopup"},
-        {HotkeyScope::SelectChannelPopup, "selectChannelPopup"},
+        {HotkeyScope::PopupWindow, "popupWindow"},
         {HotkeyScope::Settings, "settings"},
         {HotkeyScope::Split, "split"},
         {HotkeyScope::SplitInput, "splitInput"},
-        {HotkeyScope::UserCard, "userCard"},
         {HotkeyScope::Window, "window"}};
 
     const std::map<HotkeyScope, QString> hotkeyScopeDisplayNames = {
-        {HotkeyScope::EmotePopup, "Emote popup"},
-        {HotkeyScope::SelectChannelPopup, "Select channel popup"},
+        {HotkeyScope::PopupWindow, "Popup Windows"},
         {HotkeyScope::Settings, "Settings dialog"},
         {HotkeyScope::Split, "Split"},
         {HotkeyScope::SplitInput, "Split input box"},
-        {HotkeyScope::UserCard, "User card"},
         {HotkeyScope::Window, "Window"},
     };
     pajlada::Signals::NoArgSignal onItemsUpdated;

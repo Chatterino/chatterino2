@@ -58,13 +58,9 @@ Qt::ShortcutContext Hotkey::getContext() const
             return Qt::WidgetWithChildrenShortcut;
         case HotkeyScope::SplitInput:
             return Qt::WidgetWithChildrenShortcut;
-        case HotkeyScope::UserCard:
-            return Qt::WindowShortcut;
         case HotkeyScope::Settings:
             return Qt::WidgetWithChildrenShortcut;
-        case HotkeyScope::EmotePopup:
-            return Qt::WindowShortcut;
-        case HotkeyScope::SelectChannelPopup:
+        case HotkeyScope::PopupWindow:
             return Qt::WindowShortcut;
     }
     qCDebug(chatterinoHotkeys)
