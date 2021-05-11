@@ -22,6 +22,7 @@
 #include "util/Shortcut.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
@@ -140,6 +141,31 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
             {"delete",
              [this](std::vector<QString>) -> QString {
                  this->deleteLater();
+                 return "";
+             }},
+            {"scrollPage",
+             [this](std::vector<QString> arguments) -> QString {
+                 if (arguments.size() == 0)
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "scrollPage hotkey called without arguments!";
+                     return "scrollPage hotkey called without arguments!";
+                 }
+                 auto direction = arguments.at(0);
+
+                 auto &scrollbar = this->ui_.latestMessages->getScrollBar();
+                 if (direction == "up")
+                 {
+                     scrollbar.offset(-scrollbar.getLargeChange());
+                 }
+                 else if (direction == "down")
+                 {
+                     scrollbar.offset(scrollbar.getLargeChange());
+                 }
+                 else
+                 {
+                     qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
+                 }
                  return "";
              }},
         };
