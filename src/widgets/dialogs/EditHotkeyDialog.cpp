@@ -164,7 +164,7 @@ void EditHotkeyDialog::updatePossibleActions()
 
         return;
     }
-    const auto currentText = this->data_->action();
+    const auto currentText = this->ui_->actionPicker->currentData().toString();
     this->ui_->actionPicker->clear();
     qCDebug(chatterinoHotkeys) << "update possible actions for" << (int)*scope;
     auto actions = actionNames.find(*scope);
