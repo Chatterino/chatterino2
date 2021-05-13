@@ -149,6 +149,7 @@ URL: https://dev.twitch.tv/docs/api/reference#search-categories
   - `controllers/commands/CommandController.cpp` in `/setgame` command to fuzzy search for game titles
 
 ### Manage Held AutoMod Messages
+
 URL: https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
 Requires `moderator:manage:automod` scope
 
