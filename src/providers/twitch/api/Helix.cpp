@@ -1,7 +1,9 @@
 #include "providers/twitch/api/Helix.hpp"
 
+#include "Application.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
 
 #include <QJsonDocument>
 
@@ -659,6 +661,61 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
         })
         .execute();
 }
+
+void Helix::manageAutoModMessages(
+    QString msgId, QString action, std::function<void()> successCallback,
+    std::function<void(HelixAutoModMessageError)> failureCallback)
+{
+    QJsonObject payload;
+
+    payload.insert("user_id",
+                   getApp()->accounts->twitch.getCurrent()->getUserId());
+    payload.insert("msg_id", msgId);
+    payload.insert("action", action);
+
+    this->makeRequest("moderation/automod/message", QUrlQuery())
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback, msgId, action](NetworkResult result) {
+            switch (result.status())
+            {
+                case 400: {
+                    // Message was already processed
+                    failureCallback(
+                        HelixAutoModMessageError::MessageAlreadyProcessed);
+                }
+                break;
+
+                case 403: {
+                    // Requesting user is not authorized to manage messages
+                    failureCallback(
+                        HelixAutoModMessageError::UserNotAuthorized);
+                }
+                break;
+
+                case 404: {
+                    // Message not found or invalid msgId
+                    failureCallback(HelixAutoModMessageError::MessageNotFound);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to manage automod message: " << action
+                        << msgId << result.status() << result.getData();
+                    failureCallback(HelixAutoModMessageError::Unknown);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

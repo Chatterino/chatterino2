@@ -102,13 +102,13 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
         .emplace<TextElement>("Allow", MessageElementFlag::Text,
                               MessageColor(QColor("green")),
                               FontStyle::ChatMediumBold)
-        ->setLink({Link::AutoModAllow, action.msgID});
+        ->setLink({Link::AutoModAllow, action.msgId});
     builder
         .emplace<TextElement>(" Deny", MessageElementFlag::Text,
                               MessageColor(QColor("red")),
                               FontStyle::ChatMediumBold)
-        ->setLink({Link::AutoModDeny, action.msgID});
-    // builder.emplace<TextElement>(action.msgID,
+        ->setLink({Link::AutoModDeny, action.msgId});
+    // builder.emplace<TextElement>(action.msgId
     // MessageElementFlag::Text,
     //                             MessageColor::Text);
     builder.message().flags.set(MessageFlag::AutoMod);

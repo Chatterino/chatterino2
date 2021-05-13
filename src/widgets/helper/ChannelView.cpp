@@ -2068,12 +2068,14 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         break;
 
         case Link::AutoModAllow: {
-            getApp()->accounts->twitch.getCurrent()->autoModAllow(link.value);
+            getApp()->accounts->twitch.getCurrent()->autoModAllow(
+                link.value, this->channel());
         }
         break;
 
         case Link::AutoModDeny: {
-            getApp()->accounts->twitch.getCurrent()->autoModDeny(link.value);
+            getApp()->accounts->twitch.getCurrent()->autoModDeny(
+                link.value, this->channel());
         }
         break;
 
