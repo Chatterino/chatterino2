@@ -469,16 +469,20 @@ void Window::addShortcuts()
                             "or \"previous\")";
                  }
                  int newIndex = -1;
+                 bool indexIsGenerated =
+                     false;  // indicates if `newIndex` was generated using target="next" or target="previous"
 
                  auto target = arguments.at(0);
                  qCDebug(chatterinoHotkeys) << target;
                  if (target == "next")
                  {
                      newIndex = this->notebook_->getSelectedIndex() + 1;
+                     indexIsGenerated = true;
                  }
                  else if (target == "previous")
                  {
                      newIndex = this->notebook_->getSelectedIndex() - 1;
+                     indexIsGenerated = true;
                  }
                  else
                  {
@@ -499,6 +503,10 @@ void Window::addShortcuts()
                  if (newIndex >= this->notebook_->getPageCount() ||
                      0 > newIndex)
                  {
+                     if (indexIsGenerated)
+                     {
+                         return "";  // don't error out on generated indexes, ie move tab right
+                     }
                      qCWarning(chatterinoHotkeys)
                          << "Invalid index for moveTab shortcut:" << newIndex;
                      return QString("Invalid index for moveTab shortcut: %1.")
