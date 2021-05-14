@@ -447,6 +447,10 @@ void SplitInput::installKeyPressedEvent()
     });
 }
 
+void SplitInput::onTextChanged()
+{
+}
+
 void SplitInput::onCursorPositionChanged()
 {
     this->updateColonMenu();
