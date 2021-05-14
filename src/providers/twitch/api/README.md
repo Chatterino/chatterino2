@@ -4,7 +4,7 @@ this folder describes what sort of API requests we do, what permissions are requ
 
 ## Kraken (V5)
 
-We use a bunch of Kraken (V5) in Chatterino2.
+We use few Kraken endpoints in Chatterino2.
 
 ### Get Cheermotes
 
@@ -22,18 +22,6 @@ Requires `user_subscriptions` scope
 Migration path: **Unknown**
 
 - We use this in `providers/twitch/TwitchAccount.cpp loadEmotes` to figure out which emotes a user is allowed to use!
-
-### AUTOMOD APPROVE
-
-**Unofficial** documentation: https://discuss.dev.twitch.tv/t/allowing-others-aka-bots-to-use-twitchbot-reject/8508/2
-
-- We use this in `providers/twitch/TwitchAccount.cpp autoModAllow` to approve an automod deny/allow question
-
-### AUTOMOD DENY
-
-**Unofficial** documentation: https://discuss.dev.twitch.tv/t/allowing-others-aka-bots-to-use-twitchbot-reject/8508/2
-
-- We use this in `providers/twitch/TwitchAccount.cpp autoModDeny` to deny an automod deny/allow question
 
 ## Helix
 
@@ -159,6 +147,15 @@ URL: https://dev.twitch.tv/docs/api/reference#search-categories
 - We implement this in `providers/twitch/api/Helix.cpp searchGames`
   Used in:
   - `controllers/commands/CommandController.cpp` in `/setgame` command to fuzzy search for game titles
+
+### Manage Held AutoMod Messages
+
+URL: https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
+Requires `moderator:manage:automod` scope
+
+- We implement this in `providers/twitch/api/Helix.cpp manageAutoModMessages`
+  Used in:
+  - `providers/twitch/TwitchAccount.cpp` to approve/deny held AutoMod messages
 
 ## TMI
 

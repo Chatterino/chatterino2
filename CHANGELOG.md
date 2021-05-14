@@ -11,6 +11,8 @@
 - Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
 - Bugfix: Fix a deadlock that would occur during user badge loading. (#1704, #2756)
 - Bugfix: Tabbing in `Select a channel to open` is now consistent. (#1797)
+- Bugfix: Approving/denying AutoMod messages works again. (#2779)
+- Dev: Migrated AutoMod approve/deny endpoints to Helix. (#2779)
 
 ## 2.3.1
 
