@@ -541,7 +541,7 @@ PubSub::PubSub()
             try
             {
                 const auto &args = getArgs(data);
-                const auto &msgId = getMsgID(data);
+                const auto &msgID = getMsgID(data);
 
                 if (args.Size() < 1)
                 {
@@ -569,7 +569,7 @@ PubSub::PubSub()
                     }
                 }
 
-                if (!rj::getSafe(msgId, action.msgId))
+                if (!rj::getSafe(msgID, action.msgID))
                 {
                     return;
                 }

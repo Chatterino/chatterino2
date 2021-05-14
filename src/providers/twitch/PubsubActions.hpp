@@ -114,7 +114,7 @@ struct AutomodAction : PubSubAction {
 
     QString reason;
 
-    QString msgId;
+    QString msgID;
 };
 
 struct AutomodUserAction : PubSubAction {
