@@ -11,6 +11,7 @@
 - Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
 - Bugfix: Fix a deadlock that would occur during user badge loading. (#1704, #2756)
 - Bugfix: Tabbing in `Select a channel to open` is now consistent. (#1797)
+- Bugfix: Fix Ctrl + Backspace not closing colon emote picker (#2780)
 
 ## 2.3.1
 
