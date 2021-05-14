@@ -316,7 +316,8 @@ public:
 
     // https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
     void manageAutoModMessages(
-        QString msgId, QString action, std::function<void()> successCallback,
+        QString userId, QString msgId, QString action,
+        std::function<void()> successCallback,
         std::function<void(HelixAutoModMessageError)> failureCallback);
 
     void update(QString clientId, QString oauthToken);

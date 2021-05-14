@@ -1,9 +1,7 @@
 #include "providers/twitch/api/Helix.hpp"
 
-#include "Application.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
-#include "controllers/accounts/AccountController.hpp"
 
 #include <QJsonDocument>
 
@@ -663,13 +661,13 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
 }
 
 void Helix::manageAutoModMessages(
-    QString msgId, QString action, std::function<void()> successCallback,
+    QString userId, QString msgId, QString action,
+    std::function<void()> successCallback,
     std::function<void(HelixAutoModMessageError)> failureCallback)
 {
     QJsonObject payload;
 
-    payload.insert("user_id",
-                   getApp()->accounts->twitch.getCurrent()->getUserId());
+    payload.insert("user_id", userId);
     payload.insert("msg_id", msgId);
     payload.insert("action", action);
 
