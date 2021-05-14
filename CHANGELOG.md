@@ -6,6 +6,7 @@
 - Minor: Added a message that displays a new date on new day. (#1016)
 - Minor: Hosting messages are now clickable. (#2655)
 - Minor: Messages held by automod are now shown to the user. (#2626)
+- Minor: Load 100 blocked users rather than the default 20. (#2772)
 - Bugfix: Strip newlines from stream titles to prevent text going off of split header (#2755)
 - Bugfix: Automod messages now work properly again. (#2682)
 - Bugfix: `Login expired` message no longer highlights all tabs. (#2735)

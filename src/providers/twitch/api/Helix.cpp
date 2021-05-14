@@ -547,6 +547,7 @@ void Helix::loadBlocks(QString userId,
 {
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", userId);
+    urlQuery.addQueryItem("first", "100");
 
     this->makeRequest("users/blocks", urlQuery)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
