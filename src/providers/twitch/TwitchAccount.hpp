@@ -115,8 +115,8 @@ public:
     SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
-    void autoModAllow(const QString msgId, ChannelPtr channel);
-    void autoModDeny(const QString msgId, ChannelPtr channel);
+    void autoModAllow(const QString msgID, ChannelPtr channel);
+    void autoModDeny(const QString msgID, ChannelPtr channel);
 
 private:
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);

@@ -358,10 +358,10 @@ SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
 }
 
 // AutoModActions
-void TwitchAccount::autoModAllow(const QString msgId, ChannelPtr channel)
+void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
 {
     getHelix()->manageAutoModMessages(
-        this->getUserId(), msgId, QString("ALLOW"),
+        this->getUserId(), msgID, "ALLOW",
         [] {
             // success
         },
@@ -404,10 +404,10 @@ void TwitchAccount::autoModAllow(const QString msgId, ChannelPtr channel)
         });
 }
 
-void TwitchAccount::autoModDeny(const QString msgId, ChannelPtr channel)
+void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
 {
     getHelix()->manageAutoModMessages(
-        this->getUserId(), msgId, QString("DENY"),
+        this->getUserId(), msgID, "DENY",
         [] {
             // success
         },

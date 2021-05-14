@@ -661,14 +661,14 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
 }
 
 void Helix::manageAutoModMessages(
-    QString userId, QString msgId, QString action,
+    QString userID, QString msgID, QString action,
     std::function<void()> successCallback,
     std::function<void(HelixAutoModMessageError)> failureCallback)
 {
     QJsonObject payload;
 
-    payload.insert("user_id", userId);
-    payload.insert("msg_id", msgId);
+    payload.insert("user_id", userID);
+    payload.insert("msg_id", msgID);
     payload.insert("action", action);
 
     this->makeRequest("moderation/automod/message", QUrlQuery())
@@ -679,7 +679,7 @@ void Helix::manageAutoModMessages(
             successCallback();
             return Success;
         })
-        .onError([failureCallback, msgId, action](NetworkResult result) {
+        .onError([failureCallback, msgID, action](NetworkResult result) {
             switch (result.status())
             {
                 case 400: {
@@ -704,7 +704,7 @@ void Helix::manageAutoModMessages(
                 break;
 
                 case 404: {
-                    // Message not found or invalid msgId
+                    // Message not found or invalid msgID
                     failureCallback(HelixAutoModMessageError::MessageNotFound);
                 }
                 break;
@@ -712,7 +712,7 @@ void Helix::manageAutoModMessages(
                 default: {
                     qCDebug(chatterinoTwitch)
                         << "Failed to manage automod message: " << action
-                        << msgId << result.status() << result.getData();
+                        << msgID << result.status() << result.getData();
                     failureCallback(HelixAutoModMessageError::Unknown);
                 }
                 break;
