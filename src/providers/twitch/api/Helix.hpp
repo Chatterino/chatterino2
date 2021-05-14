@@ -208,6 +208,7 @@ enum class HelixStreamMarkerError {
 enum class HelixAutoModMessageError {
     Unknown,
     MessageAlreadyProcessed,
+    UserNotAuthenticated,
     UserNotAuthorized,
     MessageNotFound,
 };

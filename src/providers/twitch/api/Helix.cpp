@@ -689,6 +689,13 @@ void Helix::manageAutoModMessages(
                 }
                 break;
 
+                case 401: {
+                    // User is missing the required scope
+                    failureCallback(
+                        HelixAutoModMessageError::UserNotAuthenticated);
+                }
+                break;
+
                 case 403: {
                     // Requesting user is not authorized to manage messages
                     failureCallback(

@@ -376,6 +376,11 @@ void TwitchAccount::autoModAllow(const QString msgId, ChannelPtr channel)
                 }
                 break;
 
+                case HelixAutoModMessageError::UserNotAuthenticated: {
+                    errorMessage += "you need to re-authenticate.";
+                }
+                break;
+
                 case HelixAutoModMessageError::UserNotAuthorized: {
                     errorMessage +=
                         "you don't have permission to perform that action";
@@ -390,8 +395,7 @@ void TwitchAccount::autoModAllow(const QString msgId, ChannelPtr channel)
                 // This would most likely happen if the service is down, or if the JSON payload returned has changed format
                 case HelixAutoModMessageError::Unknown:
                 default: {
-                    errorMessage += "an unknown error occured. You may need to "
-                                    "reauthenticate.";
+                    errorMessage += "an unknown error occured.";
                 }
                 break;
             }
@@ -418,6 +422,11 @@ void TwitchAccount::autoModDeny(const QString msgId, ChannelPtr channel)
                 }
                 break;
 
+                case HelixAutoModMessageError::UserNotAuthenticated: {
+                    errorMessage += "you need to re-authenticate.";
+                }
+                break;
+
                 case HelixAutoModMessageError::UserNotAuthorized: {
                     errorMessage +=
                         "you don't have permission to perform that action";
@@ -432,8 +441,7 @@ void TwitchAccount::autoModDeny(const QString msgId, ChannelPtr channel)
                 // This would most likely happen if the service is down, or if the JSON payload returned has changed format
                 case HelixAutoModMessageError::Unknown:
                 default: {
-                    errorMessage += "an unknown error occured. You may need to "
-                                    "reauthenticate.";
+                    errorMessage += "an unknown error occured.";
                 }
                 break;
             }
