@@ -217,8 +217,6 @@ set(SOURCE_FILES main.cpp
         providers/twitch/TwitchIrcServer.hpp
         providers/twitch/TwitchMessageBuilder.cpp
         providers/twitch/TwitchMessageBuilder.hpp
-        providers/twitch/TwitchParseCheerEmotes.cpp
-        providers/twitch/TwitchParseCheerEmotes.hpp
         providers/twitch/TwitchUser.cpp
         providers/twitch/TwitchUser.hpp
 
