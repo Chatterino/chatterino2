@@ -607,10 +607,10 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                     if (this->channel_->lastDate_ != QDate::currentDate())
                     {
                         this->channel_->lastDate_ = QDate::currentDate();
-                        auto msg =
-                            makeSystemMessage(QDate::currentDate().toString(
-                                                  Qt::SystemLocaleLongDate),
-                                              QTime(0, 0));
+                        auto msg = makeSystemMessage(
+                            QLocale().toString(QDate::currentDate(),
+                                               QLocale::LongFormat),
+                            QTime(0, 0));
                         this->channel_->addMessage(msg);
                     }
                     // When the message was received in the underlyingChannel,
