@@ -6,14 +6,6 @@ this folder describes what sort of API requests we do, what permissions are requ
 
 We use few Kraken endpoints in Chatterino2.
 
-### Get Cheermotes
-
-URL: https://dev.twitch.tv/docs/v5/reference/bits#get-cheermotes
-
-Migration path: **Not checked**
-
-- We implement this API in `providers/twitch/TwitchChannel.cpp` to resolve a chats available cheer emotes. This helps us parse incoming messages like `pajaCheer1000`
-
 ### Get User Emotes
 
 URL: https://dev.twitch.tv/docs/v5/reference/users#get-user-emotes  
@@ -156,6 +148,14 @@ Requires `moderator:manage:automod` scope
 - We implement this in `providers/twitch/api/Helix.cpp manageAutoModMessages`
   Used in:
   - `providers/twitch/TwitchAccount.cpp` to approve/deny held AutoMod messages
+
+### Get Cheermotes
+
+URL: https://dev.twitch.tv/docs/api/reference/#get-cheermotes
+
+- We implement this in `providers/twitch/api/Helix.cpp getCheermotes`  
+  Used in:
+  - `providers/twitch/TwitchChannel.cpp` to resolve a chats available cheer emotes. This helps us parse incoming messages like `pajaCheer1000`
 
 ## TMI
 
