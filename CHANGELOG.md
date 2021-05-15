@@ -14,6 +14,7 @@
 - Bugfix: Tabbing in `Select a channel to open` is now consistent. (#1797)
 - Bugfix: Approving/denying AutoMod messages works again. (#2779)
 - Dev: Migrated AutoMod approve/deny endpoints to Helix. (#2779)
+- Dev: Migrated Get Cheermotes endpoint to Helix. (#2440)
 
 ## 2.3.1
 
