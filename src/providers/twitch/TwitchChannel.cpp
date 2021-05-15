@@ -754,7 +754,7 @@ void TwitchChannel::loadRecentMessages()
                     {
                         shared.get()->lastDate_ = msgDate;
                         auto msg = makeSystemMessage(
-                            msgDate.toString(Qt::SystemLocaleLongDate),
+                            QLocale().toString(msgDate, QLocale::LongFormat),
                             QTime(0, 0));
                         msg->flags.set(MessageFlag::RecentMessage);
                         allBuiltMessages.emplace_back(msg);
