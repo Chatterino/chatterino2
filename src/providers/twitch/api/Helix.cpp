@@ -663,7 +663,7 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
 
 void Helix::getCheermotes(
     QString broadcasterId,
-    ResultCallback<std::vector<HelixCheermote>> successCallback,
+    ResultCallback<std::vector<HelixCheermoteSet>> successCallback,
     HelixFailureCallback failureCallback)
 {
     QUrlQuery urlQuery;
@@ -681,20 +681,20 @@ void Helix::getCheermotes(
                 return Failure;
             }
 
-            std::vector<HelixCheermote> cheermotes;
+            std::vector<HelixCheermoteSet> cheermoteSets;
 
             for (const auto &jsonStream : data.toArray())
             {
-                cheermotes.emplace_back(jsonStream.toObject());
+                cheermoteSets.emplace_back(jsonStream.toObject());
             }
 
-            successCallback(cheermotes);
+            successCallback(cheermoteSets);
             return Success;
         })
-        .onError([failureCallback](NetworkResult result) {
-            // TODO: make better xd
-            qDebug() << "xd fail";
-            qDebug() << result.getData() << result.status();
+        .onError([broadcasterId, failureCallback](NetworkResult result) {
+            qCDebug(chatterinoTwitch)
+                << "Failed to get cheermotes(broadcaster_id=" << broadcasterId
+                << "): " << result.status() << result.getData();
             failureCallback();
         })
         .execute();

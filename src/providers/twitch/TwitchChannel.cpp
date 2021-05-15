@@ -910,49 +910,26 @@ void TwitchChannel::refreshBadges()
 
 void TwitchChannel::refreshCheerEmotes()
 {
-    //    getHelix()->getCheermotes(
-    //        this->roomId(),
-    //        [weak = weakOf<Channel>(this)](
-    //            const std::vector<HelixCheermote> cheermotes) -> Outcome {
-    //            auto shared = weak.lock();
-
-    //            if (!shared)
-    //            {
-    //                return Failure;
-    //            }
-
-    //            std::vector<CheerEmoteSet> emoteSets;
-
-    //            return Success;
-    //        },
-    //        [] {
-    //            // Failure
-    //            return Failure;
-    //        });
-
-    /// KRAKEN (read as "shit") CODE
-    QString url("https://api.twitch.tv/kraken/bits/actions?channel_id=" +
-                this->roomId());
-    NetworkRequest::twitchRequest(url)
-        .onSuccess([this,
-                    weak = weakOf<Channel>(this)](auto result) -> Outcome {
+    getHelix()->getCheermotes(
+        this->roomId(),
+        [this, weak = weakOf<Channel>(this)](
+            const std::vector<HelixCheermoteSet> &cheermoteSets) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
             {
                 return Failure;
             }
 
-            auto cheerEmoteSets = ParseCheermoteSets(result.parseRapidJson());
             std::vector<CheerEmoteSet> emoteSets;
 
-            for (auto &set : cheerEmoteSets)
+            for (const auto &set : cheermoteSets)
             {
                 auto cheerEmoteSet = CheerEmoteSet();
                 cheerEmoteSet.regex = QRegularExpression(
                     "^" + set.prefix + "([1-9][0-9]*)$",
                     QRegularExpression::CaseInsensitiveOption);
 
-                for (auto &tier : set.tiers)
+                for (const auto &tier : set.tiers)
                 {
                     CheerEmote cheerEmote;
 
@@ -970,36 +947,42 @@ void TwitchChannel::refreshCheerEmotes()
                     cheerEmote.animatedEmote = std::make_shared<Emote>(
                         Emote{EmoteName{"cheer emote"},
                               ImageSet{
-                                  tier.images["dark"]["animated"]["1"],
-                                  tier.images["dark"]["animated"]["2"],
-                                  tier.images["dark"]["animated"]["4"],
+                                  tier.darkAnimated.imageURL1x,
+                                  tier.darkAnimated.imageURL2x,
+                                  tier.darkAnimated.imageURL4x,
                               },
                               Tooltip{emoteTooltip}, Url{}});
                     cheerEmote.staticEmote = std::make_shared<Emote>(
                         Emote{EmoteName{"cheer emote"},
                               ImageSet{
-                                  tier.images["dark"]["static"]["1"],
-                                  tier.images["dark"]["static"]["2"],
-                                  tier.images["dark"]["static"]["4"],
+                                  tier.darkStatic.imageURL1x,
+                                  tier.darkStatic.imageURL2x,
+                                  tier.darkStatic.imageURL4x,
                               },
                               Tooltip{emoteTooltip}, Url{}});
 
-                    cheerEmoteSet.cheerEmotes.emplace_back(cheerEmote);
+                    cheerEmoteSet.cheerEmotes.emplace_back(
+                        std::move(cheerEmote));
                 }
 
+                // Sort cheermotes by cost
                 std::sort(cheerEmoteSet.cheerEmotes.begin(),
                           cheerEmoteSet.cheerEmotes.end(),
                           [](const auto &lhs, const auto &rhs) {
                               return lhs.minBits > rhs.minBits;
                           });
 
-                emoteSets.emplace_back(cheerEmoteSet);
+                emoteSets.emplace_back(std::move(cheerEmoteSet));
             }
+
             *this->cheerEmoteSets_.access() = std::move(emoteSets);
 
             return Success;
-        })
-        .execute();
+        },
+        [] {
+            // Failure
+            return Failure;
+        });
 }
 
 void TwitchChannel::createClip()

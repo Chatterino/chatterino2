@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Aliases.hpp"
 #include "common/NetworkRequest.hpp"
 
 #include <QJsonArray>
@@ -193,21 +194,75 @@ struct HelixBlock {
     }
 };
 
-struct HelixCheermote {
+struct HelixCheermoteImage {
+    Url imageURL1x;
+    Url imageURL2x;
+    Url imageURL4x;
+
+    explicit HelixCheermoteImage(QJsonObject jsonObject)
+        : imageURL1x(Url{jsonObject.value("1").toString()})
+        , imageURL2x(Url{jsonObject.value("2").toString()})
+        , imageURL4x(Url{jsonObject.value("4").toString()})
+    {
+    }
+};
+
+struct HelixCheermoteTier {
     QString id;
-    QString tiers;
     QString color;
-    QString type;
+
+    HelixCheermoteImage darkAnimated;
+    HelixCheermoteImage darkStatic;
+    HelixCheermoteImage lightAnimated;
+    HelixCheermoteImage lightStatic;
 
     int minBits;
 
-    explicit HelixCheermote(QJsonObject jsonObject)
+    explicit HelixCheermoteTier(QJsonObject jsonObject)
         : id(jsonObject.value("id").toString())
-        , tiers(jsonObject.value("tiers").toString())
         , color(jsonObject.value("color").toString())
-        , type(jsonObject.value("type").toString())
+        , darkAnimated(jsonObject.value("images")
+                           .toObject()
+                           .value("dark")
+                           .toObject()
+                           .value("animated")
+                           .toObject())
+        , darkStatic(jsonObject.value("images")
+                         .toObject()
+                         .value("dark")
+                         .toObject()
+                         .value("static")
+                         .toObject())
+        , lightAnimated(jsonObject.value("images")
+                            .toObject()
+                            .value("light")
+                            .toObject()
+                            .value("animated")
+                            .toObject())
+        , lightStatic(jsonObject.value("images")
+                          .toObject()
+                          .value("light")
+                          .toObject()
+                          .value("static")
+                          .toObject())
         , minBits(jsonObject.value("min_bits").toInt())
     {
+    }
+};
+
+struct HelixCheermoteSet {
+    QString prefix;
+    QString type;
+    std::vector<HelixCheermoteTier> tiers;
+
+    explicit HelixCheermoteSet(QJsonObject jsonObject)
+        : prefix(jsonObject.value("prefix").toString())
+        , type(jsonObject.value("type").toString())
+    {
+        for (const auto &tier : jsonObject.value("tiers").toArray())
+        {
+            this->tiers.emplace_back(tier.toObject());
+        }
     }
 };
 
@@ -342,7 +397,7 @@ public:
     // https://dev.twitch.tv/docs/api/reference/#get-cheermotes
     void getCheermotes(
         QString broadcasterId,
-        ResultCallback<std::vector<HelixCheermote>> successCallback,
+        ResultCallback<std::vector<HelixCheermoteSet>> successCallback,
         HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
