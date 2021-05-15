@@ -205,6 +205,14 @@ enum class HelixStreamMarkerError {
     UserNotAuthenticated,
 };
 
+enum class HelixAutoModMessageError {
+    Unknown,
+    MessageAlreadyProcessed,
+    UserNotAuthenticated,
+    UserNotAuthorized,
+    MessageNotFound,
+};
+
 class Helix final : boost::noncopyable
 {
 public:
@@ -306,6 +314,12 @@ public:
                        QString title,
                        std::function<void(NetworkResult)> successCallback,
                        HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
+    void manageAutoModMessages(
+        QString userID, QString msgID, QString action,
+        std::function<void()> successCallback,
+        std::function<void(HelixAutoModMessageError)> failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

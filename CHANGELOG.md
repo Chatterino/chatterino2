@@ -6,12 +6,15 @@
 - Minor: Added a message that displays a new date on new day. (#1016)
 - Minor: Hosting messages are now clickable. (#2655)
 - Minor: Messages held by automod are now shown to the user. (#2626)
+- Minor: Load 100 blocked users rather than the default 20. (#2772)
 - Bugfix: Strip newlines from stream titles to prevent text going off of split header (#2755)
 - Bugfix: Automod messages now work properly again. (#2682)
 - Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
 - Bugfix: Fix a deadlock that would occur during user badge loading. (#1704, #2756)
 - Bugfix: Tabbing in `Select a channel to open` is now consistent. (#1797)
-- Bugfix: Fix Ctrl + Backspace not closing colon emote picker (#2780)
+- Bugfix: Fix Ctrl + Backspace not closing colon emote picker. (#2780)
+- Bugfix: Approving/denying AutoMod messages works again. (#2779)
+- Dev: Migrated AutoMod approve/deny endpoints to Helix. (#2779)
 
 ## 2.3.1
 
