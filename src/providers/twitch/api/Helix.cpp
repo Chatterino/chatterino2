@@ -661,45 +661,6 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
         .execute();
 }
 
-void Helix::getCheermotes(
-    QString broadcasterId,
-    ResultCallback<std::vector<HelixCheermoteSet>> successCallback,
-    HelixFailureCallback failureCallback)
-{
-    QUrlQuery urlQuery;
-
-    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
-
-    this->makeRequest("bits/cheermotes", urlQuery)
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
-            auto root = result.parseJson();
-            auto data = root.value("data");
-
-            if (!data.isArray())
-            {
-                failureCallback();
-                return Failure;
-            }
-
-            std::vector<HelixCheermoteSet> cheermoteSets;
-
-            for (const auto &jsonStream : data.toArray())
-            {
-                cheermoteSets.emplace_back(jsonStream.toObject());
-            }
-
-            successCallback(cheermoteSets);
-            return Success;
-        })
-        .onError([broadcasterId, failureCallback](NetworkResult result) {
-            qCDebug(chatterinoTwitch)
-                << "Failed to get cheermotes(broadcaster_id=" << broadcasterId
-                << "): " << result.status() << result.getData();
-            failureCallback();
-        })
-        .execute();
-}
-
 void Helix::manageAutoModMessages(
     QString userID, QString msgID, QString action,
     std::function<void()> successCallback,
@@ -757,6 +718,45 @@ void Helix::manageAutoModMessages(
                 }
                 break;
             }
+        })
+        .execute();
+}
+
+void Helix::getCheermotes(
+    QString broadcasterId,
+    ResultCallback<std::vector<HelixCheermoteSet>> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+
+    this->makeRequest("bits/cheermotes", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixCheermoteSet> cheermoteSets;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                cheermoteSets.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(cheermoteSets);
+            return Success;
+        })
+        .onError([broadcasterId, failureCallback](NetworkResult result) {
+            qCDebug(chatterinoTwitch)
+                << "Failed to get cheermotes(broadcaster_id=" << broadcasterId
+                << "): " << result.status() << result.getData();
+            failureCallback();
         })
         .execute();
 }

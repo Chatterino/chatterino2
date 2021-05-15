@@ -210,17 +210,16 @@ struct HelixCheermoteImage {
 struct HelixCheermoteTier {
     QString id;
     QString color;
-
+    int minBits;
     HelixCheermoteImage darkAnimated;
     HelixCheermoteImage darkStatic;
     HelixCheermoteImage lightAnimated;
     HelixCheermoteImage lightStatic;
 
-    int minBits;
-
     explicit HelixCheermoteTier(QJsonObject jsonObject)
         : id(jsonObject.value("id").toString())
         , color(jsonObject.value("color").toString())
+        , minBits(jsonObject.value("min_bits").toInt())
         , darkAnimated(jsonObject.value("images")
                            .toObject()
                            .value("dark")
@@ -245,7 +244,6 @@ struct HelixCheermoteTier {
                           .toObject()
                           .value("static")
                           .toObject())
-        , minBits(jsonObject.value("min_bits").toInt())
     {
     }
 };
