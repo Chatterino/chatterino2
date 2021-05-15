@@ -80,16 +80,16 @@ Requires `clips:edit` scope
 
 URL: https://dev.twitch.tv/docs/api/reference#get-channel-information
 
-- We implement this in `providers/twitch/api/Helix.cpp getChannel`
+- We implement this in `providers/twitch/api/Helix.cpp getChannel`  
   Used in:
   - `TwitchChannel` to refresh stream title
 
 ### Update Channel
 
-URL: https://dev.twitch.tv/docs/api/reference#modify-channel-information
+URL: https://dev.twitch.tv/docs/api/reference#modify-channel-information  
 Requires `channel:manage:broadcast` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp updateChannel`
+- We implement this in `providers/twitch/api/Helix.cpp updateChannel`  
   Used in:
   - `/setgame` to update the game in the current channel
   - `/settitle` to update the title in the current channel
@@ -105,29 +105,29 @@ Requires `user:edit:broadcast` scope
 
 ### Get User Block List
 
-URL: https://dev.twitch.tv/docs/api/reference#get-user-block-list
+URL: https://dev.twitch.tv/docs/api/reference#get-user-block-list  
 Requires `user:read:blocked_users` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp loadBlocks`
+- We implement this in `providers/twitch/api/Helix.cpp loadBlocks`  
   Used in:
   - `providers/twitch/TwitchAccount.cpp loadBlocks` to load list of blocked (blocked) users by current user
 
 ### Block User
 
-URL: https://dev.twitch.tv/docs/api/reference#block-user
+URL: https://dev.twitch.tv/docs/api/reference#block-user  
 Requires `user:manage:blocked_users` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp blockUser`
+- We implement this in `providers/twitch/api/Helix.cpp blockUser`  
   Used in:
   - `widgets/dialogs/UserInfoPopup.cpp` to block a user via checkbox in the usercard
   - `controllers/commands/CommandController.cpp` to block a user via "/block" command
 
 ### Unblock User
 
-URL: https://dev.twitch.tv/docs/api/reference#unblock-user
+URL: https://dev.twitch.tv/docs/api/reference#unblock-user  
 Requires `user:manage:blocked_users` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp unblockUser`
+- We implement this in `providers/twitch/api/Helix.cpp unblockUser`  
   Used in:
   - `widgets/dialogs/UserInfoPopup.cpp` to unblock a user via checkbox in the usercard
   - `controllers/commands/CommandController.cpp` to unblock a user via "/unblock" command
@@ -136,16 +136,16 @@ Requires `user:manage:blocked_users` scope
 
 URL: https://dev.twitch.tv/docs/api/reference#search-categories
 
-- We implement this in `providers/twitch/api/Helix.cpp searchGames`
+- We implement this in `providers/twitch/api/Helix.cpp searchGames`  
   Used in:
   - `controllers/commands/CommandController.cpp` in `/setgame` command to fuzzy search for game titles
 
 ### Manage Held AutoMod Messages
 
-URL: https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
+URL: https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages  
 Requires `moderator:manage:automod` scope
 
-- We implement this in `providers/twitch/api/Helix.cpp manageAutoModMessages`
+- We implement this in `providers/twitch/api/Helix.cpp manageAutoModMessages`  
   Used in:
   - `providers/twitch/TwitchAccount.cpp` to approve/deny held AutoMod messages
 
