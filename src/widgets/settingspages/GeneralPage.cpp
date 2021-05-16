@@ -570,6 +570,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Chatterino", s.showBadgesChatterino);
     layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
                        s.showBadgesFfz);
+    layout.addSeperator();
+    layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
+                       s.useCustomFfzModeratorBadges);
+    layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
+                       s.useCustomFfzVipBadges);
 
     layout.addSubtitle("Miscellaneous");
 

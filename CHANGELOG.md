@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Added settings to disable custom FrankerFaceZ VIP/mod badges. (#2693, #2759)
+
 ## 2.3.2
 
 - Major: New split for channels going live! /live. (#1797)
