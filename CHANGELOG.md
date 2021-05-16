@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.3.2
+
 - Major: New split for channels going live! /live. (#1797)
 - Minor: Added a message that displays a new date on new day. (#1016)
 - Minor: Hosting messages are now clickable. (#2655)
