@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "common/Version.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -441,6 +442,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addTitle("Browser Integration");
     layout.addDescription("The browser extension replaces the default "
                           "Twitch.tv chat with chatterino.");
+
+    {
+        if (auto err = nmIpcError().get())
+        {
+            layout.addDescription(
+                "An error happened during initialization of the "
+                "browser extension: " +
+                *err);
+        }
+    }
 
     layout.addDescription(formatRichNamedLink(
         CHROME_EXTENSION_LINK,

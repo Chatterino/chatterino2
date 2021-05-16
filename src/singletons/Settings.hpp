@@ -304,6 +304,8 @@ public:
                                            false};
     QStringSetting notificationPathSound = {"/notifications/highlightSoundPath",
                                             "qrc:/sounds/ping3.wav"};
+    BoolSetting notificationOnAnyChannel = {"/notifications/onAnyChannel",
+                                            false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",
