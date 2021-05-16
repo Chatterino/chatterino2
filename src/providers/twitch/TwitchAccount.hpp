@@ -2,6 +2,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "common/Channel.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
@@ -114,8 +115,8 @@ public:
     SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
-    void autoModAllow(const QString msgID);
-    void autoModDeny(const QString msgID);
+    void autoModAllow(const QString msgID, ChannelPtr channel);
+    void autoModDeny(const QString msgID, ChannelPtr channel);
 
 private:
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);

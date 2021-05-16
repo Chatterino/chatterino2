@@ -141,6 +141,10 @@ public:
     BoolSetting showBadgesChatterino = {"/appearance/badges/chatterino", true};
     BoolSetting showBadgesDankerino = {"/appearance/badges/dankerino", true};
     BoolSetting showBadgesFfz = {"/appearance/badges/ffz", true};
+    BoolSetting useCustomFfzModeratorBadges = {
+        "/appearance/badges/useCustomFfzModeratorBadges", true};
+    BoolSetting useCustomFfzVipBadges = {
+        "/appearance/badges/useCustomFfzVipBadges", true};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
