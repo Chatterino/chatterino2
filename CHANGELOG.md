@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.3.2
+
 - Major: New split for channels going live! /live. (#1797)
 - Minor: Added settings to disable custom FrankerFaceZ VIP/mod badges. (#2693, #2759)
 - Minor: Added a message that displays a new date on new day. (#1016)
