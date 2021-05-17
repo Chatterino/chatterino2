@@ -300,287 +300,282 @@ void Window::addDebugStuff(
 
 void Window::addShortcuts()
 {
-    std::map<QString, std::function<QString(std::vector<QString>)>>
-        windowActions{
-            {"openSettings",  // Open settings
-             [this](std::vector<QString>) -> QString {
-                 SettingsDialog::showDialog(this);
-                 return "";
-             }},
-            {"newSplit",  // Create a new split
-             [this](std::vector<QString>) -> QString {
-                 this->notebook_->getOrAddSelectedPage()->appendNewSplit(true);
-                 return "";
-             }},
-            {"openTab",  // CTRL + 1-8 to open corresponding tab.
-             [this](std::vector<QString> arguments) -> QString {
-                 if (arguments.size() == 0)
+    std::map<QString, std::function<QString(std::vector<QString>)>> windowActions{
+        {"openSettings",  // Open settings
+         [this](std::vector<QString>) -> QString {
+             SettingsDialog::showDialog(this);
+             return "";
+         }},
+        {"newSplit",  // Create a new split
+         [this](std::vector<QString>) -> QString {
+             this->notebook_->getOrAddSelectedPage()->appendNewSplit(true);
+             return "";
+         }},
+        {"openTab",  // CTRL + 1-8 to open corresponding tab.
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "openTab shortcut called without arguments. "
+                        "Takes only "
+                        "one argument: tab specifier";
+                 return "openTab shortcut called without arguments. "
+                        "Takes only "
+                        "one argument: tab specifier";
+             }
+             auto target = arguments.at(0);
+             if (target == "last")
+             {
+                 this->notebook_->selectLastTab();
+             }
+             else if (target == "next")
+             {
+                 this->notebook_->selectNextTab();
+             }
+             else if (target == "previous")
+             {
+                 this->notebook_->selectPreviousTab();
+             }
+             else
+             {
+                 bool ok;
+                 int result = target.toInt(&ok);
+                 if (ok)
                  {
-                     qCWarning(chatterinoHotkeys)
-                         << "openTab shortcut called without arguments. "
-                            "Takes only "
-                            "one argument: tab specifier";
-                     return "openTab shortcut called without arguments. "
-                            "Takes only "
-                            "one argument: tab specifier";
-                 }
-                 auto target = arguments.at(0);
-                 if (target == "last")
-                 {
-                     this->notebook_->selectLastTab();
-                 }
-                 else if (target == "next")
-                 {
-                     this->notebook_->selectNextTab();
-                 }
-                 else if (target == "previous")
-                 {
-                     this->notebook_->selectPreviousTab();
-                 }
-                 else
-                 {
-                     bool ok;
-                     int result = target.toInt(&ok);
-                     if (ok)
-                     {
-                         this->notebook_->selectIndex(result);
-                     }
-                     else
-                     {
-                         qCWarning(chatterinoHotkeys)
-                             << "Invalid argument for openTab shortcut";
-                         return QString("Invalid argument for openTab "
-                                        "shortcut: \"%1\". Use \"last\", "
-                                        "\"next\", \"previous\" or an integer.")
-                             .arg(target);
-                     }
-                 }
-                 return "";
-             }},
-            {"popup",
-             [this](std::vector<QString>) -> QString {
-                 if (auto page = dynamic_cast<SplitContainer *>(
-                         this->notebook_->getSelectedPage()))
-                 {
-                     if (auto split = page->getSelectedSplit())
-                     {
-                         split->popup();
-                     }
-                 }
-                 return "";
-             }},
-            {"zoom",
-             [](std::vector<QString> arguments) -> QString {
-                 if (arguments.size() == 0)
-                 {
-                     qCWarning(chatterinoHotkeys)
-                         << "zoom shortcut called without arguments. Takes "
-                            "only "
-                            "one argument: \"in\" or \"out\"";
-                     return "zoom shortcut called without arguments. Takes "
-                            "only "
-                            "one argument: \"in\" or \"out\"";
-                 }
-                 auto change = 0.0f;
-                 auto direction = arguments.at(0);
-                 if (direction == "in")
-                 {
-                     change = 0.1f;
-                 }
-                 else if (direction == "out")
-                 {
-                     change = -0.1f;
+                     this->notebook_->selectIndex(result);
                  }
                  else
                  {
                      qCWarning(chatterinoHotkeys)
-                         << "Invalid zoom direction, use \"in\" or \"out\"";
-                     return "Invalid zoom direction. Use \"in\" or \"out\".";
+                         << "Invalid argument for openTab shortcut";
+                     return QString("Invalid argument for openTab "
+                                    "shortcut: \"%1\". Use \"last\", "
+                                    "\"next\", \"previous\" or an integer.")
+                         .arg(target);
                  }
-                 getSettings()->setClampedUiScale(
-                     getSettings()->getClampedUiScale() + change);
-                 return "";
-             }},
-            {"newTab",
-             [this](std::vector<QString>) -> QString {
-                 this->notebook_->addPage(true);
-                 return "";
-             }},
-            {"removeTab",
-             [this](std::vector<QString>) -> QString {
-                 this->notebook_->removeCurrentPage();
-                 return "";
-             }},
-            {"reopenSplit",
-             [this](std::vector<QString>) -> QString {
-                 if (ClosedSplits::empty())
+             }
+             return "";
+         }},
+        {"popup",
+         [this](std::vector<QString>) -> QString {
+             if (auto page = dynamic_cast<SplitContainer *>(
+                     this->notebook_->getSelectedPage()))
+             {
+                 if (auto split = page->getSelectedSplit())
                  {
-                     return "";
+                     split->popup();
                  }
-                 ClosedSplits::SplitInfo si = ClosedSplits::pop();
-                 SplitContainer *splitContainer{nullptr};
-                 if (si.tab)
-                 {
-                     splitContainer =
-                         dynamic_cast<SplitContainer *>(si.tab->page);
-                 }
-                 if (!splitContainer)
-                 {
-                     splitContainer = this->notebook_->getOrAddSelectedPage();
-                 }
-                 this->notebook_->select(splitContainer);
-                 Split *split = new Split(splitContainer);
-                 split->setChannel(
-                     getApp()->twitch.server->getOrAddChannel(si.channelName));
-                 splitContainer->appendSplit(split);
+             }
+             return "";
+         }},
+        {"zoom",
+         [](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "zoom shortcut called without arguments. Takes "
+                        "only "
+                        "one argument: \"in\" or \"out\"";
+                 return "zoom shortcut called without arguments. Takes "
+                        "only "
+                        "one argument: \"in\" or \"out\"";
+             }
+             auto change = 0.0f;
+             auto direction = arguments.at(0);
+             if (direction == "in")
+             {
+                 change = 0.1f;
+             }
+             else if (direction == "out")
+             {
+                 change = -0.1f;
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid zoom direction, use \"in\" or \"out\"";
+                 return "Invalid zoom direction. Use \"in\" or \"out\".";
+             }
+             getSettings()->setClampedUiScale(
+                 getSettings()->getClampedUiScale() + change);
+             return "";
+         }},
+        {"newTab",
+         [this](std::vector<QString>) -> QString {
+             this->notebook_->addPage(true);
+             return "";
+         }},
+        {"removeTab",
+         [this](std::vector<QString>) -> QString {
+             this->notebook_->removeCurrentPage();
+             return "";
+         }},
+        {"reopenSplit",
+         [this](std::vector<QString>) -> QString {
+             if (ClosedSplits::empty())
+             {
                  return "";
-             }},
-            {"toggleLocalR9K",
-             [](std::vector<QString>) -> QString {
-                 getSettings()->hideSimilar.setValue(
-                     !getSettings()->hideSimilar);
-                 getApp()->windows->forceLayoutChannelViews();
-                 return "";
-             }},
-            {"openQuickSwitcher",
-             [](std::vector<QString>) -> QString {
-                 auto quickSwitcher = new QuickSwitcherPopup(
-                     &getApp()->windows->getMainWindow());
-                 quickSwitcher->show();
-                 return "";
-             }},
-            {"quit",
-             [](std::vector<QString>) -> QString {
-                 QApplication::exit();
-                 return "";
-             }},
-            {"moveTab",
-             [this](std::vector<QString> arguments) -> QString {
-                 if (arguments.size() == 0)
-                 {
-                     qCWarning(chatterinoHotkeys)
-                         << "moveTab shortcut called without arguments. "
-                            "Takes only one argument: new index (number, "
-                            "\"next\" "
-                            "or \"previous\")";
-                     return "moveTab shortcut called without arguments. "
-                            "Takes only one argument: new index (number, "
-                            "\"next\" "
-                            "or \"previous\")";
-                 }
-                 int newIndex = -1;
-                 bool indexIsGenerated =
-                     false;  // indicates if `newIndex` was generated using target="next" or target="previous"
+             }
+             ClosedSplits::SplitInfo si = ClosedSplits::pop();
+             SplitContainer *splitContainer{nullptr};
+             if (si.tab)
+             {
+                 splitContainer = dynamic_cast<SplitContainer *>(si.tab->page);
+             }
+             if (!splitContainer)
+             {
+                 splitContainer = this->notebook_->getOrAddSelectedPage();
+             }
+             this->notebook_->select(splitContainer);
+             Split *split = new Split(splitContainer);
+             split->setChannel(
+                 getApp()->twitch.server->getOrAddChannel(si.channelName));
+             splitContainer->appendSplit(split);
+             return "";
+         }},
+        {"toggleLocalR9K",
+         [](std::vector<QString>) -> QString {
+             getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
+             getApp()->windows->forceLayoutChannelViews();
+             return "";
+         }},
+        {"openQuickSwitcher",
+         [](std::vector<QString>) -> QString {
+             auto quickSwitcher =
+                 new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
+             quickSwitcher->show();
+             return "";
+         }},
+        {"quit",
+         [](std::vector<QString>) -> QString {
+             QApplication::exit();
+             return "";
+         }},
+        {"moveTab",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "moveTab shortcut called without arguments. "
+                        "Takes only one argument: new index (number, "
+                        "\"next\" "
+                        "or \"previous\")";
+                 return "moveTab shortcut called without arguments. "
+                        "Takes only one argument: new index (number, "
+                        "\"next\" "
+                        "or \"previous\")";
+             }
+             int newIndex = -1;
+             bool indexIsGenerated =
+                 false;  // indicates if `newIndex` was generated using target="next" or target="previous"
 
-                 auto target = arguments.at(0);
-                 qCDebug(chatterinoHotkeys) << target;
-                 if (target == "next")
+             auto target = arguments.at(0);
+             qCDebug(chatterinoHotkeys) << target;
+             if (target == "next")
+             {
+                 newIndex = this->notebook_->getSelectedIndex() + 1;
+                 indexIsGenerated = true;
+             }
+             else if (target == "previous")
+             {
+                 newIndex = this->notebook_->getSelectedIndex() - 1;
+                 indexIsGenerated = true;
+             }
+             else
+             {
+                 bool ok;
+                 int result = target.toInt(&ok);
+                 if (!ok)
                  {
-                     newIndex = this->notebook_->getSelectedIndex() + 1;
-                     indexIsGenerated = true;
-                 }
-                 else if (target == "previous")
-                 {
-                     newIndex = this->notebook_->getSelectedIndex() - 1;
-                     indexIsGenerated = true;
-                 }
-                 else
-                 {
-                     bool ok;
-                     int result = target.toInt(&ok);
-                     if (!ok)
-                     {
-                         qCWarning(chatterinoHotkeys)
-                             << "Invalid argument for moveTab shortcut";
-                         return QString(
-                                    "Invalid argument for moveTab shortcut: "
+                     qCWarning(chatterinoHotkeys)
+                         << "Invalid argument for moveTab shortcut";
+                     return QString("Invalid argument for moveTab shortcut: "
                                     "%1. Use \"next\" or \"previous\" or an "
                                     "integer.")
-                             .arg(target);
-                     }
-                     newIndex = result;
+                         .arg(target);
                  }
-                 if (newIndex >= this->notebook_->getPageCount() ||
-                     0 > newIndex)
+                 newIndex = result;
+             }
+             if (newIndex >= this->notebook_->getPageCount() || 0 > newIndex)
+             {
+                 if (indexIsGenerated)
                  {
-                     if (indexIsGenerated)
-                     {
-                         return "";  // don't error out on generated indexes, ie move tab right
-                     }
+                     return "";  // don't error out on generated indexes, ie move tab right
+                 }
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid index for moveTab shortcut:" << newIndex;
+                 return QString("Invalid index for moveTab shortcut: %1.")
+                     .arg(newIndex);
+             }
+             this->notebook_->rearrangePage(this->notebook_->getSelectedPage(),
+                                            newIndex);
+             return "";
+         }},
+        {"setStreamerMode",
+         [](std::vector<QString> arguments) -> QString {
+             auto mode = 2;
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "off")
+                 {
+                     mode = 0;
+                 }
+                 else if (arg == "on")
+                 {
+                     mode = 1;
+                 }
+                 else if (arg == "toggle")
+                 {
+                     mode = 2;
+                 }
+                 else if (arg == "auto")
+                 {
+                     mode = 3;
+                 }
+                 else
+                 {
                      qCWarning(chatterinoHotkeys)
-                         << "Invalid index for moveTab shortcut:" << newIndex;
-                     return QString("Invalid index for moveTab shortcut: %1.")
-                         .arg(newIndex);
+                         << "Invalid argument for setStreamerMode hotkey: "
+                         << arg;
+                     return QString("Invalid argument for setStreamerMode "
+                                    "hotkey: %1. Use \"on\", \"off\", "
+                                    "\"toggle\" or \"auto\".")
+                         .arg(arg);
                  }
-                 this->notebook_->rearrangePage(
-                     this->notebook_->getSelectedPage(), newIndex);
-                 return "";
-             }},
-            {"setStreamerMode",
-             [](std::vector<QString> arguments) -> QString {
-                 auto mode = 2;
-                 if (arguments.size() != 0)
-                 {
-                     auto arg = arguments.at(0);
-                     if (arg == "off")
-                     {
-                         mode = 0;
-                     }
-                     else if (arg == "on")
-                     {
-                         mode = 1;
-                     }
-                     else if (arg == "toggle")
-                     {
-                         mode = 2;
-                     }
-                     else if (arg == "auto")
-                     {
-                         mode = 3;
-                     }
-                     else
-                     {
-                         qCWarning(chatterinoHotkeys)
-                             << "Invalid argument for setStreamerMode hotkey: "
-                             << arg;
-                         return QString("Invalid argument for setStreamerMode "
-                                        "hotkey: %1. Use \"on\", \"off\", "
-                                        "\"toggle\" or \"auto\".")
-                             .arg(arg);
-                     }
-                 }
+             }
 
-                 if (mode == 0)
+             if (mode == 0)
+             {
+                 getSettings()->enableStreamerMode.setValue(
+                     StreamerModeSetting::Disabled);
+             }
+             else if (mode == 1)
+             {
+                 getSettings()->enableStreamerMode.setValue(
+                     StreamerModeSetting::Enabled);
+             }
+             else if (mode == 2)
+             {
+                 if (isInStreamerMode())
                  {
                      getSettings()->enableStreamerMode.setValue(
                          StreamerModeSetting::Disabled);
                  }
-                 else if (mode == 1)
+                 else
                  {
                      getSettings()->enableStreamerMode.setValue(
                          StreamerModeSetting::Enabled);
                  }
-                 else if (mode == 2)
-                 {
-                     if (isInStreamerMode())
-                     {
-                         getSettings()->enableStreamerMode.setValue(
-                             StreamerModeSetting::Disabled);
-                     }
-                     else
-                     {
-                         getSettings()->enableStreamerMode.setValue(
-                             StreamerModeSetting::Enabled);
-                     }
-                 }
-                 else if (mode == 3)
-                 {
-                     getSettings()->enableStreamerMode.setValue(
-                         StreamerModeSetting::DetectObs);
-                 }
-                 return "";
-             }},
-        };
+             }
+             else if (mode == 3)
+             {
+                 getSettings()->enableStreamerMode.setValue(
+                     StreamerModeSetting::DetectObs);
+             }
+             return "";
+         }},
+    };
     this->addDebugStuff(windowActions);
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::Window, windowActions, this);
