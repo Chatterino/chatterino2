@@ -7,6 +7,7 @@
 #include "common/Channel.hpp"
 #include "common/SignalVector.hpp"
 #include "controllers/filters/FilterRecord.hpp"
+#include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
 #include "singletons/Toasts.hpp"
@@ -31,6 +32,7 @@ public:
 
     SignalVector<HighlightPhrase> &highlightedMessages;
     SignalVector<HighlightPhrase> &highlightedUsers;
+    SignalVector<HighlightBadge> &highlightedBadges;
     SignalVector<HighlightBlacklistUser> &blacklistedUsers;
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
@@ -131,6 +133,10 @@ public:
     BoolSetting showBadgesVanity = {"/appearance/badges/vanity", true};
     BoolSetting showBadgesChatterino = {"/appearance/badges/chatterino", true};
     BoolSetting showBadgesFfz = {"/appearance/badges/ffz", true};
+    BoolSetting useCustomFfzModeratorBadges = {
+        "/appearance/badges/useCustomFfzModeratorBadges", true};
+    BoolSetting useCustomFfzVipBadges = {
+        "/appearance/badges/useCustomFfzVipBadges", true};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
@@ -176,6 +182,8 @@ public:
     QStringSetting emojiSet = {"/emotes/emojiSet", "Twitter"};
 
     BoolSetting stackBits = {"/emotes/stackBits", false};
+    BoolSetting removeSpacesBetweenEmotes = {
+        "/emotes/removeSpacesBetweenEmotes", false};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};
@@ -296,6 +304,8 @@ public:
                                            false};
     QStringSetting notificationPathSound = {"/notifications/highlightSoundPath",
                                             "qrc:/sounds/ping3.wav"};
+    BoolSetting notificationOnAnyChannel = {"/notifications/onAnyChannel",
+                                            false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",

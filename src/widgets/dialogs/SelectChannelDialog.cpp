@@ -20,6 +20,9 @@
 #include "providers/irc/Irc2.hpp"
 #include "widgets/helper/EditableModelView.hpp"
 
+#include <QHeaderView>
+#include <QPushButton>
+
 #define TAB_TWITCH 0
 #define TAB_IRC 1
 
@@ -116,17 +119,31 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                              watching_lbl->setVisible(enabled);
                          });
 
+        // live_btn
+        auto live_btn =
+            vbox.emplace<QRadioButton>("Live").assign(&this->ui_.twitch.live);
+        auto live_lbl =
+            vbox.emplace<QLabel>("Shows when channels go live.").hidden();
+
+        live_lbl->setWordWrap(true);
+        live_btn->installEventFilter(&this->tabFilter_);
+
+        QObject::connect(live_btn.getElement(), &QRadioButton::toggled,
+                         [=](bool enabled) mutable {
+                             live_lbl->setVisible(enabled);
+                         });
+
         vbox->addStretch(1);
 
         // tabbing order
-        QWidget::setTabOrder(watching_btn.getElement(),
-                             channel_btn.getElement());
+        QWidget::setTabOrder(live_btn.getElement(), channel_btn.getElement());
         QWidget::setTabOrder(channel_btn.getElement(),
                              whispers_btn.getElement());
         QWidget::setTabOrder(whispers_btn.getElement(),
                              mentions_btn.getElement());
         QWidget::setTabOrder(mentions_btn.getElement(),
                              watching_btn.getElement());
+        QWidget::setTabOrder(watching_btn.getElement(), live_btn.getElement());
 
         // tab
         auto tab = notebook->addPage(obj.getElement());
@@ -291,6 +308,11 @@ void SelectChannelDialog::setSelectedChannel(IndirectChannel _channel)
             this->ui_.twitch.whispers->setFocus();
         }
         break;
+        case Channel::Type::TwitchLive: {
+            this->ui_.notebook->selectIndex(TAB_TWITCH);
+            this->ui_.twitch.live->setFocus();
+        }
+        break;
         case Channel::Type::Irc: {
             this->ui_.notebook->selectIndex(TAB_IRC);
             this->ui_.irc.channel->setText(_channel.get()->getName());
@@ -354,6 +376,10 @@ IndirectChannel SelectChannelDialog::getSelectedChannel() const
             {
                 return app->twitch.server->whispersChannel;
             }
+            else if (this->ui_.twitch.live->isChecked())
+            {
+                return app->twitch.server->liveChannel;
+            }
         }
         break;
         case TAB_IRC: {
@@ -414,15 +440,22 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
              event_key->key() == Qt::Key_Down) &&
             event_key->modifiers() == Qt::NoModifier)
         {
+            // Tab has been pressed, focus next entry in list
+
             if (widget == this->dialog->ui_.twitch.channelName)
             {
+                // Special case for when current selection is the "Channel" entry's edit box since the Edit box actually has the focus
                 this->dialog->ui_.twitch.whispers->setFocus();
                 return true;
             }
-            else
+            else if (widget == this->dialog->ui_.twitch.live)
             {
-                widget->nextInFocusChain()->setFocus();
+                // Special case for when current selection is "Live" (the last entry in the list), next wrap is Channel, but we need to select its edit box
+                this->dialog->ui_.twitch.channel->setFocus();
+                return true;
             }
+
+            widget->nextInFocusChain()->setFocus();
             return true;
         }
         else if (((event_key->key() == Qt::Key_Tab ||
@@ -431,14 +464,12 @@ bool SelectChannelDialog::EventFilter::eventFilter(QObject *watched,
                  ((event_key->key() == Qt::Key_Up) &&
                   event_key->modifiers() == Qt::NoModifier))
         {
+            // Shift+Tab has been pressed, focus previous entry in list
+
             if (widget == this->dialog->ui_.twitch.channelName)
             {
-                this->dialog->ui_.twitch.watching->setFocus();
-                return true;
-            }
-            else if (widget == this->dialog->ui_.twitch.whispers)
-            {
-                this->dialog->ui_.twitch.channel->setFocus();
+                // Special case for when current selection is the "Channel" entry's edit box since the Edit box actually has the focus
+                this->dialog->ui_.twitch.live->setFocus();
                 return true;
             }
 

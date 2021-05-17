@@ -8,6 +8,8 @@
 #include <QDesktopWidget>
 #include <QScreen>
 
+#include <QVBoxLayout>
+
 namespace chatterino {
 
 NotificationPopup::NotificationPopup()

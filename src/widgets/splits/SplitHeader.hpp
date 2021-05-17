@@ -10,6 +10,8 @@
 #include <pajlada/signals/signalholder.hpp>
 #include <vector>
 
+#include <QElapsedTimer>
+
 namespace chatterino {
 
 class Button;
