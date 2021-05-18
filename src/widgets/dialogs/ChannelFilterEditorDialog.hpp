@@ -1,5 +1,11 @@
 #pragma once
 
+#include <QComboBox>
+#include <QDialog>
+#include <QHBoxLayout>
+#include <QLineEdit>
+#include <QVBoxLayout>
+
 namespace chatterino {
 class ChannelFilterEditorDialog : public QDialog
 {

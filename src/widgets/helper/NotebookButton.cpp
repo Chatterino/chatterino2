@@ -10,6 +10,8 @@
 #include <QPainterPath>
 #include <QRadialGradient>
 
+#include <QMimeData>
+
 #define nuuls nullptr
 
 namespace chatterino {

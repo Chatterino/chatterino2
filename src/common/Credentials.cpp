@@ -6,6 +6,9 @@
 #include "util/CombinePath.hpp"
 #include "util/Overloaded.hpp"
 
+#include <QJsonDocument>
+#include <QJsonObject>
+
 #ifdef CMAKE_BUILD
 #    include "qt5keychain/keychain.h"
 #else

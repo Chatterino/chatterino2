@@ -9,6 +9,8 @@
 
 #include <array>
 
+#include <QLabel>
+
 namespace chatterino {
 
 /**

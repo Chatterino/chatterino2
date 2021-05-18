@@ -217,8 +217,6 @@ set(SOURCE_FILES main.cpp
         providers/twitch/TwitchIrcServer.hpp
         providers/twitch/TwitchMessageBuilder.cpp
         providers/twitch/TwitchMessageBuilder.hpp
-        providers/twitch/TwitchParseCheerEmotes.cpp
-        providers/twitch/TwitchParseCheerEmotes.hpp
         providers/twitch/TwitchUser.cpp
         providers/twitch/TwitchUser.hpp
 
@@ -476,7 +474,9 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 add_sanitizers(${PROJECT_NAME})
 
-target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
+if (USE_PRECOMPILED_HEADERS)
+    target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
+endif ()
 
 # Enable autogeneration of Qts MOC/RCC/UIC
 set_target_properties(${PROJECT_NAME}

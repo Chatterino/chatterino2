@@ -1,5 +1,6 @@
 #pragma once
 
+#include "common/Aliases.hpp"
 #include "common/NetworkRequest.hpp"
 
 #include <QJsonArray>
@@ -193,6 +194,76 @@ struct HelixBlock {
     }
 };
 
+struct HelixCheermoteImage {
+    Url imageURL1x;
+    Url imageURL2x;
+    Url imageURL4x;
+
+    explicit HelixCheermoteImage(QJsonObject jsonObject)
+        : imageURL1x(Url{jsonObject.value("1").toString()})
+        , imageURL2x(Url{jsonObject.value("2").toString()})
+        , imageURL4x(Url{jsonObject.value("4").toString()})
+    {
+    }
+};
+
+struct HelixCheermoteTier {
+    QString id;
+    QString color;
+    int minBits;
+    HelixCheermoteImage darkAnimated;
+    HelixCheermoteImage darkStatic;
+    HelixCheermoteImage lightAnimated;
+    HelixCheermoteImage lightStatic;
+
+    explicit HelixCheermoteTier(QJsonObject jsonObject)
+        : id(jsonObject.value("id").toString())
+        , color(jsonObject.value("color").toString())
+        , minBits(jsonObject.value("min_bits").toInt())
+        , darkAnimated(jsonObject.value("images")
+                           .toObject()
+                           .value("dark")
+                           .toObject()
+                           .value("animated")
+                           .toObject())
+        , darkStatic(jsonObject.value("images")
+                         .toObject()
+                         .value("dark")
+                         .toObject()
+                         .value("static")
+                         .toObject())
+        , lightAnimated(jsonObject.value("images")
+                            .toObject()
+                            .value("light")
+                            .toObject()
+                            .value("animated")
+                            .toObject())
+        , lightStatic(jsonObject.value("images")
+                          .toObject()
+                          .value("light")
+                          .toObject()
+                          .value("static")
+                          .toObject())
+    {
+    }
+};
+
+struct HelixCheermoteSet {
+    QString prefix;
+    QString type;
+    std::vector<HelixCheermoteTier> tiers;
+
+    explicit HelixCheermoteSet(QJsonObject jsonObject)
+        : prefix(jsonObject.value("prefix").toString())
+        , type(jsonObject.value("type").toString())
+    {
+        for (const auto &tier : jsonObject.value("tiers").toArray())
+        {
+            this->tiers.emplace_back(tier.toObject());
+        }
+    }
+};
+
 enum class HelixClipError {
     Unknown,
     ClipsDisabled,
@@ -203,6 +274,14 @@ enum class HelixStreamMarkerError {
     Unknown,
     UserNotAuthorized,
     UserNotAuthenticated,
+};
+
+enum class HelixAutoModMessageError {
+    Unknown,
+    MessageAlreadyProcessed,
+    UserNotAuthenticated,
+    UserNotAuthorized,
+    MessageNotFound,
 };
 
 class Helix final : boost::noncopyable
@@ -306,6 +385,18 @@ public:
                        QString title,
                        std::function<void(NetworkResult)> successCallback,
                        HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#manage-held-automod-messages
+    void manageAutoModMessages(
+        QString userID, QString msgID, QString action,
+        std::function<void()> successCallback,
+        std::function<void(HelixAutoModMessageError)> failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference/#get-cheermotes
+    void getCheermotes(
+        QString broadcasterId,
+        ResultCallback<std::vector<HelixCheermoteSet>> successCallback,
+        HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

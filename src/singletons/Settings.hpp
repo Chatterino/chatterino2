@@ -133,6 +133,10 @@ public:
     BoolSetting showBadgesVanity = {"/appearance/badges/vanity", true};
     BoolSetting showBadgesChatterino = {"/appearance/badges/chatterino", true};
     BoolSetting showBadgesFfz = {"/appearance/badges/ffz", true};
+    BoolSetting useCustomFfzModeratorBadges = {
+        "/appearance/badges/useCustomFfzModeratorBadges", true};
+    BoolSetting useCustomFfzVipBadges = {
+        "/appearance/badges/useCustomFfzVipBadges", true};
 
     /// Behaviour
     BoolSetting allowDuplicateMessages = {"/behaviour/allowDuplicateMessages",
@@ -300,6 +304,8 @@ public:
                                            false};
     QStringSetting notificationPathSound = {"/notifications/highlightSoundPath",
                                             "qrc:/sounds/ping3.wav"};
+    BoolSetting notificationOnAnyChannel = {"/notifications/onAnyChannel",
+                                            false};
 
     BoolSetting notificationToast = {"/notifications/enableToast", false};
     IntSetting openFromToast = {"/notifications/openFromToast",
