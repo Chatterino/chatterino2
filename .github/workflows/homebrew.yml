@@ -13,10 +13,6 @@ env:
   C2_CASK_NAME: 'chatterino'
   C2_TAGGED_VERSION: '${{ github.ref }}'
 
-# Notes:
-#
-# - brew autoinstalled on macOS agents, would be nice to report version in PR
-
 jobs:
   update_stable_homebrew_cask:
     name: 'Update the stable homebrew cask'
