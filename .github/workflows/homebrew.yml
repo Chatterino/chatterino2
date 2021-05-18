@@ -22,3 +22,8 @@ env:
 # 5. Run brew uninstall & validate data dir is removed
 # 6. Run brew audit
 # 7. Run brew style --fix
+
+jobs:
+  update_stable_homebrew_cask:
+    name: 'Update the stable homebrew cask'
+    runs-on: 'macos-latest'
