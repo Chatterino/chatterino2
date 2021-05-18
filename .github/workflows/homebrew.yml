@@ -9,6 +9,8 @@ on:
       # - v2.[0-9]+.[0-9]+-beta(?:[0-9]+)
 
 env:
+  C2_CASKREPO_OWNER: 'Chatterino'
+  C2_CASKREPO_NAME: 'homebrew-cask'
   # This gets updated later on in the run by a bash script to strip the prefix
   C2_TAGGED_VERSION: '${{ github.ref }}'
   # If we had a better release process this could just be a github artifact,
@@ -40,8 +42,8 @@ jobs:
         uses: 'GuillaumeFalourd/clone-github-repo-action@v1'
         with:
           # TODO: move to envvar
-          owner: 'Chatterino'
-          repository: 'homebrew-cask'
+          owner: '$( C2_CASKREPO_OWNER )'
+          repository: '$( C2_CASKREPO_NAME )'
       - name: 'Extract version from tag'
         run: |
             'STRIPPED_VERSION=$("refs/tags/$(C2_TAGGED_VERSION)" | sed "s/refs\/tags\///gm")'
