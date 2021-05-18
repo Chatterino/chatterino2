@@ -8,6 +8,10 @@ on:
       # Also maybe add check to c2 so update checker mentions using brew?
       # - v2.[0-9]+.[0-9]+-beta(?:[0-9]+)
 
+env:
+  # This gets updated later on in the run by a bash script to strip the prefix
+  C2_TAGGED_VERSION: '${{ github.ref }}'
+  C2_BIN_URL: 'https://chatterino.fra1.digitaloceanspaces.com/bin//Chatterino.dmg'
 
 # Steps:
 
