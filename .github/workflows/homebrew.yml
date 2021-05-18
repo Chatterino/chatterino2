@@ -9,52 +9,20 @@ on:
       # - v2.[0-9]+.[0-9]+-beta(?:[0-9]+)
 
 env:
-  C2_CASKREPO_OWNER: 'Chatterino'
-  C2_CASKREPO_NAME: 'homebrew-cask'
   # This gets updated later on in the run by a bash script to strip the prefix
   C2_TAGGED_VERSION: '${{ github.ref }}'
-  # If we had a better release process this could just be a github artifact,
-  #   making this action easier
-  C2_BIN_URL: 'https://chatterino.fra1.digitaloceanspaces.com/bin/{0}/Chatterino.dmg'
-  C2_BIN_SHA256: ''
 
 # Notes:
 #
 # - brew autoinstalled on macOS agents, would be nice to report version in PR
-
-# Steps:
-
-# 1. Take version number from tag
-# 2. Get DMG from DO namespace
-# 3. Calculate sha256 hash using DMG
-# 4. Run brew install
-# 5. Run brew uninstall & validate data dir is removed
-# 6. Run brew audit
-# 7. Run brew style --fix
 
 jobs:
   update_stable_homebrew_cask:
     name: 'Update the stable homebrew cask'
     runs-on: 'macos-latest'
     steps:
-      # Checkout the forked homebrew casks repo
-      - name: 'Clone Homebrew Cask repo'
-        uses: 'GuillaumeFalourd/clone-github-repo-action@v1'
-        with:
-          # TODO: move to envvar
-          owner: '$( C2_CASKREPO_OWNER )'
-          repository: '$( C2_CASKREPO_NAME )'
       - name: 'Extract version from tag'
         run: |
             'STRIPPED_VERSION=$("refs/tags/$(C2_TAGGED_VERSION)" | sed "s/refs\/tags\///gm")'
             'echo "C2_TAGGED_VERSION=$(STRIPPED_VERSION)" >> $GITHUB_ENV'
-      # Download the latest DMG from the DO workspace
-      # Need to confirm this works, not to sure about that template expression
-      - name: 'Download Chatterino.dmg from DigitalOcean'
-        run: 'curl -O ${{ format($C2_BIN_URL,$C2_TAGGED_VERSION) }}'
-      # Calculte the sha256 sum used by the cask file
-      - name: 'Calculate the DMG''s sha256 checksum'
-        run: 'echo "C2_BIN_SHA256=$(shasum -a 256 Chatterino.dmg)" >> $GITHUB_ENV'
-      - name: 'Calculate the DMG''s sha256 checksum'
-        run: 'echo "C2_BIN_SHA256=$(shasum -a 256 Chatterino.dmg)" >> $GITHUB_ENV'
 
