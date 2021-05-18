@@ -36,7 +36,7 @@ jobs:
     runs-on: 'macos-latest'
     steps:
       # Checkout the forked homebrew casks repo
-      - name: 'Checkout Homebrew Cask repo'
+      - name: 'Clone Homebrew Cask repo'
         uses: 'GuillaumeFalourd/clone-github-repo-action@v1'
         with:
           # TODO: move to envvar
