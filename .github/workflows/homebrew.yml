@@ -13,6 +13,10 @@ env:
   C2_TAGGED_VERSION: '${{ github.ref }}'
   C2_BIN_URL: 'https://chatterino.fra1.digitaloceanspaces.com/bin//Chatterino.dmg'
 
+# Notes:
+#
+# - brew autoinstalled on macOS agents, would be nice to report version in PR
+
 # Steps:
 
 # 1. Take version number from tag
