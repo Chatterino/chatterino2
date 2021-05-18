@@ -14,6 +14,7 @@ env:
   # If we had a better release process this could just be a github artifact,
   #   making this action easier
   C2_BIN_URL: 'https://chatterino.fra1.digitaloceanspaces.com/bin/{0}/Chatterino.dmg'
+  C2_BIN_SHA256: ''
 
 # Notes:
 #
@@ -49,3 +50,9 @@ jobs:
       # Need to confirm this works, not to sure about that template expression
       - name: 'Download Chatterino.dmg from DigitalOcean'
         run: 'curl -O ${{ format($C2_BIN_URL,$C2_TAGGED_VERSION) }}'
+      # Calculte the sha256 sum used by the cask file
+      - name: 'Calculate the DMG''s sha256 checksum'
+        run: 'echo "C2_BIN_SHA256=$(shasum -a 256 Chatterino.dmg)" >> $GITHUB_ENV'
+      - name: 'Calculate the DMG''s sha256 checksum'
+        run: 'echo "C2_BIN_SHA256=$(shasum -a 256 Chatterino.dmg)" >> $GITHUB_ENV'
+
