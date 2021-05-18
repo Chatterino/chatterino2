@@ -39,3 +39,7 @@ jobs:
           # TODO: move to envvar
           owner: 'Chatterino'
           repository: 'homebrew-cask'
+      - name: 'Extract version from tag'
+        run: |
+            'STRIPPED_VERSION=$("refs/tags/$(C2_TAGGED_VERSION)" | sed "s/refs\/tags\///gm")'
+            'echo "C2_TAGGED_VERSION=$()" >> $GITHUB_ENV'
