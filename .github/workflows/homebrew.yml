@@ -6,6 +6,7 @@ on:
       - v2.[0-9]+.[0-9]+
       # TODO: handle beta and nightly releases
       # Also maybe add check to c2 so update checker mentions using brew?
+      # - v2.[0-9]+.[0-9]+-beta(?:[0-9]+)
 
 
 # Steps:
