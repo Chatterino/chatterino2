@@ -11,7 +11,9 @@ on:
 env:
   # This gets updated later on in the run by a bash script to strip the prefix
   C2_TAGGED_VERSION: '${{ github.ref }}'
-  C2_BIN_URL: 'https://chatterino.fra1.digitaloceanspaces.com/bin//Chatterino.dmg'
+  # If we had a better release process this could just be a github artifact,
+  #   making this action easier
+  C2_BIN_URL: 'https://chatterino.fra1.digitaloceanspaces.com/bin/{0}/Chatterino.dmg'
 
 # Notes:
 #
@@ -43,3 +45,7 @@ jobs:
         run: |
             'STRIPPED_VERSION=$("refs/tags/$(C2_TAGGED_VERSION)" | sed "s/refs\/tags\///gm")'
             'echo "C2_TAGGED_VERSION=$(STRIPPED_VERSION)" >> $GITHUB_ENV'
+      # Download the latest DMG from the DO workspace
+      # Need to confirm this works, not to sure about that template expression
+      - name: 'Download Chatterino.dmg from DigitalOcean'
+        run: 'curl -O ${{ format($C2_BIN_URL,$C2_TAGGED_VERSION) }}'
