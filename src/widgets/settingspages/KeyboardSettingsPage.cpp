@@ -19,9 +19,6 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
     LayoutCreator<KeyboardSettingsPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>();
-    layout.emplace<QLabel>("If a hotkey's configuration is invalid you'll "
-                           "receive a popup message when using it.\n"
-                           "Some actions of hotkeys don't have any feedback.");
 
     auto model = app->hotkeys->createModel(nullptr);
     EditableModelView *view =
