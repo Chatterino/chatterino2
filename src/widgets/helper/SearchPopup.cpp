@@ -6,13 +6,13 @@
 #include <QVBoxLayout>
 
 #include "common/Channel.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
 #include "messages/search/AuthorPredicate.hpp"
 #include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
 #include "messages/search/MessageFlagsPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {
@@ -59,11 +59,21 @@ SearchPopup::SearchPopup(QWidget *parent)
 {
     this->initLayout();
     this->resize(400, 600);
+    this->addShortcuts();
+}
 
-    createShortcut(this, "CTRL+F", [this] {
-        this->searchInput_->setFocus();
-        this->searchInput_->selectAll();
-    });
+void SearchPopup::addShortcuts()
+{
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+        HotkeyScope::PopupWindow,
+        std::map<QString, std::function<QString(std::vector<QString>)>>{
+            {"search",
+             [this](std::vector<QString>) -> QString {
+                 this->searchInput_->setFocus();
+                 this->searchInput_->selectAll();
+                 return "";
+             }}},
+        this);
 }
 
 void SearchPopup::setChannelFilters(FilterSetPtr filters)

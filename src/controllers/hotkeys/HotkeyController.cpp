@@ -339,6 +339,9 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
                             QKeySequence("Escape"), "reject",
                             std::vector<QString>(), "default popup reject");
+        this->tryAddDefault(
+            addedHotkeys, HotkeyScope::PopupWindow, QKeySequence("Ctrl+F"),
+            "search", std::vector<QString>(), "default popup focus search box");
     }
 
     // window

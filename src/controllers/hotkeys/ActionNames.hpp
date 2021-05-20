@@ -15,6 +15,7 @@ const std::map<HotkeyScope, std::map<QString, ActionDefinition>> actionNames{
          {"delete", ActionDefinition{"Close"}},
          {"openTab", ActionDefinition{"Select Tab", 1}},
          {"scrollPage", ActionDefinition{"Scroll", 1}},
+         {"search", ActionDefinition{"Focus search box"}},
      }},
     {HotkeyScope::Settings,
      {

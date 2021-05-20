@@ -26,6 +26,7 @@ protected:
 private:
     void initLayout();
     void search();
+    void addShortcuts();
 
     /**
      * @brief Only retains those message from a list of messages that satisfy a
