@@ -46,6 +46,7 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/SearchPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
 #define DRAW_WIDTH (this->width())
@@ -998,6 +999,16 @@ MessageElementFlags ChannelView::getFlags() const
     MessageElementFlags flags = app->windows->getWordFlags();
 
     Split *split = dynamic_cast<Split *>(this->parentWidget());
+
+    if (split == nullptr)
+    {
+        SearchPopup *searchPopup =
+            dynamic_cast<SearchPopup *>(this->parentWidget());
+        if (searchPopup != nullptr)
+        {
+            split = dynamic_cast<Split *>(searchPopup->parentWidget());
+        }
+    }
 
     if (split != nullptr)
     {
