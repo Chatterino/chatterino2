@@ -17,10 +17,6 @@ const std::map<HotkeyScope, std::map<QString, ActionDefinition>> actionNames{
          {"scrollPage", ActionDefinition{"Scroll", 1}},
          {"search", ActionDefinition{"Focus search box"}},
      }},
-    {HotkeyScope::Settings,
-     {
-         {"search", ActionDefinition{"Focus search box"}},
-     }},
     {HotkeyScope::Split,
      {
          {"changeChannel", ActionDefinition{"Change channel"}},

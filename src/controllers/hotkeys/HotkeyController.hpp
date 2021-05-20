@@ -35,14 +35,12 @@ public:
 
     const std::map<HotkeyScope, QString> hotkeyScopeNames = {
         {HotkeyScope::PopupWindow, "popupWindow"},
-        {HotkeyScope::Settings, "settings"},
         {HotkeyScope::Split, "split"},
         {HotkeyScope::SplitInput, "splitInput"},
         {HotkeyScope::Window, "window"}};
 
     const std::map<HotkeyScope, QString> hotkeyScopeDisplayNames = {
         {HotkeyScope::PopupWindow, "Popup Windows"},
-        {HotkeyScope::Settings, "Settings dialog"},
         {HotkeyScope::Split, "Split"},
         {HotkeyScope::SplitInput, "Split input box"},
         {HotkeyScope::Window, "Window"},

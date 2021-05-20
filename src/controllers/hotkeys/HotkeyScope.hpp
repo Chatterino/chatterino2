@@ -7,7 +7,6 @@ enum class HotkeyScope {
     // Each HotkeyScope represents a widget that has customizable hotkeys. This
     // is needed because more than one widget can have the same or similar action.
     PopupWindow,
-    Settings,
     Split,
     SplitInput,
     Window,

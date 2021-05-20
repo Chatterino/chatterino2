@@ -53,7 +53,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 void SettingsDialog::addShortcuts()
 {
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
-        HotkeyScope::Settings,
+        HotkeyScope::PopupWindow,
         std::map<QString, std::function<QString(std::vector<QString>)>>{
             {"search",
              [this](std::vector<QString>) -> QString {

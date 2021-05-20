@@ -424,13 +424,6 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             std::vector<QString>(),
                             "default open quick switcher");
     }
-
-    // settings
-    {
-        this->tryAddDefault(
-            addedHotkeys, HotkeyScope::Settings, QKeySequence("Ctrl+F"),
-            "search", std::vector<QString>(), "default search in settings");
-    }
 }
 
 void HotkeyController::save()

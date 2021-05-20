@@ -39,7 +39,7 @@ public:
     /**
      * @brief Returns the action which describes what this Hotkey is meant to do
      *
-     * For example, in the Settings scope there's a "search" action which activates the search input box
+     * For example, in the Window scope there's a "showSearch" action which opens a search popup
      */
     QString action() const;
 
@@ -53,7 +53,7 @@ public:
     /**
      * @brief Returns the display name of the hotkey
      *
-     * For example, in the Settings scope there's a "search" action that has a default hotkey with the name "default search in settings shortcut"
+     * For example, in the Split scope there's a "showSearch" action that has a default hotkey with the name "default show search"
      */
     QString name() const;
 

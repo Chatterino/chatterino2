@@ -58,8 +58,6 @@ Qt::ShortcutContext Hotkey::getContext() const
             return Qt::WidgetWithChildrenShortcut;
         case HotkeyScope::SplitInput:
             return Qt::WidgetWithChildrenShortcut;
-        case HotkeyScope::Settings:
-            return Qt::WidgetWithChildrenShortcut;
         case HotkeyScope::PopupWindow:
             return Qt::WindowShortcut;
     }
