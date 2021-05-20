@@ -56,12 +56,11 @@ KeyboardSettingsPage::KeyboardSettingsPage()
                          this->tableCellClicked(clicked, view);
                      });
 
-    QPushButton *resetEverything = new QPushButton("Reset EVERYTHING");
+    QPushButton *resetEverything = new QPushButton("Reset to defaults");
     QObject::connect(resetEverything, &QPushButton::clicked, [this]() {
         auto reply = QMessageBox::question(
             this, "Reset hotkeys",
-            "Are you sure you want to reset hotkeys? "
-            "This action is permanent and CANNOT BE UNDONE!",
+            "Are you sure you want to reset hotkeys to defaults?",
             QMessageBox::Yes | QMessageBox::Cancel);
 
         if (reply == QMessageBox::Yes)
