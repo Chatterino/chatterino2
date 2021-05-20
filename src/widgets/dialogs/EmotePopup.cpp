@@ -11,13 +11,11 @@
 #include "providers/twitch/TwitchChannel.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QHBoxLayout>
-#include <QShortcut>
 #include <QTabWidget>
 
 namespace chatterino {

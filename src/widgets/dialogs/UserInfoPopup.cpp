@@ -19,7 +19,6 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
-#include "util/Shortcut.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/Scrollbar.hpp"

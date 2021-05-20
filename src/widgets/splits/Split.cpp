@@ -19,7 +19,6 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/NuulsUploader.hpp"
-#include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"

@@ -6,7 +6,6 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/IrcConnectionEditor.hpp"
 #include "widgets/helper/NotebookTab.hpp"

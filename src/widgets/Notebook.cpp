@@ -6,7 +6,6 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/NotebookButton.hpp"
@@ -19,7 +18,6 @@
 #include <QFormLayout>
 #include <QLayout>
 #include <QList>
-#include <QShortcut>
 #include <QStandardPaths>
 #include <QUuid>
 #include <QWidget>

@@ -6,7 +6,6 @@
 #include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/helper/Button.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"

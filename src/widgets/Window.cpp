@@ -13,7 +13,6 @@
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -37,7 +36,6 @@
 #include <QHeaderView>
 #include <QMenuBar>
 #include <QPalette>
-#include <QShortcut>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 
