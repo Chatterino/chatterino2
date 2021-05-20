@@ -94,6 +94,8 @@ void SplitInput::initLayout()
         app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
     QObject::connect(this->ui_.textEdit, &QTextEdit::cursorPositionChanged,
                      this, &SplitInput::onCursorPositionChanged);
+    QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
+                     &SplitInput::onTextChanged);
 
     this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
         this->ui_.textEdit->setFont(
@@ -460,6 +462,11 @@ void SplitInput::installKeyPressedEvent()
             }
         }
     });
+}
+
+void SplitInput::onTextChanged()
+{
+    this->updateColonMenu();
 }
 
 void SplitInput::onCursorPositionChanged()

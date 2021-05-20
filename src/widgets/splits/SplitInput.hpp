@@ -47,6 +47,7 @@ private:
     void initLayout();
     void installKeyPressedEvent();
     void onCursorPositionChanged();
+    void onTextChanged();
     void updateEmoteButton();
     void updateColonMenu();
     void showColonMenu(const QString &text);

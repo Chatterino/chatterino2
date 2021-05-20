@@ -26,10 +26,12 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#include <rapidjson/document.h>
-#include "providers/twitch/PubsubClient.hpp"
-#include "util/SampleCheerMessages.hpp"
-#include "util/SampleLinks.hpp"
+#ifndef NDEBUG
+#    include <rapidjson/document.h>
+#    include "providers/twitch/PubsubClient.hpp"
+#    include "util/SampleCheerMessages.hpp"
+#    include "util/SampleLinks.hpp"
+#endif
 
 #include <QApplication>
 #include <QDesktopServices>
@@ -182,6 +184,7 @@ void Window::addCustomTitlebarButtons()
 void Window::addDebugStuff(
     std::map<QString, std::function<QString(std::vector<QString>)>> &actions)
 {
+#ifndef NDEBUG
     std::vector<QString> cheerMessages, subMessages, miscMessages, linkMessages,
         emoteTestMessages;
 
@@ -294,6 +297,7 @@ void Window::addDebugStuff(
                         getApp()->twitch.server->addFakeMessage(msg);
                         return "";
                     }});
+#endif
 }
 
 void Window::addShortcuts()

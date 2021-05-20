@@ -547,6 +547,7 @@ void Helix::loadBlocks(QString userId,
 {
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("broadcaster_id", userId);
+    urlQuery.addQueryItem("first", "100");
 
     this->makeRequest("users/blocks", urlQuery)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
@@ -659,6 +660,107 @@ void Helix::updateChannel(QString broadcasterId, QString gameId,
         })
         .execute();
 }
+
+void Helix::manageAutoModMessages(
+    QString userID, QString msgID, QString action,
+    std::function<void()> successCallback,
+    std::function<void(HelixAutoModMessageError)> failureCallback)
+{
+    QJsonObject payload;
+
+    payload.insert("user_id", userID);
+    payload.insert("msg_id", msgID);
+    payload.insert("action", action);
+
+    this->makeRequest("moderation/automod/message", QUrlQuery())
+        .type(NetworkRequestType::Post)
+        .header("Content-Type", "application/json")
+        .payload(QJsonDocument(payload).toJson(QJsonDocument::Compact))
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            successCallback();
+            return Success;
+        })
+        .onError([failureCallback, msgID, action](NetworkResult result) {
+            switch (result.status())
+            {
+                case 400: {
+                    // Message was already processed
+                    failureCallback(
+                        HelixAutoModMessageError::MessageAlreadyProcessed);
+                }
+                break;
+
+                case 401: {
+                    // User is missing the required scope
+                    failureCallback(
+                        HelixAutoModMessageError::UserNotAuthenticated);
+                }
+                break;
+
+                case 403: {
+                    // Requesting user is not authorized to manage messages
+                    failureCallback(
+                        HelixAutoModMessageError::UserNotAuthorized);
+                }
+                break;
+
+                case 404: {
+                    // Message not found or invalid msgID
+                    failureCallback(HelixAutoModMessageError::MessageNotFound);
+                }
+                break;
+
+                default: {
+                    qCDebug(chatterinoTwitch)
+                        << "Failed to manage automod message: " << action
+                        << msgID << result.status() << result.getData();
+                    failureCallback(HelixAutoModMessageError::Unknown);
+                }
+                break;
+            }
+        })
+        .execute();
+}
+
+void Helix::getCheermotes(
+    QString broadcasterId,
+    ResultCallback<std::vector<HelixCheermoteSet>> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+
+    this->makeRequest("bits/cheermotes", urlQuery)
+        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+            auto root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixCheermoteSet> cheermoteSets;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                cheermoteSets.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(cheermoteSets);
+            return Success;
+        })
+        .onError([broadcasterId, failureCallback](NetworkResult result) {
+            qCDebug(chatterinoTwitch)
+                << "Failed to get cheermotes(broadcaster_id=" << broadcasterId
+                << "): " << result.status() << result.getData();
+            failureCallback();
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
