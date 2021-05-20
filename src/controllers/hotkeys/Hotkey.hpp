@@ -30,7 +30,7 @@ public:
     QString toPortableString() const;
 
     /**
-     * @brief Returns the scope where this hotkey is active
+     * @brief Returns the scope where this hotkey is active. This is labeled the "Category" in the UI.
      *
      * See enum HotkeyScope for more information about the various hotkey scopes
      */
