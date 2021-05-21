@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added moderation buttons to search popup when searching in a split with moderation mode enabled. (#2148, #2803)
 - Minor: Added settings to disable custom FrankerFaceZ VIP/mod badges. (#2693, #2759)
 
 ## 2.3.2
