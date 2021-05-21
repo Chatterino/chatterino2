@@ -2067,14 +2067,26 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserAction: {
             QString value = link.value;
 
+            ChannelPtr channel = this->underlyingChannel_;
+            SearchPopup *searchPopup =
+                dynamic_cast<SearchPopup *>(this->parentWidget());
+            if (searchPopup != nullptr)
+            {
+                Split *split =
+                    dynamic_cast<Split *>(searchPopup->parentWidget());
+                if (split != nullptr)
+                {
+                    channel = split->getChannel();
+                }
+            }
+
             value.replace("{user}", layout->getMessage()->loginName)
                 .replace("{channel}", this->channel_->getName())
                 .replace("{msg-id}", layout->getMessage()->id)
                 .replace("{message}", layout->getMessage()->messageText);
 
-            value = getApp()->commands->execCommand(
-                value, this->underlyingChannel_, false);
-            this->underlyingChannel_->sendMessage(value);
+            value = getApp()->commands->execCommand(value, channel, false);
+            channel->sendMessage(value);
         }
         break;
 
