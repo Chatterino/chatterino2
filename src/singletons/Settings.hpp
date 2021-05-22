@@ -318,7 +318,11 @@ public:
     QStringSetting streamlinkPath = {"/external/streamlink/customPath", ""};
     QStringSetting preferredQuality = {"/external/streamlink/quality",
                                        "Choose"};
-    QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
+    QStringSetting streamlinkOpts = {"/external/streamlink/options",
+                                     "--twitch-low-latency --twitch-disable-ads"};
+
+    // MPV player
+    QStringSetting mpvPlayerPath = {"/external/mpv/path", ""};
 
     // Custom URI Scheme
     QStringSetting customURIScheme = {"/external/urischeme"};

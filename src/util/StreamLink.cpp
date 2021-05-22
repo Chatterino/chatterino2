@@ -26,6 +26,15 @@ namespace {
 #endif
     }
 
+    const char *getBinaryNameMPV()
+    {
+#ifdef _WIN32
+        return "mpv.exe";
+#else
+        return "mpv";
+#endif
+    }
+
     const char *getDefaultBinaryPath()
     {
 #ifdef _WIN32
@@ -47,7 +56,12 @@ namespace {
         }
     }
 
-    bool checkStreamlinkPath(const QString &path)
+    QString getMPVProgram()
+    {
+        return getSettings()->mpvPlayerPath + "/" + getBinaryNameMPV();
+    }
+
+    bool checkExecutablePath(const QString &path)
     {
         QFileInfo fileinfo(path);
 
@@ -78,6 +92,15 @@ namespace {
                 "Unable to find Streamlink executable.\nIf you have Streamlink "
                 "installed, you might need to enable the custom path option");
         }
+    }
+
+    void showMPVNotFoundError()
+    {
+        static QErrorMessage *msg = new QErrorMessage;
+        msg->setWindowTitle("Chatterino - mpv player not found");
+        msg->showMessage("Unable to find mpv player executable\nMake sure "
+                         "your path is pointing to the DIRECTORY "
+                         "where the mpv player executable is located");
     }
 
     QProcess *createStreamlinkProcess()
@@ -221,10 +244,16 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV, unsigned l
 
     QStringList args;
 
+    // First check to see if player is valid path!
+    if(streamMPV && !checkExecutablePath(getMPVProgram())) {
+        showMPVNotFoundError();
+        return;
+    }
+
     // Append MVP player settings if we have a container to play in
     // https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst
     if(streamMPV) {
-        args << "--player \"C:/Program Files/mpv-x86_64/mpv.exe --wid=" + QString::number(mpvContainer)+"\"";
+        args << "--player \""+getMPVProgram()+" --wid=" + QString::number(mpvContainer)+"\"";
     }
 
     // Quality converted from Chatterino format to Streamlink format
