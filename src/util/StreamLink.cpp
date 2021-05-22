@@ -170,8 +170,10 @@ void getStreamQualities(const QString &channelURL,
     p->start();
 }
 
+
+
 void openStreamlink(const QString &channelURL, const QString &quality,
-                    QStringList extraArguments)
+                    QStringList extraArguments, bool streamMPV)
 {
     QStringList arguments = extraArguments << channelURL << quality;
 
@@ -182,15 +184,26 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
     arguments << splitCommand(additionalOptions);
 
-    bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
-
-    if (!res)
-    {
-        showStreamlinkNotFoundError();
+    // If we are not doing our MPV video view start as detached
+    // Else we will kill our existing stream proccess and start a new stream
+    if(!streamMPV) {
+        bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
+        if (!res)
+        {
+            showStreamlinkNotFoundError();
+        }
+    } else {
+        QString command = "\""+getStreamlinkProgram()+"\" "+arguments.join(" ");
+        if(streamlinkProcess != nullptr) {
+            streamlinkProcess->kill();
+        }
+        streamlinkProcess = new QProcess;
+        streamlinkProcess->start(command);
     }
+
 }
 
-void openStreamlinkForChannel(const QString &channel)
+void openStreamlinkForChannel(const QString &channel, bool streamMPV, unsigned long mpvContainer)
 {
     QString channelURL = "twitch.tv/" + channel;
 
@@ -207,6 +220,12 @@ void openStreamlinkForChannel(const QString &channel)
     }
 
     QStringList args;
+
+    // Append MVP player settings if we have a container to play in
+    // https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst
+    if(streamMPV) {
+        args << "--player \"C:/Program Files/mpv-x86_64/mpv.exe --wid=" + QString::number(mpvContainer)+"\"";
+    }
 
     // Quality converted from Chatterino format to Streamlink format
     QString quality;
@@ -241,7 +260,7 @@ void openStreamlinkForChannel(const QString &channel)
         args << "--stream-sorting-excludes" << exclude;
     }
 
-    openStreamlink(channelURL, quality, args);
+    openStreamlink(channelURL, quality, args, streamMPV);
 }
 
 }  // namespace chatterino

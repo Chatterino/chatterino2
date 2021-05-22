@@ -1,5 +1,7 @@
 #pragma once
 
+#include "widgets/BaseWidget.hpp"
+
 #include <QString>
 #include <QStringList>
 
@@ -18,10 +20,10 @@ public:
 // the "Additional arguments" are fetched and added at the beginning of the
 // streamlink call
 void openStreamlink(const QString &channelURL, const QString &quality,
-                    QStringList extraArguments = QStringList());
+                    QStringList extraArguments = QStringList(), bool streamMPV = false);
 
 // Start opening streamlink for the given channel, reading settings like quality
 // from settings and opening a quality dialog if the quality is "Choose"
-void openStreamlinkForChannel(const QString &channel);
+void openStreamlinkForChannel(const QString &channel, bool streamMPV = false, unsigned long mpvContainer = 0);
 
 }  // namespace chatterino

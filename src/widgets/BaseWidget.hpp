@@ -5,6 +5,16 @@
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
+
+
+static QWindow * mpv_window = nullptr;
+static QWidget * _mpvContainer = nullptr;
+static unsigned long _mpvContainerWID;
+static QString last_channel = "";
+static QProcess *streamlinkProcess = nullptr;
+
+
+
 namespace chatterino {
 
 class Theme;

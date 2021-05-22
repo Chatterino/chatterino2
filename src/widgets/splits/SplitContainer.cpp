@@ -297,6 +297,10 @@ void SplitContainer::setSelected(Split *split)
         this->focusSplitRecursive(node);
         this->setPreferedTargetRecursive(node);
     }
+
+    // switch the mpv window if it is being shown
+    split->openInStreamlinkMPVIfOpen();
+
 }
 
 void SplitContainer::setPreferedTargetRecursive(Node *node)

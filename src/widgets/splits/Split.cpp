@@ -628,6 +628,58 @@ void Split::openInStreamlink()
     }
 }
 
+
+void Split::openInStreamlinkMPVIfOpen()
+{
+    try
+    {
+        // If the stream is already open then we can change it to a new stream
+        // We should check to make sure we did not reques to change to the same channel
+        // Also ignore if the channel clicked is not a live channel
+        QString channel = this->getChannel()->getName();
+        if(mpv_window == nullptr || _mpvContainer == nullptr
+                || channel == last_channel || !this->getChannel()->isLive()) {
+            return;
+        }
+        last_channel = channel;
+        openStreamlinkForChannel(channel, true, _mpvContainerWID);
+    }
+    catch (const Exception &ex)
+    {
+        qCWarning(chatterinoWidget)
+            << "Error in openInStreamlinkMPVIfOpen:" << ex.what();
+    }
+}
+
+void Split::openInStreamlinkMPV()
+{
+    try
+    {
+        // This will open our streamlink in our new mpv window
+        // This window will stream in the mpv video file!
+        // install from: https://mpv.io/
+        //  https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst
+        QString channel = this->getChannel()->getName();
+        if(mpv_window == nullptr || _mpvContainer == nullptr) {
+            mpv_window = new QWindow;
+            _mpvContainerWID = mpv_window->winId();
+            _mpvContainer = createWindowContainer(mpv_window);
+            _mpvContainer->setStyleSheet("background-color: black;"); // todo: why no work?
+            _mpvContainer->setContentsMargins(0, 0, 0, 0);
+            _mpvContainer->setBackgroundRole(QPalette::Window);
+            _mpvContainer->setSizePolicy(QSizePolicy::Policy::Expanding,QSizePolicy::Policy::Expanding);
+            _mpvContainer->show();
+        }
+        last_channel = channel;
+        openStreamlinkForChannel(channel, true, _mpvContainerWID);
+    }
+    catch (const Exception &ex)
+    {
+        qCWarning(chatterinoWidget)
+            << "Error in doOpenStreamlink:" << ex.what();
+    }
+}
+
 void Split::openWithCustomScheme()
 {
     QString scheme = getSettings()->customURIScheme.getValue();
