@@ -84,7 +84,7 @@ ExternalToolsPage::ExternalToolsPage()
         auto description = new QLabel(
             "The mpv player is an open-source cross-platform video player. "
             "This can be used alongside Streamlink to have an attached player. "
-            "Be sure to extract mpv and set the path correctly below!");
+            "Be sure to extract the mpv player and set the path correctly below!");
         description->setWordWrap(true);
         description->setStyleSheet("color: #bbb");
 
