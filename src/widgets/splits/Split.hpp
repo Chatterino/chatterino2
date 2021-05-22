@@ -10,6 +10,8 @@
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QWindow>
+
 
 namespace chatterino {
 
@@ -152,6 +154,8 @@ public slots:
     void openWhispersInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
+    void openInStreamlinkMPVIfOpen();
+    void openInStreamlinkMPV();
     void openWithCustomScheme();
     void copyToClipboard();
     void setFiltersDialog();
