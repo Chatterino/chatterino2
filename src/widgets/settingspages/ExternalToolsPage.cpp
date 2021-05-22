@@ -78,6 +78,39 @@ ExternalToolsPage::ExternalToolsPage()
     layout->addSpacing(16);
 
     {
+        auto group = layout.emplace<QGroupBox>("mpv player");
+        auto groupLayout = group.setLayoutType<QFormLayout>();
+
+        auto description = new QLabel(
+            "The mpv player is an open-source cross-platform video player. "
+            "This can be used alongside Streamlink to have an attached player. "
+            "Be sure to extract mpv and set the path correctly below!");
+        description->setWordWrap(true);
+        description->setStyleSheet("color: #bbb");
+
+        auto links = new QLabel(
+            formatRichNamedLink("https://mpv.io/", "Website") +
+            " " +
+            formatRichNamedLink(
+                "https://mpv.io/installation/", "Download"));
+        links->setTextFormat(Qt::RichText);
+        links->setTextInteractionFlags(Qt::TextBrowserInteraction |
+                                       Qt::LinksAccessibleByKeyboard |
+                                       Qt::LinksAccessibleByMouse);
+        links->setOpenExternalLinks(true);
+
+        groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
+        groupLayout->setWidget(1, QFormLayout::SpanningRole, links);
+
+        auto customPath = this->createLineEdit(getSettings()->mpvPlayerPath);
+        customPath->setPlaceholderText(
+            "Path to folder where mpv executable can be found");
+        groupLayout->addRow("mpv path:", customPath);
+
+    }
+    layout->addSpacing(16);
+
+    {
         auto group = layout.emplace<QGroupBox>("Custom stream player");
         auto groupLayout = group.setLayoutType<QFormLayout>();
 
