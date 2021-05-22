@@ -637,7 +637,7 @@ void Split::openInStreamlinkMPVIfOpen()
         // We should check to make sure we did not reques to change to the same channel
         // Also ignore if the channel clicked is not a live channel
         QString channel = this->getChannel()->getName();
-        if(mpv_window == nullptr || _mpvContainer == nullptr
+        if(mpv_window == nullptr || _mpvContainer == nullptr || !_mpvContainer->isVisible()
                 || channel == last_channel || !this->getChannel()->isLive()) {
             return;
         }
@@ -660,12 +660,10 @@ void Split::openInStreamlinkMPV()
         // install from: https://mpv.io/
         //  https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst
         QString channel = this->getChannel()->getName();
-        if(mpv_window == nullptr || _mpvContainer == nullptr) {
+        if(mpv_window == nullptr || _mpvContainer == nullptr || !_mpvContainer->isVisible()) {
             mpv_window = new QWindow;
             _mpvContainerWID = mpv_window->winId();
             _mpvContainer = createWindowContainer(mpv_window);
-            _mpvContainer->setStyleSheet("background-color: black;"); // todo: why no work?
-            _mpvContainer->setContentsMargins(0, 0, 0, 0);
             _mpvContainer->setBackgroundRole(QPalette::Window);
             _mpvContainer->setSizePolicy(QSizePolicy::Policy::Expanding,QSizePolicy::Policy::Expanding);
             _mpvContainer->show();
