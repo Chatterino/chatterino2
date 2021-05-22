@@ -4,6 +4,7 @@
 
 - Minor: Made "#channel" in `/mentions` tab show in usercards and in the search popup. (#2802)
 - Minor: Added settings to disable custom FrankerFaceZ VIP/mod badges. (#2693, #2759)
+- Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
 
 ## 2.3.2
 

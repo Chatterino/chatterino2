@@ -67,7 +67,8 @@ namespace {
                 auto jsonEmote = jsonEmoteValue.toObject();
 
                 auto name = EmoteName{jsonEmote.value("name").toString()};
-                auto id = EmoteId{jsonEmote.value("id").toString()};
+                auto id =
+                    EmoteId{QString::number(jsonEmote.value("id").toInt())};
                 auto urls = jsonEmote.value("urls").toObject();
 
                 auto emote = Emote();
