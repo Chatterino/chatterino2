@@ -1024,6 +1024,9 @@ MessageElementFlags ChannelView::getFlags() const
         }
     }
 
+    if (this->sourceChannel_ == app->twitch.server->mentionsChannel)
+        flags.set(MessageElementFlag::ChannelName);
+
     return flags;
 }
 
