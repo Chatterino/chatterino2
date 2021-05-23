@@ -46,6 +46,7 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/SearchPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
 #define DRAW_WIDTH (this->width())
@@ -998,6 +999,16 @@ MessageElementFlags ChannelView::getFlags() const
     MessageElementFlags flags = app->windows->getWordFlags();
 
     Split *split = dynamic_cast<Split *>(this->parentWidget());
+
+    if (split == nullptr)
+    {
+        SearchPopup *searchPopup =
+            dynamic_cast<SearchPopup *>(this->parentWidget());
+        if (searchPopup != nullptr)
+        {
+            split = dynamic_cast<Split *>(searchPopup->parentWidget());
+        }
+    }
 
     if (split != nullptr)
     {
@@ -2059,14 +2070,26 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserAction: {
             QString value = link.value;
 
+            ChannelPtr channel = this->underlyingChannel_;
+            SearchPopup *searchPopup =
+                dynamic_cast<SearchPopup *>(this->parentWidget());
+            if (searchPopup != nullptr)
+            {
+                Split *split =
+                    dynamic_cast<Split *>(searchPopup->parentWidget());
+                if (split != nullptr)
+                {
+                    channel = split->getChannel();
+                }
+            }
+
             value.replace("{user}", layout->getMessage()->loginName)
                 .replace("{channel}", this->channel_->getName())
                 .replace("{msg-id}", layout->getMessage()->id)
                 .replace("{message}", layout->getMessage()->messageText);
 
-            value = getApp()->commands->execCommand(
-                value, this->underlyingChannel_, false);
-            this->underlyingChannel_->sendMessage(value);
+            value = getApp()->commands->execCommand(value, channel, false);
+            channel->sendMessage(value);
         }
         break;
 
