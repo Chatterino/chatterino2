@@ -1,4 +1,4 @@
-#include "ChatterSet.hpp"
+#include "common/ChatterSet.hpp"
 
 #include <tuple>
 #include "debug/Benchmark.hpp"
