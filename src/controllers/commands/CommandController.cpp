@@ -666,38 +666,26 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
-    this->registerCommand("/popout", [](const QStringList &words,
-                                        ChannelPtr channel) {
-        if (words.size() < 2)
-        {
-            if (const auto type = channel->getType();
-                type != Channel::Type::Twitch &&
-                type != Channel::Type::TwitchWatching)
+    this->registerCommand(
+        "/popout", [](const QStringList &words, ChannelPtr channel) {
+            QString target(words.size() < 2 ? channel->getName() : words[1]);
+
+            if (words.size() < 2 &&
+                (!channel->isTwitchChannel() || channel->isEmpty()))
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /popout <channel>. You can also use the "
-                    "command without arguments in any Twitch channel to "
-                    "open its popout chat."));
+                    "Usage: /popout [channel]. You can also use the command "
+                    "without arguments in any Twitch channel to open its "
+                    "popout chat."));
+                return "";
             }
-            else
-            {
-                channel->addMessage(
-                    makeSystemMessage(QString("Opening popout chat for %1...")
-                                          .arg(channel->getName())));
-                QDesktopServices::openUrl(
-                    QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
-                             .arg(channel->getName())));
-            }
-            return "";
-        }
-        channel->addMessage(makeSystemMessage(
-            QString("Opening popout chat for %1...").arg(words[1])));
-        QDesktopServices::openUrl(
-            QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
-                     .arg(words[1])));
 
-        return "";
-    });
+            QDesktopServices::openUrl(
+                QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
+                         .arg(target)));
+
+            return "";
+        });
 
     this->registerCommand("/clearmessages", [](const auto & /*words*/,
                                                ChannelPtr channel) {
