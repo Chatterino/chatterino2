@@ -1,5 +1,9 @@
 #pragma once
 
+#include <memory>
+
+#include <QColor>
+
 namespace chatterino {
 
 class ScrollbarHighlight

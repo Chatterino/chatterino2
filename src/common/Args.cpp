@@ -1,15 +1,17 @@
 #include "Args.hpp"
 
-#include <QApplication>
-#include <QCommandLineParser>
-#include <QDebug>
-#include <QStringList>
 #include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/AttachToConsole.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/Window.hpp"
+
+#include <QApplication>
+#include <QCommandLineParser>
+#include <QDebug>
+#include <QStringList>
+#include <QUuid>
 
 namespace chatterino {
 

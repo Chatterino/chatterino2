@@ -1,5 +1,7 @@
 #pragma once
 
+#include <memory>
+
 // This file contains common forward declarations.
 
 namespace chatterino {

@@ -1,6 +1,7 @@
 #include "util/Twitch.hpp"
 
 #include <QDesktopServices>
+#include <QUrl>
 
 namespace chatterino {
 

@@ -10,6 +10,7 @@
 #include "messages/search/AuthorPredicate.hpp"
 #include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
+#include "messages/search/MessageFlagsPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -191,6 +192,11 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
             else if (name == "in")
             {
                 channels.append(value);
+            }
+            else if (name == "is")
+            {
+                predicates.push_back(
+                    std::make_unique<MessageFlagsPredicate>(value));
             }
             else
             {

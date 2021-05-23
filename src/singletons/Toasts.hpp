@@ -3,6 +3,8 @@
 #include "Application.hpp"
 #include "common/Singleton.hpp"
 
+#include <pajlada/settings/setting.hpp>
+
 namespace chatterino {
 
 enum class Platform : uint8_t;

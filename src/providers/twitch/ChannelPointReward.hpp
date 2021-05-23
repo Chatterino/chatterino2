@@ -4,6 +4,8 @@
 #include "messages/Image.hpp"
 #include "messages/ImageSet.hpp"
 
+#include <rapidjson/document.h>
+
 #define TWITCH_CHANNEL_POINT_REWARD_URL(x)                                  \
     QString("https://static-cdn.jtvnw.net/custom-reward-images/default-%1") \
         .arg(x)

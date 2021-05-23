@@ -8,6 +8,8 @@
 #include "common/Aliases.hpp"
 #include "common/UniqueAccess.hpp"
 
+#include <memory>
+
 #define TWITCH_EMOTE_TEMPLATE \
     "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
 

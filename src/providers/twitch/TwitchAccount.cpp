@@ -3,12 +3,16 @@
 #include <QThread>
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
+#include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchUser.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -101,14 +105,17 @@ void TwitchAccount::loadBlocks()
     getHelix()->loadBlocks(
         getApp()->accounts->twitch.getCurrent()->userId_,
         [this](std::vector<HelixBlock> blocks) {
-            std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-            this->ignores_.clear();
+            auto ignores = this->ignores_.access();
+            auto userIds = this->ignoresUserIds_.access();
+            ignores->clear();
+            userIds->clear();
 
             for (const HelixBlock &block : blocks)
             {
                 TwitchUser blockedUser;
                 blockedUser.fromHelixBlock(block);
-                this->ignores_.insert(blockedUser);
+                ignores->insert(blockedUser);
+                userIds->insert(blockedUser.id);
             }
         },
         [] {
@@ -125,9 +132,11 @@ void TwitchAccount::blockUser(QString userId, std::function<void()> onSuccess,
             TwitchUser blockedUser;
             blockedUser.id = userId;
             {
-                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+                auto ignores = this->ignores_.access();
+                auto userIds = this->ignoresUserIds_.access();
 
-                this->ignores_.insert(blockedUser);
+                ignores->insert(blockedUser);
+                userIds->insert(blockedUser.id);
             }
             onSuccess();
         },
@@ -143,9 +152,11 @@ void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
             TwitchUser ignoredUser;
             ignoredUser.id = userId;
             {
-                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+                auto ignores = this->ignores_.access();
+                auto userIds = this->ignoresUserIds_.access();
 
-                this->ignores_.erase(ignoredUser);
+                ignores->erase(ignoredUser);
+                userIds->erase(ignoredUser.id);
             }
             onSuccess();
         },
@@ -169,11 +180,16 @@ void TwitchAccount::checkFollow(const QString targetUserID,
                               [] {});
 }
 
-std::set<TwitchUser> TwitchAccount::getBlocks() const
+SharedAccessGuard<const std::set<TwitchUser>> TwitchAccount::accessBlocks()
+    const
 {
-    std::lock_guard<std::mutex> lock(this->ignoresMutex_);
+    return this->ignores_.accessConst();
+}
 
-    return this->ignores_;
+SharedAccessGuard<const std::set<QString>> TwitchAccount::accessBlockedUserIds()
+    const
+{
+    return this->ignoresUserIds_.accessConst();
 }
 
 void TwitchAccount::loadEmotes()
@@ -335,49 +351,103 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
         });
 }
 
-AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
+SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
     TwitchAccount::accessEmotes() const
 {
     return this->emotes_.accessConst();
 }
 
 // AutoModActions
-void TwitchAccount::autoModAllow(const QString msgID)
+void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
 {
-    QString url("https://api.twitch.tv/kraken/chat/twitchbot/approve");
+    getHelix()->manageAutoModMessages(
+        this->getUserId(), msgID, "ALLOW",
+        [] {
+            // success
+        },
+        [channel](auto error) {
+            // failure
+            QString errorMessage("Failed to allow AutoMod message - ");
 
-    auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
+            switch (error)
+            {
+                case HelixAutoModMessageError::MessageAlreadyProcessed: {
+                    errorMessage += "message has already been processed.";
+                }
+                break;
 
-    NetworkRequest(url, NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .header("Content-Length", QByteArray::number(qba.size()))
-        .payload(qba)
+                case HelixAutoModMessageError::UserNotAuthenticated: {
+                    errorMessage += "you need to re-authenticate.";
+                }
+                break;
 
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
-            qCWarning(chatterinoTwitch)
-                << "[TwitchAccounts::autoModAllow] Error" << result.status();
-        })
-        .execute();
+                case HelixAutoModMessageError::UserNotAuthorized: {
+                    errorMessage +=
+                        "you don't have permission to perform that action";
+                }
+                break;
+
+                case HelixAutoModMessageError::MessageNotFound: {
+                    errorMessage += "target message not found.";
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixAutoModMessageError::Unknown:
+                default: {
+                    errorMessage += "an unknown error occured.";
+                }
+                break;
+            }
+
+            channel->addMessage(makeSystemMessage(errorMessage));
+        });
 }
 
-void TwitchAccount::autoModDeny(const QString msgID)
+void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
 {
-    QString url("https://api.twitch.tv/kraken/chat/twitchbot/deny");
+    getHelix()->manageAutoModMessages(
+        this->getUserId(), msgID, "DENY",
+        [] {
+            // success
+        },
+        [channel](auto error) {
+            // failure
+            QString errorMessage("Failed to deny AutoMod message - ");
 
-    auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
+            switch (error)
+            {
+                case HelixAutoModMessageError::MessageAlreadyProcessed: {
+                    errorMessage += "message has already been processed.";
+                }
+                break;
 
-    NetworkRequest(url, NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .header("Content-Length", QByteArray::number(qba.size()))
-        .payload(qba)
+                case HelixAutoModMessageError::UserNotAuthenticated: {
+                    errorMessage += "you need to re-authenticate.";
+                }
+                break;
 
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
-            qCWarning(chatterinoTwitch)
-                << "[TwitchAccounts::autoModDeny] Error" << result.status();
-        })
-        .execute();
+                case HelixAutoModMessageError::UserNotAuthorized: {
+                    errorMessage +=
+                        "you don't have permission to perform that action";
+                }
+                break;
+
+                case HelixAutoModMessageError::MessageNotFound: {
+                    errorMessage += "target message not found.";
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixAutoModMessageError::Unknown:
+                default: {
+                    errorMessage += "an unknown error occured.";
+                }
+                break;
+            }
+
+            channel->addMessage(makeSystemMessage(errorMessage));
+        });
 }
 
 void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)

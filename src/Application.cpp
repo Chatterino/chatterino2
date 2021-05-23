@@ -9,6 +9,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
+#include "debug/AssertInGuiThread.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
@@ -34,6 +35,8 @@
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/splits/Split.hpp"
+
+#include <QDesktopServices>
 
 namespace chatterino {
 
@@ -313,7 +316,7 @@ void Application::initPubsub()
             }
 
             postToThread([chan, action] {
-                auto p = makeAutomodMessage(action);
+                const auto p = makeAutomodMessage(action);
                 chan->addMessage(p.first);
                 chan->addMessage(p.second);
             });
@@ -335,6 +338,22 @@ void Application::initPubsub()
                 chan->addMessage(msg);
             });
             chan->deleteMessage(msg->id);
+        });
+
+    this->twitch.pubsub->signals_.moderation.automodInfoMessage.connect(
+        [&](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            postToThread([chan, action] {
+                const auto p = makeAutomodInfoMessage(action);
+                chan->addMessage(p);
+            });
         });
 
     this->twitch.pubsub->signals_.pointReward.redeemed.connect([&](auto &data) {
@@ -378,6 +397,8 @@ void Application::initPubsub()
 Application *getApp()
 {
     assert(Application::instance != nullptr);
+
+    assertInGuiThread();
 
     return Application::instance;
 }

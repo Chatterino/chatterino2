@@ -2,12 +2,43 @@
 
 ## Unversioned
 
+- Minor: Made "#channel" in `/mentions` tab show in usercards and in the search popup. (#2802)
+- Minor: Added settings to disable custom FrankerFaceZ VIP/mod badges. (#2693, #2759)
+- Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
+- Minor: Added `/popout` command. It opens provided channel's web chat (or current split's web chat if no arguments are provided) in browser. Usage: /popout [channel] (#2556)
+
+## 2.3.2
+
+- Major: New split for channels going live! /live. (#1797)
+- Minor: Added a message that displays a new date on new day. (#1016)
+- Minor: Hosting messages are now clickable. (#2655)
+- Minor: Messages held by automod are now shown to the user. (#2626)
+- Minor: Load 100 blocked users rather than the default 20. (#2772)
+- Bugfix: Fixed a potential crashing issue related to the browser extension. (#2774)
+- Bugfix: Strip newlines from stream titles to prevent text going off of split header (#2755)
+- Bugfix: Automod messages now work properly again. (#2682)
+- Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
+- Bugfix: Fix a deadlock that would occur during user badge loading. (#1704, #2756)
+- Bugfix: Tabbing in `Select a channel to open` is now consistent. (#1797)
+- Bugfix: Fix Ctrl + Backspace not closing colon emote picker. (#2780)
+- Bugfix: Approving/denying AutoMod messages works again. (#2779)
+- Dev: Migrated AutoMod approve/deny endpoints to Helix. (#2779)
+- Dev: Migrated Get Cheermotes endpoint to Helix. (#2440)
+
+## 2.3.1
+
+- Major: Fixed crashing with the extension (#2704)
+- Major: Added the ability to highlight messages based on user badges. (#1704)
+- Minor: Added visual indicator to message length if over 500 characters long (#2659)
+- Minor: Added `is:<flags>` search filter to find messages of specific types. (#2653, #2671)
 - Minor: Added image links to the badge context menu. (#2667)
 - Minor: Added a setting to hide Twitch Predictions badges. (#2668)
 - Minor: Optionally remove spaces between emotes, originally made for Mm2PL/Dankerino. (#2651)
-- Minor: Added `/popout` command. It opens provided channel's web chat (or current split's web chat if no arguments are provided) in browser. Usage: /popout [channel] (#2556)
+- Minor: Improved UX of `Rename Tab` dialog. (#2713)
 - Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
 - Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
+- Bugfix: Clicking on split header focuses its split. (#2720)
+- Bugfix: Handle new user messages ("rituals") properly. (#2703)
 
 ## 2.3.0
 

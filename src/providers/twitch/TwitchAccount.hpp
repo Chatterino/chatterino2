@@ -2,6 +2,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "common/Channel.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
@@ -106,15 +107,16 @@ public:
     void checkFollow(const QString targetUserID,
                      std::function<void(FollowResult)> onFinished);
 
-    std::set<TwitchUser> getBlocks() const;
+    SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;
+    SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 
     void loadEmotes();
     void loadUserstateEmotes(QStringList emoteSetKeys);
-    AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
+    SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
-    void autoModAllow(const QString msgID);
-    void autoModDeny(const QString msgID);
+    void autoModAllow(const QString msgID, ChannelPtr channel);
+    void autoModDeny(const QString msgID, ChannelPtr channel);
 
 private:
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
@@ -128,7 +130,8 @@ private:
 
     mutable std::mutex ignoresMutex_;
     QElapsedTimer userstateEmotesTimer_;
-    std::set<TwitchUser> ignores_;
+    UniqueAccess<std::set<TwitchUser>> ignores_;
+    UniqueAccess<std::set<QString>> ignoresUserIds_;
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;

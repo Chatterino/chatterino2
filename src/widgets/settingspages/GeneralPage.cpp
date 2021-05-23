@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "common/Version.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -17,6 +18,9 @@
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
+
+#include <QDesktopServices>
+#include <QFileDialog>
 
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
@@ -439,6 +443,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addDescription("The browser extension replaces the default "
                           "Twitch.tv chat with chatterino.");
 
+    {
+        if (auto err = nmIpcError().get())
+        {
+            layout.addDescription(
+                "An error happened during initialization of the "
+                "browser extension: " +
+                *err);
+        }
+    }
+
     layout.addDescription(formatRichNamedLink(
         CHROME_EXTENSION_LINK,
         "Download for Google Chrome and similar browsers."));
@@ -556,6 +570,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Chatterino", s.showBadgesChatterino);
     layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
                        s.showBadgesFfz);
+    layout.addSeperator();
+    layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
+                       s.useCustomFfzModeratorBadges);
+    layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
+                       s.useCustomFfzVipBadges);
 
     layout.addSubtitle("Miscellaneous");
 
