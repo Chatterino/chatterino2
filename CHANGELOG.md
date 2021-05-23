@@ -5,8 +5,8 @@
 - Minor: Added moderation buttons to search popup when searching in a split with moderation mode enabled. (#2148, #2803)
 - Minor: Made "#channel" in `/mentions` tab show in usercards and in the search popup. (#2802)
 - Minor: Added settings to disable custom FrankerFaceZ VIP/mod badges. (#2693, #2759)
+- Minor: Added `/popout` command. Usage: `/popout [channel]`. It opens browser chat for provided channel. Can also be used without arguments to open current channels browser chat. (#2556, #2812)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
-- Minor: Added `/popout` command. It opens provided channel's web chat (or current split's web chat if no arguments are provided) in browser. Usage: /popout [channel] (#2556)
 
 ## 2.3.2
 
