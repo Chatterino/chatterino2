@@ -12,11 +12,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Sync AUR package with current version
+      - name: Build AUR -git package
+        id: arch_linux_build
         uses: pajlada/aur-sync-action@master
         with:
           package_name: chatterino2-git
           commit_username: chatterino2-ci
           commit_email: chatterino2-ci@pajlada.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          dry_run: true
+
+      - name: Bump AUR version of nightly AppImage package
+        # - if: github.ref == 'refs/heads/master' && steps.arch_linux_build.changed == '1'
+        if: steps.arch_linux_build.changed == '1'
+        run: |
+            echo "Changed pkgver to '${{ steps.arch_linux_build.new_pkgver }}'"
+
+      - name: Bump AUR version of nightly AppImage package
+        # - if: github.ref == 'refs/heads/master' && steps.arch_linux_build.changed == '1'
+        if: steps.arch_linux_build.changed == '1'
+        uses: pajlada/aur-bump-action@master
+        with:
+          package_name: chatterino2-nightly-appimage
+          commit_username: chatterino2-ci
+          commit_email: chatterino2-ci@pajlada.com
+          ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+          new_pkgver: ${{ steps.arch_linux_build.new_pkgver }}
           dry_run: true
