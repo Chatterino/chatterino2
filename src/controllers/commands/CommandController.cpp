@@ -25,6 +25,7 @@
 #include "widgets/splits/Split.hpp"
 
 #include <QApplication>
+#include <QDesktopServices>
 #include <QFile>
 #include <QRegularExpression>
 #include <QUrl>
