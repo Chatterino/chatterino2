@@ -25,7 +25,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#ifdef C_DEBUG
+#ifndef NDEBUG
 #    include <rapidjson/document.h>
 #    include "providers/twitch/PubsubClient.hpp"
 #    include "util/SampleCheerMessages.hpp"
@@ -178,7 +178,7 @@ void Window::addCustomTitlebarButtons()
 
 void Window::addDebugStuff()
 {
-#ifdef C_DEBUG
+#ifndef NDEBUG
     std::vector<QString> cheerMessages, subMessages, miscMessages, linkMessages,
         emoteTestMessages;
 

@@ -134,7 +134,7 @@ namespace {
     // true.
     void initSignalHandler()
     {
-#ifndef C_DEBUG
+#ifdef NDEBUG
         signalsInitTime = std::chrono::steady_clock::now();
 
         signal(SIGSEGV, handleSignal);
