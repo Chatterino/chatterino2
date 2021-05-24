@@ -64,7 +64,7 @@ public:
     }
 
     UniqueAccess(T &&element)
-        : element_(element)
+        : element_(std::move(element))
     {
     }
 
@@ -76,7 +76,7 @@ public:
 
     UniqueAccess<T> &operator=(T &&element)
     {
-        this->element_ = element;
+        this->element_ = std::move(element);
         return *this;
     }
 

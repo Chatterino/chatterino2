@@ -127,6 +127,7 @@ SOURCES += \
     src/common/Args.cpp \
     src/common/Channel.cpp \
     src/common/ChannelChatters.cpp \
+    src/common/ChatterSet.cpp \
     src/common/ChatterinoSetting.cpp \
     src/common/CompletionModel.cpp \
     src/common/Credentials.cpp \
@@ -139,7 +140,6 @@ SOURCES += \
     src/common/NetworkPrivate.cpp \
     src/common/NetworkRequest.cpp \
     src/common/NetworkResult.cpp \
-    src/common/UsernameSet.cpp \
     src/common/Version.cpp \
     src/common/WindowDescriptors.cpp \
     src/common/QLogging.cpp \
@@ -340,6 +340,7 @@ HEADERS += \
     src/common/Atomic.hpp \
     src/common/Channel.hpp \
     src/common/ChannelChatters.hpp \
+    src/common/ChatterSet.hpp \
     src/common/ChatterinoSetting.hpp \
     src/common/Common.hpp \
     src/common/CompletionModel.hpp \
@@ -363,7 +364,6 @@ HEADERS += \
     src/common/SignalVectorModel.hpp \
     src/common/Singleton.hpp \
     src/common/UniqueAccess.hpp \
-    src/common/UsernameSet.hpp \
     src/common/Version.hpp \
     src/common/QLogging.hpp \
     src/controllers/accounts/Account.hpp \

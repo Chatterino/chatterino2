@@ -519,11 +519,11 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
     if (this->twitchChannel != nullptr && getSettings()->findAllUsernames)
     {
-        auto chatters = this->twitchChannel->accessChatters();
         auto match = allUsernamesMentionRegex.match(string);
         QString username = match.captured(1);
 
-        if (match.hasMatch() && chatters->contains(username))
+        if (match.hasMatch() &&
+            this->twitchChannel->accessChatters()->contains(username))
         {
             auto originalTextColor = textColor;
 
