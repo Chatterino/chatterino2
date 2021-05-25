@@ -37,49 +37,125 @@ namespace chatterino {
             return cachedOrMakeEmotePtr(std::move(emote), cache, mutex, id);
         }
 
-        std::pair<Outcome, EmoteMap> parseEmotes(
+        struct CreateEmoteResult {
+            EmoteId id;
+            EmoteName name;
+            Emote emote;
+        };
+
+        CreateEmoteResult createEmote(QJsonValue jsonEmote, bool isGlobal) {
+            auto id = EmoteId{jsonEmote.toObject().value("id").toString()};
+            auto name = EmoteName{jsonEmote.toObject().value("name").toString()};
+            auto author = EmoteAuthor{jsonEmote.toObject().value("owner")
+                                          .toObject()
+                                          .value("display_name")
+                                          .toString()};
+
+            auto emote = Emote({
+                name,
+                ImageSet{Image::fromUrl(getEmoteLink(id, "1x"), 1),
+                         Image::fromUrl(getEmoteLink(id, "2x"), 0.5),
+                         Image::fromUrl(getEmoteLink(id, "3x"), 0.25)},
+                Tooltip{
+                    QString("%1<br> %27TV Emote<br>By: %3")
+                        .arg(name.string)
+                        .arg(isGlobal ? "Global " : "")
+                        .arg(author.string)
+
+                },
+                Url{emoteLinkFormat.arg(id.string)}
+            });
+
+            auto result = CreateEmoteResult({
+                id, name, emote
+            });
+            return result;
+        }
+
+        std::pair<Outcome, EmoteMap> parseGlobalEmotes(
             const QJsonArray &jsonEmotes,
-            const EmoteMap &currentEmotes,
-            const bool isGlobal
+            const EmoteMap &currentEmotes
         )
         {
             auto emotes = EmoteMap();
 
             for (auto jsonEmote : jsonEmotes)
             {
-                auto id = EmoteId{jsonEmote.toObject().value("id").toString()};
-                auto name = EmoteName{jsonEmote.toObject().value("name").toString()};
-                auto author = EmoteAuthor{jsonEmote.toObject().value("owner")
+                auto emote =  createEmote(jsonEmote, true);
+                emotes[emote.name] = cachedOrMakeEmotePtr(std::move(emote.emote), currentEmotes);
+            }
+
+
+            return {Success, std::move(emotes)};
+        }
+
+        EmoteMap parseChannelEmotes(
+            const QJsonObject &jsonRoot,
+            const QString &channelName
+        )
+        {
+            auto emotes = EmoteMap();
+
+            auto jsonEmotes = jsonRoot.value("emotes").toArray();
+            for (auto jsonEmote_ : jsonEmotes)
+            {
+                auto jsonEmote = jsonEmote_.toObject();
+
+                auto emote = createEmote(jsonEmote, false);
+
+                emotes[emote.name] = cachedOrMake(std::move(emote.emote), emote.id);
+            }
+
+            return emotes;
+        }
+
+        /*
+    std::pair<Outcome, EmoteMap> parseChannelEmotes(
+        const QJsonObject &jsonRoot, const QString &channelDisplayName)
+    {
+        auto emotes = EmoteMap();
+
+        auto innerParse = [&jsonRoot, &emotes,
+                           &channelDisplayName](const char *key) {
+            auto jsonEmotes = jsonRoot.value(key).toArray();
+            for (auto jsonEmote_ : jsonEmotes)
+            {
+                auto jsonEmote = jsonEmote_.toObject();
+
+                auto id = EmoteId{jsonEmote.value("id").toString()};
+                auto name = EmoteName{jsonEmote.value("code").toString()};
+                auto author = EmoteAuthor{jsonEmote.value("user")
                                               .toObject()
-                                              .value("display_name")
+                                              .value("displayName")
                                               .toString()};
 
                 auto emote = Emote({
                     name,
-                    ImageSet{Image::fromUrl(getEmoteLink(id, "1x"), 1),
-                             Image::fromUrl(getEmoteLink(id, "2x"), 0.5),
-                             Image::fromUrl(getEmoteLink(id, "3x"), 0.25)},
-                    Tooltip{
-                        QString("%1<br> %27TV Emote<br>By: %3")
-                            .arg(name.string)
-                            .arg(isGlobal ? "Global " : "")
-                            .arg(author.string)
-
+                    ImageSet{
+                        Image::fromUrl(getEmoteLinkV3(id, "1x"), 1),
+                        Image::fromUrl(getEmoteLinkV3(id, "2x"), 0.5),
+                        Image::fromUrl(getEmoteLinkV3(id, "3x"), 0.25),
                     },
+                    Tooltip{
+                        QString("%1<br>%2 BetterTTV Emote<br>By: %3")
+                            .arg(name.string)
+                            // when author is empty, it is a channel emote created by the broadcaster
+                            .arg(author.string.isEmpty() ? "Channel" : "Shared")
+                            .arg(author.string.isEmpty() ? channelDisplayName
+                                                         : author.string)},
                     Url{emoteLinkFormat.arg(id.string)},
                 });
 
-                if (isGlobal) {
-                    emotes[name] =
-                        cachedOrMakeEmotePtr(std::move(emote), currentEmotes);
-                } else {
-                    emotes[name] = cachedOrMake(std::move(emote), id);
-                }
+                emotes[name] = cachedOrMake(std::move(emote), id);
             }
+        };
 
-            return {Success, std::move(emotes)};
-        }
-	}
+        innerParse("channelEmotes");
+        innerParse("sharedEmotes");
+
+        return {Success, std::move(emotes)};
+    }*/
+}
 
 
 SeventvEmotes::SeventvEmotes()
@@ -143,7 +219,7 @@ void SeventvEmotes::loadEmotes()
             qCDebug(chatterinoSeventv) << "7TV Global Emotes:" << parsedEmotes;
 
             auto emotes = this->global_.get();
-            auto pair = parseEmotes(parsedEmotes, *emotes, true);
+            auto pair = parseGlobalEmotes(parsedEmotes, *emotes);
             if (pair.first)
                 this->global_.set(
                     std::make_shared<EmoteMap>(std::move(pair.second)));
@@ -154,7 +230,7 @@ void SeventvEmotes::loadEmotes()
 
 void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                              const QString &channelId,
-                             const QString &channelDisplayName,
+                             const QString &channelLogin,
                              std::function<void(EmoteMap &&)> callback,
                              bool manualRefresh)
 {
@@ -163,9 +239,10 @@ void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,
 
     QJsonObject body;
 
-    const char *gqlQuery = R""""(
+    std::string queryStr =
+    R"(
         {
-            user(id: "anatoleam") {
+            user(id: "%1") {
                 emotes {
                     id
                     name
@@ -182,9 +259,12 @@ void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                 }
             }
         }
-    )"""";
+    )";
+    QString query = QString::fromStdString(queryStr)
+        .arg(channelLogin);
+    qCDebug(chatterinoSeventv) << query;
 
-    body.insert("query", gqlQuery);
+    body.insert("query", query);
     body.insert("variables", QJsonObject{});
 
     QJsonDocument doc(body);
@@ -195,19 +275,18 @@ void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,
         .header("Content-Type", "application/json")
         .payload(b)
         .onSuccess([callback = std::move(callback), channel,
-                    &channelDisplayName,
+                    &channelId,
                     manualRefresh](NetworkResult result) -> Outcome {
 
-            QJsonArray parsedEmotes = result.parseJson().value("data").toObject().value("user").toObject().value("emotes").toArray();
+            QJsonObject parsedEmotes = result.parseJson().value("data").toObject().value("user").toObject();
             qCDebug(chatterinoSeventv) << "7TV Channel Emotes:" << parsedEmotes;
 
-            auto pair =
-                parseEmotes(parsedEmotes, EmoteMap{}, false);
-            bool hasEmotes = false;
-            if (pair.first)
-            {
-                hasEmotes = !pair.second.empty();
-                callback(std::move(pair.second));
+            auto emoteMap =
+                parseChannelEmotes(parsedEmotes, channelId);
+            bool hasEmotes = !emoteMap.empty();
+
+            if (hasEmotes) {
+                callback(std::move(emoteMap));
             }
             if (auto shared = channel.lock(); manualRefresh)
             {
@@ -222,7 +301,7 @@ void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
                 }
             }
-            return pair.first;
+            return Success;
         })
         .onError([channelId, channel, manualRefresh](NetworkResult result) {
             auto shared = channel.lock();
@@ -230,10 +309,7 @@ void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,
                 return;
             if (result.status() == 400)
             {
-                // There was a problem with the request
-                qCDebug(chatterinoSeventv) << "Cock and ball torture: " << result.getData().toBase64();
-
-
+                qCWarning(chatterinoSeventv) << "Error occured fetching 7TV emotes: " << result.parseJson();
                 if (manualRefresh)
                     shared->addMessage(
                         makeSystemMessage(CHANNEL_HAS_NO_EMOTES));
