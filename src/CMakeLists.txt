@@ -153,6 +153,9 @@ set(SOURCE_FILES main.cpp
         providers/LinkResolver.cpp
         providers/LinkResolver.hpp
 
+        providers/seventv/SeventvEmotes.cpp
+        providers/seventv/SeventvEmotes.hpp
+
         providers/bttv/BttvEmotes.cpp
         providers/bttv/BttvEmotes.hpp
         providers/bttv/LoadBttvChannelEmote.cpp
