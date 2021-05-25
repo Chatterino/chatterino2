@@ -247,9 +247,10 @@ void Updates::checkForUpdates()
     }
 
     QString url =
-        "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/" +
+        "https://api.7tv.app/v2/chatterino/version/" CHATTERINO_OS "/" +
         currentBranch();
 
+    qCDebug(chatterinoApp) << "UPDATE CHECK URL: " << url;
     NetworkRequest(url)
         .timeout(60000)
         .onSuccess([this](auto result) -> Outcome {

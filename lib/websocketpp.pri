@@ -1,5 +1,5 @@
 # websocketpp
-# Chatterino2 is tested with websocketpp 0.8.1
+# Chatterino7 is tested with websocketpp 0.8.1
 # Exposed build flags:
 #  - WEBSOCKETPP_PREFIX ($$PWD by default)
 #  - WEBSOCKETPP_SYSTEM (1 = true) (unix only)

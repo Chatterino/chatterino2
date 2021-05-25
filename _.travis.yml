@@ -72,7 +72,7 @@ matrix:
         - hdiutil attach chatterino.dmg
         - cp -r /Volumes/chatterino/chatterino.app app/
         - "create-dmg \
-          --volname Chatterino2 \
+          --volname Chatterino7 \
           --volicon ../resources/chatterino.icns \
           --icon-size 50 \
           --app-drop-link 0 0 \
