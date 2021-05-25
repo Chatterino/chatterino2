@@ -7,6 +7,7 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/Message.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
@@ -143,7 +144,7 @@ namespace {
     }
 }  // namespace
 
-TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
+TwitchChannel::TwitchChannel(const QString &name, SeventvEmotes &seventv, BttvEmotes &bttv,
                              FfzEmotes &ffz)
     : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
@@ -152,8 +153,10 @@ TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
                        name)
+    , globalSeventv_(seventv)
     , globalBttv_(bttv)
     , globalFfz_(ffz)
+    , seventvEmotes_(std::make_shared<EmoteMap>())
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , mod_(false)
@@ -180,6 +183,7 @@ TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
         this->refreshLiveStatus();
         this->refreshBadges();
         this->refreshCheerEmotes();
+        this->refresh7TVChannelEmotes(false);
         this->refreshFFZChannelEmotes(false);
         this->refreshBTTVChannelEmotes(false);
     });
@@ -238,6 +242,18 @@ const QString &TwitchChannel::getLocalizedName() const
 void TwitchChannel::setLocalizedName(const QString &name)
 {
     this->nameOptions.localizedName = name;
+}
+
+void TwitchChannel::refresh7TVChannelEmotes(bool manualRefresh)
+{
+    SeventvEmotes::loadChannel(
+        weakOf<Channel>(this), this->roomId(), this->getName(),
+        [this, weak = weakOf<Channel>(this)](auto &&emoteMap) {
+            if (auto shared = weak.lock())
+                this->seventvEmotes_.set(
+                    std::make_shared<EmoteMap>(std::move(emoteMap)));
+        },
+        manualRefresh);
 }
 
 void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
@@ -476,6 +492,11 @@ SharedAccessGuard<const TwitchChannel::StreamStatus>
     return this->streamStatus_.accessConst();
 }
 
+const SeventvEmotes &TwitchChannel::globalSeventv() const
+{
+    return this->globalSeventv_;
+}
+
 const BttvEmotes &TwitchChannel::globalBttv() const
 {
     return this->globalBttv_;
@@ -484,6 +505,16 @@ const BttvEmotes &TwitchChannel::globalBttv() const
 const FfzEmotes &TwitchChannel::globalFfz() const
 {
     return this->globalFfz_;
+}
+
+boost::optional<EmotePtr> TwitchChannel::seventvEmote(const EmoteName &name) const
+{
+    auto emotes = this->seventvEmotes_.get();
+    auto it = emotes->find(name);
+
+    if (it == emotes->end())
+        return boost::none;
+    return it->second;
 }
 
 boost::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
@@ -504,6 +535,11 @@ boost::optional<EmotePtr> TwitchChannel::ffzEmote(const EmoteName &name) const
     if (it == emotes->end())
         return boost::none;
     return it->second;
+}
+
+std::shared_ptr<const EmoteMap> TwitchChannel::seventvEmotes() const
+{
+    return this->seventvEmotes_.get();
 }
 
 std::shared_ptr<const EmoteMap> TwitchChannel::bttvEmotes() const

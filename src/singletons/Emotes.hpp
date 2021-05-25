@@ -2,6 +2,7 @@
 
 #include "common/Singleton.hpp"
 
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
