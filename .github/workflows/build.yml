@@ -4,7 +4,7 @@ name: Build
 on:
   push:
     branches:
-      - master
+      - chatterino7
   pull_request:
 
 jobs:
@@ -223,7 +223,7 @@ jobs:
   create-release:
     needs: build
     runs-on: ubuntu-latest
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/master')
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/chatterino7')
 
     steps:
       - name: Create release
