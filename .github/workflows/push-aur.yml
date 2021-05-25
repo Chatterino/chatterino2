@@ -15,8 +15,8 @@ jobs:
       - name: Sync AUR package with current version
         uses: pajlada/aur-sync-action@master
         with:
-          package_name: chatterino7-git
-          commit_username: chatterino7-ci
-          commit_email: chatterino7-ci@pajlada.com
+          package_name: chatterino2-git
+          commit_username: chatterino2-ci
+          commit_email: chatterino2-ci@pajlada.com
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           dry_run: true

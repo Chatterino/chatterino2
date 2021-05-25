@@ -48,19 +48,19 @@ namespace {
 
 Env::Env()
     : recentMessagesApiUrl(
-          readStringEnv("CHATTERINO7_RECENT_MESSAGES_URL",
+          readStringEnv("CHATTERINO2_RECENT_MESSAGES_URL",
                         "https://recent-messages.robotty.de/api/v2/"
                         "recent-messages/%1"))
     , linkResolverUrl(readStringEnv(
-          "CHATTERINO7_LINK_RESOLVER_URL",
+          "CHATTERINO2_LINK_RESOLVER_URL",
           "https://braize.pajlada.com/chatterino/link_resolver/%1"))
     , twitchEmoteSetResolverUrl(readStringEnv(
-          "CHATTERINO7_TWITCH_EMOTE_SET_RESOLVER_URL",
+          "CHATTERINO2_TWITCH_EMOTE_SET_RESOLVER_URL",
           "https://braize.pajlada.com/chatterino/twitchemotes/set/%1/"))
     , twitchServerHost(
-          readStringEnv("CHATTERINO7_TWITCH_SERVER_HOST", "irc.chat.twitch.tv"))
-    , twitchServerPort(readPortEnv("CHATTERINO7_TWITCH_SERVER_PORT", 443))
-    , twitchServerSecure(readBoolEnv("CHATTERINO7_TWITCH_SERVER_SECURE", true))
+          readStringEnv("CHATTERINO2_TWITCH_SERVER_HOST", "irc.chat.twitch.tv"))
+    , twitchServerPort(readPortEnv("CHATTERINO2_TWITCH_SERVER_PORT", 443))
+    , twitchServerSecure(readBoolEnv("CHATTERINO2_TWITCH_SERVER_SECURE", true))
 {
 }
 

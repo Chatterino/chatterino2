@@ -92,10 +92,10 @@ jobs:
             qmake ..
             set cl=/MP
             nmake /S /NOLOGO
-            windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino7/
-            cp release/chatterino.exe Chatterino7/
-            echo nightly > Chatterino7/modes
-            7z a chatterino-windows-x86-64.zip Chatterino7/
+            windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+            cp release/chatterino.exe Chatterino2/
+            echo nightly > Chatterino2/modes
+            7z a chatterino-windows-x86-64.zip Chatterino2/
             
       - name: Build with CMake (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'cmake'
@@ -106,10 +106,10 @@ jobs:
             cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=Release -DUSE_CONAN=ON ..
             set cl=/MP
             nmake /S /NOLOGO
-            windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino7/
-            cp bin/chatterino.exe Chatterino7/
-            echo nightly > Chatterino7/modes
-            7z a chatterino-windows-x86-64.zip Chatterino7/
+            windeployqt bin/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+            cp bin/chatterino.exe Chatterino2/
+            echo nightly > Chatterino2/modes
+            7z a chatterino-windows-x86-64.zip Chatterino2/
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')

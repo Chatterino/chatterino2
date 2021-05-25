@@ -646,9 +646,9 @@ DEFINES += CHATTERINO_GIT_RELEASE=\\\"$$git_release\\\"
 DEFINES += CHATTERINO_GIT_HASH=\\\"$$git_hash\\\"
 
 CONFIG(debug, debug|release) {
-    message("Building Chatterino7 DEBUG")
+    message("Building Chatterino2 DEBUG")
 } else {
-    message("Building Chatterino7 RELEASE")
+    message("Building Chatterino2 RELEASE")
     DEFINES += DEBUG_OFF
 }
 
