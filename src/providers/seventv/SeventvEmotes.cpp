@@ -17,11 +17,6 @@ namespace chatterino {
 		const QString CHANNEL_HAS_NO_EMOTES(
 			"This channel has no 7TV channel emotes."
 		);
-
-
-        auto emotes = EmoteMap();
-
-		return {Success, std::move(emotes)};
 	}
 
 
@@ -48,18 +43,7 @@ boost::optional<EmotePtr> SeventvEmotes::emote(const EmoteName &name) const
 
 void SeventvEmotes::loadEmotes()
 {
-	// TODO: Network request
-    NetworkRequest(QString(apiUrlGQL))
-        .timeout(30000)
-        .onSuccess([this](auto result) -> Outcome {
-            auto emotes = this->global_.get();
-            auto pair = parseGlobalEmotes(result.parseJsonArray(), *emotes);
-            if (pair.first)
-                this->global_.set(
-                    std::make_shared<EmoteMap>(std::move(pair.second)));
-            return pair.first;
-        })
-        .execute();
+    // TODO: Network request
 }
 
 void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,
