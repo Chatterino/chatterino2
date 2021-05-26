@@ -722,7 +722,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
     this->registerCommand("/setgame", [](const QStringList &words,
-                                         ChannelPtr channel) {
+                                         const ChannelPtr& channel) {
         if (words.size() < 2)
         {
             channel->addMessage(
@@ -747,7 +747,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                         auto status = twitchChannel->accessStreamStatus();
                         getHelix()->updateChannel(
                             twitchChannel->roomId(), matchedGame.id, "", "",
-                            [channel, games, matchedGame](NetworkResult) {
+                            [channel, games, matchedGame](const NetworkResult&) {
                                 channel->addMessage(makeSystemMessage(
                                     QString("Updated game to %1")
                                         .arg(matchedGame.name)));
