@@ -743,13 +743,14 @@ void CommandController::initialize(Settings &, Paths &paths)
                     }
                     else  // 1 or more games
                     {
+                        auto matchedGame = games.at(0);
                         auto status = twitchChannel->accessStreamStatus();
                         getHelix()->updateChannel(
-                            twitchChannel->roomId(), games.at(0).id, "", "",
-                            [channel, games](NetworkResult) {
+                            twitchChannel->roomId(), matchedGame.id, "", "",
+                            [channel, games, matchedGame](NetworkResult) {
                                 channel->addMessage(makeSystemMessage(
                                     QString("Updated game to %1")
-                                        .arg(games.at(0).name)));
+                                        .arg(matchedGame.name)));
                             },
                             [channel] {
                                 channel->addMessage(makeSystemMessage(
