@@ -763,7 +763,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                         getHelix()->updateChannel(
                             twitchChannel->roomId(), matchedGame.id, "", "",
                             [channel, games,
-                             matchedGame](const NetworkResult&) {
+                             matchedGame](const NetworkResult &) {
                                 channel->addMessage(makeSystemMessage(
                                     QString("Updated game to %1")
                                         .arg(matchedGame.name)));
