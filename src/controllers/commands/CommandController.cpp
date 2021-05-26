@@ -731,8 +731,10 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
         if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
         {
+            auto gameName = words.mid(1).join(" ");
+
             getHelix()->searchGames(
-                words.mid(1).join(" "),
+                gameName,
                 [channel, twitchChannel](std::vector<HelixGame> games) {
                     if (games.empty())
                     {
