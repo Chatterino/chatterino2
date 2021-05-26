@@ -749,7 +749,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                         if (games.size() > 1)
                         {
                             // attempt to find the best looking game by matching lowercase values
-                            for (auto &game : games) {
+                            for (auto &game : games)
+                            {
                                 if (game.name.toLower() == gameName.toLower())
                                 {
                                     matchedGame = game;
