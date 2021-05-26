@@ -744,6 +744,19 @@ void CommandController::initialize(Settings &, Paths &paths)
                     else  // 1 or more games
                     {
                         auto matchedGame = games.at(0);
+
+                        if (games.size() > 1)
+                        {
+                            // attempt to find the best looking game by matching lowercase values
+                            for (auto &game : games) {
+                                if (game.name.toLower() == gameName.toLower())
+                                {
+                                    matchedGame = game;
+                                    break;
+                                }
+                            }
+                        }
+
                         auto status = twitchChannel->accessStreamStatus();
                         getHelix()->updateChannel(
                             twitchChannel->roomId(), matchedGame.id, "", "",
