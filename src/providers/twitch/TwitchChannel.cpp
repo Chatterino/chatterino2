@@ -119,13 +119,14 @@ namespace {
 
         return messages;
     }
-    std::pair<Outcome, UsernameSet> parseChatters(const QJsonObject &jsonRoot)
+    std::pair<Outcome, std::unordered_set<QString>> parseChatters(
+        const QJsonObject &jsonRoot)
     {
         static QStringList categories = {"broadcaster", "vips",   "moderators",
                                          "staff",       "admins", "global_mods",
                                          "viewers"};
 
-        auto usernames = UsernameSet();
+        auto usernames = std::unordered_set<QString>();
 
         // parse json
         QJsonObject jsonCategories = jsonRoot.value("chatters").toObject();
@@ -729,7 +730,6 @@ void TwitchChannel::loadRecentMessages()
                    .arg(getSettings()->twitchMessageHistoryLimit);
 
     NetworkRequest(url)
-        .concurrent()
         .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
@@ -824,7 +824,7 @@ void TwitchChannel::refreshChatters()
                 auto pair = parseChatters(std::move(data));
                 if (pair.first)
                 {
-                    this->setChatters(std::move(pair.second));
+                    this->updateOnlineChatters(pair.second);
                 }
 
                 return pair.first;
