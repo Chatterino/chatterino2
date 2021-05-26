@@ -4,6 +4,7 @@
 #include "widgets/BaseWidget.hpp"
 
 #include <QList>
+#include <QMenu>
 #include <QMessageBox>
 #include <QWidget>
 #include <pajlada/signals/signalholder.hpp>
