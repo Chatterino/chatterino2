@@ -735,7 +735,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             getHelix()->searchGames(
                 gameName,
-                [channel, twitchChannel, gameName](std::vector<HelixGame> games) {
+                [channel, twitchChannel,
+                 gameName](std::vector<HelixGame> games) {
                     if (games.empty())
                     {
                         channel->addMessage(
@@ -760,7 +761,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                         auto status = twitchChannel->accessStreamStatus();
                         getHelix()->updateChannel(
                             twitchChannel->roomId(), matchedGame.id, "", "",
-                            [channel, games, matchedGame](const NetworkResult&) {
+                            [channel, games,
+                             matchedGame](const NetworkResult&) {
                                 channel->addMessage(makeSystemMessage(
                                     QString("Updated game to %1")
                                         .arg(matchedGame.name)));
