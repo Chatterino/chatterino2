@@ -355,7 +355,7 @@ void Notebook::setShowTabs(bool value)
         msgBox.setText("You've just hidden your tabs");
         msgBox.setInformativeText(
             "You can toggle tabs by using the keyboard shortcut (Ctrl + U by "
-            "default) or right-clicking on tab area and selecting \"Toggle "
+            "default) or right-clicking on the tab area and selecting \"Toggle "
             "visibility of tabs\".");
         msgBox.addButton(QMessageBox::Ok);
         auto *dsaButton =
