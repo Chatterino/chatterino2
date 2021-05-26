@@ -722,7 +722,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
     this->registerCommand("/setgame", [](const QStringList &words,
-                                         const ChannelPtr& channel) {
+                                         const ChannelPtr channel) {
         if (words.size() < 2)
         {
             channel->addMessage(
