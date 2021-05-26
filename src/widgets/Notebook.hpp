@@ -62,6 +62,7 @@ public:
 protected:
     virtual void scaleChangedEvent(float scale_) override;
     virtual void resizeEvent(QResizeEvent *) override;
+    virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void paintEvent(QPaintEvent *) override;
 
     NotebookButton *getAddButton();
@@ -86,6 +87,7 @@ private:
     NotebookTab *getTabFromPage(QWidget *page);
 
     QList<Item> items_;
+    QMenu menu_;
     QWidget *selectedPage_ = nullptr;
 
     NotebookButton *addButton_;

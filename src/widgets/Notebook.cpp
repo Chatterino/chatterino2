@@ -29,11 +29,16 @@ namespace chatterino {
 
 Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
+    , menu_(this)
     , addButton_(new NotebookButton(this))
 {
     this->addButton_->setIcon(NotebookButton::Icon::Plus);
 
     this->addButton_->setHidden(true);
+
+    this->menu_.addAction("Toggle visibility of tabs", [this]() {
+        this->setShowTabs(!this->getShowTabs());
+    });
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
@@ -603,6 +608,20 @@ void Notebook::performLayout(bool animated)
             this->selectedPage_->resize(width() - x, height());
             this->selectedPage_->raise();
         }
+    }
+}
+
+void Notebook::mousePressEvent(QMouseEvent *event)
+{
+    this->update();
+
+    switch (event->button())
+    {
+        case Qt::RightButton: {
+            this->menu_.popup(event->globalPos() + QPoint(0, 8));
+        }
+        break;
+        default:;
     }
 }
 

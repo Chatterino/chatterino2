@@ -89,7 +89,6 @@ public slots:
     void reloadChannelEmotes();
     void reloadSubscriberEmotes();
     void reconnect();
-    void toggleTabVisibility();
 };
 
 }  // namespace chatterino
