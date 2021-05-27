@@ -7,9 +7,9 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/Message.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/bttv/LoadBttvChannelEmote.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/IrcMessageHandler.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
@@ -144,8 +144,8 @@ namespace {
     }
 }  // namespace
 
-TwitchChannel::TwitchChannel(const QString &name, SeventvEmotes &seventv, BttvEmotes &bttv,
-                             FfzEmotes &ffz)
+TwitchChannel::TwitchChannel(const QString &name, SeventvEmotes &seventv,
+                             BttvEmotes &bttv, FfzEmotes &ffz)
     : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
     , nameOptions{name, name}
@@ -507,7 +507,8 @@ const FfzEmotes &TwitchChannel::globalFfz() const
     return this->globalFfz_;
 }
 
-boost::optional<EmotePtr> TwitchChannel::seventvEmote(const EmoteName &name) const
+boost::optional<EmotePtr> TwitchChannel::seventvEmote(
+    const EmoteName &name) const
 {
     auto emotes = this->seventvEmotes_.get();
     auto it = emotes->find(name);

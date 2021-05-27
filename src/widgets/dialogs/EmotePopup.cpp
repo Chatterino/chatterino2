@@ -224,8 +224,8 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         *globalChannel, *subChannel, _channel->getName());
 
     // global
-    addEmotes(*globalChannel, *twitchChannel->globalSeventv().emotes(),
-              "7TV", MessageElementFlag::SeventvEmote);
+    addEmotes(*globalChannel, *twitchChannel->globalSeventv().emotes(), "7TV",
+              MessageElementFlag::SeventvEmote);
     addEmotes(*globalChannel, *twitchChannel->globalBttv().emotes(),
               "BetterTTV", MessageElementFlag::BttvEmote);
     addEmotes(*globalChannel, *twitchChannel->globalFfz().emotes(),

@@ -137,8 +137,10 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         }
 
         // 7TV Global
-        for (auto &emote : *channel->globalSeventv().emotes()) {
-            addString(emote.first.string, TaggedString::Type::SEVENTVGlobalEmote);
+        for (auto &emote : *channel->globalSeventv().emotes())
+        {
+            addString(emote.first.string,
+                      TaggedString::Type::SEVENTVGlobalEmote);
         }
 
         // Bttv Global
@@ -154,8 +156,10 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         }
 
         // 7TV Channel
-        for (auto &emote : *channel->seventvEmotes()) {
-            addString(emote.first.string, TaggedString::Type::SEVENTVChannelEmote);
+        for (auto &emote : *channel->seventvEmotes())
+        {
+            addString(emote.first.string,
+                      TaggedString::Type::SEVENTVChannelEmote);
         }
 
         // Bttv Channel

@@ -132,7 +132,8 @@ private:
     } nameOptions;
 
 protected:
-    explicit TwitchChannel(const QString &channelName, SeventvEmotes &globalSeventv, BttvEmotes &globalBttv,
+    explicit TwitchChannel(const QString &channelName,
+                           SeventvEmotes &globalSeventv, BttvEmotes &globalBttv,
                            FfzEmotes &globalFfz);
 
 private:

@@ -4,10 +4,10 @@
 #include "common/Channel.hpp"
 #include "common/Singleton.hpp"
 #include "pajlada/signals/signalholder.hpp"
-#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 
 #include <chrono>
 #include <memory>

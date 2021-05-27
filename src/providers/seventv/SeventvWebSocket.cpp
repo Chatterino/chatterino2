@@ -2,5 +2,4 @@
 
 SeventvWebSocket::SeventvWebSocket()
 {
-
 }

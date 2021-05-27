@@ -14,8 +14,7 @@ class EmoteMap;
 
 class SeventvEmotes final
 {
-    static constexpr const char *apiUrlGQL =
-        "https://api.7tv.app/v2/gql";
+    static constexpr const char *apiUrlGQL = "https://api.7tv.app/v2/gql";
 
 public:
     SeventvEmotes();
