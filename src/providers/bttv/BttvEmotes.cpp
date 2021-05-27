@@ -222,14 +222,14 @@ void BttvEmotes::loadChannel(std::weak_ptr<Channel> channel,
 }
 
 /*
-    static Url getEmoteLink(QString urlTemplate, const EmoteId &id,
-                            const QString &emoteScale)
-    {
-        urlTemplate.detach();
+static Url getEmoteLink(QString urlTemplate, const EmoteId &id,
+                        const QString &emoteScale)
+{
+    urlTemplate.detach();
 
-        return {urlTemplate.replace("{{id}}", id.string)
-                    .replace("{{image}}", emoteScale)};
-    }
-    */
+    return {urlTemplate.replace("{{id}}", id.string)
+                .replace("{{image}}", emoteScale)};
+}
+*/
 
 }  // namespace chatterino
