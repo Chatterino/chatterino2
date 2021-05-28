@@ -521,11 +521,11 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
     if (this->twitchChannel != nullptr && getSettings()->findAllUsernames)
     {
-        auto chatters = this->twitchChannel->accessChatters();
         auto match = allUsernamesMentionRegex.match(string);
         QString username = match.captured(1);
 
-        if (match.hasMatch() && chatters->contains(username))
+        if (match.hasMatch() &&
+            this->twitchChannel->accessChatters()->contains(username))
         {
             auto originalTextColor = textColor;
 
@@ -1033,6 +1033,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 {
     auto *app = getApp();
 
+    const auto &globalSeventvEmotes = app->twitch.server->getSeventvEmotes();
     const auto &globalBttvEmotes = app->twitch.server->getBttvEmotes();
     const auto &globalFfzEmotes = app->twitch.server->getFfzEmotes();
 
@@ -1049,9 +1050,18 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
         flags = MessageElementFlag::FfzEmote;
     }
     else if (this->twitchChannel &&
+             (emote = this->twitchChannel->seventvEmote(name)))
+    {
+        flags = MessageElementFlag::SeventvEmote;
+    }
+    else if (this->twitchChannel &&
              (emote = this->twitchChannel->bttvEmote(name)))
     {
         flags = MessageElementFlag::BttvEmote;
+    }
+    else if ((emote = globalSeventvEmotes.emote(name)))
+    {
+        flags = MessageElementFlag::SeventvEmote;
     }
     else if ((emote = globalFfzEmotes.emote(name)))
     {

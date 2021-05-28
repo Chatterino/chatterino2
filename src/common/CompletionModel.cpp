@@ -1,8 +1,8 @@
 #include "common/CompletionModel.hpp"
 
 #include "Application.hpp"
+#include "common/ChatterSet.hpp"
 #include "common/Common.hpp"
-#include "common/UsernameSet.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Benchmark.hpp"
@@ -108,51 +108,56 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         }
 
         // Usernames
-        if (prefix.length() >= UsernameSet::PrefixLength)
+        QString usernamePostfix =
+            isFirstWord && getSettings()->mentionUsersWithComma ? ","
+                                                                : QString();
+
+        if (prefix.startsWith("@"))
         {
-            auto usernames = channel->accessChatters();
-
             QString usernamePrefix = prefix;
-            QString usernamePostfix =
-                isFirstWord && getSettings()->mentionUsersWithComma ? ","
-                                                                    : QString();
+            usernamePrefix.remove(0, 1);
 
-            if (usernamePrefix.startsWith("@"))
+            auto chatters =
+                channel->accessChatters()->filterByPrefix(usernamePrefix);
+
+            for (const auto &name : chatters)
             {
-                usernamePrefix.remove(0, 1);
-                for (const auto &name :
-                     usernames->subrange(Prefix(usernamePrefix)))
+                if (getSettings()->lowercaseUsernames)
                 {
-                    if (getSettings()->lowercaseUsernames)
-                    {
-                        addString(
-                            QString("@" + name + usernamePostfix).toLower(),
-                            TaggedString::Type::Username);
-                    }
-                    else
-                    {
-                        addString("@" + name + usernamePostfix,
-                                  TaggedString::Type::Username);
-                    }
+                    addString(QString("@" + name + usernamePostfix).toLower(),
+                              TaggedString::Type::Username);
+                }
+                else
+                {
+                    addString("@" + name + usernamePostfix,
+                              TaggedString::Type::Username);
                 }
             }
-            else if (!getSettings()->userCompletionOnlyWithAt)
+        }
+        else if (!getSettings()->userCompletionOnlyWithAt)
+        {
+            auto chatters = channel->accessChatters()->filterByPrefix(prefix);
+
+            for (const auto &name : chatters)
             {
-                for (const auto &name :
-                     usernames->subrange(Prefix(usernamePrefix)))
+                if (getSettings()->lowercaseUsernames)
                 {
-                    if (getSettings()->lowercaseUsernames)
-                    {
-                        addString(QString(name + usernamePostfix).toLower(),
-                                  TaggedString::Type::Username);
-                    }
-                    else
-                    {
-                        addString(name + usernamePostfix,
-                                  TaggedString::Type::Username);
-                    }
+                    addString(QString(name + usernamePostfix).toLower(),
+                              TaggedString::Type::Username);
+                }
+                else
+                {
+                    addString(name + usernamePostfix,
+                              TaggedString::Type::Username);
                 }
             }
+        }
+
+        // 7TV Global
+        for (auto &emote : *channel->globalSeventv().emotes())
+        {
+            addString(emote.first.string,
+                      TaggedString::Type::SEVENTVGlobalEmote);
         }
 
         // Bttv Global
@@ -165,6 +170,13 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         for (auto &emote : *channel->globalFfz().emotes())
         {
             addString(emote.first.string, TaggedString::Type::FFZChannelEmote);
+        }
+
+        // 7TV Channel
+        for (auto &emote : *channel->seventvEmotes())
+        {
+            addString(emote.first.string,
+                      TaggedString::Type::SEVENTVChannelEmote);
         }
 
         // Bttv Channel

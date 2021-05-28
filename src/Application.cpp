@@ -17,6 +17,7 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/Irc2.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"

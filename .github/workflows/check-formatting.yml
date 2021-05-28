@@ -4,7 +4,7 @@ name: Check formatting
 on:
   push:
     branches:
-      - master
+      - dankerino
   pull_request:
 
 jobs:

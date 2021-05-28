@@ -4,9 +4,9 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/ChannelChatters.hpp"
+#include "common/ChatterSet.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
-#include "common/UsernameSet.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -30,6 +30,7 @@ using EmotePtr = std::shared_ptr<const Emote>;
 class EmoteMap;
 
 class TwitchBadges;
+class SeventvEmotes;
 class FfzEmotes;
 class BttvEmotes;
 
@@ -87,13 +88,17 @@ public:
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
 
     // Emotes
+    const SeventvEmotes &globalSeventv() const;
     const BttvEmotes &globalBttv() const;
     const FfzEmotes &globalFfz() const;
+    boost::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
     boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
     boost::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
+    std::shared_ptr<const EmoteMap> seventvEmotes() const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
 
+    virtual void refresh7TVChannelEmotes(bool manualRefresh);
     virtual void refreshBTTVChannelEmotes(bool manualRefresh);
     virtual void refreshFFZChannelEmotes(bool manualRefresh);
 
@@ -127,7 +132,8 @@ private:
     } nameOptions;
 
 protected:
-    explicit TwitchChannel(const QString &channelName, BttvEmotes &globalBttv,
+    explicit TwitchChannel(const QString &channelName,
+                           SeventvEmotes &globalSeventv, BttvEmotes &globalBttv,
                            FfzEmotes &globalFfz);
 
 private:
@@ -162,8 +168,10 @@ private:
     UniqueAccess<RoomModes> roomModes_;
 
 protected:
+    SeventvEmotes &globalSeventv_;
     BttvEmotes &globalBttv_;
     FfzEmotes &globalFfz_;
+    Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;

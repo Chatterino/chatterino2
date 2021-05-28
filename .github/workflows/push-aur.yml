@@ -4,7 +4,7 @@ name: Build on Arch Linux
 on:
   push:
     branches:
-      - master
+      - dankerino
   pull_request:
 
 jobs:

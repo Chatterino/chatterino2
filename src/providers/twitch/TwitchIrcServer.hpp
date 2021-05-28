@@ -7,6 +7,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 
 #include <chrono>
 #include <memory>
@@ -40,6 +41,7 @@ public:
 
     PubSub *pubsub;
 
+    const SeventvEmotes &getSeventvEmotes() const;
     const BttvEmotes &getBttvEmotes() const;
     const FfzEmotes &getFfzEmotes() const;
 
@@ -75,6 +77,7 @@ private:
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
+    SeventvEmotes seventv;
     BttvEmotes bttv;
     FfzEmotes ffz;
 

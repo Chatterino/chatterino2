@@ -5,6 +5,7 @@
 #include "messages/Emote.hpp"
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
@@ -86,12 +87,16 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
 
         if (tc)
         {
+            if (auto seventv = tc->seventvEmotes())
+                addEmotes(emotes, *seventv, text, "Channel 7TV");
             // TODO extract "Channel BetterTTV" text into a #define.
             if (auto bttv = tc->bttvEmotes())
                 addEmotes(emotes, *bttv, text, "Channel BetterTTV");
             if (auto ffz = tc->ffzEmotes())
                 addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
 
+            if (auto seventvG = tc->globalSeventv().emotes())
+                addEmotes(emotes, *seventvG, text, "Global 7TV");
             if (auto bttvG = tc->globalBttv().emotes())
                 addEmotes(emotes, *bttvG, text, "Global BetterTTV");
             if (auto ffzG = tc->globalFfz().emotes())

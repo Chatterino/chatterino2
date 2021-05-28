@@ -193,6 +193,7 @@ public:
     BoolSetting stackBits = {"/emotes/stackBits", false};
     BoolSetting removeSpacesBetweenEmotes = {
         "/emotes/removeSpacesBetweenEmotes", false};
+    BoolSetting enableLoadingSevenTV = {"/emotes/enableLoadingSevenTV", false};
 
     /// Links
     BoolSetting linksDoubleClickOnly = {"/links/doubleClickToOpen", false};

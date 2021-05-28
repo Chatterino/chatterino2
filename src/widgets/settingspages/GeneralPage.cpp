@@ -316,6 +316,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Remove spaces between emotes",
                        s.removeSpacesBetweenEmotes);
+    layout.addCheckbox("Enable loading 7TV emotes", s.enableLoadingSevenTV);
     layout.addDropdown<int>(
         "Show info on hover", {"Don't show", "Always show", "Hold shift"},
         s.emotesTooltipPreview,

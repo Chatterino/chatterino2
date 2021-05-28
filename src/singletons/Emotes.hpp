@@ -5,6 +5,7 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/emoji/Emojis.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
+#include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "singletons/helper/GifTimer.hpp"
 
