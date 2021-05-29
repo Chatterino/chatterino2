@@ -412,6 +412,7 @@ void Notebook::performLayout(bool animated)
     {
         auto x = left;
         auto y = 0;
+        auto visibleButtons = 0;
 
         // set size of custom buttons (settings, user, ...)
         for (auto *btn : this->customButtons_)
@@ -424,6 +425,8 @@ void Notebook::performLayout(bool animated)
             btn->setFixedSize(tabHeight, tabHeight - 1);
             btn->move(x, 0);
             x += tabHeight;
+
+            visibleButtons++;
         }
 
         if (this->showTabs_)
@@ -496,8 +499,15 @@ void Notebook::performLayout(bool animated)
         // set page bounds
         if (this->selectedPage_ != nullptr)
         {
-            this->selectedPage_->move(0, y + tabHeight);
-            this->selectedPage_->resize(width(), height() - y - tabHeight);
+            auto tabAreaHeight = y + tabHeight;
+            if (visibleButtons == 0 && !this->showTabs_)
+            {
+                // No buttons or tabs are visible, ensure there's a small gap for right-clicking
+                tabAreaHeight *= 0.5;
+            }
+
+            this->selectedPage_->move(0, tabAreaHeight);
+            this->selectedPage_->resize(width(), height() - tabAreaHeight);
             this->selectedPage_->raise();
         }
     }
@@ -506,6 +516,7 @@ void Notebook::performLayout(bool animated)
         const int lineThickness = int(2 * scale);
         auto x = left;
         auto y = 0;
+        auto visibleButtons = 0;
 
         // set size of custom buttons (settings, user, ...)
         for (auto *btn : this->customButtons_)
@@ -518,6 +529,8 @@ void Notebook::performLayout(bool animated)
             btn->setFixedSize(tabHeight, tabHeight - 1);
             btn->move(x, y);
             x += tabHeight;
+
+            visibleButtons++;
         }
 
         if (this->customButtons_.size() > 0)
@@ -604,6 +617,12 @@ void Notebook::performLayout(bool animated)
         // set page bounds
         if (this->selectedPage_ != nullptr)
         {
+            if (visibleButtons == 0 && !this->showTabs_)
+            {
+                // No buttons or tabs are visible, ensure there's a small gap for right-clicking
+                x = tabHeight * 0.5;
+            }
+
             this->selectedPage_->move(x, 0);
             this->selectedPage_->resize(width() - x, height());
             this->selectedPage_->raise();
