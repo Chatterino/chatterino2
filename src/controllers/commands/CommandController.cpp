@@ -736,7 +736,7 @@ void CommandController::initialize(Settings &, Paths &paths)
             getHelix()->searchGames(
                 gameName,
                 [channel, twitchChannel,
-                 gameName](std::vector<HelixGame> games) {
+                 gameName](const std::vector<HelixGame> &games) {
                     if (games.empty())
                     {
                         channel->addMessage(
