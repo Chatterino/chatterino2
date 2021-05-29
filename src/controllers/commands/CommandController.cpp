@@ -741,39 +741,38 @@ void CommandController::initialize(Settings &, Paths &paths)
                     {
                         channel->addMessage(
                             makeSystemMessage("Game not found."));
+                        return;
                     }
-                    else  // 1 or more games
-                    {
-                        auto matchedGame = games.at(0);
 
-                        if (games.size() > 1)
+                    auto matchedGame = games.at(0);
+
+                    if (games.size() > 1)
+                    {
+                        // NOTE: Improvements could be made with 'fuzzy string matching' code here
+                        // attempt to find the best looking game by comparing exactly with lowercase values
+                        for (const auto &game : games)
                         {
-                            // attempt to find the best looking game by matching lowercase values
-                            for (const auto &game : games)
+                            if (game.name.toLower() == gameName.toLower())
                             {
-                                if (game.name.toLower() == gameName.toLower())
-                                {
-                                    matchedGame = game;
-                                    break;
-                                }
+                                matchedGame = game;
+                                break;
                             }
                         }
-
-                        auto status = twitchChannel->accessStreamStatus();
-                        getHelix()->updateChannel(
-                            twitchChannel->roomId(), matchedGame.id, "", "",
-                            [channel, games,
-                             matchedGame](const NetworkResult &) {
-                                channel->addMessage(makeSystemMessage(
-                                    QString("Updated game to %1")
-                                        .arg(matchedGame.name)));
-                            },
-                            [channel] {
-                                channel->addMessage(makeSystemMessage(
-                                    "Game update failed! Are you "
-                                    "missing the required scope?"));
-                            });
                     }
+
+                    auto status = twitchChannel->accessStreamStatus();
+                    getHelix()->updateChannel(
+                        twitchChannel->roomId(), matchedGame.id, "", "",
+                        [channel, games, matchedGame](const NetworkResult &) {
+                            channel->addMessage(
+                                makeSystemMessage(QString("Updated game to %1")
+                                                      .arg(matchedGame.name)));
+                        },
+                        [channel] {
+                            channel->addMessage(makeSystemMessage(
+                                "Game update failed! Are you "
+                                "missing the required scope?"));
+                        });
                 },
                 [channel] {
                     channel->addMessage(
