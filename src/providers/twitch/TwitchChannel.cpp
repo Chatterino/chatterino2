@@ -723,11 +723,18 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    auto baseURL = Env::get().recentMessagesApiUrl.arg(this->getName());
+    QUrl url(Env::get().recentMessagesApiUrl.arg(this->getName()));
 
-    auto url = QString("%1?limit=%2")
-                   .arg(baseURL)
-                   .arg(getSettings()->twitchMessageHistoryLimit);
+    QUrlQuery urlQueryValues(url);
+
+    if (!urlQueryValues.hasQueryItem("limit"))
+    {
+        urlQueryValues.addQueryItem(
+            "limit", QString::number(
+                         getSettings()->twitchMessageHistoryLimit.getValue()));
+
+        url.setQuery(urlQueryValues);
+    }
 
     NetworkRequest(url)
         .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
