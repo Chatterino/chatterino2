@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Major: Added ability to toggle visibility of Channel Tabs - with keyboard shortcut (default: Ctrl+U). (#2600)
+- Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
 - Minor: Added moderation buttons to search popup when searching in a split with moderation mode enabled. (#2148, #2803)
 - Minor: Made "#channel" in `/mentions` tab show in usercards and in the search popup. (#2802)
 - Minor: Added settings to disable custom FrankerFaceZ VIP/mod badges. (#2693, #2759)
