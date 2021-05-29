@@ -1,6 +1,7 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 
 #include <QJsonArray>
+#include <QJsonDocument>
 #include <QThread>
 
 #include "common/Common.hpp"
