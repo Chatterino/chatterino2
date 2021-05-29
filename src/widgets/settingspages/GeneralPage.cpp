@@ -671,6 +671,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addStretch();
 
+    layout.addSubtitle("Miscellaneous Dankerino things");
+    layout.addIntInput("High rate limit spam delay in milliseconds (mod/vip)",
+                       s.twitchHighRateLimitDelay, 100, 2000, 100);
+    layout.addIntInput(
+        "Low rate limit spam delay in milliseconds (non mod/vip)",
+        s.twitchLowRateLimitDelay, 500, 3000, 1100);
+
     // invisible element for width
     auto inv = new BaseWidget(this);
     //    inv->setScaleIndependantWidth(600);

@@ -4,6 +4,7 @@
 
 ### Dankerino
 
+- Minor: Allow for adjusting rate limit settings.
 - Major: Add 7TV emotes from Chatterino7 (Mm2PL/Dankerino#79)
 
 ### Chatterino

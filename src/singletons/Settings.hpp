@@ -407,6 +407,16 @@ public:
          {"d", 1},
          {"w", 1}}};
 
+    // more misc dankerino shit
+    IntSetting twitchHighRateLimitDelay = {
+        "/misc/twitch/highRateLimitDelay",
+        100,
+    };
+    IntSetting twitchLowRateLimitDelay = {
+        "/misc/twitch/lowRateLimitDelay",
+        1100,
+    };
+
 private:
     void updateModerationActions();
     void moveLegacyDankerinoSettings_();
