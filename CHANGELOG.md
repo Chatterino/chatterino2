@@ -2,11 +2,13 @@
 
 ## Unversioned
 
+- Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
 - Minor: Added moderation buttons to search popup when searching in a split with moderation mode enabled. (#2148, #2803)
 - Minor: Made "#channel" in `/mentions` tab show in usercards and in the search popup. (#2802)
 - Minor: Added settings to disable custom FrankerFaceZ VIP/mod badges. (#2693, #2759)
 - Minor: Limit the number of recent chatters to improve memory usage and reduce freezes. (#2796, #2814)
 - Minor: Added `/popout` command. Usage: `/popout [channel]`. It opens browser chat for the provided channel. Can also be used without arguments to open current channels browser chat. (#2556, #2812)
+- Minor: Improved matching of game names when using `/setgame` command (#2636)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
 
 ## 2.3.2

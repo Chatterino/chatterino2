@@ -66,13 +66,17 @@ Window::Window(WindowType type)
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
-        getSettings()->tabDirection.connect([this](int val) {
-            this->notebook_->setTabDirection(NotebookTabDirection(val));
-        });
     }
     else
     {
         this->resize(int(300 * this->scale()), int(500 * this->scale()));
+    }
+
+    if (type == WindowType::Main || type == WindowType::Popup)
+    {
+        getSettings()->tabDirection.connect([this](int val) {
+            this->notebook_->setTabDirection(NotebookTabDirection(val));
+        });
     }
 }
 
@@ -396,6 +400,10 @@ void Window::addShortcuts()
         auto quickSwitcher =
             new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
         quickSwitcher->show();
+    });
+
+    createWindowShortcut(this, "CTRL+U", [this] {
+        this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
     });
 }
 
