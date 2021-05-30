@@ -406,13 +406,14 @@ void Notebook::performLayout(bool animated)
     const auto left = int(2 * this->scale());
     const auto scale = this->scale();
     const auto tabHeight = int(NOTEBOOK_TAB_HEIGHT * scale);
+    const auto minimumTabAreaSpace = int(tabHeight * 0.5);
     const auto addButtonWidth = this->showAddButton_ ? tabHeight : 0;
 
     if (this->tabDirection_ == NotebookTabDirection::Horizontal)
     {
         auto x = left;
         auto y = 0;
-        auto visibleButtons = 0;
+        auto buttonHeight = 0;
 
         // set size of custom buttons (settings, user, ...)
         for (auto *btn : this->customButtons_)
@@ -426,7 +427,7 @@ void Notebook::performLayout(bool animated)
             btn->move(x, 0);
             x += tabHeight;
 
-            visibleButtons++;
+            buttonHeight = tabHeight;
         }
 
         if (this->showTabs_)
@@ -475,14 +476,7 @@ void Notebook::performLayout(bool animated)
                 this->addButton_->move(x, y);
             }
 
-            if (this->lineOffset_ != y + tabHeight)
-            {
-                this->lineOffset_ = y + tabHeight;
-                this->update();
-            }
-
-            /// Increment for the line at the bottom
-            y += int(2 * scale);
+            y += tabHeight;
 
             // raise elements
             for (auto &i : this->items_)
@@ -496,18 +490,22 @@ void Notebook::performLayout(bool animated)
             }
         }
 
+        y = std::max({y, buttonHeight, minimumTabAreaSpace});
+
+        if (this->lineOffset_ != y)
+        {
+            this->lineOffset_ = y;
+            this->update();
+        }
+
+        /// Increment for the line at the bottom
+        y += int(2 * scale);
+
         // set page bounds
         if (this->selectedPage_ != nullptr)
         {
-            auto tabAreaHeight = y + tabHeight;
-            if (visibleButtons == 0 && !this->showTabs_)
-            {
-                // No buttons or tabs are visible, ensure there's a small gap for right-clicking
-                tabAreaHeight *= 0.5;
-            }
-
-            this->selectedPage_->move(0, tabAreaHeight);
-            this->selectedPage_->resize(width(), height() - tabAreaHeight);
+            this->selectedPage_->move(0, y);
+            this->selectedPage_->resize(width(), height() - y);
             this->selectedPage_->raise();
         }
     }
@@ -516,7 +514,6 @@ void Notebook::performLayout(bool animated)
         const int lineThickness = int(2 * scale);
         auto x = left;
         auto y = 0;
-        auto visibleButtons = 0;
 
         // set size of custom buttons (settings, user, ...)
         for (auto *btn : this->customButtons_)
@@ -529,8 +526,6 @@ void Notebook::performLayout(bool animated)
             btn->setFixedSize(tabHeight, tabHeight - 1);
             btn->move(x, y);
             x += tabHeight;
-
-            visibleButtons++;
         }
 
         if (this->customButtons_.size() > 0)
@@ -595,7 +590,7 @@ void Notebook::performLayout(bool animated)
             }
         }
 
-        x = std::max(x, buttonWidth);
+        x = std::max({x, buttonWidth, minimumTabAreaSpace});
 
         if (this->lineOffset_ != x - lineThickness)
         {
@@ -617,12 +612,6 @@ void Notebook::performLayout(bool animated)
         // set page bounds
         if (this->selectedPage_ != nullptr)
         {
-            if (visibleButtons == 0 && !this->showTabs_)
-            {
-                // No buttons or tabs are visible, ensure there's a small gap for right-clicking
-                x = tabHeight * 0.5;
-            }
-
             this->selectedPage_->move(x, 0);
             this->selectedPage_->resize(width() - x, height());
             this->selectedPage_->raise();
