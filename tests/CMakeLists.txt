@@ -1,9 +1,5 @@
 project(chatterino-test)
 
-set(main_dir ${CMAKE_SOURCE_DIR}/src)
-
-include_directories(${main_dir})
-
 set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
@@ -14,52 +10,16 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
     )
 
-add_executable(${PROJECT_NAME}
-    ${test_SOURCES}
-    $<TARGET_OBJECTS:chatterino-lib>
-    )
+add_executable(${PROJECT_NAME} ${test_SOURCES})
 add_sanitizers(${PROJECT_NAME})
 
-# Enable autogeneration of Qts MOC/RCC/UIC
-set_target_properties(${PROJECT_NAME}
-    PROPERTIES
-    AUTOMOC ON
-    AUTORCC ON
-    AUTOUIC ON
-    )
+target_link_libraries(${PROJECT_NAME} PRIVATE chatterino-lib)
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    Qt5::Core
-    Qt5::Widgets
-    Qt5::Network
-    Qt5::Concurrent
-    gtest gtest_main
-    Pajlada::Serialize
-    Pajlada::Settings
-    Pajlada::Signals
-    Threads::Threads
-    LRUCache
-    chatterino-lib
-    )
+target_link_libraries(${PROJECT_NAME} PRIVATE gtest)
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE
-    CHATTERINO
     CHATTERINO_TEST
-    UNICODE
-    AB_CUSTOM_THEME
-    AB_CUSTOM_SETTINGS
-    IRC_STATIC
-    IRC_NAMESPACE=Communi
-    CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
-    CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
-    CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
     )
-
-if (WIN32)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE
-        USEWINSDK
-        )
-endif ()
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES

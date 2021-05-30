@@ -476,16 +476,16 @@ source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 
 add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
-if (BUILD_APP)
-    add_executable(${EXECUTABLE_PROJECT} main.cpp $<TARGET_OBJECTS:${LIBRARY_PROJECT}>)
-    add_sanitizers(${EXECUTABLE_PROJECT})
-
-    target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-    target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
-
-    target_link_libraries(${EXECUTABLE_PROJECT}
+target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
+        Qt5::Core
+        Qt5::Widgets
+        Qt5::Gui
+        Qt5::Network
+        Qt5::Multimedia
+        Qt5::Svg
+        Qt5::Concurrent
+
         LibCommuni::LibCommuni
         qt5keychain
         Pajlada::Serialize
@@ -496,6 +496,14 @@ if (BUILD_APP)
         RapidJSON::RapidJSON
         LRUCache
         )
+
+if (BUILD_APP)
+    add_executable(${EXECUTABLE_PROJECT} main.cpp)
+    add_sanitizers(${EXECUTABLE_PROJECT})
+
+    target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+    target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
 
     set_target_properties(${EXECUTABLE_PROJECT}
         PROPERTIES
@@ -561,19 +569,18 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
-    )
-if (USE_SYSTEM_QT5KEYCHAIN)
-    target_compile_definitions(${LIBRARY_PROJECT} PRIVATE
-        CMAKE_BUILD
-        )
-endif ()
-target_compile_definitions(${LIBRARY_PROJECT} PRIVATE
+
     CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
     CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
     CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
     )
+if (USE_SYSTEM_QT5KEYCHAIN)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
+        CMAKE_BUILD
+        )
+endif ()
 if (WIN32)
-    target_compile_definitions(${LIBRARY_PROJECT} PRIVATE
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         USEWINSDK
         )
     if (BUILD_APP)
@@ -582,7 +589,7 @@ if (WIN32)
 endif ()
 
 if (MSVC)
-    target_compile_options(${LIBRARY_PROJECT} PRIVATE /EHsc)
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc)
 endif ()
 
 if (APPLE AND BUILD_APP)
@@ -599,67 +606,44 @@ if (APPLE AND BUILD_APP)
         )
 endif ()
 
-target_include_directories(${LIBRARY_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        Qt5::Core
-        Qt5::Widgets
-        Qt5::Gui
-        Qt5::Network
-        Qt5::Multimedia
-        Qt5::Svg
-        Qt5::Concurrent
-        )
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 if (WinToast_FOUND)
     target_link_libraries(${LIBRARY_PROJECT}
-        PRIVATE
+        PUBLIC
         WinToast)
 endif ()
 
 if (USE_CONAN AND TARGET CONAN_PKG::boost)
     target_link_libraries(${LIBRARY_PROJECT}
-        PRIVATE
+        PUBLIC
         CONAN_PKG::boost
         )
 else ()
     target_link_libraries(${LIBRARY_PROJECT}
-        PRIVATE
+        PUBLIC
         Boost::boost
         )
 endif ()
 
 if (USE_CONAN AND TARGET CONAN_PKG::openssl)
     target_link_libraries(${LIBRARY_PROJECT}
-        PRIVATE
+        PUBLIC
         CONAN_PKG::openssl
         )
 else ()
     target_link_libraries(${LIBRARY_PROJECT}
-        PRIVATE
+        PUBLIC
         OpenSSL::SSL
         OpenSSL::Crypto
         )
 endif ()
 
-target_include_directories(${LIBRARY_PROJECT} PRIVATE ${RapidJSON_INCLUDE_DIRS})
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
 
-target_link_libraries(${LIBRARY_PROJECT}
-    PRIVATE
-    LibCommuni::LibCommuni
-    qt5keychain
-    Pajlada::Serialize
-    Pajlada::Settings
-    Pajlada::Signals
-    websocketpp::websocketpp
-    Threads::Threads
-    RapidJSON::RapidJSON
-    LRUCache
-    )
 if (LIBRT)
     target_link_libraries(${LIBRARY_PROJECT}
-        PRIVATE
+        PUBLIC
         ${LIBRT}
         )
 endif ()
