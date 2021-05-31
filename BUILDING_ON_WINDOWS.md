@@ -17,7 +17,7 @@ Notes:
 
 1. First, download a boost installer appropriate for your version of Visual Studio.
 
-   - Visit the downloads list [SourceForge](https://sourceforge.net/projects/boost/files/boost-binaries/).
+   - Visit the downloads list on [SourceForge](https://sourceforge.net/projects/boost/files/boost-binaries/).
    - Select the latest version from the list.
    - Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `-64` for 64-bit systems).
      Visual Studio versions map as follows: `14.2` in the filename corresponds to MSVC 2019, `14.1` to 2017, `14.0` to 2015. _Anything prior to Visual Studio 2015 is unsupported. Please upgrade should you have an older installation._
