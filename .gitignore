@@ -81,6 +81,7 @@ Thumbs.db
 .vscode
 .idea
 dependencies
+cmake-build-debug
 
 ### CMake ###
 CMakeLists.txt.user
