@@ -21,6 +21,7 @@ public:
     pajlada::Signals::NoArgSignal smartReconnect;
 
     virtual void open();
+    virtual void close();
 
 private:
     QTimer pingTimer_;

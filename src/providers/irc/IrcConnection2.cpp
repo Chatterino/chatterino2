@@ -133,4 +133,10 @@ void IrcConnection::open()
     Communi::IrcConnection::open();
 }
 
+void IrcConnection::close()
+{
+    this->expectConnectionLoss_ = true;
+    Communi::IrcConnection::close();
+}
+
 }  // namespace chatterino
