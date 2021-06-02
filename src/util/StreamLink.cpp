@@ -209,24 +209,23 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 
     // If we are not doing our MPV video view start as detached
     // Else we will kill our existing stream proccess and start a new stream
-    if(!streamMPV) {
+    if(!streamMPV)
+    {
         bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
         if (!res)
         {
             showStreamlinkNotFoundError();
         }
-    } else {
+    }
+    else
+    {
         QString command = "\""+getStreamlinkProgram()+"\" "+arguments.join(" ");
-        if(streamlinkProcess != nullptr) {
-            streamlinkProcess->kill();
-        }
-        streamlinkProcess = new QProcess;
-        streamlinkProcess->start(command);
+        AttachedPlayer::getInstance().updateStreamLinkProcess(channelURL,command);
     }
 
 }
 
-void openStreamlinkForChannel(const QString &channel, bool streamMPV, unsigned long mpvContainer)
+void openStreamlinkForChannel(const QString &channel, bool streamMPV)
 {
     QString channelURL = "twitch.tv/" + channel;
 
@@ -245,15 +244,22 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV, unsigned l
     QStringList args;
 
     // First check to see if player is valid path!
-    if(streamMPV && !checkExecutablePath(getMPVProgram())) {
+    if(streamMPV && !checkExecutablePath(getMPVProgram()))
+    {
         showMPVNotFoundError();
+        return;
+    }
+    if(!checkExecutablePath(getStreamlinkProgram()))
+    {
+        showStreamlinkNotFoundError();
         return;
     }
 
     // Append MVP player settings if we have a container to play in
     // https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst
-    if(streamMPV) {
-        args << "--player \""+getMPVProgram()+" --wid=" + QString::number(mpvContainer)+"\"";
+    if(streamMPV)
+    {
+        args << "--player \""+getMPVProgram()+" --wid=WID\"";
     }
 
     // Quality converted from Chatterino format to Streamlink format

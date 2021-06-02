@@ -299,7 +299,9 @@ void SplitContainer::setSelected(Split *split)
     }
 
     // switch the mpv window if it is being shown
-    split->openInStreamlinkMPVIfOpen();
+    if(getSettings()->mpvFollowActive) {
+        split->openInStreamlinkMPVIfOpen();
+    }
 
 }
 

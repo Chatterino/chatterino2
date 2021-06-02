@@ -102,6 +102,11 @@ ExternalToolsPage::ExternalToolsPage()
         groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
         groupLayout->setWidget(1, QFormLayout::SpanningRole, links);
 
+        auto followActiveCb =
+                this->createCheckBox("Follow active chat (will automatically switch "
+                                     "player stream based on what chat you are in)",
+                                     getSettings()->mpvFollowActive);
+        groupLayout->setWidget(2, QFormLayout::SpanningRole, followActiveCb);
         auto customPath = this->createLineEdit(getSettings()->mpvPlayerPath);
         customPath->setPlaceholderText(
             "Path to folder where mpv executable can be found");

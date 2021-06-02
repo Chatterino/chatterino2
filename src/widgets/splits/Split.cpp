@@ -631,18 +631,17 @@ void Split::openInStreamlink()
 
 void Split::openInStreamlinkMPVIfOpen()
 {
+    // Return if the stream is not open currently
+    if(!AttachedPlayer::getInstance().getIfStreamActive())
+    {
+        return;
+    }
+
+    // Else try to open
     try
     {
-        // If the stream is already open then we can change it to a new stream
-        // We should check to make sure we did not reques to change to the same channel
-        // Also ignore if the channel clicked is not a live channel
         QString channel = this->getChannel()->getName();
-        if(mpv_window == nullptr || _mpvContainer == nullptr || !_mpvContainer->isVisible()
-                || channel == last_channel || !this->getChannel()->isLive()) {
-            return;
-        }
-        last_channel = channel;
-        openStreamlinkForChannel(channel, true, _mpvContainerWID);
+        openStreamlinkForChannel(channel, true);
     }
     catch (const Exception &ex)
     {
@@ -657,19 +656,8 @@ void Split::openInStreamlinkMPV()
     {
         // This will open our streamlink in our new mpv window
         // This window will stream in the mpv video file!
-        // install from: https://mpv.io/
-        //  https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst
         QString channel = this->getChannel()->getName();
-        if(mpv_window == nullptr || _mpvContainer == nullptr || !_mpvContainer->isVisible()) {
-            mpv_window = new QWindow;
-            _mpvContainerWID = mpv_window->winId();
-            _mpvContainer = createWindowContainer(mpv_window);
-            _mpvContainer->setBackgroundRole(QPalette::Window);
-            _mpvContainer->setSizePolicy(QSizePolicy::Policy::Expanding,QSizePolicy::Policy::Expanding);
-            _mpvContainer->show();
-        }
-        last_channel = channel;
-        openStreamlinkForChannel(channel, true, _mpvContainerWID);
+        openStreamlinkForChannel(channel, true);
     }
     catch (const Exception &ex)
     {

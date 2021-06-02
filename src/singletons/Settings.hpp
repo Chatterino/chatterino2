@@ -322,6 +322,7 @@ public:
                                      "--twitch-low-latency --twitch-disable-ads"};
 
     // MPV player
+    BoolSetting mpvFollowActive = {"/external/mpv/followActive", true};
     QStringSetting mpvPlayerPath = {"/external/mpv/path", ""};
 
     // Custom URI Scheme

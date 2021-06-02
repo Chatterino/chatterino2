@@ -237,6 +237,7 @@ SOURCES += \
     src/singletons/TooltipPreviewImage.cpp \
     src/singletons/Updates.cpp \
     src/singletons/WindowManager.cpp \
+    src/util/AttachedPlayer.cpp \
     src/util/AttachToConsole.cpp \
     src/util/Clipboard.cpp \
     src/util/DebugCount.cpp \
@@ -475,6 +476,7 @@ HEADERS += \
     src/singletons/TooltipPreviewImage.hpp \
     src/singletons/Updates.hpp \
     src/singletons/WindowManager.hpp \
+    src/util/AttachedPlayer.h \
     src/util/AttachToConsole.hpp \
     src/util/Clamp.hpp \
     src/util/Clipboard.hpp \

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/BaseWidget.hpp"
+#include "AttachedPlayer.h"
 
 #include <QString>
 #include <QStringList>
@@ -24,6 +25,6 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 
 // Start opening streamlink for the given channel, reading settings like quality
 // from settings and opening a quality dialog if the quality is "Choose"
-void openStreamlinkForChannel(const QString &channel, bool streamMPV = false, unsigned long mpvContainer = 0);
+void openStreamlinkForChannel(const QString &channel, bool streamMPV = false);
 
 }  // namespace chatterino
