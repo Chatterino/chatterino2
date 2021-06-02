@@ -126,7 +126,14 @@ You can now create a zip archive of all the contents in `releases` and distribut
 
 ## Building with CMake
 
-Open up your terminal with the Visual Studio environment variables, then:
+Install [conan](https://docs.conan.io/en/latest/installation.html) which we will use to get required dependencies.
+
+1. `pip install conan`
+2. `mkdir build`
+3. `cd build`
+4. `conan install ..`
+
+Open up your terminal with the Visual Studio environment variables.
 
 1. `mkdir build`
 2. `cd build`
