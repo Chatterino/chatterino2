@@ -15,7 +15,9 @@ set(chatterino_SOURCES
     ${CMAKE_SOURCE_DIR}/src/common/NetworkRequest.cpp
     ${CMAKE_SOURCE_DIR}/src/common/NetworkResult.cpp
     ${CMAKE_SOURCE_DIR}/src/common/QLogging.cpp
-    ${CMAKE_SOURCE_DIR}/src/common/UsernameSet.cpp
+    ${CMAKE_SOURCE_DIR}/src/common/ChatterSet.cpp
+
+    ${CMAKE_SOURCE_DIR}/src/debug/Benchmark.cpp
 
     ${CMAKE_SOURCE_DIR}/src/controllers/highlights/HighlightPhrase.cpp
 
@@ -39,7 +41,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkRequest.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/src/UsernameSet.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/ChatterSet.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/HighlightPhrase.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
     )
@@ -68,6 +70,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Pajlada::Settings
     Pajlada::Signals
     Threads::Threads
+    LRUCache
     )
 
 target_compile_definitions(${PROJECT_NAME} PRIVATE

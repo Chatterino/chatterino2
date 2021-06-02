@@ -17,12 +17,12 @@ Notes:
 
 1. First, download a boost installer appropriate for your version of Visual Studio.
 
-   - Visit the downloads list [on Bintray](https://dl.bintray.com/boostorg/release/).
-   - Select the latest version from the list and navigate into the `binaries/` directory.
-   - Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `x64` for 64-bit systems).
+   - Visit the downloads list on [SourceForge](https://sourceforge.net/projects/boost/files/boost-binaries/).
+   - Select the latest version from the list.
+   - Download the `.exe` file appropriate to your Visual Studio installation version and system bitness (choose `-64` for 64-bit systems).
      Visual Studio versions map as follows: `14.2` in the filename corresponds to MSVC 2019, `14.1` to 2017, `14.0` to 2015. _Anything prior to Visual Studio 2015 is unsupported. Please upgrade should you have an older installation._
 
-     **Convenience link for Visual Studio 2019: [Boost 1.75.0-MSVC-14.2](https://dl.bintray.com/boostorg/release/1.75.0/binaries/boost_1_75_0-msvc-14.2-64.exe)**
+     **Convenience link for Visual Studio 2019: [boost_1_76_0-msvc-14.2-64.exe](https://sourceforge.net/projects/boost/files/boost-binaries/1.76.0/boost_1_76_0-msvc-14.2-64.exe/download)**
 
 2. When prompted where to install Boost, set the location to `C:\local\boost`.
 3. After the installation finishes, rename the `C:\local\boost\lib64-msvc-14.2` (or similar) directory to simply `lib` (`C:\local\boost\lib`).
@@ -33,7 +33,7 @@ Note: This installation will take about 1.5 GB of disk space.
 
 ### For our websocket library, we need OpenSSL 1.1
 
-1. Download OpenSSL for windows, version `1.1.1j`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1j.exe)**
+1. Download OpenSSL for windows, version `1.1.1k`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1k.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 

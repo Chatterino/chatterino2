@@ -11,14 +11,15 @@ ChannelChatters::ChannelChatters(Channel &channel)
 {
 }
 
-SharedAccessGuard<const UsernameSet> ChannelChatters::accessChatters() const
+SharedAccessGuard<const ChatterSet> ChannelChatters::accessChatters() const
 {
     return this->chatters_.accessConst();
 }
 
 void ChannelChatters::addRecentChatter(const QString &user)
 {
-    this->chatters_.access()->insert(user);
+    auto chatters = this->chatters_.access();
+    chatters->addRecentChatter(user);
 }
 
 void ChannelChatters::addJoinedUser(const QString &user)
@@ -66,9 +67,11 @@ void ChannelChatters::addPartedUser(const QString &user)
     }
 }
 
-void ChannelChatters::setChatters(UsernameSet &&set)
+void ChannelChatters::updateOnlineChatters(
+    const std::unordered_set<QString> &chatters)
 {
-    this->chatters_.access()->merge(std::move(set));
+    auto chatters_ = this->chatters_.access();
+    chatters_->updateOnlineChatters(chatters);
 }
 
 const QColor ChannelChatters::getUserColor(const QString &user)
