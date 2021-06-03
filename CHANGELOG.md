@@ -10,6 +10,7 @@
 - Minor: Added `/popout` command. Usage: `/popout [channel]`. It opens browser chat for the provided channel. Can also be used without arguments to open current channels browser chat. (#2556, #2812)
 - Minor: Improved matching of game names when using `/setgame` command (#2636)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
+- Bugfix: Fixed bit emotes not loading in some rare cases. (#2856)
 
 ## 2.3.2
 
