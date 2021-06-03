@@ -3,6 +3,10 @@
 #include <QWindow>
 #include <QWidget>
 
+#include <Application.hpp>
+#include <widgets/Window.hpp>
+#include <singletons/WindowManager.hpp>
+
 namespace chatterino {
 
 class AttachedPlayer {
@@ -29,13 +33,11 @@ private:
     AttachedPlayer(AttachedPlayer const&);
     void operator=(AttachedPlayer const&);
 
-    // TODO: rename these to be better
     QWindow *mpvWindow = nullptr;
     QWidget *mpvContainer = nullptr;
     unsigned long mpvContainerWID;
     QString lastShownChannel = "";
     QProcess* streamlinkProcess = nullptr;
-
 
 };
 

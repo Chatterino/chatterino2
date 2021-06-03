@@ -257,6 +257,7 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
 
     // Append MVP player settings if we have a container to play in
     // https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst
+    // https://mpv.io/manual/master/#options-wid
     if(streamMPV)
     {
         args << "--player \""+getMPVProgram()+" --wid=WID\"";

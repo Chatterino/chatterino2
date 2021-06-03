@@ -21,11 +21,19 @@ void AttachedPlayer::updateStreamLinkProcess(const QString &channel, const QStri
     // TODO: how to add a volumn control to this??
     if(!getIfStreamActive())
     {
+        // create the window
+        QWindow* mainWindow = chatterino::getApp()->windows->getMainWindow().windowHandle();
         mpvWindow = new QWindow;
+        //mpvWindow = mainWindow;
         mpvContainerWID = mpvWindow->winId();
         mpvContainer = QWidget::createWindowContainer(mpvWindow);
         mpvContainer->setBackgroundRole(QPalette::Window);
         mpvContainer->setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
+        // the size should default to near the same height as the main chat client
+        float scale = 0.90;
+        int height = (int)(scale*(float)mainWindow->size().height());
+        int width = (int)(16.0/9.0*scale*(float)mainWindow->size().height());
+        mpvContainer->setFixedSize(width,height);
         mpvContainer->show();
     }
 
@@ -36,7 +44,8 @@ void AttachedPlayer::updateStreamLinkProcess(const QString &channel, const QStri
     commandEdited.replace("WID", QString::number(mpvContainerWID));
 
     // Now lets update our process
-    if(streamlinkProcess != nullptr) {
+    if(streamlinkProcess != nullptr)
+    {
         streamlinkProcess->terminate();
         streamlinkProcess->kill();
     }
