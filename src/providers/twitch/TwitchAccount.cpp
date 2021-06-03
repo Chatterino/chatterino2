@@ -21,10 +21,6 @@
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
-namespace {
-    constexpr int USERSTATE_EMOTES_REFRESH_PERIOD = 10 * 60 * 1000;
-}  // namespace
-
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
     : Account(ProviderId::Twitch)
@@ -263,20 +259,20 @@ void TwitchAccount::loadEmotes()
         });
 }
 
-void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
+bool TwitchAccount::areRecentUserstateEmoteSetsEmpty()
 {
-    // do not attempt to load emotes too often
-    if (!this->userstateEmotesTimer_.isValid())
-    {
-        this->userstateEmotesTimer_.start();
-    }
-    else if (this->userstateEmotesTimer_.elapsed() <
-             USERSTATE_EMOTES_REFRESH_PERIOD)
-    {
-        return;
-    }
-    this->userstateEmotesTimer_.restart();
+    qDebug() << this->recentUserstateEmoteSets_.size();
+    return this->recentUserstateEmoteSets_.size() == 0;
+}
 
+void TwitchAccount::setRecentUserstateEmoteSets(QStringList emoteSets)
+{
+    this->recentUserstateEmoteSets_ = emoteSets;
+}
+
+void TwitchAccount::loadUserstateEmotes()
+{
+    qDebug() << this->recentUserstateEmoteSets_;
     auto emoteData = this->emotes_.access();
     auto userEmoteSets = emoteData->emoteSets;
 
@@ -286,8 +282,9 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
     {
         currentEmoteSetKeys.push_back(userEmoteSet->key);
     }
+
     // filter out emote sets from userstate message, which are not in fetched emote set list
-    for (const auto &emoteSetKey : emoteSetKeys)
+    for (const auto &emoteSetKey : this->recentUserstateEmoteSets_)
     {
         if (!currentEmoteSetKeys.contains(emoteSetKey))
         {

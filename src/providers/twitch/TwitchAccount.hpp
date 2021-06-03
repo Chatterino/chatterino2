@@ -111,7 +111,9 @@ public:
     SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 
     void loadEmotes();
-    void loadUserstateEmotes(QStringList emoteSetKeys);
+    bool areRecentUserstateEmoteSetsEmpty();
+    void setRecentUserstateEmoteSets(QStringList emoteSets);
+    void loadUserstateEmotes();
     SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
@@ -129,7 +131,7 @@ private:
     Atomic<QColor> color_;
 
     mutable std::mutex ignoresMutex_;
-    QElapsedTimer userstateEmotesTimer_;
+    QStringList recentUserstateEmoteSets_;
     UniqueAccess<std::set<TwitchUser>> ignores_;
     UniqueAccess<std::set<QString>> ignoresUserIds_;
 

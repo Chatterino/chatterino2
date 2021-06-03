@@ -934,6 +934,7 @@ void SplitHeader::reloadChannelEmotes()
 void SplitHeader::reloadSubscriberEmotes()
 {
     getApp()->accounts->twitch.getCurrent()->loadEmotes();
+    getApp()->accounts->twitch.getCurrent()->loadUserstateEmotes();
 }
 
 void SplitHeader::reconnect()

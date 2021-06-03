@@ -485,6 +485,21 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 {
     auto app = getApp();
+    auto currentUser = app->accounts->twitch.getCurrent();
+
+    // set received emote-sets, used in TwitchAccount::loadUserstateEmotes
+    bool loadEmotes = currentUser->areRecentUserstateEmoteSetsEmpty();
+
+    currentUser->setRecentUserstateEmoteSets(
+        message->tag("emote-sets").toString().split(","));
+
+    // we have to call loadUserstateEmotes if this is a first USERSTATE
+    // after currentUserChanged signal emitted
+    if (loadEmotes)
+    {
+        qDebug() << message->toData();
+        currentUser->loadUserstateEmotes();
+    }
 
     QString channelName;
     if (!trimChannelName(message->parameter(0), channelName))
@@ -519,10 +534,6 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
             tc->setMod(_mod == "1");
         }
     }
-
-    // handle emotes
-    app->accounts->twitch.getCurrent()->loadUserstateEmotes(
-        message->tag("emote-sets").toString().split(","));
 }
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
