@@ -4,6 +4,7 @@
 #include "widgets/BaseWidget.hpp"
 
 #include <QList>
+#include <QMenu>
 #include <QMessageBox>
 #include <QWidget>
 #include <pajlada/signals/signalholder.hpp>
@@ -49,6 +50,9 @@ public:
     bool getAllowUserTabManagement() const;
     void setAllowUserTabManagement(bool value);
 
+    bool getShowTabs() const;
+    void setShowTabs(bool value);
+
     bool getShowAddButton() const;
     void setShowAddButton(bool value);
 
@@ -59,6 +63,7 @@ public:
 protected:
     virtual void scaleChangedEvent(float scale_) override;
     virtual void resizeEvent(QResizeEvent *) override;
+    virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void paintEvent(QPaintEvent *) override;
 
     NotebookButton *getAddButton();
@@ -83,12 +88,14 @@ private:
     NotebookTab *getTabFromPage(QWidget *page);
 
     QList<Item> items_;
+    QMenu menu_;
     QWidget *selectedPage_ = nullptr;
 
     NotebookButton *addButton_;
     std::vector<NotebookButton *> customButtons_;
 
     bool allowUserTabManagement_ = false;
+    bool showTabs_ = true;
     bool showAddButton_ = false;
     int lineOffset_ = 20;
     NotebookTabDirection tabDirection_ = NotebookTabDirection::Horizontal;
