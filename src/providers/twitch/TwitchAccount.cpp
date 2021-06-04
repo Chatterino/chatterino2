@@ -316,7 +316,7 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
                              newEmoteSetKeysVector.begin() + last);
     }
 
-    for (const auto &batch : std::move(batches))
+    for (const auto &batch : batches)
     {
         QStringList emoteSetBatch;
 
