@@ -328,11 +328,30 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (!app->accounts->twitch.isLoggedIn())
     {
-        // XXX: It would be nice if we could add a link here somehow that opened
-        // the "account manager" dialog
-        this->addMessage(
-            makeSystemMessage("You need to log in to send messages. You can "
-                              "link your Twitch account in the settings."));
+        if (!message.isEmpty())
+        {
+            const auto linkColor = MessageColor(MessageColor::Link);
+            const auto accountsLink = Link(Link::OpenAccountsPage, QString());
+            const auto currentUser = getApp()->accounts->twitch.getCurrent();
+            const auto expirationText =
+                QString("You need to log in to send messages. You can link "
+                        "your Twitch account");
+            const auto loginPromptText = QString(" in the settings.");
+
+            auto builder = MessageBuilder();
+            builder.message().flags.set(MessageFlag::System);
+            builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+            builder.emplace<TimestampElement>();
+            builder.emplace<TextElement>(
+                expirationText, MessageElementFlag::Text, MessageColor::System);
+            builder
+                .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                                      linkColor)
+                ->setLink(accountsLink);
+
+            this->addMessage(builder.release());
+        }
         return;
     }
 
@@ -340,24 +359,18 @@ void TwitchChannel::sendMessage(const QString &message)
         << "[TwitchChannel" << this->getName() << "] Send message:" << message;
 
     // Do last message processing
-    QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
-
-    parsedMessage = parsedMessage.trimmed();
+    QString parsedMessage(
+        app->emotes->emojis.replaceShortCodes(message).trimmed());
 
     if (parsedMessage.isEmpty())
     {
         return;
     }
 
-    if (!this->hasHighRateLimit())
+    if (!this->hasHighRateLimit() && getSettings()->allowDuplicateMessages &&
+        parsedMessage == this->lastSentMessage_)
     {
-        if (getSettings()->allowDuplicateMessages)
-        {
-            if (parsedMessage == this->lastSentMessage_)
-            {
-                parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
-            }
-        }
+        parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
     }
 
     bool messageSent = false;
