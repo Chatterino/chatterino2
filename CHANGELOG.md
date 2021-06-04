@@ -11,6 +11,7 @@
 - Minor: Added `/popout` command. Usage: `/popout [channel]`. It opens browser chat for the provided channel. Can also be used without arguments to open current channels browser chat. (#2556, #2812)
 - Minor: Improved matching of game names when using `/setgame` command (#2636)
 - Minor: Switch to Twitch v2 emote API for animated emote support. (#2863)
+- Bugfix: Moderation buttons now show the correct time unit when using units other than seconds. (#1719, #2864)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
 
 ## 2.3.2
