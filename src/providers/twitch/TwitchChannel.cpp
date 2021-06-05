@@ -371,10 +371,15 @@ void TwitchChannel::sendMessage(const QString &message)
         return;
     }
 
-    if (!this->hasHighRateLimit() && getSettings()->allowDuplicateMessages &&
-        parsedMessage == this->lastSentMessage_)
+    if (!this->hasHighRateLimit())
     {
-        parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
+        if (getSettings()->allowDuplicateMessages)
+        {
+            if (parsedMessage == this->lastSentMessage_)
+            {
+                parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
+            }
+        }
     }
 
     bool messageSent = false;
