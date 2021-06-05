@@ -41,7 +41,10 @@ ExternalToolsPage::ExternalToolsPage()
             " " +
             formatRichNamedLink(
                 "https://github.com/streamlink/streamlink/releases/latest",
-                "Download"));
+                "Download") +
+            " " +
+            formatRichNamedLink("https://streamlink.github.io/cli.html#twitch",
+                                "Documentation"));
         links->setTextFormat(Qt::RichText);
         links->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                        Qt::LinksAccessibleByKeyboard |
