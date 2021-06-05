@@ -225,8 +225,6 @@ set(SOURCE_FILES main.cpp
         providers/twitch/api/Kraken.cpp
         providers/twitch/api/Kraken.hpp
 
-        util/AttachedPlayer.cpp
-        util/AttachedPlayer.h
         singletons/Badges.cpp
         singletons/Badges.hpp
         singletons/Emotes.cpp
@@ -261,6 +259,8 @@ set(SOURCE_FILES main.cpp
 
         util/AttachToConsole.cpp
         util/AttachToConsole.hpp
+        util/AttachedPlayer.cpp
+        util/AttachedPlayer.hpp
         util/Clipboard.cpp
         util/Clipboard.hpp
         util/DebugCount.cpp
