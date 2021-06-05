@@ -476,8 +476,8 @@ HEADERS += \
     src/singletons/TooltipPreviewImage.hpp \
     src/singletons/Updates.hpp \
     src/singletons/WindowManager.hpp \
-    src/util/AttachedPlayer.h \
     src/util/AttachToConsole.hpp \
+    src/util/AttachedPlayer.hpp \
     src/util/Clamp.hpp \
     src/util/Clipboard.hpp \
     src/util/CombinePath.hpp \

@@ -628,11 +628,10 @@ void Split::openInStreamlink()
     }
 }
 
-
 void Split::openInStreamlinkMPVIfOpen()
 {
     // Return if the stream is not open currently
-    if(!AttachedPlayer::getInstance().getIfStreamActive())
+    if (!AttachedPlayer::getInstance().getIfStreamActive())
     {
         return;
     }

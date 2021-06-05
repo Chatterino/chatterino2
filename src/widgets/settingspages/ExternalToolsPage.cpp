@@ -84,15 +84,14 @@ ExternalToolsPage::ExternalToolsPage()
         auto description = new QLabel(
             "The mpv player is an open-source cross-platform video player. "
             "This can be used alongside Streamlink to have an attached player. "
-            "Be sure to extract the mpv player and set the path correctly below!");
+            "Be sure to extract the mpv player and set the path correctly "
+            "below!");
         description->setWordWrap(true);
         description->setStyleSheet("color: #bbb");
 
         auto links = new QLabel(
-            formatRichNamedLink("https://mpv.io/", "Website") +
-            " " +
-            formatRichNamedLink(
-                "https://mpv.io/installation/", "Download"));
+            formatRichNamedLink("https://mpv.io/", "Website") + " " +
+            formatRichNamedLink("https://mpv.io/installation/", "Download"));
         links->setTextFormat(Qt::RichText);
         links->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                        Qt::LinksAccessibleByKeyboard |
@@ -102,16 +101,15 @@ ExternalToolsPage::ExternalToolsPage()
         groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
         groupLayout->setWidget(1, QFormLayout::SpanningRole, links);
 
-        auto followActiveCb =
-                this->createCheckBox("Follow active chat (will automatically switch "
-                                     "player stream based on what chat you are in)",
-                                     getSettings()->mpvFollowActive);
+        auto followActiveCb = this->createCheckBox(
+            "Follow active chat (will automatically switch "
+            "player stream based on what chat you are in)",
+            getSettings()->mpvFollowActive);
         groupLayout->setWidget(2, QFormLayout::SpanningRole, followActiveCb);
         auto customPath = this->createLineEdit(getSettings()->mpvPlayerPath);
         customPath->setPlaceholderText(
             "Path to folder where mpv executable can be found");
         groupLayout->addRow("mpv path:", customPath);
-
     }
     layout->addSpacing(16);
 

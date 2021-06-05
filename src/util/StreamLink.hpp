@@ -1,7 +1,7 @@
 #pragma once
 
+#include "AttachedPlayer.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "AttachedPlayer.h"
 
 #include <QString>
 #include <QStringList>
@@ -21,7 +21,8 @@ public:
 // the "Additional arguments" are fetched and added at the beginning of the
 // streamlink call
 void openStreamlink(const QString &channelURL, const QString &quality,
-                    QStringList extraArguments = QStringList(), bool streamMPV = false);
+                    QStringList extraArguments = QStringList(),
+                    bool streamMPV = false);
 
 // Start opening streamlink for the given channel, reading settings like quality
 // from settings and opening a quality dialog if the quality is "Choose"

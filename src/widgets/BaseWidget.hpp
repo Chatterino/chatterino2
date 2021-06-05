@@ -5,7 +5,6 @@
 #include <pajlada/signals/signal.hpp>
 #include <pajlada/signals/signalholder.hpp>
 
-
 namespace chatterino {
 
 class Theme;

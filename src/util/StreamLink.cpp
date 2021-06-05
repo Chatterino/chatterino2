@@ -193,8 +193,6 @@ void getStreamQualities(const QString &channelURL,
     p->start();
 }
 
-
-
 void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments, bool streamMPV)
 {
@@ -209,7 +207,7 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 
     // If we are not doing our MPV video view start as detached
     // Else we will kill our existing stream proccess and start a new stream
-    if(!streamMPV)
+    if (!streamMPV)
     {
         bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
         if (!res)
@@ -219,10 +217,11 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     }
     else
     {
-        QString command = "\""+getStreamlinkProgram()+"\" "+arguments.join(" ");
-        AttachedPlayer::getInstance().updateStreamLinkProcess(channelURL,command);
+        QString command =
+            "\"" + getStreamlinkProgram() + "\" " + arguments.join(" ");
+        AttachedPlayer::getInstance().updateStreamLinkProcess(channelURL,
+                                                              command);
     }
-
 }
 
 void openStreamlinkForChannel(const QString &channel, bool streamMPV)
@@ -244,12 +243,12 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
     QStringList args;
 
     // First check to see if player is valid path!
-    if(streamMPV && !checkExecutablePath(getMPVProgram()))
+    if (streamMPV && !checkExecutablePath(getMPVProgram()))
     {
         showMPVNotFoundError();
         return;
     }
-    if(!checkExecutablePath(getStreamlinkProgram()))
+    if (!checkExecutablePath(getStreamlinkProgram()))
     {
         showStreamlinkNotFoundError();
         return;
@@ -258,9 +257,9 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
     // Append MVP player settings if we have a container to play in
     // https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst
     // https://mpv.io/manual/master/#options-wid
-    if(streamMPV)
+    if (streamMPV)
     {
-        args << "--player \""+getMPVProgram()+" --wid=WID\"";
+        args << "--player \"" + getMPVProgram() + " --wid=WID\"";
     }
 
     // Quality converted from Chatterino format to Streamlink format

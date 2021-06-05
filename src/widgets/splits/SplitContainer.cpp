@@ -299,10 +299,10 @@ void SplitContainer::setSelected(Split *split)
     }
 
     // switch the mpv window if it is being shown
-    if(getSettings()->mpvFollowActive) {
+    if (getSettings()->mpvFollowActive)
+    {
         split->openInStreamlinkMPVIfOpen();
     }
-
 }
 
 void SplitContainer::setPreferedTargetRecursive(Node *node)

@@ -4,15 +4,14 @@
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
 #include "pajlada/signals/signalholder.hpp"
+#include "util/AttachedPlayer.hpp"
 #include "widgets/BaseWidget.hpp"
-#include "util/AttachedPlayer.h"
 
 #include <QFont>
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
 #include <QWindow>
-
 
 namespace chatterino {
 
