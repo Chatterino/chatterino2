@@ -348,7 +348,8 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
                         auto code = EmoteName{ivrEmote.code};
                         auto cleanCode =
                             EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
-                        newUserEmoteSet->emotes.emplace_back({id, cleanCode});
+                        newUserEmoteSet->emotes.push_back(
+                            TwitchEmote{id, cleanCode});
 
                         emoteData->allEmoteNames.push_back(cleanCode);
 
