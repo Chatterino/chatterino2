@@ -306,7 +306,7 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
     // splitting newEmoteSetKeys to batches of 100, because Ivr API endpoint accepts a maximum of 100 emotesets at once
     constexpr int batchSize = 100;
 
-    std::vector<QStringList> batches;
+    std::vector<std::vector<QString>> batches;
 
     auto newEmoteSetKeysVector = newEmoteSetKeys.toVector();
     batches.reserve((newEmoteSetKeysVector.size() + 1) / batchSize);
@@ -320,8 +320,14 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
 
     for (const auto &batch : batches)
     {
+        QStringList batchList;
+        for (const auto &el : batch)
+        {
+            batchList.push_back(el);
+        }
+
         getIvr()->getBulkEmoteSets(
-            batch.join(","),
+            batchList.join(","),
             [this](QJsonArray emoteSetArray) {
                 auto emoteData = this->emotes_.access();
                 for (auto emoteSet : emoteSetArray)
