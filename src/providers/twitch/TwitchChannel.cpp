@@ -339,7 +339,7 @@ void TwitchChannel::sendMessage(const QString &message)
         const auto expirationText =
             QString("You need to log in to send messages. You can link your "
                     "Twitch account");
-        const auto loginPromptText = QString(" in the settings.");
+        const auto loginPromptText = QString("in the settings.");
 
         auto builder = MessageBuilder();
         builder.message().flags.set(MessageFlag::System);
