@@ -313,7 +313,7 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
     for (int i = 0; i < newEmoteSetKeys.size(); i += batchSize)
     {
         QStringList batch;
-        for (int j = batchSize * i; i < batchSize; i++)
+        for (int j = batchSize * i; j < batchSize; j++)
         {
             batch.push_back(newEmoteSetKeys.at(j));
         }
