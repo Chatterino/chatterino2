@@ -362,7 +362,7 @@ void TwitchChannel::sendMessage(const QString &message)
         << "[TwitchChannel" << this->getName() << "] Send message:" << message;
 
     // Do last message processing
-    QString parsedMessage(app->emotes->emojis.replaceShortCodes(message));
+    QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
     parsedMessage = parsedMessage.trimmed();
 
