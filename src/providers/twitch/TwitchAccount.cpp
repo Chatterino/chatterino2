@@ -308,7 +308,7 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
 
     std::vector<QStringList> batches;
 
-    QStringList newEmoteSetKeysVector = newEmoteSetKeys.toVector().toList();
+    auto newEmoteSetKeysVector = newEmoteSetKeys.toVector();
     batches.reserve((newEmoteSetKeysVector.size() + 1) / batchSize);
 
     for (int i = 0; i < newEmoteSetKeysVector.size(); i += batchSize)
