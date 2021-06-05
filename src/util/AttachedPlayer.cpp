@@ -33,7 +33,7 @@ void AttachedPlayer::updateStreamLinkProcess(const QString &channel, const QStri
         float scale = 0.90;
         int height = (int)(scale*(float)mainWindow->size().height());
         int width = (int)(16.0/9.0*scale*(float)mainWindow->size().height());
-        mpvContainer->setFixedSize(width,height);
+        mpvContainer->resize(width,height);
         mpvContainer->show();
     }
 
