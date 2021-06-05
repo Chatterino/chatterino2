@@ -328,30 +328,33 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (!app->accounts->twitch.isLoggedIn())
     {
-        if (!message.isEmpty())
+        if (message.isEmpty())
         {
-            const auto linkColor = MessageColor(MessageColor::Link);
-            const auto accountsLink = Link(Link::OpenAccountsPage, QString());
-            const auto currentUser = getApp()->accounts->twitch.getCurrent();
-            const auto expirationText =
-                QString("You need to log in to send messages. You can link "
-                        "your Twitch account");
-            const auto loginPromptText = QString(" in the settings.");
-
-            auto builder = MessageBuilder();
-            builder.message().flags.set(MessageFlag::System);
-            builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
-
-            builder.emplace<TimestampElement>();
-            builder.emplace<TextElement>(
-                expirationText, MessageElementFlag::Text, MessageColor::System);
-            builder
-                .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
-                                      linkColor)
-                ->setLink(accountsLink);
-
-            this->addMessage(builder.release());
+            return;
         }
+
+        const auto linkColor = MessageColor(MessageColor::Link);
+        const auto accountsLink = Link(Link::OpenAccountsPage, QString());
+        const auto currentUser = getApp()->accounts->twitch.getCurrent();
+        const auto expirationText =
+            QString("You need to log in to send messages. You can link your "
+                    "Twitch account");
+        const auto loginPromptText = QString(" in the settings.");
+
+        auto builder = MessageBuilder();
+        builder.message().flags.set(MessageFlag::System);
+        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+        builder.emplace<TimestampElement>();
+        builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
+                                     MessageColor::System);
+        builder
+            .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                                  linkColor)
+            ->setLink(accountsLink);
+
+        this->addMessage(builder.release());
+
         return;
     }
 
@@ -359,8 +362,9 @@ void TwitchChannel::sendMessage(const QString &message)
         << "[TwitchChannel" << this->getName() << "] Send message:" << message;
 
     // Do last message processing
-    QString parsedMessage(
-        app->emotes->emojis.replaceShortCodes(message).trimmed());
+    QString parsedMessage(app->emotes->emojis.replaceShortCodes(message));
+
+    parsedMessage = parsedMessage.trimmed();
 
     if (parsedMessage.isEmpty())
     {
