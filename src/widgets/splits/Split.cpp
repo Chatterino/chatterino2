@@ -722,7 +722,7 @@ void Split::showViewerList()
         auto query = searchBar->text();
         if (!query.isEmpty())
         {
-            auto results = chattersList->findItems(query, Qt::MatchStartsWith);
+            auto results = chattersList->findItems(query, Qt::MatchContains);
             chattersList->hide();
             resultList->clear();
             for (auto &item : results)

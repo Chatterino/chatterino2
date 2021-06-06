@@ -344,11 +344,33 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (!app->accounts->twitch.isLoggedIn())
     {
-        // XXX: It would be nice if we could add a link here somehow that opened
-        // the "account manager" dialog
-        this->addMessage(
-            makeSystemMessage("You need to log in to send messages. You can "
-                              "link your Twitch account in the settings."));
+        if (message.isEmpty())
+        {
+            return;
+        }
+
+        const auto linkColor = MessageColor(MessageColor::Link);
+        const auto accountsLink = Link(Link::OpenAccountsPage, QString());
+        const auto currentUser = getApp()->accounts->twitch.getCurrent();
+        const auto expirationText =
+            QString("You need to log in to send messages. You can link your "
+                    "Twitch account");
+        const auto loginPromptText = QString("in the settings.");
+
+        auto builder = MessageBuilder();
+        builder.message().flags.set(MessageFlag::System);
+        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+        builder.emplace<TimestampElement>();
+        builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
+                                     MessageColor::System);
+        builder
+            .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                                  linkColor)
+            ->setLink(accountsLink);
+
+        this->addMessage(builder.release());
+
         return;
     }
 
