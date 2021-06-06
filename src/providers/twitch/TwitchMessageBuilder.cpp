@@ -1372,7 +1372,7 @@ void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
                                MessageElementFlag::Username,
                                MessageColor::System, FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, originalMessage->loginName});
-    builder->emplace<TextElement>("was deleted: ", MessageElementFlag::Text,
+    builder->emplace<TextElement>("was deleted:", MessageElementFlag::Text,
                                   MessageColor::System);
     if (originalMessage->messageText.length() > 50)
     {
