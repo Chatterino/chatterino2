@@ -401,6 +401,10 @@ void Window::addShortcuts()
             new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
         quickSwitcher->show();
     });
+
+    createWindowShortcut(this, "CTRL+U", [this] {
+        this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
+    });
 }
 
 void Window::addMenuBar()

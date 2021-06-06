@@ -29,11 +29,16 @@ namespace chatterino {
 
 Notebook::Notebook(QWidget *parent)
     : BaseWidget(parent)
+    , menu_(this)
     , addButton_(new NotebookButton(this))
 {
     this->addButton_->setIcon(NotebookButton::Icon::Plus);
 
     this->addButton_->setHidden(true);
+
+    this->menu_.addAction("Toggle visibility of tabs", [this]() {
+        this->setShowTabs(!this->getShowTabs());
+    });
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
@@ -325,6 +330,48 @@ void Notebook::setAllowUserTabManagement(bool value)
     this->allowUserTabManagement_ = value;
 }
 
+bool Notebook::getShowTabs() const
+{
+    return this->showTabs_;
+}
+
+void Notebook::setShowTabs(bool value)
+{
+    this->showTabs_ = value;
+
+    this->performLayout();
+    for (auto &item : this->items_)
+    {
+        item.tab->setHidden(!value);
+    }
+
+    this->setShowAddButton(value);
+
+    // show a popup upon hiding tabs
+    if (!value && getSettings()->informOnTabVisibilityToggle.getValue())
+    {
+        QMessageBox msgBox;
+        msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
+        msgBox.setText("You've just hidden your tabs");
+        msgBox.setInformativeText(
+            "You can toggle tabs by using the keyboard shortcut (Ctrl + U by "
+            "default) or right-clicking on the tab area and selecting \"Toggle "
+            "visibility of tabs\".");
+        msgBox.addButton(QMessageBox::Ok);
+        auto *dsaButton =
+            msgBox.addButton("Don't show again", QMessageBox::YesRole);
+
+        msgBox.setDefaultButton(QMessageBox::Ok);
+
+        msgBox.exec();
+
+        if (msgBox.clickedButton() == dsaButton)
+        {
+            getSettings()->informOnTabVisibilityToggle.setValue(false);
+        }
+    }
+}
+
 bool Notebook::getShowAddButton() const
 {
     return this->showAddButton_;
@@ -359,12 +406,14 @@ void Notebook::performLayout(bool animated)
     const auto left = int(2 * this->scale());
     const auto scale = this->scale();
     const auto tabHeight = int(NOTEBOOK_TAB_HEIGHT * scale);
+    const auto minimumTabAreaSpace = int(tabHeight * 0.5);
     const auto addButtonWidth = this->showAddButton_ ? tabHeight : 0;
 
     if (this->tabDirection_ == NotebookTabDirection::Horizontal)
     {
         auto x = left;
         auto y = 0;
+        auto buttonHeight = 0;
 
         // set size of custom buttons (settings, user, ...)
         for (auto *btn : this->customButtons_)
@@ -377,77 +426,86 @@ void Notebook::performLayout(bool animated)
             btn->setFixedSize(tabHeight, tabHeight - 1);
             btn->move(x, 0);
             x += tabHeight;
+
+            buttonHeight = tabHeight;
         }
 
-        // layout tabs
-        /// Notebook tabs need to know if they are in the last row.
-        auto firstInBottomRow =
-            this->items_.size() ? &this->items_.front() : nullptr;
-
-        for (auto &item : this->items_)
+        if (this->showTabs_)
         {
-            /// Break line if element doesn't fit.
-            auto isFirst = &item == &this->items_.front();
-            auto isLast = &item == &this->items_.back();
+            // layout tabs
+            /// Notebook tabs need to know if they are in the last row.
+            auto firstInBottomRow =
+                this->items_.size() ? &this->items_.front() : nullptr;
 
-            auto fitsInLine = ((isLast ? addButtonWidth : 0) + x +
-                               item.tab->width()) <= width();
-
-            if (!isFirst && !fitsInLine)
+            for (auto &item : this->items_)
             {
-                y += item.tab->height();
-                x = left;
-                firstInBottomRow = &item;
+                /// Break line if element doesn't fit.
+                auto isFirst = &item == &this->items_.front();
+                auto isLast = &item == &this->items_.back();
+
+                auto fitsInLine = ((isLast ? addButtonWidth : 0) + x +
+                                   item.tab->width()) <= width();
+
+                if (!isFirst && !fitsInLine)
+                {
+                    y += item.tab->height();
+                    x = left;
+                    firstInBottomRow = &item;
+                }
+
+                /// Layout tab
+                item.tab->growWidth(0);
+                item.tab->moveAnimated(QPoint(x, y), animated);
+                x += item.tab->width() + std::max<int>(1, int(scale * 1));
             }
 
-            /// Layout tab
-            item.tab->growWidth(0);
-            item.tab->moveAnimated(QPoint(x, y), animated);
-            x += item.tab->width() + std::max<int>(1, int(scale * 1));
-        }
-
-        /// Update which tabs are in the last row
-        auto inLastRow = false;
-        for (const auto &item : this->items_)
-        {
-            if (&item == firstInBottomRow)
+            /// Update which tabs are in the last row
+            auto inLastRow = false;
+            for (const auto &item : this->items_)
             {
-                inLastRow = true;
+                if (&item == firstInBottomRow)
+                {
+                    inLastRow = true;
+                }
+                item.tab->setInLastRow(inLastRow);
             }
-            item.tab->setInLastRow(inLastRow);
+
+            // move misc buttons
+            if (this->showAddButton_)
+            {
+                this->addButton_->move(x, y);
+            }
+
+            y += tabHeight;
+
+            // raise elements
+            for (auto &i : this->items_)
+            {
+                i.tab->raise();
+            }
+
+            if (this->showAddButton_)
+            {
+                this->addButton_->raise();
+            }
         }
 
-        // move misc buttons
-        if (this->showAddButton_)
-        {
-            this->addButton_->move(x, y);
-        }
+        y = std::max({y, buttonHeight, minimumTabAreaSpace});
 
-        if (this->lineOffset_ != y + tabHeight)
+        if (this->lineOffset_ != y)
         {
-            this->lineOffset_ = y + tabHeight;
+            this->lineOffset_ = y;
             this->update();
         }
 
         /// Increment for the line at the bottom
         y += int(2 * scale);
 
-        // raise elements
-        for (auto &i : this->items_)
-        {
-            i.tab->raise();
-        }
-
-        if (this->showAddButton_)
-        {
-            this->addButton_->raise();
-        }
-
         // set page bounds
         if (this->selectedPage_ != nullptr)
         {
-            this->selectedPage_->move(0, y + tabHeight);
-            this->selectedPage_->resize(width(), height() - y - tabHeight);
+            this->selectedPage_->move(0, y);
+            this->selectedPage_->resize(width(), height() - y);
             this->selectedPage_->raise();
         }
     }
@@ -477,54 +535,62 @@ void Notebook::performLayout(bool animated)
         int top = y;
         x = left;
 
+        // zneix: if we were to remove buttons when tabs are hidden
+        // stuff below to "set page bounds" part should be in conditional statement
         int verticalRowSpace = (this->height() - top) / tabHeight;
         if (verticalRowSpace == 0)  // window hasn't properly rendered yet
+        {
             return;
+        }
         int count = this->items_.size() + (this->showAddButton_ ? 1 : 0);
         int columnCount = ceil((float)count / verticalRowSpace);
 
-        for (int col = 0; col < columnCount; col++)
+        // only add width of all the tabs if they are not hidden
+        if (this->showTabs_)
         {
-            auto largestWidth = 0;
-            int colStart = col * verticalRowSpace;
-            int colEnd =
-                std::min((col + 1) * verticalRowSpace, this->items_.size());
-
-            for (int i = colStart; i < colEnd; i++)
+            for (int col = 0; col < columnCount; col++)
             {
-                largestWidth = std::max(
-                    this->items_.at(i).tab->normalTabWidth(), largestWidth);
+                auto largestWidth = 0;
+                int colStart = col * verticalRowSpace;
+                int colEnd =
+                    std::min((col + 1) * verticalRowSpace, this->items_.size());
+
+                for (int i = colStart; i < colEnd; i++)
+                {
+                    largestWidth = std::max(
+                        this->items_.at(i).tab->normalTabWidth(), largestWidth);
+                }
+
+                if (col == columnCount - 1 && this->showAddButton_ &&
+                    largestWidth == 0)
+                {
+                    largestWidth = this->addButton_->width();
+                }
+
+                if (largestWidth + x < buttonWidth && col == columnCount - 1)
+                    largestWidth = buttonWidth - x;
+
+                for (int i = colStart; i < colEnd; i++)
+                {
+                    auto item = this->items_.at(i);
+
+                    /// Layout tab
+                    item.tab->growWidth(largestWidth);
+                    item.tab->moveAnimated(QPoint(x, y), animated);
+                    y += tabHeight;
+                }
+
+                if (col == columnCount - 1 && this->showAddButton_)
+                {
+                    this->addButton_->move(x, y);
+                }
+
+                x += largestWidth + lineThickness;
+                y = top;
             }
-
-            if (col == columnCount - 1 && this->showAddButton_ &&
-                largestWidth == 0)
-            {
-                largestWidth = this->addButton_->width();
-            }
-
-            if (largestWidth + x < buttonWidth && col == columnCount - 1)
-                largestWidth = buttonWidth - x;
-
-            for (int i = colStart; i < colEnd; i++)
-            {
-                auto item = this->items_.at(i);
-
-                /// Layout tab
-                item.tab->growWidth(largestWidth);
-                item.tab->moveAnimated(QPoint(x, y), animated);
-                y += tabHeight;
-            }
-
-            if (col == columnCount - 1 && this->showAddButton_)
-            {
-                this->addButton_->move(x, y);
-            }
-
-            x += largestWidth + lineThickness;
-            y = top;
         }
 
-        x = std::max(x, buttonWidth);
+        x = std::max({x, buttonWidth, minimumTabAreaSpace});
 
         if (this->lineOffset_ != x - lineThickness)
         {
@@ -550,6 +616,20 @@ void Notebook::performLayout(bool animated)
             this->selectedPage_->resize(width() - x, height());
             this->selectedPage_->raise();
         }
+    }
+}
+
+void Notebook::mousePressEvent(QMouseEvent *event)
+{
+    this->update();
+
+    switch (event->button())
+    {
+        case Qt::RightButton: {
+            this->menu_.popup(event->globalPos() + QPoint(0, 8));
+        }
+        break;
+        default:;
     }
 }
 
@@ -713,7 +793,7 @@ SplitContainer *SplitNotebook::addPage(bool select)
     auto tab = Notebook::addPage(container, QString(), select);
     container->setTab(tab);
     tab->setParent(this);
-    tab->show();
+    tab->setVisible(this->getShowTabs());
     return container;
 }
 
