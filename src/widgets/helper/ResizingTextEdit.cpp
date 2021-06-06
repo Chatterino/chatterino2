@@ -280,6 +280,7 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
             if (mime.name().startsWith("image"))
             {
                 hasUploadable = true;
+                break;
             }
         }
 
