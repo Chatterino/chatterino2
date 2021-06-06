@@ -13,6 +13,7 @@
 - Minor: Added a link to accounts page in settings to "You need to be logged in to send messages" message. (#2862)
 - Minor: Switch to Twitch v2 emote API for animated emote support. (#2863)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
+- Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850)
 
 ## 2.3.2
 
