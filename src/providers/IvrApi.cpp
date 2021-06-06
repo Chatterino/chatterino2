@@ -37,8 +37,6 @@ void IvrApi::getBulkEmoteSets(QString emoteSetList,
                               ResultCallback<QJsonArray> successCallback,
                               IvrFailureCallback failureCallback)
 {
-    assert(!emoteSetList.isEmpty());
-
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("set_id", emoteSetList);
 
