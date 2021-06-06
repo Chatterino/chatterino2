@@ -464,12 +464,57 @@ void SplitInput::installKeyPressedEvent()
 
 void SplitInput::onTextChanged()
 {
-    this->updateCompletionMenus();
+    this->updateColonMenu();
+    this->updateUsernameMenu();
 }
 
 void SplitInput::onCursorPositionChanged()
 {
-    this->updateCompletionMenus();
+    this->updateColonMenu();
+    this->updateUsernameMenu();
+}
+
+void SplitInput::updateColonMenu()
+{
+    auto channel = this->split_->getChannel().get();
+    if (!getSettings()->emoteCompletionWithColon ||
+        (!dynamic_cast<TwitchChannel *>(channel) &&
+         !(channel->getType() == Channel::Type::TwitchWhispers)))
+    {
+        this->hideColonMenu();
+        return;
+    }
+
+    // check if in :
+    auto &edit = *this->ui_.textEdit;
+
+    auto text = edit.toPlainText();
+    auto position = edit.textCursor().position() - 1;
+
+    if (text.length() == 0)
+    {
+        this->hideColonMenu();
+        return;
+    }
+
+    for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
+    {
+        if (text[i] == ' ')
+        {
+            this->hideColonMenu();
+            return;
+        }
+        else if (text[i] == ':')
+        {
+            if (i == 0 || text[i - 1].isSpace())
+                this->showColonMenu(text.mid(i, position - i + 1).mid(1));
+            else
+                this->hideColonMenu();
+            return;
+        }
+    }
+
+    this->hideColonMenu();
 }
 
 void SplitInput::showColonMenu(const QString &text)
@@ -505,7 +550,7 @@ void SplitInput::hideColonMenu()
         popup->hide();
 }
 
-void SplitInput::updateCompletionMenus()
+void SplitInput::updateUsernameMenu()
 {
     auto channel = this->split_->getChannel().get();
     if (!getSettings()->showUsernameCompletionMenu ||
@@ -514,15 +559,8 @@ void SplitInput::updateCompletionMenus()
         this->hideUsernameMenu();
         return;
     }
-    if (!getSettings()->emoteCompletionWithColon ||
-        (!dynamic_cast<TwitchChannel *>(channel) &&
-         !(channel->getType() == Channel::Type::TwitchWhispers)))
-    {
-        this->hideColonMenu();
-        return;
-    }
 
-    // check if in competion prefix
+    // check if in @ completion prefix
     auto &edit = *this->ui_.textEdit;
 
     auto text = edit.toPlainText();
@@ -530,7 +568,6 @@ void SplitInput::updateCompletionMenus()
 
     if (text.length() == 0)
     {
-        this->hideColonMenu();
         this->hideUsernameMenu();
         return;
     }
@@ -539,16 +576,7 @@ void SplitInput::updateCompletionMenus()
     {
         if (text[i] == ' ')
         {
-            this->hideColonMenu();
             this->hideUsernameMenu();
-            return;
-        }
-        else if (text[i] == ':')
-        {
-            if (i == 0 || text[i - 1].isSpace())
-                this->showColonMenu(text.mid(i, position - i + 1).mid(1));
-            else
-                this->hideColonMenu();
             return;
         }
         else if (text[i] == '@')
@@ -561,7 +589,6 @@ void SplitInput::updateCompletionMenus()
         }
     }
 
-    this->hideColonMenu();
     this->hideUsernameMenu();
 }
 

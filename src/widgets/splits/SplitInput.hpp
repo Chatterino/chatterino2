@@ -49,9 +49,10 @@ private:
     void onCursorPositionChanged();
     void onTextChanged();
     void updateEmoteButton();
+    void updateColonMenu();
     void showColonMenu(const QString &text);
     void hideColonMenu();
-    void updateCompletionMenus();
+    void updateUsernameMenu();
     void showUsernameMenu(const QString &text);
     void hideUsernameMenu();
     void insertCompletionText(const QString &text);
