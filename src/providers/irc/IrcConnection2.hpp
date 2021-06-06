@@ -13,8 +13,9 @@ class IrcConnection : public Communi::IrcConnection
 public:
     IrcConnection(QObject *parent = nullptr);
 
-    // Signal to notify that we're no longer connected; signal receiver should
-    // trigger a reconnect, if desired
+    // Signal to notify that we're unexpectedly no longer connected, either due
+    // to a connection error or if we think we've timed out. It's up to the
+    // receiver to trigger a reconnect, if desired
     pajlada::Signals::Signal<bool> connectionLost;
 
     // Request a reconnect with a minimum interval between attempts.

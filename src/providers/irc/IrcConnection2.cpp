@@ -28,11 +28,14 @@ IrcConnection::IrcConnection(QObject *parent)
         [this](QAbstractSocket::SocketState state) {
             if (state == QAbstractSocket::UnconnectedState)
             {
+                this->pingTimer_.stop();
+
+                // The socket will enter unconnected state both in case of
+                // socket error (including failures to connect) and regular
+                // disconnects. We signal that the connection was lost if this
+                // was not the result of us calling `close`.
                 if (!this->expectConnectionLoss_.load())
                 {
-                    // Ensure we always notify our parent that we should
-                    // reconnect; will also be called if we're reconnecting
-                    // manually
                     this->connectionLost.invoke(false);
                 }
             }
@@ -90,8 +93,6 @@ IrcConnection::IrcConnection(QObject *parent)
             {
                 // The remote server did not send a PONG fast enough; close the
                 // connection
-                this->expectConnectionLoss_ = true;
-                this->pingTimer_.stop();
                 this->close();
                 this->connectionLost.invoke(true);
             }
@@ -104,8 +105,6 @@ IrcConnection::IrcConnection(QObject *parent)
     });
 
     QObject::connect(this, &Communi::IrcConnection::connected, this, [this] {
-        this->waitingForPong_ = false;
-        this->recentlyReceivedMessage_ = false;
         this->pingTimer_.start();
     });
 
@@ -129,6 +128,8 @@ void IrcConnection::open()
     // Accurately track the time a connection was opened
     this->lastConnected_ = std::chrono::steady_clock::now();
     this->expectConnectionLoss_ = false;
+    this->waitingForPong_ = false;
+    this->recentlyReceivedMessage_ = false;
     Communi::IrcConnection::open();
 }
 
