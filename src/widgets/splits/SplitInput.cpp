@@ -508,7 +508,8 @@ void SplitInput::hideColonMenu()
 void SplitInput::updateCompletionMenus()
 {
     auto channel = this->split_->getChannel().get();
-    if (!dynamic_cast<TwitchChannel *>(channel))
+    if (!getSettings()->showUsernameCompletionMenu ||
+        !dynamic_cast<TwitchChannel *>(channel))
     {
         this->hideUsernameMenu();
         return;
