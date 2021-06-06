@@ -597,6 +597,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
+    layout.addCheckbox("Show deletions of single messages",
+                       s.hideDeletionActions, true);
     layout.addCheckbox("Colorize users without color set (gray names)",
                        s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
