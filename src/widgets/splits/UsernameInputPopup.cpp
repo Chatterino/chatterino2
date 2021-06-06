@@ -40,7 +40,6 @@ void UsernameInputPopup::initLayout()
 
 void UsernameInputPopup::updateUsers(const QString &text, ChannelPtr channel)
 {
-    std::vector<QString> usernames;
     auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
     if (twitchChannel)
     {
