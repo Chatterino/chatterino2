@@ -15,6 +15,7 @@
 - Minor: Switch to Twitch v2 emote API for animated emote support. (#2863)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
 - Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850)
+- Bugfix: Fixed bit emotes not loading in some rare cases. (#2856)
 
 ## 2.3.2
 

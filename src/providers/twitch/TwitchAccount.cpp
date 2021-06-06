@@ -281,11 +281,13 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
     auto userEmoteSets = emoteData->emoteSets;
 
     QStringList newEmoteSetKeys, currentEmoteSetKeys;
+
     // get list of already fetched emote sets
     for (const auto &userEmoteSet : userEmoteSets)
     {
         currentEmoteSetKeys.push_back(userEmoteSet->key);
     }
+
     // filter out emote sets from userstate message, which are not in fetched emote set list
     for (const auto &emoteSetKey : emoteSetKeys)
     {
@@ -301,54 +303,75 @@ void TwitchAccount::loadUserstateEmotes(QStringList emoteSetKeys)
         return;
     }
 
-    getIvr()->getBulkEmoteSets(
-        newEmoteSetKeys.join(","),
-        [this](QJsonArray emoteSetArray) {
-            auto emoteData = this->emotes_.access();
-            for (auto emoteSet : emoteSetArray)
-            {
-                auto newUserEmoteSet = std::make_shared<EmoteSet>();
+    // splitting newEmoteSetKeys to batches of 100, because Ivr API endpoint accepts a maximum of 100 emotesets at once
+    constexpr int batchSize = 100;
 
-                IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
+    std::vector<QStringList> batches;
 
-                newUserEmoteSet->key = ivrEmoteSet.setId;
+    batches.reserve((newEmoteSetKeys.size() + 1) / batchSize);
 
-                auto name = ivrEmoteSet.login;
-                name.detach();
-                name[0] = name[0].toUpper();
+    for (int i = 0; i < newEmoteSetKeys.size(); i += batchSize)
+    {
+        QStringList batch;
+        for (int j = batchSize * i; j < batchSize; j++)
+        {
+            batch.push_back(newEmoteSetKeys.at(j));
+        }
+        batches.emplace_back(batch);
+    }
 
-                newUserEmoteSet->text = name;
-                newUserEmoteSet->type = QString();
-                newUserEmoteSet->channelName = ivrEmoteSet.login;
-
-                for (const auto &emote : ivrEmoteSet.emotes)
+    for (const auto &batch : batches)
+    {
+        getIvr()->getBulkEmoteSets(
+            batch.join(","),
+            [this](QJsonArray emoteSetArray) {
+                auto emoteData = this->emotes_.access();
+                for (auto emoteSet : emoteSetArray)
                 {
-                    IvrEmote ivrEmote(emote.toObject());
+                    auto newUserEmoteSet = std::make_shared<EmoteSet>();
 
-                    auto id = EmoteId{ivrEmote.id};
-                    auto code = EmoteName{ivrEmote.code};
-                    auto cleanCode =
-                        EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
-                    newUserEmoteSet->emotes.emplace_back(
-                        TwitchEmote{id, cleanCode});
+                    IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
 
-                    emoteData->allEmoteNames.push_back(cleanCode);
+                    newUserEmoteSet->key = ivrEmoteSet.setId;
 
-                    auto twitchEmote =
-                        getApp()->emotes->twitch.getOrCreateEmote(id, code);
-                    emoteData->emotes.emplace(code, twitchEmote);
+                    auto name = ivrEmoteSet.login;
+                    name.detach();
+                    name[0] = name[0].toUpper();
+
+                    newUserEmoteSet->text = name;
+                    newUserEmoteSet->type = QString();
+                    newUserEmoteSet->channelName = ivrEmoteSet.login;
+
+                    for (const auto &emote : ivrEmoteSet.emotes)
+                    {
+                        IvrEmote ivrEmote(emote.toObject());
+
+                        auto id = EmoteId{ivrEmote.id};
+                        auto code = EmoteName{ivrEmote.code};
+                        auto cleanCode =
+                            EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
+                        newUserEmoteSet->emotes.push_back(
+                            TwitchEmote{id, cleanCode});
+
+                        emoteData->allEmoteNames.push_back(cleanCode);
+
+                        auto twitchEmote =
+                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
+                        emoteData->emotes.emplace(code, twitchEmote);
+                    }
+                    std::sort(newUserEmoteSet->emotes.begin(),
+                              newUserEmoteSet->emotes.end(),
+                              [](const TwitchEmote &l, const TwitchEmote &r) {
+                                  return l.name.string < r.name.string;
+                              });
+                    emoteData->emoteSets.emplace_back(newUserEmoteSet);
                 }
-                std::sort(newUserEmoteSet->emotes.begin(),
-                          newUserEmoteSet->emotes.end(),
-                          [](const TwitchEmote &l, const TwitchEmote &r) {
-                              return l.name.string < r.name.string;
-                          });
-                emoteData->emoteSets.emplace_back(newUserEmoteSet);
-            }
-        },
-        [] {
-            // fetching emotes failed, ivr API might be down
-        });
+            },
+            [] {
+                // fetching emotes failed, ivr API might be down
+            });
+    };
+    return;
 }
 
 SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
