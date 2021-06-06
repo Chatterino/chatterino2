@@ -325,6 +325,8 @@ SOURCES += \
     src/widgets/splits/SplitHeader.cpp \
     src/widgets/splits/SplitInput.cpp \
     src/widgets/splits/SplitOverlay.cpp \
+    src/widgets/splits/UsernameInputItem.cpp \
+    src/widgets/splits/UsernameInputPopup.cpp \
     src/widgets/StreamView.cpp \
     src/widgets/TooltipWidget.cpp \
     src/widgets/Window.cpp \
@@ -586,6 +588,8 @@ HEADERS += \
     src/widgets/splits/SplitHeader.hpp \
     src/widgets/splits/SplitInput.hpp \
     src/widgets/splits/SplitOverlay.hpp \
+    src/widgets/splits/UsernameInputItem.hpp \
+    src/widgets/splits/UsernameInputPopup.hpp \
     src/widgets/StreamView.hpp \
     src/widgets/TooltipWidget.hpp \
     src/widgets/Window.hpp \

@@ -19,6 +19,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 #include "widgets/splits/SplitInput.hpp"
+#include "widgets/splits/UsernameInputPopup.hpp"
 
 #include <QCompleter>
 #include <QPainter>
@@ -46,6 +47,7 @@ SplitInput::SplitInput(Split *_chatWidget)
     this->installKeyPressedEvent();
     this->ui_.textEdit->focusLost.connect([this] {
         this->hideColonMenu();
+        this->hideUsernameMenu();
     });
     this->scaleChangedEvent(this->scale());
 }
@@ -203,6 +205,17 @@ void SplitInput::installKeyPressedEvent()
 
     this->ui_.textEdit->keyPressed.connect([this, app](QKeyEvent *event) {
         if (auto popup = this->emoteInputPopup_.get())
+        {
+            if (popup->isVisible())
+            {
+                if (popup->eventFilter(nullptr, event))
+                {
+                    event->accept();
+                    return;
+                }
+            }
+        }
+        if (auto popup = this->usernameInputPopup_.get())
         {
             if (popup->isVisible())
             {
@@ -451,55 +464,12 @@ void SplitInput::installKeyPressedEvent()
 
 void SplitInput::onTextChanged()
 {
-    this->updateColonMenu();
+    this->updateCompletionMenus();
 }
 
 void SplitInput::onCursorPositionChanged()
 {
-    this->updateColonMenu();
-}
-
-void SplitInput::updateColonMenu()
-{
-    auto channel = this->split_->getChannel().get();
-    if (!getSettings()->emoteCompletionWithColon ||
-        (!dynamic_cast<TwitchChannel *>(channel) &&
-         !(channel->getType() == Channel::Type::TwitchWhispers)))
-    {
-        this->hideColonMenu();
-        return;
-    }
-
-    // check if in :
-    auto &edit = *this->ui_.textEdit;
-
-    auto text = edit.toPlainText();
-    auto position = edit.textCursor().position() - 1;
-
-    if (text.length() == 0)
-    {
-        this->hideColonMenu();
-        return;
-    }
-
-    for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
-    {
-        if (text[i] == ' ')
-        {
-            this->hideColonMenu();
-            return;
-        }
-        else if (text[i] == ':')
-        {
-            if (i == 0 || text[i - 1].isSpace())
-                this->showColonMenu(text.mid(i, position - i + 1).mid(1));
-            else
-                this->hideColonMenu();
-            return;
-        }
-    }
-
-    this->hideColonMenu();
+    this->updateCompletionMenus();
 }
 
 void SplitInput::showColonMenu(const QString &text)
@@ -511,7 +481,7 @@ void SplitInput::showColonMenu(const QString &text)
             [that = QObjectRef(this)](const QString &text) mutable {
                 if (auto this2 = that.get())
                 {
-                    this2->insertColonText(text);
+                    this2->insertCompletionText(text);
                     this2->hideColonMenu();
                 }
             });
@@ -535,7 +505,99 @@ void SplitInput::hideColonMenu()
         popup->hide();
 }
 
-void SplitInput::insertColonText(const QString &input_)
+void SplitInput::updateCompletionMenus()
+{
+    auto channel = this->split_->getChannel().get();
+    if (!dynamic_cast<TwitchChannel *>(channel))
+    {
+        this->hideUsernameMenu();
+        return;
+    }
+    if (!getSettings()->emoteCompletionWithColon ||
+        (!dynamic_cast<TwitchChannel *>(channel) &&
+         !(channel->getType() == Channel::Type::TwitchWhispers)))
+    {
+        this->hideColonMenu();
+        return;
+    }
+
+    // check if in competion prefix
+    auto &edit = *this->ui_.textEdit;
+
+    auto text = edit.toPlainText();
+    auto position = edit.textCursor().position() - 1;
+
+    if (text.length() == 0)
+    {
+        this->hideColonMenu();
+        this->hideUsernameMenu();
+        return;
+    }
+
+    for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
+    {
+        if (text[i] == ' ')
+        {
+            this->hideColonMenu();
+            this->hideUsernameMenu();
+            return;
+        }
+        else if (text[i] == ':')
+        {
+            if (i == 0 || text[i - 1].isSpace())
+                this->showColonMenu(text.mid(i, position - i + 1).mid(1));
+            else
+                this->hideColonMenu();
+            return;
+        }
+        else if (text[i] == '@')
+        {
+            if (i == 0 || text[i - 1].isSpace())
+                this->showUsernameMenu(text.mid(i, position - i + 1).mid(1));
+            else
+                this->hideUsernameMenu();
+            return;
+        }
+    }
+
+    this->hideColonMenu();
+    this->hideUsernameMenu();
+}
+
+void SplitInput::showUsernameMenu(const QString &text)
+{
+    if (!this->usernameInputPopup_.get())
+    {
+        this->usernameInputPopup_ = new UsernameInputPopup(this);
+        this->usernameInputPopup_->setInputAction(
+            [that = QObjectRef(this)](const QString &text) mutable {
+                if (auto this2 = that.get())
+                {
+                    this2->insertCompletionText(text);
+                    this2->hideUsernameMenu();
+                }
+            });
+    }
+
+    auto popup = this->usernameInputPopup_.get();
+    assert(popup);
+
+    popup->updateUsers(text, this->split_->getChannel());
+
+    auto pos = this->mapToGlobal({0, 0}) - QPoint(0, popup->height()) +
+               QPoint((this->width() - popup->width()) / 2, 0);
+
+    popup->move(pos);
+    popup->show();
+}
+
+void SplitInput::hideUsernameMenu()
+{
+    if (auto popup = this->usernameInputPopup_.get())
+        popup->hide();
+}
+
+void SplitInput::insertCompletionText(const QString &input_)
 {
     auto &edit = *this->ui_.textEdit;
     auto input = input_ + ' ';
@@ -545,10 +607,21 @@ void SplitInput::insertColonText(const QString &input_)
 
     for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
     {
+        bool done = false;
         if (text[i] == ':')
         {
-            auto cursor = edit.textCursor();
+            done = true;
+        }
+        else if (text[i] == '@')
+        {
+            input = "@" + input_ +
+                    (getSettings()->mentionUsersWithComma ? ", " : " ");
+            done = true;
+        }
 
+        if (done)
+        {
+            auto cursor = edit.textCursor();
             edit.setText(text.remove(i, position - i).insert(i, input));
 
             cursor.setPosition(i + input.size());
