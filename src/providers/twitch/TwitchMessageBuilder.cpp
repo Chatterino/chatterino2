@@ -1356,6 +1356,8 @@ void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
                                MessageColor::System, FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, channelName});
 }
+
+// irc variant
 void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
                                            MessageBuilder *builder)
 {
@@ -1385,6 +1387,42 @@ void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
         builder->emplace<TextElement>(originalMessage->messageText,
                                       MessageElementFlag::Text,
                                       MessageColor::Text);
+    }
+}
+
+// pubsub variant
+void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
+                                           MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->message().flags.set(MessageFlag::Timeout);
+
+    builder
+        ->emplace<TextElement>(action.source.name, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.source.name});
+    // TODO(mm2pl): If or when jumping to a single message gets implemented a link,
+    // add a link to the originalMessage
+    builder->emplace<TextElement>(
+        "deleted message from", MessageElementFlag::Text, MessageColor::System);
+    builder
+        ->emplace<TextElement>(action.target.name, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.target.name});
+    builder->emplace<TextElement>("saying:", MessageElementFlag::Text,
+                                  MessageColor::System);
+    if (action.messageText.length() > 50)
+    {
+        builder->emplace<TextElement>(action.messageText.left(50) + "...",
+                                      MessageElementFlag::Text,
+                                      MessageColor::Text);
+    }
+    else
+    {
+        builder->emplace<TextElement>(
+            action.messageText, MessageElementFlag::Text, MessageColor::Text);
     }
 }
 

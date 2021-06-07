@@ -18,6 +18,7 @@
 #include "providers/irc/Irc2.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Logging.hpp"
@@ -281,6 +282,24 @@ void Application::initPubsub()
             }
 
             MessageBuilder msg(action);
+            msg->flags.set(MessageFlag::PubSub);
+
+            postToThread([chan, msg = msg.release()] {
+                chan->addOrReplaceTimeout(msg);
+            });
+        });
+    this->twitch.pubsub->signals_.moderation.messageDeleted.connect(
+        [&](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            MessageBuilder msg;
+            TwitchMessageBuilder::deletionMessage(action, &msg);
             msg->flags.set(MessageFlag::PubSub);
 
             postToThread([chan, msg = msg.release()] {
