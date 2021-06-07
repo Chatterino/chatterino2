@@ -10,7 +10,7 @@
 - Minor: Limit the number of recent chatters to improve memory usage and reduce freezes. (#2796, #2814)
 - Minor: Added `/popout` command. Usage: `/popout [channel]`. It opens browser chat for the provided channel. Can also be used without arguments to open current channels browser chat. (#2556, #2812)
 - Minor: Improved matching of game names when using `/setgame` command (#2636)
-- Minor: Now shows deletions of messages like timeouts (#1155, #2841)
+- Minor: Now shows deletions of messages like timeouts (#1155, #2841, #2867, #2874)
 - Minor: Added a link to accounts page in settings to "You need to be logged in to send messages" message. (#2862)
 - Minor: Switch to Twitch v2 emote API for animated emote support. (#2863)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
