@@ -318,15 +318,13 @@ SOURCES += \
     src/widgets/settingspages/NotificationPage.cpp \
     src/widgets/settingspages/SettingsPage.cpp \
     src/widgets/splits/ClosedSplits.cpp \
-    src/widgets/splits/EmoteInputItem.cpp \
-    src/widgets/splits/EmoteInputPopup.cpp \
+    src/widgets/splits/InputCompletionItem.cpp \
+    src/widgets/splits/InputCompletionPopup.cpp \
     src/widgets/splits/Split.cpp \
     src/widgets/splits/SplitContainer.cpp \
     src/widgets/splits/SplitHeader.cpp \
     src/widgets/splits/SplitInput.cpp \
     src/widgets/splits/SplitOverlay.cpp \
-    src/widgets/splits/UsernameInputItem.cpp \
-    src/widgets/splits/UsernameInputPopup.cpp \
     src/widgets/StreamView.cpp \
     src/widgets/TooltipWidget.cpp \
     src/widgets/Window.cpp \
@@ -581,15 +579,13 @@ HEADERS += \
     src/widgets/settingspages/NotificationPage.hpp \
     src/widgets/settingspages/SettingsPage.hpp \
     src/widgets/splits/ClosedSplits.hpp \
-    src/widgets/splits/EmoteInputItem.hpp \
-    src/widgets/splits/EmoteInputPopup.hpp \
+    src/widgets/splits/InputCompletionItem.hpp \
+    src/widgets/splits/InputCompletionPopup.hpp \
     src/widgets/splits/Split.hpp \
     src/widgets/splits/SplitContainer.hpp \
     src/widgets/splits/SplitHeader.hpp \
     src/widgets/splits/SplitInput.hpp \
     src/widgets/splits/SplitOverlay.hpp \
-    src/widgets/splits/UsernameInputItem.hpp \
-    src/widgets/splits/UsernameInputPopup.hpp \
     src/widgets/StreamView.hpp \
     src/widgets/TooltipWidget.hpp \
     src/widgets/Window.hpp \
