@@ -33,10 +33,12 @@ void AttachedPlayer::updateStreamLinkProcess(const QString &channel,
         mpvContainer->setSizePolicy(QSizePolicy::Policy::Expanding,
                                     QSizePolicy::Policy::Expanding);
         // the size should default to near the same height as the main chat client
-        float scale = 0.90;
-        int height = (int)(scale * (float)mainWindow->size().height());
-        int width =
-            (int)(16.0 / 9.0 * scale * (float)mainWindow->size().height());
+        // it should also not overflow the monitor, so also compare the width
+        int maxWidth = mainWindow->screen()->geometry().width() -
+                       mainWindow->size().width();
+        int height = mainWindow->size().height();
+        int width = (int)qMin((float)maxWidth, 16.0f / 9.0f * (float)height);
+        height = (int)(9.0f / 16.0f * (float)width);
         mpvContainer->resize(width, height);
         mpvContainer->show();
     }
