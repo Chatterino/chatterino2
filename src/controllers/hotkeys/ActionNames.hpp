@@ -83,7 +83,7 @@ const std::map<HotkeyScope, std::map<QString, ActionDefinition>> actionNames{
          {"setStreamerMode", ActionDefinition{"Set streamer mode", 1}},
          {"toggleLocalR9K", ActionDefinition{"Toggle local R9K"}},
          {"zoom", ActionDefinition{"Zoom in/out", 1}},
-     }},
+         {"setTabVisibility", ActionDefinition{"Set tab visibility", 1}}}},
 };
 
 }  // namespace chatterino

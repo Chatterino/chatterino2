@@ -580,15 +580,54 @@ void Window::addShortcuts()
              }
              return "";
          }},
+        {"setTabVisibility",
+         [this](std::vector<QString> arguments) -> QString {
+             auto mode = 2;
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "off")
+                 {
+                     mode = 0;
+                 }
+                 else if (arg == "on")
+                 {
+                     mode = 1;
+                 }
+                 else if (arg == "toggle")
+                 {
+                     mode = 2;
+                 }
+                 else
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "Invalid argument for setStreamerMode hotkey: "
+                         << arg;
+                     return QString("Invalid argument for setTabVisibility "
+                                    "hotkey: %1. Use \"on\", \"off\" or "
+                                    "\"toggle\".")
+                         .arg(arg);
+                 }
+             }
+
+             if (mode == 0)
+             {
+                 this->notebook_->setShowTabs(false);
+             }
+             else if (mode == 1)
+             {
+                 this->notebook_->setShowTabs(true);
+             }
+             else if (mode == 2)
+             {
+                 this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
+             }
+             return "";
+         }},
     };
     this->addDebugStuff(windowActions);
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::Window, windowActions, this);
-    // TODO(mm2pl)
-    createWindowShortcut(this, "CTRL+U", [this] {
-        this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
-    });
-
 }
 
 void Window::addMenuBar()
