@@ -18,6 +18,8 @@ set(SOURCE_FILES main.cpp
         common/ChannelChatters.hpp
         common/ChatterinoSetting.cpp
         common/ChatterinoSetting.hpp
+        common/ChatterSet.cpp
+        common/ChatterSet.hpp
         common/CompletionModel.cpp
         common/CompletionModel.hpp
         common/Credentials.cpp
@@ -42,8 +44,6 @@ set(SOURCE_FILES main.cpp
         common/NetworkResult.hpp
         common/QLogging.cpp
         common/QLogging.hpp
-        common/UsernameSet.cpp
-        common/UsernameSet.hpp
         common/Version.cpp
         common/Version.hpp
         common/WindowDescriptors.cpp

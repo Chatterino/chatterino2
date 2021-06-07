@@ -7,6 +7,7 @@
 #include "util/QStringHash.hpp"
 
 #include <map>
+#include <memory>
 #include <shared_mutex>
 #include <vector>
 

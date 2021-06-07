@@ -119,13 +119,14 @@ namespace {
 
         return messages;
     }
-    std::pair<Outcome, UsernameSet> parseChatters(const QJsonObject &jsonRoot)
+    std::pair<Outcome, std::unordered_set<QString>> parseChatters(
+        const QJsonObject &jsonRoot)
     {
         static QStringList categories = {"broadcaster", "vips",   "moderators",
                                          "staff",       "admins", "global_mods",
                                          "viewers"};
 
-        auto usernames = UsernameSet();
+        auto usernames = std::unordered_set<QString>();
 
         // parse json
         QJsonObject jsonCategories = jsonRoot.value("chatters").toObject();
@@ -327,11 +328,33 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (!app->accounts->twitch.isLoggedIn())
     {
-        // XXX: It would be nice if we could add a link here somehow that opened
-        // the "account manager" dialog
-        this->addMessage(
-            makeSystemMessage("You need to log in to send messages. You can "
-                              "link your Twitch account in the settings."));
+        if (message.isEmpty())
+        {
+            return;
+        }
+
+        const auto linkColor = MessageColor(MessageColor::Link);
+        const auto accountsLink = Link(Link::OpenAccountsPage, QString());
+        const auto currentUser = getApp()->accounts->twitch.getCurrent();
+        const auto expirationText =
+            QString("You need to log in to send messages. You can link your "
+                    "Twitch account");
+        const auto loginPromptText = QString("in the settings.");
+
+        auto builder = MessageBuilder();
+        builder.message().flags.set(MessageFlag::System);
+        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+        builder.emplace<TimestampElement>();
+        builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
+                                     MessageColor::System);
+        builder
+            .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                                  linkColor)
+            ->setLink(accountsLink);
+
+        this->addMessage(builder.release());
+
         return;
     }
 
@@ -729,7 +752,6 @@ void TwitchChannel::loadRecentMessages()
                    .arg(getSettings()->twitchMessageHistoryLimit);
 
     NetworkRequest(url)
-        .concurrent()
         .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
@@ -824,7 +846,7 @@ void TwitchChannel::refreshChatters()
                 auto pair = parseChatters(std::move(data));
                 if (pair.first)
                 {
-                    this->setChatters(std::move(pair.second));
+                    this->updateOnlineChatters(pair.second);
                 }
 
                 return pair.first;

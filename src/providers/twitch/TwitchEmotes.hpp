@@ -10,8 +10,10 @@
 
 #include <memory>
 
+// NB: "default" can be replaced with "static" to always get a non-animated
+// variant
 #define TWITCH_EMOTE_TEMPLATE \
-    "https://static-cdn.jtvnw.net/emoticons/v1/{id}/{scale}"
+    "https://static-cdn.jtvnw.net/emoticons/v2/{id}/default/dark/{scale}"
 
 namespace chatterino {
 struct Emote;

@@ -65,9 +65,6 @@ Window::Window(WindowType type)
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
-        getSettings()->tabDirection.connect([this](int val) {
-            this->notebook_->setTabDirection(NotebookTabDirection(val));
-        });
     }
     else
     {
@@ -79,6 +76,12 @@ Window::Window(WindowType type)
                                            this->clearShortcuts();
                                            this->addShortcuts();
                                        });
+    if (type == WindowType::Main || type == WindowType::Popup)
+    {
+        getSettings()->tabDirection.connect([this](int val) {
+            this->notebook_->setTabDirection(NotebookTabDirection(val));
+        });
+    }
 }
 
 WindowType Window::getType()
@@ -581,6 +584,11 @@ void Window::addShortcuts()
     this->addDebugStuff(windowActions);
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::Window, windowActions, this);
+    // TODO(mm2pl)
+    createWindowShortcut(this, "CTRL+U", [this] {
+        this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
+    });
+
 }
 
 void Window::addMenuBar()

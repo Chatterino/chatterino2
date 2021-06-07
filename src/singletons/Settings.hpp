@@ -84,6 +84,8 @@ public:
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
+    BoolSetting hideDeletionActions = {
+        "/appearance/messages/hideDeletionActions", false};
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
                                      true};
 
@@ -360,6 +362,8 @@ public:
     BoolSetting attachExtensionToAnyProcess = {
         "/misc/attachExtensionToAnyProcess", false};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
+    BoolSetting informOnTabVisibilityToggle = {"/misc/askOnTabVisibilityToggle",
+                                               true};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",

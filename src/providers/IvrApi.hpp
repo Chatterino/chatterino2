@@ -74,8 +74,7 @@ public:
                    ResultCallback<IvrSubage> resultCallback,
                    IvrFailureCallback failureCallback);
 
-    // https://api.ivr.fi/docs#tag/Twitch/paths/~1twitch~1emoteset~1{setid}/get
-    // however, we use undocumented endpoint, which takes ?set_id=1,2,3,4,... as query parameter
+    // https://api.ivr.fi/docs#tag/Twitch/paths/~1twitch~1emoteset/get
     void getBulkEmoteSets(QString emoteSetList,
                           ResultCallback<QJsonArray> successCallback,
                           IvrFailureCallback failureCallback);

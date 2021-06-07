@@ -479,7 +479,17 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     QString targetID = tags.value("target-msg-id").toString();
 
-    chan->deleteMessage(targetID);
+    auto msg = chan->findMessage(targetID);
+    if (msg != nullptr)
+    {
+        msg->flags.set(MessageFlag::Disabled);
+        if (!getSettings()->hideDeletionActions)
+        {
+            MessageBuilder builder;
+            TwitchMessageBuilder::deletionMessage(msg, &builder);
+            chan->addMessage(builder.release());
+        }
+    }
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
