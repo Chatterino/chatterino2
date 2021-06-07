@@ -61,7 +61,7 @@ void InputCompletionItem::paint(QPainter *painter, const QRect &rect) const
     }
     else
     {
-        textRect = QRect(rect.topLeft() + QPoint{margin, margin},
+        textRect = QRect(rect.topLeft() + QPoint{margin, 0},
                          QSize(rect.width(), rect.height()));
     }
 
