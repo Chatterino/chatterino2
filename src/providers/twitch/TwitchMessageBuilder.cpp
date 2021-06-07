@@ -1379,7 +1379,7 @@ void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
     if (originalMessage->messageText.length() > 50)
     {
         builder->emplace<TextElement>(
-            originalMessage->messageText.left(50) + "...",
+            originalMessage->messageText.left(50) + "…",
             MessageElementFlag::Text, MessageColor::Text);
     }
     else
@@ -1415,7 +1415,7 @@ void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
                                   MessageColor::System);
     if (action.messageText.length() > 50)
     {
-        builder->emplace<TextElement>(action.messageText.left(50) + "...",
+        builder->emplace<TextElement>(action.messageText.left(50) + "…",
                                       MessageElementFlag::Text,
                                       MessageColor::Text);
     }
