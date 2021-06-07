@@ -160,49 +160,25 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("Alt+x"), "createClip",
                             std::vector<QString>(), "default create clip");
 
-        {
-            std::vector<QString> args;
-            args.push_back("left");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
-                                QKeySequence("Alt+left"), "focus", args,
-                                "default focus left");
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("down");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
-                                QKeySequence("Alt+down"), "focus", args,
-                                "default focus down");
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("up");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
-                                QKeySequence("Alt+up"), "focus", args,
-                                "default focus up");
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("right");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
-                                QKeySequence("Alt+right"), "focus", args,
-                                "default focus right");
-        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
+                            QKeySequence("Alt+left"), "focus", {"left"},
+                            "default focus left");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
+                            QKeySequence("Alt+down"), "focus", {"down"},
+                            "default focus down");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
+                            QKeySequence("Alt+up"), "focus", {"up"},
+                            "default focus up");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
+                            QKeySequence("Alt+right"), "focus", {"right"},
+                            "default focus right");
 
-        {
-            std::vector<QString> args;
-            args.push_back("up");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
-                                QKeySequence("PgUp"), "scrollPage", args,
-                                "default scroll page up");
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("down");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
-                                QKeySequence("PgDown"), "scrollPage", args,
-                                "default scroll page down");
-        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
+                            QKeySequence("PgUp"), "scrollPage", {"up"},
+                            "default scroll page up");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
+                            QKeySequence("PgDown"), "scrollPage", {"down"},
+                            "default scroll page down");
         this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
                             QKeySequence("Ctrl+End"), "scrollToBottom",
                             std::vector<QString>(), "default scroll to bottom");
@@ -219,60 +195,37 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
             this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
                                 QKeySequence("Return"), "sendMessage",
                                 std::vector<QString>(), "default send message");
-            {
-                std::vector<QString> args;
-                args.push_back("keepInput");
-                this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                                    QKeySequence("Ctrl+Return"), "sendMessage",
-                                    args, "default send message and keep text");
-            }
+            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                                QKeySequence("Ctrl+Return"), "sendMessage",
+                                {"keepInput"},
+                                "default send message and keep text");
 
             this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
                                 QKeySequence("Shift+Return"), "sendMessage",
                                 std::vector<QString>(), "default send message");
-            {
-                std::vector<QString> args;
-                args.push_back("keepInput");
-                this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                                    QKeySequence("Ctrl+Shift+Return"),
-                                    "sendMessage", args,
-                                    "default send message and keep text");
-            }
+            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                                QKeySequence("Ctrl+Shift+Return"),
+                                "sendMessage", {"keepInput"},
+                                "default send message and keep text");
         }
 
-        {
-            std::vector<QString> args;
-            args.push_back("start");
-            args.push_back("withoutSelection");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                                QKeySequence("Home"), "jumpCursor", args,
-                                "default go to start of input");
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("end");
-            args.push_back("withoutSelection");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                                QKeySequence("End"), "jumpCursor", args,
-                                "default go to end of input");
-        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                            QKeySequence("Home"), "jumpCursor",
+                            {"start", "withoutSelection"},
+                            "default go to start of input");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                            QKeySequence("End"), "jumpCursor",
+                            {"end", "withoutSelection"},
+                            "default go to end of input");
 
-        {
-            std::vector<QString> args;
-            args.push_back("start");
-            args.push_back("withSelection");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                                QKeySequence("Shift+Home"), "jumpCursor", args,
-                                "default go to start of input with selection");
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("end");
-            args.push_back("withSelection");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                                QKeySequence("Shift+End"), "jumpCursor", args,
-                                "default go to end of input with selection");
-        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                            QKeySequence("Shift+Home"), "jumpCursor",
+                            {"start", "withSelection"},
+                            "default go to start of input with selection");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
+                            QKeySequence("Shift+End"), "jumpCursor",
+                            {"end", "withSelection"},
+                            "default go to end of input with selection");
 
         this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
                             QKeySequence("Up"), "previousMessage",
@@ -289,50 +242,29 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
             "delete", std::vector<QString>(), "default close popup window");
         for (int i = 0; i < 8; i++)
         {
-            std::vector<QString> args;
-            args.push_back(QString::number(i));
             this->tryAddDefault(
                 addedHotkeys, HotkeyScope::PopupWindow,
-                QKeySequence(QString("Ctrl+%1").arg(i + 1)), "openTab", args,
+                QKeySequence(QString("Ctrl+%1").arg(i + 1)), "openTab",
+                {QString::number(i)},
                 QString("default popup select tab #%1").arg(i + 1));
         }
-        {
-            std::vector<QString> args;
-            args.push_back("last");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                                QKeySequence("Ctrl+9"), "openTab", args,
-                                "default popup select last tab");
-        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Ctrl+9"), "openTab", {"last"},
+                            "default popup select last tab");
 
-        {
-            std::vector<QString> args;
-            args.push_back("next");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                                QKeySequence("Ctrl+Tab"), "openTab", args,
-                                "default popup select next tab");
-        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Ctrl+Tab"), "openTab", {"next"},
+                            "default popup select next tab");
 
-        {
-            std::vector<QString> args;
-            args.push_back("previous");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                                QKeySequence("Ctrl+Shift+Tab"), "openTab", args,
-                                "default popup select previous tab");
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("up");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                                QKeySequence("PgUp"), "scrollPage", args,
-                                "default popup scroll up");
-        }
-        {
-            std::vector<QString> args;
-            args.push_back("down");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                                QKeySequence("PgDown"), "scrollPage", args,
-                                "default popup scroll down");
-        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Ctrl+Shift+Tab"), "openTab",
+                            {"previous"}, "default popup select previous tab");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("PgUp"), "scrollPage", {"up"},
+                            "default popup scroll up");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("PgDown"), "scrollPage", {"down"},
+                            "default popup scroll down");
         this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
                             QKeySequence("Return"), "accept",
                             std::vector<QString>(), "default popup accept");
@@ -354,54 +286,34 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             std::vector<QString>(), "default new split");
         for (int i = 0; i < 8; i++)
         {
-            std::vector<QString> args;
-            args.push_back(QString::number(i));
             this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
                                 QKeySequence(QString("Ctrl+%1").arg(i + 1)),
-                                "openTab", args,
+                                "openTab", {QString::number(i)},
                                 QString("default select tab #%1").arg(i + 1));
         }
         this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
-                            QKeySequence("Ctrl+9"), "openTab",
-                            std::vector<QString>(), "default select last tab");
+                            QKeySequence("Ctrl+9"), "openTab", {"last"},
+                            "default select last tab");
 
-        {
-            std::vector<QString> args;
-            args.push_back("next");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
-                                QKeySequence("Ctrl+Tab"), "openTab", args,
-                                "default select next tab");
-        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence("Ctrl+Tab"), "openTab", {"next"},
+                            "default select next tab");
 
-        {
-            std::vector<QString> args;
-            args.push_back("previous");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
-                                QKeySequence("Ctrl+Shift+Tab"), "openTab", args,
-                                "default select previous tab");
-        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence("Ctrl+Shift+Tab"), "openTab",
+                            {"previous"}, "default select previous tab");
 
         this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
                             QKeySequence("Ctrl+N"), "popup",
                             std::vector<QString>(), "default new popup window");
 
-        {
-            std::vector<QString> args;
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence::ZoomIn, "zoom", {"in"},
+                            "default zoom in");
 
-            args.push_back("in");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
-                                QKeySequence::ZoomIn, "zoom", args,
-                                "default zoom in");
-        }
-
-        {
-            std::vector<QString> args;
-
-            args.push_back("out");
-            this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
-                                QKeySequence::ZoomOut, "zoom", args,
-                                "default zoom out");
-        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence::ZoomOut, "zoom", {"out"},
+                            "default zoom out");
 
         this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
                             QKeySequence("Ctrl+Shift+T"), "newTab",
@@ -426,8 +338,7 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
 
         this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
                             QKeySequence("Ctrl+U"), "setTabVisibility",
-                            {QString("toggle")},
-                            "default toggle tab visibility");
+                            {"toggle"}, "default toggle tab visibility");
     }
 }
 
