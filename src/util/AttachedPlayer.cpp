@@ -1,6 +1,6 @@
 #include "AttachedPlayer.hpp"
 
-using namespace chatterino;
+namespace chatterino {
 
 bool AttachedPlayer::getIfStreamActive()
 {
@@ -59,3 +59,4 @@ void AttachedPlayer::updateStreamLinkProcess(const QString &channel,
     // Update the last channel we displayed
     lastShownChannel = channel;
 }
+}  // namespace chatterino

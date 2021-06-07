@@ -318,9 +318,7 @@ public:
     QStringSetting streamlinkPath = {"/external/streamlink/customPath", ""};
     QStringSetting preferredQuality = {"/external/streamlink/quality",
                                        "Choose"};
-    QStringSetting streamlinkOpts = {
-        "/external/streamlink/options",
-        "--twitch-low-latency --twitch-disable-ads"};
+    QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
 
     // MPV player
     BoolSetting mpvFollowActive = {"/external/mpv/followActive", true};
