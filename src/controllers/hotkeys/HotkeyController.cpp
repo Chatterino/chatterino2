@@ -423,6 +423,11 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence("Ctrl+K"), "openQuickSwitcher",
                             std::vector<QString>(),
                             "default open quick switcher");
+
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence("Ctrl+U"), "setTabVisibility",
+                            {QString("toggle")},
+                            "default toggle tab visibility");
     }
 }
 
