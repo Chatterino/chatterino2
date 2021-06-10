@@ -1313,6 +1313,9 @@ void TwitchMessageBuilder::liveMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
                                   MessageColor::Text);
+    auto text = channelName + " is live!";
+    builder->message().searchText = text;
+    builder->message().messageText = text;
 }
 
 void TwitchMessageBuilder::offlineMessage(const QString &channelName,
@@ -1327,6 +1330,9 @@ void TwitchMessageBuilder::offlineMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is now offline.", MessageElementFlag::Text,
                                   MessageColor::Text);
+    auto text = channelName + " is now offline!";
+    builder->message().searchText = text;
+    builder->message().messageText = text;
 }
 
 void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
