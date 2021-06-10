@@ -613,12 +613,6 @@ void TwitchChannel::setLive(bool newLiveStatus)
                     this->getDisplayName(), &builder);
                 this->addMessage(builder.release());
 
-                // Message in /live channel
-                MessageBuilder builder2;
-                TwitchMessageBuilder::offlineMessage(this->getDisplayName(),
-                                                     &builder2);
-                getApp()->twitch2->liveChannel->addMessage(builder2.release());
-
                 // "delete" old 'CHANNEL is live' message
                 LimitedQueueSnapshot<MessagePtr> snapshot =
                     getApp()->twitch2->liveChannel->getMessageSnapshot();
