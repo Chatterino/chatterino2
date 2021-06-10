@@ -607,10 +607,17 @@ void TwitchChannel::setLive(bool newLiveStatus)
             }
             else
             {
+                // Channel offline message
                 MessageBuilder builder;
                 TwitchMessageBuilder::offlineSystemMessage(
                     this->getDisplayName(), &builder);
                 this->addMessage(builder.release());
+
+                // Message in /live channel
+                MessageBuilder builder2;
+                TwitchMessageBuilder::offlineMessage(this->getDisplayName(),
+                                                     &builder2);
+                getApp()->twitch2->liveChannel->addMessage(builder2.release());
             }
             guard->live = newLiveStatus;
         }
