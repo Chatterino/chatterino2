@@ -91,7 +91,7 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getSettings()->highlightedMessages.append(HighlightPhrase{
-                        "my phrase", true, true, false, false, false, "",
+                        "my phrase", true, true, false, false, true, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
                 });
@@ -142,9 +142,9 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getSettings()->highlightedUsers.append(HighlightPhrase{
-                        "highlighted user", true, true, false, false, false, "",
-                        *ColorProvider::instance().color(
-                            ColorType::SelfHighlight)});
+                        "highlighted user", true, true, false, false, true,
+                        false, "", *ColorProvider::instance().color(
+                                       ColorType::SelfHighlight)});
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,

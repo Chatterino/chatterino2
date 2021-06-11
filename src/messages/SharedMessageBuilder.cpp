@@ -294,7 +294,7 @@ void SharedMessageBuilder::parseHighlights()
         HighlightPhrase selfHighlight(
             currentUsername, getSettings()->showSelfHighlightInMentions,
             getSettings()->enableSelfHighlightTaskbar,
-            getSettings()->enableSelfHighlightSound, false, false,
+            getSettings()->enableSelfHighlightSound, false, false, false,
             getSettings()->selfHighlightSoundUrl.getValue(),
             ColorProvider::instance().color(ColorType::SelfHighlight));
         activeHighlights.emplace_back(std::move(selfHighlight));

@@ -25,8 +25,8 @@ public:
      * Use this constructor when creating a new HighlightPhrase.
      */
     HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
-                    bool hasSound, bool isRegex, bool isCaseSensitive,
-                    const QString &soundUrl, QColor color);
+                    bool hasSound, bool isRegex, bool isGloballyEnabled,
+                    bool isCaseSensitive,const QString &soundUrl, QColor color);
 
     /**
      * @brief Create a new HighlightPhrase.
@@ -34,8 +34,9 @@ public:
      * Use this constructor when updating an existing HighlightPhrase's color.
      */
     HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
-                    bool hasSound, bool isRegex, bool isCaseSensitive,
-                    const QString &soundUrl, std::shared_ptr<QColor> color);
+                    bool hasSound, bool isRegex, bool isGloballyEnabled,
+                    bool isCaseSensitive, const QString &soundUrl,
+                    std::shared_ptr<QColor> color);
 
     const QString &getPattern() const;
     bool showInMentions() const;
@@ -105,7 +106,8 @@ namespace {
     chatterino::HighlightPhrase constructError()
     {
         return chatterino::HighlightPhrase(QString(), false, false, false,
-                                           false, false, QString(), QColor());
+                                           false, false, false, QString(),
+                                           QColor());
     }
 }  // namespace
 
@@ -169,7 +171,8 @@ struct Deserialize<chatterino::HighlightPhrase> {
 
         return chatterino::HighlightPhrase(_pattern, _showInMentions, _hasAlert,
                                            _hasSound, _isRegex,
-                                           _isCaseSensitive, _soundUrl, _color);
+                                           _isGloballyEnabled,_isCaseSensitive,
+                                           _soundUrl, _color);
     }
 };
 
