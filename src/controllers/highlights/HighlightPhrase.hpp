@@ -69,6 +69,7 @@ public:
     bool hasCustomSound() const;
 
     bool isRegex() const;
+    bool isGloballyEnabled() const;
     bool isValid() const;
     bool isMatch(const QString &subject) const;
     bool isCaseSensitive() const;
@@ -89,6 +90,7 @@ private:
     bool hasAlert_;
     bool hasSound_;
     bool isRegex_;
+    bool isGloballyEnabled_;
     bool isCaseSensitive_;
     QUrl soundUrl_;
     std::shared_ptr<QColor> color_;
@@ -119,6 +121,7 @@ struct Serialize<chatterino::HighlightPhrase> {
         chatterino::rj::set(ret, "alert", value.hasAlert(), a);
         chatterino::rj::set(ret, "sound", value.hasSound(), a);
         chatterino::rj::set(ret, "regex", value.isRegex(), a);
+        chatterino::rj::set(ret, "globalEnable", value.isGloballyEnabled(), a);
         chatterino::rj::set(ret, "case", value.isCaseSensitive(), a);
         chatterino::rj::set(ret, "soundUrl", value.getSoundUrl().toString(), a);
         chatterino::rj::set(ret, "color",
@@ -145,6 +148,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         bool _hasAlert = true;
         bool _hasSound = false;
         bool _isRegex = false;
+        bool _isGloballyEnabled = true;
         bool _isCaseSensitive = false;
         QString _soundUrl;
         QString encodedColor;
@@ -154,6 +158,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         chatterino::rj::getSafe(value, "alert", _hasAlert);
         chatterino::rj::getSafe(value, "sound", _hasSound);
         chatterino::rj::getSafe(value, "regex", _isRegex);
+        chatterino::rj::getSafe(value, "regex", _isGloballyEnabled);
         chatterino::rj::getSafe(value, "case", _isCaseSensitive);
         chatterino::rj::getSafe(value, "soundUrl", _soundUrl);
         chatterino::rj::getSafe(value, "color", encodedColor);

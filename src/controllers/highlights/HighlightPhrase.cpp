@@ -98,6 +98,11 @@ bool HighlightPhrase::isRegex() const
     return this->isRegex_;
 }
 
+bool HighlightPhrase::isGloballyEnabled() const
+{
+    return this->isGloballyEnabled_;
+}
+
 bool HighlightPhrase::isValid() const
 {
     return !this->pattern_.isEmpty() && this->regex_.isValid();
