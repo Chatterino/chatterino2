@@ -618,7 +618,7 @@ void TwitchChannel::setLive(bool newLiveStatus)
                     getApp()->twitch2->liveChannel->getMessageSnapshot();
                 int snapshotLength = snapshot.size();
 
-                int end = std::max(0, snapshotLength - 200);
+                auto end = int(std::max(0, snapshotLength - 200));
                 auto liveMessageSearchText =
                     QString("%1 is live!").arg(this->getDisplayName());
 
@@ -629,6 +629,7 @@ void TwitchChannel::setLive(bool newLiveStatus)
                     if (s->messageText == liveMessageSearchText)
                     {
                         s->flags.set(MessageFlag::Disabled);
+                        break;
                     }
                 }
             }
