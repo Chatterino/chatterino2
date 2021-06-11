@@ -26,7 +26,8 @@ public:
      */
     HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
                     bool hasSound, bool isRegex, bool isGloballyEnabled,
-                    bool isCaseSensitive,const QString &soundUrl, QColor color);
+                    bool isCaseSensitive, const QString &soundUrl,
+                    QColor color);
 
     /**
      * @brief Create a new HighlightPhrase.
@@ -169,10 +170,9 @@ struct Deserialize<chatterino::HighlightPhrase> {
         if (!_color.isValid())
             _color = chatterino::HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR;
 
-        return chatterino::HighlightPhrase(_pattern, _showInMentions, _hasAlert,
-                                           _hasSound, _isRegex,
-                                           _isGloballyEnabled,_isCaseSensitive,
-                                           _soundUrl, _color);
+        return chatterino::HighlightPhrase(
+            _pattern, _showInMentions, _hasAlert, _hasSound, _isRegex,
+            _isGloballyEnabled, _isCaseSensitive, _soundUrl, _color);
     }
 };
 
