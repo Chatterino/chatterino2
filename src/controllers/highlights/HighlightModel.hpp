@@ -19,9 +19,10 @@ public:
         FlashTaskbar = 2,
         PlaySound = 3,
         UseRegex = 4,
-        CaseSensitive = 5,
-        SoundPath = 6,
-        Color = 7,
+        GloballyEnabled = 5,
+        CaseSensitive = 6,
+        SoundPath = 7,
+        Color = 8,
         COUNT  // keep this as last member of enum
     };
 
