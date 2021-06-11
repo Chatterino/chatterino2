@@ -29,6 +29,7 @@ HighlightPhrase HighlightModel::getItemFromRow(
         row[Column::FlashTaskbar]->data(Qt::CheckStateRole).toBool(),
         row[Column::PlaySound]->data(Qt::CheckStateRole).toBool(),
         row[Column::UseRegex]->data(Qt::CheckStateRole).toBool(),
+        row[Column::GloballyEnabled]->data(Qt::CheckStateRole).toBool(),
         row[Column::CaseSensitive]->data(Qt::CheckStateRole).toBool(),
         row[Column::SoundPath]->data(Qt::UserRole).toString(),
         highlightColor};
@@ -43,6 +44,7 @@ void HighlightModel::getRowFromItem(const HighlightPhrase &item,
     setBoolItem(row[Column::FlashTaskbar], item.hasAlert());
     setBoolItem(row[Column::PlaySound], item.hasSound());
     setBoolItem(row[Column::UseRegex], item.isRegex());
+    setBoolItem(row[Column::GloballyEnabled], item.isGloballyEnabled());
     setBoolItem(row[Column::CaseSensitive], item.isCaseSensitive());
     setFilePathItem(row[Column::SoundPath], item.getSoundUrl());
     setColorItem(row[Column::Color], *item.getColor());
@@ -66,6 +68,7 @@ void HighlightModel::afterInit()
                 getSettings()->enableSelfHighlightSound.getValue(), true,
                 false);
     usernameRow[Column::UseRegex]->setFlags({});
+    usernameRow[Column::GloballyEnabled]->setFlags({});
     usernameRow[Column::CaseSensitive]->setFlags({});
 
     QUrl selfSound = QUrl(getSettings()->selfHighlightSoundUrl.getValue());
@@ -89,6 +92,7 @@ void HighlightModel::afterInit()
                 getSettings()->enableWhisperHighlightSound.getValue(), true,
                 false);
     whisperRow[Column::UseRegex]->setFlags({});
+    whisperRow[Column::GloballyEnabled]->setFlags({});
     whisperRow[Column::CaseSensitive]->setFlags({});
 
     QUrl whisperSound =
@@ -113,6 +117,7 @@ void HighlightModel::afterInit()
     setBoolItem(subRow[Column::PlaySound],
                 getSettings()->enableSubHighlightSound.getValue(), true, false);
     subRow[Column::UseRegex]->setFlags({});
+    subRow[Column::GloballyEnabled]->setFlags({});
     subRow[Column::CaseSensitive]->setFlags({});
 
     QUrl subSound = QUrl(getSettings()->subHighlightSoundUrl.getValue());
@@ -139,6 +144,7 @@ void HighlightModel::afterInit()
     redeemedRow[Column::FlashTaskbar]->setFlags({});
     redeemedRow[Column::PlaySound]->setFlags({});
     redeemedRow[Column::UseRegex]->setFlags({});
+    redeemedRow[Column::GloballyEnabled]->setFlags({});
     redeemedRow[Column::CaseSensitive]->setFlags({});
 
     QUrl RedeemedSound =
@@ -247,6 +253,10 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
         break;
         case Column::UseRegex: {
             // Regex --> empty
+        }
+        break;
+        case Column::GloballyEnabled: {
+            // Globally Enabled --> empty
         }
         break;
         case Column::CaseSensitive: {
