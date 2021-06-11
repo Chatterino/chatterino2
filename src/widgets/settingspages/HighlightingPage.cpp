@@ -121,6 +121,8 @@ HighlightingPage::HighlightingPage()
                 view->getTableView()->horizontalHeader()->hideSection(
                     HighlightModel::Column::UseRegex);
                 view->getTableView()->horizontalHeader()->hideSection(
+                    HighlightModel::Column::GloballyEnabled);
+                view->getTableView()->horizontalHeader()->hideSection(
                     HighlightModel::Column::CaseSensitive);
                 // Case-sensitivity doesn't make sense for user names so it is
                 // set to "false" by default & the column is hidden
