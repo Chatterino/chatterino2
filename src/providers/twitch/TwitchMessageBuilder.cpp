@@ -1388,6 +1388,7 @@ void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
                                       MessageElementFlag::Text,
                                       MessageColor::Text);
     }
+    builder->message().timeoutUser = "msg:" + originalMessage->id;
 }
 
 // pubsub variant
@@ -1424,6 +1425,7 @@ void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
         builder->emplace<TextElement>(
             action.messageText, MessageElementFlag::Text, MessageColor::Text);
     }
+    builder->message().timeoutUser = "msg:" + action.messageId;
 }
 
 }  // namespace chatterino

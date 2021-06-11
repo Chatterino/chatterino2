@@ -303,7 +303,28 @@ void Application::initPubsub()
             msg->flags.set(MessageFlag::PubSub);
 
             postToThread([chan, msg = msg.release()] {
-                chan->addOrReplaceTimeout(msg);
+                auto replaced = false;
+                LimitedQueueSnapshot<MessagePtr> snapshot =
+                    chan->getMessageSnapshot();
+                int snapshotLength = snapshot.size();
+
+                int end = std::max(0, snapshotLength - 200);
+
+                for (int i = snapshotLength - 1; i >= end; --i)
+                {
+                    auto &s = snapshot[i];
+                    if (!s->flags.has(MessageFlag::PubSub) &&
+                        s->timeoutUser == msg->timeoutUser)
+                    {
+                        chan->replaceMessage(s, msg);
+                        replaced = true;
+                        break;
+                    }
+                }
+                if (!replaced)
+                {
+                    chan->addMessage(msg);
+                }
             });
         });
 
