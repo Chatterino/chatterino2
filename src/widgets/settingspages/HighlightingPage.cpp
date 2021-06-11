@@ -75,8 +75,8 @@ HighlightingPage::HighlightingPage()
                 view->addRegexHelpLink();
                 view->setTitles({"Pattern", "Show in\nMentions",
                                  "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex", "Case-\nsensitive",
-                                 "Custom\nsound", "Color"});
+                                 "Enable\nregex", "Globally\nEnabled",
+                                 "Case-\nsensitive", "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -126,8 +126,8 @@ HighlightingPage::HighlightingPage()
                 // set to "false" by default & the column is hidden
                 view->setTitles({"Username", "Show in\nMentions",
                                  "Flash\ntaskbar", "Play\nsound",
-                                 "Enable\nregex", "Case-\nsensitive",
-                                 "Custom\nsound", "Color"});
+                                 "Enable\nregex", "Globally\nEnabled",
+                                 "Case-\nsensitive", "Custom\nsound", "Color"});
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
