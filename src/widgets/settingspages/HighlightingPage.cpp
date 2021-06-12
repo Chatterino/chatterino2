@@ -82,7 +82,7 @@ HighlightingPage::HighlightingPage()
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
 
-                // fourtf: make class extrend BaseWidget and add this to
+                // fourtf: make class extend BaseWidget and add this to
                 // dpiChanged
                 QTimer::singleShot(1, [view] {
                     view->getTableView()->resizeColumnsToContents();
@@ -136,7 +136,7 @@ HighlightingPage::HighlightingPage()
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
 
-                // fourtf: make class extrend BaseWidget and add this to
+                // fourtf: make class extend BaseWidget and add this to
                 // dpiChanged
                 QTimer::singleShot(1, [view] {
                     view->getTableView()->resizeColumnsToContents();
@@ -178,7 +178,7 @@ HighlightingPage::HighlightingPage()
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
 
-                // fourtf: make class extrend BaseWidget and add this to
+                // fourtf: make class extend BaseWidget and add this to
                 // dpiChanged
                 QTimer::singleShot(1, [view] {
                     view->getTableView()->resizeColumnsToContents();
@@ -231,7 +231,7 @@ HighlightingPage::HighlightingPage()
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
 
-                // fourtf: make class extrend BaseWidget and add this to
+                // fourtf: make class extend BaseWidget and add this to
                 // dpiChanged
                 QTimer::singleShot(1, [view] {
                     view->getTableView()->resizeColumnsToContents();
