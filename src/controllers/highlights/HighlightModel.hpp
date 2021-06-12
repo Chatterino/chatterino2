@@ -23,6 +23,7 @@ public:
         CaseSensitive = 6,
         SoundPath = 7,
         Color = 8,
+        Identifier = 9,
         COUNT  // keep this as last member of enum
     };
 
