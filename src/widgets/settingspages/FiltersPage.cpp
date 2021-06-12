@@ -79,7 +79,6 @@ FiltersPage::FiltersPage()
 
 void FiltersPage::onShow()
 {
-    return;
 }
 
 void FiltersPage::tableCellClicked(const QModelIndex &clicked,
