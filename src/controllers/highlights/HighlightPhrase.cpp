@@ -126,6 +126,11 @@ const QUrl &HighlightPhrase::getSoundUrl() const
     return this->soundUrl_;
 }
 
+const QString &HighlightPhrase::getUniqueIdentifier() const
+{
+    return this->id_;
+}
+
 const std::shared_ptr<QColor> HighlightPhrase::getColor() const
 {
     return this->color_;

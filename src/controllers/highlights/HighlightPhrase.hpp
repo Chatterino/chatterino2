@@ -39,6 +39,7 @@ public:
                     bool isCaseSensitive, const QString &soundUrl,
                     std::shared_ptr<QColor> color);
 
+    const QString &getUniqueIdentifier() const;
     const QString &getPattern() const;
     bool showInMentions() const;
     bool hasAlert() const;
@@ -87,6 +88,7 @@ public:
     static QColor FALLBACK_SUB_COLOR;
 
 private:
+    QString id_;
     QString pattern_;
     bool showInMentions_;
     bool hasAlert_;
