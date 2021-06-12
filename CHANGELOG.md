@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
+- Minor: Restore automod functionality for moderators (#2817, #2887)
 - Minor: Searching for users in the viewer list now searches anywhere in the user's name. (#2861)
 - Minor: Added moderation buttons to search popup when searching in a split with moderation mode enabled. (#2148, #2803)
 - Minor: Made "#channel" in `/mentions` tab show in usercards and in the search popup. (#2802)
