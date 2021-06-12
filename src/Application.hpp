@@ -1,9 +1,5 @@
 #pragma once
 
-#ifdef Q_OS_WIN
-#    define NOMINMAX
-#endif
-
 #include <QApplication>
 #include <memory>
 

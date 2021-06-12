@@ -308,7 +308,8 @@ void Application::initPubsub()
                     chan->getMessageSnapshot();
                 int snapshotLength = snapshot.size();
 
-                int end = std::max(0, snapshotLength - 200);
+                // without parens it doesn't build on windows
+                int end = (std::max)(0, snapshotLength - 200);
 
                 for (int i = snapshotLength - 1; i >= end; --i)
                 {
