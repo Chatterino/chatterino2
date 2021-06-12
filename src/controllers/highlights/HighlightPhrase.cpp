@@ -33,6 +33,7 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
     , isRegex_(isRegex)
+    , isGloballyEnabled_(isGloballyEnabled)
     , isCaseSensitive_(isCaseSensitive)
     , soundUrl_(soundUrl)
     , regex_(isRegex_
@@ -56,6 +57,7 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
     , isRegex_(isRegex)
+    , isGloballyEnabled_(isGloballyEnabled)
     , isCaseSensitive_(isCaseSensitive)
     , soundUrl_(soundUrl)
     , color_(std::move(color))
