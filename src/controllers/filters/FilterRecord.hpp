@@ -91,6 +91,7 @@ struct Serialize<chatterino::FilterRecordPtr> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
+        // TODO: disabledHighlights section
         chatterino::rj::set(ret, "name", value->getName(), a);
         chatterino::rj::set(ret, "filter", value->getFilter(), a);
         chatterino::rj::set(ret, "id",
@@ -114,6 +115,7 @@ struct Deserialize<chatterino::FilterRecordPtr> {
 
         QString _name, _filter, _id;
 
+        // TODO: disabledHighlights section
         chatterino::rj::getSafe(value, "name", _name);
         chatterino::rj::getSafe(value, "filter", _filter);
         chatterino::rj::getSafe(value, "id", _id);
