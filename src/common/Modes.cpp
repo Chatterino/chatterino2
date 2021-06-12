@@ -25,6 +25,11 @@ Modes::Modes()
             this->isPortable = true;
         }
     }
+    this->isNightly = true;
+    // there are no plans for "stable" Dankerino, Chatterino stable is always
+    // very outdated and potentially less stable than nightly. Also disables
+    // updates to make sure that Dankerino doesn't get overridden by upstream
+    // Chatterino
 }
 
 const Modes &Modes::instance()
