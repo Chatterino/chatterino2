@@ -108,9 +108,9 @@ namespace pajlada {
 namespace {
     chatterino::HighlightPhrase constructError()
     {
-        return chatterino::HighlightPhrase(QString(), false, false, false,
-                                           false, false, false, QString(),
-                                           QColor());
+        return chatterino::HighlightPhrase(QString(), QString(), false, false,
+                                           false, false, false, false,
+                                           QString(), QColor());
     }
 }  // namespace
 
@@ -173,7 +173,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
             _color = chatterino::HighlightPhrase::FALLBACK_HIGHLIGHT_COLOR;
 
         return chatterino::HighlightPhrase(
-            _pattern, _showInMentions, _hasAlert, _hasSound, _isRegex,
+            _id, _pattern, _showInMentions, _hasAlert, _hasSound, _isRegex,
             _isGloballyEnabled, _isCaseSensitive, _soundUrl, _color);
     }
 };

@@ -49,7 +49,7 @@ HighlightPhrase::HighlightPhrase(QString identifier, const QString &pattern,
     this->color_ = std::make_shared<QColor>(color);
 }
 
-HighlightPhrase::HighlightPhrase(QString identifier,const QString &pattern,
+HighlightPhrase::HighlightPhrase(QString identifier, const QString &pattern,
                                  bool showInMentions, bool hasAlert,
                                  bool hasSound, bool isRegex,
                                  bool isGloballyEnabled, bool isCaseSensitive,

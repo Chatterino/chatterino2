@@ -292,7 +292,8 @@ void SharedMessageBuilder::parseHighlights()
         currentUsername.size() > 0)
     {
         HighlightPhrase selfHighlight(
-            currentUsername, getSettings()->showSelfHighlightInMentions,
+            QString{}, currentUsername,
+            getSettings()->showSelfHighlightInMentions,
             getSettings()->enableSelfHighlightTaskbar,
             getSettings()->enableSelfHighlightSound, false, false, false,
             getSettings()->selfHighlightSoundUrl.getValue(),
