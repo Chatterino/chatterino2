@@ -24,20 +24,20 @@ public:
      *
      * Use this constructor when creating a new HighlightPhrase.
      */
-    HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
-                    bool hasSound, bool isRegex, bool isGloballyEnabled,
-                    bool isCaseSensitive, const QString &soundUrl,
-                    QColor color);
+    HighlightPhrase(const QString identifier, const QString &pattern,
+                    bool showInMentions, bool hasAlert, bool hasSound,
+                    bool isRegex, bool isGloballyEnabled, bool isCaseSensitive,
+                    const QString &soundUrl, QColor color);
 
     /**
      * @brief Create a new HighlightPhrase.
      *
      * Use this constructor when updating an existing HighlightPhrase's color.
      */
-    HighlightPhrase(const QString &pattern, bool showInMentions, bool hasAlert,
-                    bool hasSound, bool isRegex, bool isGloballyEnabled,
-                    bool isCaseSensitive, const QString &soundUrl,
-                    std::shared_ptr<QColor> color);
+    HighlightPhrase(QString identifier, const QString &pattern,
+                    bool showInMentions, bool hasAlert, bool hasSound,
+                    bool isRegex, bool isGloballyEnabled, bool isCaseSensitive,
+                    const QString &soundUrl, std::shared_ptr<QColor> color);
 
     const QString &getUniqueIdentifier() const;
     const QString &getPattern() const;

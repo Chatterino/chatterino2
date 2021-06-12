@@ -24,11 +24,13 @@ bool HighlightPhrase::operator==(const HighlightPhrase &other) const
                     other.soundUrl_, other.color_);
 }
 
-HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
-                                 bool hasAlert, bool hasSound, bool isRegex,
+HighlightPhrase::HighlightPhrase(QString identifier, const QString &pattern,
+                                 bool showInMentions, bool hasAlert,
+                                 bool hasSound, bool isRegex,
                                  bool isGloballyEnabled, bool isCaseSensitive,
                                  const QString &soundUrl, QColor color)
-    : pattern_(pattern)
+    : id_(std::move(identifier))
+    , pattern_(pattern)
     , showInMentions_(showInMentions)
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
@@ -47,12 +49,14 @@ HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
     this->color_ = std::make_shared<QColor>(color);
 }
 
-HighlightPhrase::HighlightPhrase(const QString &pattern, bool showInMentions,
-                                 bool hasAlert, bool hasSound, bool isRegex,
+HighlightPhrase::HighlightPhrase(QString identifier,const QString &pattern,
+                                 bool showInMentions, bool hasAlert,
+                                 bool hasSound, bool isRegex,
                                  bool isGloballyEnabled, bool isCaseSensitive,
                                  const QString &soundUrl,
                                  std::shared_ptr<QColor> color)
-    : pattern_(pattern)
+    : id_(std::move(identifier))
+    , pattern_(pattern)
     , showInMentions_(showInMentions)
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
