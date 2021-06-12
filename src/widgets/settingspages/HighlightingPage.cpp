@@ -81,6 +81,8 @@ HighlightingPage::HighlightingPage()
                     QHeaderView::Fixed);
                 view->getTableView()->horizontalHeader()->setSectionResizeMode(
                     0, QHeaderView::Stretch);
+                view->getTableView()->horizontalHeader()->hideSection(
+                    HighlightModel::Column::Identifier);
 
                 // fourtf: make class extend BaseWidget and add this to
                 // dpiChanged
