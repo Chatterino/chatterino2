@@ -24,7 +24,7 @@ public:
      *
      * Use this constructor when creating a new HighlightPhrase.
      */
-    HighlightPhrase(const QString identifier, const QString &pattern,
+    HighlightPhrase(QString identifier, const QString &pattern,
                     bool showInMentions, bool hasAlert, bool hasSound,
                     bool isRegex, bool isGloballyEnabled, bool isCaseSensitive,
                     const QString &soundUrl, QColor color);
