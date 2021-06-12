@@ -121,6 +121,7 @@ struct Serialize<chatterino::HighlightPhrase> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
+        chatterino::rj::set(ret, "id", value.getUniqueIdentifier(), a);
         chatterino::rj::set(ret, "pattern", value.getPattern(), a);
         chatterino::rj::set(ret, "showInMentions", value.showInMentions(), a);
         chatterino::rj::set(ret, "alert", value.hasAlert(), a);
@@ -148,6 +149,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
             return constructError();
         }
 
+        QString _id;
         QString _pattern;
         bool _showInMentions = true;
         bool _hasAlert = true;
@@ -158,6 +160,7 @@ struct Deserialize<chatterino::HighlightPhrase> {
         QString _soundUrl;
         QString encodedColor;
 
+        chatterino::rj::getSafe(value, "id", _id);
         chatterino::rj::getSafe(value, "pattern", _pattern);
         chatterino::rj::getSafe(value, "showInMentions", _showInMentions);
         chatterino::rj::getSafe(value, "alert", _hasAlert);
