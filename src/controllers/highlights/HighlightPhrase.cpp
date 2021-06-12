@@ -16,12 +16,14 @@ QColor HighlightPhrase::FALLBACK_SUB_COLOR = QColor(196, 102, 255, 100);
 
 bool HighlightPhrase::operator==(const HighlightPhrase &other) const
 {
-    return std::tie(this->pattern_, this->showInMentions_, this->hasSound_,
-                    this->hasAlert_, this->isRegex_, this->isCaseSensitive_,
-                    this->soundUrl_, this->color_) ==
-           std::tie(other.pattern_, other.showInMentions_, other.hasSound_,
-                    other.hasAlert_, other.isRegex_, other.isCaseSensitive_,
-                    other.soundUrl_, other.color_);
+    return std::tie(this->id_, this->pattern_, this->showInMentions_,
+                    this->hasSound_, this->hasAlert_, this->isRegex_,
+                    this->isCaseSensitive_, this->soundUrl_, this->color_,
+                    this->isGloballyEnabled_) ==
+           std::tie(other.id_, other.pattern_, other.showInMentions_,
+                    other.hasSound_, other.hasAlert_, other.isRegex_,
+                    other.isCaseSensitive_, other.soundUrl_, other.color_,
+                    other.isGloballyEnabled_);
 }
 
 HighlightPhrase::HighlightPhrase(QString identifier, const QString &pattern,
