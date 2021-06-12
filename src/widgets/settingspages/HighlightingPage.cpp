@@ -91,8 +91,8 @@ HighlightingPage::HighlightingPage()
 
                 view->addButtonPressed.connect([] {
                     getSettings()->highlightedMessages.append(HighlightPhrase{
-                        QUuid::createUuid().toString(), "my phrase", true, true,
-                        false, false, true, false, "",
+                        QUuid::createUuid().toString(QUuid::WithoutBraces),
+                        "my phrase", true, true, false, false, true, false, "",
                         *ColorProvider::instance().color(
                             ColorType::SelfHighlight)});
                 });
