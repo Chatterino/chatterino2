@@ -37,7 +37,7 @@ public:
     void replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
     boost::optional<HotkeyScope> hotkeyScopeFromName(QString scopeName);
     QString hotkeyScopeToName(HotkeyScope scope);
-    bool isDuplicate(std::shared_ptr<Hotkey> hotkey);
+    bool isDuplicate(std::shared_ptr<Hotkey> hotkey, QString ignoreNamed);
 
     const std::map<HotkeyScope, QString> hotkeyScopeNames = {
         {HotkeyScope::PopupWindow, "popupWindow"},

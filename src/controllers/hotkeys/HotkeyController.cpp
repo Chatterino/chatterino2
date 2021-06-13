@@ -463,12 +463,14 @@ void HotkeyController::replaceHotkey(QString oldName,
     this->hotkeys_.append(newHotkey);
 }
 
-bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey)
+bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
+                                   QString ignoreNamed)
 {
     for (const auto shared : this->hotkeys_)
     {
         if (shared->scope() == hotkey->scope() &&
-            shared->keySequence() == hotkey->keySequence())
+            shared->keySequence() == hotkey->keySequence() &&
+            shared->name() != hotkey->name() && shared->name() != ignoreNamed)
         {
             return true;
         }
