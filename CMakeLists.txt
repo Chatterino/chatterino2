@@ -58,39 +58,37 @@ find_package(Threads REQUIRED)
 
 find_library(LIBRT rt)
 
-if (BUILD_APP)
-    if (USE_SYSTEM_LIBCOMMUNI)
-        find_package(LibCommuni REQUIRED)
-    else()
-        set(LIBCOMMUNI_ROOT_LIB_FOLDER "${CMAKE_SOURCE_DIR}/lib/libcommuni")
-        if (NOT EXISTS "${LIBCOMMUNI_ROOT_LIB_FOLDER}/CMakeLists.txt")
-            message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/libcommuni/CMakeLists.txt")
-        endif()
-
-        add_subdirectory("${LIBCOMMUNI_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
+if (USE_SYSTEM_LIBCOMMUNI)
+    find_package(LibCommuni REQUIRED)
+else()
+    set(LIBCOMMUNI_ROOT_LIB_FOLDER "${CMAKE_SOURCE_DIR}/lib/libcommuni")
+    if (NOT EXISTS "${LIBCOMMUNI_ROOT_LIB_FOLDER}/CMakeLists.txt")
+        message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/libcommuni/CMakeLists.txt")
     endif()
 
-    # Link QtKeychain statically
-    option(QTKEYCHAIN_STATIC "" ON)
+    add_subdirectory("${LIBCOMMUNI_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
+endif()
 
-    if (USE_SYSTEM_QT5KEYCHAIN)
-        find_package(Qt5Keychain REQUIRED)
-    else()
-        set(QT5KEYCHAIN_ROOT_LIB_FOLDER "${CMAKE_SOURCE_DIR}/lib/qtkeychain")
-        if (NOT EXISTS "${QT5KEYCHAIN_ROOT_LIB_FOLDER}/CMakeLists.txt")
-            message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/qtkeychain/CMakeLists.txt")
-        endif()
+# Link QtKeychain statically
+option(QTKEYCHAIN_STATIC "" ON)
 
-        add_subdirectory("${QT5KEYCHAIN_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
-        if (NOT TARGET qt5keychain)
-            message(FATAL_ERROR "qt5keychain target was not created :@")
-        endif()
+if (USE_SYSTEM_QT5KEYCHAIN)
+    find_package(Qt5Keychain REQUIRED)
+else()
+    set(QT5KEYCHAIN_ROOT_LIB_FOLDER "${CMAKE_SOURCE_DIR}/lib/qtkeychain")
+    if (NOT EXISTS "${QT5KEYCHAIN_ROOT_LIB_FOLDER}/CMakeLists.txt")
+        message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/qtkeychain/CMakeLists.txt")
     endif()
 
-    find_package(RapidJSON REQUIRED)
+    add_subdirectory("${QT5KEYCHAIN_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
+    if (NOT TARGET qt5keychain)
+        message(FATAL_ERROR "qt5keychain target was not created :@")
+    endif()
+endif()
 
-    find_package(Websocketpp REQUIRED)
-endif ()
+find_package(RapidJSON REQUIRED)
+
+find_package(Websocketpp REQUIRED)
 
 if (BUILD_TESTS)
     find_package(GTest REQUIRED)
@@ -113,9 +111,12 @@ endif()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-if (BUILD_APP)
-    add_subdirectory(src)
+if (BUILD_TESTS)
+    add_definitions(-DCHATTERINO_TEST)
 endif ()
+
+add_subdirectory(src)
+
 if (BUILD_TESTS)
     enable_testing()
     add_subdirectory(tests)
