@@ -31,8 +31,6 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
         this->ui_->keyComboEdit->setKeySequence(
             QKeySequence::fromString(hotkey->keySequence().toString()));
         this->ui_->nameEdit->setText(hotkey->name());
-        this->updatePossibleActions();  // make sure the action names are available
-
         // update arguments
         bool isFirst = true;
         QString argsText;
@@ -170,13 +168,19 @@ void EditHotkeyDialog::updatePossibleActions()
 
         return;
     }
-    const auto currentText = this->ui_->actionPicker->currentData().toString();
+    auto currentText = this->ui_->actionPicker->currentData().toString();
+    if (this->data_ && (currentText == "" || this->data_->scope() == scope))
+    {
+        // is editing
+        currentText = this->data_->action();
+    }
     this->ui_->actionPicker->clear();
-    qCDebug(chatterinoHotkeys) << "update possible actions for" << (int)*scope;
+    qCDebug(chatterinoHotkeys)
+        << "update possible actions for" << (int)*scope << currentText;
     auto actions = actionNames.find(*scope);
     if (actions != actionNames.end())
     {
-        int index = 0;
+        int indexToSet = -1;
         for (const auto action : actions->second)
         {
             this->ui_->actionPicker->addItem(action.second.displayName,
@@ -184,9 +188,12 @@ void EditHotkeyDialog::updatePossibleActions()
             if (action.first == currentText)
             {
                 // update action raw name to display name
-                this->ui_->actionPicker->setCurrentIndex(index);
+                indexToSet = this->ui_->actionPicker->model()->rowCount() - 1;
             }
-            index++;
+        }
+        if (indexToSet != -1)
+        {
+            this->ui_->actionPicker->setCurrentIndex(indexToSet);
         }
     }
     else
