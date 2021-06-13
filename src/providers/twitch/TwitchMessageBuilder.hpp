@@ -64,6 +64,8 @@ public:
                                      MessageBuilder *builder);
     static void hostingSystemMessage(const QString &channelName,
                                      MessageBuilder *builder);
+    static void deletionMessage(const MessagePtr originalMessage,
+                                MessageBuilder *builder);
 
 private:
     void parseUsernameColor() override;
