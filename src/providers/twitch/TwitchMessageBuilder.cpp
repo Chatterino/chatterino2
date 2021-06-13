@@ -674,11 +674,7 @@ void TwitchMessageBuilder::appendUsername()
     // The full string that will be rendered in the chat widget
     QString usernameText;
 
-    pajlada::Settings::Setting<int> usernameDisplayMode(
-        "/appearance/messages/usernameDisplayMode",
-        UsernameDisplayMode::UsernameAndLocalizedName);
-
-    switch (usernameDisplayMode.getValue())
+    switch (getSettings()->usernameDisplayMode.getValue())
     {
         case UsernameDisplayMode::Username: {
             usernameText = username;
