@@ -11,7 +11,6 @@
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
 
-#include <IrcConnection>
 #include <QColor>
 #include <QElapsedTimer>
 #include <QRegularExpression>
