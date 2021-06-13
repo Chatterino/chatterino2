@@ -52,6 +52,11 @@ private:
 
 ConcurrentSettings &getCSettings();
 
+enum UsernameDisplayMode : int {
+    Username = 1,                  // Username
+    LocalizedName = 2,             // Localized name
+    UsernameAndLocalizedName = 3,  // Username (Localized name)
+};
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings : public ABSettings, public ConcurrentSettings
@@ -88,6 +93,9 @@ public:
         "/appearance/messages/hideDeletionActions", false};
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
                                      true};
+    EnumSetting<UsernameDisplayMode> usernameDisplayMode = {
+        "/appearance/messages/usernameDisplayMode",
+        UsernameDisplayMode::UsernameAndLocalizedName};
 
     IntSetting tabDirection = {"/appearance/tabDirection",
                                NotebookTabDirection::Horizontal};
