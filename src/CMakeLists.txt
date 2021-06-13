@@ -423,6 +423,8 @@ set(SOURCE_FILES
         widgets/settingspages/CommandPage.cpp
         widgets/settingspages/CommandPage.hpp
         widgets/settingspages/ExternalToolsPage.cpp
+        widgets/settingspages/DankerinoPage.cpp
+        widgets/settingspages/DankerinoPage.hpp
         widgets/settingspages/ExternalToolsPage.hpp
         widgets/settingspages/FiltersPage.cpp
         widgets/settingspages/FiltersPage.hpp

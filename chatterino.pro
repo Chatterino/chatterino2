@@ -310,6 +310,7 @@ SOURCES += \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
+    src/widgets/settingspages/DankerinoPage.cpp \
     src/widgets/settingspages/ExternalToolsPage.cpp \
     src/widgets/settingspages/FiltersPage.cpp \
     src/widgets/settingspages/GeneralPage.cpp \
@@ -574,6 +575,7 @@ HEADERS += \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \
+    src/widgets/settingspages/DankerinoPage.hpp \
     src/widgets/settingspages/ExternalToolsPage.hpp \
     src/widgets/settingspages/FiltersPage.hpp \
     src/widgets/settingspages/GeneralPage.hpp \

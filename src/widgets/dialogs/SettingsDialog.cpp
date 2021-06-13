@@ -10,6 +10,7 @@
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
 #include "widgets/settingspages/CommandPage.hpp"
+#include "widgets/settingspages/DankerinoPage.hpp"
 #include "widgets/settingspages/ExternalToolsPage.hpp"
 #include "widgets/settingspages/FiltersPage.hpp"
 #include "widgets/settingspages/GeneralPage.hpp"
@@ -159,9 +160,13 @@ void SettingsDialog::addTabs()
     this->ui_.tabContainer->setContentsMargins(0, 20, 0, 20);
 
     // Constructors are wrapped in std::function to remove some strain from first time loading.
+    QString externalToolsIcon = getSettings()->dankerinoThreeLetterApiEasterEgg
+                                    ? ":/settings/GraphQL.svg"
+                                    : ":/settings/externaltools.svg";
 
     // clang-format off
     this->addTab([]{return new GeneralPage;},          "General",        ":/settings/about.svg");
+    this->addTab([]{return new DankerinoPage;},        "Dankerino",      ":/settings/about.svg");
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new AccountsPage;},         "Accounts",       ":/settings/accounts.svg", SettingsTabId::Accounts);
     this->ui_.tabContainer->addSpacing(16);
@@ -173,7 +178,7 @@ void SettingsDialog::addTabs()
     this->addTab([]{return new KeyboardSettingsPage;}, "Keybindings",    ":/settings/keybinds.svg");
     this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg", SettingsTabId::Moderation);
     this->addTab([]{return new NotificationPage;},     "Live Notifications",  ":/settings/notification2.svg");
-    this->addTab([]{return new ExternalToolsPage;},    "External tools", ":/settings/externaltools.svg");
+    this->addTab([]{return new ExternalToolsPage;},    "External tools",  externalToolsIcon);
     this->ui_.tabContainer->addStretch(1);
     this->addTab([]{return new AboutPage;},            "About",          ":/settings/about.svg", SettingsTabId(), Qt::AlignBottom);
     // clang-format on

@@ -429,6 +429,9 @@ public:
         1100,
     };
 
+    BoolSetting dankerinoThreeLetterApiEasterEgg = {
+        "/misc/dankerinoThreeLetterApiEasterEgg", false};
+
 private:
     void updateModerationActions();
     void moveLegacyDankerinoSettings_();

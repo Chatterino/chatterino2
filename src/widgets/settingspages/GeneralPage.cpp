@@ -223,8 +223,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Smooth scrolling on new messages",
                        s.enableSmoothScrollingNewMessages);
     layout.addCheckbox("Show input when it's empty", s.showEmptyInput);
-    layout.addCheckbox("Show placeholder in text input box (requires restart)",
-                       s.showTextInputPlaceholder);
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
     layout.addCheckbox("Allow sending duplicate messages",
                        s.allowDuplicateMessages);
@@ -316,7 +314,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Remove spaces between emotes",
                        s.removeSpacesBetweenEmotes);
-    layout.addCheckbox("Enable loading 7TV emotes", s.enableLoadingSevenTV);
     layout.addDropdown<int>(
         "Show info on hover", {"Don't show", "Always show", "Hold shift"},
         s.emotesTooltipPreview,
@@ -610,7 +607,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
                        s.mentionUsersWithComma);
-    layout.addCheckbox("Lowercase usernames", s.lowercaseUsernames);
     layout.addCheckbox("Show joined users (< 1000 chatters)", s.showJoins);
     layout.addCheckbox("Show parted users (< 1000 chatters)", s.showParts);
     layout.addCheckbox("Automatically close user popup when it loses focus",
@@ -667,7 +663,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.enableExperimentalIrc);
     layout.addCheckbox("Show unhandled IRC messages",
                        s.showUnhandledIrcMessages);
-    layout.addCheckbox("Colorize usernames on IRC", s.colorizeNicknamesOnIrc);
     layout.addDropdown<int>(
         "Stack timeouts", {"Stack", "Stack until timeout", "Don't stack"},
         s.timeoutStackStyle,
@@ -685,13 +680,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.highlightMentions);
 
     layout.addStretch();
-
-    layout.addSubtitle("Miscellaneous Dankerino things");
-    layout.addIntInput("High rate limit spam delay in milliseconds (mod/vip)",
-                       s.twitchHighRateLimitDelay, 100, 2000, 100);
-    layout.addIntInput(
-        "Low rate limit spam delay in milliseconds (non mod/vip)",
-        s.twitchLowRateLimitDelay, 500, 3000, 1100);
 
     // invisible element for width
     auto inv = new BaseWidget(this);
