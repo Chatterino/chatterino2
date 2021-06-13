@@ -1,8 +1,6 @@
 #include "util/ExponentialBackoff.hpp"
 
 #include <gtest/gtest.h>
-#include <QDebug>
-#include <QString>
 
 using namespace chatterino;
 
