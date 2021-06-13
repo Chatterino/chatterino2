@@ -1,5 +1,10 @@
 #pragma once
+
 #include "controllers/hotkeys/Hotkey.hpp"
+
+#include <QDialog>
+
+#include <memory>
 
 namespace Ui {
 class EditHotkeyDialog;

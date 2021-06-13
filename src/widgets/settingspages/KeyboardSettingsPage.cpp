@@ -8,6 +8,7 @@
 #include "widgets/dialogs/EditHotkeyDialog.hpp"
 
 #include <QFormLayout>
+#include <QHeaderView>
 #include <QLabel>
 #include <QTableView>
 

@@ -2,6 +2,7 @@
 
 #include "HotkeyScope.hpp"
 
+#include <QKeySequence>
 #include <QString>
 
 namespace chatterino {
