@@ -31,8 +31,7 @@ HighlightPhrase::HighlightPhrase(QString identifier, const QString &pattern,
                                  bool hasSound, bool isRegex,
                                  bool isGloballyEnabled, bool isCaseSensitive,
                                  const QString &soundUrl, QColor color)
-    : id_(std::move(identifier))
-    , pattern_(pattern)
+    : pattern_(pattern)
     , showInMentions_(showInMentions)
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
