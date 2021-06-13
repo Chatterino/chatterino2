@@ -49,6 +49,9 @@ HighlightPhrase::HighlightPhrase(QString identifier, const QString &pattern,
                                    : QRegularExpression::CaseInsensitiveOption))
 {
     this->color_ = std::make_shared<QColor>(color);
+    this->id_ = identifier.isEmpty()
+                    ? QUuid::createUuid().toString(QUuid::WithoutBraces)
+                    : std::move(identifier);
 }
 
 HighlightPhrase::HighlightPhrase(QString identifier, const QString &pattern,
@@ -57,8 +60,7 @@ HighlightPhrase::HighlightPhrase(QString identifier, const QString &pattern,
                                  bool isGloballyEnabled, bool isCaseSensitive,
                                  const QString &soundUrl,
                                  std::shared_ptr<QColor> color)
-    : id_(std::move(identifier))
-    , pattern_(pattern)
+    : pattern_(pattern)
     , showInMentions_(showInMentions)
     , hasAlert_(hasAlert)
     , hasSound_(hasSound)
@@ -75,6 +77,9 @@ HighlightPhrase::HighlightPhrase(QString identifier, const QString &pattern,
                  (isCaseSensitive_ ? QRegularExpression::NoPatternOption
                                    : QRegularExpression::CaseInsensitiveOption))
 {
+    this-> id_ = identifier.isEmpty()
+                    ? QUuid::createUuid().toString(QUuid::WithoutBraces)
+                    : std::move(identifier);
 }
 
 const QString &HighlightPhrase::getPattern() const
