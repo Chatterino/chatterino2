@@ -225,6 +225,15 @@ AboutPage::AboutPage()
 
     auto buildText = QString("Built with " + buildInfo.join(", "));
     layout.emplace<QLabel>(buildText);
+    auto advancedButton =
+        layout.emplace<QPushButton>("Enable advanced Dankerino settings");
+    QObject::connect(
+        advancedButton.getElement(), &QPushButton::clicked,
+        [bttn = advancedButton.getElement()] {
+            getSettings()->dankerinoThreeLetterApiEasterEgg.setValue(true);
+            bttn->setText("now restart your client");
+            bttn->setEnabled(false);
+        });
 
     layout->addStretch(1);
 }
