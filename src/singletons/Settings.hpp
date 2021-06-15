@@ -428,6 +428,9 @@ public:
         "/misc/twitch/lowRateLimitDelay",
         1100,
     };
+    BoolSetting abnormalNonceDetection = {"/misc/abnormalNonceDetection",
+                                          false};
+    BoolSetting normalNonceDetection = {"/misc/normalNonceDetection", false};
 
     BoolSetting dankerinoThreeLetterApiEasterEgg = {
         "/misc/dankerinoThreeLetterApiEasterEgg", false};

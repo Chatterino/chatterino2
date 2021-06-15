@@ -60,9 +60,17 @@ void DankerinoPage::initLayout(GeneralPageView &layout)
 
     if (s.dankerinoThreeLetterApiEasterEgg)
     {
+        layout.addCheckbox("Click to disable GraphQL easter egg and "
+                           "advanced settings "
+                           "(requires restart)",
+                           s.dankerinoThreeLetterApiEasterEgg);
+        layout.addTitle("Random 'hacks'");
+        layout.addCheckbox("Abnormal nonce detection",
+                           s.abnormalNonceDetection);
         layout.addCheckbox(
-            "Click to disable GraphQL easter egg (requires restart)",
-            s.dankerinoThreeLetterApiEasterEgg);
+            "Webchat detection. Adds a little orange asterisk before the "
+            "message timestamp if it was sent from webchat.",
+            s.normalNonceDetection);
     }
     layout.addStretch();
     // invisible element for width

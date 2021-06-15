@@ -6,6 +6,7 @@
 
 - Major: Add 7TV emotes from Chatterino7 (Mm2PL/Dankerino#79)
 - Minor: Move Dankerino settings to a separate tab (Mm2PL/Dankerino#84)
+- Minor: Add advanced IRC tag related settings (Mm2PL/Dankerino#86)
 - Minor: Allow for adjusting rate limit settings.
 
 ### Chatterino
