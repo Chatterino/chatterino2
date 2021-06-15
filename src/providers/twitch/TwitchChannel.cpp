@@ -618,7 +618,8 @@ void TwitchChannel::setLive(bool newLiveStatus)
                     getApp()->twitch2->liveChannel->getMessageSnapshot();
                 int snapshotLength = snapshot.size();
 
-                auto end = int(std::max(0, snapshotLength - 200));
+                // MSVC hates this code if the parens are not there
+                int end = (std::max)(0, snapshotLength - 200);
                 auto liveMessageSearchText =
                     QString("%1 is live!").arg(this->getDisplayName());
 
