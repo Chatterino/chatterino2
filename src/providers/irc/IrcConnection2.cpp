@@ -116,7 +116,6 @@ IrcConnection::IrcConnection(QObject *parent)
 
 void IrcConnection::open()
 {
-    // Accurately track the time a connection was opened
     this->expectConnectionLoss_ = false;
     this->waitingForPong_ = false;
     this->recentlyReceivedMessage_ = false;
