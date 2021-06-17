@@ -113,7 +113,7 @@ jobs:
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ matrix.build-system }}.zip
           path: build/chatterino-windows-x86-64.zip
@@ -170,7 +170,7 @@ jobs:
 
       - name: Upload artifact (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
           path: build/Chatterino-x86_64.AppImage
@@ -215,7 +215,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
           path: build/chatterino-osx.dmg
