@@ -10,6 +10,7 @@
 
 #include <rapidjson/document.h>
 #include <QColor>
+#include <QElapsedTimer>
 #include <QString>
 
 #include <functional>
