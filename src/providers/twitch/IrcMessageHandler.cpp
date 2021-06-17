@@ -494,21 +494,19 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 {
-    auto app = getApp();
-    auto currentUser = app->accounts->twitch.getCurrent();
+    auto currentUser = getApp()->accounts->twitch.getCurrent();
 
     // set received emote-sets, used in TwitchAccount::loadUserstateEmotes
-    bool loadEmotes = currentUser->areRecentUserstateEmoteSetsEmpty();
+    bool shouldLoadEmotes = currentUser->areLastUserstateEmoteSetsEmpty();
 
-    currentUser->setRecentUserstateEmoteSets(
+    currentUser->setLastUserstateEmoteSets(
         message->tag("emote-sets").toString().split(","));
 
     // we have to call loadUserstateEmotes if this is a first USERSTATE
     // after currentUserChanged signal emitted
-    if (loadEmotes)
+    if (shouldLoadEmotes)
     {
-        qDebug() << message->toData();
-        currentUser->loadUserstateEmotes();
+        // TODO: figure out a nice way to reload only emotes from USERSTATE
     }
 
     QString channelName;
@@ -517,7 +515,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         return;
     }
 
-    auto c = app->twitch.server->getChannelOrEmpty(channelName);
+    auto c = getApp()->twitch.server->getChannelOrEmpty(channelName);
     if (c->isEmpty())
     {
         return;

@@ -195,18 +195,14 @@ void TwitchAccount::loadEmotes()
 
     if (this->getOAuthClient().isEmpty() || this->getOAuthToken().isEmpty())
     {
-        qCDebug(chatterinoTwitch) << "Missing Client ID or OAuth token";
+        qCDebug(chatterinoTwitch) << "Missing Client ID and/or OAuth token";
         return;
     }
 
+    // Getting subscription emotes from kraken
     getKraken()->getUserEmotes(
         this,
         [this](KrakenEmoteSets data) {
-            // clear emote data
-            auto emoteData = this->emotes_.access();
-            emoteData->emoteSets.clear();
-            emoteData->allEmoteNames.clear();
-
             // no emotes available
             if (data.emoteSets.isEmpty())
             {
@@ -215,6 +211,11 @@ void TwitchAccount::loadEmotes()
                        "Kraken::getUserEmotes response";
                 return;
             }
+
+            // Clearing emote data
+            auto emoteData = this->emotes_.access();
+            emoteData->emoteSets.clear();
+            emoteData->allEmoteNames.clear();
 
             for (auto emoteSetIt = data.emoteSets.begin();
                  emoteSetIt != data.emoteSets.end(); ++emoteSetIt)
@@ -231,6 +232,7 @@ void TwitchAccount::loadEmotes()
                         qCWarning(chatterinoTwitch)
                             << QString("Emote value from set %1 was invalid")
                                    .arg(emoteSet->key);
+                        continue;
                     }
                     KrakenEmote krakenEmote(emoteArrObj.toObject());
 
@@ -253,41 +255,50 @@ void TwitchAccount::loadEmotes()
                           });
                 emoteData->emoteSets.emplace_back(emoteSet);
             }
+            // Getting userstate emotes from Ivr
+            // Without delaying this, deadlock occurs
+            QTimer::singleShot(1, [this] {
+                this->loadUserstateEmotes();
+            });
         },
         [] {
-            // request failed
+            // kraken request failed
         });
 }
 
-bool TwitchAccount::areRecentUserstateEmoteSetsEmpty()
+bool TwitchAccount::areLastUserstateEmoteSetsEmpty()
 {
-    qDebug() << this->recentUserstateEmoteSets_.size();
-    return this->recentUserstateEmoteSets_.size() == 0;
+    return this->lastUserstateEmoteSets_.size() == 0;
 }
 
-void TwitchAccount::setRecentUserstateEmoteSets(QStringList emoteSets)
+void TwitchAccount::setLastUserstateEmoteSets(QStringList emoteSets)
 {
-    this->recentUserstateEmoteSets_ = emoteSets;
+    this->lastUserstateEmoteSets_ = emoteSets;
 }
 
 void TwitchAccount::loadUserstateEmotes()
 {
-    qDebug() << this->recentUserstateEmoteSets_;
+    // attempt loading userstate emotes only if there are any emotesets cached
+    if (this->areLastUserstateEmoteSetsEmpty())
+    {
+        return;
+    }
+
+    QStringList newEmoteSetKeys, krakenEmoteSetKeys;
+
     auto emoteData = this->emotes_.access();
     auto userEmoteSets = emoteData->emoteSets;
-
-    QStringList newEmoteSetKeys, currentEmoteSetKeys;
 
     // get list of already fetched emote sets
     for (const auto &userEmoteSet : userEmoteSets)
     {
-        currentEmoteSetKeys.push_back(userEmoteSet->key);
+        krakenEmoteSetKeys.push_back(userEmoteSet->key);
     }
 
     // filter out emote sets from userstate message, which are not in fetched emote set list
-    for (const auto &emoteSetKey : this->recentUserstateEmoteSets_)
+    for (const auto &emoteSetKey : this->lastUserstateEmoteSets_)
     {
-        if (!currentEmoteSetKeys.contains(emoteSetKey))
+        if (!krakenEmoteSetKeys.contains(emoteSetKey))
         {
             newEmoteSetKeys.push_back(emoteSetKey);
         }
@@ -298,6 +309,9 @@ void TwitchAccount::loadUserstateEmotes()
     {
         return;
     }
+    qCDebug(chatterinoTwitch) << QString("Loading %1 emotesets from IVR: %2")
+                                     .arg(newEmoteSetKeys.size())
+                                     .arg(newEmoteSetKeys.join(", "));
 
     // splitting newEmoteSetKeys to batches of 100, because Ivr API endpoint accepts a maximum of 100 emotesets at once
     constexpr int batchSize = 100;
@@ -319,6 +333,7 @@ void TwitchAccount::loadUserstateEmotes()
         batches.emplace_back(batch);
     }
 
+    // requesting emotes
     for (const auto &batch : batches)
     {
         getIvr()->getBulkEmoteSets(
@@ -370,7 +385,6 @@ void TwitchAccount::loadUserstateEmotes()
                 // fetching emotes failed, ivr API might be down
             });
     };
-    return;
 }
 
 SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
@@ -492,7 +506,6 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
     NetworkRequest(Env::get().twitchEmoteSetResolverUrl.arg(emoteSet->key))
         .cache()
         .onSuccess([emoteSet](NetworkResult result) -> Outcome {
-            auto rootOld = result.parseRapidJson();
             auto root = result.parseJson();
             if (root.isEmpty())
             {
@@ -515,10 +528,11 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
 
             return Success;
         })
-        .onError([](NetworkResult result) {
+        .onError([emoteSet](NetworkResult result) {
             qCWarning(chatterinoTwitch)
-                << QString("Error code %1 while loading emote set data")
-                       .arg(result.status());
+                << QString("Error code %1 while loading emote set data for %2")
+                       .arg(result.status())
+                       .arg(emoteSet->key);
         })
         .execute();
 }

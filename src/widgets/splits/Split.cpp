@@ -827,7 +827,6 @@ void Split::reloadChannelAndSubscriberEmotes()
     auto channel = this->getChannel();
 
     currentUser->loadEmotes();
-    currentUser->loadUserstateEmotes();
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
