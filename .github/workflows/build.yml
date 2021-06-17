@@ -239,32 +239,32 @@ jobs:
               Nightly Build
           prerelease: true
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: chatterino-windows-x86-64-5.15.2-qmake.zip
           path: windows/
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: chatterino-windows-x86-64-5.15.2-cmake.zip
           path: windows-cmake/
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: Chatterino-x86_64-5.15.2-qmake.AppImage
           path: linux/
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: Chatterino-x86_64-5.15.2-cmake.AppImage
           path: linux-cmake/
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: chatterino-osx-5.15.2-qmake.dmg
           path: macos/
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: chatterino-osx-5.15.2-cmake.dmg
           path: macos-cmake/
