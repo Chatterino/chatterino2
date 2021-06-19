@@ -512,6 +512,11 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             QJsonArray filters;
             encodeFilters(node->getSplit(), filters);
             obj.insert("filters", filters);
+
+            QJsonArray highlights;
+            // TODO
+//            encodeFilters(node->getSplit(), highlights);
+            obj.insert("highlights", highlights);
         }
         break;
         case SplitNode::HorizontalContainer:
