@@ -68,6 +68,18 @@ ExternalToolsPage::ExternalToolsPage()
             "Preferred quality:",
             this->createComboBox({STREAMLINK_QUALITY},
                                  getSettings()->preferredQuality));
+
+        auto optionLatencyCb =
+            this->createCheckBox("Enables low latency streaming by prefetching "
+                                 "HLS segments (--twitch-low-latency)",
+                                 getSettings()->streamlinkOptsLatency);
+        groupLayout->setWidget(5, QFormLayout::SpanningRole, optionLatencyCb);
+
+        auto optionAdsCb = this->createCheckBox(
+            "Skip embedded advertisement segments (--twitch-disable-ads)",
+            getSettings()->streamlinkOptsAds);
+        groupLayout->setWidget(6, QFormLayout::SpanningRole, optionAdsCb);
+
         groupLayout->addRow(
             "Additional options:",
             this->createLineEdit(getSettings()->streamlinkOpts));

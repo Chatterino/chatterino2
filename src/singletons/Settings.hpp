@@ -321,6 +321,9 @@ public:
     QStringSetting preferredQuality = {"/external/streamlink/quality",
                                        "Choose"};
     QStringSetting streamlinkOpts = {"/external/streamlink/options", ""};
+    BoolSetting streamlinkOptsLatency = {"/external/streamlink/optionsLatency",
+                                         true};
+    BoolSetting streamlinkOptsAds = {"/external/streamlink/optionsAds", true};
 
     // MPV player
     BoolSetting mpvFollowActive = {"/external/mpv/followActive", true};

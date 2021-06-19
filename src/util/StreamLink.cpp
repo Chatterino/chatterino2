@@ -294,6 +294,14 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
     {
         args << "--stream-sorting-excludes" << exclude;
     }
+    if (getSettings()->streamlinkOptsLatency)
+    {
+        args << "--twitch-low-latency";
+    }
+    if (getSettings()->streamlinkOptsAds)
+    {
+        args << "--twitch-disable-ads";
+    }
 
     openStreamlink(channelURL, quality, args, streamMPV);
 }
