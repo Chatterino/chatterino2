@@ -75,6 +75,15 @@ struct BanAction : PubSubAction {
     }
 };
 
+struct DeleteAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+
+    ActionUser target;
+
+    QString messageId;
+    QString messageText;
+};
+
 struct UnbanAction : PubSubAction {
     using PubSubAction::PubSubAction;
 
