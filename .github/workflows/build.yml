@@ -81,7 +81,7 @@ jobs:
         
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.8.1
+        uses: ilammy/msvc-dev-cmd@v1.9.0
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'qmake'
@@ -113,7 +113,7 @@ jobs:
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ matrix.build-system }}.zip
           path: build/chatterino-windows-x86-64.zip
@@ -170,7 +170,7 @@ jobs:
 
       - name: Upload artifact (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
           path: build/Chatterino-x86_64.AppImage
@@ -215,7 +215,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v2.2.3
+        uses: actions/upload-artifact@v2.2.4
         with:
           name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
           path: build/chatterino-osx.dmg
@@ -239,32 +239,32 @@ jobs:
               Nightly Build
           prerelease: true
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: chatterino-windows-x86-64-5.15.2-qmake.zip
           path: windows/
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: chatterino-windows-x86-64-5.15.2-cmake.zip
           path: windows-cmake/
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: Chatterino-x86_64-5.15.2-qmake.AppImage
           path: linux/
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: Chatterino-x86_64-5.15.2-cmake.AppImage
           path: linux-cmake/
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: chatterino-osx-5.15.2-qmake.dmg
           path: macos/
 
-      - uses: actions/download-artifact@v2.0.9
+      - uses: actions/download-artifact@v2.0.10
         with:
           name: chatterino-osx-5.15.2-cmake.dmg
           path: macos-cmake/
