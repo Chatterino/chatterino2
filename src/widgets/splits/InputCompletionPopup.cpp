@@ -1,4 +1,4 @@
-#include "EmoteInputPopup.hpp"
+#include "InputCompletionPopup.hpp"
 
 #include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
@@ -10,7 +10,7 @@
 #include "singletons/Emotes.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/listview/GenericListView.hpp"
-#include "widgets/splits/EmoteInputItem.hpp"
+#include "widgets/splits/InputCompletionItem.hpp"
 
 namespace chatterino {
 namespace {
@@ -41,7 +41,7 @@ namespace {
     }
 }  // namespace
 
-EmoteInputPopup::EmoteInputPopup(QWidget *parent)
+InputCompletionPopup::InputCompletionPopup(QWidget *parent)
     : BasePopup({BasePopup::EnableCustomFrame, BasePopup::Frameless,
                  BasePopup::DontFocus},
                 parent)
@@ -56,7 +56,7 @@ EmoteInputPopup::EmoteInputPopup(QWidget *parent)
     this->redrawTimer_.setInterval(33);
 }
 
-void EmoteInputPopup::initLayout()
+void InputCompletionPopup::initLayout()
 {
     LayoutCreator creator = {this};
 
@@ -71,7 +71,7 @@ void EmoteInputPopup::initLayout()
                      });
 }
 
-void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
+void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
 {
     std::vector<_Emote> emotes;
     auto tc = dynamic_cast<TwitchChannel *>(channel.get());
@@ -122,11 +122,11 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
     int count = 0;
     for (auto &&emote : emotes)
     {
-        this->model_.addItem(std::make_unique<EmoteInputItem>(
+        this->model_.addItem(std::make_unique<InputCompletionItem>(
             emote.emote, emote.displayName + " - " + emote.providerName,
             this->callback_));
 
-        if (count++ == maxEmoteCount)
+        if (count++ == maxEntryCount)
             break;
     }
 
@@ -136,22 +136,45 @@ void EmoteInputPopup::updateEmotes(const QString &text, ChannelPtr channel)
     }
 }
 
-bool EmoteInputPopup::eventFilter(QObject *watched, QEvent *event)
+void InputCompletionPopup::updateUsers(const QString &text, ChannelPtr channel)
+{
+    auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+    if (twitchChannel)
+    {
+        auto chatters = twitchChannel->accessChatters()->filterByPrefix(text);
+        this->model_.clear();
+        int count = 0;
+        for (const auto &name : chatters)
+        {
+            this->model_.addItem(std::make_unique<InputCompletionItem>(
+                nullptr, name, this->callback_));
+
+            if (count++ == maxEntryCount)
+                break;
+        }
+        if (!chatters.empty())
+        {
+            this->ui_.listView->setCurrentIndex(this->model_.index(0));
+        }
+    }
+}
+
+bool InputCompletionPopup::eventFilter(QObject *watched, QEvent *event)
 {
     return this->ui_.listView->eventFilter(watched, event);
 }
 
-void EmoteInputPopup::setInputAction(ActionCallback callback)
+void InputCompletionPopup::setInputAction(ActionCallback callback)
 {
     this->callback_ = std::move(callback);
 }
 
-void EmoteInputPopup::showEvent(QShowEvent *)
+void InputCompletionPopup::showEvent(QShowEvent *)
 {
     this->redrawTimer_.start();
 }
 
-void EmoteInputPopup::hideEvent(QHideEvent *)
+void InputCompletionPopup::hideEvent(QHideEvent *)
 {
     this->redrawTimer_.stop();
 }
