@@ -428,6 +428,46 @@ PubSub::PubSub()
         }
     };
 
+    this->moderationActionHandlers["delete"] = [this](const auto &data,
+                                                      const auto &roomID) {
+        DeleteAction action(data, roomID);
+
+        getCreatedByUser(data, action.source);
+        getTargetUser(data, action.target);
+
+        try
+        {
+            const auto &args = getArgs(data);
+
+            if (args.Size() < 3)
+            {
+                return;
+            }
+
+            if (!rj::getSafe(args[0], action.target.name))
+            {
+                return;
+            }
+
+            if (!rj::getSafe(args[1], action.messageText))
+            {
+                return;
+            }
+
+            if (!rj::getSafe(args[2], action.messageId))
+            {
+                return;
+            }
+
+            this->signals_.moderation.messageDeleted.invoke(action);
+        }
+        catch (const std::runtime_error &ex)
+        {
+            qCDebug(chatterinoPubsub)
+                << "Error parsing moderation action:" << ex.what();
+        }
+    };
+
     this->moderationActionHandlers["ban"] = [this](const auto &data,
                                                    const auto &roomID) {
         BanAction action(data, roomID);
