@@ -19,6 +19,7 @@
 #include "providers/seventv/SeventvEmotes.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Logging.hpp"
@@ -286,6 +287,46 @@ void Application::initPubsub()
 
             postToThread([chan, msg = msg.release()] {
                 chan->addOrReplaceTimeout(msg);
+            });
+        });
+    this->twitch.pubsub->signals_.moderation.messageDeleted.connect(
+        [&](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            MessageBuilder msg;
+            TwitchMessageBuilder::deletionMessage(action, &msg);
+            msg->flags.set(MessageFlag::PubSub);
+
+            postToThread([chan, msg = msg.release()] {
+                auto replaced = false;
+                LimitedQueueSnapshot<MessagePtr> snapshot =
+                    chan->getMessageSnapshot();
+                int snapshotLength = snapshot.size();
+
+                // without parens it doesn't build on windows
+                int end = (std::max)(0, snapshotLength - 200);
+
+                for (int i = snapshotLength - 1; i >= end; --i)
+                {
+                    auto &s = snapshot[i];
+                    if (!s->flags.has(MessageFlag::PubSub) &&
+                        s->timeoutUser == msg->timeoutUser)
+                    {
+                        chan->replaceMessage(s, msg);
+                        replaced = true;
+                        break;
+                    }
+                }
+                if (!replaced)
+                {
+                    chan->addMessage(msg);
+                }
             });
         });
 

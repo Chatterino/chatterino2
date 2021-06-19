@@ -112,7 +112,12 @@ public:
     SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 
     void loadEmotes();
-    void loadUserstateEmotes(QStringList emoteSetKeys);
+    // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
+    // this function makes sure not to load emote sets that have already been loaded
+    void loadUserstateEmotes();
+    // setUserStateEmoteSets sets the emote sets that were parsed from the USERSTATE emote-sets key
+    // Returns true if the newly inserted emote sets differ from the ones previously saved
+    [[nodiscard]] bool setUserstateEmoteSets(QStringList newEmoteSets);
     SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
@@ -130,7 +135,7 @@ private:
     Atomic<QColor> color_;
 
     mutable std::mutex ignoresMutex_;
-    QElapsedTimer userstateEmotesTimer_;
+    QStringList userstateEmoteSets_;
     UniqueAccess<std::set<TwitchUser>> ignores_;
     UniqueAccess<std::set<QString>> ignoresUserIds_;
 
