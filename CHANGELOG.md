@@ -21,7 +21,7 @@
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
 - Bugfix: Fixed pasting text with URLs included (#1688, #2855)
 - Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850)
-- Bugfix: Fixed bit emotes not loading in some rare cases. (#2856)
+- Bugfix: Fixed bit and new subscriber emotes not (re)loading in some rare cases. (#2856, #2857)
 
 ## 2.3.2
 
