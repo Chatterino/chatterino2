@@ -823,10 +823,8 @@ void Split::showSearch()
 
 void Split::reloadChannelAndSubscriberEmotes()
 {
-    auto currentUser = getApp()->accounts->twitch.getCurrent();
+    getApp()->accounts->twitch.getCurrent()->loadEmotes();
     auto channel = this->getChannel();
-
-    currentUser->loadEmotes();
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
