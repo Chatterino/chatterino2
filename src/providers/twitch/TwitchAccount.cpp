@@ -213,53 +213,54 @@ void TwitchAccount::loadEmotes()
             }
 
             // Clearing emote data
-            auto emoteData = this->emotes_.access();
-            emoteData->emoteSets.clear();
-            emoteData->allEmoteNames.clear();
-
-            for (auto emoteSetIt = data.emoteSets.begin();
-                 emoteSetIt != data.emoteSets.end(); ++emoteSetIt)
             {
-                auto emoteSet = std::make_shared<EmoteSet>();
+                auto emoteData = this->emotes_.access();
+                emoteData->emoteSets.clear();
+                emoteData->allEmoteNames.clear();
 
-                emoteSet->key = emoteSetIt.key();
-                this->loadEmoteSetData(emoteSet);
-
-                for (const auto emoteArrObj : emoteSetIt.value().toArray())
+                for (auto emoteSetIt = data.emoteSets.begin();
+                     emoteSetIt != data.emoteSets.end(); ++emoteSetIt)
                 {
-                    if (!emoteArrObj.isObject())
+                    auto emoteSet = std::make_shared<EmoteSet>();
+
+                    emoteSet->key = emoteSetIt.key();
+                    this->loadEmoteSetData(emoteSet);
+
+                    for (const auto emoteArrObj : emoteSetIt.value().toArray())
                     {
-                        qCWarning(chatterinoTwitch)
-                            << QString("Emote value from set %1 was invalid")
-                                   .arg(emoteSet->key);
-                        continue;
+                        if (!emoteArrObj.isObject())
+                        {
+                            qCWarning(chatterinoTwitch)
+                                << QString(
+                                       "Emote value from set %1 was invalid")
+                                       .arg(emoteSet->key);
+                            continue;
+                        }
+                        KrakenEmote krakenEmote(emoteArrObj.toObject());
+
+                        auto id = EmoteId{krakenEmote.id};
+                        auto code = EmoteName{krakenEmote.code};
+
+                        auto cleanCode =
+                            EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
+                        emoteSet->emotes.emplace_back(
+                            TwitchEmote{id, cleanCode});
+                        emoteData->allEmoteNames.push_back(cleanCode);
+
+                        auto emote =
+                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
+                        emoteData->emotes.emplace(code, emote);
                     }
-                    KrakenEmote krakenEmote(emoteArrObj.toObject());
 
-                    auto id = EmoteId{krakenEmote.id};
-                    auto code = EmoteName{krakenEmote.code};
-
-                    auto cleanCode =
-                        EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
-                    emoteSet->emotes.emplace_back(TwitchEmote{id, cleanCode});
-                    emoteData->allEmoteNames.push_back(cleanCode);
-
-                    auto emote =
-                        getApp()->emotes->twitch.getOrCreateEmote(id, code);
-                    emoteData->emotes.emplace(code, emote);
+                    std::sort(emoteSet->emotes.begin(), emoteSet->emotes.end(),
+                              [](const TwitchEmote &l, const TwitchEmote &r) {
+                                  return l.name.string < r.name.string;
+                              });
+                    emoteData->emoteSets.emplace_back(emoteSet);
                 }
-
-                std::sort(emoteSet->emotes.begin(), emoteSet->emotes.end(),
-                          [](const TwitchEmote &l, const TwitchEmote &r) {
-                              return l.name.string < r.name.string;
-                          });
-                emoteData->emoteSets.emplace_back(emoteSet);
             }
             // Getting userstate emotes from Ivr
-            // Without delaying this, deadlock occurs
-            QTimer::singleShot(1, [this] {
-                this->loadUserstateEmotes();
-            });
+            this->loadUserstateEmotes();
         },
         [] {
             // kraken request failed
