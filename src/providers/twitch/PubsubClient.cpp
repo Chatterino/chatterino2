@@ -900,6 +900,28 @@ void PubSub::listenToChannelModerationActions(
     this->listenToTopic(topic, account);
 }
 
+void PubSub::listenToAutomod(const QString &channelID,
+                             std::shared_ptr<TwitchAccount> account)
+{
+    static const QString topicFormat("automod-queue.%1.%2");
+    assert(!channelID.isEmpty());
+    assert(account != nullptr);
+    QString userID = account->getUserId();
+    if (userID.isEmpty())
+        return;
+
+    auto topic = topicFormat.arg(userID).arg(channelID);
+
+    if (this->isListeningToTopic(topic))
+    {
+        return;
+    }
+
+    qCDebug(chatterinoPubsub) << "Listen to topic" << topic;
+
+    this->listenToTopic(topic, account);
+}
+
 void PubSub::listenToChannelPointRewards(const QString &channelID,
                                          std::shared_ptr<TwitchAccount> account)
 {
@@ -1285,6 +1307,108 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         {
             qCDebug(chatterinoPubsub)
                 << "Invalid point event type:" << pointEventType.c_str();
+        }
+    }
+    else if (topic.startsWith("automod-queue."))
+    {
+        auto topicParts = topic.split(".");
+        assert(topicParts.length() == 3);
+        auto &data = msg["data"];
+
+        std::string automodEventType;
+        if (!rj::getSafe(msg, "type", automodEventType))
+        {
+            qCDebug(chatterinoPubsub) << "Bad automod event data";
+            return;
+        }
+
+        if (automodEventType == "automod_caught_message")
+        {
+            QString status;
+            if (!rj::getSafe(data, "status", status))
+            {
+                qDebug() << "Failed to get status";
+                return;
+            }
+            if (status == "PENDING")
+            {
+                AutomodAction action(data, topicParts[2]);
+                rapidjson::Value classification;
+                if (!rj::getSafeObject(data, "content_classification",
+                                       classification))
+                {
+                    qDebug() << "Failed to get content_classification";
+                    return;
+                }
+
+                QString contentCategory;
+                if (!rj::getSafe(classification, "category", contentCategory))
+                {
+                    qDebug() << "Failed to get content category";
+                    return;
+                }
+                int contentLevel;
+                if (!rj::getSafe(classification, "level", contentLevel))
+                {
+                    qDebug() << "Failed to get content level";
+                    return;
+                }
+                action.reason = QString("%1 level %2")
+                                    .arg(contentCategory)
+                                    .arg(contentLevel);
+
+                rapidjson::Value messageData;
+                if (!rj::getSafeObject(data, "message", messageData))
+                {
+                    qDebug() << "Failed to get message data";
+                    return;
+                }
+
+                rapidjson::Value messageContent;
+                if (!rj::getSafeObject(messageData, "content", messageContent))
+                {
+                    qDebug() << "Failed to get message content";
+                    return;
+                }
+                if (!rj::getSafe(messageData, "id", action.msgID))
+                {
+                    qDebug() << "Failed to get message id";
+                    return;
+                }
+
+                if (!rj::getSafe(messageContent, "text", action.message))
+                {
+                    qDebug() << "Failed to get message text";
+                    return;
+                }
+
+                // this message also contains per-word automod data, which could be implemented
+
+                // extract sender data manually because twitch loves not being consistent
+                rapidjson::Value senderData;
+                if (!rj::getSafeObject(messageData, "sender", senderData))
+                {
+                    qDebug() << "Failed to get sender";
+                    return;
+                }
+                QString sender_id;
+                if (!rj::getSafe(senderData, "user_id", sender_id))
+                {
+                    qDebug() << "Failed to get sender user id";
+                    return;
+                }
+                QString sender_login;
+                if (!rj::getSafe(senderData, "login", sender_login))
+                {
+                    qDebug() << "Failed to get sender login";
+                    return;
+                }
+                action.target = ActionUser{sender_id, sender_login};
+                qDebug() << action.msgID;
+                this->signals_.moderation.automodMessage.invoke(action);
+            }
+            // "ALLOWED" and "DENIED" statuses remain unimplemented
+            // They are versions of automod_message_(denied|approved) but for mods.
         }
     }
     else
