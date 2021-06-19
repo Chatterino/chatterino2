@@ -16,7 +16,7 @@ template <typename... T>
 using ResultCallback = std::function<void(T...)>;
 
 struct KrakenEmoteSets {
-    QJsonObject emoteSets;
+    const QJsonObject emoteSets;
 
     KrakenEmoteSets(QJsonObject jsonObject)
         : emoteSets(jsonObject.value("emoticon_sets").toObject())
@@ -25,8 +25,8 @@ struct KrakenEmoteSets {
 };
 
 struct KrakenEmote {
-    QString code;
-    QString id;
+    const QString code;
+    const QString id;
 
     KrakenEmote(QJsonObject jsonObject)
         : code(jsonObject.value("code").toString())
