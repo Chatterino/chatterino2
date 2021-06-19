@@ -732,6 +732,7 @@ void Helix::getCheermotes(
     urlQuery.addQueryItem("broadcaster_id", broadcasterId);
 
     this->makeRequest("bits/cheermotes", urlQuery)
+        .timeout(10000)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto root = result.parseJson();
             auto data = root.value("data");
