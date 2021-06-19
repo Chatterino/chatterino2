@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
 - Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
 - Minor: Restore automod functionality for moderators (#2817, #2887)
 - Minor: Add setting for username style (#2889, #2891)
