@@ -3,6 +3,8 @@
 ## Unversioned
 
 - Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
+- Minor: Restore automod functionality for moderators (#2817, #2887)
+- Minor: Add setting for username style (#2889, #2891)
 - Minor: Searching for users in the viewer list now searches anywhere in the user's name. (#2861)
 - Minor: Added moderation buttons to search popup when searching in a split with moderation mode enabled. (#2148, #2803)
 - Minor: Made "#channel" in `/mentions` tab show in usercards and in the search popup. (#2802)
@@ -14,6 +16,7 @@
 - Minor: Added a link to accounts page in settings to "You need to be logged in to send messages" message. (#2862)
 - Minor: Switch to Twitch v2 emote API for animated emote support. (#2863)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
+- Bugfix: Fixed pasting text with URLs included (#1688, #2855)
 - Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850)
 - Bugfix: Fixed bit emotes not loading in some rare cases. (#2856)
 
