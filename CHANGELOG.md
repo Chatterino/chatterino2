@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
+- Minor: Added opt-in system for recent-messages (#1311, #2901)
 - Minor: Restore automod functionality for moderators (#2817, #2887)
 - Minor: Add setting for username style (#2889, #2891)
 - Minor: Searching for users in the viewer list now searches anywhere in the user's name. (#2861)
