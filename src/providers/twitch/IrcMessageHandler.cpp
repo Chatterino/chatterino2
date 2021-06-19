@@ -497,16 +497,12 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
     auto currentUser = getApp()->accounts->twitch.getCurrent();
 
     // set received emote-sets, used in TwitchAccount::loadUserstateEmotes
-    bool shouldLoadEmotes = currentUser->areLastUserstateEmoteSetsEmpty();
-
-    currentUser->setLastUserstateEmoteSets(
+    bool emoteSetsChanged = currentUser->setUserstateEmoteSets(
         message->tag("emote-sets").toString().split(","));
 
-    // we have to call loadUserstateEmotes if this is a first USERSTATE
-    // after currentUserChanged signal emitted
-    if (shouldLoadEmotes)
+    if (emoteSetsChanged)
     {
-        // TODO: figure out a nice way to reload only emotes from USERSTATE
+        currentUser->loadUserstateEmotes();
     }
 
     QString channelName;

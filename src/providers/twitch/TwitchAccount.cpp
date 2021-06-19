@@ -267,20 +267,24 @@ void TwitchAccount::loadEmotes()
         });
 }
 
-bool TwitchAccount::areLastUserstateEmoteSetsEmpty()
+bool TwitchAccount::setUserstateEmoteSets(QStringList newEmoteSets)
 {
-    return this->lastUserstateEmoteSets_.size() == 0;
-}
+    newEmoteSets.sort();
 
-void TwitchAccount::setLastUserstateEmoteSets(QStringList emoteSets)
-{
-    this->lastUserstateEmoteSets_ = emoteSets;
+    if (this->userstateEmoteSets_ == newEmoteSets)
+    {
+        // Nothing has changed
+        return false;
+    }
+
+    this->userstateEmoteSets_ = newEmoteSets;
+
+    return true;
 }
 
 void TwitchAccount::loadUserstateEmotes()
 {
-    // attempt loading userstate emotes only if there are any emotesets cached
-    if (this->areLastUserstateEmoteSetsEmpty())
+    if (this->userstateEmoteSets_.isEmpty())
     {
         return;
     }
@@ -297,7 +301,7 @@ void TwitchAccount::loadUserstateEmotes()
     }
 
     // filter out emote sets from userstate message, which are not in fetched emote set list
-    for (const auto &emoteSetKey : this->lastUserstateEmoteSets_)
+    for (const auto &emoteSetKey : this->userstateEmoteSets_)
     {
         if (!krakenEmoteSetKeys.contains(emoteSetKey))
         {
