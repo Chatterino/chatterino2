@@ -597,6 +597,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
+    layout.addCheckbox("Show deletions of single messages",
+                       s.hideDeletionActions, true);
     layout.addCheckbox("Colorize users without color set (gray names)",
                        s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
@@ -610,6 +612,19 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Color @usernames", s.colorUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames);
+    const QStringList usernameDisplayModes = {"Username", "Localized name",
+                                              "Username and localized name"};
+
+    layout.addDropdown<std::underlying_type<UsernameDisplayMode>::type>(
+        "Username style", usernameDisplayModes, s.usernameDisplayMode,
+        [usernameDisplayModes](auto val) {
+            return usernameDisplayModes.at(val - 1);
+            // UsernameDisplayMode enum indexes from 1
+        },
+        [](auto args) {
+            return args.index + 1;
+        },
+        false);
     layout.addDropdown<float>(
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
         [](auto val) {
