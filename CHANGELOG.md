@@ -19,6 +19,7 @@
 - Bugfix: Fixed pasting text with URLs included (#1688, #2855)
 - Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850)
 - Bugfix: Fixed bit emotes not loading in some rare cases. (#2856)
+- Bugfix: Fixed cheer emotes timing out when user has many splits open (#2900)
 
 ## 2.3.2
 
