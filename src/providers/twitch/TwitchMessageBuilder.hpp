@@ -63,6 +63,7 @@ public:
                                 MessageBuilder *builder);
     static void deletionMessage(const DeleteAction &action,
                                 MessageBuilder *builder);
+    static void recentMessagesDisclaimer(MessageBuilder *builder);
 
 private:
     void parseUsernameColor() override;

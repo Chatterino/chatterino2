@@ -408,6 +408,8 @@ public:
          {"h", 1},
          {"d", 1},
          {"w", 1}}};
+    BoolSetting showRecentMessagesDisclaimer = {
+        "/misc/showRecentMessagesDisclaimer", true};
 
 private:
     void updateModerationActions();

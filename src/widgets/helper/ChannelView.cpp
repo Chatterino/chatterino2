@@ -2153,8 +2153,69 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             this->underlyingChannel_.get()->reconnect();
         }
         break;
+        case Link::RecentMessageDontAskAgain:
+        case Link::RecentMessageAcceptPrivacy: {
+            this->handleRecentMessagesPrivacyLinks(link);
+        }
+        break;
 
         default:;
+    }
+}
+void ChannelView::handleRecentMessagesPrivacyLinks(const Link &link)
+{
+    if (!getSettings()->showRecentMessagesDisclaimer)
+    {
+        return;
+    }
+    getSettings()->showRecentMessagesDisclaimer = false;
+    bool hasDeletedQuestion = false;
+    // find the first occurance of the question and delete it,
+    // others are just references to it
+    getApp()->twitch2->forEachChannel([&hasDeletedQuestion](ChannelPtr chan) {
+        if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+        {
+            if (!hasDeletedQuestion)
+            {
+                LimitedQueueSnapshot<MessagePtr> snapshot =
+                    chan->getMessageSnapshot();
+                int snapshotLength = snapshot.size();
+
+                int end = std::max(0, snapshotLength - 200);
+
+                for (int i = snapshotLength - 1; i >= end; --i)
+                {
+                    auto &s = snapshot[i];
+
+                    if (s->flags.has(MessageFlag::RecentMessagesPrivacy))
+                    {
+                        s->flags.set(MessageFlag::Disabled);
+                        hasDeletedQuestion = true;
+                        break;
+                    }
+                }
+            }
+        }
+    });
+    if (link.type == Link::RecentMessageDontAskAgain)
+    {
+        auto confirmationMessage =
+            makeSystemMessage("If you want to opt-in to recent messages, "
+                              "you can do so in the settings.");
+        this->channel()->addMessage(confirmationMessage);
+    }
+    else if (link.type == Link::RecentMessageAcceptPrivacy)
+    {
+        getSettings()->loadTwitchMessageHistoryOnConnect = true;
+        auto confirmationMessage = makeSystemMessage("Loading recent messages");
+        this->channel()->addMessage(confirmationMessage);
+        getApp()->twitch2->forEachChannel(
+            [confirmationMessage](ChannelPtr chan) {
+                if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+                {
+                    channel->loadRecentMessages();
+                }
+            });
     }
 }
 

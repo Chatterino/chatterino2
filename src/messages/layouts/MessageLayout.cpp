@@ -319,7 +319,8 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
             backgroundColor,
             *ColorProvider::instance().color(ColorType::RedeemedHighlight));
     }
-    else if (this->message_->flags.has(MessageFlag::AutoMod))
+    else if (this->message_->flags.hasAny(MessageFlag::AutoMod) ||
+             this->message_->flags.has(MessageFlag::RecentMessagesPrivacy))
     {
         backgroundColor = QColor("#404040");
     }

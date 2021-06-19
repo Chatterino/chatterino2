@@ -74,6 +74,7 @@ public:
     virtual void reconnect() override;
     void refreshTitle();
     void createClip();
+    void loadRecentMessages();
 
     // Data
     const QString &subscriptionUrl();
@@ -137,7 +138,6 @@ private:
     void refreshChatters();
     void refreshBadges();
     void refreshCheerEmotes();
-    void loadRecentMessages();
     void fetchDisplayName();
 
     void setLive(bool newLiveStatus);

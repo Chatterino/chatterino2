@@ -1,6 +1,7 @@
 #include "providers/twitch/TwitchMessageBuilder.hpp"
 
 #include "Application.hpp"
+#include "common/Env.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
@@ -1422,6 +1423,37 @@ void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
             action.messageText, MessageElementFlag::Text, MessageColor::Text);
     }
     builder->message().timeoutUser = "msg:" + action.messageId;
+}
+void TwitchMessageBuilder::recentMessagesDisclaimer(MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->message().flags.set(MessageFlag::RecentMessagesPrivacy);
+    auto privacyUrl =
+        "https://" + QUrl(Env::get().recentMessagesApiUrl).host() + "/privacy";
+
+    builder->emplace<TextElement>("Chatterino supports loading message history "
+                                  "from an external service. Click",
+                                  MessageElementFlag::Text);
+    builder
+        ->emplace<TextElement>("here", MessageElementFlag::Text,
+                               MessageColor::Link)
+        ->setLink(Link{Link::Url, privacyUrl});
+    builder->emplace<TextElement>("to see its privacy policy.",
+                                  MessageElementFlag::Text);
+
+    // buttons
+    builder
+        ->emplace<TextElement>("[Accept and enable support] ",
+                               MessageElementFlag::Text,
+                               MessageColor(QColor("green")))
+        ->setLink({Link::RecentMessageAcceptPrivacy, ""});
+
+    builder
+        ->emplace<TextElement>(" [Don't ask again]", MessageElementFlag::Text,
+                               MessageColor(QColor("red")))
+        ->setLink({Link::RecentMessageDontAskAgain, ""});
 }
 
 }  // namespace chatterino

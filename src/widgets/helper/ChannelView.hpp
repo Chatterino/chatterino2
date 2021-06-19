@@ -160,6 +160,8 @@ private:
     void enableScrolling(const QPointF &scrollStart);
     void disableScrolling();
 
+    void handleRecentMessagesPrivacyLinks(const Link &link);
+
     QTimer *layoutCooldown_;
     bool layoutQueued_;
 

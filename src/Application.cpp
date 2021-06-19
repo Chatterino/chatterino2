@@ -131,6 +131,20 @@ void Application::initialize(Settings &settings, Paths &paths)
             }
         }
     }
+    // add recent messages privacy question
+    if (getSettings()->showRecentMessagesDisclaimer &&
+        !getSettings()->loadTwitchMessageHistoryOnConnect)
+    {
+        MessageBuilder builder;
+        TwitchMessageBuilder::recentMessagesDisclaimer(&builder);
+        auto msg = builder.release();
+        this->twitch2->forEachChannel([msg](ChannelPtr chan) {
+            if (auto channel = dynamic_cast<TwitchChannel *>(chan.get()))
+            {
+                channel->addMessage(msg);
+            }
+        });
+    }
 
     this->windows->updateWordTypeMask();
 
