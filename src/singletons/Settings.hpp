@@ -179,6 +179,8 @@ public:
         "/behaviour/autocompletion/userCompletionOnlyWithAt", false};
     BoolSetting emoteCompletionWithColon = {
         "/behaviour/autocompletion/emoteCompletionWithColon", true};
+    BoolSetting showUsernameCompletionMenu = {
+        "/behaviour/autocompletion/showUsernameCompletionMenu", true};
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {

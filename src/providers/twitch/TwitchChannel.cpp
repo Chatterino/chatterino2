@@ -644,10 +644,32 @@ void TwitchChannel::setLive(bool newLiveStatus)
             }
             else
             {
+                // Channel offline message
                 MessageBuilder builder;
                 TwitchMessageBuilder::offlineSystemMessage(
                     this->getDisplayName(), &builder);
                 this->addMessage(builder.release());
+
+                // "delete" old 'CHANNEL is live' message
+                LimitedQueueSnapshot<MessagePtr> snapshot =
+                    getApp()->twitch2->liveChannel->getMessageSnapshot();
+                int snapshotLength = snapshot.size();
+
+                // MSVC hates this code if the parens are not there
+                int end = (std::max)(0, snapshotLength - 200);
+                auto liveMessageSearchText =
+                    QString("%1 is live!").arg(this->getDisplayName());
+
+                for (int i = snapshotLength - 1; i >= end; --i)
+                {
+                    auto &s = snapshot[i];
+
+                    if (s->messageText == liveMessageSearchText)
+                    {
+                        s->flags.set(MessageFlag::Disabled);
+                        break;
+                    }
+                }
             }
             guard->live = newLiveStatus;
         }
