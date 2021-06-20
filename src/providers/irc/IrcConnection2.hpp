@@ -1,10 +1,11 @@
 #pragma once
 
+#include "util/ExponentialBackoff.hpp"
+
 #include <pajlada/signals/signal.hpp>
 
 #include <IrcConnection>
 #include <QTimer>
-#include <chrono>
 
 namespace chatterino {
 
@@ -28,7 +29,9 @@ private:
     QTimer pingTimer_;
     QTimer reconnectTimer_;
     std::atomic<bool> recentlyReceivedMessage_{true};
-    std::chrono::steady_clock::time_point lastConnected_;
+
+    // Reconnect with a base delay of 1 second and max out at 1 second * (2^4) (i.e. 16 seconds)
+    ExponentialBackoff<4> reconnectBackoff_{std::chrono::milliseconds{1000}};
 
     std::atomic<bool> expectConnectionLoss_{false};
 

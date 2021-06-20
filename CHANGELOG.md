@@ -20,7 +20,7 @@
 - Bugfix: Moderation buttons now show the correct time unit when using units other than seconds. (#1719, #2864)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
 - Bugfix: Fixed pasting text with URLs included (#1688, #2855)
-- Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850)
+- Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850, #2892)
 - Bugfix: Fixed bit and new subscriber emotes not (re)loading in some rare cases. (#2856, #2857)
 
 ## 2.3.2
