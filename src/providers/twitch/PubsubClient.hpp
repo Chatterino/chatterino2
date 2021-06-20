@@ -124,6 +124,7 @@ public:
     struct {
         struct {
             Signal<ClearChatAction> chatCleared;
+            Signal<DeleteAction> messageDeleted;
             Signal<ModeChangedAction> modeChanged;
             Signal<ModerationStateAction> moderationStateChanged;
 
