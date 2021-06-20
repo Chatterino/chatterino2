@@ -24,7 +24,6 @@
 #include "widgets/dialogs/QualityPopup.hpp"
 #include "widgets/dialogs/SelectChannelDialog.hpp"
 #include "widgets/dialogs/SelectChannelFiltersDialog.hpp"
-#include "widgets/dialogs/TextInputDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/DebugPopup.hpp"
@@ -723,7 +722,7 @@ void Split::showViewerList()
         auto query = searchBar->text();
         if (!query.isEmpty())
         {
-            auto results = chattersList->findItems(query, Qt::MatchStartsWith);
+            auto results = chattersList->findItems(query, Qt::MatchContains);
             chattersList->hide();
             resultList->clear();
             for (auto &item : results)

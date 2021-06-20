@@ -25,7 +25,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#ifdef C_DEBUG
+#ifndef NDEBUG
 #    include <rapidjson/document.h>
 #    include "providers/twitch/PubsubClient.hpp"
 #    include "util/SampleCheerMessages.hpp"
@@ -66,13 +66,17 @@ Window::Window(WindowType type)
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
-        getSettings()->tabDirection.connect([this](int val) {
-            this->notebook_->setTabDirection(NotebookTabDirection(val));
-        });
     }
     else
     {
         this->resize(int(300 * this->scale()), int(500 * this->scale()));
+    }
+
+    if (type == WindowType::Main || type == WindowType::Popup)
+    {
+        getSettings()->tabDirection.connect([this](int val) {
+            this->notebook_->setTabDirection(NotebookTabDirection(val));
+        });
     }
 }
 
@@ -178,7 +182,7 @@ void Window::addCustomTitlebarButtons()
 
 void Window::addDebugStuff()
 {
-#ifdef C_DEBUG
+#ifndef NDEBUG
     std::vector<QString> cheerMessages, subMessages, miscMessages, linkMessages,
         emoteTestMessages;
 
@@ -396,6 +400,10 @@ void Window::addShortcuts()
         auto quickSwitcher =
             new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
         quickSwitcher->show();
+    });
+
+    createWindowShortcut(this, "CTRL+U", [this] {
+        this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
     });
 }
 

@@ -1,5 +1,7 @@
 #include "widgets/BasePopup.hpp"
 
+#include <QKeyEvent>
+
 namespace chatterino {
 
 BasePopup::BasePopup(FlagsEnum<Flags> _flags, QWidget *parent)

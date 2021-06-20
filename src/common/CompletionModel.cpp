@@ -1,8 +1,8 @@
 #include "common/CompletionModel.hpp"
 
 #include "Application.hpp"
+#include "common/ChatterSet.hpp"
 #include "common/Common.hpp"
-#include "common/UsernameSet.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Benchmark.hpp"
@@ -108,33 +108,31 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         }
 
         // Usernames
-        if (prefix.length() >= UsernameSet::PrefixLength)
+        QString usernamePostfix =
+            isFirstWord && getSettings()->mentionUsersWithComma ? ","
+                                                                : QString();
+
+        if (prefix.startsWith("@"))
         {
-            auto usernames = channel->accessChatters();
-
             QString usernamePrefix = prefix;
-            QString usernamePostfix =
-                isFirstWord && getSettings()->mentionUsersWithComma ? ","
-                                                                    : QString();
+            usernamePrefix.remove(0, 1);
 
-            if (usernamePrefix.startsWith("@"))
+            auto chatters =
+                channel->accessChatters()->filterByPrefix(usernamePrefix);
+
+            for (const auto &name : chatters)
             {
-                usernamePrefix.remove(0, 1);
-                for (const auto &name :
-                     usernames->subrange(Prefix(usernamePrefix)))
-                {
-                    addString("@" + name + usernamePostfix,
-                              TaggedString::Type::Username);
-                }
+                addString("@" + name + usernamePostfix,
+                          TaggedString::Type::Username);
             }
-            else if (!getSettings()->userCompletionOnlyWithAt)
+        }
+        else if (!getSettings()->userCompletionOnlyWithAt)
+        {
+            auto chatters = channel->accessChatters()->filterByPrefix(prefix);
+
+            for (const auto &name : chatters)
             {
-                for (const auto &name :
-                     usernames->subrange(Prefix(usernamePrefix)))
-                {
-                    addString(name + usernamePostfix,
-                              TaggedString::Type::Username);
-                }
+                addString(name + usernamePostfix, TaggedString::Type::Username);
             }
         }
 

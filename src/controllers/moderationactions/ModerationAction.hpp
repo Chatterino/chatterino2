@@ -6,6 +6,8 @@
 
 #include "util/RapidjsonHelpers.hpp"
 
+#include <memory>
+
 namespace chatterino {
 
 class Image;

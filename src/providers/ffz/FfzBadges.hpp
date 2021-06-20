@@ -4,9 +4,14 @@
 #include <common/Singleton.hpp>
 
 #include "common/Aliases.hpp"
+#include "util/QStringHash.hpp"
 
 #include <map>
+#include <memory>
+#include <shared_mutex>
 #include <vector>
+
+#include <QColor>
 
 namespace chatterino {
 
@@ -24,9 +29,12 @@ public:
 
 private:
     void loadFfzBadges();
-    std::map<QString, int> badgeMap;
+
+    std::shared_mutex mutex_;
+
+    std::unordered_map<QString, int> badgeMap;
     std::vector<EmotePtr> badges;
-    std::map<int, QColor> colorMap;
+    std::unordered_map<int, QColor> colorMap;
 };
 
 }  // namespace chatterino

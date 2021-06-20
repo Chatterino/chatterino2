@@ -168,7 +168,9 @@ namespace {
         if (settings.headerGame && !s.game.isEmpty())
             title += " - " + s.game;
         if (settings.headerStreamTitle && !s.title.isEmpty())
-            title += " - " + s.title;
+        {
+            title += " - " + s.title.simplified();
+        }
 
         return title;
     }
@@ -805,6 +807,8 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
     switch (event->button())
     {
         case Qt::LeftButton: {
+            this->split_->giveFocus(Qt::MouseFocusReason);
+
             this->dragging_ = true;
 
             this->dragStart_ = event->pos();

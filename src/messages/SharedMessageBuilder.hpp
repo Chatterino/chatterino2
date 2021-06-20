@@ -6,6 +6,7 @@
 
 #include <IrcMessage>
 #include <QColor>
+#include <QUrl>
 
 namespace chatterino {
 

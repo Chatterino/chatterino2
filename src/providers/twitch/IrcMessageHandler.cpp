@@ -23,6 +23,16 @@
 
 namespace {
 using namespace chatterino;
+
+// Message types below are the ones that might contain special user's message on USERNOTICE
+static const QSet<QString> specialMessageTypes{
+    "sub",            //
+    "subgift",        //
+    "resub",          // resub messages
+    "bitsbadgetier",  // bits badge upgrade
+    "ritual",         // new viewer ritual
+};
+
 MessagePtr generateBannedMessage(bool confirmedBan)
 {
     const auto linkColor = MessageColor(MessageColor::Link);
@@ -469,12 +479,31 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
     QString targetID = tags.value("target-msg-id").toString();
 
-    chan->deleteMessage(targetID);
+    auto msg = chan->findMessage(targetID);
+    if (msg != nullptr)
+    {
+        msg->flags.set(MessageFlag::Disabled);
+        if (!getSettings()->hideDeletionActions)
+        {
+            MessageBuilder builder;
+            TwitchMessageBuilder::deletionMessage(msg, &builder);
+            chan->addMessage(builder.release());
+        }
+    }
 }
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 {
-    auto app = getApp();
+    auto currentUser = getApp()->accounts->twitch.getCurrent();
+
+    // set received emote-sets, used in TwitchAccount::loadUserstateEmotes
+    bool emoteSetsChanged = currentUser->setUserstateEmoteSets(
+        message->tag("emote-sets").toString().split(","));
+
+    if (emoteSetsChanged)
+    {
+        currentUser->loadUserstateEmotes();
+    }
 
     QString channelName;
     if (!trimChannelName(message->parameter(0), channelName))
@@ -482,7 +511,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         return;
     }
 
-    auto c = app->twitch.server->getChannelOrEmpty(channelName);
+    auto c = getApp()->twitch.server->getChannelOrEmpty(channelName);
     if (c->isEmpty())
     {
         return;
@@ -509,10 +538,6 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
             tc->setMod(_mod == "1");
         }
     }
-
-    // handle emotes
-    app->accounts->twitch.getCurrent()->loadUserstateEmotes(
-        message->tag("emote-sets").toString().split(","));
 }
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
@@ -561,12 +586,9 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
 {
     std::vector<MessagePtr> builtMessages;
 
-    auto data = message->toData();
-
     auto tags = message->tags();
     auto parameters = message->parameters();
 
-    auto target = parameters[0];
     QString msgType = tags.value("msg-id", "").toString();
     QString content;
     if (parameters.size() >= 2)
@@ -574,11 +596,9 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
         content = parameters[1];
     }
 
-    if (msgType == "sub" || msgType == "resub" || msgType == "subgift" ||
-        msgType == "bitsbadgetier")
+    if (specialMessageTypes.contains(msgType))
     {
-        // Sub-specific and bits badge upgrade specific message.
-        // It's only allowed for "resub" messages.
+        // Messages are not required, so they might be empty
         if (!content.isEmpty())
         {
             MessageParseArgs args;
@@ -596,6 +616,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
 
     if (it != tags.end())
     {
+        // By default, we return value of system-msg tag
         QString messageText = it.value().toString();
 
         if (msgType == "bitsbadgetier")
@@ -620,8 +641,6 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
 void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
                                                 TwitchIrcServer &server)
 {
-    auto data = message->toData();
-
     auto tags = message->tags();
     auto parameters = message->parameters();
 
@@ -633,11 +652,9 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
         content = parameters[1];
     }
 
-    if (msgType == "sub" || msgType == "resub" || msgType == "subgift" ||
-        msgType == "bitsbadgetier")
+    if (specialMessageTypes.contains(msgType))
     {
-        // Sub-specific and bits badge upgrade specific message.
-        // It's only allowed for "resub" messages.
+        // Messages are not required, so they might be empty
         if (!content.isEmpty())
         {
             this->addMessage(message, target, content, server, true, false);
@@ -648,6 +665,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
 
     if (it != tags.end())
     {
+        // By default, we return value of system-msg tag
         QString messageText = it.value().toString();
 
         if (msgType == "bitsbadgetier")
@@ -721,6 +739,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 
         auto builder = MessageBuilder();
         builder.message().flags.set(MessageFlag::System);
+        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
 
         builder.emplace<TimestampElement>();
         builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
@@ -799,6 +818,23 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             channel->addMessage(makeSystemMessage(
                 "Usage: \"/delete <msg-id>\" - can't take more "
                 "than one argument"));
+        }
+        else if (tags == "host_on")
+        {
+            QStringList parts = msg->messageText.split(QLatin1Char(' '));
+            if (parts.size() != 3)
+            {
+                return;
+            }
+            auto &channelName = parts[2];
+            if (channelName.size() < 2)
+            {
+                return;
+            }
+            channelName.chop(1);
+            MessageBuilder builder;
+            TwitchMessageBuilder::hostingSystemMessage(channelName, &builder);
+            channel->addMessage(builder.release());
         }
         else
         {
