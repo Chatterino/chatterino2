@@ -761,6 +761,37 @@ void Helix::getCheermotes(
         .execute();
 }
 
+void Helix::getEmoteSetData(QString emoteSetId,
+                            ResultCallback<HelixEmoteSetData> successCallback,
+                            HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+
+    urlQuery.addQueryItem("emote_set_id", emoteSetId);
+
+    this->makeRequest("chat/emotes/set", urlQuery)
+        .onSuccess([successCallback, failureCallback,
+                    emoteSetId](auto result) -> Outcome {
+            QJsonObject root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            HelixEmoteSetData emoteSetData(data.toArray()[0].toObject());
+
+            successCallback(emoteSetData);
+            return Success;
+        })
+        .onError([](NetworkResult result) {
+            qDebug() << "Epix helix fail xd" << result.status();
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));
