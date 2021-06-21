@@ -14,7 +14,7 @@ void Kraken::getUserEmotes(TwitchAccount *account,
 {
     this->makeRequest(QString("users/%1/emotes").arg(account->getUserId()), {})
         .authorizeTwitchV5(account->getOAuthClient(), account->getOAuthToken())
-        .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
+        .onSuccess([successCallback](auto result) -> Outcome {
             auto data = result.parseJson();
 
             KrakenEmoteSets emoteSets(data);

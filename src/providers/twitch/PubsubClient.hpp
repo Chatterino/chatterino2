@@ -124,6 +124,7 @@ public:
     struct {
         struct {
             Signal<ClearChatAction> chatCleared;
+            Signal<DeleteAction> messageDeleted;
             Signal<ModeChangedAction> modeChanged;
             Signal<ModerationStateAction> moderationStateChanged;
 
@@ -153,6 +154,8 @@ public:
 
     void listenToChannelModerationActions(
         const QString &channelID, std::shared_ptr<TwitchAccount> account);
+    void listenToAutomod(const QString &channelID,
+                         std::shared_ptr<TwitchAccount> account);
 
     void listenToChannelPointRewards(const QString &channelID,
                                      std::shared_ptr<TwitchAccount> account);

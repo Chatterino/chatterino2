@@ -107,6 +107,11 @@ void SharedMessageBuilder::parse()
 {
     this->parseUsernameColor();
 
+    if (this->action_)
+    {
+        this->textColor_ = this->usernameColor_;
+    }
+
     this->parseUsername();
 
     this->message().flags.set(MessageFlag::Collapsed);
@@ -408,8 +413,7 @@ void SharedMessageBuilder::addTextOrEmoji(const QString &string_)
     // Actually just text
     auto linkString = this->matchLink(string);
     auto link = Link();
-    auto textColor = this->action_ ? MessageColor(this->usernameColor_)
-                                   : MessageColor(MessageColor::Text);
+    auto &&textColor = this->textColor_;
 
     if (linkString.isEmpty())
     {
