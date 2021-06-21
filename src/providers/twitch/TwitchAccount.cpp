@@ -510,31 +510,39 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
     getHelix()->getEmoteSetData(
         emoteSet->key,
         [emoteSet](HelixEmoteSetData emoteSetData) {
-            if (emoteSetData.userId.isEmpty() ||
+            if (emoteSetData.ownerId.isEmpty() ||
                 emoteSetData.setId != emoteSet->key)
             {
+                qCWarning(chatterinoTwitch)
+                    << QString("Failed to fetch emoteSetData for %1, assuming "
+                               "Twitch is the onwer")
+                           .arg(emoteSet->key);
+
                 // most (if not all) emotes that fail to load are time limited event emotes owned by Twitch
                 emoteSet->channelName = "twitch";
-                qCWarning(chatterinoTwitch)
-                    << "Failed to fetch emoteSetData for" << emoteSet->key;
+                emoteSet->text = "Twitch";
+
+                return;
+            }
+
+            // emote set 0 = global emotes
+            if (emoteSetData.ownerId == "0")
+            {
+                //                emoteSet->channelName = QString();
+                emoteSet->text = "Twitch Global";
                 return;
             }
 
             getHelix()->getUserById(
-                emoteSetData.userId,
+                emoteSetData.ownerId,
                 [emoteSet](HelixUser user) {
                     emoteSet->channelName = user.login;
-
-                    QString name = user.login;
-                    name.detach();
-                    name[0] = name[0].toUpper();
-
-                    emoteSet->text = name;
+                    emoteSet->text = user.displayName;
                 },
                 [emoteSetData] {
                     // epic helix fail2
                     qCWarning(chatterinoTwitch)
-                        << "Failed to query user by id:" << emoteSetData.userId
+                        << "Failed to query user by id:" << emoteSetData.ownerId
                         << emoteSetData.setId;
                 });
         },

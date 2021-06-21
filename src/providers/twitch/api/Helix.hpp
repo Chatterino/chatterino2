@@ -266,11 +266,11 @@ struct HelixCheermoteSet {
 
 struct HelixEmoteSetData {
     QString setId;
-    QString userId;
+    QString ownerId;
 
     explicit HelixEmoteSetData(QJsonObject jsonObject)
         : setId(jsonObject.value("emote_set_id").toString())
-        , userId(jsonObject.value("owner_id").toString())
+        , ownerId(jsonObject.value("owner_id").toString())
     {
     }
 };
