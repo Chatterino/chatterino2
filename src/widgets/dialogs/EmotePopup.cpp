@@ -79,8 +79,6 @@ namespace {
             builder->flags.set(MessageFlag::DisableCompactEmotes);
 
             // If value of map is empty, create init pair and add title.
-            qDebug() << (mapOfSets.find(channelName) == mapOfSets.end())
-                     << set->key << set->channelName << set->text;
             if (mapOfSets.find(channelName) == mapOfSets.end())
             {
                 std::vector<MessagePtr> b;
