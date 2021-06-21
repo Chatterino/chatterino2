@@ -405,21 +405,42 @@ std::vector<QShortcut *> HotkeyController::shortcutsForScope(
                 << hotkey->getCategory();
             continue;
         }
-        auto s = new QShortcut(QKeySequence(hotkey->keySequence()), parent);
-        s->setContext(hotkey->getContext());
-        auto functionPointer = target->second;
-        QObject::connect(s, &QShortcut::activated, parent,
-                         [functionPointer, hotkey, this]() {
-                             qCDebug(chatterinoHotkeys)
-                                 << "Shortcut pressed: " << hotkey->action();
-                             QString output =
-                                 functionPointer(hotkey->arguments());
-                             if (!output.isEmpty())
-                             {
-                                 this->showHotkeyError(hotkey, output);
-                             }
-                         });
-        output.push_back(s);
+        auto createShortcutFromKeySeq = [&](QKeySequence qs) {
+            auto s = new QShortcut(qs, parent);
+            s->setContext(hotkey->getContext());
+            auto functionPointer = target->second;
+            QObject::connect(
+                s, &QShortcut::activated, parent,
+                [functionPointer, hotkey, this]() {
+                    qCDebug(chatterinoHotkeys)
+                        << "Shortcut pressed: " << hotkey->action();
+                    QString output = functionPointer(hotkey->arguments());
+                    if (!output.isEmpty())
+                    {
+                        this->showHotkeyError(hotkey, output);
+                    }
+                });
+            output.push_back(s);
+        };
+        auto qs = QKeySequence(hotkey->keySequence());
+
+        if ((qs[0] & Qt::Key_Return) || (qs[1] & Qt::Key_Return) ||
+            (qs[2] & Qt::Key_Return) || (qs[3] & Qt::Key_Return))
+        {
+            std::array<int, 4> keys{qs[0], qs[1], qs[2], qs[3]};
+            for (auto &key : keys)
+            {
+                auto newKey = (key & ~Qt::Key_Return);
+                if (newKey != key)
+                {
+                    newKey |= Qt::Key_Enter;
+                    key = newKey;
+                }
+            }
+            auto copy = QKeySequence(keys[0], keys[1], keys[2], keys[3]);
+            createShortcutFromKeySeq(copy);
+        }
+        createShortcutFromKeySeq(qs);
     }
     return output;
 }
