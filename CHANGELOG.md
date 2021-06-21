@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.3.3
+
 - Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
 - Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
 - Minor: The /live split now shows channels going offline. (#2880)
