@@ -786,7 +786,7 @@ void Helix::getEmoteSetData(QString emoteSetId,
             successCallback(emoteSetData);
             return Success;
         })
-        .onError([](NetworkResult result) {
+        .onError([failureCallback](NetworkResult result) {
             // TODO: make better xd
             failureCallback();
         })
