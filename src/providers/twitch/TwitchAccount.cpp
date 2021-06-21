@@ -515,7 +515,7 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
             {
                 qCWarning(chatterinoTwitch)
                     << QString("Failed to fetch emoteSetData for %1, assuming "
-                               "Twitch is the onwer")
+                               "Twitch is the owner")
                            .arg(emoteSet->key);
 
                 // most (if not all) emotes that fail to load are time limited event emotes owned by Twitch
@@ -528,7 +528,7 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
             // emote set 0 = global emotes
             if (emoteSetData.ownerId == "0")
             {
-                //                emoteSet->channelName = QString();
+                // emoteSet->channelName = QString();
                 emoteSet->text = "Twitch Global";
                 return;
             }
@@ -540,15 +540,13 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
                     emoteSet->text = user.displayName;
                 },
                 [emoteSetData] {
-                    // epic helix fail2
                     qCWarning(chatterinoTwitch)
                         << "Failed to query user by id:" << emoteSetData.ownerId
                         << emoteSetData.setId;
                 });
         },
         [emoteSet] {
-            // epic helix fail
-            qDebug() << "FDM" << emoteSet->key;
+            // fetching emoteset data failed
             return;
         });
 }

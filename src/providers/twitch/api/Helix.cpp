@@ -787,7 +787,8 @@ void Helix::getEmoteSetData(QString emoteSetId,
             return Success;
         })
         .onError([](NetworkResult result) {
-            qDebug() << "Epix helix fail xd" << result.status();
+            // TODO: make better xd
+            failureCallback();
         })
         .execute();
 }
