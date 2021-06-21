@@ -21,7 +21,6 @@ IrcMessageBuilder::IrcMessageBuilder(
     const MessageParseArgs &_args)
     : SharedMessageBuilder(_channel, _ircMessage, _args)
 {
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 IrcMessageBuilder::IrcMessageBuilder(Channel *_channel,
@@ -31,7 +30,6 @@ IrcMessageBuilder::IrcMessageBuilder(Channel *_channel,
     : SharedMessageBuilder(_channel, _ircMessage, _args, content, isAction)
 {
     assert(false);
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 MessagePtr IrcMessageBuilder::build()

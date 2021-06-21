@@ -12,7 +12,7 @@
 
 #include <QHeaderView>
 
-#define FILTERS_DOCUMENTATION "https://wiki.chatterino.com/Filters/"
+#define FILTERS_DOCUMENTATION "https://wiki.chatterino.com/Filters"
 
 namespace chatterino {
 
