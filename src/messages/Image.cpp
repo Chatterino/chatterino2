@@ -26,6 +26,9 @@
 #include <queue>
 
 namespace chatterino {
+
+constexpr int MAX_THUMBNAIL_SIZE = 300;
+
 namespace detail {
     // Frames
     Frames::Frames()
@@ -147,12 +150,15 @@ namespace detail {
             return frames;
         }
 
-        const int MAX_THUMBNAIL_SIZE = 300;
+        qDebug() << url.string << reader.size() << reader.scaledSize();
+
         if (reader.size().height() > MAX_THUMBNAIL_SIZE ||
             reader.size().width() > MAX_THUMBNAIL_SIZE)
         {
             reader.setScaledSize(reader.size().scaled(
                 MAX_THUMBNAIL_SIZE, MAX_THUMBNAIL_SIZE, Qt::KeepAspectRatio));
+            qDebug() << "resized" << url.string << reader.size()
+                     << reader.scaledSize();
         }
 
         QImage image;
@@ -161,8 +167,6 @@ namespace detail {
             if (reader.read(&image))
             {
                 QPixmap::fromImage(image);
-                qDebug() << url.string << index << image.size()
-                         << reader.size();
 
                 int duration = std::max(20, reader.nextImageDelay());
                 frames.push_back(Frame<QImage>{image, duration});
@@ -405,7 +409,7 @@ void Image::actuallyLoad()
     NetworkRequest(this->url().string)
         .concurrent()
         .cache()
-        .onSuccess([weak = weakOf(this), this](auto result) -> Outcome {
+        .onSuccess([weak = weakOf(this)](auto result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
                 return Failure;
@@ -416,7 +420,6 @@ void Image::actuallyLoad()
             QBuffer buffer(const_cast<QByteArray *>(&data));
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer);
-            qDebug() << this->url().string << reader.size();
             auto parsed = detail::readFrames(reader, shared->url());
 
             postToThread(makeConvertCallback(parsed, [weak](auto frames) {
