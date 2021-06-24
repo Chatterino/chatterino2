@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed Chatterino eating up all the RAM and crashing after hovering over certain image links with link thumbnails turned on. (#2920)
+
 ## 2.3.3
 
 - Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
