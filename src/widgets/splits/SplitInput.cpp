@@ -435,7 +435,7 @@ void SplitInput::addShortcuts()
 void SplitInput::installKeyPressedEvent()
 {
     this->ui_.textEdit->keyPressed.disconnectAll();
-    this->ui_.textEdit->keyPressed.connect([this, app](QKeyEvent *event) {
+    this->ui_.textEdit->keyPressed.connect([this](QKeyEvent *event) {
         if (auto popup = this->inputCompletionPopup_.get())
         {
             if (popup->isVisible())
