@@ -156,6 +156,7 @@ void SeventvEmotes::loadEmotes()
     QByteArray b = QByteArray::fromStdString(str.toStdString());
 
     NetworkRequest(apiUrlGQL, NetworkRequestType::Post)
+        .timeout(30000)
         .header("Content-Type", "application/json")
         .payload(b)
         .onSuccess([this](NetworkResult result) -> Outcome {
@@ -219,6 +220,7 @@ void SeventvEmotes::loadChannel(std::weak_ptr<Channel> channel,
     QByteArray b = QByteArray::fromStdString(str.toStdString());
 
     NetworkRequest(apiUrlGQL, NetworkRequestType::Post)
+        .timeout(20000)
         .header("Content-Type", "application/json")
         .payload(b)
         .onSuccess([callback = std::move(callback), channel, &channelId,
