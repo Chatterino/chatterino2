@@ -24,6 +24,7 @@
 - Bugfix: Fixed pasting text with URLs included (#1688, #2855)
 - Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850, #2892)
 - Bugfix: Fixed bit and new subscriber emotes not (re)loading in some rare cases. (#2856, #2857)
+- Bugfix: Fixed subscription emotes showing up incorrectly in the emote menu. (#2905)
 
 ## 2.3.2
 
