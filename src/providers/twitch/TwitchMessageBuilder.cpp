@@ -118,7 +118,6 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     : SharedMessageBuilder(_channel, _ircMessage, _args)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
 {
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 TwitchMessageBuilder::TwitchMessageBuilder(
@@ -127,7 +126,6 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     : SharedMessageBuilder(_channel, _ircMessage, _args, content, isAction)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
 {
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 bool TwitchMessageBuilder::isIgnored() const
@@ -470,8 +468,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
     // Actually just text
     auto linkString = this->matchLink(string);
-    auto textColor = this->action_ ? MessageColor(this->usernameColor_)
-                                   : MessageColor(MessageColor::Text);
+    auto textColor = this->textColor_;
 
     if (!linkString.isEmpty())
     {
@@ -727,18 +724,15 @@ void TwitchMessageBuilder::appendUsername()
 
         // Separator
         this->emplace<TextElement>("->", MessageElementFlag::Username,
-                                   app->themes->messages.textColors.system,
-                                   FontStyle::ChatMedium);
+                                   MessageColor::System, FontStyle::ChatMedium);
 
         QColor selfColor = currentUser->color();
-        if (!selfColor.isValid())
-        {
-            selfColor = app->themes->messages.textColors.system;
-        }
+        MessageColor selfMsgColor =
+            selfColor.isValid() ? selfColor : MessageColor::System;
 
         // Your own username
         this->emplace<TextElement>(currentUser->getUserName() + ":",
-                                   MessageElementFlag::Username, selfColor,
+                                   MessageElementFlag::Username, selfMsgColor,
                                    FontStyle::ChatMediumBold);
     }
     else

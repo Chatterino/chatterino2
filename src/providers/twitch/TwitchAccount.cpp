@@ -358,7 +358,6 @@ void TwitchAccount::loadUserstateEmotes()
                     name[0] = name[0].toUpper();
 
                     newUserEmoteSet->text = name;
-                    newUserEmoteSet->type = QString();
                     newUserEmoteSet->channelName = ivrEmoteSet.login;
 
                     for (const auto &emote : ivrEmoteSet.emotes)
@@ -508,38 +507,48 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
         return;
     }
 
-    NetworkRequest(Env::get().twitchEmoteSetResolverUrl.arg(emoteSet->key))
-        .cache()
-        .onSuccess([emoteSet](NetworkResult result) -> Outcome {
-            auto root = result.parseJson();
-            if (root.isEmpty())
+    getHelix()->getEmoteSetData(
+        emoteSet->key,
+        [emoteSet](HelixEmoteSetData emoteSetData) {
+            if (emoteSetData.ownerId.isEmpty() ||
+                emoteSetData.setId != emoteSet->key)
             {
-                return Failure;
+                qCWarning(chatterinoTwitch)
+                    << QString("Failed to fetch emoteSetData for %1, assuming "
+                               "Twitch is the owner")
+                           .arg(emoteSet->key);
+
+                // most (if not all) emotes that fail to load are time limited event emotes owned by Twitch
+                emoteSet->channelName = "twitch";
+                emoteSet->text = "Twitch";
+
+                return;
             }
 
-            TwitchEmoteSetResolverResponse response(root);
+            // emote set 0 = global emotes
+            if (emoteSetData.ownerId == "0")
+            {
+                // emoteSet->channelName = QString();
+                emoteSet->text = "Twitch Global";
+                return;
+            }
 
-            auto name = response.channelName;
-            name.detach();
-            name[0] = name[0].toUpper();
-
-            emoteSet->text = name;
-            emoteSet->type = response.type;
-            emoteSet->channelName = response.channelName;
-
-            qCDebug(chatterinoTwitch)
-                << QString("Loaded twitch emote set data for %1")
-                       .arg(emoteSet->key);
-
-            return Success;
-        })
-        .onError([emoteSet](NetworkResult result) {
-            qCWarning(chatterinoTwitch)
-                << QString("Error code %1 while loading emote set data for %2")
-                       .arg(result.status())
-                       .arg(emoteSet->key);
-        })
-        .execute();
+            getHelix()->getUserById(
+                emoteSetData.ownerId,
+                [emoteSet](HelixUser user) {
+                    emoteSet->channelName = user.login;
+                    emoteSet->text = user.displayName;
+                },
+                [emoteSetData] {
+                    qCWarning(chatterinoTwitch)
+                        << "Failed to query user by id:" << emoteSetData.ownerId
+                        << emoteSetData.setId;
+                });
+        },
+        [emoteSet] {
+            // fetching emoteset data failed
+            return;
+        });
 }
 
 }  // namespace chatterino

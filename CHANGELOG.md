@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+## 2.3.3
+
 - Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
 - Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
 - Minor: The /live split now shows channels going offline. (#2880)
@@ -20,8 +22,9 @@
 - Bugfix: Moderation buttons now show the correct time unit when using units other than seconds. (#1719, #2864)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
 - Bugfix: Fixed pasting text with URLs included (#1688, #2855)
-- Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850)
+- Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850, #2892)
 - Bugfix: Fixed bit and new subscriber emotes not (re)loading in some rare cases. (#2856, #2857)
+- Bugfix: Fixed subscription emotes showing up incorrectly in the emote menu. (#2905)
 
 ## 2.3.2
 

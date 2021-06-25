@@ -2,6 +2,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/Outcome.hpp"
+#include "messages/MessageColor.hpp"
 
 #include <IrcMessage>
 #include <QColor>
@@ -59,7 +60,8 @@ protected:
 
     const bool action_{};
 
-    QColor usernameColor_;
+    QColor usernameColor_ = {153, 153, 153};
+    MessageColor textColor_ = MessageColor::Text;
 
     bool highlightAlert_ = false;
     bool highlightSound_ = false;

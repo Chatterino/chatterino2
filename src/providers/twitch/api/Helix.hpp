@@ -264,6 +264,17 @@ struct HelixCheermoteSet {
     }
 };
 
+struct HelixEmoteSetData {
+    QString setId;
+    QString ownerId;
+
+    explicit HelixEmoteSetData(QJsonObject jsonObject)
+        : setId(jsonObject.value("emote_set_id").toString())
+        , ownerId(jsonObject.value("owner_id").toString())
+    {
+    }
+};
+
 enum class HelixClipError {
     Unknown,
     ClipsDisabled,
@@ -397,6 +408,11 @@ public:
         QString broadcasterId,
         ResultCallback<std::vector<HelixCheermoteSet>> successCallback,
         HelixFailureCallback failureCallback);
+
+    // https://dev.twitch.tv/docs/api/reference#get-emote-sets
+    void getEmoteSetData(QString emoteSetId,
+                         ResultCallback<HelixEmoteSetData> successCallback,
+                         HelixFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 
