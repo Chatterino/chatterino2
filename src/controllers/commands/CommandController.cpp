@@ -800,7 +800,13 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
             openLinkIncognito(link);
         else
-            QDesktopServices::openUrl(QUrl(link));
+        {
+            QUrl url = QUrl::fromUserInput(link);
+            if (!url.isValid() || !QDesktopServices::openUrl(url))
+            {
+                channel->addMessage(makeSystemMessage("Could not open URL."));
+            }
+        }
 
         return "";
     });
