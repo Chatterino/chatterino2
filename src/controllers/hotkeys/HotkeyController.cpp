@@ -424,20 +424,11 @@ std::vector<QShortcut *> HotkeyController::shortcutsForScope(
         };
         auto qs = QKeySequence(hotkey->keySequence());
 
-        if ((qs[0] & Qt::Key_Return) || (qs[1] & Qt::Key_Return) ||
-            (qs[2] & Qt::Key_Return) || (qs[3] & Qt::Key_Return))
+        auto stringified = qs.toString(QKeySequence::NativeText);
+        if (stringified.contains("Return"))
         {
-            std::array<int, 4> keys{qs[0], qs[1], qs[2], qs[3]};
-            for (auto &key : keys)
-            {
-                auto newKey = (key & ~Qt::Key_Return);
-                if (newKey != key)
-                {
-                    newKey |= Qt::Key_Enter;
-                    key = newKey;
-                }
-            }
-            auto copy = QKeySequence(keys[0], keys[1], keys[2], keys[3]);
+            stringified.replace("Return", "Enter");
+            auto copy = QKeySequence(stringified, QKeySequence::NativeText);
             createShortcutFromKeySeq(copy);
         }
         createShortcutFromKeySeq(qs);
