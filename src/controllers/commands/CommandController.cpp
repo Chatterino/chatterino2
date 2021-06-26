@@ -354,13 +354,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     };
 
-    this->registerCommand("/logs", [](const auto & /*words*/, auto channel) {
-        channel->addMessage(makeSystemMessage(
-            "Online logs functionality has been removed. If you're a "
-            "moderator, you can use the /user command"));
-        return "";
-    });
-
     this->registerCommand(
         "/ignore", [blockLambda](const auto &words, auto channel) {
             channel->addMessage(makeSystemMessage(
