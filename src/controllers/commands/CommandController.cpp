@@ -18,6 +18,7 @@
 #include "util/CombinePath.hpp"
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
+#include "util/IncognitoBrowser.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
@@ -784,6 +785,23 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(
                 makeSystemMessage("Unable to set game of non-Twitch channel."));
         }
+        return "";
+    });
+
+    this->registerCommand("/openurl", [](const QStringList &words,
+                                         const ChannelPtr channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage("Usage: /openurl <URL>."));
+            return "";
+        }
+
+        QString link(words[1]);
+        if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
+            openLinkIncognito(link);
+        else
+            QDesktopServices::openUrl(QUrl(link));
+
         return "";
     });
 }
