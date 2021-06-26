@@ -798,7 +798,9 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         QString link(words[1]);
         if (getSettings()->openLinksIncognito && supportsIncognitoLinks())
+        {
             openLinkIncognito(link);
+        }
         else
         {
             QUrl url = QUrl::fromUserInput(link);
