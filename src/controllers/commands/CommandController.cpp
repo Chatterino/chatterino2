@@ -797,12 +797,24 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         QUrl url = QUrl::fromUserInput(words.mid(1).join(" "));
-        if (url.isValid() && getSettings()->openLinksIncognito &&
-            supportsIncognitoLinks())
+        if (!url.isValid())
         {
-            openLinkIncognito(url.toString(QUrl::FullyEncoded));
+            channel->addMessage(makeSystemMessage("Invalid URL specified."));
+            return "";
         }
-        else if (!url.isValid() || !QDesktopServices::openUrl(url))
+
+        bool res = false;
+
+        if (supportsIncognitoLinks() && getSettings()->openLinksIncognito)
+        {
+            res = openLinkIncognito(url.toString(QUrl::FullyEncoded));
+        }
+        else
+        {
+            res = QDesktopServices::openUrl(url);
+        }
+
+        if (!res)
         {
             channel->addMessage(makeSystemMessage("Could not open URL."));
         }
