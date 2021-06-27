@@ -124,7 +124,6 @@ SOURCES += \
     src/BaseSettings.cpp \
     src/BaseTheme.cpp \
     src/BrowserExtension.cpp \
-    src/CMakeFiles/3.20    CompilerIdCXX/CMakeCXXCompilerId.cpp \
     src/common/Args.cpp \
     src/common/Channel.cpp \
     src/common/ChannelChatters.cpp \
