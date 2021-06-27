@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Minor: Added `/openurl` command. Usage: `/openurl <URL>`. Opens the provided URL in the browser. (#2461, #2926)
+- Minor: Add option to right click an emote in chat and add it directly to the block list (block enabled by default). (#2615)
 - Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
 
 ## 2.3.3
@@ -208,4 +209,3 @@
 - Settings open faster
 - Dev: Fully remove Twitch Chatroom support
 - Dev: Handle conversion of historical CLEARCHAT messages to NOTICE messages in Chatterino instead of relying on the Recent Messages API to handle it for us. (#1804)
-- Minor: Add option to right click an emote in chat and add it directly to the block list (block enabled by default).
