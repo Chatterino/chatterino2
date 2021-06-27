@@ -804,7 +804,6 @@ void CommandController::initialize(Settings &, Paths &paths)
         }
 
         bool res = false;
-
         if (supportsIncognitoLinks() && getSettings()->openLinksIncognito)
         {
             res = openLinkIncognito(url.toString(QUrl::FullyEncoded));
