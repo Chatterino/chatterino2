@@ -480,7 +480,7 @@ void SplitInput::updateCompletionPopup()
     auto text = edit.toPlainText();
     auto position = edit.textCursor().position() - 1;
 
-    if (text.length() == 0)
+    if (text.length() == 0 || position == -1)
     {
         this->hideCompletionPopup();
         return;
