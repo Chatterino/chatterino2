@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
+
 ## 2.3.3
 
 - Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
@@ -19,7 +21,6 @@
 - Minor: Now shows deletions of messages like timeouts (#1155, #2841, #2867, #2874)
 - Minor: Added a link to accounts page in settings to "You need to be logged in to send messages" message. (#2862)
 - Minor: Switch to Twitch v2 emote API for animated emote support. (#2863)
-- Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
 - Bugfix: Moderation buttons now show the correct time unit when using units other than seconds. (#1719, #2864)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
 - Bugfix: Fixed pasting text with URLs included (#1688, #2855)
