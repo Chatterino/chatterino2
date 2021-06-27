@@ -84,12 +84,14 @@ bool supportsIncognitoLinks()
 #endif
 }
 
-void openLinkIncognito(const QString &link)
+bool openLinkIncognito(const QString &link)
 {
 #ifdef Q_OS_WIN
     auto command = getCommand(link);
 
-    QProcess::startDetached(command);
+    return QProcess::startDetached(command);
+#else
+    return false;
 #endif
 }
 
