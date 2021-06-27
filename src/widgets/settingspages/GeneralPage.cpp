@@ -7,6 +7,7 @@
 #include "Application.hpp"
 #include "common/Version.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/NativeMessaging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -17,6 +18,9 @@
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
+
+#include <QDesktopServices>
+#include <QFileDialog>
 
 #define CHROME_EXTENSION_LINK                                           \
     "https://chrome.google.com/webstore/detail/chatterino-native-host/" \
@@ -307,6 +311,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             return fuzzyToFloat(args.value, 1.f);
         });
 
+    layout.addCheckbox("Remove spaces between emotes",
+                       s.removeSpacesBetweenEmotes);
     layout.addDropdown<int>(
         "Show info on hover", {"Don't show", "Always show", "Hold shift"},
         s.emotesTooltipPreview,
@@ -437,6 +443,16 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addDescription("The browser extension replaces the default "
                           "Twitch.tv chat with chatterino.");
 
+    {
+        if (auto err = nmIpcError().get())
+        {
+            layout.addDescription(
+                "An error happened during initialization of the "
+                "browser extension: " +
+                *err);
+        }
+    }
+
     layout.addDescription(formatRichNamedLink(
         CHROME_EXTENSION_LINK,
         "Download for Google Chrome and similar browsers."));
@@ -545,16 +561,20 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         });
 
     layout.addSubtitle("Visible badges");
-    layout.addCheckbox("Authority (staff, admin)",
-                       getSettings()->showBadgesGlobalAuthority);
+    layout.addCheckbox("Authority (staff, admin)", s.showBadgesGlobalAuthority);
+    layout.addCheckbox("Predictions", s.showBadgesPredictions);
     layout.addCheckbox("Channel (broadcaster, moderator)",
-                       getSettings()->showBadgesChannelAuthority);
-    layout.addCheckbox("Subscriber ", getSettings()->showBadgesSubscription);
-    layout.addCheckbox("Vanity (prime, bits, subgifter)",
-                       getSettings()->showBadgesVanity);
-    layout.addCheckbox("Chatterino", getSettings()->showBadgesChatterino);
+                       s.showBadgesChannelAuthority);
+    layout.addCheckbox("Subscriber ", s.showBadgesSubscription);
+    layout.addCheckbox("Vanity (prime, bits, subgifter)", s.showBadgesVanity);
+    layout.addCheckbox("Chatterino", s.showBadgesChatterino);
     layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
-                       getSettings()->showBadgesFfz);
+                       s.showBadgesFfz);
+    layout.addSeperator();
+    layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
+                       s.useCustomFfzModeratorBadges);
+    layout.addCheckbox("Use custom FrankerFaceZ VIP badges",
+                       s.useCustomFfzVipBadges);
 
     layout.addSubtitle("Miscellaneous");
 
@@ -577,6 +597,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
+    layout.addCheckbox("Show deletions of single messages",
+                       s.hideDeletionActions, true);
     layout.addCheckbox("Colorize users without color set (gray names)",
                        s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
@@ -590,6 +612,21 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Color @usernames", s.colorUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames);
+    layout.addCheckbox("Show username autocompletion popup menu",
+                       s.showUsernameCompletionMenu);
+    const QStringList usernameDisplayModes = {"Username", "Localized name",
+                                              "Username and localized name"};
+
+    layout.addDropdown<std::underlying_type<UsernameDisplayMode>::type>(
+        "Username style", usernameDisplayModes, s.usernameDisplayMode,
+        [usernameDisplayModes](auto val) {
+            return usernameDisplayModes.at(val - 1);
+            // UsernameDisplayMode enum indexes from 1
+        },
+        [](auto args) {
+            return args.index + 1;
+        },
+        false);
     layout.addDropdown<float>(
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
         [](auto val) {
@@ -635,8 +672,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false);
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
-    layout.addCheckbox("Ask for confirmation when uploading an image",
-                       s.askOnImageUpload);
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
 

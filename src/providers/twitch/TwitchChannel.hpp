@@ -4,14 +4,13 @@
 #include "common/Atomic.hpp"
 #include "common/Channel.hpp"
 #include "common/ChannelChatters.hpp"
+#include "common/ChatterSet.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
-#include "common/UsernameSet.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
 
-#include <IrcConnection>
 #include <QColor>
 #include <QElapsedTimer>
 #include <QRegularExpression>
@@ -83,11 +82,10 @@ public:
     int chatterCount();
     virtual bool isLive() const override;
     QString roomId() const;
-    AccessGuard<const RoomModes> accessRoomModes() const;
-    AccessGuard<const StreamStatus> accessStreamStatus() const;
+    SharedAccessGuard<const RoomModes> accessRoomModes() const;
+    SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
 
     // Emotes
-    const TwitchBadges &globalTwitchBadges() const;
     const BttvEmotes &globalBttv() const;
     const FfzEmotes &globalFfz() const;
     boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
@@ -100,6 +98,7 @@ public:
 
     // Badges
     boost::optional<EmotePtr> ffzCustomModBadge() const;
+    boost::optional<EmotePtr> ffzCustomVipBadge() const;
     boost::optional<EmotePtr> twitchBadge(const QString &set,
                                           const QString &version) const;
 
@@ -127,9 +126,8 @@ private:
     } nameOptions;
 
 protected:
-    explicit TwitchChannel(const QString &channelName,
-                           TwitchBadges &globalTwitchBadges,
-                           BttvEmotes &globalBttv, FfzEmotes &globalFfz);
+    explicit TwitchChannel(const QString &channelName, BttvEmotes &globalBttv,
+                           FfzEmotes &globalFfz);
 
 private:
     // Methods
@@ -162,15 +160,13 @@ private:
     UniqueAccess<StreamStatus> streamStatus_;
     UniqueAccess<RoomModes> roomModes_;
 
-    // Emotes
-    TwitchBadges &globalTwitchBadges_;
-
 protected:
     BttvEmotes &globalBttv_;
     FfzEmotes &globalFfz_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;
+    Atomic<boost::optional<EmotePtr>> ffzCustomVipBadge_;
 
 private:
     // Badges

@@ -6,8 +6,8 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
-#include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
@@ -697,13 +697,11 @@ void UserInfoPopup::updateUserData()
 
         // get ignore state
         bool isIgnoring = false;
-        for (const auto &blockedUser : currentUser->getBlocks())
+
+        if (auto blocks = currentUser->accessBlockedUserIds();
+            blocks->find(user.id) != blocks->end())
         {
-            if (user.id == blockedUser.id)
-            {
-                isIgnoring = true;
-                break;
-            }
+            isIgnoring = true;
         }
 
         // get ignoreHighlights state

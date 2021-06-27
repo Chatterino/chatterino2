@@ -5,6 +5,7 @@
 #include "singletons/Settings.hpp"
 
 #include <QMimeData>
+#include <QMimeDatabase>
 
 namespace chatterino {
 
@@ -264,14 +265,33 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
-    if (source->hasImage() || source->hasUrls())
+    if (source->hasImage())
     {
         this->imagePasted.invoke(source);
+        return;
     }
-    else
+    else if (source->hasUrls())
     {
-        insertPlainText(source->text());
+        bool hasUploadable = false;
+        auto mimeDb = QMimeDatabase();
+        for (const QUrl url : source->urls())
+        {
+            QMimeType mime = mimeDb.mimeTypeForUrl(url);
+            if (mime.name().startsWith("image"))
+            {
+                hasUploadable = true;
+                break;
+            }
+        }
+
+        if (hasUploadable)
+        {
+            this->imagePasted.invoke(source);
+            return;
+        }
     }
+
+    insertPlainText(source->text());
 }
 
 QCompleter *ResizingTextEdit::getCompleter() const

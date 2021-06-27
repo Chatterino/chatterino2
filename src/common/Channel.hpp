@@ -4,6 +4,7 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/LimitedQueue.hpp"
 
+#include <QDate>
 #include <QString>
 #include <QTimer>
 #include <boost/optional.hpp>
@@ -36,6 +37,7 @@ public:
         TwitchWhispers,
         TwitchWatching,
         TwitchMentions,
+        TwitchLive,
         TwitchEnd,
         Irc,
         Misc
@@ -76,6 +78,7 @@ public:
     void replaceMessage(MessagePtr message, MessagePtr replacement);
     void replaceMessage(size_t index, MessagePtr replacement);
     void deleteMessage(QString messageID);
+    MessagePtr findMessage(QString messageID);
 
     bool hasMessages() const;
 
@@ -96,6 +99,7 @@ public:
     static std::shared_ptr<Channel> getEmpty();
 
     CompletionModel completionModel;
+    QDate lastDate_;
 
 protected:
     virtual void onConnected();

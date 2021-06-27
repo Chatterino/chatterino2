@@ -168,7 +168,9 @@ namespace {
         if (settings.headerGame && !s.game.isEmpty())
             title += " - " + s.game;
         if (settings.headerStreamTitle && !s.title.isEmpty())
-            title += " - " + s.title;
+        {
+            title += " - " + s.title.simplified();
+        }
 
         return title;
     }
@@ -314,12 +316,14 @@ void SplitHeader::initializeLayout()
                              }
                          });
 
-    getSettings()->customURIScheme.connect([this] {
-        if (const auto drop = this->dropdownButton_)
-        {
-            drop->setMenu(this->createMainMenu());
-        }
-    });
+    getSettings()->customURIScheme.connect(
+        [this] {
+            if (const auto drop = this->dropdownButton_)
+            {
+                drop->setMenu(this->createMainMenu());
+            }
+        },
+        this->managedConnections_);
 
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -803,6 +807,8 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
     switch (event->button())
     {
         case Qt::LeftButton: {
+            this->split_->giveFocus(Qt::MouseFocusReason);
+
             this->dragging_ = true;
 
             this->dragStart_ = event->pos();

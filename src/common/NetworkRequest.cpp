@@ -106,16 +106,12 @@ NetworkRequest NetworkRequest::header(const char *headerName,
     return std::move(*this);
 }
 
-NetworkRequest NetworkRequest::headerList(const QStringList &headers) &&
+NetworkRequest NetworkRequest::headerList(
+    const std::vector<std::pair<QByteArray, QByteArray>> &headers) &&
 {
-    for (const QString &header : headers)
+    for (const auto &[headerName, headerValue] : headers)
     {
-        const QStringList thisHeader = header.trimmed().split(":");
-        if (thisHeader.size() == 2)
-        {
-            this->data->request_.setRawHeader(thisHeader[0].trimmed().toUtf8(),
-                                              thisHeader[1].trimmed().toUtf8());
-        }
+        this->data->request_.setRawHeader(headerName, headerValue);
     }
     return std::move(*this);
 }

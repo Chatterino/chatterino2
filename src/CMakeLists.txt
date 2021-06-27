@@ -1,4 +1,7 @@
-set(SOURCE_FILES main.cpp
+set(LIBRARY_PROJECT "${PROJECT_NAME}-lib")
+set(EXECUTABLE_PROJECT "${PROJECT_NAME}")
+
+set(SOURCE_FILES
         Application.cpp
         Application.hpp
         BaseSettings.cpp
@@ -18,6 +21,8 @@ set(SOURCE_FILES main.cpp
         common/ChannelChatters.hpp
         common/ChatterinoSetting.cpp
         common/ChatterinoSetting.hpp
+        common/ChatterSet.cpp
+        common/ChatterSet.hpp
         common/CompletionModel.cpp
         common/CompletionModel.hpp
         common/Credentials.cpp
@@ -30,6 +35,8 @@ set(SOURCE_FILES main.cpp
         common/LinkParser.hpp
         common/Modes.cpp
         common/Modes.hpp
+        common/NetworkCommon.cpp
+        common/NetworkCommon.hpp
         common/NetworkManager.cpp
         common/NetworkManager.hpp
         common/NetworkPrivate.cpp
@@ -40,8 +47,6 @@ set(SOURCE_FILES main.cpp
         common/NetworkResult.hpp
         common/QLogging.cpp
         common/QLogging.hpp
-        common/UsernameSet.cpp
-        common/UsernameSet.hpp
         common/Version.cpp
         common/Version.hpp
         common/WindowDescriptors.cpp
@@ -70,6 +75,10 @@ set(SOURCE_FILES main.cpp
         controllers/filters/parser/Types.cpp
         controllers/filters/parser/Types.hpp
 
+        controllers/highlights/BadgeHighlightModel.cpp
+        controllers/highlights/BadgeHighlightModel.hpp
+        controllers/highlights/HighlightBadge.cpp
+        controllers/highlights/HighlightBadge.hpp
         controllers/highlights/HighlightBlacklistModel.cpp
         controllers/highlights/HighlightBlacklistModel.hpp
         controllers/highlights/HighlightModel.cpp
@@ -133,8 +142,12 @@ set(SOURCE_FILES main.cpp
         messages/layouts/MessageLayoutElement.hpp
         messages/search/AuthorPredicate.cpp
         messages/search/AuthorPredicate.hpp
+        messages/search/ChannelPredicate.cpp
+        messages/search/ChannelPredicate.hpp
         messages/search/LinkPredicate.cpp
         messages/search/LinkPredicate.hpp
+        messages/search/MessageFlagsPredicate.cpp
+        messages/search/MessageFlagsPredicate.hpp
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
 
@@ -207,8 +220,6 @@ set(SOURCE_FILES main.cpp
         providers/twitch/TwitchIrcServer.hpp
         providers/twitch/TwitchMessageBuilder.cpp
         providers/twitch/TwitchMessageBuilder.hpp
-        providers/twitch/TwitchParseCheerEmotes.cpp
-        providers/twitch/TwitchParseCheerEmotes.hpp
         providers/twitch/TwitchUser.cpp
         providers/twitch/TwitchUser.hpp
 
@@ -255,6 +266,8 @@ set(SOURCE_FILES main.cpp
         util/Clipboard.hpp
         util/DebugCount.cpp
         util/DebugCount.hpp
+        util/DisplayBadge.cpp
+        util/DisplayBadge.hpp
         util/FormatTime.cpp
         util/FormatTime.hpp
         util/FunctionEventFilter.cpp
@@ -298,6 +311,8 @@ set(SOURCE_FILES main.cpp
         widgets/BaseWidget.hpp
         widgets/BaseWindow.cpp
         widgets/BaseWindow.hpp
+        widgets/FramelessEmbedWindow.cpp
+        widgets/FramelessEmbedWindow.hpp
         widgets/Label.cpp
         widgets/Label.hpp
         widgets/Notebook.cpp
@@ -311,6 +326,8 @@ set(SOURCE_FILES main.cpp
         widgets/Window.cpp
         widgets/Window.hpp
 
+        widgets/dialogs/BadgePickerDialog.cpp
+        widgets/dialogs/BadgePickerDialog.hpp
         widgets/dialogs/ChannelFilterEditorDialog.cpp
         widgets/dialogs/ChannelFilterEditorDialog.hpp
         widgets/dialogs/ColorPickerDialog.cpp
@@ -334,8 +351,6 @@ set(SOURCE_FILES main.cpp
         widgets/dialogs/SelectChannelFiltersDialog.hpp
         widgets/dialogs/SettingsDialog.cpp
         widgets/dialogs/SettingsDialog.hpp
-        widgets/dialogs/TextInputDialog.cpp
-        widgets/dialogs/TextInputDialog.hpp
         widgets/dialogs/UpdateDialog.cpp
         widgets/dialogs/UpdateDialog.hpp
         widgets/dialogs/UserInfoPopup.cpp
@@ -422,10 +437,10 @@ set(SOURCE_FILES main.cpp
 
         widgets/splits/ClosedSplits.cpp
         widgets/splits/ClosedSplits.hpp
-        widgets/splits/EmoteInputItem.cpp
-        widgets/splits/EmoteInputItem.hpp
-        widgets/splits/EmoteInputPopup.cpp
-        widgets/splits/EmoteInputPopup.hpp
+        widgets/splits/InputCompletionItem.cpp
+        widgets/splits/InputCompletionItem.hpp
+        widgets/splits/InputCompletionPopup.cpp
+        widgets/splits/InputCompletionPopup.hpp
         widgets/splits/Split.cpp
         widgets/splits/Split.hpp
         widgets/splits/SplitContainer.cpp
@@ -459,51 +474,127 @@ endif ()
 # Generate source groups for use in IDEs
 source_group(TREE ${CMAKE_SOURCE_DIR} FILES ${SOURCE_FILES})
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-add_sanitizers(${PROJECT_NAME})
+add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
-target_precompile_headers(${PROJECT_NAME} PRIVATE PrecompiledHeader.hpp)
+target_link_libraries(${LIBRARY_PROJECT}
+        PUBLIC
+        Qt5::Core
+        Qt5::Widgets
+        Qt5::Gui
+        Qt5::Network
+        Qt5::Multimedia
+        Qt5::Svg
+        Qt5::Concurrent
+
+        LibCommuni::LibCommuni
+        qt5keychain
+        Pajlada::Serialize
+        Pajlada::Settings
+        Pajlada::Signals
+        websocketpp::websocketpp
+        Threads::Threads
+        RapidJSON::RapidJSON
+        LRUCache
+        )
+
+if (BUILD_APP)
+    add_executable(${EXECUTABLE_PROJECT} main.cpp)
+    add_sanitizers(${EXECUTABLE_PROJECT})
+
+    target_include_directories(${EXECUTABLE_PROJECT} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+    target_link_libraries(${EXECUTABLE_PROJECT} PUBLIC ${LIBRARY_PROJECT})
+
+    set_target_properties(${EXECUTABLE_PROJECT}
+        PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+        RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin"
+        RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
+        RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
+        )
+
+    if (MSVC)
+        get_target_property(Qt5_Core_Location Qt5::Core LOCATION)
+        get_filename_component(QT_BIN_DIR ${Qt5_Core_Location} DIRECTORY)
+        set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
+
+        install(TARGETS ${EXECUTABLE_PROJECT}
+                RUNTIME DESTINATION .
+                )
+
+        install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
+    elseif (APPLE)
+        install(TARGETS ${EXECUTABLE_PROJECT}
+                RUNTIME DESTINATION bin
+                BUNDLE DESTINATION bin
+                LIBRARY DESTINATION lib
+                ARCHIVE DESTINATION lib/static
+                )
+    else ()
+        install(TARGETS ${EXECUTABLE_PROJECT}
+                RUNTIME DESTINATION bin
+                LIBRARY DESTINATION lib
+                ARCHIVE DESTINATION lib/static
+                )
+
+        install(FILES ${CMAKE_SOURCE_DIR}/resources/com.chatterino.chatterino.desktop
+                DESTINATION share/applications
+                )
+
+        install(FILES ${CMAKE_SOURCE_DIR}/resources/icon.png
+                RENAME com.chatterino.chatterino.png
+                DESTINATION share/icons/hicolor/256x256/apps
+                )
+    endif ()
+endif ()
+
+if (USE_PRECOMPILED_HEADERS)
+    target_precompile_headers(${LIBRARY_PROJECT} PRIVATE PrecompiledHeader.hpp)
+endif ()
 
 # Enable autogeneration of Qts MOC/RCC/UIC
-set_target_properties(${PROJECT_NAME}
+set_target_properties(${LIBRARY_PROJECT}
     PROPERTIES
     AUTOMOC ON
     AUTORCC ON
     AUTOUIC ON
     )
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE
+target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO
     UNICODE
     AB_CUSTOM_THEME
     AB_CUSTOM_SETTINGS
     IRC_STATIC
     IRC_NAMESPACE=Communi
-    )
-if (USE_SYSTEM_QT5KEYCHAIN)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE
-        CMAKE_BUILD
-        )
-endif ()
-target_compile_definitions(${PROJECT_NAME} PRIVATE
+
     CHATTERINO_GIT_HASH=\"${GIT_HASH}\"
     CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
     CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
     )
+if (USE_SYSTEM_QT5KEYCHAIN)
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
+        CMAKE_BUILD
+        )
+endif ()
 if (WIN32)
-    target_compile_definitions(${PROJECT_NAME} PRIVATE
+    target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         USEWINSDK
         )
-    set_target_properties(${PROJECT_NAME} PROPERTIES WIN32_EXECUTABLE TRUE)
+    if (BUILD_APP)
+        set_target_properties(${EXECUTABLE_PROJECT} PROPERTIES WIN32_EXECUTABLE TRUE)
+    endif ()
 endif ()
 
 if (MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /EHsc)
+    target_compile_options(${LIBRARY_PROJECT} PUBLIC /EHsc)
 endif ()
 
-if (APPLE)
-    set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE TRUE)
-    set_target_properties(${PROJECT_NAME}
+if (APPLE AND BUILD_APP)
+    set_target_properties(${EXECUTABLE_PROJECT} PROPERTIES MACOSX_BUNDLE TRUE)
+    set_target_properties(${EXECUTABLE_PROJECT}
         PROPERTIES
         MACOSX_BUNDLE_BUNDLE_NAME "Chatterino"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.chatterino"
@@ -515,110 +606,45 @@ if (APPLE)
         )
 endif ()
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
-
-target_link_libraries(${PROJECT_NAME}
-        PRIVATE
-        Qt5::Core
-        Qt5::Widgets
-        Qt5::Gui
-        Qt5::Network
-        Qt5::Multimedia
-        Qt5::Svg
-        Qt5::Concurrent
-        )
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 if (WinToast_FOUND)
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
+    target_link_libraries(${LIBRARY_PROJECT}
+        PUBLIC
         WinToast)
 endif ()
 
 if (USE_CONAN AND TARGET CONAN_PKG::boost)
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
+    target_link_libraries(${LIBRARY_PROJECT}
+        PUBLIC
         CONAN_PKG::boost
         )
 else ()
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
+    target_link_libraries(${LIBRARY_PROJECT}
+        PUBLIC
         Boost::boost
         )
 endif ()
 
 if (USE_CONAN AND TARGET CONAN_PKG::openssl)
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
+    target_link_libraries(${LIBRARY_PROJECT}
+        PUBLIC
         CONAN_PKG::openssl
         )
 else ()
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
+    target_link_libraries(${LIBRARY_PROJECT}
+        PUBLIC
         OpenSSL::SSL
         OpenSSL::Crypto
         )
 endif ()
 
-target_include_directories(${PROJECT_NAME} PRIVATE ${RapidJSON_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME}
-    PRIVATE
-    LibCommuni::LibCommuni
-    qt5keychain
-    Pajlada::Serialize
-    Pajlada::Settings
-    Pajlada::Signals
-    websocketpp::websocketpp
-    Threads::Threads
-    RapidJSON::RapidJSON
-    LRUCache
-    )
+target_include_directories(${LIBRARY_PROJECT} PUBLIC ${RapidJSON_INCLUDE_DIRS})
+
 if (LIBRT)
-    target_link_libraries(${PROJECT_NAME}
-        PRIVATE
+    target_link_libraries(${LIBRARY_PROJECT}
+        PUBLIC
         ${LIBRT}
         )
 endif ()
 
-set_target_properties(${PROJECT_NAME}
-    PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib"
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-    RUNTIME_OUTPUT_DIRECTORY_RELEASE "${CMAKE_BINARY_DIR}/bin"
-    RUNTIME_OUTPUT_DIRECTORY_DEBUG "${CMAKE_BINARY_DIR}/bin"
-    RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${CMAKE_BINARY_DIR}/bin"
-    )
-
-if (MSVC)
-    get_target_property(Qt5_Core_Location Qt5::Core LOCATION)
-    get_filename_component(QT_BIN_DIR ${Qt5_Core_Location} DIRECTORY)
-    set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${PROJECT_NAME}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
-
-    install(TARGETS ${PROJECT_NAME}
-            RUNTIME DESTINATION .
-            )
-
-    install(CODE "execute_process(COMMAND ${WINDEPLOYQT_COMMAND} --dir \${CMAKE_INSTALL_PREFIX})")
-elseif (APPLE)
-    install(TARGETS ${PROJECT_NAME}
-            RUNTIME DESTINATION bin
-            BUNDLE DESTINATION bin
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib/static
-            )
-else ()
-    install(TARGETS ${PROJECT_NAME}
-            RUNTIME DESTINATION bin
-            LIBRARY DESTINATION lib
-            ARCHIVE DESTINATION lib/static
-            )
-
-    install(FILES ${CMAKE_SOURCE_DIR}/resources/com.chatterino.chatterino.desktop
-            DESTINATION share/applications
-            )
-
-    install(FILES ${CMAKE_SOURCE_DIR}/resources/icon.png
-            RENAME com.chatterino.chatterino.png
-            DESTINATION share/icons/hicolor/256x256/apps
-            )
-endif ()

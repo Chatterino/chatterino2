@@ -2,11 +2,12 @@
 
 #include <boost/optional.hpp>
 #include <common/Singleton.hpp>
-
-#include "common/Aliases.hpp"
-
-#include <map>
+#include <memory>
+#include <shared_mutex>
+#include <unordered_map>
 #include <vector>
+#include "common/Aliases.hpp"
+#include "util/QStringHash.hpp"
 
 namespace chatterino {
 
@@ -23,7 +24,10 @@ public:
 
 private:
     void loadChatterinoBadges();
-    std::map<QString, int> badgeMap;
+
+    std::shared_mutex mutex_;
+
+    std::unordered_map<QString, int> badgeMap;
     std::vector<EmotePtr> emotes;
 };
 

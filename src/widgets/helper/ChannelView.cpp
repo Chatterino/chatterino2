@@ -1,6 +1,7 @@
 #include "ChannelView.hpp"
 
 #include <QClipboard>
+#include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QGraphicsBlurEffect>
@@ -23,6 +24,7 @@
 #include "messages/Emote.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
@@ -45,6 +47,7 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/SearchPopup.hpp"
 #include "widgets/splits/Split.hpp"
 
 #define DRAW_WIDTH (this->width())
@@ -635,6 +638,15 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                    boost::optional<MessageFlags> overridingFlags) {
                 if (this->shouldIncludeMessage(message))
                 {
+                    if (this->channel_->lastDate_ != QDate::currentDate())
+                    {
+                        this->channel_->lastDate_ = QDate::currentDate();
+                        auto msg = makeSystemMessage(
+                            QLocale().toString(QDate::currentDate(),
+                                               QLocale::LongFormat),
+                            QTime(0, 0));
+                        this->channel_->addMessage(msg);
+                    }
                     // When the message was received in the underlyingChannel,
                     // logging will be handled. Prevent duplications.
                     if (overridingFlags)
@@ -817,6 +829,18 @@ void ChannelView::messageAppended(MessagePtr &message,
     }
     this->lastMessageHasAlternateBackground_ =
         !this->lastMessageHasAlternateBackground_;
+
+    if (!this->scrollBar_->isAtBottom() &&
+        this->scrollBar_->getCurrentValueAnimation().state() ==
+            QPropertyAnimation::Running)
+    {
+        QEventLoop loop;
+
+        connect(&this->scrollBar_->getCurrentValueAnimation(),
+                &QAbstractAnimation::stateChanged, &loop, &QEventLoop::quit);
+
+        loop.exec();
+    }
 
     if (this->messages_.pushBack(MessageLayoutPtr(messageRef), deleted))
     {
@@ -1009,18 +1033,32 @@ MessageElementFlags ChannelView::getFlags() const
 
     Split *split = dynamic_cast<Split *>(this->parentWidget());
 
+    if (split == nullptr)
+    {
+        SearchPopup *searchPopup =
+            dynamic_cast<SearchPopup *>(this->parentWidget());
+        if (searchPopup != nullptr)
+        {
+            split = dynamic_cast<Split *>(searchPopup->parentWidget());
+        }
+    }
+
     if (split != nullptr)
     {
         if (split->getModerationMode())
         {
             flags.set(MessageElementFlag::ModeratorTools);
         }
-        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel)
+        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel ||
+            this->underlyingChannel_ == app->twitch.server->liveChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
         }
     }
+
+    if (this->sourceChannel_ == app->twitch.server->mentionsChannel)
+        flags.set(MessageElementFlag::ChannelName);
 
     return flags;
 }
@@ -1131,8 +1169,10 @@ void ChannelView::drawMessages(QPainter &painter)
 
 void ChannelView::wheelEvent(QWheelEvent *event)
 {
-    if (event->orientation() != Qt::Vertical)
+    if (!event->angleDelta().y())
+    {
         return;
+    }
 
     if (event->modifiers() & Qt::ControlModifier)
     {
@@ -1145,7 +1185,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
         float mouseMultiplier = getSettings()->mouseScrollMultiplier;
 
         qreal desired = this->scrollBar_->getDesiredValue();
-        qreal delta = event->delta() * qreal(1.5) * mouseMultiplier;
+        qreal delta = event->angleDelta().y() * qreal(1.5) * mouseMultiplier;
 
         auto snapshot = this->getMessagesSnapshot();
         int snapshotLength = int(snapshot.size());
@@ -1848,6 +1888,13 @@ void ChannelView::addContextMenuItems(
     auto menu = new QMenu;
     previousMenu = menu;
 
+    if (creatorFlags.hasAny({MessageElementFlag::Badges}))
+    {
+        auto badgeElement = dynamic_cast<const BadgeElement *>(&creator);
+        addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
+                                 *menu);
+    }
+
     // Emote actions
     if (creatorFlags.hasAny(
             {MessageElementFlag::EmoteImages, MessageElementFlag::EmojiImage}))
@@ -2056,24 +2103,38 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserAction: {
             QString value = link.value;
 
+            ChannelPtr channel = this->underlyingChannel_;
+            SearchPopup *searchPopup =
+                dynamic_cast<SearchPopup *>(this->parentWidget());
+            if (searchPopup != nullptr)
+            {
+                Split *split =
+                    dynamic_cast<Split *>(searchPopup->parentWidget());
+                if (split != nullptr)
+                {
+                    channel = split->getChannel();
+                }
+            }
+
             value.replace("{user}", layout->getMessage()->loginName)
                 .replace("{channel}", this->channel_->getName())
                 .replace("{msg-id}", layout->getMessage()->id)
                 .replace("{message}", layout->getMessage()->messageText);
 
-            value = getApp()->commands->execCommand(
-                value, this->underlyingChannel_, false);
-            this->underlyingChannel_->sendMessage(value);
+            value = getApp()->commands->execCommand(value, channel, false);
+            channel->sendMessage(value);
         }
         break;
 
         case Link::AutoModAllow: {
-            getApp()->accounts->twitch.getCurrent()->autoModAllow(link.value);
+            getApp()->accounts->twitch.getCurrent()->autoModAllow(
+                link.value, this->channel());
         }
         break;
 
         case Link::AutoModDeny: {
-            getApp()->accounts->twitch.getCurrent()->autoModDeny(link.value);
+            getApp()->accounts->twitch.getCurrent()->autoModDeny(
+                link.value, this->channel());
         }
         break;
 

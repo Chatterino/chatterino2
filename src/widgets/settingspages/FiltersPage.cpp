@@ -10,7 +10,9 @@
 
 #include <QTableView>
 
-#define FILTERS_DOCUMENTATION "https://wiki.chatterino.com/Filters/"
+#include <QHeaderView>
+
+#define FILTERS_DOCUMENTATION "https://wiki.chatterino.com/Filters"
 
 namespace chatterino {
 

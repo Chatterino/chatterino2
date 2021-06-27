@@ -2,6 +2,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "common/Channel.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
@@ -9,6 +10,7 @@
 
 #include <rapidjson/document.h>
 #include <QColor>
+#include <QElapsedTimer>
 #include <QString>
 
 #include <functional>
@@ -60,7 +62,6 @@ public:
         QString key;
         QString channelName;
         QString text;
-        QString type;
         std::vector<TwitchEmote> emotes;
     };
 
@@ -106,15 +107,21 @@ public:
     void checkFollow(const QString targetUserID,
                      std::function<void(FollowResult)> onFinished);
 
-    std::set<TwitchUser> getBlocks() const;
+    SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;
+    SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 
     void loadEmotes();
-    void loadUserstateEmotes(QStringList emoteSetKeys);
-    AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
+    // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
+    // this function makes sure not to load emote sets that have already been loaded
+    void loadUserstateEmotes();
+    // setUserStateEmoteSets sets the emote sets that were parsed from the USERSTATE emote-sets key
+    // Returns true if the newly inserted emote sets differ from the ones previously saved
+    [[nodiscard]] bool setUserstateEmoteSets(QStringList newEmoteSets);
+    SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
-    void autoModAllow(const QString msgID);
-    void autoModDeny(const QString msgID);
+    void autoModAllow(const QString msgID, ChannelPtr channel);
+    void autoModDeny(const QString msgID, ChannelPtr channel);
 
 private:
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
@@ -127,8 +134,9 @@ private:
     Atomic<QColor> color_;
 
     mutable std::mutex ignoresMutex_;
-    QElapsedTimer userstateEmotesTimer_;
-    std::set<TwitchUser> ignores_;
+    QStringList userstateEmoteSets_;
+    UniqueAccess<std::set<TwitchUser>> ignores_;
+    UniqueAccess<std::set<QString>> ignoresUserIds_;
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;

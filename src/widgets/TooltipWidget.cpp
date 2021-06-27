@@ -12,6 +12,8 @@
 #    include <Windows.h>
 #endif
 
+#include <QPainter>
+
 namespace chatterino {
 
 TooltipWidget *TooltipWidget::instance()

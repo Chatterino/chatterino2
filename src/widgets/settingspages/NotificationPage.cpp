@@ -35,8 +35,12 @@ NotificationPage::NotificationPage()
 
                 settings.append(this->createCheckBox(
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
+                settings.append(
+                    this->createCheckBox("Play sound for selected channels",
+                                         getSettings()->notificationPlaySound));
                 settings.append(this->createCheckBox(
-                    "Play sound", getSettings()->notificationPlaySound));
+                    "Play sound for any channel going live",
+                    getSettings()->notificationOnAnyChannel));
 #ifdef Q_OS_WIN
                 settings.append(this->createCheckBox(
                     "Show notification", getSettings()->notificationToast));

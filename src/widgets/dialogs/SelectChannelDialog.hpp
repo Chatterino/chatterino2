@@ -9,6 +9,8 @@
 #include <QLabel>
 #include <QRadioButton>
 
+#include <QLineEdit>
+
 namespace chatterino {
 
 class Notebook;
@@ -47,6 +49,7 @@ private:
             QRadioButton *whispers;
             QRadioButton *mentions;
             QRadioButton *watching;
+            QRadioButton *live;
         } twitch;
         struct {
             QLineEdit *channel;

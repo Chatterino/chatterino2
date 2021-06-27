@@ -8,7 +8,9 @@
 #include "common/Channel.hpp"
 #include "messages/Message.hpp"
 #include "messages/search/AuthorPredicate.hpp"
+#include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
+#include "messages/search/MessageFlagsPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -164,9 +166,10 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
 {
     static QRegularExpression predicateRegex(R"(^(\w+):([\w,]+)$)");
 
-    auto predicates = std::vector<std::unique_ptr<MessagePredicate>>();
+    std::vector<std::unique_ptr<MessagePredicate>> predicates;
     auto words = input.split(' ', QString::SkipEmptyParts);
-    auto authors = QStringList();
+    QStringList authors;
+    QStringList channels;
 
     for (auto it = words.begin(); it != words.end();)
     {
@@ -186,6 +189,15 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
             {
                 predicates.push_back(std::make_unique<LinkPredicate>());
             }
+            else if (name == "in")
+            {
+                channels.append(value);
+            }
+            else if (name == "is")
+            {
+                predicates.push_back(
+                    std::make_unique<MessageFlagsPredicate>(value));
+            }
             else
             {
                 remove = false;
@@ -202,6 +214,9 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
 
     if (!authors.empty())
         predicates.push_back(std::make_unique<AuthorPredicate>(authors));
+
+    if (!channels.empty())
+        predicates.push_back(std::make_unique<ChannelPredicate>(channels));
 
     if (!words.empty())
         predicates.push_back(

@@ -24,6 +24,7 @@ namespace chatterino {
 //
 Channel::Channel(const QString &name, Type type)
     : completionModel(*this)
+    , lastDate_(QDate::currentDate())
     , name_(name)
     , type_(type)
 {
@@ -239,6 +240,14 @@ void Channel::replaceMessage(size_t index, MessagePtr replacement)
 
 void Channel::deleteMessage(QString messageID)
 {
+    auto msg = this->findMessage(messageID);
+    if (msg != nullptr)
+    {
+        msg->flags.set(MessageFlag::Disabled);
+    }
+}
+MessagePtr Channel::findMessage(QString messageID)
+{
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
     int snapshotLength = snapshot.size();
 
@@ -250,10 +259,10 @@ void Channel::deleteMessage(QString messageID)
 
         if (s->id == messageID)
         {
-            s->flags.set(MessageFlag::Disabled);
-            break;
+            return s;
         }
     }
+    return nullptr;
 }
 
 bool Channel::canSendMessage() const

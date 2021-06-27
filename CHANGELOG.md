@@ -2,6 +2,73 @@
 
 ## Unversioned
 
+- Minor: Added `/openurl` command. Usage: `/openurl <URL>`. Opens the provided URL in the browser. (#2461, #2926)
+- Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
+
+## 2.3.3
+
+- Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
+- Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
+- Minor: The /live split now shows channels going offline. (#2880)
+- Minor: Restore automod functionality for moderators (#2817, #2887)
+- Minor: Add setting for username style (#2889, #2891)
+- Minor: Searching for users in the viewer list now searches anywhere in the user's name. (#2861)
+- Minor: Added moderation buttons to search popup when searching in a split with moderation mode enabled. (#2148, #2803)
+- Minor: Made "#channel" in `/mentions` tab show in usercards and in the search popup. (#2802)
+- Minor: Added settings to disable custom FrankerFaceZ VIP/mod badges. (#2693, #2759)
+- Minor: Limit the number of recent chatters to improve memory usage and reduce freezes. (#2796, #2814)
+- Minor: Added `/popout` command. Usage: `/popout [channel]`. It opens browser chat for the provided channel. Can also be used without arguments to open current channels browser chat. (#2556, #2812)
+- Minor: Improved matching of game names when using `/setgame` command (#2636)
+- Minor: Now shows deletions of messages like timeouts (#1155, #2841, #2867, #2874)
+- Minor: Added a link to accounts page in settings to "You need to be logged in to send messages" message. (#2862)
+- Minor: Switch to Twitch v2 emote API for animated emote support. (#2863)
+- Bugfix: Moderation buttons now show the correct time unit when using units other than seconds. (#1719, #2864)
+- Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
+- Bugfix: Fixed pasting text with URLs included (#1688, #2855)
+- Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850, #2892)
+- Bugfix: Fixed bit and new subscriber emotes not (re)loading in some rare cases. (#2856, #2857)
+- Bugfix: Fixed subscription emotes showing up incorrectly in the emote menu. (#2905)
+
+## 2.3.2
+
+- Major: New split for channels going live! /live. (#1797)
+- Minor: Added a message that displays a new date on new day. (#1016)
+- Minor: Hosting messages are now clickable. (#2655)
+- Minor: Messages held by automod are now shown to the user. (#2626)
+- Minor: Load 100 blocked users rather than the default 20. (#2772)
+- Bugfix: Fixed a potential crashing issue related to the browser extension. (#2774)
+- Bugfix: Strip newlines from stream titles to prevent text going off of split header (#2755)
+- Bugfix: Automod messages now work properly again. (#2682)
+- Bugfix: `Login expired` message no longer highlights all tabs. (#2735)
+- Bugfix: Fix a deadlock that would occur during user badge loading. (#1704, #2756)
+- Bugfix: Tabbing in `Select a channel to open` is now consistent. (#1797)
+- Bugfix: Fix Ctrl + Backspace not closing colon emote picker. (#2780)
+- Bugfix: Approving/denying AutoMod messages works again. (#2779)
+- Dev: Migrated AutoMod approve/deny endpoints to Helix. (#2779)
+- Dev: Migrated Get Cheermotes endpoint to Helix. (#2440)
+
+## 2.3.1
+
+- Major: Fixed crashing with the extension (#2704)
+- Major: Added the ability to highlight messages based on user badges. (#1704)
+- Minor: Added visual indicator to message length if over 500 characters long (#2659)
+- Minor: Added `is:<flags>` search filter to find messages of specific types. (#2653, #2671)
+- Minor: Added image links to the badge context menu. (#2667)
+- Minor: Added a setting to hide Twitch Predictions badges. (#2668)
+- Minor: Optionally remove spaces between emotes, originally made for Mm2PL/Dankerino. (#2651)
+- Minor: Improved UX of `Rename Tab` dialog. (#2713)
+- Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
+- Bugfix: Fixed visual glitch with smooth scrolling. (#2084)
+- Bugfix: Clicking on split header focuses its split. (#2720)
+- Bugfix: Handle new user messages ("rituals") properly. (#2703)
+
+## 2.3.0
+
+- Major: Added custom FrankerFaceZ VIP Badges. (#2628)
+- Minor: Added `in:<channels>` search filter to find messages sent in specific channels. (#2299, #2634)
+- Minor: Allow for built-in Chatterino commands to be used in custom commands. (#2632)
+- Bugfix: Size of splits not saved properly (#2362, #2548)
+- Bugfix: Fix crash that could occur when the user changed the "Custom stream player URI Scheme" setting if the user had closed down and splits in the application runtime. (#2592)
 - Major: Added clip creation support. You can create clips with `/clip` command, `Alt+X` keybind or `Create a clip` option in split header's context menu. This requires a new authentication scope so re-authentication will be required to use it. (#2271, #2377, #2528)
 - Major: Added "Channel Filters". See https://wiki.chatterino.com/Filters/ for how they work or how to configure them. (#1748, #2083, #2090, #2200, #2225)
 - Major: Added Streamer Mode configuration (under `Settings -> General`), where you can select which features of Chatterino should behave differently when you are in Streamer Mode. (#2001, #2316, #2342, #2376)
@@ -53,6 +120,7 @@
 - Minor: Made username autocompletion truecase (#1199, #1883)
 - Minor: Update the listing of top-level domains. (#2345)
 - Minor: Properly respect RECONNECT messages from Twitch (#2347)
+- Minor: Added command line option to attach chatterino to another window.
 - Minor: Hide "Case-sensitive" column for user highlights. (#2404)
 - Minor: Added human-readable formatting to remaining timeout duration. (#2398)
 - Minor: Update emojis version to 13 (2020). (#1555)
@@ -90,6 +158,7 @@
 - Bugfix: Fix quickswitcher not respecting order of tabs when filtering (#2519, #2561)
 - Bugfix: Fix GNOME not associating Chatterino's window with its desktop entry (#1863, #2587)
 - Bugfix: Fix buffer overflow in emoji parsing. (#2602)
+- Bugfix: Fix windows being brought back to life after the settings dialog was closed. (#1892, #2613)
 - Dev: Updated minimum required Qt framework version to 5.12. (#2210)
 - Dev: Migrated `Kraken::getUser` to Helix (#2260)
 - Dev: Migrated `TwitchAccount::(un)followUser` from Kraken to Helix and moved it to `Helix::(un)followUser`. (#2306)

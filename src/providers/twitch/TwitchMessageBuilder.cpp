@@ -117,7 +117,6 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     : SharedMessageBuilder(_channel, _ircMessage, _args)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
 {
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 TwitchMessageBuilder::TwitchMessageBuilder(
@@ -126,7 +125,6 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     : SharedMessageBuilder(_channel, _ircMessage, _args, content, isAction)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
 {
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 bool TwitchMessageBuilder::isIgnored() const
@@ -143,28 +141,28 @@ bool TwitchMessageBuilder::isIgnored() const
     {
         auto sourceUserID = this->tags.value("user-id").toString();
 
-        for (const auto &user : app->accounts->twitch.getCurrent()->getBlocks())
-        {
-            if (sourceUserID == user.id)
-            {
-                switch (static_cast<ShowIgnoredUsersMessages>(
-                    getSettings()->showBlockedUsersMessages.getValue()))
-                {
-                    case ShowIgnoredUsersMessages::IfModerator:
-                        if (this->channel->isMod() ||
-                            this->channel->isBroadcaster())
-                            return false;
-                        break;
-                    case ShowIgnoredUsersMessages::IfBroadcaster:
-                        if (this->channel->isBroadcaster())
-                            return false;
-                        break;
-                    case ShowIgnoredUsersMessages::Never:
-                        break;
-                }
+        auto blocks =
+            app->accounts->twitch.getCurrent()->accessBlockedUserIds();
 
-                return true;
+        if (auto it = blocks->find(sourceUserID); it != blocks->end())
+        {
+            switch (static_cast<ShowIgnoredUsersMessages>(
+                getSettings()->showBlockedUsersMessages.getValue()))
+            {
+                case ShowIgnoredUsersMessages::IfModerator:
+                    if (this->channel->isMod() ||
+                        this->channel->isBroadcaster())
+                        return false;
+                    break;
+                case ShowIgnoredUsersMessages::IfBroadcaster:
+                    if (this->channel->isBroadcaster())
+                        return false;
+                    break;
+                case ShowIgnoredUsersMessages::Never:
+                    break;
             }
+
+            return true;
         }
     }
 
@@ -468,8 +466,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
     // Actually just text
     auto linkString = this->matchLink(string);
-    auto textColor = this->action_ ? MessageColor(this->usernameColor_)
-                                   : MessageColor(MessageColor::Text);
+    auto textColor = this->textColor_;
 
     if (!linkString.isEmpty())
     {
@@ -519,11 +516,11 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
     if (this->twitchChannel != nullptr && getSettings()->findAllUsernames)
     {
-        auto chatters = this->twitchChannel->accessChatters();
         auto match = allUsernamesMentionRegex.match(string);
         QString username = match.captured(1);
 
-        if (match.hasMatch() && chatters->contains(username))
+        if (match.hasMatch() &&
+            this->twitchChannel->accessChatters()->contains(username))
         {
             auto originalTextColor = textColor;
 
@@ -674,11 +671,7 @@ void TwitchMessageBuilder::appendUsername()
     // The full string that will be rendered in the chat widget
     QString usernameText;
 
-    pajlada::Settings::Setting<int> usernameDisplayMode(
-        "/appearance/messages/usernameDisplayMode",
-        UsernameDisplayMode::UsernameAndLocalizedName);
-
-    switch (usernameDisplayMode.getValue())
+    switch (getSettings()->usernameDisplayMode.getValue())
     {
         case UsernameDisplayMode::Username: {
             usernameText = username;
@@ -729,18 +722,15 @@ void TwitchMessageBuilder::appendUsername()
 
         // Separator
         this->emplace<TextElement>("->", MessageElementFlag::Username,
-                                   app->themes->messages.textColors.system,
-                                   FontStyle::ChatMedium);
+                                   MessageColor::System, FontStyle::ChatMedium);
 
         QColor selfColor = currentUser->color();
-        if (!selfColor.isValid())
-        {
-            selfColor = app->themes->messages.textColors.system;
-        }
+        MessageColor selfMsgColor =
+            selfColor.isValid() ? selfColor : MessageColor::System;
 
         // Your own username
         this->emplace<TextElement>(currentUser->getUserName() + ":",
-                                   MessageElementFlag::Username, selfColor,
+                                   MessageElementFlag::Username, selfMsgColor,
                                    FontStyle::ChatMediumBold);
     }
     else
@@ -1083,8 +1073,8 @@ boost::optional<EmotePtr> TwitchMessageBuilder::getTwitchBadge(
         return channelBadge;
     }
 
-    if (auto globalBadge = this->twitchChannel->globalTwitchBadges().badge(
-            badge.key_, badge.value_))
+    if (auto globalBadge =
+            TwitchBadges::instance()->badge(badge.key_, badge.value_))
     {
         return globalBadge;
     }
@@ -1116,7 +1106,8 @@ void TwitchMessageBuilder::appendTwitchBadges()
             const auto &cheerAmount = badge.value_;
             tooltip = QString("Twitch cheer %0").arg(cheerAmount);
         }
-        else if (badge.key_ == "moderator")
+        else if (badge.key_ == "moderator" &&
+                 getSettings()->useCustomFfzModeratorBadges)
         {
             if (auto customModBadge = this->twitchChannel->ffzCustomModBadge())
             {
@@ -1124,6 +1115,18 @@ void TwitchMessageBuilder::appendTwitchBadges()
                         customModBadge.get(),
                         MessageElementFlag::BadgeChannelAuthority)
                     ->setTooltip((*customModBadge)->tooltip.string);
+                // early out, since we have to add a custom badge element here
+                continue;
+            }
+        }
+        else if (badge.key_ == "vip" && getSettings()->useCustomFfzVipBadges)
+        {
+            if (auto customVipBadge = this->twitchChannel->ffzCustomVipBadge())
+            {
+                this->emplace<VipBadgeElement>(
+                        customVipBadge.get(),
+                        MessageElementFlag::BadgeChannelAuthority)
+                    ->setTooltip((*customVipBadge)->tooltip.string);
                 // early out, since we have to add a custom badge element here
                 continue;
             }
@@ -1288,6 +1291,134 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     }
 
     builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
+}
+
+void TwitchMessageBuilder::liveMessage(const QString &channelName,
+                                       MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder
+        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                               MessageColor::Text, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+    builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                  MessageColor::Text);
+    auto text = channelName + " is live!";
+    builder->message().searchText = text;
+    builder->message().messageText = text;
+}
+
+void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
+                                             MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder
+        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+    builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
+                                  MessageColor::System);
+}
+
+void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
+                                                MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder
+        ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+    builder->emplace<TextElement>("is now offline.", MessageElementFlag::Text,
+                                  MessageColor::System);
+}
+
+void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
+                                                MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->emplace<TextElement>("Now hosting", MessageElementFlag::Text,
+                                  MessageColor::System);
+    builder
+        ->emplace<TextElement>(channelName + ".", MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, channelName});
+}
+
+// irc variant
+void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
+                                           MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->message().flags.set(MessageFlag::Timeout);
+    // TODO(mm2pl): If or when jumping to a single message gets implemented a link,
+    // add a link to the originalMessage
+    builder->emplace<TextElement>("A message from", MessageElementFlag::Text,
+                                  MessageColor::System);
+    builder
+        ->emplace<TextElement>(originalMessage->displayName,
+                               MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, originalMessage->loginName});
+    builder->emplace<TextElement>("was deleted:", MessageElementFlag::Text,
+                                  MessageColor::System);
+    if (originalMessage->messageText.length() > 50)
+    {
+        builder->emplace<TextElement>(
+            originalMessage->messageText.left(50) + "…",
+            MessageElementFlag::Text, MessageColor::Text);
+    }
+    else
+    {
+        builder->emplace<TextElement>(originalMessage->messageText,
+                                      MessageElementFlag::Text,
+                                      MessageColor::Text);
+    }
+    builder->message().timeoutUser = "msg:" + originalMessage->id;
+}
+
+// pubsub variant
+void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
+                                           MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->message().flags.set(MessageFlag::Timeout);
+
+    builder
+        ->emplace<TextElement>(action.source.name, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.source.name});
+    // TODO(mm2pl): If or when jumping to a single message gets implemented a link,
+    // add a link to the originalMessage
+    builder->emplace<TextElement>(
+        "deleted message from", MessageElementFlag::Text, MessageColor::System);
+    builder
+        ->emplace<TextElement>(action.target.name, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.target.name});
+    builder->emplace<TextElement>("saying:", MessageElementFlag::Text,
+                                  MessageColor::System);
+    if (action.messageText.length() > 50)
+    {
+        builder->emplace<TextElement>(action.messageText.left(50) + "…",
+                                      MessageElementFlag::Text,
+                                      MessageColor::Text);
+    }
+    else
+    {
+        builder->emplace<TextElement>(
+            action.messageText, MessageElementFlag::Text, MessageColor::Text);
+    }
+    builder->message().timeoutUser = "msg:" + action.messageId;
 }
 
 }  // namespace chatterino
