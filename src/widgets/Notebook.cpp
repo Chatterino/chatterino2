@@ -352,10 +352,10 @@ void Notebook::setShowTabs(bool value)
     {
         QMessageBox msgBox;
         msgBox.window()->setWindowTitle("Chatterino - hidden tabs");
-        msgBox.setText("You've just hidden your tabs");
+        msgBox.setText("You've just hidden your tabs.");
         msgBox.setInformativeText(
-            "You can toggle tabs by using the keyboard shortcut (Ctrl + U by "
-            "default) or right-clicking on the tab area and selecting \"Toggle "
+            "You can toggle tabs by using the keyboard shortcut (Ctrl+U by "
+            "default) or right-clicking the tab area and selecting \"Toggle "
             "visibility of tabs\".");
         msgBox.addButton(QMessageBox::Ok);
         auto *dsaButton =

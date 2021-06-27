@@ -117,7 +117,6 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     : SharedMessageBuilder(_channel, _ircMessage, _args)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
 {
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 TwitchMessageBuilder::TwitchMessageBuilder(
@@ -126,7 +125,6 @@ TwitchMessageBuilder::TwitchMessageBuilder(
     : SharedMessageBuilder(_channel, _ircMessage, _args, content, isAction)
     , twitchChannel(dynamic_cast<TwitchChannel *>(_channel))
 {
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 bool TwitchMessageBuilder::isIgnored() const
@@ -468,8 +466,7 @@ void TwitchMessageBuilder::addTextOrEmoji(const QString &string_)
 
     // Actually just text
     auto linkString = this->matchLink(string);
-    auto textColor = this->action_ ? MessageColor(this->usernameColor_)
-                                   : MessageColor(MessageColor::Text);
+    auto textColor = this->textColor_;
 
     if (!linkString.isEmpty())
     {
@@ -725,18 +722,15 @@ void TwitchMessageBuilder::appendUsername()
 
         // Separator
         this->emplace<TextElement>("->", MessageElementFlag::Username,
-                                   app->themes->messages.textColors.system,
-                                   FontStyle::ChatMedium);
+                                   MessageColor::System, FontStyle::ChatMedium);
 
         QColor selfColor = currentUser->color();
-        if (!selfColor.isValid())
-        {
-            selfColor = app->themes->messages.textColors.system;
-        }
+        MessageColor selfMsgColor =
+            selfColor.isValid() ? selfColor : MessageColor::System;
 
         // Your own username
         this->emplace<TextElement>(currentUser->getUserName() + ":",
-                                   MessageElementFlag::Username, selfColor,
+                                   MessageElementFlag::Username, selfMsgColor,
                                    FontStyle::ChatMediumBold);
     }
     else
@@ -1309,6 +1303,9 @@ void TwitchMessageBuilder::liveMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
                                   MessageColor::Text);
+    auto text = channelName + " is live!";
+    builder->message().searchText = text;
+    builder->message().messageText = text;
 }
 
 void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
@@ -1340,18 +1337,36 @@ void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
 }
 
 void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
-                                                MessageBuilder *builder)
+                                                MessageBuilder *builder,
+                                                bool hostOn)
 {
     builder->emplace<TimestampElement>();
     builder->message().flags.set(MessageFlag::System);
     builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
-    builder->emplace<TextElement>("Now hosting", MessageElementFlag::Text,
-                                  MessageColor::System);
-    builder
-        ->emplace<TextElement>(channelName + ".", MessageElementFlag::Username,
-                               MessageColor::System, FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, channelName});
+    if (hostOn)
+    {
+        builder->emplace<TextElement>("Now hosting", MessageElementFlag::Text,
+                                      MessageColor::System);
+        builder
+            ->emplace<TextElement>(
+                channelName + ".", MessageElementFlag::Username,
+                MessageColor::System, FontStyle::ChatMediumBold)
+            ->setLink({Link::UserInfo, channelName});
+    }
+    else
+    {
+        builder
+            ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                                   MessageColor::System,
+                                   FontStyle::ChatMediumBold)
+            ->setLink({Link::UserInfo, channelName});
+        builder->emplace<TextElement>("has gone offline. Exiting host mode.",
+                                      MessageElementFlag::Text,
+                                      MessageColor::System);
+    }
 }
+
+// irc variant
 void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
                                            MessageBuilder *builder)
 {
@@ -1373,7 +1388,7 @@ void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
     if (originalMessage->messageText.length() > 50)
     {
         builder->emplace<TextElement>(
-            originalMessage->messageText.left(50) + "...",
+            originalMessage->messageText.left(50) + "…",
             MessageElementFlag::Text, MessageColor::Text);
     }
     else
@@ -1382,6 +1397,44 @@ void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
                                       MessageElementFlag::Text,
                                       MessageColor::Text);
     }
+    builder->message().timeoutUser = "msg:" + originalMessage->id;
+}
+
+// pubsub variant
+void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
+                                           MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->message().flags.set(MessageFlag::Timeout);
+
+    builder
+        ->emplace<TextElement>(action.source.name, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.source.name});
+    // TODO(mm2pl): If or when jumping to a single message gets implemented a link,
+    // add a link to the originalMessage
+    builder->emplace<TextElement>(
+        "deleted message from", MessageElementFlag::Text, MessageColor::System);
+    builder
+        ->emplace<TextElement>(action.target.name, MessageElementFlag::Username,
+                               MessageColor::System, FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.target.name});
+    builder->emplace<TextElement>("saying:", MessageElementFlag::Text,
+                                  MessageColor::System);
+    if (action.messageText.length() > 50)
+    {
+        builder->emplace<TextElement>(action.messageText.left(50) + "…",
+                                      MessageElementFlag::Text,
+                                      MessageColor::Text);
+    }
+    else
+    {
+        builder->emplace<TextElement>(
+            action.messageText, MessageElementFlag::Text, MessageColor::Text);
+    }
+    builder->message().timeoutUser = "msg:" + action.messageId;
 }
 
 }  // namespace chatterino

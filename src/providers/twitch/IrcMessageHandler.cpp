@@ -494,7 +494,16 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 {
-    auto app = getApp();
+    auto currentUser = getApp()->accounts->twitch.getCurrent();
+
+    // set received emote-sets, used in TwitchAccount::loadUserstateEmotes
+    bool emoteSetsChanged = currentUser->setUserstateEmoteSets(
+        message->tag("emote-sets").toString().split(","));
+
+    if (emoteSetsChanged)
+    {
+        currentUser->loadUserstateEmotes();
+    }
 
     QString channelName;
     if (!trimChannelName(message->parameter(0), channelName))
@@ -502,7 +511,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         return;
     }
 
-    auto c = app->twitch.server->getChannelOrEmpty(channelName);
+    auto c = getApp()->twitch.server->getChannelOrEmpty(channelName);
     if (c->isEmpty())
     {
         return;
@@ -529,10 +538,6 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
             tc->setMod(_mod == "1");
         }
     }
-
-    // handle emotes
-    app->accounts->twitch.getCurrent()->loadUserstateEmotes(
-        message->tag("emote-sets").toString().split(","));
 }
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
@@ -814,21 +819,26 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
                 "Usage: \"/delete <msg-id>\" - can't take more "
                 "than one argument"));
         }
-        else if (tags == "host_on")
+        else if (tags == "host_on" || tags == "host_target_went_offline")
         {
+            bool hostOn = (tags == "host_on");
             QStringList parts = msg->messageText.split(QLatin1Char(' '));
-            if (parts.size() != 3)
+            if ((hostOn && parts.size() != 3) || (!hostOn && parts.size() != 7))
             {
                 return;
             }
-            auto &channelName = parts[2];
+            auto &channelName = hostOn ? parts[2] : parts[0];
             if (channelName.size() < 2)
             {
                 return;
             }
-            channelName.chop(1);
+            if (hostOn)
+            {
+                channelName.chop(1);
+            }
             MessageBuilder builder;
-            TwitchMessageBuilder::hostingSystemMessage(channelName, &builder);
+            TwitchMessageBuilder::hostingSystemMessage(channelName, &builder,
+                                                       hostOn);
             channel->addMessage(builder.release());
         }
         else

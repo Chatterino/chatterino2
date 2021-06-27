@@ -4,6 +4,7 @@
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
@@ -57,8 +58,10 @@ public:
     static void offlineSystemMessage(const QString &channelName,
                                      MessageBuilder *builder);
     static void hostingSystemMessage(const QString &channelName,
-                                     MessageBuilder *builder);
+                                     MessageBuilder *builder, bool hostOn);
     static void deletionMessage(const MessagePtr originalMessage,
+                                MessageBuilder *builder);
+    static void deletionMessage(const DeleteAction &action,
                                 MessageBuilder *builder);
 
 private:

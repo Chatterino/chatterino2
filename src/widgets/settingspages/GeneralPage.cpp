@@ -612,6 +612,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Color @usernames", s.colorUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames);
+    layout.addCheckbox("Show username autocompletion popup menu",
+                       s.showUsernameCompletionMenu);
     const QStringList usernameDisplayModes = {"Username", "Localized name",
                                               "Username and localized name"};
 
@@ -670,8 +672,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false);
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
-    layout.addCheckbox("Ask for confirmation when uploading an image",
-                       s.askOnImageUpload);
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
 

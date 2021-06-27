@@ -51,6 +51,7 @@ public:
     MessageBuilder(const BanAction &action, uint32_t count = 1);
     MessageBuilder(const UnbanAction &action);
     MessageBuilder(const AutomodUserAction &action);
+    virtual ~MessageBuilder() = default;
 
     Message *operator->();
     Message &message();

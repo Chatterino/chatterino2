@@ -5,9 +5,6 @@
 
 namespace chatterino {
 
-// The minimum interval between attempting to establish a new connection
-const int RECONNECT_MIN_INTERVAL = 15000;
-
 namespace {
 
     const auto payload = QString("chatterino/" CHATTERINO_VERSION);
@@ -48,18 +45,11 @@ IrcConnection::IrcConnection(QObject *parent)
             return;
         }
 
-        auto delta =
-            std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now() - this->lastConnected_)
-                .count();
-        delta = delta < RECONNECT_MIN_INTERVAL
-                    ? (RECONNECT_MIN_INTERVAL - delta)
-                    : 10;
-        qCDebug(chatterinoIrc) << "Reconnecting in" << delta << "ms";
-        this->reconnectTimer_.start(delta);
+        auto delay = this->reconnectBackoff_.next();
+        qCDebug(chatterinoIrc) << "Reconnecting in" << delay.count() << "ms";
+        this->reconnectTimer_.start(delay);
     });
 
-    this->reconnectTimer_.setInterval(RECONNECT_MIN_INTERVAL);
     this->reconnectTimer_.setSingleShot(true);
     QObject::connect(&this->reconnectTimer_, &QTimer::timeout, [this] {
         if (this->isConnected())
@@ -120,13 +110,12 @@ IrcConnection::IrcConnection(QObject *parent)
                      [this](Communi::IrcMessage *message) {
                          // This connection is probably still alive
                          this->recentlyReceivedMessage_ = true;
+                         this->reconnectBackoff_.reset();
                      });
 }
 
 void IrcConnection::open()
 {
-    // Accurately track the time a connection was opened
-    this->lastConnected_ = std::chrono::steady_clock::now();
     this->expectConnectionLoss_ = false;
     this->waitingForPong_ = false;
     this->recentlyReceivedMessage_ = false;
