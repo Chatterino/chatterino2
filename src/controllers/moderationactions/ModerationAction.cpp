@@ -86,7 +86,15 @@ ModerationAction::ModerationAction(const QString &action)
         }
         else
         {
-            this->line1_ = QString::number(amount / week);
+            // limit to max timeout duration
+            if (amount > 2 * week)
+            {
+                this->line1_ = ">2";
+            }
+            else
+            {
+                this->line1_ = QString::number(amount / week);
+            }
             this->line2_ = "w";
         }
 
