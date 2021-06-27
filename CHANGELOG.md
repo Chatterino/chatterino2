@@ -5,6 +5,7 @@
 - Minor: Channel name in `<channel> has gone offline. Exiting host mode.` messages is now clickable. (#2922)
 - Minor: Added `/openurl` command. Usage: `/openurl <URL>`. Opens the provided URL in the browser. (#2461, #2926)
 - Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
+- Bugfix: Middle mouse click no longer scrolls in not fully populated usercards and splits. (#2933)
 
 ## 2.3.3
 
