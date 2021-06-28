@@ -10,6 +10,7 @@ public:
 
     struct {
         QPixmap fourtf;
+        QPixmap kararty;
         QPixmap mm2pl;
         QPixmap pajlada;
         QPixmap zneix;

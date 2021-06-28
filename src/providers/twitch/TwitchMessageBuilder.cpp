@@ -1357,17 +1357,33 @@ void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
 }
 
 void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
-                                                MessageBuilder *builder)
+                                                MessageBuilder *builder,
+                                                bool hostOn)
 {
     builder->emplace<TimestampElement>();
     builder->message().flags.set(MessageFlag::System);
     builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
-    builder->emplace<TextElement>("Now hosting", MessageElementFlag::Text,
-                                  MessageColor::System);
-    builder
-        ->emplace<TextElement>(channelName + ".", MessageElementFlag::Username,
-                               MessageColor::System, FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, channelName});
+    if (hostOn)
+    {
+        builder->emplace<TextElement>("Now hosting", MessageElementFlag::Text,
+                                      MessageColor::System);
+        builder
+            ->emplace<TextElement>(
+                channelName + ".", MessageElementFlag::Username,
+                MessageColor::System, FontStyle::ChatMediumBold)
+            ->setLink({Link::UserInfo, channelName});
+    }
+    else
+    {
+        builder
+            ->emplace<TextElement>(channelName, MessageElementFlag::Username,
+                                   MessageColor::System,
+                                   FontStyle::ChatMediumBold)
+            ->setLink({Link::UserInfo, channelName});
+        builder->emplace<TextElement>("has gone offline. Exiting host mode.",
+                                      MessageElementFlag::Text,
+                                      MessageColor::System);
+    }
 }
 
 // irc variant

@@ -1,4 +1,4 @@
-#include "SeventvWebSocket.h"
+#include "SeventvWebSocket.hpp"
 
 SeventvWebSocket::SeventvWebSocket()
 {

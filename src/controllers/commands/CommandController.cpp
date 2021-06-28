@@ -18,6 +18,7 @@
 #include "util/CombinePath.hpp"
 #include "util/FormatTime.hpp"
 #include "util/Helpers.hpp"
+#include "util/IncognitoBrowser.hpp"
 #include "util/StreamLink.hpp"
 #include "util/Twitch.hpp"
 #include "widgets/Window.hpp"
@@ -353,13 +354,6 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     };
-
-    this->registerCommand("/logs", [](const auto & /*words*/, auto channel) {
-        channel->addMessage(makeSystemMessage(
-            "Online logs functionality has been removed. If you're a "
-            "moderator, you can use the /user command"));
-        return "";
-    });
 
     this->registerCommand(
         "/ignore", [blockLambda](const auto &words, auto channel) {
@@ -784,6 +778,39 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(
                 makeSystemMessage("Unable to set game of non-Twitch channel."));
         }
+        return "";
+    });
+
+    this->registerCommand("/openurl", [](const QStringList &words,
+                                         const ChannelPtr channel) {
+        if (words.size() < 2)
+        {
+            channel->addMessage(makeSystemMessage("Usage: /openurl <URL>."));
+            return "";
+        }
+
+        QUrl url = QUrl::fromUserInput(words.mid(1).join(" "));
+        if (!url.isValid())
+        {
+            channel->addMessage(makeSystemMessage("Invalid URL specified."));
+            return "";
+        }
+
+        bool res = false;
+        if (supportsIncognitoLinks() && getSettings()->openLinksIncognito)
+        {
+            res = openLinkIncognito(url.toString(QUrl::FullyEncoded));
+        }
+        else
+        {
+            res = QDesktopServices::openUrl(url);
+        }
+
+        if (!res)
+        {
+            channel->addMessage(makeSystemMessage("Could not open URL."));
+        }
+
         return "";
     });
 }
