@@ -71,8 +71,7 @@ namespace {
         {
             // TITLE
             auto channelName = set->channelName;
-            auto text =
-                set->key == "0" || set->text.isEmpty() ? "Twitch" : set->text;
+            auto text = set->text.isEmpty() ? "Twitch" : set->text;
 
             // EMOTES
             MessageBuilder builder;
