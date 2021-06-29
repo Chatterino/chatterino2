@@ -1,16 +1,20 @@
 # Changelog
 
 
-## Dankerino
+## Unversioned
+
+### Dankerino
 
 - Major: Add 7TV emotes from Chatterino7 (Mm2PL/Dankerino#79)
 - Minor: Move Dankerino settings to a separate tab (Mm2PL/Dankerino#84)
 - Minor: Add advanced IRC tag related settings (Mm2PL/Dankerino#86)
 - Minor: Allow for adjusting rate limit settings.
 
-## Unversioned
-
 ### Chatterino
+
+- Minor: Channel name in `<channel> has gone offline. Exiting host mode.` messages is now clickable. (#2922)
+- Minor: Added `/openurl` command. Usage: `/openurl <URL>`. Opens the provided URL in the browser. (#2461, #2926)
+- Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
 
 ## 2.3.3
 
@@ -34,6 +38,7 @@
 - Bugfix: Fixed pasting text with URLs included (#1688, #2855)
 - Bugfix: Fix reconnecting when IRC write connection is lost (#1831, #2356, #2850, #2892)
 - Bugfix: Fixed bit and new subscriber emotes not (re)loading in some rare cases. (#2856, #2857)
+- Bugfix: Fixed subscription emotes showing up incorrectly in the emote menu. (#2905)
 
 ## 2.3.2
 
