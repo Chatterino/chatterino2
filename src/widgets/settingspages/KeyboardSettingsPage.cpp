@@ -75,6 +75,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
                                             EditableModelView *view)
 {
+    // TODO(mm2pl): remove debug
     qDebug() << "table cell clicked!" << clicked.column() << clicked.row();
 
     auto hotkey = getApp()->hotkeys->getHotkeyByName(
