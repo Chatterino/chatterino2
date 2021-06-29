@@ -190,8 +190,8 @@ SOURCES += \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/bttv/LoadBttvChannelEmote.cpp \
     src/providers/chatterino/ChatterinoBadges.cpp \
-    src/providers/dankerino/DankerinoBadges.cpp \
     src/providers/colors/ColorProvider.cpp \
+    src/providers/dankerino/DankerinoBadges.cpp \
     src/providers/emoji/Emojis.cpp \
     src/providers/ffz/FfzBadges.cpp \
     src/providers/ffz/FfzEmotes.cpp \
@@ -206,7 +206,6 @@ SOURCES += \
     src/providers/IvrApi.cpp \
     src/providers/LinkResolver.cpp \
     src/providers/seventv/SeventvEmotes.cpp \
-    src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/api/Helix.cpp \
     src/providers/twitch/api/Kraken.cpp \
     src/providers/twitch/ChannelPointReward.cpp \
@@ -277,6 +276,7 @@ SOURCES += \
     src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SelectChannelFiltersDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
+    src/widgets/dialogs/StreamSettingsDialog.cpp \
     src/widgets/dialogs/switcher/NewTabItem.cpp \
     src/widgets/dialogs/switcher/QuickSwitcherModel.cpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.cpp \
@@ -284,7 +284,6 @@ SOURCES += \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/dialogs/UserInfoPopup.cpp \
     src/widgets/dialogs/WelcomeDialog.cpp \
-    src/widgets/dialogs/StreamSettingsDialog.cpp \
     src/widgets/FramelessEmbedWindow.cpp \
     src/widgets/helper/Button.cpp \
     src/widgets/helper/ChannelView.cpp \
@@ -432,8 +431,8 @@ HEADERS += \
     src/providers/bttv/BttvEmotes.hpp \
     src/providers/bttv/LoadBttvChannelEmote.hpp \
     src/providers/chatterino/ChatterinoBadges.hpp \
-    src/providers/dankerino/DankerinoBadges.hpp \
     src/providers/colors/ColorProvider.hpp \
+    src/providers/dankerino/DankerinoBadges.hpp \
     src/providers/emoji/Emojis.hpp \
     src/providers/ffz/FfzBadges.hpp \
     src/providers/ffz/FfzEmotes.hpp \
@@ -448,8 +447,6 @@ HEADERS += \
     src/providers/IvrApi.hpp \
     src/providers/LinkResolver.hpp \
     src/providers/seventv/SeventvEmotes.hpp \
-    src/providers/twitch/ChannelPointReward.hpp \
-    src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/api/Helix.hpp \
     src/providers/twitch/api/Kraken.hpp \
     src/providers/twitch/ChannelPointReward.hpp \
@@ -544,6 +541,7 @@ HEADERS += \
     src/widgets/dialogs/SelectChannelDialog.hpp \
     src/widgets/dialogs/SelectChannelFiltersDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
+    src/widgets/dialogs/StreamSettingsDialog.hpp \
     src/widgets/dialogs/switcher/AbstractSwitcherItem.hpp \
     src/widgets/dialogs/switcher/NewTabItem.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherModel.hpp \
@@ -552,7 +550,6 @@ HEADERS += \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/dialogs/UserInfoPopup.hpp \
     src/widgets/dialogs/WelcomeDialog.hpp \
-    src/widgets/dialogs/StreamSettingsDialog.hpp \
     src/widgets/FramelessEmbedWindow.hpp \
     src/widgets/helper/Button.hpp \
     src/widgets/helper/ChannelView.hpp \
