@@ -33,4 +33,4 @@ DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install
 echo ""
 
 echo "Building package..."
-dpkg-deb --build "$packaging_dir" "chatterino-$chatterino_version.deb"
+dpkg-deb --build "$packaging_dir" "Chatterino.deb"

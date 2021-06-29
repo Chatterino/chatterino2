@@ -161,19 +161,33 @@ jobs:
             make -j8
         shell: bash
 
-      - name: Package (Ubuntu)
+      - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
             cd build
             sh ./../.CI/CreateAppImage.sh
         shell: bash
 
-      - name: Upload artifact (Ubuntu)
+      - name: Package - .deb (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            cd build
+            sh ./../.CI/CreateUbuntuDeb.sh
+        shell: bash
+
+      - name: Upload artifact - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v2.2.4
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
           path: build/Chatterino-x86_64.AppImage
+
+      - name: Upload artifact - .deb (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: Chatterino-${{ matrix.qt-version }}-${{ matrix.build-system }}.deb
+          path: build/Chatterino.deb
 
       # MACOS
       - name: Install dependencies (MacOS)
