@@ -6,10 +6,8 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
     exit 1
 fi
 
-# Chatterino's native version format is "Chatterino 2.3.3 (commit 6355742b)",
-# this little magic contraption transforms that into "2.3.3+6355742b"
-chatterino_version=$(bin/chatterino --version 2>&1 | tail -n 1 | sed 's/Chatterino //;s/ (commit /+/;s/)//')
-echo "Found Chatterino version $chatterino_version"
+chatterino_version=$(git describe)
+echo "Found Chatterino version $chatterino_version via git"
 
 rm -vrf "./package" || true  # delete any old packaging dir
 
