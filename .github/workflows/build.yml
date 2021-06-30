@@ -276,6 +276,16 @@ jobs:
 
       - uses: actions/download-artifact@v2.0.10
         with:
+          name: Chatterino-5.15.2-qmake.deb
+          path: ubuntu/
+
+      - uses: actions/download-artifact@v2.0.10
+        with:
+          name: Chatterino-5.15.2-cmake.deb
+          path: ubuntu-cmake/
+
+      - uses: actions/download-artifact@v2.0.10
+        with:
           name: chatterino-osx-5.15.2-qmake.dmg
           path: macos/
 
@@ -330,6 +340,26 @@ jobs:
           asset_path: ./linux-cmake/Chatterino-x86_64.AppImage
           asset_name: test-cmake-Chatterino-x86_64.AppImage
           asset_content_type: application/x-executable
+
+      - name: Upload release asset (Ubuntu .deb)
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ubuntu/Chatterino.deb
+          asset_name: Chatterino-x86_64.deb
+          asset_content_type: application/vnd.debian.binary-package
+
+      - name: Upload release asset (Ubuntu .deb) CMake
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ubuntu-cmake/Chatterino.deb
+          asset_name: test-cmake-Chatterino-x86_64.deb
+          asset_content_type: application/vnd.debian.binary-package
 
       - name: Upload release asset (MacOS)
         uses: actions/upload-release-asset@v1.0.2
