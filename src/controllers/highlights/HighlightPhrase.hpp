@@ -101,6 +101,8 @@ private:
     QRegularExpression regex_;
 };
 
+using HighlightPhrasePtr = std::shared_ptr<HighlightPhrase>;
+
 }  // namespace chatterino
 
 namespace pajlada {
