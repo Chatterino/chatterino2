@@ -54,6 +54,7 @@ public:
 
     void setFilters(const QList<QUuid> ids);
     const QList<QUuid> getFilters() const;
+    const QList<HighlightDescriptor> getHighlights() const;
 
     void setModerationMode(bool value);
     bool getModerationMode() const;
