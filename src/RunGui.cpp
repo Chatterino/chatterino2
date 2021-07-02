@@ -156,7 +156,7 @@ namespace {
             }
         }
         qCDebug(chatterinoCache)
-            << "[Cache] deleted" << deletedCount << "files";
+            << "Deleted" << deletedCount << "files";
     }
 }  // namespace
 
