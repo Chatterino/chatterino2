@@ -23,9 +23,12 @@ public:
     // Gets if the stream is currently active or not
     bool getIfStreamActive();
 
+    // Gets the last shown quality setting used
+    QString getLastQualitySetting();
+
     // This will open the attached player and play a given stream
     // If it is not open then this will try to open the window
-    void updateStreamLinkProcess(const QString &channel,
+    void updateStreamLinkProcess(const QString &channel, const QString &quality,
                                  const QString &command);
 
 private:
@@ -40,6 +43,7 @@ private:
     QWidget *mpvContainer = nullptr;
     unsigned long mpvContainerWID;
     QString lastShownChannel = "";
+    QString lastQuality = "";
     QProcess *streamlinkProcess = nullptr;
 };
 

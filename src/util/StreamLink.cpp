@@ -220,25 +220,13 @@ void openStreamlink(const QString &channelURL, const QString &quality,
         QString command =
             "\"" + getStreamlinkProgram() + "\" " + arguments.join(" ");
         AttachedPlayer::getInstance().updateStreamLinkProcess(channelURL,
-                                                              command);
+                                                              quality, command);
     }
 }
 
 void openStreamlinkForChannel(const QString &channel, bool streamMPV)
 {
     QString channelURL = "twitch.tv/" + channel;
-
-    QString preferredQuality = getSettings()->preferredQuality.getValue();
-    preferredQuality = preferredQuality.toLower();
-
-    if (preferredQuality == "choose")
-    {
-        getStreamQualities(channelURL, [=](QStringList qualityOptions) {
-            QualityPopup::showDialog(channel, qualityOptions);
-        });
-
-        return;
-    }
 
     QStringList args;
 
@@ -262,11 +250,45 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
         args << "--player \"" + getMPVProgram() + " --wid=WID\"";
     }
 
+    // Append any extra options to to our stream link command
+    // NOTE: it is important to append this before we ask for the quality
+    if (getSettings()->streamlinkOptsLatency)
+    {
+        args << "--twitch-low-latency";
+    }
+    if (getSettings()->streamlinkOptsAds)
+    {
+        args << "--twitch-disable-ads";
+    }
+
     // Quality converted from Chatterino format to Streamlink format
     QString quality;
     // Streamlink qualities to exclude
     QString exclude;
 
+    // Check to see if we should ask the user for a quality setting
+    // NOTE: if we are using the mpv player, then we should only ask the first time
+    // NOTE: afterwards we should just use the last requested quality or a near one
+    QString preferredQuality = getSettings()->preferredQuality.getValue();
+    preferredQuality = preferredQuality.toLower();
+    if (preferredQuality == "choose" && streamMPV &&
+        AttachedPlayer::getInstance().getLastQualitySetting() != "")
+    {
+        args << "--stream-sorting-excludes"
+             << ">" + AttachedPlayer::getInstance().getLastQualitySetting();
+        quality = "best";
+        openStreamlink(channelURL, quality, args, streamMPV);
+        return;
+    }
+    if (preferredQuality == "choose")
+    {
+        getStreamQualities(channelURL, [=](QStringList qualityOptions) {
+            QualityPopup::showDialog(channel, qualityOptions, args, streamMPV);
+        });
+        return;
+    }
+
+    // Else we can set the default
     if (preferredQuality == "high")
     {
         exclude = ">720p30";
@@ -293,14 +315,6 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
     if (!exclude.isEmpty())
     {
         args << "--stream-sorting-excludes" << exclude;
-    }
-    if (getSettings()->streamlinkOptsLatency)
-    {
-        args << "--twitch-low-latency";
-    }
-    if (getSettings()->streamlinkOptsAds)
-    {
-        args << "--twitch-disable-ads";
     }
 
     openStreamlink(channelURL, quality, args, streamMPV);

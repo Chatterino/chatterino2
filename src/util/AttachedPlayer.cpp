@@ -8,7 +8,17 @@ bool AttachedPlayer::getIfStreamActive()
              !mpvContainer->isVisible());
 }
 
+QString AttachedPlayer::getLastQualitySetting()
+{
+    if (!getIfStreamActive())
+    {
+        lastQuality = "";
+    }
+    return lastQuality;
+}
+
 void AttachedPlayer::updateStreamLinkProcess(const QString &channel,
+                                             const QString &quality,
                                              const QString &command)
 {
     // Return doing nothing if the stream is already active and it is the same channel
@@ -19,7 +29,7 @@ void AttachedPlayer::updateStreamLinkProcess(const QString &channel,
 
     // Create the attached window we will stream the video into
     // TODO: we should try to dock this to the application main window??
-    // TODO: how to add a volumn control to this??
+    // TODO: how to add a volume control to this??
     if (!getIfStreamActive())
     {
         // create the window
@@ -60,5 +70,9 @@ void AttachedPlayer::updateStreamLinkProcess(const QString &channel,
 
     // Update the last channel we displayed
     lastShownChannel = channel;
+    if (lastQuality == "")
+    {
+        lastQuality = quality;
+    }
 }
 }  // namespace chatterino
