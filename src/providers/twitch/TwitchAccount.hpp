@@ -62,6 +62,7 @@ public:
         QString key;
         QString channelName;
         QString text;
+        bool local{false};
         std::vector<TwitchEmote> emotes;
     };
 
@@ -69,8 +70,6 @@ public:
 
     struct TwitchAccountEmoteData {
         std::vector<std::shared_ptr<EmoteSet>> emoteSets;
-
-        std::vector<EmoteName> allEmoteNames;
 
         EmoteMap emotes;
     };

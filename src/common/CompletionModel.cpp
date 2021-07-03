@@ -96,14 +96,22 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
     if (auto channel = dynamic_cast<TwitchChannel *>(&this->channel_))
     {
-        // account emotes
+        // Twitch Emotes
         if (auto account = getApp()->accounts->twitch.getCurrent())
         {
-            for (const auto &emote : account->accessEmotes()->allEmoteNames)
+            for (const auto &emoteSet : account->accessEmotes()->emoteSets)
             {
-                // XXX: No way to discern between a twitch global emote and sub
-                // emote right now
-                addString(emote.string, TaggedString::Type::TwitchGlobalEmote);
+                for (const auto &emote : emoteSet->emotes)
+                {
+                    qDebug() << emoteSet->local << this->channel_.getName()
+                             << emoteSet->channelName << emote.name.string;
+                    // Some emotes (e.g. follower ones) are only available in the channel they're from
+                    if (!emoteSet->local ||
+                        (emoteSet->local &&
+                         this->channel_.getName() == emoteSet->channelName))
+                        addString(emote.name.string,
+                                  TaggedString::Type::TwitchGlobalEmote);
+                }
             }
         }
 

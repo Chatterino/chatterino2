@@ -2,6 +2,7 @@
 
 #include "common/NetworkRequest.hpp"
 #include "messages/Link.hpp"
+#include "providers/twitch/TwitchEmotes.hpp"
 
 #include <boost/noncopyable.hpp>
 
@@ -45,7 +46,7 @@ struct IvrEmoteSet {
         , login(root.value("channelLogin").toString())
         , id(root.value("channelID").toString())
         , tier(root.value("tier").toString())
-        , emotes(root.value("emotes").toArray())
+        , emotes(root.value("emoteList").toArray())
 
     {
     }
@@ -55,14 +56,20 @@ struct IvrEmote {
     const QString code;
     const QString id;
     const QString setId;
-    const QString url;
+    QString url;
+    const QString emoteType;
+    const QString imageType;
 
-    IvrEmote(QJsonObject root)
-        : code(root.value("token").toString())
+    explicit IvrEmote(QJsonObject root)
+        : code(root.value("code").toString())
         , id(root.value("id").toString())
         , setId(root.value("setID").toString())
-        , url(root.value("url_3x").toString())
+        , emoteType(root.value("type").toString())
+        , imageType(root.value("assetType").toBool())
     {
+        this->url = QString(TWITCH_EMOTE_TEMPLATE)
+                        .replace("{id}", root.value("id").toString())
+                        .replace("{scale}", "3.0");
     }
 };
 

@@ -216,7 +216,6 @@ void TwitchAccount::loadEmotes()
                 // Clearing emote data
                 auto emoteData = this->emotes_.access();
                 emoteData->emoteSets.clear();
-                emoteData->allEmoteNames.clear();
 
                 for (auto emoteSetIt = data.emoteSets.begin();
                      emoteSetIt != data.emoteSets.end(); ++emoteSetIt)
@@ -245,7 +244,6 @@ void TwitchAccount::loadEmotes()
                             EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
                         emoteSet->emotes.emplace_back(
                             TwitchEmote{id, cleanCode});
-                        emoteData->allEmoteNames.push_back(cleanCode);
 
                         auto emote =
                             getApp()->emotes->twitch.getOrCreateEmote(id, code);
@@ -368,10 +366,16 @@ void TwitchAccount::loadUserstateEmotes()
                         auto code = EmoteName{ivrEmote.code};
                         auto cleanCode =
                             EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
+                        qDebug() << cleanCode.string;
                         newUserEmoteSet->emotes.push_back(
                             TwitchEmote{id, cleanCode});
 
-                        emoteData->allEmoteNames.push_back(cleanCode);
+                        // Follower emotes can be only used in the channel they're from
+                        if (ivrEmote.emoteType == "FOLLOWER" &&
+                            !newUserEmoteSet->local)
+                        {
+                            newUserEmoteSet->local = true;
+                        }
 
                         auto twitchEmote =
                             getApp()->emotes->twitch.getOrCreateEmote(id, code);
@@ -510,6 +514,12 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
     getHelix()->getEmoteSetData(
         emoteSet->key,
         [emoteSet](HelixEmoteSetData emoteSetData) {
+            // Follower emotes can be only used in the channel they're from
+            if (emoteSetData.emoteType == "follower")
+            {
+                emoteSet->local = true;
+            }
+
             if (emoteSetData.ownerId.isEmpty() ||
                 emoteSetData.setId != emoteSet->key)
             {
