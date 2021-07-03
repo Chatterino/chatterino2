@@ -7,6 +7,7 @@
 - Bugfix: Now deleting cache files that weren't modified in the past 14 days. (#2947)
 - Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
 - Bugfix: Fix bad behavior of the HTML color picker edit when user input is being entered. (#2942)
+- Bugfix: Follower emotes are only suggested (emote popup menu, tab completion, emote input menu) in their origin channel, not globally. (#2951)
 
 ## 2.3.3
 
