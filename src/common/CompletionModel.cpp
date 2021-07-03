@@ -103,8 +103,6 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
             {
                 for (const auto &emote : emoteSet->emotes)
                 {
-                    qDebug() << emoteSet->local << this->channel_.getName()
-                             << emoteSet->channelName << emote.name.string;
                     // Some emotes (e.g. follower ones) are only available in the channel they're from
                     if (!emoteSet->local ||
                         (emoteSet->local &&
