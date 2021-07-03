@@ -406,8 +406,9 @@ void Image::actuallyLoad()
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer);
 
-            if (reader.size().width() * reader.size().height() *
-                    reader.imageCount() * 4 >
+            // use "double" to prevent int overflows
+            if (double(reader.size().width()) * double(reader.size().height()) *
+                    double(reader.imageCount()) * 4.0 >
                 Image::maxBytesRam)
             {
                 qCDebug(chatterinoImage) << "image too large in RAM";
