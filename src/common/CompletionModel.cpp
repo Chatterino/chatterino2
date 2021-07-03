@@ -101,14 +101,16 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         {
             for (const auto &emoteSet : account->accessEmotes()->emoteSets)
             {
-                for (const auto &emote : emoteSet->emotes)
+                // Some emotes (e.g. follower ones) are only available in their origin channel
+                if (!emoteSet->local ||
+                    (emoteSet->local &&
+                     this->channel_.getName() == emoteSet->channelName))
                 {
-                    // Some emotes (e.g. follower ones) are only available in the channel they're from
-                    if (!emoteSet->local ||
-                        (emoteSet->local &&
-                         this->channel_.getName() == emoteSet->channelName))
+                    for (const auto &emote : emoteSet->emotes)
+                    {
                         addString(emote.name.string,
                                   TaggedString::Type::TwitchGlobalEmote);
+                    }
                 }
             }
         }
