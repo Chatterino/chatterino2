@@ -96,23 +96,12 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
     if (auto channel = dynamic_cast<TwitchChannel *>(&this->channel_))
     {
-        // Twitch Emotes
+        // Twitch Emotes available globally
         if (auto account = getApp()->accounts->twitch.getCurrent())
         {
-            for (const auto &emoteSet : account->accessEmotes()->emoteSets)
+            for (const auto &emote : account->accessEmotes()->emotes)
             {
-                // Some emotes (e.g. follower ones) are only available in their origin channel
-                if (emoteSet->local &&
-                    this->channel_.getName() != emoteSet->channelName)
-                {
-                    continue;
-                }
-
-                for (const auto &emote : emoteSet->emotes)
-                {
-                    addString(emote.name.string,
-                              TaggedString::Type::TwitchGlobalEmote);
-                }
+                addString(emote.first.string, TaggedString::TwitchGlobalEmote);
             }
         }
 
