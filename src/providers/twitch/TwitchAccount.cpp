@@ -216,6 +216,7 @@ void TwitchAccount::loadEmotes()
                 // Clearing emote data
                 auto emoteData = this->emotes_.access();
                 emoteData->emoteSets.clear();
+                emoteData->emotes.clear();
 
                 for (auto emoteSetIt = data.emoteSets.begin();
                      emoteSetIt != data.emoteSets.end(); ++emoteSetIt)
