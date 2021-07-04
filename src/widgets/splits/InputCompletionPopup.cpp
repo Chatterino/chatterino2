@@ -86,7 +86,7 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
 
             // Twitch Emotes available locally
             auto localEmoteData = user->accessLocalEmotes();
-            if (localEmoteData->find(tc->roomId()) != nullptr)
+            if (localEmoteData->find(tc->roomId()) != localEmoteData->end())
             {
                 if (auto localEmotes = &localEmoteData->at(tc->roomId()))
                 {

@@ -106,7 +106,8 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
             // Twitch Emotes available locally
             auto localEmoteData = account->accessLocalEmotes();
-            if (localEmoteData->find(channel->roomId()) != nullptr)
+            if (localEmoteData->find(channel->roomId()) !=
+                localEmoteData->end())
             {
                 for (const auto &emote : localEmoteData->at(channel->roomId()))
                 {

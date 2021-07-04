@@ -385,7 +385,7 @@ void TwitchAccount::loadUserstateEmotes()
 
                             // EmoteMap for target channel wasn't initialized yet, doing it now
                             if (localEmoteData->find(ivrEmoteSet.channelId) ==
-                                nullptr)
+                                localEmoteData->end())
                             {
                                 localEmoteData->emplace(ivrEmoteSet.channelId,
                                                         EmoteMap());
