@@ -241,6 +241,8 @@ void TwitchChannel::setLocalizedName(const QString &name)
     this->nameOptions.localizedName = name;
 }
 
+// TODO: Handle manualRefresh flag
+// maybe after we add system message on sub emote refresh
 void TwitchChannel::refreshLocalTwitchEmotes(bool manualRefresh)
 {
     getHelix()->getChannelEmotes(
