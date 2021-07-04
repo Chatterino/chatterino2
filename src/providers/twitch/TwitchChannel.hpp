@@ -90,9 +90,11 @@ public:
     const FfzEmotes &globalFfz() const;
     boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
     boost::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
+    std::shared_ptr<const EmoteMap> localTwitchEmotes() const;
     std::shared_ptr<const EmoteMap> bttvEmotes() const;
     std::shared_ptr<const EmoteMap> ffzEmotes() const;
 
+    virtual void refreshLocalTwitchEmotes(bool manualRefresh);
     virtual void refreshBTTVChannelEmotes(bool manualRefresh);
     virtual void refreshFFZChannelEmotes(bool manualRefresh);
 
@@ -163,6 +165,7 @@ private:
 protected:
     BttvEmotes &globalBttv_;
     FfzEmotes &globalFfz_;
+    Atomic<std::shared_ptr<const EmoteMap>> localTwitchEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
     Atomic<boost::optional<EmotePtr>> ffzCustomModBadge_;
