@@ -287,7 +287,7 @@ MessagePtr TwitchMessageBuilder::build()
                 correctPositions.push_back(i);
             }
         }
-        for (QString emote : emoteString)
+        for (const QString &emote : emoteString)
         {
             this->appendTwitchEmote(emote, twitchEmotes, correctPositions);
         }
@@ -373,7 +373,6 @@ void TwitchMessageBuilder::addWords(
         while (doesWordContainATwitchEmote(cursor, word, twitchEmotes,
                                            currentTwitchEmoteIt))
         {
-            auto wordEnd = cursor + word.length();
             const auto &currentTwitchEmote = *currentTwitchEmoteIt;
 
             if (currentTwitchEmote.start == cursor)
@@ -1305,9 +1304,9 @@ void TwitchMessageBuilder::liveMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
                                   MessageColor::Text);
-    auto text = channelName + " is live!";
-    builder->message().searchText = text;
+    auto text = QString("%1 is live!").arg(channelName);
     builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
@@ -1322,6 +1321,9 @@ void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
                                   MessageColor::System);
+    auto text = QString("%1 is live!").arg(channelName);
+    builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
@@ -1336,12 +1338,16 @@ void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is now offline.", MessageElementFlag::Text,
                                   MessageColor::System);
+    auto text = QString("%1 is now offline.").arg(channelName);
+    builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
                                                 MessageBuilder *builder,
                                                 bool hostOn)
 {
+    QString text;
     builder->emplace<TimestampElement>();
     builder->message().flags.set(MessageFlag::System);
     builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
@@ -1354,6 +1360,7 @@ void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
                 channelName + ".", MessageElementFlag::Username,
                 MessageColor::System, FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, channelName});
+        text = QString("Now hosting %1.").arg(channelName);
     }
     else
     {
@@ -1365,7 +1372,11 @@ void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
         builder->emplace<TextElement>("has gone offline. Exiting host mode.",
                                       MessageElementFlag::Text,
                                       MessageColor::System);
+        text =
+            QString("%1 has gone offline. Exiting host mode.").arg(channelName);
     }
+    builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 // irc variant

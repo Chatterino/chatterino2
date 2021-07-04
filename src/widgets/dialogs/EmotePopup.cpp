@@ -104,7 +104,7 @@ namespace {
         // That contain title or emotes.
         // Put current channel emotes at the top
         auto currentChannelPair = mapOfSets[currentChannelName];
-        for (auto message : currentChannelPair.second)
+        for (const auto &message : currentChannelPair.second)
         {
             subChannel.addMessage(message);
         }
@@ -113,7 +113,7 @@ namespace {
         foreach (auto pair, mapOfSets)
         {
             auto &channel = pair.first ? globalChannel : subChannel;
-            for (auto message : pair.second)
+            for (const auto &message : pair.second)
             {
                 channel.addMessage(message);
             }

@@ -50,6 +50,9 @@ MessagePtr generateBannedMessage(bool confirmedBan)
             : QString("Try reconnecting.");
 
     MessageBuilder builder;
+    auto text = QString("%1 %2").arg(bannedText, reconnectPromptText);
+    builder.message().messageText = text;
+    builder.message().searchText = text;
     builder.message().flags.set(MessageFlag::System);
 
     builder.emplace<TimestampElement>();
@@ -164,7 +167,7 @@ static QMap<QString, QString> parseBadges(QString badgesString)
 {
     QMap<QString, QString> badges;
 
-    for (auto badgeData : badgesString.split(','))
+    for (const auto &badgeData : badgesString.split(','))
     {
         auto parts = badgeData.split('/');
         if (parts.length() != 2)
@@ -735,9 +738,12 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
         const auto curUser = getApp()->accounts->twitch.getCurrent();
         const auto expirationText = QString("Login expired for user \"%1\"!")
                                         .arg(curUser->getUserName());
-        const auto loginPromptText = QString(" Try adding your account again.");
+        const auto loginPromptText = QString("Try adding your account again.");
 
         auto builder = MessageBuilder();
+        auto text = QString("%1 %2").arg(expirationText, loginPromptText);
+        builder.message().messageText = text;
+        builder.message().searchText = text;
         builder.message().flags.set(MessageFlag::System);
         builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
 
@@ -786,7 +792,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     auto app = getApp();
     auto builtMessages = this->parseNoticeMessage(message);
 
-    for (auto msg : builtMessages)
+    for (const auto &msg : builtMessages)
     {
         QString channelName;
         if (!trimChannelName(message->target(), channelName) ||
