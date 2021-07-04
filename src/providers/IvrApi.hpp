@@ -56,7 +56,7 @@ struct IvrEmote {
     const QString code;
     const QString id;
     const QString setId;
-    QString url;
+    const QString url;
     const QString emoteType;
     const QString imageType;
 
@@ -64,12 +64,12 @@ struct IvrEmote {
         : code(root.value("code").toString())
         , id(root.value("id").toString())
         , setId(root.value("setID").toString())
+        , url(QString(TWITCH_EMOTE_TEMPLATE)
+                  .replace("{id}", this->id)
+                  .replace("{scale}", "3.0"))
         , emoteType(root.value("type").toString())
         , imageType(root.value("assetType").toBool())
     {
-        this->url = QString(TWITCH_EMOTE_TEMPLATE)
-                        .replace("{id}", root.value("id").toString())
-                        .replace("{scale}", "3.0");
     }
 };
 

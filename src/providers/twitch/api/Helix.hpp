@@ -279,21 +279,21 @@ struct HelixEmoteSetData {
 };
 
 struct HelixChannelEmote {
-    QString emoteId;
-    QString name;
-    QString type;
-    QString setId;
-    QString url;
+    const QString emoteId;
+    const QString name;
+    const QString type;
+    const QString setId;
+    const QString url;
 
     explicit HelixChannelEmote(QJsonObject jsonObject)
         : emoteId(jsonObject.value("id").toString())
         , name(jsonObject.value("name").toString())
         , type(jsonObject.value("emote_type").toString())
         , setId(jsonObject.value("emote_set_id").toString())
+        , url(QString(TWITCH_EMOTE_TEMPLATE)
+                  .replace("{id}", this->emoteId)
+                  .replace("{scale}", "3.0"))
     {
-        this->url = QString(TWITCH_EMOTE_TEMPLATE)
-                        .replace("{id}", this->emoteId)
-                        .replace("{scale}", "3.0");
     }
 };
 
