@@ -1626,7 +1626,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
                          hoverLayoutElement->getFlags().has(
                              MessageElementFlag::Username))
                     break;
-                else
+                else if (this->scrollBar_->isVisible())
                     this->enableScrolling(event->screenPos());
             }
         }
@@ -1700,7 +1700,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
     else if (event->button() == Qt::MiddleButton)
     {
-        if (this->isScrolling_)
+        if (this->isScrolling_ && this->scrollBar_->isVisible())
         {
             if (event->screenPos() == this->lastMiddlePressPosition_)
                 this->enableScrolling(event->screenPos());
