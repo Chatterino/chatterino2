@@ -36,7 +36,7 @@ struct IvrEmoteSet {
     const QString setId;
     const QString displayName;
     const QString login;
-    const QString id;
+    const QString channelId;
     const QString tier;
     const QJsonArray emotes;
 
@@ -44,7 +44,7 @@ struct IvrEmoteSet {
         : setId(root.value("setID").toString())
         , displayName(root.value("channelName").toString())
         , login(root.value("channelLogin").toString())
-        , id(root.value("channelID").toString())
+        , channelId(root.value("channelID").toString())
         , tier(root.value("tier").toString())
         , emotes(root.value("emoteList").toArray())
 

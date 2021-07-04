@@ -348,6 +348,7 @@ void TwitchAccount::loadUserstateEmotes()
             batch.join(","),
             [this](QJsonArray emoteSetArray) {
                 auto emoteData = this->emotes_.access();
+                auto localEmoteData = this->localEmotes_.access();
                 for (auto emoteSet : emoteSetArray)
                 {
                     auto newUserEmoteSet = std::make_shared<EmoteSet>();
@@ -363,9 +364,9 @@ void TwitchAccount::loadUserstateEmotes()
                     newUserEmoteSet->text = name;
                     newUserEmoteSet->channelName = ivrEmoteSet.login;
 
-                    for (const auto &emote : ivrEmoteSet.emotes)
+                    for (const auto &emoteObj : ivrEmoteSet.emotes)
                     {
-                        IvrEmote ivrEmote(emote.toObject());
+                        IvrEmote ivrEmote(emoteObj.toObject());
 
                         auto id = EmoteId{ivrEmote.id};
                         auto code = EmoteName{ivrEmote.code};
@@ -374,17 +375,28 @@ void TwitchAccount::loadUserstateEmotes()
                         newUserEmoteSet->emotes.push_back(
                             TwitchEmote{id, cleanCode});
 
+                        auto emote =
+                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
+
                         // Follower emotes can be only used in their origin channel
                         if (ivrEmote.emoteType == "FOLLOWER")
                         {
                             newUserEmoteSet->local = true;
+
+                            // EmoteMap for target channel wasn't initialized yet, doing it now
+                            if (localEmoteData->find(ivrEmoteSet.channelId) ==
+                                nullptr)
+                            {
+                                localEmoteData->emplace(ivrEmoteSet.channelId,
+                                                        EmoteMap());
+                            }
+
+                            localEmoteData->at(ivrEmoteSet.channelId)
+                                .emplace(code, emote);
                         }
                         else
                         {
-                            auto twitchEmote =
-                                getApp()->emotes->twitch.getOrCreateEmote(id,
-                                                                          code);
-                            emoteData->emotes.emplace(code, twitchEmote);
+                            emoteData->emotes.emplace(code, emote);
                         }
                     }
                     std::sort(newUserEmoteSet->emotes.begin(),
@@ -405,6 +417,12 @@ SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
     TwitchAccount::accessEmotes() const
 {
     return this->emotes_.accessConst();
+}
+
+SharedAccessGuard<const std::unordered_map<QString, EmoteMap>>
+    TwitchAccount::accessLocalEmotes() const
+{
+    return this->localEmotes_.accessConst();
 }
 
 // AutoModActions

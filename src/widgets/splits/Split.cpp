@@ -828,7 +828,6 @@ void Split::reloadChannelAndSubscriberEmotes()
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        twitchChannel->refreshLocalTwitchEmotes(true);
         twitchChannel->refreshBTTVChannelEmotes(true);
         twitchChannel->refreshFFZChannelEmotes(true);
     }

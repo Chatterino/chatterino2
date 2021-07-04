@@ -96,19 +96,24 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
     if (auto channel = dynamic_cast<TwitchChannel *>(&this->channel_))
     {
-        // Twitch Emotes available globally
         if (auto account = getApp()->accounts->twitch.getCurrent())
         {
+            // Twitch Emotes available globally
             for (const auto &emote : account->accessEmotes()->emotes)
             {
                 addString(emote.first.string, TaggedString::TwitchGlobalEmote);
             }
-        }
 
-        // Twitch Emotes available locally
-        for (const auto &emote : *channel->localTwitchEmotes())
-        {
-            addString(emote.first.string, TaggedString::Type::TwitchLocalEmote);
+            // Twitch Emotes available locally
+            auto localEmoteData = account->accessLocalEmotes();
+            if (localEmoteData->find(channel->roomId()) != nullptr)
+            {
+                for (const auto &emote : localEmoteData->at(channel->roomId()))
+                {
+                    addString(emote.first.string,
+                              TaggedString::Type::TwitchLocalEmote);
+                }
+            }
         }
 
         // Usernames

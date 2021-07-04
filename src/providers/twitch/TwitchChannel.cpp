@@ -180,7 +180,6 @@ TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
         this->refreshLiveStatus();
         this->refreshBadges();
         this->refreshCheerEmotes();
-        this->refreshLocalTwitchEmotes(false);
         this->refreshFFZChannelEmotes(false);
         this->refreshBTTVChannelEmotes(false);
     });
@@ -239,35 +238,6 @@ const QString &TwitchChannel::getLocalizedName() const
 void TwitchChannel::setLocalizedName(const QString &name)
 {
     this->nameOptions.localizedName = name;
-}
-
-// TODO: Handle manualRefresh flag
-// maybe after we add system message on sub emote refresh
-void TwitchChannel::refreshLocalTwitchEmotes(bool manualRefresh)
-{
-    getHelix()->getChannelEmotes(
-        this->roomId(),
-        [this](std::vector<HelixChannelEmote> channelEmotes) {
-            EmoteMap localEmotes;
-            for (const auto &emote : channelEmotes)
-            {
-                if (emote.type == "follower")
-                {
-                    auto id = EmoteId{emote.emoteId};
-                    auto code = EmoteName{emote.name};
-                    auto emote =
-                        getApp()->emotes->twitch.getOrCreateEmote(id, code);
-
-                    localEmotes[code] = emote;
-                }
-            }
-
-            this->localTwitchEmotes_.set(
-                std::make_shared<EmoteMap>(std::move(localEmotes)));
-        },
-        [] {
-            // fetching channel emotes failed
-        });
 }
 
 void TwitchChannel::refreshBTTVChannelEmotes(bool manualRefresh)
@@ -556,11 +526,6 @@ boost::optional<EmotePtr> TwitchChannel::ffzEmote(const EmoteName &name) const
     if (it == emotes->end())
         return boost::none;
     return it->second;
-}
-
-std::shared_ptr<const EmoteMap> TwitchChannel::localTwitchEmotes() const
-{
-    return this->localTwitchEmotes_.get();
 }
 
 std::shared_ptr<const EmoteMap> TwitchChannel::bttvEmotes() const

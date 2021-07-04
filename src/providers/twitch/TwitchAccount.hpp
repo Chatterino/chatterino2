@@ -119,6 +119,8 @@ public:
     // Returns true if the newly inserted emote sets differ from the ones previously saved
     [[nodiscard]] bool setUserstateEmoteSets(QStringList newEmoteSets);
     SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
+    SharedAccessGuard<const std::unordered_map<QString, EmoteMap>>
+        accessLocalEmotes() const;
 
     // Automod actions
     void autoModAllow(const QString msgID, ChannelPtr channel);
@@ -141,6 +143,7 @@ private:
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;
+    UniqueAccess<std::unordered_map<QString, EmoteMap>> localEmotes_;
 };
 
 }  // namespace chatterino
