@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Username in channel points rewards redemption messages is now clickable. (#2673, #2953)
 - Minor: Channel name in `<channel> has gone offline. Exiting host mode.` messages is now clickable. (#2922)
 - Minor: Added `/openurl` command. Usage: `/openurl <URL>`. Opens the provided URL in the browser. (#2461, #2926)
 - Bugfix: Now deleting cache files that weren't modified in the past 14 days. (#2947)
