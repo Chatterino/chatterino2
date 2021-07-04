@@ -71,6 +71,8 @@ public:
     struct TwitchAccountEmoteData {
         std::vector<std::shared_ptr<EmoteSet>> emoteSets;
 
+        // this EmoteMap should contain all emotes available globally
+        // excluding locally available emotes, such as follower ones
         EmoteMap emotes;
     };
 

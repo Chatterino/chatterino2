@@ -245,9 +245,13 @@ void TwitchAccount::loadEmotes()
                         emoteSet->emotes.emplace_back(
                             TwitchEmote{id, cleanCode});
 
-                        auto emote =
-                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
-                        emoteData->emotes.emplace(code, emote);
+                        if (!emoteSet->local)
+                        {
+                            auto emote =
+                                getApp()->emotes->twitch.getOrCreateEmote(id,
+                                                                          code);
+                            emoteData->emotes.emplace(code, emote);
+                        }
                     }
 
                     std::sort(emoteSet->emotes.begin(), emoteSet->emotes.end(),
@@ -369,16 +373,18 @@ void TwitchAccount::loadUserstateEmotes()
                         newUserEmoteSet->emotes.push_back(
                             TwitchEmote{id, cleanCode});
 
-                        // Follower emotes can be only used in the channel they're from
+                        auto twitchEmote =
+                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
+                        // Follower emotes can be only used in their origin channel
                         if (ivrEmote.emoteType == "FOLLOWER" &&
                             !newUserEmoteSet->local)
                         {
                             newUserEmoteSet->local = true;
                         }
-
-                        auto twitchEmote =
-                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
-                        emoteData->emotes.emplace(code, twitchEmote);
+                        else
+                        {
+                            emoteData->emotes.emplace(code, twitchEmote);
+                        }
                     }
                     std::sort(newUserEmoteSet->emotes.begin(),
                               newUserEmoteSet->emotes.end(),
@@ -513,7 +519,7 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
     getHelix()->getEmoteSetData(
         emoteSet->key,
         [emoteSet](HelixEmoteSetData emoteSetData) {
-            // Follower emotes can be only used in the channel they're from
+            // Follower emotes can be only used in their origin channel
             if (emoteSetData.emoteType == "follower")
             {
                 emoteSet->local = true;
