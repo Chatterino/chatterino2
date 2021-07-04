@@ -105,6 +105,12 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
             }
         }
 
+        // Twitch Emotes available locally
+        for (const auto &emote : *channel->localTwitchEmotes())
+        {
+            addString(emote.first.string, TaggedString::Type::TwitchLocalEmote);
+        }
+
         // Usernames
         QString usernamePostfix =
             isFirstWord && getSettings()->mentionUsersWithComma ? ","
