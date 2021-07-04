@@ -369,29 +369,25 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
     {
         case AutomodUserAction::AddPermitted: {
             text = QString("%1 added %2 as a permitted term on AutoMod.")
-                       .arg(action.source.name)
-                       .arg(action.message);
+                       .arg(action.source.name, action.message);
         }
         break;
 
         case AutomodUserAction::AddBlocked: {
             text = QString("%1 added %2 as a blocked term on AutoMod.")
-                       .arg(action.source.name)
-                       .arg(action.message);
+                       .arg(action.source.name, action.message);
         }
         break;
 
         case AutomodUserAction::RemovePermitted: {
             text = QString("%1 removed %2 as a permitted term on AutoMod.")
-                       .arg(action.source.name)
-                       .arg(action.message);
+                       .arg(action.source.name, action.message);
         }
         break;
 
         case AutomodUserAction::RemoveBlocked: {
             text = QString("%1 removed %2 as a blocked term on AutoMod.")
-                       .arg(action.source.name)
-                       .arg(action.message);
+                       .arg(action.source.name, action.message);
         }
         break;
 
@@ -401,6 +397,8 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
         }
         break;
     }
+    this->message().messageText = text;
+    this->message().searchText = text;
 
     this->emplace<TextElement>(text, MessageElementFlag::Text,
                                MessageColor::System);
