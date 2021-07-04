@@ -68,7 +68,7 @@ struct IvrEmote {
                   .replace("{id}", this->id)
                   .replace("{scale}", "3.0"))
         , emoteType(root.value("type").toString())
-        , imageType(root.value("assetType").toBool())
+        , imageType(root.value("assetType").toString())
     {
     }
 };
