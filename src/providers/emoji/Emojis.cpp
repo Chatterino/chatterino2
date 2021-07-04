@@ -24,7 +24,7 @@ namespace {
                     const rapidjson::Value &unparsedEmoji,
                     QString shortCode = QString())
     {
-        std::array<uint32_t, 7> unicodeBytes;
+        std::array<uint32_t, 9> unicodeBytes;
 
         struct {
             bool apple;
