@@ -374,16 +374,16 @@ void TwitchAccount::loadUserstateEmotes()
                         newUserEmoteSet->emotes.push_back(
                             TwitchEmote{id, cleanCode});
 
-                        auto twitchEmote =
-                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
                         // Follower emotes can be only used in their origin channel
-                        if (ivrEmote.emoteType == "FOLLOWER" &&
-                            !newUserEmoteSet->local)
+                        if (ivrEmote.emoteType == "FOLLOWER")
                         {
                             newUserEmoteSet->local = true;
                         }
                         else
                         {
+                            auto twitchEmote =
+                                getApp()->emotes->twitch.getOrCreateEmote(id,
+                                                                          code);
                             emoteData->emotes.emplace(code, twitchEmote);
                         }
                     }
