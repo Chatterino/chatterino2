@@ -7,6 +7,7 @@
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
 #include "providers/twitch/TwitchUser.hpp"
+#include "util/QStringHash.hpp"
 
 #include <rapidjson/document.h>
 #include <QColor>

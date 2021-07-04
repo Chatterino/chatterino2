@@ -10,6 +10,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
+#include "util/QStringHash.hpp"
 
 #include <QtAlgorithms>
 #include <utility>

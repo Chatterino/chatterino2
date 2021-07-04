@@ -18,6 +18,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Emotes.hpp"
+#include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
