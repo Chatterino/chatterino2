@@ -167,7 +167,7 @@ static QMap<QString, QString> parseBadges(QString badgesString)
 {
     QMap<QString, QString> badges;
 
-    for (const auto &badgeData : badgesString.split(','))
+    for (auto badgeData : badgesString.split(','))
     {
         auto parts = badgeData.split('/');
         if (parts.length() != 2)
@@ -792,7 +792,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     auto app = getApp();
     auto builtMessages = this->parseNoticeMessage(message);
 
-    for (const auto &msg : builtMessages)
+    for (auto msg : builtMessages)
     {
         QString channelName;
         if (!trimChannelName(message->target(), channelName) ||

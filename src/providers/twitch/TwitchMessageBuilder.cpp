@@ -287,7 +287,7 @@ MessagePtr TwitchMessageBuilder::build()
                 correctPositions.push_back(i);
             }
         }
-        for (const QString &emote : emoteString)
+        for (QString emote : emoteString)
         {
             this->appendTwitchEmote(emote, twitchEmotes, correctPositions);
         }
@@ -373,6 +373,7 @@ void TwitchMessageBuilder::addWords(
         while (doesWordContainATwitchEmote(cursor, word, twitchEmotes,
                                            currentTwitchEmoteIt))
         {
+            auto wordEnd = cursor + word.length();
             const auto &currentTwitchEmote = *currentTwitchEmoteIt;
 
             if (currentTwitchEmote.start == cursor)
