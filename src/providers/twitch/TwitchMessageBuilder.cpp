@@ -1289,9 +1289,11 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     QString redeemed = "Redeemed";
     if (!reward.isUserInputRequired)
     {
-        builder->emplace<TextElement>(
-            reward.user.login, MessageElementFlag::ChannelPointReward,
-            MessageColor::Text, FontStyle::ChatMediumBold);
+        builder
+            ->emplace<TextElement>(
+                reward.user.login, MessageElementFlag::ChannelPointReward,
+                MessageColor::Text, FontStyle::ChatMediumBold)
+            ->setLink({Link::UserInfo, reward.user.login});
         redeemed = "redeemed";
     }
     builder->emplace<TextElement>(redeemed,
