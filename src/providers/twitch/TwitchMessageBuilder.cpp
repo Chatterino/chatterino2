@@ -1266,6 +1266,7 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
 {
     builder->emplace<TimestampElement>();
     QString redeemed = "Redeemed";
+    QStringList textList;
     if (!reward.isUserInputRequired)
     {
         builder
@@ -1274,6 +1275,7 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
                 MessageColor::Text, FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, reward.user.login});
         redeemed = "redeemed";
+        textList.append(reward.user.login);
     }
     builder->emplace<TextElement>(redeemed,
                                   MessageElementFlag::ChannelPointReward);
@@ -1292,6 +1294,10 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     }
 
     builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
+
+    textList.append({redeemed, reward.title, QString::number(reward.cost)});
+    builder->message().messageText = textList.join(" ");
+    builder->message().searchText = textList.join(" ");
 }
 
 void TwitchMessageBuilder::liveMessage(const QString &channelName,
