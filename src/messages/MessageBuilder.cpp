@@ -78,63 +78,83 @@ MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
 std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     const AutomodAction &action)
 {
-    auto builder = MessageBuilder();
+    MessageBuilder builder, builder2;
 
+    //
+    // Builder for AutoMod message with explanation
     builder.emplace<TimestampElement>();
+    builder.message().loginName = "automod";
     builder.message().flags.set(MessageFlag::PubSub);
 
+    // AutoMod shield badge
     builder
         .emplace<ImageElement>(Image::fromPixmap(getResources().twitch.automod),
                                MessageElementFlag::BadgeChannelAuthority)
         ->setTooltip("AutoMod");
+    // AutoMod "username"
     builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
                                  MessageColor(QColor("blue")),
                                  FontStyle::ChatMediumBold);
     builder.emplace<TextElement>(
         "AutoMod:", MessageElementFlag::NonBoldUsername,
         MessageColor(QColor("blue")));
+    // AutoMod header message
     builder.emplace<TextElement>(
         ("Held a message for reason: " + action.reason +
          ". Allow will post it in chat. "),
         MessageElementFlag::Text, MessageColor::Text);
+    // Allow link button
     builder
         .emplace<TextElement>("Allow", MessageElementFlag::Text,
                               MessageColor(QColor("green")),
                               FontStyle::ChatMediumBold)
         ->setLink({Link::AutoModAllow, action.msgID});
+    // Deny link button
     builder
         .emplace<TextElement>(" Deny", MessageElementFlag::Text,
                               MessageColor(QColor("red")),
                               FontStyle::ChatMediumBold)
         ->setLink({Link::AutoModDeny, action.msgID});
-    // builder.emplace<TextElement>(action.msgID,
-    // MessageElementFlag::Text,
-    //                             MessageColor::Text);
+    // ID of message caught by AutoMod
+    //    builder.emplace<TextElement>(action.msgID, MessageElementFlag::Text,
+    //                                 MessageColor::Text);
     builder.message().flags.set(MessageFlag::AutoMod);
+    auto text1 =
+        QString("AutoMod: Held a message for reason: %1. Allow will post "
+                "it in chat. Allow Deny")
+            .arg(action.reason);
+    builder.message().messageText = text1;
+    builder.message().searchText = text1;
 
     auto message1 = builder.release();
 
-    builder = MessageBuilder();
-    builder.emplace<TimestampElement>();
-    builder.emplace<TwitchModerationElement>();
-    builder.message().loginName = action.target.name;
-    builder.message().flags.set(MessageFlag::PubSub);
+    //
+    // Builder for offender's message
+    builder2.emplace<TimestampElement>();
+    builder2.emplace<TwitchModerationElement>();
+    builder2.message().loginName = action.target.name;
+    builder2.message().flags.set(MessageFlag::PubSub);
 
-    builder
+    // sender username
+    builder2
         .emplace<TextElement>(
             action.target.name + ":", MessageElementFlag::BoldUsername,
             MessageColor(QColor("red")), FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, action.target.name});
-    builder
+    builder2
         .emplace<TextElement>(action.target.name + ":",
                               MessageElementFlag::NonBoldUsername,
                               MessageColor(QColor("red")))
         ->setLink({Link::UserInfo, action.target.name});
-    builder.emplace<TextElement>(action.message, MessageElementFlag::Text,
-                                 MessageColor::Text);
-    builder.message().flags.set(MessageFlag::AutoMod);
+    // sender's message caught by AutoMod
+    builder2.emplace<TextElement>(action.message, MessageElementFlag::Text,
+                                  MessageColor::Text);
+    builder2.message().flags.set(MessageFlag::AutoMod);
+    auto text2 = QString("%1: %2").arg(action.target.name, action.message);
+    builder2.message().messageText = text2;
+    builder2.message().searchText = text2;
 
-    auto message2 = builder.release();
+    auto message2 = builder2.release();
 
     return std::make_pair(message1, message2);
 }
