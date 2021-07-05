@@ -104,7 +104,7 @@ enum class MessageElementFlag : int64_t {
     // - Seventv Subscriber
     BadgeSeventv = (1LL << 40),
 
-    // Slot 7: FrankerFaceZ
+    // Slot 8: FrankerFaceZ
     // - FFZ developer badge
     // - FFZ bot badge
     // - FFZ donator badge
