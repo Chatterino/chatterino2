@@ -11,6 +11,7 @@ namespace chatterino {
 struct ActionUser {
     QString id;
     QString login;
+    // displayName should be in format "login(localizedName)" for non-ascii usernames
     QString displayName;
     QString color;
 };

@@ -1459,6 +1459,13 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                     qCDebug(chatterinoPubsub) << "Failed to get sender color";
                     return;
                 }
+                // handling non-ascii usernames
+                if (QString::compare(senderLogin, senderDisplayName,
+                                     Qt::CaseInsensitive) != 0)
+                {
+                    senderDisplayName =
+                        QString("%1(%2)").arg(senderLogin, senderDisplayName);
+                }
                 action.target = ActionUser{senderId, senderLogin,
                                            senderDisplayName, senderColor};
                 qCDebug(chatterinoPubsub) << action.msgID;
