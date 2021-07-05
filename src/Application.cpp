@@ -255,7 +255,7 @@ void Application::initPubsub()
 
             text = QString("%1 %2 %3")
                        .arg(action.source.login,
-                            (action.modded ? "unmodded" : "modded"),
+                            (action.modded ? "modded" : "unmodded"),
                             action.target.login);
 
             auto msg = makeSystemMessage(text);
