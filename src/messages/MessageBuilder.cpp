@@ -31,14 +31,17 @@ MessagePtr makeSystemMessage(const QString &text, const QTime &time)
 MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
 {
     auto builder = MessageBuilder();
+    QString text("AutoMod: ");
 
     builder.emplace<TimestampElement>();
     builder.message().flags.set(MessageFlag::PubSub);
 
+    // AutoMod shield badge
     builder
         .emplace<ImageElement>(Image::fromPixmap(getResources().twitch.automod),
                                MessageElementFlag::BadgeChannelAuthority)
         ->setTooltip("AutoMod");
+    // AutoMod "username"
     builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
                                  MessageColor(QColor("blue")),
                                  FontStyle::ChatMediumBold);
@@ -48,27 +51,32 @@ MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
     switch (action.type)
     {
         case AutomodInfoAction::OnHold: {
-            builder.emplace<TextElement>(("Hey! Your message is being checked "
-                                          "by mods and has not been sent."),
-                                         MessageElementFlag::Text,
+            QString info("Hey! Your message is being checked "
+                         "by mods and has not been sent.");
+            text += info;
+            builder.emplace<TextElement>(info, MessageElementFlag::Text,
                                          MessageColor::Text);
         }
         break;
         case AutomodInfoAction::Denied: {
-            builder.emplace<TextElement>(("Mods have removed your message."),
-                                         MessageElementFlag::Text,
+            QString info("Mods have removed your message.");
+            text += info;
+            builder.emplace<TextElement>(info, MessageElementFlag::Text,
                                          MessageColor::Text);
         }
         break;
         case AutomodInfoAction::Approved: {
-            builder.emplace<TextElement>(("Mods have accepted your message."),
-                                         MessageElementFlag::Text,
+            QString info("Mods have accepted your message.");
+            text += info;
+            builder.emplace<TextElement>(info, MessageElementFlag::Text,
                                          MessageColor::Text);
         }
         break;
     }
 
     builder.message().flags.set(MessageFlag::AutoMod);
+    builder.message().messageText = text;
+    builder.message().searchText = text;
 
     auto message = builder.release();
 
