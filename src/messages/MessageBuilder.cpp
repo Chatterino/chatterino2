@@ -117,19 +117,20 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     builder = MessageBuilder();
     builder.emplace<TimestampElement>();
     builder.emplace<TwitchModerationElement>();
-    builder.message().loginName = action.target.name;
+    builder.message().loginName = action.target.login;
     builder.message().flags.set(MessageFlag::PubSub);
 
     builder
-        .emplace<TextElement>(
-            action.target.name + ":", MessageElementFlag::BoldUsername,
-            MessageColor(QColor("red")), FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, action.target.name});
+        .emplace<TextElement>(action.target.displayName + ":",
+                              MessageElementFlag::BoldUsername,
+                              MessageColor(QColor(action.target.color)),
+                              FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.target.displayName});
     builder
-        .emplace<TextElement>(action.target.name + ":",
+        .emplace<TextElement>(action.target.login + ":",
                               MessageElementFlag::NonBoldUsername,
-                              MessageColor(QColor("red")))
-        ->setLink({Link::UserInfo, action.target.name});
+                              MessageColor(QColor(action.target.color)))
+        ->setLink({Link::UserInfo, action.target.login});
     builder.emplace<TextElement>(action.message, MessageElementFlag::Text,
                                  MessageColor::Text);
     builder.message().flags.set(MessageFlag::AutoMod);
@@ -249,7 +250,7 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     this->emplace<TimestampElement>();
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::Timeout);
-    this->message().timeoutUser = action.target.name;
+    this->message().timeoutUser = action.target.login;
     this->message().count = count;
 
     QString text;
@@ -268,13 +269,13 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
                 text);
         }
 
-        if (!action.source.name.isEmpty())
+        if (!action.target.login.isEmpty())
         {
             this->emplaceSystemTextAndUpdate("by", text);
             this->emplaceSystemTextAndUpdate(
-                    action.source.name + (action.reason.isEmpty() ? "." : ":"),
+                    action.target.login + (action.reason.isEmpty() ? "." : ":"),
                     text)
-                ->setLink({Link::UserInfo, action.source.name});
+                ->setLink({Link::UserInfo, action.target.login});
         }
 
         if (!action.reason.isEmpty())
@@ -287,29 +288,30 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     {
         if (action.isBan())
         {
-            this->emplaceSystemTextAndUpdate(action.source.name, text)
-                ->setLink({Link::UserInfo, action.source.name});
+            this->emplaceSystemTextAndUpdate(action.target.login, text)
+                ->setLink({Link::UserInfo, action.target.login});
             this->emplaceSystemTextAndUpdate("banned", text);
             if (action.reason.isEmpty())
             {
-                this->emplaceSystemTextAndUpdate(action.target.name, text)
-                    ->setLink({Link::UserInfo, action.target.name});
+                this->emplaceSystemTextAndUpdate(action.target.login, text)
+                    ->setLink({Link::UserInfo, action.target.login});
             }
             else
             {
-                this->emplaceSystemTextAndUpdate(action.target.name + ":", text)
-                    ->setLink({Link::UserInfo, action.target.name});
+                this->emplaceSystemTextAndUpdate(action.target.login + ":",
+                                                 text)
+                    ->setLink({Link::UserInfo, action.target.login});
                 this->emplaceSystemTextAndUpdate(
                     QString("\"%1\".").arg(action.reason), text);
             }
         }
         else
         {
-            this->emplaceSystemTextAndUpdate(action.source.name, text)
-                ->setLink({Link::UserInfo, action.source.name});
+            this->emplaceSystemTextAndUpdate(action.target.login, text)
+                ->setLink({Link::UserInfo, action.target.login});
             this->emplaceSystemTextAndUpdate("timed out", text);
-            this->emplaceSystemTextAndUpdate(action.target.name, text)
-                ->setLink({Link::UserInfo, action.target.name});
+            this->emplaceSystemTextAndUpdate(action.target.login, text)
+                ->setLink({Link::UserInfo, action.target.login});
             if (action.reason.isEmpty())
             {
                 this->emplaceSystemTextAndUpdate(
@@ -343,16 +345,16 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
     this->message().flags.set(MessageFlag::System);
     this->message().flags.set(MessageFlag::Untimeout);
 
-    this->message().timeoutUser = action.target.name;
+    this->message().timeoutUser = action.target.login;
 
     QString text;
 
-    this->emplaceSystemTextAndUpdate(action.source.name, text)
-        ->setLink({Link::UserInfo, action.source.name});
+    this->emplaceSystemTextAndUpdate(action.target.login, text)
+        ->setLink({Link::UserInfo, action.target.login});
     this->emplaceSystemTextAndUpdate(
         action.wasBan() ? "unbanned" : "untimedout", text);
-    this->emplaceSystemTextAndUpdate(action.target.name, text)
-        ->setLink({Link::UserInfo, action.target.name});
+    this->emplaceSystemTextAndUpdate(action.target.login, text)
+        ->setLink({Link::UserInfo, action.target.login});
 
     this->message().messageText = text;
     this->message().searchText = text;
@@ -369,35 +371,35 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
     {
         case AutomodUserAction::AddPermitted: {
             text = QString("%1 added %2 as a permitted term on AutoMod.")
-                       .arg(action.source.name)
+                       .arg(action.target.login)
                        .arg(action.message);
         }
         break;
 
         case AutomodUserAction::AddBlocked: {
             text = QString("%1 added %2 as a blocked term on AutoMod.")
-                       .arg(action.source.name)
+                       .arg(action.target.login)
                        .arg(action.message);
         }
         break;
 
         case AutomodUserAction::RemovePermitted: {
             text = QString("%1 removed %2 as a permitted term on AutoMod.")
-                       .arg(action.source.name)
+                       .arg(action.target.login)
                        .arg(action.message);
         }
         break;
 
         case AutomodUserAction::RemoveBlocked: {
             text = QString("%1 removed %2 as a blocked term on AutoMod.")
-                       .arg(action.source.name)
+                       .arg(action.target.login)
                        .arg(action.message);
         }
         break;
 
         case AutomodUserAction::Properties: {
             text = QString("%1 modified the AutoMod properties.")
-                       .arg(action.source.name);
+                       .arg(action.target.login);
         }
         break;
     }

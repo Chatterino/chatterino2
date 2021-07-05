@@ -333,7 +333,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -398,7 +398,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -444,7 +444,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -484,7 +484,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -524,7 +524,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -556,7 +556,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -588,7 +588,7 @@ PubSub::PubSub()
                     return;
                 }
 
-                if (!rj::getSafe(args[0], action.target.name))
+                if (!rj::getSafe(args[0], action.target.login))
                 {
                     return;
                 }
@@ -658,7 +658,7 @@ PubSub::PubSub()
                     return;
                 }
 
-                if (!rj::getSafe(data, "requester_login", action.source.name))
+                if (!rj::getSafe(data, "requester_login", action.source.login))
                 {
                     return;
                 }
@@ -686,7 +686,7 @@ PubSub::PubSub()
                     return;
                 }
 
-                if (!rj::getSafe(data, "requester_login", action.source.name))
+                if (!rj::getSafe(data, "requester_login", action.source.login))
                 {
                     return;
                 }
@@ -743,7 +743,7 @@ PubSub::PubSub()
                     return;
                 }
 
-                if (!rj::getSafe(data, "requester_login", action.source.name))
+                if (!rj::getSafe(data, "requester_login", action.source.login))
                 {
                     return;
                 }
@@ -802,7 +802,7 @@ PubSub::PubSub()
                     return;
                 }
 
-                if (!rj::getSafe(data, "requester_login", action.source.name))
+                if (!rj::getSafe(data, "requester_login", action.source.login))
                 {
                     return;
                 }
@@ -1367,7 +1367,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
             QString status;
             if (!rj::getSafe(data, "status", status))
             {
-                qDebug() << "Failed to get status";
+                qCDebug(chatterinoPubsub) << "Failed to get status";
                 return;
             }
             if (status == "PENDING")
@@ -1377,20 +1377,22 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                 if (!rj::getSafeObject(data, "content_classification",
                                        classification))
                 {
-                    qDebug() << "Failed to get content_classification";
+                    qCDebug(chatterinoPubsub)
+                        << "Failed to get content_classification";
                     return;
                 }
 
                 QString contentCategory;
                 if (!rj::getSafe(classification, "category", contentCategory))
                 {
-                    qDebug() << "Failed to get content category";
+                    qCDebug(chatterinoPubsub)
+                        << "Failed to get content category";
                     return;
                 }
                 int contentLevel;
                 if (!rj::getSafe(classification, "level", contentLevel))
                 {
-                    qDebug() << "Failed to get content level";
+                    qCDebug(chatterinoPubsub) << "Failed to get content level";
                     return;
                 }
                 action.reason = QString("%1 level %2")
@@ -1400,25 +1402,26 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                 rapidjson::Value messageData;
                 if (!rj::getSafeObject(data, "message", messageData))
                 {
-                    qDebug() << "Failed to get message data";
+                    qCDebug(chatterinoPubsub) << "Failed to get message data";
                     return;
                 }
 
                 rapidjson::Value messageContent;
                 if (!rj::getSafeObject(messageData, "content", messageContent))
                 {
-                    qDebug() << "Failed to get message content";
+                    qCDebug(chatterinoPubsub)
+                        << "Failed to get message content";
                     return;
                 }
                 if (!rj::getSafe(messageData, "id", action.msgID))
                 {
-                    qDebug() << "Failed to get message id";
+                    qCDebug(chatterinoPubsub) << "Failed to get message id";
                     return;
                 }
 
                 if (!rj::getSafe(messageContent, "text", action.message))
                 {
-                    qDebug() << "Failed to get message text";
+                    qCDebug(chatterinoPubsub) << "Failed to get message text";
                     return;
                 }
 
@@ -1428,23 +1431,37 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                 rapidjson::Value senderData;
                 if (!rj::getSafeObject(messageData, "sender", senderData))
                 {
-                    qDebug() << "Failed to get sender";
+                    qCDebug(chatterinoPubsub) << "Failed to get sender";
                     return;
                 }
-                QString sender_id;
-                if (!rj::getSafe(senderData, "user_id", sender_id))
+                QString senderId;
+                if (!rj::getSafe(senderData, "user_id", senderId))
                 {
-                    qDebug() << "Failed to get sender user id";
+                    qCDebug(chatterinoPubsub) << "Failed to get sender user id";
                     return;
                 }
-                QString sender_login;
-                if (!rj::getSafe(senderData, "login", sender_login))
+                QString senderLogin;
+                if (!rj::getSafe(senderData, "login", senderLogin))
                 {
-                    qDebug() << "Failed to get sender login";
+                    qCDebug(chatterinoPubsub) << "Failed to get sender login";
                     return;
                 }
-                action.target = ActionUser{sender_id, sender_login};
-                qDebug() << action.msgID;
+                QString senderDisplayName;
+                if (!rj::getSafe(senderData, "display_name", senderDisplayName))
+                {
+                    qCDebug(chatterinoPubsub)
+                        << "Failed to get sender display name";
+                    return;
+                }
+                QString senderColor;
+                if (!rj::getSafe(senderData, "chat_color", senderColor))
+                {
+                    qCDebug(chatterinoPubsub) << "Failed to get sender color";
+                    return;
+                }
+                action.target = ActionUser{senderId, senderLogin,
+                                           senderDisplayName, senderColor};
+                qCDebug(chatterinoPubsub) << action.msgID;
                 this->signals_.moderation.automodMessage.invoke(action);
             }
             // "ALLOWED" and "DENIED" statuses remain unimplemented

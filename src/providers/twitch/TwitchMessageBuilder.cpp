@@ -1412,17 +1412,19 @@ void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
     builder->message().flags.set(MessageFlag::Timeout);
 
     builder
-        ->emplace<TextElement>(action.source.name, MessageElementFlag::Username,
+        ->emplace<TextElement>(action.source.login,
+                               MessageElementFlag::Username,
                                MessageColor::System, FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, action.source.name});
+        ->setLink({Link::UserInfo, action.source.login});
     // TODO(mm2pl): If or when jumping to a single message gets implemented a link,
     // add a link to the originalMessage
     builder->emplace<TextElement>(
         "deleted message from", MessageElementFlag::Text, MessageColor::System);
     builder
-        ->emplace<TextElement>(action.target.name, MessageElementFlag::Username,
+        ->emplace<TextElement>(action.target.login,
+                               MessageElementFlag::Username,
                                MessageColor::System, FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, action.target.name});
+        ->setLink({Link::UserInfo, action.target.login});
     builder->emplace<TextElement>("saying:", MessageElementFlag::Text,
                                   MessageColor::System);
     if (action.messageText.length() > 50)

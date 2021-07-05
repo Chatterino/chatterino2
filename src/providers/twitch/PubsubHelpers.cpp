@@ -37,7 +37,7 @@ const rapidjson::Value &getMsgID(const rapidjson::Value &data)
 
 bool getCreatedByUser(const rapidjson::Value &data, ActionUser &user)
 {
-    return rj::getSafe(data, "created_by", user.name) &&
+    return rj::getSafe(data, "created_by", user.login) &&
            rj::getSafe(data, "created_by_user_id", user.id);
 }
 
@@ -48,7 +48,7 @@ bool getTargetUser(const rapidjson::Value &data, ActionUser &user)
 
 bool getTargetUserName(const rapidjson::Value &data, ActionUser &user)
 {
-    return rj::getSafe(data, "target_user_login", user.name);
+    return rj::getSafe(data, "target_user_login", user.login);
 }
 
 rapidjson::Document createListenMessage(const std::vector<QString> &topicsVec,

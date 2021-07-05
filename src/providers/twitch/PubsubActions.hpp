@@ -10,7 +10,9 @@ namespace chatterino {
 
 struct ActionUser {
     QString id;
-    QString name;
+    QString login;
+    QString displayName;
+    QString color;
 };
 
 struct PubSubAction {
