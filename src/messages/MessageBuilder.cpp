@@ -269,13 +269,13 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
                 text);
         }
 
-        if (!action.target.login.isEmpty())
+        if (!action.source.login.isEmpty())
         {
             this->emplaceSystemTextAndUpdate("by", text);
             this->emplaceSystemTextAndUpdate(
-                    action.target.login + (action.reason.isEmpty() ? "." : ":"),
+                    action.source.login + (action.reason.isEmpty() ? "." : ":"),
                     text)
-                ->setLink({Link::UserInfo, action.target.login});
+                ->setLink({Link::UserInfo, action.source.login});
         }
 
         if (!action.reason.isEmpty())
@@ -288,8 +288,8 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
     {
         if (action.isBan())
         {
-            this->emplaceSystemTextAndUpdate(action.target.login, text)
-                ->setLink({Link::UserInfo, action.target.login});
+            this->emplaceSystemTextAndUpdate(action.source.login, text)
+                ->setLink({Link::UserInfo, action.source.login});
             this->emplaceSystemTextAndUpdate("banned", text);
             if (action.reason.isEmpty())
             {
@@ -307,8 +307,8 @@ MessageBuilder::MessageBuilder(const BanAction &action, uint32_t count)
         }
         else
         {
-            this->emplaceSystemTextAndUpdate(action.target.login, text)
-                ->setLink({Link::UserInfo, action.target.login});
+            this->emplaceSystemTextAndUpdate(action.source.login, text)
+                ->setLink({Link::UserInfo, action.source.login});
             this->emplaceSystemTextAndUpdate("timed out", text);
             this->emplaceSystemTextAndUpdate(action.target.login, text)
                 ->setLink({Link::UserInfo, action.target.login});
@@ -399,7 +399,7 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
 
         case AutomodUserAction::Properties: {
             text = QString("%1 modified the AutoMod properties.")
-                       .arg(action.target.login);
+                       .arg(action.source.login);
         }
         break;
     }
