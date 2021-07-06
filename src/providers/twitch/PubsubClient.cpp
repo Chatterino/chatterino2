@@ -1456,8 +1456,9 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                 QString senderColor;
                 if (!rj::getSafe(senderData, "chat_color", senderColor))
                 {
-                    qCDebug(chatterinoPubsub) << "Failed to get sender color";
-                    return;
+                    qCDebug(chatterinoPubsub)
+                        << "Failed to get sender color, might be a grey-name";
+                    // return; // color might be empty if user is a grey-name, don't freak out
                 }
                 // handling non-ascii usernames
                 if (QString::compare(senderLogin, senderDisplayName,
