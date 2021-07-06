@@ -349,8 +349,8 @@ MessageBuilder::MessageBuilder(const UnbanAction &action)
 
     QString text;
 
-    this->emplaceSystemTextAndUpdate(action.target.login, text)
-        ->setLink({Link::UserInfo, action.target.login});
+    this->emplaceSystemTextAndUpdate(action.source.login, text)
+        ->setLink({Link::UserInfo, action.source.login});
     this->emplaceSystemTextAndUpdate(
         action.wasBan() ? "unbanned" : "untimedout", text);
     this->emplaceSystemTextAndUpdate(action.target.login, text)
@@ -371,28 +371,28 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
     {
         case AutomodUserAction::AddPermitted: {
             text = QString("%1 added %2 as a permitted term on AutoMod.")
-                       .arg(action.target.login)
+                       .arg(action.source.login)
                        .arg(action.message);
         }
         break;
 
         case AutomodUserAction::AddBlocked: {
             text = QString("%1 added %2 as a blocked term on AutoMod.")
-                       .arg(action.target.login)
+                       .arg(action.source.login)
                        .arg(action.message);
         }
         break;
 
         case AutomodUserAction::RemovePermitted: {
             text = QString("%1 removed %2 as a permitted term on AutoMod.")
-                       .arg(action.target.login)
+                       .arg(action.source.login)
                        .arg(action.message);
         }
         break;
 
         case AutomodUserAction::RemoveBlocked: {
             text = QString("%1 removed %2 as a blocked term on AutoMod.")
-                       .arg(action.target.login)
+                       .arg(action.source.login)
                        .arg(action.message);
         }
         break;
