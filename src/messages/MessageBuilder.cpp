@@ -125,7 +125,7 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
                               MessageElementFlag::BoldUsername,
                               MessageColor(QColor(action.target.color)),
                               FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, action.target.displayName});
+        ->setLink({Link::UserInfo, action.target.login});
     builder
         .emplace<TextElement>(action.target.login + ":",
                               MessageElementFlag::NonBoldUsername,
