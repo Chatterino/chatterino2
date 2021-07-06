@@ -2,6 +2,7 @@
 
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/PubsubHelpers.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -1446,11 +1447,16 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                     qCDebug(chatterinoPubsub) << "Failed to get sender login";
                     return;
                 }
-                QString senderDisplayName;
-                if (!rj::getSafe(senderData, "display_name", senderDisplayName))
+                QString senderDisplayName = senderLogin;
+                bool hasLocalizedName = false;
+                if (rj::getSafe(senderData, "display_name", senderDisplayName))
                 {
-                    // in case display_name is not present, fall back to login we've received
-                    senderDisplayName = senderLogin;
+                    // check for non-ascii display names
+                    if (QString::compare(senderLogin, senderDisplayName,
+                                         Qt::CaseInsensitive) != 0)
+                    {
+                        hasLocalizedName = true;
+                    }
                 }
                 QString senderColor;
                 if (!rj::getSafe(senderData, "chat_color", senderColor))
@@ -1459,13 +1465,28 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                         << "Failed to get sender color, might be a grey-name";
                     // return; // color might be empty if user is a grey-name, don't freak out
                 }
-                // handling non-ascii usernames
-                if (QString::compare(senderLogin, senderDisplayName,
-                                     Qt::CaseInsensitive) != 0)
+                switch (getSettings()->usernameDisplayMode.getValue())
                 {
-                    senderDisplayName =
-                        QString("%1(%2)").arg(senderLogin, senderDisplayName);
+                    case UsernameDisplayMode::Username: {
+                        if (hasLocalizedName)
+                        {
+                            senderDisplayName = senderLogin;
+                        }
+                        break;
+                    }
+                    case UsernameDisplayMode::LocalizedName: {
+                        break;
+                    }
+                    case UsernameDisplayMode::UsernameAndLocalizedName: {
+                        if (hasLocalizedName)
+                        {
+                            senderDisplayName = QString("%1(%2)").arg(
+                                senderLogin, senderDisplayName);
+                        }
+                        break;
+                    }
                 }
+
                 action.target = ActionUser{senderId, senderLogin,
                                            senderDisplayName, senderColor};
                 qCDebug(chatterinoPubsub) << action.msgID;
