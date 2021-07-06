@@ -19,6 +19,7 @@
 - Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
 - Bugfix: Middle mouse click no longer scrolls in not fully populated usercards and splits. (#2933)
 - Bugfix: Fix bad behavior of the HTML color picker edit when user input is being entered. (#2942)
+- Bugfix: Fixed founder badge not being respected by `author.subbed` filter. (#2971)
 
 ## 2.3.3
 

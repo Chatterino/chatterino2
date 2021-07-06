@@ -160,13 +160,11 @@ AdvancedLoginWidget::AdvancedLoginWidget()
 {
     this->setLayout(&this->ui_.layout);
 
-    this->ui_.instructionsLabel.setText(
-        "1. Fill in your username"
-        "\n2. Fill in your user ID or press the 'Get user ID from username' "
-        "button"
-        "\n3. Fill in your Client ID"
-        "\n4. Fill in your OAuth Token"
-        "\n5. Press Add User");
+    this->ui_.instructionsLabel.setText("1. Fill in your username"
+                                        "\n2. Fill in your user ID"
+                                        "\n3. Fill in your client ID"
+                                        "\n4. Fill in your OAuth token"
+                                        "\n5. Press Add user");
     this->ui_.instructionsLabel.setWordWrap(true);
 
     this->ui_.layout.addWidget(&this->ui_.instructionsLabel);
@@ -179,7 +177,7 @@ AdvancedLoginWidget::AdvancedLoginWidget()
     this->ui_.formLayout.addRow("Username", &this->ui_.usernameInput);
     this->ui_.formLayout.addRow("User ID", &this->ui_.userIDInput);
     this->ui_.formLayout.addRow("Client ID", &this->ui_.clientIDInput);
-    this->ui_.formLayout.addRow("Oauth token", &this->ui_.oauthTokenInput);
+    this->ui_.formLayout.addRow("OAuth token", &this->ui_.oauthTokenInput);
 
     this->ui_.oauthTokenInput.setEchoMode(QLineEdit::Password);
 
