@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QString>
+#include <QColor>
 
 namespace chatterino {
 
@@ -16,5 +16,7 @@ QString shortenString(const QString &str, unsigned maxWidth = 50);
 QString localizeNumbers(const int &number);
 
 QString kFormatNumbers(const int &number);
+
+QColor getRandomColor(const QString &id);
 
 }  // namespace chatterino
