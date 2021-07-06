@@ -1449,9 +1449,8 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                 QString senderDisplayName;
                 if (!rj::getSafe(senderData, "display_name", senderDisplayName))
                 {
-                    qCDebug(chatterinoPubsub)
-                        << "Failed to get sender display name";
-                    return;
+                    // in case display_name is not present, fall back to login we've received
+                    senderDisplayName = senderLogin;
                 }
                 QString senderColor;
                 if (!rj::getSafe(senderData, "chat_color", senderColor))
