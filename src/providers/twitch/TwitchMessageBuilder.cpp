@@ -704,6 +704,21 @@ void TwitchMessageBuilder::appendUsername()
         break;
     }
 
+    if (this->tags.contains("user-id"))
+    {
+        auto sourceUserID = this->tags.value("user-id").toString();
+
+        auto aliases = *getCSettings().aliasNames.readOnly().get();
+
+        for (const AliasesName &alias : aliases)
+        {
+            if (alias.getId() == sourceUserID)
+            {
+                usernameText = alias.getReplace();
+            }
+        }
+    }
+
     if (this->args.isSentWhisper)
     {
         // TODO(pajlada): Re-implement

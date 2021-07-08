@@ -59,6 +59,10 @@ set(SOURCE_FILES
         controllers/accounts/AccountModel.cpp
         controllers/accounts/AccountModel.hpp
 
+        controllers/aliases/AliasesModel.cpp
+        controllers/aliases/AliasesModel.hpp
+        controllers/aliases/AliasesName.hpp
+
         controllers/commands/Command.cpp
         controllers/commands/Command.hpp
         controllers/commands/CommandController.cpp
@@ -412,6 +416,8 @@ set(SOURCE_FILES
         widgets/settingspages/AboutPage.hpp
         widgets/settingspages/AccountsPage.cpp
         widgets/settingspages/AccountsPage.hpp
+        widgets/settingspages/AliasesPage.cpp
+        widgets/settingspages/AliasesPage.hpp
         widgets/settingspages/CommandPage.cpp
         widgets/settingspages/CommandPage.hpp
         widgets/settingspages/ExternalToolsPage.cpp
