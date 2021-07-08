@@ -230,7 +230,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
     layout.addCheckbox("Alternate background color", s.alternateMessages);
-    layout.addCheckbox("Gray-out recent messages", s.grayOutRecents);
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
     layout.addCheckbox("Highlight messages redeemed with Channel Points",
                        s.enableRedeemedHighlight);
@@ -332,8 +331,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                            "Google",
                        },
                        s.emojiSet);
-    layout.addCheckbox("Remove spaces around emotes",
-                       s.removeSpacesBetweenEmotes);
 
     layout.addTitle("Streamer Mode");
     layout.addDescription(
