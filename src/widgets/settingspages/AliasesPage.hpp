@@ -13,11 +13,6 @@ class AliasesPage : public SettingsPage
 {
 public:
     AliasesPage();
-
-private:
-    void tableCellClicked(const QModelIndex &clicked, EditableModelView *view);
-
-    QStringListModel userListModel_;
 };
 
 }  // namespace chatterino

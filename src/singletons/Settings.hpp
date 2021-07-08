@@ -39,7 +39,7 @@ public:
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
     SignalVector<FilterRecordPtr> &filterRecords;
-    SignalVector<AliasesNamePtr> &aliasNames;
+    SignalVector<AliasesName> &aliasNames;
     //SignalVector<TaggedUser> &taggedUsers;
     SignalVector<ModerationAction> &moderationActions;
 

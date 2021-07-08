@@ -23,7 +23,7 @@ ConcurrentSettings::ConcurrentSettings()
     , ignoredMessages(*new SignalVector<IgnorePhrase>())
     , mutedChannels(*new SignalVector<QString>())
     , filterRecords(*new SignalVector<FilterRecordPtr>())
-    , aliasNames(*new SignalVector<AliasesNamePtr>())
+    , aliasNames(*new SignalVector<AliasesName>())
     , moderationActions(*new SignalVector<ModerationAction>)
 {
     persist(this->highlightedMessages, "/highlighting/highlights");

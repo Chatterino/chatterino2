@@ -704,18 +704,13 @@ void TwitchMessageBuilder::appendUsername()
         break;
     }
 
-    if (this->tags.contains("user-id"))
+    auto aliases = *getCSettings().aliasNames.readOnly().get();
+
+    for (auto const alias : aliases)
     {
-        auto sourceUserID = this->tags.value("user-id").toString();
-
-        auto aliases = *getCSettings().aliasNames.readOnly().get();
-
-        for (auto alias : aliases)
+        if (alias.getName().toLower() == this->message().loginName.toLower())
         {
-            if (alias->getId() == sourceUserID)
-            {
-                usernameText = alias->getReplace();
-            }
+            usernameText = alias.getReplace();
         }
     }
 
