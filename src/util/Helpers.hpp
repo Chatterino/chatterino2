@@ -18,6 +18,6 @@ QString localizeNumbers(const int &number);
 
 QString kFormatNumbers(const int &number);
 
-QColor getRandomColor(const QString &id);
+QColor getRandomColor(const QString &userId);
 
 }  // namespace chatterino
