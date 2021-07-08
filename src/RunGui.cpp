@@ -9,8 +9,10 @@
 #include <csignal>
 
 #include "Application.hpp"
+#include "common/Args.hpp"
 #include "common/Modes.hpp"
 #include "common/NetworkManager.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
@@ -132,7 +134,7 @@ namespace {
     // true.
     void initSignalHandler()
     {
-#ifndef C_DEBUG
+#ifdef NDEBUG
         signalsInitTime = std::chrono::steady_clock::now();
 
         signal(SIGSEGV, handleSignal);
@@ -143,17 +145,17 @@ namespace {
     // improved in the future.
     void clearCache(const QDir &dir)
     {
-        qDebug() << "[Cache] cleared cache";
-
-        QStringList toBeRemoved;
-
+        int deletedCount = 0;
         for (auto &&info : dir.entryInfoList(QDir::Files))
         {
             if (info.lastModified().addDays(14) < QDateTime::currentDateTime())
             {
-                toBeRemoved << info.absoluteFilePath();
+                bool res = QFile(info.absoluteFilePath()).remove();
+                if (res)
+                    ++deletedCount;
             }
         }
+        qCDebug(chatterinoCache) << "Deleted" << deletedCount << "files";
     }
 }  // namespace
 
@@ -163,8 +165,9 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     initResources();
     initSignalHandler();
 
-    settings.restartOnCrash.connect(
-        [](const bool &value) { restartOnSignal = value; });
+    settings.restartOnCrash.connect([](const bool &value) {
+        restartOnSignal = value;
+    });
 
     auto thread = std::thread([dir = paths.miscDirectory] {
         {
@@ -185,7 +188,9 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
 
     // Clear the cache 1 minute after start.
     QTimer::singleShot(60 * 1000, [cachePath = paths.cacheDirectory()] {
-        QtConcurrent::run([cachePath]() { clearCache(cachePath); });
+        QtConcurrent::run([cachePath]() {
+            clearCache(cachePath);
+        });
     });
 
     chatterino::NetworkManager::init();
@@ -215,7 +220,10 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
 
     removeRunningFile(runningPath);
 
-    pajlada::Settings::SettingManager::gSave();
+    if (!getArgs().dontSaveSettings)
+    {
+        pajlada::Settings::SettingManager::gSave();
+    }
 
     chatterino::NetworkManager::deinit();
 

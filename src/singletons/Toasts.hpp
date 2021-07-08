@@ -4,6 +4,7 @@
 #include "common/Singleton.hpp"
 
 #include <QLayout>
+#include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
 

@@ -8,6 +8,10 @@
 
 #include "singletons/Settings.hpp"
 
+#include <QLabel>
+#include <QPainter>
+#include <QPushButton>
+
 #define SETTINGS_PAGE_WIDGET_BOILERPLATE(type, parent) \
     class type : public parent                         \
     {                                                  \

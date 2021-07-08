@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rapidjson/document.h>
+#include <QJsonArray>
 #include <QJsonObject>
 
 namespace chatterino {
@@ -24,8 +25,8 @@ public:
     static constexpr int timedoutStatus = -2;
 
 private:
-    int status_;
     QByteArray data_;
+    int status_;
 };
 
 }  // namespace chatterino

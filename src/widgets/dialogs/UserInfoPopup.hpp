@@ -18,7 +18,8 @@ class UserInfoPopup final : public BaseWindow
     Q_OBJECT
 
 public:
-    UserInfoPopup(bool closeAutomatically);
+    UserInfoPopup(bool closeAutomatically, QWidget *parent);
+    ~UserInfoPopup();
 
     void setData(const QString &name, const ChannelPtr &channel);
 
@@ -37,9 +38,13 @@ private:
 
     QString userName_;
     QString userId_;
+    QString avatarUrl_;
     ChannelPtr channel_;
 
     pajlada::Signals::NoArgSignal userStateChanged_;
+
+    // replace with ScopedConnection once https://github.com/pajlada/signals/pull/10 gets merged
+    pajlada::Signals::Connection refreshConnection_;
 
     std::shared_ptr<bool> hack_;
 
@@ -51,9 +56,11 @@ private:
         Label *followerCountLabel = nullptr;
         Label *createdDateLabel = nullptr;
         Label *userIDLabel = nullptr;
+        Label *followageLabel = nullptr;
+        Label *subageLabel = nullptr;
 
         QCheckBox *follow = nullptr;
-        QCheckBox *ignore = nullptr;
+        QCheckBox *block = nullptr;
         QCheckBox *ignoreHighlights = nullptr;
 
         Label *noMessagesLabel = nullptr;

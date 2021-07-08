@@ -3,16 +3,24 @@
 #include <QThread>
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
+#include "common/QLogging.hpp"
+#include "controllers/accounts/AccountController.hpp"
+#include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
+#include "providers/IvrApi.hpp"
+#include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/twitch/TwitchCommon.hpp"
+#include "providers/twitch/TwitchUser.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Emotes.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
-
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
     : Account(ProviderId::Twitch)
@@ -56,7 +64,7 @@ QColor TwitchAccount::color()
 
 void TwitchAccount::setColor(QColor color)
 {
-    this->color_.set(color);
+    this->color_.set(std::move(color));
 }
 
 bool TwitchAccount::setOAuthClient(const QString &newClientID)
@@ -88,187 +96,67 @@ bool TwitchAccount::isAnon() const
     return this->isAnon_;
 }
 
-void TwitchAccount::loadIgnores()
+void TwitchAccount::loadBlocks()
 {
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                "/blocks");
+    getHelix()->loadBlocks(
+        getApp()->accounts->twitch.getCurrent()->userId_,
+        [this](std::vector<HelixBlock> blocks) {
+            auto ignores = this->ignores_.access();
+            auto userIds = this->ignoresUserIds_.access();
+            ignores->clear();
+            userIds->clear();
 
-    NetworkRequest(url)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onSuccess([=](auto result) -> Outcome {
-            auto document = result.parseRapidJson();
-            if (!document.IsObject())
+            for (const HelixBlock &block : blocks)
             {
-                return Failure;
+                TwitchUser blockedUser;
+                blockedUser.fromHelixBlock(block);
+                ignores->insert(blockedUser);
+                userIds->insert(blockedUser.id);
             }
-
-            auto blocksIt = document.FindMember("blocks");
-            if (blocksIt == document.MemberEnd())
-            {
-                return Failure;
-            }
-            const auto &blocks = blocksIt->value;
-
-            if (!blocks.IsArray())
-            {
-                return Failure;
-            }
-
-            {
-                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-                this->ignores_.clear();
-
-                for (const auto &block : blocks.GetArray())
-                {
-                    if (!block.IsObject())
-                    {
-                        continue;
-                    }
-                    auto userIt = block.FindMember("user");
-                    if (userIt == block.MemberEnd())
-                    {
-                        continue;
-                    }
-                    TwitchUser ignoredUser;
-                    if (!rj::getSafe(userIt->value, ignoredUser))
-                    {
-                        qDebug() << "Error parsing twitch user JSON"
-                                 << rj::stringify(userIt->value).c_str();
-                        continue;
-                    }
-
-                    this->ignores_.insert(ignoredUser);
-                }
-            }
-
-            return Success;
-        })
-        .execute();
+        },
+        [] {
+            qDebug() << "Fetching blocks failed!";
+        });
 }
 
-void TwitchAccount::ignore(
-    const QString &targetName,
-    std::function<void(IgnoreResult, const QString &)> onFinished)
+void TwitchAccount::blockUser(QString userId, std::function<void()> onSuccess,
+                              std::function<void()> onFailure)
 {
-    const auto onUserFetched = [this, targetName,
-                                onFinished](const auto &user) {
-        this->ignoreByID(user.id, targetName, onFinished);  //
-    };
+    getHelix()->blockUser(
+        userId,
+        [this, userId, onSuccess] {
+            TwitchUser blockedUser;
+            blockedUser.id = userId;
+            {
+                auto ignores = this->ignores_.access();
+                auto userIds = this->ignoresUserIds_.access();
 
-    const auto onUserFetchFailed = [] {};
-
-    getHelix()->getUserByName(targetName, onUserFetched, onUserFetchFailed);
+                ignores->insert(blockedUser);
+                userIds->insert(blockedUser.id);
+            }
+            onSuccess();
+        },
+        std::move(onFailure));
 }
 
-void TwitchAccount::ignoreByID(
-    const QString &targetUserID, const QString &targetName,
-    std::function<void(IgnoreResult, const QString &)> onFinished)
+void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
+                                std::function<void()> onFailure)
 {
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                "/blocks/" + targetUserID);
-
-    NetworkRequest(url, NetworkRequestType::Put)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
-            onFinished(IgnoreResult_Failed,
-                       "An unknown error occured while trying to ignore user " +
-                           targetName + " (" +
-                           QString::number(result.status()) + ")");
-        })
-        .onSuccess([=](auto result) -> Outcome {
-            auto document = result.parseRapidJson();
-            if (!document.IsObject())
-            {
-                onFinished(IgnoreResult_Failed,
-                           "Bad JSON data while ignoring user " + targetName);
-                return Failure;
-            }
-
-            auto userIt = document.FindMember("user");
-            if (userIt == document.MemberEnd())
-            {
-                onFinished(IgnoreResult_Failed,
-                           "Bad JSON data while ignoring user (missing user) " +
-                               targetName);
-                return Failure;
-            }
-
+    getHelix()->unblockUser(
+        userId,
+        [this, userId, onSuccess] {
             TwitchUser ignoredUser;
-            if (!rj::getSafe(userIt->value, ignoredUser))
+            ignoredUser.id = userId;
             {
-                onFinished(IgnoreResult_Failed,
-                           "Bad JSON data while ignoring user (invalid user) " +
-                               targetName);
-                return Failure;
+                auto ignores = this->ignores_.access();
+                auto userIds = this->ignoresUserIds_.access();
+
+                ignores->erase(ignoredUser);
+                userIds->erase(ignoredUser.id);
             }
-            {
-                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-
-                auto res = this->ignores_.insert(ignoredUser);
-                if (!res.second)
-                {
-                    const TwitchUser &existingUser = *(res.first);
-                    existingUser.update(ignoredUser);
-                    onFinished(IgnoreResult_AlreadyIgnored,
-                               "User " + targetName + " is already ignored");
-                    return Failure;
-                }
-            }
-            onFinished(IgnoreResult_Success,
-                       "Successfully ignored user " + targetName);
-
-            return Success;
-        })
-        .execute();
-}
-
-void TwitchAccount::unignore(
-    const QString &targetName,
-    std::function<void(UnignoreResult, const QString &message)> onFinished)
-{
-    const auto onUserFetched = [this, targetName,
-                                onFinished](const auto &user) {
-        this->unignoreByID(user.id, targetName, onFinished);  //
-    };
-
-    const auto onUserFetchFailed = [] {};
-
-    getHelix()->getUserByName(targetName, onUserFetched, onUserFetchFailed);
-}
-
-void TwitchAccount::unignoreByID(
-    const QString &targetUserID, const QString &targetName,
-    std::function<void(UnignoreResult, const QString &message)> onFinished)
-{
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                "/blocks/" + targetUserID);
-
-    NetworkRequest(url, NetworkRequestType::Delete)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
-            onFinished(
-                UnignoreResult_Failed,
-                "An unknown error occured while trying to unignore user " +
-                    targetName + " (" + QString::number(result.status()) + ")");
-        })
-        .onSuccess([=](auto result) -> Outcome {
-            auto document = result.parseRapidJson();
-            TwitchUser ignoredUser;
-            ignoredUser.id = targetUserID;
-            {
-                std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-
-                this->ignores_.erase(ignoredUser);
-            }
-            onFinished(UnignoreResult_Success,
-                       "Successfully unignored user " + targetName);
-
-            return Success;
-        })
-        .execute();
+            onSuccess();
+        },
+        std::move(onFailure));
 }
 
 void TwitchAccount::checkFollow(const QString targetUserID,
@@ -288,205 +176,325 @@ void TwitchAccount::checkFollow(const QString targetUserID,
                               [] {});
 }
 
-void TwitchAccount::followUser(const QString userID,
-                               std::function<void()> successCallback)
+SharedAccessGuard<const std::set<TwitchUser>> TwitchAccount::accessBlocks()
+    const
 {
-    QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                    "/follows/channels/" + userID);
-
-    NetworkRequest(requestUrl, NetworkRequestType::Put)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onSuccess([successCallback](auto result) -> Outcome {
-            // TODO: Properly check result of follow request
-            successCallback();
-
-            return Success;
-        })
-        .execute();
+    return this->ignores_.accessConst();
 }
 
-void TwitchAccount::unfollowUser(const QString userID,
-                                 std::function<void()> successCallback)
+SharedAccessGuard<const std::set<QString>> TwitchAccount::accessBlockedUserIds()
+    const
 {
-    QUrl requestUrl("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                    "/follows/channels/" + userID);
-
-    NetworkRequest(requestUrl, NetworkRequestType::Delete)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([successCallback](NetworkResult result) {
-            if (result.status() >= 200 && result.status() <= 299)
-            {
-                successCallback();
-            }
-        })
-        .onSuccess([successCallback](const auto &document) -> Outcome {
-            successCallback();
-
-            return Success;
-        })
-        .execute();
-}
-
-std::set<TwitchUser> TwitchAccount::getIgnores() const
-{
-    std::lock_guard<std::mutex> lock(this->ignoresMutex_);
-
-    return this->ignores_;
+    return this->ignoresUserIds_.accessConst();
 }
 
 void TwitchAccount::loadEmotes()
 {
-    qDebug() << "Loading Twitch emotes for user" << this->getUserName();
+    qCDebug(chatterinoTwitch)
+        << "Loading Twitch emotes for user" << this->getUserName();
 
-    const auto &clientID = this->getOAuthClient();
-    const auto &oauthToken = this->getOAuthToken();
-
-    if (clientID.isEmpty() || oauthToken.isEmpty())
+    if (this->getOAuthClient().isEmpty() || this->getOAuthToken().isEmpty())
     {
-        qDebug() << "Missing Client ID or OAuth token";
+        qCDebug(chatterinoTwitch) << "Missing Client ID and/or OAuth token";
         return;
     }
 
-    QString url("https://api.twitch.tv/kraken/users/" + this->getUserId() +
-                "/emotes");
-
-    NetworkRequest(url)
-
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
-            qDebug() << "[TwitchAccount::loadEmotes] Error" << result.status();
-            if (result.status() == 203)
+    // Getting subscription emotes from kraken
+    getKraken()->getUserEmotes(
+        this,
+        [this](KrakenEmoteSets data) {
+            // no emotes available
+            if (data.emoteSets.isEmpty())
             {
-                // onFinished(FollowResult_NotFollowing);
+                qCWarning(chatterinoTwitch)
+                    << "\"emoticon_sets\" either empty or not present in "
+                       "Kraken::getUserEmotes response";
+                return;
             }
-            else
-            {
-                // onFinished(FollowResult_Failed);
-            }
-        })
-        .onSuccess([=](auto result) -> Outcome {
-            this->parseEmotes(result.parseRapidJson());
 
-            return Success;
-        })
-        .execute();
+            {
+                // Clearing emote data
+                auto emoteData = this->emotes_.access();
+                emoteData->emoteSets.clear();
+                emoteData->allEmoteNames.clear();
+
+                for (auto emoteSetIt = data.emoteSets.begin();
+                     emoteSetIt != data.emoteSets.end(); ++emoteSetIt)
+                {
+                    auto emoteSet = std::make_shared<EmoteSet>();
+
+                    emoteSet->key = emoteSetIt.key();
+                    this->loadEmoteSetData(emoteSet);
+
+                    for (const auto emoteArrObj : emoteSetIt.value().toArray())
+                    {
+                        if (!emoteArrObj.isObject())
+                        {
+                            qCWarning(chatterinoTwitch)
+                                << QString(
+                                       "Emote value from set %1 was invalid")
+                                       .arg(emoteSet->key);
+                            continue;
+                        }
+                        KrakenEmote krakenEmote(emoteArrObj.toObject());
+
+                        auto id = EmoteId{krakenEmote.id};
+                        auto code = EmoteName{krakenEmote.code};
+
+                        auto cleanCode =
+                            EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
+                        emoteSet->emotes.emplace_back(
+                            TwitchEmote{id, cleanCode});
+                        emoteData->allEmoteNames.push_back(cleanCode);
+
+                        auto emote =
+                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
+                        emoteData->emotes.emplace(code, emote);
+                    }
+
+                    std::sort(emoteSet->emotes.begin(), emoteSet->emotes.end(),
+                              [](const TwitchEmote &l, const TwitchEmote &r) {
+                                  return l.name.string < r.name.string;
+                              });
+                    emoteData->emoteSets.emplace_back(emoteSet);
+                }
+            }
+            // Getting userstate emotes from Ivr
+            this->loadUserstateEmotes();
+        },
+        [] {
+            // kraken request failed
+        });
 }
 
-AccessGuard<const TwitchAccount::TwitchAccountEmoteData>
+bool TwitchAccount::setUserstateEmoteSets(QStringList newEmoteSets)
+{
+    newEmoteSets.sort();
+
+    if (this->userstateEmoteSets_ == newEmoteSets)
+    {
+        // Nothing has changed
+        return false;
+    }
+
+    this->userstateEmoteSets_ = newEmoteSets;
+
+    return true;
+}
+
+void TwitchAccount::loadUserstateEmotes()
+{
+    if (this->userstateEmoteSets_.isEmpty())
+    {
+        return;
+    }
+
+    QStringList newEmoteSetKeys, krakenEmoteSetKeys;
+
+    auto emoteData = this->emotes_.access();
+    auto userEmoteSets = emoteData->emoteSets;
+
+    // get list of already fetched emote sets
+    for (const auto &userEmoteSet : userEmoteSets)
+    {
+        krakenEmoteSetKeys.push_back(userEmoteSet->key);
+    }
+
+    // filter out emote sets from userstate message, which are not in fetched emote set list
+    for (const auto &emoteSetKey : this->userstateEmoteSets_)
+    {
+        if (!krakenEmoteSetKeys.contains(emoteSetKey))
+        {
+            newEmoteSetKeys.push_back(emoteSetKey);
+        }
+    }
+
+    // return if there are no new emote sets
+    if (newEmoteSetKeys.isEmpty())
+    {
+        return;
+    }
+    qCDebug(chatterinoTwitch) << QString("Loading %1 emotesets from IVR: %2")
+                                     .arg(newEmoteSetKeys.size())
+                                     .arg(newEmoteSetKeys.join(", "));
+
+    // splitting newEmoteSetKeys to batches of 100, because Ivr API endpoint accepts a maximum of 100 emotesets at once
+    constexpr int batchSize = 100;
+
+    std::vector<QStringList> batches;
+    int batchCount = (newEmoteSetKeys.size() / batchSize) + 1;
+
+    batches.reserve(batchCount);
+
+    for (int i = 0; i < batchCount; i++)
+    {
+        QStringList batch;
+
+        int last = std::min(batchSize, newEmoteSetKeys.size() - batchSize * i);
+        for (int j = batchSize * i; j < last; j++)
+        {
+            batch.push_back(newEmoteSetKeys.at(j));
+        }
+        batches.emplace_back(batch);
+    }
+
+    // requesting emotes
+    for (const auto &batch : batches)
+    {
+        getIvr()->getBulkEmoteSets(
+            batch.join(","),
+            [this](QJsonArray emoteSetArray) {
+                auto emoteData = this->emotes_.access();
+                for (auto emoteSet : emoteSetArray)
+                {
+                    auto newUserEmoteSet = std::make_shared<EmoteSet>();
+
+                    IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
+
+                    newUserEmoteSet->key = ivrEmoteSet.setId;
+
+                    auto name = ivrEmoteSet.login;
+                    name.detach();
+                    name[0] = name[0].toUpper();
+
+                    newUserEmoteSet->text = name;
+                    newUserEmoteSet->channelName = ivrEmoteSet.login;
+
+                    for (const auto &emote : ivrEmoteSet.emotes)
+                    {
+                        IvrEmote ivrEmote(emote.toObject());
+
+                        auto id = EmoteId{ivrEmote.id};
+                        auto code = EmoteName{ivrEmote.code};
+                        auto cleanCode =
+                            EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
+                        newUserEmoteSet->emotes.push_back(
+                            TwitchEmote{id, cleanCode});
+
+                        emoteData->allEmoteNames.push_back(cleanCode);
+
+                        auto twitchEmote =
+                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
+                        emoteData->emotes.emplace(code, twitchEmote);
+                    }
+                    std::sort(newUserEmoteSet->emotes.begin(),
+                              newUserEmoteSet->emotes.end(),
+                              [](const TwitchEmote &l, const TwitchEmote &r) {
+                                  return l.name.string < r.name.string;
+                              });
+                    emoteData->emoteSets.emplace_back(newUserEmoteSet);
+                }
+            },
+            [] {
+                // fetching emotes failed, ivr API might be down
+            });
+    };
+}
+
+SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
     TwitchAccount::accessEmotes() const
 {
     return this->emotes_.accessConst();
 }
 
 // AutoModActions
-void TwitchAccount::autoModAllow(const QString msgID)
+void TwitchAccount::autoModAllow(const QString msgID, ChannelPtr channel)
 {
-    QString url("https://api.twitch.tv/kraken/chat/twitchbot/approve");
+    getHelix()->manageAutoModMessages(
+        this->getUserId(), msgID, "ALLOW",
+        [] {
+            // success
+        },
+        [channel](auto error) {
+            // failure
+            QString errorMessage("Failed to allow AutoMod message - ");
 
-    auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
+            switch (error)
+            {
+                case HelixAutoModMessageError::MessageAlreadyProcessed: {
+                    errorMessage += "message has already been processed.";
+                }
+                break;
 
-    NetworkRequest(url, NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .header("Content-Length", QByteArray::number(qba.size()))
-        .payload(qba)
+                case HelixAutoModMessageError::UserNotAuthenticated: {
+                    errorMessage += "you need to re-authenticate.";
+                }
+                break;
 
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
-            qDebug() << "[TwitchAccounts::autoModAllow] Error"
-                     << result.status();
-        })
-        .execute();
+                case HelixAutoModMessageError::UserNotAuthorized: {
+                    errorMessage +=
+                        "you don't have permission to perform that action";
+                }
+                break;
+
+                case HelixAutoModMessageError::MessageNotFound: {
+                    errorMessage += "target message not found.";
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixAutoModMessageError::Unknown:
+                default: {
+                    errorMessage += "an unknown error occured.";
+                }
+                break;
+            }
+
+            channel->addMessage(makeSystemMessage(errorMessage));
+        });
 }
 
-void TwitchAccount::autoModDeny(const QString msgID)
+void TwitchAccount::autoModDeny(const QString msgID, ChannelPtr channel)
 {
-    QString url("https://api.twitch.tv/kraken/chat/twitchbot/deny");
+    getHelix()->manageAutoModMessages(
+        this->getUserId(), msgID, "DENY",
+        [] {
+            // success
+        },
+        [channel](auto error) {
+            // failure
+            QString errorMessage("Failed to deny AutoMod message - ");
 
-    auto qba = (QString("{\"msg_id\":\"") + msgID + "\"}").toUtf8();
+            switch (error)
+            {
+                case HelixAutoModMessageError::MessageAlreadyProcessed: {
+                    errorMessage += "message has already been processed.";
+                }
+                break;
 
-    NetworkRequest(url, NetworkRequestType::Post)
-        .header("Content-Type", "application/json")
-        .header("Content-Length", QByteArray::number(qba.size()))
-        .payload(qba)
+                case HelixAutoModMessageError::UserNotAuthenticated: {
+                    errorMessage += "you need to re-authenticate.";
+                }
+                break;
 
-        .authorizeTwitchV5(this->getOAuthClient(), this->getOAuthToken())
-        .onError([=](NetworkResult result) {
-            qDebug() << "[TwitchAccounts::autoModDeny] Error"
-                     << result.status();
-        })
-        .execute();
+                case HelixAutoModMessageError::UserNotAuthorized: {
+                    errorMessage +=
+                        "you don't have permission to perform that action";
+                }
+                break;
+
+                case HelixAutoModMessageError::MessageNotFound: {
+                    errorMessage += "target message not found.";
+                }
+                break;
+
+                // This would most likely happen if the service is down, or if the JSON payload returned has changed format
+                case HelixAutoModMessageError::Unknown:
+                default: {
+                    errorMessage += "an unknown error occured.";
+                }
+                break;
+            }
+
+            channel->addMessage(makeSystemMessage(errorMessage));
+        });
 }
-
-void TwitchAccount::parseEmotes(const rapidjson::Document &root)
-{
-    auto emoteData = this->emotes_.access();
-
-    emoteData->emoteSets.clear();
-    emoteData->allEmoteNames.clear();
-
-    auto emoticonSets = root.FindMember("emoticon_sets");
-    if (emoticonSets == root.MemberEnd() || !emoticonSets->value.IsObject())
-    {
-        qDebug() << "No emoticon_sets in load emotes response";
-        return;
-    }
-
-    for (const auto &emoteSetJSON : emoticonSets->value.GetObject())
-    {
-        auto emoteSet = std::make_shared<EmoteSet>();
-
-        emoteSet->key = emoteSetJSON.name.GetString();
-
-        this->loadEmoteSetData(emoteSet);
-
-        for (const rapidjson::Value &emoteJSON : emoteSetJSON.value.GetArray())
-        {
-            if (!emoteJSON.IsObject())
-            {
-                qDebug() << "Emote value was invalid";
-                return;
-            }
-
-            uint64_t idNumber;
-            if (!rj::getSafe(emoteJSON, "id", idNumber))
-            {
-                qDebug() << "No ID key found in Emote value";
-                return;
-            }
-
-            QString _code;
-            if (!rj::getSafe(emoteJSON, "code", _code))
-            {
-                qDebug() << "No code key found in Emote value";
-                return;
-            }
-
-            auto code = EmoteName{_code};
-            auto id = EmoteId{QString::number(idNumber)};
-
-            auto cleanCode = EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
-            emoteSet->emotes.emplace_back(TwitchEmote{id, cleanCode});
-            emoteData->allEmoteNames.push_back(cleanCode);
-
-            auto emote = getApp()->emotes->twitch.getOrCreateEmote(id, code);
-            emoteData->emotes.emplace(code, emote);
-        }
-
-        std::sort(emoteSet->emotes.begin(), emoteSet->emotes.end(),
-                  [](const TwitchEmote &l, const TwitchEmote &r) {
-                      return l.name.string < r.name.string;
-                  });
-        emoteData->emoteSets.emplace_back(emoteSet);
-    }
-};
 
 void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
 {
     if (!emoteSet)
     {
-        qDebug() << "null emote set sent";
+        qCWarning(chatterinoTwitch) << "null emote set sent";
         return;
     }
 
@@ -499,46 +507,48 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
         return;
     }
 
-    NetworkRequest(Env::get().twitchEmoteSetResolverUrl.arg(emoteSet->key))
-        .cache()
-        .onError([](NetworkResult result) {
-            qDebug() << "Error code" << result.status()
-                     << "while loading emote set data";
-        })
-        .onSuccess([emoteSet](auto result) -> Outcome {
-            auto root = result.parseRapidJson();
-            if (!root.IsObject())
+    getHelix()->getEmoteSetData(
+        emoteSet->key,
+        [emoteSet](HelixEmoteSetData emoteSetData) {
+            if (emoteSetData.ownerId.isEmpty() ||
+                emoteSetData.setId != emoteSet->key)
             {
-                return Failure;
+                qCWarning(chatterinoTwitch)
+                    << QString("Failed to fetch emoteSetData for %1, assuming "
+                               "Twitch is the owner")
+                           .arg(emoteSet->key);
+
+                // most (if not all) emotes that fail to load are time limited event emotes owned by Twitch
+                emoteSet->channelName = "twitch";
+                emoteSet->text = "Twitch";
+
+                return;
             }
 
-            std::string emoteSetID;
-            QString channelName;
-            QString type;
-            if (!rj::getSafe(root, "channel_name", channelName))
+            // emote set 0 = global emotes
+            if (emoteSetData.ownerId == "0")
             {
-                return Failure;
+                // emoteSet->channelName = QString();
+                emoteSet->text = "Twitch Global";
+                return;
             }
 
-            if (!rj::getSafe(root, "type", type))
-            {
-                return Failure;
-            }
-
-            qDebug() << "Loaded twitch emote set data for" << emoteSet->key;
-
-            auto name = channelName;
-            name.detach();
-            name[0] = name[0].toUpper();
-
-            emoteSet->text = name;
-
-            emoteSet->type = type;
-            emoteSet->channelName = channelName;
-
-            return Success;
-        })
-        .execute();
+            getHelix()->getUserById(
+                emoteSetData.ownerId,
+                [emoteSet](HelixUser user) {
+                    emoteSet->channelName = user.login;
+                    emoteSet->text = user.displayName;
+                },
+                [emoteSetData] {
+                    qCWarning(chatterinoTwitch)
+                        << "Failed to query user by id:" << emoteSetData.ownerId
+                        << emoteSetData.setId;
+                });
+        },
+        [emoteSet] {
+            // fetching emoteset data failed
+            return;
+        });
 }
 
 }  // namespace chatterino

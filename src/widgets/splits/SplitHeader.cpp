@@ -10,8 +10,10 @@
 #include "singletons/Theme.hpp"
 #include "singletons/TooltipPreviewImage.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/LayoutHelper.hpp"
+#include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
@@ -46,7 +48,7 @@ namespace {
                 text += "r9k, ";
             if (modes->slowMode)
                 text +=
-                    QString("slow(%1), ").arg(QString::number(modes->slowMode));
+                    QString("slow(%1), ").arg(localizeNumbers(modes->slowMode));
             if (modes->emoteOnly)
                 text += "emote, ";
             if (modes->submode)
@@ -56,7 +58,7 @@ namespace {
                 if (modes->followerOnly != 0)
                 {
                     text += QString("follow(%1m), ")
-                                .arg(QString::number(modes->followerOnly));
+                                .arg(localizeNumbers(modes->followerOnly));
                 }
                 else
                 {
@@ -86,30 +88,64 @@ namespace {
     }
     auto formatTooltip(const TwitchChannel::StreamStatus &s, QString thumbnail)
     {
-        return QString("<style>.center { text-align: center; }</style> \
-            <p class=\"center\">%1%2%3%4%5%6 for %7 with %8 viewers</p>")
-            .arg(s.title.toHtmlEscaped())
-            .arg(s.title.isEmpty() ? QString() : "<br><br>")
-            .arg(getSettings()->thumbnailSizeStream.getValue() > 0
-                     ? ((thumbnail.isEmpty()
-                             ? "Couldn't fetch thumbnail"
-                             : "<img src=\"data:image/jpg;base64, " +
-                                   thumbnail + "\"/>") +
-                        "<br>")
-                     : QString())
-            .arg(s.game.toHtmlEscaped())
-            .arg(s.game.isEmpty() ? QString() : "<br>")
-            .arg(s.rerun ? "Vod-casting" : "Live")
-            .arg(getSettings()->hideViewerCountAndDuration ? "&lt;Hidden&gt;"
-                                                           : s.uptime)
-            .arg(getSettings()->hideViewerCountAndDuration
-                     ? "&lt;Hidden&gt;"
-                     : QString::number(s.viewerCount));
+        auto title = [&s]() -> QString {
+            if (s.title.isEmpty())
+            {
+                return QStringLiteral("");
+            }
+
+            return s.title.toHtmlEscaped() + "<br><br>";
+        }();
+
+        auto tooltip = [&thumbnail]() -> QString {
+            if (getSettings()->thumbnailSizeStream.getValue() == 0)
+            {
+                return QStringLiteral("");
+            }
+
+            if (thumbnail.isEmpty())
+            {
+                return QStringLiteral("Couldn't fetch thumbnail<br>");
+            }
+
+            return "<img src=\"data:image/jpg;base64, " + thumbnail + "\"><br>";
+        }();
+
+        auto game = [&s]() -> QString {
+            if (s.game.isEmpty())
+            {
+                return QStringLiteral("");
+            }
+
+            return s.game.toHtmlEscaped() + "<br>";
+        }();
+
+        auto extraStreamData = [&s]() -> QString {
+            if (isInStreamerMode() &&
+                getSettings()->streamerModeHideViewerCountAndDuration)
+            {
+                return QStringLiteral(
+                    "<span style=\"color: #808892;\">&lt;Streamer "
+                    "Mode&gt;</span>");
+            }
+
+            return QString("%1 for %2 with %3 viewers")
+                .arg(s.rerun ? "Vod-casting" : "Live")
+                .arg(s.uptime)
+                .arg(localizeNumbers(s.viewerCount));
+        }();
+
+        return QString("<p style=\"text-align: center;\">" +  //
+                       title +                                //
+                       tooltip +                              //
+                       game +                                 //
+                       extraStreamData +                      //
+                       "</p>"                                 //
+        );
     }
     auto formatOfflineTooltip(const TwitchChannel::StreamStatus &s)
     {
-        return QString("<style>.center { text-align: center; }</style> \
-                       <p class=\"center\">Offline<br>%1</p>")
+        return QString("<p style=\"text-align: center;\">Offline<br>%1</p>")
             .arg(s.title.toHtmlEscaped());
     }
     auto formatTitle(const TwitchChannel::StreamStatus &s, Settings &settings)
@@ -128,11 +164,13 @@ namespace {
         if (settings.headerUptime)
             title += " - " + s.uptime;
         if (settings.headerViewerCount)
-            title += " - " + QString::number(s.viewerCount);
+            title += " - " + localizeNumbers(s.viewerCount);
         if (settings.headerGame && !s.game.isEmpty())
             title += " - " + s.game;
         if (settings.headerStreamTitle && !s.title.isEmpty())
-            title += " - " + s.title;
+        {
+            title += " - " + s.title.simplified();
+        }
 
         return title;
     }
@@ -156,15 +194,23 @@ SplitHeader::SplitHeader(Split *_split)
     this->handleChannelChanged();
     this->updateModerationModeIcon();
 
-    this->split_->focused.connect([this]() { this->themeChangedEvent(); });
-    this->split_->focusLost.connect([this]() { this->themeChangedEvent(); });
-    this->split_->channelChanged.connect(
-        [this]() { this->handleChannelChanged(); });
+    this->split_->focused.connect([this]() {
+        this->themeChangedEvent();
+    });
+    this->split_->focusLost.connect([this]() {
+        this->themeChangedEvent();
+    });
+    this->split_->channelChanged.connect([this]() {
+        this->handleChannelChanged();
+    });
 
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged,
-                         [this] { this->updateModerationModeIcon(); });
+    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [this] {
+        this->updateModerationModeIcon();
+    });
 
-    auto _ = [this](const auto &, const auto &) { this->updateChannelText(); };
+    auto _ = [this](const auto &, const auto &) {
+        this->updateChannelText();
+    };
     getSettings()->headerViewerCount.connect(_, this->managedConnections_);
     getSettings()->headerStreamTitle.connect(_, this->managedConnections_);
     getSettings()->headerGame.connect(_, this->managedConnections_);
@@ -175,8 +221,9 @@ void SplitHeader::initializeLayout()
 {
     auto layout = makeLayout<QHBoxLayout>({
         // space
-        makeWidget<BaseWidget>(
-            [](auto w) { w->setScaleIndependantSize(8, 4); }),
+        makeWidget<BaseWidget>([](auto w) {
+            w->setScaleIndependantSize(8, 4);
+        }),
         // title
         this->titleLabel_ = makeWidget<Label>([](auto w) {
             w->setSizePolicy(QSizePolicy::MinimumExpanding,
@@ -185,8 +232,9 @@ void SplitHeader::initializeLayout()
             w->setHasOffset(false);
         }),
         // space
-        makeWidget<BaseWidget>(
-            [](auto w) { w->setScaleIndependantSize(8, 4); }),
+        makeWidget<BaseWidget>([](auto w) {
+            w->setScaleIndependantSize(8, 4);
+        }),
         // mode
         this->modeButton_ = makeWidget<EffectLabel>([&](auto w) {
             w->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
@@ -205,8 +253,8 @@ void SplitHeader::initializeLayout()
                             if (getSettings()->moderationActions.empty())
                             {
                                 getApp()->windows->showSettingsDialog(
-                                    SettingsDialogPreference::
-                                        ModerationActions);
+                                    this, SettingsDialogPreference::
+                                              ModerationActions);
                                 this->split_->setModerationMode(true);
                             }
                             else
@@ -223,15 +271,22 @@ void SplitHeader::initializeLayout()
                         case Qt::RightButton:
                         case Qt::MiddleButton:
                             getApp()->windows->showSettingsDialog(
+                                this,
                                 SettingsDialogPreference::ModerationActions);
                             break;
                     }
                 });
         }),
+        // viewer list
+        this->viewersButton_ = makeWidget<Button>([&](auto w) {
+            QObject::connect(w, &Button::leftClicked, this, [this]() {
+                this->split_->showViewerList();
+            });
+        }),
         // dropdown
         this->dropdownButton_ = makeWidget<Button>([&](auto w) {
             /// XXX: this never gets disconnected
-            this->split_->channelChanged.connect([this] {
+            QObject::connect(w, &Button::leftMousePress, this, [this] {
                 this->dropdownButton_->setMenu(this->createMainMenu());
             });
         }),
@@ -240,8 +295,9 @@ void SplitHeader::initializeLayout()
             w->setPixmap(getResources().buttons.addSplitDark);
             w->setEnableMargin(false);
 
-            QObject::connect(w, &Button::leftClicked, this,
-                             [this]() { this->split_->addSibling(); });
+            QObject::connect(w, &Button::leftClicked, this, [this]() {
+                this->split_->addSibling();
+            });
         }),
     });
 
@@ -260,12 +316,14 @@ void SplitHeader::initializeLayout()
                              }
                          });
 
-    getSettings()->customURIScheme.connect([this] {
-        if (const auto drop = this->dropdownButton_)
-        {
-            drop->setMenu(this->createMainMenu());
-        }
-    });
+    getSettings()->customURIScheme.connect(
+        [this] {
+            if (const auto drop = this->dropdownButton_)
+            {
+                drop->setMenu(this->createMainMenu());
+            }
+        },
+        this->managedConnections_);
 
     layout->setMargin(0);
     layout->setSpacing(0);
@@ -287,6 +345,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                     QKeySequence("Ctrl+N"));
     menu->addAction("Search", this->split_, &Split::showSearch,
                     QKeySequence("Ctrl+F"));
+    menu->addAction("Set filters", this->split_, &Split::setFiltersDialog);
     menu->addSeparator();
 #ifdef USEWEBENGINE
     this->dropdownMenu.addAction("Start watching", this, [this] {
@@ -305,7 +364,10 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     });
 #endif
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    auto *twitchChannel =
+        dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
+
+    if (twitchChannel)
     {
         menu->addAction(OPEN_IN_BROWSER, this->split_, &Split::openInBrowser);
 #ifndef USEWEBENGINE
@@ -320,6 +382,21 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
             menu->addAction("Open in custom player", this->split_,
                             &Split::openWithCustomScheme);
         }
+
+        if (this->split_->getChannel()->hasModRights())
+        {
+            menu->addAction(OPEN_MOD_VIEW_IN_BROWSER, this->split_,
+                            &Split::openModViewInBrowser);
+        }
+
+        menu->addAction(
+                "Create a clip", this->split_,
+                [twitchChannel] {
+                    twitchChannel->createClip();
+                },
+                QKeySequence("Alt+X"))
+            ->setVisible(twitchChannel->isLive());
+
         menu->addSeparator();
     }
 
@@ -332,9 +409,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     // reload / reconnect
     if (this->split_->getChannel()->canReconnect())
-        menu->addAction("Reconnect", this, SLOT(reconnect()));
+    {
+        menu->addAction("Reconnect", this, SLOT(reconnect()),
+                        QKeySequence("Ctrl+F5"));
+    }
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    if (twitchChannel)
     {
         menu->addAction("Reload channel emotes", this,
                         SLOT(reloadChannelEmotes()), QKeySequence("F5"));
@@ -361,7 +441,24 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         this->split_->setModerationMode(!this->split_->getModerationMode());
     });
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    if (this->split_->getChannel()->getType() == Channel::Type::TwitchMentions)
+    {
+        auto action = new QAction(this);
+        action->setText("Enable /mention tab highlights");
+        action->setCheckable(true);
+
+        QObject::connect(moreMenu, &QMenu::aboutToShow, this, [action, this]() {
+            action->setChecked(getSettings()->highlightMentions);
+        });
+        action->connect(action, &QAction::triggered, this, [this]() {
+            getSettings()->highlightMentions =
+                !getSettings()->highlightMentions;
+        });
+
+        moreMenu->addAction(action);
+    }
+
+    if (twitchChannel)
     {
         moreMenu->addAction("Show viewer list", this->split_,
                             &Split::showViewerList);
@@ -384,7 +481,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         moreMenu->addAction(action);
     }
 
-    if (dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
+    if (twitchChannel)
     {
         auto action = new QAction(this);
         action->setText("Mute highlight sound");
@@ -434,7 +531,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     menu->addAction(setR9k);
     menu->addAction(setFollowers);
 
-    this->managedConnections_.push_back(this->modeUpdateRequested_.connect(  //
+    this->managedConnections_.push_back(this->modeUpdateRequested_.connect(
         [this, setSub, setEmote, setSlow, setR9k, setFollowers]() {
             auto twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
@@ -459,13 +556,15 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
         action->setChecked(!action->isChecked());
     };
 
-    QObject::connect(
-        setSub, &QAction::triggered, this,
-        [setSub, toggle]() mutable { toggle("/subscribers", setSub); });
+    QObject::connect(setSub, &QAction::triggered, this,
+                     [setSub, toggle]() mutable {
+                         toggle("/subscribers", setSub);
+                     });
 
-    QObject::connect(
-        setEmote, &QAction::triggered, this,
-        [setEmote, toggle]() mutable { toggle("/emoteonly", setEmote); });
+    QObject::connect(setEmote, &QAction::triggered, this,
+                     [setEmote, toggle]() mutable {
+                         toggle("/emoteonly", setEmote);
+                     });
 
     QObject::connect(setSlow, &QAction::triggered, this, [setSlow, this]() {
         if (!setSlow->isChecked())
@@ -512,9 +611,10 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
             }
         });
 
-    QObject::connect(
-        setR9k, &QAction::triggered, this,
-        [setR9k, toggle]() mutable { toggle("/r9kbeta", setR9k); });
+    QObject::connect(setR9k, &QAction::triggered, this,
+                     [setR9k, toggle]() mutable {
+                         toggle("/r9kbeta", setR9k);
+                     });
 
     return menu;
 }
@@ -527,8 +627,8 @@ void SplitHeader::updateRoomModes()
 void SplitHeader::initializeModeSignals(EffectLabel &label)
 {
     this->modeUpdateRequested_.connect([this, &label] {
-        if (auto twitchChannel = dynamic_cast<TwitchChannel *>(
-                this->split_->getChannel().get()))  //
+        if (auto twitchChannel =
+                dynamic_cast<TwitchChannel *>(this->split_->getChannel().get()))
         {
             label.setEnable(twitchChannel->hasModRights());
 
@@ -547,16 +647,27 @@ void SplitHeader::initializeModeSignals(EffectLabel &label)
     });
 }
 
+void SplitHeader::resetThumbnail()
+{
+    this->lastThumbnail_.invalidate();
+    this->thumbnail_.clear();
+}
+
 void SplitHeader::handleChannelChanged()
 {
+    this->resetThumbnail();
+
+    this->updateChannelText();
+
     this->channelConnections_.clear();
 
     auto channel = this->split_->getChannel();
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
         this->channelConnections_.emplace_back(
-            twitchChannel->liveStatusChanged.connect(
-                [this]() { this->updateChannelText(); }));
+            twitchChannel->liveStatusChanged.connect([this]() {
+                this->updateChannelText();
+            }));
     }
 }
 
@@ -567,12 +678,18 @@ void SplitHeader::scaleChangedEvent(float scale)
     this->setFixedHeight(w);
     this->dropdownButton_->setFixedWidth(w);
     this->moderationButton_->setFixedWidth(w);
+    this->viewersButton_->setFixedWidth(w);
     this->addButton_->setFixedWidth(w * 5 / 8);
 }
 
 void SplitHeader::setAddButtonVisible(bool value)
 {
     this->addButton_->setVisible(value);
+}
+
+void SplitHeader::setViewersButtonVisible(bool value)
+{
+    this->viewersButton_->setVisible(value);
 }
 
 void SplitHeader::updateChannelText()
@@ -582,7 +699,7 @@ void SplitHeader::updateChannelText()
     this->isLive_ = false;
     this->tooltipText_ = QString();
 
-    auto title = channel->getName();
+    auto title = channel->getLocalizedName();
 
     if (indirectChannel.getType() == Channel::Type::TwitchWatching)
         title = "watching: " + (title.isEmpty() ? "none" : title);
@@ -594,6 +711,7 @@ void SplitHeader::updateChannelText()
         if (streamStatus->live)
         {
             this->isLive_ = true;
+            // XXX: This URL format can be figured out from the Helix Get Streams API which we parse in TwitchChannel::parseLiveStatus
             QString url = "https://static-cdn.jtvnw.net/"
                           "previews-ttv/live_user_" +
                           channel->getName().toLower();
@@ -617,9 +735,17 @@ void SplitHeader::updateChannelText()
             {
                 NetworkRequest(url, NetworkRequestType::Get)
                     .onSuccess([this](auto result) -> Outcome {
-                        this->thumbnail_ =
-                            QString::fromLatin1(result.getData().toBase64());
-                        updateChannelText();
+                        // NOTE: We do not follow the redirects, so we need to make sure we only treat code 200 as a valid image
+                        if (result.status() == 200)
+                        {
+                            this->thumbnail_ = QString::fromLatin1(
+                                result.getData().toBase64());
+                        }
+                        else
+                        {
+                            this->thumbnail_.clear();
+                        }
+                        this->updateChannelText();
                         return Success;
                     })
                     .execute();
@@ -632,6 +758,11 @@ void SplitHeader::updateChannelText()
         {
             this->tooltipText_ = formatOfflineTooltip(*streamStatus);
         }
+    }
+
+    if (!title.isEmpty() && this->split_->getFilters().size() != 0)
+    {
+        title += " - filtered";
     }
 
     this->titleLabel_->setText(title.isEmpty() ? "<empty>" : title);
@@ -676,6 +807,8 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
     switch (event->button())
     {
         case Qt::LeftButton: {
+            this->split_->giveFocus(Qt::MouseFocusReason);
+
             this->dragging_ = true;
 
             this->dragStart_ = event->pos();
@@ -759,23 +892,25 @@ void SplitHeader::themeChangedEvent()
 
     if (this->split_->hasFocus())
     {
-        palette.setColor(QPalette::Foreground,
+        palette.setColor(QPalette::WindowText,
                          this->theme->splits.header.focusedText);
     }
     else
     {
-        palette.setColor(QPalette::Foreground, this->theme->splits.header.text);
+        palette.setColor(QPalette::WindowText, this->theme->splits.header.text);
     }
     this->titleLabel_->setPalette(palette);
 
     // --
     if (this->theme->isLightTheme())
     {
+        this->viewersButton_->setPixmap(getResources().buttons.viewersDark);
         this->dropdownButton_->setPixmap(getResources().buttons.menuDark);
         this->addButton_->setPixmap(getResources().buttons.addSplit);
     }
     else
     {
+        this->viewersButton_->setPixmap(getResources().buttons.viewersLight);
         this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
         this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }

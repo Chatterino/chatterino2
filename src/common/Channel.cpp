@@ -24,6 +24,7 @@ namespace chatterino {
 //
 Channel::Channel(const QString &name, Type type)
     : completionModel(*this)
+    , lastDate_(QDate::currentDate())
     , name_(name)
     , type_(type)
 {
@@ -45,6 +46,11 @@ const QString &Channel::getName() const
 }
 
 const QString &Channel::getDisplayName() const
+{
+    return this->getName();
+}
+
+const QString &Channel::getLocalizedName() const
 {
     return this->getName();
 }
@@ -130,17 +136,17 @@ void Channel::addOrReplaceTimeout(MessagePtr message)
         }
 
         if (s->flags.has(MessageFlag::Timeout) &&
-            s->timeoutUser == message->timeoutUser)  //
+            s->timeoutUser == message->timeoutUser)
         {
             if (message->flags.has(MessageFlag::PubSub) &&
-                !s->flags.has(MessageFlag::PubSub))  //
+                !s->flags.has(MessageFlag::PubSub))
             {
                 this->replaceMessage(s, message);
                 addMessage = false;
                 break;
             }
             if (!message->flags.has(MessageFlag::PubSub) &&
-                s->flags.has(MessageFlag::PubSub))  //
+                s->flags.has(MessageFlag::PubSub))
             {
                 addMessage = timeoutStackStyle == TimeoutStackStyle::DontStack;
                 break;
@@ -224,7 +230,23 @@ void Channel::replaceMessage(MessagePtr message, MessagePtr replacement)
     }
 }
 
+void Channel::replaceMessage(size_t index, MessagePtr replacement)
+{
+    if (this->messages_.replaceItem(index, replacement))
+    {
+        this->messageReplaced.invoke(index, replacement);
+    }
+}
+
 void Channel::deleteMessage(QString messageID)
+{
+    auto msg = this->findMessage(messageID);
+    if (msg != nullptr)
+    {
+        msg->flags.set(MessageFlag::Disabled);
+    }
+}
+MessagePtr Channel::findMessage(QString messageID)
 {
     LimitedQueueSnapshot<MessagePtr> snapshot = this->getMessageSnapshot();
     int snapshotLength = snapshot.size();
@@ -237,10 +259,10 @@ void Channel::deleteMessage(QString messageID)
 
         if (s->id == messageID)
         {
-            s->flags.set(MessageFlag::Disabled);
-            break;
+            return s;
         }
     }
+    return nullptr;
 }
 
 bool Channel::canSendMessage() const
@@ -307,13 +329,13 @@ void Channel::onConnected()
 // Indirect channel
 //
 IndirectChannel::Data::Data(ChannelPtr _channel, Channel::Type _type)
-    : channel(_channel)
+    : channel(std::move(_channel))
     , type(_type)
 {
 }
 
 IndirectChannel::IndirectChannel(ChannelPtr channel, Channel::Type type)
-    : data_(std::make_unique<Data>(channel, type))
+    : data_(std::make_unique<Data>(std::move(channel), type))
 {
 }
 
@@ -326,7 +348,7 @@ void IndirectChannel::reset(ChannelPtr channel)
 {
     assert(this->data_->type != Channel::Type::Direct);
 
-    this->data_->channel = channel;
+    this->data_->channel = std::move(channel);
     this->data_->changed.invoke();
 }
 

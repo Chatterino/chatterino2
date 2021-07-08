@@ -75,6 +75,15 @@ struct BanAction : PubSubAction {
     }
 };
 
+struct DeleteAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+
+    ActionUser target;
+
+    QString messageId;
+    QString messageText;
+};
+
 struct UnbanAction : PubSubAction {
     using PubSubAction::PubSubAction;
 
@@ -131,6 +140,15 @@ struct AutomodUserAction : PubSubAction {
     } type;
 
     QString message;
+};
+
+struct AutomodInfoAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+    enum {
+        OnHold,
+        Denied,
+        Approved,
+    } type;
 };
 
 }  // namespace chatterino

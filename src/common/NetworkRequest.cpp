@@ -12,6 +12,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QtConcurrent>
+#include "common/QLogging.hpp"
 
 #include <cassert>
 
@@ -78,6 +79,12 @@ NetworkRequest NetworkRequest::onSuccess(NetworkSuccessCallback cb) &&
     return std::move(*this);
 }
 
+NetworkRequest NetworkRequest::finally(NetworkFinallyCallback cb) &&
+{
+    this->data->finally_ = cb;
+    return std::move(*this);
+}
+
 NetworkRequest NetworkRequest::header(const char *headerName,
                                       const char *value) &&
 {
@@ -99,16 +106,12 @@ NetworkRequest NetworkRequest::header(const char *headerName,
     return std::move(*this);
 }
 
-NetworkRequest NetworkRequest::headerList(const QStringList &headers) &&
+NetworkRequest NetworkRequest::headerList(
+    const std::vector<std::pair<QByteArray, QByteArray>> &headers) &&
 {
-    for (const QString &header : headers)
+    for (const auto &[headerName, headerValue] : headers)
     {
-        const QStringList thisHeader = header.trimmed().split(":");
-        if (thisHeader.size() == 2)
-        {
-            this->data->request_.setRawHeader(thisHeader[0].trimmed().toUtf8(),
-                                              thisHeader[1].trimmed().toUtf8());
-        }
+        this->data->request_.setRawHeader(headerName, headerValue);
     }
     return std::move(*this);
 }
@@ -116,7 +119,7 @@ NetworkRequest NetworkRequest::headerList(const QStringList &headers) &&
 NetworkRequest NetworkRequest::timeout(int ms) &&
 {
     this->data->hasTimeout_ = true;
-    this->data->timer_->setInterval(ms);
+    this->data->timeoutMS_ = ms;
     return std::move(*this);
 }
 
@@ -167,7 +170,7 @@ void NetworkRequest::execute()
     if (this->data->cache_ &&
         this->data->requestType_ != NetworkRequestType::Get)
     {
-        qDebug() << "Can only cache GET requests!";
+        qCDebug(chatterinoCommon) << "Can only cache GET requests!";
         this->data->cache_ = false;
     }
 

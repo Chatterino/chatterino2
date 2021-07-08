@@ -1,12 +1,18 @@
 #pragma once
 
 #include <QLayout>
-#include <QWidget>
 #include <boost/variant.hpp>
+
+class QWidget;
+class QScrollArea;
 
 namespace chatterino {
 
-using LayoutItem = boost::variant<QWidget *, QLayout *>;
+using LayoutItem = boost::variant<QWidget *, QLayoutItem *>;
+using WidgetOrLayout = boost::variant<QWidget *, QLayout *>;
+
+QWidget *wrapLayout(QLayout *layout);
+QScrollArea *makeScrollArea(WidgetOrLayout item);
 
 template <typename T>
 T *makeLayout(std::initializer_list<LayoutItem> items)
@@ -21,10 +27,12 @@ T *makeLayout(std::initializer_list<LayoutItem> items)
                 t->addItem(new QWidgetItem(boost::get<QWidget *>(item)));
                 break;
             case 1:
-                t->addItem(boost::get<QLayout *>(item));
+                t->addItem(boost::get<QLayoutItem *>(item));
                 break;
         }
     }
+
+    t->setContentsMargins(0, 0, 0, 0);
 
     return t;
 }

@@ -11,6 +11,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QHBoxLayout>
@@ -26,42 +27,43 @@ namespace {
         builder->flags.set(MessageFlag::Centered);
         return builder.release();
     }
-    auto makeEmoteMessage(const EmoteMap &map)
+    auto makeEmoteMessage(const EmoteMap &map,
+                          const MessageElementFlag &emoteFlag)
     {
         MessageBuilder builder;
         builder->flags.set(MessageFlag::Centered);
         builder->flags.set(MessageFlag::DisableCompactEmotes);
 
-        if (!map.empty())
-        {
-            std::vector<std::pair<EmoteName, EmotePtr>> vec(map.begin(),
-                                                            map.end());
-            std::sort(vec.begin(), vec.end(),
-                      [](const std::pair<EmoteName, EmotePtr> &l,
-                         const std::pair<EmoteName, EmotePtr> &r) {
-                          return CompletionModel::compareStrings(
-                              l.first.string, r.first.string);
-                      });
-            for (const auto &emote : vec)
-            {
-                builder
-                    .emplace<EmoteElement>(emote.second,
-                                           MessageElementFlag::AlwaysShow)
-                    ->setLink(Link(Link::InsertText, emote.first.string));
-            }
-        }
-        else
+        if (map.empty())
         {
             builder.emplace<TextElement>("no emotes available",
                                          MessageElementFlag::Text,
                                          MessageColor::System);
+            return builder.release();
+        }
+
+        std::vector<std::pair<EmoteName, EmotePtr>> vec(map.begin(), map.end());
+        std::sort(vec.begin(), vec.end(),
+                  [](const std::pair<EmoteName, EmotePtr> &l,
+                     const std::pair<EmoteName, EmotePtr> &r) {
+                      return CompletionModel::compareStrings(l.first.string,
+                                                             r.first.string);
+                  });
+        for (const auto &emote : vec)
+        {
+            builder
+                .emplace<EmoteElement>(
+                    emote.second,
+                    MessageElementFlags{MessageElementFlag::AlwaysShow,
+                                        emoteFlag})
+                ->setLink(Link(Link::InsertText, emote.first.string));
         }
 
         return builder.release();
     }
     void addEmoteSets(
         std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> sets,
-        Channel &globalChannel, Channel &subChannel)
+        Channel &globalChannel, Channel &subChannel, QString currentChannelName)
     {
         QMap<QString, QPair<bool, std::vector<MessagePtr>>> mapOfSets;
 
@@ -69,8 +71,7 @@ namespace {
         {
             // TITLE
             auto channelName = set->channelName;
-            auto text =
-                set->key == "0" || set->text.isEmpty() ? "Twitch" : set->text;
+            auto text = set->text.isEmpty() ? "Twitch" : set->text;
 
             // EMOTES
             MessageBuilder builder;
@@ -91,7 +92,8 @@ namespace {
                     .emplace<EmoteElement>(
                         getApp()->emotes->twitch.getOrCreateEmote(emote.id,
                                                                   emote.name),
-                        MessageElementFlag::AlwaysShow)
+                        MessageElementFlags{MessageElementFlag::AlwaysShow,
+                                            MessageElementFlag::TwitchEmote})
                     ->setLink(Link(Link::InsertText, emote.name.string));
             }
 
@@ -100,6 +102,14 @@ namespace {
 
         // Output to channel all created messages,
         // That contain title or emotes.
+        // Put current channel emotes at the top
+        auto currentChannelPair = mapOfSets[currentChannelName];
+        for (auto message : currentChannelPair.second)
+        {
+            subChannel.addMessage(message);
+        }
+        mapOfSets.remove(currentChannelName);
+
         foreach (auto pair, mapOfSets)
         {
             auto &channel = pair.first ? globalChannel : subChannel;
@@ -124,7 +134,9 @@ EmotePopup::EmotePopup(QWidget *parent)
     layout->addWidget(notebook);
     layout->setMargin(0);
 
-    auto clicked = [this](const Link &link) { this->linkClicked.invoke(link); };
+    auto clicked = [this](const Link &link) {
+        this->linkClicked.invoke(link);
+    };
 
     auto makeView = [&](QString tabTitle) {
         auto view = new ChannelView();
@@ -146,9 +158,42 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     this->loadEmojis();
 
-    createWindowShortcut(this, "CTRL+Tab", [=] { notebook->selectNextTab(); });
-    createWindowShortcut(this, "CTRL+Shift+Tab",
-                         [=] { notebook->selectPreviousTab(); });
+    // CTRL + 1-8 to open corresponding tab
+    for (auto i = 0; i < 8; i++)
+    {
+        const auto openTab = [this, i, notebook] {
+            notebook->selectIndex(i);
+        };
+        createWindowShortcut(this, QString("CTRL+%1").arg(i + 1).toUtf8(),
+                             openTab);
+    }
+
+    // Open last tab (first one from right)
+    createWindowShortcut(this, "CTRL+9", [=] {
+        notebook->selectLastTab();
+    });
+
+    // Cycle through tabs
+    createWindowShortcut(this, "CTRL+Tab", [=] {
+        notebook->selectNextTab();
+    });
+    createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
+        notebook->selectPreviousTab();
+    });
+
+    // Scroll with Page Up / Page Down
+    createWindowShortcut(this, "PgUp", [=] {
+        auto &scrollbar =
+            dynamic_cast<ChannelView *>(notebook->getSelectedPage())
+                ->getScrollBar();
+        scrollbar.offset(-scrollbar.getLargeChange());
+    });
+    createWindowShortcut(this, "PgDown", [=] {
+        auto &scrollbar =
+            dynamic_cast<ChannelView *>(notebook->getSelectedPage())
+                ->getScrollBar();
+        scrollbar.offset(scrollbar.getLargeChange());
+    });
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)
@@ -162,9 +207,10 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         return;
 
     auto addEmotes = [&](Channel &channel, const EmoteMap &map,
-                         const QString &title) {
+                         const QString &title,
+                         const MessageElementFlag &emoteFlag) {
         channel.addMessage(makeTitleMessage(title));
-        channel.addMessage(makeEmoteMessage(map));
+        channel.addMessage(makeEmoteMessage(map, emoteFlag));
     };
 
     auto subChannel = std::make_shared<Channel>("", Channel::Type::None);
@@ -174,17 +220,19 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
     // twitch
     addEmoteSets(
         getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets,
-        *globalChannel, *subChannel);
+        *globalChannel, *subChannel, _channel->getName());
 
     // global
     addEmotes(*globalChannel, *twitchChannel->globalBttv().emotes(),
-              "BetterTTV");
+              "BetterTTV", MessageElementFlag::BttvEmote);
     addEmotes(*globalChannel, *twitchChannel->globalFfz().emotes(),
-              "FrankerFaceZ");
+              "FrankerFaceZ", MessageElementFlag::FfzEmote);
 
     // channel
-    addEmotes(*channelChannel, *twitchChannel->bttvEmotes(), "BetterTTV");
-    addEmotes(*channelChannel, *twitchChannel->ffzEmotes(), "FrankerFaceZ");
+    addEmotes(*channelChannel, *twitchChannel->bttvEmotes(), "BetterTTV",
+              MessageElementFlag::BttvEmote);
+    addEmotes(*channelChannel, *twitchChannel->ffzEmotes(), "FrankerFaceZ",
+              MessageElementFlag::FfzEmote);
 
     this->globalEmotesView_->setChannel(globalChannel);
     this->subEmotesView_->setChannel(subChannel);
@@ -215,7 +263,10 @@ void EmotePopup::loadEmojis()
 
     emojis.each([&builder](const auto &key, const auto &value) {
         builder
-            .emplace<EmoteElement>(value->emote, MessageElementFlag::AlwaysShow)
+            .emplace<EmoteElement>(
+                value->emote,
+                MessageElementFlags{MessageElementFlag::AlwaysShow,
+                                    MessageElementFlag::EmojiAll})
             ->setLink(
                 Link(Link::Type::InsertText, ":" + value->shortCodes[0] + ":"));
     });

@@ -3,11 +3,13 @@
 #include "Application.hpp"
 #include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
+#include "util/SplitCommand.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 
 #include <QErrorMessage>
 #include <QFileInfo>
 #include <QProcess>
+#include "common/QLogging.hpp"
 
 #include <functional>
 
@@ -62,14 +64,13 @@ namespace {
     void showStreamlinkNotFoundError()
     {
         static QErrorMessage *msg = new QErrorMessage;
+        msg->setWindowTitle("Chatterino - streamlink not found");
 
         if (getSettings()->streamlinkUseCustomPath)
         {
-            msg->showMessage(
-                "Unable to find Streamlink executable\nMake sure your custom "
-                "path "
-                "is pointing "
-                "to the DIRECTORY where the streamlink executable is located");
+            msg->showMessage("Unable to find Streamlink executable\nMake sure "
+                             "your custom path is pointing to the DIRECTORY "
+                             "where the streamlink executable is located");
         }
         else
         {
@@ -91,16 +92,18 @@ namespace {
             }
             else
             {
-                qDebug() << "Error occured" << err;
+                qCWarning(chatterinoStreamlink) << "Error occurred" << err;
             }
 
             p->deleteLater();
         });
 
         QObject::connect(
-            p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-            [=](int res) {
-                p->deleteLater();  //
+            p,
+            static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+                &QProcess::finished),
+            [=](int /*exitCode*/, QProcess::ExitStatus /*exitStatus*/) {
+                p->deleteLater();
             });
 
         return p;
@@ -114,11 +117,13 @@ void getStreamQualities(const QString &channelURL,
     auto p = createStreamlinkProcess();
 
     QObject::connect(
-        p, static_cast<void (QProcess::*)(int)>(&QProcess::finished),
-        [=](int res) {
-            if (res != 0)
+        p,
+        static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
+            &QProcess::finished),
+        [=](int exitCode, QProcess::ExitStatus /*exitStatus*/) {
+            if (exitCode != 0)
             {
-                qDebug() << "Got error code" << res;
+                qCWarning(chatterinoStreamlink) << "Got error code" << exitCode;
                 // return;
             }
             QString lastLine = QString(p->readAllStandardOutput());
@@ -168,25 +173,16 @@ void getStreamQualities(const QString &channelURL,
 void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments)
 {
-    QStringList arguments;
+    QStringList arguments = extraArguments << channelURL << quality;
+
+    // Remove empty arguments before appending additional streamlink options
+    // as the options might purposely contain empty arguments
+    arguments.removeAll(QString());
 
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
-    if (!additionalOptions.isEmpty())
-    {
-        arguments << getSettings()->streamlinkOpts;
-    }
+    arguments << splitCommand(additionalOptions);
 
-    arguments.append(extraArguments);
-
-    arguments << channelURL;
-
-    if (!quality.isEmpty())
-    {
-        arguments << quality;
-    }
-
-    bool res = QProcess::startDetached(getStreamlinkProgram() + " " +
-                                       QString(arguments.join(' ')));
+    bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
 
     if (!res)
     {

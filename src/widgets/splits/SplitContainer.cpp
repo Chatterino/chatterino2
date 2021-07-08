@@ -11,6 +11,7 @@
 #include "widgets/Notebook.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookTab.hpp"
+#include "widgets/splits/ClosedSplits.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QApplication>
@@ -160,8 +161,6 @@ void SplitContainer::insertSplit(Split *split, Direction direction,
 
     assertInGuiThread();
 
-    split->setContainer(this);
-
     if (relativeTo == nullptr)
     {
         if (this->baseNode_.type_ == Node::EmptyRoot)
@@ -211,19 +210,73 @@ void SplitContainer::addSplit(Split *split)
 
     this->refreshTab();
 
-    split->getChannelView().tabHighlightRequested.connect(
-        [this](HighlightState state) {
-            if (this->tab_ != nullptr)
+    auto &&conns = this->connectionsPerSplit_[split];
+
+    conns.managedConnect(split->getChannelView().tabHighlightRequested,
+                         [this](HighlightState state) {
+                             if (this->tab_ != nullptr)
+                             {
+                                 this->tab_->setHighlightState(state);
+                             }
+                         });
+
+    conns.managedConnect(split->getChannelView().liveStatusChanged, [this]() {
+        this->refreshTabLiveStatus();
+    });
+
+    conns.managedConnect(split->focused, [this, split] {
+        this->setSelected(split);
+    });
+
+    conns.managedConnect(split->openSplitRequested, [this](auto channel) {
+        this->appendNewSplit(false)->setChannel(channel);
+    });
+
+    conns.managedConnect(
+        split->actionRequested, [this, split](Split::Action action) {
+            switch (action)
             {
-                this->tab_->setHighlightState(state);
+                case Split::Action::RefreshTab:
+                    this->refreshTab();
+                    break;
+
+                case Split::Action::ResetMouseStatus:
+                    this->resetMouseStatus();
+                    break;
+
+                case Split::Action::AppendNewSplit:
+                    this->appendNewSplit(true);
+                    break;
+
+                case Split::Action::Delete: {
+                    this->deleteSplit(split);
+                    auto *tab = this->getTab();
+                    tab->connect(tab, &QWidget::destroyed, [tab]() mutable {
+                        ClosedSplits::invalidateTab(tab);
+                    });
+                    ClosedSplits::push({split->getChannel()->getName(), tab});
+                }
+                break;
+
+                case Split::Action::SelectSplitLeft:
+                    this->selectNextSplit(SplitContainer::Left);
+                    break;
+                case Split::Action::SelectSplitRight:
+                    this->selectNextSplit(SplitContainer::Right);
+                    break;
+                case Split::Action::SelectSplitAbove:
+                    this->selectNextSplit(SplitContainer::Above);
+                    break;
+                case Split::Action::SelectSplitBelow:
+                    this->selectNextSplit(SplitContainer::Below);
+                    break;
             }
         });
 
-    split->getChannelView().liveStatusChanged.connect([this]() {
-        this->refreshTabLiveStatus();  //
+    conns.managedConnect(split->insertSplitRequested, [this](int dir,
+                                                             Split *parent) {
+        this->insertSplit(new Split(this), static_cast<Direction>(dir), parent);
     });
-
-    split->focused.connect([this, split] { this->setSelected(split); });
 
     this->layout();
 }
@@ -280,10 +333,7 @@ SplitContainer::Position SplitContainer::releaseSplit(Split *split)
 
     this->refreshTab();
 
-    // fourtf: really bad
-    split->getChannelView().tabHighlightRequested.disconnectAll();
-
-    split->getChannelView().tabHighlightRequested.disconnectAll();
+    this->connectionsPerSplit_.erase(this->connectionsPerSplit_.find(split));
 
     return position;
 }
@@ -318,9 +368,10 @@ void SplitContainer::selectSplitRecursive(Node *node, Direction direction)
         {
             auto &siblings = node->parent_->children_;
 
-            auto it = std::find_if(
-                siblings.begin(), siblings.end(),
-                [node](const auto &other) { return other.get() == node; });
+            auto it = std::find_if(siblings.begin(), siblings.end(),
+                                   [node](const auto &other) {
+                                       return other.get() == node;
+                                   });
             assert(it != siblings.end());
 
             if (direction == Direction::Left || direction == Direction::Above)
@@ -409,6 +460,11 @@ Split *SplitContainer::getTopRightSplit(Node &node)
 
 void SplitContainer::layout()
 {
+    if (this->disableLayouting_)
+    {
+        return;
+    }
+
     // update top right split
     auto topRight = this->getTopRightSplit(this->baseNode_);
     if (this->topRight_)
@@ -699,7 +755,10 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
 {
     assert(this->baseNode_.type_ == Node::EmptyRoot);
 
+    this->disableLayouting_ = true;
     this->applyFromDescriptorRecursively(rootNode, &this->baseNode_);
+    this->disableLayouting_ = false;
+    this->layout();
 }
 
 void SplitContainer::applyFromDescriptorRecursively(
@@ -716,6 +775,7 @@ void SplitContainer::applyFromDescriptorRecursively(
         auto *split = new Split(this);
         split->setChannel(WindowManager::decodeChannel(splitNode));
         split->setModerationMode(splitNode.moderationMode_);
+        split->setFilters(splitNode.filters_);
 
         this->appendSplit(split);
     }
@@ -748,6 +808,7 @@ void SplitContainer::applyFromDescriptorRecursively(
                 auto *split = new Split(this);
                 split->setChannel(WindowManager::decodeChannel(splitNode));
                 split->setModerationMode(splitNode.moderationMode_);
+                split->setFilters(splitNode.filters_);
 
                 Node *_node = new Node();
                 _node->parent_ = node;
@@ -764,6 +825,13 @@ void SplitContainer::applyFromDescriptorRecursively(
             {
                 Node *_node = new Node();
                 _node->parent_ = node;
+
+                if (auto *n = std::get_if<ContainerNodeDescriptor>(&item))
+                {
+                    _node->flexH_ = n->flexH_;
+                    _node->flexV_ = n->flexV_;
+                }
+
                 node->children_.emplace_back(_node);
                 this->applyFromDescriptorRecursively(item, _node);
             }
@@ -783,7 +851,7 @@ void SplitContainer::refreshTabTitle()
 
     for (const auto &chatWidget : this->splits_)
     {
-        auto channelName = chatWidget->getChannel()->getName();
+        auto channelName = chatWidget->getChannel()->getLocalizedName();
         if (channelName.isEmpty())
         {
             continue;
@@ -991,8 +1059,10 @@ void SplitContainer::Node::insertNextToThis(Split *_split, Direction _direction)
         this->geometry_ = QRect(0, 0, int(width), int(height));
     }
 
-    auto it = std::find_if(siblings.begin(), siblings.end(),
-                           [this](auto &node) { return this == node.get(); });
+    auto it =
+        std::find_if(siblings.begin(), siblings.end(), [this](auto &node) {
+            return this == node.get();
+        });
 
     assert(it != siblings.end());
     if (_direction == Direction::Right || _direction == Direction::Below)
@@ -1033,8 +1103,9 @@ SplitContainer::Position SplitContainer::Node::releaseSplit()
         auto &siblings = this->parent_->children_;
 
         auto it =
-            std::find_if(begin(siblings), end(siblings),
-                         [this](auto &node) { return this == node.get(); });
+            std::find_if(begin(siblings), end(siblings), [this](auto &node) {
+                return this == node.get();
+            });
         assert(it != siblings.end());
 
         Position position;

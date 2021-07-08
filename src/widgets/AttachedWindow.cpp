@@ -7,6 +7,7 @@
 
 #include <QTimer>
 #include <QVBoxLayout>
+#include "common/QLogging.hpp"
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
@@ -142,7 +143,7 @@ void AttachedWindow::detach(const QString &winId)
 
 void AttachedWindow::setChannel(ChannelPtr channel)
 {
-    this->ui_.split->setChannel(channel);
+    this->ui_.split->setChannel(std::move(channel));
 }
 
 void AttachedWindow::showEvent(QShowEvent *)
@@ -192,7 +193,8 @@ void AttachedWindow::attachToHwnd(void *_attachedPtr)
                     !qfilename.endsWith("brave.exe"))
 
                 {
-                    qDebug() << "NM Illegal caller" << qfilename;
+                    qCWarning(chatterinoWidget)
+                        << "NM Illegal caller" << qfilename;
                     this->timer_.stop();
                     this->deleteLater();
                     return;
@@ -241,7 +243,7 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
 
     if (::GetLastError() != 0)
     {
-        qDebug() << "NM GetLastError()" << ::GetLastError();
+        qCWarning(chatterinoWidget) << "NM GetLastError()" << ::GetLastError();
 
         this->timer_.stop();
         this->deleteLater();

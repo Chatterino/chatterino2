@@ -1,9 +1,11 @@
 #include "AboutPage.hpp"
 
 #include "common/Modes.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/RemoveScrollAreaBackground.hpp"
+#include "widgets/BasePopup.hpp"
 #include "widgets/helper/SignalLabel.hpp"
 
 #include <QFormLayout>
@@ -122,6 +124,9 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "QtKeychain",
                        "https://github.com/frankosterfeld/qtkeychain",
                        ":/licenses/qtkeychain.txt");
+            addLicense(form.getElement(), "lrucache",
+                       "https://github.com/lamerman/cpp-lru-cache",
+                       ":/licenses/lrucache.txt");
         }
 
         auto attributions = layout.emplace<QGroupBox>("Attributions...");
@@ -129,12 +134,10 @@ AboutPage::AboutPage()
             auto l = attributions.emplace<QVBoxLayout>();
 
             // clang-format off
-            l.emplace<QLabel>("EmojiOne 2 and 3 emojis provided by <a href=\"https://www.emojione.com/\">EmojiOne</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Twemoji emojis provided by <a href=\"https://github.com/twitter/twemoji\">Twitter's Twemoji</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Facebook emojis provided by <a href=\"https://facebook.com\">Facebook</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Apple emojis provided by <a href=\"https://apple.com\">Apple</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Google emojis provided by <a href=\"https://google.com\">Google</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("Messenger emojis provided by <a href=\"https://facebook.com\">Facebook</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Emoji datasource provided by <a href=\"https://www.iamcal.com/\">Cal Henderson</a>"
                               "(<a href=\"https://github.com/iamcal/emoji-data/blob/master/LICENSE\">show license</a>)")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Twitch emote data provided by <a href=\"https://twitchemotes.com/\">twitchemotes.com</a> through the <a href=\"https://github.com/Chatterino/api\">Chatterino API</a>")->setOpenExternalLinks(true);
@@ -165,7 +168,8 @@ AboutPage::AboutPage()
 
                 if (contributorParts.size() != 4)
                 {
-                    qDebug() << "Missing parts in line" << line;
+                    qCDebug(chatterinoWidget)
+                        << "Missing parts in line" << line;
                     continue;
                 }
 
@@ -230,15 +234,25 @@ void AboutPage::addLicense(QFormLayout *form, const QString &name,
     auto *a = new QLabel("<a href=\"" + website + "\">" + name + "</a>");
     a->setOpenExternalLinks(true);
     auto *b = new QLabel("<a href=\"" + licenseLink + "\">show license</a>");
-    QObject::connect(b, &QLabel::linkActivated, [licenseLink] {
-        auto *edit = new QTextEdit;
+    QObject::connect(
+        b, &QLabel::linkActivated, [parent = this, name, licenseLink] {
+            auto window =
+                new BasePopup(BaseWindow::Flags::EnableCustomFrame, parent);
+            window->setWindowTitle("Chatterino - License for " + name);
+            window->setAttribute(Qt::WA_DeleteOnClose);
+            auto layout = new QVBoxLayout();
+            auto *edit = new QTextEdit;
 
-        QFile file(licenseLink);
-        file.open(QIODevice::ReadOnly);
-        edit->setText(file.readAll());
-        edit->setReadOnly(true);
-        edit->show();
-    });
+            QFile file(licenseLink);
+            file.open(QIODevice::ReadOnly);
+            edit->setText(file.readAll());
+            edit->setReadOnly(true);
+
+            layout->addWidget(edit);
+
+            window->getLayoutContainer()->setLayout(layout);
+            window->show();
+        });
 
     form->addRow(a, b);
 }

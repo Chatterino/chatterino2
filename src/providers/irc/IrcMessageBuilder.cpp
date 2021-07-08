@@ -21,7 +21,6 @@ IrcMessageBuilder::IrcMessageBuilder(
     const MessageParseArgs &_args)
     : SharedMessageBuilder(_channel, _ircMessage, _args)
 {
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 IrcMessageBuilder::IrcMessageBuilder(Channel *_channel,
@@ -31,7 +30,6 @@ IrcMessageBuilder::IrcMessageBuilder(Channel *_channel,
     : SharedMessageBuilder(_channel, _ircMessage, _args, content, isAction)
 {
     assert(false);
-    this->usernameColor_ = getApp()->themes->messages.textColors.system;
 }
 
 MessagePtr IrcMessageBuilder::build()
@@ -76,6 +74,7 @@ void IrcMessageBuilder::appendUsername()
 
     QString username = this->userName;
     this->message().loginName = username;
+    this->message().displayName = username;
 
     // The full string that will be rendered in the chat widget
     QString usernameText = username;
@@ -87,7 +86,7 @@ void IrcMessageBuilder::appendUsername()
 
     this->emplace<TextElement>(usernameText, MessageElementFlag::Username,
                                this->usernameColor_, FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, this->message().displayName});
+        ->setLink({Link::UserInfo, this->message().loginName});
 }
 
 }  // namespace chatterino

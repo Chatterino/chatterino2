@@ -1,5 +1,8 @@
 #include "widgets/listview/GenericListItem.hpp"
 
+#include <QAbstractListModel>
+#include <QWidget>
+
 namespace chatterino {
 
 class GenericListModel : public QAbstractListModel

@@ -65,8 +65,9 @@ void SettingsDialogTab::paintEvent(QPaintEvent *)
 
     a = a + a + 20 + a;
 
-    painter.drawText(QRect(a, 0, width() - a, height()), this->ui_.labelText,
-                     QTextOption(Qt::AlignLeft | Qt::AlignVCenter));
+    this->style()->drawItemText(&painter, QRect(a, 0, width() - a, height()),
+                                Qt::AlignLeft | Qt::AlignVCenter,
+                                this->palette(), false, this->ui_.labelText);
 }
 
 void SettingsDialogTab::mousePressEvent(QMouseEvent *event)

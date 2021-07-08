@@ -6,6 +6,7 @@
 #include "Application.hpp"
 #include "common/Common.hpp"
 #include "common/Env.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -16,6 +17,8 @@
 #include "providers/twitch/TwitchHelpers.hpp"
 #include "util/PostToThread.hpp"
 
+#include <QMetaEnum>
+
 // using namespace Communi;
 using namespace std::chrono_literals;
 
@@ -25,6 +28,7 @@ TwitchIrcServer::TwitchIrcServer()
     : whispersChannel(new Channel("/whispers", Channel::Type::TwitchWhispers))
     , mentionsChannel(new Channel("/mentions", Channel::Type::TwitchMentions))
     , watchingChannel(Channel::getEmpty(), Channel::Type::TwitchWatching)
+    , liveChannel(new Channel("/live", Channel::Type::TwitchLive))
 {
     this->initializeIrc();
 
@@ -38,10 +42,12 @@ TwitchIrcServer::TwitchIrcServer()
 
 void TwitchIrcServer::initialize(Settings &settings, Paths &paths)
 {
-    getApp()->accounts->twitch.currentUserChanged.connect(
-        [this]() { postToThread([this] { this->connect(); }); });
+    getApp()->accounts->twitch.currentUserChanged.connect([this]() {
+        postToThread([this] {
+            this->connect();
+        });
+    });
 
-    this->twitchBadges.loadTwitchBadges();
     this->bttv.loadEmotes();
     this->ffz.loadEmotes();
 }
@@ -52,7 +58,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
     std::shared_ptr<TwitchAccount> account =
         getApp()->accounts->twitch.getCurrent();
 
-    qDebug() << "logging in as" << account->getUserName();
+    qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
 
     QString username = account->getUserName();
     QString oauthToken = account->getOAuthToken();
@@ -84,8 +90,8 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
 std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     const QString &channelName)
 {
-    auto channel = std::shared_ptr<TwitchChannel>(new TwitchChannel(
-        channelName, this->twitchBadges, this->bttv, this->ffz));
+    auto channel = std::shared_ptr<TwitchChannel>(
+        new TwitchChannel(channelName, this->bttv, this->ffz));
     channel->initialize();
 
     channel->sendMessageSignal.connect(
@@ -161,6 +167,12 @@ void TwitchIrcServer::readConnectionMessageReceived(
     {
         handler.handleWhisperMessage(message);
     }
+    else if (command == "RECONNECT")
+    {
+        this->addGlobalSystemMessage(
+            "Twitch Servers requested us to reconnect, reconnecting");
+        this->connect();
+    }
 }
 
 void TwitchIrcServer::writeConnectionMessageReceived(
@@ -203,6 +215,12 @@ void TwitchIrcServer::writeConnectionMessageReceived(
         handler.handleNoticeMessage(
             static_cast<Communi::IrcNoticeMessage *>(message));
     }
+    else if (command == "RECONNECT")
+    {
+        this->addGlobalSystemMessage(
+            "Twitch Servers requested us to reconnect, reconnecting");
+        this->connect();
+    }
 }
 
 void TwitchIrcServer::onReadConnected(IrcConnection *connection)
@@ -240,6 +258,11 @@ std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(
         return this->mentionsChannel;
     }
 
+    if (channelName == "/live")
+    {
+        return this->liveChannel;
+    }
+
     if (channelName == "$$$")
     {
         static auto channel =
@@ -272,6 +295,7 @@ void TwitchIrcServer::forEachChannelAndSpecialChannels(
 
     func(this->whispersChannel);
     func(this->mentionsChannel);
+    func(this->liveChannel);
 }
 
 std::shared_ptr<Channel> TwitchIrcServer::getChannelOrEmptyByID(
@@ -336,7 +360,7 @@ void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
             if (this->lastErrorTimeSpeed_ + 30s < now)
             {
                 auto errorMessage =
-                    makeSystemMessage("sending messages too fast");
+                    makeSystemMessage("You are sending messages too quickly.");
 
                 channel->addMessage(errorMessage);
 
@@ -357,7 +381,7 @@ void TwitchIrcServer::onMessageSendRequested(TwitchChannel *channel,
             if (this->lastErrorTimeAmount_ + 30s < now)
             {
                 auto errorMessage =
-                    makeSystemMessage("sending too many messages");
+                    makeSystemMessage("You are sending too many messages.");
 
                 channel->addMessage(errorMessage);
 

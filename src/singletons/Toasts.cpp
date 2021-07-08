@@ -56,7 +56,7 @@ void Toasts::sendToastMessage(const QString &channelName)
 void Toasts::actuallySendToastMessage(const QUrl &url,
                                       const QString &channelName)
 {
-    QString bottomText = "";
+    QString bottomText;
     if (static_cast<ToastReaction>(getSettings()->openFromToast.getValue()) !=
         ToastReaction::DontOpen)
     {
@@ -97,7 +97,7 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
                 getApp()->notifications->addNotification(
                     makeLayout(
                         avatar,
-                        QString("<b>" + channelName + "</b> just went live!"),
+                        QString("<b>%1</b> just went live!").arg(channelName),
                         bottomText),
                     std::chrono::milliseconds(
                         (int)(getSettings()->notificationDuration * 1000)),
@@ -110,7 +110,7 @@ void Toasts::actuallySendToastMessage(const QUrl &url,
                 getApp()->notifications->addNotification(
                     makeLayout(
                         getResources().icon,
-                        QString("<b>" + channelName + "</b> just went live!"),
+                        QString("<b>%1</b> just went live!").arg(channelName),
                         bottomText),
                     std::chrono::milliseconds(
                         (int)(getSettings()->notificationDuration * 1000)),

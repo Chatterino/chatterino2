@@ -34,6 +34,8 @@ public:
         } line;
     };
 
+    QColor accent{"#00aeef"};
+
     /// WINDOW
     struct {
         QColor background;
@@ -59,6 +61,7 @@ public:
             QColor caret;
             QColor link;
             QColor system;
+            QColor chatPlaceholder;
         } textColors;
 
         struct {

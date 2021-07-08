@@ -1,6 +1,10 @@
 #pragma once
 
+#include <QJsonObject>
+#include <QList>
+#include <QRect>
 #include <QString>
+#include <QUuid>
 
 #include <optional>
 #include <variant>
@@ -36,6 +40,8 @@ struct SplitDescriptor {
 
     // Whether "Moderation Mode" (the sword icon) is enabled in this split or not
     bool moderationMode_{false};
+
+    QList<QUuid> filters_;
 
     static void loadFromJSON(SplitDescriptor &descriptor,
                              const QJsonObject &root, const QJsonObject &data);

@@ -10,6 +10,8 @@
 #include <QLabel>
 #include <QScreen>
 
+#include <QVBoxLayout>
+
 namespace chatterino {
 
 NotificationPopup::NotificationPopup()
@@ -44,6 +46,9 @@ void NotificationPopup::mouseReleaseEvent(QMouseEvent *event)
 {
     mouseRelease.invoke(event);
     BaseWindow::mouseReleaseEvent(event);
+    this->channel_->addMessage(std::move(msg));
+
+    //    QTimer::singleShot(5000, this, [this, msg] { this->channel->remove });
 }
 
 }  // namespace chatterino

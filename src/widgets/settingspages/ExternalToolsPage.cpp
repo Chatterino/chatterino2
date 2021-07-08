@@ -71,7 +71,7 @@ ExternalToolsPage::ExternalToolsPage()
 
         getSettings()->streamlinkUseCustomPath.connect(
             [=](const auto &value, auto) {
-                customPath->setEnabled(value);  //
+                customPath->setEnabled(value);
             },
             this->managedConnections_);
     }
@@ -121,6 +121,9 @@ ExternalToolsPage::ExternalToolsPage()
 
         groupLayout->addRow(this->createCheckBox(
             "Enable image uploader", getSettings()->imageUploaderEnabled));
+        groupLayout->addRow(
+            this->createCheckBox("Ask for confirmation when uploading an image",
+                                 getSettings()->askOnImageUpload));
 
         groupLayout->addRow(
             "Request URL: ",

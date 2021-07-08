@@ -13,17 +13,16 @@ namespace chatterino {
 class SwitchSplitItem : public AbstractSwitcherItem
 {
 public:
-    SwitchSplitItem(Split *split);
-    SwitchSplitItem(SplitContainer *container);
+    SwitchSplitItem(SplitContainer *container, Split *split = nullptr);
 
     virtual void action() override;
 
-    virtual void paint(QPainter *painter, const QRect &rect) const;
-    virtual QSize sizeHint(const QRect &rect) const;
+    virtual void paint(QPainter *painter, const QRect &rect) const override;
+    virtual QSize sizeHint(const QRect &rect) const override;
 
 private:
-    Split *split_{};
     SplitContainer *container_{};
+    Split *split_{};
 };
 
 }  // namespace chatterino

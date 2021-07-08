@@ -5,6 +5,7 @@
 #include "singletons/Settings.hpp"
 
 #include <QMimeData>
+#include <QMimeDatabase>
 
 namespace chatterino {
 
@@ -21,8 +22,9 @@ ResizingTextEdit::ResizingTextEdit()
 
     // Whenever the setting for emote completion changes, force a
     // refresh on the completion model the next time "Tab" is pressed
-    getSettings()->prefixOnlyEmoteCompletion.connect(
-        [this] { this->completionInProgress_ = false; });
+    getSettings()->prefixOnlyEmoteCompletion.connect([this] {
+        this->completionInProgress_ = false;
+    });
 
     this->setFocusPolicy(Qt::ClickFocus);
 }
@@ -94,7 +96,8 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     bool doComplete =
         (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Backtab) &&
-        (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier;
+        (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier &&
+        !event->isAccepted();
 
     if (doComplete)
     {
@@ -262,14 +265,33 @@ bool ResizingTextEdit::canInsertFromMimeData(const QMimeData *source) const
 
 void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
 {
-    if (source->hasImage() || source->hasUrls())
+    if (source->hasImage())
     {
         this->imagePasted.invoke(source);
+        return;
     }
-    else
+    else if (source->hasUrls())
     {
-        insertPlainText(source->text());
+        bool hasUploadable = false;
+        auto mimeDb = QMimeDatabase();
+        for (const QUrl url : source->urls())
+        {
+            QMimeType mime = mimeDb.mimeTypeForUrl(url);
+            if (mime.name().startsWith("image"))
+            {
+                hasUploadable = true;
+                break;
+            }
+        }
+
+        if (hasUploadable)
+        {
+            this->imagePasted.invoke(source);
+            return;
+        }
     }
+
+    insertPlainText(source->text());
 }
 
 QCompleter *ResizingTextEdit::getCompleter() const

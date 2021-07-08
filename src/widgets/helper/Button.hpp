@@ -78,6 +78,7 @@ private:
 
     QColor borderColor_{};
     QPixmap pixmap_{};
+    QPixmap resizedPixmap_{};
     Dim dimPixmap_{Dim::Some};
     bool enableMargin_{true};
     QPoint mousePos_{};

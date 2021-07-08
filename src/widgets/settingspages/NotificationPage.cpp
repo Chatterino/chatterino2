@@ -29,14 +29,20 @@ NotificationPage::NotificationPage()
         {
             auto settings = tabs.appendTab(new QVBoxLayout, "Options");
             {
-                settings.emplace<QLabel>("You can be informed when certain "
-                                         "channels go live. You can be "
-                                         "informed in multiple ways:");
+                settings.emplace<QLabel>(
+                    "You can be informed when certain channels go live. You "
+                    "can be informed in multiple ways:");
 
                 settings.append(this->createCheckBox(
                     "Flash taskbar", getSettings()->notificationFlashTaskbar));
+                settings.append(
+                    this->createCheckBox("Play sound for selected channels",
+                                         getSettings()->notificationPlaySound));
                 settings.append(this->createCheckBox(
                     "Play sound", getSettings()->notificationPlaySound));
+                settings.append(this->createCheckBox(
+                    "Play sound for any channel going live",
+                    getSettings()->notificationOnAnyChannel));
                 settings.append(this->createCheckBox(
                     "Show notification", getSettings()->notificationToast));
                 auto openIn = settings.emplace<QHBoxLayout>().withoutMargin();
