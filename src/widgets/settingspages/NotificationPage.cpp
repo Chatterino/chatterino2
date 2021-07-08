@@ -39,8 +39,6 @@ NotificationPage::NotificationPage()
                     this->createCheckBox("Play sound for selected channels",
                                          getSettings()->notificationPlaySound));
                 settings.append(this->createCheckBox(
-                    "Play sound", getSettings()->notificationPlaySound));
-                settings.append(this->createCheckBox(
                     "Play sound for any channel going live",
                     getSettings()->notificationOnAnyChannel));
                 settings.append(this->createCheckBox(

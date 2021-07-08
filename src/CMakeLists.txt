@@ -27,8 +27,6 @@ set(SOURCE_FILES
         common/CompletionModel.hpp
         common/Credentials.cpp
         common/Credentials.hpp
-        common/DownloadManager.cpp
-        common/DownloadManager.hpp
         common/Env.cpp
         common/Env.hpp
         common/LinkParser.cpp
@@ -608,11 +606,6 @@ endif ()
 
 target_include_directories(${LIBRARY_PROJECT} PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-if (WinToast_FOUND)
-    target_link_libraries(${LIBRARY_PROJECT}
-        PUBLIC
-        WinToast)
-endif ()
 
 if (USE_CONAN AND TARGET CONAN_PKG::boost)
     target_link_libraries(${LIBRARY_PROJECT}

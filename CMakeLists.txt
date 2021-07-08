@@ -42,9 +42,6 @@ find_package(Qt5 REQUIRED
     Concurrent
     )
 
-if (WIN32)
-    find_package(WinToast REQUIRED)
-endif ()
 
 find_package(Sanitizers)
 
