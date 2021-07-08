@@ -18,7 +18,7 @@ AliasesPage::AliasesPage()
     LayoutCreator<AliasesPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    layout.emplace<QLabel>("Gives an alias to a user.");
+    layout.emplace<QLabel>("Give an alias to a user.");
     EditableModelView *view =
         layout
             .emplace<EditableModelView>(

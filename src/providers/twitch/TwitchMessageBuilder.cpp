@@ -705,12 +705,14 @@ void TwitchMessageBuilder::appendUsername()
     }
 
     auto aliases = *getCSettings().aliasNames.readOnly().get();
+    auto loginLower = this->message().loginName.toLower();
 
     for (auto const alias : aliases)
     {
-        if (alias.getName().toLower() == this->message().loginName.toLower())
+        if (alias.getName().toLower() == loginLower)
         {
             usernameText = alias.getReplace();
+            break;
         }
     }
 
