@@ -9,6 +9,7 @@
 - Minor: Move Dankerino settings to a separate tab (Mm2PL/Dankerino#84)
 - Minor: Add advanced IRC tag related settings (Mm2PL/Dankerino#86)
 - Minor: Allow for adjusting rate limit settings.
+- Minor: Webchat detection uses a highlight now. (Mm2PL/Dankerino#90)
 
 ### Chatterino
 

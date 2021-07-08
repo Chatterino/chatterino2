@@ -34,6 +34,11 @@ ContextMap buildContextMap(const MessagePtr &m)
      *
      */
 
+    /*
+     * Dankerino identifiers:
+     * flags.webchat_detected
+     */
+
     using MessageFlag = chatterino::MessageFlag;
 
     QStringList badges;
@@ -77,6 +82,7 @@ ContextMap buildContextMap(const MessagePtr &m)
         {"flags.points_redeemed", m->flags.has(MessageFlag::RedeemedHighlight)},
         {"flags.sub_message", m->flags.has(MessageFlag::Subscription)},
         {"flags.system_message", m->flags.has(MessageFlag::System)},
+        {"flags.webchat_detected", m->flags.has(MessageFlag::WebchatDetected)},
         {"flags.whisper", m->flags.has(MessageFlag::Whisper)},
 
         {"message.content", m->messageText},

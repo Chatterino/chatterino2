@@ -67,10 +67,9 @@ void DankerinoPage::initLayout(GeneralPageView &layout)
         layout.addTitle("Random 'hacks'");
         layout.addCheckbox("Abnormal nonce detection",
                            s.abnormalNonceDetection);
-        layout.addCheckbox(
-            "Webchat detection. Adds a little orange asterisk before the "
-            "message timestamp if it was sent from webchat.",
-            s.normalNonceDetection);
+        layout.addCheckbox("Webchat detection. Highlights messages sent from "
+                           "webchat in orange.",
+                           s.normalNonceDetection);
     }
     layout.addStretch();
     // invisible element for width

@@ -242,10 +242,9 @@ MessagePtr TwitchMessageBuilder::build()
             this->emplace<LinebreakElement>(
                 MessageElementFlag::ChannelPointReward);
         }
-        else if (!isAbnormal && getSettings()->normalNonceDetection)
+        else if (!isAbnormal)
         {
-            this->emplace<TextElement>("*", MessageElementFlag::Text,
-                                       MessageColor(QColor(255, 163, 11)));
+            this->message().flags.set(MessageFlag::WebchatDetected);
         }
     }
 
