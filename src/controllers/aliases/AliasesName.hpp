@@ -1,8 +1,6 @@
 #pragma once
 
-#include "Application.hpp"
 #include "controllers/accounts/AccountController.hpp"
-#include "singletons/Settings.hpp"
 
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
@@ -42,40 +40,48 @@ public:
     {
         return this->replace_;
     }
+    void setId(QString id)
+    {
+        this->id_ = id;
+    }
 
 private:
     QString name_;
     QString id_;
     QString replace_;
 };
+
+using AliasesNamePtr = std::shared_ptr<AliasesName>;
+
 }  // namespace chatterino
 
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::AliasesName> {
-    static rapidjson::Value get(const chatterino::AliasesName &value,
+struct Serialize<chatterino::AliasesNamePtr> {
+    static rapidjson::Value get(const chatterino::AliasesNamePtr &value,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
-        chatterino::rj::set(ret, "name", value.getName(), a);
-        chatterino::rj::set(ret, "id", value.getId(), a);
-        chatterino::rj::set(ret, "replace", value.getReplace(), a);
+        chatterino::rj::set(ret, "name", value->getName(), a);
+        chatterino::rj::set(ret, "id", value->getId(), a);
+        chatterino::rj::set(ret, "replace", value->getReplace(), a);
 
         return ret;
     }
 };
 
 template <>
-struct Deserialize<chatterino::AliasesName> {
-    static chatterino::AliasesName get(const rapidjson::Value &value,
-                                       bool *error = nullptr)
+struct Deserialize<chatterino::AliasesNamePtr> {
+    static chatterino::AliasesNamePtr get(const rapidjson::Value &value,
+                                          bool *error = nullptr)
     {
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error)
-            return chatterino::AliasesName(QString(), QString(), QString());
+            return std::make_shared<chatterino::AliasesName>(
+                QString(), QString(), QString());
         }
 
         QString _name;
@@ -86,7 +92,7 @@ struct Deserialize<chatterino::AliasesName> {
         chatterino::rj::getSafe(value, "id", _id);
         chatterino::rj::getSafe(value, "replace", _replace);
 
-        return chatterino::AliasesName(_name, _replace, _id);
+        return std::make_shared<chatterino::AliasesName>(_name, _replace, _id);
     }
 };
 

@@ -28,7 +28,7 @@ AliasesPage::AliasesPage()
                     ->initialized(&getSettings()->aliasNames))
             .getElement();
 
-    view->setTitles({"Name", "Replacement" /*,"Id"*/});
+    view->setTitles({"Name", "Replacement"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Interactive);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -36,13 +36,12 @@ AliasesPage::AliasesPage()
 
     view->addButtonPressed.connect([] {
         getSettings()->aliasNames.append(
-            AliasesName{"Name", "", "Replacement"});
+            std::make_shared<AliasesName>("Name", "", "Replacement"));
     });
 
     QTimer::singleShot(1, [view] {
         view->getTableView()->resizeColumnsToContents();
-        view->getTableView()->setColumnWidth(0, 150);
-        view->getTableView()->setColumnWidth(2, 125);
+        view->getTableView()->setColumnWidth(0, 250);
     });
 
     QObject::connect(view->getTableView(), &QTableView::clicked,

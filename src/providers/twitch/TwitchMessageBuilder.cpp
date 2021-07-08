@@ -710,11 +710,11 @@ void TwitchMessageBuilder::appendUsername()
 
         auto aliases = *getCSettings().aliasNames.readOnly().get();
 
-        for (const AliasesName &alias : aliases)
+        for (auto alias : aliases)
         {
-            if (alias.getId() == sourceUserID)
+            if (alias->getId() == sourceUserID)
             {
-                usernameText = alias.getReplace();
+                usernameText = alias->getReplace();
             }
         }
     }
