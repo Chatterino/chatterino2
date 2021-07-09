@@ -10,13 +10,13 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
 #include "widgets/Window.hpp"
 
@@ -65,21 +65,6 @@ bool isAbnormalNonce(const QString &nonce)
 namespace chatterino {
 
 namespace {
-
-    QColor getRandomColor(const QVariant &userId)
-    {
-        bool ok = true;
-        int colorSeed = userId.toInt(&ok);
-        if (!ok)
-        {
-            // We were unable to convert the user ID to an integer, this means Twitch has decided to start using non-integer user IDs
-            // Just randomize the users color
-            colorSeed = std::rand();
-        }
-
-        const auto colorIndex = colorSeed % TWITCH_USERNAME_COLORS.size();
-        return TWITCH_USERNAME_COLORS[colorIndex];
-    }
 
     QStringList parseTagList(const QVariantMap &tags, const QString &key)
     {
@@ -641,7 +626,8 @@ void TwitchMessageBuilder::parseUsernameColor()
 
     if (getSettings()->colorizeNicknames && this->tags.contains("user-id"))
     {
-        this->usernameColor_ = getRandomColor(this->tags.value("user-id"));
+        this->usernameColor_ =
+            getRandomColor(this->tags.value("user-id").toString());
         this->message().usernameColor = this->usernameColor_;
     }
 }
