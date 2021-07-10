@@ -30,7 +30,7 @@ class ConcurrentSettings
 public:
     ConcurrentSettings();
 
-    SignalVector<HighlightPhrase> &highlightedMessages;
+    SignalVector<HighlightPhrasePtr> &highlightedMessages;
     SignalVector<HighlightPhrase> &highlightedUsers;
     SignalVector<HighlightBadge> &highlightedBadges;
     SignalVector<HighlightBlacklistUser> &blacklistedUsers;

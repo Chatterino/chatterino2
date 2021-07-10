@@ -16,7 +16,7 @@ ConcurrentSettings *concurrentInstance_{};
 
 ConcurrentSettings::ConcurrentSettings()
     // NOTE: these do not get deleted
-    : highlightedMessages(*new SignalVector<HighlightPhrase>())
+    : highlightedMessages(*new SignalVector<HighlightPhrasePtr>())
     , highlightedUsers(*new SignalVector<HighlightPhrase>())
     , highlightedBadges(*new SignalVector<HighlightBadge>())
     , blacklistedUsers(*new SignalVector<HighlightBlacklistUser>())

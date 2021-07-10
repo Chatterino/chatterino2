@@ -37,12 +37,13 @@ QSet<QColor> ColorProvider::recentColors() const
      * Currently, only colors used in highlight phrases are considered. This
      * may change at any point in the future.
      */
-    for (auto phrase : getSettings()->highlightedMessages)
+    for (const auto &phrase : getSettings()->highlightedMessages)
     {
-        retVal.insert(*phrase.getColor());
+        const QColor *color = phrase->getColor().get();
+        retVal.insert(*color);
     }
 
-    for (auto userHl : getSettings()->highlightedUsers)
+    for (auto &userHl : getSettings()->highlightedUsers)
     {
         retVal.insert(*userHl.getColor());
     }

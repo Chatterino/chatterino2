@@ -92,11 +92,12 @@ HighlightingPage::HighlightingPage()
                 });
 
                 view->addButtonPressed.connect([] {
-                    getSettings()->highlightedMessages.append(HighlightPhrase{
-                        QUuid::createUuid().toString(QUuid::WithoutBraces),
-                        "my phrase", true, true, false, false, true, false, "",
-                        *ColorProvider::instance().color(
-                            ColorType::SelfHighlight)});
+                    getSettings()->highlightedMessages.append(
+                        std::make_shared<HighlightPhrase>(
+                            QUuid::createUuid().toString(QUuid::WithoutBraces),
+                            "my phrase", true, true, false, false, true, false,
+                            "",*ColorProvider::instance().color(
+                                    ColorType::SelfHighlight)));
                 });
 
                 QObject::connect(view->getTableView(), &QTableView::clicked,

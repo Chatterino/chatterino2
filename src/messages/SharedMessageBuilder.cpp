@@ -283,9 +283,10 @@ void SharedMessageBuilder::parseHighlights()
         return;
     }
 
+    // TODO: cloneVector() is deprecated, ask someone about this
     // TODO: This vector should only be rebuilt upon highlights being changed
     // fourtf: should be implemented in the HighlightsController
-    std::vector<HighlightPhrase> activeHighlights =
+    auto activeHighlights =
         getSettings()->highlightedMessages.cloneVector();
 
     if (!currentUser->isAnon() && getSettings()->enableSelfHighlight &&
@@ -298,40 +299,41 @@ void SharedMessageBuilder::parseHighlights()
             getSettings()->enableSelfHighlightSound, false, false, false,
             getSettings()->selfHighlightSoundUrl.getValue(),
             ColorProvider::instance().color(ColorType::SelfHighlight));
-        activeHighlights.emplace_back(std::move(selfHighlight));
+        activeHighlights.emplace_back(
+            std::make_shared<HighlightPhrase>(selfHighlight));
     }
 
     // Highlight because of message
-    for (const HighlightPhrase &highlight : activeHighlights)
+    for (const HighlightPhrasePtr &highlight : activeHighlights)
     {
-        if (!highlight.isMatch(this->originalMessage_))
+        if (!highlight->isMatch(this->originalMessage_))
         {
             continue;
         }
 
         this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor = highlight.getColor();
+        this->message().highlightColor = highlight->getColor();
 
-        if (highlight.showInMentions())
+        if (highlight->showInMentions())
         {
             this->message().flags.set(MessageFlag::ShowInMentions);
         }
 
-        if (highlight.hasAlert())
+        if (highlight->hasAlert())
         {
             this->highlightAlert_ = true;
         }
 
         // Only set highlightSound_ if it hasn't been set by username
         // highlights already.
-        if (highlight.hasSound() && !this->highlightSound_)
+        if (highlight->hasSound() && !this->highlightSound_)
         {
             this->highlightSound_ = true;
 
             // Use custom sound if set, otherwise use fallback sound
-            if (highlight.hasCustomSound())
+            if (highlight->hasCustomSound())
             {
-                this->highlightSoundUrl_ = highlight.getSoundUrl();
+                this->highlightSoundUrl_ = highlight->getSoundUrl();
             }
             else
             {
