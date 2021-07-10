@@ -136,7 +136,7 @@ const QUrl &HighlightPhrase::getSoundUrl() const
     return this->soundUrl_;
 }
 
-const QString &HighlightPhrase::getUniqueIdentifier() const
+const QString &HighlightPhrase::getId() const
 {
     return this->id_;
 }

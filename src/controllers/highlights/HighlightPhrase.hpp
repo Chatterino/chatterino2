@@ -39,7 +39,7 @@ public:
                     bool isRegex, bool isGloballyEnabled, bool isCaseSensitive,
                     const QString &soundUrl, std::shared_ptr<QColor> color);
 
-    const QString &getUniqueIdentifier() const;
+    const QString &getId() const;
     const QString &getPattern() const;
     bool showInMentions() const;
     bool hasAlert() const;
@@ -123,7 +123,7 @@ struct Serialize<chatterino::HighlightPhrase> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
-        chatterino::rj::set(ret, "id", value.getUniqueIdentifier(), a);
+        chatterino::rj::set(ret, "id", value.getId(), a);
         chatterino::rj::set(ret, "pattern", value.getPattern(), a);
         chatterino::rj::set(ret, "showInMentions", value.showInMentions(), a);
         chatterino::rj::set(ret, "alert", value.hasAlert(), a);

@@ -42,7 +42,7 @@ HighlightPhrase UserHighlightModel::getItemFromRow(
 void UserHighlightModel::getRowFromItem(const HighlightPhrase &item,
                                         std::vector<QStandardItem *> &row)
 {
-    setStringItem(row[Column::Identifier], item.getUniqueIdentifier());
+    setStringItem(row[Column::Identifier], item.getId());
     setStringItem(row[Column::Pattern], item.getPattern());
     setBoolItem(row[Column::ShowInMentions], item.showInMentions());
     setBoolItem(row[Column::FlashTaskbar], item.hasAlert());
