@@ -1458,13 +1458,18 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                         hasLocalizedName = true;
                     }
                 }
-                QString senderColor;
-                if (!rj::getSafe(senderData, "chat_color", senderColor))
+                QColor senderColor;
+                QString senderColor_;
+                if (rj::getSafe(senderData, "chat_color", senderColor_))
                 {
-                    qCDebug(chatterinoPubsub)
-                        << "Failed to get sender color, might be a grey-name";
-                    // return; // color might be empty if user is a grey-name, don't freak out
+                    senderColor = QColor(senderColor_);
                 }
+                else if (getSettings()->colorizeNicknames)
+                {
+                    // color may be not present if user is a grey-name
+                    senderColor = getRandomColor(senderId);
+                }
+                // handle username style based on prefered setting
                 switch (getSettings()->usernameDisplayMode.getValue())
                 {
                     case UsernameDisplayMode::Username: {
@@ -1489,7 +1494,6 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
                 action.target = ActionUser{senderId, senderLogin,
                                            senderDisplayName, senderColor};
-                qCDebug(chatterinoPubsub) << action.msgID;
                 this->signals_.moderation.automodMessage.invoke(action);
             }
             // "ALLOWED" and "DENIED" statuses remain unimplemented

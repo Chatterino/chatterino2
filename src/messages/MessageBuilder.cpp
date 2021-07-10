@@ -121,15 +121,14 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     builder.message().flags.set(MessageFlag::PubSub);
 
     builder
-        .emplace<TextElement>(action.target.displayName + ":",
-                              MessageElementFlag::BoldUsername,
-                              MessageColor(QColor(action.target.color)),
-                              FontStyle::ChatMediumBold)
+        .emplace<TextElement>(
+            action.target.displayName + ":", MessageElementFlag::BoldUsername,
+            MessageColor(action.target.color), FontStyle::ChatMediumBold)
         ->setLink({Link::UserInfo, action.target.login});
     builder
-        .emplace<TextElement>(action.target.login + ":",
+        .emplace<TextElement>(action.target.displayName + ":",
                               MessageElementFlag::NonBoldUsername,
-                              MessageColor(QColor(action.target.color)))
+                              MessageColor(action.target.color))
         ->setLink({Link::UserInfo, action.target.login});
     builder.emplace<TextElement>(action.message, MessageElementFlag::Text,
                                  MessageColor::Text);

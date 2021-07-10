@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rapidjson/document.h>
+#include <QColor>
 #include <QString>
 
 #include <chrono>
@@ -13,7 +14,7 @@ struct ActionUser {
     QString login;
     // displayName should be in format "login(localizedName)" for non-ascii usernames
     QString displayName;
-    QString color;
+    QColor color;
 };
 
 struct PubSubAction {
