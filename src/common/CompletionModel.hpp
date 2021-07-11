@@ -25,6 +25,7 @@ class CompletionModel : public QAbstractListModel
             BTTVGlobalEmote,
             BTTVChannelEmote,
             TwitchGlobalEmote,
+            TwitchLocalEmote,
             TwitchSubscriberEmote,
             Emoji,
             EmoteEnd,

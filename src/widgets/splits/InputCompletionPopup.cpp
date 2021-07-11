@@ -81,8 +81,20 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
     {
         if (auto user = getApp()->accounts->twitch.getCurrent())
         {
-            auto twitch = user->accessEmotes();
-            addEmotes(emotes, twitch->emotes, text, "Twitch Emote");
+            // Twitch Emotes available globally
+            auto emoteData = user->accessEmotes();
+            addEmotes(emotes, emoteData->emotes, text, "Twitch Emote");
+
+            // Twitch Emotes available locally
+            auto localEmoteData = user->accessLocalEmotes();
+            if (localEmoteData->find(tc->roomId()) != localEmoteData->end())
+            {
+                if (auto localEmotes = &localEmoteData->at(tc->roomId()))
+                {
+                    addEmotes(emotes, *localEmotes, text,
+                              "Local Twitch Emotes");
+                }
+            }
         }
 
         if (tc)
