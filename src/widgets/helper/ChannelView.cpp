@@ -1943,18 +1943,22 @@ void ChannelView::addContextMenuItems(
         {
             menu->addSeparator();
             menu->addAction("Open in new split", [twitchUsername, this] {
-                this->openChannelIn.invoke(twitchUsername, FromTwitchLinkOpenChannelIn::Split);
+                this->openChannelIn.invoke(twitchUsername,
+                                           FromTwitchLinkOpenChannelIn::Split);
             });
             menu->addAction("Open in new tab", [twitchUsername, this] {
-                this->openChannelIn.invoke(twitchUsername, FromTwitchLinkOpenChannelIn::Tab);
+                this->openChannelIn.invoke(twitchUsername,
+                                           FromTwitchLinkOpenChannelIn::Tab);
             });
 
             menu->addSeparator();
             menu->addAction("Open player in browser", [twitchUsername, this] {
-                this->openChannelIn.invoke(twitchUsername, FromTwitchLinkOpenChannelIn::BrowserPlayer);
+                this->openChannelIn.invoke(
+                    twitchUsername, FromTwitchLinkOpenChannelIn::BrowserPlayer);
             });
             menu->addAction("Open in streamlink", [twitchUsername, this] {
-                this->openChannelIn.invoke(twitchUsername, FromTwitchLinkOpenChannelIn::Streamlink);
+                this->openChannelIn.invoke(
+                    twitchUsername, FromTwitchLinkOpenChannelIn::Streamlink);
             });
         }
     }

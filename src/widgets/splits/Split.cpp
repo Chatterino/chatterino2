@@ -163,25 +163,29 @@ Split::Split(QWidget *parent)
         }
     });
 
-    this->view_->openChannelIn.connect([this](QString twitchChannel, FromTwitchLinkOpenChannelIn openIn) {
-        ChannelPtr channel = getApp()->twitch.server->getOrAddChannel(twitchChannel);
-        switch(openIn)
+    this->view_->openChannelIn.connect([this](
+                                           QString twitchChannel,
+                                           FromTwitchLinkOpenChannelIn openIn) {
+        ChannelPtr channel =
+            getApp()->twitch.server->getOrAddChannel(twitchChannel);
+        switch (openIn)
         {
-            case(FromTwitchLinkOpenChannelIn::Split):
+            case (FromTwitchLinkOpenChannelIn::Split):
                 this->openSplitRequested.invoke(channel);
                 break;
-            case(FromTwitchLinkOpenChannelIn::Tab):
+            case (FromTwitchLinkOpenChannelIn::Tab):
                 this->joinChannelInNewTab(channel);
                 break;
-            case(FromTwitchLinkOpenChannelIn::BrowserPlayer):
+            case (FromTwitchLinkOpenChannelIn::BrowserPlayer):
                 this->openChannelInBrowserPlayer(channel);
                 break;
-            case(FromTwitchLinkOpenChannelIn::Streamlink):
+            case (FromTwitchLinkOpenChannelIn::Streamlink):
                 this->openChannelInStreamlink(twitchChannel);
                 break;
             default:
                 qCWarning(chatterinoWidget)
-                    << "Unhandled \"FromTwitchLinkOpenChannelIn\" enum value: " << static_cast<int>(openIn);
+                    << "Unhandled \"FromTwitchLinkOpenChannelIn\" enum value: "
+                    << static_cast<int>(openIn);
         }
     });
 
@@ -325,7 +329,6 @@ void Split::updateInputPlaceholder()
 
     this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
 }
-
 
 void Split::joinChannelInNewTab(ChannelPtr channel)
 {
