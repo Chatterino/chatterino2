@@ -114,6 +114,19 @@ private:
     void handleModifiers(Qt::KeyboardModifiers modifiers);
     void updateInputPlaceholder();
 
+    /**
+     * @brief Opens twitch channel stream in a browser player (opens a formatted link)
+     */
+    void openChannelInBrowserPlayer(ChannelPtr channel);
+    /**
+     * @brief Opens twitch channel stream in streamlink app (if stream is live and streamlink is installed)
+     */
+    void openChannelInStreamlink(QString channelName);
+    /**
+     * @brief Opens twitch channel chat in a new chatterino tab
+     */
+    void joinChannelInNewTab(ChannelPtr channel);
+
     IndirectChannel channel_;
 
     bool moderationMode_{};

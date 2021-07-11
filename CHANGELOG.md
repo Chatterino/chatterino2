@@ -5,10 +5,17 @@
 - Minor: Username in channel points rewards redemption messages is now clickable. (#2673, #2953)
 - Minor: Channel name in `<channel> has gone offline. Exiting host mode.` messages is now clickable. (#2922)
 - Minor: Added `/openurl` command. Usage: `/openurl <URL>`. Opens the provided URL in the browser. (#2461, #2926)
+- Minor: Updated to Emoji v13.1 (#2958)
+- Minor: Added "Open in: new tab, browser player, streamlink" in twitch link context menu. (#2988)
+- Minor: Sender username in automod messages shown to moderators shows correct color and display name. (#2967)
 - Bugfix: Now deleting cache files that weren't modified in the past 14 days. (#2947)
 - Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
 - Bugfix: Middle mouse click no longer scrolls in not fully populated usercards and splits. (#2933)
 - Bugfix: Fix bad behavior of the HTML color picker edit when user input is being entered. (#2942)
+- Bugfix: Made follower emotes suggested (in emote popup menu, tab completion, emote input menu) only in their origin channel, not globally. (#2951)
+- Bugfix: Fixed founder badge not being respected by `author.subbed` filter. (#2971)
+- Bugfix: Usercards on IRC will now only show user's messages. (#1780, #2979)
+- Bugfix: Messages that couldn't be searched or filtered are now handled correctly. (#2962)
 
 ## 2.3.3
 

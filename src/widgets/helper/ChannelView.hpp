@@ -47,6 +47,13 @@ enum class PauseReason {
     KeyboardModifier,
 };
 
+enum class FromTwitchLinkOpenChannelIn {
+    Split,
+    Tab,
+    BrowserPlayer,
+    Streamlink,
+};
+
 using SteadyClock = std::chrono::steady_clock;
 
 class ChannelView final : public BaseWidget
@@ -96,7 +103,8 @@ public:
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::Signal<const Link &> linkClicked;
-    pajlada::Signals::Signal<QString> joinToChannel;
+    pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
+        openChannelIn;
 
 protected:
     void themeChangedEvent() override;

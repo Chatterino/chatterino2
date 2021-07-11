@@ -163,9 +163,30 @@ Split::Split(QWidget *parent)
         }
     });
 
-    this->view_->joinToChannel.connect([this](QString twitchChannel) {
-        this->openSplitRequested.invoke(
-            getApp()->twitch.server->getOrAddChannel(twitchChannel));
+    this->view_->openChannelIn.connect([this](
+                                           QString twitchChannel,
+                                           FromTwitchLinkOpenChannelIn openIn) {
+        ChannelPtr channel =
+            getApp()->twitch.server->getOrAddChannel(twitchChannel);
+        switch (openIn)
+        {
+            case FromTwitchLinkOpenChannelIn::Split:
+                this->openSplitRequested.invoke(channel);
+                break;
+            case FromTwitchLinkOpenChannelIn::Tab:
+                this->joinChannelInNewTab(channel);
+                break;
+            case FromTwitchLinkOpenChannelIn::BrowserPlayer:
+                this->openChannelInBrowserPlayer(channel);
+                break;
+            case FromTwitchLinkOpenChannelIn::Streamlink:
+                this->openChannelInStreamlink(twitchChannel);
+                break;
+            default:
+                qCWarning(chatterinoWidget)
+                    << "Unhandled \"FromTwitchLinkOpenChannelIn\" enum value: "
+                    << static_cast<int>(openIn);
+        }
     });
 
     this->input_->textChanged.connect([=](const QString &newText) {
@@ -307,6 +328,39 @@ void Split::updateInputPlaceholder()
     }
 
     this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
+}
+
+void Split::joinChannelInNewTab(ChannelPtr channel)
+{
+    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+    SplitContainer *container = nb.addPage(true);
+
+    Split *split = new Split(container);
+    split->setChannel(channel);
+    container->appendSplit(split);
+}
+
+void Split::openChannelInBrowserPlayer(ChannelPtr channel)
+{
+    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    {
+        QDesktopServices::openUrl(
+            "https://player.twitch.tv/?parent=twitch.tv&channel=" +
+            twitchChannel->getName());
+    }
+}
+
+void Split::openChannelInStreamlink(QString channelName)
+{
+    try
+    {
+        openStreamlinkForChannel(channelName);
+    }
+    catch (const Exception &ex)
+    {
+        qCWarning(chatterinoWidget)
+            << "Error in doOpenStreamlink:" << ex.what();
+    }
 }
 
 IndirectChannel Split::getIndirectChannel()
@@ -595,13 +649,7 @@ void Split::openWhispersInBrowser()
 
 void Split::openBrowserPlayer()
 {
-    ChannelPtr channel = this->getChannel();
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
-    {
-        QDesktopServices::openUrl(
-            "https://player.twitch.tv/?parent=twitch.tv&channel=" +
-            twitchChannel->getName());
-    }
+    this->openChannelInBrowserPlayer(this->getChannel());
 }
 
 void Split::openModViewInBrowser()
@@ -617,15 +665,7 @@ void Split::openModViewInBrowser()
 
 void Split::openInStreamlink()
 {
-    try
-    {
-        openStreamlinkForChannel(this->getChannel()->getName());
-    }
-    catch (const Exception &ex)
-    {
-        qCWarning(chatterinoWidget)
-            << "Error in doOpenStreamlink:" << ex.what();
-    }
+    this->openChannelInStreamlink(this->getChannel()->getName());
 }
 
 void Split::openWithCustomScheme()

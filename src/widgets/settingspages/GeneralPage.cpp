@@ -618,16 +618,19 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     const QStringList usernameDisplayModes = {"Username", "Localized name",
                                               "Username and localized name"};
 
-    layout.addDropdown<std::underlying_type<UsernameDisplayMode>::type>(
-        "Username style", usernameDisplayModes, s.usernameDisplayMode,
-        [usernameDisplayModes](auto val) {
-            return usernameDisplayModes.at(val - 1);
-            // UsernameDisplayMode enum indexes from 1
-        },
-        [](auto args) {
-            return args.index + 1;
-        },
-        false);
+    ComboBox *nameDropdown =
+        layout.addDropdown<std::underlying_type<UsernameDisplayMode>::type>(
+            "Username style", usernameDisplayModes, s.usernameDisplayMode,
+            [usernameDisplayModes](auto val) {
+                return usernameDisplayModes.at(val - 1);
+                // UsernameDisplayMode enum indexes from 1
+            },
+            [](auto args) {
+                return args.index + 1;
+            },
+            false);
+    nameDropdown->setMinimumWidth(nameDropdown->minimumSizeHint().width());
+
     layout.addDropdown<float>(
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
         [](auto val) {

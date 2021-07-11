@@ -210,7 +210,7 @@ void Application::initPubsub()
             }
 
             QString text =
-                QString("%1 cleared the chat").arg(action.source.name);
+                QString("%1 cleared the chat").arg(action.source.login);
 
             auto msg = makeSystemMessage(text);
             postToThread([chan, msg] {
@@ -229,15 +229,14 @@ void Application::initPubsub()
 
             QString text =
                 QString("%1 turned %2 %3 mode")
-                    .arg(action.source.name)
+                    .arg(action.source.login)
                     .arg(action.state == ModeChangedAction::State::On ? "on"
                                                                       : "off")
                     .arg(action.getModeName());
 
             if (action.duration > 0)
             {
-                text.append(" (" + QString::number(action.duration) +
-                            " seconds)");
+                text += QString(" (%1 seconds)").arg(action.duration);
             }
 
             auto msg = makeSystemMessage(text);
@@ -257,16 +256,10 @@ void Application::initPubsub()
 
             QString text;
 
-            if (action.modded)
-            {
-                text = QString("%1 modded %2")
-                           .arg(action.source.name, action.target.name);
-            }
-            else
-            {
-                text = QString("%1 unmodded %2")
-                           .arg(action.source.name, action.target.name);
-            }
+            text = QString("%1 %2 %3")
+                       .arg(action.source.login,
+                            (action.modded ? "modded" : "unmodded"),
+                            action.target.login);
 
             auto msg = makeSystemMessage(text);
             postToThread([chan, msg] {

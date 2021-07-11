@@ -10,6 +10,7 @@
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
+#include "util/QStringHash.hpp"
 
 #include <QColor>
 #include <QElapsedTimer>
