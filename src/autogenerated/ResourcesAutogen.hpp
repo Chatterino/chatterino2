@@ -10,7 +10,10 @@ public:
 
     struct {
         QPixmap fourtf;
+        QPixmap kararty;
+        QPixmap mm2pl;
         QPixmap pajlada;
+        QPixmap zneix;
     } avatars;
     struct {
         QPixmap addSplit;
@@ -35,6 +38,8 @@ public:
         QPixmap unvip;
         QPixmap update;
         QPixmap updateError;
+        QPixmap viewersDark;
+        QPixmap viewersLight;
         QPixmap vip;
     } buttons;
     QPixmap error;

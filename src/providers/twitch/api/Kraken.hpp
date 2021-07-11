@@ -1,11 +1,11 @@
 #pragma once
 
 #include "common/NetworkRequest.hpp"
+#include "providers/twitch/TwitchAccount.hpp"
 
 #include <QString>
 #include <QStringList>
 #include <QUrlQuery>
-#include <boost/noncopyable.hpp>
 
 #include <functional>
 
@@ -15,20 +15,22 @@ using KrakenFailureCallback = std::function<void()>;
 template <typename... T>
 using ResultCallback = std::function<void(T...)>;
 
-struct KrakenChannel {
-    const QString status;
+struct KrakenEmoteSets {
+    const QJsonObject emoteSets;
 
-    KrakenChannel(QJsonObject jsonObject)
-        : status(jsonObject.value("status").toString())
+    KrakenEmoteSets(QJsonObject jsonObject)
+        : emoteSets(jsonObject.value("emoticon_sets").toObject())
     {
     }
 };
 
-struct KrakenUser {
-    const QString createdAt;
+struct KrakenEmote {
+    const QString code;
+    const QString id;
 
-    KrakenUser(QJsonObject jsonObject)
-        : createdAt(jsonObject.value("created_at").toString())
+    KrakenEmote(QJsonObject jsonObject)
+        : code(jsonObject.value("code").toString())
+        , id(QString::number(jsonObject.value("id").toInt()))
     {
     }
 };
@@ -36,14 +38,10 @@ struct KrakenUser {
 class Kraken final : boost::noncopyable
 {
 public:
-    // https://dev.twitch.tv/docs/v5/reference/users#follow-channel
-    void getChannel(QString userId,
-                    ResultCallback<KrakenChannel> resultCallback,
-                    KrakenFailureCallback failureCallback);
-
-    // https://dev.twitch.tv/docs/v5/reference/users#get-user-by-id
-    void getUser(QString userId, ResultCallback<KrakenUser> resultCallback,
-                 KrakenFailureCallback failureCallback);
+    // https://dev.twitch.tv/docs/v5/reference/users#get-user-emotes
+    void getUserEmotes(TwitchAccount *account,
+                       ResultCallback<KrakenEmoteSets> successCallback,
+                       KrakenFailureCallback failureCallback);
 
     void update(QString clientId, QString oauthToken);
 

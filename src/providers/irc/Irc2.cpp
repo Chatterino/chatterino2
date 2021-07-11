@@ -11,6 +11,8 @@
 #include <QSaveFile>
 #include <QtConcurrent>
 
+#include <unordered_set>
+
 namespace chatterino {
 
 namespace {
@@ -137,7 +139,9 @@ Irc::Irc()
         }
     });
 
-    this->connections.delayedItemsChanged.connect([this] { this->save(); });
+    this->connections.delayedItemsChanged.connect([this] {
+        this->save();
+    });
 }
 
 QAbstractTableModel *Irc::newConnectionModel(QObject *parent)

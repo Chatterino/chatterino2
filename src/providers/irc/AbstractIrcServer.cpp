@@ -2,6 +2,7 @@
 
 #include "common/Channel.hpp"
 #include "common/Common.hpp"
+#include "common/QLogging.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -17,57 +18,59 @@ const int MAX_FALLOFF_COUNTER = 60;
 AbstractIrcServer::AbstractIrcServer()
 {
     // Initialize the connections
-    // XXX: don't create write connection if there is not separate write connection.
+    // XXX: don't create write connection if there is no separate write connection.
     this->writeConnection_.reset(new IrcConnection);
     this->writeConnection_->moveToThread(
         QCoreApplication::instance()->thread());
 
-    QObject::connect(
-        this->writeConnection_.get(), &Communi::IrcConnection::messageReceived,
-        this, [this](auto msg) { this->writeConnectionMessageReceived(msg); });
-    QObject::connect(
-        this->writeConnection_.get(), &Communi::IrcConnection::connected, this,
-        [this] { this->onWriteConnected(this->writeConnection_.get()); });
+    QObject::connect(this->writeConnection_.get(),
+                     &Communi::IrcConnection::messageReceived, this,
+                     [this](auto msg) {
+                         this->writeConnectionMessageReceived(msg);
+                     });
+    QObject::connect(this->writeConnection_.get(),
+                     &Communi::IrcConnection::connected, this, [this] {
+                         this->onWriteConnected(this->writeConnection_.get());
+                     });
+    this->writeConnection_->connectionLost.connect([this](bool timeout) {
+        qCDebug(chatterinoIrc)
+            << "Write connection reconnect requested. Timeout:" << timeout;
+        this->writeConnection_->smartReconnect.invoke();
+    });
 
     // Listen to read connection message signals
     this->readConnection_.reset(new IrcConnection);
     this->readConnection_->moveToThread(QCoreApplication::instance()->thread());
 
-    QObject::connect(
-        this->readConnection_.get(), &Communi::IrcConnection::messageReceived,
-        this, [this](auto msg) { this->readConnectionMessageReceived(msg); });
+    QObject::connect(this->readConnection_.get(),
+                     &Communi::IrcConnection::messageReceived, this,
+                     [this](auto msg) {
+                         this->readConnectionMessageReceived(msg);
+                     });
     QObject::connect(this->readConnection_.get(),
                      &Communi::IrcConnection::privateMessageReceived, this,
-                     [this](auto msg) { this->privateMessageReceived(msg); });
-    QObject::connect(
-        this->readConnection_.get(), &Communi::IrcConnection::connected, this,
-        [this] { this->onReadConnected(this->readConnection_.get()); });
+                     [this](auto msg) {
+                         this->privateMessageReceived(msg);
+                     });
     QObject::connect(this->readConnection_.get(),
-                     &Communi::IrcConnection::disconnected, this,
-                     [this] { this->onDisconnected(); });
+                     &Communi::IrcConnection::connected, this, [this] {
+                         this->onReadConnected(this->readConnection_.get());
+                     });
     QObject::connect(this->readConnection_.get(),
-                     &Communi::IrcConnection::socketError, this,
-                     [this] { this->onSocketError(); });
-
-    // listen to reconnect request
-    this->readConnection_->reconnectRequested.connect(
-        [this] { this->connect(); });
-    //    this->writeConnection->reconnectRequested.connect([this] {
-    //    this->connect(); });
-    this->reconnectTimer_.setInterval(RECONNECT_BASE_INTERVAL);
-    this->reconnectTimer_.setSingleShot(true);
-    QObject::connect(&this->reconnectTimer_, &QTimer::timeout, [this] {
-        this->reconnectTimer_.setInterval(RECONNECT_BASE_INTERVAL *
-                                          this->falloffCounter_);
-
-        this->falloffCounter_ =
-            std::min(MAX_FALLOFF_COUNTER, this->falloffCounter_ + 1);
-
-        if (!this->readConnection_->isConnected())
+                     &Communi::IrcConnection::disconnected, this, [this] {
+                         this->onDisconnected();
+                     });
+    this->readConnection_->connectionLost.connect([this](bool timeout) {
+        qCDebug(chatterinoIrc)
+            << "Read connection reconnect requested. Timeout:" << timeout;
+        if (timeout)
         {
-            qDebug() << "Trying to reconnect..." << this->falloffCounter_;
-            this->connect();
+            // Show additional message since this is going to interrupt a
+            // connection that is still "connected"
+            this->addGlobalSystemMessage(
+                "Server connection timed out, reconnecting");
         }
+        this->readConnection_->smartReconnect.invoke();
     });
 }
 
@@ -119,6 +122,25 @@ void AbstractIrcServer::open(ConnectionType type)
     if (type & Read)
     {
         this->readConnection_->open();
+    }
+}
+
+void AbstractIrcServer::addGlobalSystemMessage(const QString &messageText)
+{
+    std::lock_guard<std::mutex> lock(this->channelMutex);
+
+    MessageBuilder b(systemMessage, messageText);
+    auto message = b.release();
+
+    for (std::weak_ptr<Channel> &weak : this->channels.values())
+    {
+        std::shared_ptr<Channel> chan = weak.lock();
+        if (!chan)
+        {
+            continue;
+        }
+
+        chan->addMessage(message);
     }
 }
 
@@ -184,8 +206,8 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         chan->destroyed.connect([this, channelName] {
             // fourtf: issues when the server itself is destroyed
 
-            qDebug() << "[AbstractIrcServer::addChannel]" << channelName
-                     << "was destroyed";
+            qCDebug(chatterinoIrc) << "[AbstractIrcServer::addChannel]"
+                                   << channelName << "was destroyed";
             this->channels.remove(channelName);
 
             if (this->readConnection_)
@@ -334,11 +356,6 @@ void AbstractIrcServer::onDisconnected()
 
         chan->addMessage(disconnectedMsg);
     }
-}
-
-void AbstractIrcServer::onSocketError()
-{
-    this->reconnectTimer_.start();
 }
 
 std::shared_ptr<Channel> AbstractIrcServer::getCustomChannel(

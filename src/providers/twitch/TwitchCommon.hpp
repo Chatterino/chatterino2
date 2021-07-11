@@ -5,6 +5,14 @@
 
 namespace chatterino {
 
+#ifndef ATTR_UNUSED
+#    ifdef Q_OS_WIN
+#        define ATTR_UNUSED
+#    else
+#        define ATTR_UNUSED __attribute__((unused))
+#    endif
+#endif
+
 static const char *ANONYMOUS_USERNAME ATTR_UNUSED = "justinfan64537";
 
 inline QByteArray getDefaultClientID()

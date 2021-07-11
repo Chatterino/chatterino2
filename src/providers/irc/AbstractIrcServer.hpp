@@ -43,6 +43,8 @@ public:
 
     void addFakeMessage(const QString &data);
 
+    void addGlobalSystemMessage(const QString &messageText);
+
     // iteration
     void forEachChannel(std::function<void(ChannelPtr)> func);
 
@@ -68,7 +70,6 @@ protected:
     virtual void onReadConnected(IrcConnection *connection);
     virtual void onWriteConnected(IrcConnection *connection);
     virtual void onDisconnected();
-    virtual void onSocketError();
 
     virtual std::shared_ptr<Channel> getCustomChannel(
         const QString &channelName);

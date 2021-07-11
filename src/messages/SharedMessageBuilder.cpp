@@ -1,12 +1,17 @@
 #include "messages/SharedMessageBuilder.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
+#include "util/StreamerMode.hpp"
+
+#include <QFileInfo>
+#include <QMediaPlayer>
 
 namespace chatterino {
 
@@ -27,6 +32,34 @@ namespace {
         {
             return QUrl("qrc:/sounds/ping2.wav");
         }
+    }
+
+    QStringList parseTagList(const QVariantMap &tags, const QString &key)
+    {
+        auto iterator = tags.find(key);
+        if (iterator == tags.end())
+            return QStringList{};
+
+        return iterator.value().toString().split(
+            ',', QString::SplitBehavior::SkipEmptyParts);
+    }
+
+    std::vector<Badge> parseBadges(const QVariantMap &tags)
+    {
+        std::vector<Badge> badges;
+
+        for (QString badge : parseTagList(tags, "badges"))
+        {
+            QStringList parts = badge.split('/');
+            if (parts.size() != 2)
+            {
+                continue;
+            }
+
+            badges.emplace_back(parts[0], parts[1]);
+        }
+
+        return badges;
     }
 
 }  // namespace
@@ -55,24 +88,14 @@ SharedMessageBuilder::SharedMessageBuilder(
 {
 }
 
-namespace {
-
-    QColor getRandomColor(const QString &v)
-    {
-        int colorSeed = 0;
-        for (const auto &c : v)
-        {
-            colorSeed += c.digitValue();
-        }
-        const auto colorIndex = colorSeed % TWITCH_USERNAME_COLORS.size();
-        return TWITCH_USERNAME_COLORS[colorIndex];
-    }
-
-}  // namespace
-
 void SharedMessageBuilder::parse()
 {
     this->parseUsernameColor();
+
+    if (this->action_)
+    {
+        this->textColor_ = this->usernameColor_;
+    }
 
     this->parseUsername();
 
@@ -87,8 +110,9 @@ bool SharedMessageBuilder::isIgnored() const
     {
         if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
         {
-            qDebug() << "Blocking message because it contains ignored phrase"
-                     << phrase.getPattern();
+            qCDebug(chatterinoMessage)
+                << "Blocking message because it contains ignored phrase"
+                << phrase.getPattern();
             return true;
         }
     }
@@ -201,11 +225,17 @@ void SharedMessageBuilder::parseHighlights()
         {
             continue;
         }
-        qDebug() << "Highlight because user" << this->ircMessage->nick()
-                 << "sent a message";
+        qCDebug(chatterinoMessage)
+            << "Highlight because user" << this->ircMessage->nick()
+            << "sent a message";
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = userHighlight.getColor();
+
+        if (userHighlight.showInMentions())
+        {
+            this->message().flags.set(MessageFlag::ShowInMentions);
+        }
 
         if (userHighlight.hasAlert())
         {
@@ -248,10 +278,12 @@ void SharedMessageBuilder::parseHighlights()
     std::vector<HighlightPhrase> activeHighlights =
         getSettings()->highlightedMessages.cloneVector();
 
-    if (getSettings()->enableSelfHighlight && currentUsername.size() > 0)
+    if (!currentUser->isAnon() && getSettings()->enableSelfHighlight &&
+        currentUsername.size() > 0)
     {
         HighlightPhrase selfHighlight(
-            currentUsername, getSettings()->enableSelfHighlightTaskbar,
+            currentUsername, getSettings()->showSelfHighlightInMentions,
+            getSettings()->enableSelfHighlightTaskbar,
             getSettings()->enableSelfHighlightSound, false, false,
             getSettings()->selfHighlightSoundUrl.getValue(),
             ColorProvider::instance().color(ColorType::SelfHighlight));
@@ -268,6 +300,11 @@ void SharedMessageBuilder::parseHighlights()
 
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor = highlight.getColor();
+
+        if (highlight.showInMentions())
+        {
+            this->message().flags.set(MessageFlag::ShowInMentions);
+        }
 
         if (highlight.hasAlert())
         {
@@ -300,6 +337,53 @@ void SharedMessageBuilder::parseHighlights()
             break;
         }
     }
+
+    // Highlight because of badge
+    auto badges = parseBadges(this->tags);
+    auto badgeHighlights = getCSettings().highlightedBadges.readOnly();
+    bool badgeHighlightSet = false;
+    for (const HighlightBadge &highlight : *badgeHighlights)
+    {
+        for (const Badge &badge : badges)
+        {
+            if (!highlight.isMatch(badge))
+            {
+                continue;
+            }
+
+            if (!badgeHighlightSet)
+            {
+                this->message().flags.set(MessageFlag::Highlighted);
+                this->message().highlightColor = highlight.getColor();
+                badgeHighlightSet = true;
+            }
+
+            if (highlight.hasAlert())
+            {
+                this->highlightAlert_ = true;
+            }
+
+            // Only set highlightSound_ if it hasn't been set by badge
+            // highlights already.
+            if (highlight.hasSound() && !this->highlightSound_)
+            {
+                this->highlightSound_ = true;
+                // Use custom sound if set, otherwise use fallback sound
+                this->highlightSoundUrl_ = highlight.hasCustomSound()
+                                               ? highlight.getSoundUrl()
+                                               : getFallbackHighlightSound();
+            }
+
+            if (this->highlightAlert_ && this->highlightSound_)
+            {
+                /*
+                 * Break once no further attributes (taskbar, sound) can be
+                 * applied.
+                 */
+                break;
+            }
+        }
+    }
 }
 
 void SharedMessageBuilder::addTextOrEmoji(EmotePtr emote)
@@ -314,8 +398,7 @@ void SharedMessageBuilder::addTextOrEmoji(const QString &string_)
     // Actually just text
     auto linkString = this->matchLink(string);
     auto link = Link();
-    auto textColor = this->action_ ? MessageColor(this->usernameColor_)
-                                   : MessageColor(MessageColor::Text);
+    auto &&textColor = this->textColor_;
 
     if (linkString.isEmpty())
     {
@@ -341,10 +424,10 @@ void SharedMessageBuilder::addTextOrEmoji(const QString &string_)
 void SharedMessageBuilder::appendChannelName()
 {
     QString channelName("#" + this->channel->getName());
-    Link link(Link::Url, this->channel->getName() + "\n" + this->message().id);
+    Link link(Link::JumpToChannel, this->channel->getName());
 
     this->emplace<TextElement>(channelName, MessageElementFlag::ChannelName,
-                               MessageColor::System)  //
+                               MessageColor::System)
         ->setLink(link);
 }
 
@@ -364,6 +447,12 @@ inline QMediaPlayer *getPlayer()
 void SharedMessageBuilder::triggerHighlights()
 {
     static QUrl currentPlayerUrl;
+
+    if (isInStreamerMode() && getSettings()->streamerModeMuteMentions)
+    {
+        // We are in streamer mode with muting mention sounds enabled. Do nothing.
+        return;
+    }
 
     if (getCSettings().isMutedChannel(this->channel->getName()))
     {

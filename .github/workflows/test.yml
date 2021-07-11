@@ -1,0 +1,82 @@
+---
+name: Test
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-20.04]
+      fail-fast: false
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          submodules: recursive
+
+      - name: Cache Qt
+        id: cache-qt
+        uses: actions/cache@v2.1.6
+        with:
+          path: ../Qt
+          key: ${{ runner.os }}-QtCache-20201005
+
+      # LINUX
+      - name: Install p7zip (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: sudo apt-get update && sudo apt-get -y install p7zip-full
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v2
+        with:
+          aqtversion: '==1.1.1'
+          cached: ${{ steps.cache-qt.outputs.cache-hit }}
+          extra: --external 7z
+
+      # LINUX
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            sudo apt-get update
+            sudo apt-get -y install \
+                cmake \
+                rapidjson-dev \
+                libssl-dev \
+                libboost-dev \
+                libboost-system-dev \
+                libboost-filesystem-dev \
+                libpulse-dev \
+                libxkbcommon-x11-0 \
+                libgstreamer-plugins-base1.0-0 \
+                build-essential \
+                libgl1-mesa-dev \
+                libxcb-icccm4 \
+                libxcb-image0 \
+                libxcb-keysyms1 \
+                libxcb-render-util0 \
+                libxcb-xinerama0 \
+                libgtest-dev
+
+      - name: Create build directory (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            mkdir build-test
+        shell: bash
+
+      - name: Build (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            cmake -DBUILD_TESTS=On -DBUILD_APP=OFF ..
+            cmake --build . --config Release
+        working-directory: build-test
+        shell: bash
+
+      - name: Test (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            ./bin/chatterino-test --platform minimal
+        working-directory: build-test
+        shell: bash

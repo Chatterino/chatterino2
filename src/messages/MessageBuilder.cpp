@@ -12,7 +12,6 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Theme.hpp"
 #include "util/FormatTime.hpp"
-#include "util/IrcHelpers.hpp"
 
 #include <QDateTime>
 #include <QImageReader>
@@ -27,6 +26,53 @@ MessagePtr makeSystemMessage(const QString &text)
 MessagePtr makeSystemMessage(const QString &text, const QTime &time)
 {
     return MessageBuilder(systemMessage, text, time).release();
+}
+
+MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
+{
+    auto builder = MessageBuilder();
+
+    builder.emplace<TimestampElement>();
+    builder.message().flags.set(MessageFlag::PubSub);
+
+    builder
+        .emplace<ImageElement>(Image::fromPixmap(getResources().twitch.automod),
+                               MessageElementFlag::BadgeChannelAuthority)
+        ->setTooltip("AutoMod");
+    builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
+                                 MessageColor(QColor("blue")),
+                                 FontStyle::ChatMediumBold);
+    builder.emplace<TextElement>(
+        "AutoMod:", MessageElementFlag::NonBoldUsername,
+        MessageColor(QColor("blue")));
+    switch (action.type)
+    {
+        case AutomodInfoAction::OnHold: {
+            builder.emplace<TextElement>(("Hey! Your message is being checked "
+                                          "by mods and has not been sent."),
+                                         MessageElementFlag::Text,
+                                         MessageColor::Text);
+        }
+        break;
+        case AutomodInfoAction::Denied: {
+            builder.emplace<TextElement>(("Mods have removed your message."),
+                                         MessageElementFlag::Text,
+                                         MessageColor::Text);
+        }
+        break;
+        case AutomodInfoAction::Approved: {
+            builder.emplace<TextElement>(("Mods have accepted your message."),
+                                         MessageElementFlag::Text,
+                                         MessageColor::Text);
+        }
+        break;
+    }
+
+    builder.message().flags.set(MessageFlag::AutoMod);
+
+    auto message = builder.release();
+
+    return message;
 }
 
 std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
@@ -127,7 +173,8 @@ MessageBuilder::MessageBuilder(SystemMessageTag, const QString &text,
 }
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag,
-                               const QString &systemMessageText, int times)
+                               const QString &systemMessageText, int times,
+                               const QTime &time)
     : MessageBuilder()
 {
     QString username = systemMessageText.split(" ").at(0);
@@ -135,7 +182,7 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag,
 
     QString text;
 
-    this->emplace<TimestampElement>();
+    this->emplace<TimestampElement>(time);
     this->emplaceSystemTextAndUpdate(username, text)
         ->setLink({Link::UserInfo, username});
     this->emplaceSystemTextAndUpdate(
@@ -147,13 +194,13 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag,
 
 MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
                                const QString &durationInSeconds,
-                               const QString &reason, bool multipleTimes)
+                               bool multipleTimes, const QTime &time)
     : MessageBuilder()
 {
     QString fullText;
     QString text;
 
-    this->emplace<TimestampElement>();
+    this->emplace<TimestampElement>(time);
     this->emplaceSystemTextAndUpdate(username, fullText)
         ->setLink({Link::UserInfo, username});
 
@@ -176,12 +223,6 @@ MessageBuilder::MessageBuilder(TimeoutMessageTag, const QString &username,
         text.append("has been permanently banned");
     }
 
-    if (reason.length() > 0)
-    {
-        text.append(": \"");
-        text.append(parseTagString(reason));
-        text.append("\"");
-    }
     text.append(".");
 
     if (multipleTimes)
@@ -341,7 +382,7 @@ MessageBuilder::MessageBuilder(const AutomodUserAction &action)
         break;
 
         case AutomodUserAction::RemovePermitted: {
-            text = QString("%1 removed %2 as a permitted term term on AutoMod.")
+            text = QString("%1 removed %2 as a permitted term on AutoMod.")
                        .arg(action.source.name)
                        .arg(action.message);
         }

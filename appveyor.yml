@@ -1,7 +1,7 @@
 version: "{build}"
 branches:
   only:
-  - master
+  - dont-automatically-build-appveyor
 image: Visual Studio 2017
 platform: Any CPU
 clone_depth: 1

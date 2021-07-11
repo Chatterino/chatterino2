@@ -2,6 +2,7 @@
 
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "common/Channel.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
@@ -9,6 +10,7 @@
 
 #include <rapidjson/document.h>
 #include <QColor>
+#include <QElapsedTimer>
 #include <QString>
 
 #include <functional>
@@ -17,21 +19,35 @@
 
 namespace chatterino {
 
-enum IgnoreResult {
-    IgnoreResult_Success,
-    IgnoreResult_AlreadyIgnored,
-    IgnoreResult_Failed,
-};
-
-enum UnignoreResult {
-    UnignoreResult_Success,
-    UnignoreResult_Failed,
-};
-
 enum FollowResult {
     FollowResult_Following,
     FollowResult_NotFollowing,
     FollowResult_Failed,
+};
+
+struct TwitchEmoteSetResolverResponse {
+    const QString channelName;
+    const QString channelId;
+    const QString type;
+    const int tier;
+    const bool isCustom;
+    // Example response:
+    //    {
+    //      "channel_name": "zneix",
+    //      "channel_id": "99631238",
+    //      "type": "",
+    //      "tier": 1,
+    //      "custom": false
+    //    }
+
+    TwitchEmoteSetResolverResponse(QJsonObject jsonObject)
+        : channelName(jsonObject.value("channel_name").toString())
+        , channelId(jsonObject.value("channel_id").toString())
+        , type(jsonObject.value("type").toString())
+        , tier(jsonObject.value("tier").toInt())
+        , isCustom(jsonObject.value("custom").toBool())
+    {
+    }
 };
 
 class TwitchAccount : public Account
@@ -46,7 +62,6 @@ public:
         QString key;
         QString channelName;
         QString text;
-        QString type;
         std::vector<TwitchEmote> emotes;
     };
 
@@ -83,37 +98,32 @@ public:
 
     bool isAnon() const;
 
-    void loadIgnores();
-    void ignore(const QString &targetName,
-                std::function<void(IgnoreResult, const QString &)> onFinished);
-    void ignoreByID(
-        const QString &targetUserID, const QString &targetName,
-        std::function<void(IgnoreResult, const QString &)> onFinished);
-    void unignore(
-        const QString &targetName,
-        std::function<void(UnignoreResult, const QString &)> onFinished);
-    void unignoreByID(
-        const QString &targetUserID, const QString &targetName,
-        std::function<void(UnignoreResult, const QString &message)> onFinished);
+    void loadBlocks();
+    void blockUser(QString userId, std::function<void()> onSuccess,
+                   std::function<void()> onFailure);
+    void unblockUser(QString userId, std::function<void()> onSuccess,
+                     std::function<void()> onFailure);
 
     void checkFollow(const QString targetUserID,
                      std::function<void(FollowResult)> onFinished);
-    void followUser(const QString userID,
-                    std::function<void()> successCallback);
-    void unfollowUser(const QString userID,
-                      std::function<void()> successCallback);
 
-    std::set<TwitchUser> getIgnores() const;
+    SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;
+    SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 
     void loadEmotes();
-    AccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
+    // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
+    // this function makes sure not to load emote sets that have already been loaded
+    void loadUserstateEmotes();
+    // setUserStateEmoteSets sets the emote sets that were parsed from the USERSTATE emote-sets key
+    // Returns true if the newly inserted emote sets differ from the ones previously saved
+    [[nodiscard]] bool setUserstateEmoteSets(QStringList newEmoteSets);
+    SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
 
     // Automod actions
-    void autoModAllow(const QString msgID);
-    void autoModDeny(const QString msgID);
+    void autoModAllow(const QString msgID, ChannelPtr channel);
+    void autoModDeny(const QString msgID, ChannelPtr channel);
 
 private:
-    void parseEmotes(const rapidjson::Document &document);
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
 
     QString oauthClient_;
@@ -124,7 +134,9 @@ private:
     Atomic<QColor> color_;
 
     mutable std::mutex ignoresMutex_;
-    std::set<TwitchUser> ignores_;
+    QStringList userstateEmoteSets_;
+    UniqueAccess<std::set<TwitchUser>> ignores_;
+    UniqueAccess<std::set<QString>> ignoresUserIds_;
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;

@@ -1,6 +1,7 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
@@ -46,6 +47,16 @@ bool MessageLayoutElement::hasTrailingSpace() const
     return this->trailingSpace;
 }
 
+int MessageLayoutElement::getLine() const
+{
+    return this->line_;
+}
+
+void MessageLayoutElement::setLine(int line)
+{
+    this->line_ = line;
+}
+
 MessageLayoutElement *MessageLayoutElement::setTrailingSpace(bool value)
 {
     this->trailingSpace = value;
@@ -87,7 +98,7 @@ FlagsEnum<MessageElementFlag> MessageLayoutElement::getFlags() const
 ImageLayoutElement::ImageLayoutElement(MessageElement &creator, ImagePtr image,
                                        const QSize &size)
     : MessageLayoutElement(creator, size)
-    , image_(image)
+    , image_(std::move(image))
 {
     this->trailingSpace = creator.hasTrailingSpace();
 }
@@ -217,7 +228,7 @@ void TextLayoutElement::listenToLinkChanges()
             .linkChanged.connect([this]() {
                 // log("Old link: {}", this->getCreator().getLink().value);
                 // log("This link: {}", this->getLink().value);
-                this->setLink(this->getCreator().getLink());  //
+                this->setLink(this->getCreator().getLink());
             }));
 }
 
@@ -269,7 +280,7 @@ int TextLayoutElement::getMouseOverIndex(const QPoint &abs) const
     for (auto i = 0; i < this->getText().size(); i++)
     {
         auto &&text = this->getText();
-        auto width = metrics.width(this->getText()[i]);
+        auto width = metrics.horizontalAdvance(this->getText()[i]);
 
         if (x + width > abs.x())
         {
@@ -308,7 +319,7 @@ int TextLayoutElement::getXFromIndex(int index)
         int x = 0;
         for (int i = 0; i < index; i++)
         {
-            x += metrics.width(this->getText()[i]);
+            x += metrics.horizontalAdvance(this->getText()[i]);
         }
         return x + this->getRect().left();
     }
@@ -422,13 +433,13 @@ void MultiColorTextLayoutElement::paint(QPainter &painter)
 
     for (const auto &segment : this->segments_)
     {
-        // qDebug() << "Draw segment:" << segment.text;
+        qCDebug(chatterinoMessage) << "Draw segment:" << segment.text;
         painter.setPen(segment.color);
         painter.drawText(QRectF(this->getRect().x() + xOffset,
                                 this->getRect().y(), 10000, 10000),
                          segment.text,
                          QTextOption(Qt::AlignLeft | Qt::AlignTop));
-        xOffset += metrics.width(segment.text);
+        xOffset += metrics.horizontalAdvance(segment.text);
     }
 }
 

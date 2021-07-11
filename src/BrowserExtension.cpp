@@ -2,11 +2,16 @@
 
 #include "singletons/NativeMessaging.hpp"
 
+#include <QJsonDocument>
+#include <QJsonObject>
 #include <QStringList>
 #include <QTimer>
+
+#include <chrono>
 #include <fstream>
 #include <iostream>
 #include <memory>
+#include <thread>
 
 #ifdef Q_OS_WIN
 #    include <fcntl.h>

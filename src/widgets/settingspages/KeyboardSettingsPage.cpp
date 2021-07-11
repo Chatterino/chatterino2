@@ -57,6 +57,7 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
     form->addRow(new QLabel("Alt + ←/↑/→/↓"),
                  new QLabel("Select left/upper/right/bottom split"));
+    form->addRow(new QLabel("Ctrl+U"), new QLabel("Toggle visibility of tabs"));
 
     form->addItem(new QSpacerItem(16, 16));
     form->addRow(new QLabel("Ctrl + R"), new QLabel("Change channel"));
@@ -66,6 +67,12 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     form->addRow(new QLabel("Ctrl + P"), new QLabel("Open Settings menu"));
     form->addRow(new QLabel("F5"),
                  new QLabel("Reload subscriber and channel emotes"));
+    form->addRow(new QLabel("Ctrl + F5"), new QLabel("Reconnect channels"));
+    form->addRow(new QLabel("Alt + X"), new QLabel("Create a clip"));
+
+    form->addItem(new QSpacerItem(16, 16));
+    form->addRow(new QLabel("PageUp"), new QLabel("Scroll up"));
+    form->addRow(new QLabel("PageDown"), new QLabel("Scroll down"));
 }
 
 }  // namespace chatterino

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <QDebug>
 #include <QElapsedTimer>
+#include <QString>
 #include <boost/noncopyable.hpp>
 
 namespace chatterino {
