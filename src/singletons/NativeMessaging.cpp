@@ -220,7 +220,7 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         }
 
         args.fullscreen = attachFullscreen;
-      
+
         qCDebug(chatterinoNativeMessage)
             << args.x << args.pixelRatio << args.width << args.height
             << args.winId;
