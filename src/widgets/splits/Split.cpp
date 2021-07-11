@@ -170,16 +170,16 @@ Split::Split(QWidget *parent)
             getApp()->twitch.server->getOrAddChannel(twitchChannel);
         switch (openIn)
         {
-            case (FromTwitchLinkOpenChannelIn::Split):
+            case FromTwitchLinkOpenChannelIn::Split:
                 this->openSplitRequested.invoke(channel);
                 break;
-            case (FromTwitchLinkOpenChannelIn::Tab):
+            case FromTwitchLinkOpenChannelIn::Tab:
                 this->joinChannelInNewTab(channel);
                 break;
-            case (FromTwitchLinkOpenChannelIn::BrowserPlayer):
+            case FromTwitchLinkOpenChannelIn::BrowserPlayer:
                 this->openChannelInBrowserPlayer(channel);
                 break;
-            case (FromTwitchLinkOpenChannelIn::Streamlink):
+            case FromTwitchLinkOpenChannelIn::Streamlink:
                 this->openChannelInStreamlink(twitchChannel);
                 break;
             default:
@@ -332,8 +332,6 @@ void Split::updateInputPlaceholder()
 
 void Split::joinChannelInNewTab(ChannelPtr channel)
 {
-    // Code opening a new tab was taken from:
-    // src/widgets/dialogs/switcher/NewTabItem.cpp#22 - NewTabItem::action
     auto &nb = getApp()->windows->getMainWindow().getNotebook();
     SplitContainer *container = nb.addPage(true);
 
