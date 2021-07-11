@@ -227,6 +227,23 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
             reply->deleteLater();
 
+            if (data->requestType_ == NetworkRequestType::Get)
+            {
+                qCDebug(chatterinoHttp)
+                    << QString("%1 %3 %2")  // reversed to not break URLs
+                           .arg(networkRequestTypes.at(int(data->requestType_)))
+                           .arg(status.toInt())
+                           .arg(data->request_.url().toString());
+            }
+            else
+            {
+                qCDebug(chatterinoHttp)
+                    << QString("%1 %2 %3 %4")
+                           .arg(networkRequestTypes.at(int(data->requestType_)))
+                           .arg(data->request_.url().toString())
+                           .arg(status.toInt())
+                           .arg(QString(data->payload_));
+            }
             if (data->finally_)
             {
                 if (data->executeConcurrently_)
@@ -286,6 +303,10 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
         QByteArray bytes = cachedFile.readAll();
         NetworkResult result(bytes, 200);
 
+        qCDebug(chatterinoHttp)
+            << QString("%1 %2 [CACHED] 200")
+                   .arg(networkRequestTypes.at(int(data->requestType_)))
+                   .arg(data->request_.url().toString());
         if (data->onSuccess_)
         {
             if (data->executeConcurrently_ || isGuiThread())
