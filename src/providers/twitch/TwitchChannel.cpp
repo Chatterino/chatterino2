@@ -1058,6 +1058,10 @@ void TwitchChannel::createClip()
         // successCallback
         [this](const HelixClip &clip) {
             MessageBuilder builder;
+            QString text(
+                "Clip created! Copy link to clipboard or edit it in browser.");
+            builder.message().messageText = text;
+            builder.message().searchText = text;
             builder.message().flags.set(MessageFlag::System);
 
             builder.emplace<TimestampElement>();
@@ -1086,6 +1090,7 @@ void TwitchChannel::createClip()
         // failureCallback
         [this](auto error) {
             MessageBuilder builder;
+            QString text;
             builder.message().flags.set(MessageFlag::System);
 
             builder.emplace<TimestampElement>();
@@ -1096,6 +1101,7 @@ void TwitchChannel::createClip()
                     builder.emplace<TextElement>(
                         CLIPS_FAILURE_CLIPS_DISABLED_TEXT,
                         MessageElementFlag::Text, MessageColor::System);
+                    text = CLIPS_FAILURE_CLIPS_DISABLED_TEXT;
                 }
                 break;
 
@@ -1108,6 +1114,9 @@ void TwitchChannel::createClip()
                                               MessageElementFlag::Text,
                                               MessageColor::Link)
                         ->setLink(ACCOUNTS_LINK);
+                    text = QString("%1 %2").arg(
+                        CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT,
+                        LOGIN_PROMPT_TEXT);
                 }
                 break;
 
@@ -1117,9 +1126,13 @@ void TwitchChannel::createClip()
                     builder.emplace<TextElement>(
                         CLIPS_FAILURE_UNKNOWN_ERROR_TEXT,
                         MessageElementFlag::Text, MessageColor::System);
+                    text = CLIPS_FAILURE_UNKNOWN_ERROR_TEXT;
                 }
                 break;
             }
+
+            builder.message().messageText = text;
+            builder.message().searchText = text;
 
             this->addMessage(builder.release());
         },
