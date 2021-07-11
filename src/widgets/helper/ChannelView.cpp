@@ -1950,7 +1950,7 @@ void ChannelView::addContextMenuItems(
             });
 
             menu->addSeparator();
-            menu->addAction("Open in player in browser", [twitchUsername, this] {
+            menu->addAction("Open player in browser", [twitchUsername, this] {
                 this->openChannelIn.invoke(twitchUsername, FromTwitchLinkOpenChannelIn::BrowserPlayer);
             });
             menu->addAction("Open in streamlink", [twitchUsername, this] {
