@@ -114,6 +114,10 @@ private:
     void handleModifiers(Qt::KeyboardModifiers modifiers);
     void updateInputPlaceholder();
 
+    void openChannelInBrowserPlayer(ChannelPtr channel);
+    void openChannelInStreamlink(QString channelName);
+    void joinChannelInNewTab(ChannelPtr channel);
+
     IndirectChannel channel_;
 
     bool moderationMode_{};
