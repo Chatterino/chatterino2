@@ -18,6 +18,7 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Emotes.hpp"
+#include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
 namespace chatterino {
@@ -216,7 +217,7 @@ void TwitchAccount::loadEmotes()
                 // Clearing emote data
                 auto emoteData = this->emotes_.access();
                 emoteData->emoteSets.clear();
-                emoteData->allEmoteNames.clear();
+                emoteData->emotes.clear();
 
                 for (auto emoteSetIt = data.emoteSets.begin();
                      emoteSetIt != data.emoteSets.end(); ++emoteSetIt)
@@ -245,11 +246,14 @@ void TwitchAccount::loadEmotes()
                             EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
                         emoteSet->emotes.emplace_back(
                             TwitchEmote{id, cleanCode});
-                        emoteData->allEmoteNames.push_back(cleanCode);
 
-                        auto emote =
-                            getApp()->emotes->twitch.getOrCreateEmote(id, code);
-                        emoteData->emotes.emplace(code, emote);
+                        if (!emoteSet->local)
+                        {
+                            auto emote =
+                                getApp()->emotes->twitch.getOrCreateEmote(id,
+                                                                          code);
+                            emoteData->emotes.emplace(code, emote);
+                        }
                     }
 
                     std::sort(emoteSet->emotes.begin(), emoteSet->emotes.end(),
@@ -345,6 +349,7 @@ void TwitchAccount::loadUserstateEmotes()
             batch.join(","),
             [this](QJsonArray emoteSetArray) {
                 auto emoteData = this->emotes_.access();
+                auto localEmoteData = this->localEmotes_.access();
                 for (auto emoteSet : emoteSetArray)
                 {
                     auto newUserEmoteSet = std::make_shared<EmoteSet>();
@@ -360,9 +365,9 @@ void TwitchAccount::loadUserstateEmotes()
                     newUserEmoteSet->text = name;
                     newUserEmoteSet->channelName = ivrEmoteSet.login;
 
-                    for (const auto &emote : ivrEmoteSet.emotes)
+                    for (const auto &emoteObj : ivrEmoteSet.emotes)
                     {
-                        IvrEmote ivrEmote(emote.toObject());
+                        IvrEmote ivrEmote(emoteObj.toObject());
 
                         auto id = EmoteId{ivrEmote.id};
                         auto code = EmoteName{ivrEmote.code};
@@ -371,11 +376,29 @@ void TwitchAccount::loadUserstateEmotes()
                         newUserEmoteSet->emotes.push_back(
                             TwitchEmote{id, cleanCode});
 
-                        emoteData->allEmoteNames.push_back(cleanCode);
-
-                        auto twitchEmote =
+                        auto emote =
                             getApp()->emotes->twitch.getOrCreateEmote(id, code);
-                        emoteData->emotes.emplace(code, twitchEmote);
+
+                        // Follower emotes can be only used in their origin channel
+                        if (ivrEmote.emoteType == "FOLLOWER")
+                        {
+                            newUserEmoteSet->local = true;
+
+                            // EmoteMap for target channel wasn't initialized yet, doing it now
+                            if (localEmoteData->find(ivrEmoteSet.channelId) ==
+                                localEmoteData->end())
+                            {
+                                localEmoteData->emplace(ivrEmoteSet.channelId,
+                                                        EmoteMap());
+                            }
+
+                            localEmoteData->at(ivrEmoteSet.channelId)
+                                .emplace(code, emote);
+                        }
+                        else
+                        {
+                            emoteData->emotes.emplace(code, emote);
+                        }
                     }
                     std::sort(newUserEmoteSet->emotes.begin(),
                               newUserEmoteSet->emotes.end(),
@@ -395,6 +418,12 @@ SharedAccessGuard<const TwitchAccount::TwitchAccountEmoteData>
     TwitchAccount::accessEmotes() const
 {
     return this->emotes_.accessConst();
+}
+
+SharedAccessGuard<const std::unordered_map<QString, EmoteMap>>
+    TwitchAccount::accessLocalEmotes() const
+{
+    return this->localEmotes_.accessConst();
 }
 
 // AutoModActions
@@ -510,6 +539,12 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
     getHelix()->getEmoteSetData(
         emoteSet->key,
         [emoteSet](HelixEmoteSetData emoteSetData) {
+            // Follower emotes can be only used in their origin channel
+            if (emoteSetData.emoteType == "follower")
+            {
+                emoteSet->local = true;
+            }
+
             if (emoteSetData.ownerId.isEmpty() ||
                 emoteSetData.setId != emoteSet->key)
             {

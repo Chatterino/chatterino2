@@ -10,6 +10,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
+#include "util/QStringHash.hpp"
 
 #include <QtAlgorithms>
 #include <utility>
@@ -96,14 +97,24 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
     if (auto channel = dynamic_cast<TwitchChannel *>(&this->channel_))
     {
-        // account emotes
         if (auto account = getApp()->accounts->twitch.getCurrent())
         {
-            for (const auto &emote : account->accessEmotes()->allEmoteNames)
+            // Twitch Emotes available globally
+            for (const auto &emote : account->accessEmotes()->emotes)
             {
-                // XXX: No way to discern between a twitch global emote and sub
-                // emote right now
-                addString(emote.string, TaggedString::Type::TwitchGlobalEmote);
+                addString(emote.first.string, TaggedString::TwitchGlobalEmote);
+            }
+
+            // Twitch Emotes available locally
+            auto localEmoteData = account->accessLocalEmotes();
+            if (localEmoteData->find(channel->roomId()) !=
+                localEmoteData->end())
+            {
+                for (const auto &emote : localEmoteData->at(channel->roomId()))
+                {
+                    addString(emote.first.string,
+                              TaggedString::Type::TwitchLocalEmote);
+                }
             }
         }
 
