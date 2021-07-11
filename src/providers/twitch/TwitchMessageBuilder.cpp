@@ -9,13 +9,13 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
 #include "widgets/Window.hpp"
 
@@ -47,21 +47,6 @@ const QSet<QString> zeroWidthEmotes{
 namespace chatterino {
 
 namespace {
-
-    QColor getRandomColor(const QVariant &userId)
-    {
-        bool ok = true;
-        int colorSeed = userId.toInt(&ok);
-        if (!ok)
-        {
-            // We were unable to convert the user ID to an integer, this means Twitch has decided to start using non-integer user IDs
-            // Just randomize the users color
-            colorSeed = std::rand();
-        }
-
-        const auto colorIndex = colorSeed % TWITCH_USERNAME_COLORS.size();
-        return TWITCH_USERNAME_COLORS[colorIndex];
-    }
 
     QStringList parseTagList(const QVariantMap &tags, const QString &key)
     {
@@ -601,7 +586,8 @@ void TwitchMessageBuilder::parseUsernameColor()
 
     if (getSettings()->colorizeNicknames && this->tags.contains("user-id"))
     {
-        this->usernameColor_ = getRandomColor(this->tags.value("user-id"));
+        this->usernameColor_ =
+            getRandomColor(this->tags.value("user-id").toString());
         this->message().usernameColor = this->usernameColor_;
     }
 }
@@ -1267,6 +1253,7 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
 {
     builder->emplace<TimestampElement>();
     QString redeemed = "Redeemed";
+    QStringList textList;
     if (!reward.isUserInputRequired)
     {
         builder
@@ -1275,6 +1262,7 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
                 MessageColor::Text, FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, reward.user.login});
         redeemed = "redeemed";
+        textList.append(reward.user.login);
     }
     builder->emplace<TextElement>(redeemed,
                                   MessageElementFlag::ChannelPointReward);
@@ -1293,6 +1281,10 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     }
 
     builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
+
+    textList.append({redeemed, reward.title, QString::number(reward.cost)});
+    builder->message().messageText = textList.join(" ");
+    builder->message().searchText = textList.join(" ");
 }
 
 void TwitchMessageBuilder::liveMessage(const QString &channelName,
@@ -1305,9 +1297,9 @@ void TwitchMessageBuilder::liveMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
                                   MessageColor::Text);
-    auto text = channelName + " is live!";
-    builder->message().searchText = text;
+    auto text = QString("%1 is live!").arg(channelName);
     builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
@@ -1322,6 +1314,9 @@ void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
                                   MessageColor::System);
+    auto text = QString("%1 is live!").arg(channelName);
+    builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
@@ -1336,12 +1331,16 @@ void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is now offline.", MessageElementFlag::Text,
                                   MessageColor::System);
+    auto text = QString("%1 is now offline.").arg(channelName);
+    builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
                                                 MessageBuilder *builder,
                                                 bool hostOn)
 {
+    QString text;
     builder->emplace<TimestampElement>();
     builder->message().flags.set(MessageFlag::System);
     builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
@@ -1354,6 +1353,7 @@ void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
                 channelName + ".", MessageElementFlag::Username,
                 MessageColor::System, FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, channelName});
+        text = QString("Now hosting %1.").arg(channelName);
     }
     else
     {
@@ -1365,7 +1365,11 @@ void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
         builder->emplace<TextElement>("has gone offline. Exiting host mode.",
                                       MessageElementFlag::Text,
                                       MessageColor::System);
+        text =
+            QString("%1 has gone offline. Exiting host mode.").arg(channelName);
     }
+    builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 // irc variant

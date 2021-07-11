@@ -69,6 +69,12 @@ namespace {
 
         for (const auto &set : sets)
         {
+            // Some emotes (e.g. follower ones) are only available in their origin channel
+            if (set->local && currentChannelName != set->channelName)
+            {
+                continue;
+            }
+
             // TITLE
             auto channelName = set->channelName;
             auto text = set->text.isEmpty() ? "Twitch" : set->text;

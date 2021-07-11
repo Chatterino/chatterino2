@@ -4,6 +4,7 @@
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/Message.hpp"
@@ -21,6 +22,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/FormatTime.hpp"
 #include "util/PostToThread.hpp"
+#include "util/QStringHash.hpp"
 #include "widgets/Window.hpp"
 
 #include <rapidjson/document.h>
@@ -30,7 +32,6 @@
 #include <QJsonValue>
 #include <QThread>
 #include <QTimer>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -1057,6 +1058,10 @@ void TwitchChannel::createClip()
         // successCallback
         [this](const HelixClip &clip) {
             MessageBuilder builder;
+            QString text(
+                "Clip created! Copy link to clipboard or edit it in browser.");
+            builder.message().messageText = text;
+            builder.message().searchText = text;
             builder.message().flags.set(MessageFlag::System);
 
             builder.emplace<TimestampElement>();
@@ -1085,6 +1090,7 @@ void TwitchChannel::createClip()
         // failureCallback
         [this](auto error) {
             MessageBuilder builder;
+            QString text;
             builder.message().flags.set(MessageFlag::System);
 
             builder.emplace<TimestampElement>();
@@ -1095,6 +1101,7 @@ void TwitchChannel::createClip()
                     builder.emplace<TextElement>(
                         CLIPS_FAILURE_CLIPS_DISABLED_TEXT,
                         MessageElementFlag::Text, MessageColor::System);
+                    text = CLIPS_FAILURE_CLIPS_DISABLED_TEXT;
                 }
                 break;
 
@@ -1107,6 +1114,9 @@ void TwitchChannel::createClip()
                                               MessageElementFlag::Text,
                                               MessageColor::Link)
                         ->setLink(ACCOUNTS_LINK);
+                    text = QString("%1 %2").arg(
+                        CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT,
+                        LOGIN_PROMPT_TEXT);
                 }
                 break;
 
@@ -1116,9 +1126,13 @@ void TwitchChannel::createClip()
                     builder.emplace<TextElement>(
                         CLIPS_FAILURE_UNKNOWN_ERROR_TEXT,
                         MessageElementFlag::Text, MessageColor::System);
+                    text = CLIPS_FAILURE_UNKNOWN_ERROR_TEXT;
                 }
                 break;
             }
+
+            builder.message().messageText = text;
+            builder.message().searchText = text;
 
             this->addMessage(builder.release());
         },
