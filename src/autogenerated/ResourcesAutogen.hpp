@@ -13,6 +13,7 @@ public:
         QPixmap kararty;
         QPixmap mm2pl;
         QPixmap pajlada;
+        QPixmap slch;
         QPixmap zneix;
     } avatars;
     struct {
