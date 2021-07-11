@@ -50,6 +50,9 @@ MessagePtr generateBannedMessage(bool confirmedBan)
             : QString("Try reconnecting.");
 
     MessageBuilder builder;
+    auto text = QString("%1 %2").arg(bannedText, reconnectPromptText);
+    builder.message().messageText = text;
+    builder.message().searchText = text;
     builder.message().flags.set(MessageFlag::System);
 
     builder.emplace<TimestampElement>();
@@ -735,9 +738,12 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
         const auto curUser = getApp()->accounts->twitch.getCurrent();
         const auto expirationText = QString("Login expired for user \"%1\"!")
                                         .arg(curUser->getUserName());
-        const auto loginPromptText = QString(" Try adding your account again.");
+        const auto loginPromptText = QString("Try adding your account again.");
 
         auto builder = MessageBuilder();
+        auto text = QString("%1 %2").arg(expirationText, loginPromptText);
+        builder.message().messageText = text;
+        builder.message().searchText = text;
         builder.message().flags.set(MessageFlag::System);
         builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
 
