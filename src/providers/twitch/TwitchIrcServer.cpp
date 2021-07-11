@@ -60,6 +60,19 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
 
     qCDebug(chatterinoTwitch) << "logging in as" << account->getUserName();
 
+    // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags
+    // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands
+    // twitch.tv/membership enables the JOIN/PART/MODE/NAMES commands. See https://dev.twitch.tv/docs/irc/membership
+    // This is enabled so we receive USERSTATE messages when joining channels / typing messages, along with the other command capabilities
+    QStringList caps{"twitch.tv/tags", "twitch.tv/commands"};
+    if (type != ConnectionType::Write)
+    {
+        caps.push_back("twitch.tv/membership");
+    }
+
+    connection->network()->setSkipCapabilityValidation(true);
+    connection->network()->setRequestedCapabilities(caps);
+
     QString username = account->getUserName();
     QString oauthToken = account->getOAuthToken();
 
@@ -173,6 +186,10 @@ void TwitchIrcServer::readConnectionMessageReceived(
             "Twitch Servers requested us to reconnect, reconnecting");
         this->connect();
     }
+    else if (command == "GLOBALUSERSTATE")
+    {
+        handler.handleGlobalUserStateMessage(message);
+    }
 }
 
 void TwitchIrcServer::writeConnectionMessageReceived(
@@ -221,28 +238,6 @@ void TwitchIrcServer::writeConnectionMessageReceived(
             "Twitch Servers requested us to reconnect, reconnecting");
         this->connect();
     }
-}
-
-void TwitchIrcServer::onReadConnected(IrcConnection *connection)
-{
-    // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags/
-    // twitch.tv/membership enables the JOIN/PART/MODE/NAMES commands. See https://dev.twitch.tv/docs/irc/membership/
-    // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands/
-    //                    This is enabled here so we receive USERSTATE messages when joining channels
-    connection->sendRaw(
-        "CAP REQ :twitch.tv/tags twitch.tv/membership twitch.tv/commands");
-
-    AbstractIrcServer::onReadConnected(connection);
-}
-
-void TwitchIrcServer::onWriteConnected(IrcConnection *connection)
-{
-    // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags/
-    // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands/
-    //                    This is enabled here so we receive USERSTATE messages when typing messages, along with the other command capabilities
-    connection->sendRaw("CAP REQ :twitch.tv/tags twitch.tv/commands");
-
-    AbstractIrcServer::onWriteConnected(connection);
 }
 
 std::shared_ptr<Channel> TwitchIrcServer::getCustomChannel(

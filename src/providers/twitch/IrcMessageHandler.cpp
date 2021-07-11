@@ -520,6 +520,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         return;
     }
 
+    // Checking if currentUser is a VIP or staff member
     QVariant _badges = message->tag("badges");
     if (_badges.isValid())
     {
@@ -532,6 +533,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         }
     }
 
+    // Checking if currentUser is a moderator
     QVariant _mod = message->tag("mod");
     if (_mod.isValid())
     {
@@ -541,6 +543,28 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
             tc->setMod(_mod == "1");
         }
     }
+}
+
+// This will emit only once and right after user logs in to IRC - reset emote data and reload emtoes
+void IrcMessageHandler::handleGlobalUserStateMessage(
+    Communi::IrcMessage *message)
+{
+    auto currentUser = getApp()->accounts->twitch.getCurrent();
+
+    // set received emote-sets, used in TwitchAccount::loadUserstateEmotes
+    // NOTE: this should always return true
+    auto emoteSetsChanged = currentUser->setUserstateEmoteSets(
+        message->tag("emote-sets").toString().split(","));
+
+    qCDebug(chatterinoTwitch) << emoteSetsChanged << message->toData();
+    // We should always attempt to reload emotes even on reconnections where
+    // emoteSetsChanged, since we want to trigger emote reloads when
+    // "currentUserChanged" signal is emitted
+
+    //    if (emoteSetsChanged)
+    //    {
+    currentUser->loadEmotes();
+    //    }
 }
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
