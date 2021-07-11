@@ -40,7 +40,7 @@ void IvrApi::getBulkEmoteSets(QString emoteSetList,
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("set_id", emoteSetList);
 
-    this->makeRequest("twitch/emoteset", urlQuery)
+    this->makeRequest("v2/twitch/emotes/sets", urlQuery)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto root = result.parseJsonArray();
 

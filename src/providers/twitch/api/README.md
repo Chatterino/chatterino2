@@ -165,6 +165,13 @@ URL: https://dev.twitch.tv/docs/api/reference#get-emote-sets
   Used in:
   - `providers/twitch/TwitchAccount.cpp` to set emoteset owner data upon loading subscriber emotes from Kraken
 
+### Get Channel Emotes
+
+URL: https://dev.twitch.tv/docs/api/reference#get-channel-emotes
+
+- We implement this in `providers/twitch/api/Helix.cpp getChannelEmotes`  
+  Not used anywhere at the moment.
+
 ## TMI
 
 The TMI api is undocumented.
