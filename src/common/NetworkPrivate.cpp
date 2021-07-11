@@ -148,8 +148,8 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                     qCDebug(chatterinoHttp)
                         << QString("%1 %2 [timed out]")
                                .arg(networkRequestTypes.at(
-                                   int(data->requestType_)))
-                               .arg(data->request_.url().toString());
+                                        int(data->requestType_)),
+                                    data->request_.url().toString());
 
                     if (data->onError_)
                     {
@@ -189,8 +189,8 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                     qCDebug(chatterinoHttp)
                         << QString("%1 %2 [cancelled]")
                                .arg(networkRequestTypes.at(
-                                   int(data->requestType_)))
-                               .arg(data->request_.url().toString());
+                                        int(data->requestType_)),
+                                    data->request_.url().toString());
                     return;
                 }
 
@@ -204,19 +204,19 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                             << QString(
                                    "%1 %3 %2")  // reversed to not break URLs
                                    .arg(networkRequestTypes.at(
-                                       int(data->requestType_)))
-                                   .arg(status.toInt())
-                                   .arg(data->request_.url().toString());
+                                            int(data->requestType_)),
+                                        QString(status.toInt()),
+                                        data->request_.url().toString());
                     }
                     else
                     {
                         qCDebug(chatterinoHttp)
                             << QString("%1 %2 %3 %4")
                                    .arg(networkRequestTypes.at(
-                                       int(data->requestType_)))
-                                   .arg(data->request_.url().toString())
-                                   .arg(status.toInt())
-                                   .arg(QString(data->payload_));
+                                            int(data->requestType_)),
+                                        data->request_.url().toString(),
+                                        QString::number(status.toInt()),
+                                        QString(data->payload_));
                     }
                     // TODO: Should this always be run on the GUI thread?
                     postToThread([data, code = status.toInt()] {
@@ -261,18 +261,18 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
             {
                 qCDebug(chatterinoHttp)
                     << QString("%1 %3 %2")  // reversed to not break URLs
-                           .arg(networkRequestTypes.at(int(data->requestType_)))
-                           .arg(status.toInt())
-                           .arg(data->request_.url().toString());
+                           .arg(networkRequestTypes.at(int(data->requestType_)),
+                                QString(status.toInt()),
+                                data->request_.url().toString());
             }
             else
             {
                 qCDebug(chatterinoHttp)
                     << QString("%1 %2 %3 %4")
-                           .arg(networkRequestTypes.at(int(data->requestType_)))
-                           .arg(data->request_.url().toString())
-                           .arg(status.toInt())
-                           .arg(QString(data->payload_));
+                           .arg(networkRequestTypes.at(int(data->requestType_)),
+                                data->request_.url().toString(),
+                                QString(status.toInt()),
+                                QString(data->payload_));
             }
             if (data->finally_)
             {
@@ -335,8 +335,8 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
 
         qCDebug(chatterinoHttp)
             << QString("%1 %2 [CACHED] 200")
-                   .arg(networkRequestTypes.at(int(data->requestType_)))
-                   .arg(data->request_.url().toString());
+                   .arg(networkRequestTypes.at(int(data->requestType_)),
+                        data->request_.url().toString());
         if (data->onSuccess_)
         {
             if (data->executeConcurrently_ || isGuiThread())
