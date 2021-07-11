@@ -569,6 +569,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Vanity (prime, bits, subgifter)", s.showBadgesVanity);
     layout.addCheckbox("Chatterino", s.showBadgesChatterino);
     layout.addCheckbox("Dankerino", s.showBadgesDankerino);
+    layout.addCheckbox("SevenTV", s.showBadgesSeventv);
     layout.addCheckbox("FrankerFaceZ (Bot, FFZ Supporter, FFZ Developer)",
                        s.showBadgesFfz);
     layout.addSeperator();

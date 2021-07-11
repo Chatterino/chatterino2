@@ -10,6 +10,7 @@
 - Minor: Add advanced IRC tag related settings (Mm2PL/Dankerino#86)
 - Minor: Allow for adjusting rate limit settings.
 - Minor: Webchat detection uses a highlight now. (Mm2PL/Dankerino#90)
+- Minor: Update 7TV code (Mm2pl/Dankerino#95)
 
 ### Chatterino
 
