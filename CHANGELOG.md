@@ -6,6 +6,7 @@
 - Minor: Channel name in `<channel> has gone offline. Exiting host mode.` messages is now clickable. (#2922)
 - Minor: Added `/openurl` command. Usage: `/openurl <URL>`. Opens the provided URL in the browser. (#2461, #2926)
 - Minor: Updated to Emoji v13.1 (#2958)
+- Minor: Added "Open in: new tab, browser player, streamlink" in twitch link context menu. (#2988)
 - Minor: Sender username in automod messages shown to moderators shows correct color and display name. (#2967)
 - Bugfix: Now deleting cache files that weren't modified in the past 14 days. (#2947)
 - Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
