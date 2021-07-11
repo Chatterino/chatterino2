@@ -16,6 +16,7 @@
 - Bugfix: Fixed founder badge not being respected by `author.subbed` filter. (#2971)
 - Bugfix: Usercards on IRC will now only show user's messages. (#1780, #2979)
 - Bugfix: Messages that couldn't be searched or filtered are now handled correctly. (#2962)
+- Dev: Add logging for HTTP requests (#2991)
 
 ## 2.3.3
 
