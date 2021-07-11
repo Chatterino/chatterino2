@@ -1,11 +1,10 @@
 #pragma once
 
+#include <memory>
 #include "boost/optional.hpp"
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
-
-#include <memory>
 
 namespace chatterino {
 
@@ -25,6 +24,7 @@ public:
     void loadEmotes();
     static void loadChannel(std::weak_ptr<Channel> channel,
                             const QString &channelId,
+                            const QString &channelLogin,
                             std::function<void(EmoteMap &&)> callback,
                             bool manualRefresh);
 

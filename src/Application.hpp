@@ -27,7 +27,6 @@ class Fonts;
 class Toasts;
 class ChatterinoBadges;
 class DankerinoBadges;
-class SeventvBadges;
 class FfzBadges;
 
 class Application
@@ -61,7 +60,6 @@ public:
     TwitchIrcServer *const twitch2{};
     ChatterinoBadges *const chatterinoBadges{};
     DankerinoBadges *const dankerinoBadges{};
-    SeventvBadges *const seventvBadges{};
     FfzBadges *const ffzBadges{};
 
     /*[[deprecated]]*/ Logging *const logging{};

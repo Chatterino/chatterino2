@@ -8,7 +8,6 @@
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/dankerino/DankerinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
-#include "providers/seventv/SeventvBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -285,7 +284,6 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->appendChatterinoBadges();
     this->appendDankerinoBadges();
-    this->appendSeventvBadges();
     this->appendFfzBadges();
 
     this->appendUsername();
@@ -1210,14 +1208,6 @@ void TwitchMessageBuilder::appendDankerinoBadges()
     if (auto badge = getApp()->dankerinoBadges->getBadge({this->userId_}))
     {
         this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeDankerino);
-    }
-}
-
-void TwitchMessageBuilder::appendSeventvBadges()
-{
-    if (auto badge = getApp()->seventvBadges->getBadge({this->userId_}))
-    {
-        this->emplace<BadgeElement>(*badge, MessageElementFlag::BadgeSeventv);
     }
 }
 

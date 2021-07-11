@@ -246,9 +246,9 @@ void Updates::checkForUpdates()
         return;
     }
 
-    QString url = "https://api.7tv.app/v2/chatterino/version/" CHATTERINO_OS
-                  "/" +
-                  currentBranch();
+    QString url =
+        "https://notitia.chatterino.com/version/chatterino/" CHATTERINO_OS "/" +
+        currentBranch();
 
     NetworkRequest(url)
         .timeout(60000)

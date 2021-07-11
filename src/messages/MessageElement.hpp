@@ -51,7 +51,6 @@ enum class MessageElementFlag : int64_t {
 
     SeventvEmoteImage = (1LL << 34),
     SeventvEmoteText = (1LL << 35),
-
     SeventvEmote = SeventvEmoteImage | SeventvEmoteText,
 
     EmoteImages =
@@ -98,14 +97,7 @@ enum class MessageElementFlag : int64_t {
     // - Chatterino gnome badge
     BadgeChatterino = (1LL << 18),
 
-    // Slot 7: Seventv
-    // - Seventv Admin
-    // - Seventv Dungeon Mistress
-    // - Seventv Moderator
-    // - Seventv Subscriber
-    BadgeSeventv = (1LL << 40),
-
-    // Slot 8: FrankerFaceZ
+    // Slot 7: FrankerFaceZ
     // - FFZ developer badge
     // - FFZ bot badge
     // - FFZ donator badge
@@ -117,7 +109,7 @@ enum class MessageElementFlag : int64_t {
 
     Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
              BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeFfz |
-             BadgeDankerino | BadgeSeventv,
+             BadgeDankerino,
 
     ChannelName = (1LL << 20),
 
