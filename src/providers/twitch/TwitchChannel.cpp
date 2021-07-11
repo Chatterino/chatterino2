@@ -4,6 +4,7 @@
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/Message.hpp"
@@ -21,6 +22,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/FormatTime.hpp"
 #include "util/PostToThread.hpp"
+#include "util/QStringHash.hpp"
 #include "widgets/Window.hpp"
 
 #include <rapidjson/document.h>
@@ -30,7 +32,6 @@
 #include <QJsonValue>
 #include <QThread>
 #include <QTimer>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {
