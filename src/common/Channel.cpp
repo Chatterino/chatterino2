@@ -83,7 +83,6 @@ void Channel::addMessage(MessagePtr message,
     auto app = getApp();
     MessagePtr deleted;
 
-    // FOURTF: change this when adding more providers
     if (!overridingFlags || !overridingFlags->has(MessageFlag::DoNotLog))
     {
         QString channelPlatform("other");
