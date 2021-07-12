@@ -128,9 +128,7 @@ public:
     void autoModDeny(const QString msgID, ChannelPtr channel);
 
 private:
-    // callback is there to ensure that we try to execute other stuff in it ONLY after calling Ivr finishes
-    void requestIvrEmotes(QStringList emoteSetKeys,
-                          std::function<void()> callback);
+    void loadKrakenEmotes();
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
 
     QString oauthClient_;

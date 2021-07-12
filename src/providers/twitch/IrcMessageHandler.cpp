@@ -551,7 +551,7 @@ void IrcMessageHandler::handleGlobalUserStateMessage(
 {
     auto currentUser = getApp()->accounts->twitch.getCurrent();
 
-    // set received emote-sets, used in TwitchAccount::loadUserstateEmotes
+    // set received emote-sets, this time used to initially load emotes
     // NOTE: this should always return true
     auto emoteSetsChanged = currentUser->setUserstateEmoteSets(
         message->tag("emote-sets").toString().split(","));
