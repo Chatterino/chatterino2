@@ -15,7 +15,8 @@ void Logging::initialize(Settings &settings, Paths &paths)
 {
 }
 
-void Logging::addMessage(const QString &channelName, MessagePtr message)
+void Logging::addMessage(const QString &channelName, MessagePtr message,
+                         const QString &platformName)
 {
     if (!getSettings()->enableLogging)
     {
@@ -25,7 +26,7 @@ void Logging::addMessage(const QString &channelName, MessagePtr message)
     auto it = this->loggingChannels_.find(channelName);
     if (it == this->loggingChannels_.end())
     {
-        auto channel = new LoggingChannel(channelName);
+        auto channel = new LoggingChannel(channelName, platformName);
         channel->addMessage(message);
         this->loggingChannels_.emplace(
             channelName, std::unique_ptr<LoggingChannel>(std::move(channel)));
