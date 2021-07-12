@@ -205,7 +205,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                                    "%1 %3 %2")  // reversed to not break URLs
                                    .arg(networkRequestTypes.at(
                                             int(data->requestType_)),
-                                        QString(status.toInt()),
+                                        QString::number(status.toInt()),
                                         data->request_.url().toString());
                     }
                     else
@@ -262,7 +262,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                 qCDebug(chatterinoHttp)
                     << QString("%1 %3 %2")  // reversed to not break URLs
                            .arg(networkRequestTypes.at(int(data->requestType_)),
-                                QString(status.toInt()),
+                                QString::number(status.toInt()),
                                 data->request_.url().toString());
             }
             else
@@ -271,7 +271,7 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                     << QString("%1 %2 %3 %4")
                            .arg(networkRequestTypes.at(int(data->requestType_)),
                                 data->request_.url().toString(),
-                                QString(status.toInt()),
+                                QString::number(status.toInt()),
                                 QString(data->payload_));
             }
             if (data->finally_)
