@@ -139,7 +139,6 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     {
         return;
     }
-    qDebug() << "penis";
 
     // Usernames
     QString usernamePostfix =
