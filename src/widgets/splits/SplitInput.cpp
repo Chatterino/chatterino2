@@ -639,9 +639,6 @@ void SplitInput::editTextChanged()
         this->textChanged.invoke(text);
 
         text = text.trimmed();
-        static QRegularExpression spaceRegex("\\s\\s+");
-        text = text.replace(spaceRegex, " ");
-
         text =
             app->commands->execCommand(text, this->split_->getChannel(), true);
     }
