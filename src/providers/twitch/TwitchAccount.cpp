@@ -333,12 +333,8 @@ void TwitchAccount::loadUserstateEmotes()
                                  << "does not exist in emoteData";
                     }
 
-                    auto name = ivrEmoteSet.login;
-                    name.detach();
-                    name[0] = name[0].toUpper();
-
-                    newUserEmoteSet->text = name;
                     newUserEmoteSet->channelName = ivrEmoteSet.login;
+                    newUserEmoteSet->text = ivrEmoteSet.displayName;
 
                     for (const auto &emoteObj : ivrEmoteSet.emotes)
                     {
@@ -539,7 +535,7 @@ void TwitchAccount::loadKrakenEmotes()
                              << "does not exist in emoteData";
                 }
 
-                for (const auto emoteArrObj : emoteSetIt.value().toArray())
+                for (const auto emoteArrObj : emoteSetIt->toArray())
                 {
                     if (!emoteArrObj.isObject())
                     {
