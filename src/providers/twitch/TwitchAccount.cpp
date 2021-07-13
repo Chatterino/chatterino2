@@ -240,10 +240,13 @@ void TwitchAccount::loadEmotes()
     // TODO(zneix): Once Helix adds Get User Emotes we could remove this hacky solution
     // For now, this is necessary as Kraken's equivalent doesn't return all emotes
     // See: https://twitch.uservoice.com/forums/310213-developers/suggestions/43599900
-    this->loadUserstateEmotes();
+    this->loadUserstateEmotes([=] {
+        qDebug() << "penis!";
+        this->loadKrakenEmotes();
+    });
 
     // Fill up emoteData with emote sets that were returned in a Kraken call, but aren't present in emoteData.
-    this->loadKrakenEmotes();
+    //    this->loadKrakenEmotes();
 }
 
 bool TwitchAccount::setUserstateEmoteSets(QStringList newEmoteSets)
@@ -261,7 +264,7 @@ bool TwitchAccount::setUserstateEmoteSets(QStringList newEmoteSets)
     return true;
 }
 
-void TwitchAccount::loadUserstateEmotes()
+void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
 {
     if (this->userstateEmoteSets_.isEmpty())
     {
@@ -298,10 +301,11 @@ void TwitchAccount::loadUserstateEmotes()
     qCDebug(chatterinoTwitch) << QString("Loading %1 emotesets from IVR: %2")
                                      .arg(newEmoteSetKeys.size())
                                      .arg(newEmoteSetKeys.join(", "));
-    for (const auto &batch : getEmoteSetBatches(newEmoteSetKeys))
+    auto batches = getEmoteSetBatches(newEmoteSetKeys);
+    for (int i = 0; i < batches.size(); i++)
     {
         getIvr()->getBulkEmoteSets(
-            batch.join(","),
+            batches.at(i).join(","),
             [this](QJsonArray emoteSetArray) {
                 auto emoteData = this->emotes_.access();
                 auto localEmoteData = this->localEmotes_.access();
@@ -382,6 +386,13 @@ void TwitchAccount::loadUserstateEmotes()
             },
             [] {
                 // fetching emotes failed, ivr API might be down
+            },
+            [=] {
+                // XXX(zneix): We check if this is the last iteration and if so, call the call
+                if (i + 1 == batches.size())
+                {
+                    callback();
+                }
             });
     };
 }

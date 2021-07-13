@@ -84,7 +84,8 @@ public:
     // https://api.ivr.fi/docs#tag/Twitch/paths/~1twitch~1emoteset/get
     void getBulkEmoteSets(QString emoteSetList,
                           ResultCallback<QJsonArray> successCallback,
-                          IvrFailureCallback failureCallback);
+                          IvrFailureCallback failureCallback,
+                          std::function<void()> finallyCallback);
 
     static void initialize();
 
