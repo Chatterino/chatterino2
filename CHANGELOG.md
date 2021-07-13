@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Major: Newly uploaded Twitch emotes are present in emote picker and can be "Tabbed" as well. (#2992)
+
 ## 2.3.3
 
 - Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
