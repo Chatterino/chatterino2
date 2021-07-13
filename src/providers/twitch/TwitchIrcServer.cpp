@@ -103,8 +103,8 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
 std::shared_ptr<Channel> TwitchIrcServer::createChannel(
     const QString &channelName)
 {
-    auto channel = std::shared_ptr<TwitchChannel>(
-        new TwitchChannel(channelName, this->bttv, this->ffz));
+    auto channel =
+        std::shared_ptr<TwitchChannel>(new TwitchChannel(channelName));
     channel->initialize();
 
     channel->sendMessageSignal.connect(
