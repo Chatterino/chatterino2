@@ -73,124 +73,125 @@ int CompletionModel::rowCount(const QModelIndex &) const
 
 void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 {
-    std::function<void(const QString &, TaggedString::Type)> addString;
-    if (getSettings()->prefixOnlyEmoteCompletion)
-    {
-        addString = [&](const QString &str, TaggedString::Type type) {
-            if (str.startsWith(prefix, Qt::CaseInsensitive))
-                this->items_.emplace(str + " ", type);
-        };
-    }
-    else
-    {
-        addString = [&](const QString &str, TaggedString::Type type) {
-            if (str.contains(prefix, Qt::CaseInsensitive))
-                this->items_.emplace(str + " ", type);
-        };
-    }
-
     std::lock_guard<std::mutex> guard(this->itemsMutex_);
     this->items_.clear();
 
-    if (prefix.length() < 2)
-        return;
-
-    if (auto channel = dynamic_cast<TwitchChannel *>(&this->channel_))
+    // Twitch channel
+    auto tc = dynamic_cast<TwitchChannel *>(&this->channel_);
+    // Special Twitch channels
+    auto sc = this->channel_.isTwitchChannel() &&
+              this->channel_.getType() != Channel::Type::Twitch;
+    if ((!tc && !sc) || prefix.length() < 2)
     {
-        if (auto account = getApp()->accounts->twitch.getCurrent())
-        {
-            // Twitch Emotes available globally
-            for (const auto &emote : account->accessEmotes()->emotes)
-            {
-                addString(emote.first.string, TaggedString::TwitchGlobalEmote);
-            }
+        return;
+    }
 
-            // Twitch Emotes available locally
-            auto localEmoteData = account->accessLocalEmotes();
-            if (localEmoteData->find(channel->roomId()) !=
-                localEmoteData->end())
-            {
-                for (const auto &emote : localEmoteData->at(channel->roomId()))
-                {
-                    addString(emote.first.string,
-                              TaggedString::Type::TwitchLocalEmote);
-                }
-            }
+    if (auto account = getApp()->accounts->twitch.getCurrent())
+    {
+        // Twitch Emotes available globally
+        for (const auto &emote : account->accessEmotes()->emotes)
+        {
+            addString(prefix, emote.first.string,
+                      TaggedString::TwitchGlobalEmote);
         }
 
-        // Usernames
-        QString usernamePostfix =
-            isFirstWord && getSettings()->mentionUsersWithComma ? ","
-                                                                : QString();
-
-        if (prefix.startsWith("@"))
+        // Twitch Emotes available locally
+        auto localEmoteData = account->accessLocalEmotes();
+        if (tc && localEmoteData->find(tc->roomId()) != localEmoteData->end())
         {
-            QString usernamePrefix = prefix;
-            usernamePrefix.remove(0, 1);
-
-            auto chatters =
-                channel->accessChatters()->filterByPrefix(usernamePrefix);
-
-            for (const auto &name : chatters)
+            for (const auto &emote : localEmoteData->at(tc->roomId()))
             {
-                addString("@" + name + usernamePostfix,
-                          TaggedString::Type::Username);
+                addString(prefix, emote.first.string,
+                          TaggedString::Type::TwitchLocalEmote);
             }
         }
-        else if (!getSettings()->userCompletionOnlyWithAt)
-        {
-            auto chatters = channel->accessChatters()->filterByPrefix(prefix);
+    }
 
-            for (const auto &name : chatters)
-            {
-                addString(name + usernamePostfix, TaggedString::Type::Username);
-            }
-        }
+    auto server = getApp()->twitch2;
 
-        // Bttv Global
-        for (auto &emote : *channel->globalBttv().emotes())
-        {
-            addString(emote.first.string, TaggedString::Type::BTTVChannelEmote);
-        }
+    // Bttv Global
+    for (auto &emote : *server->getBttvEmotes().emotes())
+    {
+        addString(prefix, emote.first.string,
+                  TaggedString::Type::BTTVChannelEmote);
+    }
 
-        // Ffz Global
-        for (auto &emote : *channel->globalFfz().emotes())
-        {
-            addString(emote.first.string, TaggedString::Type::FFZChannelEmote);
-        }
+    // Ffz Global
+    for (auto &emote : *server->getFfzEmotes().emotes())
+    {
+        addString(prefix, emote.first.string,
+                  TaggedString::Type::FFZChannelEmote);
+    }
 
-        // Bttv Channel
-        for (auto &emote : *channel->bttvEmotes())
+    // Emojis
+    if (prefix.startsWith(":"))
+    {
+        const auto &emojiShortCodes = getApp()->emotes->emojis.shortCodes;
+        for (auto &m : emojiShortCodes)
         {
-            addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
+            addString(prefix, ":" + m + ":", TaggedString::Type::Emoji);
         }
+    }
 
-        // Ffz Channel
-        for (auto &emote : *channel->ffzEmotes())
-        {
-            addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
-        }
+    //
+    // Stuff below is available only in special Twitch channels
+    if (sc)
+    {
+        return;
+    }
+    qDebug() << "penis";
 
-        // Emojis
-        if (prefix.startsWith(":"))
-        {
-            const auto &emojiShortCodes = getApp()->emotes->emojis.shortCodes;
-            for (auto &m : emojiShortCodes)
-            {
-                addString(":" + m + ":", TaggedString::Type::Emoji);
-            }
-        }
+    // Usernames
+    QString usernamePostfix =
+        isFirstWord && getSettings()->mentionUsersWithComma ? "," : QString();
 
-        // Commands
-        for (auto &command : getApp()->commands->items_)
-        {
-            addString(command.name, TaggedString::Command);
-        }
+    if (prefix.startsWith("@"))
+    {
+        QString usernamePrefix = prefix;
+        usernamePrefix.remove(0, 1);
 
-        for (auto &command : getApp()->commands->getDefaultTwitchCommandList())
+        auto chatters = tc->accessChatters()->filterByPrefix(usernamePrefix);
+
+        for (const auto &name : chatters)
         {
-            addString(command, TaggedString::Command);
+            addString(prefix, "@" + name + usernamePostfix,
+                      TaggedString::Type::Username);
         }
+    }
+    else if (!getSettings()->userCompletionOnlyWithAt)
+    {
+        auto chatters = tc->accessChatters()->filterByPrefix(prefix);
+
+        for (const auto &name : chatters)
+        {
+            addString(prefix, name + usernamePostfix,
+                      TaggedString::Type::Username);
+        }
+    }
+
+    // Bttv Channel
+    for (auto &emote : *tc->bttvEmotes())
+    {
+        addString(prefix, emote.first.string,
+                  TaggedString::Type::BTTVGlobalEmote);
+    }
+
+    // Ffz Channel
+    for (auto &emote : *tc->ffzEmotes())
+    {
+        addString(prefix, emote.first.string,
+                  TaggedString::Type::BTTVGlobalEmote);
+    }
+
+    // Commands
+    for (auto &command : getApp()->commands->items_)
+    {
+        addString(prefix, command.name, TaggedString::Command);
+    }
+
+    for (auto &command : getApp()->commands->getDefaultTwitchCommandList())
+    {
+        addString(prefix, command, TaggedString::Command);
     }
 }
 
@@ -204,5 +205,20 @@ bool CompletionModel::compareStrings(const QString &a, const QString &b)
 
     return k < 0;
 }
+
+void CompletionModel::addString(const QString &prefix, const QString &str,
+                                TaggedString::Type type)
+{
+    if (getSettings()->prefixOnlyEmoteCompletion)
+    {
+        if (str.startsWith(prefix, Qt::CaseInsensitive))
+            this->items_.emplace(str + " ", type);
+    }
+    else
+    {
+        if (str.contains(prefix, Qt::CaseInsensitive))
+            this->items_.emplace(str + " ", type);
+    }
+};
 
 }  // namespace chatterino

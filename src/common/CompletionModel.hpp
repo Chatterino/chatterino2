@@ -53,7 +53,8 @@ public:
     static bool compareStrings(const QString &a, const QString &b);
 
 private:
-    TaggedString createUser(const QString &str);
+    void addString(const QString &prefix, const QString &str,
+                   TaggedString::Type type);
 
     std::set<TaggedString> items_;
     mutable std::mutex itemsMutex_;
