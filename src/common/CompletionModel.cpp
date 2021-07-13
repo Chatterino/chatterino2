@@ -148,13 +148,13 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         }
 
         // Bttv Global
-        for (auto &emote : *channel->globalBttv().emotes())
+        for (auto &emote : *getApp()->twitch2->getBttvEmotes().emotes())
         {
             addString(emote.first.string, TaggedString::Type::BTTVChannelEmote);
         }
 
         // Ffz Global
-        for (auto &emote : *channel->globalFfz().emotes())
+        for (auto &emote : *getApp()->twitch2->getFfzEmotes().emotes())
         {
             addString(emote.first.string, TaggedString::Type::FFZChannelEmote);
         }
