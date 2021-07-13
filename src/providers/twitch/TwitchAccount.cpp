@@ -145,7 +145,7 @@ void TwitchAccount::loadBlocks()
             }
         },
         [] {
-            qDebug() << "Fetching blocks failed!";
+            qCWarning(chatterinoTwitch) << "Fetching blocks failed!";
         });
 }
 
@@ -234,19 +234,16 @@ void TwitchAccount::loadEmotes()
         auto emoteData = this->emotes_.access();
         emoteData->emoteSets.clear();
         emoteData->emotes.clear();
-        qDebug() << "cleared emotes";
+        qCDebug(chatterinoTwitch) << "Cleared emotes!";
     }
 
     // TODO(zneix): Once Helix adds Get User Emotes we could remove this hacky solution
     // For now, this is necessary as Kraken's equivalent doesn't return all emotes
     // See: https://twitch.uservoice.com/forums/310213-developers/suggestions/43599900
     this->loadUserstateEmotes([=] {
-        qDebug() << "penis!";
+        // Fill up emoteData with emote sets that were returned in a Kraken call, but aren't present in emoteData.
         this->loadKrakenEmotes();
     });
-
-    // Fill up emoteData with emote sets that were returned in a Kraken call, but aren't present in emoteData.
-    //    this->loadKrakenEmotes();
 }
 
 bool TwitchAccount::setUserstateEmoteSets(QStringList newEmoteSets)
@@ -268,6 +265,7 @@ void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
 {
     if (this->userstateEmoteSets_.isEmpty())
     {
+        callback();
         return;
     }
 
@@ -294,6 +292,7 @@ void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
     // return if there are no new emote sets
     if (newEmoteSetKeys.isEmpty())
     {
+        callback();
         return;
     }
 
@@ -327,14 +326,7 @@ void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
                                      });
                     if (isAlreadyFetched != emoteData->emoteSets.end())
                     {
-                        qDebug() << "Set" << newUserEmoteSet->key
-                                 << "does exists in emoteData, continuing...";
                         continue;
-                    }
-                    else
-                    {
-                        qDebug() << "Set" << newUserEmoteSet->key
-                                 << "does not exist in emoteData";
                     }
 
                     newUserEmoteSet->channelName = ivrEmoteSet.login;
@@ -388,7 +380,7 @@ void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
                 // fetching emotes failed, ivr API might be down
             },
             [=] {
-                // XXX(zneix): We check if this is the last iteration and if so, call the call
+                // XXX(zneix): We check if this is the last iteration and if so, call the callback
                 if (i + 1 == batches.size())
                 {
                     callback();
@@ -536,14 +528,7 @@ void TwitchAccount::loadKrakenEmotes()
                     });
                 if (isAlreadyFetched != emoteData->emoteSets.end())
                 {
-                    qDebug() << "Set" << emoteSet->key
-                             << "does exists in emoteData, continuing...";
                     continue;
-                }
-                else
-                {
-                    qDebug() << "Set" << emoteSet->key
-                             << "does not exist in emoteData";
                 }
 
                 for (const auto emoteArrObj : emoteSetIt->toArray())
@@ -617,7 +602,7 @@ void TwitchAccount::loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet)
             if (emoteSetData.ownerId.isEmpty() ||
                 emoteSetData.setId != emoteSet->key)
             {
-                qCWarning(chatterinoTwitch)
+                qCDebug(chatterinoTwitch)
                     << QString("Failed to fetch emoteSetData for %1, assuming "
                                "Twitch is the owner")
                            .arg(emoteSet->key);
