@@ -120,16 +120,14 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         }
     }
 
-    auto server = getApp()->twitch2;
-
     // Bttv Global
-    for (auto &emote : *server->getBttvEmotes().emotes())
+    for (auto &emote : *getApp()->twitch2->getBttvEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::BTTVChannelEmote);
     }
 
     // Ffz Global
-    for (auto &emote : *server->getFfzEmotes().emotes())
+    for (auto &emote : *getApp()->twitch2->getFfzEmotes().emotes())
     {
         addString(emote.first.string, TaggedString::Type::FFZChannelEmote);
     }
