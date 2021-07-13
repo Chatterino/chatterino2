@@ -86,13 +86,26 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         return;
     }
 
+    std::function<void(const QString &str, TaggedString::Type type)> addString =
+        [=](const QString &str, TaggedString::Type type) {
+            if (getSettings()->prefixOnlyEmoteCompletion)
+            {
+                if (str.startsWith(prefix, Qt::CaseInsensitive))
+                    this->items_.emplace(str + " ", type);
+            }
+            else
+            {
+                if (str.contains(prefix, Qt::CaseInsensitive))
+                    this->items_.emplace(str + " ", type);
+            }
+        };
+
     if (auto account = getApp()->accounts->twitch.getCurrent())
     {
         // Twitch Emotes available globally
         for (const auto &emote : account->accessEmotes()->emotes)
         {
-            addString(prefix, emote.first.string,
-                      TaggedString::TwitchGlobalEmote);
+            addString(emote.first.string, TaggedString::TwitchGlobalEmote);
         }
 
         // Twitch Emotes available locally
@@ -101,7 +114,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         {
             for (const auto &emote : localEmoteData->at(tc->roomId()))
             {
-                addString(prefix, emote.first.string,
+                addString(emote.first.string,
                           TaggedString::Type::TwitchLocalEmote);
             }
         }
@@ -112,15 +125,13 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     // Bttv Global
     for (auto &emote : *server->getBttvEmotes().emotes())
     {
-        addString(prefix, emote.first.string,
-                  TaggedString::Type::BTTVChannelEmote);
+        addString(emote.first.string, TaggedString::Type::BTTVChannelEmote);
     }
 
     // Ffz Global
     for (auto &emote : *server->getFfzEmotes().emotes())
     {
-        addString(prefix, emote.first.string,
-                  TaggedString::Type::FFZChannelEmote);
+        addString(emote.first.string, TaggedString::Type::FFZChannelEmote);
     }
 
     // Emojis
@@ -129,7 +140,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         const auto &emojiShortCodes = getApp()->emotes->emojis.shortCodes;
         for (auto &m : emojiShortCodes)
         {
-            addString(prefix, ":" + m + ":", TaggedString::Type::Emoji);
+            addString(QString(":%1:").arg(m), TaggedString::Type::Emoji);
         }
     }
 
@@ -153,7 +164,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
         for (const auto &name : chatters)
         {
-            addString(prefix, "@" + name + usernamePostfix,
+            addString("@" + name + usernamePostfix,
                       TaggedString::Type::Username);
         }
     }
@@ -163,34 +174,31 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
         for (const auto &name : chatters)
         {
-            addString(prefix, name + usernamePostfix,
-                      TaggedString::Type::Username);
+            addString(name + usernamePostfix, TaggedString::Type::Username);
         }
     }
 
     // Bttv Channel
     for (auto &emote : *tc->bttvEmotes())
     {
-        addString(prefix, emote.first.string,
-                  TaggedString::Type::BTTVGlobalEmote);
+        addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
     }
 
     // Ffz Channel
     for (auto &emote : *tc->ffzEmotes())
     {
-        addString(prefix, emote.first.string,
-                  TaggedString::Type::BTTVGlobalEmote);
+        addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
     }
 
     // Commands
     for (auto &command : getApp()->commands->items_)
     {
-        addString(prefix, command.name, TaggedString::Command);
+        addString(command.name, TaggedString::Command);
     }
 
     for (auto &command : getApp()->commands->getDefaultTwitchCommandList())
     {
-        addString(prefix, command, TaggedString::Command);
+        addString(command, TaggedString::Command);
     }
 }
 
@@ -204,20 +212,5 @@ bool CompletionModel::compareStrings(const QString &a, const QString &b)
 
     return k < 0;
 }
-
-void CompletionModel::addString(const QString &prefix, const QString &str,
-                                TaggedString::Type type)
-{
-    if (getSettings()->prefixOnlyEmoteCompletion)
-    {
-        if (str.startsWith(prefix, Qt::CaseInsensitive))
-            this->items_.emplace(str + " ", type);
-    }
-    else
-    {
-        if (str.contains(prefix, Qt::CaseInsensitive))
-            this->items_.emplace(str + " ", type);
-    }
-};
 
 }  // namespace chatterino

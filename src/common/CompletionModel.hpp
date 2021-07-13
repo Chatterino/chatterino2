@@ -53,9 +53,6 @@ public:
     static bool compareStrings(const QString &a, const QString &b);
 
 private:
-    void addString(const QString &prefix, const QString &str,
-                   TaggedString::Type type);
-
     std::set<TaggedString> items_;
     mutable std::mutex itemsMutex_;
     Channel &channel_;
