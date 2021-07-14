@@ -544,11 +544,10 @@ void TwitchAccount::loadKrakenEmotes()
                     KrakenEmote krakenEmote(emoteArrObj.toObject());
 
                     auto id = EmoteId{krakenEmote.id};
-                    auto code = EmoteName{krakenEmote.code};
+                    auto code = EmoteName{TwitchEmotes::cleanUpEmoteCode(
+                        EmoteName{krakenEmote.code})};
 
-                    auto cleanCode =
-                        EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
-                    emoteSet->emotes.emplace_back(TwitchEmote{id, cleanCode});
+                    emoteSet->emotes.emplace_back(TwitchEmote{id, code});
 
                     if (!emoteSet->local)
                     {
