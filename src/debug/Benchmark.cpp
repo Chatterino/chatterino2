@@ -12,12 +12,12 @@ BenchmarkGuard::BenchmarkGuard(const QString &_name)
 BenchmarkGuard::~BenchmarkGuard()
 {
     qCDebug(chatterinoBenchmark)
-        << this->name_ << float(timer_.nsecsElapsed()) / 1000000.0f << "ms";
+        << this->name_ << float(timer_.nsecsElapsed()) / 1000.0f << "ms";
 }
 
 qreal BenchmarkGuard::getElapsedMs()
 {
-    return qreal(timer_.nsecsElapsed()) / 1000000.0;
+    return qreal(timer_.nsecsElapsed()) / 1000.0;
 }
 
 }  // namespace chatterino
