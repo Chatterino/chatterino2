@@ -585,7 +585,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
     auto tags = message->tags();
     auto parameters = message->parameters();
 
-    QString msgType = tags.value("msg-id", "").toString();
+    QString msgType = tags.value("msg-id", QString()).toString();
     QString content;
     if (parameters.size() >= 2)
     {
@@ -642,7 +642,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     auto parameters = message->parameters();
 
     auto target = parameters[0];
-    QString msgType = tags.value("msg-id", "").toString();
+    QString msgType = tags.value("msg-id", QString()).toString();
     QString content;
     if (parameters.size() >= 2)
     {
