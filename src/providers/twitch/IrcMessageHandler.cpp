@@ -167,7 +167,7 @@ static QMap<QString, QString> parseBadges(QString badgesString)
 {
     QMap<QString, QString> badges;
 
-    for (auto badgeData : badgesString.split(','))
+    for (const auto &badgeData : badgesString.split(','))
     {
         auto parts = badgeData.split('/');
         if (parts.length() != 2)
@@ -340,53 +340,50 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
     {
         return;
     }
-    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
+    auto chan = getApp()->twitch.server->getChannelOrEmpty(chanName);
 
-    if (auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get()))
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(chan.get());
+    if (!twitchChannel)
     {
-        // room-id
-        decltype(tags.find("xD")) it;
-
-        if ((it = tags.find("room-id")) != tags.end())
-        {
-            auto roomId = it.value().toString();
-
-            twitchChannel->setRoomId(roomId);
-        }
-
-        // Room modes
-        {
-            auto roomModes = *twitchChannel->accessRoomModes();
-
-            if ((it = tags.find("emote-only")) != tags.end())
-            {
-                roomModes.emoteOnly = it.value() == "1";
-            }
-            if ((it = tags.find("subs-only")) != tags.end())
-            {
-                roomModes.submode = it.value() == "1";
-            }
-            if ((it = tags.find("slow")) != tags.end())
-            {
-                roomModes.slowMode = it.value().toInt();
-            }
-            if ((it = tags.find("r9k")) != tags.end())
-            {
-                roomModes.r9k = it.value() == "1";
-            }
-            if ((it = tags.find("broadcaster-lang")) != tags.end())
-            {
-                roomModes.broadcasterLang = it.value().toString();
-            }
-            if ((it = tags.find("followers-only")) != tags.end())
-            {
-                roomModes.followerOnly = it.value().toInt();
-            }
-            twitchChannel->setRoomModes(roomModes);
-        }
-
-        twitchChannel->roomModesChanged.invoke();
+        return;
     }
+
+    // room-id
+
+    if (auto it = tags.find("room-id"); it != tags.end())
+    {
+        auto roomId = it.value().toString();
+        twitchChannel->setRoomId(roomId);
+    }
+
+    // Room modes
+    {
+        auto roomModes = *twitchChannel->accessRoomModes();
+
+        if (auto it = tags.find("emote-only"); it != tags.end())
+        {
+            roomModes.emoteOnly = it.value() == "1";
+        }
+        if (auto it = tags.find("subs-only"); it != tags.end())
+        {
+            roomModes.submode = it.value() == "1";
+        }
+        if (auto it = tags.find("slow"); it != tags.end())
+        {
+            roomModes.slowMode = it.value().toInt();
+        }
+        if (auto it = tags.find("r9k"); it != tags.end())
+        {
+            roomModes.r9k = it.value() == "1";
+        }
+        if (auto it = tags.find("followers-only"); it != tags.end())
+        {
+            roomModes.followerOnly = it.value().toInt();
+        }
+        twitchChannel->setRoomModes(roomModes);
+    }
+
+    twitchChannel->roomModesChanged.invoke();
 }
 
 void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
