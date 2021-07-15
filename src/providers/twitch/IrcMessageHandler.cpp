@@ -758,7 +758,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 
         return builtMessages;
     }
-}  // namespace chatterino
+}
 
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
