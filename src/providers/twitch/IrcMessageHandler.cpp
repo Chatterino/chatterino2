@@ -749,15 +749,13 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 
         return builtMessage;
     }
-    else
-    {
-        std::vector<MessagePtr> builtMessages;
 
-        builtMessages.emplace_back(makeSystemMessage(
-            message->content(), calculateMessageTimestamp(message)));
+    std::vector<MessagePtr> builtMessages;
 
-        return builtMessages;
-    }
+    builtMessages.emplace_back(makeSystemMessage(
+        message->content(), calculateMessageTimestamp(message)));
+
+    return builtMessages;
 }
 
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
