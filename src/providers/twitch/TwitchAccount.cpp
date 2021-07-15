@@ -297,12 +297,17 @@ void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
     }
 
     // requesting emotes
-    qCDebug(chatterinoTwitch) << QString("Loading %1 emotesets from IVR: %2")
-                                     .arg(newEmoteSetKeys.size())
-                                     .arg(newEmoteSetKeys.join(", "));
     auto batches = getEmoteSetBatches(newEmoteSetKeys);
     for (int i = 0; i < batches.size(); i++)
     {
+        qCDebug(chatterinoTwitch)
+            << QString(
+                   "Loading %1 emotesets from IVR; batch %2/%3 (%4 sets): %5")
+                   .arg(newEmoteSetKeys.size())
+                   .arg(i + 1)
+                   .arg(batches.size())
+                   .arg(batches.at(i).size())
+                   .arg(batches.at(i).join(","));
         getIvr()->getBulkEmoteSets(
             batches.at(i).join(","),
             [this](QJsonArray emoteSetArray) {
