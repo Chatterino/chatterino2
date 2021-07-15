@@ -332,7 +332,6 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
 void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 {
     const auto &tags = message->tags();
-    auto app = getApp();
 
     // get twitch channel
     QString chanName;
@@ -400,10 +399,8 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
         return;
     }
 
-    auto app = getApp();
-
     // get channel
-    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
+    auto chan = getApp()->twitch.server->getChannelOrEmpty(chanName);
 
     if (chan->isEmpty())
     {
@@ -440,10 +437,10 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     chan->addOrReplaceTimeout(timeoutMsg);
 
     // refresh all
-    app->windows->repaintVisibleChatWidgets(chan.get());
+    getApp()->windows->repaintVisibleChatWidgets(chan.get());
     if (getSettings()->hideModerated)
     {
-        app->windows->forceLayoutChannelViews();
+        getApp()->windows->forceLayoutChannelViews();
     }
 }
 
@@ -461,10 +458,8 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
         return;
     }
 
-    auto app = getApp();
-
     // get channel
-    auto chan = app->twitch.server->getChannelOrEmpty(chanName);
+    auto chan = getApp()->twitch.server->getChannelOrEmpty(chanName);
 
     if (chan->isEmpty())
     {
@@ -542,12 +537,11 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 {
-    auto app = getApp();
     MessageParseArgs args;
 
     args.isReceivedWhisper = true;
 
-    auto c = app->twitch.server->whispersChannel.get();
+    auto c = getApp()->twitch.server->whispersChannel.get();
 
     TwitchMessageBuilder builder(c, message, args, message->parameter(1),
                                  false);
@@ -558,11 +552,11 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
         MessagePtr _message = builder.build();
         builder.triggerHighlights();
 
-        app->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
+        getApp()->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
 
         if (_message->flags.has(MessageFlag::Highlighted))
         {
-            app->twitch.server->mentionsChannel->addMessage(_message);
+            getApp()->twitch.server->mentionsChannel->addMessage(_message);
         }
 
         c->addMessage(_message);
@@ -573,7 +567,7 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
         if (getSettings()->inlineWhispers)
         {
-            app->twitch.server->forEachChannel(
+            getApp()->twitch.server->forEachChannel(
                 [&_message, overrideFlags](ChannelPtr channel) {
                     channel->addMessage(_message, overrideFlags);
                 });
@@ -705,9 +699,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
 
 void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
 {
-    auto app = getApp();
-
-    auto channel = app->twitch.server->getChannelOrEmpty(
+    auto channel = getApp()->twitch.server->getChannelOrEmpty(
         message->parameter(0).remove(0, 1));
 
     if (channel->isEmpty())
@@ -786,7 +778,6 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
 
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
-    auto app = getApp();
     auto builtMessages = this->parseNoticeMessage(message);
 
     for (auto msg : builtMessages)
@@ -797,7 +788,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         {
             // Notice wasn't targeted at a single channel, send to all twitch
             // channels
-            app->twitch.server->forEachChannelAndSpecialChannels(
+            getApp()->twitch.server->forEachChannelAndSpecialChannels(
                 [msg](const auto &c) {
                     c->addMessage(msg);
                 });
@@ -805,7 +796,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             return;
         }
 
-        auto channel = app->twitch.server->getChannelOrEmpty(channelName);
+        auto channel = getApp()->twitch.server->getChannelOrEmpty(channelName);
 
         if (channel->isEmpty())
         {
@@ -853,8 +844,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 
 void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
 {
-    auto app = getApp();
-    auto channel = app->twitch.server->getChannelOrEmpty(
+    auto channel = getApp()->twitch.server->getChannelOrEmpty(
         message->parameter(0).remove(0, 1));
 
     if (TwitchChannel *twitchChannel =
@@ -871,8 +861,7 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
 
 void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
 {
-    auto app = getApp();
-    auto channel = app->twitch.server->getChannelOrEmpty(
+    auto channel = getApp()->twitch.server->getChannelOrEmpty(
         message->parameter(0).remove(0, 1));
 
     if (TwitchChannel *twitchChannel =
