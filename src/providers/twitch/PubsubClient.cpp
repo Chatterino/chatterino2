@@ -23,7 +23,7 @@ namespace chatterino {
 
 static const char *pingPayload = "{\"type\":\"PING\"}";
 
-static std::map<QString, std::string> sentMessages;
+static std::map<QString, QString> sentMessages;
 
 namespace detail {
 
@@ -72,10 +72,10 @@ namespace detail {
 
         rj::set(message, "nonce", uuid);
 
-        std::string payload = rj::stringify(message);
+        QString payload = rj::stringify(message);
         sentMessages[uuid] = payload;
 
-        this->send(payload.c_str());
+        this->send(payload.toUtf8());
 
         return true;
     }
@@ -109,10 +109,10 @@ namespace detail {
 
         rj::set(message, "nonce", generateUuid());
 
-        std::string payload = rj::stringify(message);
+        QString payload = rj::stringify(message);
         sentMessages[uuid] = payload;
 
-        this->send(payload.c_str());
+        this->send(payload.toUtf8());
     }
 
     void PubSubClient::handlePong()
@@ -829,20 +829,17 @@ PubSub::PubSub()
     //        this->signals_.moderation.automodUserMessage.invoke(action);
     //    };
 
-    this->moderationActionHandlers["denied_automod_message"] = [](const auto
-                                                                      &data,
-                                                                  const auto
-                                                                      &roomID) {
-        // This message got denied by a moderator
-        // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
-    };
+    this->moderationActionHandlers["denied_automod_message"] =
+        [](const auto &data, const auto &roomID) {
+            // This message got denied by a moderator
+            // qCDebug(chatterinoPubsub) << rj::stringify(data);
+        };
 
-    this->moderationActionHandlers
-        ["approved_automod_message"] = [](const auto &data,
-                                          const auto &roomID) {
-        // This message got approved by a moderator
-        // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
-    };
+    this->moderationActionHandlers["approved_automod_message"] =
+        [](const auto &data, const auto &roomID) {
+            // This message got approved by a moderator
+            // qCDebug(chatterinoPubsub) << rj::stringify(data);
+        };
 
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
     this->websocketClient.clear_access_channels(
@@ -929,7 +926,7 @@ void PubSub::listenToChannelModerationActions(
     if (userID.isEmpty())
         return;
 
-    auto topic = topicFormat.arg(userID).arg(channelID);
+    auto topic = topicFormat.arg(userID, channelID);
 
     if (this->isListeningToTopic(topic))
     {
@@ -951,7 +948,7 @@ void PubSub::listenToAutomod(const QString &channelID,
     if (userID.isEmpty())
         return;
 
-    auto topic = topicFormat.arg(userID).arg(channelID);
+    auto topic = topicFormat.arg(userID, channelID);
 
     if (this->isListeningToTopic(topic))
     {
@@ -969,7 +966,6 @@ void PubSub::listenToChannelPointRewards(const QString &channelID,
     static const QString topicFormat("community-points-channel-v1.%1");
     assert(!channelID.isEmpty());
     assert(account != nullptr);
-    QString userID = account->getUserId();
 
     auto topic = topicFormat.arg(channelID);
 
@@ -1034,26 +1030,27 @@ bool PubSub::isListeningToTopic(const QString &topic)
 void PubSub::onMessage(websocketpp::connection_hdl hdl,
                        WebsocketMessagePtr websocketMessage)
 {
-    const std::string &payload = websocketMessage->get_payload();
+    const auto &payload =
+        QString::fromStdString(websocketMessage->get_payload());
 
     rapidjson::Document msg;
 
-    rapidjson::ParseResult res = msg.Parse(payload.c_str());
+    rapidjson::ParseResult res = msg.Parse(payload.toUtf8());
 
     if (!res)
     {
         qCDebug(chatterinoPubsub)
-            << "Error parsing message '" << payload.c_str()
-            << "' from PubSub:" << rapidjson::GetParseError_En(res.Code());
+            << QString("Error parsing message '%1' from PubSub: %2")
+                   .arg(payload, rapidjson::GetParseError_En(res.Code()));
         return;
     }
 
     if (!msg.IsObject())
     {
         qCDebug(chatterinoPubsub)
-            << "Error parsing message '" << payload.c_str()
-            << "' from PubSub. Root object is not an "
-               "object";
+            << QString("Error parsing message '%1' from PubSub. Root object is "
+                       "not an object")
+                   .arg(payload);
         return;
     }
 
@@ -1197,7 +1194,7 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
 void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 {
     QString topic;
-    qCDebug(chatterinoPubsub) << rj::stringify(outerData).c_str();
+    qCDebug(chatterinoPubsub) << rj::stringify(outerData);
 
     if (!rj::getSafe(outerData, "topic", topic))
     {
@@ -1206,7 +1203,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         return;
     }
 
-    std::string payload;
+    QString payload;
 
     if (!rj::getSafe(outerData, "message", payload))
     {
@@ -1216,19 +1213,19 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
     rapidjson::Document msg;
 
-    rapidjson::ParseResult res = msg.Parse(payload.c_str());
+    rapidjson::ParseResult res = msg.Parse(payload.toUtf8());
 
     if (!res)
     {
         qCDebug(chatterinoPubsub)
-            << "Error parsing message '" << payload.c_str()
-            << "' from PubSub:" << rapidjson::GetParseError_En(res.Code());
+            << QString("Error parsing message '%1' from PubSub: %2")
+                   .arg(payload, rapidjson::GetParseError_En(res.Code()));
         return;
     }
 
     if (topic.startsWith("whispers."))
     {
-        std::string whisperType;
+        QString whisperType;
 
         if (!rj::getSafe(msg, "type", whisperType))
         {
@@ -1250,8 +1247,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         }
         else
         {
-            qCDebug(chatterinoPubsub)
-                << "Invalid whisper type:" << whisperType.c_str();
+            qCDebug(chatterinoPubsub) << "Invalid whisper type:" << whisperType;
             return;
         }
     }
@@ -1261,7 +1257,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         assert(topicParts.length() == 3);
         const auto &data = msg["data"];
 
-        std::string moderationEventType;
+        QString moderationEventType;
 
         if (!rj::getSafe(msg, "type", moderationEventType))
         {
@@ -1270,13 +1266,13 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         }
         if (moderationEventType == "moderation_action")
         {
-            std::string moderationAction;
+            QString moderationAction;
 
             if (!rj::getSafe(data, "moderation_action", moderationAction))
             {
                 qCDebug(chatterinoPubsub)
                     << "Missing moderation action in data:"
-                    << rj::stringify(data).c_str();
+                    << rj::stringify(data);
                 return;
             }
 
@@ -1287,7 +1283,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
             {
                 qCDebug(chatterinoPubsub)
                     << "No handler found for moderation action"
-                    << moderationAction.c_str();
+                    << moderationAction;
                 return;
             }
             // Invoke handler function
@@ -1295,13 +1291,13 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         }
         else if (moderationEventType == "channel_terms_action")
         {
-            std::string channelTermsAction;
+            QString channelTermsAction;
 
             if (!rj::getSafe(data, "type", channelTermsAction))
             {
                 qCDebug(chatterinoPubsub)
                     << "Missing channel terms action in data:"
-                    << rj::stringify(data).c_str();
+                    << rj::stringify(data);
                 return;
             }
 
@@ -1312,7 +1308,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
             {
                 qCDebug(chatterinoPubsub)
                     << "No handler found for channel terms action"
-                    << channelTermsAction.c_str();
+                    << channelTermsAction;
                 return;
             }
             // Invoke handler function
@@ -1321,7 +1317,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
     }
     else if (topic.startsWith("community-points-channel-v1."))
     {
-        std::string pointEventType;
+        QString pointEventType;
         if (!rj::getSafe(msg, "type", pointEventType))
         {
             qCDebug(chatterinoPubsub) << "Bad channel point event data";
@@ -1347,7 +1343,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         else
         {
             qCDebug(chatterinoPubsub)
-                << "Invalid point event type:" << pointEventType.c_str();
+                << "Invalid point event type:" << pointEventType;
         }
     }
     else if (topic.startsWith("automod-queue."))
@@ -1356,7 +1352,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         assert(topicParts.length() == 3);
         auto &data = msg["data"];
 
-        std::string automodEventType;
+        QString automodEventType;
         if (!rj::getSafe(msg, "type", automodEventType))
         {
             qCDebug(chatterinoPubsub) << "Bad automod event data";
