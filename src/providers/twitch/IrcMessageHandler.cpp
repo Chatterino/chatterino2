@@ -475,15 +475,15 @@ void IrcMessageHandler::handleClearMessageMessage(Communi::IrcMessage *message)
     QString targetID = tags.value("target-msg-id").toString();
 
     auto msg = chan->findMessage(targetID);
-    if (msg != nullptr)
+    if (msg == nullptr)
+        return;
+
+    msg->flags.set(MessageFlag::Disabled);
+    if (!getSettings()->hideDeletionActions)
     {
-        msg->flags.set(MessageFlag::Disabled);
-        if (!getSettings()->hideDeletionActions)
-        {
-            MessageBuilder builder;
-            TwitchMessageBuilder::deletionMessage(msg, &builder);
-            chan->addMessage(builder.release());
-        }
+        MessageBuilder builder;
+        TwitchMessageBuilder::deletionMessage(msg, &builder);
+        chan->addMessage(builder.release());
     }
 }
 
@@ -780,7 +780,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
     auto builtMessages = this->parseNoticeMessage(message);
 
-    for (auto msg : builtMessages)
+    for (const auto &msg : builtMessages)
     {
         QString channelName;
         if (!trimChannelName(message->target(), channelName) ||
@@ -806,7 +806,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             return;
         }
 
-        QString tags = message->tags().value("msg-id", "").toString();
+        QString tags = message->tags().value("msg-id", QString()).toString();
         if (tags == "bad_delete_message_error" || tags == "usage_delete")
         {
             channel->addMessage(makeSystemMessage(
