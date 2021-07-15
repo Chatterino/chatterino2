@@ -701,26 +701,6 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     }
 }
 
-void IrcMessageHandler::handleModeMessage(Communi::IrcMessage *message)
-{
-    auto channel = getApp()->twitch.server->getChannelOrEmpty(
-        message->parameter(0).remove(0, 1));
-
-    if (channel->isEmpty())
-    {
-        return;
-    }
-
-    if (message->parameter(1) == "+o")
-    {
-        channel->modList.append(message->parameter(2));
-    }
-    else if (message->parameter(1) == "-o")
-    {
-        channel->modList.append(message->parameter(2));
-    }
-}
-
 std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     Communi::IrcNoticeMessage *message)
 {

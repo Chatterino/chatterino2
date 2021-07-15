@@ -124,11 +124,7 @@ void TwitchIrcServer::readConnectionMessageReceived(
     auto &handler = IrcMessageHandler::instance();
 
     // Below commands enabled through the twitch.tv/membership CAP REQ
-    if (command == "MODE")
-    {
-        handler.handleModeMessage(message);
-    }
-    else if (command == "JOIN")
+    if (command == "JOIN")
     {
         handler.handleJoinMessage(message);
     }
