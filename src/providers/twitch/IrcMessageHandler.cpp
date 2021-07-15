@@ -617,10 +617,11 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
 
         if (msgType == "bitsbadgetier")
         {
-            messageText = QString("%1 just earned a new %2 Bits badge!")
-                              .arg(tags.value("display-name").toString())
-                              .arg(kFormatNumbers(
-                                  tags.value("msg-param-threshold").toInt()));
+            messageText =
+                QString("%1 just earned a new %2 Bits badge!")
+                    .arg(tags.value("display-name").toString(),
+                         kFormatNumbers(
+                             tags.value("msg-param-threshold").toInt()));
         }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
@@ -666,10 +667,11 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
 
         if (msgType == "bitsbadgetier")
         {
-            messageText = QString("%1 just earned a new %2 Bits badge!")
-                              .arg(tags.value("display-name").toString())
-                              .arg(kFormatNumbers(
-                                  tags.value("msg-param-threshold").toInt()));
+            messageText =
+                QString("%1 just earned a new %2 Bits badge!")
+                    .arg(tags.value("display-name").toString(),
+                         kFormatNumbers(
+                             tags.value("msg-param-threshold").toInt()));
         }
 
         auto b = MessageBuilder(systemMessage, parseTagString(messageText),
