@@ -713,7 +713,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
                                         .arg(curUser->getUserName());
         const auto loginPromptText = QString("Try adding your account again.");
 
-        auto builder = MessageBuilder();
+        MessageBuilder builder;
         auto text = QString("%1 %2").arg(expirationText, loginPromptText);
         builder.message().messageText = text;
         builder.message().searchText = text;
