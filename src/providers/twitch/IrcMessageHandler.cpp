@@ -546,32 +546,34 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
     TwitchMessageBuilder builder(c, message, args, message->parameter(1),
                                  false);
 
-    if (!builder.isIgnored())
+    if (builder.isIgnored())
     {
-        builder->flags.set(MessageFlag::Whisper);
-        MessagePtr _message = builder.build();
-        builder.triggerHighlights();
+        return;
+    }
 
-        getApp()->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
+    builder->flags.set(MessageFlag::Whisper);
+    MessagePtr _message = builder.build();
+    builder.triggerHighlights();
 
-        if (_message->flags.has(MessageFlag::Highlighted))
-        {
-            getApp()->twitch.server->mentionsChannel->addMessage(_message);
-        }
+    getApp()->twitch.server->lastUserThatWhisperedMe.set(builder.userName);
 
-        c->addMessage(_message);
+    if (_message->flags.has(MessageFlag::Highlighted))
+    {
+        getApp()->twitch.server->mentionsChannel->addMessage(_message);
+    }
 
-        auto overrideFlags = boost::optional<MessageFlags>(_message->flags);
-        overrideFlags->set(MessageFlag::DoNotTriggerNotification);
-        overrideFlags->set(MessageFlag::DoNotLog);
+    c->addMessage(_message);
 
-        if (getSettings()->inlineWhispers)
-        {
-            getApp()->twitch.server->forEachChannel(
-                [&_message, overrideFlags](ChannelPtr channel) {
-                    channel->addMessage(_message, overrideFlags);
-                });
-        }
+    auto overrideFlags = boost::optional<MessageFlags>(_message->flags);
+    overrideFlags->set(MessageFlag::DoNotTriggerNotification);
+    overrideFlags->set(MessageFlag::DoNotLog);
+
+    if (getSettings()->inlineWhispers)
+    {
+        getApp()->twitch.server->forEachChannel(
+            [&_message, overrideFlags](ChannelPtr channel) {
+                channel->addMessage(_message, overrideFlags);
+            });
     }
 }
 
