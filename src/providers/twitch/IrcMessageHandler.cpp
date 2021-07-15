@@ -750,6 +750,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
         return builtMessage;
     }
 
+    // default case
     std::vector<MessagePtr> builtMessages;
 
     builtMessages.emplace_back(makeSystemMessage(
@@ -829,15 +830,17 @@ void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)
     auto channel = getApp()->twitch.server->getChannelOrEmpty(
         message->parameter(0).remove(0, 1));
 
-    if (TwitchChannel *twitchChannel =
-            dynamic_cast<TwitchChannel *>(channel.get()))
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+    if (!twitchChannel)
     {
-        if (message->nick() !=
-                getApp()->accounts->twitch.getCurrent()->getUserName() &&
-            getSettings()->showJoins.getValue())
-        {
-            twitchChannel->addJoinedUser(message->nick());
-        }
+        return;
+    }
+
+    if (message->nick() !=
+            getApp()->accounts->twitch.getCurrent()->getUserName() &&
+        getSettings()->showJoins.getValue())
+    {
+        twitchChannel->addJoinedUser(message->nick());
     }
 }
 
@@ -846,21 +849,23 @@ void IrcMessageHandler::handlePartMessage(Communi::IrcMessage *message)
     auto channel = getApp()->twitch.server->getChannelOrEmpty(
         message->parameter(0).remove(0, 1));
 
-    if (TwitchChannel *twitchChannel =
-            dynamic_cast<TwitchChannel *>(channel.get()))
+    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+    if (!twitchChannel)
     {
-        const auto selfAccountName =
-            getApp()->accounts->twitch.getCurrent()->getUserName();
-        if (message->nick() != selfAccountName &&
-            getSettings()->showParts.getValue())
-        {
-            twitchChannel->addPartedUser(message->nick());
-        }
+        return;
+    }
 
-        if (message->nick() == selfAccountName)
-        {
-            channel->addMessage(generateBannedMessage(false));
-        }
+    const auto selfAccountName =
+        getApp()->accounts->twitch.getCurrent()->getUserName();
+    if (message->nick() != selfAccountName &&
+        getSettings()->showParts.getValue())
+    {
+        twitchChannel->addPartedUser(message->nick());
+    }
+
+    if (message->nick() == selfAccountName)
+    {
+        channel->addMessage(generateBannedMessage(false));
     }
 }
 }  // namespace chatterino
