@@ -165,7 +165,7 @@ void SettingsDialog::addTabs()
     this->addTab([]{return new GeneralPage;},          "General",        ":/settings/about.svg");
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new AccountsPage;},         "Accounts",       ":/settings/accounts.svg", SettingsTabId::Accounts);
-    this->addTab([]{return new AliasesPage;},         "Aliases",       ":/settings/accounts.svg");
+    this->addTab([]{return new AliasesPage;},          "Aliases",       ":/settings/accounts.svg");
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new CommandPage;},          "Commands",       ":/settings/commands.svg");
     this->addTab([]{return new HighlightingPage;},     "Highlights",     ":/settings/notifications.svg");

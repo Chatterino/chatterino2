@@ -21,11 +21,11 @@ public:
     {
     }
 
-    const QString &getName() const
+    const QString &name() const
     {
         return this->name_;
     }
-    const QString &getReplace() const
+    const QString &replace() const
     {
         return this->replace_;
     }
