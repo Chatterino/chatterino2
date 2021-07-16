@@ -2,6 +2,9 @@
 
 ## Unversioned
 
+- Minor: Received Twitch messages now use the exact same timestamp (obtained from Twitch's server) for every Chatterino user instead of assuming message timestamp on client's side. (#3021)
+- Minor: Received IRC messages use `time` message tag for timestamp if it's available. (#3021)
+
 ## 2.3.3
 
 - Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
