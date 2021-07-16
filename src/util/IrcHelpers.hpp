@@ -75,7 +75,7 @@ inline QTime calculateMessageTimestamp(const Communi::IrcMessage *message)
         return QDateTime::fromMSecsSinceEpoch(ts).time();
     }
 
-    // If present, handle tmi-sent-ts tag and use it as for timestamp
+    // If present, handle tmi-sent-ts tag and use it as timestamp
     if (message->tags().contains("tmi-sent-ts"))
     {
         auto ts = message->tags().value("tmi-sent-ts").toLongLong();
