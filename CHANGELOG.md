@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Received messages now use the exact same timestamp for every Chatterino user instead of assuming message timestamp on client's side. (#3021)
+
 ## 2.3.3
 
 - Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
