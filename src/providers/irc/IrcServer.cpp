@@ -9,6 +9,7 @@
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
 #include "singletons/Settings.hpp"
+#include "util/IrcHelpers.hpp"
 #include "util/QObjectRef.hpp"
 
 #include <QMetaEnum>
@@ -92,7 +93,8 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
                          // XD PAJLADA
                          MessageBuilder builder;
 
-                         builder.emplace<TimestampElement>();
+                         builder.emplace<TimestampElement>(
+                             calculateMessageTimestamp(message));
                          builder.emplace<TextElement>(
                              message->nick(), MessageElementFlag::Username);
                          builder.emplace<TextElement>(
@@ -259,7 +261,8 @@ void IrcServer::readConnectionMessageReceived(Communi::IrcMessage *message)
             {
                 MessageBuilder builder;
 
-                builder.emplace<TimestampElement>();
+                builder.emplace<TimestampElement>(
+                    calculateMessageTimestamp(message));
                 builder.emplace<TextElement>(message->toData(),
                                              MessageElementFlag::Text);
                 builder->flags.set(MessageFlag::Debug);
