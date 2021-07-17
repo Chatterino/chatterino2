@@ -690,6 +690,18 @@ void TwitchMessageBuilder::appendUsername()
         break;
     }
 
+    auto aliases = *getCSettings().aliasNames.readOnly().get();
+    auto loginLower = this->message().loginName.toLower();
+
+    for (auto const alias : aliases)
+    {
+        if (alias.name().toLower() == loginLower)
+        {
+            usernameText = alias.replace();
+            break;
+        }
+    }
+
     if (this->args.isSentWhisper)
     {
         // TODO(pajlada): Re-implement

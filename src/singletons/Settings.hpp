@@ -6,6 +6,7 @@
 #include "BaseSettings.hpp"
 #include "common/Channel.hpp"
 #include "common/SignalVector.hpp"
+#include "controllers/aliases/AliasesName.hpp"
 #include "controllers/filters/FilterRecord.hpp"
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
@@ -23,6 +24,7 @@ class HighlightBlacklistUser;
 class IgnorePhrase;
 class TaggedUser;
 class FilterRecord;
+class AliasesName;
 
 /// Settings which are availlable for reading on all threads.
 class ConcurrentSettings
@@ -37,6 +39,7 @@ public:
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
     SignalVector<FilterRecordPtr> &filterRecords;
+    SignalVector<AliasesName> &aliasNames;
     //SignalVector<TaggedUser> &taggedUsers;
     SignalVector<ModerationAction> &moderationActions;
 
