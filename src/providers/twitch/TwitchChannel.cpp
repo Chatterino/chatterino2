@@ -832,9 +832,7 @@ void TwitchChannel::loadRecentMessages()
                 return;
 
             shared->addMessage(makeSystemMessage(
-                QString("Recent-messages API responded with an error %1 while "
-                        "retrieving messages. This isn't Chatterino's fault, "
-                        "but rather a temporary issue with the service itself.")
+                QString("Message history service unavailable (Error %1)")
                     .arg(result.status())));
         })
         .execute();
