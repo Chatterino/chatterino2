@@ -4,6 +4,7 @@
 
 - Minor: Added autocompletion in /whispers for Twitch emotes, Global Bttv/Ffz emotes and emojis. (#2999)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
+- Dev: Ubuntu packages are now available (#2936)
 
 ## 2.3.3
 
