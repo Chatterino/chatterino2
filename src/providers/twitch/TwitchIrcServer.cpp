@@ -62,7 +62,7 @@ void TwitchIrcServer::initializeConnection(IrcConnection *connection,
 
     // twitch.tv/tags enables IRCv3 tags on messages. See https://dev.twitch.tv/docs/irc/tags
     // twitch.tv/commands enables a bunch of miscellaneous command capabilities. See https://dev.twitch.tv/docs/irc/commands
-    // twitch.tv/membership enables the JOIN/PART/MODE/NAMES commands. See https://dev.twitch.tv/docs/irc/membership
+    // twitch.tv/membership enables the JOIN/PART/NAMES commands. See https://dev.twitch.tv/docs/irc/membership
     // This is enabled so we receive USERSTATE messages when joining channels / typing messages, along with the other command capabilities
     QStringList caps{"twitch.tv/tags", "twitch.tv/commands"};
     if (type != ConnectionType::Write)
