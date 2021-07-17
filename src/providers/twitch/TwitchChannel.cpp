@@ -764,7 +764,7 @@ void TwitchChannel::loadRecentMessages()
     auto weak = weakOf<Channel>(this);
 
     NetworkRequest(url)
-        .onSuccess([weak](NetworkResult result) -> Outcome {
+        .onSuccess([this, weak](NetworkResult result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
                 return Failure;
@@ -804,7 +804,7 @@ void TwitchChannel::loadRecentMessages()
                 }
             }
 
-            postToThread([shared, root,
+            postToThread([this, shared, root,
                           messages = std::move(allBuiltMessages)]() mutable {
                 shared->addMessagesAtStart(messages);
 
@@ -812,7 +812,9 @@ void TwitchChannel::loadRecentMessages()
                 if (QString errorCode = root.value("error_code").toString();
                     !errorCode.isEmpty())
                 {
-                    qDebug() << errorCode;
+                    qCDebug(chatterinoTwitch)
+                        << QString("rm error_code=%1, channel=%2")
+                               .arg(errorCode, this->getName());
                     if (errorCode == "channel_not_joined")
                     {
                         shared->addMessage(makeSystemMessage(
@@ -832,7 +834,7 @@ void TwitchChannel::loadRecentMessages()
             shared->addMessage(makeSystemMessage(
                 QString("Recent-messages API responded with an error %1 while "
                         "retrieving messages. This isn't Chatterino's fault, "
-                        "but rahter a temporary issue with the service itself.")
+                        "but rather a temporary issue with the service itself.")
                     .arg(result.status())));
         })
         .execute();
