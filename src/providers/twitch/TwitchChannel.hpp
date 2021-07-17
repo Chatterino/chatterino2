@@ -57,7 +57,6 @@ public:
         bool emoteOnly = false;
         int followerOnly = -1;
         int slowMode = 0;
-        QString broadcasterLang;
     };
 
     void initialize();
