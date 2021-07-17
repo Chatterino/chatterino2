@@ -40,7 +40,8 @@ MessagePtr IrcMessageBuilder::build()
     // PUSH ELEMENTS
     this->appendChannelName();
 
-    this->emplace<TimestampElement>();
+    this->emplace<TimestampElement>(
+        calculateMessageTimestamp(this->ircMessage));
 
     this->appendUsername();
 
@@ -70,8 +71,6 @@ void IrcMessageBuilder::addWords(const QStringList &words)
 
 void IrcMessageBuilder::appendUsername()
 {
-    auto app = getApp();
-
     QString username = this->userName;
     this->message().loginName = username;
     this->message().displayName = username;
