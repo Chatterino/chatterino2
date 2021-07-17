@@ -761,13 +761,16 @@ void TwitchChannel::loadRecentMessages()
                    .arg(baseURL)
                    .arg(getSettings()->twitchMessageHistoryLimit);
 
+    auto weak = weakOf<Channel>(this);
+
     NetworkRequest(url)
-        .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
+        .onSuccess([weak](NetworkResult result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
                 return Failure;
 
-            auto messages = parseRecentMessages(result.parseJson(), shared);
+            auto root = result.parseJson();
+            auto messages = parseRecentMessages(root, shared);
 
             auto &handler = IrcMessageHandler::instance();
 
@@ -801,12 +804,36 @@ void TwitchChannel::loadRecentMessages()
                 }
             }
 
-            postToThread(
-                [shared, messages = std::move(allBuiltMessages)]() mutable {
-                    shared->addMessagesAtStart(messages);
-                });
+            postToThread([shared, root,
+                          messages = std::move(allBuiltMessages)]() mutable {
+                shared->addMessagesAtStart(messages);
+
+                // Notify user about a possible gap in logs
+                if (QString errorCode = root.value("error_code").toString();
+                    !errorCode.isEmpty())
+                {
+                    qDebug() << errorCode;
+                    if (errorCode == "channel_not_joined")
+                    {
+                        shared->addMessage(makeSystemMessage(
+                            "Recent-messages API isn't currently joined to "
+                            "this channel (in progress or due to an issue)."));
+                    }
+                }
+            });
 
             return Success;
+        })
+        .onError([weak](NetworkResult result) {
+            auto shared = weak.lock();
+            if (!shared)
+                return;
+
+            shared->addMessage(makeSystemMessage(
+                QString("Recent-messages API responded with an error %1 while "
+                        "retrieving messages. This isn't Chatterino's fault, "
+                        "but rahter a temporary issue with the service itself.")
+                    .arg(result.status())));
         })
         .execute();
 }
