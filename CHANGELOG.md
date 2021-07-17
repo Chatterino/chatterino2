@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Added informative messages for recent-messages API's errors. (#3029)
+
 ## 2.3.3
 
 - Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
