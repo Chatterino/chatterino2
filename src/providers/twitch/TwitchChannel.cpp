@@ -808,9 +808,10 @@ void TwitchChannel::loadRecentMessages()
                           messages = std::move(allBuiltMessages)]() mutable {
                 shared->addMessagesAtStart(messages);
 
-                // Notify user about a possible gap in logs
+                // Notify user about a possible gap in logs if it returned some messages
+                // but isn't currently joined to a channel
                 if (QString errorCode = root.value("error_code").toString();
-                    !errorCode.isEmpty())
+                    !errorCode.isEmpty() && messages.size() > 0)
                 {
                     qCDebug(chatterinoTwitch)
                         << QString("rm error_code=%1, channel=%2")
@@ -818,8 +819,8 @@ void TwitchChannel::loadRecentMessages()
                     if (errorCode == "channel_not_joined")
                     {
                         shared->addMessage(makeSystemMessage(
-                            "Recent-messages API isn't currently joined to "
-                            "this channel (in progress or due to an issue)."));
+                            "Message history service recovering, there may be "
+                            "gaps in the message history."));
                     }
                 }
             });
