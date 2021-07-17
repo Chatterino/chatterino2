@@ -846,7 +846,8 @@ PubSub::PubSub()
 
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
     this->websocketClient.clear_access_channels(
-        websocketpp::log::alevel::frame_payload);
+        websocketpp::log::alevel::frame_payload |
+        websocketpp::log::alevel::frame_header);
 
     this->websocketClient.init_asio();
 
