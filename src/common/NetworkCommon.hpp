@@ -29,7 +29,7 @@ const static std::vector<QString> networkRequestTypes{
     "POST",    //
     "PUT",     //
     "DELETE",  //
-    "PATCH"    //
+    "PATCH",   //
 };
 
 // parseHeaderList takes a list of headers in string form,
