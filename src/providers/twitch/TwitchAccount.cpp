@@ -28,9 +28,9 @@ std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys)
     // splitting emoteSetKeys to batches of 100, because Ivr API endpoint accepts a maximum of 100 emotesets at once
     constexpr int batchSize = 100;
 
-    std::vector<QStringList> batches;
     int batchCount = (emoteSetKeys.size() / batchSize) + 1;
 
+    std::vector<QStringList> batches;
     batches.reserve(batchCount);
 
     for (int i = 0; i < batchCount; i++)
@@ -38,9 +38,9 @@ std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys)
         QStringList batch;
 
         int last = std::min(batchSize, emoteSetKeys.size() - batchSize * i);
-        for (int j = batchSize * i; j < last; j++)
+        for (int j = 0; j < last; j++)
         {
-            batch.push_back(emoteSetKeys.at(j));
+            batch.push_back(emoteSetKeys.at(j + (batchSize * i)));
         }
         batches.emplace_back(batch);
     }
