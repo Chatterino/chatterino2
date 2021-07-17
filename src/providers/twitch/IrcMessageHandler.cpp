@@ -585,7 +585,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseUserNoticeMessage(
     auto tags = message->tags();
     auto parameters = message->parameters();
 
-    QString msgType = tags.value("msg-id", QString()).toString();
+    QString msgType = tags.value("msg-id").toString();
     QString content;
     if (parameters.size() >= 2)
     {
@@ -642,7 +642,7 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     auto parameters = message->parameters();
 
     auto target = parameters[0];
-    QString msgType = tags.value("msg-id", QString()).toString();
+    QString msgType = tags.value("msg-id").toString();
     QString content;
     if (parameters.size() >= 2)
     {
@@ -789,7 +789,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             return;
         }
 
-        QString tags = message->tags().value("msg-id", QString()).toString();
+        QString tags = message->tags().value("msg-id").toString();
         if (tags == "bad_delete_message_error" || tags == "usage_delete")
         {
             channel->addMessage(makeSystemMessage(
