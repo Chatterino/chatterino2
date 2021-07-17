@@ -46,8 +46,8 @@ struct Serialize<chatterino::AliasesName> {
     {
         rapidjson::Value ret(rapidjson::kObjectType);
 
-        chatterino::rj::set(ret, "name", value.getName(), a);
-        chatterino::rj::set(ret, "replace", value.getReplace(), a);
+        chatterino::rj::set(ret, "name", value.name(), a);
+        chatterino::rj::set(ret, "replace", value.replace(), a);
 
         return ret;
     }
