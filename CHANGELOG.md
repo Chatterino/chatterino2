@@ -2,6 +2,11 @@
 
 ## Unversioned
 
+- Major: Newly uploaded Twitch emotes are once again present in emote picker and can be autocompleted with Tab as well. (#2992)
+- Minor: Added autocompletion in /whispers for Twitch emotes, Global Bttv/Ffz emotes and emojis. (#2999)
+- Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
+- Dev: Ubuntu packages are now available (#2936)
+
 ## 2.3.3
 
 - Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
