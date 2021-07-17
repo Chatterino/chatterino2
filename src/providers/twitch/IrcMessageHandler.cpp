@@ -545,7 +545,7 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
     }
 }
 
-// This will emit only once and right after user logs in to IRC - reset emote data and reload emtoes
+// This will emit only once and right after user logs in to IRC - reset emote data and reload emotes
 void IrcMessageHandler::handleGlobalUserStateMessage(
     Communi::IrcMessage *message)
 {

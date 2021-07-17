@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Major: Newly uploaded Twitch emotes are present in emote picker and can be "Tabbed" as well. (#2992)
+- Major: Newly uploaded Twitch emotes are once again present in emote picker and can be "Tabbed" as well. (#2992)
 
 ## 2.3.3
 
