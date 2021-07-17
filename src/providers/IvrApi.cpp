@@ -35,12 +35,13 @@ void IvrApi::getSubage(QString userName, QString channelName,
 
 void IvrApi::getBulkEmoteSets(QString emoteSetList,
                               ResultCallback<QJsonArray> successCallback,
-                              IvrFailureCallback failureCallback)
+                              IvrFailureCallback failureCallback,
+                              std::function<void()> finallyCallback)
 {
     QUrlQuery urlQuery;
     urlQuery.addQueryItem("set_id", emoteSetList);
 
-    this->makeRequest("twitch/emoteset", urlQuery)
+    this->makeRequest("v2/twitch/emotes/sets", urlQuery)
         .onSuccess([successCallback, failureCallback](auto result) -> Outcome {
             auto root = result.parseJsonArray();
 
@@ -54,6 +55,7 @@ void IvrApi::getBulkEmoteSets(QString emoteSetList,
                 << QString(result.getData());
             failureCallback();
         })
+        .finally(std::move(finallyCallback))
         .execute();
 }
 

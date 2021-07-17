@@ -80,8 +80,20 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
     {
         if (auto user = getApp()->accounts->twitch.getCurrent())
         {
-            auto twitch = user->accessEmotes();
-            addEmotes(emotes, twitch->emotes, text, "Twitch Emote");
+            // Twitch Emotes available globally
+            auto emoteData = user->accessEmotes();
+            addEmotes(emotes, emoteData->emotes, text, "Twitch Emote");
+
+            // Twitch Emotes available locally
+            auto localEmoteData = user->accessLocalEmotes();
+            if (localEmoteData->find(tc->roomId()) != localEmoteData->end())
+            {
+                if (auto localEmotes = &localEmoteData->at(tc->roomId()))
+                {
+                    addEmotes(emotes, *localEmotes, text,
+                              "Local Twitch Emotes");
+                }
+            }
         }
 
         if (tc)
@@ -92,9 +104,9 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
             if (auto ffz = tc->ffzEmotes())
                 addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
 
-            if (auto bttvG = tc->globalBttv().emotes())
+            if (auto bttvG = getApp()->twitch2->getBttvEmotes().emotes())
                 addEmotes(emotes, *bttvG, text, "Global BetterTTV");
-            if (auto ffzG = tc->globalFfz().emotes())
+            if (auto ffzG = getApp()->twitch2->getFfzEmotes().emotes())
                 addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
         }
 

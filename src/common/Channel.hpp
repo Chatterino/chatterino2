@@ -82,8 +82,6 @@ public:
 
     bool hasMessages() const;
 
-    QStringList modList;
-
     // CHANNEL INFO
     virtual bool canSendMessage() const;
     virtual void sendMessage(const QString &message);
