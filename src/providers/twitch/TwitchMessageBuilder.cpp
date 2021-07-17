@@ -711,7 +711,7 @@ void TwitchMessageBuilder::appendUsername()
     {
         if (alias.name().toLower() == loginLower)
         {
-            usernameText = alias.getReplace();
+            usernameText = alias.replace();
             break;
         }
     }
