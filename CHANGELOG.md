@@ -2,25 +2,23 @@
 
 ## Unversioned
 
+- Major: Newly uploaded Twitch emotes are once again present in emote picker and can be autocompleted with Tab as well. (#2992)
+- Minor: Added autocompletion in /whispers for Twitch emotes, Global Bttv/Ffz emotes and emojis. (#2999)
+- Minor: Received Twitch messages now use the exact same timestamp (obtained from Twitch's server) for every Chatterino user instead of assuming message timestamp on client's side. (#3021)
+- Minor: Received IRC messages use `time` message tag for timestamp if it's available. (#3021)
+- Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
+- Dev: Ubuntu packages are now available (#2936)
+
+## 2.3.3
+
+- Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
+- Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
 - Minor: Username in channel points rewards redemption messages is now clickable. (#2673, #2953)
 - Minor: Channel name in `<channel> has gone offline. Exiting host mode.` messages is now clickable. (#2922)
 - Minor: Added `/openurl` command. Usage: `/openurl <URL>`. Opens the provided URL in the browser. (#2461, #2926)
 - Minor: Updated to Emoji v13.1 (#2958)
 - Minor: Added "Open in: new tab, browser player, streamlink" in twitch link context menu. (#2988)
 - Minor: Sender username in automod messages shown to moderators shows correct color and display name. (#2967)
-- Bugfix: Now deleting cache files that weren't modified in the past 14 days. (#2947)
-- Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
-- Bugfix: Middle mouse click no longer scrolls in not fully populated usercards and splits. (#2933)
-- Bugfix: Fix bad behavior of the HTML color picker edit when user input is being entered. (#2942)
-- Bugfix: Made follower emotes suggested (in emote popup menu, tab completion, emote input menu) only in their origin channel, not globally. (#2951)
-- Bugfix: Fixed founder badge not being respected by `author.subbed` filter. (#2971)
-- Bugfix: Usercards on IRC will now only show user's messages. (#1780, #2979)
-- Bugfix: Messages that couldn't be searched or filtered are now handled correctly. (#2962)
-
-## 2.3.3
-
-- Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
-- Major: Added ability to toggle visibility of Channel Tabs - This can be done by right-clicking the tab area or pressing the keyboard shortcut (default: Ctrl+U). (#2600)
 - Minor: The /live split now shows channels going offline. (#2880)
 - Minor: Restore automod functionality for moderators (#2817, #2887)
 - Minor: Add setting for username style (#2889, #2891)
@@ -34,6 +32,14 @@
 - Minor: Now shows deletions of messages like timeouts (#1155, #2841, #2867, #2874)
 - Minor: Added a link to accounts page in settings to "You need to be logged in to send messages" message. (#2862)
 - Minor: Switch to Twitch v2 emote API for animated emote support. (#2863)
+- Bugfix: Now deleting cache files that weren't modified in the past 14 days. (#2947)
+- Bugfix: Fixed large timeout durations in moderation buttons overlapping with usernames or other buttons. (#2865, #2921)
+- Bugfix: Middle mouse click no longer scrolls in not fully populated usercards and splits. (#2933)
+- Bugfix: Fix bad behavior of the HTML color picker edit when user input is being entered. (#2942)
+- Bugfix: Made follower emotes suggested (in emote popup menu, tab completion, emote input menu) only in their origin channel, not globally. (#2951)
+- Bugfix: Fixed founder badge not being respected by `author.subbed` filter. (#2971)
+- Bugfix: Usercards on IRC will now only show user's messages. (#1780, #2979)
+- Bugfix: Messages that couldn't be searched or filtered are now handled correctly. (#2962)
 - Bugfix: Moderation buttons now show the correct time unit when using units other than seconds. (#1719, #2864)
 - Bugfix: Fixed FFZ emote links for global emotes (#2807, #2808)
 - Bugfix: Fixed pasting text with URLs included (#1688, #2855)

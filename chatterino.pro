@@ -250,7 +250,6 @@ SOURCES += \
     src/util/Helpers.cpp \
     src/util/IncognitoBrowser.cpp \
     src/util/InitUpdateButton.cpp \
-    src/util/JsonQuery.cpp \
     src/util/LayoutHelper.cpp \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
@@ -500,7 +499,6 @@ HEADERS += \
     src/util/InitUpdateButton.hpp \
     src/util/IrcHelpers.hpp \
     src/util/IsBigEndian.hpp \
-    src/util/JsonQuery.hpp \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
     src/util/NuulsUploader.hpp \

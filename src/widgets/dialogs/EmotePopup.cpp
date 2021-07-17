@@ -7,6 +7,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Shortcut.hpp"
@@ -229,11 +230,11 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         *globalChannel, *subChannel, _channel->getName());
 
     // global
-    addEmotes(*globalChannel, *twitchChannel->globalSeventv().emotes(), "7TV",
-              MessageElementFlag::SeventvEmote);
-    addEmotes(*globalChannel, *twitchChannel->globalBttv().emotes(),
+    addEmotes(*globalChannel, *getApp()->twitch2->getSeventvEmotes().emotes(),
+              "7TV", MessageElementFlag::SeventvEmote);
+    addEmotes(*globalChannel, *getApp()->twitch2->getBttvEmotes().emotes(),
               "BetterTTV", MessageElementFlag::BttvEmote);
-    addEmotes(*globalChannel, *twitchChannel->globalFfz().emotes(),
+    addEmotes(*globalChannel, *getApp()->twitch2->getFfzEmotes().emotes(),
               "FrankerFaceZ", MessageElementFlag::FfzEmote);
 
     // channel

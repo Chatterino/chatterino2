@@ -58,7 +58,6 @@ public:
         bool emoteOnly = false;
         int followerOnly = -1;
         int slowMode = 0;
-        QString broadcasterLang;
     };
 
     void initialize();
@@ -88,9 +87,6 @@ public:
     SharedAccessGuard<const StreamStatus> accessStreamStatus() const;
 
     // Emotes
-    const SeventvEmotes &globalSeventv() const;
-    const BttvEmotes &globalBttv() const;
-    const FfzEmotes &globalFfz() const;
     boost::optional<EmotePtr> seventvEmote(const EmoteName &name) const;
     boost::optional<EmotePtr> bttvEmote(const EmoteName &name) const;
     boost::optional<EmotePtr> ffzEmote(const EmoteName &name) const;
@@ -132,9 +128,7 @@ private:
     } nameOptions;
 
 protected:
-    explicit TwitchChannel(const QString &channelName,
-                           SeventvEmotes &globalSeventv, BttvEmotes &globalBttv,
-                           FfzEmotes &globalFfz);
+    explicit TwitchChannel(const QString &channelName);
 
 private:
     // Methods
@@ -168,9 +162,6 @@ private:
     UniqueAccess<RoomModes> roomModes_;
 
 protected:
-    SeventvEmotes &globalSeventv_;
-    BttvEmotes &globalBttv_;
-    FfzEmotes &globalFfz_;
     Atomic<std::shared_ptr<const EmoteMap>> seventvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> bttvEmotes_;
     Atomic<std::shared_ptr<const EmoteMap>> ffzEmotes_;
