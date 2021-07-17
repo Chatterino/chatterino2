@@ -552,19 +552,15 @@ void IrcMessageHandler::handleGlobalUserStateMessage(
     auto currentUser = getApp()->accounts->twitch.getCurrent();
 
     // set received emote-sets, this time used to initially load emotes
-    // NOTE: this should always return true
+    // NOTE: this should always return true unless we reconnect
     auto emoteSetsChanged = currentUser->setUserstateEmoteSets(
         message->tag("emote-sets").toString().split(","));
 
-    qCDebug(chatterinoTwitch) << emoteSetsChanged << message->toData();
     // We should always attempt to reload emotes even on reconnections where
     // emoteSetsChanged, since we want to trigger emote reloads when
     // "currentUserChanged" signal is emitted
-
-    //    if (emoteSetsChanged)
-    //    {
+    qCDebug(chatterinoTwitch) << emoteSetsChanged << message->toData();
     currentUser->loadEmotes();
-    //    }
 }
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
