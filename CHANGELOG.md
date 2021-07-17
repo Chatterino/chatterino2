@@ -3,6 +3,8 @@
 ## Unversioned
 
 - Major: Newly uploaded Twitch emotes are once again present in emote picker and can be "Tabbed" as well. (#2992)
+- Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
+- Dev: Ubuntu packages are now available (#2936)
 
 ## 2.3.3
 

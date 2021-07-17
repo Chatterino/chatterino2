@@ -313,14 +313,14 @@ void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
             [this](QJsonArray emoteSetArray) {
                 auto emoteData = this->emotes_.access();
                 auto localEmoteData = this->localEmotes_.access();
-                for (auto emoteSet : emoteSetArray)
+                for (auto emoteSet_ : emoteSetArray)
                 {
-                    auto newUserEmoteSet = std::make_shared<EmoteSet>();
+                    auto emoteSet = std::make_shared<EmoteSet>();
 
-                    IvrEmoteSet ivrEmoteSet(emoteSet.toObject());
+                    IvrEmoteSet ivrEmoteSet(emoteSet_.toObject());
 
                     QString setKey = ivrEmoteSet.setId;
-                    newUserEmoteSet->key = setKey;
+                    emoteSet->key = setKey;
 
                     // check if the emoteset is already in emoteData
                     auto isAlreadyFetched =
@@ -334,19 +334,18 @@ void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
                         continue;
                     }
 
-                    newUserEmoteSet->channelName = ivrEmoteSet.login;
-                    newUserEmoteSet->text = ivrEmoteSet.displayName;
+                    emoteSet->channelName = ivrEmoteSet.login;
+                    emoteSet->text = ivrEmoteSet.displayName;
 
                     for (const auto &emoteObj : ivrEmoteSet.emotes)
                     {
                         IvrEmote ivrEmote(emoteObj.toObject());
 
                         auto id = EmoteId{ivrEmote.id};
-                        auto code = EmoteName{ivrEmote.code};
-                        auto cleanCode =
-                            EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
-                        newUserEmoteSet->emotes.push_back(
-                            TwitchEmote{id, cleanCode});
+                        auto code = EmoteName{
+                            TwitchEmotes::cleanUpEmoteCode(ivrEmote.code)};
+
+                        emoteSet->emotes.push_back(TwitchEmote{id, code});
 
                         auto emote =
                             getApp()->emotes->twitch.getOrCreateEmote(id, code);
@@ -354,7 +353,7 @@ void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
                         // Follower emotes can be only used in their origin channel
                         if (ivrEmote.emoteType == "FOLLOWER")
                         {
-                            newUserEmoteSet->local = true;
+                            emoteSet->local = true;
 
                             // EmoteMap for target channel wasn't initialized yet, doing it now
                             if (localEmoteData->find(ivrEmoteSet.channelId) ==
@@ -372,13 +371,11 @@ void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
                             emoteData->emotes.emplace(code, emote);
                         }
                     }
-                    std::sort(newUserEmoteSet->emotes.begin(),
-                              newUserEmoteSet->emotes.end(),
+                    std::sort(emoteSet->emotes.begin(), emoteSet->emotes.end(),
                               [](const TwitchEmote &l, const TwitchEmote &r) {
                                   return l.name.string < r.name.string;
                               });
-
-                    emoteData->emoteSets.emplace_back(newUserEmoteSet);
+                    emoteData->emoteSets.emplace_back(emoteSet);
                 }
             },
             [] {
@@ -388,6 +385,9 @@ void TwitchAccount::loadUserstateEmotes(std::function<void()> callback)
                 // XXX(zneix): We check if this is the last iteration and if so, call the callback
                 if (i + 1 == batches.size())
                 {
+                    qCDebug(chatterinoTwitch)
+                        << "Finished loading emotes from IVR, attempting to "
+                           "load Kraken emotes now";
                     callback();
                 }
             });
@@ -540,16 +540,15 @@ void TwitchAccount::loadKrakenEmotes()
                     if (!emoteArrObj.isObject())
                     {
                         qCWarning(chatterinoTwitch)
-                            << QString("Emote value from set %1 was "
-                                       "invalid")
+                            << QString("Emote value from set %1 was invalid")
                                    .arg(emoteSet->key);
                         continue;
                     }
                     KrakenEmote krakenEmote(emoteArrObj.toObject());
 
                     auto id = EmoteId{krakenEmote.id};
-                    auto code = EmoteName{TwitchEmotes::cleanUpEmoteCode(
-                        EmoteName{krakenEmote.code})};
+                    auto code = EmoteName{
+                        TwitchEmotes::cleanUpEmoteCode(krakenEmote.code)};
 
                     emoteSet->emotes.emplace_back(TwitchEmote{id, code});
 
