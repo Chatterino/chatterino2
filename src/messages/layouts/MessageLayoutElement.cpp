@@ -111,7 +111,7 @@ void ImageLayoutElement::addCopyTextToString(QString &str, int from,
     if (emoteElement)
     {
         str += emoteElement->getEmote()->getCopyString();
-        str = TwitchEmotes::cleanUpEmoteCode(EmoteName{str});
+        str = TwitchEmotes::cleanUpEmoteCode(str);
         if (this->hasTrailingSpace())
         {
             str += " ";

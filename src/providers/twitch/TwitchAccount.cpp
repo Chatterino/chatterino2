@@ -240,12 +240,10 @@ void TwitchAccount::loadEmotes()
                         KrakenEmote krakenEmote(emoteArrObj.toObject());
 
                         auto id = EmoteId{krakenEmote.id};
-                        auto code = EmoteName{krakenEmote.code};
+                        auto code = EmoteName{
+                            TwitchEmotes::cleanUpEmoteCode(krakenEmote.code)};
 
-                        auto cleanCode =
-                            EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
-                        emoteSet->emotes.emplace_back(
-                            TwitchEmote{id, cleanCode});
+                        emoteSet->emotes.emplace_back(TwitchEmote{id, code});
 
                         if (!emoteSet->local)
                         {
@@ -370,11 +368,11 @@ void TwitchAccount::loadUserstateEmotes()
                         IvrEmote ivrEmote(emoteObj.toObject());
 
                         auto id = EmoteId{ivrEmote.id};
-                        auto code = EmoteName{ivrEmote.code};
-                        auto cleanCode =
-                            EmoteName{TwitchEmotes::cleanUpEmoteCode(code)};
+                        auto code = EmoteName{
+                            TwitchEmotes::cleanUpEmoteCode(ivrEmote.code)};
+
                         newUserEmoteSet->emotes.push_back(
-                            TwitchEmote{id, cleanCode});
+                            TwitchEmote{id, code});
 
                         auto emote =
                             getApp()->emotes->twitch.getOrCreateEmote(id, code);
