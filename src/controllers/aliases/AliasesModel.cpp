@@ -24,8 +24,8 @@ AliasesName AliasesModel::getItemFromRow(std::vector<QStandardItem *> &row,
 void AliasesModel::getRowFromItem(const AliasesName &item,
                                   std::vector<QStandardItem *> &row)
 {
-    setStringItem(row[0], item.getName());
-    setStringItem(row[1], item.getReplace());
+    setStringItem(row[0], item.name());
+    setStringItem(row[1], item.replace());
 }
 
 }  // namespace chatterino
