@@ -513,7 +513,6 @@ void TwitchAccount::loadKrakenEmotes()
                 return;
             }
 
-            // Clearing emote data - NOIDONTTHINKSO
             auto emoteData = this->emotes_.access();
 
             for (auto emoteSetIt = data.emoteSets.begin();
@@ -568,9 +567,6 @@ void TwitchAccount::loadKrakenEmotes()
                           });
                 emoteData->emoteSets.emplace_back(emoteSet);
             }
-
-            // Getting userstate emotes from Ivr - NOIDONTTHINKSO
-            // this->loadUserstateEmotes();
         },
         [] {
             // kraken request failed
