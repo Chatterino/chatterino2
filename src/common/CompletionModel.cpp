@@ -76,15 +76,13 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     std::lock_guard<std::mutex> guard(this->itemsMutex_);
     this->items_.clear();
 
-    // Twitch channel
-    auto tc = dynamic_cast<TwitchChannel *>(&this->channel_);
-    // Special Twitch channels
-    auto sc = this->channel_.isTwitchChannel() &&
-              this->channel_.getType() != Channel::Type::Twitch;
-    if ((!tc && !sc) || prefix.length() < 2)
+    if (prefix.length() < 2 || !this->channel_.isTwitchChannel())
     {
         return;
     }
+
+    // Twitch channel
+    auto tc = dynamic_cast<TwitchChannel *>(&this->channel_);
 
     std::function<void(const QString &str, TaggedString::Type type)> addString;
     if (getSettings()->prefixOnlyEmoteCompletion)
@@ -145,8 +143,8 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     //
-    // Stuff below is available only in special Twitch channels
-    if (sc)
+    // Stuff below is available only in regular Twitch channels
+    if (!tc)
     {
         return;
     }
