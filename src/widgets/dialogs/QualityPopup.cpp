@@ -2,6 +2,7 @@
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Window.hpp"
 
@@ -29,6 +30,10 @@ QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
 
     this->ui_.vbox.addWidget(&this->ui_.selector);
     this->ui_.vbox.addWidget(&this->ui_.buttonBox);
+
+    createWindowShortcut(this, "Return", [=] {
+        this->okButtonClicked();
+    });
 
     this->setLayout(&this->ui_.vbox);
 }
