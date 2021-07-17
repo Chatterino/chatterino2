@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Added autocompletion in #/whispers for Twitch emotes, Global Bttv/Ffz emotes and emojis. (#2999)
+- Minor: Added autocompletion in /whispers for Twitch emotes, Global Bttv/Ffz emotes and emojis. (#2999)
 
 ## 2.3.3
 

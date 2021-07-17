@@ -86,19 +86,21 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         return;
     }
 
-    std::function<void(const QString &str, TaggedString::Type type)> addString =
-        [=](const QString &str, TaggedString::Type type) {
-            if (getSettings()->prefixOnlyEmoteCompletion)
-            {
-                if (str.startsWith(prefix, Qt::CaseInsensitive))
-                    this->items_.emplace(str + " ", type);
-            }
-            else
-            {
-                if (str.contains(prefix, Qt::CaseInsensitive))
-                    this->items_.emplace(str + " ", type);
-            }
+    std::function<void(const QString &str, TaggedString::Type type)> addString;
+    if (getSettings()->prefixOnlyEmoteCompletion)
+    {
+        addString = [=](const QString &str, TaggedString::Type type) {
+            if (str.startsWith(prefix, Qt::CaseInsensitive))
+                this->items_.emplace(str + " ", type);
         };
+    }
+    else
+    {
+        addString = [=](const QString &str, TaggedString::Type type) {
+            if (str.contains(prefix, Qt::CaseInsensitive))
+                this->items_.emplace(str + " ", type);
+        };
+    }
 
     if (auto account = getApp()->accounts->twitch.getCurrent())
     {
