@@ -71,20 +71,18 @@ make
 ### Example output
 
 ```
-2021-07-18T13:03:08+02:00
+2021-07-18T13:12:11+02:00
 Running ./bin/chatterino-benchmark
 Run on (12 X 4000 MHz CPU s)
 CPU Caches:
-L1 Data 32 KiB (x6)
-L1 Instruction 32 KiB (x6)
-L2 Unified 256 KiB (x6)
-L3 Unified 15360 KiB (x1)
-Load Average: 3.24, 3.52, 3.95
-**_WARNING_** CPU scaling is enabled, the benchmark real time measurements may be noisy and will incur extra overhead.
-
----
-
-## Benchmark Time CPU Iterations
-
-BM_ShortcodeParsing 2398 ns 2394 ns 281532
+  L1 Data 32 KiB (x6)
+  L1 Instruction 32 KiB (x6)
+  L2 Unified 256 KiB (x6)
+  L3 Unified 15360 KiB (x1)
+Load Average: 2.86, 3.08, 3.51
+***WARNING*** CPU scaling is enabled, the benchmark real time measurements may be noisy and will incur extra overhead.
+--------------------------------------------------------------
+Benchmark                    Time             CPU   Iterations
+--------------------------------------------------------------
+BM_ShortcodeParsing       2394 ns         2389 ns       278933
 ```
