@@ -81,10 +81,11 @@ public:
                    ResultCallback<IvrSubage> resultCallback,
                    IvrFailureCallback failureCallback);
 
-    // https://api.ivr.fi/docs#tag/Twitch/paths/~1twitch~1emoteset/get
+    // https://api.ivr.fi/v2/docs/static/index.html#/Twitch/get_twitch_emotes_sets
     void getBulkEmoteSets(QString emoteSetList,
                           ResultCallback<QJsonArray> successCallback,
-                          IvrFailureCallback failureCallback);
+                          IvrFailureCallback failureCallback,
+                          std::function<void()> finallyCallback);
 
     static void initialize();
 
