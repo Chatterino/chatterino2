@@ -81,3 +81,28 @@ _`gstreamer-plugins-good` package is retired in Fedora 31, see: [rhbz#1735324](h
 ### Using CMake
 
 1. `cmake .. && make`
+
+## Gentoo Linux
+
+### ebuild
+
+1. `eselect repository add KKona git git://github.com/absurdsec/gentoo-overlay.git` OR `layman -o https://raw.githubusercontent.com/absurdsec/gentoo-overlay/main/repositories.xml -f -a KKona`
+1. `echo '=net-irc/chatterino-9999 ** ' > /etc/portage/package.accept_keywords/net-irc`
+1. `emerge net-irc/chatterino`
+
+### Manually
+
+#### Optional dependencies
+- net-misc/streamlink media-libs/pulsaudio-qt media-libs/gst-plugins-good
+
+1. `emerge dev-qt/qtmultimedia dev-qt/qtconcurrent dev-qt/linguist-tools dev-qt/qtcore dev-libs/boost dev-libs/openssl`
+1. go into project directory
+1. create build folder `mkdir build && cd build`
+
+#### Using QMake
+
+1. `qmake .. && make`
+
+#### Using CMake
+
+1. `cmake .. && make`
