@@ -21,7 +21,7 @@
 #include "util/QStringHash.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
-namespace {
+namespace chatterino {
 
 std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys)
 {
@@ -48,9 +48,6 @@ std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys)
     return batches;
 }
 
-}  // namespace
-
-namespace chatterino {
 TwitchAccount::TwitchAccount(const QString &username, const QString &oauthToken,
                              const QString &oauthClient, const QString &userID)
     : Account(ProviderId::Twitch)
