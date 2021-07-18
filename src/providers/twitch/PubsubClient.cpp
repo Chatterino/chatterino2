@@ -3,6 +3,7 @@
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/PubsubHelpers.hpp"
 #include "singletons/Settings.hpp"
+#include "util/DebugCount.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -59,6 +60,7 @@ namespace detail {
             // This PubSubClient is already at its peak listens
             return false;
         }
+        DebugCount::increase("PubSub topic pending listens");
 
         this->numListens_ += numRequestedListens;
 
@@ -868,6 +870,13 @@ PubSub::PubSub()
 
 void PubSub::addClient()
 {
+    if (this->addingClient)
+    {
+        return;
+    }
+
+    this->addingClient = true;
+
     websocketpp::lib::error_code ec;
     auto con = this->websocketClient.get_connection(TWITCH_PUBSUB_URL, ec);
 
@@ -1002,6 +1011,8 @@ void PubSub::listen(rapidjson::Document &&msg)
 
     this->requests.emplace_back(
         std::make_unique<rapidjson::Document>(std::move(msg)));
+
+    DebugCount::increase("PubSub topic backlog");
 }
 
 bool PubSub::tryListen(rapidjson::Document &msg)
@@ -1110,6 +1121,9 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
 void PubSub::onConnectionOpen(WebsocketHandle hdl)
 {
+    DebugCount::increase("PubSub connections");
+    this->addingClient = false;
+
     auto client =
         std::make_shared<detail::PubSubClient>(this->websocketClient, hdl);
 
@@ -1126,6 +1140,7 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
         const auto &request = *it;
         if (client->listen(*request))
         {
+            DebugCount::decrease("PubSub topic backlog");
             it = this->requests.erase(it);
         }
         else
@@ -1133,10 +1148,16 @@ void PubSub::onConnectionOpen(WebsocketHandle hdl)
             ++it;
         }
     }
+
+    if (!this->requests.empty())
+    {
+        this->addClient();
+    }
 }
 
 void PubSub::onConnectionClose(WebsocketHandle hdl)
 {
+    DebugCount::decrease("PubSub connections");
     auto clientIt = this->clients.find(hdl);
 
     // If this assert goes off, there's something wrong with the connection
@@ -1183,6 +1204,7 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
 
         if (error.isEmpty())
         {
+            DebugCount::decrease("PubSub topic pending listens");
             qCDebug(chatterinoPubsub)
                 << "Successfully listened to nonce" << nonce;
             // Nothing went wrong
