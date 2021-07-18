@@ -55,8 +55,6 @@ public:
     static bool compareStrings(const QString &a, const QString &b);
 
 private:
-    TaggedString createUser(const QString &str);
-
     std::set<TaggedString> items_;
     mutable std::mutex itemsMutex_;
     Channel &channel_;

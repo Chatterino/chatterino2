@@ -42,6 +42,7 @@ Iulian Onofrei | https://github.com/revolter | :/avatars/revolter.jpg | Contribu
 matthewde | https://github.com/m4tthewde | :/avatars/matthewde.jpg | Contributor
 Karar Al-Remahy | https://github.com/KararTY | :/avatars/kararty.png | Contributor
 Talen | https://github.com/talneoran | | Contributor
+SLCH | https://github.com/SLCH | :/avatars/slch.png | Contributor
 
 # If you are a contributor add yourself above this line
 
