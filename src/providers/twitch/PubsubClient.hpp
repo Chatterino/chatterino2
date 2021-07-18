@@ -172,6 +172,7 @@ private:
     bool isListeningToTopic(const QString &topic);
 
     void addClient();
+    std::atomic<bool> addingClient{false};
 
     State state = State::Connected;
 
