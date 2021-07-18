@@ -26,6 +26,15 @@ namespace {
 #endif
     }
 
+    const char *getBinaryNameMPV()
+    {
+#ifdef _WIN32
+        return "mpv.exe";
+#else
+        return "mpv";
+#endif
+    }
+
     const char *getDefaultBinaryPath()
     {
 #ifdef _WIN32
@@ -47,7 +56,12 @@ namespace {
         }
     }
 
-    bool checkStreamlinkPath(const QString &path)
+    QString getMPVProgram()
+    {
+        return getSettings()->mpvPlayerPath + "/" + getBinaryNameMPV();
+    }
+
+    bool checkExecutablePath(const QString &path)
     {
         QFileInfo fileinfo(path);
 
@@ -78,6 +92,15 @@ namespace {
                 "Unable to find Streamlink executable.\nIf you have Streamlink "
                 "installed, you might need to enable the custom path option");
         }
+    }
+
+    void showMPVNotFoundError()
+    {
+        static QErrorMessage *msg = new QErrorMessage;
+        msg->setWindowTitle("Chatterino - mpv player not found");
+        msg->showMessage("Unable to find mpv player executable\nMake sure "
+                         "your path is pointing to the DIRECTORY "
+                         "where the mpv player executable is located");
     }
 
     QProcess *createStreamlinkProcess()
@@ -171,7 +194,7 @@ void getStreamQualities(const QString &channelURL,
 }
 
 void openStreamlink(const QString &channelURL, const QString &quality,
-                    QStringList extraArguments)
+                    QStringList extraArguments, bool streamMPV)
 {
     QStringList arguments = extraArguments << channelURL << quality;
 
@@ -182,37 +205,90 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
     arguments << splitCommand(additionalOptions);
 
-    bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
-
-    if (!res)
+    // If we are not doing our MPV video view start as detached
+    // Else we will kill our existing stream proccess and start a new stream
+    if (!streamMPV)
     {
-        showStreamlinkNotFoundError();
+        bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
+        if (!res)
+        {
+            showStreamlinkNotFoundError();
+        }
+    }
+    else
+    {
+        QString command =
+            "\"" + getStreamlinkProgram() + "\" " + arguments.join(" ");
+        AttachedPlayer::getInstance().updateStreamLinkProcess(channelURL,
+                                                              quality, command);
     }
 }
 
-void openStreamlinkForChannel(const QString &channel)
+void openStreamlinkForChannel(const QString &channel, bool streamMPV)
 {
     QString channelURL = "twitch.tv/" + channel;
 
-    QString preferredQuality = getSettings()->preferredQuality.getValue();
-    preferredQuality = preferredQuality.toLower();
+    QStringList args;
 
-    if (preferredQuality == "choose")
+    // First check to see if player is valid path!
+    if (streamMPV && !checkExecutablePath(getMPVProgram()))
     {
-        getStreamQualities(channelURL, [=](QStringList qualityOptions) {
-            QualityPopup::showDialog(channel, qualityOptions);
-        });
-
+        showMPVNotFoundError();
+        return;
+    }
+    if (!checkExecutablePath(getStreamlinkProgram()))
+    {
+        showStreamlinkNotFoundError();
         return;
     }
 
-    QStringList args;
+    // Append MVP player settings if we have a container to play in
+    // https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst
+    // https://mpv.io/manual/master/#options-wid
+    if (streamMPV)
+    {
+        args << "--player \"" + getMPVProgram() + " --wid=WID\"";
+    }
+
+    // Append any extra options to to our stream link command
+    // NOTE: it is important to append this before we ask for the quality
+    if (getSettings()->streamlinkOptsLatency)
+    {
+        args << "--twitch-low-latency";
+    }
+    if (getSettings()->streamlinkOptsAds)
+    {
+        args << "--twitch-disable-ads";
+    }
 
     // Quality converted from Chatterino format to Streamlink format
     QString quality;
     // Streamlink qualities to exclude
     QString exclude;
 
+    // Check to see if we should ask the user for a quality setting
+    // NOTE: if we are using the mpv player, then we should only ask the first time
+    // NOTE: afterwards we should just use the last requested quality or a near one
+    QString preferredQuality = getSettings()->preferredQuality.getValue();
+    preferredQuality = preferredQuality.toLower();
+    if (preferredQuality == "choose" && streamMPV &&
+        AttachedPlayer::getInstance().getLastQualitySetting() != "")
+    {
+        args << "--stream-sorting-excludes"
+             << ">" + AttachedPlayer::getInstance().getLastQualitySetting();
+        quality = "best";
+        openStreamlink(channelURL, quality, args, streamMPV);
+        return;
+    }
+    if (preferredQuality == "choose")
+    {
+        getStreamQualities(channelURL, [=](QStringList qualityOptions) {
+            QualityPopup::showDialog(channel, qualityOptions, args, streamMPV);
+        });
+        return;
+    }
+
+    // Else we can set the default
     if (preferredQuality == "high")
     {
         exclude = ">720p30";
@@ -241,7 +317,7 @@ void openStreamlinkForChannel(const QString &channel)
         args << "--stream-sorting-excludes" << exclude;
     }
 
-    openStreamlink(channelURL, quality, args);
+    openStreamlink(channelURL, quality, args, streamMPV);
 }
 
 }  // namespace chatterino

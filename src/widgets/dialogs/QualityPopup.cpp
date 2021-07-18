@@ -7,10 +7,13 @@
 
 namespace chatterino {
 
-QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
+QualityPopup::QualityPopup(const QString &_channelName, QStringList options,
+                           QStringList extraArguments, bool streamMPV)
     : BasePopup({},
                 static_cast<QWidget *>(&(getApp()->windows->getMainWindow())))
     , channelName_(_channelName)
+    , extraArguments_(extraArguments)
+    , streamMPV_(streamMPV)
 {
     this->ui_.okButton.setText("OK");
     this->ui_.cancelButton.setText("Cancel");
@@ -33,9 +36,11 @@ QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
     this->setLayout(&this->ui_.vbox);
 }
 
-void QualityPopup::showDialog(const QString &channelName, QStringList options)
+void QualityPopup::showDialog(const QString &channelName, QStringList options,
+                              QStringList extraArguments, bool streamMPV)
 {
-    QualityPopup *instance = new QualityPopup(channelName, options);
+    QualityPopup *instance =
+        new QualityPopup(channelName, options, extraArguments, streamMPV);
 
     instance->window()->setWindowTitle("Chatterino - select stream quality");
     instance->setAttribute(Qt::WA_DeleteOnClose, true);
@@ -52,7 +57,8 @@ void QualityPopup::okButtonClicked()
 
     try
     {
-        openStreamlink(channelURL, this->ui_.selector.currentText());
+        openStreamlink(channelURL, this->ui_.selector.currentText(),
+                       this->extraArguments_, this->streamMPV_);
     }
     catch (const Exception &ex)
     {

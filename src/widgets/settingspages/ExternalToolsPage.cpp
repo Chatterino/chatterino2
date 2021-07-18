@@ -41,7 +41,10 @@ ExternalToolsPage::ExternalToolsPage()
             " " +
             formatRichNamedLink(
                 "https://github.com/streamlink/streamlink/releases/latest",
-                "Download"));
+                "Download") +
+            " " +
+            formatRichNamedLink("https://streamlink.github.io/cli.html#twitch",
+                                "Documentation"));
         links->setTextFormat(Qt::RichText);
         links->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                        Qt::LinksAccessibleByKeyboard |
@@ -65,6 +68,18 @@ ExternalToolsPage::ExternalToolsPage()
             "Preferred quality:",
             this->createComboBox({STREAMLINK_QUALITY},
                                  getSettings()->preferredQuality));
+
+        auto optionLatencyCb =
+            this->createCheckBox("Enables low latency streaming by prefetching "
+                                 "HLS segments (--twitch-low-latency)",
+                                 getSettings()->streamlinkOptsLatency);
+        groupLayout->setWidget(5, QFormLayout::SpanningRole, optionLatencyCb);
+
+        auto optionAdsCb = this->createCheckBox(
+            "Skip embedded advertisement segments (--twitch-disable-ads)",
+            getSettings()->streamlinkOptsAds);
+        groupLayout->setWidget(6, QFormLayout::SpanningRole, optionAdsCb);
+
         groupLayout->addRow(
             "Additional options:",
             this->createLineEdit(getSettings()->streamlinkOpts));
@@ -74,6 +89,42 @@ ExternalToolsPage::ExternalToolsPage()
                 customPath->setEnabled(value);
             },
             this->managedConnections_);
+    }
+    layout->addSpacing(16);
+
+    {
+        auto group = layout.emplace<QGroupBox>("mpv player");
+        auto groupLayout = group.setLayoutType<QFormLayout>();
+
+        auto description = new QLabel(
+            "The mpv player is an open-source cross-platform video player. "
+            "This can be used alongside Streamlink to have an attached player. "
+            "Be sure to extract the mpv player and set the path correctly "
+            "below!");
+        description->setWordWrap(true);
+        description->setStyleSheet("color: #bbb");
+
+        auto links = new QLabel(
+            formatRichNamedLink("https://mpv.io/", "Website") + " " +
+            formatRichNamedLink("https://mpv.io/installation/", "Download"));
+        links->setTextFormat(Qt::RichText);
+        links->setTextInteractionFlags(Qt::TextBrowserInteraction |
+                                       Qt::LinksAccessibleByKeyboard |
+                                       Qt::LinksAccessibleByMouse);
+        links->setOpenExternalLinks(true);
+
+        groupLayout->setWidget(0, QFormLayout::SpanningRole, description);
+        groupLayout->setWidget(1, QFormLayout::SpanningRole, links);
+
+        auto followActiveCb = this->createCheckBox(
+            "Follow active chat (will automatically switch "
+            "player stream based on what chat you are in)",
+            getSettings()->mpvFollowActive);
+        groupLayout->setWidget(2, QFormLayout::SpanningRole, followActiveCb);
+        auto customPath = this->createLineEdit(getSettings()->mpvPlayerPath);
+        customPath->setPlaceholderText(
+            "Path to folder where mpv executable can be found");
+        groupLayout->addRow("mpv path:", customPath);
     }
     layout->addSpacing(16);
 

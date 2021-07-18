@@ -4,12 +4,14 @@
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
 #include "pajlada/signals/signalholder.hpp"
+#include "util/AttachedPlayer.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QFont>
 #include <QShortcut>
 #include <QVBoxLayout>
 #include <QWidget>
+#include <QWindow>
 
 namespace chatterino {
 
@@ -165,6 +167,8 @@ public slots:
     void openWhispersInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
+    void openInStreamlinkMPVIfOpen();
+    void openInStreamlinkMPV();
     void openWithCustomScheme();
     void copyToClipboard();
     void setFiltersDialog();

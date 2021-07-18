@@ -12,8 +12,12 @@ namespace chatterino {
 class QualityPopup : public BasePopup
 {
 public:
-    QualityPopup(const QString &_channelName, QStringList options);
-    static void showDialog(const QString &_channelName, QStringList options);
+    QualityPopup(const QString &_channelName, QStringList options,
+                 QStringList extraArguments = QStringList(),
+                 bool streamMPV = false);
+    static void showDialog(const QString &_channelName, QStringList options,
+                           QStringList extraArguments = QStringList(),
+                           bool streamMPV = false);
 
 private:
     void okButtonClicked();
@@ -28,6 +32,8 @@ private:
     } ui_;
 
     QString channelName_;
+    QStringList extraArguments_;
+    bool streamMPV_;
 };
 
 }  // namespace chatterino
