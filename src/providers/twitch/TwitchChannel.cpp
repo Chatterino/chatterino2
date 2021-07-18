@@ -811,12 +811,12 @@ void TwitchChannel::loadRecentMessages()
                 // Notify user about a possible gap in logs if it returned some messages
                 // but isn't currently joined to a channel
                 if (QString errorCode = root.value("error_code").toString();
-                    !errorCode.isEmpty() && messages.size() > 0)
+                    !errorCode.isEmpty())
                 {
                     qCDebug(chatterinoTwitch)
                         << QString("rm error_code=%1, channel=%2")
                                .arg(errorCode, this->getName());
-                    if (errorCode == "channel_not_joined")
+                    if (errorCode == "channel_not_joined" && !messages.empty())
                     {
                         shared->addMessage(makeSystemMessage(
                             "Message history service recovering, there may be "
