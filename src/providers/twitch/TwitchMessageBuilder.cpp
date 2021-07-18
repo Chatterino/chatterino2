@@ -214,29 +214,8 @@ MessagePtr TwitchMessageBuilder::build()
     this->emplace<TimestampElement>(
         calculateMessageTimestamp(this->ircMessage));
 
-    bool addModerationElement = true;
-    if (this->senderIsBroadcaster)
-    {
-        addModerationElement = false;
-    }
-    else
-    {
-        bool hasUserType = this->tags.contains("user-type");
-        if (hasUserType)
-        {
-            QString userType = this->tags.value("user-type").toString();
-
-            if (userType == "mod")
-            {
-                if (!args.isStaffOrBroadcaster)
-                {
-                    addModerationElement = false;
-                }
-            }
-        }
-    }
-
-    if (addModerationElement)
+    if (!this->senderIsBroadcaster &&
+        !(this->tags.value("user-type") == "mod" && !args.isStaffOrBroadcaster))
     {
         this->emplace<TwitchModerationElement>();
     }
