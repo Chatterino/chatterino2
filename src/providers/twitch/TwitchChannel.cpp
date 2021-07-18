@@ -755,11 +755,14 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    auto baseURL = Env::get().recentMessagesApiUrl.arg(this->getName());
-
-    auto url = QString("%1?limit=%2")
-                   .arg(baseURL)
-                   .arg(getSettings()->twitchMessageHistoryLimit);
+    QUrl url(Env::get().recentMessagesApiUrl.arg(this->getName()));
+    QUrlQuery urlQuery(url);
+    if (!urlQuery.hasQueryItem("limit"))
+    {
+        urlQuery.addQueryItem(
+            "limit", QString::number(getSettings()->twitchMessageHistoryLimit));
+    }
+    url.setQuery(urlQuery);
 
     auto weak = weakOf<Channel>(this);
 
