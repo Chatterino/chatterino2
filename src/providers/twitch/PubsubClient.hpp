@@ -179,12 +179,12 @@ private:
              std::owner_less<WebsocketHandle>>
         clients;
 
-    std::unordered_map<std::string, std::function<void(const rapidjson::Value &,
-                                                       const QString &)>>
+    std::unordered_map<
+        QString, std::function<void(const rapidjson::Value &, const QString &)>>
         moderationActionHandlers;
 
-    std::unordered_map<std::string, std::function<void(const rapidjson::Value &,
-                                                       const QString &)>>
+    std::unordered_map<
+        QString, std::function<void(const rapidjson::Value &, const QString &)>>
         channelTermsActionHandlers;
 
     void onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);
