@@ -73,6 +73,7 @@
 - Minor: Added `is:<flags>` search filter to find messages of specific types. (#2653, #2671)
 - Minor: Added image links to the badge context menu. (#2667)
 - Minor: Added a setting to hide Twitch Predictions badges. (#2668)
+- Minor: Added a setting to hide similar messages by any user. (#2716)
 - Minor: Optionally remove spaces between emotes, originally made for Mm2PL/Dankerino. (#2651)
 - Minor: Improved UX of `Rename Tab` dialog. (#2713)
 - Bugfix: Added missing Copy/Open link context menu entries to emotes in Emote Picker. (#2670)
