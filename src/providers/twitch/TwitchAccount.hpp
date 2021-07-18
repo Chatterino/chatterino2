@@ -51,6 +51,8 @@ struct TwitchEmoteSetResolverResponse {
     }
 };
 
+std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys);
+
 class TwitchAccount : public Account
 {
 public:
