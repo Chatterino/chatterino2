@@ -7,6 +7,7 @@
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
 #include "providers/twitch/TwitchUser.hpp"
+#include "util/QStringHash.hpp"
 
 #include <rapidjson/document.h>
 #include <QColor>
@@ -62,6 +63,7 @@ public:
         QString key;
         QString channelName;
         QString text;
+        bool local{false};
         std::vector<TwitchEmote> emotes;
     };
 
@@ -70,8 +72,8 @@ public:
     struct TwitchAccountEmoteData {
         std::vector<std::shared_ptr<EmoteSet>> emoteSets;
 
-        std::vector<EmoteName> allEmoteNames;
-
+        // this EmoteMap should contain all emotes available globally
+        // excluding locally available emotes, such as follower ones
         EmoteMap emotes;
     };
 
@@ -113,17 +115,20 @@ public:
     void loadEmotes();
     // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
     // this function makes sure not to load emote sets that have already been loaded
-    void loadUserstateEmotes();
+    void loadUserstateEmotes(std::function<void()> callback);
     // setUserStateEmoteSets sets the emote sets that were parsed from the USERSTATE emote-sets key
     // Returns true if the newly inserted emote sets differ from the ones previously saved
     [[nodiscard]] bool setUserstateEmoteSets(QStringList newEmoteSets);
     SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
+    SharedAccessGuard<const std::unordered_map<QString, EmoteMap>>
+        accessLocalEmotes() const;
 
     // Automod actions
     void autoModAllow(const QString msgID, ChannelPtr channel);
     void autoModDeny(const QString msgID, ChannelPtr channel);
 
 private:
+    void loadKrakenEmotes();
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
 
     QString oauthClient_;
@@ -140,6 +145,7 @@ private:
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;
+    UniqueAccess<std::unordered_map<QString, EmoteMap>> localEmotes_;
 };
 
 }  // namespace chatterino

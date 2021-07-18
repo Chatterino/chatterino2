@@ -133,11 +133,11 @@ void Args::applyCustomChannelLayout(const QString &argValue)
         QString platform = "t";
         QString channelName = channelArg;
 
-        const QRegExp regExp("(.):(.*)");
-        if (regExp.indexIn(channelArg) != -1)
+        const QRegularExpression regExp("(.):(.*)");
+        if (auto match = regExp.match(channelArg); match.hasMatch())
         {
-            platform = regExp.cap(1);
-            channelName = regExp.cap(2);
+            platform = match.captured(1);
+            channelName = match.captured(2);
         }
 
         // Twitch (default)
@@ -147,7 +147,7 @@ void Args::applyCustomChannelLayout(const QString &argValue)
 
             // Set first tab as selected
             tab.selected_ = window.tabs_.empty();
-            tab.rootNode_ = SplitNodeDescriptor{"twitch", channelName};
+            tab.rootNode_ = SplitNodeDescriptor{{"twitch", channelName}};
 
             window.tabs_.emplace_back(std::move(tab));
         }

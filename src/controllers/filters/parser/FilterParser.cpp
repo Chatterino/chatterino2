@@ -47,10 +47,20 @@ ContextMap buildContextMap(const MessagePtr &m)
                     watchingChannel->getName().compare(
                         m->channelName, Qt::CaseInsensitive) == 0;
 
-    bool subscribed = badges.contains("subscriber");
-    int subLength = (subscribed && m->badgeInfos.count("subscriber") != 0)
-                        ? m->badgeInfos.at("subscriber").toInt()
-                        : 0;
+    bool subscribed = false;
+    int subLength = 0;
+    for (const QString &subBadge : {"subscriber", "founder"})
+    {
+        if (!badges.contains(subBadge))
+        {
+            continue;
+        }
+        subscribed = true;
+        if (m->badgeInfos.find(subBadge) != m->badgeInfos.end())
+        {
+            subLength = m->badgeInfos.at(subBadge).toInt();
+        }
+    }
 
     return {
         {"author.badges", std::move(badges)},
