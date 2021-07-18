@@ -5,9 +5,9 @@
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
-#include "providers/twitch/TwitchCommon.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/StreamerMode.hpp"
 
 #include <QFileInfo>
@@ -88,24 +88,14 @@ SharedMessageBuilder::SharedMessageBuilder(
 {
 }
 
-namespace {
-
-    QColor getRandomColor(const QString &v)
-    {
-        int colorSeed = 0;
-        for (const auto &c : v)
-        {
-            colorSeed += c.digitValue();
-        }
-        const auto colorIndex = colorSeed % TWITCH_USERNAME_COLORS.size();
-        return TWITCH_USERNAME_COLORS[colorIndex];
-    }
-
-}  // namespace
-
 void SharedMessageBuilder::parse()
 {
     this->parseUsernameColor();
+
+    if (this->action_)
+    {
+        this->textColor_ = this->usernameColor_;
+    }
 
     this->parseUsername();
 
@@ -408,8 +398,7 @@ void SharedMessageBuilder::addTextOrEmoji(const QString &string_)
     // Actually just text
     auto linkString = this->matchLink(string);
     auto link = Link();
-    auto textColor = this->action_ ? MessageColor(this->usernameColor_)
-                                   : MessageColor(MessageColor::Text);
+    auto &&textColor = this->textColor_;
 
     if (linkString.isEmpty())
     {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rapidjson/document.h>
+#include <QColor>
 #include <QString>
 
 #include <chrono>
@@ -10,7 +11,10 @@ namespace chatterino {
 
 struct ActionUser {
     QString id;
-    QString name;
+    QString login;
+    // displayName should be in format "login(localizedName)" for non-ascii usernames
+    QString displayName;
+    QColor color;
 };
 
 struct PubSubAction {
@@ -73,6 +77,15 @@ struct BanAction : PubSubAction {
     {
         return this->duration == 0;
     }
+};
+
+struct DeleteAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+
+    ActionUser target;
+
+    QString messageId;
+    QString messageText;
 };
 
 struct UnbanAction : PubSubAction {

@@ -78,10 +78,9 @@ public:
     void replaceMessage(MessagePtr message, MessagePtr replacement);
     void replaceMessage(size_t index, MessagePtr replacement);
     void deleteMessage(QString messageID);
+    MessagePtr findMessage(QString messageID);
 
     bool hasMessages() const;
-
-    QStringList modList;
 
     // CHANNEL INFO
     virtual bool canSendMessage() const;

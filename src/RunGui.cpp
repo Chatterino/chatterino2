@@ -145,17 +145,17 @@ namespace {
     // improved in the future.
     void clearCache(const QDir &dir)
     {
-        qCDebug(chatterinoCache) << "[Cache] cleared cache";
-
-        QStringList toBeRemoved;
-
+        int deletedCount = 0;
         for (auto &&info : dir.entryInfoList(QDir::Files))
         {
             if (info.lastModified().addDays(14) < QDateTime::currentDateTime())
             {
-                toBeRemoved << info.absoluteFilePath();
+                bool res = QFile(info.absoluteFilePath()).remove();
+                if (res)
+                    ++deletedCount;
             }
         }
+        qCDebug(chatterinoCache) << "Deleted" << deletedCount << "files";
     }
 }  // namespace
 

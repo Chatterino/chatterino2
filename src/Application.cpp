@@ -18,6 +18,7 @@
 #include "providers/irc/Irc2.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Fonts.hpp"
 #include "singletons/Logging.hpp"
@@ -206,7 +207,7 @@ void Application::initPubsub()
             }
 
             QString text =
-                QString("%1 cleared the chat").arg(action.source.name);
+                QString("%1 cleared the chat").arg(action.source.login);
 
             auto msg = makeSystemMessage(text);
             postToThread([chan, msg] {
@@ -225,15 +226,14 @@ void Application::initPubsub()
 
             QString text =
                 QString("%1 turned %2 %3 mode")
-                    .arg(action.source.name)
+                    .arg(action.source.login)
                     .arg(action.state == ModeChangedAction::State::On ? "on"
                                                                       : "off")
                     .arg(action.getModeName());
 
             if (action.duration > 0)
             {
-                text.append(" (" + QString::number(action.duration) +
-                            " seconds)");
+                text += QString(" (%1 seconds)").arg(action.duration);
             }
 
             auto msg = makeSystemMessage(text);
@@ -253,16 +253,10 @@ void Application::initPubsub()
 
             QString text;
 
-            if (action.modded)
-            {
-                text = QString("%1 modded %2")
-                           .arg(action.source.name, action.target.name);
-            }
-            else
-            {
-                text = QString("%1 unmodded %2")
-                           .arg(action.source.name, action.target.name);
-            }
+            text = QString("%1 %2 %3")
+                       .arg(action.source.login,
+                            (action.modded ? "modded" : "unmodded"),
+                            action.target.login);
 
             auto msg = makeSystemMessage(text);
             postToThread([chan, msg] {
@@ -285,6 +279,46 @@ void Application::initPubsub()
 
             postToThread([chan, msg = msg.release()] {
                 chan->addOrReplaceTimeout(msg);
+            });
+        });
+    this->twitch.pubsub->signals_.moderation.messageDeleted.connect(
+        [&](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            MessageBuilder msg;
+            TwitchMessageBuilder::deletionMessage(action, &msg);
+            msg->flags.set(MessageFlag::PubSub);
+
+            postToThread([chan, msg = msg.release()] {
+                auto replaced = false;
+                LimitedQueueSnapshot<MessagePtr> snapshot =
+                    chan->getMessageSnapshot();
+                int snapshotLength = snapshot.size();
+
+                // without parens it doesn't build on windows
+                int end = (std::max)(0, snapshotLength - 200);
+
+                for (int i = snapshotLength - 1; i >= end; --i)
+                {
+                    auto &s = snapshot[i];
+                    if (!s->flags.has(MessageFlag::PubSub) &&
+                        s->timeoutUser == msg->timeoutUser)
+                    {
+                        chan->replaceMessage(s, msg);
+                        replaced = true;
+                        break;
+                    }
+                }
+                if (!replaced)
+                {
+                    chan->addMessage(msg);
+                }
             });
         });
 

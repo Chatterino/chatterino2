@@ -4,6 +4,7 @@
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
@@ -28,12 +29,6 @@ struct TwitchEmoteOccurence {
 class TwitchMessageBuilder : public SharedMessageBuilder
 {
 public:
-    enum UsernameDisplayMode : int {
-        Username = 1,                  // Username
-        LocalizedName = 2,             // Localized name
-        UsernameAndLocalizedName = 3,  // Username (Localized name)
-    };
-
     TwitchMessageBuilder() = delete;
 
     explicit TwitchMessageBuilder(Channel *_channel,
@@ -63,7 +58,11 @@ public:
     static void offlineSystemMessage(const QString &channelName,
                                      MessageBuilder *builder);
     static void hostingSystemMessage(const QString &channelName,
-                                     MessageBuilder *builder);
+                                     MessageBuilder *builder, bool hostOn);
+    static void deletionMessage(const MessagePtr originalMessage,
+                                MessageBuilder *builder);
+    static void deletionMessage(const DeleteAction &action,
+                                MessageBuilder *builder);
 
 private:
     void parseUsernameColor() override;
