@@ -10,6 +10,7 @@ Resources2::Resources2()
     this->avatars.pajlada = QPixmap(":/avatars/pajlada.png");
     this->avatars.slch = QPixmap(":/avatars/slch.png");
     this->avatars.zneix = QPixmap(":/avatars/zneix.png");
+    this->avatars.xHeaveny = QPixmap(":/avatars/xheaveny.png");
     this->buttons.addSplit = QPixmap(":/buttons/addSplit.png");
     this->buttons.addSplitDark = QPixmap(":/buttons/addSplitDark.png");
     this->buttons.ban = QPixmap(":/buttons/ban.png");
