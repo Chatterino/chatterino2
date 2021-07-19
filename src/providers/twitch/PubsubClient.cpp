@@ -60,9 +60,9 @@ namespace detail {
             // This PubSubClient is already at its peak listens
             return false;
         }
-        DebugCount::increase("PubSub topic pending listens");
-
         this->numListens_ += numRequestedListens;
+        DebugCount::increase("PubSub topic pending listens",
+                             message["data"]["topics"].GetArray().Size());
 
         for (const auto &topic : message["data"]["topics"].GetArray())
         {
@@ -70,12 +70,13 @@ namespace detail {
                 Listener{topic.GetString(), false, false, false});
         }
 
-        auto uuid = generateUuid();
-
-        rj::set(message, "nonce", uuid);
+        auto nonce = QString("LISTEN-%1-%2")
+                         .arg(message["data"]["topics"].GetArray().Size())
+                         .arg(generateUuid());
+        rj::set(message, "nonce", nonce);
 
         QString payload = rj::stringify(message);
-        sentMessages[uuid] = payload;
+        sentMessages[nonce] = payload;
 
         this->send(payload.toUtf8());
 
@@ -107,12 +108,12 @@ namespace detail {
 
         auto message = createUnlistenMessage(topics);
 
-        auto uuid = generateUuid();
-
-        rj::set(message, "nonce", generateUuid());
+        auto nonce =
+            QString("UNLISTEN-%1-%2").arg(topics.size()).arg(generateUuid());
+        rj::set(message, "nonce", nonce);
 
         QString payload = rj::stringify(message);
-        sentMessages[uuid] = payload;
+        sentMessages[nonce] = payload;
 
         this->send(payload.toUtf8());
     }
@@ -1194,22 +1195,35 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
 {
     QString error;
 
-    if (rj::getSafe(msg, "error", error))
+    if (!rj::getSafe(msg, "error", error))
+        return;
+
+    QString nonce;
+    rj::getSafe(msg, "nonce", nonce);
+
+    if (!error.isEmpty())
     {
-        QString nonce;
-        rj::getSafe(msg, "nonce", nonce);
-
-        if (error.isEmpty())
-        {
-            DebugCount::decrease("PubSub topic pending listens");
-            qCDebug(chatterinoPubsub)
-                << "Successfully listened to nonce" << nonce;
-            // Nothing went wrong
-            return;
-        }
-
         qCDebug(chatterinoPubsub)
-            << "PubSub error:" << error << "on nonce" << nonce;
+            << QString("Error %1 on nonce %2").arg(error, nonce);
+        return;
+    }
+
+    // Nothing went wrong
+    QRegularExpression regexp(R"((LISTEN|UNLISTEN)-(\d+)-.+)");
+    auto match = regexp.match(nonce);
+    qCDebug(chatterinoPubsub) << "Received success nonce" << nonce;
+    if (match.captured(1) == "LISTEN")
+    {
+        DebugCount::decrease("PubSub topic pending listens",
+                             match.captured(2).toInt());
+        DebugCount::increase("PubSub topic listening",
+                             match.captured(2).toInt());
+        return;
+    }
+    if (match.captured(1) == "UNLISTEN")
+    {
+        DebugCount::decrease("PubSub topic listening",
+                             match.captured(2).toInt());
         return;
     }
 }
