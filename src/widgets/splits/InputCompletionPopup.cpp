@@ -76,8 +76,8 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
 {
     std::vector<_Emote> emotes;
     auto tc = dynamic_cast<TwitchChannel *>(channel.get());
-    auto wc = channel.get()->getType() == Channel::Type::TwitchWhispers;
-    if (tc || wc)
+    // returns true also for special Twitch channels (/live, /mentions, /whispers, etc.)
+    if (channel->isTwitchChannel())
     {
         if (auto user = getApp()->accounts->twitch.getCurrent())
         {
@@ -87,7 +87,8 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
 
             // Twitch Emotes available locally
             auto localEmoteData = user->accessLocalEmotes();
-            if (localEmoteData->find(tc->roomId()) != localEmoteData->end())
+            if (tc &&
+                localEmoteData->find(tc->roomId()) != localEmoteData->end())
             {
                 if (auto localEmotes = &localEmoteData->at(tc->roomId()))
                 {
@@ -106,14 +107,14 @@ void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)
                 addEmotes(emotes, *bttv, text, "Channel BetterTTV");
             if (auto ffz = tc->ffzEmotes())
                 addEmotes(emotes, *ffz, text, "Channel FrankerFaceZ");
-
-            if (auto seventvG = tc->globalSeventv().emotes())
-                addEmotes(emotes, *seventvG, text, "Global 7TV");
-            if (auto bttvG = tc->globalBttv().emotes())
-                addEmotes(emotes, *bttvG, text, "Global BetterTTV");
-            if (auto ffzG = tc->globalFfz().emotes())
-                addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
         }
+
+        if (auto seventvG = getApp()->twitch2->getSeventvEmotes().emotes())
+            addEmotes(emotes, *seventvG, text, "Global 7TV");
+        if (auto bttvG = getApp()->twitch2->getBttvEmotes().emotes())
+            addEmotes(emotes, *bttvG, text, "Global BetterTTV");
+        if (auto ffzG = getApp()->twitch2->getFfzEmotes().emotes())
+            addEmotes(emotes, *ffzG, text, "Global FrankerFaceZ");
 
         addEmojis(emotes, getApp()->emotes->emojis.emojis, text);
     }
