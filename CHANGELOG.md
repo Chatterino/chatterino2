@@ -6,6 +6,7 @@
 - Minor: Added autocompletion in /whispers for Twitch emotes, Global Bttv/Ffz emotes and emojis. (#2999, #3033)
 - Minor: Received Twitch messages now use the exact same timestamp (obtained from Twitch's server) for every Chatterino user instead of assuming message timestamp on client's side. (#3021)
 - Minor: Received IRC messages use `time` message tag for timestamp if it's available. (#3021)
+- Minor: Added informative messages for recent-messages API's errors. (#3029)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
 - Bugfix: PubSub didn't properly try to resolve pending listens when the pending listens list was larger than 50. (#3037)
 - Dev: Ubuntu packages are now available (#2936)
