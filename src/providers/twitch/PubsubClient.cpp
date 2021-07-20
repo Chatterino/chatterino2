@@ -1201,26 +1201,31 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
     QString nonce;
     rj::getSafe(msg, "nonce", nonce);
 
+    QRegularExpression regexp(R"((LISTEN|UNLISTEN)-(\d+)-.+)");
+    auto match = regexp.match(nonce);
+
     if (!error.isEmpty())
     {
         qCDebug(chatterinoPubsub)
             << QString("Error %1 on nonce %2").arg(error, nonce);
-        return;
+    }
+    else
+    {
+        qCDebug(chatterinoPubsub) << "Received success nonce" << nonce;
     }
 
-    // Nothing went wrong
-    QRegularExpression regexp(R"((LISTEN|UNLISTEN)-(\d+)-.+)");
-    auto match = regexp.match(nonce);
-    qCDebug(chatterinoPubsub) << "Received success nonce" << nonce;
     if (match.captured(1) == "LISTEN")
     {
         DebugCount::decrease("PubSub topic pending listens",
                              match.captured(2).toInt());
-        DebugCount::increase("PubSub topic listening",
-                             match.captured(2).toInt());
+        if (error.isEmpty())
+        {
+            DebugCount::increase("PubSub topic listening",
+                                 match.captured(2).toInt());
+        }
         return;
     }
-    if (match.captured(1) == "UNLISTEN")
+    if (match.captured(1) == "UNLISTEN" && error.isEmpty())
     {
         DebugCount::decrease("PubSub topic listening",
                              match.captured(2).toInt());
