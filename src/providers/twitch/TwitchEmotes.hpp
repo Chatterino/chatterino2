@@ -36,7 +36,7 @@ struct CheerEmoteSet {
 class TwitchEmotes
 {
 public:
-    static QString cleanUpEmoteCode(const EmoteName &dirtyEmoteCode);
+    static QString cleanUpEmoteCode(const QString &dirtyEmoteCode);
     TwitchEmotes();
 
     EmotePtr getOrCreateEmote(const EmoteId &id, const EmoteName &name);

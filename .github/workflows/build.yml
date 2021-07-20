@@ -41,6 +41,7 @@ jobs:
       - uses: actions/checkout@v2.3.4
         with:
           submodules: true
+          fetch-depth: 0  # allows for tags access
 
       - name: Cache Qt
         id: cache-qt
@@ -161,19 +162,33 @@ jobs:
             make -j8
         shell: bash
 
-      - name: Package (Ubuntu)
+      - name: Package - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         run: |
             cd build
             sh ./../.CI/CreateAppImage.sh
         shell: bash
 
-      - name: Upload artifact (Ubuntu)
+      - name: Package - .deb (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+            cd build
+            sh ./../.CI/CreateUbuntuDeb.sh
+        shell: bash
+
+      - name: Upload artifact - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v2.2.4
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
           path: build/Chatterino-x86_64.AppImage
+
+      - name: Upload artifact - .deb (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu')
+        uses: actions/upload-artifact@v2.2.4
+        with:
+          name: Chatterino-${{ matrix.qt-version }}-${{ matrix.build-system }}.deb
+          path: build/Chatterino.deb
 
       # MACOS
       - name: Install dependencies (MacOS)
@@ -261,6 +276,16 @@ jobs:
 
       - uses: actions/download-artifact@v2.0.10
         with:
+          name: Chatterino-5.15.2-qmake.deb
+          path: ubuntu/
+
+      - uses: actions/download-artifact@v2.0.10
+        with:
+          name: Chatterino-5.15.2-cmake.deb
+          path: ubuntu-cmake/
+
+      - uses: actions/download-artifact@v2.0.10
+        with:
           name: chatterino-osx-5.15.2-qmake.dmg
           path: macos/
 
@@ -315,6 +340,26 @@ jobs:
           asset_path: ./linux-cmake/Chatterino-x86_64.AppImage
           asset_name: test-cmake-Chatterino-x86_64.AppImage
           asset_content_type: application/x-executable
+
+      - name: Upload release asset (Ubuntu .deb)
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ubuntu/Chatterino.deb
+          asset_name: Chatterino-x86_64.deb
+          asset_content_type: application/vnd.debian.binary-package
+
+      - name: Upload release asset (Ubuntu .deb) CMake
+        uses: actions/upload-release-asset@v1.0.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./ubuntu-cmake/Chatterino.deb
+          asset_name: test-cmake-Chatterino-x86_64.deb
+          asset_content_type: application/vnd.debian.binary-package
 
       - name: Upload release asset (MacOS)
         uses: actions/upload-release-asset@v1.0.2
