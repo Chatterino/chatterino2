@@ -7,6 +7,7 @@
 - Minor: Received Twitch messages now use the exact same timestamp (obtained from Twitch's server) for every Chatterino user instead of assuming message timestamp on client's side. (#3021)
 - Minor: Received IRC messages use `time` message tag for timestamp if it's available. (#3021)
 - Minor: Added informative messages for recent-messages API's errors. (#3029)
+- Minor: Added logging to experimental IRC (#2996)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
 - Dev: Ubuntu packages are now available (#2936)
 
