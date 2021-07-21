@@ -1,8 +1,8 @@
 # Building on Windows
 
-**Note that installing all the development prerequisites and libraries will require about 30 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
+**Note that installing all of the development prerequisites and libraries will require about 30 GBs of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
 
-This guide assumes you are on a 64-bit system. You might need to manually search out alternate download links should you desire to build chatterino on a 32-bit system.
+This guide assumes you are on a 64-bit system. You might need to manually search out alternate download links should you desire to build Chatterino on a 32-bit system.
 
 ## Visual Studio 2019
 
@@ -39,12 +39,12 @@ Note: This installation will take about 1.5 GB of disk space.
 
 ### For Qt SSL, we need OpenSSL 1.0
 
-1. Download OpenSSL for windows, version `1.0.2u`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2u.exe)**
+1. Download OpenSSL for Windows, version `1.0.2u`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2u.exe)**
 2. When prompted, install it to any arbitrary empty directory.
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 4. Copy the OpenSSL 1.0 files from its `\bin` folder to `C:\local\bin` (You will need to create the folder)
 5. Then copy the OpenSSL 1.1 files from its `\bin` folder to `C:\local\bin` (Overwrite any duplicate files)
-6. Add `C:\local\bin` to your path folder ([Follow guide here if you don't know how to do it](https://www.computerhope.com/issues/ch000549.htm#windows10))
+6. Add `C:\local\bin` to your path folder ([Follow the guide here if you don't know how to do it](https://www.computerhope.com/issues/ch000549.htm#windows10))
 
 **If the download links above do not work, try downloading similar 1.1.x & 1.0.x versions [here](https://slproweb.com/products/Win32OpenSSL.html). Note: Don't download the "light" installers, they do not have the required files.**
 
@@ -76,13 +76,13 @@ Note: This installation will take about 2 GB of disk space.
 
 Compiling with Breakpad support enables crash reports that can be of use for developing/beta versions of Chatterino. If you have no interest in reporting crashes anyways, this optional dependency will probably be of no use to you.
 
-1. Open up `lib/qBreakpad/handler/handler.pro`in Qt Creator
+1. Open up `lib/qBreakpad/handler/handler.pro`in the Qt Creator
 2. Build it in whichever mode you want to build Chatterino in (Debug/Profile/Release)
 3. Copy the newly built `qBreakpad.lib` to the following directory: `lib/qBreakpad/build/handler` (You will have to manually create this directory)
 
 ## Run the build in Qt Creator
 
-1. Open the `chatterino.pro` file by double-clicking or by opening it via Qt Creator.
+1. Open the `chatterino.pro` file by double-clicking it, or by opening it via Qt Creator.
 2. You will be presented with a screen that is titled "Configure Project". In this screen, you should have at least one option present ready to be configured, like this:
    ![Qt Create Configure Project screenshot](https://i.imgur.com/dbz45mB.png)
 3. Select the profile(s) you want to build with and click "Configure Project".
@@ -101,14 +101,14 @@ Build results will be placed in a folder at the same level as the "chatterino2" 
 
 If you build chatterino, the result directories will contain a `chatterino.exe` file in the `$OUTPUTDIR\release\` directory. This `.exe` file will not directly run on any given target system, because it will be lacking various Qt runtimes.
 
-To produce a standalone package, you need to generate all required files using the tool `windeployqt`. This tool can be found in the `bin` directory of your Qt installation, e.g. at `C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe`.
+To produce a standalone package, you will need to generate all required files by using the tool `windeployqt`. This tool can be found in the `bin` directory of your Qt installation, e.g. at `C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe`.
 
 To produce all supplement files for a standalone build, follow these steps (adjust paths as required):
 
-1.  Navigate to your build output directory with windows explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release`
+1.  Navigate to your build output directory with the Windows Explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release`
 2.  Enter the `release` directory
 3.  Delete all files except the `chatterino.exe` file. You should be left with a directory only containing `chatterino.exe`.
-4.  Open a `cmd` window and execute:
+4.  Open a command prompt (CMD, or PowerShell), and execute:
 
         cd C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release\release
         C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe chatterino.exe
@@ -126,7 +126,7 @@ You can now create a zip archive of all the contents in `releases` and distribut
 
 ## Building with CMake
 
-Open up your terminal with the Visual Studio environment variables, then:
+Open up your terminal with the Visual Studio environment variables, then enter the following commands:
 
 1. `mkdir build`
 2. `cd build`
