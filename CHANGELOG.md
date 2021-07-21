@@ -9,7 +9,7 @@
 - Minor: Added informative messages for recent-messages API's errors. (#3029)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
 - Dev: Ubuntu packages are now available (#2936)
-- Minor: Disable update checker on Flatpak
+- Dev: Disabled update checker on Flatpak. (#3051)
 
 ## 2.3.3
 
