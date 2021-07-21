@@ -79,9 +79,68 @@ namespace {
 
 }  // namespace
 
+LoginServer::LoginServer(QObject *parent)
+    : QTcpServer(parent)
+{
+    server_ = new QTcpServer(this);
+
+    connect(server_, &QTcpServer::newConnection, this,
+            &LoginServer::slotNewConnection);
+}
+
+QTcpServer *LoginServer::getServer()
+{
+    return this->server_;
+}
+
+void LoginServer::slotNewConnection()
+{
+    qDebug() << "HONDETEDTED!!!";
+    socket_ = server_->nextPendingConnection();
+
+    connect(socket_, &QTcpSocket::readyRead, this,
+            &LoginServer::slotServerRead);
+    connect(socket_, &QTcpSocket::disconnected, this,
+            &LoginServer::slotClientDisconnected);
+}
+
+void LoginServer::slotServerRead()
+{
+    qDebug() << "reading data...";
+    while (socket_->bytesAvailable() > 0)
+    {
+        QByteArray array = socket_->readAll();
+        qDebug() << array;
+    }
+
+    // Write data back
+    socket_->write(
+        "HTTP/1.1 200 OK\r\nServer: nginx/1.14.2\r\nDate: Wed, 21 Jul "
+        "2021 20:19:05 GMT\r\nContent-Type: text/plain\r\nContent-Length: "
+        "4\r\nConnection: close\r\n\r\nxd\r\n");
+    socket_->waitForBytesWritten(5000);
+    socket_->close();
+
+    //    socket_->write("HTTP/1.1 204 No Content\r\n");
+}
+
+void LoginServer::slotBytesWritten()
+{
+    qDebug() << "bytes written!";
+}
+
+void LoginServer::slotClientDisconnected()
+{
+    qDebug() << "HEDISCONNECTED!";
+    socket_->close();
+}
+
 BasicLoginWidget::BasicLoginWidget()
 {
-    const QString logInLink = "https://chatterino.com/client_login";
+    // init tcp server
+    this->loginServer_ = new LoginServer(this);
+
+    const QString loginLink = "http://localhost:1234";
     this->setLayout(&this->ui_.layout);
 
     this->ui_.loginButton.setText("Log in (Opens in browser)");
@@ -94,7 +153,7 @@ BasicLoginWidget::BasicLoginWidget()
         QString("An error occurred while attempting to open <a href=\"%1\">the "
                 "log in link (%1)</a> - open it manually in your browser and "
                 "proceed from there.")
-            .arg(logInLink));
+            .arg(loginLink));
     this->ui_.unableToOpenBrowserHelper.setOpenExternalLinks(true);
 
     this->ui_.horizontalLayout.addWidget(&this->ui_.loginButton);
@@ -103,12 +162,24 @@ BasicLoginWidget::BasicLoginWidget()
     this->ui_.layout.addLayout(&this->ui_.horizontalLayout);
     this->ui_.layout.addWidget(&this->ui_.unableToOpenBrowserHelper);
 
-    connect(&this->ui_.loginButton, &QPushButton::clicked, [this, logInLink]() {
-        qCDebug(chatterinoWidget) << "open login in browser";
-        if (!QDesktopServices::openUrl(QUrl(logInLink)))
+    connect(&this->ui_.loginButton, &QPushButton::clicked, [this, loginLink]() {
+        qDebug() << "penis";
+
+        // Initialize the server
+        if (!this->loginServer_->getServer()->listen(QHostAddress::LocalHost,
+                                                     52107))
         {
-            qCWarning(chatterinoWidget) << "open login in browser failed";
+            qDebug() << "failed to start server";
+            return;
+        }
+        qDebug() << "listening!";
+        return;
+
+        // Open login page
+        if (!QDesktopServices::openUrl(QUrl(loginLink)))
+        {
             this->ui_.unableToOpenBrowserHelper.show();
+            return;
         }
     });
 
@@ -154,6 +225,12 @@ BasicLoginWidget::BasicLoginWidget()
         crossPlatformCopy("");
         this->window()->close();
     });
+}
+
+BasicLoginWidget::~BasicLoginWidget()
+{
+    qDebug() << "BasicLoinWidget was destroyed, closing connection";
+    this->loginServer_->close();
 }
 
 AdvancedLoginWidget::AdvancedLoginWidget()
@@ -262,6 +339,13 @@ LoginWidget::LoginWidget(QWidget *parent)
                      });
 
     this->ui_.mainLayout.addWidget(&this->ui_.buttonBox);
+}
+
+void LoginWidget::hideEvent(QHideEvent *event)
+{
+    // Make the port free
+    qDebug() << "closing server";
+    this->ui_.basic.loginServer_->getServer()->close();
 }
 
 }  // namespace chatterino

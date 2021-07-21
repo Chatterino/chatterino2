@@ -14,15 +14,40 @@
 #include <QLineEdit>
 #include <QPushButton>
 #include <QTabWidget>
+#include <QTcpServer>
+#include <QTcpSocket>
 #include <QVBoxLayout>
 #include <QtCore/QVariant>
 
 namespace chatterino {
 
+class LoginServer : public QTcpServer
+{
+public:
+    static constexpr int chatterinoPort = 52107;
+
+    explicit LoginServer(QObject *parent = {});
+    QTcpServer *getServer();
+    //    void incomingConnection(qintptr handle) override;
+public slots:
+    void slotNewConnection();
+    void slotServerRead();
+    void slotBytesWritten();
+    void slotClientDisconnected();
+
+    //public slots:
+    //    void newConnection();
+
+private:
+    QTcpServer *server_;
+    QTcpSocket *socket_;
+};
+
 class BasicLoginWidget : public QWidget
 {
 public:
     BasicLoginWidget();
+    ~BasicLoginWidget();
 
     struct {
         QVBoxLayout layout;
@@ -31,6 +56,10 @@ public:
         QPushButton pasteCodeButton;
         QLabel unableToOpenBrowserHelper;
     } ui_;
+
+    //private:
+    // Local server listening to login data
+    LoginServer *loginServer_;
 };
 
 class AdvancedLoginWidget : public QWidget
@@ -78,6 +107,8 @@ private:
 
         AdvancedLoginWidget advanced;
     } ui_;
+
+    void hideEvent(QHideEvent *e) override;
 };
 
 }  // namespace chatterino
