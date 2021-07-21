@@ -8,6 +8,7 @@
 - Minor: Received IRC messages use `time` message tag for timestamp if it's available. (#3021)
 - Minor: Added informative messages for recent-messages API's errors. (#3029)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
+- Bugfix: Copy buttons in usercard now show properly in light mode (#3057)
 - Dev: Ubuntu packages are now available (#2936)
 
 ## 2.3.3
