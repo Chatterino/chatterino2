@@ -1,6 +1,6 @@
 # Building on Windows
 
-**Note that installing all of the development prerequisites and libraries will require about 30 GBs of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
+**Note that installing all of the development prerequisites and libraries will require about 30 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
 
 This guide assumes you are on a 64-bit system. You might need to manually search out alternate download links should you desire to build Chatterino on a 32-bit system.
 
@@ -76,7 +76,7 @@ Note: This installation will take about 2 GB of disk space.
 
 Compiling with Breakpad support enables crash reports that can be of use for developing/beta versions of Chatterino. If you have no interest in reporting crashes anyways, this optional dependency will probably be of no use to you.
 
-1. Open up `lib/qBreakpad/handler/handler.pro`in the Qt Creator
+1. Open up `lib/qBreakpad/handler/handler.pro`in Qt Creator
 2. Build it in whichever mode you want to build Chatterino in (Debug/Profile/Release)
 3. Copy the newly built `qBreakpad.lib` to the following directory: `lib/qBreakpad/build/handler` (You will have to manually create this directory)
 
@@ -105,10 +105,10 @@ To produce a standalone package, you will need to generate all required files by
 
 To produce all supplement files for a standalone build, follow these steps (adjust paths as required):
 
-1.  Navigate to your build output directory with the Windows Explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release`
+1.  Navigate to your build output directory with Windows Explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release`
 2.  Enter the `release` directory
 3.  Delete all files except the `chatterino.exe` file. You should be left with a directory only containing `chatterino.exe`.
-4.  Open a command prompt (CMD, or PowerShell), and execute:
+4.  Open a command prompt (cmd, or PowerShell), and execute:
 
         cd C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release\release
         C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe chatterino.exe
