@@ -126,7 +126,7 @@ Generally the lowest level of requirement should be used, e.g. passing `Channel&
 
 ## Members
 
-All functions, names, are in `camelCase`. _Private_ member variables are in `camelCase_` (note the underscore at the end). We don't use the `get` prefix for getters. We mark functions as `const` [if applicable](https://stackoverflow.com/questions/751681/meaning-of-const-last-in-a-function-declaration-of-a-class).
+All function names are in `camelCase`. _Private_ member variables are in `camelCase_` (note the underscore at the end). We don't use the `get` prefix for getters. We mark functions as `const` [if applicable](https://stackoverflow.com/questions/751681/meaning-of-const-last-in-a-function-declaration-of-a-class).
 
 ```cpp
 class NamedObject
