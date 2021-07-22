@@ -569,7 +569,9 @@ void SplitInput::insertCompletionText(const QString &input_)
         else if (text[i] == '@')
         {
             input = "@" + input_ +
-                    (getSettings()->mentionUsersWithComma ? ", " : " ");
+                    (edit.isFirstWord() && getSettings()->mentionUsersWithComma
+                         ? ", "
+                         : " ");
             done = true;
         }
 
