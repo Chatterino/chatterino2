@@ -40,6 +40,7 @@ find_package(Qt5 REQUIRED
     Multimedia
     Svg
     Concurrent
+    HttpServer
     )
 
 if (WIN32)

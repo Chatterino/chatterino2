@@ -20,7 +20,7 @@ MINIMUM_REQUIRED_QT_VERSION = 5.12.0
     error("You're trying to compile with Qt $$QT_VERSION, but minimum required Qt version is $$MINIMUM_REQUIRED_QT_VERSION")
 }
 
-QT                += widgets core gui network multimedia svg concurrent
+QT                += widgets core gui network multimedia svg concurrent httpserver
 CONFIG            += communi
 COMMUNI           += core model util
 

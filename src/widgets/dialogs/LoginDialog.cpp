@@ -17,6 +17,7 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QUrl>
+#include <QtHttpServer/QHttpServer>
 #include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
@@ -79,66 +80,27 @@ namespace {
 
 }  // namespace
 
-LoginServer::LoginServer(QObject *parent)
-    : QTcpServer(parent)
-{
-    server_ = new QTcpServer(this);
-
-    connect(server_, &QTcpServer::newConnection, this,
-            &LoginServer::slotNewConnection);
-}
-
-QTcpServer *LoginServer::getServer()
-{
-    return this->server_;
-}
-
-void LoginServer::slotNewConnection()
-{
-    qDebug() << "HONDETEDTED!!!";
-    socket_ = server_->nextPendingConnection();
-
-    connect(socket_, &QTcpSocket::readyRead, this,
-            &LoginServer::slotServerRead);
-    connect(socket_, &QTcpSocket::disconnected, this,
-            &LoginServer::slotClientDisconnected);
-}
-
-void LoginServer::slotServerRead()
-{
-    qDebug() << "reading data...";
-    while (socket_->bytesAvailable() > 0)
-    {
-        QByteArray array = socket_->readAll();
-        qDebug() << array;
-    }
-
-    // Write data back
-    socket_->write(
-        "HTTP/1.1 200 OK\r\nServer: nginx/1.14.2\r\nDate: Wed, 21 Jul "
-        "2021 20:19:05 GMT\r\nContent-Type: text/plain\r\nContent-Length: "
-        "4\r\nConnection: close\r\n\r\nxd\r\n");
-    socket_->waitForBytesWritten(5000);
-    socket_->close();
-
-    //    socket_->write("HTTP/1.1 204 No Content\r\n");
-}
-
-void LoginServer::slotBytesWritten()
-{
-    qDebug() << "bytes written!";
-}
-
-void LoginServer::slotClientDisconnected()
-{
-    qDebug() << "HEDISCONNECTED!";
-    socket_->close();
-}
-
 BasicLoginWidget::BasicLoginWidget()
 {
-    // init tcp server
-    this->loginServer_ = new LoginServer(this);
+    // Initialize HTTP server and its routes
+    qCDebug(chatterinoWidget) << "Creating new HTTP server";
+    this->httpServer_ = new QHttpServer(this);
+    this->tcpServer_ = new QTcpServer(this->httpServer_);
+    this->httpServer_->bind(this->tcpServer_);
+
+    qCDebug(chatterinoWidget) << "Initializing HTTP server's routes";
+    this->httpServer_->route(
+        "/code", QHttpServerRequest::Method::GET,
+        [this](const QHttpServerRequest &req, QHttpServerResponder &&resp) {
+            qDebug() << "got credentials!";
+            resp.write("KKona", "text/plain",
+                       QHttpServerResponder::StatusCode::Ok);
+            qDebug() << req.url().fragment();
+            qDebug() << req.url();
+
+            this->ui_.loginButton.setText("Logged in!");
+            this->ui_.loginButton.setEnabled(true);
+        });
 
     const QString loginLink = "http://localhost:1234";
     this->setLayout(&this->ui_.layout);
@@ -163,17 +125,20 @@ BasicLoginWidget::BasicLoginWidget()
     this->ui_.layout.addWidget(&this->ui_.unableToOpenBrowserHelper);
 
     connect(&this->ui_.loginButton, &QPushButton::clicked, [this, loginLink]() {
-        qDebug() << "penis";
-
-        // Initialize the server
-        if (!this->loginServer_->getServer()->listen(QHostAddress::LocalHost,
-                                                     52107))
+        // Start listening for credentials
+        qDebug() << this->tcpServer_->isListening();
+        if (!this->tcpServer_->listen(serverAddress, serverPort))
         {
-            qDebug() << "failed to start server";
-            return;
+            qCWarning(chatterinoWidget) << "Failed to start HTTP server";
         }
-        qDebug() << "listening!";
-        return;
+        else
+        {
+            qInfo(chatterinoWidget) << QString("HTTP server Listening on %1:%2")
+                                           .arg(serverAddress.toString())
+                                           .arg(serverPort);
+            this->ui_.loginButton.setText("Listening...");
+            this->ui_.loginButton.setDisabled(true);
+        }
 
         // Open login page
         if (!QDesktopServices::openUrl(QUrl(loginLink)))
@@ -227,10 +192,17 @@ BasicLoginWidget::BasicLoginWidget()
     });
 }
 
-BasicLoginWidget::~BasicLoginWidget()
+void BasicLoginWidget::closeHttpServer()
 {
-    qDebug() << "BasicLoinWidget was destroyed, closing connection";
-    this->loginServer_->close();
+    // Revert login button
+    this->ui_.loginButton.setText("Log in (Opens in browser)");
+    this->ui_.loginButton.setEnabled(true);
+
+    qCDebug(chatterinoWidget) << "Closing TCP servers bind to HTTP server";
+    for (const auto &server : this->httpServer_->servers())
+    {
+        server->close();
+    }
 }
 
 AdvancedLoginWidget::AdvancedLoginWidget()
@@ -344,8 +316,7 @@ LoginWidget::LoginWidget(QWidget *parent)
 void LoginWidget::hideEvent(QHideEvent *event)
 {
     // Make the port free
-    qDebug() << "closing server";
-    this->ui_.basic.loginServer_->getServer()->close();
+    this->ui_.basic.closeHttpServer();
 }
 
 }  // namespace chatterino

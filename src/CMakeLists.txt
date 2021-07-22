@@ -483,6 +483,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt5::Multimedia
         Qt5::Svg
         Qt5::Concurrent
+        Qt5::HttpServer
 
         LibCommuni::LibCommuni
         qt5keychain

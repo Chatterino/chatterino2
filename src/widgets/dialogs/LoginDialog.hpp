@@ -18,36 +18,14 @@
 #include <QTcpSocket>
 #include <QVBoxLayout>
 #include <QtCore/QVariant>
+#include <QtHttpServer/QHttpServer>
 
 namespace chatterino {
-
-class LoginServer : public QTcpServer
-{
-public:
-    static constexpr int chatterinoPort = 52107;
-
-    explicit LoginServer(QObject *parent = {});
-    QTcpServer *getServer();
-    //    void incomingConnection(qintptr handle) override;
-public slots:
-    void slotNewConnection();
-    void slotServerRead();
-    void slotBytesWritten();
-    void slotClientDisconnected();
-
-    //public slots:
-    //    void newConnection();
-
-private:
-    QTcpServer *server_;
-    QTcpSocket *socket_;
-};
 
 class BasicLoginWidget : public QWidget
 {
 public:
     BasicLoginWidget();
-    ~BasicLoginWidget();
 
     struct {
         QVBoxLayout layout;
@@ -57,9 +35,14 @@ public:
         QLabel unableToOpenBrowserHelper;
     } ui_;
 
-    //private:
+    void closeHttpServer();
+
+private:
     // Local server listening to login data
-    LoginServer *loginServer_;
+    const QHostAddress serverAddress{QHostAddress::LocalHost};
+    static const int serverPort = 52107;
+    QHttpServer *httpServer_;
+    QTcpServer *tcpServer_;
 };
 
 class AdvancedLoginWidget : public QWidget
