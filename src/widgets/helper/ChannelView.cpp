@@ -48,6 +48,7 @@
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
@@ -1804,8 +1805,9 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
         }
         break;
         case Qt::RightButton: {
+            auto split = dynamic_cast<Split *>(this->parentWidget());
             auto insertText = [=](QString text) {
-                if (auto split = dynamic_cast<Split *>(this->parentWidget()))
+                if (split)
                 {
                     split->insertTextToInput(text);
                 }
@@ -1815,7 +1817,11 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             if (link.type == Link::UserInfo)
             {
                 const bool commaMention = getSettings()->mentionUsersWithComma;
-                insertText("@" + link.value + (commaMention ? ", " : " "));
+                insertText("@" + link.value +
+                           (split && split->getInput().isEditFirstWord() &&
+                                    commaMention
+                                ? ", "
+                                : " "));
             }
             else if (link.type == Link::UserWhisper)
             {

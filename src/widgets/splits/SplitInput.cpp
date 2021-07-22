@@ -597,6 +597,11 @@ void SplitInput::clearSelection()
     this->ui_.textEdit->setTextCursor(c);
 }
 
+bool SplitInput::isEditFirstWord() const
+{
+    return this->ui_.textEdit->isFirstWord();
+}
+
 QString SplitInput::getInputText() const
 {
     return this->ui_.textEdit->toPlainText();
