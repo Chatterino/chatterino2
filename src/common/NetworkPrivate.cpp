@@ -145,8 +145,8 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                 data->timer_, &QTimer::timeout, worker, [reply, data]() {
                     qCDebug(chatterinoCommon) << "Aborted!";
                     reply->abort();
-                    qCDebug(chatterinoHttp)
-                        << QString("%1 %2 [timed out]")
+                    qCDebug(chatterinoHTTP)
+                        << QString("%1 [timed out] %2")
                                .arg(networkRequestTypes.at(
                                         int(data->requestType_)),
                                     data->request_.url().toString());
@@ -186,8 +186,8 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                     QNetworkReply::NetworkError::OperationCanceledError)
                 {
                     // Operation cancelled, most likely timed out
-                    qCDebug(chatterinoHttp)
-                        << QString("%1 %2 [cancelled]")
+                    qCDebug(chatterinoHTTP)
+                        << QString("%1 [cancelled] %2")
                                .arg(networkRequestTypes.at(
                                         int(data->requestType_)),
                                     data->request_.url().toString());
@@ -200,9 +200,8 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                         QNetworkRequest::HttpStatusCodeAttribute);
                     if (data->requestType_ == NetworkRequestType::Get)
                     {
-                        qCDebug(chatterinoHttp)
-                            << QString(
-                                   "%1 %3 %2")  // reversed to not break URLs
+                        qCDebug(chatterinoHTTP)
+                            << QString("%1 %2 %3")
                                    .arg(networkRequestTypes.at(
                                             int(data->requestType_)),
                                         QString::number(status.toInt()),
@@ -210,12 +209,12 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                     }
                     else
                     {
-                        qCDebug(chatterinoHttp)
+                        qCDebug(chatterinoHTTP)
                             << QString("%1 %2 %3 %4")
                                    .arg(networkRequestTypes.at(
                                             int(data->requestType_)),
-                                        data->request_.url().toString(),
                                         QString::number(status.toInt()),
+                                        data->request_.url().toString(),
                                         QString(data->payload_));
                     }
                     // TODO: Should this always be run on the GUI thread?
@@ -259,16 +258,16 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
             if (data->requestType_ == NetworkRequestType::Get)
             {
-                qCDebug(chatterinoHttp)
-                    << QString("%1 %3 %2")  // reversed to not break URLs
+                qCDebug(chatterinoHTTP)
+                    << QString("%1 %2 %3")
                            .arg(networkRequestTypes.at(int(data->requestType_)),
                                 QString::number(status.toInt()),
                                 data->request_.url().toString());
             }
             else
             {
-                qCDebug(chatterinoHttp)
-                    << QString("%1 %2 %3 %4")
+                qCDebug(chatterinoHTTP)
+                    << QString("%1 %3 %2 %4")
                            .arg(networkRequestTypes.at(int(data->requestType_)),
                                 data->request_.url().toString(),
                                 QString::number(status.toInt()),
@@ -333,8 +332,8 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
         QByteArray bytes = cachedFile.readAll();
         NetworkResult result(bytes, 200);
 
-        qCDebug(chatterinoHttp)
-            << QString("%1 %2 [CACHED] 200")
+        qCDebug(chatterinoHTTP)
+            << QString("%1 [CACHED] 200 %2")
                    .arg(networkRequestTypes.at(int(data->requestType_)),
                         data->request_.url().toString());
         if (data->onSuccess_)
