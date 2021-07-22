@@ -24,7 +24,7 @@
 	url = https://github.com/Chatterino/qtkeychain
 [submodule "lib/websocketpp"]
 	path = lib/websocketpp
-	url = https://github.com/ziocleto/websocketpp
+	url = https://github.com/zaphoyd/websocketpp
 [submodule "cmake/sanitizers-cmake"]
 	path = cmake/sanitizers-cmake
 	url = https://github.com/arsenm/sanitizers-cmake
