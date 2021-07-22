@@ -124,7 +124,7 @@ To produce all supplement files for a standalone build, follow these steps (adju
 
 You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist package must be present, as usual - see the [README](README.md)).
 
-## Building with CMake
+## Using CMake
 
 Open up your terminal with the Visual Studio environment variables, then enter the following commands:
 
