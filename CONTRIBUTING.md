@@ -1,6 +1,6 @@
 # Chatterino code guidelines
 
-This is a set of guidelines for contributing to Chatterino. The goal is to teach programmers without a C++ background (java/python/etc.), or people who haven't used Qt or otherwise have different experience, the idioms of the codebase. Thus we will focus on those which are different from those other environments. There are extra guidelines available [here](https://hackmd.io/@fourtf/chatterino-pendantic-guidelines) but they are considered as extras and not as important.
+This is a set of guidelines for contributing to Chatterino. The goal is to teach programmers without a C++ background (java/python/etc.), people who haven't used Qt, or otherwise have different experience, the idioms of the codebase. Thus we will focus on those which are different from those other environments. There are extra guidelines available [here](https://hackmd.io/@fourtf/chatterino-pendantic-guidelines) but they are considered as extras and not as important.
 
 # Tooling
 
@@ -214,4 +214,4 @@ Keep the element on the stack if possible. If you need a pointer or have complex
 
 - Use the [object tree](https://doc.qt.io/qt-5/objecttrees.html#) to manage lifetimes where possible. Objects are destroyed when their parent object is destroyed.
 - If you have to explicitly delete an object use `variable->deleteLater()` instead of `delete variable`. This ensures that it will be deleted on the correct thread.
-- If an object doesn't have a parent, consider using `std::unique_ptr<Type, DeleteLater>`, with `DeleteLater` from "src/common/Common.hpp". This will call `deleteLater()` on the pointer once it goes out of scope, or the object is destroyed.
+- If an object doesn't have a parent, consider using `std::unique_ptr<Type, DeleteLater>` with `DeleteLater` from "src/common/Common.hpp". This will call `deleteLater()` on the pointer once it goes out of scope, or the object is destroyed.
