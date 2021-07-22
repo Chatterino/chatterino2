@@ -21,11 +21,11 @@ _Most likely works the same for other Debian-like distros_
 
 ### Compiling via CMake
 
- `cmake .. && make`
+`cmake .. && make`
 
 ### Compiling via QMake
 
- `qmake .. && make`
+`qmake .. && make`
 
 ## Arch Linux
 
@@ -42,11 +42,11 @@ _Most likely works the same for other Debian-like distros_
 
 ### Compiling via CMake
 
- `cmake .. && make`
+`cmake .. && make`
 
 ### Compiling via QMake
 
- `qmake .. && make`
+`qmake .. && make`
 
 ## Fedora 28 and above
 
@@ -59,11 +59,11 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 
 ### Compiling via CMake
 
- `cmake .. && make -j$(nproc)`
+`cmake .. && make -j$(nproc)`
 
 ### Compiling via QMake
 
- `qmake-qt5 .. && make -j$(nproc)`
+`qmake-qt5 .. && make -j$(nproc)`
 
 ## NixOS 18.09+
 
@@ -74,9 +74,9 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 
 ### Compiling via CMake
 
- `cmake .. && make`
+`cmake .. && make`
 
 
 ### Compiling via QMake
 
- `qmake .. && make`
+`qmake .. && make`
