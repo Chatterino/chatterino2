@@ -9,7 +9,6 @@ Resources2::Resources2()
     this->avatars.mm2pl = QPixmap(":/avatars/mm2pl.png");
     this->avatars.pajlada = QPixmap(":/avatars/pajlada.png");
     this->avatars.slch = QPixmap(":/avatars/slch.png");
-    this->avatars.xHeaveny = QPixmap(":/avatars/xheaveny.png");
     this->avatars.zneix = QPixmap(":/avatars/zneix.png");
     this->buttons.addSplit = QPixmap(":/buttons/addSplit.png");
     this->buttons.addSplitDark = QPixmap(":/buttons/addSplitDark.png");
