@@ -19,11 +19,11 @@ _Most likely works the same for other Debian-like distros_
 1. Create a build folder and open it (`mkdir build && cd build`)
 1. Use one of the options below to compile it
 
-### Compiling via CMake
+### Using CMake
 
 `cmake .. && make`
 
-### Compiling via QMake
+### Using QMake
 
 `qmake .. && make`
 
@@ -40,11 +40,11 @@ _Most likely works the same for other Debian-like distros_
 1. Create a build folder and open it (`mkdir build && cd build`)
 1. Use one of the options below to compile it
 
-### Compiling via CMake
+### Using CMake
 
 `cmake .. && make`
 
-### Compiling via QMake
+### Using QMake
 
 `qmake .. && make`
 
@@ -57,11 +57,11 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 1. Create a build folder and open it (`mkdir build && cd build`)
 1. Use one of the options below to compile it
 
-### Compiling via CMake
+### Using CMake
 
 `cmake .. && make -j$(nproc)`
 
-### Compiling via QMake
+### Using QMake
 
 `qmake-qt5 .. && make -j$(nproc)`
 
@@ -72,11 +72,11 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 1. Create a build folder and open it (`mkdir build && cd build`)
 1. Use one of the options below to compile it
 
-### Compiling via CMake
+### Using CMake
 
 `cmake .. && make`
 
 
-### Compiling via QMake
+### Using QMake
 
 `qmake .. && make`
