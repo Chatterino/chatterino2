@@ -37,6 +37,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
+#include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "util/Twitch.hpp"
@@ -1817,11 +1818,11 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             if (link.type == Link::UserInfo)
             {
                 const bool commaMention = getSettings()->mentionUsersWithComma;
-                insertText("@" + link.value +
-                           (split && split->getInput().isEditFirstWord() &&
-                                    commaMention
-                                ? ", "
-                                : " "));
+                const bool isFirstWord =
+                    split && split->getInput().isEditFirstWord();
+                auto userMention =
+                    formatUserMention(link.value, isFirstWord, commaMention);
+                insertText("@" + userMention + " ");
             }
             else if (link.type == Link::UserWhisper)
             {
