@@ -108,7 +108,7 @@ To produce all supplement files for a standalone build, follow these steps (adju
 1.  Navigate to your build output directory with Windows Explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release`
 2.  Enter the `release` directory
 3.  Delete all files except the `chatterino.exe` file. You should be left with a directory only containing `chatterino.exe`.
-4.  Open a command prompt (cmd or PowerShell), and execute:
+4.  Open a command prompt and execute:
 
         cd C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release\release
         C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe chatterino.exe
