@@ -12,5 +12,5 @@ FreeBSD 13.0-CURRENT.
    ports tree): `# pkg install qt5-core qt5-multimedia qt5-svg qt5-qmake qt5-buildtools gstreamer-plugins-good boost-libs rapidjson`
 1. Go into the project directory
 1. Create a build folder and open it (`mkdir build && cd build`)
-1. Proceed to compiling using the command 
+1. Proceed to compiling using the command
    `qmake .. && make`
