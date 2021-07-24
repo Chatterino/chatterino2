@@ -76,6 +76,7 @@ AboutPage::AboutPage()
             //            }
         }*/
 
+        // Version
         auto versionInfo = layout.emplace<QGroupBox>("Version");
         {
             auto version = Version::instance();
@@ -96,6 +97,7 @@ AboutPage::AboutPage()
                                                   Qt::LinksAccessibleByMouse);
         }
 
+        // Licenses
         auto licenses =
             layout.emplace<QGroupBox>("Open source software used...");
         {
@@ -128,7 +130,21 @@ AboutPage::AboutPage()
                        "https://github.com/lamerman/cpp-lru-cache",
                        ":/licenses/lrucache.txt");
         }
+        
+        // About Chatterino
+        auto about_chatterino = layout.emplace<QGroupBox>("About Chatterino...");
+        {
+            auto l = about_chatterino.emplace<QVBoxLayout>();
 
+            // clang-format off
+            l.emplace<QLabel>("Chatterino Wiki can be found <a href=\"https://wiki.chatterino.com\">here</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Support <a href=\"https://streamelements.com/fourtf/tip\">Chatterino</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("All about Chatterino's <a href=\"https://chatterino.com/#features\">features</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Join the official Chatterino <a href=\"https:/\discord.gg/7Y5AYhAK4z\">Discord</a>")->setOpenExternalLinks(true);
+            // clang-format on
+        }
+        
+        // Attributions
         auto attributions = layout.emplace<QGroupBox>("Attributions...");
         {
             auto l = attributions.emplace<QVBoxLayout>();
