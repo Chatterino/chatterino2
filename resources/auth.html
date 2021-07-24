@@ -2,14 +2,14 @@
     <head>
         <title>Login - Chatterino</title>
     </head>
-    <body onload="xd()">
+    <body>
         <noscript>
             <p>noscript stuffs here</p>
         </noscript>
 
         <p id="status">Loading...</p>
         <script>
-            function xd() {
+            (function() {
                 // Address of local Chatterino's http server
                 const address = "localhost";
                 const port = 52107;
@@ -19,19 +19,12 @@
                 history.replaceState(null, null, " ");
 
                 // Find token in the hash
-                let token = "";
-                const fragmentElements = fragment.split("&");
-                for (element of fragmentElements) {
-                    const parts = element.split("=");
-                    if (parts[0] === "access_token" && parts[1].length !== 0) {
-                        token = parts[1];
-                    }
-                }
+                const token = new URLSearchParams(fragment).get("access_token");
 
                 let status = document.getElementById("status");
 
                 // Return if no token was found
-                if (token.length === 0) {
+                if (!token) {
                     status.innerHTML = "Bad request";
                     return;
                 }
@@ -40,7 +33,7 @@
                 status.innerHTML = "Sending your credentials to Chatterino...";
 
                 fetch(`http://${address}:${port}/token`, {
-                    method: "POST",
+                    method: "PUT",
                     headers: {
                         "X-Access-Token": token
                     }
@@ -57,7 +50,7 @@
                     console.log(err);
                     status.innerHTML = "Something went wrong, check console for details";
                 });
-            }
+            })();
         </script>
     </body>
 </html>

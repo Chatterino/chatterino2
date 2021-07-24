@@ -99,7 +99,7 @@ BasicLoginWidget::BasicLoginWidget()
 
             resp.write(redirectHTML.readAll(),
                        {{"Access-Control-Allow-Origin", "*"},
-                        {"Access-Control-Allow-Methods", "GET, POST"},
+                        {"Access-Control-Allow-Methods", "GET, PUT"},
                         {"Access-Control-Allow-Headers", "X-Access-Token"}},
                        QHttpServerResponder::StatusCode::Ok);
         });
@@ -108,12 +108,12 @@ BasicLoginWidget::BasicLoginWidget()
         [](const QHttpServerRequest &req, QHttpServerResponder &&resp) {
             qDebug() << "options called!";
             resp.write({{"Access-Control-Allow-Origin", "*"},
-                        {"Access-Control-Allow-Methods", "GET, POST"},
+                        {"Access-Control-Allow-Methods", "GET, PUT"},
                         {"Access-Control-Allow-Headers", "X-Access-Token"}},
                        QHttpServerResponder::StatusCode::Ok);
         });
     this->httpServer_->route(
-        "/token", QHttpServerRequest::Method::POST,
+        "/token", QHttpServerRequest::Method::PUT,
         [](const QHttpServerRequest &req, QHttpServerResponder &&resp) {
             if (!req.headers().contains("X-Access-Token"))
             {
@@ -122,10 +122,10 @@ BasicLoginWidget::BasicLoginWidget()
             }
 
             // Handle token
-            auto token = req.headers()["X-Access-Token"];
+            const auto token = req.headers().value("X-Access-Token").toString();
             qDebug() << token;
             resp.write({{"Access-Control-Allow-Origin", "*"},
-                        {"Access-Control-Allow-Methods", "GET, POST"},
+                        {"Access-Control-Allow-Methods", "GET, PUT"},
                         {"Access-Control-Allow-Headers", "X-Access-Token"}},
                        QHttpServerResponder::StatusCode::Ok);
         });
