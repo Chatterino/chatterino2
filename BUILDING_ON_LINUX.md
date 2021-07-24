@@ -16,7 +16,7 @@ _Most likely works the same for other Debian-like distros_
 ### Manually
 
 1. Go into the project directory
-1. Create a build folder and open it (`mkdir build && cd build`)
+1. Create a build folder and go into it (`mkdir build && cd build`)
 1. Use one of the options below to compile it
 
 ### Using CMake
@@ -37,12 +37,13 @@ _Most likely works the same for other Debian-like distros_
 
 1. Install all of the dependencies using `sudo pacman -S qt5-base qt5-multimedia qt5-svg qt5-tools gst-plugins-ugly gst-plugins-good boost rapidjson pkgconf openssl cmake`
 1. Go into the project directory
-1. Create a build folder and open it (`mkdir build && cd build`)
+1. Create a build folder and go into it (`mkdir build && cd build`)
 1. Use one of the options below to compile it
 
 ### Using CMake
 
 `cmake .. && make`
+
 
 ### Using QMake
 
@@ -54,7 +55,7 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 
 1. Install all of the dependencies using `sudo dnf install qt5-qtbase-devel qt5-qtmultimedia-devel qt5-qtsvg-devel libsecret-devel openssl-devel boost-devel cmake`
 1. Go into the project directory
-1. Create a build folder and open it (`mkdir build && cd build`)
+1. Create a build folder and go into it (`mkdir build && cd build`)
 1. Use one of the options below to compile it
 
 ### Using CMake
@@ -69,13 +70,16 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 
 1. Enter the development environment with all of the dependencies: `nix-shell -p openssl boost qt5.full pkg-config cmake`
 1. Go into the project directory
-1. Create a build folder and open it (`mkdir build && cd build`)
+1. Create a build folder and go into it (`mkdir build && cd build`)
 1. Use one of the options below to compile it
 
 ### Using CMake
 
 `cmake .. && make`
 
+
 ### Using QMake
 
 `qmake .. && make`
+
+
