@@ -77,7 +77,6 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 
 `cmake .. && make`
 
-
 ### Using QMake
 
 `qmake .. && make`
