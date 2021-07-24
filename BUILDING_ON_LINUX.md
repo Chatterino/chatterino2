@@ -44,7 +44,6 @@ _Most likely works the same for other Debian-like distros_
 
 `cmake .. && make`
 
-
 ### Using QMake
 
 `qmake .. && make`
@@ -80,5 +79,3 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 ### Using QMake
 
 `qmake .. && make`
-
-

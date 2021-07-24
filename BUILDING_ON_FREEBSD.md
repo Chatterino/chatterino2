@@ -13,4 +13,4 @@ FreeBSD 13.0-CURRENT.
 1. Go into the project directory
 1. Create a build folder and go into it (`mkdir build && cd build`)
 1. Proceed to compiling using the command
-`qmake .. && make`
+   `qmake .. && make`
