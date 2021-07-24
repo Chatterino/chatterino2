@@ -1,12 +1,59 @@
 <html>
     <head>
         <title>Login - Chatterino</title>
+        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" rel="stylesheet">
+        <link rel="icon" href="https://chatterino.com/logo.png">
+        <style>
+            body {
+                font-family: 'Noto Sans', sans-serif;
+                color: #efefef;
+                background-color: #1f1f1f;
+                font-size: 1.1em;
+
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                text-align: center;
+            }
+            .title {
+                display: flex;
+                align-items: center;
+                font-size: 44px;
+                font-weight: bolder;
+                margin: 16px 0;
+                margin-bottom: 0.2em;
+            }
+            .title > img {
+                margin-right: 22px;
+                height: 40px;
+                width: 40px;
+            }
+            p {
+                margin: 6px 0;
+                text-decoration: none;
+                font-size: 1.5em;
+                max-width: 960px;
+            }
+        </style>
     </head>
     <body>
+        <div class="title">
+            <img src="https://chatterino.com/logo.png">Chatterino
+        </div>
         <noscript>
-            <p>noscript stuffs here</p>
+            <style>
+                #status {
+                    display: none;
+                }
+            </style>
+            <p>This page requires Javascript to run
+                <br>
+                <br>Alternatively, copy your access token from the URL
+                <br>and click "Paste token" button in Chatterino
+            </p>
         </noscript>
-
         <p id="status">Loading...</p>
         <script>
             (function() {
