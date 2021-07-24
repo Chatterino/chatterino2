@@ -10,6 +10,7 @@
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
 - Bugfix: Fixed comma appended to username completion when not at the beginning of the message. (#3060)
 - Dev: Ubuntu packages are now available (#2936)
+- Dev: Disabled update checker on Flatpak. (#3051)
 
 ## 2.3.3
 
