@@ -14,6 +14,7 @@ public:
         QPixmap mm2pl;
         QPixmap pajlada;
         QPixmap slch;
+        QPixmap xheaveny;
         QPixmap zneix;
     } avatars;
     struct {
