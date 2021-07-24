@@ -101,7 +101,7 @@ Build results will be placed in a folder at the same level as the "chatterino2" 
 
 If you build chatterino, the result directories will contain a `chatterino.exe` file in the `$OUTPUTDIR\release\` directory. This `.exe` file will not directly run on any given target system, because it will be lacking various Qt runtimes.
 
-To produce a standalone package, you will need to generate all required files by using the tool `windeployqt`. This tool can be found in the `bin` directory of your Qt installation, e.g. at `C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe`.
+To produce a standalone package, you need to generate all required files using the tool `windeployqt`. This tool can be found in the `bin` directory of your Qt installation, e.g. at `C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe`.
 
 To produce all supplement files for a standalone build, follow these steps (adjust paths as required):
 
