@@ -132,15 +132,15 @@ AboutPage::AboutPage()
         }
         
         // About Chatterino
-        auto about_chatterino = layout.emplace<QGroupBox>("About Chatterino...");
+        auto aboutChatterino = layout.emplace<QGroupBox>("About Chatterino...");
         {
-            auto l = about_chatterino.emplace<QVBoxLayout>();
+            auto l = aboutChatterino.emplace<QVBoxLayout>();
 
             // clang-format off
             l.emplace<QLabel>("Chatterino Wiki can be found <a href=\"https://wiki.chatterino.com\">here</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("Support <a href=\"https://streamelements.com/fourtf/tip\">Chatterino</a>")->setOpenExternalLinks(true);
             l.emplace<QLabel>("All about Chatterino's <a href=\"https://chatterino.com/#features\">features</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("Join the official Chatterino <a href=\"https:/\discord.gg/7Y5AYhAK4z\">Discord</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Join the official Chatterino <a href=\"https://discord.gg/7Y5AYhAK4z\">Discord</a>")->setOpenExternalLinks(true);
             // clang-format on
         }
         
