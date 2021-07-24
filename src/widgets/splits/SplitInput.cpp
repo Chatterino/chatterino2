@@ -8,6 +8,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -568,10 +569,10 @@ void SplitInput::insertCompletionText(const QString &input_)
         }
         else if (text[i] == '@')
         {
-            input = "@" + input_ +
-                    (edit.isFirstWord() && getSettings()->mentionUsersWithComma
-                         ? ", "
-                         : " ");
+            const auto userMention =
+                formatUserMention(input_, edit.isFirstWord(),
+                                  getSettings()->mentionUsersWithComma);
+            input = "@" + userMention + " ";
             done = true;
         }
 
