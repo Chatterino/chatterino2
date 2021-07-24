@@ -11,7 +11,7 @@
 5. Install Qt using `brew install qt`
 6. Step 5 should output some directions to add Qt to your path, you will need to do this for qmake
 7. Go into the project directory
-8. Create a build folder and open it (`mkdir build && cd build`)
+8. Create a build folder and go into it (`mkdir build && cd build`)
 9. Compile using `qmake .. && make`
 
 _If you want to use cmake instead of qmake, just replace the above qmake command with cmake_
