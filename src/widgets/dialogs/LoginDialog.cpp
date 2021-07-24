@@ -15,9 +15,11 @@
 #include <QClipboard>
 #include <QDebug>
 #include <QDesktopServices>
+#include <QFile>
 #include <QMessageBox>
 #include <QUrl>
 #include <QtHttpServer/QHttpServer>
+#include <QtHttpServer/QHttpServerResponder>
 #include <pajlada/settings/setting.hpp>
 
 namespace chatterino {
@@ -90,16 +92,42 @@ BasicLoginWidget::BasicLoginWidget()
 
     qCDebug(chatterinoWidget) << "Initializing HTTP server's routes";
     this->httpServer_->route(
-        "/code", QHttpServerRequest::Method::GET,
-        [this](const QHttpServerRequest &req, QHttpServerResponder &&resp) {
-            qDebug() << "got credentials!";
-            resp.write("KKona", "text/plain",
-                       QHttpServerResponder::StatusCode::Ok);
-            qDebug() << req.url().fragment();
-            qDebug() << req.url();
+        "/redirect", QHttpServerRequest::Method::GET,
+        [](const QHttpServerRequest &req, QHttpServerResponder &&resp) {
+            QFile redirectHTML(":/auth.html");
+            redirectHTML.open(QIODevice::ReadOnly);
 
-            this->ui_.loginButton.setText("Logged in!");
-            this->ui_.loginButton.setEnabled(true);
+            resp.write(redirectHTML.readAll(),
+                       {{"Access-Control-Allow-Origin", "*"},
+                        {"Access-Control-Allow-Methods", "GET, POST"},
+                        {"Access-Control-Allow-Headers", "X-Access-Token"}},
+                       QHttpServerResponder::StatusCode::Ok);
+        });
+    this->httpServer_->route(
+        ".*", QHttpServerRequest::Method::OPTIONS,
+        [](const QHttpServerRequest &req, QHttpServerResponder &&resp) {
+            qDebug() << "options called!";
+            resp.write({{"Access-Control-Allow-Origin", "*"},
+                        {"Access-Control-Allow-Methods", "GET, POST"},
+                        {"Access-Control-Allow-Headers", "X-Access-Token"}},
+                       QHttpServerResponder::StatusCode::Ok);
+        });
+    this->httpServer_->route(
+        "/token", QHttpServerRequest::Method::POST,
+        [](const QHttpServerRequest &req, QHttpServerResponder &&resp) {
+            if (!req.headers().contains("X-Access-Token"))
+            {
+                resp.write(QHttpServerResponder::StatusCode::BadRequest);
+                return;
+            }
+
+            // Handle token
+            auto token = req.headers()["X-Access-Token"];
+            qDebug() << token;
+            resp.write({{"Access-Control-Allow-Origin", "*"},
+                        {"Access-Control-Allow-Methods", "GET, POST"},
+                        {"Access-Control-Allow-Headers", "X-Access-Token"}},
+                       QHttpServerResponder::StatusCode::Ok);
         });
 
     const QString loginLink = "http://localhost:1234";
@@ -126,7 +154,6 @@ BasicLoginWidget::BasicLoginWidget()
 
     connect(&this->ui_.loginButton, &QPushButton::clicked, [this, loginLink]() {
         // Start listening for credentials
-        qDebug() << this->tcpServer_->isListening();
         if (!this->tcpServer_->listen(serverAddress, serverPort))
         {
             qCWarning(chatterinoWidget) << "Failed to start HTTP server";

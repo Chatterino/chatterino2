@@ -1,0 +1,63 @@
+<html>
+    <head>
+        <title>Login - Chatterino</title>
+    </head>
+    <body onload="xd()">
+        <noscript>
+            <p>noscript stuffs here</p>
+        </noscript>
+
+        <p id="status">Loading...</p>
+        <script>
+            function xd() {
+                // Address of local Chatterino's http server
+                const address = "localhost";
+                const port = 52107;
+
+                // Retrieve hash with token and hide it immidiatelly
+                const fragment = location.hash.substring(1);
+                history.replaceState(null, null, " ");
+
+                // Find token in the hash
+                let token = "";
+                const fragmentElements = fragment.split("&");
+                for (element of fragmentElements) {
+                    const parts = element.split("=");
+                    if (parts[0] === "access_token" && parts[1].length !== 0) {
+                        token = parts[1];
+                    }
+                }
+
+                let status = document.getElementById("status");
+
+                // Return if no token was found
+                if (token.length === 0) {
+                    status.innerHTML = "Bad request";
+                    return;
+                }
+
+                // Call Chatterino's http server
+                status.innerHTML = "Sending your credentials to Chatterino...";
+
+                fetch(`http://${address}:${port}/token`, {
+                    method: "POST",
+                    headers: {
+                        "X-Access-Token": token
+                    }
+                }).then(resp => {
+                    // Failure
+                    if (resp.status !== 200) {
+                        status.innerHTML = `Chatterino refused your credentials, error ${resp.status}`;
+                        return;
+                    }
+                    // Success
+                    status.innerHTML = "Chatterino added your account successfully!<br>You can close this tab now.";
+                }).catch(err => {
+                    // Unexpected the unexpectable
+                    console.log(err);
+                    status.innerHTML = "Something went wrong, check console for details";
+                });
+            }
+        </script>
+    </body>
+</html>
