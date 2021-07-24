@@ -9,6 +9,7 @@
 - Minor: Added informative messages for recent-messages API's errors. (#3029)
 - Minor: Added "About Chatterino" to About tab. (#2965, #3066)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
+- Bugfix: Fixed comma appended to username completion when not at the beginning of the message. (#3060)
 - Dev: Ubuntu packages are now available (#2936)
 
 ## 2.3.3
