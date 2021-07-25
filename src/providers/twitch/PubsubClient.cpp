@@ -1206,8 +1206,6 @@ void PubSub::handleResponse(const rapidjson::Document &msg)
         return;
     }
 
-    qCDebug(chatterinoPubsub) << "RESPONSE" << nonce;
-
     if (auto it = sentListens.find(nonce); it != sentListens.end())
     {
         this->handleListenResponse(it->second);
