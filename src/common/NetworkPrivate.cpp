@@ -145,6 +145,11 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                 data->timer_, &QTimer::timeout, worker, [reply, data]() {
                     qCDebug(chatterinoCommon) << "Aborted!";
                     reply->abort();
+                    qCDebug(chatterinoHTTP)
+                        << QString("%1 [timed out] %2")
+                               .arg(networkRequestTypes.at(
+                                        int(data->requestType_)),
+                                    data->request_.url().toString());
 
                     if (data->onError_)
                     {
@@ -181,6 +186,11 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                     QNetworkReply::NetworkError::OperationCanceledError)
                 {
                     // Operation cancelled, most likely timed out
+                    qCDebug(chatterinoHTTP)
+                        << QString("%1 [cancelled] %2")
+                               .arg(networkRequestTypes.at(
+                                        int(data->requestType_)),
+                                    data->request_.url().toString());
                     return;
                 }
 
@@ -188,6 +198,25 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
                 {
                     auto status = reply->attribute(
                         QNetworkRequest::HttpStatusCodeAttribute);
+                    if (data->requestType_ == NetworkRequestType::Get)
+                    {
+                        qCDebug(chatterinoHTTP)
+                            << QString("%1 %2 %3")
+                                   .arg(networkRequestTypes.at(
+                                            int(data->requestType_)),
+                                        QString::number(status.toInt()),
+                                        data->request_.url().toString());
+                    }
+                    else
+                    {
+                        qCDebug(chatterinoHTTP)
+                            << QString("%1 %2 %3 %4")
+                                   .arg(networkRequestTypes.at(
+                                            int(data->requestType_)),
+                                        QString::number(status.toInt()),
+                                        data->request_.url().toString(),
+                                        QString(data->payload_));
+                    }
                     // TODO: Should this always be run on the GUI thread?
                     postToThread([data, code = status.toInt()] {
                         data->onError_(NetworkResult({}, code));
@@ -227,6 +256,23 @@ void loadUncached(const std::shared_ptr<NetworkData> &data)
 
             reply->deleteLater();
 
+            if (data->requestType_ == NetworkRequestType::Get)
+            {
+                qCDebug(chatterinoHTTP)
+                    << QString("%1 %2 %3")
+                           .arg(networkRequestTypes.at(int(data->requestType_)),
+                                QString::number(status.toInt()),
+                                data->request_.url().toString());
+            }
+            else
+            {
+                qCDebug(chatterinoHTTP)
+                    << QString("%1 %3 %2 %4")
+                           .arg(networkRequestTypes.at(int(data->requestType_)),
+                                data->request_.url().toString(),
+                                QString::number(status.toInt()),
+                                QString(data->payload_));
+            }
             if (data->finally_)
             {
                 if (data->executeConcurrently_)
@@ -286,6 +332,10 @@ void loadCached(const std::shared_ptr<NetworkData> &data)
         QByteArray bytes = cachedFile.readAll();
         NetworkResult result(bytes, 200);
 
+        qCDebug(chatterinoHTTP)
+            << QString("%1 [CACHED] 200 %2")
+                   .arg(networkRequestTypes.at(int(data->requestType_)),
+                        data->request_.url().toString());
         if (data->onSuccess_)
         {
             if (data->executeConcurrently_ || isGuiThread())

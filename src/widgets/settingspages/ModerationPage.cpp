@@ -160,7 +160,7 @@ ModerationPage::ModerationPage()
             "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
             "Moderation buttons can be bound to chat commands such as \"/ban {user}\", \"/timeout {user} 1000\", \"/w someusername !report {user} was bad in channel {channel}\" or any other custom text commands.<br>"
             "For deleting messages use /delete {msg-id}.<br><br>"
-            "More information can be found <a href='http://wiki.chatterino.com/Moderation/#moderation-mode'>here</a>.");
+            "More information can be found <a href='https://wiki.chatterino.com/Moderation/#moderation-mode'>here</a>.");
         label->setOpenExternalLinks(true);
         label->setWordWrap(true);
         label->setStyleSheet("color: #bbb");
