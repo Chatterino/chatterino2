@@ -22,7 +22,6 @@ public:
         QPixmap ban;
         QPixmap banRed;
         QPixmap copyDark;
-        QPixmap copyDarkTheme;
         QPixmap copyLight;
         QPixmap menuDark;
         QPixmap menuLight;

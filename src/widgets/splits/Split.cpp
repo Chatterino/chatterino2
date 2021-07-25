@@ -306,6 +306,11 @@ ChannelView &Split::getChannelView()
     return *this->view_;
 }
 
+SplitInput &Split::getInput()
+{
+    return *this->input_;
+}
+
 void Split::updateInputPlaceholder()
 {
     if (!this->getChannel()->isTwitchChannel())
