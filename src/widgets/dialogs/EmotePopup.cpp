@@ -173,8 +173,9 @@ EmotePopup::EmotePopup(QWidget *parent)
 }
 void EmotePopup::addShortcuts()
 {
-    std::map<QString, std::function<QString(std::vector<QString>)>>
-        emotePopupActions{
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+        HotkeyScope::PopupWindow,
+        {
             {"openTab",  // CTRL + 1-8 to open corresponding tab.
              [this](std::vector<QString> arguments) -> QString {
                  if (arguments.size() == 0)
@@ -250,9 +251,8 @@ void EmotePopup::addShortcuts()
                  }
                  return "";
              }},
-        };
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
-        HotkeyScope::PopupWindow, emotePopupActions, this);
+        },
+        this);
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)

@@ -184,8 +184,7 @@ void Window::addCustomTitlebarButtons()
     this->userLabel_->setMinimumWidth(20 * scale());
 }
 
-void Window::addDebugStuff(
-    std::map<QString, std::function<QString(std::vector<QString>)>> &actions)
+void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
 {
 #ifndef NDEBUG
     std::vector<QString> cheerMessages, subMessages, miscMessages, linkMessages,
@@ -305,7 +304,7 @@ void Window::addDebugStuff(
 
 void Window::addShortcuts()
 {
-    std::map<QString, std::function<QString(std::vector<QString>)>> windowActions{
+    HotkeyController::HotkeyMap windowActions{
         {"openSettings",  // Open settings
          [this](std::vector<QString>) -> QString {
              SettingsDialog::showDialog(this);

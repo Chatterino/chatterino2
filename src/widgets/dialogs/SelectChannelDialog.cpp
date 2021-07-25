@@ -238,7 +238,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     this->ui_.notebook->selectIndex(TAB_TWITCH);
     this->ui_.twitch.channel->setFocus();
 
-    std::map<QString, std::function<QString(std::vector<QString>)>> actions{
+    HotkeyController::HotkeyMap actions{
         {"accept",
          [this](std::vector<QString>) -> QString {
              this->ok();

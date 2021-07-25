@@ -22,15 +22,16 @@ class HotkeyModel;
 class HotkeyController final : public Singleton
 {
 public:
+    using HotkeyFunction = std::function<QString(std::vector<QString>)>;
+    using HotkeyMap = std::map<QString, HotkeyFunction>;
+
     HotkeyController();
     HotkeyModel *createModel(QObject *parent);
 
     virtual void initialize(Settings &settings, Paths &paths) override;
-    std::vector<QShortcut *> shortcutsForScope(
-        HotkeyScope scope,
-        std::map<QString, std::function<QString(std::vector<QString>)>>
-            actionMap,
-        QWidget *parent);
+    std::vector<QShortcut *> shortcutsForScope(HotkeyScope scope,
+                                               HotkeyMap actionMap,
+                                               QWidget *parent);
 
     void save() override;
     std::shared_ptr<Hotkey> getHotkeyByName(QString name);

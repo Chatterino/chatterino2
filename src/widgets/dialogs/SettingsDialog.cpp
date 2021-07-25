@@ -55,7 +55,7 @@ void SettingsDialog::addShortcuts()
 {
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::PopupWindow,
-        std::map<QString, std::function<QString(std::vector<QString>)>>{
+        {
             {"search",
              [this](std::vector<QString>) -> QString {
                  this->ui_.search->setFocus();
