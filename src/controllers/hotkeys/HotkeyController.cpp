@@ -137,6 +137,46 @@ void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
 
 void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
 {
+    // popup window
+    {
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Escape"), "delete",
+                            std::vector<QString>(), "close popup window");
+        for (int i = 0; i < 8; i++)
+        {
+            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                                QKeySequence(QString("Ctrl+%1").arg(i + 1)),
+                                "openTab", {QString::number(i)},
+                                QString("popup select tab #%1").arg(i + 1));
+        }
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Ctrl+9"), "openTab", {"last"},
+                            "popup select last tab");
+
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Ctrl+Tab"), "openTab", {"next"},
+                            "popup select next tab");
+
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Ctrl+Shift+Tab"), "openTab",
+                            {"previous"}, "popup select previous tab");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("PgUp"), "scrollPage", {"up"},
+                            "popup scroll up");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("PgDown"), "scrollPage", {"down"},
+                            "popup scroll down");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Return"), "accept",
+                            std::vector<QString>(), "popup accept");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Escape"), "reject",
+                            std::vector<QString>(), "popup reject");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
+                            QKeySequence("Ctrl+F"), "search",
+                            std::vector<QString>(), "popup focus search box");
+    }
+
     // split
     {
         this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
@@ -231,46 +271,6 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
                             QKeySequence("Down"), "nextMessage",
                             std::vector<QString>(), "next message");
-    }
-
-    // popup window
-    {
-        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                            QKeySequence("Escape"), "delete",
-                            std::vector<QString>(), "close popup window");
-        for (int i = 0; i < 8; i++)
-        {
-            this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                                QKeySequence(QString("Ctrl+%1").arg(i + 1)),
-                                "openTab", {QString::number(i)},
-                                QString("popup select tab #%1").arg(i + 1));
-        }
-        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                            QKeySequence("Ctrl+9"), "openTab", {"last"},
-                            "popup select last tab");
-
-        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                            QKeySequence("Ctrl+Tab"), "openTab", {"next"},
-                            "popup select next tab");
-
-        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                            QKeySequence("Ctrl+Shift+Tab"), "openTab",
-                            {"previous"}, "popup select previous tab");
-        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                            QKeySequence("PgUp"), "scrollPage", {"up"},
-                            "popup scroll up");
-        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                            QKeySequence("PgDown"), "scrollPage", {"down"},
-                            "popup scroll down");
-        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                            QKeySequence("Return"), "accept",
-                            std::vector<QString>(), "popup accept");
-        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                            QKeySequence("Escape"), "reject",
-                            std::vector<QString>(), "popup reject");
-        this->tryAddDefault(addedHotkeys, HotkeyScope::PopupWindow,
-                            QKeySequence("Ctrl+F"), "search",
-                            std::vector<QString>(), "popup focus search box");
     }
 
     // window
