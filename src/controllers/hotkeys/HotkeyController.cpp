@@ -395,6 +395,7 @@ std::vector<QShortcut *> HotkeyController::shortcutsForScope(
         if (target == actionMap.end())
         {
             qCDebug(chatterinoHotkeys)
+                << qPrintable(parent->objectName())
                 << "Unimplemeneted hotkey action:" << hotkey->action() << "in "
                 << hotkey->getCategory();
             continue;

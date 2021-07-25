@@ -29,6 +29,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
           {BaseWindow::Flags::DisableCustomScaling, BaseWindow::Flags::Dialog},
           parent)
 {
+    this->setObjectName("SettingsDialog");
     this->setWindowTitle("Chatterino Settings");
     this->resize(915, 600);
     this->themeChangedEvent();
