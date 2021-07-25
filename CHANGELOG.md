@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Major: Changed login process. It is now fully automatic with no need to copy-paste credentials and is fully client-sided (doesn't require connecting to chatterino.com). (#3065)
 - Major: Newly uploaded Twitch emotes are once again present in emote picker and can be autocompleted with Tab as well. (#2992)
 - Minor: Added autocompletion in /whispers for Twitch emotes, Global Bttv/Ffz emotes and emojis. (#2999, #3033)
 - Minor: Received Twitch messages now use the exact same timestamp (obtained from Twitch's server) for every Chatterino user instead of assuming message timestamp on client's side. (#3021)
