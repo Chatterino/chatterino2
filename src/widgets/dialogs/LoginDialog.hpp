@@ -1,97 +1,81 @@
 #pragma once
 
+#include "common/NetworkRequest.hpp"
+#include "common/Outcome.hpp"
 #include "widgets/BaseWidget.hpp"
+#include "widgets/helper/LoginServer.hpp"
 
-#include <QAction>
 #include <QApplication>
-#include <QButtonGroup>
 #include <QDialog>
 #include <QDialogButtonBox>
-#include <QFormLayout>
 #include <QHBoxLayout>
-#include <QHeaderView>
+#include <QJsonArray>
+#include <QJsonObject>
 #include <QLabel>
-#include <QLineEdit>
 #include <QPushButton>
-#include <QTabWidget>
-#include <QTcpServer>
-#include <QTcpSocket>
 #include <QVBoxLayout>
 #include <QtCore/QVariant>
-#include <QtHttpServer/QHttpServer>
+
+#define LOGIN_BUTTON_START "Click to Log in"
+#define TOKEN_BUTTON_START "Paste token from clipboard"
+#define VALIDATING_TOKEN "Validating your token..."
 
 namespace chatterino {
 
-class BasicLoginWidget : public QWidget
+class LoginServer;
+
+struct TokenValidationResponse {
+    QString clientId;
+    QString login;
+    QString userId;
+    std::vector<QString> scopes;
+    int expiresIn;
+
+    explicit TokenValidationResponse(QJsonObject root)
+        : clientId(root.value("client_id").toString())
+        , login(root.value("login").toString())
+        , userId(root.value("user_id").toString())
+        , expiresIn(root.value("expires_in").toInt())
+    {
+        for (const auto &scope : root.value("scopes").toArray())
+        {
+            this->scopes.emplace_back(scope.toString());
+        }
+    }
+};
+
+class LoginDialog : public QDialog
 {
 public:
-    BasicLoginWidget();
+    LoginDialog(QWidget *parent);
 
+private:
     struct {
         QVBoxLayout layout;
-        QHBoxLayout horizontalLayout;
+
+        QLabel helpLabel;
+        QLabel warningLabel;
+
+        QHBoxLayout buttons;
         QPushButton loginButton;
-        QPushButton pasteCodeButton;
-        QLabel unableToOpenBrowserHelper;
-    } ui_;
-
-    void closeHttpServer();
-
-private:
-    // Local server listening to login data
-    const QHostAddress serverAddress{QHostAddress::LocalHost};
-    static const int serverPort = 52107;
-    QHttpServer *httpServer_;
-    QTcpServer *tcpServer_;
-};
-
-class AdvancedLoginWidget : public QWidget
-{
-public:
-    AdvancedLoginWidget();
-
-    void refreshButtons();
-
-    struct {
-        QVBoxLayout layout;
-
-        QLabel instructionsLabel;
-
-        QFormLayout formLayout;
-
-        QLineEdit userIDInput;
-        QLineEdit usernameInput;
-        QLineEdit clientIDInput;
-        QLineEdit oauthTokenInput;
-
-        struct {
-            QHBoxLayout layout;
-
-            QPushButton addUserButton;
-            QPushButton clearFieldsButton;
-        } buttonUpperRow;
-    } ui_;
-};
-
-class LoginWidget : public QDialog
-{
-public:
-    LoginWidget(QWidget *parent);
-
-private:
-    struct {
-        QVBoxLayout mainLayout;
-
-        QTabWidget tabWidget;
+        QPushButton pasteTokenButton;
 
         QDialogButtonBox buttonBox;
-
-        BasicLoginWidget basic;
-
-        AdvancedLoginWidget advanced;
     } ui_;
 
+    // Local server listening to login data returned from Twitch
+    LoginServer *loginServer_;
+    QUrl loginLink;
+
+    void deactivateLoginButton();
+    void activateLoginButton();
+    void logInWithToken(QString token, std::function<void()> successCallback,
+                        std::function<void()> failureCallback,
+                        std::function<void()> finallyCallback);
+
     void hideEvent(QHideEvent *e) override;
+
+    friend class LoginServer;
 };
 
 }  // namespace chatterino

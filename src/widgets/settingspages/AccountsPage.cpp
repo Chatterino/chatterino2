@@ -33,10 +33,10 @@ AccountsPage::AccountsPage()
     view->getTableView()->horizontalHeader()->setStretchLastSection(true);
 
     view->addButtonPressed.connect([this] {
-        static auto loginWidget = new LoginWidget(this);
+        static auto loginDialog = new LoginDialog(this);
 
-        loginWidget->show();
-        loginWidget->raise();
+        loginDialog->show();
+        loginDialog->raise();
     });
 
     view->getTableView()->setStyleSheet("background: #333");
