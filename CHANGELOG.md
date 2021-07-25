@@ -2,7 +2,6 @@
 
 ## Unversioned
 
-- Bugfix: Fixed bug misplacing chat when zooming on Chrome with Chatterino Native Host extension (#1936)
 - Major: Newly uploaded Twitch emotes are once again present in emote picker and can be autocompleted with Tab as well. (#2992)
 - Minor: Added autocompletion in /whispers for Twitch emotes, Global Bttv/Ffz emotes and emojis. (#2999, #3033)
 - Minor: Received Twitch messages now use the exact same timestamp (obtained from Twitch's server) for every Chatterino user instead of assuming message timestamp on client's side. (#3021)
@@ -11,6 +10,7 @@
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
 - Bugfix: Copy buttons in usercard now show properly in light mode (#3057)
 - Bugfix: Fixed comma appended to username completion when not at the beginning of the message. (#3060)
+- Bugfix: Fixed bug misplacing chat when zooming on Chrome with Chatterino Native Host extension (#1936)
 - Dev: Ubuntu packages are now available (#2936)
 - Dev: Disabled update checker on Flatpak. (#3051)
 - Dev: Add logging for HTTP requests (#2991)
