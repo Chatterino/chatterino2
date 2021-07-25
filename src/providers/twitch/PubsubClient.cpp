@@ -105,8 +105,11 @@ namespace detail {
             return;
         }
 
-        this->numListens_ -= topics.size();
-        DebugCount::increase("PubSub topic pending unlistens", topics.size());
+        int numRequestedUnlistens = topics.size();
+
+        this->numListens_ -= numRequestedUnlistens;
+        DebugCount::increase("PubSub topic pending unlistens",
+                             numRequestedUnlistens);
 
         auto message = createUnlistenMessage(topics);
 
@@ -114,8 +117,7 @@ namespace detail {
         rj::set(message, "nonce", nonce);
 
         QString payload = rj::stringify(message);
-        int size = topics.size();
-        sentUnlistens[nonce] = RequestMessage{payload, size};
+        sentUnlistens[nonce] = RequestMessage{payload, numRequestedUnlistens};
 
         this->send(payload.toUtf8());
     }
