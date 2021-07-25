@@ -9,9 +9,11 @@
 - Minor: Added informative messages for recent-messages API's errors. (#3029)
 - Minor: Added "About Chatterino" to About tab where The Chatterino Wiki and other Stuff can be found. (#2965, #3068)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
+- Bugfix: Copy buttons in usercard now show properly in light mode (#3057)
 - Bugfix: Fixed comma appended to username completion when not at the beginning of the message. (#3060)
 - Dev: Ubuntu packages are now available (#2936)
 - Dev: Disabled update checker on Flatpak. (#3051)
+- Dev: Add logging for HTTP requests (#2991)
 
 ## 2.3.3
 
