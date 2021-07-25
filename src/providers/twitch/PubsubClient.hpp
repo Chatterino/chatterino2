@@ -47,14 +47,9 @@ using WebsocketErrorCode = websocketpp::lib::error_code;
 #define MAX_PUBSUB_LISTENS 50
 #define MAX_PUBSUB_CONNECTIONS 10
 
-struct ListenMessage {
+struct RequestMessage {
     QString payload;
-    int numListens;
-};
-
-struct UnlistenMessage {
-    QString payload;
-    int numUnlistens;
+    int topicCount;
 };
 
 namespace detail {
@@ -204,8 +199,8 @@ private:
     WebsocketContextPtr onTLSInit(websocketpp::connection_hdl hdl);
 
     void handleResponse(const rapidjson::Document &msg);
-    void handleListenResponse(const ListenMessage &msg);
-    void handleUnlistenResponse(const UnlistenMessage &msg);
+    void handleListenResponse(const RequestMessage &msg, bool failed);
+    void handleUnlistenResponse(const RequestMessage &msg, bool failed);
     void handleMessageResponse(const rapidjson::Value &data);
 
     void runThread();

@@ -24,8 +24,8 @@ namespace chatterino {
 
 static const char *pingPayload = "{\"type\":\"PING\"}";
 
-static std::map<QString, ListenMessage> sentListens;
-static std::map<QString, UnlistenMessage> sentUnlistens;
+static std::map<QString, RequestMessage> sentListens;
+static std::map<QString, RequestMessage> sentUnlistens;
 
 namespace detail {
 
@@ -75,7 +75,7 @@ namespace detail {
         rj::set(message, "nonce", nonce);
 
         QString payload = rj::stringify(message);
-        sentListens[nonce] = ListenMessage{payload, numRequestedListens};
+        sentListens[nonce] = RequestMessage{payload, numRequestedListens};
 
         this->send(payload.toUtf8());
 
@@ -115,7 +115,7 @@ namespace detail {
 
         QString payload = rj::stringify(message);
         int size = topics.size();
-        sentUnlistens[nonce] = UnlistenMessage{payload, size};
+        sentUnlistens[nonce] = RequestMessage{payload, size};
 
         this->send(payload.toUtf8());
     }
@@ -1207,20 +1207,19 @@ void PubSub::handleResponse(const rapidjson::Document &msg)
     {
         qCDebug(chatterinoPubsub)
             << QString("Error %1 on nonce %2").arg(error, nonce);
-        return;
     }
 
     qCDebug(chatterinoPubsub) << "RESPONSE" << nonce;
 
     if (auto it = sentListens.find(nonce); it != sentListens.end())
     {
-        this->handleListenResponse(it->second);
+        this->handleListenResponse(it->second, !error.isEmpty());
         return;
     }
 
     if (auto it = sentUnlistens.find(nonce); it != sentUnlistens.end())
     {
-        this->handleUnlistenResponse(it->second);
+        this->handleUnlistenResponse(it->second, !error.isEmpty());
         return;
     }
 
@@ -1228,16 +1227,30 @@ void PubSub::handleResponse(const rapidjson::Document &msg)
         << "Response on unused" << nonce << "client/topic listener mismatch?";
 }
 
-void PubSub::handleListenResponse(const ListenMessage &msg)
+void PubSub::handleListenResponse(const RequestMessage &msg, bool failed)
 {
-    DebugCount::decrease("PubSub topic pending listens", msg.numListens);
-    DebugCount::increase("PubSub topic listening", msg.numListens);
+    DebugCount::decrease("PubSub topic pending listens", msg.topicCount);
+    if (failed)
+    {
+        DebugCount::increase("PubSub topic failed listens", msg.topicCount);
+    }
+    else
+    {
+        DebugCount::increase("PubSub topic listening", msg.topicCount);
+    }
 }
 
-void PubSub::handleUnlistenResponse(const UnlistenMessage &msg)
+void PubSub::handleUnlistenResponse(const RequestMessage &msg, bool failed)
 {
-    DebugCount::decrease("PubSub topic pending unlistens", msg.numUnlistens);
-    DebugCount::decrease("PubSub topic listening", msg.numUnlistens);
+    DebugCount::decrease("PubSub topic pending unlistens", msg.topicCount);
+    if (failed)
+    {
+        DebugCount::increase("PubSub topic failed unlistens", msg.topicCount);
+    }
+    else
+    {
+        DebugCount::decrease("PubSub topic listening", msg.topicCount);
+    }
 }
 
 void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
