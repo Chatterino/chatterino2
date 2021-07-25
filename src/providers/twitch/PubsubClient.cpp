@@ -1209,8 +1209,6 @@ void PubSub::handleResponse(const rapidjson::Document &msg)
             << QString("Error %1 on nonce %2").arg(error, nonce);
     }
 
-    qCDebug(chatterinoPubsub) << "RESPONSE" << nonce;
-
     if (auto it = sentListens.find(nonce); it != sentListens.end())
     {
         this->handleListenResponse(it->second, !error.isEmpty());
