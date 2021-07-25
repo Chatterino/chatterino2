@@ -62,7 +62,7 @@ namespace detail {
         }
         this->numListens_ += numRequestedListens;
         DebugCount::increase("PubSub topic pending listens",
-                             message["data"]["topics"].GetArray().Size());
+                             message["data"]["topics"].Size());
 
         for (const auto &topic : message["data"]["topics"].GetArray())
         {
