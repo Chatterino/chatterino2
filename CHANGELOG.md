@@ -9,7 +9,12 @@
 - Minor: Added informative messages for recent-messages API's errors. (#3029)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
 - Bugfix: PubSub didn't properly try to resolve pending listens when the pending listens list was larger than 50. (#3037)
+- Bugfix: Copy buttons in usercard now show properly in light mode (#3057)
+- Bugfix: Fixed comma appended to username completion when not at the beginning of the message. (#3060)
+- Bugfix: Fixed bug misplacing chat when zooming on Chrome with Chatterino Native Host extension (#1936)
 - Dev: Ubuntu packages are now available (#2936)
+- Dev: Disabled update checker on Flatpak. (#3051)
+- Dev: Add logging for HTTP requests (#2991)
 
 ## 2.3.3
 
