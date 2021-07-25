@@ -400,6 +400,11 @@ std::vector<QShortcut *> HotkeyController::shortcutsForScope(
                 << hotkey->getCategory();
             continue;
         }
+        if (!target->second)
+        {
+            // Widget has chosen to explicitly not handle this action
+            continue;
+        }
         auto createShortcutFromKeySeq = [&](QKeySequence qs) {
             auto s = new QShortcut(qs, parent);
             s->setContext(hotkey->getContext());
