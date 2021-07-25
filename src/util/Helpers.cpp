@@ -68,4 +68,22 @@ QColor getRandomColor(const QString &userId)
     return TWITCH_USERNAME_COLORS[colorIndex];
 }
 
+QString formatUserMention(const QString &userName, bool isFirstWord,
+                          bool mentionUsersWithComma, bool lowercaseUsernames)
+{
+    QString result = userName;
+
+    if (isFirstWord && mentionUsersWithComma)
+    {
+        result += ",";
+    }
+
+    if (lowercaseUsernames)
+    {
+        return result.toLower();
+    }
+
+    return result;
+}
+
 }  // namespace chatterino

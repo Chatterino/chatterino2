@@ -17,6 +17,11 @@
 
 #define PIXMAP_WIDTH 500
 
+#define LINK_CHATTERINO_WIKI "https://wiki.chatterino.com"
+#define LINK_DONATE "https://streamelements.com/fourtf/tip"
+#define LINK_CHATTERINO_FEATURES "https://chatterino.com/#features"
+#define LINK_CHATTERINO_DISCORD "https://discord.gg/7Y5AYhAK4z"
+
 namespace chatterino {
 
 AboutPage::AboutPage()
@@ -76,6 +81,7 @@ AboutPage::AboutPage()
             //            }
         }*/
 
+        // Version
         auto versionInfo = layout.emplace<QGroupBox>("Version");
         {
             auto version = Version::instance();
@@ -96,6 +102,20 @@ AboutPage::AboutPage()
                                                   Qt::LinksAccessibleByMouse);
         }
 
+        // About Chatterino
+        auto aboutChatterino = layout.emplace<QGroupBox>("About Chatterino...");
+        {
+            auto l = aboutChatterino.emplace<QVBoxLayout>();
+
+            // clang-format off
+            l.emplace<QLabel>("Chatterino Wiki can be found <a href=\"" LINK_CHATTERINO_WIKI "\">here</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Support <a href=\"" LINK_DONATE "\">Chatterino</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("All about Chatterino's <a href=\"" LINK_CHATTERINO_FEATURES "\">features</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Join the official Chatterino <a href=\"" LINK_CHATTERINO_DISCORD "\">Discord</a>")->setOpenExternalLinks(true);
+            // clang-format on
+        }
+
+        // Licenses
         auto licenses =
             layout.emplace<QGroupBox>("Open source software used...");
         {
@@ -129,6 +149,7 @@ AboutPage::AboutPage()
                        ":/licenses/lrucache.txt");
         }
 
+        // Attributions
         auto attributions = layout.emplace<QGroupBox>("Attributions...");
         {
             auto l = attributions.emplace<QVBoxLayout>();
