@@ -24,7 +24,8 @@ namespace chatterino {
 
 static const char *pingPayload = "{\"type\":\"PING\"}";
 
-static std::map<QString, QString> sentMessages;
+static std::map<QString, ListenMessage> sentListens;
+static std::map<QString, UnlistenMessage> sentUnlistens;
 
 namespace detail {
 
@@ -62,7 +63,7 @@ namespace detail {
         }
         this->numListens_ += numRequestedListens;
         DebugCount::increase("PubSub topic pending listens",
-                             message["data"]["topics"].Size());
+                             numRequestedListens);
 
         for (const auto &topic : message["data"]["topics"].GetArray())
         {
@@ -70,13 +71,11 @@ namespace detail {
                 Listener{topic.GetString(), false, false, false});
         }
 
-        auto nonce = QString("LISTEN-%1-%2")
-                         .arg(message["data"]["topics"].GetArray().Size())
-                         .arg(generateUuid());
+        auto nonce = generateUuid();
         rj::set(message, "nonce", nonce);
 
         QString payload = rj::stringify(message);
-        sentMessages[nonce] = payload;
+        sentListens[nonce] = ListenMessage{payload, numRequestedListens};
 
         this->send(payload.toUtf8());
 
@@ -108,12 +107,11 @@ namespace detail {
 
         auto message = createUnlistenMessage(topics);
 
-        auto nonce =
-            QString("UNLISTEN-%1-%2").arg(topics.size()).arg(generateUuid());
+        auto nonce = generateUuid();
         rj::set(message, "nonce", nonce);
 
         QString payload = rj::stringify(message);
-        sentMessages[nonce] = payload;
+        sentUnlistens[nonce] = UnlistenMessage{payload, topics.size()};
 
         this->send(payload.toUtf8());
     }
@@ -1078,7 +1076,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
     if (type == "RESPONSE")
     {
-        this->handleListenResponse(msg);
+        this->handleResponse(msg);
     }
     else if (type == "MESSAGE")
     {
@@ -1191,7 +1189,7 @@ PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
     return ctx;
 }
 
-void PubSub::handleListenResponse(const rapidjson::Document &msg)
+void PubSub::handleResponse(const rapidjson::Document &msg)
 {
     QString error;
 
@@ -1201,36 +1199,40 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
     QString nonce;
     rj::getSafe(msg, "nonce", nonce);
 
-    QRegularExpression regexp(R"((LISTEN|UNLISTEN)-(\d+)-.+)");
-    auto match = regexp.match(nonce);
-
     if (!error.isEmpty())
     {
         qCDebug(chatterinoPubsub)
             << QString("Error %1 on nonce %2").arg(error, nonce);
-    }
-    else
-    {
-        qCDebug(chatterinoPubsub) << "Received success nonce" << nonce;
+        return;
     }
 
-    if (match.captured(1) == "LISTEN")
+    qCDebug(chatterinoPubsub) << "RESPONSE" << nonce;
+
+    if (auto it = sentListens.find(nonce); it != sentListens.end())
     {
-        DebugCount::decrease("PubSub topic pending listens",
-                             match.captured(2).toInt());
-        if (error.isEmpty())
-        {
-            DebugCount::increase("PubSub topic listening",
-                                 match.captured(2).toInt());
-        }
+        this->handleListenResponse(it->second);
         return;
     }
-    if (match.captured(1) == "UNLISTEN" && error.isEmpty())
+
+    if (auto it = sentUnlistens.find(nonce); it != sentUnlistens.end())
     {
-        DebugCount::decrease("PubSub topic listening",
-                             match.captured(2).toInt());
+        this->handleUnlistenResponse(it->second);
         return;
     }
+
+    qCDebug(chatterinoPubsub)
+        << "Response on unused" << nonce << "client/topic listener mismatch?";
+}
+
+void PubSub::handleListenResponse(const ListenMessage &msg)
+{
+    DebugCount::decrease("PubSub topic pending listens", msg.numListens);
+    DebugCount::increase("PubSub topic listening", msg.numListens);
+}
+
+void PubSub::handleUnlistenResponse(const UnlistenMessage &msg)
+{
+    DebugCount::decrease("PubSub topic listening", msg.numUnlistens);
 }
 
 void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
