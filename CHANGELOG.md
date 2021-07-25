@@ -8,7 +8,7 @@
 - Minor: Received IRC messages use `time` message tag for timestamp if it's available. (#3021)
 - Minor: Added informative messages for recent-messages API's errors. (#3029)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
-- Bugfix: PubSub didn't properly try to resolve pending listens when the pending listens list was larger than 50. (#3037)
+- Bugfix: Fixed PubSub not properly trying to resolve pending listens when the pending listens list was larger than 50. (#3037)
 - Bugfix: Copy buttons in usercard now show properly in light mode (#3057)
 - Bugfix: Fixed comma appended to username completion when not at the beginning of the message. (#3060)
 - Bugfix: Fixed bug misplacing chat when zooming on Chrome with Chatterino Native Host extension (#1936)
