@@ -48,6 +48,10 @@ public:
         } input;
     } splits;
 
+    struct {
+        QPixmap copy;
+    } buttons;
+
     void normalizeColor(QColor &color);
 
 private:
