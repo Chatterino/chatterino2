@@ -1203,7 +1203,9 @@ void PubSub::handleResponse(const rapidjson::Document &msg)
     QString nonce;
     rj::getSafe(msg, "nonce", nonce);
 
-    if (!error.isEmpty())
+    const bool failed = !error.isEmpty();
+
+    if (failed)
     {
         qCDebug(chatterinoPubsub)
             << QString("Error %1 on nonce %2").arg(error, nonce);
@@ -1211,13 +1213,13 @@ void PubSub::handleResponse(const rapidjson::Document &msg)
 
     if (auto it = sentListens.find(nonce); it != sentListens.end())
     {
-        this->handleListenResponse(it->second, !error.isEmpty());
+        this->handleListenResponse(it->second, failed);
         return;
     }
 
     if (auto it = sentUnlistens.find(nonce); it != sentUnlistens.end())
     {
-        this->handleUnlistenResponse(it->second, !error.isEmpty());
+        this->handleUnlistenResponse(it->second, failed);
         return;
     }
 
