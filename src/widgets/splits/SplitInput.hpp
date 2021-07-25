@@ -28,6 +28,7 @@ public:
     SplitInput(Split *_chatWidget);
 
     void clearSelection();
+    bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
 

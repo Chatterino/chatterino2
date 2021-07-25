@@ -2,6 +2,7 @@
 
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/PubsubHelpers.hpp"
+#include "singletons/Settings.hpp"
 #include "util/Helpers.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -22,7 +23,7 @@ namespace chatterino {
 
 static const char *pingPayload = "{\"type\":\"PING\"}";
 
-static std::map<QString, std::string> sentMessages;
+static std::map<QString, QString> sentMessages;
 
 namespace detail {
 
@@ -71,10 +72,10 @@ namespace detail {
 
         rj::set(message, "nonce", uuid);
 
-        std::string payload = rj::stringify(message);
+        QString payload = rj::stringify(message);
         sentMessages[uuid] = payload;
 
-        this->send(payload.c_str());
+        this->send(payload.toUtf8());
 
         return true;
     }
@@ -108,10 +109,10 @@ namespace detail {
 
         rj::set(message, "nonce", generateUuid());
 
-        std::string payload = rj::stringify(message);
+        QString payload = rj::stringify(message);
         sentMessages[uuid] = payload;
 
-        this->send(payload.c_str());
+        this->send(payload.toUtf8());
     }
 
     void PubSubClient::handlePong()
@@ -333,7 +334,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -398,7 +399,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -444,7 +445,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -484,7 +485,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -524,7 +525,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -556,7 +557,7 @@ PubSub::PubSub()
                 return;
             }
 
-            if (!rj::getSafe(args[0], action.target.name))
+            if (!rj::getSafe(args[0], action.target.login))
             {
                 return;
             }
@@ -588,7 +589,7 @@ PubSub::PubSub()
                     return;
                 }
 
-                if (!rj::getSafe(args[0], action.target.name))
+                if (!rj::getSafe(args[0], action.target.login))
                 {
                     return;
                 }
@@ -658,7 +659,7 @@ PubSub::PubSub()
                     return;
                 }
 
-                if (!rj::getSafe(data, "requester_login", action.source.name))
+                if (!rj::getSafe(data, "requester_login", action.source.login))
                 {
                     return;
                 }
@@ -686,7 +687,7 @@ PubSub::PubSub()
                     return;
                 }
 
-                if (!rj::getSafe(data, "requester_login", action.source.name))
+                if (!rj::getSafe(data, "requester_login", action.source.login))
                 {
                     return;
                 }
@@ -743,7 +744,7 @@ PubSub::PubSub()
                     return;
                 }
 
-                if (!rj::getSafe(data, "requester_login", action.source.name))
+                if (!rj::getSafe(data, "requester_login", action.source.login))
                 {
                     return;
                 }
@@ -802,7 +803,7 @@ PubSub::PubSub()
                     return;
                 }
 
-                if (!rj::getSafe(data, "requester_login", action.source.name))
+                if (!rj::getSafe(data, "requester_login", action.source.login))
                 {
                     return;
                 }
@@ -828,24 +829,22 @@ PubSub::PubSub()
     //        this->signals_.moderation.automodUserMessage.invoke(action);
     //    };
 
-    this->moderationActionHandlers["denied_automod_message"] = [](const auto
-                                                                      &data,
-                                                                  const auto
-                                                                      &roomID) {
-        // This message got denied by a moderator
-        // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
-    };
+    this->moderationActionHandlers["denied_automod_message"] =
+        [](const auto &data, const auto &roomID) {
+            // This message got denied by a moderator
+            // qCDebug(chatterinoPubsub) << rj::stringify(data);
+        };
 
-    this->moderationActionHandlers
-        ["approved_automod_message"] = [](const auto &data,
-                                          const auto &roomID) {
-        // This message got approved by a moderator
-        // qCDebug(chatterinoPubsub) << QString::fromStdString(rj::stringify(data));
-    };
+    this->moderationActionHandlers["approved_automod_message"] =
+        [](const auto &data, const auto &roomID) {
+            // This message got approved by a moderator
+            // qCDebug(chatterinoPubsub) << rj::stringify(data);
+        };
 
     this->websocketClient.set_access_channels(websocketpp::log::alevel::all);
     this->websocketClient.clear_access_channels(
-        websocketpp::log::alevel::frame_payload);
+        websocketpp::log::alevel::frame_payload |
+        websocketpp::log::alevel::frame_header);
 
     this->websocketClient.init_asio();
 
@@ -928,7 +927,7 @@ void PubSub::listenToChannelModerationActions(
     if (userID.isEmpty())
         return;
 
-    auto topic = topicFormat.arg(userID).arg(channelID);
+    auto topic = topicFormat.arg(userID, channelID);
 
     if (this->isListeningToTopic(topic))
     {
@@ -950,7 +949,7 @@ void PubSub::listenToAutomod(const QString &channelID,
     if (userID.isEmpty())
         return;
 
-    auto topic = topicFormat.arg(userID).arg(channelID);
+    auto topic = topicFormat.arg(userID, channelID);
 
     if (this->isListeningToTopic(topic))
     {
@@ -968,7 +967,6 @@ void PubSub::listenToChannelPointRewards(const QString &channelID,
     static const QString topicFormat("community-points-channel-v1.%1");
     assert(!channelID.isEmpty());
     assert(account != nullptr);
-    QString userID = account->getUserId();
 
     auto topic = topicFormat.arg(channelID);
 
@@ -1033,26 +1031,27 @@ bool PubSub::isListeningToTopic(const QString &topic)
 void PubSub::onMessage(websocketpp::connection_hdl hdl,
                        WebsocketMessagePtr websocketMessage)
 {
-    const std::string &payload = websocketMessage->get_payload();
+    const auto &payload =
+        QString::fromStdString(websocketMessage->get_payload());
 
     rapidjson::Document msg;
 
-    rapidjson::ParseResult res = msg.Parse(payload.c_str());
+    rapidjson::ParseResult res = msg.Parse(payload.toUtf8());
 
     if (!res)
     {
         qCDebug(chatterinoPubsub)
-            << "Error parsing message '" << payload.c_str()
-            << "' from PubSub:" << rapidjson::GetParseError_En(res.Code());
+            << QString("Error parsing message '%1' from PubSub: %2")
+                   .arg(payload, rapidjson::GetParseError_En(res.Code()));
         return;
     }
 
     if (!msg.IsObject())
     {
         qCDebug(chatterinoPubsub)
-            << "Error parsing message '" << payload.c_str()
-            << "' from PubSub. Root object is not an "
-               "object";
+            << QString("Error parsing message '%1' from PubSub. Root object is "
+                       "not an object")
+                   .arg(payload);
         return;
     }
 
@@ -1196,7 +1195,7 @@ void PubSub::handleListenResponse(const rapidjson::Document &msg)
 void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 {
     QString topic;
-    qCDebug(chatterinoPubsub) << rj::stringify(outerData).c_str();
+    qCDebug(chatterinoPubsub) << rj::stringify(outerData);
 
     if (!rj::getSafe(outerData, "topic", topic))
     {
@@ -1205,7 +1204,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         return;
     }
 
-    std::string payload;
+    QString payload;
 
     if (!rj::getSafe(outerData, "message", payload))
     {
@@ -1215,19 +1214,19 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
     rapidjson::Document msg;
 
-    rapidjson::ParseResult res = msg.Parse(payload.c_str());
+    rapidjson::ParseResult res = msg.Parse(payload.toUtf8());
 
     if (!res)
     {
         qCDebug(chatterinoPubsub)
-            << "Error parsing message '" << payload.c_str()
-            << "' from PubSub:" << rapidjson::GetParseError_En(res.Code());
+            << QString("Error parsing message '%1' from PubSub: %2")
+                   .arg(payload, rapidjson::GetParseError_En(res.Code()));
         return;
     }
 
     if (topic.startsWith("whispers."))
     {
-        std::string whisperType;
+        QString whisperType;
 
         if (!rj::getSafe(msg, "type", whisperType))
         {
@@ -1249,8 +1248,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         }
         else
         {
-            qCDebug(chatterinoPubsub)
-                << "Invalid whisper type:" << whisperType.c_str();
+            qCDebug(chatterinoPubsub) << "Invalid whisper type:" << whisperType;
             return;
         }
     }
@@ -1260,7 +1258,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         assert(topicParts.length() == 3);
         const auto &data = msg["data"];
 
-        std::string moderationEventType;
+        QString moderationEventType;
 
         if (!rj::getSafe(msg, "type", moderationEventType))
         {
@@ -1269,13 +1267,13 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         }
         if (moderationEventType == "moderation_action")
         {
-            std::string moderationAction;
+            QString moderationAction;
 
             if (!rj::getSafe(data, "moderation_action", moderationAction))
             {
                 qCDebug(chatterinoPubsub)
                     << "Missing moderation action in data:"
-                    << rj::stringify(data).c_str();
+                    << rj::stringify(data);
                 return;
             }
 
@@ -1286,7 +1284,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
             {
                 qCDebug(chatterinoPubsub)
                     << "No handler found for moderation action"
-                    << moderationAction.c_str();
+                    << moderationAction;
                 return;
             }
             // Invoke handler function
@@ -1294,13 +1292,13 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         }
         else if (moderationEventType == "channel_terms_action")
         {
-            std::string channelTermsAction;
+            QString channelTermsAction;
 
             if (!rj::getSafe(data, "type", channelTermsAction))
             {
                 qCDebug(chatterinoPubsub)
                     << "Missing channel terms action in data:"
-                    << rj::stringify(data).c_str();
+                    << rj::stringify(data);
                 return;
             }
 
@@ -1311,7 +1309,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
             {
                 qCDebug(chatterinoPubsub)
                     << "No handler found for channel terms action"
-                    << channelTermsAction.c_str();
+                    << channelTermsAction;
                 return;
             }
             // Invoke handler function
@@ -1320,7 +1318,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
     }
     else if (topic.startsWith("community-points-channel-v1."))
     {
-        std::string pointEventType;
+        QString pointEventType;
         if (!rj::getSafe(msg, "type", pointEventType))
         {
             qCDebug(chatterinoPubsub) << "Bad channel point event data";
@@ -1346,7 +1344,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         else
         {
             qCDebug(chatterinoPubsub)
-                << "Invalid point event type:" << pointEventType.c_str();
+                << "Invalid point event type:" << pointEventType;
         }
     }
     else if (topic.startsWith("automod-queue."))
@@ -1355,7 +1353,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
         assert(topicParts.length() == 3);
         auto &data = msg["data"];
 
-        std::string automodEventType;
+        QString automodEventType;
         if (!rj::getSafe(msg, "type", automodEventType))
         {
             qCDebug(chatterinoPubsub) << "Bad automod event data";
@@ -1367,7 +1365,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
             QString status;
             if (!rj::getSafe(data, "status", status))
             {
-                qDebug() << "Failed to get status";
+                qCDebug(chatterinoPubsub) << "Failed to get status";
                 return;
             }
             if (status == "PENDING")
@@ -1377,20 +1375,22 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                 if (!rj::getSafeObject(data, "content_classification",
                                        classification))
                 {
-                    qDebug() << "Failed to get content_classification";
+                    qCDebug(chatterinoPubsub)
+                        << "Failed to get content_classification";
                     return;
                 }
 
                 QString contentCategory;
                 if (!rj::getSafe(classification, "category", contentCategory))
                 {
-                    qDebug() << "Failed to get content category";
+                    qCDebug(chatterinoPubsub)
+                        << "Failed to get content category";
                     return;
                 }
                 int contentLevel;
                 if (!rj::getSafe(classification, "level", contentLevel))
                 {
-                    qDebug() << "Failed to get content level";
+                    qCDebug(chatterinoPubsub) << "Failed to get content level";
                     return;
                 }
                 action.reason = QString("%1 level %2")
@@ -1400,25 +1400,26 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                 rapidjson::Value messageData;
                 if (!rj::getSafeObject(data, "message", messageData))
                 {
-                    qDebug() << "Failed to get message data";
+                    qCDebug(chatterinoPubsub) << "Failed to get message data";
                     return;
                 }
 
                 rapidjson::Value messageContent;
                 if (!rj::getSafeObject(messageData, "content", messageContent))
                 {
-                    qDebug() << "Failed to get message content";
+                    qCDebug(chatterinoPubsub)
+                        << "Failed to get message content";
                     return;
                 }
                 if (!rj::getSafe(messageData, "id", action.msgID))
                 {
-                    qDebug() << "Failed to get message id";
+                    qCDebug(chatterinoPubsub) << "Failed to get message id";
                     return;
                 }
 
                 if (!rj::getSafe(messageContent, "text", action.message))
                 {
-                    qDebug() << "Failed to get message text";
+                    qCDebug(chatterinoPubsub) << "Failed to get message text";
                     return;
                 }
 
@@ -1428,23 +1429,68 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
                 rapidjson::Value senderData;
                 if (!rj::getSafeObject(messageData, "sender", senderData))
                 {
-                    qDebug() << "Failed to get sender";
+                    qCDebug(chatterinoPubsub) << "Failed to get sender";
                     return;
                 }
-                QString sender_id;
-                if (!rj::getSafe(senderData, "user_id", sender_id))
+                QString senderId;
+                if (!rj::getSafe(senderData, "user_id", senderId))
                 {
-                    qDebug() << "Failed to get sender user id";
+                    qCDebug(chatterinoPubsub) << "Failed to get sender user id";
                     return;
                 }
-                QString sender_login;
-                if (!rj::getSafe(senderData, "login", sender_login))
+                QString senderLogin;
+                if (!rj::getSafe(senderData, "login", senderLogin))
                 {
-                    qDebug() << "Failed to get sender login";
+                    qCDebug(chatterinoPubsub) << "Failed to get sender login";
                     return;
                 }
-                action.target = ActionUser{sender_id, sender_login};
-                qDebug() << action.msgID;
+                QString senderDisplayName = senderLogin;
+                bool hasLocalizedName = false;
+                if (rj::getSafe(senderData, "display_name", senderDisplayName))
+                {
+                    // check for non-ascii display names
+                    if (QString::compare(senderLogin, senderDisplayName,
+                                         Qt::CaseInsensitive) != 0)
+                    {
+                        hasLocalizedName = true;
+                    }
+                }
+                QColor senderColor;
+                QString senderColor_;
+                if (rj::getSafe(senderData, "chat_color", senderColor_))
+                {
+                    senderColor = QColor(senderColor_);
+                }
+                else if (getSettings()->colorizeNicknames)
+                {
+                    // color may be not present if user is a grey-name
+                    senderColor = getRandomColor(senderId);
+                }
+                // handle username style based on prefered setting
+                switch (getSettings()->usernameDisplayMode.getValue())
+                {
+                    case UsernameDisplayMode::Username: {
+                        if (hasLocalizedName)
+                        {
+                            senderDisplayName = senderLogin;
+                        }
+                        break;
+                    }
+                    case UsernameDisplayMode::LocalizedName: {
+                        break;
+                    }
+                    case UsernameDisplayMode::UsernameAndLocalizedName: {
+                        if (hasLocalizedName)
+                        {
+                            senderDisplayName = QString("%1(%2)").arg(
+                                senderLogin, senderDisplayName);
+                        }
+                        break;
+                    }
+                }
+
+                action.target = ActionUser{senderId, senderLogin,
+                                           senderDisplayName, senderColor};
                 this->signals_.moderation.automodMessage.invoke(action);
             }
             // "ALLOWED" and "DENIED" statuses remain unimplemented

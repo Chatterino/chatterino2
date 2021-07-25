@@ -24,7 +24,7 @@ namespace {
                     const rapidjson::Value &unparsedEmoji,
                     QString shortCode = QString())
     {
-        std::array<uint32_t, 7> unicodeBytes;
+        std::array<uint32_t, 9> unicodeBytes;
 
         struct {
             bool apple;
@@ -137,7 +137,7 @@ void Emojis::load()
 
 void Emojis::loadEmojis()
 {
-    // Current version: https://github.com/iamcal/emoji-data/blob/v6.0.0/emoji.json (Emoji version 13 (2020))
+    // Current version: https://github.com/iamcal/emoji-data/blob/v7.0.2/emoji.json (Emoji version 13.1 (2021))
     QFile file(":/emoji.json");
     file.open(QFile::ReadOnly);
     QTextStream s1(&file);

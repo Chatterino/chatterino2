@@ -10,6 +10,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -478,8 +479,7 @@ void SplitInput::updateCompletionPopup()
     auto channel = this->split_->getChannel().get();
     auto tc = dynamic_cast<TwitchChannel *>(channel);
     bool showEmoteCompletion =
-        getSettings()->emoteCompletionWithColon &&
-        (tc || (channel->getType() == Channel::Type::TwitchWhispers));
+        channel->isTwitchChannel() && getSettings()->emoteCompletionWithColon;
     bool showUsernameCompletion =
         tc && getSettings()->showUsernameCompletionMenu;
     if (!showEmoteCompletion && !showUsernameCompletion)
@@ -583,8 +583,10 @@ void SplitInput::insertCompletionText(const QString &input_)
         }
         else if (text[i] == '@')
         {
-            input = "@" + input_ +
-                    (getSettings()->mentionUsersWithComma ? ", " : " ");
+            const auto userMention =
+                formatUserMention(input_, edit.isFirstWord(),
+                                  getSettings()->mentionUsersWithComma);
+            input = "@" + userMention + " ";
             done = true;
         }
 
@@ -608,6 +610,11 @@ void SplitInput::clearSelection()
     c.setPosition(c.position(), QTextCursor::KeepAnchor);
 
     this->ui_.textEdit->setTextCursor(c);
+}
+
+bool SplitInput::isEditFirstWord() const
+{
+    return this->ui_.textEdit->isFirstWord();
 }
 
 QString SplitInput::getInputText() const

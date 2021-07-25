@@ -793,6 +793,43 @@ void Helix::getEmoteSetData(QString emoteSetId,
         .execute();
 }
 
+void Helix::getChannelEmotes(
+    QString broadcasterId,
+    ResultCallback<std::vector<HelixChannelEmote>> successCallback,
+    HelixFailureCallback failureCallback)
+{
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("broadcaster_id", broadcasterId);
+
+    this->makeRequest("chat/emotes", urlQuery)
+        .onSuccess([successCallback,
+                    failureCallback](NetworkResult result) -> Outcome {
+            QJsonObject root = result.parseJson();
+            auto data = root.value("data");
+
+            if (!data.isArray())
+            {
+                failureCallback();
+                return Failure;
+            }
+
+            std::vector<HelixChannelEmote> channelEmotes;
+
+            for (const auto &jsonStream : data.toArray())
+            {
+                channelEmotes.emplace_back(jsonStream.toObject());
+            }
+
+            successCallback(channelEmotes);
+            return Success;
+        })
+        .onError([failureCallback](auto result) {
+            // TODO: make better xd
+            failureCallback();
+        })
+        .execute();
+}
+
 NetworkRequest Helix::makeRequest(QString url, QUrlQuery urlQuery)
 {
     assert(!url.startsWith("/"));

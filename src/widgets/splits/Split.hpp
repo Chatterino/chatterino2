@@ -47,6 +47,7 @@ public:
     pajlada::Signals::NoArgSignal focusLost;
 
     ChannelView &getChannelView();
+    SplitInput &getInput();
 
     IndirectChannel getIndirectChannel();
     ChannelPtr getChannel();
@@ -114,6 +115,19 @@ private:
     void handleModifiers(Qt::KeyboardModifiers modifiers);
     void updateInputPlaceholder();
     virtual void addShortcuts() override;
+
+    /**
+     * @brief Opens twitch channel stream in a browser player (opens a formatted link)
+     */
+    void openChannelInBrowserPlayer(ChannelPtr channel);
+    /**
+     * @brief Opens twitch channel stream in streamlink app (if stream is live and streamlink is installed)
+     */
+    void openChannelInStreamlink(QString channelName);
+    /**
+     * @brief Opens twitch channel chat in a new chatterino tab
+     */
+    void joinChannelInNewTab(ChannelPtr channel);
 
     IndirectChannel channel_;
 

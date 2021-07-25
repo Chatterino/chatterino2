@@ -12,9 +12,9 @@ TwitchEmotes::TwitchEmotes()
 {
 }
 
-QString TwitchEmotes::cleanUpEmoteCode(const EmoteName &dirtyEmoteCode)
+QString TwitchEmotes::cleanUpEmoteCode(const QString &dirtyEmoteCode)
 {
-    auto cleanCode = dirtyEmoteCode.string;
+    auto cleanCode = dirtyEmoteCode;
     cleanCode.detach();
 
     static QMap<QString, QString> emoteNameReplacements{
@@ -27,14 +27,11 @@ QString TwitchEmotes::cleanUpEmoteCode(const EmoteName &dirtyEmoteCode)
         {"R-?\\)", "R)"},           {"B-?\\)", "B)"},
     };
 
-    auto it = emoteNameReplacements.find(dirtyEmoteCode.string);
+    auto it = emoteNameReplacements.find(dirtyEmoteCode);
     if (it != emoteNameReplacements.end())
     {
         cleanCode = it.value();
     }
-
-    cleanCode.replace("&lt;", "<");
-    cleanCode.replace("&gt;", ">");
 
     return cleanCode;
 }
@@ -44,29 +41,7 @@ QString TwitchEmotes::cleanUpEmoteCode(const EmoteName &dirtyEmoteCode)
 EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
                                         const EmoteName &name_)
 {
-    static const QMap<QString, QString> replacements{
-        {"[oO](_|\\.)[oO]", "O_o"}, {"\\&gt\\;\\(", "&gt;("},
-        {"\\&lt\\;3", "&lt;3"},     {"\\:-?(o|O)", ":O"},
-        {"\\:-?(p|P)", ":P"},       {"\\:-?[\\\\/]", ":/"},
-        {"\\:-?[z|Z|\\|]", ":Z"},   {"\\:-?\\(", ":("},
-        {"\\:-?\\)", ":)"},         {"\\:-?D", ":D"},
-        {"\\;-?(p|P)", ";P"},       {"\\;-?\\)", ";)"},
-        {"R-?\\)", "R)"},           {"B-?\\)", "B)"},
-    };
-
-    auto name = name_.string;
-    name.detach();
-
-    // replace < >
-    name.replace("<", "&lt;");
-    name.replace(">", "&gt;");
-
-    // replace regexes
-    auto it = replacements.find(name);
-    if (it != replacements.end())
-    {
-        name = it.value();
-    }
+    auto name = TwitchEmotes::cleanUpEmoteCode(name_.string);
 
     // search in cache or create new emote
     auto cache = this->twitchEmotesCache_.access();
@@ -75,13 +50,13 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
     if (!shared)
     {
         (*cache)[id] = shared = std::make_shared<Emote>(Emote{
-            EmoteName{TwitchEmotes::cleanUpEmoteCode(EmoteName{name})},
+            EmoteName{name},
             ImageSet{
                 Image::fromUrl(getEmoteLink(id, "1.0"), 1),
                 Image::fromUrl(getEmoteLink(id, "2.0"), 0.5),
                 Image::fromUrl(getEmoteLink(id, "3.0"), 0.25),
             },
-            Tooltip{name + "<br>Twitch Emote"},
+            Tooltip{name.toHtmlEscaped() + "<br>Twitch Emote"},
             Url{QString("https://twitchemotes.com/emotes/%1").arg(id.string)}});
     }
 

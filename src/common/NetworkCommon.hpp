@@ -24,6 +24,13 @@ enum class NetworkRequestType {
     Delete,
     Patch,
 };
+const static std::vector<QString> networkRequestTypes{
+    "GET",     //
+    "POST",    //
+    "PUT",     //
+    "DELETE",  //
+    "PATCH",   //
+};
 
 // parseHeaderList takes a list of headers in string form,
 // where each header pair is separated by semicolons (;) and the header name and value is divided by a colon (:)

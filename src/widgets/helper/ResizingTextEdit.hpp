@@ -15,6 +15,7 @@ public:
     QSize sizeHint() const override;
 
     bool hasHeightForWidth() const override;
+    bool isFirstWord() const;
 
     pajlada::Signals::Signal<QKeyEvent *> keyPressed;
     pajlada::Signals::NoArgSignal focused;
