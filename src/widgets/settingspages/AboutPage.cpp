@@ -17,6 +17,11 @@
 
 #define PIXMAP_WIDTH 500
 
+#define chatterinoWiki "https://wiki.chatterino.com/"
+#define donateFourtf "https://streamelements.com/fourtf/tip/"
+#define chatterinoFeatures "https://chatterino.com/#features/"
+#define chatterinoDiscord "https://discord.gg/7Y5AYhAK4z/"
+
 namespace chatterino {
 
 AboutPage::AboutPage()
@@ -97,6 +102,19 @@ AboutPage::AboutPage()
                                                   Qt::LinksAccessibleByMouse);
         }
 
+        // About Chatterino
+        auto aboutChatterino = layout.emplace<QGroupBox>("About Chatterino...");
+        {
+            auto l = aboutChatterino.emplace<QVBoxLayout>();
+
+            // clang-format off
+            l.emplace<QLabel>("Chatterino Wiki can be found <a href=\""chatterinoWiki"\">here</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Support <a href=\""donateFourtf"\">Chatterino</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("All about Chatterino's <a href=\""chatterinoFeatures"\">features</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Join the official Chatterino <a href=\""chatterinoDiscord "\">Discord</a>")->setOpenExternalLinks(true);
+            // clang-format on
+        }
+        
         // Licenses
         auto licenses =
             layout.emplace<QGroupBox>("Open source software used...");
@@ -129,19 +147,6 @@ AboutPage::AboutPage()
             addLicense(form.getElement(), "lrucache",
                        "https://github.com/lamerman/cpp-lru-cache",
                        ":/licenses/lrucache.txt");
-        }
-        
-        // About Chatterino
-        auto aboutChatterino = layout.emplace<QGroupBox>("About Chatterino...");
-        {
-            auto l = aboutChatterino.emplace<QVBoxLayout>();
-
-            // clang-format off
-            l.emplace<QLabel>("Chatterino Wiki can be found <a href=\"https://wiki.chatterino.com\">here</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("Support <a href=\"https://streamelements.com/fourtf/tip\">Chatterino</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("All about Chatterino's <a href=\"https://chatterino.com/#features\">features</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("Join the official Chatterino <a href=\"https://discord.gg/7Y5AYhAK4z\">Discord</a>")->setOpenExternalLinks(true);
-            // clang-format on
         }
         
         // Attributions
