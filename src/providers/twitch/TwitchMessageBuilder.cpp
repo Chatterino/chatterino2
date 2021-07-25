@@ -1253,6 +1253,7 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
 {
     builder->emplace<TimestampElement>();
     QString redeemed = "Redeemed";
+    QStringList textList;
     if (!reward.isUserInputRequired)
     {
         builder
@@ -1261,6 +1262,7 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
                 MessageColor::Text, FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, reward.user.login});
         redeemed = "redeemed";
+        textList.append(reward.user.login);
     }
     builder->emplace<TextElement>(redeemed,
                                   MessageElementFlag::ChannelPointReward);
@@ -1279,6 +1281,10 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     }
 
     builder->message().flags.set(MessageFlag::RedeemedChannelPointReward);
+
+    textList.append({redeemed, reward.title, QString::number(reward.cost)});
+    builder->message().messageText = textList.join(" ");
+    builder->message().searchText = textList.join(" ");
 }
 
 void TwitchMessageBuilder::liveMessage(const QString &channelName,
@@ -1291,9 +1297,9 @@ void TwitchMessageBuilder::liveMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
                                   MessageColor::Text);
-    auto text = channelName + " is live!";
-    builder->message().searchText = text;
+    auto text = QString("%1 is live!").arg(channelName);
     builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
@@ -1308,6 +1314,9 @@ void TwitchMessageBuilder::liveSystemMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is live!", MessageElementFlag::Text,
                                   MessageColor::System);
+    auto text = QString("%1 is live!").arg(channelName);
+    builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
@@ -1322,12 +1331,16 @@ void TwitchMessageBuilder::offlineSystemMessage(const QString &channelName,
         ->setLink({Link::UserInfo, channelName});
     builder->emplace<TextElement>("is now offline.", MessageElementFlag::Text,
                                   MessageColor::System);
+    auto text = QString("%1 is now offline.").arg(channelName);
+    builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
                                                 MessageBuilder *builder,
                                                 bool hostOn)
 {
+    QString text;
     builder->emplace<TimestampElement>();
     builder->message().flags.set(MessageFlag::System);
     builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
@@ -1340,6 +1353,7 @@ void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
                 channelName + ".", MessageElementFlag::Username,
                 MessageColor::System, FontStyle::ChatMediumBold)
             ->setLink({Link::UserInfo, channelName});
+        text = QString("Now hosting %1.").arg(channelName);
     }
     else
     {
@@ -1351,7 +1365,11 @@ void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
         builder->emplace<TextElement>("has gone offline. Exiting host mode.",
                                       MessageElementFlag::Text,
                                       MessageColor::System);
+        text =
+            QString("%1 has gone offline. Exiting host mode.").arg(channelName);
     }
+    builder->message().messageText = text;
+    builder->message().searchText = text;
 }
 
 // irc variant
@@ -1398,17 +1416,19 @@ void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
     builder->message().flags.set(MessageFlag::Timeout);
 
     builder
-        ->emplace<TextElement>(action.source.name, MessageElementFlag::Username,
+        ->emplace<TextElement>(action.source.login,
+                               MessageElementFlag::Username,
                                MessageColor::System, FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, action.source.name});
+        ->setLink({Link::UserInfo, action.source.login});
     // TODO(mm2pl): If or when jumping to a single message gets implemented a link,
     // add a link to the originalMessage
     builder->emplace<TextElement>(
         "deleted message from", MessageElementFlag::Text, MessageColor::System);
     builder
-        ->emplace<TextElement>(action.target.name, MessageElementFlag::Username,
+        ->emplace<TextElement>(action.target.login,
+                               MessageElementFlag::Username,
                                MessageColor::System, FontStyle::ChatMediumBold)
-        ->setLink({Link::UserInfo, action.target.name});
+        ->setLink({Link::UserInfo, action.target.login});
     builder->emplace<TextElement>("saying:", MessageElementFlag::Text,
                                   MessageColor::System);
     if (action.messageText.length() > 50)
