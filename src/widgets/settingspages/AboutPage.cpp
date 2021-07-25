@@ -108,10 +108,10 @@ AboutPage::AboutPage()
             auto l = aboutChatterino.emplace<QVBoxLayout>();
 
             // clang-format off
-            l.emplace<QLabel>("Chatterino Wiki can be found <a href=\""chatterinoWiki"\">here</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("Support <a href=\""donateFourtf"\">Chatterino</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("All about Chatterino's <a href=\""chatterinoFeatures"\">features</a>")->setOpenExternalLinks(true);
-            l.emplace<QLabel>("Join the official Chatterino <a href=\""chatterinoDiscord "\">Discord</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Chatterino Wiki can be found <a href=\"" chatterinoWiki "\">here</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Support <a href=\"" donateFourtf "\">Chatterino</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("All about Chatterino's <a href=\"" chatterinoFeatures "\">features</a>")->setOpenExternalLinks(true);
+            l.emplace<QLabel>("Join the official Chatterino <a href=\"" chatterinoDiscord "\">Discord</a>")->setOpenExternalLinks(true);
             // clang-format on
         }
         
