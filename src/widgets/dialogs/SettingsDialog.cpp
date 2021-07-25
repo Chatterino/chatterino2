@@ -61,7 +61,13 @@ void SettingsDialog::addShortcuts()
                  this->ui_.search->setFocus();
                  this->ui_.search->selectAll();
                  return "";
-             }}},
+             }},
+            {"delete", nullptr},
+            {"accept", nullptr},
+            {"reject", nullptr},
+            {"scrollPage", nullptr},
+            {"openTab", nullptr},
+        },
         this);
 }
 
