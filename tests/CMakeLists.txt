@@ -10,6 +10,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ExponentialBackoff.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchAccount.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
     )
 
 add_executable(${PROJECT_NAME} ${test_SOURCES})
