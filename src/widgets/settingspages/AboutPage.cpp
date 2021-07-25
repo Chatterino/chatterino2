@@ -114,7 +114,7 @@ AboutPage::AboutPage()
             l.emplace<QLabel>("Join the official Chatterino <a href=\"" LINK_CHATTERINO_DISCORD "\">Discord</a>")->setOpenExternalLinks(true);
             // clang-format on
         }
-        
+
         // Licenses
         auto licenses =
             layout.emplace<QGroupBox>("Open source software used...");
@@ -148,7 +148,7 @@ AboutPage::AboutPage()
                        "https://github.com/lamerman/cpp-lru-cache",
                        ":/licenses/lrucache.txt");
         }
-        
+
         // Attributions
         auto attributions = layout.emplace<QGroupBox>("Attributions...");
         {
