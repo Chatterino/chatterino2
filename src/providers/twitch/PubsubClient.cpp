@@ -24,7 +24,8 @@ namespace chatterino {
 
 static const char *pingPayload = "{\"type\":\"PING\"}";
 
-static std::map<QString, QString> sentMessages;
+static std::map<QString, RequestMessage> sentListens;
+static std::map<QString, RequestMessage> sentUnlistens;
 
 namespace detail {
 
@@ -60,9 +61,9 @@ namespace detail {
             // This PubSubClient is already at its peak listens
             return false;
         }
-        DebugCount::increase("PubSub topic pending listens");
-
         this->numListens_ += numRequestedListens;
+        DebugCount::increase("PubSub topic pending listens",
+                             numRequestedListens);
 
         for (const auto &topic : message["data"]["topics"].GetArray())
         {
@@ -70,12 +71,11 @@ namespace detail {
                 Listener{topic.GetString(), false, false, false});
         }
 
-        auto uuid = generateUuid();
-
-        rj::set(message, "nonce", uuid);
+        auto nonce = generateUuid();
+        rj::set(message, "nonce", nonce);
 
         QString payload = rj::stringify(message);
-        sentMessages[uuid] = payload;
+        sentListens[nonce] = RequestMessage{payload, numRequestedListens};
 
         this->send(payload.toUtf8());
 
@@ -105,14 +105,19 @@ namespace detail {
             return;
         }
 
+        int numRequestedUnlistens = topics.size();
+
+        this->numListens_ -= numRequestedUnlistens;
+        DebugCount::increase("PubSub topic pending unlistens",
+                             numRequestedUnlistens);
+
         auto message = createUnlistenMessage(topics);
 
-        auto uuid = generateUuid();
-
-        rj::set(message, "nonce", generateUuid());
+        auto nonce = generateUuid();
+        rj::set(message, "nonce", nonce);
 
         QString payload = rj::stringify(message);
-        sentMessages[uuid] = payload;
+        sentUnlistens[nonce] = RequestMessage{payload, numRequestedUnlistens};
 
         this->send(payload.toUtf8());
     }
@@ -1077,7 +1082,7 @@ void PubSub::onMessage(websocketpp::connection_hdl hdl,
 
     if (type == "RESPONSE")
     {
-        this->handleListenResponse(msg);
+        this->handleResponse(msg);
     }
     else if (type == "MESSAGE")
     {
@@ -1190,27 +1195,63 @@ PubSub::WebsocketContextPtr PubSub::onTLSInit(websocketpp::connection_hdl hdl)
     return ctx;
 }
 
-void PubSub::handleListenResponse(const rapidjson::Document &msg)
+void PubSub::handleResponse(const rapidjson::Document &msg)
 {
     QString error;
 
-    if (rj::getSafe(msg, "error", error))
-    {
-        QString nonce;
-        rj::getSafe(msg, "nonce", nonce);
-
-        if (error.isEmpty())
-        {
-            DebugCount::decrease("PubSub topic pending listens");
-            qCDebug(chatterinoPubsub)
-                << "Successfully listened to nonce" << nonce;
-            // Nothing went wrong
-            return;
-        }
-
-        qCDebug(chatterinoPubsub)
-            << "PubSub error:" << error << "on nonce" << nonce;
+    if (!rj::getSafe(msg, "error", error))
         return;
+
+    QString nonce;
+    rj::getSafe(msg, "nonce", nonce);
+
+    const bool failed = !error.isEmpty();
+
+    if (failed)
+    {
+        qCDebug(chatterinoPubsub)
+            << QString("Error %1 on nonce %2").arg(error, nonce);
+    }
+
+    if (auto it = sentListens.find(nonce); it != sentListens.end())
+    {
+        this->handleListenResponse(it->second, failed);
+        return;
+    }
+
+    if (auto it = sentUnlistens.find(nonce); it != sentUnlistens.end())
+    {
+        this->handleUnlistenResponse(it->second, failed);
+        return;
+    }
+
+    qCDebug(chatterinoPubsub)
+        << "Response on unused" << nonce << "client/topic listener mismatch?";
+}
+
+void PubSub::handleListenResponse(const RequestMessage &msg, bool failed)
+{
+    DebugCount::decrease("PubSub topic pending listens", msg.topicCount);
+    if (failed)
+    {
+        DebugCount::increase("PubSub topic failed listens", msg.topicCount);
+    }
+    else
+    {
+        DebugCount::increase("PubSub topic listening", msg.topicCount);
+    }
+}
+
+void PubSub::handleUnlistenResponse(const RequestMessage &msg, bool failed)
+{
+    DebugCount::decrease("PubSub topic pending unlistens", msg.topicCount);
+    if (failed)
+    {
+        DebugCount::increase("PubSub topic failed unlistens", msg.topicCount);
+    }
+    else
+    {
+        DebugCount::decrease("PubSub topic listening", msg.topicCount);
     }
 }
 
