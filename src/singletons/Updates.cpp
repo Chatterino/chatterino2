@@ -240,6 +240,12 @@ void Updates::checkForUpdates()
         return;
     }
 
+    // Disable updates on Flatpak
+    if (QFileInfo::exists("/.flatpak-info"))
+    {
+        return;
+    }
+
     // Disable updates if on nightly
     if (Modes::instance().isNightly)
     {

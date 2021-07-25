@@ -10,6 +10,7 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
+#include "util/Helpers.hpp"
 #include "util/QStringHash.hpp"
 
 #include <QtAlgorithms>
@@ -156,9 +157,6 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     // Usernames
-    QString usernamePostfix =
-        isFirstWord && getSettings()->mentionUsersWithComma ? "," : QString();
-
     if (prefix.startsWith("@"))
     {
         QString usernamePrefix = prefix;
@@ -168,8 +166,10 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
         for (const auto &name : chatters)
         {
-            addString("@" + name + usernamePostfix,
-                      TaggedString::Type::Username);
+            addString(
+                "@" + formatUserMention(name, isFirstWord,
+                                        getSettings()->mentionUsersWithComma),
+                TaggedString::Type::Username);
         }
     }
     else if (!getSettings()->userCompletionOnlyWithAt)
@@ -178,7 +178,9 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
 
         for (const auto &name : chatters)
         {
-            addString(name + usernamePostfix, TaggedString::Type::Username);
+            addString(formatUserMention(name, isFirstWord,
+                                        getSettings()->mentionUsersWithComma),
+                      TaggedString::Type::Username);
         }
     }
 

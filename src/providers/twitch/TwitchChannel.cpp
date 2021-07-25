@@ -786,19 +786,25 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    auto baseURL = Env::get().recentMessagesApiUrl.arg(this->getName());
+    QUrl url(Env::get().recentMessagesApiUrl.arg(this->getName()));
+    QUrlQuery urlQuery(url);
+    if (!urlQuery.hasQueryItem("limit"))
+    {
+        urlQuery.addQueryItem(
+            "limit", QString::number(getSettings()->twitchMessageHistoryLimit));
+    }
+    url.setQuery(urlQuery);
 
-    auto url = QString("%1?limit=%2")
-                   .arg(baseURL)
-                   .arg(getSettings()->twitchMessageHistoryLimit);
+    auto weak = weakOf<Channel>(this);
 
     NetworkRequest(url)
-        .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
+        .onSuccess([this, weak](NetworkResult result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
                 return Failure;
 
-            auto messages = parseRecentMessages(result.parseJson(), shared);
+            auto root = result.parseJson();
+            auto messages = parseRecentMessages(root, shared);
 
             auto &handler = IrcMessageHandler::instance();
 
@@ -832,12 +838,37 @@ void TwitchChannel::loadRecentMessages()
                 }
             }
 
-            postToThread(
-                [shared, messages = std::move(allBuiltMessages)]() mutable {
-                    shared->addMessagesAtStart(messages);
-                });
+            postToThread([this, shared, root,
+                          messages = std::move(allBuiltMessages)]() mutable {
+                shared->addMessagesAtStart(messages);
+
+                // Notify user about a possible gap in logs if it returned some messages
+                // but isn't currently joined to a channel
+                if (QString errorCode = root.value("error_code").toString();
+                    !errorCode.isEmpty())
+                {
+                    qCDebug(chatterinoTwitch)
+                        << QString("rm error_code=%1, channel=%2")
+                               .arg(errorCode, this->getName());
+                    if (errorCode == "channel_not_joined" && !messages.empty())
+                    {
+                        shared->addMessage(makeSystemMessage(
+                            "Message history service recovering, there may be "
+                            "gaps in the message history."));
+                    }
+                }
+            });
 
             return Success;
+        })
+        .onError([weak](NetworkResult result) {
+            auto shared = weak.lock();
+            if (!shared)
+                return;
+
+            shared->addMessage(makeSystemMessage(
+                QString("Message history service unavailable (Error %1)")
+                    .arg(result.status())));
         })
         .execute();
 }
