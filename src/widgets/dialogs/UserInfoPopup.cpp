@@ -43,9 +43,7 @@ namespace {
     {
         auto label = box.emplace<Label>();
         auto button = box.emplace<Button>();
-        button->setPixmap(getApp()->themes->isLightTheme()
-                              ? getResources().buttons.copyDark
-                              : getResources().buttons.copyLight);
+        button->setPixmap(getApp()->themes->buttons.copy);
         button->setScaleIndependantSize(18, 18);
         button->setDim(Button::Dim::Lots);
         QObject::connect(

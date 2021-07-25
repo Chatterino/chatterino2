@@ -1,11 +1,14 @@
-#define LOOKUP_COLOR_COUNT 360
 
 #include "singletons/Theme.hpp"
+
 #include "Application.hpp"
+#include "singletons/Resources.hpp"
 
 #include <QColor>
 
 #include <cmath>
+
+#define LOOKUP_COLOR_COUNT 360
 
 namespace chatterino {
 
@@ -80,6 +83,16 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
+
+    // Copy button
+    if (this->isLightTheme())
+    {
+        this->buttons.copy = getResources().buttons.copyDark;
+    }
+    else
+    {
+        this->buttons.copy = getResources().buttons.copyLight;
+    }
 }
 
 void Theme::normalizeColor(QColor &color)
