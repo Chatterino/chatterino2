@@ -54,7 +54,7 @@ struct ListenMessage {
 
 struct UnlistenMessage {
     QString payload;
-    std::size_t numUnlistens;
+    int numUnlistens;
 };
 
 namespace detail {

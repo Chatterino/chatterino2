@@ -105,13 +105,17 @@ namespace detail {
             return;
         }
 
+        this->numListens_ -= topics.size();
+        DebugCount::increase("PubSub topic pending unlistens", topics.size());
+
         auto message = createUnlistenMessage(topics);
 
         auto nonce = generateUuid();
         rj::set(message, "nonce", nonce);
 
         QString payload = rj::stringify(message);
-        sentUnlistens[nonce] = UnlistenMessage{payload, topics.size()};
+        int size = topics.size();
+        sentUnlistens[nonce] = UnlistenMessage{payload, size};
 
         this->send(payload.toUtf8());
     }
@@ -1232,6 +1236,7 @@ void PubSub::handleListenResponse(const ListenMessage &msg)
 
 void PubSub::handleUnlistenResponse(const UnlistenMessage &msg)
 {
+    DebugCount::decrease("PubSub topic pending unlistens", msg.numUnlistens);
     DebugCount::decrease("PubSub topic listening", msg.numUnlistens);
 }
 
