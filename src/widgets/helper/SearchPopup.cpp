@@ -72,7 +72,13 @@ void SearchPopup::addShortcuts()
                  this->searchInput_->setFocus();
                  this->searchInput_->selectAll();
                  return "";
-             }}},
+             }},
+
+            {"reject", nullptr},
+            {"accept", nullptr},
+            {"openTab", nullptr},
+            {"scrollPage", nullptr},
+        },
         this);
 }
 

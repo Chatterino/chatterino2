@@ -167,6 +167,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                  }
                  return "";
              }},
+
+            // these actions make no sense in the context of a usercard, so they aren't implemented
+            {"reject", nullptr},
+            {"accept", nullptr},
+            {"openTab", nullptr},
+            {"search", nullptr},
         };
 
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(

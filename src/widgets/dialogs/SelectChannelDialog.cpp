@@ -249,6 +249,11 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
              this->close();
              return "";
          }},
+
+        // these make no sense, so they aren't implemented
+        {"scrollPage", nullptr},
+        {"search", nullptr},
+        {"delete", nullptr},
     };
     // Shortcuts
 
@@ -301,6 +306,10 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                  }
                  return "";
              }});
+    }
+    else
+    {
+        actions.emplace("openTab", nullptr);
     }
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::PopupWindow, actions, this);

@@ -251,6 +251,10 @@ void EmotePopup::addShortcuts()
                  }
                  return "";
              }},
+
+            {"reject", nullptr},
+            {"accept", nullptr},
+            {"search", nullptr},
         },
         this);
 }
