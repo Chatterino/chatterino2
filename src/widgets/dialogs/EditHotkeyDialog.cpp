@@ -143,8 +143,9 @@ void EditHotkeyDialog::afterEdit()
         std::make_shared<Hotkey>(*scope, this->ui_->keyComboEdit->keySequence(),
                                  action, arguments, nameText);
     auto keyComboWasEdited =
+        this->data() &&
         this->ui_->keyComboEdit->keySequence() != this->data()->keySequence();
-    auto nameWasEdited = nameText != this->data()->name();
+    auto nameWasEdited = this->data() && nameText != this->data()->name();
 
     if (isEditing && (keyComboWasEdited || nameWasEdited) &&
         getApp()->hotkeys->isDuplicate(hotkey, this->data()->name()))
