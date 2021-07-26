@@ -73,6 +73,11 @@ void SearchPopup::addShortcuts()
                  this->searchInput_->selectAll();
                  return "";
              }},
+            {"delete",
+             [this](std::vector<QString>) -> QString {
+                 this->close();
+                 return "";
+             }},
 
             {"reject", nullptr},
             {"accept", nullptr},
