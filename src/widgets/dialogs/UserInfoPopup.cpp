@@ -640,7 +640,6 @@ void UserInfoPopup::updateUserData()
             if (result != FollowResult_Failed)
             {
                 this->ui_.follow->setChecked(result == FollowResult_Following);
-                // this->ui_.follow->setEnabled(true);
             }
         });
 
