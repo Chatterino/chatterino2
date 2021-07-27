@@ -372,16 +372,6 @@ public:
     void getGameById(QString gameId, ResultCallback<HelixGame> successCallback,
                      HelixFailureCallback failureCallback);
 
-    // https://dev.twitch.tv/docs/api/reference#create-user-follows
-    void followUser(QString userId, QString targetId,
-                    std::function<void()> successCallback,
-                    HelixFailureCallback failureCallback);
-
-    // https://dev.twitch.tv/docs/api/reference#delete-user-follows
-    void unfollowUser(QString userId, QString targetlId,
-                      std::function<void()> successCallback,
-                      HelixFailureCallback failureCallback);
-
     // https://dev.twitch.tv/docs/api/reference#create-clip
     void createClip(QString channelId,
                     ResultCallback<HelixClip> successCallback,
