@@ -617,16 +617,10 @@ void Split::explainSplitting()
 
 void Split::popup()
 {
-    auto app = getApp();
-    Window &window = app->windows->createWindow(WindowType::Popup);
-
-    Split *split = new Split(static_cast<SplitContainer *>(
-        window.getNotebook().getOrAddSelectedPage()));
-
-    split->setChannel(this->getIndirectChannel());
-    window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
-
-    window.show();
+    if (auto container = dynamic_cast<SplitContainer *>(this->parent()))
+    {
+        container->popup(true);
+    }
 }
 
 void Split::clear()
