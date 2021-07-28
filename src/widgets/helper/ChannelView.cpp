@@ -529,7 +529,7 @@ QString ChannelView::getSelectedText()
         layout->addSelectionText(result, from, to);
     }
 
-    return result;
+    return result.trimmed();
 }
 
 bool ChannelView::hasSelection()
@@ -1912,7 +1912,7 @@ void ChannelView::addContextMenuItems(
     if (!this->selection_.isEmpty())
     {
         menu->addAction("Copy selection", [this] {
-            crossPlatformCopy(this->getSelectedText().trimmed());
+            crossPlatformCopy(this->getSelectedText());
         });
     }
 
