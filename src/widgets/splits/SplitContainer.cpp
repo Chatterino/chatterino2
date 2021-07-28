@@ -9,6 +9,7 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
@@ -759,6 +760,46 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
     this->applyFromDescriptorRecursively(rootNode, &this->baseNode_);
     this->disableLayouting_ = false;
     this->layout();
+}
+
+void SplitContainer::popup(bool onlySelectedSplit)
+{
+    if (this->getSplitCount() == 0)
+    {
+        return;
+    }
+
+    auto splits = this->getSplits();
+    auto selectedSplit = this->getSelectedSplit();
+    if (onlySelectedSplit)
+    {
+        splits = {selectedSplit};
+    }
+
+    auto app = getApp();
+    Window &window = app->windows->createWindow(WindowType::Popup);
+    auto popupContainer = window.getNotebook().getOrAddSelectedPage();
+    if (this->getTab()->hasCustomTitle() && !onlySelectedSplit)
+    {
+        popupContainer->getTab()->setCustomTitle(
+            this->getTab()->getCustomTitle());
+    }
+
+    Split *selectedPopupSplit;
+    for (auto split : splits)
+    {
+        Split *popupSplit = new Split(popupContainer);
+        popupSplit->setChannel(split->getIndirectChannel());
+        popupContainer->appendSplit(popupSplit);
+
+        if (split == selectedSplit)
+        {
+            selectedPopupSplit = popupSplit;
+        }
+    }
+
+    popupContainer->setSelected(selectedPopupSplit);
+    window.show();
 }
 
 void SplitContainer::applyFromDescriptorRecursively(
