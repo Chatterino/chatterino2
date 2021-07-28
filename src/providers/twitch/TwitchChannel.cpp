@@ -375,7 +375,16 @@ void TwitchChannel::sendMessage(const QString &message)
         {
             if (parsedMessage == this->lastSentMessage_)
             {
-                parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
+                auto spaceIndex = parsedMessage.indexOf(' ');
+                if (spaceIndex == -1)
+                {
+                    parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
+                }
+                else
+                {
+                    // replace only first space with a double space
+                    parsedMessage.replace(spaceIndex, 1, "  ");
+                }
             }
         }
     }
