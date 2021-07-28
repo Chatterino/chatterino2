@@ -1912,7 +1912,7 @@ void ChannelView::addContextMenuItems(
     if (!this->selection_.isEmpty())
     {
         menu->addAction("Copy selection", [this] {
-            crossPlatformCopy(this->getSelectedText());
+            crossPlatformCopy(this->getSelectedText().trimmed());
         });
     }
 
@@ -1921,14 +1921,14 @@ void ChannelView::addContextMenuItems(
         layout->addSelectionText(copyString, 0, INT_MAX,
                                  CopyMode::OnlyTextAndEmotes);
 
-        crossPlatformCopy(copyString);
+        crossPlatformCopy(copyString.trimmed());
     });
 
     menu->addAction("Copy full message", [layout] {
         QString copyString;
         layout->addSelectionText(copyString);
 
-        crossPlatformCopy(copyString);
+        crossPlatformCopy(copyString.trimmed());
     });
 
     // If is a link to a twitch user/stream
