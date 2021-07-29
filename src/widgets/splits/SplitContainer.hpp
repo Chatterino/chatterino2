@@ -202,7 +202,7 @@ public:
 
     void applyFromDescriptor(const NodeDescriptor &rootNode);
 
-    void popup(bool onlySelectedSplit = false);
+    void popup(Split *singleSplit = nullptr);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

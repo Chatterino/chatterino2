@@ -762,7 +762,7 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
     this->layout();
 }
 
-void SplitContainer::popup(bool onlySelectedSplit)
+void SplitContainer::popup(Split *singleSplit)
 {
     if (this->getSplitCount() == 0)
     {
@@ -771,15 +771,15 @@ void SplitContainer::popup(bool onlySelectedSplit)
 
     auto splits = this->getSplits();
     auto selectedSplit = this->getSelectedSplit();
-    if (onlySelectedSplit)
+    if (singleSplit)
     {
-        splits = {selectedSplit};
+        splits = {singleSplit};
     }
 
     auto app = getApp();
     Window &window = app->windows->createWindow(WindowType::Popup);
     auto popupContainer = window.getNotebook().getOrAddSelectedPage();
-    if (this->getTab()->hasCustomTitle() && !onlySelectedSplit)
+    if (this->getTab()->hasCustomTitle() && !singleSplit)
     {
         popupContainer->getTab()->setCustomTitle(
             this->getTab()->getCustomTitle());

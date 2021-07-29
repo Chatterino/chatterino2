@@ -619,7 +619,7 @@ void Split::popup()
 {
     if (auto container = dynamic_cast<SplitContainer *>(this->parent()))
     {
-        container->popup(true);
+        container->popup(this);
     }
 }
 

@@ -328,18 +328,21 @@ void Window::addShortcuts()
     });
 
     createWindowShortcut(this, "CTRL+N", [this] {
-        if (auto container = dynamic_cast<SplitContainer *>(
+        if (auto page = dynamic_cast<SplitContainer *>(
                 this->notebook_->getSelectedPage()))
         {
-            container->popup(true);
+            if (auto split = page->getSelectedSplit())
+            {
+                page->popup(split);
+            }
         }
     });
 
     createWindowShortcut(this, "CTRL+SHIFT+N", [this] {
-        if (auto container = dynamic_cast<SplitContainer *>(
+        if (auto page = dynamic_cast<SplitContainer *>(
                 this->notebook_->getSelectedPage()))
         {
-            container->popup();
+            page->popup();
         }
     });
 
