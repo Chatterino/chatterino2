@@ -40,8 +40,7 @@ namespace {
         if (iterator == tags.end())
             return QStringList{};
 
-        return iterator.value().toString().split(
-            ',', QString::SplitBehavior::SkipEmptyParts);
+        return iterator.value().toString().split(',', Qt::SkipEmptyParts);
     }
 
     std::vector<Badge> parseBadges(const QVariantMap &tags)
