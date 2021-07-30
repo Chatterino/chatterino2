@@ -444,7 +444,7 @@ bool Image::operator==(const Image &other) const
         return true;
     if (!this->url_.string.isEmpty() && this->url_ == other.url_)
         return true;
-    if (this->frames_->first() == other.frames_->first())
+    if (this->frames_->first()->toImage() == other.frames_->first()->toImage())
         return true;
 
     return false;
