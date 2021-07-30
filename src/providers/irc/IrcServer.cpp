@@ -85,7 +85,8 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
 
     QObject::connect(connection, &Communi::IrcConnection::nickNameRequired,
                      this, [](const QString &reserved, QString *result) {
-                         *result = reserved + (std::rand() % 100);
+                         *result =
+                             reserved + QString::number(std::rand() % 100);
                      });
 
     QObject::connect(connection, &Communi::IrcConnection::noticeMessageReceived,
