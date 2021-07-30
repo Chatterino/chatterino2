@@ -81,3 +81,11 @@ _`gstreamer-plugins-good` package is retired in Fedora 31, see: [rhbz#1735324](h
 ### Using CMake
 
 1. `cmake .. && make`
+
+
+## chromebook using Debian 10
+1. On your Chromebook, at the bottom right, select the time.
+2. Select Settings  and then Advanced and then Developers.
+3. Next to "Linux development environment," select Turn On.
+4. Follow the on-screen instructions.
+5. follow the ubuntu instructions. https://github.com/Chatterino/chatterino2/blob/master/BUILDING_ON_LINUX.md#ubuntu-1804
