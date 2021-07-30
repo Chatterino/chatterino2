@@ -65,7 +65,7 @@ public:
 
 protected:
     virtual bool nativeEvent(const QByteArray &eventType, void *message,
-                             long *result) override;
+                             qintptr *result) override;
     virtual void scaleChangedEvent(float) override;
 
     virtual void paintEvent(QPaintEvent *) override;
@@ -100,10 +100,10 @@ private:
 
     bool handleDPICHANGED(MSG *msg);
     bool handleSHOWWINDOW(MSG *msg);
-    bool handleNCCALCSIZE(MSG *msg, long *result);
+    bool handleNCCALCSIZE(MSG *msg, qintptr *result);
     bool handleSIZE(MSG *msg);
     bool handleMOVE(MSG *msg);
-    bool handleNCHITTEST(MSG *msg, long *result);
+    bool handleNCHITTEST(MSG *msg, qintptr *result);
 
     bool enableCustomFrame_;
     ActionOnFocusLoss actionOnFocusLoss_ = Nothing;
