@@ -1232,7 +1232,7 @@ void ChannelView::wheelEvent(QWheelEvent *event)
     }
 }
 
-void ChannelView::enterEvent(QEvent *)
+void ChannelView::enterEvent(QEnterEvent *)
 {
 }
 

@@ -115,7 +115,7 @@ protected:
     void paintEvent(QPaintEvent *) override;
     void wheelEvent(QWheelEvent *event) override;
 
-    void enterEvent(QEvent *) override;
+    void enterEvent(QEnterEvent *) override;
     void leaveEvent(QEvent *) override;
 
     void mouseMoveEvent(QMouseEvent *event) override;
