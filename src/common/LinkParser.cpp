@@ -5,7 +5,7 @@
 #include <QRegularExpression>
 #include <QSet>
 #include <QString>
-#include <QStringRef>
+#include <QStringView>
 #include <QTextStream>
 
 namespace chatterino {
@@ -16,7 +16,7 @@ namespace {
             QFile file(":/tlds.txt");
             file.open(QFile::ReadOnly);
             QTextStream stream(&file);
-            stream.setCodec("UTF-8");
+            // stream.setEncoding(QStringConverter::Encoding::Utf8);
             int safetyMax = 20000;
 
             QSet<QString> set;
@@ -35,7 +35,7 @@ namespace {
         return tlds;
     }
 
-    bool isValidHostname(QStringRef &host)
+    bool isValidHostname(QStringView &host)
     {
         int index = host.lastIndexOf('.');
 
@@ -43,7 +43,7 @@ namespace {
                tlds().contains(host.mid(index + 1).toString().toLower());
     }
 
-    bool isValidIpv4(QStringRef &host)
+    bool isValidIpv4(QStringView &host)
     {
         static auto exp = QRegularExpression("^\\d{1,3}(?:\\.\\d{1,3}){3}$");
 
@@ -51,7 +51,7 @@ namespace {
     }
 
 #ifdef C_MATCH_IPV6_LINK
-    bool isValidIpv6(QStringRef &host)
+    bool isValidIpv6(QStringView &host)
     {
         static auto exp = QRegularExpression("^\\[[a-fA-F0-9:%]+\\]$");
 
@@ -66,17 +66,17 @@ LinkParser::LinkParser(const QString &unparsedString)
 
     // This is not implemented with a regex to increase performance.
     // We keep removing parts of the url until there's either nothing left or we fail.
-    QStringRef l(&unparsedString);
+    QStringView l(unparsedString);
 
     bool hasHttp = false;
 
     // Protocol `https?://`
-    if (l.startsWith("https://", Qt::CaseInsensitive))
+    if (l.startsWith(*"https://", Qt::CaseInsensitive))
     {
         hasHttp = true;
         l = l.mid(8);
     }
-    else if (l.startsWith("http://", Qt::CaseInsensitive))
+    else if (l.startsWith(*"http://", Qt::CaseInsensitive))
     {
         hasHttp = true;
         l = l.mid(7);
@@ -86,7 +86,7 @@ LinkParser::LinkParser(const QString &unparsedString)
     // Not supported for security reasons (misleading links)
 
     // Host `a.b.c.com`
-    QStringRef host = l;
+    QStringView host = l;
     bool lastWasDot = true;
     bool inIpv6 = false;
 
