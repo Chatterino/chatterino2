@@ -6,7 +6,7 @@ MessageFlagsPredicate::MessageFlagsPredicate(const QString &flags)
     : flags_()
 {
     // Check if any comma-seperated values were passed and transform those
-    for (const auto &flag : flags.split(',', QString::SkipEmptyParts))
+    for (const auto &flag : flags.split(',', Qt::SkipEmptyParts))
     {
         if (flag == "deleted" || flag == "disabled")
         {

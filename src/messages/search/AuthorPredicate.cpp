@@ -8,7 +8,7 @@ AuthorPredicate::AuthorPredicate(const QStringList &authors)
     // Check if any comma-seperated values were passed and transform those
     for (const auto &entry : authors)
     {
-        for (const auto &author : entry.split(',', QString::SkipEmptyParts))
+        for (const auto &author : entry.split(',', Qt::SkipEmptyParts))
         {
             this->authors_ << author;
         }

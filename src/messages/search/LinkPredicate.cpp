@@ -9,8 +9,7 @@ LinkPredicate::LinkPredicate()
 
 bool LinkPredicate::appliesTo(const Message &message)
 {
-    for (const auto &word :
-         message.messageText.split(' ', QString::SkipEmptyParts))
+    for (const auto &word : message.messageText.split(' ', Qt::SkipEmptyParts))
     {
         if (LinkParser(word).hasMatch())
             return true;

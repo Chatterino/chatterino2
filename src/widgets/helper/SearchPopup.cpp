@@ -167,7 +167,7 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     static QRegularExpression predicateRegex(R"(^(\w+):([\w,]+)$)");
 
     std::vector<std::unique_ptr<MessagePredicate>> predicates;
-    auto words = input.split(' ', QString::SkipEmptyParts);
+    auto words = input.split(' ', Qt::SkipEmptyParts);
     QStringList authors;
     QStringList channels;
 
