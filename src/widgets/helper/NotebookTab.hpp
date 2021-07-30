@@ -62,7 +62,7 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
-    virtual void enterEvent(QEvent *) override;
+    virtual void enterEvent(QEnterEvent *) override;
     virtual void leaveEvent(QEvent *) override;
 
     virtual void dragEnterEvent(QDragEnterEvent *event) override;

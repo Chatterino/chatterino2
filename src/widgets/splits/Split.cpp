@@ -534,7 +534,7 @@ void Split::resizeEvent(QResizeEvent *event)
     this->overlay_->setGeometry(this->rect());
 }
 
-void Split::enterEvent(QEvent *event)
+void Split::enterEvent(QEnterEvent *event)
 {
     this->isMouseOver_ = true;
 

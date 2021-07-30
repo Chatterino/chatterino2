@@ -571,7 +571,7 @@ void NotebookTab::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-void NotebookTab::enterEvent(QEvent *event)
+void NotebookTab::enterEvent(QEnterEvent *event)
 {
     this->mouseOver_ = true;
 

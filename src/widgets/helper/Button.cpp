@@ -217,7 +217,7 @@ void Button::fancyPaint(QPainter &painter)
     }
 }
 
-void Button::enterEvent(QEvent *)
+void Button::enterEvent(QEnterEvent *)
 {
     this->mouseOver_ = true;
 }

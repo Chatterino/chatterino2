@@ -852,7 +852,7 @@ void SplitHeader::mouseDoubleClickEvent(QMouseEvent *event)
     this->doubleClicked_ = true;
 }
 
-void SplitHeader::enterEvent(QEvent *event)
+void SplitHeader::enterEvent(QEnterEvent *event)
 {
     if (!this->tooltipText_.isEmpty())
     {
