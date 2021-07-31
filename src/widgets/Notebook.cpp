@@ -552,8 +552,8 @@ void Notebook::performLayout(bool animated)
             {
                 auto largestWidth = 0;
                 int colStart = col * verticalRowSpace;
-                int colEnd =
-                    std::min((col + 1) * verticalRowSpace, this->items_.size());
+                int colEnd = std::min((col + 1) * verticalRowSpace,
+                                      static_cast<int>(this->items_.size()));
 
                 for (int i = colStart; i < colEnd; i++)
                 {
