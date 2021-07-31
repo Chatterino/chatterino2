@@ -9,6 +9,7 @@ public:
     Resources2();
 
     struct {
+        QPixmap alazymeme;
         QPixmap fourtf;
         QPixmap kararty;
         QPixmap mm2pl;
