@@ -67,7 +67,7 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
 
     auto textUpToCursor = currentText.left(tc.selectionStart());
 
-    auto words = textUpToCursor.splitRef(' ');
+    auto words = textUpToCursor.split(' ');
     if (words.size() == 0)
     {
         return QString();
@@ -89,7 +89,7 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
             continue;
         }
 
-        lastWord = word.toString();
+        lastWord = word;
         break;
     }
 
