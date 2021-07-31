@@ -690,10 +690,10 @@ void TwitchMessageBuilder::appendUsername()
         break;
     }
 
-    auto aliases = *getCSettings().aliasNames.readOnly().get();
+    auto aliases = getCSettings().aliasNames.readOnly();
     auto loginLower = this->message().loginName.toLower();
 
-    for (auto const alias : aliases)
+    for (const auto &alias : *aliases)
     {
         if (alias.name().toLower() == loginLower)
         {
