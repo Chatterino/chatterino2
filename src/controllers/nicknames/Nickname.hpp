@@ -12,10 +12,10 @@
 
 namespace chatterino {
 
-class AliasesName
+class Nickname
 {
 public:
-    AliasesName(const QString &name, const QString &replace)
+    Nickname(const QString &name, const QString &replace)
         : name_(name)
         , replace_(replace)
     {
@@ -40,8 +40,8 @@ private:
 namespace pajlada {
 
 template <>
-struct Serialize<chatterino::AliasesName> {
-    static rapidjson::Value get(const chatterino::AliasesName &value,
+struct Serialize<chatterino::Nickname> {
+    static rapidjson::Value get(const chatterino::Nickname &value,
                                 rapidjson::Document::AllocatorType &a)
     {
         rapidjson::Value ret(rapidjson::kObjectType);
@@ -54,14 +54,14 @@ struct Serialize<chatterino::AliasesName> {
 };
 
 template <>
-struct Deserialize<chatterino::AliasesName> {
-    static chatterino::AliasesName get(const rapidjson::Value &value,
-                                       bool *error = nullptr)
+struct Deserialize<chatterino::Nickname> {
+    static chatterino::Nickname get(const rapidjson::Value &value,
+                                    bool *error = nullptr)
     {
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error)
-            return chatterino::AliasesName(QString(), QString());
+            return chatterino::Nickname(QString(), QString());
         }
 
         QString _name;
@@ -70,7 +70,7 @@ struct Deserialize<chatterino::AliasesName> {
         chatterino::rj::getSafe(value, "name", _name);
         chatterino::rj::getSafe(value, "replace", _replace);
 
-        return chatterino::AliasesName(_name, _replace);
+        return chatterino::Nickname(_name, _replace);
     }
 };
 

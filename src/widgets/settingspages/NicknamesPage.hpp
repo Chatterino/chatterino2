@@ -9,10 +9,10 @@ class QVBoxLayout;
 
 namespace chatterino {
 
-class AliasesPage : public SettingsPage
+class NicknamesPage : public SettingsPage
 {
 public:
-    AliasesPage();
+    NicknamesPage();
 };
 
 }  // namespace chatterino

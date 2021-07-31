@@ -690,14 +690,14 @@ void TwitchMessageBuilder::appendUsername()
         break;
     }
 
-    auto aliases = getCSettings().aliasNames.readOnly();
+    auto nicknames = getCSettings().nicknames.readOnly();
     auto loginLower = this->message().loginName.toLower();
 
-    for (const auto &alias : *aliases)
+    for (const auto &nickname : *nicknames)
     {
-        if (alias.name().toLower() == loginLower)
+        if (nickname.name().toLower() == loginLower)
         {
-            usernameText = alias.replace();
+            usernameText = nickname.replace();
             break;
         }
     }

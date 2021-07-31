@@ -59,10 +59,6 @@ set(SOURCE_FILES
         controllers/accounts/AccountModel.cpp
         controllers/accounts/AccountModel.hpp
 
-        controllers/aliases/AliasesModel.cpp
-        controllers/aliases/AliasesModel.hpp
-        controllers/aliases/AliasesName.hpp
-
         controllers/commands/Command.cpp
         controllers/commands/Command.hpp
         controllers/commands/CommandController.cpp
@@ -99,6 +95,10 @@ set(SOURCE_FILES
         controllers/moderationactions/ModerationAction.hpp
         controllers/moderationactions/ModerationActionModel.cpp
         controllers/moderationactions/ModerationActionModel.hpp
+
+        controllers/nicknames/NicknamesModel.cpp
+        controllers/nicknames/NicknamesModel.hpp
+        controllers/nicknames/Nickname.hpp
 
         controllers/notifications/NotificationController.cpp
         controllers/notifications/NotificationController.hpp
@@ -414,8 +414,6 @@ set(SOURCE_FILES
         widgets/settingspages/AboutPage.hpp
         widgets/settingspages/AccountsPage.cpp
         widgets/settingspages/AccountsPage.hpp
-        widgets/settingspages/AliasesPage.cpp
-        widgets/settingspages/AliasesPage.hpp
         widgets/settingspages/CommandPage.cpp
         widgets/settingspages/CommandPage.hpp
         widgets/settingspages/ExternalToolsPage.cpp
@@ -434,6 +432,8 @@ set(SOURCE_FILES
         widgets/settingspages/KeyboardSettingsPage.hpp
         widgets/settingspages/ModerationPage.cpp
         widgets/settingspages/ModerationPage.hpp
+        widgets/settingspages/NicknamesPage.cpp
+        widgets/settingspages/NicknamesPage.hpp
         widgets/settingspages/NotificationPage.cpp
         widgets/settingspages/NotificationPage.hpp
         widgets/settingspages/SettingsPage.cpp

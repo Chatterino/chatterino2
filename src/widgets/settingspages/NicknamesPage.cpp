@@ -1,6 +1,6 @@
-#include "AliasesPage.hpp"
+#include "NicknamesPage.hpp"
 
-#include "controllers/aliases/AliasesModel.hpp"
+#include "controllers/nicknames/NicknamesModel.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/LayoutCreator.hpp"
@@ -13,30 +13,30 @@
 
 namespace chatterino {
 
-AliasesPage::AliasesPage()
+NicknamesPage::NicknamesPage()
 {
-    LayoutCreator<AliasesPage> layoutCreator(this);
+    LayoutCreator<NicknamesPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
     layout.emplace<QLabel>(
-        "Give an alias to a user which changes their name in chat for "
-        "you.\nThis does not work with features such as search, in those "
-        "places you will still need to use the user's original name.");
+        "Nicknames do not work with features such as search or user highlights."
+        "\nWith those features you will still need to use the user's original "
+        "name.");
     EditableModelView *view =
         layout
             .emplace<EditableModelView>(
-                (new AliasesModel(nullptr))
-                    ->initialized(&getSettings()->aliasNames))
+                (new NicknamesModel(nullptr))
+                    ->initialized(&getSettings()->nicknames))
             .getElement();
 
-    view->setTitles({"Name", "Replacement"});
+    view->setTitles({"Username", "Nickname"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Interactive);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         1, QHeaderView::Stretch);
 
     view->addButtonPressed.connect([] {
-        getSettings()->aliasNames.append(AliasesName{"Name", "Replacement"});
+        getSettings()->nicknames.append(Nickname{"Username", "Nickname"});
     });
 
     QTimer::singleShot(1, [view] {
