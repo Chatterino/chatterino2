@@ -769,14 +769,14 @@ void TwitchMessageBuilder::runIgnoreReplaces(
     };
 
     auto addReplEmotes = [&twitchEmotes](const IgnorePhrase &phrase,
-                                         const QStringRef &midrepl,
+                                         const QStringView &midrepl,
                                          int startIndex) mutable {
         if (!phrase.containsEmote())
         {
             return;
         }
 
-        QVector<QStringRef> words = midrepl.split(' ');
+        const QVector<QStringView> words = QStringView{midrepl}.split(u' ');
         int pos = 0;
         for (const auto &word : words)
         {
@@ -852,8 +852,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
                 shiftIndicesAfter(from + len, midsize - len);
 
-                auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
+                auto midExtendedView =
+                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
 
                 for (auto &tup : vret)
                 {
@@ -866,7 +866,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     QRegularExpression emoteregex(
                         "\\b" + tup.name.string + "\\b",
                         QRegularExpression::UseUnicodePropertiesOption);
-                    auto _match = emoteregex.match(midExtendedRef);
+                    auto _match = emoteregex.match(midExtendedView);
                     if (_match.hasMatch())
                     {
                         int last = _match.lastCapturedIndex();
@@ -878,7 +878,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     }
                 }
 
-                addReplEmotes(phrase, midExtendedRef, pos1);
+                addReplEmotes(phrase, midExtendedView, pos1);
 
                 from += midsize;
             }
@@ -917,8 +917,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
 
                 shiftIndicesAfter(from + len, replacesize - len);
 
-                auto midExtendedRef =
-                    this->originalMessage_.midRef(pos1, pos2 - pos1);
+                auto midExtendedView =
+                    QStringView{this->originalMessage_}.mid(pos1, pos2 - pos1);
 
                 for (auto &tup : vret)
                 {
@@ -931,7 +931,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     QRegularExpression emoteregex(
                         "\\b" + tup.name.string + "\\b",
                         QRegularExpression::UseUnicodePropertiesOption);
-                    auto match = emoteregex.match(midExtendedRef);
+                    auto match = emoteregex.match(midExtendedView);
                     if (match.hasMatch())
                     {
                         int last = match.lastCapturedIndex();
@@ -943,7 +943,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     }
                 }
 
-                addReplEmotes(phrase, midExtendedRef, pos1);
+                addReplEmotes(phrase, midExtendedView, pos1);
 
                 from += replacesize;
             }
