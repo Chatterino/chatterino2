@@ -175,7 +175,7 @@ AboutPage::AboutPage()
             contributorsFile.open(QFile::ReadOnly);
 
             QTextStream stream(&contributorsFile);
-            stream.setCodec("UTF-8");
+            // stream.setCodec("UTF-8");
 
             QString line;
 
