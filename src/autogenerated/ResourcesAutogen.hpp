@@ -9,11 +9,13 @@ public:
     Resources2();
 
     struct {
+        QPixmap alazymeme;
         QPixmap fourtf;
         QPixmap kararty;
         QPixmap mm2pl;
         QPixmap pajlada;
         QPixmap slch;
+        QPixmap xheaveny;
         QPixmap zneix;
     } avatars;
     struct {
