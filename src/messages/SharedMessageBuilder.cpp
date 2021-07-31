@@ -469,7 +469,7 @@ void SharedMessageBuilder::triggerHighlights()
             // update the media player url if necessary
             if (currentPlayerUrl != this->highlightSoundUrl_)
             {
-                player->setMedia(this->highlightSoundUrl_);
+                player->setSource(this->highlightSoundUrl_);
 
                 currentPlayerUrl = this->highlightSoundUrl_;
             }

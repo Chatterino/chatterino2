@@ -112,7 +112,7 @@ void NotificationController::playSound()
 
     if (currentPlayerUrl != highlightSoundUrl)
     {
-        player->setMedia(highlightSoundUrl);
+        player->setSource(highlightSoundUrl);
 
         currentPlayerUrl = highlightSoundUrl;
     }
