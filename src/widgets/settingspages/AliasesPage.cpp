@@ -18,7 +18,10 @@ AliasesPage::AliasesPage()
     LayoutCreator<AliasesPage> layoutCreator(this);
     auto layout = layoutCreator.setLayoutType<QVBoxLayout>();
 
-    layout.emplace<QLabel>("Give an alias to a user.");
+    layout.emplace<QLabel>(
+        "Give an alias to a user which changes their name in chat for "
+        "you.\nThis does not work with features such as search, in those "
+        "places you will still need to use the user's original name.");
     EditableModelView *view =
         layout
             .emplace<EditableModelView>(
