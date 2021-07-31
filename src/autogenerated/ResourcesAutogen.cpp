@@ -4,6 +4,7 @@ namespace chatterino {
 
 Resources2::Resources2()
 {
+    this->avatars.alazymeme = QPixmap(":/avatars/alazymeme.png");
     this->avatars.fourtf = QPixmap(":/avatars/fourtf.png");
     this->avatars.kararty = QPixmap(":/avatars/kararty.png");
     this->avatars.mm2pl = QPixmap(":/avatars/mm2pl.png");
