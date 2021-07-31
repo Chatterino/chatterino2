@@ -127,8 +127,8 @@ SOURCES += \
     src/common/Args.cpp \
     src/common/Channel.cpp \
     src/common/ChannelChatters.cpp \
-    src/common/ChatterSet.cpp \
     src/common/ChatterinoSetting.cpp \
+    src/common/ChatterSet.cpp \
     src/common/CompletionModel.cpp \
     src/common/Credentials.cpp \
     src/common/DownloadManager.cpp \
@@ -140,21 +140,21 @@ SOURCES += \
     src/common/NetworkPrivate.cpp \
     src/common/NetworkRequest.cpp \
     src/common/NetworkResult.cpp \
+    src/common/QLogging.cpp \
     src/common/Version.cpp \
     src/common/WindowDescriptors.cpp \
-    src/common/QLogging.cpp \
     src/controllers/accounts/Account.cpp \
     src/controllers/accounts/AccountController.cpp \
     src/controllers/accounts/AccountModel.cpp \
     src/controllers/commands/Command.cpp \
     src/controllers/commands/CommandController.cpp \
     src/controllers/commands/CommandModel.cpp \
-    src/controllers/highlights/BadgeHighlightModel.cpp \
-    src/controllers/highlights/HighlightBadge.cpp \
     src/controllers/filters/FilterModel.cpp \
     src/controllers/filters/parser/FilterParser.cpp \
     src/controllers/filters/parser/Tokenizer.cpp \
     src/controllers/filters/parser/Types.cpp \
+    src/controllers/highlights/BadgeHighlightModel.cpp \
+    src/controllers/highlights/HighlightBadge.cpp \
     src/controllers/highlights/HighlightBlacklistModel.cpp \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
@@ -204,9 +204,9 @@ SOURCES += \
     src/providers/irc/IrcServer.cpp \
     src/providers/IvrApi.cpp \
     src/providers/LinkResolver.cpp \
-    src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/api/Helix.cpp \
     src/providers/twitch/api/Kraken.cpp \
+    src/providers/twitch/ChannelPointReward.cpp \
     src/providers/twitch/IrcMessageHandler.cpp \
     src/providers/twitch/PubsubActions.cpp \
     src/providers/twitch/PubsubClient.cpp \
@@ -247,13 +247,12 @@ SOURCES += \
     src/util/Helpers.cpp \
     src/util/IncognitoBrowser.cpp \
     src/util/InitUpdateButton.cpp \
-    src/util/JsonQuery.cpp \
     src/util/LayoutHelper.cpp \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
+    src/util/SplitCommand.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
-    src/util/SplitCommand.cpp \
     src/util/Twitch.cpp \
     src/util/WindowsHelper.cpp \
     src/widgets/AccountSwitchPopup.cpp \
@@ -262,7 +261,6 @@ SOURCES += \
     src/widgets/BasePopup.cpp \
     src/widgets/BaseWidget.cpp \
     src/widgets/BaseWindow.cpp \
-    src/widgets/FramelessEmbedWindow.cpp \
     src/widgets/dialogs/BadgePickerDialog.cpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.cpp \
     src/widgets/dialogs/ColorPickerDialog.cpp \
@@ -275,13 +273,14 @@ SOURCES += \
     src/widgets/dialogs/SelectChannelDialog.cpp \
     src/widgets/dialogs/SelectChannelFiltersDialog.cpp \
     src/widgets/dialogs/SettingsDialog.cpp \
-    src/widgets/listview/GenericItemDelegate.cpp \
     src/widgets/dialogs/switcher/NewTabItem.cpp \
+    src/widgets/dialogs/switcher/QuickSwitcherModel.cpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.cpp \
     src/widgets/dialogs/switcher/SwitchSplitItem.cpp \
     src/widgets/dialogs/UpdateDialog.cpp \
     src/widgets/dialogs/UserInfoPopup.cpp \
     src/widgets/dialogs/WelcomeDialog.cpp \
+    src/widgets/FramelessEmbedWindow.cpp \
     src/widgets/helper/Button.cpp \
     src/widgets/helper/ChannelView.cpp \
     src/widgets/helper/ColorButton.cpp \
@@ -299,11 +298,12 @@ SOURCES += \
     src/widgets/helper/SignalLabel.cpp \
     src/widgets/helper/TitlebarButton.cpp \
     src/widgets/Label.cpp \
-    src/widgets/Notebook.cpp \
-    src/widgets/Scrollbar.cpp \
+    src/widgets/listview/GenericItemDelegate.cpp \
     src/widgets/listview/GenericListItem.cpp \
     src/widgets/listview/GenericListModel.cpp \
     src/widgets/listview/GenericListView.cpp \
+    src/widgets/Notebook.cpp \
+    src/widgets/Scrollbar.cpp \
     src/widgets/settingspages/AboutPage.cpp \
     src/widgets/settingspages/AccountsPage.cpp \
     src/widgets/settingspages/CommandPage.cpp \
@@ -340,8 +340,8 @@ HEADERS += \
     src/common/Atomic.hpp \
     src/common/Channel.hpp \
     src/common/ChannelChatters.hpp \
-    src/common/ChatterSet.hpp \
     src/common/ChatterinoSetting.hpp \
+    src/common/ChatterSet.hpp \
     src/common/Common.hpp \
     src/common/CompletionModel.hpp \
     src/common/ConcurrentMap.hpp \
@@ -360,26 +360,27 @@ HEADERS += \
     src/common/NullablePtr.hpp \
     src/common/Outcome.hpp \
     src/common/ProviderId.hpp \
+    src/common/QLogging.hpp \
     src/common/SignalVector.hpp \
     src/common/SignalVectorModel.hpp \
     src/common/Singleton.hpp \
     src/common/UniqueAccess.hpp \
     src/common/Version.hpp \
-    src/common/QLogging.hpp \
+    src/common/WindowDescriptors.hpp \
     src/controllers/accounts/Account.hpp \
     src/controllers/accounts/AccountController.hpp \
     src/controllers/accounts/AccountModel.hpp \
     src/controllers/commands/Command.hpp \
     src/controllers/commands/CommandController.hpp \
     src/controllers/commands/CommandModel.hpp \
-    src/controllers/highlights/BadgeHighlightModel.hpp \
-    src/controllers/highlights/HighlightBadge.hpp \
     src/controllers/filters/FilterModel.hpp \
     src/controllers/filters/FilterRecord.hpp \
     src/controllers/filters/FilterSet.hpp \
     src/controllers/filters/parser/FilterParser.hpp \
     src/controllers/filters/parser/Tokenizer.hpp \
     src/controllers/filters/parser/Types.hpp \
+    src/controllers/highlights/BadgeHighlightModel.hpp \
+    src/controllers/highlights/HighlightBadge.hpp \
     src/controllers/highlights/HighlightBlacklistModel.hpp \
     src/controllers/highlights/HighlightBlacklistUser.hpp \
     src/controllers/highlights/HighlightModel.hpp \
@@ -439,10 +440,10 @@ HEADERS += \
     src/providers/irc/IrcServer.hpp \
     src/providers/IvrApi.hpp \
     src/providers/LinkResolver.hpp \
-    src/providers/twitch/ChannelPointReward.hpp \
-    src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/api/Helix.hpp \
     src/providers/twitch/api/Kraken.hpp \
+    src/providers/twitch/ChannelPointReward.hpp \
+    src/providers/twitch/ChatterinoWebSocketppLogger.hpp \
     src/providers/twitch/EmoteValue.hpp \
     src/providers/twitch/IrcMessageHandler.hpp \
     src/providers/twitch/PubsubActions.hpp \
@@ -483,6 +484,7 @@ HEADERS += \
     src/util/DebugCount.hpp \
     src/util/DisplayBadge.hpp \
     src/util/DistanceBetweenPoints.hpp \
+    src/util/ExponentialBackoff.hpp \
     src/util/FormatTime.hpp \
     src/util/FunctionEventFilter.hpp \
     src/util/FuzzyConvert.hpp \
@@ -491,7 +493,6 @@ HEADERS += \
     src/util/InitUpdateButton.hpp \
     src/util/IrcHelpers.hpp \
     src/util/IsBigEndian.hpp \
-    src/util/JsonQuery.hpp \
     src/util/LayoutCreator.hpp \
     src/util/LayoutHelper.hpp \
     src/util/NuulsUploader.hpp \
@@ -508,6 +509,7 @@ HEADERS += \
     src/util/SampleLinks.hpp \
     src/util/SharedPtrElementLess.hpp \
     src/util/Shortcut.hpp \
+    src/util/SplitCommand.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamerMode.hpp \
     src/util/StreamLink.hpp \
@@ -519,7 +521,6 @@ HEADERS += \
     src/widgets/BasePopup.hpp \
     src/widgets/BaseWidget.hpp \
     src/widgets/BaseWindow.hpp \
-    src/widgets/FramelessEmbedWindow.hpp \
     src/widgets/dialogs/BadgePickerDialog.hpp \
     src/widgets/dialogs/ChannelFilterEditorDialog.hpp \
     src/widgets/dialogs/ColorPickerDialog.hpp \
@@ -533,7 +534,6 @@ HEADERS += \
     src/widgets/dialogs/SelectChannelFiltersDialog.hpp \
     src/widgets/dialogs/SettingsDialog.hpp \
     src/widgets/dialogs/switcher/AbstractSwitcherItem.hpp \
-    src/widgets/listview/GenericItemDelegate.hpp \
     src/widgets/dialogs/switcher/NewTabItem.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherModel.hpp \
     src/widgets/dialogs/switcher/QuickSwitcherPopup.hpp \
@@ -541,6 +541,7 @@ HEADERS += \
     src/widgets/dialogs/UpdateDialog.hpp \
     src/widgets/dialogs/UserInfoPopup.hpp \
     src/widgets/dialogs/WelcomeDialog.hpp \
+    src/widgets/FramelessEmbedWindow.hpp \
     src/widgets/helper/Button.hpp \
     src/widgets/helper/ChannelView.hpp \
     src/widgets/helper/ColorButton.hpp \
@@ -560,11 +561,12 @@ HEADERS += \
     src/widgets/helper/SignalLabel.hpp \
     src/widgets/helper/TitlebarButton.hpp \
     src/widgets/Label.hpp \
-    src/widgets/Notebook.hpp \
-    src/widgets/Scrollbar.hpp \
+    src/widgets/listview/GenericItemDelegate.hpp \
     src/widgets/listview/GenericListItem.hpp \
     src/widgets/listview/GenericListModel.hpp \
     src/widgets/listview/GenericListView.hpp \
+    src/widgets/Notebook.hpp \
+    src/widgets/Scrollbar.hpp \
     src/widgets/settingspages/AboutPage.hpp \
     src/widgets/settingspages/AccountsPage.hpp \
     src/widgets/settingspages/CommandPage.hpp \

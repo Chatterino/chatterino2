@@ -1,7 +1,6 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 
 #include "Application.hpp"
-#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
@@ -111,7 +110,7 @@ void ImageLayoutElement::addCopyTextToString(QString &str, int from,
     if (emoteElement)
     {
         str += emoteElement->getEmote()->getCopyString();
-        str = TwitchEmotes::cleanUpEmoteCode(EmoteName{str});
+        str = TwitchEmotes::cleanUpEmoteCode(str);
         if (this->hasTrailingSpace())
         {
             str += " ";
@@ -433,7 +432,6 @@ void MultiColorTextLayoutElement::paint(QPainter &painter)
 
     for (const auto &segment : this->segments_)
     {
-        qCDebug(chatterinoMessage) << "Draw segment:" << segment.text;
         painter.setPen(segment.color);
         painter.drawText(QRectF(this->getRect().x() + xOffset,
                                 this->getRect().y(), 10000, 10000),

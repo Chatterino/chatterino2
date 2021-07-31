@@ -105,12 +105,15 @@ QString getJSONValue(QJsonValue responseJson, QString jsonPattern)
 
 QString getLinkFromResponse(NetworkResult response, QString pattern)
 {
-    QRegExp regExp("\\{(.+)\\}");
-    regExp.setMinimal(true);
-    while (regExp.indexIn(pattern) != -1)
+    QRegularExpression regExp("{(.+)}",
+                              QRegularExpression::InvertedGreedinessOption);
+    auto match = regExp.match(pattern);
+
+    while (match.hasMatch())
     {
-        pattern.replace(regExp.cap(0),
-                        getJSONValue(response.parseJson(), regExp.cap(1)));
+        pattern.replace(match.captured(0),
+                        getJSONValue(response.parseJson(), match.captured(1)));
+        match = regExp.match(pattern);
     }
     return pattern;
 }
