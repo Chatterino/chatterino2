@@ -1,6 +1,7 @@
 [submodule "lib/libcommuni"]
 	path = lib/libcommuni
 	url = https://github.com/Chatterino/libcommuni
+	branch = chatterino-cmake
 [submodule "lib/qBreakpad"]
 	path = lib/qBreakpad
 	url = https://github.com/jiakuan/qBreakpad.git
