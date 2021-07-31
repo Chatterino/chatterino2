@@ -375,7 +375,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/follow", [](const auto &words, auto channel) {
         channel->addMessage(makeSystemMessage(
-            "Twitch has removed possibility to follow users through "
+            "Twitch has removed the ability to follow users through "
             "third-party applications. For more information, see "
             "https://github.com/Chatterino/chatterino2/issues/3076"));
         return "";
@@ -383,7 +383,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/unfollow", [](const auto &words, auto channel) {
         channel->addMessage(makeSystemMessage(
-            "Twitch has removed possibility to unfollow users through "
+            "Twitch has removed the ability to unfollow users through "
             "third-party applications. For more information, see "
             "https://github.com/Chatterino/chatterino2/issues/3076"));
         return "";
