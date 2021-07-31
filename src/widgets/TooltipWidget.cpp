@@ -4,7 +4,6 @@
 #include "singletons/Fonts.hpp"
 
 #include <QDebug>
-#include <QDesktopWidget>
 #include <QStyle>
 #include <QVBoxLayout>
 

@@ -13,7 +13,6 @@
 
 #include <QApplication>
 #include <QDebug>
-#include <QDesktopWidget>
 #include <QFont>
 #include <QIcon>
 #include <functional>
@@ -349,14 +348,14 @@ bool BaseWindow::event(QEvent *event)
 
 void BaseWindow::wheelEvent(QWheelEvent *event)
 {
-    if (event->orientation() != Qt::Vertical)
+    if (!event->angleDelta().y())
     {
         return;
     }
 
     if (event->modifiers() & Qt::ControlModifier)
     {
-        if (event->delta() > 0)
+        if (event->angleDelta().y() > 0)
         {
             getSettings()->setClampedUiScale(
                 getSettings()->getClampedUiScale() + 0.1);
