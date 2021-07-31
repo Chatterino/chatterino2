@@ -96,6 +96,10 @@ set(SOURCE_FILES
         controllers/moderationactions/ModerationActionModel.cpp
         controllers/moderationactions/ModerationActionModel.hpp
 
+        controllers/nicknames/NicknamesModel.cpp
+        controllers/nicknames/NicknamesModel.hpp
+        controllers/nicknames/Nickname.hpp
+
         controllers/notifications/NotificationController.cpp
         controllers/notifications/NotificationController.hpp
         controllers/notifications/NotificationModel.cpp
@@ -433,6 +437,8 @@ set(SOURCE_FILES
         widgets/settingspages/KeyboardSettingsPage.hpp
         widgets/settingspages/ModerationPage.cpp
         widgets/settingspages/ModerationPage.hpp
+        widgets/settingspages/NicknamesPage.cpp
+        widgets/settingspages/NicknamesPage.hpp
         widgets/settingspages/NotificationPage.cpp
         widgets/settingspages/NotificationPage.hpp
         widgets/settingspages/SettingsPage.cpp

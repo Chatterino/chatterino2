@@ -692,6 +692,18 @@ void TwitchMessageBuilder::appendUsername()
         break;
     }
 
+    auto nicknames = getCSettings().nicknames.readOnly();
+    auto loginLower = this->message().loginName.toLower();
+
+    for (const auto &nickname : *nicknames)
+    {
+        if (nickname.name().toLower() == loginLower)
+        {
+            usernameText = nickname.replace();
+            break;
+        }
+    }
+
     if (this->args.isSentWhisper)
     {
         // TODO(pajlada): Re-implement
