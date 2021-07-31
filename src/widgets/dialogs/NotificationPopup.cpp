@@ -5,9 +5,7 @@
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QScreen>
-
 #include <QVBoxLayout>
 
 namespace chatterino {
@@ -32,7 +30,7 @@ void NotificationPopup::updatePosition()
 {
     Location location = BottomRight;
 
-    QDesktopWidget *desktop = QApplication::desktop();
+    auto *desktop = QApplication::screens().first();
     const QRect rect = desktop->availableGeometry();
 
     switch (location)

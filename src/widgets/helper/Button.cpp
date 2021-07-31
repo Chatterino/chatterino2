@@ -2,7 +2,6 @@
 
 #include <QApplication>
 #include <QDebug>
-#include <QDesktopWidget>
 #include <QPainter>
 
 #include "BaseTheme.hpp"
@@ -345,7 +344,8 @@ void Button::showMenu()
         return;
 
     auto point = [this] {
-        auto bounds = QApplication::desktop()->availableGeometry(this);
+        auto bounds =
+            QApplication::screens().first()->availableGeometry(/*this*/);
 
         auto point = this->mapToGlobal(
             QPoint(this->width() - this->menu_->width(), this->height()));

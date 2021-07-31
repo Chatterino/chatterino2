@@ -15,6 +15,7 @@
 #include <QDebug>
 #include <QFont>
 #include <QIcon>
+#include <QScreen>
 #include <functional>
 
 #ifdef CHATTERINO
@@ -601,10 +602,10 @@ void BaseWindow::moveIntoDesktopRect(QWidget *parent, QPoint point)
         return;
 
     // move the widget into the screen geometry if it's not already in there
-    QDesktopWidget *desktop = QApplication::desktop();
+    auto *desktop = QApplication::screens().first();
     QPoint globalCursorPos = QCursor::pos();
 
-    QRect s = desktop->availableGeometry(parent);
+    QRect s = desktop->availableGeometry(/*parent*/);
 
     bool stickRight = false;
     bool stickBottom = false;

@@ -22,7 +22,6 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#include <QDesktopWidget>
 #include <QDrag>
 #include <QHBoxLayout>
 #include <QInputDialog>
