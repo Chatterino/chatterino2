@@ -150,7 +150,7 @@ void BaseWindow::init()
             {
                 QHBoxLayout *buttonLayout = this->ui_.titlebarBox =
                     new QHBoxLayout();
-                buttonLayout->setMargin(0);
+                buttonLayout->setContentsMargins(0, 0, 0, 0);
                 layout->addLayout(buttonLayout);
 
                 // title

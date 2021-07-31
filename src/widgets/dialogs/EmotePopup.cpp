@@ -139,7 +139,7 @@ EmotePopup::EmotePopup(QWidget *parent)
 
     auto notebook = new Notebook(this);
     layout->addWidget(notebook);
-    layout->setMargin(0);
+    layout->setContentsMargins(0, 0, 0, 0);
 
     auto clicked = [this](const Link &link) {
         this->linkClicked.invoke(link);

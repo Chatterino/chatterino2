@@ -13,7 +13,7 @@ EffectLabel::EffectLabel(BaseWidget *parent, int spacing)
 
     this->label_.setAlignment(Qt::AlignCenter);
 
-    this->hbox_.setMargin(0);
+    this->hbox_.setContentsMargins(0, 0, 0, 0);
     this->hbox_.addSpacing(spacing);
     this->hbox_.addWidget(&this->label_);
     this->hbox_.addSpacing(spacing);
@@ -29,7 +29,7 @@ EffectLabel2::EffectLabel2(BaseWidget *parent, int padding)
     //    this->label_.setAlignment(Qt::AlignCenter);
     this->label_.setCentered(true);
 
-    hbox->setMargin(0);
+    hbox->setContentsMargins(0, 0, 0, 0);
     //    hbox.addSpacing(spacing);
     hbox->addWidget(&this->label_);
     //    hbox.addSpacing(spacing);

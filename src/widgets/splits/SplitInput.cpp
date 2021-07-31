@@ -144,8 +144,8 @@ void SplitInput::themeChangedEvent()
     this->ui_.textEdit->setPalette(placeholderPalette);
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
-    this->ui_.hbox->setMargin(
-        int((this->theme->isLightTheme() ? 4 : 2) * this->scale()));
+    int scale = (this->theme->isLightTheme() ? 4 : 2) * this->scale();
+    this->ui_.hbox->setContentsMargins(scale, scale, scale, scale);
 
     this->ui_.emoteButton->getLabel().setStyleSheet("color: #000");
 }

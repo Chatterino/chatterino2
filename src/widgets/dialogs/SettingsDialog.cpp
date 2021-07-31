@@ -84,7 +84,7 @@ void SettingsDialog::initUi()
         .assign(&this->ui_.pageStack)
         .withoutMargin();
 
-    this->ui_.pageStack->setMargin(0);
+    this->ui_.pageStack->setContentsMargins(0, 0, 0, 0);
 
     outerBox->addSpacing(12);
 
@@ -154,7 +154,7 @@ void SettingsDialog::filterElements(const QString &text)
 
 void SettingsDialog::addTabs()
 {
-    this->ui_.tabContainer->setMargin(0);
+    this->ui_.tabContainer->setContentsMargins(0, 0, 0, 0);
     this->ui_.tabContainer->setSpacing(0);
 
     this->ui_.tabContainer->setContentsMargins(0, 20, 0, 20);
