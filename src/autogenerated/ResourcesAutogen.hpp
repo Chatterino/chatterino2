@@ -14,6 +14,7 @@ public:
         QPixmap mm2pl;
         QPixmap pajlada;
         QPixmap slch;
+        QPixmap xheaveny;
         QPixmap zneix;
     } avatars;
     struct {
@@ -22,7 +23,6 @@ public:
         QPixmap ban;
         QPixmap banRed;
         QPixmap copyDark;
-        QPixmap copyDarkTheme;
         QPixmap copyLight;
         QPixmap menuDark;
         QPixmap menuLight;
