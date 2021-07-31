@@ -37,8 +37,8 @@ std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys)
     {
         QStringList batch;
 
-        int last =
-            std::min(batchSize, int(emoteSetKeys.size()) - batchSize * i);
+        int last = std::min(
+            batchSize, static_cast<int>(emoteSetKeys.size() - batchSize * i));
         for (int j = 0; j < last; j++)
         {
             batch.push_back(emoteSetKeys.at(j + (batchSize * i)));

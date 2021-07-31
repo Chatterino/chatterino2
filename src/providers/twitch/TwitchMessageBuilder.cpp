@@ -791,7 +791,8 @@ void TwitchMessageBuilder::runIgnoreReplaces(
                     }
                     twitchEmotes.push_back(TwitchEmoteOccurence{
                         startIndex + pos,
-                        startIndex + pos + emote.first.string.length(),
+                        static_cast<int>(startIndex + pos +
+                                         emote.first.string.length()),
                         emote.second,
                         emote.first,
                     });
