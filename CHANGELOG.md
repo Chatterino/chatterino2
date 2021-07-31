@@ -16,7 +16,7 @@
 - Dev: Ubuntu packages are now available (#2936)
 - Dev: Disabled update checker on Flatpak. (#3051)
 - Dev: Add logging for HTTP requests (#2991)
-
+- Dev: added chromebook to the building on linux page (#3095)
 ## 2.3.3
 
 - Major: Added username autocompletion popup menu when typing usernames with an @ prefix. (#1979, #2866)
