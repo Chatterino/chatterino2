@@ -720,6 +720,8 @@ void UserInfoPopup::updateUserData()
                               onUserFetchFailed);
 
     this->ui_.follow->setEnabled(false);
+    this->ui_.follow->setToolTip("Twitch has removed the ability to follow "
+                                 "users through third-party applications.");
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
 }
