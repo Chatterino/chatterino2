@@ -1,6 +1,6 @@
 # Chatterino code guidelines
 
-This is a set of guidelines for contributing to Chatterino. The goal is to teach programmers without C++ background (java/python/etc.), people who haven't used Qt or otherwise have different experience the idioms of the codebase. Thus we will focus on those which are different from those other environments. There are extra guidelines available [here](https://hackmd.io/@fourtf/chatterino-pendantic-guidelines) but they are considered as extras and not as important.
+This is a set of guidelines for contributing to Chatterino. The goal is to teach programmers without a C++ background (java/python/etc.), people who haven't used Qt, or otherwise have different experience, the idioms of the codebase. Thus we will focus on those which are different from those other environments. There are extra guidelines available [here](https://hackmd.io/@fourtf/chatterino-pendantic-guidelines) but they are considered as extras and not as important.
 
 # Tooling
 
@@ -70,7 +70,7 @@ void myFunc() {
 
 ## Passing parameters
 
-The way a parameter is passed signals how it is going to be used inside of the function. C++ doesn't have multiple return values so there is "out parameters" (reference to a variable that is going to be assigned inside of the function) to simulate multiple return values.
+The way a parameter is passed, signals how it is going to be used inside of the function. C++ doesn't have multiple return values, so there are "out parameters" (reference to a variable that is going to be assigned inside of the function) to simulate multiple return values.
 
 **Cheap to copy types** like int/enum/etc. can be passed in per value since copying them is fast.
 
@@ -122,11 +122,11 @@ void main() {
 }
 ```
 
-Generally the lowest level of requirement should be used e.g. passing `Channel&` instead of `std::shared_ptr<Channel>&` (aka `ChannelPtr`) if possible.
+Generally the lowest level of requirement should be used, e.g. passing `Channel&` instead of `std::shared_ptr<Channel>&` (aka `ChannelPtr`) if possible.
 
 ## Members
 
-All functions names are in `camelCase`. _Private_ member variables are in `camelCase_` (note the underscore at the end). We don't use the `get` prefix for getters. We mark functions as `const` [if applicable](https://stackoverflow.com/questions/751681/meaning-of-const-last-in-a-function-declaration-of-a-class).
+All function names are in `camelCase`. _Private_ member variables are in `camelCase_` (note the underscore at the end). We don't use the `get` prefix for getters. We mark functions as `const` [if applicable](https://stackoverflow.com/questions/751681/meaning-of-const-last-in-a-function-declaration-of-a-class).
 
 ```cpp
 class NamedObject
@@ -212,6 +212,6 @@ Keep the element on the stack if possible. If you need a pointer or have complex
 
 #### QObject classes
 
-- Use the [object tree](https://doc.qt.io/qt-5/objecttrees.html#) to manage lifetime where possible. Objects are destroyed when their parent object is destroyed.
+- Use the [object tree](https://doc.qt.io/qt-5/objecttrees.html#) to manage lifetimes where possible. Objects are destroyed when their parent object is destroyed.
 - If you have to explicitly delete an object use `variable->deleteLater()` instead of `delete variable`. This ensures that it will be deleted on the correct thread.
-- If an object doesn't have a parent consider using `std::unique_ptr<Type, DeleteLater>` with `DeleteLater` from "src/common/Common.hpp". This will call `deleteLater()` on the pointer once it goes out of scope or the object is destroyed.
+- If an object doesn't have a parent, consider using `std::unique_ptr<Type, DeleteLater>` with `DeleteLater` from "src/common/Common.hpp". This will call `deleteLater()` on the pointer once it goes out of scope, or the object is destroyed.
