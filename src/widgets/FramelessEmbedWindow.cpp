@@ -30,11 +30,7 @@ FramelessEmbedWindow::FramelessEmbedWindow()
 bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
                                        void *message, long *result)
 {
-#    if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
-    MSG *msg = *reinterpret_cast<MSG **>(message);
-#    else
     MSG *msg = reinterpret_cast<MSG *>(message);
-#    endif
 
     if (msg->message == WM_COPYDATA)
     {
