@@ -14,6 +14,7 @@
 - Bugfix: Copy buttons in usercard now show properly in light mode (#3057)
 - Bugfix: Fixed comma appended to username completion when not at the beginning of the message. (#3060)
 - Bugfix: Fixed bug misplacing chat when zooming on Chrome with Chatterino Native Host extension (#1936)
+- Bugfix: Channel point redemptions from ignored users are now properly blocked. (#3102)
 - Dev: Ubuntu packages are now available (#2936)
 - Dev: Disabled update checker on Flatpak. (#3051)
 - Dev: Add logging for HTTP requests (#2991)
