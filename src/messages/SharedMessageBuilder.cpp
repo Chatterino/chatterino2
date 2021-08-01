@@ -106,7 +106,7 @@ void SharedMessageBuilder::parse()
 bool SharedMessageBuilder::isIgnored() const
 {
     return isIgnoredMessage({
-        .message = this->originalMessage_,
+        /*.message = */ this->originalMessage_,
     });
 }
 

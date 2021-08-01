@@ -115,10 +115,10 @@ TwitchMessageBuilder::TwitchMessageBuilder(
 bool TwitchMessageBuilder::isIgnored() const
 {
     return isIgnoredMessage({
-        .message = this->originalMessage_,
-        .twitchUserID = this->tags.value("user-id").toString(),
-        .isMod = this->channel->isMod(),
-        .isBroadcaster = this->channel->isBroadcaster(),
+        /*.message = */ this->originalMessage_,
+        /*.twitchUserID = */ this->tags.value("user-id").toString(),
+        /*.isMod = */ this->channel->isMod(),
+        /*.isBroadcaster = */ this->channel->isBroadcaster(),
     });
 }
 
@@ -1235,9 +1235,10 @@ void TwitchMessageBuilder::appendChannelPointRewardMessage(
     bool isBroadcaster)
 {
     if (isIgnoredMessage({
-            .twitchUserID = reward.user.id,
-            .isMod = isMod,
-            .isBroadcaster = isBroadcaster,
+            /*.message = */ "",
+            /*.twitchUserID = */ reward.user.id,
+            /*.isMod = */ isMod,
+            /*.isBroadcaster = */ isBroadcaster,
         }))
     {
         return;
