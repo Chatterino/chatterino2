@@ -378,11 +378,12 @@ void TwitchChannel::sendMessage(const QString &message)
                 auto spaceIndex = parsedMessage.indexOf(' ');
                 if (spaceIndex == -1)
                 {
+                    // no spaces found, fall back to old magic character
                     parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
                 }
                 else
                 {
-                    // replace only first space with a double space
+                    // replace the space we found in spaceIndex with two spaces
                     parsedMessage.replace(spaceIndex, 1, "  ");
                 }
             }
