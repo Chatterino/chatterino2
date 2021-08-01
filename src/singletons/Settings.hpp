@@ -10,6 +10,7 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
+#include "controllers/nicknames/Nickname.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
@@ -23,6 +24,7 @@ class HighlightBlacklistUser;
 class IgnorePhrase;
 class TaggedUser;
 class FilterRecord;
+class Nickname;
 
 /// Settings which are availlable for reading on all threads.
 class ConcurrentSettings
@@ -37,6 +39,7 @@ public:
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
     SignalVector<FilterRecordPtr> &filterRecords;
+    SignalVector<Nickname> &nicknames;
     //SignalVector<TaggedUser> &taggedUsers;
     SignalVector<ModerationAction> &moderationActions;
 

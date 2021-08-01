@@ -17,6 +17,7 @@ static const QMap<QString, QString> validIdentifiersMap = {
     {"author.sub_length", "author sub length"},
     {"channel.name", "channel name"},
     {"channel.watching", "/watching channel?"},
+    {"channel.live", "Channel live?"},
     {"flags.highlighted", "highlighted?"},
     {"flags.points_redeemed", "redeemed points?"},
     {"flags.sub_message", "sub/resub message?"},

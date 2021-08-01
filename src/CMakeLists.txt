@@ -88,6 +88,8 @@ set(SOURCE_FILES
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
 
+        controllers/ignores/IgnoreController.cpp
+        controllers/ignores/IgnoreController.hpp
         controllers/ignores/IgnoreModel.cpp
         controllers/ignores/IgnoreModel.hpp
 
@@ -95,6 +97,10 @@ set(SOURCE_FILES
         controllers/moderationactions/ModerationAction.hpp
         controllers/moderationactions/ModerationActionModel.cpp
         controllers/moderationactions/ModerationActionModel.hpp
+
+        controllers/nicknames/NicknamesModel.cpp
+        controllers/nicknames/NicknamesModel.hpp
+        controllers/nicknames/Nickname.hpp
 
         controllers/notifications/NotificationController.cpp
         controllers/notifications/NotificationController.hpp
@@ -440,6 +446,8 @@ set(SOURCE_FILES
         widgets/settingspages/KeyboardSettingsPage.hpp
         widgets/settingspages/ModerationPage.cpp
         widgets/settingspages/ModerationPage.hpp
+        widgets/settingspages/NicknamesPage.cpp
+        widgets/settingspages/NicknamesPage.hpp
         widgets/settingspages/NotificationPage.cpp
         widgets/settingspages/NotificationPage.hpp
         widgets/settingspages/SettingsPage.cpp

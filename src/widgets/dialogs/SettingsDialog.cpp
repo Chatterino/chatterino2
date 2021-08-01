@@ -18,6 +18,7 @@
 #include "widgets/settingspages/IgnoresPage.hpp"
 #include "widgets/settingspages/KeyboardSettingsPage.hpp"
 #include "widgets/settingspages/ModerationPage.hpp"
+#include "widgets/settingspages/NicknamesPage.hpp"
 #include "widgets/settingspages/NotificationPage.hpp"
 
 #include <QDialogButtonBox>
@@ -169,6 +170,7 @@ void SettingsDialog::addTabs()
     this->addTab([]{return new DankerinoPage;},        "Dankerino",      ":/settings/about.svg");
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new AccountsPage;},         "Accounts",       ":/settings/accounts.svg", SettingsTabId::Accounts);
+    this->addTab([]{return new NicknamesPage;},        "Nicknames",      ":/settings/accounts.svg");
     this->ui_.tabContainer->addSpacing(16);
     this->addTab([]{return new CommandPage;},          "Commands",       ":/settings/commands.svg");
     this->addTab([]{return new HighlightingPage;},     "Highlights",     ":/settings/notifications.svg");

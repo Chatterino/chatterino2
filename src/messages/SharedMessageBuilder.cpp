@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
@@ -104,20 +105,9 @@ void SharedMessageBuilder::parse()
 
 bool SharedMessageBuilder::isIgnored() const
 {
-    // TODO(pajlada): Do we need to check if the phrase is valid first?
-    auto phrases = getCSettings().ignoredMessages.readOnly();
-    for (const auto &phrase : *phrases)
-    {
-        if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
-        {
-            qCDebug(chatterinoMessage)
-                << "Blocking message because it contains ignored phrase"
-                << phrase.getPattern();
-            return true;
-        }
-    }
-
-    return false;
+    return isIgnoredMessage({
+        /*.message = */ this->originalMessage_,
+    });
 }
 
 void SharedMessageBuilder::parseUsernameColor()
