@@ -233,7 +233,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
     {
         user->addStretch(1);
 
-        user.emplace<QCheckBox>("Follow").assign(&this->ui_.follow);
         user.emplace<QCheckBox>("Block").assign(&this->ui_.block);
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
@@ -631,18 +630,6 @@ void UserInfoPopup::updateUserData()
                 // on failure
             });
 
-        // get follow state
-        currentUser->checkFollow(user.id, [this, hack](auto result) {
-            if (!hack.lock())
-            {
-                return;
-            }
-            if (result != FollowResult_Failed)
-            {
-                this->ui_.follow->setChecked(result == FollowResult_Following);
-            }
-        });
-
         // get ignore state
         bool isIgnoring = false;
 
@@ -719,9 +706,6 @@ void UserInfoPopup::updateUserData()
     getHelix()->getUserByName(this->userName_, onUserFetched,
                               onUserFetchFailed);
 
-    this->ui_.follow->setEnabled(false);
-    this->ui_.follow->setToolTip("Twitch has removed the ability to follow "
-                                 "users through third-party applications.");
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
 }

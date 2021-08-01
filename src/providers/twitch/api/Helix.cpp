@@ -142,25 +142,6 @@ void Helix::getUserFollowers(
                             std::move(failureCallback));
 }
 
-void Helix::getUserFollow(
-    QString userId, QString targetId,
-    ResultCallback<bool, HelixUsersFollowsRecord> successCallback,
-    HelixFailureCallback failureCallback)
-{
-    this->fetchUsersFollows(
-        std::move(userId), std::move(targetId),
-        [successCallback](const auto &response) {
-            if (response.data.empty())
-            {
-                successCallback(false, HelixUsersFollowsRecord());
-                return;
-            }
-
-            successCallback(true, response.data[0]);
-        },
-        std::move(failureCallback));
-}
-
 void Helix::fetchStreams(
     QStringList userIds, QStringList userLogins,
     ResultCallback<std::vector<HelixStream>> successCallback,
