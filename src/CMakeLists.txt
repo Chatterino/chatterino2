@@ -88,6 +88,8 @@ set(SOURCE_FILES
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
 
+        controllers/ignores/IgnoreController.cpp
+        controllers/ignores/IgnoreController.hpp
         controllers/ignores/IgnoreModel.cpp
         controllers/ignores/IgnoreModel.hpp
 
