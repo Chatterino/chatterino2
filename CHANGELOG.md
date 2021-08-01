@@ -3,12 +3,14 @@
 ## Unversioned
 
 - Major: Newly uploaded Twitch emotes are once again present in emote picker and can be autocompleted with Tab as well. (#2992)
+- Major: Added the ability to add nicknames for users. (#137, #2981)
 - Minor: Added autocompletion in /whispers for Twitch emotes, Global Bttv/Ffz emotes and emojis. (#2999, #3033)
 - Minor: Received Twitch messages now use the exact same timestamp (obtained from Twitch's server) for every Chatterino user instead of assuming message timestamp on client's side. (#3021)
 - Minor: Received IRC messages use `time` message tag for timestamp if it's available. (#3021)
 - Minor: Added informative messages for recent-messages API's errors. (#3029)
 - Minor: Added section with helpful Chatterino-related links to the About page. (#3068)
 - Minor: Now uses spaces instead of magic Unicode character for sending duplicate messages (#3081)
+- Minor: Added `channel.live` filter variable (#3092)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
 - Bugfix: Fixed PubSub not properly trying to resolve pending listens when the pending listens list was larger than 50. (#3037)
 - Bugfix: Copy buttons in usercard now show properly in light mode (#3057)

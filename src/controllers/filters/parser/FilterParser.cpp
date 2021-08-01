@@ -61,8 +61,7 @@ ContextMap buildContextMap(const MessagePtr &m)
             subLength = m->badgeInfos.at(subBadge).toInt();
         }
     }
-
-    return {
+    ContextMap vars = {
         {"author.badges", std::move(badges)},
         {"author.color", m->usernameColor},
         {"author.name", m->displayName},
@@ -82,6 +81,20 @@ ContextMap buildContextMap(const MessagePtr &m)
         {"message.content", m->messageText},
         {"message.length", m->messageText.length()},
     };
+    {
+        using namespace chatterino;
+        auto channel = getApp()->twitch2->getChannelOrEmpty(m->channelName);
+        auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+        if (!channel->isEmpty() && tc)
+        {
+            vars["channel.live"] = tc->isLive();
+        }
+        else
+        {
+            vars["channel.live"] = false;
+        }
+    }
+    return vars;
 }
 
 FilterParser::FilterParser(const QString &text)
