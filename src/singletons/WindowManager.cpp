@@ -426,34 +426,12 @@ void WindowManager::save()
         for (int tab_i = 0; tab_i < window->getNotebook().getPageCount();
              tab_i++)
         {
-            QJsonObject tab_obj;
             SplitContainer *tab = dynamic_cast<SplitContainer *>(
                 window->getNotebook().getPageAt(tab_i));
             assert(tab != nullptr);
 
-            // custom tab title
-            if (tab->getTab()->hasCustomTitle())
-            {
-                tab_obj.insert("title", tab->getTab()->getCustomTitle());
-            }
-
-            // selected
-            if (window->getNotebook().getSelectedPage() == tab)
-            {
-                tab_obj.insert("selected", true);
-            }
-
-            // highlighting on new messages
-            tab_obj.insert("highlightsEnabled",
-                           tab->getTab()->hasHighlightsEnabled());
-
-            // splits
-            QJsonObject splits;
-
-            this->encodeNodeRecursively(tab->getBaseNode(), splits);
-
-            tab_obj.insert("splits2", splits);
-            tabs_arr.append(tab_obj);
+            tabs_arr.append(tab->encodeToJson(
+                window->getNotebook().getSelectedPage() == tab));
         }
 
         window_obj.insert("tabs", tabs_arr);
@@ -497,6 +475,13 @@ void WindowManager::queueSave()
     this->saveTimer->start(10s);
 }
 
+QJsonObject WindowManager::encodeNode(SplitContainer::Node *node)
+{
+    QJsonObject splits;
+    encodeNodeRecursively(node, splits);
+    return splits;
+}
+
 void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
 {
     switch (node->getType())
@@ -524,7 +509,7 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             for (const std::unique_ptr<SplitNode> &n : node->getChildren())
             {
                 QJsonObject subObj;
-                this->encodeNodeRecursively(n.get(), subObj);
+                encodeNodeRecursively(n.get(), subObj);
                 items_arr.append(subObj);
             }
             obj.insert("items", items_arr);

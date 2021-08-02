@@ -333,7 +333,7 @@ void Window::addShortcuts()
         {
             if (auto split = page->getSelectedSplit())
             {
-                page->popup(split);
+                split->popup();
             }
         }
     });

@@ -98,8 +98,11 @@ public:
     pajlada::Signals::Signal<Split *> selectSplit;
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
 
+    static QJsonObject encodeNode(SplitContainer::Node *node);
+
 private:
-    void encodeNodeRecursively(SplitContainer::Node *node, QJsonObject &obj);
+    static void encodeNodeRecursively(SplitContainer::Node *node,
+                                      QJsonObject &obj);
 
     // Load window layout from the window-layout.json file
     WindowLayout loadWindowLayoutFromFile() const;

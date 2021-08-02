@@ -110,6 +110,42 @@ void SplitDescriptor::loadFromJSON(SplitDescriptor &descriptor,
     descriptor.filters_ = loadFilters(root.value("filters"));
 }
 
+TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
+{
+    TabDescriptor tab;
+    // Load tab custom title
+    QJsonValue title_val = tabObj.value("title");
+    if (title_val.isString())
+    {
+        tab.customTitle_ = title_val.toString();
+    }
+
+    // Load tab selected state
+    tab.selected_ = tabObj.value("selected").toBool(false);
+
+    // Load tab "highlightsEnabled" state
+    tab.highlightsEnabled_ = tabObj.value("highlightsEnabled").toBool(true);
+
+    QJsonObject splitRoot = tabObj.value("splits2").toObject();
+
+    // Load tab splits
+    if (!splitRoot.isEmpty())
+    {
+        // root type
+        auto nodeType = splitRoot.value("type").toString();
+        if (nodeType == "split")
+        {
+            tab.rootNode_ = loadNodes<SplitNodeDescriptor>(splitRoot);
+        }
+        else if (nodeType == "horizontal" || nodeType == "vertical")
+        {
+            tab.rootNode_ = loadNodes<ContainerNodeDescriptor>(splitRoot);
+        }
+    }
+
+    return tab;
+}
+
 WindowLayout WindowLayout::loadFromFile(const QString &path)
 {
     WindowLayout layout;
@@ -165,22 +201,9 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
 
         // Load window tabs
         QJsonArray tabs = window_obj.value("tabs").toArray();
-        for (QJsonValue tab_val : tabs)
+        for (QJsonValue tabVal : tabs)
         {
-            TabDescriptor tab;
-
-            QJsonObject tab_obj = tab_val.toObject();
-
-            // Load tab custom title
-            QJsonValue title_val = tab_obj.value("title");
-            if (title_val.isString())
-            {
-                tab.customTitle_ = title_val.toString();
-            }
-
-            // Load tab selected state
-            tab.selected_ = tab_obj.value("selected").toBool(false);
-
+            TabDescriptor tab = TabDescriptor::loadFromJSON(tabVal.toObject());
             if (tab.selected_)
             {
                 if (hasSetASelectedTab)
@@ -192,29 +215,6 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
                 }
                 hasSetASelectedTab = true;
             }
-
-            // Load tab "highlightsEnabled" state
-            tab.highlightsEnabled_ =
-                tab_obj.value("highlightsEnabled").toBool(true);
-
-            QJsonObject splitRoot = tab_obj.value("splits2").toObject();
-
-            // Load tab splits
-            if (!splitRoot.isEmpty())
-            {
-                // root type
-                auto nodeType = splitRoot.value("type").toString();
-                if (nodeType == "split")
-                {
-                    tab.rootNode_ = loadNodes<SplitNodeDescriptor>(splitRoot);
-                }
-                else if (nodeType == "horizontal" || nodeType == "vertical")
-                {
-                    tab.rootNode_ =
-                        loadNodes<ContainerNodeDescriptor>(splitRoot);
-                }
-            }
-
             window.tabs_.emplace_back(std::move(tab));
         }
 

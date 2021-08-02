@@ -202,7 +202,8 @@ public:
 
     void applyFromDescriptor(const NodeDescriptor &rootNode);
 
-    void popup(Split *singleSplit = nullptr);
+    QJsonObject encodeToJson(bool isSelected);
+    void popup();
 
 protected:
     void paintEvent(QPaintEvent *event) override;

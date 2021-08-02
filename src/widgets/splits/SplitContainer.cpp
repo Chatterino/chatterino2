@@ -762,43 +762,55 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
     this->layout();
 }
 
-void SplitContainer::popup(Split *singleSplit)
+QJsonObject SplitContainer::encodeToJson(bool isSelected)
 {
-    if (this->getSplitCount() == 0)
+    QJsonObject tabObj;
+
+    // custom tab title
+    if (this->getTab()->hasCustomTitle())
     {
-        return;
+        tabObj.insert("title", this->getTab()->getCustomTitle());
     }
 
-    auto splits = this->getSplits();
-    auto selectedSplit = this->getSelectedSplit();
-    if (singleSplit)
+    // selected
+    if (isSelected)
     {
-        splits = {singleSplit};
+        tabObj.insert("selected", true);
     }
 
+    // highlighting on new messages
+    tabObj.insert("highlightsEnabled", this->getTab()->hasHighlightsEnabled());
+
+    // splits
+    tabObj.insert("splits2", WindowManager::encodeNode(this->getBaseNode()));
+
+    return tabObj;
+}
+
+void SplitContainer::popup()
+{
     auto app = getApp();
     Window &window = app->windows->createWindow(WindowType::Popup);
     auto popupContainer = window.getNotebook().getOrAddSelectedPage();
-    if (this->getTab()->hasCustomTitle() && !singleSplit)
+
+    QJsonObject encodedTab = this->encodeToJson(true);
+    TabDescriptor tab = TabDescriptor::loadFromJSON(encodedTab);
+
+    // custom title
+    if (!tab.customTitle_.isEmpty())
     {
-        popupContainer->getTab()->setCustomTitle(
-            this->getTab()->getCustomTitle());
+        popupContainer->getTab()->setCustomTitle(tab.customTitle_);
     }
 
-    Split *selectedPopupSplit;
-    for (auto split : splits)
-    {
-        Split *popupSplit = new Split(popupContainer);
-        popupSplit->setChannel(split->getIndirectChannel());
-        popupContainer->appendSplit(popupSplit);
+    // highlighting on new messages
+    popupContainer->getTab()->setHighlightsEnabled(tab.highlightsEnabled_);
 
-        if (split == selectedSplit)
-        {
-            selectedPopupSplit = popupSplit;
-        }
+    // splits
+    if (tab.rootNode_)
+    {
+        popupContainer->applyFromDescriptor(*tab.rootNode_);
     }
 
-    popupContainer->setSelected(selectedPopupSplit);
     window.show();
 }
 
