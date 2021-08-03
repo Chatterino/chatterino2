@@ -30,6 +30,8 @@ public:
     WindowManager();
     ~WindowManager() override;
 
+    static void encodeTab(SplitContainer *tab, bool isSelected,
+                          QJsonObject &obj);
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
     static void encodeFilters(Split *split, QJsonArray &arr);
     static IndirectChannel decodeChannel(const SplitDescriptor &descriptor);
@@ -97,8 +99,6 @@ public:
 
     pajlada::Signals::Signal<Split *> selectSplit;
     pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
-
-    static QJsonObject encodeNode(SplitContainer::Node *node);
 
 private:
     static void encodeNodeRecursively(SplitContainer::Node *node,

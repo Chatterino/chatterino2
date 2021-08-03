@@ -762,38 +762,14 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
     this->layout();
 }
 
-QJsonObject SplitContainer::encodeToJson(bool isSelected)
-{
-    QJsonObject tabObj;
-
-    // custom tab title
-    if (this->getTab()->hasCustomTitle())
-    {
-        tabObj.insert("title", this->getTab()->getCustomTitle());
-    }
-
-    // selected
-    if (isSelected)
-    {
-        tabObj.insert("selected", true);
-    }
-
-    // highlighting on new messages
-    tabObj.insert("highlightsEnabled", this->getTab()->hasHighlightsEnabled());
-
-    // splits
-    tabObj.insert("splits2", WindowManager::encodeNode(this->getBaseNode()));
-
-    return tabObj;
-}
-
 void SplitContainer::popup()
 {
     auto app = getApp();
     Window &window = app->windows->createWindow(WindowType::Popup);
     auto popupContainer = window.getNotebook().getOrAddSelectedPage();
 
-    QJsonObject encodedTab = this->encodeToJson(true);
+    QJsonObject encodedTab;
+    WindowManager::encodeTab(this, true, encodedTab);
     TabDescriptor tab = TabDescriptor::loadFromJSON(encodedTab);
 
     // custom title

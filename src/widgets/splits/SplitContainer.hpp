@@ -202,7 +202,6 @@ public:
 
     void applyFromDescriptor(const NodeDescriptor &rootNode);
 
-    QJsonObject encodeToJson(bool isSelected);
     void popup();
 
 protected:

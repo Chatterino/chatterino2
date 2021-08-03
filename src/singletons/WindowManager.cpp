@@ -426,12 +426,14 @@ void WindowManager::save()
         for (int tab_i = 0; tab_i < window->getNotebook().getPageCount();
              tab_i++)
         {
+            QJsonObject tabObj;
             SplitContainer *tab = dynamic_cast<SplitContainer *>(
                 window->getNotebook().getPageAt(tab_i));
             assert(tab != nullptr);
 
-            tabs_arr.append(tab->encodeToJson(
-                window->getNotebook().getSelectedPage() == tab));
+            bool isSelected = window->getNotebook().getSelectedPage() == tab;
+            this->encodeTab(tab, isSelected, tabObj);
+            tabs_arr.append(tabObj);
         }
 
         window_obj.insert("tabs", tabs_arr);
@@ -475,11 +477,30 @@ void WindowManager::queueSave()
     this->saveTimer->start(10s);
 }
 
-QJsonObject WindowManager::encodeNode(SplitContainer::Node *node)
+void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
+                              QJsonObject &obj)
 {
+    // custom tab title
+    if (tab->getTab()->hasCustomTitle())
+    {
+        obj.insert("title", tab->getTab()->getCustomTitle());
+    }
+
+    // selected
+    if (isSelected)
+    {
+        obj.insert("selected", true);
+    }
+
+    // highlighting on new messages
+    obj.insert("highlightsEnabled", tab->getTab()->hasHighlightsEnabled());
+
+    // splits
     QJsonObject splits;
-    encodeNodeRecursively(node, splits);
-    return splits;
+
+    encodeNodeRecursively(tab->getBaseNode(), splits);
+
+    obj.insert("splits2", splits);
 }
 
 void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
