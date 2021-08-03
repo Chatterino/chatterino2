@@ -197,33 +197,34 @@ void TwitchIrcServer::writeConnectionMessageReceived(
     // Below commands enabled through the twitch.tv/commands CAP REQ
     if (command == "USERSTATE")
     {
-        // Received USERSTATE upon PRIVMSGing
+        // Received USERSTATE upon sending PRIVMSG messages
         handler.handleUserStateMessage(message);
     }
     else if (command == "NOTICE")
     {
-        static std::unordered_set<std::string> readConnectionOnlyIDs{
-            "host_on",
-            "host_off",
-            "host_target_went_offline",
-            "emote_only_on",
-            "emote_only_off",
-            "slow_on",
-            "slow_off",
-            "subs_on",
-            "subs_off",
-            "r9k_on",
-            "r9k_off",
+        // Expected NOTICE messages on write connection
 
-            // Display for user who times someone out. This implies you're a
-            // moderator, at which point you will be connected to PubSub and receive
-            // a better message from there.
-            "timeout_success",
-            "ban_success",
+        // Ban / timeout other user.
+        // While connected to PubSub you'll receive a better message from there.
+        //
+        // ban_success
+        // timeout_success
 
-            // Channel suspended notices
-            "msg_channel_suspended",
-        };
+        // Other moderator events
+        //
+        // mod_success
+        // unmod_success
+        // vip_success
+        // unvip_success
+
+        // Channel suspended notice
+        //
+        // msg_channel_suspended
+
+        // We tried to send a message where we're banned / timed out
+        //
+        // msg_banned
+        // msg_timedout
 
         handler.handleNoticeMessage(
             static_cast<Communi::IrcNoticeMessage *>(message));
