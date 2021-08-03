@@ -3,15 +3,20 @@
 #include "controllers/filters/parser/Tokenizer.hpp"
 #include "controllers/filters/parser/Types.hpp"
 
+namespace chatterino {
+
+class Channel;
+
+}  // namespace chatterino
+
 namespace filterparser {
 
-ContextMap buildContextMap(const MessagePtr &m);
+ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel);
 
 class FilterParser
 {
 public:
     FilterParser(const QString &text);
-    bool execute(const MessagePtr &message) const;
     bool execute(const ContextMap &context) const;
     bool valid() const;
 
