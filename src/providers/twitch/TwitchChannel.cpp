@@ -301,7 +301,8 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     if (!reward.isUserInputRequired)
     {
         MessageBuilder builder;
-        TwitchMessageBuilder::appendChannelPointRewardMessage(reward, &builder);
+        TwitchMessageBuilder::appendChannelPointRewardMessage(
+            reward, &builder, this->isMod(), this->isBroadcaster());
         this->addMessage(builder.release());
         return;
     }
@@ -390,7 +391,17 @@ void TwitchChannel::sendMessage(const QString &message)
         {
             if (parsedMessage == this->lastSentMessage_)
             {
-                parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
+                auto spaceIndex = parsedMessage.indexOf(' ');
+                if (spaceIndex == -1)
+                {
+                    // no spaces found, fall back to old magic character
+                    parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
+                }
+                else
+                {
+                    // replace the space we found in spaceIndex with two spaces
+                    parsedMessage.replace(spaceIndex, 1, "  ");
+                }
             }
         }
     }

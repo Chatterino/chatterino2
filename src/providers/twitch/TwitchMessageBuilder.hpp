@@ -46,7 +46,8 @@ public:
     MessagePtr build() override;
 
     static void appendChannelPointRewardMessage(
-        const ChannelPointReward &reward, MessageBuilder *builder);
+        const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,
+        bool isBroadcaster);
 
     // Message in the /live chat for channel going live
     static void liveMessage(const QString &channelName,
