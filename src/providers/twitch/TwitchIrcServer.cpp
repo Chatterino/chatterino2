@@ -202,30 +202,8 @@ void TwitchIrcServer::writeConnectionMessageReceived(
     }
     else if (command == "NOTICE")
     {
-        // Expected NOTICE messages on write connection
-
-        // Ban / timeout other user.
-        // While connected to PubSub you'll receive a better message from there.
-        //
-        // ban_success
-        // timeout_success
-
-        // Other moderator events
-        //
-        // mod_success
-        // unmod_success
-        // vip_success
-        // unvip_success
-
-        // Channel suspended notice
-        //
-        // msg_channel_suspended
-
-        // We tried to send a message where we're banned / timed out
-        //
-        // msg_banned
-        // msg_timedout
-
+        // List of expected NOTICE messages on write connection
+        // https://git.kotmisia.pl/Mm2PL/docs/src/branch/master/irc_msg_ids.md#command-results
         handler.handleNoticeMessage(
             static_cast<Communi::IrcNoticeMessage *>(message));
     }
