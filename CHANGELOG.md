@@ -10,7 +10,7 @@
 - Minor: Added informative messages for recent-messages API's errors. (#3029)
 - Minor: Added section with helpful Chatterino-related links to the About page. (#3068)
 - Minor: Now uses spaces instead of magic Unicode character for sending duplicate messages (#3081)
-- Minor: Added `channel.live` filter variable (#3092)
+- Minor: Added `channel.live` filter variable (#3092, #3110)
 - Bugfix: Fixed "smiley" emotes being unable to be "Tabbed" with autocompletion, introduced in v2.3.3. (#3010)
 - Bugfix: Fixed PubSub not properly trying to resolve pending listens when the pending listens list was larger than 50. (#3037)
 - Bugfix: Copy buttons in usercard now show properly in light mode (#3057)
