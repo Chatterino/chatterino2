@@ -21,7 +21,7 @@ private:
     int budget_;
 
     /**
-     * @ brief This is the amount of time it takes for one used up budget to be put back into the bucket for use elsewhere
+     * @brief This is the amount of time in milliseconds it takes for one used up budget to be put back into the bucket for use elsewhere
      **/
     int cooldown_;
 
