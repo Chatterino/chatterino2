@@ -24,13 +24,13 @@ AbstractIrcServer::AbstractIrcServer()
         QCoreApplication::instance()->thread());
 
     // Apply a leaky bucket rate limitting to JOIN mesasges
-    this->bucket_ = std::make_unique<RatelimitBucket>(
+    this->bucket_.reset(new RatelimitBucket(
         18, 10500,
         [&](QString message) {
             qCDebug(chatterinoIrc) << "joining" << message;
             this->readConnection_->sendRaw("JOIN #" + message);
         },
-        this);
+        this));
 
     QObject::connect(this->writeConnection_.get(),
                      &Communi::IrcConnection::messageReceived, this,

@@ -89,7 +89,7 @@ private:
     QObjectPtr<IrcConnection> writeConnection_ = nullptr;
     QObjectPtr<IrcConnection> readConnection_ = nullptr;
 
-    std::unique_ptr<RatelimitBucket> bucket_;
+    QObjectPtr<RatelimitBucket> bucket_;
     QTimer reconnectTimer_;
     int falloffCounter_ = 1;
 
