@@ -25,7 +25,13 @@ AbstractIrcServer::AbstractIrcServer()
 
     // Apply a leaky bucket rate limiting to JOIN messages
     auto actuallyJoin = [&](QString message) {
-        qCDebug(chatterinoIrc) << "joining" << message;
+        if (!this->channels.contains(message))
+        {
+            qCDebug(chatterinoIrc)
+                << QString("attempted to join %1 but it does not exist anymore")
+                       .arg(message);
+            return;
+        }
         this->readConnection_->sendRaw("JOIN #" + message);
     };
     this->joinBucket_.reset(new RatelimitBucket(18, 10500, actuallyJoin, this));
