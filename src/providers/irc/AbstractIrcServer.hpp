@@ -89,7 +89,10 @@ private:
     QObjectPtr<IrcConnection> writeConnection_ = nullptr;
     QObjectPtr<IrcConnection> readConnection_ = nullptr;
 
-    QObjectPtr<RatelimitBucket> bucket_;
+    // Our rate limiting bucket for the Twitch join rate limits
+    // https://dev.twitch.tv/docs/irc/guide#rate-limits
+    QObjectPtr<RatelimitBucket> joinBucket_;
+
     QTimer reconnectTimer_;
     int falloffCounter_ = 1;
 

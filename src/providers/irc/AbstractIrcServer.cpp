@@ -24,7 +24,7 @@ AbstractIrcServer::AbstractIrcServer()
         QCoreApplication::instance()->thread());
 
     // Apply a leaky bucket rate limitting to JOIN mesasges
-    this->bucket_.reset(new RatelimitBucket(
+    this->joinBucket_.reset(new RatelimitBucket(
         18, 10500,
         [&](QString message) {
             qCDebug(chatterinoIrc) << "joining" << message;
@@ -233,7 +233,7 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         {
             if (this->readConnection_->isConnected())
             {
-                this->bucket_->send(channelName);
+                this->joinBucket_->send(channelName);
             }
         }
     }
@@ -294,7 +294,7 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
         if (auto channel = weak.lock())
         {
             qCDebug(chatterinoIrc) << "queued joining" << channel->getName();
-            this->bucket_->send(channel->getName());
+            this->joinBucket_->send(channel->getName());
         }
     }
 
