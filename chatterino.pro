@@ -255,6 +255,7 @@ SOURCES += \
     src/util/LayoutHelper.cpp \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
+    src/util/RatelimitBucket.cpp \
     src/util/SplitCommand.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
@@ -517,6 +518,7 @@ HEADERS += \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
+    src/util/RatelimitBucket.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
     src/util/SampleCheerMessages.hpp \
     src/util/SampleLinks.hpp \
@@ -593,6 +595,7 @@ HEADERS += \
     src/widgets/settingspages/IgnoresPage.hpp \
     src/widgets/settingspages/KeyboardSettingsPage.hpp \
     src/widgets/settingspages/ModerationPage.hpp \
+    src/widgets/settingspages/NicknamesPage.hpp \
     src/widgets/settingspages/NotificationPage.hpp \
     src/widgets/settingspages/SettingsPage.hpp \
     src/widgets/splits/ClosedSplits.hpp \
