@@ -23,7 +23,7 @@ AbstractIrcServer::AbstractIrcServer()
     this->writeConnection_->moveToThread(
         QCoreApplication::instance()->thread());
 
-    // Apply a leaky bucket rate limitting to JOIN mesasges
+    // Apply a leaky bucket rate limiting to JOIN messages
     this->joinBucket_.reset(new RatelimitBucket(
         18, 10500,
         [&](QString message) {
