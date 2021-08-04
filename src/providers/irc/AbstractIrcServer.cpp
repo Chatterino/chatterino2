@@ -293,7 +293,7 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
     {
         if (auto channel = weak.lock())
         {
-            qCDebug(chatterinoIrc) << "sending to bucket" << channel->getName();
+            qCDebug(chatterinoIrc) << "queued joining" << channel->getName();
             this->bucket_->send(channel->getName());
         }
     }
