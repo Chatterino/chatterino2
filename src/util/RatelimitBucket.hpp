@@ -23,7 +23,7 @@ private:
     /**
      * @brief This is the amount of time in milliseconds it takes for one used up budget to be put back into the bucket for use elsewhere
      **/
-    int cooldown_;
+    const int cooldown_;
 
     std::function<void(QString)> callback_;
     QList<QString> queue_;
