@@ -31,9 +31,6 @@ AbstractIrcServer::AbstractIrcServer()
     auto actuallyJoin = [&](QString message) {
         if (!this->channels.contains(message))
         {
-            qCDebug(chatterinoIrc)
-                << QString("attempted to join %1 but it does not exist anymore")
-                       .arg(message);
             return;
         }
         this->readConnection_->sendRaw("JOIN #" + message);
@@ -302,7 +299,6 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
     {
         if (auto channel = weak.lock())
         {
-            qCDebug(chatterinoIrc) << "queued joining" << channel->getName();
             this->joinBucket_->send(channel->getName());
         }
     }
