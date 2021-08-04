@@ -15,9 +15,16 @@ public:
     void send(QString message);
 
 private:
-    int limit_;
-    int pending_ = 0;
+    /**
+     * @brief budget_ denotes the amount of calls that can be handled before we need to wait for the cooldown
+     **/
+    int budget_;
+
+    /**
+     * @ brief This is the amount of time it takes for one used up budget to be put back into the bucket for use elsewhere
+     **/
     int cooldown_;
+
     std::function<void(QString)> callback_;
     QList<QString> queue_;
 
