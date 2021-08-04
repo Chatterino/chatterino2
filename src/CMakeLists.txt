@@ -297,6 +297,8 @@ set(SOURCE_FILES
         util/NuulsUploader.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
+        util/RatelimitBucket.cpp
+        util/RatelimitBucket.hpp
         util/SplitCommand.cpp
         util/SplitCommand.hpp
         util/StreamLink.cpp

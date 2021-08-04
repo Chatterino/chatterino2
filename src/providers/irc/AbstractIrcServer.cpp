@@ -15,6 +15,10 @@ const int RECONNECT_BASE_INTERVAL = 2000;
 // 60 falloff counter means it will try to reconnect at most every 60*2 seconds
 const int MAX_FALLOFF_COUNTER = 60;
 
+// Ratelimits for joinBucket_
+const int JOIN_RATELIMIT_BUDGET = 18;
+const int JOIN_RATELIMIT_COOLDOWN = 10500;
+
 AbstractIrcServer::AbstractIrcServer()
 {
     // Initialize the connections
@@ -22,6 +26,17 @@ AbstractIrcServer::AbstractIrcServer()
     this->writeConnection_.reset(new IrcConnection);
     this->writeConnection_->moveToThread(
         QCoreApplication::instance()->thread());
+
+    // Apply a leaky bucket rate limiting to JOIN messages
+    auto actuallyJoin = [&](QString message) {
+        if (!this->channels.contains(message))
+        {
+            return;
+        }
+        this->readConnection_->sendRaw("JOIN #" + message);
+    };
+    this->joinBucket_.reset(new RatelimitBucket(
+        JOIN_RATELIMIT_BUDGET, JOIN_RATELIMIT_COOLDOWN, actuallyJoin, this));
 
     QObject::connect(this->writeConnection_.get(),
                      &Communi::IrcConnection::messageReceived, this,
@@ -224,7 +239,7 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         {
             if (this->readConnection_->isConnected())
             {
-                this->readConnection_->sendRaw("JOIN #" + channelName);
+                this->joinBucket_->send(channelName);
             }
         }
     }
@@ -284,7 +299,7 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
     {
         if (auto channel = weak.lock())
         {
-            connection->sendRaw("JOIN #" + channel->getName());
+            this->joinBucket_->send(channel->getName());
         }
     }
 

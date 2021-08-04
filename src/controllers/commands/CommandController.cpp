@@ -373,6 +373,22 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
+    this->registerCommand("/follow", [](const auto &words, auto channel) {
+        channel->addMessage(makeSystemMessage(
+            "Twitch has removed the ability to follow users through "
+            "third-party applications. For more information, see "
+            "https://github.com/Chatterino/chatterino2/issues/3076"));
+        return "";
+    });
+
+    this->registerCommand("/unfollow", [](const auto &words, auto channel) {
+        channel->addMessage(makeSystemMessage(
+            "Twitch has removed the ability to unfollow users through "
+            "third-party applications. For more information, see "
+            "https://github.com/Chatterino/chatterino2/issues/3076"));
+        return "";
+    });
+
     /// Supported commands
 
     this->registerCommand(
@@ -406,90 +422,6 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/block", blockLambda);
 
     this->registerCommand("/unblock", unblockLambda);
-
-    this->registerCommand("/follow", [](const auto &words, auto channel) {
-        if (words.size() < 2)
-        {
-            channel->addMessage(makeSystemMessage("Usage: /follow [user]"));
-            return "";
-        }
-
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(
-                makeSystemMessage("You must be logged in to follow someone!"));
-            return "";
-        }
-
-        auto target = words.at(1);
-
-        getHelix()->getUserByName(
-            target,
-            [currentUser, channel, target](const auto &targetUser) {
-                getHelix()->followUser(
-                    currentUser->getUserId(), targetUser.id,
-                    [channel, target]() {
-                        channel->addMessage(makeSystemMessage(
-                            "You successfully followed " + target));
-                    },
-                    [channel, target]() {
-                        channel->addMessage(makeSystemMessage(
-                            QString("User %1 could not be followed, an unknown "
-                                    "error occurred!")
-                                .arg(target)));
-                    });
-            },
-            [channel, target] {
-                channel->addMessage(
-                    makeSystemMessage(QString("User %1 could not be followed, "
-                                              "no user with that name found!")
-                                          .arg(target)));
-            });
-
-        return "";
-    });
-
-    this->registerCommand("/unfollow", [](const auto &words, auto channel) {
-        if (words.size() < 2)
-        {
-            channel->addMessage(makeSystemMessage("Usage: /unfollow [user]"));
-            return "";
-        }
-
-        auto currentUser = getApp()->accounts->twitch.getCurrent();
-
-        if (currentUser->isAnon())
-        {
-            channel->addMessage(makeSystemMessage(
-                "You must be logged in to unfollow someone!"));
-            return "";
-        }
-
-        auto target = words.at(1);
-
-        getHelix()->getUserByName(
-            target,
-            [currentUser, channel, target](const auto &targetUser) {
-                getHelix()->unfollowUser(
-                    currentUser->getUserId(), targetUser.id,
-                    [channel, target]() {
-                        channel->addMessage(makeSystemMessage(
-                            "You successfully unfollowed " + target));
-                    },
-                    [channel, target]() {
-                        channel->addMessage(makeSystemMessage(
-                            "An error occurred while unfollowing " + target));
-                    });
-            },
-            [channel, target] {
-                channel->addMessage(makeSystemMessage(
-                    QString("User %1 could not be followed!").arg(target)));
-            });
-
-        return "";
-    });
 
     this->registerCommand("/user", [](const auto &words, auto channel) {
         if (words.size() < 2)
