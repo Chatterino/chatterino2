@@ -14,9 +14,9 @@ RatelimitBucket::RatelimitBucket(int budget, int cooldown,
 {
 }
 
-void RatelimitBucket::send(QString message)
+void RatelimitBucket::send(QString channel)
 {
-    this->queue_.append(message);
+    this->queue_.append(channel);
 
     if (this->budget_ > 0)
     {

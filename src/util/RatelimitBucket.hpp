@@ -12,7 +12,7 @@ public:
     RatelimitBucket(int budget, int cooldown,
                     std::function<void(QString)> callback, QObject *parent);
 
-    void send(QString message);
+    void send(QString channel);
 
 private:
     /**
