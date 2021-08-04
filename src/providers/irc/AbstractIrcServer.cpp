@@ -214,11 +214,6 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
             {
                 this->readConnection_->sendRaw("PART #" + channelName);
             }
-
-            if (this->writeConnection_ && this->hasSeparateWriteConnection())
-            {
-                this->writeConnection_->sendRaw("PART #" + channelName);
-            }
         }));
 
     // join irc channel
@@ -230,14 +225,6 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
             if (this->readConnection_->isConnected())
             {
                 this->readConnection_->sendRaw("JOIN #" + channelName);
-            }
-        }
-
-        if (this->writeConnection_ && this->hasSeparateWriteConnection())
-        {
-            if (this->readConnection_->isConnected())
-            {
-                this->writeConnection_->sendRaw("JOIN #" + channelName);
             }
         }
     }
