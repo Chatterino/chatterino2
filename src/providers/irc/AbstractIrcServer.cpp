@@ -23,6 +23,13 @@ AbstractIrcServer::AbstractIrcServer()
     this->writeConnection_->moveToThread(
         QCoreApplication::instance()->thread());
 
+    // Apply a leaky bucket rate limitting to JOIN mesasges
+    this->bucket_ =
+        std::make_unique<RatelimitBucket>(18, 10500, [&](QString message) {
+            qCDebug(chatterinoIrc) << "joining" << message;
+            this->readConnection_->sendRaw("JOIN #" + message);
+        });
+
     QObject::connect(this->writeConnection_.get(),
                      &Communi::IrcConnection::messageReceived, this,
                      [this](auto msg) {
@@ -224,7 +231,7 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
         {
             if (this->readConnection_->isConnected())
             {
-                this->readConnection_->sendRaw("JOIN #" + channelName);
+                this->bucket_->send(channelName);
             }
         }
     }
@@ -278,13 +285,6 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
     (void)connection;
 
     std::lock_guard lock(this->channelMutex);
-
-    // Apply a leaky bucket rate limitting to JOIN mesasges
-    this->bucket_ =
-        std::make_unique<RatelimitBucket>(18, 10500, [&](QString message) {
-            qCDebug(chatterinoIrc) << "joining" << message;
-            connection->sendRaw("JOIN #" + message);
-        });
 
     // join channels
     for (auto &&weak : this->channels)
