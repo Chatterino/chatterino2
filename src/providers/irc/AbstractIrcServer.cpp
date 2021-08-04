@@ -220,7 +220,8 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
             {
                 this->readConnection_->sendRaw("PART #" + channelName);
             }
-        }));
+        }
+    }));
 
     // join irc channel
     {
@@ -300,11 +301,12 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
         {
             if (channel->getName().at(0) == "$")
             {
-                connection->sendRaw("JOIN " + channel->getName().mid(1));
+                this->readConnection_->sendRaw("JOIN " +
+                                               channel->getName().mid(1));
             }
             else
             {
-                connection->sendRaw("JOIN #" + channel->getName());
+                this->readConnection_->sendRaw("JOIN #" + channel->getName());
             }
         }
     }
