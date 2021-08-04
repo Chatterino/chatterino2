@@ -8,6 +8,7 @@
 
 #include "common/Common.hpp"
 #include "providers/irc/IrcConnection2.hpp"
+#include "util/RatelimitBucket.hpp"
 
 namespace chatterino {
 
@@ -88,6 +89,7 @@ private:
     QObjectPtr<IrcConnection> writeConnection_ = nullptr;
     QObjectPtr<IrcConnection> readConnection_ = nullptr;
 
+    std::unique_ptr<RatelimitBucket> bucket_;
     QTimer reconnectTimer_;
     int falloffCounter_ = 1;
 
