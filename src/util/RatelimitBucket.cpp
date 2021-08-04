@@ -4,11 +4,11 @@
 
 namespace chatterino {
 
-RatelimitBucket::RatelimitBucket(int limit, int cooldown,
+RatelimitBucket::RatelimitBucket(int budget, int cooldown,
                                  std::function<void(QString)> callback,
                                  QObject *parent)
     : QObject(parent)
-    , budget_(limit)
+    , budget_(budget)
     , cooldown_(cooldown)
     , callback_(callback)
 {

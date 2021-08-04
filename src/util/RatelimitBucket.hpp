@@ -9,7 +9,7 @@ namespace chatterino {
 class RatelimitBucket : public QObject
 {
 public:
-    RatelimitBucket(int limit, int cooldown,
+    RatelimitBucket(int budget, int cooldown,
                     std::function<void(QString)> callback, QObject *parent);
 
     void send(QString message);
