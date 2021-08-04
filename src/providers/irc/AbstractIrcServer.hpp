@@ -8,6 +8,7 @@
 
 #include "common/Common.hpp"
 #include "providers/irc/IrcConnection2.hpp"
+#include "util/RatelimitBucket.hpp"
 
 namespace chatterino {
 
@@ -87,6 +88,10 @@ private:
 
     QObjectPtr<IrcConnection> writeConnection_ = nullptr;
     QObjectPtr<IrcConnection> readConnection_ = nullptr;
+
+    // Our rate limiting bucket for the Twitch join rate limits
+    // https://dev.twitch.tv/docs/irc/guide#rate-limits
+    QObjectPtr<RatelimitBucket> joinBucket_;
 
     QTimer reconnectTimer_;
     int falloffCounter_ = 1;
