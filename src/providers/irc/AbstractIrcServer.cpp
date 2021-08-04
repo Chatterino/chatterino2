@@ -6,6 +6,7 @@
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "util/RatelimitBucket.hpp"
 
 #include <QCoreApplication>
 
@@ -280,11 +281,16 @@ void AbstractIrcServer::onReadConnected(IrcConnection *connection)
     std::lock_guard lock(this->channelMutex);
 
     // join channels
+    auto bucket = new RatelimitBucket(18, 10500, [connection](QString message) {
+        qCDebug(chatterinoIrc) << "joining" << message;
+        connection->sendRaw("JOIN #" + message);
+    });
     for (auto &&weak : this->channels)
     {
         if (auto channel = weak.lock())
         {
-            connection->sendRaw("JOIN #" + channel->getName());
+            qCDebug(chatterinoIrc) << "sending to bucket" << channel->getName();
+            bucket->send(channel->getName());
         }
     }
 
