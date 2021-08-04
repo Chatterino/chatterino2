@@ -1,15 +1,16 @@
 #pragma once
 
 #include <QList>
+#include <QObject>
 #include <QString>
 
 namespace chatterino {
 
-class RatelimitBucket
+class RatelimitBucket : public QObject
 {
 public:
     RatelimitBucket(int limit, int cooldown,
-                    std::function<void(QString)> callback);
+                    std::function<void(QString)> callback, QObject *parent);
 
     void send(QString message);
 

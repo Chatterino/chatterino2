@@ -5,8 +5,10 @@
 namespace chatterino {
 
 RatelimitBucket::RatelimitBucket(int limit, int cooldown,
-                                 std::function<void(QString)> callback)
-    : limit_(limit)
+                                 std::function<void(QString)> callback,
+                                 QObject *parent)
+    : QObject(parent)
+    , limit_(limit)
     , cooldown_(cooldown)
     , callback_(callback)
 {
@@ -34,7 +36,7 @@ void RatelimitBucket::execute()
     this->pending_++;
     callback_(item);
 
-    QTimer::singleShot(cooldown_, [this] {
+    QTimer::singleShot(cooldown_, this, [this] {
         this->pending_--;
         this->execute();
     });
