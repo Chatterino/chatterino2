@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Major: Newly uploaded Twitch emotes are once again present in emote picker and can be autocompleted with Tab as well. (#2992)
+- Major: Deprecated `/(un)follow` commands and (un)following in the usercards as Twitch has removed this feature for 3rd party applications. (#3076, #3078)
 - Major: Added the ability to add nicknames for users. (#137, #2981)
 - Major: Fixed constant disconnections with more than 20 channels by rate-limiting outgoing JOIN messages. (#3112, #3115)
 - Minor: Added autocompletion in /whispers for Twitch emotes, Global Bttv/Ffz emotes and emojis. (#2999, #3033)

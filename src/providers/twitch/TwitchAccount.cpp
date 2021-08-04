@@ -186,23 +186,6 @@ void TwitchAccount::unblockUser(QString userId, std::function<void()> onSuccess,
         std::move(onFailure));
 }
 
-void TwitchAccount::checkFollow(const QString targetUserID,
-                                std::function<void(FollowResult)> onFinished)
-{
-    const auto onResponse = [onFinished](bool following, const auto &record) {
-        if (!following)
-        {
-            onFinished(FollowResult_NotFollowing);
-            return;
-        }
-
-        onFinished(FollowResult_Following);
-    };
-
-    getHelix()->getUserFollow(this->getUserId(), targetUserID, onResponse,
-                              [] {});
-}
-
 SharedAccessGuard<const std::set<TwitchUser>> TwitchAccount::accessBlocks()
     const
 {
