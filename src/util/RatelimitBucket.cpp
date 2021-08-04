@@ -20,11 +20,11 @@ void RatelimitBucket::send(QString message)
 
     if (this->pending_ < this->limit_)
     {
-        this->execute();
+        this->handleOne();
     }
 }
 
-void RatelimitBucket::execute()
+void RatelimitBucket::handleOne()
 {
     if (queue_.isEmpty())
     {
@@ -38,7 +38,7 @@ void RatelimitBucket::execute()
 
     QTimer::singleShot(cooldown_, this, [this] {
         this->pending_--;
-        this->execute();
+        this->handleOne();
     });
 }
 

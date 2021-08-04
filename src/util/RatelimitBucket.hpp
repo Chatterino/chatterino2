@@ -21,7 +21,13 @@ private:
     std::function<void(QString)> callback_;
     QList<QString> queue_;
 
-    void execute();
+    /**
+     * @brief Run the callback on one entry in the queue.
+     *
+     * This will start a timer that runs after cooldown_ milliseconds that
+     * gives back one "token" to the bucket and calls handleOne again.
+     **/
+    void handleOne();
 };
 
 }  // namespace chatterino
