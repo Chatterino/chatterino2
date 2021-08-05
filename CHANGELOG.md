@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Fix: Notifications for moderators about other moderators deleting messages can now be disabled (#3121)
+- Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
 
 ## 2.3.4
 
