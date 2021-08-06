@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Minor: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
+- Bugfix: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
 
 ## 2.3.4
 
