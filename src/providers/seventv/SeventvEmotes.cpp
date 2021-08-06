@@ -55,6 +55,11 @@ namespace {
                                       .toObject()
                                       .value("display_name")
                                       .toString()};
+        int64_t visibility = jsonEmote.toObject().value("visibility").toInt();
+        auto visibilityFlags =
+            SeventvEmoteVisibilityFlags(SeventvEmoteVisibilityFlag(visibility));
+        bool zeroWidth =
+            visibilityFlags.has(SeventvEmoteVisibilityFlag::ZeroWidth);
 
         auto emote = Emote(
             {name,
@@ -64,7 +69,7 @@ namespace {
              Tooltip{QString("%1<br>%2 7TV Emote<br>By: %3")
                          .arg(name.string, (isGlobal ? "Global" : "Channel"),
                               author.string)},
-             Url{emoteLinkFormat.arg(id.string)}});
+             Url{emoteLinkFormat.arg(id.string)}, zeroWidth});
 
         auto result = CreateEmoteResult({id, name, emote});
         return result;

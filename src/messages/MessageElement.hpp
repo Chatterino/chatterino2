@@ -139,7 +139,7 @@ enum class MessageElementFlag : int64_t {
     OriginalLink = (1LL << 30),
 
     // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
-    // e.g. BTTV's SoSnowy during christmas season
+    // e.g. BTTV's SoSnowy during christmas season or zerowidth 7TV emotes
     ZeroWidthEmote = (1LL << 31),
 
     // (1LL << 32) is used by SeventvEmoteImage, it is next to FfzEmote
