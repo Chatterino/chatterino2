@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Bugfix: Fixed a bug that caused all badge highlights to use the same color. (#3132, #3134)
+
 ## 2.3.4
 
 - Major: Newly uploaded Twitch emotes are once again present in emote picker and can be autocompleted with Tab as well. (#2992)
