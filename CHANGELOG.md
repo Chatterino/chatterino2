@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Minor: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
+
 ## 2.3.4
 
 - Major: Newly uploaded Twitch emotes are once again present in emote picker and can be autocompleted with Tab as well. (#2992)
