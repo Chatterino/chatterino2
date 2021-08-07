@@ -230,8 +230,8 @@ void TwitchAccount::loadEmotes(const std::shared_ptr<Channel> &channel)
         this->loadKrakenEmotes();
         if (channel != nullptr)
         {
-            channel->addMessage(makeSystemMessage(
-                "Twitch subscriber emotes reloaded."));
+            channel->addMessage(
+                makeSystemMessage("Twitch subscriber emotes reloaded."));
         }
     });
 }
