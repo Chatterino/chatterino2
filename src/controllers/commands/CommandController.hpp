@@ -27,7 +27,7 @@ public:
 
     QString execCommand(const QString &text, std::shared_ptr<Channel> channel,
                         bool dryRun);
-    QStringList getDefaultTwitchCommandList();
+    QStringList getDefaultChatterinoCommandList();
 
     virtual void initialize(Settings &, Paths &paths) override;
     virtual void save() override;
@@ -60,7 +60,7 @@ private:
     QString execCustomCommand(const QStringList &words, const Command &command,
                               bool dryRun);
 
-    QStringList commandAutoCompletions_;
+    QStringList defaultChatterinoCommandAutoCompletions_;
 };
 
 }  // namespace chatterino

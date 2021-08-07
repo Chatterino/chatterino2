@@ -7,6 +7,7 @@
 #include "controllers/commands/CommandController.hpp"
 #include "debug/Benchmark.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/Settings.hpp"
@@ -85,21 +86,29 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     // Twitch channel
     auto tc = dynamic_cast<TwitchChannel *>(&this->channel_);
 
-    std::function<void(const QString &str, TaggedString::Type type)> addString;
-    if (getSettings()->prefixOnlyEmoteCompletion)
-    {
-        addString = [=](const QString &str, TaggedString::Type type) {
-            if (str.startsWith(prefix, Qt::CaseInsensitive))
+    std::function<void(const QString &str, TaggedString::Type type)> addString =
+        [=](const QString &str, TaggedString::Type type) {
+            // Special case for handling default Twitch commands
+            if (type == TaggedString::TwitchCommand)
+            {
+                if (prefix.size() > 1 &&
+                    (prefix.at(0) == '/' || prefix.at(0) == '.') &&
+                    prefix.at(1) != ' ')
+                {
+                    if (startsWithOrContains(
+                            (prefix.at(0) + str), prefix, Qt::CaseInsensitive,
+                            getSettings()->prefixOnlyEmoteCompletion))
+                    {
+                        this->items_.emplace((prefix.at(0) + str + " "), type);
+                    }
+                }
+            }
+
+            else if (startsWithOrContains(
+                         str, prefix, Qt::CaseInsensitive,
+                         getSettings()->prefixOnlyEmoteCompletion))
                 this->items_.emplace(str + " ", type);
         };
-    }
-    else
-    {
-        addString = [=](const QString &str, TaggedString::Type type) {
-            if (str.contains(prefix, Qt::CaseInsensitive))
-                this->items_.emplace(str + " ", type);
-        };
-    }
 
     if (auto account = getApp()->accounts->twitch.getCurrent())
     {
@@ -190,15 +199,22 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         addString(emote.first.string, TaggedString::Type::BTTVGlobalEmote);
     }
 
-    // Commands
+    // Custom Chatterino commands
     for (auto &command : getApp()->commands->items_)
     {
-        addString(command.name, TaggedString::Command);
+        addString(command.name, TaggedString::CustomCommand);
     }
 
-    for (auto &command : getApp()->commands->getDefaultTwitchCommandList())
+    // Default Chatterino commands
+    for (auto &command : getApp()->commands->getDefaultChatterinoCommandList())
     {
-        addString(command, TaggedString::Command);
+        addString(command, TaggedString::ChatterinoCommand);
+    }
+
+    // Default Twitch commands
+    for (auto &command : TWITCH_DEFAULT_COMMANDS)
+    {
+        addString(command, TaggedString::TwitchCommand);
     }
 }
 
