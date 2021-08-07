@@ -200,7 +200,7 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     }
 
     // Custom Chatterino commands
-    for (auto &command : getApp()->commands->items_)
+    for (auto &command : getApp()->commands->items)
     {
         addString(command.name, TaggedString::CustomCommand);
     }

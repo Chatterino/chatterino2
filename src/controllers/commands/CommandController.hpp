@@ -23,7 +23,7 @@ class CommandModel;
 class CommandController final : public Singleton
 {
 public:
-    SignalVector<Command> items_;
+    SignalVector<Command> items;
 
     QString execCommand(const QString &text, std::shared_ptr<Channel> channel,
                         bool dryRun);
