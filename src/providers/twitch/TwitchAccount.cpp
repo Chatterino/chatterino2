@@ -198,6 +198,8 @@ SharedAccessGuard<const std::set<QString>> TwitchAccount::accessBlockedUserIds()
     return this->ignoresUserIds_.accessConst();
 }
 
+// this overload is for compatability with the IRCMessageHandler
+// since it doesn't have access to the channel
 void TwitchAccount::loadEmotes()
 {
     this->loadEmotes(nullptr);
