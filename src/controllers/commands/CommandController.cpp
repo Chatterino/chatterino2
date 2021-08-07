@@ -430,6 +430,11 @@ void CommandController::initialize(Settings &, Paths &paths)
                 makeSystemMessage("Usage /user [user] (channel)"));
             return "";
         }
+        QString userName = words[1];
+        if (userName[0] == '@')
+        {
+            userName.remove(0, 1);
+        }
         QString channelName = channel->getName();
         if (words.size() > 2)
         {
@@ -439,7 +444,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 channelName.remove(0, 1);
             }
         }
-        openTwitchUsercard(channelName, words[1]);
+        openTwitchUsercard(channelName, userName);
 
         return "";
     });
@@ -451,10 +456,15 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         }
 
+        QString userName = words[1];
+        if (userName[0] == '@')
+        {
+            userName.remove(0, 1);
+        }
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
-        userPopup->setData(words[1], channel);
+        userPopup->setData(userName, channel);
         userPopup->move(QCursor::pos());
         userPopup->show();
         return "";
