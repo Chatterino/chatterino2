@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Display a system message when reloading subscription emotes to match BTTV/FFZ behavior (#3135)
 - Bugfix: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
 
 ## 2.3.4
