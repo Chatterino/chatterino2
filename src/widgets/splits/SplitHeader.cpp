@@ -916,10 +916,6 @@ void SplitHeader::themeChangedEvent()
     }
 }
 
-void SplitHeader::moveSplit()
-{
-}
-
 void SplitHeader::reloadChannelEmotes()
 {
     auto channel = this->split_->getChannel();
