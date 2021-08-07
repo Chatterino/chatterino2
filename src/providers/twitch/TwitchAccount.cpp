@@ -200,7 +200,7 @@ SharedAccessGuard<const std::set<QString>> TwitchAccount::accessBlockedUserIds()
 
 void TwitchAccount::loadEmotes()
 {
-    loadEmotes(nullptr);
+    this->loadEmotes(nullptr);
 }
 
 void TwitchAccount::loadEmotes(const std::shared_ptr<Channel> &channel)
