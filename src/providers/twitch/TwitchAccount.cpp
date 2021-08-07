@@ -228,8 +228,11 @@ void TwitchAccount::loadEmotes(const std::shared_ptr<Channel> &channel)
     this->loadUserstateEmotes([this, channel] {
         // Fill up emoteData with emote sets that were returned in a Kraken call, but aren't present in emoteData.
         this->loadKrakenEmotes();
-        channel->addMessage(makeSystemMessage(
-            "Twitch subscriber emotes reloaded."));
+        if (channel != nullptr)
+        {
+            channel->addMessage(makeSystemMessage(
+                "Twitch subscriber emotes reloaded."));
+        }
     });
 }
 
