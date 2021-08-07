@@ -43,6 +43,8 @@ matthewde | https://github.com/m4tthewde | :/avatars/matthewde.jpg | Contributor
 Karar Al-Remahy | https://github.com/KararTY | :/avatars/kararty.png | Contributor
 Talen | https://github.com/talneoran | | Contributor
 SLCH | https://github.com/SLCH | :/avatars/slch.png | Contributor
+ALazyMeme | https://github.com/alazymeme | :/avatars/alazymeme.png | Contributor
+xHeaveny_ | https://github.com/xHeaveny | :/avatars/xheaveny.png | Contributor
 
 # If you are a contributor add yourself above this line
 

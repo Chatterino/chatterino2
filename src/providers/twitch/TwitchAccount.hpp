@@ -108,9 +108,6 @@ public:
     void unblockUser(QString userId, std::function<void()> onSuccess,
                      std::function<void()> onFailure);
 
-    void checkFollow(const QString targetUserID,
-                     std::function<void(FollowResult)> onFinished);
-
     SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;
     SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 

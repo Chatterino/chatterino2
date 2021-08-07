@@ -60,11 +60,6 @@ public:
         return this->parser_->valid();
     }
 
-    bool filter(const MessagePtr &message) const
-    {
-        return this->parser_->execute(message);
-    }
-
     bool filter(const filterparser::ContextMap &context) const
     {
         return this->parser_->execute(context);
