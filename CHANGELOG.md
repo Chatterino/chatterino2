@@ -2,8 +2,10 @@
 
 ## Unversioned
 
+- Minor: Remove TwitchEmotes.com attribution and the open/copy options when right-clicking a Twitch Emote. (#2214, #3136)
 - Minor: Display a system message when reloading subscription emotes to match BTTV/FFZ behavior (#3135)
 - Bugfix: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
+- Bugfix: Fixed a bug that caused all badge highlights to use the same color. (#3132, #3134)
 
 ## 2.3.4
 
@@ -24,6 +26,7 @@
 - Bugfix: Fixed comma appended to username completion when not at the beginning of the message. (#3060)
 - Bugfix: Fixed bug misplacing chat when zooming on Chrome with Chatterino Native Host extension (#1936)
 - Bugfix: Channel point redemptions from ignored users are now properly blocked. (#3102)
+- Dev: Allow building against Qt 5.11 (#3105)
 - Dev: Ubuntu packages are now available (#2936)
 - Dev: Disabled update checker on Flatpak. (#3051)
 - Dev: Add logging for HTTP requests (#2991)
