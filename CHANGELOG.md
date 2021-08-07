@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Minor: Remove TwitchEmotes.com attribution and the open/copy options when right-clicking a Twitch Emote. (#2214, #3136)
+- Minor: Added autocompletion for default Twitch commands starting with the dot (e.g. `.mods` which does the same as `/mods`). (#3144)
 - Bugfix: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
 - Bugfix: Fixed a bug that caused all badge highlights to use the same color. (#3132, #3134)
 
