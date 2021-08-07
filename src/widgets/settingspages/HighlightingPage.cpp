@@ -195,7 +195,7 @@ HighlightingPage::HighlightingPage()
                         }
                         getSettings()->highlightedBadges.append(HighlightBadge{
                             s->badgeName(), s->displayName(), false, false, "",
-                            ColorProvider::instance().color(
+                            *ColorProvider::instance().color(
                                 ColorType::SelfHighlight)});
                     }
                 });
