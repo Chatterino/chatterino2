@@ -643,10 +643,27 @@ void TwitchMessageBuilder::appendUsername()
 
     for (const auto &nickname : *nicknames)
     {
-        if (nickname.name().toLower() == loginLower)
+        if (nickname.regex())
         {
-            usernameText = nickname.replace();
-            break;
+            const auto &regex = QRegularExpression(nickname.name());
+            if (!regex.isValid())
+            {
+                continue;
+            }
+            auto match = regex.match(this->message().loginName);
+            if (match.hasMatch())
+            {
+                usernameText = nickname.replace();
+                break;
+            }
+        }
+        else
+        {
+            if (nickname.name().toLower() == loginLower)
+            {
+                usernameText = nickname.replace();
+                break;
+            }
         }
     }
 

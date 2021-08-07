@@ -29,19 +29,22 @@ NicknamesPage::NicknamesPage()
                     ->initialized(&getSettings()->nicknames))
             .getElement();
 
-    view->setTitles({"Username", "Nickname"});
+    view->setTitles({"Username", "Enable regex", "Nickname"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        QHeaderView::Interactive);
+        QHeaderView::Fixed);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
-        1, QHeaderView::Stretch);
+        0, QHeaderView::Stretch);
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        2, QHeaderView::Stretch);
 
     view->addButtonPressed.connect([] {
-        getSettings()->nicknames.append(Nickname{"Username", "Nickname"});
+        getSettings()->nicknames.append(
+            Nickname{"Username", false, "Nickname"});
     });
 
     QTimer::singleShot(1, [view] {
         view->getTableView()->resizeColumnsToContents();
-        view->getTableView()->setColumnWidth(0, 250);
+        view->getTableView()->setColumnWidth(0, 200);
     });
 }
 

@@ -15,8 +15,9 @@ namespace chatterino {
 class Nickname
 {
 public:
-    Nickname(const QString &name, const QString &replace)
+    Nickname(const QString &name, const bool regex, const QString &replace)
         : name_(name)
+        , regex_(regex)
         , replace_(replace)
     {
     }
@@ -25,6 +26,10 @@ public:
     {
         return this->name_;
     }
+    const bool &regex() const
+    {
+        return this->regex_;
+    }
     const QString &replace() const
     {
         return this->replace_;
@@ -32,6 +37,7 @@ public:
 
 private:
     QString name_;
+    bool regex_;
     QString replace_;
 };
 
@@ -47,6 +53,7 @@ struct Serialize<chatterino::Nickname> {
         rapidjson::Value ret(rapidjson::kObjectType);
 
         chatterino::rj::set(ret, "name", value.name(), a);
+        chatterino::rj::set(ret, "regex", value.regex(), a);
         chatterino::rj::set(ret, "replace", value.replace(), a);
 
         return ret;
@@ -61,16 +68,18 @@ struct Deserialize<chatterino::Nickname> {
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error)
-            return chatterino::Nickname(QString(), QString());
+            return chatterino::Nickname(QString(), false, QString());
         }
 
         QString _name;
+        bool _regex;
         QString _replace;
 
         chatterino::rj::getSafe(value, "name", _name);
+        chatterino::rj::getSafe(value, "regex", _regex);
         chatterino::rj::getSafe(value, "replace", _replace);
 
-        return chatterino::Nickname(_name, _replace);
+        return chatterino::Nickname(_name, _regex, _replace);
     }
 };
 
