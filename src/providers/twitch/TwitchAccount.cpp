@@ -200,30 +200,7 @@ SharedAccessGuard<const std::set<QString>> TwitchAccount::accessBlockedUserIds()
 
 void TwitchAccount::loadEmotes()
 {
-    qCDebug(chatterinoTwitch)
-        << "Loading Twitch emotes for user" << this->getUserName();
-
-    if (this->getOAuthClient().isEmpty() || this->getOAuthToken().isEmpty())
-    {
-        qCDebug(chatterinoTwitch)
-            << "Aborted loadEmotes due to missing Client ID and/or OAuth token";
-        return;
-    }
-
-    {
-        auto emoteData = this->emotes_.access();
-        emoteData->emoteSets.clear();
-        emoteData->emotes.clear();
-        qCDebug(chatterinoTwitch) << "Cleared emotes!";
-    }
-
-    // TODO(zneix): Once Helix adds Get User Emotes we could remove this hacky solution
-    // For now, this is necessary as Kraken's equivalent doesn't return all emotes
-    // See: https://twitch.uservoice.com/forums/310213-developers/suggestions/43599900
-    this->loadUserstateEmotes([=] {
-        // Fill up emoteData with emote sets that were returned in a Kraken call, but aren't present in emoteData.
-        this->loadKrakenEmotes();
-    });
+    loadEmotes(nullptr);
 }
 
 void TwitchAccount::loadEmotes(const std::shared_ptr<Channel> &channel)
