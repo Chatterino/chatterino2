@@ -650,10 +650,10 @@ void TwitchMessageBuilder::appendUsername()
             {
                 continue;
             }
-            auto match = regex.match(this->message().loginName);
-            if (match.hasMatch())
+            usernameText = this->message().loginName;
+            usernameText.replace(regex, nickname.replace());
+            if (usernameText != this->message().loginName)
             {
-                usernameText = nickname.replace();
                 break;
             }
         }
