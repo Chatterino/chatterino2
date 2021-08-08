@@ -645,15 +645,16 @@ void TwitchMessageBuilder::appendUsername()
     {
         if (nickname.regex())
         {
-            const auto &regex = QRegularExpression(nickname.name());
+            const auto &regex = QRegularExpression("^" + nickname.name() + "$");
             if (!regex.isValid())
             {
                 continue;
             }
-            usernameText = this->message().loginName;
-            usernameText.replace(regex, nickname.replace());
-            if (usernameText != this->message().loginName)
+            auto workingCopy = this->message().loginName;
+            workingCopy.replace(regex, nickname.replace());
+            if (workingCopy != this->message().loginName)
             {
+                usernameText = workingCopy;
                 break;
             }
         }
