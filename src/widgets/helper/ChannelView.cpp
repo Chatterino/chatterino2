@@ -108,11 +108,7 @@ namespace {
                                 });
         };
 
-        if (creatorFlags.has(MessageElementFlag::TwitchEmote))
-        {
-            addPageLink("TwitchEmotes");
-        }
-        else if (creatorFlags.has(MessageElementFlag::SeventvEmote))
+        if (creatorFlags.has(MessageElementFlag::SeventvEmote))
         {
             addPageLink("7TV");
         }

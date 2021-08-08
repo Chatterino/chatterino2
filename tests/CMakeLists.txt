@@ -12,6 +12,7 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchAccount.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/RatelimitBucket.cpp
+    # Add your new file above this line!
     )
 
 add_executable(${PROJECT_NAME} ${test_SOURCES})
