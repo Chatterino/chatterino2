@@ -71,4 +71,16 @@ const bool &Version::isSupportedOS() const
     return this->isSupportedOS_;
 }
 
+const bool &Version::isFlatpak() const
+{
+    if (QFileInfo::exists("/.flatpak-info"))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 }  // namespace chatterino

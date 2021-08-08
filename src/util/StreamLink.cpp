@@ -10,6 +10,7 @@
 #include <QFileInfo>
 #include <QProcess>
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 
 #include <functional>
 
@@ -83,7 +84,15 @@ namespace {
     QProcess *createStreamlinkProcess()
     {
         auto p = new QProcess;
-        p->setProgram(getStreamlinkProgram());
+
+        if (Version::instance().isFlatpak())
+        {
+            p->setProgram("flatpak-spawn --host " + getStreamlinkProgram());
+        }
+        else
+        {
+            p->setProgram(getStreamlinkProgram());
+        }
 
         QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
             if (err == QProcess::FailedToStart)
