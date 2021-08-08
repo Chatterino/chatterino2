@@ -14,7 +14,7 @@ CCACHE_BIN = $$system(which ccache)
   CONFIG+=ccache
 }
 
-MINIMUM_REQUIRED_QT_VERSION = 5.12.0
+MINIMUM_REQUIRED_QT_VERSION = 5.11.0
 
 !versionAtLeast(QT_VERSION, $$MINIMUM_REQUIRED_QT_VERSION) {
     error("You're trying to compile with Qt $$QT_VERSION, but minimum required Qt version is $$MINIMUM_REQUIRED_QT_VERSION")
@@ -159,9 +159,11 @@ SOURCES += \
     src/controllers/highlights/HighlightModel.cpp \
     src/controllers/highlights/HighlightPhrase.cpp \
     src/controllers/highlights/UserHighlightModel.cpp \
+    src/controllers/ignores/IgnoreController.cpp \
     src/controllers/ignores/IgnoreModel.cpp \
     src/controllers/moderationactions/ModerationAction.cpp \
     src/controllers/moderationactions/ModerationActionModel.cpp \
+    src/controllers/nicknames/NicknamesModel.cpp \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
     src/controllers/pings/MutedChannelModel.cpp \
@@ -250,6 +252,7 @@ SOURCES += \
     src/util/LayoutHelper.cpp \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
+    src/util/RatelimitBucket.cpp \
     src/util/SplitCommand.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
@@ -316,6 +319,7 @@ SOURCES += \
     src/widgets/settingspages/IgnoresPage.cpp \
     src/widgets/settingspages/KeyboardSettingsPage.cpp \
     src/widgets/settingspages/ModerationPage.cpp \
+    src/widgets/settingspages/NicknamesPage.cpp \
     src/widgets/settingspages/NotificationPage.cpp \
     src/widgets/settingspages/SettingsPage.cpp \
     src/widgets/splits/ClosedSplits.cpp \
@@ -392,6 +396,8 @@ HEADERS += \
     src/controllers/ignores/IgnorePhrase.hpp \
     src/controllers/moderationactions/ModerationAction.hpp \
     src/controllers/moderationactions/ModerationActionModel.hpp \
+    src/controllers/nicknames/Nickname.hpp \
+    src/controllers/nicknames/NicknamesModel.hpp \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
     src/controllers/pings/MutedChannelModel.hpp \
@@ -505,6 +511,7 @@ HEADERS += \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \
+    src/util/RatelimitBucket.hpp \
     src/util/RemoveScrollAreaBackground.hpp \
     src/util/SampleCheerMessages.hpp \
     src/util/SampleLinks.hpp \
@@ -580,6 +587,7 @@ HEADERS += \
     src/widgets/settingspages/IgnoresPage.hpp \
     src/widgets/settingspages/KeyboardSettingsPage.hpp \
     src/widgets/settingspages/ModerationPage.hpp \
+    src/widgets/settingspages/NicknamesPage.hpp \
     src/widgets/settingspages/NotificationPage.hpp \
     src/widgets/settingspages/SettingsPage.hpp \
     src/widgets/splits/ClosedSplits.hpp \

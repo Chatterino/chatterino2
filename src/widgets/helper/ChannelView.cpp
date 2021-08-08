@@ -108,11 +108,7 @@ namespace {
                                 });
         };
 
-        if (creatorFlags.has(MessageElementFlag::TwitchEmote))
-        {
-            addPageLink("TwitchEmotes");
-        }
-        else if (creatorFlags.has(MessageElementFlag::BttvEmote))
+        if (creatorFlags.has(MessageElementFlag::BttvEmote))
         {
             addPageLink("BTTV");
         }
@@ -754,7 +750,7 @@ bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
                 m->loginName, Qt::CaseInsensitive) == 0)
             return true;
 
-        return this->channelFilters_->filter(m);
+        return this->channelFilters_->filter(m, this->channel_);
     }
 
     return true;
