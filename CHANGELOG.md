@@ -9,6 +9,7 @@
 - Bugfix: Fixed a bug that caused all badge highlights to use the same color. (#3132, #3134)
 - Bugfix: Allow resub messages to show in `/mentions` tab (#1013, #3148)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
+- Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 
 ## 2.3.4
 
