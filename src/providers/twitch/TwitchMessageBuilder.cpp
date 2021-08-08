@@ -639,13 +639,12 @@ void TwitchMessageBuilder::appendUsername()
     }
 
     auto nicknames = getCSettings().nicknames.readOnly();
-    auto loginLower = this->message().loginName.toLower();
 
     for (const auto &nickname : *nicknames)
     {
-        if (nickname.regex())
+        if (nickname.isRegex())
         {
-            const auto &regex = QRegularExpression(nickname.name());
+            const auto &regex = nickname.regex();
             if (!regex.isValid())
             {
                 continue;
@@ -655,12 +654,22 @@ void TwitchMessageBuilder::appendUsername()
             if (workingCopy != usernameText)
             {
                 usernameText = workingCopy;
-                break;
+                // Removing this break makes it so that you can run
+                // multiple regexes on each other
+                // break;
             }
         }
         else
         {
-            if (nickname.name().toLower() == loginLower)
+            if (nickname.isCaseSensitive())
+            {
+                if (nickname.name() == usernameText)
+                {
+                    usernameText = nickname.replace();
+                    break;
+                }
+            }
+            else if (nickname.name() == this->message().loginName)
             {
                 usernameText = nickname.replace();
                 break;
