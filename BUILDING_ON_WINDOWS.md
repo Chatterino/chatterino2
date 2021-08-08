@@ -1,8 +1,8 @@
 # Building on Windows
 
-**Note that installing all the development prerequisites and libraries will require about 30 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
+**Note that installing all of the development prerequisites and libraries will require about 30 GB of free disk space. Please ensure this space is available on your `C:` drive before proceeding.**
 
-This guide assumes you are on a 64-bit system. You might need to manually search out alternate download links should you desire to build chatterino on a 32-bit system.
+This guide assumes you are on a 64-bit system. You might need to manually search out alternate download links should you desire to build Chatterino on a 32-bit system.
 
 ## Visual Studio 2019
 
@@ -39,12 +39,12 @@ Note: This installation will take about 1.5 GB of disk space.
 
 ### For Qt SSL, we need OpenSSL 1.0
 
-1. Download OpenSSL for windows, version `1.0.2u`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2u.exe)**
+1. Download OpenSSL for Windows, version `1.0.2u`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_0_2u.exe)**
 2. When prompted, install it to any arbitrary empty directory.
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 4. Copy the OpenSSL 1.0 files from its `\bin` folder to `C:\local\bin` (You will need to create the folder)
 5. Then copy the OpenSSL 1.1 files from its `\bin` folder to `C:\local\bin` (Overwrite any duplicate files)
-6. Add `C:\local\bin` to your path folder ([Follow guide here if you don't know how to do it](https://www.computerhope.com/issues/ch000549.htm#windows10))
+6. Add `C:\local\bin` to your path folder ([Follow the guide here if you don't know how to do it](https://www.computerhope.com/issues/ch000549.htm#windows10))
 
 **If the download links above do not work, try downloading similar 1.1.x & 1.0.x versions [here](https://slproweb.com/products/Win32OpenSSL.html). Note: Don't download the "light" installers, they do not have the required files.**
 
@@ -82,7 +82,7 @@ Compiling with Breakpad support enables crash reports that can be of use for dev
 
 ## Run the build in Qt Creator
 
-1. Open the `chatterino.pro` file by double-clicking or by opening it via Qt Creator.
+1. Open the `chatterino.pro` file by double-clicking it, or by opening it via Qt Creator.
 2. You will be presented with a screen that is titled "Configure Project". In this screen, you should have at least one option present ready to be configured, like this:
    ![Qt Create Configure Project screenshot](https://i.imgur.com/dbz45mB.png)
 3. Select the profile(s) you want to build with and click "Configure Project".
@@ -105,10 +105,10 @@ To produce a standalone package, you need to generate all required files using t
 
 To produce all supplement files for a standalone build, follow these steps (adjust paths as required):
 
-1.  Navigate to your build output directory with windows explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release`
+1.  Navigate to your build output directory with Windows Explorer, e.g. `C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release`
 2.  Enter the `release` directory
 3.  Delete all files except the `chatterino.exe` file. You should be left with a directory only containing `chatterino.exe`.
-4.  Open a `cmd` window and execute:
+4.  Open a command prompt and execute:
 
         cd C:\Users\example\src\build-chatterino-Desktop_Qt_5_15_2_MSVC2019_64bit-Release\release
         C:\Qt\5.15.2\msvc2019_64\bin\windeployqt.exe chatterino.exe
@@ -124,9 +124,9 @@ To produce all supplement files for a standalone build, follow these steps (adju
 
 You can now create a zip archive of all the contents in `releases` and distribute the program as is, without requiring any development tools to be present on the target system. (However, the vcredist package must be present, as usual - see the [README](README.md)).
 
-## Building with CMake
+## Using CMake
 
-Open up your terminal with the Visual Studio environment variables, then:
+Open up your terminal with the Visual Studio environment variables, then enter the following commands:
 
 1. `mkdir build`
 2. `cd build`

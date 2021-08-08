@@ -7,17 +7,24 @@ list(APPEND CMAKE_MODULE_PATH
     "${CMAKE_SOURCE_DIR}/cmake/sanitizers-cmake/cmake"
     )
 
-project(chatterino VERSION 2.3.3)
+project(chatterino VERSION 2.3.4)
 
 option(BUILD_APP "Build Chatterino" ON)
 option(BUILD_TESTS "Build the tests for Chatterino" OFF)
 option(BUILD_BENCHMARKS "Build the benchmarks for Chatterino" OFF)
 option(USE_SYSTEM_PAJLADA_SETTINGS "Use system pajlada settings library" OFF)
 option(USE_SYSTEM_LIBCOMMUNI "Use system communi library" OFF)
-option(USE_SYSTEM_QT5KEYCHAIN "Use system Qt5Keychain library" OFF)
+option(USE_SYSTEM_QTKEYCHAIN "Use system QtKeychain library" OFF)
 option(USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
+option(BUILD_WITH_QT6 "Use Qt6 instead of default Qt5" OFF)
 
 option(USE_CONAN "Use conan" OFF)
+
+if (BUILD_WITH_QT6)
+    set(MAJOR_QT_VERSION "6")
+else()
+    set(MAJOR_QT_VERSION "5")
+endif()
 
 if (USE_CONAN OR CONAN_EXPORTED)
     include(${CMAKE_CURRENT_BINARY_DIR}/conanbuildinfo.cmake)
@@ -32,7 +39,7 @@ endif ()
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/GIT.cmake)
 
-find_package(Qt5 REQUIRED
+find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     COMPONENTS
     Core
     Widgets
@@ -73,17 +80,17 @@ endif()
 # Link QtKeychain statically
 option(QTKEYCHAIN_STATIC "" ON)
 
-if (USE_SYSTEM_QT5KEYCHAIN)
-    find_package(Qt5Keychain REQUIRED)
+if (USE_SYSTEM_QTKEYCHAIN)
+    find_package(Qt${MAJOR_QT_VERSION}Keychain REQUIRED)
 else()
-    set(QT5KEYCHAIN_ROOT_LIB_FOLDER "${CMAKE_SOURCE_DIR}/lib/qtkeychain")
-    if (NOT EXISTS "${QT5KEYCHAIN_ROOT_LIB_FOLDER}/CMakeLists.txt")
+    set(QTKEYCHAIN_ROOT_LIB_FOLDER "${CMAKE_SOURCE_DIR}/lib/qtkeychain")
+    if (NOT EXISTS "${QTKEYCHAIN_ROOT_LIB_FOLDER}/CMakeLists.txt")
         message(FATAL_ERROR "Submodules probably not loaded, unable to find lib/qtkeychain/CMakeLists.txt")
     endif()
 
-    add_subdirectory("${QT5KEYCHAIN_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
-    if (NOT TARGET qt5keychain)
-        message(FATAL_ERROR "qt5keychain target was not created :@")
+    add_subdirectory("${QTKEYCHAIN_ROOT_LIB_FOLDER}" EXCLUDE_FROM_ALL)
+    if (NOT TARGET qt${MAJOR_QT_VERSION}keychain)
+        message(FATAL_ERROR "qt${MAJOR_QT_VERSION}keychain target was not created :@")
     endif()
 endif()
 

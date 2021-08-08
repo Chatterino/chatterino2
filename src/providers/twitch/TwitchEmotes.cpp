@@ -57,7 +57,7 @@ EmotePtr TwitchEmotes::getOrCreateEmote(const EmoteId &id,
                 Image::fromUrl(getEmoteLink(id, "3.0"), 0.25),
             },
             Tooltip{name.toHtmlEscaped() + "<br>Twitch Emote"},
-            Url{QString("https://twitchemotes.com/emotes/%1").arg(id.string)}});
+        });
     }
 
     return shared;

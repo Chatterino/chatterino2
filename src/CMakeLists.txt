@@ -88,6 +88,8 @@ set(SOURCE_FILES
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
 
+        controllers/ignores/IgnoreController.cpp
+        controllers/ignores/IgnoreController.hpp
         controllers/ignores/IgnoreModel.cpp
         controllers/ignores/IgnoreModel.hpp
 
@@ -95,6 +97,10 @@ set(SOURCE_FILES
         controllers/moderationactions/ModerationAction.hpp
         controllers/moderationactions/ModerationActionModel.cpp
         controllers/moderationactions/ModerationActionModel.hpp
+
+        controllers/nicknames/NicknamesModel.cpp
+        controllers/nicknames/NicknamesModel.hpp
+        controllers/nicknames/Nickname.hpp
 
         controllers/notifications/NotificationController.cpp
         controllers/notifications/NotificationController.hpp
@@ -286,6 +292,8 @@ set(SOURCE_FILES
         util/NuulsUploader.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
+        util/RatelimitBucket.cpp
+        util/RatelimitBucket.hpp
         util/SplitCommand.cpp
         util/SplitCommand.hpp
         util/StreamLink.cpp
@@ -428,6 +436,8 @@ set(SOURCE_FILES
         widgets/settingspages/KeyboardSettingsPage.hpp
         widgets/settingspages/ModerationPage.cpp
         widgets/settingspages/ModerationPage.hpp
+        widgets/settingspages/NicknamesPage.cpp
+        widgets/settingspages/NicknamesPage.hpp
         widgets/settingspages/NotificationPage.cpp
         widgets/settingspages/NotificationPage.hpp
         widgets/settingspages/SettingsPage.cpp
@@ -476,16 +486,16 @@ add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
-        Qt5::Core
-        Qt5::Widgets
-        Qt5::Gui
-        Qt5::Network
-        Qt5::Multimedia
-        Qt5::Svg
-        Qt5::Concurrent
+        Qt${MAJOR_QT_VERSION}::Core
+        Qt${MAJOR_QT_VERSION}::Widgets
+        Qt${MAJOR_QT_VERSION}::Gui
+        Qt${MAJOR_QT_VERSION}::Network
+        Qt${MAJOR_QT_VERSION}::Multimedia
+        Qt${MAJOR_QT_VERSION}::Svg
+        Qt${MAJOR_QT_VERSION}::Concurrent
 
         LibCommuni::LibCommuni
-        qt5keychain
+        qt${MAJOR_QT_VERSION}keychain
         Pajlada::Serialize
         Pajlada::Settings
         Pajlada::Signals
@@ -514,8 +524,8 @@ if (BUILD_APP)
         )
 
     if (MSVC)
-        get_target_property(Qt5_Core_Location Qt5::Core LOCATION)
-        get_filename_component(QT_BIN_DIR ${Qt5_Core_Location} DIRECTORY)
+        get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
+        get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
         set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
 
         install(TARGETS ${EXECUTABLE_PROJECT}
@@ -572,7 +582,7 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
     CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
     )
-if (USE_SYSTEM_QT5KEYCHAIN)
+if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CMAKE_BUILD
         )

@@ -1,6 +1,6 @@
 [requires]
-openssl/1.1.1d
-boost/1.75.0
+openssl/1.1.1k
+boost/1.76.0
 
 [generators]
 qmake
