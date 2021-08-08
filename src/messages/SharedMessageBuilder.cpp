@@ -157,10 +157,6 @@ void SharedMessageBuilder::parseHighlights()
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor =
             ColorProvider::instance().color(ColorType::Subscription);
-
-        // This message was a subscription.
-        // Don't check for any other highlight phrases.
-        return;
     }
 
     // XXX: Non-common term in SharedMessageBuilder
