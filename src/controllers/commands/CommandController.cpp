@@ -439,7 +439,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() > 2)
         {
             channelName = words[2];
-            if (channelName[0] == '#')
+            if (channelName[0] == '#' || channelName[0] == '@')
             {
                 channelName.remove(0, 1);
             }
