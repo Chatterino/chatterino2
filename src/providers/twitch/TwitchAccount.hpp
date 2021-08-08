@@ -111,7 +111,6 @@ public:
     SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;
     SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 
-    void loadEmotes();
     void loadEmotes(const std::shared_ptr<Channel> &channel);
     // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
     // this function makes sure not to load emote sets that have already been loaded
