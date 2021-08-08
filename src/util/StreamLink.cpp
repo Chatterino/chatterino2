@@ -108,6 +108,8 @@ namespace {
 
             p->deleteLater();
         });
+        
+        qCWarning(chatterinoStreamlink) << "command:" << p->program() << p->arguments().join(" ");
 
         QObject::connect(
             p,
