@@ -87,7 +87,9 @@ namespace {
 
         if (Version::instance().isFlatpak())
         {
-            p->setProgram("flatpak-spawn --host " + getStreamlinkProgram());
+            p->setProgram("flatpak-spawn");
+
+            p->setArguments({"--host", getStreamlinkProgram()});
         }
         else
         {
@@ -174,7 +176,8 @@ void getStreamQualities(const QString &channelURL,
             }
         });
 
-    p->setArguments({channelURL, "--default-stream=KKona"});
+    p->setArguments(p->arguments() +
+                    QStringList({channelURL, "--default-stream=KKona"}));
 
     p->start();
 }
