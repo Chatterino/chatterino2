@@ -650,9 +650,9 @@ void TwitchMessageBuilder::appendUsername()
             {
                 continue;
             }
-            auto workingCopy = this->message().loginName;
+            auto workingCopy = usernameText;
             workingCopy.replace(regex, nickname.replace());
-            if (workingCopy != this->message().loginName)
+            if (workingCopy != usernameText)
             {
                 usernameText = workingCopy;
                 break;
