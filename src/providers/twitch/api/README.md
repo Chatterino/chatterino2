@@ -47,26 +47,6 @@ URL: https://dev.twitch.tv/docs/api/reference#get-streams
   - `TwitchChannel` to get live status, game, title, and viewer count of a channel
   - `NotificationController` to provide notifications for channels you might not have open in Chatterino, but are still interested in getting notifications for
 
-### Follow User
-
-URL: https://dev.twitch.tv/docs/api/reference#create-user-follows  
-Requires `user:edit:follows` scope
-
-- We implement this in `providers/twitch/api/Helix.cpp followUser`  
-  Used in:
-  - `widgets/dialogs/UserInfoPopup.cpp` to follow a user by ticking follow checkbox in usercard
-  - `controllers/commands/CommandController.cpp` in /follow command
-
-### Unfollow User
-
-URL: https://dev.twitch.tv/docs/api/reference#delete-user-follows  
-Requires `user:edit:follows` scope
-
-- We implement this in `providers/twitch/api/Helix.cpp unfollowUser`  
-  Used in:
-  - `widgets/dialogs/UserInfoPopup.cpp` to unfollow a user by unticking follow checkbox in usercard
-  - `controllers/commands/CommandController.cpp` in /unfollow command
-
 ### Create Clip
 
 URL: https://dev.twitch.tv/docs/api/reference#create-clip  

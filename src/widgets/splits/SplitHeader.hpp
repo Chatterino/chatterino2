@@ -85,7 +85,6 @@ private:
     std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
 
 public slots:
-    void moveSplit();
     void reloadChannelEmotes();
     void reloadSubscriberEmotes();
     void reconnect();

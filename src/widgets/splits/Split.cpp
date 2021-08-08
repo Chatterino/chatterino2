@@ -624,8 +624,10 @@ void Split::popup()
         window.getNotebook().getOrAddSelectedPage()));
 
     split->setChannel(this->getIndirectChannel());
-    window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+    split->setModerationMode(this->getModerationMode());
+    split->setFilters(this->getFilters());
 
+    window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
     window.show();
 }
 
@@ -868,8 +870,8 @@ void Split::showSearch()
 
 void Split::reloadChannelAndSubscriberEmotes()
 {
-    getApp()->accounts->twitch.getCurrent()->loadEmotes();
     auto channel = this->getChannel();
+    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
