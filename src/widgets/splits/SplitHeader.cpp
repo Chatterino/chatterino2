@@ -916,10 +916,6 @@ void SplitHeader::themeChangedEvent()
     }
 }
 
-void SplitHeader::moveSplit()
-{
-}
-
 void SplitHeader::reloadChannelEmotes()
 {
     auto channel = this->split_->getChannel();
@@ -933,7 +929,8 @@ void SplitHeader::reloadChannelEmotes()
 
 void SplitHeader::reloadSubscriberEmotes()
 {
-    getApp()->accounts->twitch.getCurrent()->loadEmotes();
+    auto channel = this->split_->getChannel();
+    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
 }
 
 void SplitHeader::reconnect()
