@@ -552,7 +552,7 @@ void IrcMessageHandler::handleGlobalUserStateMessage(
     // emoteSetsChanged, since we want to trigger emote reloads when
     // "currentUserChanged" signal is emitted
     qCDebug(chatterinoTwitch) << emoteSetsChanged << message->toData();
-    currentUser->loadEmotes(nullptr);
+    currentUser->loadEmotes();
 }
 
 void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
