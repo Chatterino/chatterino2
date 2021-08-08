@@ -313,12 +313,9 @@ void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
         const auto highlighted = msg->flags.has(MessageFlag::Highlighted);
         const auto showInMentions = msg->flags.has(MessageFlag::ShowInMentions);
 
-        if (!isSub)
+        if (highlighted && showInMentions)
         {
-            if (highlighted && showInMentions)
-            {
-                server.mentionsChannel->addMessage(msg);
-            }
+            server.mentionsChannel->addMessage(msg);
         }
 
         chan->addMessage(msg);
