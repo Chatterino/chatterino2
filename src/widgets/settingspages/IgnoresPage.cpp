@@ -49,7 +49,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
                     ->initialized(&getSettings()->ignoredMessages))
             .getElement();
     view->setTitles(
-        {"Pattern", "Regex", "Case Sensitive", "Block", "Replacement"});
+        {"Pattern", "User", "Regex", "Case Sensitive", "Block", "Replacement"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Fixed);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -63,7 +63,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 
     view->addButtonPressed.connect([] {
         getSettings()->ignoredMessages.append(
-            IgnorePhrase{"my pattern", false, false,
+            IgnorePhrase{"my pattern", "user", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
     });
 }

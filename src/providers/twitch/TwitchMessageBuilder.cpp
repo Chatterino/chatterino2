@@ -795,6 +795,12 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         {
             continue;
         }
+        const auto &user = phrase.getUser();
+        if (user != "" &&
+            user.compare(this->userName, Qt::CaseInsensitive) != 0)
+        {
+            continue;
+        }
         if (phrase.isRegex())
         {
             const auto &regex = phrase.getRegex();
