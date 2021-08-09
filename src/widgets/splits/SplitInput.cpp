@@ -134,14 +134,18 @@ void SplitInput::themeChangedEvent()
     QPalette palette, placeholderPalette;
 
     palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     placeholderPalette.setColor(
         QPalette::PlaceholderText,
         this->theme->messages.textColors.chatPlaceholder);
+#endif
 
     this->updateEmoteButton();
     this->ui_.textEditLength->setPalette(palette);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     this->ui_.textEdit->setPalette(placeholderPalette);
+#endif
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
     this->ui_.hbox->setMargin(
