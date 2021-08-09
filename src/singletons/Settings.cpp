@@ -85,8 +85,7 @@ void ConcurrentSettings::mute(const QString &channelName)
 
 void ConcurrentSettings::unmute(const QString &channelName)
 {
-    for (std::vector<int>::size_type i = 0; i != mutedChannels.raw().size();
-         i++)
+    for (std::size_t i = 0; i != mutedChannels.raw().size(); i++)
     {
         if (mutedChannels.raw()[i].toLower() == channelName.toLower())
         {
