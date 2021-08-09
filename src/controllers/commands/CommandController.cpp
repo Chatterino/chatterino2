@@ -881,7 +881,7 @@ QString CommandController::execCustomCommand(const QStringList &words,
     QString result;
 
     static QRegularExpression parseCommand(
-        "(^|[^{])({{)*{(\\d+\\+?|channel|channelid|game|title|userid)}");
+        "(^|[^{])({{)*{(\\d+\\+?|([a-zA-Z]+)(?:;(.+?))?)}");
 
     int lastCaptureEnd = 0;
 
@@ -913,28 +913,45 @@ QString CommandController::execCustomCommand(const QStringList &words,
         int wordIndex = wordIndexMatch.replace("=", "").toInt(&ok);
         if (!ok || wordIndex == 0)
         {
+            auto var = match.captured(4);
+            auto altText = match.captured(5);  // alt text or empty string
             auto tc = dynamic_cast<TwitchChannel *>(channel.get());
-            if (match.captured(3) == "channel")
+            if (var == "channel")
             {
                 result += channel->getName();
             }
-            else if (match.captured(3) == "channelid" && tc != nullptr)
+            else if (var == "channelid" && tc != nullptr)
             {
                 result += tc->roomId();
             }
-            else if (match.captured(3) == "game" && tc != nullptr)
+            else if (var == "game")
             {
-                const auto &status = tc->accessStreamStatus();
-                result += status->live ? status->game : "";
+                if (tc != nullptr)
+                {
+                    const auto &status = tc->accessStreamStatus();
+                    result += status->live ? status->game : altText;
+                }
+                else
+                {
+                    result += altText;
+                }
             }
-            else if (match.captured(3) == "title" && tc != nullptr)
+            else if (var == "title")
             {
-                const auto &status = tc->accessStreamStatus();
-                result += status->live ? status->title : "";
+                if (tc != nullptr)
+                {
+                    const auto &status = tc->accessStreamStatus();
+                    result += status->live ? status->title : altText;
+                }
+                else
+                {
+                    result += altText;
+                }
             }
-            else if (match.captured(3) == "userid" && tc != nullptr)
+            else if (var == "userid")
             {
-                result += getApp()->accounts->twitch.getCurrent()->getUserId();
+                auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
+                result += uid.isEmpty() ? altText : uid;
             }
             else
             {
