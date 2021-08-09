@@ -41,7 +41,9 @@ IgnoresPage::IgnoresPage()
 
 void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
 {
-    layout.emplace<QLabel>("Ignore messages based certain patterns.");
+    layout.emplace<QLabel>(
+        "Ignore messages based certain patterns. "
+        "Leaving the User tab empty will make it target all users");
     EditableModelView *view =
         layout
             .emplace<EditableModelView>(
