@@ -3,9 +3,9 @@
 ## Unversioned
 
 - Minor: Remove TwitchEmotes.com attribution and the open/copy options when right-clicking a Twitch Emote. (#2214, #3136)
-- Minor: Strip leading @ and trailing , from username in /user and /usercard commands. (#2707, #3143)
+- Minor: Strip leading @ and trailing , from username in /user and /usercard commands. (#3143)
 - Minor: Display a system message when reloading subscription emotes to match BTTV/FFZ behavior (#3135)
-- Minor: Subcategories in settings are now searchable. (#3157)
+- Minor: Subcategories in settings are now searchable. (#2707, #3157)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
 - Bugfix: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
 - Bugfix: Fixed a bug that caused all badge highlights to use the same color. (#3132, #3134)
