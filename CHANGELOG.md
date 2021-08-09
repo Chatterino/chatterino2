@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Add new command placeholders (#3155)
 - Minor: Remove TwitchEmotes.com attribution and the open/copy options when right-clicking a Twitch Emote. (#2214, #3136)
 - Minor: Strip leading @ and trailing , from username in /user and /usercard commands. (#3143)
 - Minor: Display a system message when reloading subscription emotes to match BTTV/FFZ behavior (#3135)
