@@ -654,9 +654,7 @@ void TwitchMessageBuilder::appendUsername()
             if (workingCopy != usernameText)
             {
                 usernameText = workingCopy;
-                // Removing this break makes it so that you can run
-                // multiple regexes on each other
-                // break;
+                break;
             }
         }
         else
