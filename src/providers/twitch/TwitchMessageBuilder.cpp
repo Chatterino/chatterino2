@@ -796,7 +796,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
             continue;
         }
         const auto &user = phrase.getUser();
-        if (user.isEmpty() &&
+        if (!user.isEmpty() &&
             user.compare(this->userName, Qt::CaseInsensitive) != 0)
         {
             continue;
