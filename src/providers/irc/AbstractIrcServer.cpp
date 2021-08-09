@@ -35,8 +35,7 @@ AbstractIrcServer::AbstractIrcServer()
         }
         if (message.at(0) == "$")
         {
-            this->readConnection_->sendRaw("JOIN " +
-                                           message.mid(1));
+            this->readConnection_->sendRaw("JOIN " + message.mid(1));
         }
         else
         {
