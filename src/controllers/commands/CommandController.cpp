@@ -825,7 +825,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         if (it != this->userCommands_.end())
         {
             text = getApp()->emotes->emojis.replaceShortCodes(
-                this->execCustomCommand(words, it.value(), dryRun));
+                this->execCustomCommand(words, it.value(), dryRun, channel));
 
             words = text.split(' ', QString::SkipEmptyParts);
 
@@ -857,7 +857,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         const auto it = this->userCommands_.find(commandName);
         if (it != this->userCommands_.end())
         {
-            return this->execCustomCommand(words, it.value(), dryRun);
+            return this->execCustomCommand(words, it.value(), dryRun, channel);
         }
     }
 
@@ -876,11 +876,12 @@ void CommandController::registerCommand(QString commandName,
 
 QString CommandController::execCustomCommand(const QStringList &words,
                                              const Command &command,
-                                             bool dryRun)
+                                             bool dryRun, ChannelPtr channel)
 {
     QString result;
 
-    static QRegularExpression parseCommand("(^|[^{])({{)*{(\\d+\\+?)}");
+    static QRegularExpression parseCommand(
+        "(^|[^{])({{)*{(\\d+\\+?|channel|channelid|game|title|userid)}");
 
     int lastCaptureEnd = 0;
 
@@ -912,7 +913,33 @@ QString CommandController::execCustomCommand(const QStringList &words,
         int wordIndex = wordIndexMatch.replace("=", "").toInt(&ok);
         if (!ok || wordIndex == 0)
         {
-            result += "{" + match.captured(3) + "}";
+            auto tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (match.captured(3) == "channel")
+            {
+                result += channel->getName();
+            }
+            else if (match.captured(3) == "channelid" && tc != nullptr)
+            {
+                result += tc->roomId();
+            }
+            else if (match.captured(3) == "game" && tc != nullptr)
+            {
+                const auto &status = tc->accessStreamStatus();
+                result += status->live ? status->game : "";
+            }
+            else if (match.captured(3) == "title" && tc != nullptr)
+            {
+                const auto &status = tc->accessStreamStatus();
+                result += status->live ? status->title : "";
+            }
+            else if (match.captured(3) == "userid" && tc != nullptr)
+            {
+                result += getApp()->accounts->twitch.getCurrent()->getUserId();
+            }
+            else
+            {
+                result += "{" + match.captured(3) + "}";
+            }
             continue;
         }
 

@@ -58,7 +58,7 @@ private:
         commandsSetting_;
 
     QString execCustomCommand(const QStringList &words, const Command &command,
-                              bool dryRun);
+                              bool dryRun, ChannelPtr channel);
 
     QStringList commandAutoCompletions_;
 };
