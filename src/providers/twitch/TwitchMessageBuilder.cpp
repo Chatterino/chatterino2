@@ -182,7 +182,8 @@ MessagePtr TwitchMessageBuilder::build()
                 this->channel->isBroadcaster());
         }
     }
-    if (this->tags.contains("client-nonce"))
+    if (this->tags.contains("client-nonce") &&
+        getSettings()->nonceFuckeryEnabled)
     {
         auto isAbnormal =
             isAbnormalNonce(this->tags["client-nonce"].toString());

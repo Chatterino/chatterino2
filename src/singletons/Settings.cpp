@@ -143,6 +143,12 @@ void Settings::moveLegacyDankerinoSettings_()
         this->legacyDankerinoRemoveSpacesBetweenEmotes_ = false;
         this->removeSpacesBetweenEmotes = true;
     }
+    if (!this->nonceFuckeryMigrated_)
+    {
+        this->nonceFuckeryEnabled = this->abnormalNonceDetection.getValue() ||
+                                    this->normalNonceDetection.getValue();
+        this->nonceFuckeryMigrated_ = true;
+    }
 }
 
 Settings &Settings::instance()
