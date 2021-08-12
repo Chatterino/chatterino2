@@ -66,11 +66,15 @@ void DankerinoPage::initLayout(GeneralPageView &layout)
                            "(requires restart)",
                            s.dankerinoThreeLetterApiEasterEgg);
         layout.addTitle("Random 'hacks'");
+        layout.addCheckbox("Enable. Required for settings below to work!",
+                           s.nonceFuckeryEnabled);
         layout.addCheckbox("Abnormal nonce detection",
                            s.abnormalNonceDetection);
-        layout.addCheckbox("Webchat detection. Highlights messages sent from "
-                           "webchat in orange.",
-                           s.normalNonceDetection);
+
+        layout.addCheckbox(
+            "Webchat detection highlights. Highlights messages sent from "
+            "webchat in orange.",
+            s.normalNonceDetection);
     }
     layout.addStretch();
     // invisible element for width

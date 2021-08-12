@@ -437,11 +437,13 @@ public:
     BoolSetting abnormalNonceDetection = {"/misc/abnormalNonceDetection",
                                           false};
     BoolSetting normalNonceDetection = {"/misc/normalNonceDetection", false};
+    BoolSetting nonceFuckeryEnabled = {"/misc/nonceFuckeryEnabled", false};
 
     BoolSetting dankerinoThreeLetterApiEasterEgg = {
         "/misc/dankerinoThreeLetterApiEasterEgg", false};
 
 private:
+    BoolSetting nonceFuckeryMigrated_ = {"/misc/nonceFuckeryMigrated", false};
     void updateModerationActions();
     void moveLegacyDankerinoSettings_();
 };
