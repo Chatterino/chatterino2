@@ -2,7 +2,12 @@
 
 #include "HotkeyScope.hpp"
 
+#include <QString>
+
+#include <map>
+
 namespace chatterino {
+
 struct ActionDefinition {
     QString displayName;
     uint8_t minCountArguments = 0;
