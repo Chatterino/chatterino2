@@ -1,4 +1,5 @@
-#include "HotkeyController.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
+
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/HotkeyModel.hpp"
 #include "singletons/Settings.hpp"
@@ -489,4 +490,5 @@ bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
     }
     return false;
 }
+
 }  // namespace chatterino
