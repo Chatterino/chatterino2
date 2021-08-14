@@ -8,29 +8,8 @@
 
 namespace chatterino {
 
-boost::optional<HotkeyScope> HotkeyController::hotkeyScopeFromName(
-    QString scopeName)
-{
-    for (auto ref : this->hotkeyScopeNames)
-    {
-        if (ref.second == scopeName)
-        {
-            return ref.first;
-        }
-    }
-    qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
-    return {};
-}
-
-QString HotkeyController::hotkeyScopeToName(HotkeyScope scope)
-{
-    unsigned long scopeId = (unsigned long)(scope);
-    return 0 <= scopeId && scopeId <= this->hotkeyScopeNames.size()
-               ? this->hotkeyScopeNames.find(scope)->second
-               : "";
-}
-bool hotkeySortCompare_(const std::shared_ptr<Hotkey> &a,
-                        const std::shared_ptr<Hotkey> &b)
+static bool hotkeySortCompare_(const std::shared_ptr<Hotkey> &a,
+                               const std::shared_ptr<Hotkey> &b)
 {
     if (a->scope() == b->scope())
     {
@@ -49,6 +28,140 @@ HotkeyController::HotkeyController()
             qCDebug(chatterinoHotkeys) << "Reloading hotkeys!";
             this->onItemsUpdated.invoke();
         });
+}
+
+HotkeyModel *HotkeyController::createModel(QObject *parent)
+{
+    HotkeyModel *model = new HotkeyModel(parent);
+    model->initialize(&this->hotkeys_);
+    return model;
+}
+
+std::vector<QShortcut *> HotkeyController::shortcutsForScope(
+    HotkeyScope scope,
+    std::map<QString, std::function<QString(std::vector<QString>)>> actionMap,
+    QWidget *parent)
+{
+    std::vector<QShortcut *> output;
+    for (const auto &hotkey : this->hotkeys_)
+    {
+        if (hotkey->scope() != scope)
+        {
+            continue;
+        }
+        auto target = actionMap.find(hotkey->action());
+        if (target == actionMap.end())
+        {
+            qCDebug(chatterinoHotkeys)
+                << qPrintable(parent->objectName())
+                << "Unimplemeneted hotkey action:" << hotkey->action() << "in "
+                << hotkey->getCategory();
+            continue;
+        }
+        if (!target->second)
+        {
+            // Widget has chosen to explicitly not handle this action
+            continue;
+        }
+        auto createShortcutFromKeySeq = [&](QKeySequence qs) {
+            auto s = new QShortcut(qs, parent);
+            s->setContext(hotkey->getContext());
+            auto functionPointer = target->second;
+            QObject::connect(
+                s, &QShortcut::activated, parent,
+                [functionPointer, hotkey, this]() {
+                    qCDebug(chatterinoHotkeys)
+                        << "Shortcut pressed: " << hotkey->action();
+                    QString output = functionPointer(hotkey->arguments());
+                    if (!output.isEmpty())
+                    {
+                        this->showHotkeyError(hotkey, output);
+                    }
+                });
+            output.push_back(s);
+        };
+        auto qs = QKeySequence(hotkey->keySequence());
+
+        auto stringified = qs.toString(QKeySequence::NativeText);
+        if (stringified.contains("Return"))
+        {
+            stringified.replace("Return", "Enter");
+            auto copy = QKeySequence(stringified, QKeySequence::NativeText);
+            createShortcutFromKeySeq(copy);
+        }
+        createShortcutFromKeySeq(qs);
+    }
+    return output;
+}
+
+void HotkeyController::save()
+{
+    this->saveHotkeys();
+}
+
+void HotkeyController::replaceHotkey(QString oldName,
+                                     std::shared_ptr<Hotkey> newHotkey)
+{
+    int i = 0;
+    for (auto &hotkey : this->hotkeys_)
+    {
+        if (hotkey->name() == oldName)
+        {
+            this->hotkeys_.removeAt(i);
+            break;
+        }
+        i++;
+    }
+    this->hotkeys_.append(newHotkey);
+}
+
+boost::optional<HotkeyScope> HotkeyController::hotkeyScopeFromName(
+    QString scopeName)
+{
+    for (auto ref : this->hotkeyScopeNames)
+    {
+        if (ref.second == scopeName)
+        {
+            return ref.first;
+        }
+    }
+    qCDebug(chatterinoHotkeys) << "Unknown scope: " << scopeName;
+    return {};
+}
+
+std::shared_ptr<Hotkey> HotkeyController::getHotkeyByName(QString name)
+{
+    for (auto &hotkey : this->hotkeys_)
+    {
+        if (hotkey->name() == name)
+        {
+            return hotkey;
+        }
+    }
+    return nullptr;
+}
+
+QString HotkeyController::hotkeyScopeToName(HotkeyScope scope)
+{
+    unsigned long scopeId = (unsigned long)(scope);
+    return 0 <= scopeId && scopeId <= this->hotkeyScopeNames.size()
+               ? this->hotkeyScopeNames.find(scope)->second
+               : "";
+}
+
+bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
+                                   QString ignoreNamed)
+{
+    for (const auto shared : this->hotkeys_)
+    {
+        if (shared->scope() == hotkey->scope() &&
+            shared->keySequence() == hotkey->keySequence() &&
+            shared->name() != hotkey->name() && shared->name() != ignoreNamed)
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 void HotkeyController::loadHotkeys()
@@ -99,37 +212,35 @@ void HotkeyController::loadHotkeys()
     }
 }
 
-void HotkeyController::resetToDefaults()
+void HotkeyController::saveHotkeys()
 {
-    std::set<QString> addedSet;
+    auto defaultHotkeysAdded =
+        pajlada::Settings::Setting<std::vector<QString>>::get(
+            "/hotkeys/addedDefaults");
+
+    // make sure that hotkeys are deleted
+    pajlada::Settings::SettingManager::getInstance()->set(
+        "/hotkeys", rapidjson::Value(rapidjson::kObjectType));
+
+    // re-add /hotkeys/addedDefaults as previous set call deleted that key
     pajlada::Settings::Setting<std::vector<QString>>::set(
         "/hotkeys/addedDefaults",
-        std::vector<QString>(addedSet.begin(), addedSet.end()));
-    auto size = this->hotkeys_.raw().size();
-    for (unsigned long i = 0; i < size; i++)
-    {
-        this->hotkeys_.removeAt(0);
-    }
+        std::vector<QString>(defaultHotkeysAdded.begin(),
+                             defaultHotkeysAdded.end()));
 
-    // add defaults back
-    this->saveHotkeys();
-    this->loadHotkeys();
-}
-void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
-                                     HotkeyScope scope,
-                                     QKeySequence keySequence, QString action,
-                                     std::vector<QString> args, QString name)
-{
-    qCDebug(chatterinoHotkeys) << "Try add default" << name;
-    if (addedHotkeys.count(name) != 0)
+    for (auto &hotkey : this->hotkeys_)
     {
-        qCDebug(chatterinoHotkeys) << "Already exists";
-        return;  // hotkey was added before
+        auto section = "/hotkeys/" + hotkey->name().toStdString();
+        pajlada::Settings::Setting<QString>::set(section + "/action",
+                                                 hotkey->action());
+        pajlada::Settings::Setting<QString>::set(
+            section + "/keySequence", hotkey->keySequence().toString());
+
+        auto scopeName = HotkeyController::hotkeyScopeToName(hotkey->scope());
+        pajlada::Settings::Setting<QString>::set(section + "/scope", scopeName);
+        pajlada::Settings::Setting<std::vector<QString>>::set(
+            section + "/arguments", hotkey->arguments());
     }
-    qCDebug(chatterinoHotkeys) << "Inserted";
-    this->hotkeys_.append(
-        std::make_shared<Hotkey>(scope, keySequence, action, args, name));
-    addedHotkeys.insert(name);
 }
 
 void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
@@ -333,105 +444,40 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
     }
 }
 
-void HotkeyController::save()
+void HotkeyController::resetToDefaults()
 {
-    this->saveHotkeys();
-}
-
-void HotkeyController::saveHotkeys()
-{
-    auto defaultHotkeysAdded =
-        pajlada::Settings::Setting<std::vector<QString>>::get(
-            "/hotkeys/addedDefaults");
-
-    // make sure that hotkeys are deleted
-    pajlada::Settings::SettingManager::getInstance()->set(
-        "/hotkeys", rapidjson::Value(rapidjson::kObjectType));
-
-    // re-add /hotkeys/addedDefaults as previous set call deleted that key
+    std::set<QString> addedSet;
     pajlada::Settings::Setting<std::vector<QString>>::set(
         "/hotkeys/addedDefaults",
-        std::vector<QString>(defaultHotkeysAdded.begin(),
-                             defaultHotkeysAdded.end()));
-
-    for (auto &hotkey : this->hotkeys_)
+        std::vector<QString>(addedSet.begin(), addedSet.end()));
+    auto size = this->hotkeys_.raw().size();
+    for (unsigned long i = 0; i < size; i++)
     {
-        auto section = "/hotkeys/" + hotkey->name().toStdString();
-        pajlada::Settings::Setting<QString>::set(section + "/action",
-                                                 hotkey->action());
-        pajlada::Settings::Setting<QString>::set(
-            section + "/keySequence", hotkey->keySequence().toString());
-
-        auto scopeName = HotkeyController::hotkeyScopeToName(hotkey->scope());
-        pajlada::Settings::Setting<QString>::set(section + "/scope", scopeName);
-        pajlada::Settings::Setting<std::vector<QString>>::set(
-            section + "/arguments", hotkey->arguments());
+        this->hotkeys_.removeAt(0);
     }
+
+    // add defaults back
+    this->saveHotkeys();
+    this->loadHotkeys();
 }
 
-HotkeyModel *HotkeyController::createModel(QObject *parent)
+void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
+                                     HotkeyScope scope,
+                                     QKeySequence keySequence, QString action,
+                                     std::vector<QString> args, QString name)
 {
-    HotkeyModel *model = new HotkeyModel(parent);
-    model->initialize(&this->hotkeys_);
-    return model;
-}
-
-std::vector<QShortcut *> HotkeyController::shortcutsForScope(
-    HotkeyScope scope,
-    std::map<QString, std::function<QString(std::vector<QString>)>> actionMap,
-    QWidget *parent)
-{
-    std::vector<QShortcut *> output;
-    for (const auto &hotkey : this->hotkeys_)
+    qCDebug(chatterinoHotkeys) << "Try add default" << name;
+    if (addedHotkeys.count(name) != 0)
     {
-        if (hotkey->scope() != scope)
-        {
-            continue;
-        }
-        auto target = actionMap.find(hotkey->action());
-        if (target == actionMap.end())
-        {
-            qCDebug(chatterinoHotkeys)
-                << qPrintable(parent->objectName())
-                << "Unimplemeneted hotkey action:" << hotkey->action() << "in "
-                << hotkey->getCategory();
-            continue;
-        }
-        if (!target->second)
-        {
-            // Widget has chosen to explicitly not handle this action
-            continue;
-        }
-        auto createShortcutFromKeySeq = [&](QKeySequence qs) {
-            auto s = new QShortcut(qs, parent);
-            s->setContext(hotkey->getContext());
-            auto functionPointer = target->second;
-            QObject::connect(
-                s, &QShortcut::activated, parent,
-                [functionPointer, hotkey, this]() {
-                    qCDebug(chatterinoHotkeys)
-                        << "Shortcut pressed: " << hotkey->action();
-                    QString output = functionPointer(hotkey->arguments());
-                    if (!output.isEmpty())
-                    {
-                        this->showHotkeyError(hotkey, output);
-                    }
-                });
-            output.push_back(s);
-        };
-        auto qs = QKeySequence(hotkey->keySequence());
-
-        auto stringified = qs.toString(QKeySequence::NativeText);
-        if (stringified.contains("Return"))
-        {
-            stringified.replace("Return", "Enter");
-            auto copy = QKeySequence(stringified, QKeySequence::NativeText);
-            createShortcutFromKeySeq(copy);
-        }
-        createShortcutFromKeySeq(qs);
+        qCDebug(chatterinoHotkeys) << "Already exists";
+        return;  // hotkey was added before
     }
-    return output;
+    qCDebug(chatterinoHotkeys) << "Inserted";
+    this->hotkeys_.append(
+        std::make_shared<Hotkey>(scope, keySequence, action, args, name));
+    addedHotkeys.insert(name);
 }
+
 void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> hotkey,
                                        QString warning)
 {
@@ -442,49 +488,6 @@ void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> hotkey,
             .arg(hotkey->name(), warning),
         QMessageBox::Ok);
     msgBox->exec();
-}
-
-std::shared_ptr<Hotkey> HotkeyController::getHotkeyByName(QString name)
-{
-    for (auto &hotkey : this->hotkeys_)
-    {
-        if (hotkey->name() == name)
-        {
-            return hotkey;
-        }
-    }
-    return nullptr;
-}
-
-void HotkeyController::replaceHotkey(QString oldName,
-                                     std::shared_ptr<Hotkey> newHotkey)
-{
-    int i = 0;
-    for (auto &hotkey : this->hotkeys_)
-    {
-        if (hotkey->name() == oldName)
-        {
-            this->hotkeys_.removeAt(i);
-            break;
-        }
-        i++;
-    }
-    this->hotkeys_.append(newHotkey);
-}
-
-bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
-                                   QString ignoreNamed)
-{
-    for (const auto shared : this->hotkeys_)
-    {
-        if (shared->scope() == hotkey->scope() &&
-            shared->keySequence() == hotkey->keySequence() &&
-            shared->name() != hotkey->name() && shared->name() != ignoreNamed)
-        {
-            return true;
-        }
-    }
-    return false;
 }
 
 }  // namespace chatterino
