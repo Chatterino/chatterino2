@@ -1,18 +1,19 @@
 #pragma once
 
-#include <boost/optional.hpp>
-#include <pajlada/signals/signal.hpp>
-#include <pajlada/signals/signalholder.hpp>
-
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
 #include "controllers/hotkeys/HotkeyScope.hpp"
+
+#include <boost/optional.hpp>
+#include <pajlada/signals/signal.hpp>
+#include <pajlada/signals/signalholder.hpp>
 
 #include <set>
 
 class QShortcut;
 
 namespace chatterino {
+
 class Hotkey;
 class Settings;
 class Paths;
