@@ -8,9 +8,16 @@
 
 namespace chatterino {
 
+// ActionDefinition is an action that can be performed with a hotkey
 struct ActionDefinition {
+    // displayName is the value that would be shown to a user when they edit or create a hotkey for an action
     QString displayName;
+
+    // minCountArguments is the minimum amount of arguments the action accepts
+    // Example action: "Select Tab" in a popup window accepts 1 argument for which tab to select
     uint8_t minCountArguments = 0;
+
+    // maxCountArguments is the maximum amount of arguments the action accepts
     uint8_t maxCountArguments = minCountArguments;
 };
 
