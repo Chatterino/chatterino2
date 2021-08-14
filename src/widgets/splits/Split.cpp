@@ -262,10 +262,11 @@ Split::Split(QWidget *parent)
             if (getSettings()->askOnImageUpload.getValue())
             {
                 QMessageBox msgBox;
+                msgBox.setWindowTitle("Chatterino");
                 msgBox.setText("Image upload");
                 msgBox.setInformativeText(
                     "You are uploading an image to a 3rd party service not in "
-                    "control of the chatterino team. You may not be able to "
+                    "control of the Chatterino team. You may not be able to "
                     "remove the image from the site. Are you okay with this?");
                 msgBox.addButton(QMessageBox::Cancel);
                 msgBox.addButton(QMessageBox::Yes);
