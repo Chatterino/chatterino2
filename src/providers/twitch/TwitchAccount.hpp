@@ -2,13 +2,16 @@
 
 #include "common/Aliases.hpp"
 #include "common/Atomic.hpp"
+#include "common/Channel.hpp"
 #include "common/UniqueAccess.hpp"
 #include "controllers/accounts/Account.hpp"
 #include "messages/Emote.hpp"
 #include "providers/twitch/TwitchUser.hpp"
+#include "util/QStringHash.hpp"
 
 #include <rapidjson/document.h>
 #include <QColor>
+#include <QElapsedTimer>
 #include <QString>
 
 #include <functional>
@@ -48,6 +51,8 @@ struct TwitchEmoteSetResolverResponse {
     }
 };
 
+std::vector<QStringList> getEmoteSetBatches(QStringList emoteSetKeys);
+
 class TwitchAccount : public Account
 {
 public:
@@ -60,7 +65,7 @@ public:
         QString key;
         QString channelName;
         QString text;
-        QString type;
+        bool local{false};
         std::vector<TwitchEmote> emotes;
     };
 
@@ -69,8 +74,8 @@ public:
     struct TwitchAccountEmoteData {
         std::vector<std::shared_ptr<EmoteSet>> emoteSets;
 
-        std::vector<EmoteName> allEmoteNames;
-
+        // this EmoteMap should contain all emotes available globally
+        // excluding locally available emotes, such as follower ones
         EmoteMap emotes;
     };
 
@@ -103,21 +108,26 @@ public:
     void unblockUser(QString userId, std::function<void()> onSuccess,
                      std::function<void()> onFailure);
 
-    void checkFollow(const QString targetUserID,
-                     std::function<void(FollowResult)> onFinished);
-
     SharedAccessGuard<const std::set<QString>> accessBlockedUserIds() const;
     SharedAccessGuard<const std::set<TwitchUser>> accessBlocks() const;
 
-    void loadEmotes();
-    void loadUserstateEmotes(QStringList emoteSetKeys);
+    void loadEmotes(std::weak_ptr<Channel> weakChannel = {});
+    // loadUserstateEmotes loads emote sets that are part of the USERSTATE emote-sets key
+    // this function makes sure not to load emote sets that have already been loaded
+    void loadUserstateEmotes(std::function<void()> callback);
+    // setUserStateEmoteSets sets the emote sets that were parsed from the USERSTATE emote-sets key
+    // Returns true if the newly inserted emote sets differ from the ones previously saved
+    [[nodiscard]] bool setUserstateEmoteSets(QStringList newEmoteSets);
     SharedAccessGuard<const TwitchAccountEmoteData> accessEmotes() const;
+    SharedAccessGuard<const std::unordered_map<QString, EmoteMap>>
+        accessLocalEmotes() const;
 
     // Automod actions
-    void autoModAllow(const QString msgID);
-    void autoModDeny(const QString msgID);
+    void autoModAllow(const QString msgID, ChannelPtr channel);
+    void autoModDeny(const QString msgID, ChannelPtr channel);
 
 private:
+    void loadKrakenEmotes();
     void loadEmoteSetData(std::shared_ptr<EmoteSet> emoteSet);
 
     QString oauthClient_;
@@ -128,12 +138,13 @@ private:
     Atomic<QColor> color_;
 
     mutable std::mutex ignoresMutex_;
-    QElapsedTimer userstateEmotesTimer_;
+    QStringList userstateEmoteSets_;
     UniqueAccess<std::set<TwitchUser>> ignores_;
     UniqueAccess<std::set<QString>> ignoresUserIds_;
 
     //    std::map<UserId, TwitchAccountEmoteData> emotes;
     UniqueAccess<TwitchAccountEmoteData> emotes_;
+    UniqueAccess<std::unordered_map<QString, EmoteMap>> localEmotes_;
 };
 
 }  // namespace chatterino

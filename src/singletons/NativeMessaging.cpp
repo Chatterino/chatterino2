@@ -149,30 +149,41 @@ void NativeMessagingServer::start()
 
 void NativeMessagingServer::ReceiverThread::run()
 {
-    ipc::message_queue::remove("chatterino_gui");
-    ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui", 100,
-                                    MESSAGE_SIZE);
-
-    while (true)
+    try
     {
-        try
+        ipc::message_queue::remove("chatterino_gui");
+        ipc::message_queue messageQueue(ipc::open_or_create, "chatterino_gui",
+                                        100, MESSAGE_SIZE);
+
+        while (true)
         {
-            auto buf = std::make_unique<char[]>(MESSAGE_SIZE);
-            auto retSize = ipc::message_queue::size_type();
-            auto priority = static_cast<unsigned int>(0);
+            try
+            {
+                auto buf = std::make_unique<char[]>(MESSAGE_SIZE);
+                auto retSize = ipc::message_queue::size_type();
+                auto priority = static_cast<unsigned int>(0);
 
-            messageQueue.receive(buf.get(), MESSAGE_SIZE, retSize, priority);
+                messageQueue.receive(buf.get(), MESSAGE_SIZE, retSize,
+                                     priority);
 
-            auto document = QJsonDocument::fromJson(
-                QByteArray::fromRawData(buf.get(), retSize));
+                auto document = QJsonDocument::fromJson(
+                    QByteArray::fromRawData(buf.get(), retSize));
 
-            this->handleMessage(document.object());
+                this->handleMessage(document.object());
+            }
+            catch (ipc::interprocess_exception &ex)
+            {
+                qCDebug(chatterinoNativeMessage)
+                    << "received from gui process:" << ex.what();
+            }
         }
-        catch (ipc::interprocess_exception &ex)
-        {
-            qCDebug(chatterinoNativeMessage)
-                << "received from gui process:" << ex.what();
-        }
+    }
+    catch (ipc::interprocess_exception &ex)
+    {
+        qCDebug(chatterinoNativeMessage)
+            << "run ipc message queue:" << ex.what();
+
+        nmIpcError().set(QString::fromLatin1(ex.what()));
     }
 }
 
@@ -180,7 +191,6 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
     const QJsonObject &root)
 {
     auto app = getApp();
-
     QString action = root.value("action").toString();
 
     if (action.isNull())
@@ -200,13 +210,20 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
         AttachedWindow::GetArgs args;
         args.winId = root.value("winId").toString();
         args.yOffset = root.value("yOffset").toInt(-1);
-        args.x = root.value("size").toObject().value("x").toInt(-1);
-        args.width = root.value("size").toObject().value("width").toInt(-1);
-        args.height = root.value("size").toObject().value("height").toInt(-1);
+
+        {
+            const auto sizeObject = root.value("size").toObject();
+            args.x = sizeObject.value("x").toDouble(-1.0);
+            args.pixelRatio = sizeObject.value("pixelRatio").toDouble(-1.0);
+            args.width = sizeObject.value("width").toInt(-1);
+            args.height = sizeObject.value("height").toInt(-1);
+        }
+
         args.fullscreen = attachFullscreen;
 
         qCDebug(chatterinoNativeMessage)
-            << args.x << args.width << args.height << args.winId;
+            << args.x << args.pixelRatio << args.width << args.height
+            << args.winId;
 
         if (_type.isNull() || args.winId.isNull())
         {
@@ -270,6 +287,12 @@ void NativeMessagingServer::ReceiverThread::handleMessage(
     {
         qCDebug(chatterinoNativeMessage) << "NM unknown action " + action;
     }
+}
+
+Atomic<boost::optional<QString>> &nmIpcError()
+{
+    static Atomic<boost::optional<QString>> x;
+    return x;
 }
 
 }  // namespace chatterino

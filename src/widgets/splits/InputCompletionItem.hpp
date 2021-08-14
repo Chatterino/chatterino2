@@ -6,13 +6,13 @@
 
 namespace chatterino {
 
-class EmoteInputItem : public GenericListItem
+class InputCompletionItem : public GenericListItem
 {
     using ActionCallback = std::function<void(const QString &)>;
 
 public:
-    EmoteInputItem(const EmotePtr &emote, const QString &text,
-                   ActionCallback action);
+    InputCompletionItem(const EmotePtr &emote, const QString &text,
+                        ActionCallback action);
 
     // GenericListItem interface
 public:

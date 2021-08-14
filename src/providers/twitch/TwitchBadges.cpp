@@ -1,9 +1,13 @@
 #include "TwitchBadges.hpp"
 
+#include <QBuffer>
+#include <QIcon>
+#include <QImageReader>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QThread>
+#include <QUrlQuery>
 
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
@@ -21,8 +25,11 @@ void TwitchBadges::loadTwitchBadges()
 {
     assert(this->loaded_ == false);
 
-    static QString url(
-        "https://badges.twitch.tv/v1/badges/global/display?language=en");
+    QUrl url("https://badges.twitch.tv/v1/badges/global/display");
+
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("language", "en");
+    url.setQuery(urlQuery);
 
     NetworkRequest(url)
         .onSuccess([this](auto result) -> Outcome {
@@ -88,6 +95,10 @@ void TwitchBadges::loaded()
 
     // Flush callback queue
     std::unique_lock queueLock(this->queueMutex_);
+
+    // Once we have gained unique access of the queue, we can release our unique access of the loaded mutex allowing future calls to read locked_
+    loadedLock.unlock();
+
     while (!this->callbackQueue_.empty())
     {
         auto callback = this->callbackQueue_.front();

@@ -7,6 +7,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Shortcut.hpp"
@@ -69,10 +70,15 @@ namespace {
 
         for (const auto &set : sets)
         {
+            // Some emotes (e.g. follower ones) are only available in their origin channel
+            if (set->local && currentChannelName != set->channelName)
+            {
+                continue;
+            }
+
             // TITLE
             auto channelName = set->channelName;
-            auto text =
-                set->key == "0" || set->text.isEmpty() ? "Twitch" : set->text;
+            auto text = set->text.isEmpty() ? "Twitch" : set->text;
 
             // EMOTES
             MessageBuilder builder;
@@ -224,9 +230,9 @@ void EmotePopup::loadChannel(ChannelPtr _channel)
         *globalChannel, *subChannel, _channel->getName());
 
     // global
-    addEmotes(*globalChannel, *twitchChannel->globalBttv().emotes(),
+    addEmotes(*globalChannel, *getApp()->twitch2->getBttvEmotes().emotes(),
               "BetterTTV", MessageElementFlag::BttvEmote);
-    addEmotes(*globalChannel, *twitchChannel->globalFfz().emotes(),
+    addEmotes(*globalChannel, *getApp()->twitch2->getFfzEmotes().emotes(),
               "FrankerFaceZ", MessageElementFlag::FfzEmote);
 
     // channel

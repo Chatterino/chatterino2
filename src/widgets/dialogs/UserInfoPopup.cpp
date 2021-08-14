@@ -6,13 +6,14 @@
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
-#include "providers/irc/IrcMessageBuilder.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/Theme.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
@@ -42,7 +43,7 @@ namespace {
     {
         auto label = box.emplace<Label>();
         auto button = box.emplace<Button>();
-        button->setPixmap(getResources().buttons.copyDark);
+        button->setPixmap(getApp()->themes->buttons.copy);
         button->setScaleIndependantSize(18, 18);
         button->setDim(Button::Dim::Lots);
         QObject::connect(
@@ -232,7 +233,6 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
     {
         user->addStretch(1);
 
-        user.emplace<QCheckBox>("Follow").assign(&this->ui_.follow);
         user.emplace<QCheckBox>("Block").assign(&this->ui_.block);
         user.emplace<QCheckBox>("Ignore highlights")
             .assign(&this->ui_.ignoreHighlights);
@@ -402,56 +402,6 @@ void UserInfoPopup::scaleChangedEvent(float /*scale*/)
 
 void UserInfoPopup::installEvents()
 {
-    std::weak_ptr<bool> hack = this->hack_;
-
-    // follow
-    QObject::connect(
-        this->ui_.follow, &QCheckBox::stateChanged,
-        [this](int newState) mutable {
-            auto currentUser = getApp()->accounts->twitch.getCurrent();
-
-            const auto reenableFollowCheckbox = [this] {
-                this->ui_.follow->setEnabled(true);
-            };
-
-            if (!this->ui_.follow->isEnabled())
-            {
-                // We received a state update while the checkbox was disabled
-                // This can only happen from the "check current follow state" call
-                // The state has been updated to properly reflect the users current follow state
-                reenableFollowCheckbox();
-                return;
-            }
-
-            switch (newState)
-            {
-                case Qt::CheckState::Unchecked: {
-                    this->ui_.follow->setEnabled(false);
-                    getHelix()->unfollowUser(currentUser->getUserId(),
-                                             this->userId_,
-                                             reenableFollowCheckbox, [] {
-                                                 //
-                                             });
-                }
-                break;
-
-                case Qt::CheckState::PartiallyChecked: {
-                    // We deliberately ignore this state
-                }
-                break;
-
-                case Qt::CheckState::Checked: {
-                    this->ui_.follow->setEnabled(false);
-                    getHelix()->followUser(currentUser->getUserId(),
-                                           this->userId_,
-                                           reenableFollowCheckbox, [] {
-                                               //
-                                           });
-                }
-                break;
-            }
-        });
-
     std::shared_ptr<bool> ignoreNext = std::make_shared<bool>(false);
 
     // block
@@ -615,8 +565,6 @@ void UserInfoPopup::updateLatestMessages()
 
 void UserInfoPopup::updateUserData()
 {
-    this->ui_.follow->setEnabled(false);
-
     std::weak_ptr<bool> hack = this->hack_;
     auto currentUser = getApp()->accounts->twitch.getCurrent();
 
@@ -681,19 +629,6 @@ void UserInfoPopup::updateUserData()
             [] {
                 // on failure
             });
-
-        // get follow state
-        currentUser->checkFollow(user.id, [this, hack](auto result) {
-            if (!hack.lock())
-            {
-                return;
-            }
-            if (result != FollowResult_Failed)
-            {
-                this->ui_.follow->setChecked(result == FollowResult_Following);
-                this->ui_.follow->setEnabled(true);
-            }
-        });
 
         // get ignore state
         bool isIgnoring = false;
@@ -771,7 +706,6 @@ void UserInfoPopup::updateUserData()
     getHelix()->getUserByName(this->userName_, onUserFetched,
                               onUserFetchFailed);
 
-    this->ui_.follow->setEnabled(false);
     this->ui_.block->setEnabled(false);
     this->ui_.ignoreHighlights->setEnabled(false);
 }

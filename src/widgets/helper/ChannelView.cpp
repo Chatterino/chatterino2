@@ -1,6 +1,7 @@
 #include "ChannelView.hpp"
 
 #include <QClipboard>
+#include <QDate>
 #include <QDebug>
 #include <QDesktopServices>
 #include <QGraphicsBlurEffect>
@@ -22,6 +23,7 @@
 #include "messages/Emote.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/Message.hpp"
+#include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
 #include "messages/layouts/MessageLayout.hpp"
 #include "messages/layouts/MessageLayoutElement.hpp"
@@ -35,6 +37,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
+#include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "util/Twitch.hpp"
@@ -44,7 +47,9 @@
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UserInfoPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
+#include "widgets/helper/SearchPopup.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
@@ -103,11 +108,7 @@ namespace {
                                 });
         };
 
-        if (creatorFlags.has(MessageElementFlag::TwitchEmote))
-        {
-            addPageLink("TwitchEmotes");
-        }
-        else if (creatorFlags.has(MessageElementFlag::BttvEmote))
+        if (creatorFlags.has(MessageElementFlag::BttvEmote))
         {
             addPageLink("BTTV");
         }
@@ -602,6 +603,15 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
                    boost::optional<MessageFlags> overridingFlags) {
                 if (this->shouldIncludeMessage(message))
                 {
+                    if (this->channel_->lastDate_ != QDate::currentDate())
+                    {
+                        this->channel_->lastDate_ = QDate::currentDate();
+                        auto msg = makeSystemMessage(
+                            QLocale().toString(QDate::currentDate(),
+                                               QLocale::LongFormat),
+                            QTime(0, 0));
+                        this->channel_->addMessage(msg);
+                    }
                     // When the message was received in the underlyingChannel,
                     // logging will be handled. Prevent duplications.
                     if (overridingFlags)
@@ -740,7 +750,7 @@ bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
                 m->loginName, Qt::CaseInsensitive) == 0)
             return true;
 
-        return this->channelFilters_->filter(m);
+        return this->channelFilters_->filter(m, this->channel_);
     }
 
     return true;
@@ -988,18 +998,32 @@ MessageElementFlags ChannelView::getFlags() const
 
     Split *split = dynamic_cast<Split *>(this->parentWidget());
 
+    if (split == nullptr)
+    {
+        SearchPopup *searchPopup =
+            dynamic_cast<SearchPopup *>(this->parentWidget());
+        if (searchPopup != nullptr)
+        {
+            split = dynamic_cast<Split *>(searchPopup->parentWidget());
+        }
+    }
+
     if (split != nullptr)
     {
         if (split->getModerationMode())
         {
             flags.set(MessageElementFlag::ModeratorTools);
         }
-        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel)
+        if (this->underlyingChannel_ == app->twitch.server->mentionsChannel ||
+            this->underlyingChannel_ == app->twitch.server->liveChannel)
         {
             flags.set(MessageElementFlag::ChannelName);
             flags.unset(MessageElementFlag::ChannelPointReward);
         }
     }
+
+    if (this->sourceChannel_ == app->twitch.server->mentionsChannel)
+        flags.set(MessageElementFlag::ChannelName);
 
     return flags;
 }
@@ -1596,7 +1620,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
                          hoverLayoutElement->getFlags().has(
                              MessageElementFlag::Username))
                     break;
-                else
+                else if (this->scrollBar_->isVisible())
                     this->enableScrolling(event->screenPos());
             }
         }
@@ -1670,7 +1694,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
     else if (event->button() == Qt::MiddleButton)
     {
-        if (this->isScrolling_)
+        if (this->isScrolling_ && this->scrollBar_->isVisible())
         {
             if (event->screenPos() == this->lastMiddlePressPosition_)
                 this->enableScrolling(event->screenPos());
@@ -1778,8 +1802,9 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
         }
         break;
         case Qt::RightButton: {
+            auto split = dynamic_cast<Split *>(this->parentWidget());
             auto insertText = [=](QString text) {
-                if (auto split = dynamic_cast<Split *>(this->parentWidget()))
+                if (split)
                 {
                     split->insertTextToInput(text);
                 }
@@ -1789,7 +1814,11 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             if (link.type == Link::UserInfo)
             {
                 const bool commaMention = getSettings()->mentionUsersWithComma;
-                insertText("@" + link.value + (commaMention ? ", " : " "));
+                const bool isFirstWord =
+                    split && split->getInput().isEditFirstWord();
+                auto userMention =
+                    formatUserMention(link.value, isFirstWord, commaMention);
+                insertText("@" + userMention + " ");
             }
             else if (link.type == Link::UserWhisper)
             {
@@ -1898,7 +1927,7 @@ void ChannelView::addContextMenuItems(
         crossPlatformCopy(copyString);
     });
 
-    // Open in new split.
+    // If is a link to a twitch user/stream
     if (hoveredElement->getLink().type == Link::Url)
     {
         static QRegularExpression twitchChannelRegex(
@@ -1917,7 +1946,22 @@ void ChannelView::addContextMenuItems(
         {
             menu->addSeparator();
             menu->addAction("Open in new split", [twitchUsername, this] {
-                this->joinToChannel.invoke(twitchUsername);
+                this->openChannelIn.invoke(twitchUsername,
+                                           FromTwitchLinkOpenChannelIn::Split);
+            });
+            menu->addAction("Open in new tab", [twitchUsername, this] {
+                this->openChannelIn.invoke(twitchUsername,
+                                           FromTwitchLinkOpenChannelIn::Tab);
+            });
+
+            menu->addSeparator();
+            menu->addAction("Open player in browser", [twitchUsername, this] {
+                this->openChannelIn.invoke(
+                    twitchUsername, FromTwitchLinkOpenChannelIn::BrowserPlayer);
+            });
+            menu->addAction("Open in streamlink", [twitchUsername, this] {
+                this->openChannelIn.invoke(
+                    twitchUsername, FromTwitchLinkOpenChannelIn::Streamlink);
             });
         }
     }
@@ -2044,24 +2088,38 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
         case Link::UserAction: {
             QString value = link.value;
 
+            ChannelPtr channel = this->underlyingChannel_;
+            SearchPopup *searchPopup =
+                dynamic_cast<SearchPopup *>(this->parentWidget());
+            if (searchPopup != nullptr)
+            {
+                Split *split =
+                    dynamic_cast<Split *>(searchPopup->parentWidget());
+                if (split != nullptr)
+                {
+                    channel = split->getChannel();
+                }
+            }
+
             value.replace("{user}", layout->getMessage()->loginName)
                 .replace("{channel}", this->channel_->getName())
                 .replace("{msg-id}", layout->getMessage()->id)
                 .replace("{message}", layout->getMessage()->messageText);
 
-            value = getApp()->commands->execCommand(
-                value, this->underlyingChannel_, false);
-            this->underlyingChannel_->sendMessage(value);
+            value = getApp()->commands->execCommand(value, channel, false);
+            channel->sendMessage(value);
         }
         break;
 
         case Link::AutoModAllow: {
-            getApp()->accounts->twitch.getCurrent()->autoModAllow(link.value);
+            getApp()->accounts->twitch.getCurrent()->autoModAllow(
+                link.value, this->channel());
         }
         break;
 
         case Link::AutoModDeny: {
-            getApp()->accounts->twitch.getCurrent()->autoModDeny(link.value);
+            getApp()->accounts->twitch.getCurrent()->autoModDeny(
+                link.value, this->channel());
         }
         break;
 

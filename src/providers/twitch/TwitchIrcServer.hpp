@@ -35,6 +35,7 @@ public:
 
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
+    const ChannelPtr liveChannel;
     IndirectChannel watchingChannel;
 
     PubSub *pubsub;
@@ -54,9 +55,6 @@ protected:
         Communi::IrcMessage *message) override;
     virtual void writeConnectionMessageReceived(
         Communi::IrcMessage *message) override;
-
-    virtual void onReadConnected(IrcConnection *connection) override;
-    virtual void onWriteConnected(IrcConnection *connection) override;
 
     virtual std::shared_ptr<Channel> getCustomChannel(
         const QString &channelname) override;

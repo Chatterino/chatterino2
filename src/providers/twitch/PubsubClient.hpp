@@ -47,6 +47,11 @@ using WebsocketErrorCode = websocketpp::lib::error_code;
 #define MAX_PUBSUB_LISTENS 50
 #define MAX_PUBSUB_CONNECTIONS 10
 
+struct RequestMessage {
+    QString payload;
+    int topicCount;
+};
+
 namespace detail {
 
     struct Listener {
@@ -124,6 +129,7 @@ public:
     struct {
         struct {
             Signal<ClearChatAction> chatCleared;
+            Signal<DeleteAction> messageDeleted;
             Signal<ModeChangedAction> modeChanged;
             Signal<ModerationStateAction> moderationStateChanged;
 
@@ -132,6 +138,7 @@ public:
 
             Signal<AutomodAction> automodMessage;
             Signal<AutomodUserAction> automodUserMessage;
+            Signal<AutomodInfoAction> automodInfoMessage;
         } moderation;
 
         struct {
@@ -152,6 +159,8 @@ public:
 
     void listenToChannelModerationActions(
         const QString &channelID, std::shared_ptr<TwitchAccount> account);
+    void listenToAutomod(const QString &channelID,
+                         std::shared_ptr<TwitchAccount> account);
 
     void listenToChannelPointRewards(const QString &channelID,
                                      std::shared_ptr<TwitchAccount> account);
@@ -168,6 +177,7 @@ private:
     bool isListeningToTopic(const QString &topic);
 
     void addClient();
+    std::atomic<bool> addingClient{false};
 
     State state = State::Connected;
 
@@ -175,16 +185,22 @@ private:
              std::owner_less<WebsocketHandle>>
         clients;
 
-    std::unordered_map<std::string, std::function<void(const rapidjson::Value &,
-                                                       const QString &)>>
+    std::unordered_map<
+        QString, std::function<void(const rapidjson::Value &, const QString &)>>
         moderationActionHandlers;
+
+    std::unordered_map<
+        QString, std::function<void(const rapidjson::Value &, const QString &)>>
+        channelTermsActionHandlers;
 
     void onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);
     void onConnectionOpen(websocketpp::connection_hdl hdl);
     void onConnectionClose(websocketpp::connection_hdl hdl);
     WebsocketContextPtr onTLSInit(websocketpp::connection_hdl hdl);
 
-    void handleListenResponse(const rapidjson::Document &msg);
+    void handleResponse(const rapidjson::Document &msg);
+    void handleListenResponse(const RequestMessage &msg, bool failed);
+    void handleUnlistenResponse(const RequestMessage &msg, bool failed);
     void handleMessageResponse(const rapidjson::Value &data);
 
     void runThread();

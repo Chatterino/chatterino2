@@ -2,6 +2,8 @@
 #include "singletons/Theme.hpp"
 #include "widgets/listview/GenericListModel.hpp"
 
+#include <QKeyEvent>
+
 namespace chatterino {
 
 GenericListView::GenericListView()

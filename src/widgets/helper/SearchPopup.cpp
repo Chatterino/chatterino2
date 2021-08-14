@@ -44,7 +44,7 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
         }
 
         if (accept && filterSet)
-            accept = filterSet->filter(message);
+            accept = filterSet->filter(message, channel);
 
         // If all predicates match, add the message to the channel
         if (accept)

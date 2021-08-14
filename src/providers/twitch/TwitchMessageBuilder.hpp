@@ -4,6 +4,7 @@
 #include "common/Outcome.hpp"
 #include "messages/SharedMessageBuilder.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
+#include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/TwitchBadge.hpp"
 
 #include <IrcMessage>
@@ -28,12 +29,6 @@ struct TwitchEmoteOccurence {
 class TwitchMessageBuilder : public SharedMessageBuilder
 {
 public:
-    enum UsernameDisplayMode : int {
-        Username = 1,                  // Username
-        LocalizedName = 2,             // Localized name
-        UsernameAndLocalizedName = 3,  // Username (Localized name)
-    };
-
     TwitchMessageBuilder() = delete;
 
     explicit TwitchMessageBuilder(Channel *_channel,
@@ -51,7 +46,24 @@ public:
     MessagePtr build() override;
 
     static void appendChannelPointRewardMessage(
-        const ChannelPointReward &reward, MessageBuilder *builder);
+        const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,
+        bool isBroadcaster);
+
+    // Message in the /live chat for channel going live
+    static void liveMessage(const QString &channelName,
+                            MessageBuilder *builder);
+
+    // Messages in normal chat for channel stuff
+    static void liveSystemMessage(const QString &channelName,
+                                  MessageBuilder *builder);
+    static void offlineSystemMessage(const QString &channelName,
+                                     MessageBuilder *builder);
+    static void hostingSystemMessage(const QString &channelName,
+                                     MessageBuilder *builder, bool hostOn);
+    static void deletionMessage(const MessagePtr originalMessage,
+                                MessageBuilder *builder);
+    static void deletionMessage(const DeleteAction &action,
+                                MessageBuilder *builder);
 
 private:
     void parseUsernameColor() override;
@@ -77,6 +89,8 @@ private:
     void appendChatterinoBadges();
     void appendFfzBadges();
     Outcome tryParseCheermote(const QString &string);
+
+    bool shouldAddModerationElements() const;
 
     QString roomID_;
     bool hasBits_ = false;

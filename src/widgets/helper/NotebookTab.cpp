@@ -14,6 +14,9 @@
 
 #include <QApplication>
 #include <QDebug>
+#include <QDialogButtonBox>
+#include <QLabel>
+#include <QLineEdit>
 #include <QLinearGradient>
 #include <QMimeData>
 #include <QPainter>
@@ -70,6 +73,12 @@ NotebookTab::NotebookTab(Notebook *notebook)
                          this->highlightEnabled_ = checked;
                      });
     this->menu_.addAction(highlightNewMessagesAction_);
+
+    this->menu_.addSeparator();
+
+    this->menu_.addAction("Toggle visibility of tabs", [this]() {
+        this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
+    });
 }
 
 void NotebookTab::showRenameDialog()

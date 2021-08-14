@@ -168,7 +168,9 @@ namespace {
         if (settings.headerGame && !s.game.isEmpty())
             title += " - " + s.game;
         if (settings.headerStreamTitle && !s.title.isEmpty())
-            title += " - " + s.title;
+        {
+            title += " - " + s.title.simplified();
+        }
 
         return title;
     }
@@ -914,10 +916,6 @@ void SplitHeader::themeChangedEvent()
     }
 }
 
-void SplitHeader::moveSplit()
-{
-}
-
 void SplitHeader::reloadChannelEmotes()
 {
     auto channel = this->split_->getChannel();
@@ -931,7 +929,8 @@ void SplitHeader::reloadChannelEmotes()
 
 void SplitHeader::reloadSubscriberEmotes()
 {
-    getApp()->accounts->twitch.getCurrent()->loadEmotes();
+    auto channel = this->split_->getChannel();
+    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
 }
 
 void SplitHeader::reconnect()
