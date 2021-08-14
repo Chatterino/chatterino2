@@ -184,8 +184,7 @@ MessagePtr TwitchMessageBuilder::build()
     this->emplace<TimestampElement>(
         calculateMessageTimestamp(this->ircMessage));
 
-    if (!this->senderIsBroadcaster &&
-        !(this->tags.value("user-type") == "mod" && !args.isStaffOrBroadcaster))
+    if (this->shouldAddModerationElements())
     {
         this->emplace<TwitchModerationElement>();
     }
@@ -1207,6 +1206,24 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     }
 
     return Success;
+}
+
+bool TwitchMessageBuilder::shouldAddModerationElements() const
+{
+    if (this->senderIsBroadcaster)
+    {
+        // You cannot timeout the broadcaster
+        return false;
+    }
+
+    if (this->tags.value("user-type").toString() == "mod" &&
+        !this->args.isStaffOrBroadcaster)
+    {
+        // You cannot timeout moderators UNLESS you are Twitch Staff or the broadcaster of the channel
+        return false;
+    }
+
+    return true;
 }
 
 void TwitchMessageBuilder::appendChannelPointRewardMessage(
