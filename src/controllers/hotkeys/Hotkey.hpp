@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HotkeyScope.hpp"
+#include "controllers/hotkeys/HotkeyScope.hpp"
 
 #include <QKeySequence>
 #include <QString>
