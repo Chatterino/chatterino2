@@ -1,3 +1,5 @@
+#pragma once
+
 #include "HotkeyScope.hpp"
 
 namespace chatterino {
