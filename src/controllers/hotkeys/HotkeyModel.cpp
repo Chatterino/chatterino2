@@ -1,4 +1,4 @@
-#include "HotkeyModel.hpp"
+#include "controllers/hotkeys/HotkeyModel.hpp"
 
 #include "common/QLogging.hpp"
 #include "util/StandardItemHelper.hpp"
