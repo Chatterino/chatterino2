@@ -1,8 +1,8 @@
-#include "Hotkey.hpp"
-#include "Application.hpp"
-#include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/hotkeys/Hotkey.hpp"
 
+#include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 
 namespace chatterino {
 
