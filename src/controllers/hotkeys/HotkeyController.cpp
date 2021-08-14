@@ -51,10 +51,6 @@ HotkeyController::HotkeyController()
         });
 }
 
-void HotkeyController::initialize(Settings &settings, Paths &paths)
-{
-}
-
 void HotkeyController::loadHotkeys()
 {
     auto defaultHotkeysAdded =

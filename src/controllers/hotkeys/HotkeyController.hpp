@@ -29,7 +29,6 @@ public:
     HotkeyController();
     HotkeyModel *createModel(QObject *parent);
 
-    virtual void initialize(Settings &settings, Paths &paths) override;
     std::vector<QShortcut *> shortcutsForScope(HotkeyScope scope,
                                                HotkeyMap actionMap,
                                                QWidget *parent);
