@@ -6,6 +6,7 @@
 - Minor: Strip leading @ and trailing , from username in /user and /usercard commands. (#3143)
 - Minor: Display a system message when reloading subscription emotes to match BTTV/FFZ behavior (#3135)
 - Minor: Added autocompletion for default Twitch commands starting with the dot (e.g. `.mods` which does the same as `/mods`). (#3144)
+- Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
 - Bugfix: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
 - Bugfix: Fixed a bug that caused all badge highlights to use the same color. (#3132, #3134)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
