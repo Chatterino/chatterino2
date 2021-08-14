@@ -42,10 +42,10 @@ protected:
 
     virtual void scaleChangedEvent(float newScale);
     virtual void themeChangedEvent();
-    virtual void addShortcuts()
+    [[deprecated("addShortcuts called without overriding it")]] virtual void
+        addShortcuts()
     {
-        qDebug() << "Default add shortcuts used";
-    };
+    }
 
     void setScale(float value);
 
