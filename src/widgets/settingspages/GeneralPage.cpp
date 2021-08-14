@@ -520,11 +520,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Title", s.headerStreamTitle);
 
     layout.addSubtitle("R9K");
-    layout.addDescription(
-        "Hide similar messages by the same user. Toggle hidden "
-        "messages by pressing Ctrl+H.");
+    layout.addDescription("Hide similar messages. Toggle hidden "
+                          "messages by pressing Ctrl+H.");
     layout.addCheckbox("Hide similar messages", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
+    layout.addCheckbox("By the same user", s.hideSimilarBySameUser);
     layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
     layout.addCheckbox("Receive notification sounds from hidden messages",
                        s.shownSimilarTriggerHighlights);

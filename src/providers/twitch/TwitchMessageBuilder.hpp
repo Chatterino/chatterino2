@@ -92,6 +92,8 @@ private:
     void appendFfzBadges();
     Outcome tryParseCheermote(const QString &string);
 
+    bool shouldAddModerationElements() const;
+
     QString roomID_;
     bool hasBits_ = false;
     QString bits;
