@@ -21,7 +21,9 @@ struct ActionDefinition {
     uint8_t maxCountArguments = minCountArguments;
 };
 
-const std::map<HotkeyScope, std::map<QString, ActionDefinition>> actionNames{
+using ActionDefinitionMap = std::map<QString, ActionDefinition>;
+
+inline const std::map<HotkeyScope, ActionDefinitionMap> actionNames{
     {HotkeyScope::PopupWindow,
      {
          {"reject", ActionDefinition{"Confirmable popups: Cancel"}},
