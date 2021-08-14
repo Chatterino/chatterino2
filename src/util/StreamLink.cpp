@@ -2,8 +2,11 @@
 
 #include "Application.hpp"
 #include "singletons/Settings.hpp"
+#include "singletons/WindowManager.hpp"
+#include "util/CombinePath.hpp"
 #include "util/Helpers.hpp"
 #include "util/SplitCommand.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/dialogs/QualityPopup.hpp"
 
 #include <QErrorMessage>
@@ -39,7 +42,7 @@ namespace {
     {
         if (getSettings()->streamlinkUseCustomPath)
         {
-            return getSettings()->streamlinkPath + "/" + getBinaryName();
+            return combinePath(getSettings()->streamlinkPath, getBinaryName());
         }
         else
         {
@@ -200,7 +203,7 @@ void openStreamlinkForChannel(const QString &channel)
     if (preferredQuality == "choose")
     {
         getStreamQualities(channelURL, [=](QStringList qualityOptions) {
-            QualityPopup::showDialog(channel, qualityOptions);
+            showStreamlinkQualityDialog(channelURL, qualityOptions);
         });
 
         return;
@@ -242,6 +245,64 @@ void openStreamlinkForChannel(const QString &channel)
     }
 
     openStreamlink(channelURL, quality, args);
+}
+
+void showStreamlinkQualityDialog(const QString &channelURL,
+                                 QStringList &options)
+{
+    auto dialog = new QDialog(
+        static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
+
+    auto vbox = new QVBoxLayout;
+
+    // dropdown with options
+    auto dropdown = QComboBox(dialog);
+    dropdown.addItems(options);
+
+    // buttons
+    auto buttonBox =
+        new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+
+    QObject::connect(buttonBox, &QDialogButtonBox::accepted, [dialog] {
+        dialog->accept();
+        dialog->close();
+    });
+
+    QObject::connect(buttonBox, &QDialogButtonBox::rejected, [dialog] {
+        dialog->reject();
+        dialog->close();
+    });
+
+    // Assign layout
+    vbox->addWidget(&dropdown);
+    vbox->addWidget(buttonBox);
+
+    dialog->setLayout(vbox);
+    dialog->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+
+    dialog->setWindowFlags(
+        (dialog->windowFlags() & ~(Qt::WindowContextHelpButtonHint)) |
+        Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
+
+    // Adjust dialog's width to fit the title
+    QString title = "Chatterino - select stream quality";
+    QFontMetrics titleMetrics(dialog->font());
+    dialog->setWindowTitle(title);
+    dialog->setMinimumSize(titleMetrics.horizontalAdvance(title) + 50,
+                           dialog->minimumSizeHint().height() + 10);
+
+    if (dialog->exec() == QDialog::Accepted)
+    {
+        try
+        {
+            openStreamlink(channelURL, dropdown.currentText());
+        }
+        catch (const Exception &ex)
+        {
+            qCWarning(chatterinoWidget)
+                << "Exception caught trying to open streamlink:" << ex.what();
+        }
+    }
 }
 
 }  // namespace chatterino

@@ -24,4 +24,7 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 // from settings and opening a quality dialog if the quality is "Choose"
 void openStreamlinkForChannel(const QString &channel);
 
+void showStreamlinkQualityDialog(const QString &channelName,
+                                 QStringList &options);
+
 }  // namespace chatterino
