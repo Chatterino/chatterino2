@@ -4,7 +4,6 @@
 
 #include <QComboBox>
 #include <QDialogButtonBox>
-#include <QPushButton>
 #include <QVBoxLayout>
 
 namespace chatterino {
@@ -15,16 +14,17 @@ public:
     QualityPopup(const QString &_channelName, QStringList options);
     static void showDialog(const QString &_channelName, QStringList options);
 
+protected:
+    void keyPressEvent(QKeyEvent *e) override;
+
 private:
     void okButtonClicked();
     void cancelButtonClicked();
 
     struct {
-        QVBoxLayout vbox;
-        QComboBox selector;
-        QDialogButtonBox buttonBox;
-        QPushButton okButton;
-        QPushButton cancelButton;
+        QVBoxLayout *vbox;
+        QComboBox *selector;
+        QDialogButtonBox *buttonBox;
     } ui_;
 
     QString channelName_;
