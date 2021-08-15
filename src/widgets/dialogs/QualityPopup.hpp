@@ -11,8 +11,8 @@ namespace chatterino {
 class QualityPopup : public BasePopup
 {
 public:
-    QualityPopup(const QString &_channelName, QStringList options);
-    static void showDialog(const QString &_channelName, QStringList options);
+    QualityPopup(const QString &channelURL, QStringList options);
+    static void showDialog(const QString &channelURL, QStringList options);
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
@@ -27,7 +27,7 @@ private:
         QDialogButtonBox *buttonBox;
     } ui_;
 
-    QString channelName_;
+    QString channelURL_;
 };
 
 }  // namespace chatterino

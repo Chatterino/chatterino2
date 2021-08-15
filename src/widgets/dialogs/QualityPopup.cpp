@@ -7,10 +7,10 @@
 
 namespace chatterino {
 
-QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
+QualityPopup::QualityPopup(const QString &channelURL, QStringList options)
     : BasePopup({},
                 static_cast<QWidget *>(&(getApp()->windows->getMainWindow())))
-    , channelName_(_channelName)
+    , channelURL_(channelURL)
 {
     this->ui_.selector = new QComboBox(this);
     this->ui_.vbox = new QVBoxLayout(this);
@@ -30,9 +30,9 @@ QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
     this->setLayout(this->ui_.vbox);
 }
 
-void QualityPopup::showDialog(const QString &channelName, QStringList options)
+void QualityPopup::showDialog(const QString &channelURL, QStringList options)
 {
-    QualityPopup *instance = new QualityPopup(channelName, options);
+    QualityPopup *instance = new QualityPopup(channelURL, options);
 
     instance->window()->setWindowTitle("Chatterino - select stream quality");
     instance->setAttribute(Qt::WA_DeleteOnClose, true);
@@ -58,11 +58,9 @@ void QualityPopup::keyPressEvent(QKeyEvent *e)
 
 void QualityPopup::okButtonClicked()
 {
-    QString channelURL = "twitch.tv/" + this->channelName_;
-
     try
     {
-        openStreamlink(channelURL, this->ui_.selector->currentText());
+        openStreamlink(this->channelURL_, this->ui_.selector->currentText());
     }
     catch (const Exception &ex)
     {
