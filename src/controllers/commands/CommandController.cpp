@@ -499,6 +499,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                     "currently opened in Chatterino"));
                 return "";
             }
+
+            channel = channelTemp;
         }
 
         auto *userPopup = new UserInfoPopup(
