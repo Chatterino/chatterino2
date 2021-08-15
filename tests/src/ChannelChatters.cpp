@@ -1,9 +1,9 @@
 #include "common/ChannelChatters.hpp"
 
-#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <QColor>
 #include <QStringList>
+
 namespace chatterino {
 
 class MockChannel : public Channel
