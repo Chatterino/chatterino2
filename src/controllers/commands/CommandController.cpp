@@ -488,9 +488,11 @@ void CommandController::initialize(Settings &, Paths &paths)
             QString channelName = words[2];
             stripChannelName(channelName);
 
-            ChannelPtr channelTemp = getApp()->twitch2->getChannelOrEmpty(channelName);
+            ChannelPtr channelTemp =
+                getApp()->twitch2->getChannelOrEmpty(channelName);
 
-            if (channelTemp->getType() != Channel::Type::None) {
+            if (channelTemp->getType() != Channel::Type::None)
+            {
                 channel = channelTemp;
             }
         }

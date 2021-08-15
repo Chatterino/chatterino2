@@ -598,7 +598,8 @@ void UserInfoPopup::updateUserData()
         this->avatarUrl_ = user.profileImageUrl;
 
         this->ui_.nameLabel->setText(user.displayName);
-        this->setWindowTitle(TEXT_TITLE.arg(user.displayName, this->channel_->getName()));
+        this->setWindowTitle(
+            TEXT_TITLE.arg(user.displayName, this->channel_->getName()));
         this->ui_.viewCountLabel->setText(
             TEXT_VIEWS.arg(localizeNumbers(user.viewCount)));
         this->ui_.createdDateLabel->setText(
