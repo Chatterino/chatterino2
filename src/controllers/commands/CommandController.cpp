@@ -476,7 +476,8 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/usercard", [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage /usercard [user] (channel)"));
+            channel->addMessage(
+                makeSystemMessage("Usage /usercard [user] (channel)"));
             return "";
         }
 
