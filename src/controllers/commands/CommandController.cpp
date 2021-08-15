@@ -267,6 +267,8 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto path = combinePath(paths.settingsDirectory, "commands.json");
     this->sm_ = std::make_shared<pajlada::Settings::SettingManager>();
     this->sm_->setPath(path.toStdString());
+    this->sm_->setBackupEnabled(true);
+    this->sm_->setBackupSlots(9);
 
     // Delayed initialization of the setting storing all commands
     this->commandsSetting_.reset(
