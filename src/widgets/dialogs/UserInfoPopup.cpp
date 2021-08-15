@@ -33,7 +33,7 @@
 const QString TEXT_VIEWS("Views: %1");
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
-const QString TEXT_TITLE("%1's Usercard - %2");
+const QString TEXT_TITLE("%1's Usercard - #%2");
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
 
