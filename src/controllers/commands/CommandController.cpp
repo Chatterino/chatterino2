@@ -490,7 +490,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             ChannelPtr channelTemp = getApp()->twitch2->getChannelOrEmpty(channelName);
 
-            if(channelTemp->getType() != Channel::Type::None) {
+            if (channelTemp->getType() != Channel::Type::None) {
                 channel = channelTemp;
             }
         }
