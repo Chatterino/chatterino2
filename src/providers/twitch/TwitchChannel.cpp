@@ -392,6 +392,16 @@ void TwitchChannel::sendMessage(const QString &message)
             if (parsedMessage == this->lastSentMessage_)
             {
                 auto spaceIndex = parsedMessage.indexOf(' ');
+                // If the message starts with either '/' or '.' Twitch will treat it as a command, omitting
+                // first space and only rest of the arguments treated as actual message content
+                // In cases when user sends a message like ". .a b" first character and first space are omitted as well
+                bool ignoreFirstSpace =
+                    parsedMessage.at(0) == '/' || parsedMessage.at(0) == '.';
+                if (ignoreFirstSpace)
+                {
+                    spaceIndex = parsedMessage.indexOf(' ', spaceIndex + 1);
+                }
+
                 if (spaceIndex == -1)
                 {
                     // no spaces found, fall back to old magic character

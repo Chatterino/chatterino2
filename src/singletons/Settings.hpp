@@ -393,6 +393,8 @@ public:
     BoolSetting colorSimilarDisabled = {"/similarity/colorSimilarDisabled",
                                         true};
     BoolSetting hideSimilar = {"/similarity/hideSimilar", false};
+    BoolSetting hideSimilarBySameUser = {"/similarity/hideSimilarBySameUser",
+                                         true};
     BoolSetting hideSimilarMyself = {"/similarity/hideSimilarMyself", false};
     BoolSetting shownSimilarTriggerHighlights = {
         "/similarity/shownSimilarTriggerHighlights", false};
