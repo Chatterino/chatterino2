@@ -7,6 +7,7 @@
 - Minor: Display a system message when reloading subscription emotes to match BTTV/FFZ behavior (#3135)
 - Minor: Added a setting to hide similar messages by any user. (#2716)
 - Minor: Duplicate spaces now count towards the display message length. (#3002)
+- Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
 - Bugfix: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
 - Bugfix: Fixed a bug that caused all badge highlights to use the same color. (#3132, #3134)
