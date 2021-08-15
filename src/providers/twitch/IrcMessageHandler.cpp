@@ -112,11 +112,10 @@ float IrcMessageHandler::similarity(
     MessagePtr msg, const LimitedQueueSnapshot<MessagePtr> &messages)
 {
     float similarityPercent = 0.0f;
-    int bySameUser = 0;
-    for (int i = 1; bySameUser < getSettings()->hideSimilarMaxMessagesToCheck;
-         ++i)
+    int checked = 0;
+    for (int i = 1; i <= messages.size(); ++i)
     {
-        if (messages.size() < i)
+        if (checked >= getSettings()->hideSimilarMaxMessagesToCheck)
         {
             break;
         }
@@ -126,11 +125,12 @@ float IrcMessageHandler::similarity(
         {
             break;
         }
-        if (msg->loginName != prevMsg->loginName)
+        if (getSettings()->hideSimilarBySameUser &&
+            msg->loginName != prevMsg->loginName)
         {
             continue;
         }
-        ++bySameUser;
+        ++checked;
         similarityPercent = std::max(
             similarityPercent,
             relativeSimilarity(msg->messageText, prevMsg->messageText));
