@@ -493,7 +493,10 @@ void CommandController::initialize(Settings &, Paths &paths)
 
             if (channelTemp->isEmpty())
             {
-                channel = channelTemp;
+                channel->addMessage(makeSystemMessage(
+                    "A usercard can only be displayed for a channel that is "
+                    "currently opened in Chatterino"));
+                return "";
             }
         }
 
