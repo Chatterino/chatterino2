@@ -482,6 +482,15 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         QString userName = words[1];
         stripUserName(userName);
+
+        if (words.size() > 2)
+        {
+            QString channelName = words[2];
+            stripChannelName(channelName);
+
+            channel = getApp()->twitch2->getChannelOrEmpty(channelName);
+        }
+
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
