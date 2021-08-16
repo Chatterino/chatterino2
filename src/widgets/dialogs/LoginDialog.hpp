@@ -76,6 +76,7 @@ private:
     void hideEvent(QHideEvent *e) override;
 
     friend class LoginServer;
+    friend class LoginBoost;
 };
 
 }  // namespace chatterino

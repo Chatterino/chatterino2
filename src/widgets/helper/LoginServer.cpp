@@ -7,6 +7,21 @@
 
 namespace chatterino {
 
+namespace {
+    // zneix: This part of boost's example looks stupid as hell, I'll try not using it and see what breaks
+    // "Loop" forever accepting new connections
+    void httpServer(tcp::acceptor &acceptor, tcp::socket &socket)
+    {
+        acceptor.async_accept(socket, [&](beast::error_code ec) {
+            if (!ec)
+            {
+                std::make_shared<LoginBoost>(std::move(socket))->start();
+            }
+            httpServer(acceptor, socket);
+        });
+    }
+}  // namespace
+
 LoginServer::LoginServer(LoginDialog *parent)
     : parent_(parent)
     , http_(new QHttpServer())
@@ -99,6 +114,117 @@ void LoginServer::initializeRoutes()
                     this->parent_->activateLoginButton();
                 });
         });
+}
+
+void LoginBoost::start()
+{
+    readRequest();
+    checkDeadline();
+}
+
+void LoginBoost::readRequest()
+{
+    auto self = shared_from_this();
+
+    http::async_read(socket_, buffer_, request_,
+                     [self](beast::error_code ec, size_t bytes_transferred) {
+                         boost::ignore_unused(bytes_transferred);
+                         if (!ec)
+                         {
+                             self->processRequest();
+                         }
+                     });
+}
+
+void LoginBoost::processRequest()
+{
+    response_.version(request_.version());
+    response_.keep_alive(false);
+
+    switch (request_.method())
+    {
+        case http::verb::get:
+            response_.result(http::status::ok);
+            response_.set(http::field::server, "Beast");
+            response_.set("ssds", "asdfas");
+            createResponse();
+            break;
+
+        default:
+            // We return responses indicating an error if
+            // we do not recognize the request method.
+            response_.result(http::status::bad_request);
+            response_.set(http::field::content_type, "text/plain");
+            beast::ostream(response_.body())
+                << "Invalid request-method '"
+                << std::string(request_.method_string()) << "'";
+            break;
+    }
+
+    writeResponse();
+}
+
+void LoginBoost::createResponse()
+{
+    if (request_.target() == "/count")
+    {
+        response_.set(http::field::content_type, "text/html");
+        beast::ostream(response_.body())
+            << "<html>\n"
+            << "<head><title>Request count</title></head>\n"
+            << "<body>\n"
+            << "<h1>Request count</h1>\n"
+            << "<p>There have been 0 requests so far.</p>\n"
+            << "</body>\n"
+            << "</html>\n";
+    }
+    else if (request_.target() == "/time")
+    {
+        response_.set(http::field::content_type, "text/html");
+        beast::ostream(response_.body())
+            << "<html>\n"
+            << "<head><title>Current time</title></head>\n"
+            << "<body>\n"
+            << "<h1>Current time</h1>\n"
+            << "<p>The current time is "
+            << QTime::currentTime().toString().toStdString()
+            << " seconds since the epoch.</p>\n"
+            << "</body>\n"
+            << "</html>\n";
+    }
+    else
+    {
+        response_.result(http::status::not_found);
+        response_.set(http::field::content_type, "text/plain");
+        beast::ostream(response_.body()) << "File not found\r\n";
+    }
+}
+
+void LoginBoost::writeResponse()
+{
+    auto self = shared_from_this();
+
+    response_.content_length(response_.body().size());
+
+    http::async_write(
+        socket_, response_, [self](beast::error_code ec, std::size_t) {
+            self->socket_.shutdown(tcp::socket::shutdown_send, ec);
+            self->deadline_.cancel();
+        });
+}
+
+void LoginBoost::checkDeadline()
+{
+    auto self = shared_from_this();
+
+    deadline_.async_wait([this, self](beast::error_code ec) {
+        if (!ec)
+        {
+            // Close socket to cancel any outstanding operation
+            self->socket_.close(ec);
+            this->socket_.close(ec);
+        }
+    });
 }
 
 }  // namespace chatterino
