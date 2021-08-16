@@ -217,12 +217,11 @@ void LoginBoost::checkDeadline()
 {
     auto self = shared_from_this();
 
-    deadline_.async_wait([this, self](beast::error_code ec) {
+    deadline_.async_wait([self](beast::error_code ec) {
         if (!ec)
         {
             // Close socket to cancel any outstanding operation
             self->socket_.close(ec);
-            this->socket_.close(ec);
         }
     });
 }
