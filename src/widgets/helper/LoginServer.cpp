@@ -7,122 +7,143 @@
 
 namespace chatterino {
 
-namespace {
-    // zneix: This part of boost's example looks stupid as hell, I'll try not using it and see what breaks
-    // "Loop" forever accepting new connections
-    void httpServer(tcp::acceptor &acceptor, tcp::socket &socket)
-    {
-        acceptor.async_accept(socket, [&](beast::error_code ec) {
-            if (!ec)
-            {
-                std::make_shared<LoginBoost>(std::move(socket))->start();
-            }
-            httpServer(acceptor, socket);
-        });
-    }
-}  // namespace
+//LoginServer::LoginServer(LoginDialog *parent)
+//    : parent_(parent)
+//    , http_(new QHttpServer())
+//    , tcp_(new QTcpServer(this->http_))
+//{
+//    qCDebug(chatterinoWidget) << "Creating new HTTP server";
+//    this->http_->bind(this->tcp_);
+//    this->initializeRoutes();
+//}
+
+//QString LoginServer::getAddress()
+//{
+//    return QString("%1:%2")
+//        .arg(this->bind_.ip.toString())
+//        .arg(this->bind_.port);
+//}
+
+//bool LoginServer::listen()
+//{
+//    return this->tcp_->listen(this->bind_.ip, this->bind_.port);
+//}
+
+//void LoginServer::close()
+//{
+//    // There's no way to close QHttpServer, so we have to work with our QTcpServer instead
+//    qCDebug(chatterinoWidget) << "Closing TCP server bound to HTTP server";
+//    this->tcp_->close();
+//}
+
+//void LoginServer::initializeRoutes()
+//{
+//    // Redirect page containing JS script that takes token from URL fragment and calls /token
+//    this->http_->route(
+//        "/redirect", QHttpServerRequest::Method::GET,
+//        [](QHttpServerResponder &&resp) {
+//            QFile redirectPage(":/auth.html");
+//            redirectPage.open(QIODevice::ReadOnly);
+
+//            resp.write(redirectPage.readAll(),
+//                       {{"Access-Control-Allow-Origin", "*"},
+//                        {"Access-Control-Allow-Methods", "GET, PUT"},
+//                        {"Access-Control-Allow-Headers", "X-Access-Token"}},
+//                       QHttpServerResponder::StatusCode::Ok);
+//        });
+//    // For CORS, letting the browser know that it's fine to make a cross-origin request
+//    this->http_->route(
+//        ".*", QHttpServerRequest::Method::OPTIONS,
+//        [](QHttpServerResponder &&resp) {
+//            resp.write({{"Access-Control-Allow-Origin", "*"},
+//                        {"Access-Control-Allow-Methods", "GET, PUT"},
+//                        {"Access-Control-Allow-Headers", "X-Access-Token"}},
+//                       QHttpServerResponder::StatusCode::Ok);
+//        });
+//    // Endpoint called from /redirect that processes token passed in headers
+//    // Returns no content, but different headers indicating token's validity
+//    this->http_->route(
+//        "/token", QHttpServerRequest::Method::PUT,
+//        [this](const QHttpServerRequest &req, QHttpServerResponder &&resp) {
+//            // Access token wasn't specified
+//            if (!req.headers().contains("X-Access-Token"))
+//            {
+//                resp.write(QHttpServerResponder::StatusCode::BadRequest);
+//                return;
+//            }
+
+//            // Validate token
+//            const auto token = req.headers().value("X-Access-Token").toString();
+
+//            auto respPtr =
+//                std::make_shared<QHttpServerResponder>(std::move(resp));
+//            this->parent_->ui_.loginButton.setText(VALIDATING_TOKEN);
+//            this->parent_->logInWithToken(
+//                token,
+//                [respPtr] {
+//                    respPtr->write(
+//                        {{"Access-Control-Allow-Origin", "*"},
+//                         {"Access-Control-Allow-Methods", "GET, PUT"},
+//                         {"Access-Control-Allow-Headers", "X-Access-Token"}},
+//                        QHttpServerResponder::StatusCode::Ok);
+//                },
+//                [respPtr] {
+//                    respPtr->write(
+//                        {{"Access-Control-Allow-Origin", "*"},
+//                         {"Access-Control-Allow-Methods", "GET, PUT"},
+//                         {"Access-Control-Allow-Headers", "X-Access-Token"}},
+//                        QHttpServerResponder::StatusCode::BadRequest);
+//                },
+//                [this] {
+//                    this->close();
+//                    this->parent_->activateLoginButton();
+//                });
+//        });
+//}
+
+/// BOOST
 
 LoginServer::LoginServer(LoginDialog *parent)
-    : parent_(parent)
-    , http_(new QHttpServer())
-    , tcp_(new QTcpServer(this->http_))
+    : iocontext_(1)
+    , acceptor_(this->iocontext_,
+                {net::ip::make_address(this->bind_.ip.toString().toStdString()),
+                 this->bind_.port})
+    , socket_(tcp::socket{this->iocontext_})
+//    , socket_(this->iocontext_)
 {
     qCDebug(chatterinoWidget) << "Creating new HTTP server";
-    this->http_->bind(this->tcp_);
-    this->initializeRoutes();
 }
 
-QString LoginServer::getAddress()
+void LoginServer::start()
 {
-    return QString("%1:%2")
-        .arg(this->bind_.ip.toString())
-        .arg(this->bind_.port);
+    qCDebug(chatterinoWidget) << "Starting the HTTP server";
+    this->loop();
+    this->iocontext_.run();
+
+    this->readRequest();
+    this->checkDeadline();
 }
 
-bool LoginServer::listen()
+void LoginServer::loop()
 {
-    return this->tcp_->listen(this->bind_.ip, this->bind_.port);
+    qDebug() << this->iocontext_.stopped();
+    acceptor_.async_accept(this->socket_, [&](beast::error_code ec) {
+        if (!ec)
+        {
+            std::make_shared<LoginServer>(this->parent_)->start();
+        }
+        qDebug() << "dank";
+        //        this->loop();
+    });
 }
 
-void LoginServer::close()
+void LoginServer::stop()
 {
-    // There's no way to close QHttpServer, so we have to work with our QTcpServer instead
-    qCDebug(chatterinoWidget) << "Closing TCP server bound to HTTP server";
-    this->tcp_->close();
+    qCDebug(chatterinoWidget) << "Stopping the HTTP server";
+    this->iocontext_.stop();
 }
 
-void LoginServer::initializeRoutes()
-{
-    // Redirect page containing JS script that takes token from URL fragment and calls /token
-    this->http_->route(
-        "/redirect", QHttpServerRequest::Method::GET,
-        [](QHttpServerResponder &&resp) {
-            QFile redirectPage(":/auth.html");
-            redirectPage.open(QIODevice::ReadOnly);
-
-            resp.write(redirectPage.readAll(),
-                       {{"Access-Control-Allow-Origin", "*"},
-                        {"Access-Control-Allow-Methods", "GET, PUT"},
-                        {"Access-Control-Allow-Headers", "X-Access-Token"}},
-                       QHttpServerResponder::StatusCode::Ok);
-        });
-    // For CORS, letting the browser know that it's fine to make a cross-origin request
-    this->http_->route(
-        ".*", QHttpServerRequest::Method::OPTIONS,
-        [](QHttpServerResponder &&resp) {
-            resp.write({{"Access-Control-Allow-Origin", "*"},
-                        {"Access-Control-Allow-Methods", "GET, PUT"},
-                        {"Access-Control-Allow-Headers", "X-Access-Token"}},
-                       QHttpServerResponder::StatusCode::Ok);
-        });
-    // Endpoint called from /redirect that processes token passed in headers
-    // Returns no content, but different headers indicating token's validity
-    this->http_->route(
-        "/token", QHttpServerRequest::Method::PUT,
-        [this](const QHttpServerRequest &req, QHttpServerResponder &&resp) {
-            // Access token wasn't specified
-            if (!req.headers().contains("X-Access-Token"))
-            {
-                resp.write(QHttpServerResponder::StatusCode::BadRequest);
-                return;
-            }
-
-            // Validate token
-            const auto token = req.headers().value("X-Access-Token").toString();
-
-            auto respPtr =
-                std::make_shared<QHttpServerResponder>(std::move(resp));
-            this->parent_->ui_.loginButton.setText(VALIDATING_TOKEN);
-            this->parent_->logInWithToken(
-                token,
-                [respPtr] {
-                    respPtr->write(
-                        {{"Access-Control-Allow-Origin", "*"},
-                         {"Access-Control-Allow-Methods", "GET, PUT"},
-                         {"Access-Control-Allow-Headers", "X-Access-Token"}},
-                        QHttpServerResponder::StatusCode::Ok);
-                },
-                [respPtr] {
-                    respPtr->write(
-                        {{"Access-Control-Allow-Origin", "*"},
-                         {"Access-Control-Allow-Methods", "GET, PUT"},
-                         {"Access-Control-Allow-Headers", "X-Access-Token"}},
-                        QHttpServerResponder::StatusCode::BadRequest);
-                },
-                [this] {
-                    this->close();
-                    this->parent_->activateLoginButton();
-                });
-        });
-}
-
-void LoginBoost::start()
-{
-    readRequest();
-    checkDeadline();
-}
-
-void LoginBoost::readRequest()
+void LoginServer::readRequest()
 {
     auto self = shared_from_this();
 
@@ -136,71 +157,70 @@ void LoginBoost::readRequest()
                      });
 }
 
-void LoginBoost::processRequest()
+void LoginServer::processRequest()
 {
     response_.version(request_.version());
     response_.keep_alive(false);
 
-    switch (request_.method())
-    {
-        case http::verb::get:
-            response_.result(http::status::ok);
-            response_.set(http::field::server, "Beast");
-            response_.set("ssds", "asdfas");
-            createResponse();
-            break;
+    auto method = request_.method();
+    auto target = request_.target();
 
-        default:
-            // We return responses indicating an error if
-            // we do not recognize the request method.
+    // Common headers
+    response_.set(http::field::server, "Chatterino");
+    response_.set(http::field::access_control_allow_origin, "*");
+    response_.set(http::field::access_control_allow_methods, "GET, PUT");
+    response_.set(http::field::access_control_allow_headers, "X-Access-Token");
+
+    // GET /redirect
+    if (method == http::verb::get && target == "/redirect")
+    {
+        // Read auth.html from resources/
+        QFile redirectPageFile(":/auth.html");
+        redirectPageFile.open(QIODevice::ReadOnly);
+        auto redirectPage = redirectPageFile.readAll().toStdString();
+
+        // Write successful response
+        response_.result(http::status::ok);
+        response_.set(http::field::content_type, "text/html");
+        beast::ostream(response_.body()) << redirectPage;
+    }
+    // OPTIONS .*
+    else if (method == http::verb::options)
+    {
+        // Respond with 200 for CORS calls
+        response_.result(http::status::ok);
+    }
+    // PUT /token
+    else if (method == http::verb::put && target == "/token")
+    {
+        // Handle received token
+        auto it = request_.find("X-Access-Token");
+        if (it == request_.end())
+        {
+            qDebug() << "X-Access-Token wasn't found!";
             response_.result(http::status::bad_request);
-            response_.set(http::field::content_type, "text/plain");
-            beast::ostream(response_.body())
-                << "Invalid request-method '"
-                << std::string(request_.method_string()) << "'";
-            break;
+        }
+        else
+        {
+            // TODO: reimplement zulu magic for validating the token etc.
+            qDebug() << it->value().to_string().data();
+            response_.result(http::status::ok);
+        }
     }
-
-    writeResponse();
-}
-
-void LoginBoost::createResponse()
-{
-    if (request_.target() == "/count")
-    {
-        response_.set(http::field::content_type, "text/html");
-        beast::ostream(response_.body())
-            << "<html>\n"
-            << "<head><title>Request count</title></head>\n"
-            << "<body>\n"
-            << "<h1>Request count</h1>\n"
-            << "<p>There have been 0 requests so far.</p>\n"
-            << "</body>\n"
-            << "</html>\n";
-    }
-    else if (request_.target() == "/time")
-    {
-        response_.set(http::field::content_type, "text/html");
-        beast::ostream(response_.body())
-            << "<html>\n"
-            << "<head><title>Current time</title></head>\n"
-            << "<body>\n"
-            << "<h1>Current time</h1>\n"
-            << "<p>The current time is "
-            << QTime::currentTime().toString().toStdString()
-            << " seconds since the epoch.</p>\n"
-            << "</body>\n"
-            << "</html>\n";
-    }
+    // Unhandled route
     else
     {
         response_.result(http::status::not_found);
         response_.set(http::field::content_type, "text/plain");
-        beast::ostream(response_.body()) << "File not found\r\n";
+
+        beast::ostream(response_.body()) << "404 Not found";
     }
+
+    // Send the response to the client
+    this->writeResponse();
 }
 
-void LoginBoost::writeResponse()
+void LoginServer::writeResponse()
 {
     auto self = shared_from_this();
 
@@ -213,7 +233,7 @@ void LoginBoost::writeResponse()
         });
 }
 
-void LoginBoost::checkDeadline()
+void LoginServer::checkDeadline()
 {
     auto self = shared_from_this();
 

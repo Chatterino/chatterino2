@@ -2,74 +2,87 @@
 
 #include "widgets/dialogs/LoginDialog.hpp"
 
-#include <QHttpServer>
-#include <QTcpServer>
-#include <QtHttpServer/QHttpServer>
+#include <QHostAddress>
 
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
 
+namespace chatterino {
+
 namespace beast = boost::beast;    // from <boost/beast.hpp>
 namespace http = beast::http;      // from <boost/beast/http.hpp>
 namespace net = boost::asio;       // from <boost/asio.hpp>
 using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
-namespace chatterino {
+//class LoginServer
+//{
+//public:
+//    LoginServer(LoginDialog *parent);
+
+//    QString getAddress();
+//    bool listen();
+//    void close();
+
+//private:
+//    LoginDialog *parent_;
+
+//    const struct {
+//        QHostAddress ip = QHostAddress::LocalHost;
+//        int port = 52107;
+//    } bind_;
+
+//    QHttpServer *http_;
+//    QTcpServer *tcp_;
+
+//    void initializeRoutes();
+//};
 
 class LoginDialog;
 
-class LoginServer
+class LoginServer : public std::enable_shared_from_this<LoginServer>
 {
 public:
     LoginServer(LoginDialog *parent);
 
-    QString getAddress();
-    bool listen();
-    void close();
-
-private:
-    LoginDialog *parent_;
-
-    const struct {
-        QHostAddress ip = QHostAddress::LocalHost;
-        int port = 52107;
-    } bind_;
-
-    QHttpServer *http_;
-    QTcpServer *tcp_;
-
-    void initializeRoutes();
-};
-
-class LoginBoost : public std::enable_shared_from_this<LoginBoost>
-{
-public:
-    LoginBoost(tcp::socket socket)
-        : socket_(std::move(socket))
-    {
-    }
-
     // Initiate the asynchronous operations associated with the connection
     void start();
 
+    // Stops the HTTP server or something, idk I'm not the engineer
+    void stop();
+
 private:
-    // The socket for the currently connected client
+    const struct {
+        QHostAddress ip = QHostAddress::LocalHost;
+        unsigned short port = 52107;
+    } bind_;
+
+    // Parent LoginDialog instance
+    LoginDialog *parent_;
+
+    // Input/Output context
+    net::io_context iocontext_;
+
+    // Acceptor
+    tcp::acceptor acceptor_;
+
+    // Socket for the currently connected client
     tcp::socket socket_;
 
-    // The buffer for performing reads
+    // Buffer for performing reads
     beast::flat_buffer buffer_{8192};
 
-    // The request message
+    // Request and response messages
     http::request<http::dynamic_body> request_;
-
-    // The response message
     http::response<http::dynamic_body> response_;
 
-    // The timer for putting a deadline on connection processing
+    // Timer for putting a deadline on connection processing
     net::steady_timer deadline_{socket_.get_executor(),
                                 std::chrono::seconds(15)};
+
+    // FeelsGoodMan
+    void loop();
 
     // Asynchronously receive a complete request message
     void readRequest();

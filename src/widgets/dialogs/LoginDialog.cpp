@@ -82,19 +82,11 @@ LoginDialog::LoginDialog(QWidget *parent)
 
     QObject::connect(&this->ui_.loginButton, &QPushButton::clicked, [this] {
         // Start listening for credentials
-        if (!this->loginServer_->listen())
-        {
-            qCWarning(chatterinoWidget) << "Failed to start HTTP server";
-        }
-        else
-        {
-            qInfo(chatterinoWidget) << "HTTP server Listening on " +
-                                           this->loginServer_->getAddress();
-        }
+        this->loginServer_->start();
 
         // Open login page
-        QDesktopServices::openUrl(this->loginLink);
-        this->deactivateLoginButton();
+        //        QDesktopServices::openUrl(this->loginLink);
+        //        this->deactivateLoginButton();
     });
 
     QObject::connect(&this->ui_.pasteTokenButton, &QPushButton::clicked, [this] {
@@ -187,7 +179,7 @@ void LoginDialog::logInWithToken(QString token,
 void LoginDialog::hideEvent(QHideEvent *event)
 {
     // Make the port free
-    this->loginServer_->close();
+    this->loginServer_->stop();
     // Restore login button
     this->activateLoginButton();
 }
