@@ -230,7 +230,7 @@ void openStreamlinkForChannel(const QString &channel)
     if (preferredQuality == "choose")
     {
         getStreamQualities(channelURL, [=](QStringList qualityOptions) {
-            QualityPopup::showDialog(channel, qualityOptions);
+            QualityPopup::showDialog(channelURL, qualityOptions);
         });
 
         return;
