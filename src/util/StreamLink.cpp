@@ -108,8 +108,9 @@ namespace {
 
             p->deleteLater();
         });
-        
-        qCWarning(chatterinoStreamlink) << "command:" << p->program() << p->arguments().join(" ");
+
+        qCWarning(chatterinoStreamlink)
+            << "command:" << p->program() << p->arguments().join(" ");
 
         QObject::connect(
             p,
@@ -187,7 +188,21 @@ void getStreamQualities(const QString &channelURL,
 void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments)
 {
-    QStringList arguments = extraArguments << channelURL << quality;
+    QStringList arguments;
+    
+    QString program;
+
+    if (Version::instance().isFlatpak())
+    {
+        program = "flatpak-spawn";
+        
+        arguments << "--host" << getStreamlinkProgram();
+    }
+    else {
+        program = getStreamlinkProgram();
+    }
+
+    arguments << extraArguments << channelURL << quality;
 
     // Remove empty arguments before appending additional streamlink options
     // as the options might purposely contain empty arguments
@@ -196,7 +211,7 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
     arguments << splitCommand(additionalOptions);
 
-    bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
+    bool res = QProcess::startDetached(program, arguments);
 
     if (!res)
     {
