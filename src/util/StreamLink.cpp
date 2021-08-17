@@ -189,16 +189,17 @@ void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments)
 {
     QStringList arguments;
-    
+
     QString program;
 
     if (Version::instance().isFlatpak())
     {
         program = "flatpak-spawn";
-        
+
         arguments << "--host" << getStreamlinkProgram();
     }
-    else {
+    else
+    {
         program = getStreamlinkProgram();
     }
 
