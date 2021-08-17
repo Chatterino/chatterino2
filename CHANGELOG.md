@@ -15,7 +15,7 @@
 - Bugfix: Fixed a bug that caused all badge highlights to use the same color. (#3132, #3134)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
-- Dev: Fix Streamlink when running as a Flatpak. (#3178)
+- Bugfix: Use `flatpak-spawn` to call streamlink when running as a Flatapk. Fixes streamlink functionality. (#3178)
 
 ## 2.3.4
 
