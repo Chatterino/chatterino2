@@ -71,7 +71,7 @@ const bool &Version::isSupportedOS() const
     return this->isSupportedOS_;
 }
 
-const bool Version::isFlatpak() const
+bool Version::isFlatpak() const
 {
     return QFileInfo::exists("/.flatpak-info");
 }
