@@ -180,7 +180,7 @@ void getStreamQualities(const QString &channelURL,
         });
 
     p->setArguments(p->arguments() +
-                    QStringList({channelURL, "--default-stream=KKona"}));
+                    QStringList{channelURL, "--default-stream=KKona"});
 
     p->start();
 }
