@@ -9,7 +9,7 @@
 - Minor: Added a setting to hide similar messages by any user. (#2716)
 - Minor: Duplicate spaces now count towards the display message length. (#3002)
 - Minor: Commands are now backed up. (#3168)
-- Minor: Added the ability to open an entire tab as a popup. (#2288, #3082)
+- Minor: Added the ability to open an entire tab as a popup. (#3082)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
 - Bugfix: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
