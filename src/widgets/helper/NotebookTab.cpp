@@ -64,12 +64,15 @@ NotebookTab::NotebookTab(Notebook *notebook)
         this->notebook_->removePage(this->page);
     });
 
-    this->menu_.addAction("Popup", [=]() {
-        if (auto container = dynamic_cast<SplitContainer *>(this->page))
-        {
-            container->popup();
-        }
-    });
+    this->menu_.addAction(
+        "Popup Tab",
+        [=]() {
+            if (auto container = dynamic_cast<SplitContainer *>(this->page))
+            {
+                container->popup();
+            }
+        },
+        QKeySequence("Ctrl+Shift+N"));
 
     highlightNewMessagesAction_ =
         new QAction("Mark Tab as Unread on New Messages", &this->menu_);
