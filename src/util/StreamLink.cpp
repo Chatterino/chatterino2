@@ -109,7 +109,7 @@ namespace {
             p->deleteLater();
         });
 
-        qCWarning(chatterinoStreamlink)
+        qCDebug(chatterinoStreamlink)
             << "command:" << p->program() << p->arguments().join(" ");
 
         QObject::connect(
