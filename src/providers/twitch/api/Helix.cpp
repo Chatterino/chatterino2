@@ -712,7 +712,7 @@ void Helix::getEmoteSetData(QString emoteSetId,
             QJsonObject root = result.parseJson();
             auto data = root.value("data");
 
-            if (!data.isArray())
+            if (!data.isArray() || data.toArray().isEmpty())
             {
                 failureCallback();
                 return Failure;

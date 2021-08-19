@@ -286,7 +286,7 @@ void Application::initPubsub()
             auto chan =
                 this->twitch.server->getChannelOrEmptyByID(action.roomID);
 
-            if (chan->isEmpty())
+            if (chan->isEmpty() || getSettings()->hideDeletionActions)
             {
                 return;
             }
