@@ -114,10 +114,10 @@ TabDescriptor TabDescriptor::loadFromJSON(const QJsonObject &tabObj)
 {
     TabDescriptor tab;
     // Load tab custom title
-    QJsonValue title_val = tabObj.value("title");
-    if (title_val.isString())
+    QJsonValue titleVal = tabObj.value("title");
+    if (titleVal.isString())
     {
-        tab.customTitle_ = title_val.toString();
+        tab.customTitle_ = titleVal.toString();
     }
 
     // Load tab selected state
@@ -153,15 +153,15 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
     bool hasSetAMainWindow = false;
 
     // "deserialize"
-    for (const QJsonValue &window_val : loadWindowArray(path))
+    for (const QJsonValue &windowVal : loadWindowArray(path))
     {
-        QJsonObject window_obj = window_val.toObject();
+        QJsonObject windowObj = windowVal.toObject();
 
         WindowDescriptor window;
 
         // Load window type
-        QString type_val = window_obj.value("type").toString();
-        auto type = type_val == "main" ? WindowType::Main : WindowType::Popup;
+        QString typeVal = windowObj.value("type").toString();
+        auto type = typeVal == "main" ? WindowType::Main : WindowType::Popup;
 
         if (type == WindowType::Main)
         {
@@ -178,21 +178,21 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
         window.type_ = type;
 
         // Load window state
-        if (window_obj.value("state") == "minimized")
+        if (windowObj.value("state") == "minimized")
         {
             window.state_ = WindowDescriptor::State::Minimized;
         }
-        else if (window_obj.value("state") == "maximized")
+        else if (windowObj.value("state") == "maximized")
         {
             window.state_ = WindowDescriptor::State::Maximized;
         }
 
         // Load window geometry
         {
-            int x = window_obj.value("x").toInt(-1);
-            int y = window_obj.value("y").toInt(-1);
-            int width = window_obj.value("width").toInt(-1);
-            int height = window_obj.value("height").toInt(-1);
+            int x = windowObj.value("x").toInt(-1);
+            int y = windowObj.value("y").toInt(-1);
+            int width = windowObj.value("width").toInt(-1);
+            int height = windowObj.value("height").toInt(-1);
 
             window.geometry_ = QRect(x, y, width, height);
         }
@@ -200,7 +200,7 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
         bool hasSetASelectedTab = false;
 
         // Load window tabs
-        QJsonArray tabs = window_obj.value("tabs").toArray();
+        QJsonArray tabs = windowObj.value("tabs").toArray();
         for (QJsonValue tabVal : tabs)
         {
             TabDescriptor tab = TabDescriptor::loadFromJSON(tabVal.toObject());
@@ -219,7 +219,7 @@ WindowLayout WindowLayout::loadFromFile(const QString &path)
         }
 
         // Load emote popup position
-        QJsonObject emote_popup_obj = window_obj.value("emotePopup").toObject();
+        QJsonObject emote_popup_obj = windowObj.value("emotePopup").toObject();
         layout.emotePopupPos_ = QPoint(emote_popup_obj.value("x").toInt(),
                                        emote_popup_obj.value("y").toInt());
 
