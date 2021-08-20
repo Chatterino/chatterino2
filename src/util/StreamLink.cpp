@@ -36,18 +36,6 @@ namespace {
 #endif
     }
 
-    QString getStreamlinkProgram()
-    {
-        if (getSettings()->streamlinkUseCustomPath)
-        {
-            return getSettings()->streamlinkPath + "/" + getBinaryName();
-        }
-        else
-        {
-            return getBinaryName();
-        }
-    }
-
     bool checkStreamlinkPath(const QString &path)
     {
         QFileInfo fileinfo(path);
@@ -85,15 +73,25 @@ namespace {
     {
         auto p = new QProcess;
 
+        const QString path = [] {
+            if (getSettings()->streamlinkUseCustomPath)
+            {
+                return getSettings()->streamlinkPath + "/" + getBinaryName();
+            }
+            else
+            {
+                return QString{getBinaryName()};
+            }
+        }();
+
         if (Version::instance().isFlatpak())
         {
             p->setProgram("flatpak-spawn");
-
-            p->setArguments({"--host", getStreamlinkProgram()});
+            p->setArguments({"--host", path});
         }
         else
         {
-            p->setProgram(getStreamlinkProgram());
+            p->setProgram(path);
         }
 
         QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
@@ -109,6 +107,8 @@ namespace {
             p->deleteLater();
         });
 
+        // REVIEW: Keep? This is not the full command that is actually executed
+        //         since we may add more arguments later on.
         qCDebug(chatterinoStreamlink)
             << "command:" << p->program() << p->arguments().join(" ");
 
@@ -188,18 +188,9 @@ void getStreamQualities(const QString &channelURL,
 void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments)
 {
-    QStringList arguments;
-
-    QString program = getStreamlinkProgram();
-
-    if (Version::instance().isFlatpak())
-    {
-        program = "flatpak-spawn";
-
-        arguments << "--host" << getStreamlinkProgram();
-    }
-
-    arguments << extraArguments << channelURL << quality;
+    auto proc = createStreamlinkProcess();
+    auto arguments = proc->arguments()
+                     << extraArguments << channelURL << quality;
 
     // Remove empty arguments before appending additional streamlink options
     // as the options might purposely contain empty arguments
@@ -208,7 +199,8 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
     arguments << splitCommand(additionalOptions);
 
-    bool res = QProcess::startDetached(program, arguments);
+    proc->setArguments(std::move(arguments));
+    bool res = proc->startDetached();
 
     if (!res)
     {
