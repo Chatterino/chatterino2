@@ -222,7 +222,7 @@ Keep the element on the stack if possible. If you need a pointer or have complex
 
 When informing the user about how a command is supposed to be used, we aim to follow [this standard](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap12.html) where possible.
 
-- Square brackets are reserved for `[optional options]`.
+- Square brackets are reserved for `[optional arguments]`.
 - Angle brackets are reserved for `<required arguments>`.
 - The word _Usage_ should be capitalized and must be followed by a colon.
 - If the usage deserves a description, put a dot after all parameters and explain it briefly.
@@ -231,7 +231,6 @@ When informing the user about how a command is supposed to be used, we aim to fo
 
 - `Usage: /block <user>`
 - `Usage: /unblock <user>. Unblocks a user.`
-- `Usage: /streamlink <channel>`
 - `Usage: /streamlink <channel>`
 - `Usage: /usercard <user> [channel]`
 
