@@ -455,7 +455,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage /user [user] (channel)"));
+                makeSystemMessage("Usage: /user <user> [channel]"));
             return "";
         }
         QString userName = words[1];
