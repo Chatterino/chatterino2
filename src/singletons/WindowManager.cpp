@@ -379,7 +379,7 @@ void WindowManager::save()
     QJsonDocument document;
 
     // "serialize"
-    QJsonArray window_arr;
+    QJsonArray windowArr;
     for (Window *window : this->windows_)
     {
         QJsonObject window_obj;
@@ -437,11 +437,11 @@ void WindowManager::save()
         }
 
         window_obj.insert("tabs", tabs_arr);
-        window_arr.append(window_obj);
+        windowArr.append(window_obj);
     }
 
     QJsonObject obj;
-    obj.insert("windows", window_arr);
+    obj.insert("windows", windowArr);
     document.setObject(obj);
 
     // save file
