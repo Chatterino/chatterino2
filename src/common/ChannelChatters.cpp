@@ -74,6 +74,12 @@ void ChannelChatters::updateOnlineChatters(
     chatters_->updateOnlineChatters(chatters);
 }
 
+size_t ChannelChatters::colorsSize() const
+{
+    auto size = this->chatterColors_.access()->size();
+    return size;
+}
+
 const QColor ChannelChatters::getUserColor(const QString &user)
 {
     const auto chatterColors = this->chatterColors_.access();
