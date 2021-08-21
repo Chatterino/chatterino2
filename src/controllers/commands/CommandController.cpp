@@ -296,7 +296,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto blockLambda = [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /block [user]"));
+            channel->addMessage(makeSystemMessage("Usage: /block <user>"));
             return "";
         }
 
@@ -341,7 +341,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto unblockLambda = [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /unblock [user]"));
+            channel->addMessage(makeSystemMessage("Usage: /unblock <user>"));
             return "";
         }
 
@@ -455,7 +455,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage /user [user] (channel)"));
+                makeSystemMessage("Usage: /user <user> [channel]"));
             return "";
         }
         QString userName = words[1];
@@ -625,7 +625,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 (!channel->isTwitchChannel() || channel->isEmpty()))
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /streamlink [channel]. You can also use the "
+                    "Usage: /streamlink <channel>. You can also use the "
                     "command without arguments in any Twitch channel to open "
                     "it in streamlink."));
                 return "";
@@ -646,7 +646,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 (!channel->isTwitchChannel() || channel->isEmpty()))
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /popout [channel]. You can also use the command "
+                    "Usage: /popout <channel>. You can also use the command "
                     "without arguments in any Twitch channel to open its "
                     "popout chat."));
                 return "";
@@ -673,7 +673,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage: /settitle <stream title>."));
+                makeSystemMessage("Usage: /settitle <stream title>"));
             return "";
         }
         if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -704,7 +704,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage: /setgame <stream game>."));
+                makeSystemMessage("Usage: /setgame <stream game>"));
             return "";
         }
         if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -769,7 +769,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                                          const ChannelPtr channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /openurl <URL>."));
+            channel->addMessage(makeSystemMessage("Usage: /openurl <URL>"));
             return "";
         }
 
