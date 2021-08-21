@@ -527,14 +527,14 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
                                    ? "horizontal"
                                    : "vertical");
 
-            QJsonArray items_arr;
+            QJsonArray itemsArr;
             for (const std::unique_ptr<SplitNode> &n : node->getChildren())
             {
                 QJsonObject subObj;
                 WindowManager::encodeNodeRecursively(n.get(), subObj);
-                items_arr.append(subObj);
+                itemsArr.append(subObj);
             }
-            obj.insert("items", items_arr);
+            obj.insert("items", itemsArr);
         }
         break;
     }
