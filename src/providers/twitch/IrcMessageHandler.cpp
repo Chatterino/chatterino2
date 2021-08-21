@@ -810,8 +810,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         if (tags == "bad_delete_message_error" || tags == "usage_delete")
         {
             channel->addMessage(makeSystemMessage(
-                "Usage: \"/delete <msg-id>\" - can't take more "
-                "than one argument"));
+                "Usage: /delete <msg-id>. Can't take more than one argument"));
         }
         else if (tags == "host_on" || tags == "host_target_went_offline")
         {
