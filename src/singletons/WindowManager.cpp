@@ -421,7 +421,7 @@ void WindowManager::save()
         windowObj.insert("emotePopup", emote_popup_obj);
 
         // window tabs
-        QJsonArray tabs_arr;
+        QJsonArray tabsArr;
 
         for (int tabIndex = 0; tabIndex < window->getNotebook().getPageCount();
              tabIndex++)
@@ -433,10 +433,10 @@ void WindowManager::save()
 
             bool isSelected = window->getNotebook().getSelectedPage() == tab;
             WindowManager::encodeTab(tab, isSelected, tabObj);
-            tabs_arr.append(tabObj);
+            tabsArr.append(tabObj);
         }
 
-        windowObj.insert("tabs", tabs_arr);
+        windowObj.insert("tabs", tabsArr);
         windowArr.append(windowObj);
     }
 
