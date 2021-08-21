@@ -646,7 +646,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 (!channel->isTwitchChannel() || channel->isEmpty()))
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /popout [channel]. You can also use the command "
+                    "Usage: /popout <channel>. You can also use the command "
                     "without arguments in any Twitch channel to open its "
                     "popout chat."));
                 return "";
