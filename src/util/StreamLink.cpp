@@ -107,11 +107,6 @@ namespace {
             p->deleteLater();
         });
 
-        // REVIEW: Keep? This is not the full command that is actually executed
-        //         since we may add more arguments later on.
-        qCDebug(chatterinoStreamlink)
-            << "command:" << p->program() << p->arguments().join(" ");
-
         QObject::connect(
             p,
             static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(
