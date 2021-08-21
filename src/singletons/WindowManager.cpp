@@ -432,7 +432,7 @@ void WindowManager::save()
             assert(tab != nullptr);
 
             bool isSelected = window->getNotebook().getSelectedPage() == tab;
-            this->encodeTab(tab, isSelected, tabObj);
+            WindowManager::encodeTab(tab, isSelected, tabObj);
             tabs_arr.append(tabObj);
         }
 
@@ -498,7 +498,7 @@ void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
     // splits
     QJsonObject splits;
 
-    encodeNodeRecursively(tab->getBaseNode(), splits);
+    WindowManager::encodeNodeRecursively(tab->getBaseNode(), splits);
 
     obj.insert("splits2", splits);
 }
@@ -512,11 +512,12 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             obj.insert("moderationMode", node->getSplit()->getModerationMode());
 
             QJsonObject split;
-            encodeChannel(node->getSplit()->getIndirectChannel(), split);
+            WindowManager::encodeChannel(node->getSplit()->getIndirectChannel(),
+                                         split);
             obj.insert("data", split);
 
             QJsonArray filters;
-            encodeFilters(node->getSplit(), filters);
+            WindowManager::encodeFilters(node->getSplit(), filters);
             obj.insert("filters", filters);
         }
         break;
@@ -530,7 +531,7 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             for (const std::unique_ptr<SplitNode> &n : node->getChildren())
             {
                 QJsonObject subObj;
-                encodeNodeRecursively(n.get(), subObj);
+                WindowManager::encodeNodeRecursively(n.get(), subObj);
                 items_arr.append(subObj);
             }
             obj.insert("items", items_arr);
