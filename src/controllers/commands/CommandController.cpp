@@ -769,7 +769,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                                          const ChannelPtr channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /openurl <URL>."));
+            channel->addMessage(makeSystemMessage("Usage: /openurl <URL>"));
             return "";
         }
 
