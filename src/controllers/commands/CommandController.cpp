@@ -296,7 +296,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto blockLambda = [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /block [user]"));
+            channel->addMessage(makeSystemMessage("Usage: /block <user>"));
             return "";
         }
 
