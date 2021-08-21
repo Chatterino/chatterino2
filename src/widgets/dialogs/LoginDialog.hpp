@@ -9,6 +9,7 @@
 #include <QDialog>
 #include <QDialogButtonBox>
 #include <QHBoxLayout>
+#include <QHostAddress>
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QLabel>
@@ -16,9 +17,19 @@
 #include <QVBoxLayout>
 #include <QtCore/QVariant>
 
+#include <boost/asio.hpp>
+#include <boost/beast/core.hpp>
+#include <boost/beast/http.hpp>
+#include <boost/beast/version.hpp>
+
 #define LOGIN_BUTTON_START "Click to Log in"
 #define TOKEN_BUTTON_START "Paste token from clipboard"
 #define VALIDATING_TOKEN "Validating your token..."
+
+namespace beast = boost::beast;    // from <boost/beast.hpp>
+namespace http = beast::http;      // from <boost/beast/http.hpp>
+namespace net = boost::asio;       // from <boost/asio.hpp>
+using tcp = boost::asio::ip::tcp;  // from <boost/asio/ip/tcp.hpp>
 
 namespace chatterino {
 
@@ -63,8 +74,23 @@ private:
         QDialogButtonBox buttonBox;
     } ui_;
 
+    QHostAddress ip_ = QHostAddress::LocalHost;
+    unsigned short port_ = 52107;
+
+    // Properties of the LoginServer
+
+    // Input/Output context
+    net::io_context iocontext_;
+
+    // Acceptor
+    tcp::acceptor acceptor_;
+
+    // Socket for the currently connected client
+    tcp::socket socket_;
+
     // Local server listening to login data returned from Twitch
-    LoginServer *loginServer_;
+    LoginServer *server_;
+
     QUrl loginLink;
 
     void deactivateLoginButton();

@@ -2,8 +2,6 @@
 
 #include "widgets/dialogs/LoginDialog.hpp"
 
-#include <QHostAddress>
-
 #include <boost/asio.hpp>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
@@ -44,31 +42,24 @@ class LoginDialog;
 class LoginServer : public std::enable_shared_from_this<LoginServer>
 {
 public:
-    LoginServer(LoginDialog *parent);
+    LoginServer(LoginDialog *parent, tcp::socket *socket);
 
     // Initiate the asynchronous operations associated with the connection
     void start();
 
+    // FeelsGoodMan
+    void loop(net::io_context *iocontext, tcp::acceptor *acceptor,
+              tcp::socket *socket);
+
     // Stops the HTTP server or something, idk I'm not the engineer
-    void stop();
+    void stop(net::io_context *iocontext);
 
 private:
-    const struct {
-        QHostAddress ip = QHostAddress::LocalHost;
-        unsigned short port = 52107;
-    } bind_;
-
     // Parent LoginDialog instance
     LoginDialog *parent_;
 
-    // Input/Output context
-    net::io_context iocontext_;
-
-    // Acceptor
-    tcp::acceptor acceptor_;
-
     // Socket for the currently connected client
-    tcp::socket socket_;
+    tcp::socket *socket_;
 
     // Buffer for performing reads
     beast::flat_buffer buffer_{8192};
@@ -78,11 +69,8 @@ private:
     http::response<http::dynamic_body> response_;
 
     // Timer for putting a deadline on connection processing
-    net::steady_timer deadline_{socket_.get_executor(),
+    net::steady_timer deadline_{socket_->get_executor(),
                                 std::chrono::seconds(15)};
-
-    // FeelsGoodMan
-    void loop();
 
     // Asynchronously receive a complete request message
     void readRequest();

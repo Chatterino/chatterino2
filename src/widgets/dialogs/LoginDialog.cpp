@@ -24,7 +24,13 @@ namespace chatterino {
 
 LoginDialog::LoginDialog(QWidget *parent)
     : QDialog(parent)
-    , loginServer_(new LoginServer(this))
+    , iocontext_(1)
+    , acceptor_(this->iocontext_,
+                {net::ip::make_address(this->ip_.toString().toStdString()),
+                 this->port_})
+    , socket_(tcp::socket{this->iocontext_})
+    , server_(new LoginServer(this, &this->socket_))
+    //    , socket_(this->iocontext_)
     // By default, QUrl constructor urlencodes our string so we don't have to do this ourselves
     , loginLink(QString("https://id.twitch.tv/oauth2/authorize"
                         "?client_id=%1"
@@ -82,7 +88,13 @@ LoginDialog::LoginDialog(QWidget *parent)
 
     QObject::connect(&this->ui_.loginButton, &QPushButton::clicked, [this] {
         // Start listening for credentials
-        this->loginServer_->start();
+        qCDebug(chatterinoWidget) << "Starting the HTTP server";
+        this->server_->loop(&this->iocontext_, &this->acceptor_,
+                            &this->socket_);
+        this->iocontext_.run();
+        qDebug() << "before start";
+        this->server_->start();
+        qDebug() << "after start";
 
         // Open login page
         //        QDesktopServices::openUrl(this->loginLink);
@@ -179,7 +191,7 @@ void LoginDialog::logInWithToken(QString token,
 void LoginDialog::hideEvent(QHideEvent *event)
 {
     // Make the port free
-    this->loginServer_->stop();
+    this->server_->stop(&this->iocontext_);
     // Restore login button
     this->activateLoginButton();
 }

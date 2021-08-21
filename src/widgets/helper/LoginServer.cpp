@@ -103,51 +103,43 @@ namespace chatterino {
 
 /// BOOST
 
-LoginServer::LoginServer(LoginDialog *parent)
-    : iocontext_(1)
-    , acceptor_(this->iocontext_,
-                {net::ip::make_address(this->bind_.ip.toString().toStdString()),
-                 this->bind_.port})
-    , socket_(tcp::socket{this->iocontext_})
-//    , socket_(this->iocontext_)
+LoginServer::LoginServer(LoginDialog *parent, tcp::socket *socket)
+    : socket_(socket)
 {
     qCDebug(chatterinoWidget) << "Creating new HTTP server";
 }
 
 void LoginServer::start()
 {
-    qCDebug(chatterinoWidget) << "Starting the HTTP server";
-    this->loop();
-    this->iocontext_.run();
-
     this->readRequest();
     this->checkDeadline();
 }
 
-void LoginServer::loop()
+void LoginServer::loop(net::io_context *iocontext, tcp::acceptor *acceptor,
+                       tcp::socket *socket)
 {
-    qDebug() << this->iocontext_.stopped();
-    acceptor_.async_accept(this->socket_, [&](beast::error_code ec) {
+    qDebug() << iocontext->stopped();
+    acceptor->async_accept(*this->socket_, [&](beast::error_code ec) {
         if (!ec)
         {
-            std::make_shared<LoginServer>(this->parent_)->start();
+            std::make_shared<LoginServer>(this->parent_, socket)->start();
         }
         qDebug() << "dank";
         //        this->loop();
     });
 }
 
-void LoginServer::stop()
+void LoginServer::stop(net::io_context *iocontext)
 {
     qCDebug(chatterinoWidget) << "Stopping the HTTP server";
-    this->iocontext_.stop();
+    iocontext->stop();
 }
 
 void LoginServer::readRequest()
 {
     auto self = shared_from_this();
 
-    http::async_read(socket_, buffer_, request_,
+    http::async_read(*self->socket_, buffer_, request_,
                      [self](beast::error_code ec, size_t bytes_transferred) {
                          boost::ignore_unused(bytes_transferred);
                          if (!ec)
@@ -227,8 +219,8 @@ void LoginServer::writeResponse()
     response_.content_length(response_.body().size());
 
     http::async_write(
-        socket_, response_, [self](beast::error_code ec, std::size_t) {
-            self->socket_.shutdown(tcp::socket::shutdown_send, ec);
+        *self->socket_, response_, [self](beast::error_code ec, std::size_t) {
+            self->socket_->shutdown(tcp::socket::shutdown_send, ec);
             self->deadline_.cancel();
         });
 }
@@ -241,7 +233,7 @@ void LoginServer::checkDeadline()
         if (!ec)
         {
             // Close socket to cancel any outstanding operation
-            self->socket_.close(ec);
+            self->socket_->close(ec);
         }
     });
 }
