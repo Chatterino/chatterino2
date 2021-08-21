@@ -2,6 +2,8 @@
 
 #include "common/Modes.hpp"
 
+#include <QFileInfo>
+
 #define UGLYMACROHACK1(s) #s
 #define FROM_EXTERNAL_DEFINE(s) UGLYMACROHACK1(s)
 

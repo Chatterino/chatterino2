@@ -9,6 +9,7 @@
 - Minor: Added a setting to hide similar messages by any user. (#2716)
 - Minor: Duplicate spaces now count towards the display message length. (#3002)
 - Minor: Commands are now backed up. (#3168)
+- Minor: Added the ability to open an entire tab as a popup. (#3082)
 - Minor: Added optional parameter to /usercard command for opening a usercard in a different channel context. (#3172)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)

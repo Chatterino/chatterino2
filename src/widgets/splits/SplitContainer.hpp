@@ -202,6 +202,8 @@ public:
 
     void applyFromDescriptor(const NodeDescriptor &rootNode);
 
+    void popup();
+
 protected:
     void paintEvent(QPaintEvent *event) override;
 
