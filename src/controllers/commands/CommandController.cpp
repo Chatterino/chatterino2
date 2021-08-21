@@ -625,7 +625,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 (!channel->isTwitchChannel() || channel->isEmpty()))
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /streamlink [channel]. You can also use the "
+                    "Usage: /streamlink <channel>. You can also use the "
                     "command without arguments in any Twitch channel to open "
                     "it in streamlink."));
                 return "";
