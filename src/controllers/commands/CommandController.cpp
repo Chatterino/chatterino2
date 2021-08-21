@@ -341,7 +341,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto unblockLambda = [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /unblock [user]"));
+            channel->addMessage(makeSystemMessage("Usage: /unblock <user>"));
             return "";
         }
 
