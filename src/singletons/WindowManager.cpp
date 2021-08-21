@@ -415,10 +415,10 @@ void WindowManager::save()
         windowObj.insert("width", rect.width());
         windowObj.insert("height", rect.height());
 
-        QJsonObject emote_popup_obj;
-        emote_popup_obj.insert("x", this->emotePopupPos_.x());
-        emote_popup_obj.insert("y", this->emotePopupPos_.y());
-        windowObj.insert("emotePopup", emote_popup_obj);
+        QJsonObject emotePopupObj;
+        emotePopupObj.insert("x", this->emotePopupPos_.x());
+        emotePopupObj.insert("y", this->emotePopupPos_.y());
+        windowObj.insert("emotePopup", emotePopupObj);
 
         // window tabs
         QJsonArray tabsArr;
