@@ -476,12 +476,33 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/usercard", [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage /usercard [user]"));
+            channel->addMessage(
+                makeSystemMessage("Usage: /usercard <user> [channel]"));
             return "";
         }
 
         QString userName = words[1];
         stripUserName(userName);
+
+        if (words.size() > 2)
+        {
+            QString channelName = words[2];
+            stripChannelName(channelName);
+
+            ChannelPtr channelTemp =
+                getApp()->twitch2->getChannelOrEmpty(channelName);
+
+            if (channelTemp->isEmpty())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "A usercard can only be displayed for a channel that is "
+                    "currently opened in Chatterino."));
+                return "";
+            }
+
+            channel = channelTemp;
+        }
+
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
