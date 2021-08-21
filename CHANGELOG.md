@@ -9,6 +9,7 @@
 - Minor: Added a setting to hide similar messages by any user. (#2716)
 - Minor: Duplicate spaces now count towards the display message length. (#3002)
 - Minor: Commands are now backed up. (#3168)
+- Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
 - Bugfix: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
