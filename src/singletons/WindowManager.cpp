@@ -423,12 +423,12 @@ void WindowManager::save()
         // window tabs
         QJsonArray tabs_arr;
 
-        for (int tab_i = 0; tab_i < window->getNotebook().getPageCount();
-             tab_i++)
+        for (int tabIndex = 0; tabIndex < window->getNotebook().getPageCount();
+             tabIndex++)
         {
             QJsonObject tabObj;
             SplitContainer *tab = dynamic_cast<SplitContainer *>(
-                window->getNotebook().getPageAt(tab_i));
+                window->getNotebook().getPageAt(tabIndex));
             assert(tab != nullptr);
 
             bool isSelected = window->getNotebook().getSelectedPage() == tab;
