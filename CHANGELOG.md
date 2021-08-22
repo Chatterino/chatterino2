@@ -11,6 +11,7 @@
 - Minor: Commands are now backed up. (#3168)
 - Minor: Added the ability to open an entire tab as a popup. (#3082)
 - Minor: Added optional parameter to /usercard command for opening a usercard in a different channel context. (#3172)
+- Minor: Added regex option to Nicknames. (#3146)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
