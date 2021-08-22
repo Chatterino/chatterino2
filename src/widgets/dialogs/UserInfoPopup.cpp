@@ -34,7 +34,7 @@
 const QString TEXT_VIEWS("Views: %1");
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
-const QString TEXT_TITLE("%1's Usercard");
+const QString TEXT_TITLE("%1's Usercard - #%2");
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
 
@@ -593,7 +593,7 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 {
     this->userName_ = name;
     this->channel_ = channel;
-    this->setWindowTitle(TEXT_TITLE.arg(name));
+    this->setWindowTitle(TEXT_TITLE.arg(name, channel->getName()));
 
     this->ui_.nameLabel->setText(name);
     this->ui_.nameLabel->setProperty("copy-text", name);
@@ -678,7 +678,8 @@ void UserInfoPopup::updateUserData()
         this->avatarUrl_ = user.profileImageUrl;
 
         this->ui_.nameLabel->setText(user.displayName);
-        this->setWindowTitle(TEXT_TITLE.arg(user.displayName));
+        this->setWindowTitle(
+            TEXT_TITLE.arg(user.displayName, this->channel_->getName()));
         this->ui_.viewCountLabel->setText(
             TEXT_VIEWS.arg(localizeNumbers(user.viewCount)));
         this->ui_.createdDateLabel->setText(

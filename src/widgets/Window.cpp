@@ -338,6 +338,14 @@ void Window::addShortcuts()
         }
     });
 
+    createWindowShortcut(this, "CTRL+SHIFT+N", [this] {
+        if (auto page = dynamic_cast<SplitContainer *>(
+                this->notebook_->getSelectedPage()))
+        {
+            page->popup();
+        }
+    });
+
     // Zoom in
     {
         auto s = new QShortcut(QKeySequence::ZoomIn, this);

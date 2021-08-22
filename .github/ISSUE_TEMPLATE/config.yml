@@ -1,5 +1,8 @@
 blank_issues_enabled: false
 contact_links:
+    - name: Issue about the Chatterino Browser Extension
+      url: https://github.com/Chatterino/chatterino-browser-ext/issues
+      about: Make a suggestion or report a bug about the Chatterino browser extension.
     - name: Suggestions or feature request
       url: https://github.com/chatterino/chatterino2/discussions/categories/ideas
       about: Got something you think should change or be added? Search for or start a new discussion!
