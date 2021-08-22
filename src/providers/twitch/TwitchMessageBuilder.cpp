@@ -1432,4 +1432,70 @@ void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
     builder->message().timeoutUser = "msg:" + action.messageId;
 }
 
+void TwitchMessageBuilder::modsOrVipsSystemMessage(QString prefix,
+                                                   QStringList users,
+                                                   TwitchChannel *channel,
+                                                   MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->emplace<TextElement>(prefix, MessageElementFlag::Text,
+                                  MessageColor::System);
+    bool hasColor = false;
+    bool isFirst = true;
+    MessageColor color;
+    for (const QString &username : users)
+    {
+        if (!isFirst)
+        {
+            // this is used to add the ", " after each but the last entry
+            builder->emplace<TextElement>(", ", MessageElementFlag::Text,
+                                          MessageColor::System);
+        }
+        isFirst = false;
+
+        hasColor = false;
+        if (getSettings()->colorUsernames)
+        {
+            if (auto userColor = channel->getUserColor(username);
+                userColor.isValid())
+            {
+                color = MessageColor(userColor);
+                hasColor = true;
+            }
+        }
+
+        if (hasColor)
+        {
+            builder
+                ->emplace<TextElement>(username,
+                                       MessageElementFlag::BoldUsername, color,
+                                       FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, username})
+                ->setTrailingSpace(false);
+            builder
+                ->emplace<TextElement>(
+                    username, MessageElementFlag::NonBoldUsername, color)
+                ->setLink({Link::UserInfo, username})
+                ->setTrailingSpace(false);
+        }
+        else
+        {
+            builder
+                ->emplace<TextElement>(
+                    username, MessageElementFlag::BoldUsername,
+                    MessageColor::System, FontStyle::ChatMediumBold)
+                ->setLink({Link::UserInfo, username})
+                ->setTrailingSpace(false);
+            builder
+                ->emplace<TextElement>(username,
+                                       MessageElementFlag::NonBoldUsername,
+                                       MessageColor::System)
+                ->setLink({Link::UserInfo, username})
+                ->setTrailingSpace(false);
+        }
+    }
+}
+
 }  // namespace chatterino
