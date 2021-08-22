@@ -2,6 +2,7 @@ project(chatterino-test)
 
 set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/ChannelChatters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkRequest.cpp
