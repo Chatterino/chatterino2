@@ -75,21 +75,11 @@ private:
     } ui_;
 
     QHostAddress ip_ = QHostAddress::LocalHost;
-    unsigned short port_ = 52107;
 
     // Properties of the LoginServer
 
-    // Input/Output context
-    net::io_context iocontext_;
-
-    // Acceptor
-    tcp::acceptor acceptor_;
-
-    // Socket for the currently connected client
-    tcp::socket socket_;
-
     // Local server listening to login data returned from Twitch
-    LoginServer *server_;
+    std::shared_ptr<LoginServer> server_;
 
     QUrl loginLink;
 

@@ -103,139 +103,228 @@ namespace chatterino {
 
 /// BOOST
 
-LoginServer::LoginServer(LoginDialog *parent, tcp::socket *socket)
-    : socket_(socket)
+class LoginServerSession
+    : public std::enable_shared_from_this<LoginServerSession>
+{
+public:
+    LoginServerSession(tcp::socket &&socket)
+        : stream_(std::move(socket))
+        , lambda_(*this)
+    {
+    }
+
+    void run()
+    {
+        net::dispatch(this->stream_.get_executor(),
+                      beast::bind_front_handler(&LoginServerSession::doRead,
+                                                shared_from_this()));
+    }
+
+    void doRead()
+    {
+        this->request_ = {};
+        this->stream_.expires_after(std::chrono::seconds(15));
+
+        http::async_read(this->stream_, this->buffer_, this->request_,
+                         beast::bind_front_handler(&LoginServerSession::onRead,
+                                                   shared_from_this()));
+    }
+
+    void onRead(beast::error_code ec, std::size_t /*bytesTransferred*/)
+    {
+        if (ec)
+        {
+            if (ec == http::error::end_of_stream)
+            {
+                // nice close
+                this->doClose();
+                return;
+            }
+
+            // non-nice close
+            qDebug() << "unhandled error in onRead:" << ec.message().c_str();
+            return;
+        }
+
+        this->handleRequest(std::move(this->request_));
+    }
+
+    void doClose()
+    {
+        beast::error_code ec;
+        this->stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
+    }
+
+    void handleRequest(http::request<http::string_body> request)
+    {
+        http::response<http::dynamic_body> response;
+
+        response.version(request.version());
+        response.keep_alive(false);
+
+        auto method = request.method();
+        auto target = request.target();
+
+        // Common headers
+        response.set(http::field::server, "Chatterino");
+        response.set(http::field::access_control_allow_origin, "*");
+        response.set(http::field::access_control_allow_methods, "GET, PUT");
+        response.set(http::field::access_control_allow_headers,
+                     "X-Access-Token");
+
+        // GET /redirect
+        if (method == http::verb::get && target == "/redirect")
+        {
+            // Read auth.html from resources/
+            QFile redirectPageFile(":/auth.html");
+            redirectPageFile.open(QIODevice::ReadOnly);
+            auto redirectPage = redirectPageFile.readAll().toStdString();
+
+            // Write successful response
+            response.result(http::status::ok);
+            response.set(http::field::content_type, "text/html");
+            beast::ostream(response.body()) << redirectPage;
+        }
+        // OPTIONS .*
+        else if (method == http::verb::options)
+        {
+            // Respond with 200 for CORS calls
+            response.result(http::status::ok);
+        }
+        // PUT /token
+        else if (method == http::verb::put && target == "/token")
+        {
+            // Handle received token
+            auto it = request.find("X-Access-Token");
+            if (it == request.end())
+            {
+                qDebug() << "X-Access-Token wasn't found!";
+                response.result(http::status::bad_request);
+            }
+            else
+            {
+                // TODO: reimplement zulu magic for validating the token etc.
+                qDebug() << it->value().to_string().data();
+                response.result(http::status::ok);
+            }
+        }
+        // Unhandled route
+        else
+        {
+            response.result(http::status::not_found);
+            response.set(http::field::content_type, "text/plain");
+
+            beast::ostream(response.body()) << "404 Not found";
+        }
+
+        response.content_length(response.body().size());
+
+        this->lambda_(std::move(response));
+        // http::async_write(
+        //     this->stream_, response,
+        //     beast::bind_front_handler(&LoginServerSession::onWrite,
+        //                               shared_from_this()));
+    }
+
+    void onWrite(bool close, beast::error_code ec,
+                 std::size_t /*bytesTransferred*/)
+    {
+        if (ec)
+        {
+            qDebug() << "error in onWrite: " << ec.message().c_str();
+            return;
+        }
+
+        assert(close);
+
+        if (close)
+        {
+            this->doClose();
+        }
+        else
+        {
+            qDebug() << "NO CLOSE?????";
+        }
+    }
+
+private:
+    struct SendLambda {
+        LoginServerSession &self_;
+
+        explicit SendLambda(LoginServerSession &self)
+            : self_(self)
+        {
+        }
+
+        template <bool isRequest, class Body, class Fields>
+        void operator()(http::message<isRequest, Body, Fields> &&msg) const
+        {
+            // The lifetime of the message has to extend
+            // for the duration of the async operation so
+            // we use a shared_ptr to manage it.
+            auto sp = std::make_shared<http::message<isRequest, Body, Fields>>(
+                std::move(msg));
+
+            // Store a type-erased version of the shared
+            // pointer in the class to keep it alive.
+            self_.res_ = sp;
+
+            // Write the response
+            http::async_write(self_.stream_, *sp,
+                              beast::bind_front_handler(
+                                  &LoginServerSession::onWrite,
+                                  self_.shared_from_this(), sp->need_eof()));
+        }
+    };
+
+    beast::tcp_stream stream_;
+    beast::flat_buffer buffer_;
+    http::request<http::string_body> request_;
+    SendLambda lambda_;
+    std::shared_ptr<void> res_;
+};
+
+LoginServer::LoginServer(LoginDialog *parent, net::io_context &ioContext)
+    : ioContext_(ioContext)
+    , acceptor_(this->ioContext_,
+                {net::ip::make_address("127.0.0.1"), this->port_})
+    , parent_(parent)
 {
     qCDebug(chatterinoWidget) << "Creating new HTTP server";
 }
 
 void LoginServer::start()
 {
-    this->readRequest();
-    this->checkDeadline();
+    this->doAccept();
 }
 
-void LoginServer::loop(net::io_context *iocontext, tcp::acceptor *acceptor,
-                       tcp::socket *socket)
-{
-    qDebug() << iocontext->stopped();
-    acceptor->async_accept(*this->socket_, [&](beast::error_code ec) {
-        if (!ec)
-        {
-            std::make_shared<LoginServer>(this->parent_, socket)->start();
-        }
-        qDebug() << "dank";
-        //        this->loop();
-    });
-}
-
-void LoginServer::stop(net::io_context *iocontext)
+void LoginServer::stop()
 {
     qCDebug(chatterinoWidget) << "Stopping the HTTP server";
-    iocontext->stop();
+    this->acceptor_.close();
 }
 
-void LoginServer::readRequest()
+void LoginServer::doAccept()
 {
-    auto self = shared_from_this();
-
-    http::async_read(*self->socket_, buffer_, request_,
-                     [self](beast::error_code ec, size_t bytes_transferred) {
-                         boost::ignore_unused(bytes_transferred);
-                         if (!ec)
-                         {
-                             self->processRequest();
-                         }
-                     });
+    this->acceptor_.async_accept(
+        net::make_strand(this->ioContext_),
+        beast::bind_front_handler(&LoginServer::onAccept, shared_from_this()));
 }
 
-void LoginServer::processRequest()
+void LoginServer::onAccept(beast::error_code ec, tcp::socket socket)
 {
-    response_.version(request_.version());
-    response_.keep_alive(false);
-
-    auto method = request_.method();
-    auto target = request_.target();
-
-    // Common headers
-    response_.set(http::field::server, "Chatterino");
-    response_.set(http::field::access_control_allow_origin, "*");
-    response_.set(http::field::access_control_allow_methods, "GET, PUT");
-    response_.set(http::field::access_control_allow_headers, "X-Access-Token");
-
-    // GET /redirect
-    if (method == http::verb::get && target == "/redirect")
+    if (ec)
     {
-        // Read auth.html from resources/
-        QFile redirectPageFile(":/auth.html");
-        redirectPageFile.open(QIODevice::ReadOnly);
-        auto redirectPage = redirectPageFile.readAll().toStdString();
-
-        // Write successful response
-        response_.result(http::status::ok);
-        response_.set(http::field::content_type, "text/html");
-        beast::ostream(response_.body()) << redirectPage;
+        qDebug() << "error in onaccept:" << ec.message().c_str();
     }
-    // OPTIONS .*
-    else if (method == http::verb::options)
-    {
-        // Respond with 200 for CORS calls
-        response_.result(http::status::ok);
-    }
-    // PUT /token
-    else if (method == http::verb::put && target == "/token")
-    {
-        // Handle received token
-        auto it = request_.find("X-Access-Token");
-        if (it == request_.end())
-        {
-            qDebug() << "X-Access-Token wasn't found!";
-            response_.result(http::status::bad_request);
-        }
-        else
-        {
-            // TODO: reimplement zulu magic for validating the token etc.
-            qDebug() << it->value().to_string().data();
-            response_.result(http::status::ok);
-        }
-    }
-    // Unhandled route
     else
     {
-        response_.result(http::status::not_found);
-        response_.set(http::field::content_type, "text/plain");
-
-        beast::ostream(response_.body()) << "404 Not found";
+        // Move socket to LoginServerSession to handle the request
+        std::make_shared<LoginServerSession>(std::move(socket))->run();
     }
 
-    // Send the response to the client
-    this->writeResponse();
-}
-
-void LoginServer::writeResponse()
-{
-    auto self = shared_from_this();
-
-    response_.content_length(response_.body().size());
-
-    http::async_write(
-        *self->socket_, response_, [self](beast::error_code ec, std::size_t) {
-            self->socket_->shutdown(tcp::socket::shutdown_send, ec);
-            self->deadline_.cancel();
-        });
-}
-
-void LoginServer::checkDeadline()
-{
-    auto self = shared_from_this();
-
-    deadline_.async_wait([self](beast::error_code ec) {
-        if (!ec)
-        {
-            // Close socket to cancel any outstanding operation
-            self->socket_->close(ec);
-        }
-    });
+    // Accept further requests
+    this->doAccept();
 }
 
 }  // namespace chatterino

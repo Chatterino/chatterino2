@@ -35,9 +35,11 @@
 #include "util/RapidjsonHelpers.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Window.hpp"
+#include "widgets/helper/LoginServer.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QDesktopServices>
+#include <QtConcurrent>
 
 namespace chatterino {
 
@@ -143,6 +145,15 @@ void Application::initialize(Settings &settings, Paths &paths)
 
 int Application::run(QApplication &qtApp)
 {
+    net::io_context ioContext;
+    auto loginServer = std::make_shared<LoginServer>(nullptr, ioContext);
+    loginServer->start();
+    QtConcurrent::run([&] {
+        qDebug() << "iocontext run";
+        ioContext.run();
+        qDebug() << "iocontext done";
+    });
+
     assert(isAppInitialized);
 
     this->twitch.server->connect();

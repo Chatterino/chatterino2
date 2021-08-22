@@ -42,50 +42,30 @@ class LoginDialog;
 class LoginServer : public std::enable_shared_from_this<LoginServer>
 {
 public:
-    LoginServer(LoginDialog *parent, tcp::socket *socket);
+    LoginServer(LoginDialog *parent, net::io_context &ioContext);
 
-    // Initiate the asynchronous operations associated with the connection
+    // Kickstarts the acceptor into accepting new sessions
     void start();
 
-    // FeelsGoodMan
-    void loop(net::io_context *iocontext, tcp::acceptor *acceptor,
-              tcp::socket *socket);
+    // Stops the acceptor from accepting new sessions
+    void stop();
 
-    // Stops the HTTP server or something, idk I'm not the engineer
-    void stop(net::io_context *iocontext);
+    unsigned short port_ = 52107;
 
 private:
+    // doAccept starts listening to the acceptor
+    void doAccept();
+
+    // onAccept is called when a client has been accepted by the accptor
+    void onAccept(beast::error_code ec, tcp::socket socket);
+
+    net::io_context &ioContext_;
+
+    // Acceptor
+    tcp::acceptor acceptor_;
+
     // Parent LoginDialog instance
     LoginDialog *parent_;
-
-    // Socket for the currently connected client
-    tcp::socket *socket_;
-
-    // Buffer for performing reads
-    beast::flat_buffer buffer_{8192};
-
-    // Request and response messages
-    http::request<http::dynamic_body> request_;
-    http::response<http::dynamic_body> response_;
-
-    // Timer for putting a deadline on connection processing
-    net::steady_timer deadline_{socket_->get_executor(),
-                                std::chrono::seconds(15)};
-
-    // Asynchronously receive a complete request message
-    void readRequest();
-
-    // Determine what needs to be done with the request message
-    void processRequest();
-
-    // Construct a response message based on the program state
-    void createResponse();
-
-    // Asynchronously transmit the response message
-    void writeResponse();
-
-    // Check whether we have spent enough time on this connection
-    void checkDeadline();
 };
 
 }  // namespace chatterino
