@@ -48,7 +48,6 @@ find_package(Qt${MAJOR_QT_VERSION} REQUIRED
     Multimedia
     Svg
     Concurrent
-    HttpServer
     )
 
 if (WIN32)

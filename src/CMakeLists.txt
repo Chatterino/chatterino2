@@ -495,7 +495,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Multimedia
         Qt${MAJOR_QT_VERSION}::Svg
         Qt${MAJOR_QT_VERSION}::Concurrent
-        Qt${MAJOR_QT_VERSION}::HttpServer
 
         LibCommuni::LibCommuni
         qt${MAJOR_QT_VERSION}keychain
