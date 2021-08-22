@@ -1,7 +1,6 @@
 #pragma once
 
 #include "controllers/accounts/AccountController.hpp"
-
 #include "util/RapidJsonSerializeQString.hpp"
 #include "util/RapidjsonHelpers.hpp"
 
@@ -9,13 +8,6 @@
 #include <pajlada/serialize.hpp>
 
 #include <memory>
-
-namespace {
-
-const QString REGEX_START_BOUNDARY("(\\b|\\s|^)");
-const QString REGEX_END_BOUNDARY("(\\b|\\s|$)");
-
-}  // namespace
 
 namespace chatterino {
 
@@ -28,36 +20,77 @@ public:
         , replace_(replace)
         , isRegex_(isRegex)
         , isCaseSensitive_(isCaseSensitive)
-        , regex_(isRegex_
-                     ? name
-                     : REGEX_START_BOUNDARY + QRegularExpression::escape(name) +
-                           REGEX_END_BOUNDARY,
-                 QRegularExpression::UseUnicodePropertiesOption |
-                     (isCaseSensitive_
-                          ? QRegularExpression::NoPatternOption
-                          : QRegularExpression::CaseInsensitiveOption))
+        , caseSensitivity_(this->isCaseSensitive_ ? Qt::CaseSensitive
+                                                  : Qt::CaseInsensitive)
     {
+        if (this->isRegex())
+        {
+            this->regex_ = QRegularExpression(
+                name, QRegularExpression::UseUnicodePropertiesOption |
+                          (this->isCaseSensitive()
+                               ? QRegularExpression::NoPatternOption
+                               : QRegularExpression::CaseInsensitiveOption));
+        }
     }
 
-    const QString &name() const
+    [[nodiscard]] const QString &name() const
     {
         return this->name_;
     }
-    const QString &replace() const
+
+    [[nodiscard]] const QString &replace() const
     {
         return this->replace_;
     }
-    const bool &isRegex() const
+
+    [[nodiscard]] bool isRegex() const
     {
         return this->isRegex_;
     }
-    const bool &isCaseSensitive() const
+
+    [[nodiscard]] Qt::CaseSensitivity caseSensitivity() const
+    {
+        return this->caseSensitivity_;
+    }
+
+    [[nodiscard]] const bool &isCaseSensitive() const
     {
         return this->isCaseSensitive_;
     }
-    const QRegularExpression &regex() const
+
+    [[nodiscard]] bool match(QString &usernameText) const
     {
-        return this->regex_;
+        if (this->isRegex())
+        {
+            if (!this->regex_.isValid())
+            {
+                return false;
+            }
+            if (this->name().isEmpty())
+            {
+                return false;
+            }
+
+            auto workingCopy = usernameText;
+            workingCopy.replace(this->regex_, this->replace());
+            if (workingCopy != usernameText)
+            {
+                usernameText = workingCopy;
+                return true;
+            }
+        }
+        else
+        {
+            auto res =
+                this->name().compare(usernameText, this->caseSensitivity());
+            if (res == 0)
+            {
+                usernameText = this->replace();
+                return true;
+            }
+        }
+
+        return false;
     }
 
 private:
@@ -65,7 +98,8 @@ private:
     QString replace_;
     bool isRegex_;
     bool isCaseSensitive_;
-    QRegularExpression regex_;
+    Qt::CaseSensitivity caseSensitivity_;
+    QRegularExpression regex_{};
 };
 
 }  // namespace chatterino
@@ -96,7 +130,7 @@ struct Deserialize<chatterino::Nickname> {
         if (!value.IsObject())
         {
             PAJLADA_REPORT_ERROR(error)
-            return chatterino::Nickname(QString(), QString(), false, true);
+            return chatterino::Nickname(QString(), QString(), false, false);
         }
 
         QString _name;

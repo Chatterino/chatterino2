@@ -642,36 +642,9 @@ void TwitchMessageBuilder::appendUsername()
 
     for (const auto &nickname : *nicknames)
     {
-        if (nickname.isRegex())
+        if (nickname.match(usernameText))
         {
-            const auto &regex = nickname.regex();
-            if (!regex.isValid())
-            {
-                continue;
-            }
-            auto workingCopy = usernameText;
-            workingCopy.replace(regex, nickname.replace());
-            if (workingCopy != usernameText)
-            {
-                usernameText = workingCopy;
-                break;
-            }
-        }
-        else
-        {
-            if (nickname.isCaseSensitive())
-            {
-                if (nickname.name() == usernameText)
-                {
-                    usernameText = nickname.replace();
-                    break;
-                }
-            }
-            else if (nickname.name() == this->message().loginName)
-            {
-                usernameText = nickname.replace();
-                break;
-            }
+            break;
         }
     }
 

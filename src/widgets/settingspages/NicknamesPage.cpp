@@ -39,7 +39,7 @@ NicknamesPage::NicknamesPage()
 
     view->addButtonPressed.connect([] {
         getSettings()->nicknames.append(
-            Nickname{"Username", "Nickname", false, true});
+            Nickname{"Username", "Nickname", false, false});
     });
 
     QTimer::singleShot(1, [view] {
