@@ -956,10 +956,16 @@ QString CommandController::execCustomCommand(const QStringList &words,
                     result += altText;
                 }
             }
-            else if (var == "userid")
+            else if (var == "myid")
             {
                 auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
                 result += uid.isEmpty() ? altText : uid;
+            }
+            else if (var == "myname")
+            {
+                auto name =
+                    getApp()->accounts->twitch.getCurrent()->getUserName();
+                result += name.isEmpty() ? altText : name;
             }
             else
             {
