@@ -641,13 +641,11 @@ void TwitchMessageBuilder::appendUsername()
     }
 
     auto nicknames = getCSettings().nicknames.readOnly();
-    auto loginLower = this->message().loginName.toLower();
 
     for (const auto &nickname : *nicknames)
     {
-        if (nickname.name().toLower() == loginLower)
+        if (nickname.match(usernameText))
         {
-            usernameText = nickname.replace();
             break;
         }
     }
