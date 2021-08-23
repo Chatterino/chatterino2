@@ -116,6 +116,18 @@ void SplitInput::initLayout()
             this->editTextChanged();
         },
         this->managedConnections_);
+
+    // init inputCompletionPopup_
+    this->inputCompletionPopup_ = new InputCompletionPopup(this);
+    this->inputCompletionPopup_->setInputAction(
+        [that = QObjectRef(this)](const QString &text) mutable {
+            if (auto this2 = that.get())
+            {
+                this2->insertCompletionText(text);
+                this2->hideCompletionPopup();
+            }
+        });
+
 }
 
 void SplitInput::scaleChangedEvent(float scale)
@@ -522,31 +534,14 @@ void SplitInput::updateCompletionPopup()
 
 void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
 {
-    if (!this->inputCompletionPopup_.get())
-    {
-        this->inputCompletionPopup_ = new InputCompletionPopup(this);
-        this->inputCompletionPopup_->setInputAction(
-            [that = QObjectRef(this)](const QString &text) mutable {
-                if (auto this2 = that.get())
-                {
-                    this2->insertCompletionText(text);
-                    this2->hideCompletionPopup();
-                }
-            });
-    }
-
     auto popup = this->inputCompletionPopup_.get();
-    assert(popup);
 
     if (emoteCompletion)  // autocomplete emotes
         popup->updateEmotes(text, this->split_->getChannel());
     else  // autocomplete usernames
         popup->updateUsers(text, this->split_->getChannel());
 
-    auto pos = this->mapToGlobal({0, 0}) - QPoint(0, popup->height()) +
-               QPoint((this->width() - popup->width()) / 2, 0);
-
-    popup->move(pos);
+    this->repositionCompletionPopup();
     popup->show();
 }
 
@@ -554,6 +549,15 @@ void SplitInput::hideCompletionPopup()
 {
     if (auto popup = this->inputCompletionPopup_.get())
         popup->hide();
+}
+
+void SplitInput::repositionCompletionPopup()
+{
+    auto popup = this->inputCompletionPopup_.get();
+
+    auto pos = this->mapToGlobal({0, 0}) - QPoint(0, popup->height()) +
+        QPoint((this->width() - popup->width()) / 2, 0);
+    popup->move(pos);
 }
 
 void SplitInput::insertCompletionText(const QString &input_)
@@ -705,6 +709,9 @@ void SplitInput::resizeEvent(QResizeEvent *)
     else
     {
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    }
+    if (this->inputCompletionPopup_->isVisible()) {
+        this->repositionCompletionPopup();
     }
 }
 

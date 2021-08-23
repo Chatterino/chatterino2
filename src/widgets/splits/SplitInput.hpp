@@ -51,6 +51,7 @@ private:
     void updateEmoteButton();
     void updateCompletionPopup();
     void showCompletionPopup(const QString &text, bool emoteCompletion);
+    void repositionCompletionPopup();
     void hideCompletionPopup();
     void insertCompletionText(const QString &text);
     void openEmotePopup();
