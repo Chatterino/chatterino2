@@ -878,6 +878,14 @@ QString CommandController::execCustomCommand(const QStringList &words,
                                              const Command &command,
                                              bool dryRun, ChannelPtr channel)
 {
+    return this->execCustomCommand(words, command, dryRun, channel, {});
+}
+
+QString CommandController::execCustomCommand(const QStringList &words,
+                                             const Command &command,
+                                             bool dryRun, ChannelPtr channel,
+                                             std::map<QString, QString> context)
+{
     QString result;
 
     static QRegularExpression parseCommand(
@@ -955,7 +963,15 @@ QString CommandController::execCustomCommand(const QStringList &words,
             }
             else
             {
-                result += "{" + match.captured(3) + "}";
+                auto it = context.find(var);
+                if (it != context.end())
+                {
+                    result += it->second.isEmpty() ? altText : it->second;
+                }
+                else
+                {
+                    result += "{" + match.captured(3) + "}";
+                }
             }
             continue;
         }
