@@ -1450,7 +1450,7 @@ void TwitchMessageBuilder::modsOrVipsSystemMessage(QString prefix,
         if (!isFirst)
         {
             // this is used to add the ", " after each but the last entry
-            builder->emplace<TextElement>(", ", MessageElementFlag::Text,
+            builder->emplace<TextElement>(",", MessageElementFlag::Text,
                                           MessageColor::System);
         }
         isFirst = false;
