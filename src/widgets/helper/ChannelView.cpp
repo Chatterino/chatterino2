@@ -2101,12 +2101,13 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                 }
             }
 
-            value.replace("{user}", layout->getMessage()->loginName)
-                .replace("{channel}", this->channel_->getName())
-                .replace("{msg-id}", layout->getMessage()->id)
-                .replace("{message}", layout->getMessage()->messageText);
-
-            value = getApp()->commands->execCommand(value, channel, false);
+            value = getApp()->commands->execCustomCommand(
+                QStringList(), Command{"(modaction)", value}, true, channel,
+                {
+                    {"user", layout->getMessage()->loginName},
+                    {"msg-id", layout->getMessage()->id},
+                    {"message", layout->getMessage()->messageText},
+                });
             channel->sendMessage(value);
         }
         break;

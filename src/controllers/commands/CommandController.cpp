@@ -889,7 +889,7 @@ QString CommandController::execCustomCommand(const QStringList &words,
     QString result;
 
     static QRegularExpression parseCommand(
-        "(^|[^{])({{)*{(\\d+\\+?|([a-zA-Z]+)(?:;(.+?))?)}");
+        "(^|[^{])({{)*{(\\d+\\+?|([a-zA-Z-]+)(?:;(.+?))?)}");
 
     int lastCaptureEnd = 0;
 
