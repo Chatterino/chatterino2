@@ -73,8 +73,10 @@ void InputCompletionPopup::initLayout()
 
 QSize InputCompletionPopup::sizeHint() const
 {
-    auto listItemRect = this->ui_.listView->visualRect(this->ui_.listView->currentIndex());
-    return QSize(this->width(), listItemRect.height() * this->model_.rowCount());
+    auto listItemRect =
+        this->ui_.listView->visualRect(this->ui_.listView->currentIndex());
+    return QSize(this->width(),
+                 listItemRect.height() * this->model_.rowCount());
 }
 
 void InputCompletionPopup::updateEmotes(const QString &text, ChannelPtr channel)

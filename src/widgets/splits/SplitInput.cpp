@@ -130,7 +130,8 @@ void SplitInput::initLayout()
 
     // reposition inputCompletionPopup_ when window has moved
     this->split_->windowMoved.connect([this] {
-        if (this->inputCompletionPopup_->isVisible()) {
+        if (this->inputCompletionPopup_->isVisible())
+        {
             this->repositionCompletionPopup();
         }
     });
@@ -563,7 +564,7 @@ void SplitInput::repositionCompletionPopup()
     auto popup = this->inputCompletionPopup_.get();
 
     auto pos = this->mapToGlobal({0, 0}) - QPoint(0, popup->height()) +
-        QPoint((this->width() - popup->width()) / 2, 0);
+               QPoint((this->width() - popup->width()) / 2, 0);
     popup->move(pos);
 }
 
@@ -719,7 +720,8 @@ void SplitInput::resizeEvent(QResizeEvent *)
     }
     auto popup = this->inputCompletionPopup_.get();
     popup->setMaximumHeight(this->split_->height() / 2);
-    if (popup->isVisible()) {
+    if (popup->isVisible())
+    {
         popup->adjustSize();
         this->repositionCompletionPopup();
     }
