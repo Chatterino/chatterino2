@@ -541,6 +541,7 @@ void SplitInput::showCompletionPopup(const QString &text, bool emoteCompletion)
     else  // autocomplete usernames
         popup->updateUsers(text, this->split_->getChannel());
 
+    popup->adjustSize();
     this->repositionCompletionPopup();
     popup->show();
 }
@@ -710,7 +711,10 @@ void SplitInput::resizeEvent(QResizeEvent *)
     {
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     }
-    if (this->inputCompletionPopup_->isVisible()) {
+    auto popup = this->inputCompletionPopup_.get();
+    popup->setMaximumHeight(this->split_->height() / 2);
+    if (popup->isVisible()) {
+        popup->adjustSize();
         this->repositionCompletionPopup();
     }
 }

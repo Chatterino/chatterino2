@@ -21,6 +21,7 @@ public:
     void updateEmotes(const QString &text, ChannelPtr channel);
     void updateUsers(const QString &text, ChannelPtr channel);
     virtual bool eventFilter(QObject *, QEvent *event) override;
+    virtual QSize sizeHint() const override;
 
     void setInputAction(ActionCallback callback);
 
