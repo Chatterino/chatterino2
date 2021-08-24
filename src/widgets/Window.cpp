@@ -117,7 +117,8 @@ bool Window::event(QEvent *event)
             }
         }
         case QEvent::Move: {
-            auto page = this->notebook_->getOrAddSelectedPage();
+            auto page = dynamic_cast<SplitContainer *>(
+                this->notebook_->getSelectedPage());
 
             if (page != nullptr)
             {
@@ -130,7 +131,8 @@ bool Window::event(QEvent *event)
             }
         }
         case QEvent::Resize: {
-            auto page = this->notebook_->getOrAddSelectedPage();
+            auto page = dynamic_cast<SplitContainer *>(
+                this->notebook_->getSelectedPage());
 
             if (page != nullptr)
             {
