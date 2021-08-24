@@ -128,6 +128,12 @@ void SplitInput::initLayout()
             }
         });
 
+    // reposition inputCompletionPopup_ when window has moved
+    this->split_->windowMoved.connect([this] {
+        if (this->inputCompletionPopup_->isVisible()) {
+            this->repositionCompletionPopup();
+        }
+    });
 }
 
 void SplitInput::scaleChangedEvent(float scale)

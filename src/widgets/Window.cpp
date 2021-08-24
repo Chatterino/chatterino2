@@ -116,6 +116,19 @@ bool Window::event(QEvent *event)
                 container->hideResizeHandles();
             }
         }
+        case QEvent::Move: {
+            auto page = this->notebook_->getOrAddSelectedPage();
+
+            if (page != nullptr)
+            {
+                std::vector<Split *> splits = page->getSplits();
+
+                for (Split *split : splits)
+                {
+                    split->windowMoved.invoke();
+                }
+            }
+        }
         break;
 
         default:;
