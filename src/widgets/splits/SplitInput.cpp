@@ -128,10 +128,21 @@ void SplitInput::initLayout()
             }
         });
 
-    // reposition inputCompletionPopup_ when window has moved
+    // reposition inputCompletionPopup_ when window was moved
     this->split_->windowMoved.connect([this] {
         if (this->inputCompletionPopup_->isVisible())
         {
+            this->repositionCompletionPopup();
+        }
+    });
+
+    // reposition inputCompletionPopup_ when window was resized
+    this->split_->windowResized.connect([this] {
+        auto popup = this->inputCompletionPopup_.get();
+        popup->setMaximumHeight(this->split_->height() / 2);
+        if (popup->isVisible())
+        {
+            popup->adjustSize();
             this->repositionCompletionPopup();
         }
     });
@@ -717,13 +728,6 @@ void SplitInput::resizeEvent(QResizeEvent *)
     else
     {
         this->ui_.textEdit->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    }
-    auto popup = this->inputCompletionPopup_.get();
-    popup->setMaximumHeight(this->split_->height() / 2);
-    if (popup->isVisible())
-    {
-        popup->adjustSize();
-        this->repositionCompletionPopup();
     }
 }
 
