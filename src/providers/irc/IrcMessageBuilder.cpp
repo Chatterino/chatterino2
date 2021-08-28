@@ -11,6 +11,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
+#include "util/Helpers.hpp"
 #include "util/IrcHelpers.hpp"
 #include "widgets/Window.hpp"
 
@@ -38,7 +39,7 @@ MessagePtr IrcMessageBuilder::build()
     this->parse();
     if (getSettings()->colorizeNicknamesOnIrc)
     {
-        this->setRandomUsernameColor();
+        this->usernameColor_ = getRandomColor(this->ircMessage->nick());
     }
     else
     {
