@@ -100,9 +100,6 @@ public:
         "/appearance/messages/usernameDisplayMode",
         UsernameDisplayMode::UsernameAndLocalizedName};
 
-    BoolSetting colorizeNicknamesOnIrc = {
-        "/appearance/messages/colorizeNicknamesOnIrc", true};
-
     IntSetting tabDirection = {"/appearance/tabDirection",
                                NotebookTabDirection::Horizontal};
 

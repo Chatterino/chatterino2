@@ -37,14 +37,7 @@ MessagePtr IrcMessageBuilder::build()
 {
     // PARSE
     this->parse();
-    if (getSettings()->colorizeNicknamesOnIrc)
-    {
-        this->usernameColor_ = getRandomColor(this->ircMessage->nick());
-    }
-    else
-    {
-        this->usernameColor_ = getApp()->themes->messages.textColors.system;
-    }
+    this->usernameColor_ = getRandomColor(this->ircMessage->nick());
 
     // PUSH ELEMENTS
     this->appendChannelName();
