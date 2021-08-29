@@ -121,6 +121,14 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
         }
     }
 
+    if (auto cmds = tc->chatCommands())
+    {
+        for (auto &&cmd : *cmds)
+        {
+            addString(cmd.prefix, TaggedString::Type::Command);
+        }
+    }
+
     // Bttv Global
     for (auto &emote : *getApp()->twitch2->getBttvEmotes().emotes())
     {

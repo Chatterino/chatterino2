@@ -191,6 +191,7 @@ SOURCES += \
     src/messages/SharedMessageBuilder.cpp \
     src/providers/bttv/BttvEmotes.cpp \
     src/providers/bttv/LoadBttvChannelEmote.cpp \
+    src/providers/chatterino/ChatCommands.cpp \
     src/providers/chatterino/ChatterinoBadges.cpp \
     src/providers/colors/ColorProvider.cpp \
     src/providers/emoji/Emojis.cpp \
@@ -431,6 +432,7 @@ HEADERS += \
     src/PrecompiledHeader.hpp \
     src/providers/bttv/BttvEmotes.hpp \
     src/providers/bttv/LoadBttvChannelEmote.hpp \
+    src/providers/chatterino/ChatCommands.hpp \
     src/providers/chatterino/ChatterinoBadges.hpp \
     src/providers/colors/ColorProvider.hpp \
     src/providers/emoji/Emojis.hpp \

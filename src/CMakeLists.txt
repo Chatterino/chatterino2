@@ -169,6 +169,8 @@ set(SOURCE_FILES
 
         providers/chatterino/ChatterinoBadges.cpp
         providers/chatterino/ChatterinoBadges.hpp
+        providers/chatterino/ChatCommands.hpp
+        providers/chatterino/ChatCommands.cpp
 
         providers/colors/ColorProvider.cpp
         providers/colors/ColorProvider.hpp
