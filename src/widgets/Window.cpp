@@ -116,6 +116,8 @@ bool Window::event(QEvent *event)
                 container->hideResizeHandles();
             }
         }
+        break;
+
         case QEvent::Move: {
             auto page = dynamic_cast<SplitContainer *>(
                 this->notebook_->getSelectedPage());
@@ -130,6 +132,8 @@ bool Window::event(QEvent *event)
                 }
             }
         }
+        break;
+
         case QEvent::Resize: {
             auto page = dynamic_cast<SplitContainer *>(
                 this->notebook_->getSelectedPage());
