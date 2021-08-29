@@ -2,6 +2,8 @@
 
 ## Unversioned
 
+- Add chat commands from bots to the autocompletion.
+
 ## 2.3.4
 
 - Major: Newly uploaded Twitch emotes are once again present in emote picker and can be autocompleted with Tab as well. (#2992)
