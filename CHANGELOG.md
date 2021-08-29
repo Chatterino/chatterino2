@@ -19,6 +19,7 @@
 - Bugfix: Moderation mode and active filters are now preserved when opening a split as a popup. (#3113, #3130)
 - Bugfix: Fixed a bug that caused all badge highlights to use the same color. (#3132, #3134)
 - Bugfix: Allow starting Streamlink from Chatterino when running as a Flatpak. (#3178)
+- Bugfix: Fixed own IRC messages not having metadata and a link to a usercard. (#3203)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 
