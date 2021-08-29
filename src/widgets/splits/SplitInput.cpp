@@ -135,17 +135,6 @@ void SplitInput::initLayout()
             this->repositionCompletionPopup();
         }
     });
-
-    // reposition inputCompletionPopup_ when window was resized
-    this->split_->windowResized.connect([this] {
-        auto popup = this->inputCompletionPopup_.get();
-        popup->setMaximumHeight(this->split_->height() / 2);
-        if (popup->isVisible())
-        {
-            popup->adjustSize();
-            this->repositionCompletionPopup();
-        }
-    });
 }
 
 void SplitInput::scaleChangedEvent(float scale)
@@ -573,10 +562,20 @@ void SplitInput::hideCompletionPopup()
 void SplitInput::repositionCompletionPopup()
 {
     auto popup = this->inputCompletionPopup_.get();
-
     auto pos = this->mapToGlobal({0, 0}) - QPoint(0, popup->height()) +
                QPoint((this->width() - popup->width()) / 2, 0);
     popup->move(pos);
+}
+
+void SplitInput::handleSplitResize()
+{
+    auto popup = this->inputCompletionPopup_.get();
+    popup->setMaximumHeight(this->split_->height() / 2);
+    if (popup->isVisible())
+    {
+        popup->adjustSize();
+        this->repositionCompletionPopup();
+    }
 }
 
 void SplitInput::insertCompletionText(const QString &input_)

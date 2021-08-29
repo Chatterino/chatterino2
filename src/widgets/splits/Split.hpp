@@ -46,7 +46,6 @@ public:
     pajlada::Signals::NoArgSignal focused;
     pajlada::Signals::NoArgSignal focusLost;
     pajlada::Signals::NoArgSignal windowMoved;
-    pajlada::Signals::NoArgSignal windowResized;
 
     ChannelView &getChannelView();
     SplitInput &getInput();

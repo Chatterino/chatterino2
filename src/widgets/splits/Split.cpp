@@ -533,6 +533,10 @@ void Split::resizeEvent(QResizeEvent *event)
     BaseWidget::resizeEvent(event);
 
     this->overlay_->setGeometry(this->rect());
+
+    // inputCompletionPopup resizing has to be done here because technically
+    // Split can be resized without affecting the Window layout
+    this->input_->handleSplitResize();
 }
 
 void Split::enterEvent(QEvent *event)

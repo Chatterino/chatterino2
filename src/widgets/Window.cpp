@@ -134,22 +134,6 @@ bool Window::event(QEvent *event)
         }
         break;
 
-        case QEvent::Resize: {
-            auto page = dynamic_cast<SplitContainer *>(
-                this->notebook_->getSelectedPage());
-
-            if (page != nullptr)
-            {
-                std::vector<Split *> splits = page->getSplits();
-
-                for (Split *split : splits)
-                {
-                    split->windowResized.invoke();
-                }
-            }
-        }
-        break;
-
         default:;
     }
 
