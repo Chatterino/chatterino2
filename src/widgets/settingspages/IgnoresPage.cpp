@@ -49,7 +49,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
                     ->initialized(&getSettings()->ignoredMessages))
             .getElement();
     view->setTitles(
-        {"Pattern", "Regex", "Case Sensitive", "Block", "Replacement"});
+        {"Pattern", "Regex", "Case-sensitive", "Block", "Replacement"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Fixed);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
