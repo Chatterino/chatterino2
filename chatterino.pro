@@ -14,7 +14,7 @@ CCACHE_BIN = $$system(which ccache)
   CONFIG+=ccache
 }
 
-MINIMUM_REQUIRED_QT_VERSION = 5.12.0
+MINIMUM_REQUIRED_QT_VERSION = 5.11.0
 
 !versionAtLeast(QT_VERSION, $$MINIMUM_REQUIRED_QT_VERSION) {
     error("You're trying to compile with Qt $$QT_VERSION, but minimum required Qt version is $$MINIMUM_REQUIRED_QT_VERSION")
