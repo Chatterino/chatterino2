@@ -111,9 +111,8 @@ void Application::initialize(Settings &settings, Paths &paths)
     }
 
     // add crash message
-    if (!getArgs().isFramelessEmbed &&
-        getSettings()->showMessageAfterRestartOnCrash.getValue() &&
-        getArgs().crashRecovery)
+    if (!getArgs().isFramelessEmbed && getArgs().crashRecovery &&
+        getSettings()->showMessageAfterRestartOnCrash.getValue())
     {
         if (auto selected =
                 this->windows->getMainWindow().getNotebook().getSelectedPage())
