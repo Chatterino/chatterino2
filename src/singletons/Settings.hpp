@@ -372,6 +372,8 @@ public:
 
     QStringSetting cachePath = {"/cache/path", ""};
     BoolSetting restartOnCrash = {"/misc/restartOnCrash", false};
+    BoolSetting showMessageAfterRestartOnCrash = {
+        "/misc/showMessageAfterRestartOnCrash", true};
     BoolSetting attachExtensionToAnyProcess = {
         "/misc/attachExtensionToAnyProcess", false};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};

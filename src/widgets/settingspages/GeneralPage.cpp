@@ -586,6 +586,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
 
+    layout.addCheckbox("Show message after restarting on crash",
+                       s.showMessageAfterRestartOnCrash);
+
 #ifdef Q_OS_LINUX
     if (!getPaths()->isPortable())
     {
