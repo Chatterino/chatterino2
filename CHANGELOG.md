@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Add chat commands from bots to the autocompletion.
+- Major: Added the ability to autocomplete Fossabot & Streamelements commands. (#3209)
 
 ## 2.3.4
 
