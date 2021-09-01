@@ -4,6 +4,7 @@
 
 - Minor: Remove TwitchEmotes.com attribution and the open/copy options when right-clicking a Twitch Emote. (#2214, #3136)
 - Minor: Strip leading @ and trailing , from username in /user and /usercard commands. (#3143)
+- Minor: Strip leading @ and trailing , from username in popout command. (#3217)
 - Minor: Display a system message when reloading subscription emotes to match BTTV/FFZ behavior (#3135)
 - Minor: Allow resub messages to show in `/mentions` tab (#3148)
 - Minor: Added a setting to hide similar messages by any user. (#2716)
