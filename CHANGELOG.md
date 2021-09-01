@@ -12,6 +12,7 @@
 - Minor: Added the ability to open an entire tab as a popup. (#3082)
 - Minor: Added optional parameter to /usercard command for opening a usercard in a different channel context. (#3172)
 - Minor: Added regex option to Nicknames. (#3146)
+- Minor: Added `/raw` command. (#3189)
 - Minor: Colorizing usernames on IRC, originally made for Mm2PL/dankerino (#3206)
 - Minor: Added an option to disable the system message displayed on restarting after a crash (#3211)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
