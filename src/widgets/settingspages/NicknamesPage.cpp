@@ -29,7 +29,7 @@ NicknamesPage::NicknamesPage()
                     ->initialized(&getSettings()->nicknames))
             .getElement();
 
-    view->setTitles({"Username", "Nickname", "Enable regex", "Case Sensitive"});
+    view->setTitles({"Username", "Nickname", "Enable regex", "Case-sensitive"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Fixed);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
