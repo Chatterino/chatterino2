@@ -13,6 +13,7 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/LayoutHelper.hpp"
+#include "util/RunStreamView.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
@@ -369,6 +370,12 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
     if (twitchChannel)
     {
+        if (canRunStreamView())
+        {
+            menu->addAction("Start watching", this->split_,
+                            &Split::startWatching);
+        }
+
         menu->addAction(OPEN_IN_BROWSER, this->split_, &Split::openInBrowser);
 #ifndef USEWEBENGINE
         menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,

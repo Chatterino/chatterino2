@@ -251,6 +251,7 @@ SOURCES += \
     src/util/NuulsUploader.cpp \
     src/util/RapidjsonHelpers.cpp \
     src/util/RatelimitBucket.cpp \
+    src/util/RunStreamView.cpp \
     src/util/SplitCommand.cpp \
     src/util/StreamerMode.cpp \
     src/util/StreamLink.cpp \
@@ -503,6 +504,7 @@ HEADERS += \
     src/util/PostToThread.hpp \
     src/util/QObjectRef.hpp \
     src/util/QStringHash.hpp \
+    src/util/RunStreamView.hpp \
     src/util/rangealgorithm.hpp \
     src/util/RapidjsonHelpers.hpp \
     src/util/RapidJsonSerializeQString.hpp \

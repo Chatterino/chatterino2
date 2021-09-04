@@ -15,6 +15,24 @@
 
 namespace chatterino {
 
+namespace {
+#ifdef USEWINSDK
+    void sendToStreamView(void *handle, QJsonDocument doc)
+    {
+        auto json = doc.toJson();
+        json.append('\0');
+
+        COPYDATASTRUCT cds;
+        cds.cbData = static_cast<DWORD>(json.size());
+        cds.lpData = json.data();
+
+        ::SendMessage((HWND)handle, WM_COPYDATA,
+                      reinterpret_cast<WPARAM>(handle),
+                      reinterpret_cast<LPARAM>(&cds));
+    }
+#endif
+}  // namespace
+
 FramelessEmbedWindow::FramelessEmbedWindow()
     : BaseWindow(BaseWindow::Frameless)
 {
@@ -52,9 +70,22 @@ bool FramelessEmbedWindow::nativeEvent(const QByteArray &eventType,
                     getApp()->twitch2->getOrAddChannel(channelName));
             }
         }
+        else if (root.value("type").toString() == "request-show")
+        {
+            QJsonDocument doc{QJsonObject{{"type", "shown"}}};
+
+            auto callback = root.value("callback-handle");
+            sendToStreamView(
+                reinterpret_cast<void *>(callback.toString().toLongLong()),
+                doc);
+
+            this->hostWindowId = callback.toString();
+
+            this->show();
+        }
     }
 
-    return BaseWidget::nativeEvent(eventType, message, result);
+    return BaseWindow::nativeEvent(eventType, message, result);
 }
 
 void FramelessEmbedWindow::showEvent(QShowEvent *)
@@ -89,6 +120,16 @@ void FramelessEmbedWindow::showEvent(QShowEvent *)
 
         ::SendMessage(parentHwnd, WM_COPYDATA, reinterpret_cast<WPARAM>(handle),
                       reinterpret_cast<LPARAM>(&cds));
+    }
+}
+
+void FramelessEmbedWindow::scaleChangedEvent(float)
+{
+    if (!this->hostWindowId.isEmpty())
+    {
+        QJsonDocument doc{QJsonObject{{"type", "fix-bounds"}}};
+        sendToStreamView(
+            reinterpret_cast<void *>(this->hostWindowId.toLongLong()), doc);
     }
 }
 #endif

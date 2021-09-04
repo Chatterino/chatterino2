@@ -16,6 +16,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/NuulsUploader.hpp"
+#include "util/RunStreamView.hpp"
 #include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
 #include "widgets/Notebook.hpp"
@@ -614,6 +615,14 @@ void Split::explainSplitting()
 {
     showTutorialVideo(this, ":/examples/splitting.gif", "Splitting",
                       "Hold <Ctrl+Alt> to add new splits.\n\nExample:");
+}
+
+void Split::startWatching()
+{
+    if (auto channel = this->channel_.get())
+    {
+        runStreamView(channel->getName());
+    }
 }
 
 void Split::popup()
