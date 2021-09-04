@@ -14,7 +14,7 @@
 - Minor: Added regex option to Nicknames. (#3146)
 - Minor: Added `/raw` command. (#3189)
 - Minor: Colorizing usernames on IRC, originally made for Mm2PL/dankerino (#3206)
-- Minor: Strip leading @ and trailing , from username in /popout command. (#3217)
+- Minor: Strip leading @ and trailing , from username in `/popout` command. (#3217)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
