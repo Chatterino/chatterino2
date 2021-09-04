@@ -653,6 +653,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
 
+            stripChannelName(target);
             QDesktopServices::openUrl(
                 QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
                          .arg(target)));
