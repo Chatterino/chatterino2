@@ -16,6 +16,7 @@
 - Minor: Colorizing usernames on IRC, originally made for Mm2PL/dankerino (#3206)
 - Minor: Fixed `/streamlink` command not stripping leading @'s or #'s (#3215)
 - Minor: Strip leading @ and trailing , from username in `/popout` command. (#3217)
+- Minor: Added `flags.reward_message` filter variable (#3231)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
