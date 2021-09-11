@@ -7,6 +7,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 #include <QThread>
+#include <QUrlQuery>
 
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
@@ -24,8 +25,11 @@ void TwitchBadges::loadTwitchBadges()
 {
     assert(this->loaded_ == false);
 
-    static QString url(
-        "https://badges.twitch.tv/v1/badges/global/display?language=en");
+    QUrl url("https://badges.twitch.tv/v1/badges/global/display");
+
+    QUrlQuery urlQuery;
+    urlQuery.addQueryItem("language", "en");
+    url.setQuery(urlQuery);
 
     NetworkRequest(url)
         .onSuccess([this](auto result) -> Outcome {

@@ -35,6 +35,7 @@ public:
     lru_cache(lru_cache<key_t, value_t> &&other)
         : _cache_items_list(std::move(other._cache_items_list))
         , _cache_items_map(std::move(other._cache_items_map))
+        , _max_size(other._max_size)
     {
         other._cache_items_list.clear();
         other._cache_items_map.clear();
@@ -44,6 +45,7 @@ public:
     {
         _cache_items_list = std::move(other._cache_items_list);
         _cache_items_map = std::move(other._cache_items_map);
+        _max_size = other._max_size;
         other._cache_items_list.clear();
         other._cache_items_map.clear();
         return *this;

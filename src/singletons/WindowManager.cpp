@@ -379,20 +379,20 @@ void WindowManager::save()
     QJsonDocument document;
 
     // "serialize"
-    QJsonArray window_arr;
+    QJsonArray windowArr;
     for (Window *window : this->windows_)
     {
-        QJsonObject window_obj;
+        QJsonObject windowObj;
 
         // window type
         switch (window->getType())
         {
             case WindowType::Main:
-                window_obj.insert("type", "main");
+                windowObj.insert("type", "main");
                 break;
 
             case WindowType::Popup:
-                window_obj.insert("type", "popup");
+                windowObj.insert("type", "popup");
                 break;
 
             case WindowType::Attached:;
@@ -400,68 +400,48 @@ void WindowManager::save()
 
         if (window->isMaximized())
         {
-            window_obj.insert("state", "maximized");
+            windowObj.insert("state", "maximized");
         }
         else if (window->isMinimized())
         {
-            window_obj.insert("state", "minimized");
+            windowObj.insert("state", "minimized");
         }
 
         // window geometry
         auto rect = window->getBounds();
 
-        window_obj.insert("x", rect.x());
-        window_obj.insert("y", rect.y());
-        window_obj.insert("width", rect.width());
-        window_obj.insert("height", rect.height());
+        windowObj.insert("x", rect.x());
+        windowObj.insert("y", rect.y());
+        windowObj.insert("width", rect.width());
+        windowObj.insert("height", rect.height());
 
-        QJsonObject emote_popup_obj;
-        emote_popup_obj.insert("x", this->emotePopupPos_.x());
-        emote_popup_obj.insert("y", this->emotePopupPos_.y());
-        window_obj.insert("emotePopup", emote_popup_obj);
+        QJsonObject emotePopupObj;
+        emotePopupObj.insert("x", this->emotePopupPos_.x());
+        emotePopupObj.insert("y", this->emotePopupPos_.y());
+        windowObj.insert("emotePopup", emotePopupObj);
 
         // window tabs
-        QJsonArray tabs_arr;
+        QJsonArray tabsArr;
 
-        for (int tab_i = 0; tab_i < window->getNotebook().getPageCount();
-             tab_i++)
+        for (int tabIndex = 0; tabIndex < window->getNotebook().getPageCount();
+             tabIndex++)
         {
-            QJsonObject tab_obj;
+            QJsonObject tabObj;
             SplitContainer *tab = dynamic_cast<SplitContainer *>(
-                window->getNotebook().getPageAt(tab_i));
+                window->getNotebook().getPageAt(tabIndex));
             assert(tab != nullptr);
 
-            // custom tab title
-            if (tab->getTab()->hasCustomTitle())
-            {
-                tab_obj.insert("title", tab->getTab()->getCustomTitle());
-            }
-
-            // selected
-            if (window->getNotebook().getSelectedPage() == tab)
-            {
-                tab_obj.insert("selected", true);
-            }
-
-            // highlighting on new messages
-            tab_obj.insert("highlightsEnabled",
-                           tab->getTab()->hasHighlightsEnabled());
-
-            // splits
-            QJsonObject splits;
-
-            this->encodeNodeRecursively(tab->getBaseNode(), splits);
-
-            tab_obj.insert("splits2", splits);
-            tabs_arr.append(tab_obj);
+            bool isSelected = window->getNotebook().getSelectedPage() == tab;
+            WindowManager::encodeTab(tab, isSelected, tabObj);
+            tabsArr.append(tabObj);
         }
 
-        window_obj.insert("tabs", tabs_arr);
-        window_arr.append(window_obj);
+        windowObj.insert("tabs", tabsArr);
+        windowArr.append(windowObj);
     }
 
     QJsonObject obj;
-    obj.insert("windows", window_arr);
+    obj.insert("windows", windowArr);
     document.setObject(obj);
 
     // save file
@@ -497,6 +477,32 @@ void WindowManager::queueSave()
     this->saveTimer->start(10s);
 }
 
+void WindowManager::encodeTab(SplitContainer *tab, bool isSelected,
+                              QJsonObject &obj)
+{
+    // custom tab title
+    if (tab->getTab()->hasCustomTitle())
+    {
+        obj.insert("title", tab->getTab()->getCustomTitle());
+    }
+
+    // selected
+    if (isSelected)
+    {
+        obj.insert("selected", true);
+    }
+
+    // highlighting on new messages
+    obj.insert("highlightsEnabled", tab->getTab()->hasHighlightsEnabled());
+
+    // splits
+    QJsonObject splits;
+
+    WindowManager::encodeNodeRecursively(tab->getBaseNode(), splits);
+
+    obj.insert("splits2", splits);
+}
+
 void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
 {
     switch (node->getType())
@@ -506,11 +512,12 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
             obj.insert("moderationMode", node->getSplit()->getModerationMode());
 
             QJsonObject split;
-            encodeChannel(node->getSplit()->getIndirectChannel(), split);
+            WindowManager::encodeChannel(node->getSplit()->getIndirectChannel(),
+                                         split);
             obj.insert("data", split);
 
             QJsonArray filters;
-            encodeFilters(node->getSplit(), filters);
+            WindowManager::encodeFilters(node->getSplit(), filters);
             obj.insert("filters", filters);
         }
         break;
@@ -520,14 +527,14 @@ void WindowManager::encodeNodeRecursively(SplitNode *node, QJsonObject &obj)
                                    ? "horizontal"
                                    : "vertical");
 
-            QJsonArray items_arr;
+            QJsonArray itemsArr;
             for (const std::unique_ptr<SplitNode> &n : node->getChildren())
             {
                 QJsonObject subObj;
-                this->encodeNodeRecursively(n.get(), subObj);
-                items_arr.append(subObj);
+                WindowManager::encodeNodeRecursively(n.get(), subObj);
+                itemsArr.append(subObj);
             }
-            obj.insert("items", items_arr);
+            obj.insert("items", itemsArr);
         }
         break;
     }

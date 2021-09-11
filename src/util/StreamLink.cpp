@@ -10,6 +10,7 @@
 #include <QFileInfo>
 #include <QProcess>
 #include "common/QLogging.hpp"
+#include "common/Version.hpp"
 
 #include <functional>
 
@@ -32,15 +33,6 @@ namespace {
         return "mpv.exe";
 #else
         return "mpv";
-#endif
-    }
-
-    const char *getDefaultBinaryPath()
-    {
-#ifdef _WIN32
-        return "C:\\Program Files (x86)\\Streamlink\\bin\\streamlink.exe";
-#else
-        return "/usr/bin/streamlink";
 #endif
     }
 
@@ -106,7 +98,27 @@ namespace {
     QProcess *createStreamlinkProcess()
     {
         auto p = new QProcess;
-        p->setProgram(getStreamlinkProgram());
+
+        const QString path = [] {
+            if (getSettings()->streamlinkUseCustomPath)
+            {
+                return getSettings()->streamlinkPath + "/" + getBinaryName();
+            }
+            else
+            {
+                return QString{getBinaryName()};
+            }
+        }();
+
+        if (Version::instance().isFlatpak())
+        {
+            p->setProgram("flatpak-spawn");
+            p->setArguments({"--host", path});
+        }
+        else
+        {
+            p->setProgram(path);
+        }
 
         QObject::connect(p, &QProcess::errorOccurred, [=](auto err) {
             if (err == QProcess::FailedToStart)
@@ -188,7 +200,8 @@ void getStreamQualities(const QString &channelURL,
             }
         });
 
-    p->setArguments({channelURL, "--default-stream=KKona"});
+    p->setArguments(p->arguments() +
+                    QStringList{channelURL, "--default-stream=KKona"});
 
     p->start();
 }
@@ -196,7 +209,9 @@ void getStreamQualities(const QString &channelURL,
 void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments, bool streamMPV)
 {
-    QStringList arguments = extraArguments << channelURL << quality;
+    auto proc = createStreamlinkProcess();
+    auto arguments = proc->arguments()
+                     << extraArguments << channelURL << quality;
 
     // Remove empty arguments before appending additional streamlink options
     // as the options might purposely contain empty arguments
@@ -209,7 +224,8 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     // Else we will kill our existing stream proccess and start a new stream
     if (!streamMPV)
     {
-        bool res = QProcess::startDetached(getStreamlinkProgram(), arguments);
+        proc->setArguments(std::move(arguments));
+        bool res = proc->startDetached();
         if (!res)
         {
             showStreamlinkNotFoundError();
@@ -217,6 +233,9 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     }
     else
     {
+        // TODO: use the createStreamlinkProcess() here also...
+        // TODO: right now we just kill the created process...
+        proc->terminate();
         QString command =
             "\"" + getStreamlinkProgram() + "\" " + arguments.join(" ");
         AttachedPlayer::getInstance().updateStreamLinkProcess(channelURL,
@@ -247,7 +266,9 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
     // https://mpv.io/manual/master/#options-wid
     if (streamMPV)
     {
-        args << "--player \"" + getMPVProgram() + " --wid=WID\"";
+        args << "--player \"" + getMPVProgram() +
+                    " --wid=WID -input-default-bindings=yes "
+                    "--input-vo-keyboard=yes\"";
     }
 
     // Append any extra options to to our stream link command
@@ -283,7 +304,8 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
     if (preferredQuality == "choose")
     {
         getStreamQualities(channelURL, [=](QStringList qualityOptions) {
-            QualityPopup::showDialog(channel, qualityOptions, args, streamMPV);
+            QualityPopup::showDialog(channelURL, qualityOptions, args,
+                                     streamMPV);
         });
         return;
     }

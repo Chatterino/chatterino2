@@ -114,44 +114,12 @@ TwitchMessageBuilder::TwitchMessageBuilder(
 
 bool TwitchMessageBuilder::isIgnored() const
 {
-    if (SharedMessageBuilder::isIgnored())
-    {
-        return true;
-    }
-
-    auto app = getApp();
-
-    if (getSettings()->enableTwitchBlockedUsers &&
-        this->tags.contains("user-id"))
-    {
-        auto sourceUserID = this->tags.value("user-id").toString();
-
-        auto blocks =
-            app->accounts->twitch.getCurrent()->accessBlockedUserIds();
-
-        if (auto it = blocks->find(sourceUserID); it != blocks->end())
-        {
-            switch (static_cast<ShowIgnoredUsersMessages>(
-                getSettings()->showBlockedUsersMessages.getValue()))
-            {
-                case ShowIgnoredUsersMessages::IfModerator:
-                    if (this->channel->isMod() ||
-                        this->channel->isBroadcaster())
-                        return false;
-                    break;
-                case ShowIgnoredUsersMessages::IfBroadcaster:
-                    if (this->channel->isBroadcaster())
-                        return false;
-                    break;
-                case ShowIgnoredUsersMessages::Never:
-                    break;
-            }
-
-            return true;
-        }
-    }
-
-    return false;
+    return isIgnoredMessage({
+        /*.message = */ this->originalMessage_,
+        /*.twitchUserID = */ this->tags.value("user-id").toString(),
+        /*.isMod = */ this->channel->isMod(),
+        /*.isBroadcaster = */ this->channel->isBroadcaster(),
+    });
 }
 
 void TwitchMessageBuilder::triggerHighlights()
@@ -190,7 +158,9 @@ MessagePtr TwitchMessageBuilder::build()
             this->args.channelPointRewardId);
         if (reward)
         {
-            this->appendChannelPointRewardMessage(reward.get(), this);
+            this->appendChannelPointRewardMessage(
+                reward.get(), this, this->channel->isMod(),
+                this->channel->isBroadcaster());
         }
     }
 
@@ -214,29 +184,7 @@ MessagePtr TwitchMessageBuilder::build()
     this->emplace<TimestampElement>(
         calculateMessageTimestamp(this->ircMessage));
 
-    bool addModerationElement = true;
-    if (this->senderIsBroadcaster)
-    {
-        addModerationElement = false;
-    }
-    else
-    {
-        bool hasUserType = this->tags.contains("user-type");
-        if (hasUserType)
-        {
-            QString userType = this->tags.value("user-type").toString();
-
-            if (userType == "mod")
-            {
-                if (!args.isStaffOrBroadcaster)
-                {
-                    addModerationElement = false;
-                }
-            }
-        }
-    }
-
-    if (addModerationElement)
+    if (this->shouldAddModerationElements())
     {
         this->emplace<TwitchModerationElement>();
     }
@@ -688,6 +636,16 @@ void TwitchMessageBuilder::appendUsername()
             }
         }
         break;
+    }
+
+    auto nicknames = getCSettings().nicknames.readOnly();
+
+    for (const auto &nickname : *nicknames)
+    {
+        if (nickname.match(usernameText))
+        {
+            break;
+        }
     }
 
     if (this->args.isSentWhisper)
@@ -1248,9 +1206,38 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     return Success;
 }
 
-void TwitchMessageBuilder::appendChannelPointRewardMessage(
-    const ChannelPointReward &reward, MessageBuilder *builder)
+bool TwitchMessageBuilder::shouldAddModerationElements() const
 {
+    if (this->senderIsBroadcaster)
+    {
+        // You cannot timeout the broadcaster
+        return false;
+    }
+
+    if (this->tags.value("user-type").toString() == "mod" &&
+        !this->args.isStaffOrBroadcaster)
+    {
+        // You cannot timeout moderators UNLESS you are Twitch Staff or the broadcaster of the channel
+        return false;
+    }
+
+    return true;
+}
+
+void TwitchMessageBuilder::appendChannelPointRewardMessage(
+    const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,
+    bool isBroadcaster)
+{
+    if (isIgnoredMessage({
+            /*.message = */ "",
+            /*.twitchUserID = */ reward.user.id,
+            /*.isMod = */ isMod,
+            /*.isBroadcaster = */ isBroadcaster,
+        }))
+    {
+        return;
+    }
+
     builder->emplace<TimestampElement>();
     QString redeemed = "Redeemed";
     QStringList textList;

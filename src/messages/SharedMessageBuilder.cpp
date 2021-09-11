@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/ignores/IgnorePhrase.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageElement.hpp"
@@ -104,20 +105,9 @@ void SharedMessageBuilder::parse()
 
 bool SharedMessageBuilder::isIgnored() const
 {
-    // TODO(pajlada): Do we need to check if the phrase is valid first?
-    auto phrases = getCSettings().ignoredMessages.readOnly();
-    for (const auto &phrase : *phrases)
-    {
-        if (phrase.isBlock() && phrase.isMatch(this->originalMessage_))
-        {
-            qCDebug(chatterinoMessage)
-                << "Blocking message because it contains ignored phrase"
-                << phrase.getPattern();
-            return true;
-        }
-    }
-
-    return false;
+    return isIgnoredMessage({
+        /*.message = */ this->originalMessage_,
+    });
 }
 
 void SharedMessageBuilder::parseUsernameColor()
@@ -167,10 +157,6 @@ void SharedMessageBuilder::parseHighlights()
         this->message().flags.set(MessageFlag::Highlighted);
         this->message().highlightColor =
             ColorProvider::instance().color(ColorType::Subscription);
-
-        // This message was a subscription.
-        // Don't check for any other highlight phrases.
-        return;
     }
 
     // XXX: Non-common term in SharedMessageBuilder
@@ -230,7 +216,10 @@ void SharedMessageBuilder::parseHighlights()
             << "sent a message";
 
         this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor = userHighlight.getColor();
+        if (!this->message().flags.has(MessageFlag::Subscription))
+        {
+            this->message().highlightColor = userHighlight.getColor();
+        }
 
         if (userHighlight.showInMentions())
         {
@@ -299,7 +288,10 @@ void SharedMessageBuilder::parseHighlights()
         }
 
         this->message().flags.set(MessageFlag::Highlighted);
-        this->message().highlightColor = highlight.getColor();
+        if (!this->message().flags.has(MessageFlag::Subscription))
+        {
+            this->message().highlightColor = highlight.getColor();
+        }
 
         if (highlight.showInMentions())
         {
@@ -354,7 +346,11 @@ void SharedMessageBuilder::parseHighlights()
             if (!badgeHighlightSet)
             {
                 this->message().flags.set(MessageFlag::Highlighted);
-                this->message().highlightColor = highlight.getColor();
+                if (!this->message().flags.has(MessageFlag::Subscription))
+                {
+                    this->message().highlightColor = highlight.getColor();
+                }
+
                 badgeHighlightSet = true;
             }
 

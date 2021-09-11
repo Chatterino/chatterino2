@@ -36,9 +36,10 @@ void AttachedPlayer::updateStreamLinkProcess(const QString &channel,
         QWindow *mainWindow =
             chatterino::getApp()->windows->getMainWindow().windowHandle();
         mpvWindow = new QWindow;
-        //mpvWindow = mainWindow;
-        mpvContainerWID = mpvWindow->winId();
         mpvContainer = QWidget::createWindowContainer(mpvWindow);
+        mpvContainer->setAttribute(Qt::WA_DontCreateNativeAncestors);
+        mpvContainer->setAttribute(Qt::WA_NativeWindow);
+        mpvContainerWID = mpvContainer->winId();
         mpvContainer->setBackgroundRole(QPalette::Window);
         mpvContainer->setSizePolicy(QSizePolicy::Policy::Expanding,
                                     QSizePolicy::Policy::Expanding);

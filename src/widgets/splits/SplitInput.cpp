@@ -8,6 +8,7 @@
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "util/Clamp.hpp"
+#include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
@@ -133,14 +134,18 @@ void SplitInput::themeChangedEvent()
     QPalette palette, placeholderPalette;
 
     palette.setColor(QPalette::WindowText, this->theme->splits.input.text);
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     placeholderPalette.setColor(
         QPalette::PlaceholderText,
         this->theme->messages.textColors.chatPlaceholder);
+#endif
 
     this->updateEmoteButton();
     this->ui_.textEditLength->setPalette(palette);
 
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
     this->ui_.textEdit->setPalette(placeholderPalette);
+#endif
     this->ui_.textEdit->setStyleSheet(this->theme->splits.input.styleSheet);
 
     this->ui_.hbox->setMargin(
@@ -568,8 +573,10 @@ void SplitInput::insertCompletionText(const QString &input_)
         }
         else if (text[i] == '@')
         {
-            input = "@" + input_ +
-                    (getSettings()->mentionUsersWithComma ? ", " : " ");
+            const auto userMention =
+                formatUserMention(input_, edit.isFirstWord(),
+                                  getSettings()->mentionUsersWithComma);
+            input = "@" + userMention + " ";
             done = true;
         }
 
@@ -593,6 +600,11 @@ void SplitInput::clearSelection()
     c.setPosition(c.position(), QTextCursor::KeepAnchor);
 
     this->ui_.textEdit->setTextCursor(c);
+}
+
+bool SplitInput::isEditFirstWord() const
+{
+    return this->ui_.textEdit->isFirstWord();
 }
 
 QString SplitInput::getInputText() const
@@ -627,9 +639,6 @@ void SplitInput::editTextChanged()
         this->textChanged.invoke(text);
 
         text = text.trimmed();
-        static QRegularExpression spaceRegex("\\s\\s+");
-        text = text.replace(spaceRegex, " ");
-
         text =
             app->commands->execCommand(text, this->split_->getChannel(), true);
     }

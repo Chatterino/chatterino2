@@ -49,6 +49,7 @@ public:
     pajlada::Signals::NoArgSignal focusLost;
 
     ChannelView &getChannelView();
+    SplitInput &getInput();
 
     IndirectChannel getIndirectChannel();
     ChannelPtr getChannel();

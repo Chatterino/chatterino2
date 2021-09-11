@@ -4,18 +4,19 @@ namespace chatterino {
 
 Resources2::Resources2()
 {
+    this->avatars.alazymeme = QPixmap(":/avatars/alazymeme.png");
     this->avatars.fourtf = QPixmap(":/avatars/fourtf.png");
     this->avatars.kararty = QPixmap(":/avatars/kararty.png");
     this->avatars.mm2pl = QPixmap(":/avatars/mm2pl.png");
     this->avatars.pajlada = QPixmap(":/avatars/pajlada.png");
     this->avatars.slch = QPixmap(":/avatars/slch.png");
+    this->avatars.xheaveny = QPixmap(":/avatars/xheaveny.png");
     this->avatars.zneix = QPixmap(":/avatars/zneix.png");
     this->buttons.addSplit = QPixmap(":/buttons/addSplit.png");
     this->buttons.addSplitDark = QPixmap(":/buttons/addSplitDark.png");
     this->buttons.ban = QPixmap(":/buttons/ban.png");
     this->buttons.banRed = QPixmap(":/buttons/banRed.png");
     this->buttons.copyDark = QPixmap(":/buttons/copyDark.png");
-    this->buttons.copyDarkTheme = QPixmap(":/buttons/copyDarkTheme.png");
     this->buttons.copyLight = QPixmap(":/buttons/copyLight.png");
     this->buttons.menuDark = QPixmap(":/buttons/menuDark.png");
     this->buttons.menuLight = QPixmap(":/buttons/menuLight.png");
