@@ -180,6 +180,7 @@ TwitchChannel::TwitchChannel(const QString &name)
         this->refreshCheerEmotes();
         this->refreshFFZChannelEmotes(false);
         this->refreshBTTVChannelEmotes(false);
+        this->refreshChatCommands();
     });
 
     // timers
@@ -319,6 +320,29 @@ boost::optional<ChannelPointReward> TwitchChannel::channelPointReward(
     if (it == rewards->end())
         return boost::none;
     return it->second;
+}
+
+std::shared_ptr<const std::vector<ExternalChatCommand>>
+    TwitchChannel::chatCommands() const
+{
+    return this->chatCommands_;
+}
+
+void TwitchChannel::refreshChatCommands()
+{
+    if (this->roomID_.access()->isEmpty())
+    {
+        qCDebug(chatterinoTwitch) << "[TwitchChannel" << this->getName()
+                                  << "] Refreshing chat commands (Missing ID)";
+        return;
+    }
+
+    loadChatCommands(*this->roomID_.access(),
+                     [this](std::vector<ExternalChatCommand> &&cmds) {
+                         this->chatCommands_ =
+                             std::make_shared<std::vector<ExternalChatCommand>>(
+                                 std::move(cmds));
+                     });
 }
 
 void TwitchChannel::sendMessage(const QString &message)

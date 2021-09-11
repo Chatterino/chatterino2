@@ -7,6 +7,7 @@
 #include "common/ChatterSet.hpp"
 #include "common/Outcome.hpp"
 #include "common/UniqueAccess.hpp"
+#include "providers/chatterino/ChatCommands.hpp"
 #include "providers/twitch/ChannelPointReward.hpp"
 #include "providers/twitch/TwitchEmotes.hpp"
 #include "providers/twitch/api/Helix.hpp"
@@ -117,6 +118,11 @@ public:
     boost::optional<ChannelPointReward> channelPointReward(
         const QString &rewardId) const;
 
+    // Chat commands
+    std::shared_ptr<const std::vector<ExternalChatCommand>> chatCommands()
+        const;
+    void refreshChatCommands();
+
 private:
     struct NameOptions {
         QString displayName;
@@ -169,6 +175,7 @@ private:
         badgeSets_;  // "subscribers": { "0": ... "3": ... "6": ...
     UniqueAccess<std::vector<CheerEmoteSet>> cheerEmoteSets_;
     UniqueAccess<std::map<QString, ChannelPointReward>> channelPointRewards_;
+    std::shared_ptr<const std::vector<ExternalChatCommand>> chatCommands_;
 
     bool mod_ = false;
     bool vip_ = false;
