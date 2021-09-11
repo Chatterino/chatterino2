@@ -2109,8 +2109,12 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                     {"msg.text", layout->getMessage()->messageText},
 
                     // old placehodlers
+                    {"user", layout->getMessage()->loginName},
                     {"msg-id", layout->getMessage()->id},
                     {"message", layout->getMessage()->messageText},
+
+                    // new version of this is inside execCustomCommand
+                    {"channel", this->channel()->getName()},
                 });
             channel->sendMessage(value);
         }
