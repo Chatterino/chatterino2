@@ -2108,7 +2108,7 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                     {"msg.id", layout->getMessage()->id},
                     {"msg.text", layout->getMessage()->messageText},
 
-                    // old placehodlers
+                    // old placeholders
                     {"user", layout->getMessage()->loginName},
                     {"msg-id", layout->getMessage()->id},
                     {"message", layout->getMessage()->messageText},

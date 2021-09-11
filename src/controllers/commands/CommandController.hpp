@@ -35,11 +35,8 @@ public:
     CommandModel *createModel(QObject *parent);
 
     QString execCustomCommand(const QStringList &words, const Command &command,
-                              bool dryRun, ChannelPtr channel);
-
-    QString execCustomCommand(const QStringList &words, const Command &command,
                               bool dryRun, ChannelPtr channel,
-                              std::map<QString, QString> context);
+                              std::map<QString, QString> context = {});
 
 private:
     void load(Paths &paths);

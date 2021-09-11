@@ -972,13 +972,6 @@ void CommandController::registerCommand(QString commandName,
 
 QString CommandController::execCustomCommand(const QStringList &words,
                                              const Command &command,
-                                             bool dryRun, ChannelPtr channel)
-{
-    return this->execCustomCommand(words, command, dryRun, channel, {});
-}
-
-QString CommandController::execCustomCommand(const QStringList &words,
-                                             const Command &command,
                                              bool dryRun, ChannelPtr channel,
                                              std::map<QString, QString> context)
 {
