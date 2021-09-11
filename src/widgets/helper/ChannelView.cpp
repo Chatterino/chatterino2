@@ -2104,7 +2104,11 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
             value = getApp()->commands->execCustomCommand(
                 QStringList(), Command{"(modaction)", value}, true, channel,
                 {
-                    {"user", layout->getMessage()->loginName},
+                    {"user.name", layout->getMessage()->loginName},
+                    {"msg.id", layout->getMessage()->id},
+                    {"msg.text", layout->getMessage()->messageText},
+
+                    // old placehodlers
                     {"msg-id", layout->getMessage()->id},
                     {"message", layout->getMessage()->messageText},
                 });

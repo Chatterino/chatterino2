@@ -924,15 +924,15 @@ QString CommandController::execCustomCommand(const QStringList &words,
             auto var = match.captured(4);
             auto altText = match.captured(5);  // alt text or empty string
             auto tc = dynamic_cast<TwitchChannel *>(channel.get());
-            if (var == "channel")
+            if (var == "channel.name")
             {
                 result += channel->getName();
             }
-            else if (var == "channelid" && tc != nullptr)
+            else if (var == "channel.id" && tc != nullptr)
             {
                 result += tc->roomId();
             }
-            else if (var == "game")
+            else if (var == "stream.game")
             {
                 if (tc != nullptr)
                 {
@@ -944,7 +944,7 @@ QString CommandController::execCustomCommand(const QStringList &words,
                     result += altText;
                 }
             }
-            else if (var == "title")
+            else if (var == "stream.title")
             {
                 if (tc != nullptr)
                 {
@@ -956,12 +956,12 @@ QString CommandController::execCustomCommand(const QStringList &words,
                     result += altText;
                 }
             }
-            else if (var == "myid")
+            else if (var == "my.id")
             {
                 auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
                 result += uid.isEmpty() ? altText : uid;
             }
-            else if (var == "myname")
+            else if (var == "my.name")
             {
                 auto name =
                     getApp()->accounts->twitch.getCurrent()->getUserName();
