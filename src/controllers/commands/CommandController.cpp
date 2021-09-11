@@ -226,6 +226,72 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
     }
     return false;
 }
+
+const std::map<QString,
+               std::function<QString(const QString &, const ChannelPtr &)>>
+    COMMAND_VARS{
+        {
+            "channel.name",
+            [](const auto &altText, const auto &channel) {
+                (void)(altText);  //unused
+                return channel->getName();
+            },
+        },
+        {
+            "channel.id",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+
+                return tc->roomId();
+            },
+        },
+        {
+            "stream.game",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+                const auto &status = tc->accessStreamStatus();
+                return status->live ? status->game : altText;
+            },
+        },
+        {
+            "stream.title",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+                const auto &status = tc->accessStreamStatus();
+                return status->live ? status->title : altText;
+            },
+        },
+        {
+            "my.id",
+            [](const auto &altText, const auto &channel) {
+                (void)(channel);  //unused
+                auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
+                return uid.isEmpty() ? altText : uid;
+            },
+        },
+        {
+            "my.name",
+            [](const auto &altText, const auto &channel) {
+                (void)(channel);  //unused
+                auto name =
+                    getApp()->accounts->twitch.getCurrent()->getUserName();
+                return name.isEmpty() ? altText : name;
+            },
+        },
+    };
+
 }  // namespace
 
 namespace chatterino {
@@ -951,55 +1017,18 @@ QString CommandController::execCustomCommand(const QStringList &words,
         int wordIndex = wordIndexMatch.replace("=", "").toInt(&ok);
         if (!ok || wordIndex == 0)
         {
-            auto var = match.captured(4);
+            auto varName = match.captured(4);
             auto altText = match.captured(5);  // alt text or empty string
-            auto tc = dynamic_cast<TwitchChannel *>(channel.get());
-            if (var == "channel.name")
+
+            auto var = COMMAND_VARS.find(varName);
+
+            if (var != COMMAND_VARS.end())
             {
-                result += channel->getName();
-            }
-            else if (var == "channel.id" && tc != nullptr)
-            {
-                result += tc->roomId();
-            }
-            else if (var == "stream.game")
-            {
-                if (tc != nullptr)
-                {
-                    const auto &status = tc->accessStreamStatus();
-                    result += status->live ? status->game : altText;
-                }
-                else
-                {
-                    result += altText;
-                }
-            }
-            else if (var == "stream.title")
-            {
-                if (tc != nullptr)
-                {
-                    const auto &status = tc->accessStreamStatus();
-                    result += status->live ? status->title : altText;
-                }
-                else
-                {
-                    result += altText;
-                }
-            }
-            else if (var == "my.id")
-            {
-                auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
-                result += uid.isEmpty() ? altText : uid;
-            }
-            else if (var == "my.name")
-            {
-                auto name =
-                    getApp()->accounts->twitch.getCurrent()->getUserName();
-                result += name.isEmpty() ? altText : name;
+                result += var->second(altText, channel);
             }
             else
             {
-                auto it = context.find(var);
+                auto it = context.find(varName);
                 if (it != context.end())
                 {
                     result += it->second.isEmpty() ? altText : it->second;
