@@ -289,6 +289,8 @@ set(SOURCE_FILES
         util/RapidjsonHelpers.hpp
         util/RatelimitBucket.cpp
         util/RatelimitBucket.hpp
+        util/RunStreamView.cpp
+        util/RunStreamView.hpp
         util/SplitCommand.cpp
         util/SplitCommand.hpp
         util/StreamLink.cpp

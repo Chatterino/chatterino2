@@ -16,10 +16,12 @@ protected:
     bool nativeEvent(const QByteArray &eventType, void *message,
                      long *result) override;
     void showEvent(QShowEvent *event) override;
+    virtual void scaleChangedEvent(float) override;
 #endif
 
 private:
     Split *split_{};
+    QString hostWindowId{};
 };
 
 }  // namespace chatterino

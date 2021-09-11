@@ -159,6 +159,7 @@ public slots:
     void changeChannel();
     void explainMoving();
     void explainSplitting();
+    void startWatching();
     void popup();
     void clear();
     void openInBrowser();
