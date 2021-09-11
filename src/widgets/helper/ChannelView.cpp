@@ -2116,6 +2116,9 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                     // new version of this is inside execCustomCommand
                     {"channel", this->channel()->getName()},
                 });
+
+            value = getApp()->commands->execCommand(value, channel, false);
+
             channel->sendMessage(value);
         }
         break;
