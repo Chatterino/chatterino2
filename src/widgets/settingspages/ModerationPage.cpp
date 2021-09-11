@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/moderationactions/ModerationActionModel.hpp"
-#include "controllers/taggedusers/TaggedUsersModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
 #include "util/Helpers.hpp"
@@ -191,20 +190,6 @@ ModerationPage::ModerationPage()
             getSettings()->moderationActions.append(
                 ModerationAction("/timeout {user.name} 300"));
         });
-
-        /*auto taggedUsers = tabs.appendTab(new QVBoxLayout, "Tagged users");
-        {
-            EditableModelView *view = *taggedUsers.emplace<EditableModelView>(
-                app->taggedUsers->createModel(nullptr));
-
-            view->setTitles({"Name"});
-            view->getTableView()->horizontalHeader()->setStretchLastSection(true);
-
-            view->addButtonPressed.connect([] {
-                getApp()->taggedUsers->users.appendItem(
-                    TaggedUser(ProviderId::Twitch, "example", "xD"));
-            });
-        }*/
     }
 
     this->addModerationButtonSettings(tabs);

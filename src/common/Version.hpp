@@ -29,6 +29,7 @@ public:
     const QString &dateOfBuild() const;
     const QString &fullVersion() const;
     const bool &isSupportedOS() const;
+    bool isFlatpak() const;
 
 private:
     Version();

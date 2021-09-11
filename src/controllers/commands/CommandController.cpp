@@ -267,6 +267,8 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto path = combinePath(paths.settingsDirectory, "commands.json");
     this->sm_ = std::make_shared<pajlada::Settings::SettingManager>();
     this->sm_->setPath(path.toStdString());
+    this->sm_->setBackupEnabled(true);
+    this->sm_->setBackupSlots(9);
 
     // Delayed initialization of the setting storing all commands
     this->commandsSetting_.reset(
@@ -294,7 +296,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto blockLambda = [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /block [user]"));
+            channel->addMessage(makeSystemMessage("Usage: /block <user>"));
             return "";
         }
 
@@ -339,7 +341,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto unblockLambda = [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /unblock [user]"));
+            channel->addMessage(makeSystemMessage("Usage: /unblock <user>"));
             return "";
         }
 
@@ -453,7 +455,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage /user [user] (channel)"));
+                makeSystemMessage("Usage: /user <user> [channel]"));
             return "";
         }
         QString userName = words[1];
@@ -474,12 +476,33 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/usercard", [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage /usercard [user]"));
+            channel->addMessage(
+                makeSystemMessage("Usage: /usercard <user> [channel]"));
             return "";
         }
 
         QString userName = words[1];
         stripUserName(userName);
+
+        if (words.size() > 2)
+        {
+            QString channelName = words[2];
+            stripChannelName(channelName);
+
+            ChannelPtr channelTemp =
+                getApp()->twitch2->getChannelOrEmpty(channelName);
+
+            if (channelTemp->isEmpty())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "A usercard can only be displayed for a channel that is "
+                    "currently opened in Chatterino."));
+                return "";
+            }
+
+            channel = channelTemp;
+        }
+
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
@@ -602,12 +625,13 @@ void CommandController::initialize(Settings &, Paths &paths)
                 (!channel->isTwitchChannel() || channel->isEmpty()))
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /streamlink [channel]. You can also use the "
+                    "Usage: /streamlink <channel>. You can also use the "
                     "command without arguments in any Twitch channel to open "
                     "it in streamlink."));
                 return "";
             }
 
+            stripChannelName(target);
             channel->addMessage(makeSystemMessage(
                 QString("Opening %1 in streamlink...").arg(target)));
             openStreamlinkForChannel(target);
@@ -623,12 +647,13 @@ void CommandController::initialize(Settings &, Paths &paths)
                 (!channel->isTwitchChannel() || channel->isEmpty()))
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /popout [channel]. You can also use the command "
+                    "Usage: /popout <channel>. You can also use the command "
                     "without arguments in any Twitch channel to open its "
                     "popout chat."));
                 return "";
             }
 
+            stripChannelName(target);
             QDesktopServices::openUrl(
                 QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
                          .arg(target)));
@@ -650,7 +675,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage: /settitle <stream title>."));
+                makeSystemMessage("Usage: /settitle <stream title>"));
             return "";
         }
         if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -681,7 +706,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage: /setgame <stream game>."));
+                makeSystemMessage("Usage: /setgame <stream game>"));
             return "";
         }
         if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -746,7 +771,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                                          const ChannelPtr channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /openurl <URL>."));
+            channel->addMessage(makeSystemMessage("Usage: /openurl <URL>"));
             return "";
         }
 
@@ -772,6 +797,11 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(makeSystemMessage("Could not open URL."));
         }
 
+        return "";
+    });
+
+    this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
+        getApp()->twitch2->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
 }

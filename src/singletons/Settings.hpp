@@ -22,7 +22,6 @@ namespace chatterino {
 class HighlightPhrase;
 class HighlightBlacklistUser;
 class IgnorePhrase;
-class TaggedUser;
 class FilterRecord;
 class Nickname;
 
@@ -40,7 +39,6 @@ public:
     SignalVector<QString> &mutedChannels;
     SignalVector<FilterRecordPtr> &filterRecords;
     SignalVector<Nickname> &nicknames;
-    //SignalVector<TaggedUser> &taggedUsers;
     SignalVector<ModerationAction> &moderationActions;
 
     bool isHighlightedUser(const QString &username);
@@ -392,6 +390,8 @@ public:
     BoolSetting colorSimilarDisabled = {"/similarity/colorSimilarDisabled",
                                         true};
     BoolSetting hideSimilar = {"/similarity/hideSimilar", false};
+    BoolSetting hideSimilarBySameUser = {"/similarity/hideSimilarBySameUser",
+                                         true};
     BoolSetting hideSimilarMyself = {"/similarity/hideSimilarMyself", false};
     BoolSetting shownSimilarTriggerHighlights = {
         "/similarity/shownSimilarTriggerHighlights", false};
