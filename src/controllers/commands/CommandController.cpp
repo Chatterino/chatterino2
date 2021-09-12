@@ -226,6 +226,72 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
     }
     return false;
 }
+
+const std::map<QString,
+               std::function<QString(const QString &, const ChannelPtr &)>>
+    COMMAND_VARS{
+        {
+            "channel.name",
+            [](const auto &altText, const auto &channel) {
+                (void)(altText);  //unused
+                return channel->getName();
+            },
+        },
+        {
+            "channel.id",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+
+                return tc->roomId();
+            },
+        },
+        {
+            "stream.game",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+                const auto &status = tc->accessStreamStatus();
+                return status->live ? status->game : altText;
+            },
+        },
+        {
+            "stream.title",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+                const auto &status = tc->accessStreamStatus();
+                return status->live ? status->title : altText;
+            },
+        },
+        {
+            "my.id",
+            [](const auto &altText, const auto &channel) {
+                (void)(channel);  //unused
+                auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
+                return uid.isEmpty() ? altText : uid;
+            },
+        },
+        {
+            "my.name",
+            [](const auto &altText, const auto &channel) {
+                (void)(channel);  //unused
+                auto name =
+                    getApp()->accounts->twitch.getCurrent()->getUserName();
+                return name.isEmpty() ? altText : name;
+            },
+        },
+    };
+
 }  // namespace
 
 namespace chatterino {
@@ -855,7 +921,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         if (it != this->userCommands_.end())
         {
             text = getApp()->emotes->emojis.replaceShortCodes(
-                this->execCustomCommand(words, it.value(), dryRun));
+                this->execCustomCommand(words, it.value(), dryRun, channel));
 
             words = text.split(' ', QString::SkipEmptyParts);
 
@@ -887,7 +953,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         const auto it = this->userCommands_.find(commandName);
         if (it != this->userCommands_.end())
         {
-            return this->execCustomCommand(words, it.value(), dryRun);
+            return this->execCustomCommand(words, it.value(), dryRun, channel);
         }
     }
 
@@ -906,11 +972,13 @@ void CommandController::registerCommand(QString commandName,
 
 QString CommandController::execCustomCommand(const QStringList &words,
                                              const Command &command,
-                                             bool dryRun)
+                                             bool dryRun, ChannelPtr channel,
+                                             std::map<QString, QString> context)
 {
     QString result;
 
-    static QRegularExpression parseCommand("(^|[^{])({{)*{(\\d+\\+?)}");
+    static QRegularExpression parseCommand(
+        R"((^|[^{])({{)*{(\d+\+?|([a-zA-Z.-]+)(?:;(.+?))?)})");
 
     int lastCaptureEnd = 0;
 
@@ -942,7 +1010,27 @@ QString CommandController::execCustomCommand(const QStringList &words,
         int wordIndex = wordIndexMatch.replace("=", "").toInt(&ok);
         if (!ok || wordIndex == 0)
         {
-            result += "{" + match.captured(3) + "}";
+            auto varName = match.captured(4);
+            auto altText = match.captured(5);  // alt text or empty string
+
+            auto var = COMMAND_VARS.find(varName);
+
+            if (var != COMMAND_VARS.end())
+            {
+                result += var->second(altText, channel);
+            }
+            else
+            {
+                auto it = context.find(varName);
+                if (it != context.end())
+                {
+                    result += it->second.isEmpty() ? altText : it->second;
+                }
+                else
+                {
+                    result += "{" + match.captured(3) + "}";
+                }
+            }
             continue;
         }
 
