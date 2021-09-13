@@ -17,7 +17,7 @@ const int MAX_FALLOFF_COUNTER = 60;
 
 // Ratelimits for joinBucket_
 const int JOIN_RATELIMIT_BUDGET = 18;
-const int JOIN_RATELIMIT_COOLDOWN = 10500;
+const int JOIN_RATELIMIT_COOLDOWN = 12500;
 
 AbstractIrcServer::AbstractIrcServer()
 {
