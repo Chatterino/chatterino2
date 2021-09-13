@@ -110,11 +110,6 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
-        controllers/taggedusers/TaggedUser.cpp
-        controllers/taggedusers/TaggedUser.hpp
-        controllers/taggedusers/TaggedUsersModel.cpp
-        controllers/taggedusers/TaggedUsersModel.hpp
-
         debug/Benchmark.cpp
         debug/Benchmark.hpp
 
