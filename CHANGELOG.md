@@ -27,6 +27,7 @@
 - Bugfix: Fixed own IRC messages not having metadata and a link to a usercard. (#3203)
 - Bugfix: Fixed some channels still not loading in rare cases. (#3219)
 - Bugfix: Fixed a bug with usernames or emotes completing from the wrong position. (#3229)
+- Bugfix: Fixed a bug that caused zero-width emotes to be misaligned when the "Remove spaces between emotes" setting is on. (#3249)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 
