@@ -2,7 +2,6 @@
 
 #include "Application.hpp"
 #include "controllers/moderationactions/ModerationActionModel.hpp"
-#include "controllers/taggedusers/TaggedUsersModel.hpp"
 #include "singletons/Logging.hpp"
 #include "singletons/Paths.hpp"
 #include "util/Helpers.hpp"
@@ -158,8 +157,8 @@ ModerationPage::ModerationPage()
         // clang-format off
         auto label = modMode.emplace<QLabel>(
             "Moderation mode is enabled by clicking <img width='18' height='18' src=':/buttons/modModeDisabled.png'> in a channel that you moderate.<br><br>"
-            "Moderation buttons can be bound to chat commands such as \"/ban {user}\", \"/timeout {user} 1000\", \"/w someusername !report {user} was bad in channel {channel}\" or any other custom text commands.<br>"
-            "For deleting messages use /delete {msg-id}.<br><br>"
+            "Moderation buttons can be bound to chat commands such as \"/ban {user.name}\", \"/timeout {user.name} 1000\", \"/w someusername !report {user.name} was bad in channel {channel.name}\" or any other custom text commands.<br>"
+            "For deleting messages use /delete {msg.id}.<br><br>"
             "More information can be found <a href='https://wiki.chatterino.com/Moderation/#moderation-mode'>here</a>.");
         label->setOpenExternalLinks(true);
         label->setWordWrap(true);
@@ -189,22 +188,8 @@ ModerationPage::ModerationPage()
 
         view->addButtonPressed.connect([] {
             getSettings()->moderationActions.append(
-                ModerationAction("/timeout {user} 300"));
+                ModerationAction("/timeout {user.name} 300"));
         });
-
-        /*auto taggedUsers = tabs.appendTab(new QVBoxLayout, "Tagged users");
-        {
-            EditableModelView *view = *taggedUsers.emplace<EditableModelView>(
-                app->taggedUsers->createModel(nullptr));
-
-            view->setTitles({"Name"});
-            view->getTableView()->horizontalHeader()->setStretchLastSection(true);
-
-            view->addButtonPressed.connect([] {
-                getApp()->taggedUsers->users.appendItem(
-                    TaggedUser(ProviderId::Twitch, "example", "xD"));
-            });
-        }*/
     }
 
     this->addModerationButtonSettings(tabs);

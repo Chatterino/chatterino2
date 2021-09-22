@@ -170,8 +170,6 @@ SOURCES += \
     src/controllers/notifications/NotificationController.cpp \
     src/controllers/notifications/NotificationModel.cpp \
     src/controllers/pings/MutedChannelModel.cpp \
-    src/controllers/taggedusers/TaggedUser.cpp \
-    src/controllers/taggedusers/TaggedUsersModel.cpp \
     src/debug/Benchmark.cpp \
     src/main.cpp \
     src/messages/Emote.cpp \
@@ -409,8 +407,6 @@ HEADERS += \
     src/controllers/notifications/NotificationController.hpp \
     src/controllers/notifications/NotificationModel.hpp \
     src/controllers/pings/MutedChannelModel.hpp \
-    src/controllers/taggedusers/TaggedUser.hpp \
-    src/controllers/taggedusers/TaggedUsersModel.hpp \
     src/debug/AssertInGuiThread.hpp \
     src/debug/Benchmark.hpp \
     src/ForwardDecl.hpp \

@@ -576,7 +576,7 @@ void SplitInput::insertCompletionText(const QString &input_)
     auto input = input_ + ' ';
 
     auto text = edit.toPlainText();
-    auto position = edit.textCursor().position();
+    auto position = edit.textCursor().position() - 1;
 
     for (int i = clamp(position, 0, text.length() - 1); i >= 0; i--)
     {
@@ -597,7 +597,7 @@ void SplitInput::insertCompletionText(const QString &input_)
         if (done)
         {
             auto cursor = edit.textCursor();
-            edit.setText(text.remove(i, position - i).insert(i, input));
+            edit.setText(text.remove(i, position - i + 1).insert(i, input));
 
             cursor.setPosition(i + input.size());
             edit.setTextCursor(cursor);
@@ -653,9 +653,6 @@ void SplitInput::editTextChanged()
         this->textChanged.invoke(text);
 
         text = text.trimmed();
-        static QRegularExpression spaceRegex("\\s\\s+");
-        text = text.replace(spaceRegex, " ");
-
         text =
             app->commands->execCommand(text, this->split_->getChannel(), true);
     }

@@ -70,6 +70,32 @@ static const QStringList twitchDefaultCommands{
 
 static const QStringList whisperCommands{"/w", ".w"};
 
+// stripUserName removes any @ prefix or , suffix to make it more suitable for command use
+void stripUserName(QString &userName)
+{
+    if (userName.startsWith('@'))
+    {
+        userName.remove(0, 1);
+    }
+    if (userName.endsWith(','))
+    {
+        userName.chop(1);
+    }
+}
+
+// stripChannelName removes any @ prefix or , suffix to make it more suitable for command use
+void stripChannelName(QString &channelName)
+{
+    if (channelName.startsWith('@') || channelName.startsWith('#'))
+    {
+        channelName.remove(0, 1);
+    }
+    if (channelName.endsWith(','))
+    {
+        channelName.chop(1);
+    }
+}
+
 void sendWhisperMessage(const QString &text)
 {
     // (hemirt) pajlada: "we should not be sending whispers through jtv, but
@@ -200,6 +226,72 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
     }
     return false;
 }
+
+const std::map<QString,
+               std::function<QString(const QString &, const ChannelPtr &)>>
+    COMMAND_VARS{
+        {
+            "channel.name",
+            [](const auto &altText, const auto &channel) {
+                (void)(altText);  //unused
+                return channel->getName();
+            },
+        },
+        {
+            "channel.id",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+
+                return tc->roomId();
+            },
+        },
+        {
+            "stream.game",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+                const auto &status = tc->accessStreamStatus();
+                return status->live ? status->game : altText;
+            },
+        },
+        {
+            "stream.title",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+                const auto &status = tc->accessStreamStatus();
+                return status->live ? status->title : altText;
+            },
+        },
+        {
+            "my.id",
+            [](const auto &altText, const auto &channel) {
+                (void)(channel);  //unused
+                auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
+                return uid.isEmpty() ? altText : uid;
+            },
+        },
+        {
+            "my.name",
+            [](const auto &altText, const auto &channel) {
+                (void)(channel);  //unused
+                auto name =
+                    getApp()->accounts->twitch.getCurrent()->getUserName();
+                return name.isEmpty() ? altText : name;
+            },
+        },
+    };
+
 }  // namespace
 
 namespace chatterino {
@@ -241,6 +333,8 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto path = combinePath(paths.settingsDirectory, "commands.json");
     this->sm_ = std::make_shared<pajlada::Settings::SettingManager>();
     this->sm_->setPath(path.toStdString());
+    this->sm_->setBackupEnabled(true);
+    this->sm_->setBackupSlots(9);
 
     // Delayed initialization of the setting storing all commands
     this->commandsSetting_.reset(
@@ -268,7 +362,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto blockLambda = [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /block [user]"));
+            channel->addMessage(makeSystemMessage("Usage: /block <user>"));
             return "";
         }
 
@@ -313,7 +407,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     auto unblockLambda = [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /unblock [user]"));
+            channel->addMessage(makeSystemMessage("Usage: /unblock <user>"));
             return "";
         }
 
@@ -427,19 +521,20 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage /user [user] (channel)"));
+                makeSystemMessage("Usage: /user <user> [channel]"));
             return "";
         }
+        QString userName = words[1];
+        stripUserName(userName);
+
         QString channelName = channel->getName();
+
         if (words.size() > 2)
         {
             channelName = words[2];
-            if (channelName[0] == '#')
-            {
-                channelName.remove(0, 1);
-            }
+            stripChannelName(channelName);
         }
-        openTwitchUsercard(channelName, words[1]);
+        openTwitchUsercard(channelName, userName);
 
         return "";
     });
@@ -447,14 +542,37 @@ void CommandController::initialize(Settings &, Paths &paths)
     this->registerCommand("/usercard", [](const auto &words, auto channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage /usercard [user]"));
+            channel->addMessage(
+                makeSystemMessage("Usage: /usercard <user> [channel]"));
             return "";
+        }
+
+        QString userName = words[1];
+        stripUserName(userName);
+
+        if (words.size() > 2)
+        {
+            QString channelName = words[2];
+            stripChannelName(channelName);
+
+            ChannelPtr channelTemp =
+                getApp()->twitch2->getChannelOrEmpty(channelName);
+
+            if (channelTemp->isEmpty())
+            {
+                channel->addMessage(makeSystemMessage(
+                    "A usercard can only be displayed for a channel that is "
+                    "currently opened in Chatterino."));
+                return "";
+            }
+
+            channel = channelTemp;
         }
 
         auto *userPopup = new UserInfoPopup(
             getSettings()->autoCloseUserPopup,
             static_cast<QWidget *>(&(getApp()->windows->getMainWindow())));
-        userPopup->setData(words[1], channel);
+        userPopup->setData(userName, channel);
         userPopup->move(QCursor::pos());
         userPopup->show();
         return "";
@@ -573,12 +691,13 @@ void CommandController::initialize(Settings &, Paths &paths)
                 (!channel->isTwitchChannel() || channel->isEmpty()))
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /streamlink [channel]. You can also use the "
+                    "Usage: /streamlink <channel>. You can also use the "
                     "command without arguments in any Twitch channel to open "
                     "it in streamlink."));
                 return "";
             }
 
+            stripChannelName(target);
             channel->addMessage(makeSystemMessage(
                 QString("Opening %1 in streamlink...").arg(target)));
             openStreamlinkForChannel(target);
@@ -594,12 +713,13 @@ void CommandController::initialize(Settings &, Paths &paths)
                 (!channel->isTwitchChannel() || channel->isEmpty()))
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /popout [channel]. You can also use the command "
+                    "Usage: /popout <channel>. You can also use the command "
                     "without arguments in any Twitch channel to open its "
                     "popout chat."));
                 return "";
             }
 
+            stripChannelName(target);
             QDesktopServices::openUrl(
                 QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
                          .arg(target)));
@@ -621,7 +741,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage: /settitle <stream title>."));
+                makeSystemMessage("Usage: /settitle <stream title>"));
             return "";
         }
         if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -652,7 +772,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         if (words.size() < 2)
         {
             channel->addMessage(
-                makeSystemMessage("Usage: /setgame <stream game>."));
+                makeSystemMessage("Usage: /setgame <stream game>"));
             return "";
         }
         if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -717,7 +837,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                                          const ChannelPtr channel) {
         if (words.size() < 2)
         {
-            channel->addMessage(makeSystemMessage("Usage: /openurl <URL>."));
+            channel->addMessage(makeSystemMessage("Usage: /openurl <URL>"));
             return "";
         }
 
@@ -743,6 +863,11 @@ void CommandController::initialize(Settings &, Paths &paths)
             channel->addMessage(makeSystemMessage("Could not open URL."));
         }
 
+        return "";
+    });
+
+    this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
+        getApp()->twitch2->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
 }
@@ -796,7 +921,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         if (it != this->userCommands_.end())
         {
             text = getApp()->emotes->emojis.replaceShortCodes(
-                this->execCustomCommand(words, it.value(), dryRun));
+                this->execCustomCommand(words, it.value(), dryRun, channel));
 
             words = text.split(' ', QString::SkipEmptyParts);
 
@@ -828,7 +953,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         const auto it = this->userCommands_.find(commandName);
         if (it != this->userCommands_.end())
         {
-            return this->execCustomCommand(words, it.value(), dryRun);
+            return this->execCustomCommand(words, it.value(), dryRun, channel);
         }
     }
 
@@ -847,11 +972,13 @@ void CommandController::registerCommand(QString commandName,
 
 QString CommandController::execCustomCommand(const QStringList &words,
                                              const Command &command,
-                                             bool dryRun)
+                                             bool dryRun, ChannelPtr channel,
+                                             std::map<QString, QString> context)
 {
     QString result;
 
-    static QRegularExpression parseCommand("(^|[^{])({{)*{(\\d+\\+?)}");
+    static QRegularExpression parseCommand(
+        R"((^|[^{])({{)*{(\d+\+?|([a-zA-Z.-]+)(?:;(.+?))?)})");
 
     int lastCaptureEnd = 0;
 
@@ -883,7 +1010,27 @@ QString CommandController::execCustomCommand(const QStringList &words,
         int wordIndex = wordIndexMatch.replace("=", "").toInt(&ok);
         if (!ok || wordIndex == 0)
         {
-            result += "{" + match.captured(3) + "}";
+            auto varName = match.captured(4);
+            auto altText = match.captured(5);  // alt text or empty string
+
+            auto var = COMMAND_VARS.find(varName);
+
+            if (var != COMMAND_VARS.end())
+            {
+                result += var->second(altText, channel);
+            }
+            else
+            {
+                auto it = context.find(varName);
+                if (it != context.end())
+                {
+                    result += it->second.isEmpty() ? altText : it->second;
+                }
+                else
+                {
+                    result += "{" + match.captured(3) + "}";
+                }
+            }
             continue;
         }
 

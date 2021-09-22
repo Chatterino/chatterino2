@@ -220,10 +220,11 @@ Split::Split(QWidget *parent)
             if (getSettings()->askOnImageUpload.getValue())
             {
                 QMessageBox msgBox;
+                msgBox.setWindowTitle("Chatterino");
                 msgBox.setText("Image upload");
                 msgBox.setInformativeText(
                     "You are uploading an image to a 3rd party service not in "
-                    "control of the chatterino team. You may not be able to "
+                    "control of the Chatterino team. You may not be able to "
                     "remove the image from the site. Are you okay with this?");
                 msgBox.addButton(QMessageBox::Cancel);
                 msgBox.addButton(QMessageBox::Yes);
@@ -1143,8 +1144,8 @@ void Split::showSearch()
 
 void Split::reloadChannelAndSubscriberEmotes()
 {
-    getApp()->accounts->twitch.getCurrent()->loadEmotes();
     auto channel = this->getChannel();
+    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {

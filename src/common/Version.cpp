@@ -2,6 +2,8 @@
 
 #include "common/Modes.hpp"
 
+#include <QFileInfo>
+
 #define UGLYMACROHACK1(s) #s
 #define FROM_EXTERNAL_DEFINE(s) UGLYMACROHACK1(s)
 
@@ -69,6 +71,11 @@ const QString &Version::dateOfBuild() const
 const bool &Version::isSupportedOS() const
 {
     return this->isSupportedOS_;
+}
+
+bool Version::isFlatpak() const
+{
+    return QFileInfo::exists("/.flatpak-info");
 }
 
 }  // namespace chatterino
