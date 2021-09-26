@@ -3,6 +3,7 @@
 ## Unversioned
 
 - Major: Added attached video viewer which allows for watching of streams without leaving the app. Requires setting up Streamlink and MPV player. (#2854)
+- Minor: Add `{channel.name}`, `{channel.id}`, `{stream.game}`, `{stream.title}`, `{my.id}`, `{my.name}` placeholders for commands (#3155)
 - Minor: Remove TwitchEmotes.com attribution and the open/copy options when right-clicking a Twitch Emote. (#2214, #3136)
 - Minor: Strip leading @ and trailing , from username in /user and /usercard commands. (#3143)
 - Minor: Display a system message when reloading subscription emotes to match BTTV/FFZ behavior (#3135)
@@ -17,6 +18,7 @@
 - Minor: Colorizing usernames on IRC, originally made for Mm2PL/dankerino (#3206)
 - Minor: Fixed `/streamlink` command not stripping leading @'s or #'s (#3215)
 - Minor: Strip leading @ and trailing , from username in `/popout` command. (#3217)
+- Minor: Added `flags.reward_message` filter variable (#3231)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
@@ -25,6 +27,7 @@
 - Bugfix: Allow starting Streamlink from Chatterino when running as a Flatpak. (#3178)
 - Bugfix: Fixed own IRC messages not having metadata and a link to a usercard. (#3203)
 - Bugfix: Fixed some channels still not loading in rare cases. (#3219)
+- Bugfix: Fixed a bug with usernames or emotes completing from the wrong position. (#3229)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 
