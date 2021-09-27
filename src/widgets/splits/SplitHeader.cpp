@@ -374,10 +374,15 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
         menu->addAction(OPEN_PLAYER_IN_BROWSER, this->split_,
                         &Split::openBrowserPlayer);
 #endif
+
+        if (!getSettings()->vlcPlayerPath.getValue().isEmpty())
+        {
+            menu->addAction(OPEN_IN_STREAMLINK_ATTACHED, this->split_,
+                            &Split::openInStreamlinkVLC);
+        }
+
         menu->addAction(OPEN_IN_STREAMLINK, this->split_,
                         &Split::openInStreamlink);
-        menu->addAction(OPEN_IN_STREAMLINK_MPV, this->split_,
-                        &Split::openInStreamlinkMPV);
 
         if (!getSettings()->customURIScheme.getValue().isEmpty())
         {

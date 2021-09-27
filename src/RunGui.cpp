@@ -17,6 +17,7 @@
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Updates.hpp"
+#include "util/AttachedPlayer.hpp"
 #include "util/CombinePath.hpp"
 #include "widgets/dialogs/LastRunCrashDialog.hpp"
 
@@ -226,6 +227,7 @@ void runGui(QApplication &a, Paths &paths, Settings &settings)
     }
 
     chatterino::NetworkManager::deinit();
+    chatterino::AttachedPlayer::getInstance().closeStreamThread();
 
 #ifdef USEWINSDK
     // flushing windows clipboard to keep copied messages

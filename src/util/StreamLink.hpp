@@ -22,10 +22,10 @@ public:
 // streamlink call
 void openStreamlink(const QString &channelURL, const QString &quality,
                     QStringList extraArguments = QStringList(),
-                    bool streamMPV = false);
+                    bool streamVLC = false);
 
 // Start opening streamlink for the given channel, reading settings like quality
 // from settings and opening a quality dialog if the quality is "Choose"
-void openStreamlinkForChannel(const QString &channel, bool streamMPV = false);
+void openStreamlinkForChannel(const QString &channel, bool streamVLC = false);
 
 }  // namespace chatterino

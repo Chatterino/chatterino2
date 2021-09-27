@@ -13,10 +13,10 @@ class QualityPopup : public BasePopup
 public:
     QualityPopup(const QString &channelURL, QStringList options,
                  QStringList extraArguments = QStringList(),
-                 bool streamMPV = false);
+                 bool streamVLC = false);
     static void showDialog(const QString &channelURL, QStringList options,
                            QStringList extraArguments = QStringList(),
-                           bool streamMPV = false);
+                           bool streamVLC = false);
 
 protected:
     void keyPressEvent(QKeyEvent *e) override;
@@ -33,7 +33,7 @@ private:
 
     QString channelURL_;
     QStringList extraArguments_;
-    bool streamMPV_;
+    bool streamVLC_;
 };
 
 }  // namespace chatterino

@@ -676,7 +676,7 @@ void Split::openInStreamlink()
     this->openChannelInStreamlink(this->getChannel()->getName());
 }
 
-void Split::openInStreamlinkMPVIfOpen()
+void Split::openInStreamlinkVLCIfOpen()
 {
     // Return if the stream is not open currently
     if (!AttachedPlayer::getInstance().getIfStreamActive() ||
@@ -694,16 +694,15 @@ void Split::openInStreamlinkMPVIfOpen()
     catch (const Exception &ex)
     {
         qCWarning(chatterinoWidget)
-            << "Error in openInStreamlinkMPVIfOpen:" << ex.what();
+            << "Error in openInStreamlinkVLCIfOpen:" << ex.what();
     }
 }
 
-void Split::openInStreamlinkMPV()
+void Split::openInStreamlinkVLC()
 {
     try
     {
-        // This will open our streamlink in our new mpv window
-        // This window will stream in the mpv video file!
+        // This will open our streamlink in our new attached window
         QString channel = this->getChannel()->getName();
         openStreamlinkForChannel(channel, true);
     }

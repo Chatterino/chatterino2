@@ -93,20 +93,20 @@ ExternalToolsPage::ExternalToolsPage()
     layout->addSpacing(16);
 
     {
-        auto group = layout.emplace<QGroupBox>("mpv player");
+        auto group = layout.emplace<QGroupBox>("VLC Attached Player");
         auto groupLayout = group.setLayoutType<QFormLayout>();
 
-        auto description = new QLabel(
-            "The mpv player is an open-source cross-platform video player. "
-            "This can be used alongside Streamlink to have an attached player. "
-            "Be sure to extract the mpv player and set the path correctly "
-            "below!");
+        auto description =
+            new QLabel("If enabled VLC will be embedded in an attached player "
+                       "window alongside Streamlink."
+                       "The stream can auto follow the active split tab being "
+                       "watched and chatted in. The stream volume can be "
+                       "controlled with your scroll wheel.");
         description->setWordWrap(true);
         description->setStyleSheet("color: #bbb");
 
         auto links = new QLabel(
-            formatRichNamedLink("https://mpv.io/", "Website") + " " +
-            formatRichNamedLink("https://mpv.io/installation/", "Download"));
+            formatRichNamedLink("https://www.videolan.org/", "Website"));
         links->setTextFormat(Qt::RichText);
         links->setTextInteractionFlags(Qt::TextBrowserInteraction |
                                        Qt::LinksAccessibleByKeyboard |
@@ -119,12 +119,12 @@ ExternalToolsPage::ExternalToolsPage()
         auto followActiveCb = this->createCheckBox(
             "Follow active chat (will automatically switch "
             "player stream based on what chat you are in)",
-            getSettings()->mpvFollowActive);
+            getSettings()->vlcFollowActive);
         groupLayout->setWidget(2, QFormLayout::SpanningRole, followActiveCb);
-        auto customPath = this->createLineEdit(getSettings()->mpvPlayerPath);
+        auto customPath = this->createLineEdit(getSettings()->vlcPlayerPath);
         customPath->setPlaceholderText(
-            "Path to folder where mpv executable can be found");
-        groupLayout->addRow("mpv path:", customPath);
+            "Path to folder where VLC executable can be found");
+        groupLayout->addRow("VLC path:", customPath);
     }
     layout->addSpacing(16);
 

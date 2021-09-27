@@ -168,8 +168,8 @@ public slots:
     void openWhispersInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
-    void openInStreamlinkMPVIfOpen();
-    void openInStreamlinkMPV();
+    void openInStreamlinkVLCIfOpen();
+    void openInStreamlinkVLC();
     void openWithCustomScheme();
     void copyToClipboard();
     void setFiltersDialog();

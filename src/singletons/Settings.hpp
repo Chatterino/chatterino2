@@ -336,9 +336,9 @@ public:
                                          true};
     BoolSetting streamlinkOptsAds = {"/external/streamlink/optionsAds", true};
 
-    // MPV player
-    BoolSetting mpvFollowActive = {"/external/mpv/followActive", true};
-    QStringSetting mpvPlayerPath = {"/external/mpv/path", ""};
+    // VLC attached player
+    BoolSetting vlcFollowActive = {"/external/vlc/followActive", true};
+    QStringSetting vlcPlayerPath = {"/external/vlc/path", ""};
 
     // Custom URI Scheme
     QStringSetting customURIScheme = {"/external/urischeme"};

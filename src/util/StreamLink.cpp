@@ -27,12 +27,12 @@ namespace {
 #endif
     }
 
-    const char *getBinaryNameMPV()
+    const char *getBinaryNameVLC()
     {
 #ifdef _WIN32
-        return "mpv.exe";
+        return "vlc.exe";
 #else
-        return "mpv";
+        return "vlc";
 #endif
     }
 
@@ -48,9 +48,9 @@ namespace {
         }
     }
 
-    QString getMPVProgram()
+    QString getVLCProgram()
     {
-        return getSettings()->mpvPlayerPath + "/" + getBinaryNameMPV();
+        return getSettings()->vlcPlayerPath + "/" + getBinaryNameVLC();
     }
 
     bool checkExecutablePath(const QString &path)
@@ -86,13 +86,13 @@ namespace {
         }
     }
 
-    void showMPVNotFoundError()
+    void showVLCNotFoundError()
     {
         static QErrorMessage *msg = new QErrorMessage;
-        msg->setWindowTitle("Chatterino - mpv player not found");
-        msg->showMessage("Unable to find mpv player executable\nMake sure "
+        msg->setWindowTitle("Chatterino - VLC player not found");
+        msg->showMessage("Unable to find VLC player executable\nMake sure "
                          "your path is pointing to the DIRECTORY "
-                         "where the mpv player executable is located");
+                         "where the VLC player executable is located");
     }
 
     QProcess *createStreamlinkProcess()
@@ -207,7 +207,7 @@ void getStreamQualities(const QString &channelURL,
 }
 
 void openStreamlink(const QString &channelURL, const QString &quality,
-                    QStringList extraArguments, bool streamMPV)
+                    QStringList extraArguments, bool streamVLC)
 {
     auto proc = createStreamlinkProcess();
     auto arguments = proc->arguments()
@@ -220,9 +220,9 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     QString additionalOptions = getSettings()->streamlinkOpts.getValue();
     arguments << splitCommand(additionalOptions);
 
-    // If we are not doing our MPV video view start as detached
+    // If we are not doing our VLC video view start as detached
     // Else we will kill our existing stream proccess and start a new stream
-    if (!streamMPV)
+    if (!streamVLC)
     {
         proc->setArguments(std::move(arguments));
         bool res = proc->startDetached();
@@ -243,16 +243,16 @@ void openStreamlink(const QString &channelURL, const QString &quality,
     }
 }
 
-void openStreamlinkForChannel(const QString &channel, bool streamMPV)
+void openStreamlinkForChannel(const QString &channel, bool streamVLC)
 {
     QString channelURL = "twitch.tv/" + channel;
 
     QStringList args;
 
     // First check to see if player is valid path!
-    if (streamMPV && !checkExecutablePath(getMPVProgram()))
+    if (streamVLC && !checkExecutablePath(getVLCProgram()))
     {
-        showMPVNotFoundError();
+        showVLCNotFoundError();
         return;
     }
     if (!checkExecutablePath(getStreamlinkProgram()))
@@ -261,14 +261,16 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
         return;
     }
 
-    // Append MVP player settings if we have a container to play in
-    // https://github.com/mpv-player/mpv/blob/master/DOCS/man/options.rst
-    // https://mpv.io/manual/master/#options-wid
-    if (streamMPV)
+    // Append VLC player settings if we have a container to play in
+    // https://wiki.videolan.org/VLC_command-line_help/
+    if (streamVLC)
     {
-        args << "--player \"" + getMPVProgram() +
-                    " --wid=WID -input-default-bindings=yes "
-                    "--input-vo-keyboard=yes\"";
+        args
+            << "--player \"" + getVLCProgram() +
+                   " --play-and-exit -I dummy --no-embedded-video "
+                   "--qt-notification=0 --qt-auto-raise=0 --qt-start-minimized "
+                   "--no-qt-name-in-title --no-video-title-show "
+                   "--drawable-hwnd=WID\"";
     }
 
     // Append any extra options to to our stream link command
@@ -288,24 +290,24 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
     QString exclude;
 
     // Check to see if we should ask the user for a quality setting
-    // NOTE: if we are using the mpv player, then we should only ask the first time
+    // NOTE: if we are using the VLC player, then we should only ask the first time
     // NOTE: afterwards we should just use the last requested quality or a near one
     QString preferredQuality = getSettings()->preferredQuality.getValue();
     preferredQuality = preferredQuality.toLower();
-    if (preferredQuality == "choose" && streamMPV &&
+    if (preferredQuality == "choose" && streamVLC &&
         AttachedPlayer::getInstance().getLastQualitySetting() != "")
     {
         args << "--stream-sorting-excludes"
              << ">" + AttachedPlayer::getInstance().getLastQualitySetting();
         quality = "best";
-        openStreamlink(channelURL, quality, args, streamMPV);
+        openStreamlink(channelURL, quality, args, streamVLC);
         return;
     }
     if (preferredQuality == "choose")
     {
         getStreamQualities(channelURL, [=](QStringList qualityOptions) {
             QualityPopup::showDialog(channelURL, qualityOptions, args,
-                                     streamMPV);
+                                     streamVLC);
         });
         return;
     }
@@ -339,7 +341,7 @@ void openStreamlinkForChannel(const QString &channel, bool streamMPV)
         args << "--stream-sorting-excludes" << exclude;
     }
 
-    openStreamlink(channelURL, quality, args, streamMPV);
+    openStreamlink(channelURL, quality, args, streamVLC);
 }
 
 }  // namespace chatterino

@@ -299,10 +299,10 @@ void SplitContainer::setSelected(Split *split)
         this->setPreferedTargetRecursive(node);
     }
 
-    // switch the mpv window if it is being shown
-    if (getSettings()->mpvFollowActive)
+    // switch the attached window if it is being shown
+    if (getSettings()->vlcFollowActive)
     {
-        split->openInStreamlinkMPVIfOpen();
+        split->openInStreamlinkVLCIfOpen();
     }
 }
 

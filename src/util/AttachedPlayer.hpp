@@ -10,8 +10,9 @@
 
 namespace chatterino {
 
-class AttachedPlayer
+class AttachedPlayer : public QObject
 {
+    Q_OBJECT
 public:
     // Our singleton method
     static AttachedPlayer &getInstance()
@@ -23,6 +24,9 @@ public:
     // Gets if the stream is currently active or not
     bool getIfStreamActive();
 
+    // Will try to close the stream and player
+    void closeStreamThread();
+
     // Gets the last shown quality setting used
     QString getLastQualitySetting();
 
@@ -30,6 +34,15 @@ public:
     // If it is not open then this will try to open the window
     void updateStreamLinkProcess(const QString &channel, const QString &quality,
                                  const QString &command);
+
+private slots:
+
+    // This is a callback that will terminate our window threads.
+    // VLC doesn't close, so we need to manually kill to ensure we don't run in the background.
+    void widgetDestroyed(QObject *widget)
+    {
+        AttachedPlayer::getInstance().closeStreamThread();
+    }
 
 private:
     // singleton cannot be created or copied
@@ -39,9 +52,9 @@ private:
     AttachedPlayer(AttachedPlayer const &);
     void operator=(AttachedPlayer const &);
 
-    QWindow *mpvWindow = nullptr;
-    QWidget *mpvContainer = nullptr;
-    unsigned long mpvContainerWID;
+    QWindow *attachedWindow = nullptr;
+    QWidget *attachedContainer = nullptr;
+    unsigned long containerWID;
     QString lastShownChannel = "";
     QString lastQuality = "";
     QProcess *streamlinkProcess = nullptr;
