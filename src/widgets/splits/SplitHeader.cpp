@@ -375,11 +375,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
                         &Split::openBrowserPlayer);
 #endif
 
-        if (!getSettings()->vlcPlayerPath.getValue().isEmpty())
-        {
-            menu->addAction(OPEN_IN_STREAMLINK_ATTACHED, this->split_,
-                            &Split::openInStreamlinkVLC);
-        }
+        menu->addAction(OPEN_IN_STREAMLINK_ATTACHED, this->split_,
+                        &Split::openInStreamlinkVLC);
 
         menu->addAction(OPEN_IN_STREAMLINK, this->split_,
                         &Split::openInStreamlink);
