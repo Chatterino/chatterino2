@@ -744,9 +744,9 @@ void Split::showViewerList()
             QJsonObject chattersObj = obj.value("chatters").toObject();
 
             viewerDock->setWindowTitle(
-                "Viewer List - " + this->getChannel()->getName() + " (" +
-                QString::number(obj.value("chatter_count").toInt()) +
-                " chatters)");
+                QString("Viewer List - %1 (%2 chatters)")
+                    .arg(this->getChannel()->getName())
+                    .arg(obj.value("chatter_count").toInt()));
 
             loadingLabel->hide();
             for (int i = 0; i < jsonLabels.size(); i++)
