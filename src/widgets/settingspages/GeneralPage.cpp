@@ -614,7 +614,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        s.findAllUsernames);
     layout.addCheckbox("Show username autocompletion popup menu",
                        s.showUsernameCompletionMenu);
-    layout.addCheckbox("Ignore out of bounds windows", s.ignoreBounds);
     const QStringList usernameDisplayModes = {"Username", "Localized name",
                                               "Username and localized name"};
 

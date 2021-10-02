@@ -382,7 +382,6 @@ public:
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
     BoolSetting informOnTabVisibilityToggle = {"/misc/askOnTabVisibilityToggle",
                                                true};
-    BoolSetting ignoreBounds = {"/misc/ignoreBounds", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
