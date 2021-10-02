@@ -298,11 +298,11 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
     {
         backgroundColor = blendColors(
             backgroundColor,
-            *ColorProvider::instance().color(ColorType::FirstMessageHighlight)
-        );            
-    } else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
-         this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
-        !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
+            *ColorProvider::instance().color(ColorType::FirstMessageHighlight));
+    }
+    else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
+              this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
+             !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
         // Blend highlight color with usual background color
         backgroundColor =

@@ -181,7 +181,7 @@ MessagePtr TwitchMessageBuilder::build()
     }
 
     if (this->tags.contains("first-msg") &&
-       this->tags["first-msg"].toString() == "1") 
+        this->tags["first-msg"].toString() == "1")
     {
         this->message().flags.set(MessageFlag::FirstMessage);
     }

@@ -153,9 +153,9 @@ void HighlightModel::afterInit()
 
     std::vector<QStandardItem *> firtMessageRow = this->createRow();
     setBoolItem(firtMessageRow[Column::Pattern],
-                getSettings()->enableFirstMessageHighlight.getValue(), true, false);
-    firtMessageRow[Column::Pattern]->setData(
-        "First Messages", Qt::DisplayRole);
+                getSettings()->enableFirstMessageHighlight.getValue(), true,
+                false);
+    firtMessageRow[Column::Pattern]->setData("First Messages", Qt::DisplayRole);
     firtMessageRow[Column::ShowInMentions]->setFlags({});
     firtMessageRow[Column::FlashTaskbar]->setFlags({});
     firtMessageRow[Column::PlaySound]->setFlags({});
@@ -164,7 +164,8 @@ void HighlightModel::afterInit()
 
     QUrl FirstMessageSound =
         QUrl(getSettings()->firstMessageHighlightSoundUrl.getValue());
-    setFilePathItem(firtMessageRow[Column::SoundPath], FirstMessageSound, false);
+    setFilePathItem(firtMessageRow[Column::SoundPath], FirstMessageSound,
+                    false);
 
     auto FirstMessageColor =
         ColorProvider::instance().color(ColorType::FirstMessageHighlight);
@@ -327,7 +328,8 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 }
                 else if (rowIndex == 4)
                 {
-                    getSettings()->firstMessageHighlightColor.setValue(colorName);
+                    getSettings()->firstMessageHighlightColor.setValue(
+                        colorName);
                     const_cast<ColorProvider &>(ColorProvider::instance())
                         .updateColor(ColorType::FirstMessageHighlight,
                                      QColor(colorName));

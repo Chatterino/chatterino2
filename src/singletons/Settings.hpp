@@ -274,7 +274,7 @@ public:
         "/highlighting/redeemedHighlightColor", ""};
 
     BoolSetting enableFirstMessageHighlight = {
-    "/highlighting/firstMessageHighlight/highlighted", true};
+        "/highlighting/firstMessageHighlight/highlighted", true};
     QStringSetting firstMessageHighlightSoundUrl = {
         "/highlighting/firstMessageHighlightSoundUrl", ""};
     QStringSetting firstMessageHighlightColor = {
