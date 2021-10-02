@@ -293,7 +293,14 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
         }
     }();
 
-    if ((this->message_->flags.has(MessageFlag::Highlighted) ||
+    if (this->message_->flags.has(MessageFlag::FirstMessage) &&
+        getSettings()->enableFirstMessageHighlight.getValue())
+    {
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ColorProvider::instance().color(ColorType::FirstMessageHighlight)
+        );            
+    } else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
          this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
         !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {

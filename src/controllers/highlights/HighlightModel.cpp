@@ -150,6 +150,27 @@ void HighlightModel::afterInit()
     setColorItem(redeemedRow[Column::Color], *RedeemedColor, false);
 
     this->insertCustomRow(redeemedRow, 3);
+
+    std::vector<QStandardItem *> firtMessageRow = this->createRow();
+    setBoolItem(firtMessageRow[Column::Pattern],
+                getSettings()->enableFirstMessageHighlight.getValue(), true, false);
+    firtMessageRow[Column::Pattern]->setData(
+        "First Messages (only visible to Moderators)", Qt::DisplayRole);
+    firtMessageRow[Column::ShowInMentions]->setFlags({});
+    firtMessageRow[Column::FlashTaskbar]->setFlags({});
+    firtMessageRow[Column::PlaySound]->setFlags({});
+    firtMessageRow[Column::UseRegex]->setFlags({});
+    firtMessageRow[Column::CaseSensitive]->setFlags({});
+
+    QUrl FirstMessageSound =
+        QUrl(getSettings()->firstMessageHighlightSoundUrl.getValue());
+    setFilePathItem(firtMessageRow[Column::SoundPath], FirstMessageSound, false);
+
+    auto FirstMessageColor =
+        ColorProvider::instance().color(ColorType::FirstMessageHighlight);
+    setColorItem(firtMessageRow[Column::Color], *FirstMessageColor, false);
+
+    this->insertCustomRow(firtMessageRow, 4);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
@@ -302,6 +323,13 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->redeemedHighlightColor.setValue(colorName);
                     const_cast<ColorProvider &>(ColorProvider::instance())
                         .updateColor(ColorType::RedeemedHighlight,
+                                     QColor(colorName));
+                }
+                else if (rowIndex == 4)
+                {
+                    getSettings()->firstMessageHighlightColor.setValue(colorName);
+                    const_cast<ColorProvider &>(ColorProvider::instance())
+                        .updateColor(ColorType::FirstMessageHighlight,
                                      QColor(colorName));
                 }
             }
