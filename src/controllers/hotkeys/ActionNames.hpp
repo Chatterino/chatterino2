@@ -92,7 +92,7 @@ inline const std::map<HotkeyScope, ActionDefinitionMap> actionNames{
          {"openSettings", ActionDefinition{"Open settings"}},
          {"openTab", ActionDefinition{"Select tab"}},
          {"openQuickSwitcher", ActionDefinition{"Open the quick switcher"}},
-         {"popup", ActionDefinition{"New popup"}},
+         {"popup", ActionDefinition{"New popup", 1}},
          {"quit", ActionDefinition{"Quit Chatterino"}},
          {"removeTab", ActionDefinition{"Remove current tab"}},
          {"reopenSplit", ActionDefinition{"Reopen closed split"}},

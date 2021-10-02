@@ -360,14 +360,34 @@ void Window::addShortcuts()
              return "";
          }},
         {"popup",
-         [this](std::vector<QString>) -> QString {
-             if (auto page = dynamic_cast<SplitContainer *>(
-                     this->notebook_->getSelectedPage()))
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
              {
-                 if (auto split = page->getSelectedSplit())
+                 return "popup action called without arguments. Takes only "
+                        "one: \"split\" or \"window\".";
+             }
+             if (arguments.at(0) == "split")
+             {
+                 if (auto page = dynamic_cast<SplitContainer *>(
+                         this->notebook_->getSelectedPage()))
                  {
-                     split->popup();
+                     if (auto split = page->getSelectedSplit())
+                     {
+                         split->popup();
+                     }
                  }
+             }
+             else if (arguments.at(0) == "window")
+             {
+                 if (auto page = dynamic_cast<SplitContainer *>(
+                         this->notebook_->getSelectedPage()))
+                 {
+                     page->popup();
+                 }
+             }
+             else
+             {
+                 return "Invalid popup target. Use \"split\" or \"window\".";
              }
              return "";
          }},
@@ -626,15 +646,6 @@ void Window::addShortcuts()
     this->addDebugStuff(windowActions);
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::Window, windowActions, this);
-    /*
-    createWindowShortcut(this, "CTRL+SHIFT+N", [this] {
-        if (auto page = dynamic_cast<SplitContainer *>(
-                this->notebook_->getSelectedPage()))
-        {
-            page->popup();
-        }
-    });
-    */
 }
 
 void Window::addMenuBar()

@@ -409,8 +409,11 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             {"previous"}, "select previous tab");
 
         this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
-                            QKeySequence("Ctrl+N"), "popup",
-                            std::vector<QString>(), "new popup window");
+                            QKeySequence("Ctrl+N"), "popup", {"split"},
+                            "new popup window");
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence("Ctrl+Shift+N"), "popup", {"window"},
+                            "new popup window from tab");
 
         this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
                             QKeySequence::ZoomIn, "zoom", {"in"}, "zoom in");
