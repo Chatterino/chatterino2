@@ -626,7 +626,7 @@ void Window::addShortcuts()
     this->addDebugStuff(windowActions);
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::Window, windowActions, this);
-  /*
+    /*
     createWindowShortcut(this, "CTRL+SHIFT+N", [this] {
         if (auto page = dynamic_cast<SplitContainer *>(
                 this->notebook_->getSelectedPage()))
