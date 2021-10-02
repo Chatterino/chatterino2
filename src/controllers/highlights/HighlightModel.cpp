@@ -155,7 +155,7 @@ void HighlightModel::afterInit()
     setBoolItem(firtMessageRow[Column::Pattern],
                 getSettings()->enableFirstMessageHighlight.getValue(), true, false);
     firtMessageRow[Column::Pattern]->setData(
-        "First Messages (only visible to Moderators)", Qt::DisplayRole);
+        "First Messages", Qt::DisplayRole);
     firtMessageRow[Column::ShowInMentions]->setFlags({});
     firtMessageRow[Column::FlashTaskbar]->setFlags({});
     firtMessageRow[Column::PlaySound]->setFlags({});
