@@ -19,6 +19,7 @@
 - Minor: Strip leading @ and trailing , from username in `/popout` command. (#3217)
 - Minor: Added `flags.reward_message` filter variable (#3231)
 - Minor: Added highlights for first messages (#3267)
+- Minor: Added ignoreBounds misc setting (#3269)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
@@ -33,7 +34,6 @@
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 
 ## 2.3.4
-
 - Major: Newly uploaded Twitch emotes are once again present in emote picker and can be autocompleted with Tab as well. (#2992)
 - Major: Deprecated `/(un)follow` commands and (un)following in the usercards as Twitch has removed this feature for 3rd party applications. (#3076, #3078)
 - Major: Added the ability to add nicknames for users. (#137, #2981)

@@ -663,6 +663,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
     {
         return;
     }
+	auto settings = getSettings();
 
     // Set emote popup position
     this->emotePopupPos_ = layout.emotePopupPos_;
@@ -684,7 +685,7 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
         {
             // out of bounds windows
             auto screens = qApp->screens();
-            bool outOfBounds = std::none_of(
+            bool outOfBounds = !settings->ignoreBounds && std::none_of(
                 screens.begin(), screens.end(), [&](QScreen *screen) {
                     return screen->availableGeometry().intersects(
                         windowData.geometry_);
