@@ -151,27 +151,28 @@ void HighlightModel::afterInit()
 
     this->insertCustomRow(redeemedRow, 3);
 
-    std::vector<QStandardItem *> firtMessageRow = this->createRow();
-    setBoolItem(firtMessageRow[Column::Pattern],
+    std::vector<QStandardItem *> firstMessageRow = this->createRow();
+    setBoolItem(firstMessageRow[Column::Pattern],
                 getSettings()->enableFirstMessageHighlight.getValue(), true,
                 false);
-    firtMessageRow[Column::Pattern]->setData("First Messages", Qt::DisplayRole);
-    firtMessageRow[Column::ShowInMentions]->setFlags({});
-    firtMessageRow[Column::FlashTaskbar]->setFlags({});
-    firtMessageRow[Column::PlaySound]->setFlags({});
-    firtMessageRow[Column::UseRegex]->setFlags({});
-    firtMessageRow[Column::CaseSensitive]->setFlags({});
+    firstMessageRow[Column::Pattern]->setData("First Messages",
+                                              Qt::DisplayRole);
+    firstMessageRow[Column::ShowInMentions]->setFlags({});
+    firstMessageRow[Column::FlashTaskbar]->setFlags({});
+    firstMessageRow[Column::PlaySound]->setFlags({});
+    firstMessageRow[Column::UseRegex]->setFlags({});
+    firstMessageRow[Column::CaseSensitive]->setFlags({});
 
     QUrl FirstMessageSound =
         QUrl(getSettings()->firstMessageHighlightSoundUrl.getValue());
-    setFilePathItem(firtMessageRow[Column::SoundPath], FirstMessageSound,
+    setFilePathItem(firstMessageRow[Column::SoundPath], FirstMessageSound,
                     false);
 
     auto FirstMessageColor =
         ColorProvider::instance().color(ColorType::FirstMessageHighlight);
-    setColorItem(firtMessageRow[Column::Color], *FirstMessageColor, false);
+    setColorItem(firstMessageRow[Column::Color], *FirstMessageColor, false);
 
-    this->insertCustomRow(firtMessageRow, 4);
+    this->insertCustomRow(firstMessageRow, 4);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
