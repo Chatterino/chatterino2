@@ -15,6 +15,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
+#include "util/Helpers.hpp"
 #include "util/NuulsUploader.hpp"
 #include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
@@ -746,7 +747,7 @@ void Split::showViewerList()
             viewerDock->setWindowTitle(
                 QString("Viewer List - %1 (%2 chatters)")
                     .arg(this->getChannel()->getName())
-                    .arg(obj.value("chatter_count").toInt()));
+                    .arg(localizeNumbers(obj.value("chatter_count").toInt())));
 
             loadingLabel->hide();
             for (int i = 0; i < jsonLabels.size(); i++)
