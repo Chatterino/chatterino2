@@ -401,13 +401,19 @@ void Window::addShortcuts()
                  qCWarning(chatterinoHotkeys)
                      << "zoom shortcut called without arguments. Takes "
                         "only "
-                        "one argument: \"in\" or \"out\"";
+                        "one argument: \"in\", \"out\", or \"reset\"";
                  return "zoom shortcut called without arguments. Takes "
                         "only "
-                        "one argument: \"in\" or \"out\"";
+                        "one argument: \"in\", \"out\", or \"reset\"";
              }
              auto change = 0.0f;
              auto direction = arguments.at(0);
+             if (direction == "reset")
+             {
+                 getSettings()->uiScale.setValue(1);
+                 return "";
+             }
+
              if (direction == "in")
              {
                  change = 0.1f;
@@ -419,8 +425,10 @@ void Window::addShortcuts()
              else
              {
                  qCWarning(chatterinoHotkeys)
-                     << "Invalid zoom direction, use \"in\" or \"out\"";
-                 return "Invalid zoom direction. Use \"in\" or \"out\".";
+                     << "Invalid zoom direction, use \"in\", \"out\", or "
+                        "\"reset\"";
+                 return "Invalid zoom direction, use \"in\", \"out\", or "
+                        "\"reset\"";
              }
              getSettings()->setClampedUiScale(
                  getSettings()->getClampedUiScale() + change);

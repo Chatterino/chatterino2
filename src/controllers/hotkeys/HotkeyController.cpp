@@ -422,6 +422,10 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
                             QKeySequence::ZoomOut, "zoom", {"out"}, "zoom out");
 
         this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
+                            QKeySequence("CTRL+0"), "zoom", {"reset"},
+                            "zoom reset");
+
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Window,
                             QKeySequence("Ctrl+Shift+T"), "newTab",
                             std::vector<QString>(), "new tab");
 

@@ -83,10 +83,6 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
 
     this->updateScale();
 
-    createWindowShortcut(this, "CTRL+0", [] {
-        getSettings()->uiScale.setValue(1);
-    });
-
     this->resize(300, 150);
 
 #ifdef USEWINSDK
