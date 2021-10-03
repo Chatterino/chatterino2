@@ -180,6 +180,12 @@ MessagePtr TwitchMessageBuilder::build()
         this->message().flags.set(MessageFlag::RedeemedHighlight);
     }
 
+    if (this->tags.contains("first-msg") &&
+        this->tags["first-msg"].toString() == "1")
+    {
+        this->message().flags.set(MessageFlag::FirstMessage);
+    }
+
     // timestamp
     this->emplace<TimestampElement>(
         calculateMessageTimestamp(this->ircMessage));
