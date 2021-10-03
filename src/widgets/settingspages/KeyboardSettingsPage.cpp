@@ -53,8 +53,8 @@ KeyboardSettingsPage::KeyboardSettingsPage()
     });
 
     QObject::connect(view->getTableView(), &QTableView::doubleClicked,
-                     [this, view](const QModelIndex &clicked) {
-                         this->tableCellClicked(clicked, view);
+                     [this, view, model](const QModelIndex &clicked) {
+                         this->tableCellClicked(clicked, view, model);
                      });
 
     QPushButton *resetEverything = new QPushButton("Reset to defaults");
@@ -73,7 +73,8 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 }
 
 void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
-                                            EditableModelView *view)
+                                            EditableModelView *view,
+                                            HotkeyModel *model)
 {
     // TODO(mm2pl): remove debug
     qDebug() << "table cell clicked!" << clicked.column() << clicked.row();
@@ -90,8 +91,14 @@ void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
     if (wasAccepted)
     {
         auto newHotkey = dialog.data();
-        getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
+        auto vectorIndex =
+            getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
         getApp()->hotkeys->save();
+
+        // Select the replaced hotkey
+        auto modelRow = model->getModelIndexFromVectorIndex(vectorIndex);
+        auto modelIndex = model->index(modelRow, 0);
+        view->selectRow(modelRow);
     }
 }
 

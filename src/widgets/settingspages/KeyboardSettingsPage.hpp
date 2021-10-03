@@ -5,13 +5,16 @@
 
 namespace chatterino {
 
+class HotkeyModel;
+
 class KeyboardSettingsPage : public SettingsPage
 {
 public:
     KeyboardSettingsPage();
 
 private:
-    void tableCellClicked(const QModelIndex &clicked, EditableModelView *view);
+    void tableCellClicked(const QModelIndex &clicked, EditableModelView *view,
+                          HotkeyModel *model);
 };
 
 }  // namespace chatterino
