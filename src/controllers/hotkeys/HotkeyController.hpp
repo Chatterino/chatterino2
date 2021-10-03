@@ -35,7 +35,10 @@ public:
 
     void save() override;
     std::shared_ptr<Hotkey> getHotkeyByName(QString name);
-    void replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
+    /**
+     * @returns the new index in the SignalVector
+     **/
+    int replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
     boost::optional<HotkeyScope> hotkeyScopeFromName(QString scopeName);
     QString hotkeyScopeToName(HotkeyScope scope);
     bool isDuplicate(std::shared_ptr<Hotkey> hotkey, QString ignoreNamed);

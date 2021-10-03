@@ -99,8 +99,8 @@ void HotkeyController::save()
     this->saveHotkeys();
 }
 
-void HotkeyController::replaceHotkey(QString oldName,
-                                     std::shared_ptr<Hotkey> newHotkey)
+int HotkeyController::replaceHotkey(QString oldName,
+                                    std::shared_ptr<Hotkey> newHotkey)
 {
     int i = 0;
     for (auto &hotkey : this->hotkeys_)
@@ -112,7 +112,7 @@ void HotkeyController::replaceHotkey(QString oldName,
         }
         i++;
     }
-    this->hotkeys_.append(newHotkey);
+    return this->hotkeys_.append(newHotkey);
 }
 
 boost::optional<HotkeyScope> HotkeyController::hotkeyScopeFromName(
