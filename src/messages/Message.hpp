@@ -38,7 +38,8 @@ enum class MessageFlag : uint32_t {
     RedeemedHighlight = (1 << 20),
     RedeemedChannelPointReward = (1 << 21),
     ShowInMentions = (1 << 22),
-    WebchatDetected = (1 << 23)
+    FirstMessage = (1 << 23),
+    WebchatDetected = (1 << 24)
 };
 using MessageFlags = FlagsEnum<MessageFlag>;
 
