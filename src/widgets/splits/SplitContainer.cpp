@@ -123,12 +123,13 @@ Split *SplitContainer::appendNewSplit(bool openChannelNameDialog)
 
     if (openChannelNameDialog)
     {
-        split->showChangeChannelPopup("Open channel name", true, [=](bool ok) {
-            if (!ok)
-            {
-                this->deleteSplit(split);
-            }
-        });
+        split->showChangeChannelPopup("Select a channel to join", true,
+                                      [=](bool ok) {
+                                          if (!ok)
+                                          {
+                                              this->deleteSplit(split);
+                                          }
+                                      });
     }
 
     return split;
