@@ -211,7 +211,7 @@ MessagePtr TwitchMessageBuilder::build()
         this->bits = iterator.value().toString();
     }
 
-    // twitch emotes
+    // Twitch emotes
     std::vector<TwitchEmoteOccurence> twitchEmotes;
 
     iterator = this->tags.find("emotes");

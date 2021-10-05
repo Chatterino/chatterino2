@@ -1488,7 +1488,7 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
 
                 // this message also contains per-word automod data, which could be implemented
 
-                // extract sender data manually because twitch loves not being consistent
+                // extract sender data manually because Twitch loves not being consistent
                 rapidjson::Value senderData;
                 if (!rj::getSafeObject(messageData, "sender", senderData))
                 {

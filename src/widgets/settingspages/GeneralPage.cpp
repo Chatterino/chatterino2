@@ -651,7 +651,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Only search for username autocompletion with an @",
                        s.userCompletionOnlyWithAt);
 
-    layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
+    layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers);
     layout.addCheckbox("Highlight received inline whispers",
                        s.highlightInlineWhispers);
     layout.addCheckbox("Load message history on connect",
