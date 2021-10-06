@@ -1365,7 +1365,7 @@ void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
     builder->message().searchText = text;
 }
 
-// irc variant
+// IRC variant
 void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
                                            MessageBuilder *builder)
 {

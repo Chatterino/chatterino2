@@ -29,7 +29,7 @@ namespace chatterino {
 enum class WindowType;
 
 struct SplitDescriptor {
-    // Twitch or mentions or watching or whispers or irc
+    // Twitch or mentions or watching or whispers or IRC
     QString type_;
 
     // Twitch Channel name or IRC channel name

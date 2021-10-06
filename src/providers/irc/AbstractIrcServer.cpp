@@ -231,7 +231,7 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
             }
         }));
 
-    // join irc channel
+    // join IRC channel
     {
         std::lock_guard<std::mutex> lock2(this->connectionMutex_);
 
