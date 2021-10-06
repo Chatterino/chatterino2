@@ -51,7 +51,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         auto channel_btn = vbox.emplace<QRadioButton>("Channel").assign(
             &this->ui_.twitch.channel);
         auto channel_lbl =
-            vbox.emplace<QLabel>("Join a twitch channel by its name.").hidden();
+            vbox.emplace<QLabel>("Join a Twitch channel by its name.").hidden();
         channel_lbl->setWordWrap(true);
         auto channel_edit = vbox.emplace<QLineEdit>().hidden().assign(
             &this->ui_.twitch.channelName);
