@@ -505,7 +505,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         box->addWidget(layout.makeButton("Reset", []() {
             getSettings()->cachePath = "";
         }));
-        box->addWidget(layout.makeButton("Clear + Restart", [&layout]() {
+        box->addWidget(layout.makeButton("Clear Cache", [&layout]() {
             auto reply = QMessageBox::question(
                 layout.window(), "Clear cache & restart",
                 "Are you sure that you want to clear your cache? This will "
