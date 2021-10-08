@@ -193,9 +193,12 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                         menu->addAction("Copy avatar link", [avatarUrl] {
                             crossPlatformCopy(avatarUrl);
                         });
+
+                        // try to make msvc happy?
+                        auto temporary = this->userName_.toLower();
                         menu->addAction(
                             "Open channel in a new popup window",
-                            [userName = this->userName_.toLower()] {
+                            [userName = temporary] {
                                 auto app = getApp();
                                 auto &window = app->windows->createWindow(
                                     WindowType::Popup, true);
