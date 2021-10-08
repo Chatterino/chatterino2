@@ -28,8 +28,10 @@ EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
 echo "Running make install in package dir"
-# INSTALL_ROOT="$packaging_dir"
-DESTDIR="$packaging_dir" make -j"$(nproc)" install; find "$packaging_dir/"
+grep qmake Makefile > /dev/null && DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install
+grep cmake Makefile > /dev/null && DESTDIR="$packaging_dir" make -j"$(nproc)" install
+
+find "$packaging_dir/"
 echo ""
 
 echo "Removing useless directories"
