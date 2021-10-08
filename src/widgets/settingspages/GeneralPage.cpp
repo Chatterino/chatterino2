@@ -509,7 +509,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             auto reply = QMessageBox::question(
                 layout.window(), "Clear cache & restart",
                 "Are you sure that you want to clear your cache? This will "
-                "cause chatterino to restart",
+                "permanently delete all cached data and cause chatterino "
+                "to restart",
                 QMessageBox::Yes | QMessageBox::No);
 
             if (reply == QMessageBox::Yes)
