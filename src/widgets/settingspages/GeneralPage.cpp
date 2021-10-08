@@ -506,6 +506,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             getSettings()->cachePath = "";
         }));
         box->addWidget(layout.makeButton("Clear + Restart", [&layout]() {
+            auto reply = QMessageBox::question(
+                layout.window(), "Clear cache & restart",
+                "Are you sure that you want to clear your cache? This will "
+                "cause chatterino to restart",
+                QMessageBox::Yes | QMessageBox::No);
         }));
         box->addStretch(1);
 
