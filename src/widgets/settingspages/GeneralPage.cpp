@@ -511,6 +511,12 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                 "Are you sure that you want to clear your cache? This will "
                 "cause chatterino to restart",
                 QMessageBox::Yes | QMessageBox::No);
+
+            if (reply == QMessageBox::Yes)
+            {
+                auto cacheDir = QDir(getPaths()->cacheDirectory());
+                cacheDir.removeRecursively();
+            }
         }));
         box->addStretch(1);
 
