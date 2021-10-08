@@ -28,8 +28,12 @@ EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
 echo "Running make install in package dir"
-DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install; find "$packaging_dir/"
+# INSTALL_ROOT="$packaging_dir"
+DESTDIR="$packaging_dir" make -j"$(nproc)" install; find "$packaging_dir/"
 echo ""
+
+echo "Removing useless directories"
+rm -vr package/home
 
 echo "Building package..."
 dpkg-deb --build "$packaging_dir" "Chatterino.deb"
