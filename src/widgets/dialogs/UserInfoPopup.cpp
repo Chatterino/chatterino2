@@ -10,11 +10,13 @@
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "providers/twitch/api/Kraken.hpp"
 #include "singletons/Resources.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
@@ -22,9 +24,11 @@
 #include "util/Shortcut.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
+#include "widgets/splits/Split.hpp"
 
 #include <QCheckBox>
 #include <QDesktopServices>
@@ -189,6 +193,18 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                         menu->addAction("Copy avatar link", [avatarUrl] {
                             crossPlatformCopy(avatarUrl);
                         });
+                        menu->addAction(
+                            "Open channel in a new popup window",
+                            [userName = this->userName_.toLower()] {
+                                auto app = getApp();
+                                auto &window = app->windows->createWindow(
+                                    WindowType::Popup, true);
+                                auto split = window.getNotebook()
+                                                 .getOrAddSelectedPage()
+                                                 ->appendNewSplit(false);
+                                split->setChannel(app->twitch2->getOrAddChannel(
+                                    userName.toLower()));
+                            });
 
                         menu->popup(QCursor::pos());
                         menu->raise();
