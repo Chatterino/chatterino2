@@ -11,6 +11,7 @@
 - Minor: Allow for adjusting rate limit settings.
 - Minor: Webchat detection uses a highlight now. (Mm2PL/Dankerino#90)
 - Minor: Update 7TV code (Mm2pl/Dankerino#95)
+- Minor: Add Open in popup usercard menu option (Mm2PL/Dankerino#111)
 
 ### Chatterino
 
