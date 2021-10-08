@@ -29,7 +29,7 @@ echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
 echo "Running make install in package dir"
 grep qmake Makefile > /dev/null && DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install
-grep cmake Makefile > /dev/null && DESTDIR="$packaging_dir" make -j"$(nproc)" install
+grep cmake Makefile > /dev/null && make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install
 
 find "$packaging_dir/"
 echo ""
