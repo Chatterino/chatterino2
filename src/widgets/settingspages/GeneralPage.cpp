@@ -505,6 +505,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         box->addWidget(layout.makeButton("Reset", []() {
             getSettings()->cachePath = "";
         }));
+        box->addWidget(layout.makeButton("Clear + Restart", [&layout]() {
+        }));
         box->addStretch(1);
 
         layout.addLayout(box);
