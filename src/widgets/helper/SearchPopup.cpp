@@ -215,7 +215,7 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
         else
         {
             predicates.push_back(
-                std::make_unique<SubstringPredicate>(match.captured(0)));
+                std::make_unique<SubstringPredicate>(match.captured()));
         }
     }
 
