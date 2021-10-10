@@ -11,6 +11,11 @@ RegexPredicate::RegexPredicate(const QString &regex)
 
 bool RegexPredicate::appliesTo(const Message &message)
 {
+    if (!regex_.isValid())
+    {
+        return false;
+    }
+
     QRegularExpressionMatch match = regex_.match(message.messageText);
 
     return match.hasMatch();
