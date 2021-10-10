@@ -165,6 +165,12 @@ void SearchPopup::initLayout()
 std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     const QString &input)
 {
+
+    // This regex captures all name:value predicate pairs into named capturing
+    // groups and matches all other inputs seperated by spaces as normal
+    // strings.
+    // It also ignores whitespaces in values when being surrounded by quotation
+    // marks, to enable inputs like this => regex:"kappa 123"
     static QRegularExpression predicateRegex(
         R"lit((?:(?<=^|\s)(?<name>\w+):(?<value>".+?"|[^\s]+(?=\s|$)))|(?<=^|\s|")[^\s]+?(?=$|\s))lit");
     static QRegularExpression trimQuotationMarksRegex(R"(^"|"$)");
