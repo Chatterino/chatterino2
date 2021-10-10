@@ -11,7 +11,7 @@ RegexPredicate::RegexPredicate(const QString &regex)
 
 bool RegexPredicate::appliesTo(const Message &message)
 {
-    QRegularExpressionMatch match = regex_.match(message.searchText);
+    QRegularExpressionMatch match = regex_.match(message.messageText);
 
     return match.hasMatch();
 }

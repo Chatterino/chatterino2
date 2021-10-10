@@ -8,7 +8,7 @@ namespace chatterino {
 /**
  * @brief MessagePredicate checking whether the message matches a given regex.
  *
- * This predicate will only allow messages whose `searchText` match the given
+ * This predicate will only allow messages whose `messageText` match the given
  * regex.
  */
 class RegexPredicate : public MessagePredicate
