@@ -11,7 +11,7 @@
 #include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
 #include "messages/search/MessageFlagsPredicate.hpp"
-#include <messages/search/RegexPredicate.hpp>
+#include "messages/search/RegexPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -165,7 +165,6 @@ void SearchPopup::initLayout()
 std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     const QString &input)
 {
-
     // This regex captures all name:value predicate pairs into named capturing
     // groups and matches all other inputs seperated by spaces as normal
     // strings.
