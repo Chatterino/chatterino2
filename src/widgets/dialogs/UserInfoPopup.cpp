@@ -434,10 +434,11 @@ void UserInfoPopup::installEvents()
                             reenableBlockCheckbox();
                         },
                         [this, reenableBlockCheckbox] {
-                            this->channel_->addMessage(
-                                makeSystemMessage(QString(
+                            this->channel_->addMessage(makeSystemMessage(
+                                QString(
                                     "User %1 couldn't be unblocked, an unknown "
-                                    "error occurred!")));
+                                    "error occurred!")
+                                    .arg(this->userName_)));
                             reenableBlockCheckbox();
                         });
                 }
