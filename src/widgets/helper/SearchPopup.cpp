@@ -11,6 +11,7 @@
 #include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
 #include "messages/search/MessageFlagsPredicate.hpp"
+#include <messages/search/RegexPredicate.hpp>
 #include "messages/search/SubstringPredicate.hpp"
 #include "util/Shortcut.hpp"
 #include "widgets/helper/ChannelView.hpp"
@@ -197,6 +198,11 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
             {
                 predicates.push_back(
                     std::make_unique<MessageFlagsPredicate>(value));
+            }
+            else if (name == "regex")
+            {
+                predicates.push_back(
+                    std::make_unique<RegexPredicate>(value));
             }
             else
             {
