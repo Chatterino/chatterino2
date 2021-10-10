@@ -165,56 +165,51 @@ void SearchPopup::initLayout()
 std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     const QString &input)
 {
-    static QRegularExpression predicateRegex(R"(^(\w+):([\w,]+)$)");
+    static QRegularExpression predicateRegex(
+        R"lit((?:(?<=^|\s)(?<name>\w+):(?<value>".+?"|[^\s]+(?=\s|$)))|(?<=^|\s|")[^\s]+?(?=$|\s))lit");
+    static QRegularExpression trimQuotationMarksRegex(R"(^"|"$)");
+
+    QRegularExpressionMatchIterator it = predicateRegex.globalMatch(input);
 
     std::vector<std::unique_ptr<MessagePredicate>> predicates;
-    auto words = input.split(' ', QString::SkipEmptyParts);
     QStringList authors;
     QStringList channels;
 
-    for (auto it = words.begin(); it != words.end();)
+    while (it.hasNext())
     {
-        if (auto match = predicateRegex.match(*it); match.hasMatch())
+        QRegularExpressionMatch match = it.next();
+
+        QString name = match.captured("name");
+
+        QString value = match.captured("value");
+        value.remove(trimQuotationMarksRegex);
+
+        // match predicates
+        if (name == "from")
         {
-            QString name = match.captured(1);
-            QString value = match.captured(2);
-
-            bool remove = true;
-
-            // match predicates
-            if (name == "from")
-            {
-                authors.append(value);
-            }
-            else if (name == "has" && value == "link")
-            {
-                predicates.push_back(std::make_unique<LinkPredicate>());
-            }
-            else if (name == "in")
-            {
-                channels.append(value);
-            }
-            else if (name == "is")
-            {
-                predicates.push_back(
-                    std::make_unique<MessageFlagsPredicate>(value));
-            }
-            else if (name == "regex")
-            {
-                predicates.push_back(
-                    std::make_unique<RegexPredicate>(value));
-            }
-            else
-            {
-                remove = false;
-            }
-
-            // remove or advance
-            it = remove ? words.erase(it) : ++it;
+            authors.append(value);
+        }
+        else if (name == "has" && value == "link")
+        {
+            predicates.push_back(std::make_unique<LinkPredicate>());
+        }
+        else if (name == "in")
+        {
+            channels.append(value);
+        }
+        else if (name == "is")
+        {
+            predicates.push_back(
+                std::make_unique<MessageFlagsPredicate>(value));
+        }
+        else if (name == "regex")
+        {
+            predicates.push_back(std::make_unique<RegexPredicate>(value));
         }
         else
         {
-            ++it;
+            predicates.push_back(
+                std::make_unique<SubstringPredicate>(match.captured(0)));
         }
     }
 
@@ -223,10 +218,6 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
 
     if (!channels.empty())
         predicates.push_back(std::make_unique<ChannelPredicate>(channels));
-
-    if (!words.empty())
-        predicates.push_back(
-            std::make_unique<SubstringPredicate>(words.join(" ")));
 
     return predicates;
 }
