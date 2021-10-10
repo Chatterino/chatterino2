@@ -67,6 +67,8 @@ struct ContainerNodeDescriptor {
 };
 
 struct TabDescriptor {
+    static TabDescriptor loadFromJSON(const QJsonObject &root);
+
     QString customTitle_;
     bool selected_{false};
     bool highlightsEnabled_{true};

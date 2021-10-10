@@ -520,11 +520,11 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Title", s.headerStreamTitle);
 
     layout.addSubtitle("R9K");
-    layout.addDescription(
-        "Hide similar messages by the same user. Toggle hidden "
-        "messages by pressing Ctrl+H.");
+    layout.addDescription("Hide similar messages. Toggle hidden "
+                          "messages by pressing Ctrl+H.");
     layout.addCheckbox("Hide similar messages", s.similarityEnabled);
     //layout.addCheckbox("Gray out matches", s.colorSimilarDisabled);
+    layout.addCheckbox("By the same user", s.hideSimilarBySameUser);
     layout.addCheckbox("Hide my own messages", s.hideSimilarMyself);
     layout.addCheckbox("Receive notification sounds from hidden messages",
                        s.shownSimilarTriggerHighlights);
@@ -597,6 +597,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Show moderation messages", s.hideModerationActions,
                        true);
+    layout.addCheckbox("Show deletions of single messages",
+                       s.hideDeletionActions, true);
     layout.addCheckbox("Colorize users without color set (gray names)",
                        s.colorizeNicknames);
     layout.addCheckbox("Mention users with a comma (User,)",
@@ -610,6 +612,24 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Color @usernames", s.colorUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames);
+    layout.addCheckbox("Show username autocompletion popup menu",
+                       s.showUsernameCompletionMenu);
+    const QStringList usernameDisplayModes = {"Username", "Localized name",
+                                              "Username and localized name"};
+
+    ComboBox *nameDropdown =
+        layout.addDropdown<std::underlying_type<UsernameDisplayMode>::type>(
+            "Username style", usernameDisplayModes, s.usernameDisplayMode,
+            [usernameDisplayModes](auto val) {
+                return usernameDisplayModes.at(val - 1);
+                // UsernameDisplayMode enum indexes from 1
+            },
+            [](auto args) {
+                return args.index + 1;
+            },
+            false);
+    nameDropdown->setMinimumWidth(nameDropdown->minimumSizeHint().width());
+
     layout.addDropdown<float>(
         "Username font weight", {"50", "Default", "75", "100"}, s.boldScale,
         [](auto val) {
@@ -655,8 +675,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false);
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits);
-    layout.addCheckbox("Ask for confirmation when uploading an image",
-                       s.askOnImageUpload);
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
 

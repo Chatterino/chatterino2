@@ -47,7 +47,7 @@ Outcome invokeIrcCommand(const QString &commandName, const QString &allParams,
     }
     else if (cmd == "away")
     {
-        sendRaw("AWAY" + params[0] + " :" + paramsAfter(0));
+        sendRaw("AWAY " + params[0] + " :" + paramsAfter(0));
     }
     else if (cmd == "knock")
     {

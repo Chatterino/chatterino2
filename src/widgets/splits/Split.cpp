@@ -163,9 +163,30 @@ Split::Split(QWidget *parent)
         }
     });
 
-    this->view_->joinToChannel.connect([this](QString twitchChannel) {
-        this->openSplitRequested.invoke(
-            getApp()->twitch.server->getOrAddChannel(twitchChannel));
+    this->view_->openChannelIn.connect([this](
+                                           QString twitchChannel,
+                                           FromTwitchLinkOpenChannelIn openIn) {
+        ChannelPtr channel =
+            getApp()->twitch.server->getOrAddChannel(twitchChannel);
+        switch (openIn)
+        {
+            case FromTwitchLinkOpenChannelIn::Split:
+                this->openSplitRequested.invoke(channel);
+                break;
+            case FromTwitchLinkOpenChannelIn::Tab:
+                this->joinChannelInNewTab(channel);
+                break;
+            case FromTwitchLinkOpenChannelIn::BrowserPlayer:
+                this->openChannelInBrowserPlayer(channel);
+                break;
+            case FromTwitchLinkOpenChannelIn::Streamlink:
+                this->openChannelInStreamlink(twitchChannel);
+                break;
+            default:
+                qCWarning(chatterinoWidget)
+                    << "Unhandled \"FromTwitchLinkOpenChannelIn\" enum value: "
+                    << static_cast<int>(openIn);
+        }
     });
 
     this->input_->textChanged.connect([=](const QString &newText) {
@@ -241,10 +262,11 @@ Split::Split(QWidget *parent)
             if (getSettings()->askOnImageUpload.getValue())
             {
                 QMessageBox msgBox;
+                msgBox.setWindowTitle("Chatterino");
                 msgBox.setText("Image upload");
                 msgBox.setInformativeText(
                     "You are uploading an image to a 3rd party service not in "
-                    "control of the chatterino team. You may not be able to "
+                    "control of the Chatterino team. You may not be able to "
                     "remove the image from the site. Are you okay with this?");
                 msgBox.addButton(QMessageBox::Cancel);
                 msgBox.addButton(QMessageBox::Yes);
@@ -285,6 +307,11 @@ ChannelView &Split::getChannelView()
     return *this->view_;
 }
 
+SplitInput &Split::getInput()
+{
+    return *this->input_;
+}
+
 void Split::updateInputPlaceholder()
 {
     if (!this->getChannel()->isTwitchChannel())
@@ -307,6 +334,39 @@ void Split::updateInputPlaceholder()
     }
 
     this->input_->ui_.textEdit->setPlaceholderText(placeholderText);
+}
+
+void Split::joinChannelInNewTab(ChannelPtr channel)
+{
+    auto &nb = getApp()->windows->getMainWindow().getNotebook();
+    SplitContainer *container = nb.addPage(true);
+
+    Split *split = new Split(container);
+    split->setChannel(channel);
+    container->appendSplit(split);
+}
+
+void Split::openChannelInBrowserPlayer(ChannelPtr channel)
+{
+    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
+    {
+        QDesktopServices::openUrl(
+            "https://player.twitch.tv/?parent=twitch.tv&channel=" +
+            twitchChannel->getName());
+    }
+}
+
+void Split::openChannelInStreamlink(QString channelName)
+{
+    try
+    {
+        openStreamlinkForChannel(channelName);
+    }
+    catch (const Exception &ex)
+    {
+        qCWarning(chatterinoWidget)
+            << "Error in doOpenStreamlink:" << ex.what();
+    }
 }
 
 IndirectChannel Split::getIndirectChannel()
@@ -565,8 +625,10 @@ void Split::popup()
         window.getNotebook().getOrAddSelectedPage()));
 
     split->setChannel(this->getIndirectChannel());
-    window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+    split->setModerationMode(this->getModerationMode());
+    split->setFilters(this->getFilters());
 
+    window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
     window.show();
 }
 
@@ -595,13 +657,7 @@ void Split::openWhispersInBrowser()
 
 void Split::openBrowserPlayer()
 {
-    ChannelPtr channel = this->getChannel();
-    if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
-    {
-        QDesktopServices::openUrl(
-            "https://player.twitch.tv/?parent=twitch.tv&channel=" +
-            twitchChannel->getName());
-    }
+    this->openChannelInBrowserPlayer(this->getChannel());
 }
 
 void Split::openModViewInBrowser()
@@ -617,15 +673,7 @@ void Split::openModViewInBrowser()
 
 void Split::openInStreamlink()
 {
-    try
-    {
-        openStreamlinkForChannel(this->getChannel()->getName());
-    }
-    catch (const Exception &ex)
-    {
-        qCWarning(chatterinoWidget)
-            << "Error in doOpenStreamlink:" << ex.what();
-    }
+    this->openChannelInStreamlink(this->getChannel()->getName());
 }
 
 void Split::openWithCustomScheme()
@@ -722,7 +770,7 @@ void Split::showViewerList()
         auto query = searchBar->text();
         if (!query.isEmpty())
         {
-            auto results = chattersList->findItems(query, Qt::MatchStartsWith);
+            auto results = chattersList->findItems(query, Qt::MatchContains);
             chattersList->hide();
             resultList->clear();
             for (auto &item : results)
@@ -823,8 +871,8 @@ void Split::showSearch()
 
 void Split::reloadChannelAndSubscriberEmotes()
 {
-    getApp()->accounts->twitch.getCurrent()->loadEmotes();
     auto channel = this->getChannel();
+    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {

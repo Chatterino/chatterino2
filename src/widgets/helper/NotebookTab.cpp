@@ -60,9 +60,22 @@ NotebookTab::NotebookTab(Notebook *notebook)
         this->showRenameDialog();
     });
 
-    this->menu_.addAction("Close Tab", [=]() {
-        this->notebook_->removePage(this->page);
-    });
+    this->menu_.addAction(
+        "Close Tab",
+        [=]() {
+            this->notebook_->removePage(this->page);
+        },
+        QKeySequence("Ctrl+Shift+W"));
+
+    this->menu_.addAction(
+        "Popup Tab",
+        [=]() {
+            if (auto container = dynamic_cast<SplitContainer *>(this->page))
+            {
+                container->popup();
+            }
+        },
+        QKeySequence("Ctrl+Shift+N"));
 
     highlightNewMessagesAction_ =
         new QAction("Mark Tab as Unread on New Messages", &this->menu_);
@@ -73,6 +86,15 @@ NotebookTab::NotebookTab(Notebook *notebook)
                          this->highlightEnabled_ = checked;
                      });
     this->menu_.addAction(highlightNewMessagesAction_);
+
+    this->menu_.addSeparator();
+
+    this->menu_.addAction(
+        "Toggle visibility of tabs",
+        [this]() {
+            this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
+        },
+        QKeySequence("Ctrl+U"));
 }
 
 void NotebookTab::showRenameDialog()

@@ -4,6 +4,7 @@
 #include "common/Common.hpp"
 #include "common/Env.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "messages/Message.hpp"
@@ -21,6 +22,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/FormatTime.hpp"
 #include "util/PostToThread.hpp"
+#include "util/QStringHash.hpp"
 #include "widgets/Window.hpp"
 
 #include <rapidjson/document.h>
@@ -30,7 +32,6 @@
 #include <QJsonValue>
 #include <QThread>
 #include <QTimer>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 namespace {
@@ -119,13 +120,14 @@ namespace {
 
         return messages;
     }
-    std::pair<Outcome, UsernameSet> parseChatters(const QJsonObject &jsonRoot)
+    std::pair<Outcome, std::unordered_set<QString>> parseChatters(
+        const QJsonObject &jsonRoot)
     {
         static QStringList categories = {"broadcaster", "vips",   "moderators",
                                          "staff",       "admins", "global_mods",
                                          "viewers"};
 
-        auto usernames = UsernameSet();
+        auto usernames = std::unordered_set<QString>();
 
         // parse json
         QJsonObject jsonCategories = jsonRoot.value("chatters").toObject();
@@ -142,8 +144,7 @@ namespace {
     }
 }  // namespace
 
-TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
-                             FfzEmotes &ffz)
+TwitchChannel::TwitchChannel(const QString &name)
     : Channel(name, Channel::Type::Twitch)
     , ChannelChatters(*static_cast<Channel *>(this))
     , nameOptions{name, name}
@@ -151,8 +152,6 @@ TwitchChannel::TwitchChannel(const QString &name, BttvEmotes &bttv,
     , channelUrl_("https://twitch.tv/" + name)
     , popoutPlayerUrl_("https://player.twitch.tv/?parent=twitch.tv&channel=" +
                        name)
-    , globalBttv_(bttv)
-    , globalFfz_(ffz)
     , bttvEmotes_(std::make_shared<EmoteMap>())
     , ffzEmotes_(std::make_shared<EmoteMap>())
     , mod_(false)
@@ -287,7 +286,8 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     if (!reward.isUserInputRequired)
     {
         MessageBuilder builder;
-        TwitchMessageBuilder::appendChannelPointRewardMessage(reward, &builder);
+        TwitchMessageBuilder::appendChannelPointRewardMessage(
+            reward, &builder, this->isMod(), this->isBroadcaster());
         this->addMessage(builder.release());
         return;
     }
@@ -327,11 +327,33 @@ void TwitchChannel::sendMessage(const QString &message)
 
     if (!app->accounts->twitch.isLoggedIn())
     {
-        // XXX: It would be nice if we could add a link here somehow that opened
-        // the "account manager" dialog
-        this->addMessage(
-            makeSystemMessage("You need to log in to send messages. You can "
-                              "link your Twitch account in the settings."));
+        if (message.isEmpty())
+        {
+            return;
+        }
+
+        const auto linkColor = MessageColor(MessageColor::Link);
+        const auto accountsLink = Link(Link::OpenAccountsPage, QString());
+        const auto currentUser = getApp()->accounts->twitch.getCurrent();
+        const auto expirationText =
+            QString("You need to log in to send messages. You can link your "
+                    "Twitch account");
+        const auto loginPromptText = QString("in the settings.");
+
+        auto builder = MessageBuilder();
+        builder.message().flags.set(MessageFlag::System);
+        builder.message().flags.set(MessageFlag::DoNotTriggerNotification);
+
+        builder.emplace<TimestampElement>();
+        builder.emplace<TextElement>(expirationText, MessageElementFlag::Text,
+                                     MessageColor::System);
+        builder
+            .emplace<TextElement>(loginPromptText, MessageElementFlag::Text,
+                                  linkColor)
+            ->setLink(accountsLink);
+
+        this->addMessage(builder.release());
+
         return;
     }
 
@@ -354,7 +376,27 @@ void TwitchChannel::sendMessage(const QString &message)
         {
             if (parsedMessage == this->lastSentMessage_)
             {
-                parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
+                auto spaceIndex = parsedMessage.indexOf(' ');
+                // If the message starts with either '/' or '.' Twitch will treat it as a command, omitting
+                // first space and only rest of the arguments treated as actual message content
+                // In cases when user sends a message like ". .a b" first character and first space are omitted as well
+                bool ignoreFirstSpace =
+                    parsedMessage.at(0) == '/' || parsedMessage.at(0) == '.';
+                if (ignoreFirstSpace)
+                {
+                    spaceIndex = parsedMessage.indexOf(' ', spaceIndex + 1);
+                }
+
+                if (spaceIndex == -1)
+                {
+                    // no spaces found, fall back to old magic character
+                    parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
+                }
+                else
+                {
+                    // replace the space we found in spaceIndex with two spaces
+                    parsedMessage.replace(spaceIndex, 1, "  ");
+                }
             }
         }
     }
@@ -475,16 +517,6 @@ SharedAccessGuard<const TwitchChannel::StreamStatus>
     return this->streamStatus_.accessConst();
 }
 
-const BttvEmotes &TwitchChannel::globalBttv() const
-{
-    return this->globalBttv_;
-}
-
-const FfzEmotes &TwitchChannel::globalFfz() const
-{
-    return this->globalFfz_;
-}
-
 boost::optional<EmotePtr> TwitchChannel::bttvEmote(const EmoteName &name) const
 {
     auto emotes = this->bttvEmotes_.get();
@@ -584,10 +616,32 @@ void TwitchChannel::setLive(bool newLiveStatus)
             }
             else
             {
+                // Channel offline message
                 MessageBuilder builder;
                 TwitchMessageBuilder::offlineSystemMessage(
                     this->getDisplayName(), &builder);
                 this->addMessage(builder.release());
+
+                // "delete" old 'CHANNEL is live' message
+                LimitedQueueSnapshot<MessagePtr> snapshot =
+                    getApp()->twitch2->liveChannel->getMessageSnapshot();
+                int snapshotLength = snapshot.size();
+
+                // MSVC hates this code if the parens are not there
+                int end = (std::max)(0, snapshotLength - 200);
+                auto liveMessageSearchText =
+                    QString("%1 is live!").arg(this->getDisplayName());
+
+                for (int i = snapshotLength - 1; i >= end; --i)
+                {
+                    auto &s = snapshot[i];
+
+                    if (s->messageText == liveMessageSearchText)
+                    {
+                        s->flags.set(MessageFlag::Disabled);
+                        break;
+                    }
+                }
             }
             guard->live = newLiveStatus;
         }
@@ -722,20 +776,25 @@ void TwitchChannel::loadRecentMessages()
         return;
     }
 
-    auto baseURL = Env::get().recentMessagesApiUrl.arg(this->getName());
+    QUrl url(Env::get().recentMessagesApiUrl.arg(this->getName()));
+    QUrlQuery urlQuery(url);
+    if (!urlQuery.hasQueryItem("limit"))
+    {
+        urlQuery.addQueryItem(
+            "limit", QString::number(getSettings()->twitchMessageHistoryLimit));
+    }
+    url.setQuery(urlQuery);
 
-    auto url = QString("%1?limit=%2")
-                   .arg(baseURL)
-                   .arg(getSettings()->twitchMessageHistoryLimit);
+    auto weak = weakOf<Channel>(this);
 
     NetworkRequest(url)
-        .concurrent()
-        .onSuccess([weak = weakOf<Channel>(this)](auto result) -> Outcome {
+        .onSuccess([this, weak](NetworkResult result) -> Outcome {
             auto shared = weak.lock();
             if (!shared)
                 return Failure;
 
-            auto messages = parseRecentMessages(result.parseJson(), shared);
+            auto root = result.parseJson();
+            auto messages = parseRecentMessages(root, shared);
 
             auto &handler = IrcMessageHandler::instance();
 
@@ -769,12 +828,37 @@ void TwitchChannel::loadRecentMessages()
                 }
             }
 
-            postToThread(
-                [shared, messages = std::move(allBuiltMessages)]() mutable {
-                    shared->addMessagesAtStart(messages);
-                });
+            postToThread([this, shared, root,
+                          messages = std::move(allBuiltMessages)]() mutable {
+                shared->addMessagesAtStart(messages);
+
+                // Notify user about a possible gap in logs if it returned some messages
+                // but isn't currently joined to a channel
+                if (QString errorCode = root.value("error_code").toString();
+                    !errorCode.isEmpty())
+                {
+                    qCDebug(chatterinoTwitch)
+                        << QString("rm error_code=%1, channel=%2")
+                               .arg(errorCode, this->getName());
+                    if (errorCode == "channel_not_joined" && !messages.empty())
+                    {
+                        shared->addMessage(makeSystemMessage(
+                            "Message history service recovering, there may be "
+                            "gaps in the message history."));
+                    }
+                }
+            });
 
             return Success;
+        })
+        .onError([weak](NetworkResult result) {
+            auto shared = weak.lock();
+            if (!shared)
+                return;
+
+            shared->addMessage(makeSystemMessage(
+                QString("Message history service unavailable (Error %1)")
+                    .arg(result.status())));
         })
         .execute();
 }
@@ -788,6 +872,7 @@ void TwitchChannel::refreshPubsub()
     auto account = getApp()->accounts->twitch.getCurrent();
     getApp()->twitch2->pubsub->listenToChannelModerationActions(roomId,
                                                                 account);
+    getApp()->twitch2->pubsub->listenToAutomod(roomId, account);
     getApp()->twitch2->pubsub->listenToChannelPointRewards(roomId, account);
 }
 
@@ -824,7 +909,7 @@ void TwitchChannel::refreshChatters()
                 auto pair = parseChatters(std::move(data));
                 if (pair.first)
                 {
-                    this->setChatters(std::move(pair.second));
+                    this->updateOnlineChatters(pair.second);
                 }
 
                 return pair.first;
@@ -1012,6 +1097,10 @@ void TwitchChannel::createClip()
         // successCallback
         [this](const HelixClip &clip) {
             MessageBuilder builder;
+            QString text(
+                "Clip created! Copy link to clipboard or edit it in browser.");
+            builder.message().messageText = text;
+            builder.message().searchText = text;
             builder.message().flags.set(MessageFlag::System);
 
             builder.emplace<TimestampElement>();
@@ -1040,6 +1129,7 @@ void TwitchChannel::createClip()
         // failureCallback
         [this](auto error) {
             MessageBuilder builder;
+            QString text;
             builder.message().flags.set(MessageFlag::System);
 
             builder.emplace<TimestampElement>();
@@ -1050,6 +1140,7 @@ void TwitchChannel::createClip()
                     builder.emplace<TextElement>(
                         CLIPS_FAILURE_CLIPS_DISABLED_TEXT,
                         MessageElementFlag::Text, MessageColor::System);
+                    text = CLIPS_FAILURE_CLIPS_DISABLED_TEXT;
                 }
                 break;
 
@@ -1062,6 +1153,9 @@ void TwitchChannel::createClip()
                                               MessageElementFlag::Text,
                                               MessageColor::Link)
                         ->setLink(ACCOUNTS_LINK);
+                    text = QString("%1 %2").arg(
+                        CLIPS_FAILURE_NOT_AUTHENTICATED_TEXT,
+                        LOGIN_PROMPT_TEXT);
                 }
                 break;
 
@@ -1071,9 +1165,13 @@ void TwitchChannel::createClip()
                     builder.emplace<TextElement>(
                         CLIPS_FAILURE_UNKNOWN_ERROR_TEXT,
                         MessageElementFlag::Text, MessageColor::System);
+                    text = CLIPS_FAILURE_UNKNOWN_ERROR_TEXT;
                 }
                 break;
             }
+
+            builder.message().messageText = text;
+            builder.message().searchText = text;
 
             this->addMessage(builder.release());
         },

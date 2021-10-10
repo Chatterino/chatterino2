@@ -10,6 +10,7 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
+#include "controllers/nicknames/Nickname.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
@@ -21,8 +22,8 @@ namespace chatterino {
 class HighlightPhrase;
 class HighlightBlacklistUser;
 class IgnorePhrase;
-class TaggedUser;
 class FilterRecord;
+class Nickname;
 
 /// Settings which are availlable for reading on all threads.
 class ConcurrentSettings
@@ -37,7 +38,7 @@ public:
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
     SignalVector<FilterRecordPtr> &filterRecords;
-    //SignalVector<TaggedUser> &taggedUsers;
+    SignalVector<Nickname> &nicknames;
     SignalVector<ModerationAction> &moderationActions;
 
     bool isHighlightedUser(const QString &username);
@@ -52,6 +53,11 @@ private:
 
 ConcurrentSettings &getCSettings();
 
+enum UsernameDisplayMode : int {
+    Username = 1,                  // Username
+    LocalizedName = 2,             // Localized name
+    UsernameAndLocalizedName = 3,  // Username (Localized name)
+};
 /// Settings which are availlable for reading and writing on the gui thread.
 // These settings are still accessed concurrently in the code but it is bad practice.
 class Settings : public ABSettings, public ConcurrentSettings
@@ -84,8 +90,13 @@ public:
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {
         "/appearance/messages/hideModerationActions", false};
+    BoolSetting hideDeletionActions = {
+        "/appearance/messages/hideDeletionActions", false};
     BoolSetting colorizeNicknames = {"/appearance/messages/colorizeNicknames",
                                      true};
+    EnumSetting<UsernameDisplayMode> usernameDisplayMode = {
+        "/appearance/messages/usernameDisplayMode",
+        UsernameDisplayMode::UsernameAndLocalizedName};
 
     IntSetting tabDirection = {"/appearance/tabDirection",
                                NotebookTabDirection::Horizontal};
@@ -161,6 +172,8 @@ public:
         "/behaviour/autocompletion/userCompletionOnlyWithAt", false};
     BoolSetting emoteCompletionWithColon = {
         "/behaviour/autocompletion/emoteCompletionWithColon", true};
+    BoolSetting showUsernameCompletionMenu = {
+        "/behaviour/autocompletion/showUsernameCompletionMenu", true};
 
     FloatSetting pauseOnHoverDuration = {"/behaviour/pauseOnHoverDuration", 0};
     EnumSetting<Qt::KeyboardModifier> pauseChatModifier = {
@@ -259,6 +272,13 @@ public:
         "/highlighting/redeemedHighlightSoundUrl", ""};
     QStringSetting redeemedHighlightColor = {
         "/highlighting/redeemedHighlightColor", ""};
+
+    BoolSetting enableFirstMessageHighlight = {
+        "/highlighting/firstMessageHighlight/highlighted", true};
+    QStringSetting firstMessageHighlightSoundUrl = {
+        "/highlighting/firstMessageHighlightSoundUrl", ""};
+    QStringSetting firstMessageHighlightColor = {
+        "/highlighting/firstMessageHighlightColor", ""};
 
     BoolSetting enableSubHighlight = {
         "/highlighting/subHighlight/subsHighlighted", true};
@@ -360,6 +380,8 @@ public:
     BoolSetting attachExtensionToAnyProcess = {
         "/misc/attachExtensionToAnyProcess", false};
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
+    BoolSetting informOnTabVisibilityToggle = {"/misc/askOnTabVisibilityToggle",
+                                               true};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
@@ -375,6 +397,8 @@ public:
     BoolSetting colorSimilarDisabled = {"/similarity/colorSimilarDisabled",
                                         true};
     BoolSetting hideSimilar = {"/similarity/hideSimilar", false};
+    BoolSetting hideSimilarBySameUser = {"/similarity/hideSimilarBySameUser",
+                                         true};
     BoolSetting hideSimilarMyself = {"/similarity/hideSimilarMyself", false};
     BoolSetting shownSimilarTriggerHighlights = {
         "/similarity/shownSimilarTriggerHighlights", false};

@@ -232,11 +232,19 @@ void Updates::installUpdates()
 
 void Updates::checkForUpdates()
 {
-    if (!Version::instance().isSupportedOS())
+    auto version = Version::instance();
+
+    if (!version.isSupportedOS())
     {
         qCDebug(chatterinoUpdate)
             << "Update checking disabled because OS doesn't appear to be one "
                "of Windows, GNU/Linux or macOS.";
+        return;
+    }
+
+    // Disable updates on Flatpak
+    if (version.isFlatpak())
+    {
         return;
     }
 

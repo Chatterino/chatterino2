@@ -25,7 +25,7 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#ifdef C_DEBUG
+#ifndef NDEBUG
 #    include <rapidjson/document.h>
 #    include "providers/twitch/PubsubClient.hpp"
 #    include "util/SampleCheerMessages.hpp"
@@ -66,13 +66,17 @@ Window::Window(WindowType type)
     if (type == WindowType::Main)
     {
         this->resize(int(600 * this->scale()), int(500 * this->scale()));
-        getSettings()->tabDirection.connect([this](int val) {
-            this->notebook_->setTabDirection(NotebookTabDirection(val));
-        });
     }
     else
     {
         this->resize(int(300 * this->scale()), int(500 * this->scale()));
+    }
+
+    if (type == WindowType::Main || type == WindowType::Popup)
+    {
+        getSettings()->tabDirection.connect([this](int val) {
+            this->notebook_->setTabDirection(NotebookTabDirection(val));
+        });
     }
 }
 
@@ -178,7 +182,7 @@ void Window::addCustomTitlebarButtons()
 
 void Window::addDebugStuff()
 {
-#ifdef C_DEBUG
+#ifndef NDEBUG
     std::vector<QString> cheerMessages, subMessages, miscMessages, linkMessages,
         emoteTestMessages;
 
@@ -214,6 +218,9 @@ void Window::addDebugStuff()
     // display name renders strangely
     miscMessages.emplace_back(R"(@badges=;color=#00AD2B;display-name=Iamme420\s;emotes=;id=d47a1e4b-a3c6-4b9e-9bf1-51b8f3dbc76e;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1529670347537;turbo=0;user-id=56422869;user-type= :iamme420!iamme420@iamme420.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");
     miscMessages.emplace_back(R"(@badge-info=founder/47;badges=moderator/1,founder/0,premium/1;color=#00FF80;display-name=gempir;emotes=;flags=;id=d4514490-202e-43cb-b429-ef01a9d9c2fe;mod=1;room-id=11148817;subscriber=0;tmi-sent-ts=1575198233854;turbo=0;user-id=77829817;user-type=mod :gempir!gempir@gempir.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");
+
+    // "first time chat" message
+    miscMessages.emplace_back(R"(@badge-info=;badges=glhf-pledge/1;client-nonce=5d2627b0cbe56fa05faf5420def4807d;color=#1E90FF;display-name=oldcoeur;emote-only=1;emotes=84608:0-7;first-msg=1;flags=;id=7412fea4-8683-4cc9-a506-4228127a5c2d;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1623429859222;turbo=0;user-id=139147886;user-type= :oldcoeur!oldcoeur@oldcoeur.tmi.twitch.tv PRIVMSG #pajlada :cmonBruh)");
 
     // various link tests
     linkMessages.emplace_back(R"(@badge-info=subscriber/48;badges=broadcaster/1,subscriber/36,partner/1;color=#CC44FF;display-name=pajlada;emotes=;flags=;id=3c23cf3c-0864-4699-a76b-089350141147;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1577628844607;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada : Links that should pass: )" + getValidLinks().join(' '));
@@ -334,6 +341,14 @@ void Window::addShortcuts()
         }
     });
 
+    createWindowShortcut(this, "CTRL+SHIFT+N", [this] {
+        if (auto page = dynamic_cast<SplitContainer *>(
+                this->notebook_->getSelectedPage()))
+        {
+            page->popup();
+        }
+    });
+
     // Zoom in
     {
         auto s = new QShortcut(QKeySequence::ZoomIn, this);
@@ -396,6 +411,10 @@ void Window::addShortcuts()
         auto quickSwitcher =
             new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
         quickSwitcher->show();
+    });
+
+    createWindowShortcut(this, "CTRL+U", [this] {
+        this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
     });
 }
 

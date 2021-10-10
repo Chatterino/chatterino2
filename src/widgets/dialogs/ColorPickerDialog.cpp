@@ -365,12 +365,11 @@ void ColorPickerDialog::initHtmlColor(LayoutCreator<QWidget> &creator)
     html->addWidget(htmlLabel, 0, 0);
     html->addWidget(htmlEdit, 0, 1);
 
-    QObject::connect(htmlEdit, &QLineEdit::textEdited,
-                     [=](const QString &text) {
-                         QColor col(text);
-                         if (col.isValid())
-                             this->selectColor(col, false);
-                     });
+    QObject::connect(htmlEdit, &QLineEdit::editingFinished, [this] {
+        const QColor col(this->ui_.picker.htmlEdit->text());
+        if (col.isValid())
+            this->selectColor(col, false);
+    });
 }
 
 }  // namespace chatterino

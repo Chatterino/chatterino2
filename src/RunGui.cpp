@@ -28,6 +28,10 @@
 #    include <QBreakpadHandler.h>
 #endif
 
+#ifdef Q_OS_MAC
+#    include "corefoundation/CFBundle.h"
+#endif
+
 namespace chatterino {
 namespace {
     void installCustomPalette()
@@ -122,8 +126,29 @@ namespace {
             std::chrono::steady_clock::now() - signalsInitTime > 30s)
         {
             QProcess proc;
+
+#ifdef Q_OS_MAC
+            // On macOS, programs are bundled into ".app" Application bundles,
+            // when restarting chatterino that bundle should be opened with the "open"
+            // terminal command instead of directly starting the underlying executable,
+            // as those are 2 different things for the OS and i.e. do not use
+            // the same dock icon (resulting in a second chatterino icon on restarting)
+            CFURLRef appUrlRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
+            CFStringRef macPath =
+                CFURLCopyFileSystemPath(appUrlRef, kCFURLPOSIXPathStyle);
+            const char *pathPtr =
+                CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
+
+            proc.setProgram("open");
+            proc.setArguments({pathPtr, "--args", "--crash-recovery"});
+
+            CFRelease(appUrlRef);
+            CFRelease(macPath);
+#else
             proc.setProgram(QApplication::applicationFilePath());
             proc.setArguments({"--crash-recovery"});
+#endif
+
             proc.startDetached();
         }
 
@@ -134,7 +159,7 @@ namespace {
     // true.
     void initSignalHandler()
     {
-#ifndef C_DEBUG
+#ifdef NDEBUG
         signalsInitTime = std::chrono::steady_clock::now();
 
         signal(SIGSEGV, handleSignal);
@@ -145,17 +170,17 @@ namespace {
     // improved in the future.
     void clearCache(const QDir &dir)
     {
-        qCDebug(chatterinoCache) << "[Cache] cleared cache";
-
-        QStringList toBeRemoved;
-
+        int deletedCount = 0;
         for (auto &&info : dir.entryInfoList(QDir::Files))
         {
             if (info.lastModified().addDays(14) < QDateTime::currentDateTime())
             {
-                toBeRemoved << info.absoluteFilePath();
+                bool res = QFile(info.absoluteFilePath()).remove();
+                if (res)
+                    ++deletedCount;
             }
         }
+        qCDebug(chatterinoCache) << "Deleted" << deletedCount << "files";
     }
 }  // namespace
 

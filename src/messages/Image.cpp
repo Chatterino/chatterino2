@@ -405,6 +405,17 @@ void Image::actuallyLoad()
             QBuffer buffer(const_cast<QByteArray *>(&data));
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer);
+
+            // use "double" to prevent int overflows
+            if (double(reader.size().width()) * double(reader.size().height()) *
+                    double(reader.imageCount()) * 4.0 >
+                double(Image::maxBytesRam))
+            {
+                qCDebug(chatterinoImage) << "image too large in RAM";
+
+                return Failure;
+            }
+
             auto parsed = detail::readFrames(reader, shared->url());
 
             postToThread(makeConvertCallback(parsed, [weak](auto frames) {
