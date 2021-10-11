@@ -73,8 +73,12 @@ void DankerinoPage::initLayout(GeneralPageView &layout)
 
         layout.addCheckbox(
             "Webchat detection highlights. Highlights messages sent from "
-            "webchat in orange.",
+            "webchat in orange or the specified color below.",
             s.normalNonceDetection);
+
+        layout.addColorButton("Webchat detected color",
+                              QColor(getSettings()->webchatColor.getValue()),
+                              getSettings()->webchatColor);
     }
     layout.addStretch();
     // invisible element for width
