@@ -508,9 +508,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         box->addWidget(layout.makeButton("Clear Cache", [&layout]() {
             auto reply = QMessageBox::question(
                 layout.window(), "Clear cache & restart",
-                "Are you sure that you want to clear your cache? This will "
-                "permanently delete all cached data and cause Chatterino "
-                "to restart",
+                "Are you sure that you want to clear your cache? Emotes may "
+                "take longer to load after Chatterino restarts.",
                 QMessageBox::Yes | QMessageBox::No);
 
             if (reply == QMessageBox::Yes)
