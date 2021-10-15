@@ -24,7 +24,7 @@ void HotkeyModel::getRowFromItem(const std::shared_ptr<Hotkey> &item,
     setStringItem(row[0], item->name(), false);
     row[0]->setData(QFont("Segoe UI", 10), Qt::FontRole);
 
-    setStringItem(row[1], item->toPortableString(), false);
+    setStringItem(row[1], item->toString(), false);
     row[1]->setData(QFont("Segoe UI", 10), Qt::FontRole);
 }
 
