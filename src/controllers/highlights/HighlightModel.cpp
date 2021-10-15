@@ -150,6 +150,29 @@ void HighlightModel::afterInit()
     setColorItem(redeemedRow[Column::Color], *RedeemedColor, false);
 
     this->insertCustomRow(redeemedRow, 3);
+
+    std::vector<QStandardItem *> firstMessageRow = this->createRow();
+    setBoolItem(firstMessageRow[Column::Pattern],
+                getSettings()->enableFirstMessageHighlight.getValue(), true,
+                false);
+    firstMessageRow[Column::Pattern]->setData("First Messages",
+                                              Qt::DisplayRole);
+    firstMessageRow[Column::ShowInMentions]->setFlags({});
+    firstMessageRow[Column::FlashTaskbar]->setFlags({});
+    firstMessageRow[Column::PlaySound]->setFlags({});
+    firstMessageRow[Column::UseRegex]->setFlags({});
+    firstMessageRow[Column::CaseSensitive]->setFlags({});
+
+    QUrl FirstMessageSound =
+        QUrl(getSettings()->firstMessageHighlightSoundUrl.getValue());
+    setFilePathItem(firstMessageRow[Column::SoundPath], FirstMessageSound,
+                    false);
+
+    auto FirstMessageColor =
+        ColorProvider::instance().color(ColorType::FirstMessageHighlight);
+    setColorItem(firstMessageRow[Column::Color], *FirstMessageColor, false);
+
+    this->insertCustomRow(firstMessageRow, 4);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
@@ -302,6 +325,14 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->redeemedHighlightColor.setValue(colorName);
                     const_cast<ColorProvider &>(ColorProvider::instance())
                         .updateColor(ColorType::RedeemedHighlight,
+                                     QColor(colorName));
+                }
+                else if (rowIndex == 4)
+                {
+                    getSettings()->firstMessageHighlightColor.setValue(
+                        colorName);
+                    const_cast<ColorProvider &>(ColorProvider::instance())
+                        .updateColor(ColorType::FirstMessageHighlight,
                                      QColor(colorName));
                 }
             }

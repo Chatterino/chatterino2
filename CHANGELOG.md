@@ -18,6 +18,8 @@
 - Minor: Fixed `/streamlink` command not stripping leading @'s or #'s (#3215)
 - Minor: Strip leading @ and trailing , from username in `/popout` command. (#3217)
 - Minor: Added `flags.reward_message` filter variable (#3231)
+- Minor: Added highlights for first messages (#3267)
+- Minor: Ignore out of bounds check for tiling wms (#3270)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
@@ -27,6 +29,7 @@
 - Bugfix: Fixed own IRC messages not having metadata and a link to a usercard. (#3203)
 - Bugfix: Fixed some channels still not loading in rare cases. (#3219)
 - Bugfix: Fixed a bug with usernames or emotes completing from the wrong position. (#3229)
+- Bugfix: Fixed second chatterino icon appearing in the dock when restarting on a crash in macOS. (#3268)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 
