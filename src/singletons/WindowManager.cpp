@@ -686,11 +686,13 @@ void WindowManager::applyWindowLayout(const WindowLayout &layout)
         {
             // out of bounds windows
             auto screens = qApp->screens();
-            bool outOfBounds = std::none_of(
-                screens.begin(), screens.end(), [&](QScreen *screen) {
-                    return screen->availableGeometry().intersects(
-                        windowData.geometry_);
-                });
+            bool outOfBounds =
+                !getenv("I3SOCK") &&
+                std::none_of(screens.begin(), screens.end(),
+                             [&](QScreen *screen) {
+                                 return screen->availableGeometry().intersects(
+                                     windowData.geometry_);
+                             });
 
             // ask if move into bounds
             auto &&should = shouldMoveOutOfBoundsWindow();
