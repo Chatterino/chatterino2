@@ -935,7 +935,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     }
 
     // works only in a valid twitch channel
-    if (!dryRun && twitchChannel != nullptr)
+    if (!dryRun && channel->isTwitchChannel())
     {
         // check if command exists
         const auto it = this->commands_.find(commandName);
