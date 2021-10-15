@@ -39,6 +39,7 @@ bool ResizingTextEdit::hasHeightForWidth() const
     return true;
 }
 
+// XXX(zneix): This logic might be a bit stupid, see if it can be improved
 bool ResizingTextEdit::isFirstWord() const
 {
     return !this->toPlainText().contains(' ');
