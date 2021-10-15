@@ -41,15 +41,7 @@ bool ResizingTextEdit::hasHeightForWidth() const
 
 bool ResizingTextEdit::isFirstWord() const
 {
-    QString plainText = this->toPlainText();
-    for (int i = this->textCursor().position(); i >= 0; i--)
-    {
-        if (plainText[i] == ' ')
-        {
-            return false;
-        }
-    }
-    return true;
+    return !this->toPlainText().contains(' ');
 };
 
 int ResizingTextEdit::heightForWidth(int) const
