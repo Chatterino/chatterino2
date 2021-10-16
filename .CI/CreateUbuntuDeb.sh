@@ -7,7 +7,7 @@ if [ ! -f ./bin/chatterino ] || [ ! -x ./bin/chatterino ]; then
 fi
 
 chatterino_version=$(git describe | cut -c 2-)
-echo "Found Chatterino version $chatterino_version via git"
+echo "Found Chatterino version $chatterino_version via git ($(pwd))"
 
 rm -vrf "./package" || true  # delete any old packaging dir
 
