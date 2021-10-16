@@ -620,6 +620,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 "The /marker command only works in Twitch channels"));
             return "";
         }
+
         // Avoid Helix calls without Client ID and/or OAuth Token
         if (getApp()->accounts->twitch.getCurrent()->isAnon())
         {
