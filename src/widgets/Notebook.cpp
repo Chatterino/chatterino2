@@ -34,9 +34,12 @@ Notebook::Notebook(QWidget *parent)
 
     this->addButton_->setHidden(true);
 
-    this->menu_.addAction("Toggle visibility of tabs", [this]() {
-        this->setShowTabs(!this->getShowTabs());
-    });
+    this->menu_.addAction(
+        "Toggle visibility of tabs",
+        [this]() {
+            this->setShowTabs(!this->getShowTabs());
+        },
+        QKeySequence("Ctrl+U"));
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)

@@ -60,9 +60,12 @@ NotebookTab::NotebookTab(Notebook *notebook)
         this->showRenameDialog();
     });
 
-    this->menu_.addAction("Close Tab", [=]() {
-        this->notebook_->removePage(this->page);
-    });
+    this->menu_.addAction(
+        "Close Tab",
+        [=]() {
+            this->notebook_->removePage(this->page);
+        },
+        QKeySequence("Ctrl+Shift+W"));
 
     this->menu_.addAction(
         "Popup Tab",
@@ -86,9 +89,12 @@ NotebookTab::NotebookTab(Notebook *notebook)
 
     this->menu_.addSeparator();
 
-    this->menu_.addAction("Toggle visibility of tabs", [this]() {
-        this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
-    });
+    this->menu_.addAction(
+        "Toggle visibility of tabs",
+        [this]() {
+            this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
+        },
+        QKeySequence("Ctrl+U"));
 }
 
 void NotebookTab::showRenameDialog()
