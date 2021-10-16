@@ -34,8 +34,6 @@ grep cmake Makefile > /dev/null && make INSTALL_ROOT="$packaging_dir" -j"$(nproc
 find "$packaging_dir/"
 echo ""
 
-echo "Removing useless directories"
-rm -vr package/home
-
 echo "Building package..."
-dpkg-deb --build "$packaging_dir" "Chatterino.deb"
+cd "$packaging_dir"
+dpkg-deb --build "$packaging_dir" "../Chatterino.deb"
