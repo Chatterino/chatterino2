@@ -238,81 +238,14 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     this->ui_.notebook->selectIndex(TAB_TWITCH);
     this->ui_.twitch.channel->setFocus();
 
-    HotkeyController::HotkeyMap actions{
-        {"accept",
-         [this](std::vector<QString>) -> QString {
-             this->ok();
-             return "";
-         }},
-        {"reject",
-         [this](std::vector<QString>) -> QString {
-             this->close();
-             return "";
-         }},
-
-        // these make no sense, so they aren't implemented
-        {"scrollPage", nullptr},
-        {"search", nullptr},
-        {"delete", nullptr},
-    };
-    // Shortcuts
-
     // restore ui state
     // fourtf: enable when releasing irc
     if (getSettings()->enableExperimentalIrc)
     {
         this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
-        actions.insert(
-            {"openTab", [this](std::vector<QString> arguments) -> QString {
-                 if (arguments.size() == 0)
-                 {
-                     qCWarning(chatterinoHotkeys)
-                         << "openTab shortcut called without arguments. "
-                            "Takes only "
-                            "one argument: tab specifier";
-                     return "openTab shortcut called without arguments. "
-                            "Takes only one argument: tab specifier";
-                 }
-                 auto target = arguments.at(0);
-                 if (target == "last")
-                 {
-                     this->ui_.notebook->selectLastTab();
-                 }
-                 else if (target == "next")
-                 {
-                     this->ui_.notebook->selectNextTab();
-                 }
-                 else if (target == "previous")
-                 {
-                     this->ui_.notebook->selectPreviousTab();
-                 }
-                 else
-                 {
-                     bool ok;
-                     int result = target.toInt(&ok);
-                     if (ok)
-                     {
-                         this->ui_.notebook->selectIndex(result);
-                     }
-                     else
-                     {
-                         qCWarning(chatterinoHotkeys)
-                             << "Invalid argument for openTab shortcut";
-                         return QString("Invalid argument for openTab "
-                                        "shortcut: \"%1\". Use \"last\", "
-                                        "\"next\", \"previous\" or an integer.")
-                             .arg(target);
-                     }
-                 }
-                 return "";
-             }});
     }
-    else
-    {
-        actions.emplace("openTab", nullptr);
-    }
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
-        HotkeyScope::PopupWindow, actions, this);
+
+    this->addShortcuts();
 
     this->ui_.irc.servers->getTableView()->selectRow(
         getSettings()->lastSelectIrcConn);
@@ -570,6 +503,82 @@ void SelectChannelDialog::themeChangedEvent()
         this->setStyleSheet(
             "QRadioButton { color: #fff } QLabel { color: #fff }");
     }
+}
+
+void SelectChannelDialog::addShortcuts()
+{
+    HotkeyController::HotkeyMap actions{
+        {"accept",
+         [this](std::vector<QString>) -> QString {
+             this->ok();
+             return "";
+         }},
+        {"reject",
+         [this](std::vector<QString>) -> QString {
+             this->close();
+             return "";
+         }},
+
+        // these make no sense, so they aren't implemented
+        {"scrollPage", nullptr},
+        {"search", nullptr},
+        {"delete", nullptr},
+    };
+
+    if (getSettings()->enableExperimentalIrc)
+    {
+        actions.insert(
+            {"openTab", [this](std::vector<QString> arguments) -> QString {
+                 if (arguments.size() == 0)
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "openTab shortcut called without arguments. "
+                            "Takes only "
+                            "one argument: tab specifier";
+                     return "openTab shortcut called without arguments. "
+                            "Takes only one argument: tab specifier";
+                 }
+                 auto target = arguments.at(0);
+                 if (target == "last")
+                 {
+                     this->ui_.notebook->selectLastTab();
+                 }
+                 else if (target == "next")
+                 {
+                     this->ui_.notebook->selectNextTab();
+                 }
+                 else if (target == "previous")
+                 {
+                     this->ui_.notebook->selectPreviousTab();
+                 }
+                 else
+                 {
+                     bool ok;
+                     int result = target.toInt(&ok);
+                     if (ok)
+                     {
+                         this->ui_.notebook->selectIndex(result);
+                     }
+                     else
+                     {
+                         qCWarning(chatterinoHotkeys)
+                             << "Invalid argument for openTab shortcut";
+                         return QString("Invalid argument for openTab "
+                                        "shortcut: \"%1\". Use \"last\", "
+                                        "\"next\", \"previous\" or an integer.")
+                             .arg(target);
+                     }
+                 }
+                 return "";
+             }});
+    }
+    else
+    {
+        actions.emplace("openTab", nullptr);
+    }
+
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+        HotkeyScope::PopupWindow, actions, this);
 }
 
 }  // namespace chatterino

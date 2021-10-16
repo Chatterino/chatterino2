@@ -259,296 +259,293 @@ Split::Split(QWidget *parent)
 
 void Split::addShortcuts()
 {
-    std::map<QString, std::function<QString(std::vector<QString>)>>
-        splitActions{
-            {"delete",
-             [this](std::vector<QString>) -> QString {
-                 this->deleteFromContainer();
-                 return "";
-             }},
-            {"changeChannel",
-             [this](std::vector<QString>) -> QString {
-                 this->changeChannel();
-                 return "";
-             }},
-            {"showSearch",
-             [this](std::vector<QString>) -> QString {
-                 this->showSearch();
-                 return "";
-             }},
-            {"reconnect",
-             [this](std::vector<QString>) -> QString {
-                 this->reconnect();
-                 return "";
-             }},
-            {"debug",
-             [](std::vector<QString>) -> QString {
-                 auto *popup = new DebugPopup;
-                 popup->setAttribute(Qt::WA_DeleteOnClose);
-                 popup->setWindowTitle("Chatterino - Debug popup");
-                 popup->show();
-                 return "";
-             }},
-            {"focus",
-             [this](std::vector<QString> arguments) -> QString {
-                 if (arguments.size() == 0)
+    HotkeyController::HotkeyMap actions{
+        {"delete",
+         [this](std::vector<QString>) -> QString {
+             this->deleteFromContainer();
+             return "";
+         }},
+        {"changeChannel",
+         [this](std::vector<QString>) -> QString {
+             this->changeChannel();
+             return "";
+         }},
+        {"showSearch",
+         [this](std::vector<QString>) -> QString {
+             this->showSearch();
+             return "";
+         }},
+        {"reconnect",
+         [this](std::vector<QString>) -> QString {
+             this->reconnect();
+             return "";
+         }},
+        {"debug",
+         [](std::vector<QString>) -> QString {
+             auto *popup = new DebugPopup;
+             popup->setAttribute(Qt::WA_DeleteOnClose);
+             popup->setWindowTitle("Chatterino - Debug popup");
+             popup->show();
+             return "";
+         }},
+        {"focus",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 return "focus action requires only one argument: the "
+                        "focus direction Use \"up\", \"above\", \"down\", "
+                        "\"below\", \"left\" or \"right\".";
+             }
+             auto direction = arguments.at(0);
+             if (direction == "up" || direction == "above")
+             {
+                 this->actionRequested.invoke(Action::SelectSplitAbove);
+             }
+             else if (direction == "down" || direction == "below")
+             {
+                 this->actionRequested.invoke(Action::SelectSplitBelow);
+             }
+             else if (direction == "left")
+             {
+                 this->actionRequested.invoke(Action::SelectSplitLeft);
+             }
+             else if (direction == "right")
+             {
+                 this->actionRequested.invoke(Action::SelectSplitRight);
+             }
+             else
+             {
+                 return "focus in unknown direction. Use \"up\", "
+                        "\"above\", \"down\", \"below\", \"left\" or "
+                        "\"right\".";
+             }
+             return "";
+         }},
+        {"scrollToBottom",
+         [this](std::vector<QString>) -> QString {
+             this->getChannelView().getScrollBar().scrollToBottom(
+                 getSettings()->enableSmoothScrollingNewMessages.getValue());
+             return "";
+         }},
+        {"scrollPage",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "scrollPage hotkey called without arguments!";
+                 return "scrollPage hotkey called without arguments!";
+             }
+             auto direction = arguments.at(0);
+
+             auto &scrollbar = this->getChannelView().getScrollBar();
+             if (direction == "up")
+             {
+                 scrollbar.offset(-scrollbar.getLargeChange());
+             }
+             else if (direction == "down")
+             {
+                 scrollbar.offset(scrollbar.getLargeChange());
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
+             }
+             return "";
+         }},
+        {"pickFilters",
+         [this](std::vector<QString>) -> QString {
+             this->setFiltersDialog();
+             return "";
+         }},
+        {"startWatching",
+         [this](std::vector<QString>) -> QString {
+             this->startWatching();
+             return "";
+         }},
+        {"openInBrowser",
+         [this](std::vector<QString>) -> QString {
+             if (this->getChannel()->getType() == Channel::Type::TwitchWhispers)
+             {
+                 this->openWhispersInBrowser();
+             }
+             else
+             {
+                 this->openInBrowser();
+             }
+
+             return "";
+         }},
+        {"openInStreamlink",
+         [this](std::vector<QString>) -> QString {
+             this->openInStreamlink();
+             return "";
+         }},
+        {"openInCustomPlayer",
+         [this](std::vector<QString>) -> QString {
+             this->openWithCustomScheme();
+             return "";
+         }},
+        {"openModView",
+         [this](std::vector<QString>) -> QString {
+             this->openModViewInBrowser();
+             return "";
+         }},
+        {"createClip",
+         [this](std::vector<QString>) -> QString {
+             // Alt+X: create clip LUL
+             if (const auto type = this->getChannel()->getType();
+                 type != Channel::Type::Twitch &&
+                 type != Channel::Type::TwitchWatching)
+             {
+                 return "Cannot create clip it non-twitch channel.";
+             }
+
+             auto *twitchChannel =
+                 dynamic_cast<TwitchChannel *>(this->getChannel().get());
+
+             twitchChannel->createClip();
+             return "";
+         }},
+        {"reloadEmotes",
+         [this](std::vector<QString> arguments) -> QString {
+             auto reloadChannel = true;
+             auto reloadSubscriber = true;
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "channel")
                  {
-                     return "focus action requires only one argument: the "
-                            "focus direction Use \"up\", \"above\", \"down\", "
-                            "\"below\", \"left\" or \"right\".";
+                     reloadSubscriber = false;
                  }
-                 auto direction = arguments.at(0);
-                 if (direction == "up" || direction == "above")
+                 else if (arg == "subscriber")
                  {
-                     this->actionRequested.invoke(Action::SelectSplitAbove);
+                     reloadChannel = false;
                  }
-                 else if (direction == "down" || direction == "below")
+             }
+
+             if (reloadChannel)
+             {
+                 this->header_->reloadChannelEmotes();
+             }
+             if (reloadSubscriber)
+             {
+                 this->header_->reloadSubscriberEmotes();
+             }
+             return "";
+         }},
+        {"setModerationMode",
+         [this](std::vector<QString> arguments) -> QString {
+             if (!this->getChannel()->isTwitchChannel())
+             {
+                 return "Cannot set moderation mode in non-twitch channel.";
+             }
+             auto mode = 2;
+             // 0 is off
+             // 1 is on
+             // 2 is toggle
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "off")
                  {
-                     this->actionRequested.invoke(Action::SelectSplitBelow);
+                     mode = 0;
                  }
-                 else if (direction == "left")
+                 else if (arg == "on")
                  {
-                     this->actionRequested.invoke(Action::SelectSplitLeft);
-                 }
-                 else if (direction == "right")
-                 {
-                     this->actionRequested.invoke(Action::SelectSplitRight);
+                     mode = 1;
                  }
                  else
                  {
-                     return "focus in unknown direction. Use \"up\", "
-                            "\"above\", \"down\", \"below\", \"left\" or "
-                            "\"right\".";
+                     mode = 2;
                  }
-                 return "";
-             }},
-            {"scrollToBottom",
-             [this](std::vector<QString>) -> QString {
-                 this->getChannelView().getScrollBar().scrollToBottom(
-                     getSettings()
-                         ->enableSmoothScrollingNewMessages.getValue());
-                 return "";
-             }},
-            {"scrollPage",
-             [this](std::vector<QString> arguments) -> QString {
-                 if (arguments.size() == 0)
-                 {
-                     qCWarning(chatterinoHotkeys)
-                         << "scrollPage hotkey called without arguments!";
-                     return "scrollPage hotkey called without arguments!";
-                 }
-                 auto direction = arguments.at(0);
+             }
 
-                 auto &scrollbar = this->getChannelView().getScrollBar();
-                 if (direction == "up")
+             if (mode == 0)
+             {
+                 this->setModerationMode(false);
+             }
+             else if (mode == 1)
+             {
+                 this->setModerationMode(true);
+             }
+             else
+             {
+                 this->setModerationMode(!this->getModerationMode());
+             }
+             return "";
+         }},
+        {"openViewerList",
+         [this](std::vector<QString>) -> QString {
+             this->showViewerList();
+             return "";
+         }},
+        {"clearMessages",
+         [this](std::vector<QString>) -> QString {
+             this->clear();
+             return "";
+         }},
+        {"runCommand",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "runCommand hotkey called without arguments!";
+                 return "runCommand hotkey called without arguments!";
+             }
+             QString command = getApp()->commands->execCommand(
+                 arguments.at(0).replace('\n', ' '), this->getChannel(), false);
+             this->getChannel()->sendMessage(command);
+             return "";
+         }},
+        {"setChannelNotification",
+         [this](std::vector<QString> arguments) -> QString {
+             if (!this->getChannel()->isTwitchChannel())
+             {
+                 return "Cannot set channel notifications for non-twitch "
+                        "channel.";
+             }
+             auto mode = 2;
+             // 0 is off
+             // 1 is on
+             // 2 is toggle
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "off")
                  {
-                     scrollbar.offset(-scrollbar.getLargeChange());
+                     mode = 0;
                  }
-                 else if (direction == "down")
+                 else if (arg == "on")
                  {
-                     scrollbar.offset(scrollbar.getLargeChange());
+                     mode = 1;
                  }
                  else
                  {
-                     qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
+                     mode = 2;
                  }
-                 return "";
-             }},
-            {"pickFilters",
-             [this](std::vector<QString>) -> QString {
-                 this->setFiltersDialog();
-                 return "";
-             }},
-            {"startWatching",
-             [this](std::vector<QString>) -> QString {
-                 this->startWatching();
-                 return "";
-             }},
-            {"openInBrowser",
-             [this](std::vector<QString>) -> QString {
-                 if (this->getChannel()->getType() ==
-                     Channel::Type::TwitchWhispers)
-                 {
-                     this->openWhispersInBrowser();
-                 }
-                 else
-                 {
-                     this->openInBrowser();
-                 }
+             }
 
-                 return "";
-             }},
-            {"openInStreamlink",
-             [this](std::vector<QString>) -> QString {
-                 this->openInStreamlink();
-                 return "";
-             }},
-            {"openInCustomPlayer",
-             [this](std::vector<QString>) -> QString {
-                 this->openWithCustomScheme();
-                 return "";
-             }},
-            {"openModView",
-             [this](std::vector<QString>) -> QString {
-                 this->openModViewInBrowser();
-                 return "";
-             }},
-            {"createClip",
-             [this](std::vector<QString>) -> QString {
-                 // Alt+X: create clip LUL
-                 if (const auto type = this->getChannel()->getType();
-                     type != Channel::Type::Twitch &&
-                     type != Channel::Type::TwitchWatching)
-                 {
-                     return "Cannot create clip it non-twitch channel.";
-                 }
+             if (mode == 0)
+             {
+                 getApp()->notifications->removeChannelNotification(
+                     this->getChannel()->getName(), Platform::Twitch);
+             }
+             else if (mode == 1)
+             {
+                 getApp()->notifications->addChannelNotification(
+                     this->getChannel()->getName(), Platform::Twitch);
+             }
+             else
+             {
+                 getApp()->notifications->updateChannelNotification(
+                     this->getChannel()->getName(), Platform::Twitch);
+             }
+             return "";
+         }},
+    };
 
-                 auto *twitchChannel =
-                     dynamic_cast<TwitchChannel *>(this->getChannel().get());
-
-                 twitchChannel->createClip();
-                 return "";
-             }},
-            {"reloadEmotes",
-             [this](std::vector<QString> arguments) -> QString {
-                 auto reloadChannel = true;
-                 auto reloadSubscriber = true;
-                 if (arguments.size() != 0)
-                 {
-                     auto arg = arguments.at(0);
-                     if (arg == "channel")
-                     {
-                         reloadSubscriber = false;
-                     }
-                     else if (arg == "subscriber")
-                     {
-                         reloadChannel = false;
-                     }
-                 }
-
-                 if (reloadChannel)
-                 {
-                     this->header_->reloadChannelEmotes();
-                 }
-                 if (reloadSubscriber)
-                 {
-                     this->header_->reloadSubscriberEmotes();
-                 }
-                 return "";
-             }},
-            {"setModerationMode",
-             [this](std::vector<QString> arguments) -> QString {
-                 if (!this->getChannel()->isTwitchChannel())
-                 {
-                     return "Cannot set moderation mode in non-twitch channel.";
-                 }
-                 auto mode = 2;
-                 // 0 is off
-                 // 1 is on
-                 // 2 is toggle
-                 if (arguments.size() != 0)
-                 {
-                     auto arg = arguments.at(0);
-                     if (arg == "off")
-                     {
-                         mode = 0;
-                     }
-                     else if (arg == "on")
-                     {
-                         mode = 1;
-                     }
-                     else
-                     {
-                         mode = 2;
-                     }
-                 }
-
-                 if (mode == 0)
-                 {
-                     this->setModerationMode(false);
-                 }
-                 else if (mode == 1)
-                 {
-                     this->setModerationMode(true);
-                 }
-                 else
-                 {
-                     this->setModerationMode(!this->getModerationMode());
-                 }
-                 return "";
-             }},
-            {"openViewerList",
-             [this](std::vector<QString>) -> QString {
-                 this->showViewerList();
-                 return "";
-             }},
-            {"clearMessages",
-             [this](std::vector<QString>) -> QString {
-                 this->clear();
-                 return "";
-             }},
-            {"runCommand",
-             [this](std::vector<QString> arguments) -> QString {
-                 if (arguments.size() == 0)
-                 {
-                     qCWarning(chatterinoHotkeys)
-                         << "runCommand hotkey called without arguments!";
-                     return "runCommand hotkey called without arguments!";
-                 }
-                 QString command = getApp()->commands->execCommand(
-                     arguments.at(0).replace('\n', ' '), this->getChannel(),
-                     false);
-                 this->getChannel()->sendMessage(command);
-                 return "";
-             }},
-            {"setChannelNotification",
-             [this](std::vector<QString> arguments) -> QString {
-                 if (!this->getChannel()->isTwitchChannel())
-                 {
-                     return "Cannot set channel notifications for non-twitch "
-                            "channel.";
-                 }
-                 auto mode = 2;
-                 // 0 is off
-                 // 1 is on
-                 // 2 is toggle
-                 if (arguments.size() != 0)
-                 {
-                     auto arg = arguments.at(0);
-                     if (arg == "off")
-                     {
-                         mode = 0;
-                     }
-                     else if (arg == "on")
-                     {
-                         mode = 1;
-                     }
-                     else
-                     {
-                         mode = 2;
-                     }
-                 }
-
-                 if (mode == 0)
-                 {
-                     getApp()->notifications->removeChannelNotification(
-                         this->getChannel()->getName(), Platform::Twitch);
-                 }
-                 else if (mode == 1)
-                 {
-                     getApp()->notifications->addChannelNotification(
-                         this->getChannel()->getName(), Platform::Twitch);
-                 }
-                 else
-                 {
-                     getApp()->notifications->updateChannelNotification(
-                         this->getChannel()->getName(), Platform::Twitch);
-                 }
-                 return "";
-             }},
-        };
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split,
-                                                            splitActions, this);
+    this->shortcuts_ =
+        getApp()->hotkeys->shortcutsForScope(HotkeyScope::Split, actions, this);
 }
 
 Split::~Split()

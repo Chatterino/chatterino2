@@ -64,27 +64,27 @@ SearchPopup::SearchPopup(QWidget *parent)
 
 void SearchPopup::addShortcuts()
 {
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
-        HotkeyScope::PopupWindow,
-        std::map<QString, std::function<QString(std::vector<QString>)>>{
-            {"search",
-             [this](std::vector<QString>) -> QString {
-                 this->searchInput_->setFocus();
-                 this->searchInput_->selectAll();
-                 return "";
-             }},
-            {"delete",
-             [this](std::vector<QString>) -> QString {
-                 this->close();
-                 return "";
-             }},
+    HotkeyController::HotkeyMap actions{
+        {"search",
+         [this](std::vector<QString>) -> QString {
+             this->searchInput_->setFocus();
+             this->searchInput_->selectAll();
+             return "";
+         }},
+        {"delete",
+         [this](std::vector<QString>) -> QString {
+             this->close();
+             return "";
+         }},
 
-            {"reject", nullptr},
-            {"accept", nullptr},
-            {"openTab", nullptr},
-            {"scrollPage", nullptr},
-        },
-        this);
+        {"reject", nullptr},
+        {"accept", nullptr},
+        {"openTab", nullptr},
+        {"scrollPage", nullptr},
+    };
+
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+        HotkeyScope::PopupWindow, actions, this);
 }
 
 void SearchPopup::setChannelFilters(FilterSetPtr filters)

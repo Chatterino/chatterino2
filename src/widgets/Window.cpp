@@ -306,7 +306,7 @@ void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
 
 void Window::addShortcuts()
 {
-    HotkeyController::HotkeyMap windowActions{
+    HotkeyController::HotkeyMap actions{
         {"openSettings",  // Open settings
          [this](std::vector<QString>) -> QString {
              SettingsDialog::showDialog(this);
@@ -654,9 +654,11 @@ void Window::addShortcuts()
              return "";
          }},
     };
-    this->addDebugStuff(windowActions);
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
-        HotkeyScope::Window, windowActions, this);
+
+    this->addDebugStuff(actions);
+
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Window,
+                                                            actions, this);
 }
 
 void Window::addMenuBar()

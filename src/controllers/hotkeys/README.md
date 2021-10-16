@@ -12,7 +12,7 @@ Adding new hotkeys to a widget that already has hotkeys is quite easy.
 ### Add an action
 
 1.  Locate the call to `getApp()->hotkeys->shortcutsForScope(...)`
-2.  Above that should be a map of name to `std::function<QString(std::vector<QString>)>`
+2.  Above that should be a `HotkeyController::HotkeyMap` named `actions`
 3.  Add your new action inside that map, it should return a non-empty QString only when configuration errors are found.
 
 ### Add a default

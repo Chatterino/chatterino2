@@ -173,90 +173,90 @@ EmotePopup::EmotePopup(QWidget *parent)
 }
 void EmotePopup::addShortcuts()
 {
+    HotkeyController::HotkeyMap actions{
+        {"openTab",  // CTRL + 1-8 to open corresponding tab.
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "openTab shortcut called without arguments. Takes "
+                        "only one argument: tab specifier";
+                 return "openTab shortcut called without arguments. "
+                        "Takes only one argument: tab specifier";
+             }
+             auto target = arguments.at(0);
+             if (target == "last")
+             {
+                 this->notebook_->selectLastTab();
+             }
+             else if (target == "next")
+             {
+                 this->notebook_->selectNextTab();
+             }
+             else if (target == "previous")
+             {
+                 this->notebook_->selectPreviousTab();
+             }
+             else
+             {
+                 bool ok;
+                 int result = target.toInt(&ok);
+                 if (ok)
+                 {
+                     this->notebook_->selectIndex(result);
+                 }
+                 else
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "Invalid argument for openTab shortcut";
+                     return QString("Invalid argument for openTab "
+                                    "shortcut: \"%1\". Use \"last\", "
+                                    "\"next\", \"previous\" or an integer.")
+                         .arg(target);
+                 }
+             }
+             return "";
+         }},
+        {"delete",
+         [this](std::vector<QString>) -> QString {
+             this->close();
+             return "";
+         }},
+        {"scrollPage",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "scrollPage hotkey called without arguments!";
+                 return "scrollPage hotkey called without arguments!";
+             }
+             auto direction = arguments.at(0);
+             auto channelView = dynamic_cast<ChannelView *>(
+                 this->notebook_->getSelectedPage());
+
+             auto &scrollbar = channelView->getScrollBar();
+             if (direction == "up")
+             {
+                 scrollbar.offset(-scrollbar.getLargeChange());
+             }
+             else if (direction == "down")
+             {
+                 scrollbar.offset(scrollbar.getLargeChange());
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
+             }
+             return "";
+         }},
+
+        {"reject", nullptr},
+        {"accept", nullptr},
+        {"search", nullptr},
+    };
+
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
-        HotkeyScope::PopupWindow,
-        {
-            {"openTab",  // CTRL + 1-8 to open corresponding tab.
-             [this](std::vector<QString> arguments) -> QString {
-                 if (arguments.size() == 0)
-                 {
-                     qCWarning(chatterinoHotkeys)
-                         << "openTab shortcut called without arguments. Takes "
-                            "only one argument: tab specifier";
-                     return "openTab shortcut called without arguments. "
-                            "Takes only one argument: tab specifier";
-                 }
-                 auto target = arguments.at(0);
-                 if (target == "last")
-                 {
-                     this->notebook_->selectLastTab();
-                 }
-                 else if (target == "next")
-                 {
-                     this->notebook_->selectNextTab();
-                 }
-                 else if (target == "previous")
-                 {
-                     this->notebook_->selectPreviousTab();
-                 }
-                 else
-                 {
-                     bool ok;
-                     int result = target.toInt(&ok);
-                     if (ok)
-                     {
-                         this->notebook_->selectIndex(result);
-                     }
-                     else
-                     {
-                         qCWarning(chatterinoHotkeys)
-                             << "Invalid argument for openTab shortcut";
-                         return QString("Invalid argument for openTab "
-                                        "shortcut: \"%1\". Use \"last\", "
-                                        "\"next\", \"previous\" or an integer.")
-                             .arg(target);
-                     }
-                 }
-                 return "";
-             }},
-            {"delete",
-             [this](std::vector<QString>) -> QString {
-                 this->close();
-                 return "";
-             }},
-            {"scrollPage",
-             [this](std::vector<QString> arguments) -> QString {
-                 if (arguments.size() == 0)
-                 {
-                     qCWarning(chatterinoHotkeys)
-                         << "scrollPage hotkey called without arguments!";
-                     return "scrollPage hotkey called without arguments!";
-                 }
-                 auto direction = arguments.at(0);
-                 auto channelView = dynamic_cast<ChannelView *>(
-                     this->notebook_->getSelectedPage());
-
-                 auto &scrollbar = channelView->getScrollBar();
-                 if (direction == "up")
-                 {
-                     scrollbar.offset(-scrollbar.getLargeChange());
-                 }
-                 else if (direction == "down")
-                 {
-                     scrollbar.offset(scrollbar.getLargeChange());
-                 }
-                 else
-                 {
-                     qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
-                 }
-                 return "";
-             }},
-
-            {"reject", nullptr},
-            {"accept", nullptr},
-            {"search", nullptr},
-        },
-        this);
+        HotkeyScope::PopupWindow, actions, this);
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)

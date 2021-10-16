@@ -54,22 +54,22 @@ SettingsDialog::SettingsDialog(QWidget *parent)
 
 void SettingsDialog::addShortcuts()
 {
+    HotkeyController::HotkeyMap actions{
+        {"search",
+         [this](std::vector<QString>) -> QString {
+             this->ui_.search->setFocus();
+             this->ui_.search->selectAll();
+             return "";
+         }},
+        {"delete", nullptr},
+        {"accept", nullptr},
+        {"reject", nullptr},
+        {"scrollPage", nullptr},
+        {"openTab", nullptr},
+    };
+
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
-        HotkeyScope::PopupWindow,
-        {
-            {"search",
-             [this](std::vector<QString>) -> QString {
-                 this->ui_.search->setFocus();
-                 this->ui_.search->selectAll();
-                 return "";
-             }},
-            {"delete", nullptr},
-            {"accept", nullptr},
-            {"reject", nullptr},
-            {"scrollPage", nullptr},
-            {"openTab", nullptr},
-        },
-        this);
+        HotkeyScope::PopupWindow, actions, this);
 }
 
 void SettingsDialog::initUi()
