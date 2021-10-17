@@ -127,7 +127,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     auto emote = boost::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
-        {  // twitch emote
+        {  // Twitch emote
             auto it = accemotes.emotes.find({words[i]});
             if (it != accemotes.emotes.end())
             {
@@ -135,7 +135,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                                         MessageElementFlag::TwitchEmote);
                 continue;
             }
-        }  // twitch emote
+        }  // Twitch emote
 
         {  // bttv/ffz emote
             if ((emote = bttvemotes.emote({words[i]})))
@@ -899,7 +899,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     QString commandName = words[0];
 
-    // works in a valid twitch channel and /whispers, etc...
+    // works in a valid Twitch channel and /whispers, etc...
     if (!dryRun && channel->isTwitchChannel())
     {
         if (whisperCommands.contains(commandName, Qt::CaseInsensitive))
@@ -935,7 +935,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
     }
 
-    // works only in a valid twitch channel
+    // works only in a valid Twitch channel
     if (!dryRun && channel->isTwitchChannel())
     {
         // check if command exists
