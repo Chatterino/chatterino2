@@ -613,8 +613,11 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/marker", [](const QStringList &words,
                                         auto channel) {
-        if (!channel->isTwitchChannel())
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
         {
+            channel->addMessage(makeSystemMessage(
+                "The /marker command only works in Twitch channels"));
             return "";
         }
 
@@ -625,8 +628,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                 "You need to be logged in to create stream markers!"));
             return "";
         }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         // Exact same message as in webchat
         if (!twitchChannel->isLive())
@@ -935,7 +936,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     }
 
     // works only in a valid twitch channel
-    if (!dryRun && twitchChannel != nullptr)
+    if (!dryRun && channel->isTwitchChannel())
     {
         // check if command exists
         const auto it = this->commands_.find(commandName);
