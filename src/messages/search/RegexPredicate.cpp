@@ -3,10 +3,8 @@
 namespace chatterino {
 
 RegexPredicate::RegexPredicate(const QString &regex)
-    : regex_()
+    : regex_(regex, QRegularExpression::CaseInsensitiveOption)
 {
-    this->regex_ =
-        QRegularExpression(regex, QRegularExpression::CaseInsensitiveOption);
 }
 
 bool RegexPredicate::appliesTo(const Message &message)
