@@ -434,14 +434,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     {
         layout.addDescription(
             "Your operating system is not officially supplied with builds. For "
-            "updates, please rebuild chatterino from sources. Report "
+            "updates, please rebuild Chatterino from sources. Report "
             "issues <a href='https://chatterino.com/link/issues'>here</a>.");
     }
 
 #ifdef Q_OS_WIN
     layout.addTitle("Browser Integration");
     layout.addDescription("The browser extension replaces the default "
-                          "Twitch.tv chat with chatterino.");
+                          "Twitch.tv chat with Chatterino.");
 
     {
         if (auto err = nmIpcError().get())

@@ -59,7 +59,8 @@ KeyboardSettingsPage::KeyboardSettingsPage()
 
     form->addRow(new QLabel("Alt + ←/↑/→/↓"),
                  new QLabel("Select left/upper/right/bottom split"));
-    form->addRow(new QLabel("Ctrl+U"), new QLabel("Toggle visibility of tabs"));
+    form->addRow(new QLabel("Ctrl + U"),
+                 new QLabel("Toggle visibility of tabs"));
 
     form->addItem(new QSpacerItem(16, 16));
     form->addRow(new QLabel("Ctrl + R"), new QLabel("Change channel"));

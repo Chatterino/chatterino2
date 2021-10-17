@@ -124,7 +124,7 @@ private:
      */
     void openChannelInStreamlink(QString channelName);
     /**
-     * @brief Opens Twitch channel chat in a new chatterino tab
+     * @brief Opens Twitch channel chat in a new Chatterino tab
      */
     void joinChannelInNewTab(ChannelPtr channel);
 
