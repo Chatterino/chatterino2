@@ -151,6 +151,7 @@ void HighlightModel::afterInit()
 
     this->insertCustomRow(redeemedRow, 3);
 
+    // Highlight settings for first messages
     std::vector<QStandardItem *> firstMessageRow = this->createRow();
     setBoolItem(firstMessageRow[Column::Pattern],
                 getSettings()->enableFirstMessageHighlight.getValue(), true,
