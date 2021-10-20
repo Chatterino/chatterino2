@@ -23,7 +23,7 @@ public:
     virtual ~AbstractIrcServer() = default;
 
     // initializeIrc must be called from the derived class
-    // this allows us to initialize the abstract irc server based on the derived class's parameters
+    // this allows us to initialize the abstract IRC server based on the derived class's parameters
     void initializeIrc();
 
     // connection
@@ -57,7 +57,7 @@ protected:
     virtual void initializeConnectionSignals(IrcConnection *connection,
                                              ConnectionType type){};
 
-    // initializeConnection is called every time before we try to connect to the irc server
+    // initializeConnection is called every time before we try to connect to the IRC server
     virtual void initializeConnection(IrcConnection *connection,
                                       ConnectionType type) = 0;
 
