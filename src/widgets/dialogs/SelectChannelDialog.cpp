@@ -51,7 +51,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         auto channel_btn = vbox.emplace<QRadioButton>("Channel").assign(
             &this->ui_.twitch.channel);
         auto channel_lbl =
-            vbox.emplace<QLabel>("Join a twitch channel by its name.").hidden();
+            vbox.emplace<QLabel>("Join a Twitch channel by its name.").hidden();
         channel_lbl->setWordWrap(true);
         auto channel_edit = vbox.emplace<QLineEdit>().hidden().assign(
             &this->ui_.twitch.channelName);
@@ -77,7 +77,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                                 .assign(&this->ui_.twitch.whispers);
         auto whispers_lbl =
             vbox.emplace<QLabel>("Shows the whispers that you receive while "
-                                 "chatterino is running.")
+                                 "Chatterino is running.")
                 .hidden();
 
         whispers_lbl->setWordWrap(true);
@@ -108,7 +108,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         auto watching_btn = vbox.emplace<QRadioButton>("Watching")
                                 .assign(&this->ui_.twitch.watching);
         auto watching_lbl =
-            vbox.emplace<QLabel>("Requires the chatterino browser extension.")
+            vbox.emplace<QLabel>("Requires the Chatterino browser extension.")
                 .hidden();
 
         watching_lbl->setWordWrap(true);

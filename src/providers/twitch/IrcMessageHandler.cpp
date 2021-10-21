@@ -330,7 +330,7 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 {
     const auto &tags = message->tags();
 
-    // get twitch channel
+    // get Twitch channel
     QString chanName;
     if (!trimChannelName(message->parameter(0), chanName))
     {
