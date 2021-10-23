@@ -26,6 +26,11 @@ public:
 
     void refreshTheme(const Theme &theme);
 
+    void tryAcceptCompletion(bool wasTabPressed);
+    void focusNextCompletion();
+    void focusPreviousCompletion();
+    void requestClose();
+
 signals:
     void closeRequested();
 
