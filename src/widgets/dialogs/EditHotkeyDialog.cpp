@@ -91,11 +91,20 @@ void EditHotkeyDialog::afterEdit()
 
     // check if another hotkey with this name exists, accounts for editing a hotkey
     bool isEditing = bool(this->data_);
-    if (!isEditing && getApp()->hotkeys->getHotkeyByName(nameText) &&
-        this->data_->name() != nameText)
+    if (getApp()->hotkeys->getHotkeyByName(nameText))
     {
-        this->showEditError("Hotkey with this name already exists.");
-        return;
+        // A hotkey with this name already exists
+        if (isEditing && this->data()->name() == nameText)
+        {
+            // The hotkey that already exists is the one we are editing
+        }
+        else
+        {
+            // The user is either creating a hotkey with a name that already exists, or
+            // the user is editing an already-existing hotkey and changing its name to a hotkey that already exists
+            this->showEditError("Hotkey with this name already exists.");
+            return;
+        }
     }
     if (nameText == "")
     {
