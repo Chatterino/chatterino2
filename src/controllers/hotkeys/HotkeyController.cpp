@@ -299,7 +299,9 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
                             QKeySequence("Ctrl+F5"), "reconnect",
                             std::vector<QString>(), "reconnect");
-
+        this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
+                            QKeySequence("F5"), "reloadEmotes",
+                            std::vector<QString>(), "reload emotes");
         this->tryAddDefault(addedHotkeys, HotkeyScope::Split,
                             QKeySequence("F10"), "debug",
                             std::vector<QString>(), "debug");
