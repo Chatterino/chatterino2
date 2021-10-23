@@ -462,25 +462,26 @@ private:
 
 public:
     // returns the related index of the model
-    int getModelIndexFromVectorIndex(int index)
+    int getModelIndexFromVectorIndex(int vectorIndex)
     {
-        int i = 0;
+        int modelIndex = 0;
 
         for (auto &row : this->rows_)
         {
             if (row.isCustomRow)
             {
-                index++;
+                vectorIndex++;
             }
 
-            if (i == index)
+            if (modelIndex == vectorIndex)
             {
-                return i;
+                return modelIndex;
             }
-            i++;
+
+            modelIndex++;
         }
 
-        return i;
+        return modelIndex;
     }
 };
 
