@@ -460,6 +460,12 @@ private:
         return i;
     }
 
+protected:
+    const std::vector<Row> &rows() const
+    {
+        return this->rows_;
+    }
+
 public:
     // returns the related index of the model
     int getModelIndexFromVectorIndex(int vectorIndex)
