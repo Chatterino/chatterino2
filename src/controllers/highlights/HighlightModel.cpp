@@ -151,6 +151,7 @@ void HighlightModel::afterInit()
 
     this->insertCustomRow(redeemedRow, 3);
 
+    // Highlight settings for first messages
     std::vector<QStandardItem *> firstMessageRow = this->createRow();
     setBoolItem(firstMessageRow[Column::Pattern],
                 getSettings()->enableFirstMessageHighlight.getValue(), true,
@@ -200,6 +201,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 3)
                 {
                     getSettings()->enableRedeemedHighlight.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == 4)
+                {
+                    getSettings()->enableFirstMessageHighlight.setValue(
                         value.toBool());
                 }
             }
@@ -298,6 +304,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 3)
                 {
                     getSettings()->redeemedHighlightSoundUrl.setValue(
+                        value.toString());
+                }
+                else if (rowIndex == 4)
+                {
+                    getSettings()->firstMessageHighlightSoundUrl.setValue(
                         value.toString());
                 }
             }
