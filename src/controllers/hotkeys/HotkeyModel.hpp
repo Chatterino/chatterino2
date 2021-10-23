@@ -36,6 +36,9 @@ protected:
     friend class HotkeyController;
 
 private:
+    std::tuple<int, int> getCurrentAndNextCategoryModelIndex(
+        const QString &category) const;
+
     std::unordered_map<QString, int> categoryCount_;
 };
 

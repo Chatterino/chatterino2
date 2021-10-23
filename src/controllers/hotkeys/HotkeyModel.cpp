@@ -51,6 +51,15 @@ int HotkeyModel::beforeInsert(const std::shared_ptr<Hotkey> &item,
         return proposedIndex + 1;
     }
 
+    auto [currentCategoryModelIndex, nextCategoryModelIndex] =
+        this->getCurrentAndNextCategoryModelIndex(category);
+
+    if (nextCategoryModelIndex != -1 && proposedIndex >= nextCategoryModelIndex)
+    {
+        // The proposed index would have landed under the wrong category, we offset by -1 to compensate
+        return proposedIndex - 1;
+    }
+
     return proposedIndex;
 }
 
@@ -69,6 +78,37 @@ void HotkeyModel::afterRemoved(const std::shared_ptr<Hotkey> &item,
     {
         it->second--;
     }
+}
+
+std::tuple<int, int> HotkeyModel::getCurrentAndNextCategoryModelIndex(
+    const QString &category) const
+{
+    int modelIndex = 0;
+
+    int currentCategoryModelIndex = -1;
+    int nextCategoryModelIndex = -1;
+
+    for (const auto &row : this->rows())
+    {
+        if (row.isCustomRow)
+        {
+            QString customRowValue =
+                row.items[0]->data(Qt::EditRole).toString();
+            if (currentCategoryModelIndex != -1)
+            {
+                nextCategoryModelIndex = modelIndex;
+                break;
+            }
+            if (customRowValue == category)
+            {
+                currentCategoryModelIndex = modelIndex;
+            }
+        }
+
+        modelIndex += 1;
+    }
+
+    return {currentCategoryModelIndex, nextCategoryModelIndex};
 }
 
 }  // namespace chatterino
