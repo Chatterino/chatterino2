@@ -123,7 +123,7 @@ Split *SplitContainer::appendNewSplit(bool openChannelNameDialog)
 
     if (openChannelNameDialog)
     {
-        split->showChangeChannelPopup("Open channel name", true, [=](bool ok) {
+        split->showChangeChannelPopup("Open channel", true, [=](bool ok) {
             if (!ok)
             {
                 this->deleteSplit(split);
