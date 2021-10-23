@@ -34,6 +34,8 @@
 - Bugfix: Fixed second chatterino icon appearing in the dock when restarting on a crash in macOS. (#3268)
 - Bugfix: Fixed built-in Chatterino commands not working in whispers and mentions special channels (#3288)
 - Bugfix: Fixed `QCharRef with an index pointing outside the valid range of a QString` warning that was emitted on every Tab press. (#3234)
+- Bugfix: Fixed being unable to disable `First Message` highlights (#3293)
+- Bugfix: Fixed `First Message` custom sound not persisting through restart. (#3303)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 
