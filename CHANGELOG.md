@@ -22,6 +22,7 @@
 - Minor: Added highlights for first messages (#3267)
 - Minor: Ignore out of bounds check for tiling wms (#3270)
 - Minor: Added `flags.first_message` filter variable (#3292)
+- Minor: Removed duplicate setting for toggling `Channel Point Redeemed Message` highlights (#3296)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
@@ -34,6 +35,8 @@
 - Bugfix: Fixed second chatterino icon appearing in the dock when restarting on a crash in macOS. (#3268)
 - Bugfix: Fixed built-in Chatterino commands not working in whispers and mentions special channels (#3288)
 - Bugfix: Fixed `QCharRef with an index pointing outside the valid range of a QString` warning that was emitted on every Tab press. (#3234)
+- Bugfix: Fixed being unable to disable `First Message` highlights (#3293)
+- Bugfix: Fixed `First Message` custom sound not persisting through restart. (#3303)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 

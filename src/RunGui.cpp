@@ -140,7 +140,7 @@ namespace {
                 CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
 
             proc.setProgram("open");
-            proc.setArguments({pathPtr, "--args", "--crash-recovery"});
+            proc.setArguments({pathPtr, "-n", "--args", "--crash-recovery"});
 
             CFRelease(appUrlRef);
             CFRelease(macPath);
