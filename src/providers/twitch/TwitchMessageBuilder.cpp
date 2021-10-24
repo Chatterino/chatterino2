@@ -1448,9 +1448,7 @@ void TwitchMessageBuilder::modsOrVipsSystemMessage(QString prefix,
     builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
     builder->emplace<TextElement>(prefix, MessageElementFlag::Text,
                                   MessageColor::System);
-    bool hasColor = false;
     bool isFirst = true;
-    MessageColor color;
     for (const QString &username : users)
     {
         if (!isFirst)
@@ -1461,46 +1459,27 @@ void TwitchMessageBuilder::modsOrVipsSystemMessage(QString prefix,
         }
         isFirst = false;
 
-        hasColor = false;
+        MessageColor color = MessageColor::System;
+
         if (getSettings()->colorUsernames)
         {
             if (auto userColor = channel->getUserColor(username);
                 userColor.isValid())
             {
                 color = MessageColor(userColor);
-                hasColor = true;
             }
         }
 
-        if (hasColor)
-        {
-            builder
-                ->emplace<TextElement>(username,
-                                       MessageElementFlag::BoldUsername, color,
-                                       FontStyle::ChatMediumBold)
-                ->setLink({Link::UserInfo, username})
-                ->setTrailingSpace(false);
-            builder
-                ->emplace<TextElement>(
-                    username, MessageElementFlag::NonBoldUsername, color)
-                ->setLink({Link::UserInfo, username})
-                ->setTrailingSpace(false);
-        }
-        else
-        {
-            builder
-                ->emplace<TextElement>(
-                    username, MessageElementFlag::BoldUsername,
-                    MessageColor::System, FontStyle::ChatMediumBold)
-                ->setLink({Link::UserInfo, username})
-                ->setTrailingSpace(false);
-            builder
-                ->emplace<TextElement>(username,
-                                       MessageElementFlag::NonBoldUsername,
-                                       MessageColor::System)
-                ->setLink({Link::UserInfo, username})
-                ->setTrailingSpace(false);
-        }
+        builder
+            ->emplace<TextElement>(username, MessageElementFlag::BoldUsername,
+                                   color, FontStyle::ChatMediumBold)
+            ->setLink({Link::UserInfo, username})
+            ->setTrailingSpace(false);
+        builder
+            ->emplace<TextElement>(username,
+                                   MessageElementFlag::NonBoldUsername, color)
+            ->setLink({Link::UserInfo, username})
+            ->setTrailingSpace(false);
     }
 }
 
