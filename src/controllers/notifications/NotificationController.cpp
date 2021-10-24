@@ -165,7 +165,7 @@ void NotificationController::getFakeTwitchChannelLiveStatus(
             if (i != fakeTwitchChannels.end())
             {
                 // We have already pushed the live state of this stream
-                // Could not find stream in fake twitch channels!
+                // Could not find stream in fake Twitch channels!
                 return;
             }
 
