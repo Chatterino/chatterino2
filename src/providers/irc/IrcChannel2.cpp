@@ -1,6 +1,7 @@
 #include "IrcChannel2.hpp"
 
 #include "debug/AssertInGuiThread.hpp"
+#include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/irc/IrcCommands.hpp"
 #include "providers/irc/IrcServer.hpp"
@@ -33,9 +34,14 @@ void IrcChannel::sendMessage(const QString &message)
 
         MessageBuilder builder;
         builder.emplace<TimestampElement>();
-        builder.emplace<TextElement>(this->server()->nick() + ":",
-                                     MessageElementFlag::Username);
+        const auto &nick = this->server()->nick();
+        builder.emplace<TextElement>(nick + ":", MessageElementFlag::Username)
+            ->setLink({Link::UserInfo, nick});
         builder.emplace<TextElement>(message, MessageElementFlag::Text);
+        builder.message().messageText = message;
+        builder.message().searchText = nick + ": " + message;
+        builder.message().loginName = nick;
+        builder.message().displayName = nick;
         this->addMessage(builder.release());
     }
 }

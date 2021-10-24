@@ -110,11 +110,6 @@ set(SOURCE_FILES
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
 
-        controllers/taggedusers/TaggedUser.cpp
-        controllers/taggedusers/TaggedUser.hpp
-        controllers/taggedusers/TaggedUsersModel.cpp
-        controllers/taggedusers/TaggedUsersModel.hpp
-
         debug/Benchmark.cpp
         debug/Benchmark.hpp
 
@@ -154,6 +149,8 @@ set(SOURCE_FILES
         messages/search/LinkPredicate.hpp
         messages/search/MessageFlagsPredicate.cpp
         messages/search/MessageFlagsPredicate.hpp
+        messages/search/RegexPredicate.cpp
+        messages/search/RegexPredicate.hpp
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
 

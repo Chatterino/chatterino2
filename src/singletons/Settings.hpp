@@ -22,7 +22,6 @@ namespace chatterino {
 class HighlightPhrase;
 class HighlightBlacklistUser;
 class IgnorePhrase;
-class TaggedUser;
 class FilterRecord;
 class Nickname;
 
@@ -40,7 +39,6 @@ public:
     SignalVector<QString> &mutedChannels;
     SignalVector<FilterRecordPtr> &filterRecords;
     SignalVector<Nickname> &nicknames;
-    //SignalVector<TaggedUser> &taggedUsers;
     SignalVector<ModerationAction> &moderationActions;
 
     bool isHighlightedUser(const QString &username);
@@ -274,6 +272,13 @@ public:
         "/highlighting/redeemedHighlightSoundUrl", ""};
     QStringSetting redeemedHighlightColor = {
         "/highlighting/redeemedHighlightColor", ""};
+
+    BoolSetting enableFirstMessageHighlight = {
+        "/highlighting/firstMessageHighlight/highlighted", true};
+    QStringSetting firstMessageHighlightSoundUrl = {
+        "/highlighting/firstMessageHighlightSoundUrl", ""};
+    QStringSetting firstMessageHighlightColor = {
+        "/highlighting/firstMessageHighlightColor", ""};
 
     BoolSetting enableSubHighlight = {
         "/highlighting/subHighlight/subsHighlighted", true};
