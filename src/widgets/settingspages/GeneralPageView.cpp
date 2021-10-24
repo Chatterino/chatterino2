@@ -291,22 +291,30 @@ bool GeneralPageView::filterElements(const QString &query)
 
             QWidget *currentSubtitle = nullptr;
             bool currentSubtitleVisible = false;
+            bool currentSubtitleSearched = false;
 
             for (auto &&widget : group.widgets)
             {
-                if (dynamic_cast<SubtitleLabel *>(widget.element))
+                if (auto x = dynamic_cast<SubtitleLabel *>(widget.element))
                 {
+                    currentSubtitleSearched = false;
                     if (currentSubtitle)
                         currentSubtitle->setVisible(currentSubtitleVisible);
 
                     currentSubtitleVisible = false;
                     currentSubtitle = widget.element;
+
+                    if (x->text().contains(query, Qt::CaseInsensitive))
+                    {
+                        currentSubtitleSearched = true;
+                    }
                     continue;
                 }
 
                 for (auto &&keyword : widget.keywords)
                 {
-                    if (keyword.contains(query, Qt::CaseInsensitive))
+                    if (keyword.contains(query, Qt::CaseInsensitive) ||
+                        currentSubtitleSearched)
                     {
                         currentSubtitleVisible = true;
                         widget.element->show();
