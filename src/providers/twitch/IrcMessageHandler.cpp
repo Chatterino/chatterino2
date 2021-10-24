@@ -330,7 +330,7 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
 {
     const auto &tags = message->tags();
 
-    // get twitch channel
+    // get Twitch channel
     QString chanName;
     if (!trimChannelName(message->parameter(0), chanName))
     {
@@ -832,6 +832,31 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             MessageBuilder builder;
             TwitchMessageBuilder::hostingSystemMessage(channelName, &builder,
                                                        hostOn);
+            channel->addMessage(builder.release());
+        }
+        else if (tags == "room_mods" || tags == "vips_success")
+        {
+            // /mods and /vips
+            // room_mods: The moderators of this channel are: ampzyh, antichriststollen, apa420, ...
+            // vips_success: The VIPs of this channel are: 8008, aiden, botfactory, ...
+
+            QString noticeText = msg->messageText;
+            if (tags == "vips_success")
+            {
+                // this one has a trailing period, need to get rid of it.
+                noticeText.chop(1);
+            }
+
+            QStringList msgParts = noticeText.split(':');
+            MessageBuilder builder;
+
+            auto tc = dynamic_cast<TwitchChannel *>(channel.get());
+            assert(tc != nullptr &&
+                   "IrcMessageHandler::handleNoticeMessage. Twitch specific "
+                   "functionality called in non twitch channel");
+
+            TwitchMessageBuilder::modsOrVipsSystemMessage(
+                msgParts.at(0), msgParts.at(1).split(", "), tc, &builder);
             channel->addMessage(builder.release());
         }
         else

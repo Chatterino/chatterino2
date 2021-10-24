@@ -127,7 +127,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     auto emote = boost::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
-        {  // twitch emote
+        {  // Twitch emote
             auto it = accemotes.emotes.find({words[i]});
             if (it != accemotes.emotes.end())
             {
@@ -135,7 +135,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                                         MessageElementFlag::TwitchEmote);
                 continue;
             }
-        }  // twitch emote
+        }  // Twitch emote
 
         {  // bttv/ffz emote
             if ((emote = bttvemotes.emote({words[i]})))
@@ -613,8 +613,11 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/marker", [](const QStringList &words,
                                         auto channel) {
-        if (!channel->isTwitchChannel())
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
         {
+            channel->addMessage(makeSystemMessage(
+                "The /marker command only works in Twitch channels"));
             return "";
         }
 
@@ -625,8 +628,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                 "You need to be logged in to create stream markers!"));
             return "";
         }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         // Exact same message as in webchat
         if (!twitchChannel->isLive())
@@ -898,7 +899,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     QString commandName = words[0];
 
-    // works in a valid twitch channel and /whispers, etc...
+    // works in a valid Twitch channel and /whispers, etc...
     if (!dryRun && channel->isTwitchChannel())
     {
         if (whisperCommands.contains(commandName, Qt::CaseInsensitive))
@@ -934,8 +935,8 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
     }
 
-    // works only in a valid twitch channel
-    if (!dryRun && twitchChannel != nullptr)
+    // works only in a valid Twitch channel
+    if (!dryRun && channel->isTwitchChannel())
     {
         // check if command exists
         const auto it = this->commands_.find(commandName);

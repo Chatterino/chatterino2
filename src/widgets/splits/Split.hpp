@@ -116,15 +116,15 @@ private:
     void updateInputPlaceholder();
 
     /**
-     * @brief Opens twitch channel stream in a browser player (opens a formatted link)
+     * @brief Opens Twitch channel stream in a browser player (opens a formatted link)
      */
     void openChannelInBrowserPlayer(ChannelPtr channel);
     /**
-     * @brief Opens twitch channel stream in streamlink app (if stream is live and streamlink is installed)
+     * @brief Opens Twitch channel stream in streamlink app (if stream is live and streamlink is installed)
      */
     void openChannelInStreamlink(QString channelName);
     /**
-     * @brief Opens twitch channel chat in a new chatterino tab
+     * @brief Opens Twitch channel chat in a new Chatterino tab
      */
     void joinChannelInNewTab(ChannelPtr channel);
 
