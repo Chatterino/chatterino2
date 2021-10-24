@@ -32,6 +32,7 @@
 - Bugfix: Fixed own IRC messages not having metadata and a link to a usercard. (#3203)
 - Bugfix: Fixed some channels still not loading in rare cases. (#3219)
 - Bugfix: Fixed a bug with usernames or emotes completing from the wrong position. (#3229)
+- Bugfix: Fixed a bug that caused zero-width emotes to be misaligned when the "Remove spaces between emotes" setting is on. (#3249)
 - Bugfix: Fixed second chatterino icon appearing in the dock when restarting on a crash in macOS. (#3268)
 - Bugfix: Fixed the "Change channel" popup showing a wrong window title (#3273)
 - Bugfix: Fixed built-in Chatterino commands not working in whispers and mentions special channels (#3288)
