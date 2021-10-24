@@ -38,7 +38,7 @@ jobs:
             echo "vs_version=2017" >> $GITHUB_ENV
         shell: bash
 
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.3.5
         with:
           submodules: true
           fetch-depth: 0  # allows for tags access
@@ -82,7 +82,7 @@ jobs:
         
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.9.0
+        uses: ilammy/msvc-dev-cmd@v1.10.0
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'qmake'

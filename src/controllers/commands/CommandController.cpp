@@ -127,7 +127,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     auto emote = boost::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
-        {  // twitch emote
+        {  // Twitch emote
             auto it = accemotes.emotes.find({words[i]});
             if (it != accemotes.emotes.end())
             {
@@ -135,7 +135,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                                         MessageElementFlag::TwitchEmote);
                 continue;
             }
-        }  // twitch emote
+        }  // Twitch emote
 
         {  // bttv/ffz emote
             if ((emote = bttvemotes.emote({words[i]})))
@@ -226,6 +226,72 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
     }
     return false;
 }
+
+const std::map<QString,
+               std::function<QString(const QString &, const ChannelPtr &)>>
+    COMMAND_VARS{
+        {
+            "channel.name",
+            [](const auto &altText, const auto &channel) {
+                (void)(altText);  //unused
+                return channel->getName();
+            },
+        },
+        {
+            "channel.id",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+
+                return tc->roomId();
+            },
+        },
+        {
+            "stream.game",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+                const auto &status = tc->accessStreamStatus();
+                return status->live ? status->game : altText;
+            },
+        },
+        {
+            "stream.title",
+            [](const auto &altText, const auto &channel) {
+                auto *tc = dynamic_cast<TwitchChannel *>(channel.get());
+                if (tc == nullptr)
+                {
+                    return altText;
+                }
+                const auto &status = tc->accessStreamStatus();
+                return status->live ? status->title : altText;
+            },
+        },
+        {
+            "my.id",
+            [](const auto &altText, const auto &channel) {
+                (void)(channel);  //unused
+                auto uid = getApp()->accounts->twitch.getCurrent()->getUserId();
+                return uid.isEmpty() ? altText : uid;
+            },
+        },
+        {
+            "my.name",
+            [](const auto &altText, const auto &channel) {
+                (void)(channel);  //unused
+                auto name =
+                    getApp()->accounts->twitch.getCurrent()->getUserName();
+                return name.isEmpty() ? altText : name;
+            },
+        },
+    };
+
 }  // namespace
 
 namespace chatterino {
@@ -547,8 +613,11 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/marker", [](const QStringList &words,
                                         auto channel) {
-        if (!channel->isTwitchChannel())
+        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
+        if (twitchChannel == nullptr)
         {
+            channel->addMessage(makeSystemMessage(
+                "The /marker command only works in Twitch channels"));
             return "";
         }
 
@@ -559,8 +628,6 @@ void CommandController::initialize(Settings &, Paths &paths)
                 "You need to be logged in to create stream markers!"));
             return "";
         }
-
-        auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
         // Exact same message as in webchat
         if (!twitchChannel->isLive())
@@ -631,6 +698,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
 
+            stripChannelName(target);
             channel->addMessage(makeSystemMessage(
                 QString("Opening %1 in streamlink...").arg(target)));
             openStreamlinkForChannel(target);
@@ -652,6 +720,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 return "";
             }
 
+            stripChannelName(target);
             QDesktopServices::openUrl(
                 QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
                          .arg(target)));
@@ -797,6 +866,11 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+
+    this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
+        getApp()->twitch2->sendRawMessage(words.mid(1).join(" "));
+        return "";
+    });
 }
 
 void CommandController::save()
@@ -825,7 +899,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     QString commandName = words[0];
 
-    // works in a valid twitch channel and /whispers, etc...
+    // works in a valid Twitch channel and /whispers, etc...
     if (!dryRun && channel->isTwitchChannel())
     {
         if (whisperCommands.contains(commandName, Qt::CaseInsensitive))
@@ -848,7 +922,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         if (it != this->userCommands_.end())
         {
             text = getApp()->emotes->emojis.replaceShortCodes(
-                this->execCustomCommand(words, it.value(), dryRun));
+                this->execCustomCommand(words, it.value(), dryRun, channel));
 
             words = text.split(' ', QString::SkipEmptyParts);
 
@@ -861,8 +935,8 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
     }
 
-    // works only in a valid twitch channel
-    if (!dryRun && twitchChannel != nullptr)
+    // works only in a valid Twitch channel
+    if (!dryRun && channel->isTwitchChannel())
     {
         // check if command exists
         const auto it = this->commands_.find(commandName);
@@ -880,7 +954,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         const auto it = this->userCommands_.find(commandName);
         if (it != this->userCommands_.end())
         {
-            return this->execCustomCommand(words, it.value(), dryRun);
+            return this->execCustomCommand(words, it.value(), dryRun, channel);
         }
     }
 
@@ -899,11 +973,13 @@ void CommandController::registerCommand(QString commandName,
 
 QString CommandController::execCustomCommand(const QStringList &words,
                                              const Command &command,
-                                             bool dryRun)
+                                             bool dryRun, ChannelPtr channel,
+                                             std::map<QString, QString> context)
 {
     QString result;
 
-    static QRegularExpression parseCommand("(^|[^{])({{)*{(\\d+\\+?)}");
+    static QRegularExpression parseCommand(
+        R"((^|[^{])({{)*{(\d+\+?|([a-zA-Z.-]+)(?:;(.+?))?)})");
 
     int lastCaptureEnd = 0;
 
@@ -935,7 +1011,27 @@ QString CommandController::execCustomCommand(const QStringList &words,
         int wordIndex = wordIndexMatch.replace("=", "").toInt(&ok);
         if (!ok || wordIndex == 0)
         {
-            result += "{" + match.captured(3) + "}";
+            auto varName = match.captured(4);
+            auto altText = match.captured(5);  // alt text or empty string
+
+            auto var = COMMAND_VARS.find(varName);
+
+            if (var != COMMAND_VARS.end())
+            {
+                result += var->second(altText, channel);
+            }
+            else
+            {
+                auto it = context.find(varName);
+                if (it != context.end())
+                {
+                    result += it->second.isEmpty() ? altText : it->second;
+                }
+                else
+                {
+                    result += "{" + match.captured(3) + "}";
+                }
+            }
             continue;
         }
 

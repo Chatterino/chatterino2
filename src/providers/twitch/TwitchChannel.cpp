@@ -81,7 +81,7 @@ namespace {
             noticeMessage = "Chat has been cleared by a moderator.";
         }
 
-        // rebuild the raw irc message so we can convert it back to an ircmessage again!
+        // rebuild the raw IRC message so we can convert it back to an ircmessage again!
         // this could probably be done in a smarter way
 
         auto s = QString(":tmi.twitch.tv NOTICE %1 :%2")

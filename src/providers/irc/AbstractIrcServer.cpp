@@ -17,7 +17,7 @@ const int MAX_FALLOFF_COUNTER = 60;
 
 // Ratelimits for joinBucket_
 const int JOIN_RATELIMIT_BUDGET = 18;
-const int JOIN_RATELIMIT_COOLDOWN = 10500;
+const int JOIN_RATELIMIT_COOLDOWN = 12500;
 
 AbstractIrcServer::AbstractIrcServer()
 {
@@ -231,7 +231,7 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
             }
         }));
 
-    // join irc channel
+    // join IRC channel
     {
         std::lock_guard<std::mutex> lock2(this->connectionMutex_);
 
