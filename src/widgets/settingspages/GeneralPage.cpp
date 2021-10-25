@@ -231,8 +231,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Separate with lines", s.separateMessages);
     layout.addCheckbox("Alternate background color", s.alternateMessages);
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
-    layout.addCheckbox("Highlight messages redeemed with Channel Points",
-                       s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
         "Timestamp format (a = am/pm, zzz = milliseconds)",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
@@ -434,14 +432,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     {
         layout.addDescription(
             "Your operating system is not officially supplied with builds. For "
-            "updates, please rebuild chatterino from sources. Report "
+            "updates, please rebuild Chatterino from sources. Report "
             "issues <a href='https://chatterino.com/link/issues'>here</a>.");
     }
 
 #ifdef Q_OS_WIN
     layout.addTitle("Browser Integration");
     layout.addDescription("The browser extension replaces the default "
-                          "Twitch.tv chat with chatterino.");
+                          "Twitch.tv chat with Chatterino.");
 
     {
         if (auto err = nmIpcError().get())
@@ -652,7 +650,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Only search for username autocompletion with an @",
                        s.userCompletionOnlyWithAt);
 
-    layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
+    layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers);
     layout.addCheckbox("Highlight received inline whispers",
                        s.highlightInlineWhispers);
     layout.addCheckbox("Load message history on connect",

@@ -73,7 +73,7 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
 {
     auto label = users.emplace<QLabel>(INFO);
     label->setWordWrap(true);
-    users.append(page.createCheckBox("Enable twitch blocked users",
+    users.append(page.createCheckBox("Enable Twitch blocked users",
                                      getSettings()->enableTwitchBlockedUsers));
 
     auto anyways = users.emplace<QHBoxLayout>().withoutMargin();

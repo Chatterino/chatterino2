@@ -15,6 +15,7 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
+#include "util/Helpers.hpp"
 #include "util/NuulsUploader.hpp"
 #include "util/Shortcut.hpp"
 #include "util/StreamLink.hpp"
@@ -466,6 +467,7 @@ void Split::showChangeChannelPopup(const char *dialogTitle, bool empty,
         dialog->setSelectedChannel(this->getIndirectChannel());
     }
     dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialog->setWindowTitle(dialogTitle);
     dialog->show();
     dialog->closed.connect([=] {
         if (dialog->hasSeletedChannel())
@@ -742,6 +744,11 @@ void Split::showViewerList()
         .onSuccess([=](auto result) -> Outcome {
             auto obj = result.parseJson();
             QJsonObject chattersObj = obj.value("chatters").toObject();
+
+            viewerDock->setWindowTitle(
+                QString("Viewer List - %1 (%2 chatters)")
+                    .arg(this->getChannel()->getName())
+                    .arg(localizeNumbers(obj.value("chatter_count").toInt())));
 
             loadingLabel->hide();
             for (int i = 0; i < jsonLabels.size(); i++)
