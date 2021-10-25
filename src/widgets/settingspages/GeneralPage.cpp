@@ -507,7 +507,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             auto reply = QMessageBox::question(
                 layout.window(), "Clear cache",
                 "Are you sure that you want to clear your cache? Emotes may "
-                "take longer to load after Chatterino restarts.",
+                "take longer to load next time Chatterino is started.",
                 QMessageBox::Yes | QMessageBox::No);
 
             if (reply == QMessageBox::Yes)
