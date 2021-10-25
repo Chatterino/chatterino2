@@ -147,9 +147,10 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     this->lineHeight_ = std::max(this->lineHeight_, newLineHeight);
 
     auto xOffset = 0;
+    bool isZeroWidthEmote = element->getCreator().getFlags().has(
+        MessageElementFlag::ZeroWidthEmote);
 
-    if (element->getCreator().getFlags().has(
-            MessageElementFlag::ZeroWidthEmote))
+    if (isZeroWidthEmote)
     {
         xOffset -= element->getRect().width() + this->spaceWidth_;
     }
@@ -166,7 +167,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
 
     if (getSettings()->removeSpacesBetweenEmotes &&
         element->getFlags().hasAny({MessageElementFlag::EmoteImages}) &&
-        shouldRemoveSpaceBetweenEmotes())
+        !isZeroWidthEmote && shouldRemoveSpaceBetweenEmotes())
     {
         // Move cursor one 'space width' to the left to combine hug the previous emote
         this->currentX_ -= this->spaceWidth_;
@@ -183,8 +184,7 @@ void MessageLayoutContainer::_addElement(MessageLayoutElement *element,
     this->elements_.push_back(std::unique_ptr<MessageLayoutElement>(element));
 
     // set current x
-    if (!element->getCreator().getFlags().has(
-            MessageElementFlag::ZeroWidthEmote))
+    if (!isZeroWidthEmote)
     {
         this->currentX_ += element->getRect().width();
     }
