@@ -514,11 +514,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
             {
                 auto cacheDir = QDir(getPaths()->cacheDirectory());
                 cacheDir.removeRecursively();
-
-                const QString &program =
-                    QCoreApplication::applicationFilePath();
-                QProcess::startDetached(program, QCoreApplication::arguments());
-                QApplication::exit(0);
+                cacheDir.mkdir(getPaths()->cacheDirectory());
             }
         }));
         box->addStretch(1);
