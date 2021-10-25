@@ -505,7 +505,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         }));
         box->addWidget(layout.makeButton("Clear Cache", [&layout]() {
             auto reply = QMessageBox::question(
-                layout.window(), "Clear cache & restart",
+                layout.window(), "Clear cache",
                 "Are you sure that you want to clear your cache? Emotes may "
                 "take longer to load after Chatterino restarts.",
                 QMessageBox::Yes | QMessageBox::No);
