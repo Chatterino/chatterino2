@@ -10,6 +10,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
+#include <QRegularExpression>
 #include <QStringList>
 #include <QUuid>
 
