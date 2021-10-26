@@ -492,7 +492,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Concurrent
 
         LibCommuni::LibCommuni
-        qt${MAJOR_QT_VERSION}keychain
         Pajlada::Serialize
         Pajlada::Settings
         Pajlada::Signals
@@ -501,6 +500,12 @@ target_link_libraries(${LIBRARY_PROJECT}
         RapidJSON::RapidJSON
         LRUCache
         )
+if (!NO_QTKEYCHAIN)
+    target_link_libraries(${LIBRARY_PROJECT}
+            PUBLIC
+            qt${MAJOR_QT_VERSION}keychain
+            )
+endif()
 
 if (BUILD_APP)
     add_executable(${EXECUTABLE_PROJECT} main.cpp)
