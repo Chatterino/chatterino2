@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <boost/optional.hpp>
 #include <boost/preprocessor.hpp>
+#include <memory>
 #include <string>
 
 #include "common/Aliases.hpp"

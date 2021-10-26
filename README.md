@@ -28,6 +28,10 @@ Dankerino is a fork of Chatterino 2.
 You can download the latest Dankerino build over [here](https://github.com/Mm2PL/dankerino/releases/tag/nightly-build)
 Windows users can install Dankerino [from Chocolatey](https://chocolatey.org/packages/dankerino).
 
+### Discord
+
+There is a Dankerino discord, although it's not used for much. The invite link is <https://discord.gg/Qru2TSyNZu>.
+
 ## Original Chatterino 2 readme
 
 Chatterino 2 is a chat client for [Twitch.tv](https://twitch.tv).

@@ -185,6 +185,7 @@ SOURCES += \
     src/messages/search/ChannelPredicate.cpp \
     src/messages/search/LinkPredicate.cpp \
     src/messages/search/MessageFlagsPredicate.cpp \
+    src/messages/search/RegexPredicate.cpp \
     src/messages/search/SubstringPredicate.cpp \
     src/messages/SharedMessageBuilder.cpp \
     src/providers/bttv/BttvEmotes.cpp \

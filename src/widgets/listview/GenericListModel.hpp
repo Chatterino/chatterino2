@@ -2,6 +2,7 @@
 
 #include <QAbstractListModel>
 #include <QWidget>
+#include <memory>
 
 namespace chatterino {
 
