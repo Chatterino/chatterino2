@@ -9,7 +9,7 @@
 - Minor: Move Dankerino settings to a separate tab (Mm2PL/Dankerino#84)
 - Minor: Add advanced IRC tag related settings (Mm2PL/Dankerino#86)
 - Minor: Allow for adjusting rate limit settings.
-- Minor: Webchat detection uses a highlight now. (Mm2PL/Dankerino#90)
+- Minor: Webchat detection uses a customizable highlight now. (Mm2PL/Dankerino#90, Mm2PL/Dankerino#114)
 - Minor: Update 7TV code (Mm2pl/Dankerino#95)
 - Minor: Add Open in popup usercard menu option (Mm2PL/Dankerino#111)
 

@@ -445,6 +445,7 @@ public:
                                           false};
     BoolSetting normalNonceDetection = {"/misc/normalNonceDetection", false};
     BoolSetting nonceFuckeryEnabled = {"/misc/nonceFuckeryEnabled", false};
+    QStringSetting webchatColor = {"/misc/webchatColor", "#3FFFA30B"};
 
     BoolSetting dankerinoThreeLetterApiEasterEgg = {
         "/misc/dankerinoThreeLetterApiEasterEgg", false};
