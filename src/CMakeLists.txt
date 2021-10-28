@@ -500,7 +500,7 @@ target_link_libraries(${LIBRARY_PROJECT}
         RapidJSON::RapidJSON
         LRUCache
         )
-if (!NO_QTKEYCHAIN)
+if (BUILD_WITH_QTKEYCHAIN)
     target_link_libraries(${LIBRARY_PROJECT}
             PUBLIC
             qt${MAJOR_QT_VERSION}keychain
