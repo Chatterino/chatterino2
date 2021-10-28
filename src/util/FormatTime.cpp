@@ -39,7 +39,7 @@ QString formatTime(int totalSeconds)
         }
         appendDuration(minutes, 'm', res);
     }
-    if (seconds > 0)
+    if (seconds > 0 || res.isEmpty())
     {
         if (!res.isEmpty())
         {
