@@ -709,6 +709,15 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
 
     this->underlyingChannel_ = underlyingChannel;
 
+    this->channelConnections_.push_back(underlyingChannel->timeoutStatusSignal.connect(
+        [this](const QString &text) {
+            Split *split = dynamic_cast<Split *>(this->parentWidget());
+            if (split != nullptr)
+            {
+                split->getInput().setTimeoutStatus(text);
+            }
+        }));
+
     this->queueLayout();
     this->queueUpdate();
 
@@ -719,6 +728,7 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
             this->liveStatusChanged.invoke();
         }));
     }
+
 }
 
 void ChannelView::setFilters(const QList<QUuid> &ids)

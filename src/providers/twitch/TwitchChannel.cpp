@@ -193,6 +193,11 @@ TwitchChannel::TwitchChannel(const QString &name)
     });
     this->liveStatusTimer_.start(60 * 1000);
 
+    // timeout countdown message
+    QObject::connect(&this->timeoutCounter_, &QTimer::timeout, [this] {
+        this->resyncTimedOut();
+    });
+
     // debugging
 #if 0
     for (int i = 0; i < 1000; i++) {
@@ -211,6 +216,43 @@ void TwitchChannel::initialize()
 bool TwitchChannel::isEmpty() const
 {
     return this->getName().isEmpty();
+}
+
+void TwitchChannel::resyncTimedOut()
+{
+    auto now = std::chrono::steady_clock::now();
+    int seconds = (this->timeoutEnds_ - now) / std::chrono::seconds(1);
+    auto remaining = formatTime(seconds);
+    qCDebug(chatterinoTwitch)
+        << "[TwitchChannel::timeoutCounter_]" << this->getName()
+        << "Timeout remaining:" << remaining;
+    if (seconds <= 0)
+    {
+        this->timeoutCounter_.stop();
+        this->timeoutStatusSignal.invoke("");
+    } else {
+        this->timeoutStatusSignal.invoke(remaining);
+    }
+}
+
+void TwitchChannel::setTimedOut(int durationInSeconds)
+{
+    if (durationInSeconds <= 0)
+    {
+        // Clear timer
+        this->timeoutEnds_ = std::chrono::steady_clock::now();
+        this->resyncTimedOut();
+        return;
+    }
+
+    // (Re)set timer
+    this->timeoutEnds_ = std::chrono::steady_clock::now() +
+                         std::chrono::seconds(durationInSeconds);
+    if (!this->timeoutCounter_.isActive())
+    {
+        this->timeoutCounter_.start(1000);
+        this->resyncTimedOut();
+    }
 }
 
 bool TwitchChannel::canSendMessage() const

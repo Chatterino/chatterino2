@@ -74,6 +74,8 @@ public:
     virtual void reconnect() override;
     void refreshTitle();
     void createClip();
+    void setTimedOut(int durationInSeconds);
+    void resyncTimedOut();
 
     // Data
     const QString &subscriptionUrl();
@@ -122,6 +124,8 @@ private:
         QString displayName;
         QString localizedName;
     } nameOptions;
+    QTimer timeoutCounter_;
+    std::chrono::steady_clock::time_point timeoutEnds_;
 
 protected:
     explicit TwitchChannel(const QString &channelName);

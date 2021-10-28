@@ -31,6 +31,7 @@ public:
     bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
+    void setTimeoutStatus(const QString &text);
 
     pajlada::Signals::Signal<const QString &> textChanged;
 
@@ -62,6 +63,7 @@ private:
     struct {
         ResizingTextEdit *textEdit;
         QLabel *textEditLength;
+        QLabel *timeoutStatus;
         EffectLabel *emoteButton;
 
         QHBoxLayout *hbox;

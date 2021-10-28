@@ -424,7 +424,20 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
     QVariant v = message->tag("ban-duration");
     if (v.isValid())
     {
+        bool isMyself =
+            username == getApp()->accounts->twitch.getCurrent()->getUserName();
+
         durationInSeconds = v.toString();
+
+        // If this CLEARCHAT targets us, update our timeout.
+        if (isMyself)
+        {
+            TwitchChannel *tc = dynamic_cast<TwitchChannel *>(chan.get());
+            if (tc != nullptr)
+            {
+                tc->setTimedOut(durationInSeconds.toInt());
+            }
+        }
     }
 
     auto timeoutMsg =
@@ -718,6 +731,16 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     }
 }
 
+static std::shared_ptr<Channel> channelFromMessage(Communi::IrcNoticeMessage *message)
+{
+    QString channelName;
+    if (!trimChannelName(message->parameter(0), channelName))
+    {
+        return std::shared_ptr<Channel>();
+    }
+    return getApp()->twitch.server->getChannelOrEmpty(channelName);
+}
+
 std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     Communi::IrcNoticeMessage *message)
 {
@@ -751,29 +774,90 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     {
         return {generateBannedMessage(true)};
     }
-    else if (message->tags().value("msg-id") == "msg_timedout")
+
+    auto msgID = message->tags().value("msg-id").toString();
+    if (msgID == "msg_timedout")
     {
-        std::vector<MessagePtr> builtMessage;
+        int seconds = parseTimedoutNoticeMessage(message);
+        if (seconds < 0)
+        {
+            return {makeSystemMessage(message->content(),
+                                      calculateMessageTimestamp(message))};
+        }
 
-        QString remainingTime =
-            formatTime(message->content().split(" ").value(5));
+        // Synchronize remaining timeout duration
+        auto channel = channelFromMessage(message);
+        if (!channel->isEmpty())
+        {
+            TwitchChannel *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc != nullptr)
+            {
+                tc->setTimedOut(seconds);
+            }
+        }
+
         QString formattedMessage =
-            QString("You are timed out for %1.")
-                .arg(remainingTime.isEmpty() ? "0s" : remainingTime);
+            QString("You are timed out for %1s.").arg(formatTime(seconds));
+        return {makeSystemMessage(formattedMessage,
+                                  calculateMessageTimestamp(message))};
+    }
+    else if (msgID == "bad_delete_message_error" || msgID == "usage_delete")
+    {
+        return {makeSystemMessage(
+            "Usage: /delete <msg-id>. Can't take more than one argument")};
+    }
+    else if (msgID == "host_on" || msgID == "host_target_went_offline")
+    {
+        bool hostOn = (msgID == "host_on");
+        QStringList parts = message->content().split(QLatin1Char(' '));
+        if ((hostOn && parts.size() == 3) || (!hostOn && parts.size() == 7))
+        {
+            auto &channelName = hostOn ? parts[2] : parts[0];
+            if (channelName.size() >= 2)
+            {
+                if (hostOn)
+                {
+                    channelName.chop(1);
+                }
+                MessageBuilder builder;
+                TwitchMessageBuilder::hostingSystemMessage(channelName,
+                                                           &builder, hostOn);
+                return {builder.release()};
+            }
+        }
+    }
+    else if (msgID == "room_mods" || msgID == "vips_success")
+    {
+        // /mods and /vips
+        // room_mods: The moderators of this channel are: ampzyh, antichriststollen, apa420, ...
+        // vips_success: The VIPs of this channel are: 8008, aiden, botfactory, ...
 
-        builtMessage.emplace_back(makeSystemMessage(
-            formattedMessage, calculateMessageTimestamp(message)));
+        QString noticeText = message->content();
+        if (msgID == "vips_success")
+        {
+            // this one has a trailing period, need to get rid of it.
+            noticeText.chop(1);
+        }
 
-        return builtMessage;
+        QStringList msgParts = noticeText.split(':');
+        MessageBuilder builder;
+
+        auto channel = channelFromMessage(message);
+        if (!channel->isEmpty()) {
+            auto tc = dynamic_cast<TwitchChannel *>(channel.get());
+            assert(tc != nullptr &&
+                    "IrcMessageHandler::handleNoticeMessage. Twitch specific "
+                    "functionality called in non twitch channel");
+
+            TwitchMessageBuilder::modsOrVipsSystemMessage(
+                    msgParts.at(0), msgParts.at(1).split(", "), tc, &builder);
+            return {builder.release()};
+        }
     }
 
     // default case
-    std::vector<MessagePtr> builtMessages;
-
-    builtMessages.emplace_back(makeSystemMessage(
-        message->content(), calculateMessageTimestamp(message)));
-
-    return builtMessages;
+    return {makeSystemMessage(message->content(),
+                              calculateMessageTimestamp(message))};
 }
 
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
@@ -805,65 +889,30 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
                 << "not found in channel manager";
             return;
         }
-
-        QString tags = message->tags().value("msg-id").toString();
-        if (tags == "bad_delete_message_error" || tags == "usage_delete")
-        {
-            channel->addMessage(makeSystemMessage(
-                "Usage: /delete <msg-id>. Can't take more than one argument"));
-        }
-        else if (tags == "host_on" || tags == "host_target_went_offline")
-        {
-            bool hostOn = (tags == "host_on");
-            QStringList parts = msg->messageText.split(QLatin1Char(' '));
-            if ((hostOn && parts.size() != 3) || (!hostOn && parts.size() != 7))
-            {
-                return;
-            }
-            auto &channelName = hostOn ? parts[2] : parts[0];
-            if (channelName.size() < 2)
-            {
-                return;
-            }
-            if (hostOn)
-            {
-                channelName.chop(1);
-            }
-            MessageBuilder builder;
-            TwitchMessageBuilder::hostingSystemMessage(channelName, &builder,
-                                                       hostOn);
-            channel->addMessage(builder.release());
-        }
-        else if (tags == "room_mods" || tags == "vips_success")
-        {
-            // /mods and /vips
-            // room_mods: The moderators of this channel are: ampzyh, antichriststollen, apa420, ...
-            // vips_success: The VIPs of this channel are: 8008, aiden, botfactory, ...
-
-            QString noticeText = msg->messageText;
-            if (tags == "vips_success")
-            {
-                // this one has a trailing period, need to get rid of it.
-                noticeText.chop(1);
-            }
-
-            QStringList msgParts = noticeText.split(':');
-            MessageBuilder builder;
-
-            auto tc = dynamic_cast<TwitchChannel *>(channel.get());
-            assert(tc != nullptr &&
-                   "IrcMessageHandler::handleNoticeMessage. Twitch specific "
-                   "functionality called in non twitch channel");
-
-            TwitchMessageBuilder::modsOrVipsSystemMessage(
-                msgParts.at(0), msgParts.at(1).split(", "), tc, &builder);
-            channel->addMessage(builder.release());
-        }
         else
         {
             channel->addMessage(msg);
         }
     }
+}
+
+int IrcMessageHandler::parseTimedoutNoticeMessage(Communi::IrcMessage *message)
+{
+    // @msg-id=msg_timedout :tmi.twitch.tv NOTICE #twitch :You are timed out for 3597 more seconds.
+    QString text = message->parameter(1);
+    if (!text.startsWith("You are timed out for "))
+    {
+        return -1;
+    }
+    else if (!text.endsWith(" more seconds."))
+    {
+        return -1;
+    }
+
+    QStringRef durationText(&text, 22, text.size() - (22 + 14));
+    bool ok;
+    int durationInSeconds = durationText.toInt(&ok);
+    return !ok ? -1 : durationInSeconds;
 }
 
 void IrcMessageHandler::handleJoinMessage(Communi::IrcMessage *message)

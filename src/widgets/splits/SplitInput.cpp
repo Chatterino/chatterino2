@@ -73,6 +73,9 @@ void SplitInput::initLayout()
         auto textEditLength =
             box.emplace<QLabel>().assign(&this->ui_.textEditLength);
         textEditLength->setAlignment(Qt::AlignRight);
+        auto timeoutStatus =
+            box.emplace<QLabel>().assign(&this->ui_.timeoutStatus);
+        timeoutStatus->setAlignment(Qt::AlignRight);
 
         box->addStretch(1);
         box.emplace<EffectLabel>().assign(&this->ui_.emoteButton);
@@ -615,6 +618,11 @@ QString SplitInput::getInputText() const
 void SplitInput::insertText(const QString &text)
 {
     this->ui_.textEdit->insertPlainText(text);
+}
+
+void SplitInput::setTimeoutStatus(const QString &text)
+{
+    this->ui_.timeoutStatus->setText(text);
 }
 
 void SplitInput::editTextChanged()
