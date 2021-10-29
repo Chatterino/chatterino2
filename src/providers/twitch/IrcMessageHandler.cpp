@@ -783,27 +783,13 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
     if (msgID == "msg_timedout")
     {
         int seconds = parseTimedoutNoticeMessage(message);
-        if (seconds < 0)
+        if (seconds >= 0)
         {
-            return {makeSystemMessage(message->content(),
+            QString formattedMessage =
+                QString("You are timed out for %1.").arg(formatTime(seconds));
+            return {makeSystemMessage(formattedMessage,
                                       calculateMessageTimestamp(message))};
         }
-
-        // Synchronize remaining timeout duration
-        auto channel = channelFromMessage(message);
-        if (!channel->isEmpty())
-        {
-            TwitchChannel *tc = dynamic_cast<TwitchChannel *>(channel.get());
-            if (tc != nullptr)
-            {
-                tc->setTimedOut(seconds);
-            }
-        }
-
-        QString formattedMessage =
-            QString("You are timed out for %1.").arg(formatTime(seconds));
-        return {makeSystemMessage(formattedMessage,
-                                  calculateMessageTimestamp(message))};
     }
     else if (msgID == "bad_delete_message_error" || msgID == "usage_delete")
     {
@@ -859,43 +845,58 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
         }
     }
 
-    // default case
+    // Default case
     return {makeSystemMessage(message->content(),
                               calculateMessageTimestamp(message))};
 }
 
 void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
 {
+    QString channelName;
     auto builtMessages = this->parseNoticeMessage(message);
 
-    for (const auto &msg : builtMessages)
+    if (!trimChannelName(message->target(), channelName) ||
+        channelName == "jtv")
     {
-        QString channelName;
-        if (!trimChannelName(message->target(), channelName) ||
-            channelName == "jtv")
+        // Notice wasn't targeted at a single channel, send to all Twitch
+        // channels
+        for (const auto &msg : builtMessages)
         {
-            // Notice wasn't targeted at a single channel, send to all twitch
-            // channels
             getApp()->twitch.server->forEachChannelAndSpecialChannels(
                 [msg](const auto &c) {
                     c->addMessage(msg);
                 });
-
-            return;
         }
+        return;
+    }
 
-        auto channel = getApp()->twitch.server->getChannelOrEmpty(channelName);
+    auto channel = getApp()->twitch.server->getChannelOrEmpty(channelName);
+    if (channel->isEmpty())
+    {
+        qCDebug(chatterinoTwitch)
+            << "[IrcManager:handleNoticeMessage] Channel" << channelName
+            << "not found in channel manager";
+        return;
+    }
 
-        if (channel->isEmpty())
+    for (const auto &msg : builtMessages)
+    {
+        channel->addMessage(msg);
+    }
+
+    // Process message side-effects
+    auto msgID = message->tags().value("msg-id").toString();
+    if (msgID == "msg_timedout")
+    {
+        // Synchronize remaining timeout duration
+        int seconds = parseTimedoutNoticeMessage(message);
+        if (seconds >= 0)
         {
-            qCDebug(chatterinoTwitch)
-                << "[IrcManager:handleNoticeMessage] Channel" << channelName
-                << "not found in channel manager";
-            return;
-        }
-        else
-        {
-            channel->addMessage(msg);
+            TwitchChannel *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc != nullptr)
+            {
+                tc->setTimedOut(seconds);
+            }
         }
     }
 }

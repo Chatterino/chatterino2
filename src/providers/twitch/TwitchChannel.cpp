@@ -223,14 +223,13 @@ void TwitchChannel::resyncTimedOut()
     auto now = std::chrono::steady_clock::now();
     int seconds = (this->timeoutEnds_ - now) / std::chrono::seconds(1);
     auto remaining = formatTime(seconds);
-    qCDebug(chatterinoTwitch)
-        << "[TwitchChannel::timeoutCounter_]" << this->getName()
-        << "Timeout remaining:" << remaining;
     if (seconds <= 0)
     {
         this->timeoutCounter_.stop();
         this->timeoutStatusSignal.invoke("");
-    } else {
+    }
+    else
+    {
         this->timeoutStatusSignal.invoke(remaining);
     }
 }
@@ -246,8 +245,9 @@ void TwitchChannel::setTimedOut(int durationInSeconds)
     }
 
     // (Re)set timer
-    this->timeoutEnds_ = std::chrono::steady_clock::now() +
-                         std::chrono::seconds(durationInSeconds);
+    auto now = std::chrono::floor<std::chrono::seconds>(
+        std::chrono::steady_clock::now());
+    this->timeoutEnds_ = now + std::chrono::seconds(durationInSeconds);
     if (!this->timeoutCounter_.isActive())
     {
         this->timeoutCounter_.start(1000);

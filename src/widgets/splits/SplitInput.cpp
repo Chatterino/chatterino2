@@ -85,7 +85,8 @@ void SplitInput::initLayout()
         }
 
         box->addStretch(1);
-        auto emoteButton = box.emplace<EffectLabel>().assign(&this->ui_.emoteButton);
+        auto emoteButton =
+            box.emplace<EffectLabel>().assign(&this->ui_.emoteButton);
         // Keep the emote button in the bottom/right corner, instead of it
         // following the size of the above hbox
         emoteButton->getLabel().setAlignment(Qt::AlignRight | Qt::AlignVCenter);
