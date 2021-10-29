@@ -522,28 +522,32 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         return;
     }
 
-    // Checking if currentUser is a VIP or staff member
-    QVariant _badges = message->tag("badges");
-    if (_badges.isValid())
+    TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
+    if (tc != nullptr)
     {
-        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
-        if (tc != nullptr)
+        // Checking if currentUser is a VIP or staff member
+        QVariant _badges = message->tag("badges");
+        if (_badges.isValid())
         {
             auto parsedBadges = parseBadges(_badges.toString());
             tc->setVIP(parsedBadges.contains("vip"));
             tc->setStaff(parsedBadges.contains("staff"));
         }
-    }
 
-    // Checking if currentUser is a moderator
-    QVariant _mod = message->tag("mod");
-    if (_mod.isValid())
-    {
-        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
-        if (tc != nullptr)
+        // Checking if currentUser is a moderator
+        QVariant _mod = message->tag("mod");
+        if (_mod.isValid())
         {
             tc->setMod(_mod == "1");
         }
+
+        // We get USERSTATE if we were able to send a message, so if we thought
+        // we were timed out this should now be cleared. This covers the case
+        // where a mod does /untimeout of which we get no feedback.
+        //
+        // TODO: edgecase: we also get USERSTATE if we reconnected after JOIN,
+        // which would incorrectly clear the timeout.
+        tc->setTimedOut(0);
     }
 }
 
@@ -797,7 +801,7 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
         }
 
         QString formattedMessage =
-            QString("You are timed out for %1s.").arg(formatTime(seconds));
+            QString("You are timed out for %1.").arg(formatTime(seconds));
         return {makeSystemMessage(formattedMessage,
                                   calculateMessageTimestamp(message))};
     }
