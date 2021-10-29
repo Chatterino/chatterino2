@@ -69,16 +69,27 @@ void SplitInput::initLayout()
     // right box
     auto box = layout.emplace<QVBoxLayout>().withoutMargin();
     box->setSpacing(0);
+    box->setAlignment(Qt::AlignRight);
     {
-        auto textEditLength =
-            box.emplace<QLabel>().assign(&this->ui_.textEditLength);
-        textEditLength->setAlignment(Qt::AlignRight);
-        auto timeoutStatus =
-            box.emplace<QLabel>().assign(&this->ui_.timeoutStatus);
-        timeoutStatus->setAlignment(Qt::AlignRight);
+        auto hbox = box.emplace<QHBoxLayout>().withoutMargin();
+        {
+            auto timeoutStatus =
+                hbox.emplace<QLabel>().assign(&this->ui_.timeoutStatus);
+            timeoutStatus->setStyleSheet("color: gold");
+            auto textEditLength =
+                hbox.emplace<QLabel>().assign(&this->ui_.textEditLength);
+            textEditLength->setAlignment(Qt::AlignRight);
+
+            timeoutStatus->setText("1m 5s");
+            textEditLength->setText("10");
+        }
 
         box->addStretch(1);
-        box.emplace<EffectLabel>().assign(&this->ui_.emoteButton);
+        auto emoteButton = box.emplace<EffectLabel>().assign(&this->ui_.emoteButton);
+        // Keep the emote button in the bottom/right corner, instead of it
+        // following the size of the above hbox
+        emoteButton->getLabel().setAlignment(Qt::AlignRight | Qt::AlignVCenter);
+        // TODO: make it so the label doesn't stretch
     }
 
     this->ui_.emoteButton->getLabel().setTextFormat(Qt::RichText);
