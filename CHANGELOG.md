@@ -42,6 +42,7 @@
 - Bugfix: Fixed `QCharRef with an index pointing outside the valid range of a QString` warning that was emitted on every Tab press. (#3234)
 - Bugfix: Fixed being unable to disable `First Message` highlights (#3293)
 - Bugfix: Fixed `First Message` custom sound not persisting through restart. (#3303)
+- Bugfix: Fixed `First Message` scrollbar highlights not being disabled. (#3325)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 
