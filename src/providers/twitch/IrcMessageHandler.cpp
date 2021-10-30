@@ -378,8 +378,6 @@ void IrcMessageHandler::handleRoomStateMessage(Communi::IrcMessage *message)
         }
         twitchChannel->setRoomModes(roomModes);
     }
-
-    twitchChannel->roomModesChanged.invoke();
 }
 
 void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
@@ -735,7 +733,8 @@ void IrcMessageHandler::handleUserNoticeMessage(Communi::IrcMessage *message,
     }
 }
 
-static std::shared_ptr<Channel> channelFromMessage(Communi::IrcNoticeMessage *message)
+static std::shared_ptr<Channel> channelFromMessage(
+    Communi::IrcNoticeMessage *message)
 {
     QString channelName;
     if (!trimChannelName(message->parameter(0), channelName))
@@ -833,14 +832,15 @@ std::vector<MessagePtr> IrcMessageHandler::parseNoticeMessage(
         MessageBuilder builder;
 
         auto channel = channelFromMessage(message);
-        if (!channel->isEmpty()) {
+        if (!channel->isEmpty())
+        {
             auto tc = dynamic_cast<TwitchChannel *>(channel.get());
             assert(tc != nullptr &&
-                    "IrcMessageHandler::handleNoticeMessage. Twitch specific "
-                    "functionality called in non twitch channel");
+                   "IrcMessageHandler::handleNoticeMessage. Twitch specific "
+                   "functionality called in non twitch channel");
 
             TwitchMessageBuilder::modsOrVipsSystemMessage(
-                    msgParts.at(0), msgParts.at(1).split(", "), tc, &builder);
+                msgParts.at(0), msgParts.at(1).split(", "), tc, &builder);
             return {builder.release()};
         }
     }
@@ -889,7 +889,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
     if (msgID == "msg_timedout")
     {
         // Synchronize remaining timeout duration
-        int seconds = parseTimedoutNoticeMessage(message);
+        int seconds = this->parseTimedoutNoticeMessage(message);
         if (seconds >= 0)
         {
             TwitchChannel *tc = dynamic_cast<TwitchChannel *>(channel.get());
@@ -899,12 +899,25 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             }
         }
     }
+    else if (msgID == "msg_slowmode")
+    {
+        int seconds = this->parseSlowmodeNoticeMessage(message);
+        if (seconds >= 0)
+        {
+            TwitchChannel *tc = dynamic_cast<TwitchChannel *>(channel.get());
+            if (tc != nullptr)
+            {
+                tc->setSlowedDown(seconds);
+            }
+        }
+    }
 }
 
-int IrcMessageHandler::parseTimedoutNoticeMessage(Communi::IrcMessage *message)
+int IrcMessageHandler::parseTimedoutNoticeMessage(
+    Communi::IrcNoticeMessage *message)
 {
     // @msg-id=msg_timedout :tmi.twitch.tv NOTICE #twitch :You are timed out for 3597 more seconds.
-    QString text = message->parameter(1);
+    QString text = message->content();
     if (!text.startsWith("You are timed out for "))
     {
         return -1;
@@ -915,6 +928,28 @@ int IrcMessageHandler::parseTimedoutNoticeMessage(Communi::IrcMessage *message)
     }
 
     QStringRef durationText(&text, 22, text.size() - (22 + 14));
+    bool ok;
+    int durationInSeconds = durationText.toInt(&ok);
+    return !ok ? -1 : durationInSeconds;
+}
+
+int IrcMessageHandler::parseSlowmodeNoticeMessage(
+    Communi::IrcNoticeMessage *message)
+{
+    // @msg-id=msg_slowmode :tmi.twitch.tv NOTICE #twitch :This room is in slow mode and you are sending messages too quickly. You will be able to talk again in 93 seconds.
+    QString text = message->content();
+    if (!text.startsWith(
+            "This room is in slow mode and you are sending messages too "
+            "quickly. You will be able to talk again in "))
+    {
+        return -1;
+    }
+    else if (!text.endsWith(" seconds."))
+    {
+        return -1;
+    }
+
+    QStringRef durationText(&text, 102, text.size() - (102 + 9));
     bool ok;
     int durationInSeconds = durationText.toInt(&ok);
     return !ok ? -1 : durationInSeconds;

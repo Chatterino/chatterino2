@@ -194,8 +194,8 @@ TwitchChannel::TwitchChannel(const QString &name)
     this->liveStatusTimer_.start(60 * 1000);
 
     // timeout countdown message
-    QObject::connect(&this->timeoutCounter_, &QTimer::timeout, [this] {
-        this->resyncTimedOut();
+    QObject::connect(&this->chatAgainCounter_, &QTimer::timeout, [this] {
+        this->resyncChatAgain();
     });
 
     // debugging
@@ -218,20 +218,47 @@ bool TwitchChannel::isEmpty() const
     return this->getName().isEmpty();
 }
 
-void TwitchChannel::resyncTimedOut()
+void TwitchChannel::resyncChatAgain()
 {
     auto now = std::chrono::steady_clock::now();
-    int seconds = (this->timeoutEnds_ - now) / std::chrono::seconds(1);
-    auto remaining = formatTime(seconds);
+    long seconds = 0;
+    if (this->timeoutEnds_.has_value())
+        seconds = std::max(
+            seconds, (*this->timeoutEnds_ - now) / std::chrono::seconds(1));
+    if (this->slowedEnds_.has_value())
+        seconds = std::max(
+            seconds, (*this->slowedEnds_ - now) / std::chrono::seconds(1));
     if (seconds <= 0)
     {
-        this->timeoutCounter_.stop();
-        this->timeoutStatusSignal.invoke("");
+        this->chatAgainCounter_.stop();
+        this->chatAgainSignal.invoke("");
     }
     else
     {
-        this->timeoutStatusSignal.invoke(remaining);
+        auto remaining = formatTime(seconds);
+        this->chatAgainSignal.invoke(remaining);
+        if (!this->chatAgainCounter_.isActive())
+        {
+            this->chatAgainCounter_.start(1000);
+        }
     }
+}
+
+void TwitchChannel::setSlowedDown(int durationInSeconds)
+{
+    if (durationInSeconds <= 0)
+    {
+        this->slowedEnds_.reset();
+        this->resyncChatAgain();
+        return;
+    }
+    qCDebug(chatterinoTwitch)
+        << "[TwitchChannel" << this->getName() << "] Slowed down for"
+        << durationInSeconds << "seconds";
+    this->slowedEnds_ = std::chrono::ceil<std::chrono::seconds>(
+        std::chrono::steady_clock::now() +
+        std::chrono::seconds(durationInSeconds));
+    this->resyncChatAgain();
 }
 
 void TwitchChannel::setTimedOut(int durationInSeconds)
@@ -239,20 +266,20 @@ void TwitchChannel::setTimedOut(int durationInSeconds)
     if (durationInSeconds <= 0)
     {
         // Clear timer
-        this->timeoutEnds_ = std::chrono::steady_clock::now();
-        this->resyncTimedOut();
+        this->timeoutEnds_.reset();
+        this->resyncChatAgain();
         return;
     }
 
+    qCDebug(chatterinoTwitch)
+        << "[TwitchChannel" << this->getName() << "] Timed out for"
+        << durationInSeconds << "seconds";
+
     // (Re)set timer
-    auto now = std::chrono::floor<std::chrono::seconds>(
+    auto now = std::chrono::ceil<std::chrono::seconds>(
         std::chrono::steady_clock::now());
     this->timeoutEnds_ = now + std::chrono::seconds(durationInSeconds);
-    if (!this->timeoutCounter_.isActive())
-    {
-        this->timeoutCounter_.start(1000);
-        this->resyncTimedOut();
-    }
+    this->resyncChatAgain();
 }
 
 bool TwitchChannel::canSendMessage() const
@@ -450,6 +477,18 @@ void TwitchChannel::sendMessage(const QString &message)
     {
         qCDebug(chatterinoTwitch) << "sent";
         this->lastSentMessage_ = parsedMessage;
+        if (!this->hasHighRateLimit())
+        {
+            auto roomModes = *this->accessRoomModes();
+            if (roomModes.slowMode > 0)
+            {
+                // XXX: this'll (incorrectly) reset the countdown if we still
+                // have time remaining if the user was too eager to send a
+                // message. However, the timer will be corrected by the
+                // resulting error NOTICE.
+                this->setSlowedDown(roomModes.slowMode);
+            }
+        }
     }
 }
 
@@ -543,7 +582,15 @@ SharedAccessGuard<const TwitchChannel::RoomModes>
 
 void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
 {
+    int previousSlow = (*this->accessRoomModes()).slowMode;
     this->roomModes_ = _roomModes;
+
+    if (previousSlow != _roomModes.slowMode)
+    {
+        // Changing the slow mode resets the timeout for all chatters, even if
+        // the new slowmode is longer than the previous value.
+        this->setSlowedDown(0);
+    }
 
     this->roomModesChanged.invoke();
 }

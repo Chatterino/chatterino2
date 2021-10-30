@@ -54,7 +54,6 @@ public:
         messageAppended;
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
     pajlada::Signals::Signal<size_t, MessagePtr &> messageReplaced;
-    pajlada::Signals::Signal<const QString &> timeoutStatusSignal;
     pajlada::Signals::NoArgSignal destroyed;
     pajlada::Signals::NoArgSignal displayNameChanged;
 

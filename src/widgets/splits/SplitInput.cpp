@@ -73,14 +73,14 @@ void SplitInput::initLayout()
     {
         auto hbox = box.emplace<QHBoxLayout>().withoutMargin();
         {
-            auto timeoutStatus =
-                hbox.emplace<QLabel>().assign(&this->ui_.timeoutStatus);
-            timeoutStatus->setStyleSheet("color: gold");
+            auto chatAgainStatus =
+                hbox.emplace<QLabel>().assign(&this->ui_.chatAgainStatus);
+            chatAgainStatus->setStyleSheet("color: gold");
             auto textEditLength =
                 hbox.emplace<QLabel>().assign(&this->ui_.textEditLength);
             textEditLength->setAlignment(Qt::AlignRight);
 
-            timeoutStatus->setText("1m 5s");
+            chatAgainStatus->setText("1m 5s");
             textEditLength->setText("10");
         }
 
@@ -632,9 +632,9 @@ void SplitInput::insertText(const QString &text)
     this->ui_.textEdit->insertPlainText(text);
 }
 
-void SplitInput::setTimeoutStatus(const QString &text)
+void SplitInput::setChatAgainStatus(const QString &text)
 {
-    this->ui_.timeoutStatus->setText(text);
+    this->ui_.chatAgainStatus->setText(text);
 }
 
 void SplitInput::editTextChanged()

@@ -709,25 +709,25 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
 
     this->underlyingChannel_ = underlyingChannel;
 
-    this->channelConnections_.push_back(
-        underlyingChannel->timeoutStatusSignal.connect(
-            [this](const QString &text) {
-                Split *split = dynamic_cast<Split *>(this->parentWidget());
-                if (split != nullptr)
-                {
-                    split->getInput().setTimeoutStatus(text);
-                }
-            }));
-
     this->queueLayout();
     this->queueUpdate();
 
-    // Notifications
     if (auto tc = dynamic_cast<TwitchChannel *>(underlyingChannel.get()))
     {
+        // Notifications
         this->connections_.push_back(tc->liveStatusChanged.connect([this]() {
             this->liveStatusChanged.invoke();
         }));
+
+        // Timeouts/slowmode
+        this->channelConnections_.push_back(
+            tc->chatAgainSignal.connect([this](const QString &text) {
+                Split *split = dynamic_cast<Split *>(this->parentWidget());
+                if (split != nullptr)
+                {
+                    split->getInput().setChatAgainStatus(text);
+                }
+            }));
     }
 }
 

@@ -19,6 +19,7 @@
 #include <pajlada/signals/signalholder.hpp>
 
 #include <mutex>
+#include <optional>
 #include <unordered_map>
 
 namespace chatterino {
@@ -74,8 +75,9 @@ public:
     virtual void reconnect() override;
     void refreshTitle();
     void createClip();
+    void setSlowedDown(int durationInSeconds);
     void setTimedOut(int durationInSeconds);
-    void resyncTimedOut();
+    void resyncChatAgain();
 
     // Data
     const QString &subscriptionUrl();
@@ -110,6 +112,7 @@ public:
     pajlada::Signals::NoArgSignal userStateChanged;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::NoArgSignal roomModesChanged;
+    pajlada::Signals::Signal<const QString &> chatAgainSignal;
 
     // Channel point rewards
     pajlada::Signals::SelfDisconnectingSignal<ChannelPointReward>
@@ -124,8 +127,12 @@ private:
         QString displayName;
         QString localizedName;
     } nameOptions;
-    QTimer timeoutCounter_;
-    std::chrono::steady_clock::time_point timeoutEnds_;
+
+    QTimer chatAgainCounter_;
+    // Timepoint at which we can send messages again after a timeout.
+    std::optional<std::chrono::steady_clock::time_point> timeoutEnds_;
+    // Timepoint at which we can send messages again during slow mode.
+    std::optional<std::chrono::steady_clock::time_point> slowedEnds_;
 
 protected:
     explicit TwitchChannel(const QString &channelName);

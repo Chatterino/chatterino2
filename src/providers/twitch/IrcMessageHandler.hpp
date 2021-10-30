@@ -56,7 +56,8 @@ public:
     static void setSimilarityFlags(MessagePtr message, ChannelPtr channel);
 
 private:
-    int parseTimedoutNoticeMessage(Communi::IrcMessage *message);
+    int parseTimedoutNoticeMessage(Communi::IrcNoticeMessage *message);
+    int parseSlowmodeNoticeMessage(Communi::IrcNoticeMessage *message);
     void addMessage(Communi::IrcMessage *message, const QString &target,
                     const QString &content, TwitchIrcServer &server,
                     bool isResub, bool isAction);
