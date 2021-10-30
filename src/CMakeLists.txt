@@ -505,6 +505,11 @@ if (BUILD_WITH_QTKEYCHAIN)
             PUBLIC
             qt${MAJOR_QT_VERSION}keychain
             )
+else()
+    target_compile_definitions(${LIBRARY_PROJECT}
+        PUBLIC
+        NO_QTKEYCHAIN
+        )
 endif()
 
 if (BUILD_APP)

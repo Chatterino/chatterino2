@@ -94,8 +94,6 @@ if (BUILD_WITH_QTKEYCHAIN)
             message(FATAL_ERROR "qt${MAJOR_QT_VERSION}keychain target was not created :@")
         endif()
     endif()
-else()
-    add_definitions(-DNO_QTKEYCHAIN)
 endif()
 
 find_package(RapidJSON REQUIRED)
