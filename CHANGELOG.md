@@ -44,7 +44,7 @@
 - Bugfix: Fixed `First Message` custom sound not persisting through restart. (#3303)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
-- Dev: Added a CMake build option to build with or without Qt5Keychain support, `BUILD_WITH_QTKEYCHAIN` (#3318)
+- Dev: Added CMake build option `BUILD_WITH_QTKEYCHAIN` to build with or without Qt5Keychain support (On by default). (#3318)
 
 ## 2.3.4
 
