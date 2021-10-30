@@ -289,39 +289,44 @@ void Scrollbar::paintEvent(QPaintEvent *)
     int highlightHeight =
         int(std::ceil(std::max<float>(this->scale() * 2, dY)));
 
-    for (size_t i = 0; i < snapshotLength; i++)
+    for (size_t i = 0; i < snapshotLength; i++, y += dY)
     {
         ScrollbarHighlight const &highlight = snapshot[i];
 
-        if (!highlight.isNull())
+        if (highlight.isNull())
         {
-            if ((!highlight.isRedeemedHighlight() ||
-                 enableRedeemedHighlights) &&
-                (!highlight.isFirstMessageHighlight() ||
-                 enableFirstMessageHighlights))
-            {
-                QColor color = highlight.getColor();
-                color.setAlpha(255);
-
-                switch (highlight.getStyle())
-                {
-                    case ScrollbarHighlight::Default: {
-                        painter.fillRect(w / 8 * 3, int(y), w / 4,
-                                         highlightHeight, color);
-                    }
-                    break;
-
-                    case ScrollbarHighlight::Line: {
-                        painter.fillRect(0, int(y), w, 1, color);
-                    }
-                    break;
-
-                    case ScrollbarHighlight::None:;
-                }
-            }
+            continue;
         }
 
-        y += dY;
+        if (highlight.isRedeemedHighlight() && !enableRedeemedHighlights)
+        {
+            continue;
+        }
+
+        if (highlight.isFirstMessageHighlight() &&
+            !enableFirstMessageHighlights)
+        {
+            continue;
+        }
+
+        QColor color = highlight.getColor();
+        color.setAlpha(255);
+
+        switch (highlight.getStyle())
+        {
+            case ScrollbarHighlight::Default: {
+                painter.fillRect(w / 8 * 3, int(y), w / 4, highlightHeight,
+                                 color);
+            }
+            break;
+
+            case ScrollbarHighlight::Line: {
+                painter.fillRect(0, int(y), w, 1, color);
+            }
+            break;
+
+            case ScrollbarHighlight::None:;
+        }
     }
 }
 
