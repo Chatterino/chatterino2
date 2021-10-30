@@ -221,12 +221,14 @@ bool TwitchChannel::isEmpty() const
 void TwitchChannel::resyncChatAgain()
 {
     auto now = std::chrono::steady_clock::now();
-    long seconds = 0;
+    int seconds = 0;
     if (this->timeoutEnds_.has_value())
-        seconds = std::max(
+    {
+        seconds = std::max<int>(
             seconds, (*this->timeoutEnds_ - now) / std::chrono::seconds(1));
+    }
     if (this->slowedEnds_.has_value())
-        seconds = std::max(
+        seconds = std::max<int>(
             seconds, (*this->slowedEnds_ - now) / std::chrono::seconds(1));
     if (seconds <= 0)
     {

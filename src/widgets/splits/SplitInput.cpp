@@ -79,9 +79,6 @@ void SplitInput::initLayout()
             auto textEditLength =
                 hbox.emplace<QLabel>().assign(&this->ui_.textEditLength);
             textEditLength->setAlignment(Qt::AlignRight);
-
-            chatAgainStatus->setText("1m 5s");
-            textEditLength->setText("10");
         }
 
         box->addStretch(1);
