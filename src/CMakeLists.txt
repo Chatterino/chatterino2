@@ -556,7 +556,10 @@ if (BUILD_APP)
 endif ()
 
 if (USE_PRECOMPILED_HEADERS)
+    message(STATUS "Building with precompiled headers")
     target_precompile_headers(${LIBRARY_PROJECT} PRIVATE PrecompiledHeader.hpp)
+else ()
+    message(STATUS "Building without precompiled headers")
 endif ()
 
 # Enable autogeneration of Qts MOC/RCC/UIC
