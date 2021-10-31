@@ -238,7 +238,8 @@ private:
 class EmoteElement : public MessageElement
 {
 public:
-    EmoteElement(const EmotePtr &data, MessageElementFlags flags_);
+    EmoteElement(const EmotePtr &data, MessageElementFlags flags_,
+                 const MessageColor &textElementColor = MessageColor::Text);
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags_) override;
