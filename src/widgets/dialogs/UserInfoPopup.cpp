@@ -58,6 +58,23 @@ namespace {
         return label.getElement();
     };
 
+    Button *addLoginNameButton(LayoutCreator<QHBoxLayout> box)
+    {
+        auto button = box.emplace<Button>();
+        button->setPixmap(getApp()->themes->buttons.copy);
+        button->setScaleIndependantSize(18, 18);
+        button->setDim(Button::Dim::Lots);
+        QObject::connect(
+            button.getElement(), &Button::leftClicked,
+            [button = button.getElement()] {
+                auto copyText = button->property("copy-text").toString();
+
+                crossPlatformCopy(copyText.isEmpty() ? QString("") : copyText);
+            });
+
+        return button.getElement();
+    };
+
     bool checkMessageUserName(const QString &userName, MessagePtr message)
     {
         if (message->flags.has(MessageFlag::Whisper))
@@ -207,6 +224,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                .withoutSpacing();
                 this->ui_.nameLabel = addCopyableLabel(box);
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
+                this->ui_.loginNameButton = addLoginNameButton(box);
                 box->addStretch(1);
                 auto palette = QPalette();
                 palette.setColor(QPalette::WindowText, QColor("#aaa"));
@@ -582,6 +600,7 @@ void UserInfoPopup::updateUserData()
         this->ui_.createdDateLabel->setText(TEXT_CREATED.arg(TEXT_UNAVAILABLE));
 
         this->ui_.nameLabel->setText(this->userName_);
+        this->ui_.loginNameButton->hide();
 
         this->ui_.userIDLabel->setText(QString("ID ") +
                                        QString(TEXT_UNAVAILABLE));
@@ -599,6 +618,19 @@ void UserInfoPopup::updateUserData()
         this->avatarUrl_ = user.profileImageUrl;
 
         this->ui_.nameLabel->setText(user.displayName);
+        this->ui_.nameLabel->setProperty("copy-text", user.displayName);
+
+        // copyable button for login name of users with a localized username
+        if (user.displayName.toLower() != user.login)
+        {
+            this->ui_.loginNameButton->setProperty("copy-text", user.login);
+            this->ui_.loginNameButton->setToolTip("copy login name");
+        }
+        else
+        {
+            this->ui_.loginNameButton->hide();
+        }
+
         this->setWindowTitle(
             TEXT_TITLE.arg(user.displayName, this->channel_->getName()));
         this->ui_.viewCountLabel->setText(
