@@ -46,6 +46,7 @@ protected:
 private:
     void addShortcuts() override;
     void initLayout();
+    bool eventFilter(QObject *obj, QEvent *event) override;
     void installKeyPressedEvent();
     void onCursorPositionChanged();
     void onTextChanged();

@@ -33,6 +33,7 @@ SplitInput::SplitInput(Split *_chatWidget)
     : BaseWidget(_chatWidget)
     , split_(_chatWidget)
 {
+    this->installEventFilter(this);
     this->initLayout();
 
     auto completer =
@@ -434,6 +435,27 @@ void SplitInput::addShortcuts()
 
     this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
         HotkeyScope::SplitInput, actions, this);
+}
+
+bool SplitInput::eventFilter(QObject *obj, QEvent *event)
+{
+    if (event->type() == QEvent::ShortcutOverride ||
+        event->type() == QEvent::Shortcut)
+    {
+        if (auto popup = this->inputCompletionPopup_.get())
+        {
+            if (popup->isVisible())
+            {
+                // Stop shortcut from triggering by saying we will handle it ourselves
+                event->accept();
+
+                // Return false means the underlying event isn't stopped, it will continue to propagate
+                return false;
+            }
+        }
+    }
+
+    return BaseWidget::eventFilter(obj, event);
 }
 
 void SplitInput::installKeyPressedEvent()
