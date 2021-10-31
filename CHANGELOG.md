@@ -45,6 +45,7 @@
 - Bugfix: Fixed `First Message` custom sound not persisting through restart. (#3303)
 - Bugfix: Fixed `First Message` scrollbar highlights not being disabled. (#3325)
 - Bugfix: Fixed the reconnection backoff accidentally resetting when thrown out of certain IRC servers. (#3328)
+- Bugfix: Fixed underlying text from disabled emotes not being colorized properly. (#3333)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
