@@ -27,6 +27,7 @@
 - Minor: Added `flags.first_message` filter variable (#3292)
 - Minor: Removed duplicate setting for toggling `Channel Point Redeemed Message` highlights (#3296)
 - Minor: Clean up chat messages of special line characters prior to sending. (#3312)
+- Minor: IRC now parses/displays links like Twitch chat. (#3334)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
