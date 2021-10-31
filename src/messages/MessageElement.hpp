@@ -238,7 +238,8 @@ private:
 class EmoteElement : public MessageElement
 {
 public:
-    EmoteElement(const EmotePtr &data, MessageElementFlags flags_);
+    EmoteElement(const EmotePtr &data, MessageElementFlags flags_,
+                 const MessageColor &textElementColor = MessageColor::Text);
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags_) override;
@@ -332,7 +333,7 @@ public:
                         MessageElementFlags flags) override;
 };
 
-// contains a full message string that's split into words on space and parses irc colors that are then put into segments
+// contains a full message string that's split into words on space and parses IRC colors that are then put into segments
 // these segments are later passed to "MultiColorTextLayoutElement" elements to be rendered :)
 class IrcTextElement : public MessageElement
 {

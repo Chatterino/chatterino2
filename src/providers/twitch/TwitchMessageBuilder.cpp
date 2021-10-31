@@ -211,7 +211,7 @@ MessagePtr TwitchMessageBuilder::build()
         this->bits = iterator.value().toString();
     }
 
-    // twitch emotes
+    // Twitch emotes
     std::vector<TwitchEmoteOccurence> twitchEmotes;
 
     iterator = this->tags.find("emotes");
@@ -319,7 +319,9 @@ void TwitchMessageBuilder::addWords(
             {
                 // This emote exists right at the start of the word!
                 this->emplace<EmoteElement>(currentTwitchEmote.ptr,
-                                            MessageElementFlag::TwitchEmote);
+                                            MessageElementFlag::TwitchEmote,
+                                            this->textColor_);
+
                 auto len = currentTwitchEmote.name.string.length();
                 cursor += len;
                 word = word.mid(len);
@@ -1007,7 +1009,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 
     if (emote)
     {
-        this->emplace<EmoteElement>(emote.get(), flags);
+        this->emplace<EmoteElement>(emote.get(), flags, this->textColor_);
         return Success;
     }
 
@@ -1162,12 +1164,14 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
         if (cheerEmote.staticEmote)
         {
             this->emplace<EmoteElement>(cheerEmote.staticEmote,
-                                        MessageElementFlag::BitsStatic);
+                                        MessageElementFlag::BitsStatic,
+                                        this->textColor_);
         }
         if (cheerEmote.animatedEmote)
         {
             this->emplace<EmoteElement>(cheerEmote.animatedEmote,
-                                        MessageElementFlag::BitsAnimated);
+                                        MessageElementFlag::BitsAnimated,
+                                        this->textColor_);
         }
         if (cheerEmote.color != QColor())
         {
@@ -1195,12 +1199,14 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     if (cheerEmote.staticEmote)
     {
         this->emplace<EmoteElement>(cheerEmote.staticEmote,
-                                    MessageElementFlag::BitsStatic);
+                                    MessageElementFlag::BitsStatic,
+                                    this->textColor_);
     }
     if (cheerEmote.animatedEmote)
     {
         this->emplace<EmoteElement>(cheerEmote.animatedEmote,
-                                    MessageElementFlag::BitsAnimated);
+                                    MessageElementFlag::BitsAnimated,
+                                    this->textColor_);
     }
     if (cheerEmote.color != QColor())
     {
@@ -1365,7 +1371,7 @@ void TwitchMessageBuilder::hostingSystemMessage(const QString &channelName,
     builder->message().searchText = text;
 }
 
-// irc variant
+// IRC variant
 void TwitchMessageBuilder::deletionMessage(const MessagePtr originalMessage,
                                            MessageBuilder *builder)
 {
@@ -1436,6 +1442,51 @@ void TwitchMessageBuilder::deletionMessage(const DeleteAction &action,
             action.messageText, MessageElementFlag::Text, MessageColor::Text);
     }
     builder->message().timeoutUser = "msg:" + action.messageId;
+}
+
+void TwitchMessageBuilder::modsOrVipsSystemMessage(QString prefix,
+                                                   QStringList users,
+                                                   TwitchChannel *channel,
+                                                   MessageBuilder *builder)
+{
+    builder->emplace<TimestampElement>();
+    builder->message().flags.set(MessageFlag::System);
+    builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
+    builder->emplace<TextElement>(prefix, MessageElementFlag::Text,
+                                  MessageColor::System);
+    bool isFirst = true;
+    for (const QString &username : users)
+    {
+        if (!isFirst)
+        {
+            // this is used to add the ", " after each but the last entry
+            builder->emplace<TextElement>(",", MessageElementFlag::Text,
+                                          MessageColor::System);
+        }
+        isFirst = false;
+
+        MessageColor color = MessageColor::System;
+
+        if (getSettings()->colorUsernames)
+        {
+            if (auto userColor = channel->getUserColor(username);
+                userColor.isValid())
+            {
+                color = MessageColor(userColor);
+            }
+        }
+
+        builder
+            ->emplace<TextElement>(username, MessageElementFlag::BoldUsername,
+                                   color, FontStyle::ChatMediumBold)
+            ->setLink({Link::UserInfo, username})
+            ->setTrailingSpace(false);
+        builder
+            ->emplace<TextElement>(username,
+                                   MessageElementFlag::NonBoldUsername, color)
+            ->setLink({Link::UserInfo, username})
+            ->setTrailingSpace(false);
+    }
 }
 
 }  // namespace chatterino

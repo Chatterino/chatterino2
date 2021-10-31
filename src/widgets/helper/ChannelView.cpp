@@ -1927,7 +1927,7 @@ void ChannelView::addContextMenuItems(
         crossPlatformCopy(copyString);
     });
 
-    // If is a link to a twitch user/stream
+    // If is a link to a Twitch user/stream
     if (hoveredElement->getLink().type == Link::Url)
     {
         static QRegularExpression twitchChannelRegex(
@@ -1935,7 +1935,7 @@ void ChannelView::addContextMenuItems(
             QRegularExpression::CaseInsensitiveOption);
         static QSet<QString> ignoredUsernames{
             "videos",    "settings", "directory",     "jobs",     "friends",
-            "inventory", "payments", "subscriptions", "messages",
+            "inventory", "payments", "subscriptions", "messages", "drops",
         };
 
         auto twitchMatch =

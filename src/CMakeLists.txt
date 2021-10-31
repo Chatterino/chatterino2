@@ -158,6 +158,8 @@ set(SOURCE_FILES
         messages/search/LinkPredicate.hpp
         messages/search/MessageFlagsPredicate.cpp
         messages/search/MessageFlagsPredicate.hpp
+        messages/search/RegexPredicate.cpp
+        messages/search/RegexPredicate.hpp
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
 
@@ -565,7 +567,10 @@ if (BUILD_APP)
 endif ()
 
 if (USE_PRECOMPILED_HEADERS)
+    message(STATUS "Building with precompiled headers")
     target_precompile_headers(${LIBRARY_PROJECT} PRIVATE PrecompiledHeader.hpp)
+else ()
+    message(STATUS "Building without precompiled headers")
 endif ()
 
 # Enable autogeneration of Qts MOC/RCC/UIC
