@@ -9,10 +9,12 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 
-#ifdef CMAKE_BUILD
-#    include "qt5keychain/keychain.h"
-#else
-#    include "keychain.h"
+#ifndef NO_QTKEYCHAIN
+#    ifdef CMAKE_BUILD
+#        include "qt5keychain/keychain.h"
+#    else
+#        include "keychain.h"
+#    endif
 #endif
 #include <QSaveFile>
 #include <boost/variant.hpp>
@@ -28,6 +30,9 @@ namespace chatterino {
 namespace {
     bool useKeyring()
     {
+#ifdef NO_QTKEYCHAIN
+        return false;
+#endif
         if (getPaths()->isPortable())
         {
             return false;
@@ -104,6 +109,7 @@ namespace {
 
     static void runNextJob()
     {
+#ifndef NO_QTKEYCHAIN
         auto &&queue = jobQueue();
 
         if (!queue.empty())
@@ -140,6 +146,7 @@ namespace {
 
             queue.pop();
         }
+#endif
     }
 
     static void queueJob(Job &&job)
@@ -174,6 +181,8 @@ void Credentials::get(const QString &provider, const QString &name_,
 
     if (useKeyring())
     {
+#ifndef NO_QTKEYCHAIN
+        // if NO_QTKEYCHAIN is set, then this code is never used either way
         auto job = new QKeychain::ReadPasswordJob("chatterino");
         job->setAutoDelete(true);
         job->setKey(name);
@@ -184,6 +193,7 @@ void Credentials::get(const QString &provider, const QString &name_,
             },
             Qt::DirectConnection);
         job->start();
+#endif
     }
     else
     {
