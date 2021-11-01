@@ -44,8 +44,8 @@ namespace {
         auto label = box.emplace<Label>();
         auto button = box.emplace<Button>();
         button->setPixmap(getApp()->themes->buttons.copy);
-        button->setScaleIndependantSize(24, 24);
-        button->setDim(Button::Dim::Some);
+        button->setScaleIndependantSize(18, 18);
+        button->setDim(Button::Dim::Lots);
         QObject::connect(
             button.getElement(), &Button::leftClicked,
             [label = label.getElement()] {
@@ -58,21 +58,26 @@ namespace {
         return label.getElement();
     };
 
-    Button *addLoginNameButton(LayoutCreator<QHBoxLayout> box)
+    Label *addLoginLabel(LayoutCreator<QHBoxLayout> box,
+                         Button **loginCopyButton)
     {
-        auto button = box.emplace<Button>();
-        button->setPixmap(getApp()->themes->buttons.loginCopy);
-        button->setScaleIndependantSize(24, 24);
-        button->setDim(Button::Dim::Some);
+        auto label = box.emplace<Label>();
+        auto button = box.emplace<Button>().assign(loginCopyButton);
+        button->setPixmap(getApp()->themes->buttons.copy);
+        button->setScaleIndependantSize(18, 18);
+        button->setDim(Button::Dim::Lots);
         QObject::connect(
             button.getElement(), &Button::leftClicked,
-            [button = button.getElement()] {
-                auto copyText = button->property("copy-text").toString();
+            [label = label.getElement()] {
+                auto copyText = label->property("copy-text").toString();
 
-                crossPlatformCopy(copyText.isEmpty() ? QString("") : copyText);
+                crossPlatformCopy(copyText.isEmpty() ? label->getText()
+                                                     : copyText);
             });
 
-        return button.getElement();
+        button->setVisible(false);
+        label->setVisible(false);
+        return label.getElement();
     };
 
     bool checkMessageUserName(const QString &userName, MessagePtr message)
@@ -224,7 +229,10 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                .withoutSpacing();
                 this->ui_.nameLabel = addCopyableLabel(box);
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
-                this->ui_.loginNameButton = addLoginNameButton(box);
+                box->addStretch(1);
+                this->ui_.loginLabel =
+                    addLoginLabel(box, &this->ui_.loginCopyButton);
+                this->ui_.loginLabel->setFontStyle(FontStyle::UiMediumBold);
                 box->addStretch(1);
                 auto palette = QPalette();
                 palette.setColor(QPalette::WindowText, QColor("#aaa"));
@@ -600,7 +608,6 @@ void UserInfoPopup::updateUserData()
         this->ui_.createdDateLabel->setText(TEXT_CREATED.arg(TEXT_UNAVAILABLE));
 
         this->ui_.nameLabel->setText(this->userName_);
-        this->ui_.loginNameButton->hide();
 
         this->ui_.userIDLabel->setText(QString("ID ") +
                                        QString(TEXT_UNAVAILABLE));
@@ -623,12 +630,10 @@ void UserInfoPopup::updateUserData()
         // copyable button for login name of users with a localized username
         if (user.displayName.toLower() != user.login)
         {
-            this->ui_.loginNameButton->setProperty("copy-text", user.login);
-            this->ui_.loginNameButton->setToolTip("copy login name");
-        }
-        else
-        {
-            this->ui_.loginNameButton->hide();
+            this->ui_.loginLabel->setText(user.login);
+            this->ui_.loginLabel->setProperty("copy-text", user.login);
+            this->ui_.loginLabel->setVisible(true);
+            this->ui_.loginCopyButton->setVisible(true);
         }
 
         this->setWindowTitle(

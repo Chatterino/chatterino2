@@ -50,9 +50,10 @@ private:
 
     struct {
         Button *avatarButton = nullptr;
-        Button *loginNameButton = nullptr;
+        Button *loginCopyButton = nullptr;
 
         Label *nameLabel = nullptr;
+        Label *loginLabel = nullptr;
         Label *viewCountLabel = nullptr;
         Label *followerCountLabel = nullptr;
         Label *createdDateLabel = nullptr;
