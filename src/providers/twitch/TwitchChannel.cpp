@@ -221,16 +221,26 @@ bool TwitchChannel::isEmpty() const
 void TwitchChannel::resyncChatAgain()
 {
     auto now = std::chrono::steady_clock::now();
-    int seconds = 0;
+    int seconds = -1;
     if (this->timeoutEnds_.has_value())
     {
-        seconds = std::max<int>(
-            seconds, (*this->timeoutEnds_ - now) / std::chrono::seconds(1));
+        int remaining = (*this->timeoutEnds_ - now) / std::chrono::seconds(1);
+        seconds = std::max<int>(seconds, remaining);
+        if (remaining < 0)
+        {
+            this->timeoutEnds_.reset();
+        }
     }
     if (this->slowedEnds_.has_value())
-        seconds = std::max<int>(
-            seconds, (*this->slowedEnds_ - now) / std::chrono::seconds(1));
-    if (seconds <= 0)
+    {
+        int remaining = (*this->slowedEnds_ - now) / std::chrono::seconds(1);
+        seconds = std::max<int>(seconds, remaining);
+        if (remaining < 0)
+        {
+            this->slowedEnds_.reset();
+        }
+    }
+    if (seconds < 0)
     {
         this->chatAgainCounter_.stop();
         this->chatAgainSignal.invoke("");
@@ -248,12 +258,16 @@ void TwitchChannel::resyncChatAgain()
 
 void TwitchChannel::setSlowedDown(int durationInSeconds)
 {
-    if (durationInSeconds <= 0)
+    if (durationInSeconds < 0)
     {
-        this->slowedEnds_.reset();
-        this->resyncChatAgain();
+        if (this->slowedEnds_.has_value())
+        {
+            this->slowedEnds_.reset();
+            this->resyncChatAgain();
+        }
         return;
     }
+
     qCDebug(chatterinoTwitch)
         << "[TwitchChannel" << this->getName() << "] Slowed down for"
         << durationInSeconds << "seconds";
@@ -265,11 +279,13 @@ void TwitchChannel::setSlowedDown(int durationInSeconds)
 
 void TwitchChannel::setTimedOut(int durationInSeconds)
 {
-    if (durationInSeconds <= 0)
+    if (durationInSeconds < 0)
     {
-        // Clear timer
-        this->timeoutEnds_.reset();
-        this->resyncChatAgain();
+        if (this->timeoutEnds_.has_value())
+        {
+            this->timeoutEnds_.reset();
+            this->resyncChatAgain();
+        }
         return;
     }
 

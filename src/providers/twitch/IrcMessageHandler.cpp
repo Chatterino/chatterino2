@@ -523,6 +523,8 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
     TwitchChannel *tc = dynamic_cast<TwitchChannel *>(c.get());
     if (tc != nullptr)
     {
+        bool hadHighLimit = tc->hasHighRateLimit();
+
         // Checking if currentUser is a VIP or staff member
         QVariant _badges = message->tag("badges");
         if (_badges.isValid())
@@ -545,7 +547,13 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         //
         // TODO: edgecase: we also get USERSTATE if we reconnected after JOIN,
         // which would incorrectly clear the timeout.
-        tc->setTimedOut(0);
+        tc->setTimedOut(-1);
+
+        // If we got modded/vipped, clear the slowdown timer.
+        if (!hadHighLimit && tc->hasHighRateLimit())
+        {
+            tc->setSlowedDown(-1);
+        }
     }
 }
 
