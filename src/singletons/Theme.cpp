@@ -88,10 +88,12 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     if (this->isLightTheme())
     {
         this->buttons.copy = getResources().buttons.copyDark;
+        this->buttons.loginCopy = getResources().buttons.loginCopyDark;
     }
     else
     {
         this->buttons.copy = getResources().buttons.copyLight;
+        this->buttons.loginCopy = getResources().buttons.loginCopyLight;
     }
 }
 

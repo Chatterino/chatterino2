@@ -21,6 +21,10 @@
     <file>buttons/copyLight.svg</file>
     <file>buttons/emote.svg</file>
     <file>buttons/emoteDark.svg</file>
+    <file>buttons/loginCopyDark.png</file>
+    <file>buttons/loginCopyDark.svg</file>
+    <file>buttons/loginCopyLight.png</file>
+    <file>buttons/loginCopyLight.svg</file>
     <file>buttons/menuDark.png</file>
     <file>buttons/menuLight.png</file>
     <file>buttons/mod.png</file>

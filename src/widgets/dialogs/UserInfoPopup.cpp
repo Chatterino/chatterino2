@@ -44,8 +44,8 @@ namespace {
         auto label = box.emplace<Label>();
         auto button = box.emplace<Button>();
         button->setPixmap(getApp()->themes->buttons.copy);
-        button->setScaleIndependantSize(18, 18);
-        button->setDim(Button::Dim::Lots);
+        button->setScaleIndependantSize(24, 24);
+        button->setDim(Button::Dim::Some);
         QObject::connect(
             button.getElement(), &Button::leftClicked,
             [label = label.getElement()] {
@@ -61,9 +61,9 @@ namespace {
     Button *addLoginNameButton(LayoutCreator<QHBoxLayout> box)
     {
         auto button = box.emplace<Button>();
-        button->setPixmap(getApp()->themes->buttons.copy);
-        button->setScaleIndependantSize(18, 18);
-        button->setDim(Button::Dim::Lots);
+        button->setPixmap(getApp()->themes->buttons.loginCopy);
+        button->setScaleIndependantSize(24, 24);
+        button->setDim(Button::Dim::Some);
         QObject::connect(
             button.getElement(), &Button::leftClicked,
             [button = button.getElement()] {

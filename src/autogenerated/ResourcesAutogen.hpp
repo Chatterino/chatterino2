@@ -26,6 +26,8 @@ public:
         QPixmap banRed;
         QPixmap copyDark;
         QPixmap copyLight;
+        QPixmap loginCopyDark;
+        QPixmap loginCopyLight;
         QPixmap menuDark;
         QPixmap menuLight;
         QPixmap mod;

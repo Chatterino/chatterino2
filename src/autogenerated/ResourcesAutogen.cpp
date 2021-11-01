@@ -19,6 +19,8 @@ Resources2::Resources2()
     this->buttons.banRed = QPixmap(":/buttons/banRed.png");
     this->buttons.copyDark = QPixmap(":/buttons/copyDark.png");
     this->buttons.copyLight = QPixmap(":/buttons/copyLight.png");
+    this->buttons.loginCopyDark = QPixmap(":/buttons/loginCopyDark.png");
+    this->buttons.loginCopyLight = QPixmap(":/buttons/loginCopyLight.png");
     this->buttons.menuDark = QPixmap(":/buttons/menuDark.png");
     this->buttons.menuLight = QPixmap(":/buttons/menuLight.png");
     this->buttons.mod = QPixmap(":/buttons/mod.png");

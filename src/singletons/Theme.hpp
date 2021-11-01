@@ -50,6 +50,7 @@ public:
 
     struct {
         QPixmap copy;
+        QPixmap loginCopy;
     } buttons;
 
     void normalizeColor(QColor &color);
