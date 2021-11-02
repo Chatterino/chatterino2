@@ -128,6 +128,12 @@ void SplitInput::initLayout()
             this->editTextChanged();
         },
         this->managedConnections_);
+
+    getSettings()->showChatAgainTimer.connect(
+        [this](const bool &value, auto) {
+            this->ui_.chatAgainStatus->setHidden(!value);
+        },
+        this->managedConnections_);
 }
 
 void SplitInput::scaleChangedEvent(float scale)

@@ -84,6 +84,8 @@ public:
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
+    BoolSetting showChatAgainTimer = {"/appearance/messages/showChatAgainTimer",
+                                      true};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
     BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
