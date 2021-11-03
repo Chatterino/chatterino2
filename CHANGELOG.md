@@ -2,7 +2,7 @@
 
 ## Unversioned
 
-- Major: Add countdown to input box to show when you can chat again during slow mode / after a timeout (#3329)
+- Major: Added a countdown to the input box to show when you can chat again during slow mode / after a timeout. (#3329)
 - Minor: Added new search predicate to filter for messages matching a regex (#3282)
 - Minor: Add `{channel.name}`, `{channel.id}`, `{stream.game}`, `{stream.title}`, `{my.id}`, `{my.name}` placeholders for commands (#3155)
 - Minor: Remove TwitchEmotes.com attribution and the open/copy options when right-clicking a Twitch Emote. (#2214, #3136)
