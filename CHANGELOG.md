@@ -24,6 +24,7 @@
 - Minor: Added chatter count to viewer list popout (#3261)
 - Minor: Added highlights for first messages (#3267)
 - Minor: Ignore out of bounds check for tiling wms (#3270)
+- Minor: Add clear cache button to cache settings section (#3277)
 - Minor: Added `flags.first_message` filter variable (#3292)
 - Minor: Removed duplicate setting for toggling `Channel Point Redeemed Message` highlights (#3296)
 - Minor: Clean up chat messages of special line characters prior to sending. (#3312)
