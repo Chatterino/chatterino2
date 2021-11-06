@@ -194,7 +194,7 @@ void SettingsDialog::addTabs()
     this->addTab([]{return new IgnoresPage;},          "Ignores",        ":/settings/ignore.svg");
     this->addTab([]{return new FiltersPage;},          "Filters",        ":/settings/filters.svg");
     this->ui_.tabContainer->addSpacing(16);
-    this->addTab([]{return new KeyboardSettingsPage;}, "Keybindings",    ":/settings/keybinds.svg");
+    this->addTab([]{return new KeyboardSettingsPage;}, "Hotkeys",        ":/settings/keybinds.svg");
     this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg", SettingsTabId::Moderation);
     this->addTab([]{return new NotificationPage;},     "Live Notifications",  ":/settings/notification2.svg");
     this->addTab([]{return new ExternalToolsPage;},    "External tools", ":/settings/externaltools.svg");
