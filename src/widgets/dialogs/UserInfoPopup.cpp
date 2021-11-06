@@ -211,15 +211,20 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                 auto box = vbox.emplace<QHBoxLayout>()
                                .withoutMargin()
                                .withoutSpacing();
+
                 this->ui_.nameLabel = addCopyableLabel(box, "Copy name");
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
+                box->addSpacing(5);
                 box->addStretch(1);
+
                 this->ui_.localizedNameLabel =
                     addCopyableLabel(box, "Copy localized name",
                                      &this->ui_.localizedNameCopyButton);
                 this->ui_.localizedNameLabel->setFontStyle(
                     FontStyle::UiMediumBold);
+                box->addSpacing(5);
                 box->addStretch(1);
+
                 auto palette = QPalette();
                 palette.setColor(QPalette::WindowText, QColor("#aaa"));
                 this->ui_.userIDLabel = addCopyableLabel(box, "Copy ID");
