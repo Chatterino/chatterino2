@@ -142,6 +142,30 @@ namespace {
 
         return {Success, std::move(usernames)};
     }
+
+    void chatAgainTimerCheck(
+        const std::chrono::steady_clock::time_point &now,
+        std::optional<std::chrono::steady_clock::time_point> &endTime,
+        int &seconds)
+    {
+        if (!endTime.has_value())
+        {
+            return;
+        }
+
+        auto remaining =
+            std::chrono::duration_cast<std::chrono::seconds>(*endTime - now);
+        if (remaining.count() < 0)
+        {
+            endTime.reset();
+        }
+
+        if (remaining.count() > seconds)
+        {
+            seconds = remaining.count();
+        }
+    }
+
 }  // namespace
 
 TwitchChannel::TwitchChannel(const QString &name)
@@ -222,24 +246,10 @@ void TwitchChannel::resyncChatAgain()
 {
     auto now = std::chrono::steady_clock::now();
     int seconds = -1;
-    if (this->timeoutEnds_.has_value())
-    {
-        int remaining = (*this->timeoutEnds_ - now) / std::chrono::seconds(1);
-        seconds = std::max<int>(seconds, remaining);
-        if (remaining < 0)
-        {
-            this->timeoutEnds_.reset();
-        }
-    }
-    if (this->slowedEnds_.has_value())
-    {
-        int remaining = (*this->slowedEnds_ - now) / std::chrono::seconds(1);
-        seconds = std::max<int>(seconds, remaining);
-        if (remaining < 0)
-        {
-            this->slowedEnds_.reset();
-        }
-    }
+
+    chatAgainTimerCheck(now, this->userTimeoutEnd_, seconds);
+    chatAgainTimerCheck(now, this->userSlowedEnd_, seconds);
+
     if (seconds < 0)
     {
         this->chatAgainCounter_.stop();
@@ -256,13 +266,13 @@ void TwitchChannel::resyncChatAgain()
     }
 }
 
-void TwitchChannel::setSlowedDown(int durationInSeconds)
+void TwitchChannel::setUserSlowedDownDuration(int durationInSeconds)
 {
     if (durationInSeconds < 0)
     {
-        if (this->slowedEnds_.has_value())
+        if (this->userSlowedEnd_.has_value())
         {
-            this->slowedEnds_.reset();
+            this->userSlowedEnd_.reset();
             this->resyncChatAgain();
         }
         return;
@@ -271,19 +281,20 @@ void TwitchChannel::setSlowedDown(int durationInSeconds)
     qCDebug(chatterinoTwitch)
         << "[TwitchChannel" << this->getName() << "] Slowed down for"
         << durationInSeconds << "seconds";
-    this->slowedEnds_ = std::chrono::ceil<std::chrono::seconds>(
+    this->userSlowedEnd_ = std::chrono::ceil<std::chrono::seconds>(
         std::chrono::steady_clock::now() +
         std::chrono::seconds(durationInSeconds));
+
     this->resyncChatAgain();
 }
 
-void TwitchChannel::setTimedOut(int durationInSeconds)
+void TwitchChannel::setUserTimeoutDuration(int durationInSeconds)
 {
     if (durationInSeconds < 0)
     {
-        if (this->timeoutEnds_.has_value())
+        if (this->userTimeoutEnd_.has_value())
         {
-            this->timeoutEnds_.reset();
+            this->userTimeoutEnd_.reset();
             this->resyncChatAgain();
         }
         return;
@@ -296,7 +307,7 @@ void TwitchChannel::setTimedOut(int durationInSeconds)
     // (Re)set timer
     auto now = std::chrono::ceil<std::chrono::seconds>(
         std::chrono::steady_clock::now());
-    this->timeoutEnds_ = now + std::chrono::seconds(durationInSeconds);
+    this->userTimeoutEnd_ = now + std::chrono::seconds(durationInSeconds);
     this->resyncChatAgain();
 }
 
@@ -504,7 +515,7 @@ void TwitchChannel::sendMessage(const QString &message)
                 // have time remaining if the user was too eager to send a
                 // message. However, the timer will be corrected by the
                 // resulting error NOTICE.
-                this->setSlowedDown(roomModes.slowMode);
+                this->setUserSlowedDownDuration(roomModes.slowMode);
             }
         }
     }
@@ -607,7 +618,7 @@ void TwitchChannel::setRoomModes(const RoomModes &_roomModes)
     {
         // Changing the slow mode resets the timeout for all chatters, even if
         // the new slowmode is longer than the previous value.
-        this->setSlowedDown(0);
+        this->setUserSlowedDownDuration(-1);
     }
 
     this->roomModesChanged.invoke();

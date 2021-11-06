@@ -75,8 +75,21 @@ public:
     virtual void reconnect() override;
     void refreshTitle();
     void createClip();
-    void setSlowedDown(int durationInSeconds);
-    void setTimedOut(int durationInSeconds);
+
+    /**
+     * @brief Updates the user's slowmode timer
+     **/
+    void setUserSlowedDownDuration(int durationInSeconds);
+
+    /**
+     * @brief Updates the user's timeout duration.
+     *
+     * This is updated when the user gets timed out or when the user tries to
+     * type in a chat where they are timed out.
+     **/
+    void setUserTimeoutDuration(int durationInSeconds);
+
+    // TODO: Figure out a better name for this function
     void resyncChatAgain();
 
     // Data
@@ -128,11 +141,12 @@ private:
         QString localizedName;
     } nameOptions;
 
+    // TODO: Figure out better name for this
     QTimer chatAgainCounter_;
-    // Timepoint at which we can send messages again after a timeout.
-    std::optional<std::chrono::steady_clock::time_point> timeoutEnds_;
-    // Timepoint at which we can send messages again during slow mode.
-    std::optional<std::chrono::steady_clock::time_point> slowedEnds_;
+    // Timepoint at which the user's timeout ends.
+    std::optional<std::chrono::steady_clock::time_point> userTimeoutEnd_;
+    // Timepoint at which the user can send messages again after having slowmode applied to them.
+    std::optional<std::chrono::steady_clock::time_point> userSlowedEnd_;
 
 protected:
     explicit TwitchChannel(const QString &channelName);

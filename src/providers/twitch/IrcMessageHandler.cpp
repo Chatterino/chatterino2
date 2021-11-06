@@ -433,7 +433,7 @@ void IrcMessageHandler::handleClearChatMessage(Communi::IrcMessage *message)
             TwitchChannel *tc = dynamic_cast<TwitchChannel *>(chan.get());
             if (tc != nullptr)
             {
-                tc->setTimedOut(durationInSeconds.toInt());
+                tc->setUserTimeoutDuration(durationInSeconds.toInt());
             }
         }
     }
@@ -547,12 +547,12 @@ void IrcMessageHandler::handleUserStateMessage(Communi::IrcMessage *message)
         //
         // TODO: edgecase: we also get USERSTATE if we reconnected after JOIN,
         // which would incorrectly clear the timeout.
-        tc->setTimedOut(-1);
+        tc->setUserTimeoutDuration(-1);
 
         // If we got modded/vipped, clear the slowdown timer.
         if (!hadHighLimit && tc->hasHighRateLimit())
         {
-            tc->setSlowedDown(-1);
+            tc->setUserSlowedDownDuration(-1);
         }
     }
 }
@@ -903,7 +903,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             TwitchChannel *tc = dynamic_cast<TwitchChannel *>(channel.get());
             if (tc != nullptr)
             {
-                tc->setTimedOut(seconds);
+                tc->setUserTimeoutDuration(seconds);
             }
         }
     }
@@ -915,7 +915,7 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             TwitchChannel *tc = dynamic_cast<TwitchChannel *>(channel.get());
             if (tc != nullptr)
             {
-                tc->setSlowedDown(seconds);
+                tc->setUserSlowedDownDuration(seconds);
             }
         }
     }
