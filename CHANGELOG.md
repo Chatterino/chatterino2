@@ -27,6 +27,7 @@
 - Minor: Add clear cache button to cache settings section (#3277)
 - Minor: Added `flags.first_message` filter variable (#3292)
 - Minor: Removed duplicate setting for toggling `Channel Point Redeemed Message` highlights (#3296)
+- Minor: Added support for opening channels from twitch.tv/popout links. (#3309)
 - Minor: Clean up chat messages of special line characters prior to sending. (#3312)
 - Minor: Added button & label for copying login name of user instead of display name in the user info popout. (#3335)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
