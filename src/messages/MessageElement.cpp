@@ -142,12 +142,13 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
 }
 
 // EMOTE
-EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags)
+EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags,
+                           const MessageColor &textElementColor)
     : MessageElement(flags)
     , emote_(emote)
 {
-    this->textElement_.reset(
-        new TextElement(emote->getCopyString(), MessageElementFlag::Misc));
+    this->textElement_.reset(new TextElement(
+        emote->getCopyString(), MessageElementFlag::Misc, textElementColor));
 
     this->setTooltip(emote->tooltip.string);
 }

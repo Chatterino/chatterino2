@@ -1935,7 +1935,7 @@ void ChannelView::addContextMenuItems(
             QRegularExpression::CaseInsensitiveOption);
         static QSet<QString> ignoredUsernames{
             "videos",    "settings", "directory",     "jobs",     "friends",
-            "inventory", "payments", "subscriptions", "messages",
+            "inventory", "payments", "subscriptions", "messages", "drops",
         };
 
         auto twitchMatch =
