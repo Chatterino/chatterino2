@@ -9,7 +9,7 @@
 ## Glossary
 
 Word                    | Meaning
------------------------------------------------------------------------------------------
+----------------------- | ---------------------------------------------------------------
 Shortcut                | `QShortcut` object created from a hotkey.
 Hotkey                  | Template for creating shortcuts in the right scopes. See [Hotkey object][hotkey.hpp].
 Scope                   | Place where hotkeys' actions are executed.
@@ -51,11 +51,11 @@ If you want to add hotkeys to new widget that doesn't already have them it's a b
 
 ### Add the `HotkeyScope` value
 
-Add a value for the `HotkeyScope` enum in [`HotkeyScope.hpp`][HotkeyScope.hpp]. If you widget is a popup, it's best to use the existing `PopupWindow` scope.
+Add a value for the `HotkeyScope` enum in [`HotkeyScope.hpp`][hotkeyscope.hpp]. If you widget is a popup, it's best to use the existing `PopupWindow` scope.
 
 ### Add a nice name for the scope
 
-Add a string name and display name for the scope in [`HotkeyController.hpp`][HotkeyController.hpp] to `hotkeyScopeNames` and `hotkeyScopeDisplayNames`.
+Add a string name and display name for the scope in [`HotkeyController.hpp`][hotkeycontroller.hpp] to `hotkeyScopeNames` and `hotkeyScopeDisplayNames`.
 
 ### Add a shortcut context
 
@@ -87,11 +87,11 @@ Renaming defaults is currently not possible. If you were to rename one, it would
 
 <!-- big list of links -->
 
-[ActionNames.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/ActionNames.hpp
-[Hotkey.cpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/Hotkey.cpp
-[Hotkey.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/Hotkey.hpp
-[HotkeyController.cpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyController.cpp
-[HotkeyController.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyController.hpp
-[HotkeyModel.cpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyModel.cpp
-[HotkeyModel.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyModel.hpp
-[HotkeyScope.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyScope.hpp
+[actionnames.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/ActionNames.hpp
+[hotkey.cpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/Hotkey.cpp
+[hotkey.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/Hotkey.hpp
+[hotkeycontroller.cpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyController.cpp
+[hotkeycontroller.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyController.hpp
+[hotkeymodel.cpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyModel.cpp
+[hotkeymodel.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyModel.hpp
+[hotkeyscope.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyScope.hpp
