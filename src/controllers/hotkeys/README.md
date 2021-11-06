@@ -8,13 +8,14 @@
 
 ## Glossary
 
-Word            | Meaning
+Word                    | Meaning
 -----------------------------------------------------------------------------------------
-Shortcut        | `QShortcut` object created from a hotkey.
-Hotkey          | Template for creating shortcuts in the right scopes. See [Hotkey object][hotkey.hpp].
-Scope           | Place where hotkeys' actions are executed.
-Hotkey category | Another name for scopes, as "scope" was a bad name to use in the UI.
-Action          | Code that makes a hotkey do something.
+Shortcut                | `QShortcut` object created from a hotkey.
+Hotkey                  | Template for creating shortcuts in the right scopes. See [Hotkey object][hotkey.hpp].
+Scope                   | Place where hotkeys' actions are executed.
+Hotkey category         | Another name for scopes, as "scope" was a bad name to use in the UI.
+Action                  | Code that makes a hotkey do something.
+Keybinding or key combo | The keys you press on the keyboard to do something.
 
 
 ## Adding new hotkeys
