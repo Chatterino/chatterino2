@@ -46,7 +46,7 @@ SBHighlight Message::getScrollBarHighlight() const
     {
         return SBHighlight(
             ColorProvider::instance().color(ColorType::FirstMessageHighlight),
-            SBHighlight::Default, true);
+            SBHighlight::Default, false, true);
     }
     return SBHighlight();
 }
