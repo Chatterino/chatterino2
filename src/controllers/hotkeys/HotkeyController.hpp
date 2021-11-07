@@ -2,7 +2,7 @@
 
 #include "common/SignalVector.hpp"
 #include "common/Singleton.hpp"
-#include "controllers/hotkeys/HotkeyScope.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
 
 #include <boost/optional.hpp>
 #include <pajlada/signals/signal.hpp>
@@ -29,7 +29,7 @@ public:
     HotkeyController();
     HotkeyModel *createModel(QObject *parent);
 
-    std::vector<QShortcut *> shortcutsForScope(HotkeyScope scope,
+    std::vector<QShortcut *> shortcutsForCategory(HotkeyCategory category,
                                                HotkeyMap actionMap,
                                                QWidget *parent);
 
@@ -39,21 +39,21 @@ public:
      * @returns the new index in the SignalVector
      **/
     int replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
-    boost::optional<HotkeyScope> hotkeyScopeFromName(QString scopeName);
-    QString hotkeyScopeToName(HotkeyScope scope);
+    boost::optional<HotkeyCategory> hotkeyCategoryFromName(QString categoryName);
+    QString hotkeyCategoryToName(HotkeyCategory category);
     bool isDuplicate(std::shared_ptr<Hotkey> hotkey, QString ignoreNamed);
 
-    const std::map<HotkeyScope, QString> hotkeyScopeNames = {
-        {HotkeyScope::PopupWindow, "popupWindow"},
-        {HotkeyScope::Split, "split"},
-        {HotkeyScope::SplitInput, "splitInput"},
-        {HotkeyScope::Window, "window"}};
+    const std::map<HotkeyCategory, QString> hotkeyCategoryNames = {
+        {HotkeyCategory::PopupWindow, "popupWindow"},
+        {HotkeyCategory::Split, "split"},
+        {HotkeyCategory::SplitInput, "splitInput"},
+        {HotkeyCategory::Window, "window"}};
 
-    const std::map<HotkeyScope, QString> hotkeyScopeDisplayNames = {
-        {HotkeyScope::PopupWindow, "Popup Windows"},
-        {HotkeyScope::Split, "Split"},
-        {HotkeyScope::SplitInput, "Split input box"},
-        {HotkeyScope::Window, "Window"},
+    const std::map<HotkeyCategory, QString> hotkeyCategoryDisplayNames = {
+        {HotkeyCategory::PopupWindow, "Popup Windows"},
+        {HotkeyCategory::Split, "Split"},
+        {HotkeyCategory::SplitInput, "Split input box"},
+        {HotkeyCategory::Window, "Window"},
     };
     pajlada::Signals::NoArgSignal onItemsUpdated;
 
@@ -65,7 +65,7 @@ private:
     void saveHotkeys();
     void addDefaults(std::set<QString> &addedHotkeys);
     void resetToDefaults();
-    void tryAddDefault(std::set<QString> &addedHotkeys, HotkeyScope scope,
+    void tryAddDefault(std::set<QString> &addedHotkeys, HotkeyCategory category,
                        QKeySequence keySequence, QString action,
                        std::vector<QString> args, QString name);
     void showHotkeyError(std::shared_ptr<Hotkey> hotkey, QString warning);

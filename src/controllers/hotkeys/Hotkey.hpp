@@ -1,6 +1,6 @@
 #pragma once
 
-#include "controllers/hotkeys/HotkeyScope.hpp"
+#include "controllers/hotkeys/HotkeyCategory.hpp"
 
 #include <QKeySequence>
 #include <QString>
@@ -10,7 +10,7 @@ namespace chatterino {
 class Hotkey
 {
 public:
-    Hotkey(HotkeyScope scope, QKeySequence keySequence, QString action,
+    Hotkey(HotkeyCategory category, QKeySequence keySequence, QString action,
            std::vector<QString> arguments, QString name);
     virtual ~Hotkey() = default;
 
@@ -31,16 +31,16 @@ public:
     QString toPortableString() const;
 
     /**
-     * @brief Returns the scope where this hotkey is active. This is labeled the "Category" in the UI.
+     * @brief Returns the category where this hotkey is active. This is labeled the "Category" in the UI.
      *
-     * See enum HotkeyScope for more information about the various hotkey scopes
+     * See enum HotkeyCategory for more information about the various hotkey categories
      */
-    HotkeyScope scope() const;
+    HotkeyCategory category() const;
 
     /**
      * @brief Returns the action which describes what this Hotkey is meant to do
      *
-     * For example, in the Window scope there's a "showSearch" action which opens a search popup
+     * For example, in the Window category there's a "showSearch" action which opens a search popup
      */
     QString action() const;
 
@@ -56,15 +56,15 @@ public:
     /**
      * @brief Returns the display name of the hotkey
      *
-     * For example, in the Split scope there's a "showSearch" action that has a default hotkey with the name "default show search"
+     * For example, in the Split category there's a "showSearch" action that has a default hotkey with the name "default show search"
      */
     QString name() const;
 
     /**
-     * @brief Returns the user-friendly text representation of the hotkeys scope
+     * @brief Returns the user-friendly text representation of the hotkeys category
      *
      * Suitable for showing in the GUI.
-     * e.g. Split input box for HotkeyScope::SplitInput
+     * e.g. Split input box for HotkeyCategory::SplitInput
      */
     QString getCategory() const;
 
@@ -76,7 +76,7 @@ public:
     const QKeySequence &keySequence() const;
 
 private:
-    HotkeyScope scope_;
+    HotkeyCategory category_;
     QKeySequence keySequence_;
     QString action_;
     std::vector<QString> arguments_;
@@ -85,7 +85,7 @@ private:
     /**
      * @brief Returns the programmatic context of the hotkey to help Qt decide how to apply the hotkey
      *
-     * The returned value is based off the hotkeys given scope
+     * The returned value is based off the hotkeys given category
      */
     Qt::ShortcutContext getContext() const;
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "HotkeyScope.hpp"
+#include "HotkeyCategory.hpp"
 
 #include <QString>
 
@@ -23,8 +23,8 @@ struct ActionDefinition {
 
 using ActionDefinitionMap = std::map<QString, ActionDefinition>;
 
-inline const std::map<HotkeyScope, ActionDefinitionMap> actionNames{
-    {HotkeyScope::PopupWindow,
+inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
+    {HotkeyCategory::PopupWindow,
      {
          {"reject", ActionDefinition{"Confirmable popups: Cancel"}},
          {"accept", ActionDefinition{"Confirmable popups: Confirm"}},
@@ -33,7 +33,7 @@ inline const std::map<HotkeyScope, ActionDefinitionMap> actionNames{
          {"scrollPage", ActionDefinition{"Scroll", 1}},
          {"search", ActionDefinition{"Focus search box"}},
      }},
-    {HotkeyScope::Split,
+    {HotkeyCategory::Split,
      {
          {"changeChannel", ActionDefinition{"Change channel"}},
          {"clearMessages", ActionDefinition{"Clear messages"}},
@@ -61,7 +61,7 @@ inline const std::map<HotkeyScope, ActionDefinitionMap> actionNames{
          {"debug", ActionDefinition{"Show debug popup"}},
 #endif
      }},
-    {HotkeyScope::SplitInput,
+    {HotkeyCategory::SplitInput,
      {
          {"clear", ActionDefinition{"Clear message"}},
          {"copy", ActionDefinition{"Copy"}},
@@ -78,7 +78,7 @@ inline const std::map<HotkeyScope, ActionDefinitionMap> actionNames{
          {"undo", ActionDefinition{"Undo"}},
 
      }},
-    {HotkeyScope::Window,
+    {HotkeyCategory::Window,
      {
 #ifdef C_DEBUG
          {"addCheerMessage", ActionDefinition{"Debug: Add cheer test message"}},

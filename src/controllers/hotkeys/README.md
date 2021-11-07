@@ -4,18 +4,17 @@
 
 - [Glossary](#Glossary)
 - [Adding new hotkeys](#Adding_new_hotkeys)
-- [Adding new hotkey scopes](#Adding_new_hotkey_scopes)
+- [Adding new hotkey categories](#Adding_new_hotkey_categories)
 
 ## Glossary
 
-| Word                    | Meaning                                                                               |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| Shortcut                | `QShortcut` object created from a hotkey.                                             |
-| Hotkey                  | Template for creating shortcuts in the right scopes. See [Hotkey object][hotkey.hpp]. |
-| Scope                   | Place where hotkeys' actions are executed.                                            |
-| Hotkey category         | Another name for scopes, as "scope" was a bad name to use in the UI.                  |
-| Action                  | Code that makes a hotkey do something.                                                |
-| Keybinding or key combo | The keys you press on the keyboard to do something.                                   |
+| Word                    | Meaning                                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| Shortcut                | `QShortcut` object created from a hotkey.                                                 |
+| Hotkey                  | Template for creating shortcuts in the right categories. See [Hotkey object][hotkey.hpp]. |
+| Category                | Place where hotkeys' actions are executed.                                                |
+| Action                  | Code that makes a hotkey do something.                                                    |
+| Keybinding or key combo | The keys you press on the keyboard to do something.                                       |
 
 ## Adding new hotkeys
 
@@ -23,7 +22,7 @@ Adding new hotkeys to a widget that already has hotkeys is quite easy.
 
 ### Add an action
 
-1.  Locate the call to `getApp()->hotkeys->shortcutsForScope(...)`, it is located in the `addShortcuts()` method
+1.  Locate the call to `getApp()->hotkeys->shortcutsForcAtegory(...)`, it is located in the `addShortcuts()` method
 2.  Above that should be a `HotkeyController::HotkeyMap` named `actions`
 3.  Add your new action inside that map, it should return a non-empty QString only when configuration errors are found.
 4.  Go to `ActionNames.hpp` and add a definition for your hotkey with a nice user-friendly name. Be sure to double-check the argument count.
@@ -34,27 +33,27 @@ Defaults are stored in `HotkeyController.cpp` in the `resetToDefaults()` method.
 
 ```cpp
 void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
-                                     HotkeyScope scope,
+                                     HotkeyCategory category,
                                      QKeySequence keySequence, QString action,
                                      std::vector<QString> args, QString name)
 ```
 
 - where `action` is the action you added before,
-- `scope` — same scope that is in the `shortcutsForScope` call
+- `category` — same category that is in the `shortcutsForCategory` call
 - `name` — **unique** name of the default hotkey
 - `keySequence` - key combo for the hotkey
 
-## Adding new hotkey scopes
+## Adding new hotkey categories
 
-If you want to add hotkeys to new widget that doesn't already have them it's a bit more work. Scopes are called categories in the UI.
+If you want to add hotkeys to new widget that doesn't already have them it's a bit more work.
 
-### Add the `HotkeyScope` value
+### Add the `HotkeyCategory` value
 
-Add a value for the `HotkeyScope` enum in [`HotkeyScope.hpp`][hotkeyscope.hpp]. If you widget is a popup, it's best to use the existing `PopupWindow` scope.
+Add a value for the `HotkeyCategory` enum in [`HotkeyCategory.hpp`][hotkeycategory.hpp]. If you widget is a popup, it's best to use the existing `PopupWindow` category.
 
-### Add a nice name for the scope
+### Add a nice name for the category
 
-Add a string name and display name for the scope in [`HotkeyController.hpp`][hotkeycontroller.hpp] to `hotkeyScopeNames` and `hotkeyScopeDisplayNames`.
+Add a string name and display name for the category in [`HotkeyController.hpp`][hotkeycontroller.hpp] to `hotkeyCategoryNames` and `hotkeyCategoryDisplayNames`.
 
 ### Add a shortcut context
 
@@ -75,7 +74,7 @@ void YourWidget::addShortcuts()
              return ""; // only return text if there is a configuration error.
          }},
     };
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::PopupWindow /* or your scope name */,
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(HotkeyCategory::PopupWindow /* or your category name */,
                                                             actions, this);
 }
 ```
@@ -93,4 +92,4 @@ Renaming defaults is currently not possible. If you were to rename one, it would
 [hotkeycontroller.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyController.hpp
 [hotkeymodel.cpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyModel.cpp
 [hotkeymodel.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyModel.hpp
-[hotkeyscope.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyScope.hpp
+[hotkeycategory.hpp]: https://github.com/Chatterino/chatterino2/blob/custom_hotkeys/src/controllers/hotkeys/HotkeyCategory.hpp

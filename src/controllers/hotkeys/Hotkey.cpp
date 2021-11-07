@@ -7,9 +7,9 @@
 
 namespace chatterino {
 
-Hotkey::Hotkey(HotkeyScope scope, QKeySequence keySequence, QString action,
+Hotkey::Hotkey(HotkeyCategory category, QKeySequence keySequence, QString action,
                std::vector<QString> arguments, QString name)
-    : scope_(scope)
+    : category_(category)
     , keySequence_(keySequence)
     , action_(action)
     , arguments_(arguments)
@@ -27,9 +27,9 @@ QString Hotkey::name() const
     return this->name_;
 }
 
-HotkeyScope Hotkey::scope() const
+HotkeyCategory Hotkey::category() const
 {
-    return this->scope_;
+    return this->category_;
 }
 
 QString Hotkey::action() const
@@ -39,7 +39,7 @@ QString Hotkey::action() const
 
 bool Hotkey::validAction() const
 {
-    auto categoryActionsIt = actionNames.find(this->scope_);
+    auto categoryActionsIt = actionNames.find(this->category_);
     if (categoryActionsIt == actionNames.end())
     {
         // invalid category
@@ -59,21 +59,21 @@ std::vector<QString> Hotkey::arguments() const
 QString Hotkey::getCategory() const
 {
     return getApp()
-        ->hotkeys->hotkeyScopeDisplayNames.find(this->scope_)
+        ->hotkeys->hotkeyCategoryDisplayNames.find(this->category_)
         ->second;
 }
 
 Qt::ShortcutContext Hotkey::getContext() const
 {
-    switch (this->scope_)
+    switch (this->category_)
     {
-        case HotkeyScope::Window:
+        case HotkeyCategory::Window:
             return Qt::WindowShortcut;
-        case HotkeyScope::Split:
+        case HotkeyCategory::Split:
             return Qt::WidgetWithChildrenShortcut;
-        case HotkeyScope::SplitInput:
+        case HotkeyCategory::SplitInput:
             return Qt::WidgetWithChildrenShortcut;
-        case HotkeyScope::PopupWindow:
+        case HotkeyCategory::PopupWindow:
             return Qt::WindowShortcut;
     }
     qCDebug(chatterinoHotkeys)
