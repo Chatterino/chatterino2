@@ -578,7 +578,7 @@ void SelectChannelDialog::addShortcuts()
     }
 
     this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
-        HotkeyScope::PopupWindow, actions, this);
+        HotkeyCategory::PopupWindow, actions, this);
 }
 
 }  // namespace chatterino
