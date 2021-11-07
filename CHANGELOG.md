@@ -29,6 +29,7 @@
 - Minor: Removed duplicate setting for toggling `Channel Point Redeemed Message` highlights (#3296)
 - Minor: Added support for opening channels from twitch.tv/popout links. (#3309)
 - Minor: Clean up chat messages of special line characters prior to sending. (#3312)
+- Minor: IRC now parses/displays links like Twitch chat. (#3334)
 - Minor: Added button & label for copying login name of user instead of display name in the user info popout. (#3335)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
