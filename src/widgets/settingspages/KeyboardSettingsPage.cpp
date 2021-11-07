@@ -76,9 +76,6 @@ void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
                                             EditableModelView *view,
                                             HotkeyModel *model)
 {
-    // TODO(mm2pl): remove debug
-    qDebug() << "table cell clicked!" << clicked.column() << clicked.row();
-
     auto hotkey = getApp()->hotkeys->getHotkeyByName(
         clicked.siblingAtColumn(0).data(Qt::EditRole).toString());
     if (!hotkey)
