@@ -64,7 +64,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
     {HotkeyCategory::SplitInput,
      {
          {"clear", ActionDefinition{"Clear message"}},
-         {"copy", ActionDefinition{"Copy"}},
+         {"copy", ActionDefinition{"Copy", 1}},
          {"cursorToStart", ActionDefinition{"To start of message", 1}},
          {"cursorToEnd", ActionDefinition{"To end of message", 1}},
          {"nextMessage", ActionDefinition{"Choose next sent message"}},
@@ -74,7 +74,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           ActionDefinition{"Choose previously sent message"}},
          {"redo", ActionDefinition{"Redo"}},
          {"selectAll", ActionDefinition{"Select all"}},
-         {"sendMessage", ActionDefinition{"Send message"}},
+         {"sendMessage", ActionDefinition{"Send message", 0, 1}},
          {"undo", ActionDefinition{"Undo"}},
 
      }},
@@ -93,16 +93,16 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
          {"newSplit", ActionDefinition{"Create a new split"}},
          {"newTab", ActionDefinition{"Create a new tab"}},
          {"openSettings", ActionDefinition{"Open settings"}},
-         {"openTab", ActionDefinition{"Select tab"}},
+         {"openTab", ActionDefinition{"Select tab", 1}},
          {"openQuickSwitcher", ActionDefinition{"Open the quick switcher"}},
          {"popup", ActionDefinition{"New popup", 1}},
          {"quit", ActionDefinition{"Quit Chatterino"}},
          {"removeTab", ActionDefinition{"Remove current tab"}},
          {"reopenSplit", ActionDefinition{"Reopen closed split"}},
-         {"setStreamerMode", ActionDefinition{"Set streamer mode", 1}},
+         {"setStreamerMode", ActionDefinition{"Set streamer mode", 0, 1}},
          {"toggleLocalR9K", ActionDefinition{"Toggle local R9K"}},
          {"zoom", ActionDefinition{"Zoom in/out", 1}},
-         {"setTabVisibility", ActionDefinition{"Set tab visibility", 1}}}},
+         {"setTabVisibility", ActionDefinition{"Set tab visibility", 0, 1}}}},
 };
 
 }  // namespace chatterino
