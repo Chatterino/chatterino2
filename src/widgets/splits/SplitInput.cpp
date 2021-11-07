@@ -403,7 +403,7 @@ void SplitInput::addShortcuts()
          }},
         {"copy",
          [this](std::vector<QString> arguments) -> QString {
-             qCWarning(chatterinoHotkeys) << "Hello from copy shortcut!";
+             // XXX: this action is unused at the moment, a qt standard shortcut is used instead
              auto copyFromSplit = false;
              if (arguments.size() == 0)
              {
