@@ -240,8 +240,8 @@ void SplitInput::addShortcuts()
              else
              {
                  qCWarning(chatterinoHotkeys)
-                     << "Invalid jumpCursor select argument (1)!";
-                 return "Invalid jumpCursor select argument (1)!";
+                     << "Invalid cursorToStart select argument (1)!";
+                 return "Invalid cursorToStart select argument (1)!";
              }
 
              cursor.movePosition(place,
@@ -276,8 +276,8 @@ void SplitInput::addShortcuts()
              else
              {
                  qCWarning(chatterinoHotkeys)
-                     << "Invalid jumpCursor select argument (1)!";
-                 return "Invalid jumpCursor select argument (1)!";
+                     << "Invalid cursorToEnd select argument (1)!";
+                 return "Invalid cursorToEnd select argument (1)!";
              }
 
              cursor.movePosition(place,
