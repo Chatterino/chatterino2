@@ -60,15 +60,15 @@ inline const std::map<HotkeyScope, ActionDefinitionMap> actionNames{
      }},
     {HotkeyScope::SplitInput,
      {
-         // XXX(mm2pl): jumpCursor, nextMessage and previousMessage need better display names
+         // XXX(mm2pl): jumpCursor need better display names
          {"clear", ActionDefinition{"Clear message"}},
          {"copy", ActionDefinition{"Copy"}},
          {"jumpCursor", ActionDefinition{"Move cursor to start or end", 2}},
-         {"nextMessage", ActionDefinition{"Pick next edited message"}},
+         {"nextMessage", ActionDefinition{"Choose next sent message"}},
          {"openEmotesPopup", ActionDefinition{"Open emotes list"}},
          {"paste", ActionDefinition{"Paste"}},
          {"previousMessage",
-          ActionDefinition{"Pick previously edited message"}},
+          ActionDefinition{"Choose previously sent message"}},
          {"redo", ActionDefinition{"Redo"}},
          {"selectAll", ActionDefinition{"Select all"}},
          {"sendMessage", ActionDefinition{"Send message"}},
