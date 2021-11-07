@@ -23,8 +23,16 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
             pair.second);
     }
 
+    this->ui_->warningLabel->hide();
+
     if (hotkey)
     {
+        if (!hotkey->validAction())
+        {
+            this->showEditError("Invalid action, make sure you select the "
+                                "correct action before saving.");
+        }
+
         // editting a hotkey
 
         // update pickers/input boxes to values from Hotkey object
@@ -54,7 +62,6 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
             size_t(HotkeyScope::SplitInput));
         this->ui_->argumentsEdit->setPlainText("");
     }
-    this->ui_->warningLabel->hide();
 }
 
 EditHotkeyDialog::~EditHotkeyDialog()

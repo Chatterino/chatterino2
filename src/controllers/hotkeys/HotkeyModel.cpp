@@ -21,11 +21,18 @@ std::shared_ptr<Hotkey> HotkeyModel::getItemFromRow(
 void HotkeyModel::getRowFromItem(const std::shared_ptr<Hotkey> &item,
                                  std::vector<QStandardItem *> &row)
 {
+    QFont font("Segoe UI", 10);
+
+    if (!item->validAction())
+    {
+        font.setStrikeOut(true);
+    }
+
     setStringItem(row[0], item->name(), false);
-    row[0]->setData(QFont("Segoe UI", 10), Qt::FontRole);
+    row[0]->setData(font, Qt::FontRole);
 
     setStringItem(row[1], item->toString(), false);
-    row[1]->setData(QFont("Segoe UI", 10), Qt::FontRole);
+    row[1]->setData(font, Qt::FontRole);
 }
 
 int HotkeyModel::beforeInsert(const std::shared_ptr<Hotkey> &item,
