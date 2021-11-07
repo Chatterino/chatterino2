@@ -2,6 +2,7 @@
 
 #include "Application.hpp"
 #include "common/QLogging.hpp"
+#include "controllers/hotkeys/ActionNames.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
 
 namespace chatterino {
@@ -34,6 +35,20 @@ HotkeyScope Hotkey::scope() const
 QString Hotkey::action() const
 {
     return this->action_;
+}
+
+bool Hotkey::validAction() const
+{
+    auto categoryActionsIt = actionNames.find(this->scope_);
+    if (categoryActionsIt == actionNames.end())
+    {
+        // invalid category
+        return false;
+    }
+
+    auto actionDefinitionIt = categoryActionsIt->second.find(this->action());
+
+    return actionDefinitionIt != categoryActionsIt->second.end();
 }
 
 std::vector<QString> Hotkey::arguments() const

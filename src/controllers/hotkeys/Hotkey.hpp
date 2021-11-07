@@ -44,6 +44,8 @@ public:
      */
     QString action() const;
 
+    bool validAction() const;
+
     /**
      * @brief Returns a list of arguments this hotkey has bound to it
      *
