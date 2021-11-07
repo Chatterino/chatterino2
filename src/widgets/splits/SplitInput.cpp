@@ -214,35 +214,55 @@ void SplitInput::openEmotePopup()
 void SplitInput::addShortcuts()
 {
     HotkeyController::HotkeyMap actions{
-        {"jumpCursor",
+        {"cursorToStart",
          [this](std::vector<QString> arguments) -> QString {
-             if (arguments.size() != 2)
+             if (arguments.size() != 1)
              {
                  qCWarning(chatterinoHotkeys)
-                     << "Invalid jumpCursor arguments. Argument 0: place "
-                        "(\"start\" or \"end\"), argument 1: select "
+                     << "Invalid cursorToStart arguments. Argument 0: select "
                         "(\"withSelection\" or \"withoutSelection\")";
-                 return "Invalid jumpCursor arguments. Argument 0: place "
-                        "(\"start\" or \"end\"), argument 1: select "
+                 return "Invalid cursorToStart arguments. Argument 0: select "
                         "(\"withSelection\" or \"withoutSelection\")";
              }
              QTextCursor cursor = this->ui_.textEdit->textCursor();
              auto place = QTextCursor::Start;
              auto stringPlace = arguments.at(0);
-             if (stringPlace == "start")
+             auto stringTakeSelection = arguments.at(1);
+             bool select;
+             if (stringTakeSelection == "withSelection")
              {
-                 place = QTextCursor::Start;
+                 select = true;
              }
-             else if (stringPlace == "end")
+             else if (stringTakeSelection == "withoutSelection")
              {
-                 place = QTextCursor::End;
+                 select = false;
              }
              else
              {
                  qCWarning(chatterinoHotkeys)
-                     << "Invalid jumpCursor place argument (0)!";
-                 return "Invalid jumpCursor place argument (0)!";
+                     << "Invalid jumpCursor select argument (1)!";
+                 return "Invalid jumpCursor select argument (1)!";
              }
+
+             cursor.movePosition(place,
+                                 select ? QTextCursor::MoveMode::KeepAnchor
+                                        : QTextCursor::MoveMode::MoveAnchor);
+             this->ui_.textEdit->setTextCursor(cursor);
+             return "";
+         }},
+        {"cursorToEnd",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() != 1)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid cursorToEnd arguments. Argument 0: select "
+                        "(\"withSelection\" or \"withoutSelection\")";
+                 return "Invalid cursorToEnd arguments. Argument 0: select "
+                        "(\"withSelection\" or \"withoutSelection\")";
+             }
+             QTextCursor cursor = this->ui_.textEdit->textCursor();
+             auto place = QTextCursor::End;
+             auto stringPlace = arguments.at(0);
              auto stringTakeSelection = arguments.at(1);
              bool select;
              if (stringTakeSelection == "withSelection")

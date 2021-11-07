@@ -359,20 +359,19 @@ void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
         }
 
         this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                            QKeySequence("Home"), "jumpCursor",
-                            {"start", "withoutSelection"},
-                            "go to start of input");
+                            QKeySequence("Home"), "cursorToStart",
+                            {"withoutSelection"}, "go to start of input");
         this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                            QKeySequence("End"), "jumpCursor",
-                            {"end", "withoutSelection"}, "go to end of input");
+                            QKeySequence("End"), "cursorToEnd",
+                            {"withoutSelection"}, "go to end of input");
 
         this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                            QKeySequence("Shift+Home"), "jumpCursor",
-                            {"start", "withSelection"},
+                            QKeySequence("Shift+Home"), "cursorToStart",
+                            {"withSelection"},
                             "go to start of input with selection");
         this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
-                            QKeySequence("Shift+End"), "jumpCursor",
-                            {"end", "withSelection"},
+                            QKeySequence("Shift+End"), "cursorToEnd",
+                            {"withSelection"},
                             "go to end of input with selection");
 
         this->tryAddDefault(addedHotkeys, HotkeyScope::SplitInput,
