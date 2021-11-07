@@ -77,7 +77,7 @@ MessagePtr IrcMessageBuilder::build()
 
 void IrcMessageBuilder::addWords(const QStringList &words)
 {
-    MessageColor defaultColorType = MessageColor::Text;
+    MessageColor defaultColorType = this->textColor_;
     auto defaultColor = defaultColorType.getColor(*getApp()->themes);
     QColor textColor = defaultColor;
     int fg = -1;
