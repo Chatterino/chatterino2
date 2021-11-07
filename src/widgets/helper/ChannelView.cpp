@@ -1936,11 +1936,11 @@ void ChannelView::addContextMenuItems(
     if (hoveredElement->getLink().type == Link::Url)
     {
         static QRegularExpression twitchChannelRegex(
-            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]{3,}))",
+            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?:popout\/)?(?<username>[a-z0-9_]{3,}))",
             QRegularExpression::CaseInsensitiveOption);
         static QSet<QString> ignoredUsernames{
             "videos",    "settings", "directory",     "jobs",     "friends",
-            "inventory", "payments", "subscriptions", "messages",
+            "inventory", "payments", "subscriptions", "messages", "drops",
         };
 
         auto twitchMatch =

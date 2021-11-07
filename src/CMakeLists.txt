@@ -504,7 +504,6 @@ target_link_libraries(${LIBRARY_PROJECT}
         Qt${MAJOR_QT_VERSION}::Concurrent
 
         LibCommuni::LibCommuni
-        qt${MAJOR_QT_VERSION}keychain
         Pajlada::Serialize
         Pajlada::Settings
         Pajlada::Signals
@@ -513,6 +512,17 @@ target_link_libraries(${LIBRARY_PROJECT}
         RapidJSON::RapidJSON
         LRUCache
         )
+if (BUILD_WITH_QTKEYCHAIN)
+    target_link_libraries(${LIBRARY_PROJECT}
+            PUBLIC
+            qt${MAJOR_QT_VERSION}keychain
+            )
+else()
+    target_compile_definitions(${LIBRARY_PROJECT}
+        PUBLIC
+        NO_QTKEYCHAIN
+        )
+endif()
 
 if (BUILD_APP)
     add_executable(${EXECUTABLE_PROJECT} main.cpp)
@@ -568,7 +578,10 @@ if (BUILD_APP)
 endif ()
 
 if (USE_PRECOMPILED_HEADERS)
+    message(STATUS "Building with precompiled headers")
     target_precompile_headers(${LIBRARY_PROJECT} PRIVATE PrecompiledHeader.hpp)
+else ()
+    message(STATUS "Building without precompiled headers")
 endif ()
 
 # Enable autogeneration of Qts MOC/RCC/UIC
