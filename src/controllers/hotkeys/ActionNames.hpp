@@ -57,6 +57,9 @@ inline const std::map<HotkeyScope, ActionDefinitionMap> actionNames{
          {"setModerationMode", ActionDefinition{"Set moderation mode", 0, 1}},
          {"showSearch", ActionDefinition{"Search"}},
          {"startWatching", ActionDefinition{"Start watching"}},
+#ifdef C_DEBUG
+         {"debug", ActionDefinition{"Show debug popup"}},
+#endif
      }},
     {HotkeyScope::SplitInput,
      {
