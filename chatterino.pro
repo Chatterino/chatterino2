@@ -397,7 +397,7 @@ HEADERS += \
     src/controllers/hotkeys/HotkeyController.hpp \
     src/controllers/hotkeys/ActionNames.hpp \
     src/controllers/hotkeys/HotkeyModel.hpp \
-    src/controllers/hotkeys/HotkeyScope.hpp \
+    src/controllers/hotkeys/HotkeyCategory.hpp \
     src/controllers/ignores/IgnoreController.hpp \
     src/controllers/ignores/IgnoreModel.hpp \
     src/controllers/ignores/IgnorePhrase.hpp \

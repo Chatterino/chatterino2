@@ -95,7 +95,7 @@ set(SOURCE_FILES
         controllers/hotkeys/ActionNames.hpp
         controllers/hotkeys/HotkeyModel.cpp
         controllers/hotkeys/HotkeyModel.hpp
-        controllers/hotkeys/HotkeyScope.hpp
+        controllers/hotkeys/HotkeyCategory.hpp
 
         controllers/ignores/IgnoreController.cpp
         controllers/ignores/IgnoreController.hpp
