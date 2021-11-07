@@ -545,8 +545,8 @@ void Split::addShortcuts()
          }},
     };
 
-    this->shortcuts_ =
-        getApp()->hotkeys->shortcutsForCategory(HotkeyScope::Split, actions, this);
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+        HotkeyScope::Split, actions, this);
 }
 
 Split::~Split()

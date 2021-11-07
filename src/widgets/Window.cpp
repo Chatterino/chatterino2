@@ -657,8 +657,8 @@ void Window::addShortcuts()
 
     this->addDebugStuff(actions);
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(HotkeyScope::Window,
-                                                            actions, this);
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+        HotkeyScope::Window, actions, this);
 }
 
 void Window::addMenuBar()

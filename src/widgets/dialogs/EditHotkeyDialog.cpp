@@ -156,9 +156,9 @@ void EditHotkeyDialog::afterEdit()
         action = actionTemp.toString();
     }
 
-    auto hotkey =
-        std::make_shared<Hotkey>(*category, this->ui_->keyComboEdit->keySequence(),
-                                 action, arguments, nameText);
+    auto hotkey = std::make_shared<Hotkey>(
+        *category, this->ui_->keyComboEdit->keySequence(), action, arguments,
+        nameText);
     auto keyComboWasEdited =
         this->data() &&
         this->ui_->keyComboEdit->keySequence() != this->data()->keySequence();
@@ -187,7 +187,8 @@ void EditHotkeyDialog::updatePossibleActions()
         return;
     }
     auto currentText = this->ui_->actionPicker->currentData().toString();
-    if (this->data_ && (currentText == "" || this->data_->category() == category))
+    if (this->data_ &&
+        (currentText == "" || this->data_->category() == category))
     {
         // is editing
         currentText = this->data_->action();
