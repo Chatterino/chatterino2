@@ -206,9 +206,9 @@ void HotkeyController::loadHotkeys()
         {
             continue;
         }
-        this->hotkeys_.append(
-            std::make_shared<Hotkey>(*category, QKeySequence(keySequence), action,
-                                     arguments, QString::fromStdString(key)));
+        this->hotkeys_.append(std::make_shared<Hotkey>(
+            *category, QKeySequence(keySequence), action, arguments,
+            QString::fromStdString(key)));
     }
 }
 
@@ -236,8 +236,10 @@ void HotkeyController::saveHotkeys()
         pajlada::Settings::Setting<QString>::set(
             section + "/keySequence", hotkey->keySequence().toString());
 
-        auto categoryName = HotkeyController::hotkeyCategoryToName(hotkey->category());
-        pajlada::Settings::Setting<QString>::set(section + "/category", categoryName);
+        auto categoryName =
+            HotkeyController::hotkeyCategoryToName(hotkey->category());
+        pajlada::Settings::Setting<QString>::set(section + "/category",
+                                                 categoryName);
         pajlada::Settings::Setting<std::vector<QString>>::set(
             section + "/arguments", hotkey->arguments());
     }

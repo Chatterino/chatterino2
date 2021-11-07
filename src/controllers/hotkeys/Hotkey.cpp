@@ -7,8 +7,8 @@
 
 namespace chatterino {
 
-Hotkey::Hotkey(HotkeyCategory category, QKeySequence keySequence, QString action,
-               std::vector<QString> arguments, QString name)
+Hotkey::Hotkey(HotkeyCategory category, QKeySequence keySequence,
+               QString action, std::vector<QString> arguments, QString name)
     : category_(category)
     , keySequence_(keySequence)
     , action_(action)

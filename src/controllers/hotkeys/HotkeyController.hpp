@@ -30,8 +30,8 @@ public:
     HotkeyModel *createModel(QObject *parent);
 
     std::vector<QShortcut *> shortcutsForCategory(HotkeyCategory category,
-                                               HotkeyMap actionMap,
-                                               QWidget *parent);
+                                                  HotkeyMap actionMap,
+                                                  QWidget *parent);
 
     void save() override;
     std::shared_ptr<Hotkey> getHotkeyByName(QString name);
@@ -39,7 +39,8 @@ public:
      * @returns the new index in the SignalVector
      **/
     int replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
-    boost::optional<HotkeyCategory> hotkeyCategoryFromName(QString categoryName);
+    boost::optional<HotkeyCategory> hotkeyCategoryFromName(
+        QString categoryName);
     QString hotkeyCategoryToName(HotkeyCategory category);
     bool isDuplicate(std::shared_ptr<Hotkey> hotkey, QString ignoreNamed);
 
