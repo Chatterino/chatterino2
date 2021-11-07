@@ -453,7 +453,7 @@ void SplitInput::addShortcuts()
          }},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
         HotkeyScope::SplitInput, actions, this);
 }
 

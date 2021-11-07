@@ -577,7 +577,7 @@ void SelectChannelDialog::addShortcuts()
         actions.emplace("openTab", nullptr);
     }
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
         HotkeyScope::PopupWindow, actions, this);
 }
 

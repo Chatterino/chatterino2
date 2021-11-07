@@ -68,7 +68,7 @@ void SettingsDialog::addShortcuts()
         {"openTab", nullptr},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
         HotkeyScope::PopupWindow, actions, this);
 }
 

@@ -175,7 +175,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
         {"search", nullptr},
     };
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
         HotkeyScope::PopupWindow, actions, this);
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())

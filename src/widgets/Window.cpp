@@ -657,7 +657,7 @@ void Window::addShortcuts()
 
     this->addDebugStuff(actions);
 
-    this->shortcuts_ = getApp()->hotkeys->shortcutsForScope(HotkeyScope::Window,
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(HotkeyScope::Window,
                                                             actions, this);
 }
 
