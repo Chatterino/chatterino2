@@ -61,12 +61,12 @@ see this message :)</string>
       </widget>
      </item>
      <item row="1" column="0">
-      <widget class="QLabel" name="scopeLabel">
+      <widget class="QLabel" name="categoryLabel">
        <property name="text">
         <string>Category:</string>
        </property>
        <property name="buddy">
-        <cstring>scopePicker</cstring>
+        <cstring>categoryPicker</cstring>
        </property>
       </widget>
      </item>
@@ -121,7 +121,7 @@ see this message :)</string>
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QComboBox" name="scopePicker"/>
+      <widget class="QComboBox" name="categoryPicker"/>
      </item>
     </layout>
    </item>
@@ -139,7 +139,7 @@ see this message :)</string>
  </widget>
  <tabstops>
   <tabstop>nameEdit</tabstop>
-  <tabstop>scopePicker</tabstop>
+  <tabstop>categoryPicker</tabstop>
   <tabstop>actionPicker</tabstop>
   <tabstop>keyComboEdit</tabstop>
   <tabstop>argumentsEdit</tabstop>
@@ -179,7 +179,7 @@ see this message :)</string>
    </hints>
   </connection>
   <connection>
-   <sender>scopePicker</sender>
+   <sender>categoryPicker</sender>
    <signal>currentIndexChanged(int)</signal>
    <receiver>EditHotkeyDialog</receiver>
    <slot>updatePossibleActions()</slot>

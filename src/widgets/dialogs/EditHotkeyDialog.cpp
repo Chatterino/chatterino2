@@ -15,11 +15,11 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
 {
     this->ui_->setupUi(this);
     const auto app = getApp();
-    // dynamically add scope names to the scope picker
-    for (const auto pair : app->hotkeys->hotkeyScopeNames)
+    // dynamically add category names to the category picker
+    for (const auto pair : app->hotkeys->hotkeyCategoryNames)
     {
-        this->ui_->scopePicker->addItem(
-            app->hotkeys->hotkeyScopeDisplayNames.find(pair.first)->second,
+        this->ui_->categoryPicker->addItem(
+            app->hotkeys->hotkeyCategoryDisplayNames.find(pair.first)->second,
             pair.second);
     }
 
@@ -36,7 +36,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
         // editting a hotkey
 
         // update pickers/input boxes to values from Hotkey object
-        this->ui_->scopePicker->setCurrentIndex(size_t(hotkey->scope()));
+        this->ui_->categoryPicker->setCurrentIndex(size_t(hotkey->category()));
         this->ui_->keyComboEdit->setKeySequence(
             QKeySequence::fromString(hotkey->keySequence().toString()));
         this->ui_->nameEdit->setText(hotkey->name());
@@ -58,8 +58,8 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     {
         // adding a new hotkey
         this->setWindowTitle("Add hotkey");
-        this->ui_->scopePicker->setCurrentIndex(
-            size_t(HotkeyScope::SplitInput));
+        this->ui_->categoryPicker->setCurrentIndex(
+            size_t(HotkeyCategory::SplitInput));
         this->ui_->argumentsEdit->setPlainText("");
     }
 }
@@ -87,11 +87,11 @@ void EditHotkeyDialog::afterEdit()
             arguments.push_back(arg);
         }
     }
-    auto scope = getApp()->hotkeys->hotkeyScopeFromName(
-        this->ui_->scopePicker->currentData().toString());
-    if (!scope)
+    auto category = getApp()->hotkeys->hotkeyCategoryFromName(
+        this->ui_->categoryPicker->currentData().toString());
+    if (!category)
     {
-        this->showEditError("Invalid Hotkey Scope.");
+        this->showEditError("Invalid Hotkey Category.");
 
         return;
     }
@@ -157,7 +157,7 @@ void EditHotkeyDialog::afterEdit()
     }
 
     auto hotkey =
-        std::make_shared<Hotkey>(*scope, this->ui_->keyComboEdit->keySequence(),
+        std::make_shared<Hotkey>(*category, this->ui_->keyComboEdit->keySequence(),
                                  action, arguments, nameText);
     auto keyComboWasEdited =
         this->data() &&
@@ -178,24 +178,24 @@ void EditHotkeyDialog::afterEdit()
 void EditHotkeyDialog::updatePossibleActions()
 {
     const auto &hotkeys = getApp()->hotkeys;
-    auto scope = hotkeys->hotkeyScopeFromName(
-        this->ui_->scopePicker->currentData().toString());
-    if (!scope)
+    auto category = hotkeys->hotkeyCategoryFromName(
+        this->ui_->categoryPicker->currentData().toString());
+    if (!category)
     {
-        this->showEditError("Invalid Hotkey Scope.");
+        this->showEditError("Invalid Hotkey Category.");
 
         return;
     }
     auto currentText = this->ui_->actionPicker->currentData().toString();
-    if (this->data_ && (currentText == "" || this->data_->scope() == scope))
+    if (this->data_ && (currentText == "" || this->data_->category() == category))
     {
         // is editing
         currentText = this->data_->action();
     }
     this->ui_->actionPicker->clear();
     qCDebug(chatterinoHotkeys)
-        << "update possible actions for" << (int)*scope << currentText;
-    auto actions = actionNames.find(*scope);
+        << "update possible actions for" << (int)*category << currentText;
+    auto actions = actionNames.find(*category);
     if (actions != actionNames.end())
     {
         int indexToSet = -1;
@@ -228,15 +228,15 @@ void EditHotkeyDialog::updateArgumentsInput()
         return;
     }
     const auto &hotkeys = getApp()->hotkeys;
-    auto scope = hotkeys->hotkeyScopeFromName(
-        this->ui_->scopePicker->currentData().toString());
-    if (!scope)
+    auto category = hotkeys->hotkeyCategoryFromName(
+        this->ui_->categoryPicker->currentData().toString());
+    if (!category)
     {
-        this->showEditError("Invalid Hotkey Scope.");
+        this->showEditError("Invalid Hotkey category.");
 
         return;
     }
-    auto allActions = actionNames.find(*scope);
+    auto allActions = actionNames.find(*category);
     if (allActions != actionNames.end())
     {
         const auto &actionsMap = allActions->second;
