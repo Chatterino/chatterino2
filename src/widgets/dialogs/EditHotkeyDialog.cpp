@@ -1,4 +1,5 @@
-#include "EditHotkeyDialog.hpp"
+#include "widgets/dialogs/EditHotkeyDialog.hpp"
+
 #include "Application.hpp"
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/ActionNames.hpp"

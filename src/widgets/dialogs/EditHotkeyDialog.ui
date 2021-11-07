@@ -73,7 +73,7 @@ see this message :)</string>
      <item row="2" column="0">
       <widget class="QLabel" name="actionLabel">
        <property name="text">
-        <string>Hotkey action:</string>
+        <string>Action:</string>
        </property>
        <property name="buddy">
         <cstring>actionPicker</cstring>
