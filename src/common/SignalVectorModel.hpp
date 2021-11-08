@@ -467,11 +467,11 @@ private:
 
 public:
     // returns the related index of the model
-    int getModelIndexFromVectorIndex(int vectorIndex)
+    int getModelIndexFromVectorIndex(int vectorIndex) const
     {
         int modelIndex = 0;
 
-        for (auto &row : this->rows_)
+        for (auto &row : this->rows())
         {
             if (row.isCustomRow)
             {
