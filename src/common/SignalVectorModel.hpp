@@ -465,6 +465,7 @@ private:
         return i;
     }
 
+public:
     // returns the related index of the model
     int getModelIndexFromVectorIndex(int index)
     {
