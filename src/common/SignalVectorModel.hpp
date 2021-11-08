@@ -430,6 +430,11 @@ protected:
         }
     };
 
+    const std::vector<Row> &rows() const
+    {
+        return this->rows_;
+    }
+
 private:
     std::vector<QMap<int, QVariant>> headerData_;
     SignalVector<TVectorItem> *vector_;
