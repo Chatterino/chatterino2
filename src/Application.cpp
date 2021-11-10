@@ -16,6 +16,7 @@
 #include "providers/ffz/FfzBadges.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/Irc2.hpp"
+#include "providers/pronouns/PronounsBadges.hpp"
 #include "providers/twitch/PubsubClient.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/TwitchMessageBuilder.hpp"
@@ -62,6 +63,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , twitch2(&this->emplace<TwitchIrcServer>())
     , chatterinoBadges(&this->emplace<ChatterinoBadges>())
     , ffzBadges(&this->emplace<FfzBadges>())
+    , pronounsBadges(&this->emplace<PronounsBadges>())
     , logging(&this->emplace<Logging>())
 {
     this->instance = this;

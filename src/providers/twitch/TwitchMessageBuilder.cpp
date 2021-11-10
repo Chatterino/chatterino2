@@ -7,6 +7,7 @@
 #include "messages/Message.hpp"
 #include "providers/chatterino/ChatterinoBadges.hpp"
 #include "providers/ffz/FfzBadges.hpp"
+#include "providers/pronouns/PronounsBadges.hpp"
 #include "providers/twitch/TwitchBadges.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -199,6 +200,7 @@ MessagePtr TwitchMessageBuilder::build()
 
     this->appendChatterinoBadges();
     this->appendFfzBadges();
+    this->appendProunounsBadges();
 
     this->appendUsername();
 
@@ -1127,6 +1129,20 @@ void TwitchMessageBuilder::appendFfzBadges()
         {
             this->emplace<FfzBadgeElement>(*badge, MessageElementFlag::BadgeFfz,
                                            color.get());
+        }
+    }
+}
+
+void TwitchMessageBuilder::appendProunounsBadges()
+{
+    if (!this->historicalMessage_)
+    {
+        if (auto badge = getApp()->pronounsBadges->getPronouns({this->userId_},
+                                                               this->userName))
+        {
+            this->emplace<TextElement>(
+                *badge, MessageElementFlag::BadgePronouns, this->usernameColor_,
+                FontStyle::ChatMediumSmall);
         }
     }
 }

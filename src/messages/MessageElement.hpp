@@ -95,8 +95,12 @@ enum class MessageElementFlag : int64_t {
     // - FFZ donator badge
     BadgeFfz = (1LL << 19),
 
+    // Slot 8: Pronouns
+    BadgePronouns = (1LL << 32),
+
     Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
-             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeFfz,
+             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeFfz |
+             BadgePronouns,
 
     ChannelName = (1LL << 20),
 
