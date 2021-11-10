@@ -8,27 +8,39 @@
 #include <shared_mutex>
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
+#include "singletons/Settings.hpp"
 
 namespace chatterino {
 
 void PronounsBadges::initialize(Settings &settings, Paths &paths)
 {
     this->loadPronouns();
+    this->enabled_ = settings.showBadgesPronouns;
+    this->settingListener_.addSetting(settings.showBadgesPronouns);
+    this->settingListener_.setCB([this] {
+        auto settings = getSettings();
+        this->enabled_ = settings->showBadgesPronouns;
+    });
 }
 
 boost::optional<QString> PronounsBadges::getPronouns(const UserId &id,
                                                      const QString &userName)
 {
+    if (!this->enabled_)
+    {
+        return boost::none;
+    }
+
     std::shared_lock lock(this->mutex_);
 
-    auto it = this->userPronounsMap.find(id.string);
-    if (it != this->userPronounsMap.end())
+    auto it = this->userPronounsMap_.find(id.string);
+    if (it != this->userPronounsMap_.end())
     {
         return it->second;
     }
     else
     {
-        this->userPronounsMap[id.string] = boost::none;
+        this->userPronounsMap_[id.string] = boost::none;
 
         QUrl url("https://pronouns.alejo.io/api/users/" + userName);
 
@@ -41,10 +53,10 @@ boost::optional<QString> PronounsBadges::getPronouns(const UserId &id,
                     auto jsonUser = jsonUser_.toObject();
                     auto pronounId = jsonUser.value("pronoun_id").toString();
 
-                    auto it = this->pronounsMap.find(pronounId);
-                    if (it != this->pronounsMap.end())
+                    auto it = this->pronounsMap_.find(pronounId);
+                    if (it != this->pronounsMap_.end())
                     {
-                        this->userPronounsMap[id.string] = it->second;
+                        this->userPronounsMap_[id.string] = it->second;
                     }
                 }
 
@@ -70,7 +82,7 @@ void PronounsBadges::loadPronouns()
                 auto name = jsonPronouns.value("name").toString();
                 auto display = jsonPronouns.value("display").toString();
 
-                this->pronounsMap[name] = display;
+                this->pronounsMap_[name] = display;
             }
 
             return Success;

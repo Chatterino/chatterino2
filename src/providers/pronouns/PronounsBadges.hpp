@@ -4,6 +4,7 @@
 #include <common/Singleton.hpp>
 
 #include "common/Aliases.hpp"
+#include "pajlada/settings/settinglistener.hpp"
 #include "util/QStringHash.hpp"
 
 #include <map>
@@ -25,10 +26,14 @@ public:
 private:
     void loadPronouns();
 
+    bool enabled_;
+
     std::shared_mutex mutex_;
 
-    std::unordered_map<QString, boost::optional<QString>> userPronounsMap;
-    std::unordered_map<QString, QString> pronounsMap;
+    std::unordered_map<QString, boost::optional<QString>> userPronounsMap_;
+    std::unordered_map<QString, QString> pronounsMap_;
+
+    pajlada::SettingListener settingListener_;
 };
 
 }  // namespace chatterino
