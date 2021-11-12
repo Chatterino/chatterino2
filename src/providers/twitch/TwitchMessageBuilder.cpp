@@ -1452,7 +1452,7 @@ void TwitchMessageBuilder::modsOrVipsSystemMessage(QString prefix,
     builder->emplace<TimestampElement>();
     builder->message().flags.set(MessageFlag::System);
     builder->message().flags.set(MessageFlag::DoNotTriggerNotification);
-    builder->emplace<TextElement>(prefix, MessageElementFlag::Text,
+    builder->emplace<TextElement>(prefix + " ", MessageElementFlag::Text,
                                   MessageColor::System);
     bool isFirst = true;
     for (const QString &username : users)
