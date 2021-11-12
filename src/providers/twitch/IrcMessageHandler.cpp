@@ -815,9 +815,9 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         }
         else if (tags == "bad_delete_message_error")
         {
-            channel->addMessage(
-                makeSystemMessage("There was a problem deleting the message. "
-                                  "It might be from another channel"));
+            channel->addMessage(makeSystemMessage(
+                "There was a problem deleting the message. "
+                "It might be from another channel or too old to delete."));
         }
         else if (tags == "host_on" || tags == "host_target_went_offline")
         {
