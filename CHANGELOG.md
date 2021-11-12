@@ -51,7 +51,7 @@
 - Bugfix: Fixed the reconnection backoff accidentally resetting when thrown out of certain IRC servers. (#3328)
 - Bugfix: Fixed underlying text from disabled emotes not being colorized properly. (#3333)
 - Bugfix: Fixed IRC ACTION messages (/me) not being colorized properly. (#3341)
-- Bugfix: Fixed the first link being broken in `/mods` and `/vips` (#3349)
+- Bugfix: Fixed the first usercard being broken in `/mods` and `/vips` (#3349)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
