@@ -866,6 +866,39 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+    this->registerCommand(
+        "/delete", [](const QStringList &words, ChannelPtr channel) -> QString {
+            if (words.size() < 2)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /delete <msg-id> - Deletes the "
+                                      "specified message."));
+                return "";
+            }
+            auto msg_id = words.at(1);
+            auto uuid = QUuid(msg_id);
+            if (uuid.isNull())
+            {
+                // failed to parse
+
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid msg-id: \"%1\"").arg(msg_id)));
+                return "";
+            }
+            auto msg = channel->findMessage(msg_id);
+            if (msg != nullptr)
+            {
+                if (msg->loginName == channel->getName() &&
+                    !channel->isBroadcaster())
+                {
+                    channel->addMessage(makeSystemMessage(
+                        "You cannot delete the broadcaster's messages unless "
+                        "you are the broadcaster."));
+                    return "";
+                }
+            }
+            return QString("/delete ") + msg_id;
+        });
 
     this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
         getApp()->twitch2->sendRawMessage(words.mid(1).join(" "));
