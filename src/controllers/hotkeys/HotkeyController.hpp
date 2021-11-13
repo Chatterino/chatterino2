@@ -15,8 +15,6 @@ class QShortcut;
 namespace chatterino {
 
 class Hotkey;
-class Settings;
-class Paths;
 
 class HotkeyModel;
 
