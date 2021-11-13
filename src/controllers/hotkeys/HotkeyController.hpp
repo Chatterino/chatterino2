@@ -39,27 +39,31 @@ public:
     int replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
     boost::optional<HotkeyCategory> hotkeyCategoryFromName(
         QString categoryName);
-    QString hotkeyCategoryToName(HotkeyCategory category);
     bool isDuplicate(std::shared_ptr<Hotkey> hotkey, QString ignoreNamed);
 
-    const std::map<HotkeyCategory, QString> hotkeyCategoryNames = {
-        {HotkeyCategory::PopupWindow, "popupWindow"},
-        {HotkeyCategory::Split, "split"},
-        {HotkeyCategory::SplitInput, "splitInput"},
-        {HotkeyCategory::Window, "window"}};
+    /**
+     * @brief Returns the display name of the given hotkey category
+     *
+     * @returns the display name, or an empty string if an invalid hotkey category was given
+     **/
+    [[nodiscard]] QString categoryDisplayName(HotkeyCategory category) const;
 
-    const std::map<HotkeyCategory, QString> hotkeyCategoryDisplayNames = {
-        {HotkeyCategory::PopupWindow, "Popup Windows"},
-        {HotkeyCategory::Split, "Split"},
-        {HotkeyCategory::SplitInput, "Split input box"},
-        {HotkeyCategory::Window, "Window"},
-    };
+    /**
+     * @brief Returns the name of the given hotkey category
+     *
+     * @returns the name, or an empty string if an invalid hotkey category was given
+     **/
+    [[nodiscard]] QString categoryName(HotkeyCategory category) const;
+
+    /**
+     * @returns a const map with the HotkeyCategory enum as its key, and HotkeyCategoryData as the value.
+     **/
+    [[nodiscard]] const std::map<HotkeyCategory, HotkeyCategoryData>
+        &categories() const;
+
     pajlada::Signals::NoArgSignal onItemsUpdated;
 
 private:
-    SignalVector<std::shared_ptr<Hotkey>> hotkeys_;
-    pajlada::Signals::SignalHolder signalHolder_;
-
     void loadHotkeys();
     void saveHotkeys();
     void addDefaults(std::set<QString> &addedHotkeys);
@@ -68,7 +72,18 @@ private:
                        QKeySequence keySequence, QString action,
                        std::vector<QString> args, QString name);
     void showHotkeyError(std::shared_ptr<Hotkey> hotkey, QString warning);
+
     friend class KeyboardSettingsPage;
+
+    SignalVector<std::shared_ptr<Hotkey>> hotkeys_;
+    pajlada::Signals::SignalHolder signalHolder_;
+
+    const std::map<HotkeyCategory, HotkeyCategoryData> hotkeyCategories_ = {
+        {HotkeyCategory::PopupWindow, {"popupWindow", "Popup Windows"}},
+        {HotkeyCategory::Split, {"split", "Split"}},
+        {HotkeyCategory::SplitInput, {"splitInput", "Split input box"}},
+        {HotkeyCategory::Window, {"window", "Window"}},
+    };
 };
 
 }  // namespace chatterino

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <QString>
+
 namespace chatterino {
 
 // HotkeyCategory describes where the hotkeys's action takes place.
@@ -10,6 +12,11 @@ enum class HotkeyCategory {
     Split,
     SplitInput,
     Window,
+};
+
+struct HotkeyCategoryData {
+    QString name;
+    QString displayName;
 };
 
 }  // namespace chatterino

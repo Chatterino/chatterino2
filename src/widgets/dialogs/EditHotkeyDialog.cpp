@@ -16,11 +16,10 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     this->ui_->setupUi(this);
     const auto app = getApp();
     // dynamically add category names to the category picker
-    for (const auto pair : app->hotkeys->hotkeyCategoryNames)
+    for (const auto &[_, hotkeyCategory] : app->hotkeys->categories())
     {
-        this->ui_->categoryPicker->addItem(
-            app->hotkeys->hotkeyCategoryDisplayNames.find(pair.first)->second,
-            pair.second);
+        this->ui_->categoryPicker->addItem(hotkeyCategory.displayName,
+                                           hotkeyCategory.name);
     }
 
     this->ui_->warningLabel->hide();
