@@ -862,8 +862,11 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
                    "IrcMessageHandler::handleNoticeMessage. Twitch specific "
                    "functionality called in non twitch channel");
 
-            TwitchMessageBuilder::modsOrVipsSystemMessage(
-                msgParts.at(0), msgParts.at(1).split(", "), tc, &builder);
+            auto users = msgParts.at(1)
+                             .mid(1)  // there is a space before the first user
+                             .split(", ");
+            TwitchMessageBuilder::modsOrVipsSystemMessage(msgParts.at(0), users,
+                                                          tc, &builder);
             channel->addMessage(builder.release());
         }
         else

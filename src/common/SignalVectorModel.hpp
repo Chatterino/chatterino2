@@ -430,6 +430,11 @@ protected:
         }
     };
 
+    const std::vector<Row> &rows() const
+    {
+        return this->rows_;
+    }
+
 private:
     std::vector<QMap<int, QVariant>> headerData_;
     SignalVector<TVectorItem> *vector_;
@@ -460,26 +465,28 @@ private:
         return i;
     }
 
+public:
     // returns the related index of the model
-    int getModelIndexFromVectorIndex(int index)
+    int getModelIndexFromVectorIndex(int vectorIndex) const
     {
-        int i = 0;
+        int modelIndex = 0;
 
-        for (auto &row : this->rows_)
+        for (auto &row : this->rows())
         {
             if (row.isCustomRow)
             {
-                index++;
+                vectorIndex++;
             }
 
-            if (i == index)
+            if (modelIndex == vectorIndex)
             {
-                return i;
+                return modelIndex;
             }
-            i++;
+
+            modelIndex++;
         }
 
-        return i;
+        return modelIndex;
     }
 };
 

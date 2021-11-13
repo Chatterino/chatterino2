@@ -399,6 +399,7 @@ void Window::addShortcuts()
         Split *split = new Split(splitContainer);
         split->setChannel(
             getApp()->twitch.server->getOrAddChannel(si.channelName));
+        split->setFilters(si.filters);
         splitContainer->appendSplit(split);
     });
 
