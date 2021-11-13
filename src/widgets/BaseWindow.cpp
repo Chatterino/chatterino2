@@ -5,7 +5,6 @@
 #include "boost/algorithm/algorithm.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
-#include "util/Shortcut.hpp"
 #include "util/WindowsHelper.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
