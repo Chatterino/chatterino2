@@ -807,10 +807,17 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         }
 
         QString tags = message->tags().value("msg-id").toString();
-        if (tags == "bad_delete_message_error" || tags == "usage_delete")
+        if (tags == "usage_delete")
         {
             channel->addMessage(makeSystemMessage(
-                "Usage: /delete <msg-id>. Can't take more than one argument"));
+                "Usage: /delete <msg-id> - Deletes the specified message. "
+                "Can't take more than one argument."));
+        }
+        else if (tags == "bad_delete_message_error")
+        {
+            channel->addMessage(makeSystemMessage(
+                "There was a problem deleting the message. "
+                "It might be from another channel or too old to delete."));
         }
         else if (tags == "host_on" || tags == "host_target_went_offline")
         {
