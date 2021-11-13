@@ -868,6 +868,8 @@ void CommandController::initialize(Settings &, Paths &paths)
     });
     this->registerCommand(
         "/delete", [](const QStringList &words, ChannelPtr channel) -> QString {
+            // This is a wrapper over the standard Twitch /delete command
+            // We use this to ensure the user gets better error messages for missing or malformed arguments
             if (words.size() < 2)
             {
                 channel->addMessage(
@@ -875,17 +877,18 @@ void CommandController::initialize(Settings &, Paths &paths)
                                       "specified message."));
                 return "";
             }
-            auto msg_id = words.at(1);
-            auto uuid = QUuid(msg_id);
+
+            auto messageID = words.at(1);
+            auto uuid = QUuid(messageID);
             if (uuid.isNull())
             {
-                // failed to parse
-
+                // The message id must be a valid UUID
                 channel->addMessage(makeSystemMessage(
-                    QString("Invalid msg-id: \"%1\"").arg(msg_id)));
+                    QString("Invalid msg-id: \"%1\"").arg(messageID)));
                 return "";
             }
-            auto msg = channel->findMessage(msg_id);
+
+            auto msg = channel->findMessage(messageID);
             if (msg != nullptr)
             {
                 if (msg->loginName == channel->getName() &&
@@ -897,7 +900,8 @@ void CommandController::initialize(Settings &, Paths &paths)
                     return "";
                 }
             }
-            return QString("/delete ") + msg_id;
+
+            return QString("/delete ") + messageID;
         });
 
     this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
