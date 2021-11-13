@@ -521,7 +521,6 @@ HEADERS += \
     src/util/SampleCheerMessages.hpp \
     src/util/SampleLinks.hpp \
     src/util/SharedPtrElementLess.hpp \
-    src/util/Shortcut.hpp \
     src/util/SplitCommand.hpp \
     src/util/StandardItemHelper.hpp \
     src/util/StreamerMode.hpp \
