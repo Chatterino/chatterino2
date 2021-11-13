@@ -807,10 +807,17 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
         }
 
         QString tags = message->tags().value("msg-id").toString();
-        if (tags == "bad_delete_message_error" || tags == "usage_delete")
+        if (tags == "usage_delete")
         {
             channel->addMessage(makeSystemMessage(
-                "Usage: /delete <msg-id>. Can't take more than one argument"));
+                "Usage: /delete <msg-id> - Deletes the specified message. "
+                "Can't take more than one argument."));
+        }
+        else if (tags == "bad_delete_message_error")
+        {
+            channel->addMessage(makeSystemMessage(
+                "There was a problem deleting the message. "
+                "It might be from another channel or too old to delete."));
         }
         else if (tags == "host_on" || tags == "host_target_went_offline")
         {
@@ -855,8 +862,11 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
                    "IrcMessageHandler::handleNoticeMessage. Twitch specific "
                    "functionality called in non twitch channel");
 
-            TwitchMessageBuilder::modsOrVipsSystemMessage(
-                msgParts.at(0), msgParts.at(1).split(", "), tc, &builder);
+            auto users = msgParts.at(1)
+                             .mid(1)  // there is a space before the first user
+                             .split(", ");
+            TwitchMessageBuilder::modsOrVipsSystemMessage(msgParts.at(0), users,
+                                                          tc, &builder);
             channel->addMessage(builder.release());
         }
         else
