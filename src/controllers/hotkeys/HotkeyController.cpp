@@ -99,6 +99,18 @@ void HotkeyController::save()
     this->saveHotkeys();
 }
 
+std::shared_ptr<Hotkey> HotkeyController::getHotkeyByName(QString name)
+{
+    for (auto &hotkey : this->hotkeys_)
+    {
+        if (hotkey->name() == name)
+        {
+            return hotkey;
+        }
+    }
+    return nullptr;
+}
+
 int HotkeyController::replaceHotkey(QString oldName,
                                     std::shared_ptr<Hotkey> newHotkey)
 {
@@ -127,18 +139,6 @@ boost::optional<HotkeyCategory> HotkeyController::hotkeyCategoryFromName(
     }
     qCDebug(chatterinoHotkeys) << "Unknown category: " << categoryName;
     return {};
-}
-
-std::shared_ptr<Hotkey> HotkeyController::getHotkeyByName(QString name)
-{
-    for (auto &hotkey : this->hotkeys_)
-    {
-        if (hotkey->name() == name)
-        {
-            return hotkey;
-        }
-    }
-    return nullptr;
 }
 
 QString HotkeyController::hotkeyCategoryToName(HotkeyCategory category)
