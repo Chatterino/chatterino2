@@ -251,25 +251,45 @@ void EditHotkeyDialog::updateArgumentsInput()
             return;
         }
         const ActionDefinition &def = definition->second;
-        auto text = QString("Newline separated arguments for the action\n");
-        if (def.minCountArguments != 0)
-        {
-            this->ui_->argumentsEdit->setEnabled(true);
-            text += QString(" - %1 required arguments\n")
-                        .arg(def.minCountArguments);
 
-            if (def.maxCountArguments != 0)
+        if (def.maxCountArguments != 0)
+        {
+            QString text =
+                "Arguments wrapped in <> are required.\nArguments wrapped in "
+                "[] "
+                "are optional.\nArguments are separated by a newline.";
+            if (!def.argumentDescription.isEmpty())
             {
-                text += QString(" - %2 optional arguments")
-                            .arg(def.maxCountArguments - def.minCountArguments);
+                this->ui_->argumentsDescription->setVisible(true);
+                this->ui_->argumentsDescription->setText(
+                    def.argumentDescription);
             }
+            else
+            {
+                this->ui_->argumentsDescription->setVisible(false);
+            }
+
+            text = QString("Arguments wrapped in <> are required.");
+            if (def.maxCountArguments != def.minCountArguments)
+            {
+                text += QString("\nArguments wrapped in [] are optional.");
+            }
+
+            text += "\nArguments are separated by a newline.";
+
+            this->ui_->argumentsEdit->setEnabled(true);
+            this->ui_->argumentsEdit->setPlaceholderText(text);
+
+            this->ui_->argumentsLabel->setVisible(true);
+            this->ui_->argumentsDescription->setVisible(true);
+            this->ui_->argumentsEdit->setVisible(true);
         }
         else
         {
-            this->ui_->argumentsEdit->setEnabled(false);
-            text += "This action requires no arguments";
+            this->ui_->argumentsLabel->setVisible(false);
+            this->ui_->argumentsDescription->setVisible(false);
+            this->ui_->argumentsEdit->setVisible(false);
         }
-        this->ui_->argumentsEdit->setPlaceholderText(text);
     }
 }
 
