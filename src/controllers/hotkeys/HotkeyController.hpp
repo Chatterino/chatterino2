@@ -42,7 +42,17 @@ public:
     int replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
     boost::optional<HotkeyCategory> hotkeyCategoryFromName(
         QString categoryName);
-    bool isDuplicate(std::shared_ptr<Hotkey> hotkey, QString ignoreNamed);
+
+    /**
+     * @brief checks if the hotkey is duplicate
+     *
+     * @param hotkey the hotkey to check
+     * @param ignoreNamed name of hotkey to ignore. Useful for ensuring we don't fail if the hotkey's name is being edited
+     *
+     * @returns true if the given hotkey is a duplicate, false if it's not
+     **/
+    [[nodiscard]] bool isDuplicate(std::shared_ptr<Hotkey> hotkey,
+                                   QString ignoreNamed);
 
     /**
      * @brief Returns the display name of the given hotkey category

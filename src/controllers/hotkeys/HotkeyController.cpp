@@ -144,11 +144,16 @@ boost::optional<HotkeyCategory> HotkeyController::hotkeyCategoryFromName(
 bool HotkeyController::isDuplicate(std::shared_ptr<Hotkey> hotkey,
                                    QString ignoreNamed)
 {
-    for (const auto shared : this->hotkeys_)
+    for (const auto &shared : this->hotkeys_)
     {
+        if (shared->name() == ignoreNamed || shared->name() == hotkey->name())
+        {
+            // Given hotkey is the same as shared, just before it was being edited.
+            continue;
+        }
+
         if (shared->category() == hotkey->category() &&
-            shared->keySequence() == hotkey->keySequence() &&
-            shared->name() != hotkey->name() && shared->name() != ignoreNamed)
+            shared->keySequence() == hotkey->keySequence())
         {
             return true;
         }
