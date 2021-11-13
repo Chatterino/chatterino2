@@ -33,7 +33,10 @@ public:
 
     void save() override;
     std::shared_ptr<Hotkey> getHotkeyByName(QString name);
+
     /**
+     * @brief removes the hotkey with the oldName and inserts newHotkey at the end
+     *
      * @returns the new index in the SignalVector
      **/
     int replaceHotkey(QString oldName, std::shared_ptr<Hotkey> newHotkey);
