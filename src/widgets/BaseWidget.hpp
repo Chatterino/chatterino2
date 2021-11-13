@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QDebug>
 #include <QShortcut>
 #include <QWidget>
 #include <boost/optional.hpp>
