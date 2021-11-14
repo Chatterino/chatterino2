@@ -77,14 +77,41 @@ public:
     pajlada::Signals::NoArgSignal onItemsUpdated;
 
 private:
+    /**
+     * @brief load hotkeys from under the /hotkeys settings path
+     **/
     void loadHotkeys();
+
+    /**
+     * @brief save hotkeys to the /hotkeys path
+     *
+     * This is done by first fully clearing the /hotkeys object, then reapplying all hotkeys
+     * from the hotkeys_ object
+     **/
     void saveHotkeys();
+
+    /**
+     * @brief try to load all default hotkeys
+     *
+     * New hotkeys must be added to this function
+     **/
     void addDefaults(std::set<QString> &addedHotkeys);
+
+    /**
+     * @brief remove all user-made changes to hotkeys and reset to the default hotkeys
+     **/
     void resetToDefaults();
+
+    /**
+     * @brief try to add a hotkey if it hasn't already been added or modified by the user
+     **/
     void tryAddDefault(std::set<QString> &addedHotkeys, HotkeyCategory category,
                        QKeySequence keySequence, QString action,
                        std::vector<QString> args, QString name);
 
+    /**
+     * @brief show an error dialog about a hotkey in a standard format
+     **/
     static void showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
                                 QString warning);
 
