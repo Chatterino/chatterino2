@@ -44,7 +44,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
         QString argsText;
         for (int i = 0; i < hotkey->arguments().size(); i++)
         {
-            if (I != 0)
+            if (i != 0)
             {
                 argsText += '\n';
             }
