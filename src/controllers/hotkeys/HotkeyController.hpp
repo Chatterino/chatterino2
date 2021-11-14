@@ -84,7 +84,9 @@ private:
     void tryAddDefault(std::set<QString> &addedHotkeys, HotkeyCategory category,
                        QKeySequence keySequence, QString action,
                        std::vector<QString> args, QString name);
-    void showHotkeyError(std::shared_ptr<Hotkey> hotkey, QString warning);
+
+    static void showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
+                                QString warning);
 
     friend class KeyboardSettingsPage;
 

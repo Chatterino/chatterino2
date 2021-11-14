@@ -515,7 +515,7 @@ void HotkeyController::tryAddDefault(std::set<QString> &addedHotkeys,
     addedHotkeys.insert(name);
 }
 
-void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> hotkey,
+void HotkeyController::showHotkeyError(const std::shared_ptr<Hotkey> &hotkey,
                                        QString warning)
 {
     auto msgBox = new QMessageBox(
