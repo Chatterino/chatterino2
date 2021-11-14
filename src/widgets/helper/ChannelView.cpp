@@ -1934,9 +1934,9 @@ void ChannelView::addContextMenuItems(
             R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?:popout\/)?(?<username>[a-z0-9_]{3,}))",
             QRegularExpression::CaseInsensitiveOption);
         static QSet<QString> ignoredUsernames{
-            "videos",   "settings",  "directory", "jobs",
-            "friends",  "inventory", "payments",  "subscriptions",
-            "messages", "drops",     "wallet",    "profile",
+            "videos",    "settings", "directory",     "jobs",     "friends",
+            "inventory", "payments", "subscriptions", "messages", "drops",
+            "wallet",    "profile",  "downloads",
         };
 
         auto twitchMatch =
