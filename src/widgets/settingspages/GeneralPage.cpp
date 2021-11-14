@@ -503,6 +503,20 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         box->addWidget(layout.makeButton("Reset", []() {
             getSettings()->cachePath = "";
         }));
+        box->addWidget(layout.makeButton("Clear Cache", [&layout]() {
+            auto reply = QMessageBox::question(
+                layout.window(), "Clear cache",
+                "Are you sure that you want to clear your cache? Emotes may "
+                "take longer to load next time Chatterino is started.",
+                QMessageBox::Yes | QMessageBox::No);
+
+            if (reply == QMessageBox::Yes)
+            {
+                auto cacheDir = QDir(getPaths()->cacheDirectory());
+                cacheDir.removeRecursively();
+                cacheDir.mkdir(getPaths()->cacheDirectory());
+            }
+        }));
         box->addStretch(1);
 
         layout.addLayout(box);
@@ -585,7 +599,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
 
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
     if (!getPaths()->isPortable())
     {
         layout.addCheckbox(

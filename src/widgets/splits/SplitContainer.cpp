@@ -255,7 +255,8 @@ void SplitContainer::addSplit(Split *split)
                     tab->connect(tab, &QWidget::destroyed, [tab]() mutable {
                         ClosedSplits::invalidateTab(tab);
                     });
-                    ClosedSplits::push({split->getChannel()->getName(), tab});
+                    ClosedSplits::push({split->getChannel()->getName(),
+                                        split->getFilters(), tab});
                 }
                 break;
 

@@ -140,25 +140,4 @@ private:
     QString line2;
 };
 
-struct PajSegment {
-    QString text;
-    QColor color;
-};
-
-// TEXT
-class MultiColorTextLayoutElement : public TextLayoutElement
-{
-public:
-    MultiColorTextLayoutElement(MessageElement &creator_, QString &text,
-                                const QSize &size,
-                                std::vector<PajSegment> segments,
-                                FontStyle style_, float scale_);
-
-protected:
-    void paint(QPainter &painter) override;
-
-private:
-    std::vector<PajSegment> segments_;
-};
-
 }  // namespace chatterino

@@ -321,7 +321,9 @@ void TwitchMessageBuilder::addWords(
             {
                 // This emote exists right at the start of the word!
                 this->emplace<EmoteElement>(currentTwitchEmote.ptr,
-                                            MessageElementFlag::TwitchEmote);
+                                            MessageElementFlag::TwitchEmote,
+                                            this->textColor_);
+
                 auto len = currentTwitchEmote.name.string.length();
                 cursor += len;
                 word = word.mid(len);
@@ -1027,7 +1029,7 @@ Outcome TwitchMessageBuilder::tryAppendEmote(const EmoteName &name)
 
     if (emote)
     {
-        this->emplace<EmoteElement>(emote.get(), flags);
+        this->emplace<EmoteElement>(emote.get(), flags, this->textColor_);
         return Success;
     }
 
@@ -1190,12 +1192,14 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
         if (cheerEmote.staticEmote)
         {
             this->emplace<EmoteElement>(cheerEmote.staticEmote,
-                                        MessageElementFlag::BitsStatic);
+                                        MessageElementFlag::BitsStatic,
+                                        this->textColor_);
         }
         if (cheerEmote.animatedEmote)
         {
             this->emplace<EmoteElement>(cheerEmote.animatedEmote,
-                                        MessageElementFlag::BitsAnimated);
+                                        MessageElementFlag::BitsAnimated,
+                                        this->textColor_);
         }
         if (cheerEmote.color != QColor())
         {
@@ -1223,12 +1227,14 @@ Outcome TwitchMessageBuilder::tryParseCheermote(const QString &string)
     if (cheerEmote.staticEmote)
     {
         this->emplace<EmoteElement>(cheerEmote.staticEmote,
-                                    MessageElementFlag::BitsStatic);
+                                    MessageElementFlag::BitsStatic,
+                                    this->textColor_);
     }
     if (cheerEmote.animatedEmote)
     {
         this->emplace<EmoteElement>(cheerEmote.animatedEmote,
-                                    MessageElementFlag::BitsAnimated);
+                                    MessageElementFlag::BitsAnimated,
+                                    this->textColor_);
     }
     if (cheerEmote.color != QColor())
     {

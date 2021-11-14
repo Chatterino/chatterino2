@@ -45,7 +45,7 @@ jobs:
             echo "vs_version=2017" >> $GITHUB_ENV
         shell: bash
 
-      - uses: actions/checkout@v2.3.5
+      - uses: actions/checkout@v2.4.0
         with:
           submodules: true
           fetch-depth: 0  # allows for tags access
