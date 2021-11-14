@@ -36,7 +36,7 @@ private:
     void addDebugStuff(
         std::map<QString, std::function<QString(std::vector<QString>)>>
             &actions);
-    virtual void addShortcuts() override;
+    void addShortcuts() override;
     void addLayout();
     void onAccountSelected();
     void addMenuBar();

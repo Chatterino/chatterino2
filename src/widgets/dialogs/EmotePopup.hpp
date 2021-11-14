@@ -31,7 +31,7 @@ private:
     ChannelView *viewEmojis_{};
 
     Notebook *notebook_;
-    virtual void addShortcuts() override;
+    void addShortcuts() override;
 };
 
 }  // namespace chatterino

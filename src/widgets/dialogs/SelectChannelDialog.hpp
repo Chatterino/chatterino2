@@ -65,7 +65,7 @@ private:
     void ok();
     friend class EventFilter;
 
-    void addShortcuts();
+    void addShortcuts() override;
 };
 
 }  // namespace chatterino
