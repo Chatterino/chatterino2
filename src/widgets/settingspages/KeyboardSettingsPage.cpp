@@ -16,12 +16,10 @@ namespace chatterino {
 
 KeyboardSettingsPage::KeyboardSettingsPage()
 {
-    auto *app = getApp();
-
     LayoutCreator<KeyboardSettingsPage> layoutCreator(this);
     auto layout = layoutCreator.emplace<QVBoxLayout>();
 
-    auto model = app->hotkeys->createModel(nullptr);
+    auto model = getApp()->hotkeys->createModel(nullptr);
     EditableModelView *view =
         layout.emplace<EditableModelView>(model).getElement();
 

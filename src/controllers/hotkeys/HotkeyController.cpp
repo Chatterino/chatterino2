@@ -165,7 +165,7 @@ QString HotkeyController::categoryDisplayName(HotkeyCategory category) const
     {
         qCWarning(chatterinoHotkeys) << "Invalid HotkeyCategory passed to "
                                         "categoryDisplayName function";
-        return "";
+        return QString();
     }
 
     const auto &categoryData = this->hotkeyCategories_.at(category);
@@ -179,7 +179,7 @@ QString HotkeyController::categoryName(HotkeyCategory category) const
     {
         qCWarning(chatterinoHotkeys) << "Invalid HotkeyCategory passed to "
                                         "categoryName function";
-        return "";
+        return QString();
     }
 
     const auto &categoryData = this->hotkeyCategories_.at(category);

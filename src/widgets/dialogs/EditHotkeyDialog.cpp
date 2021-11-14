@@ -16,9 +16,8 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
     , data_(hotkey)
 {
     this->ui_->setupUi(this);
-    const auto app = getApp();
     // dynamically add category names to the category picker
-    for (const auto &[_, hotkeyCategory] : app->hotkeys->categories())
+    for (const auto &[_, hotkeyCategory] : getApp()->hotkeys->categories())
     {
         this->ui_->categoryPicker->addItem(hotkeyCategory.displayName,
                                            hotkeyCategory.name);
@@ -107,7 +106,7 @@ void EditHotkeyDialog::afterEdit()
             return;
         }
     }
-    if (nameText == "")
+    if (nameText.isEmpty())
     {
         this->showEditError("Hotkey name is missing");
         return;
@@ -117,7 +116,7 @@ void EditHotkeyDialog::afterEdit()
         this->showEditError("Key Sequence is missing");
         return;
     }
-    if (this->ui_->actionPicker->currentText() == "")
+    if (this->ui_->actionPicker->currentText().isEmpty())
     {
         this->showEditError("Action name cannot be empty");
         return;
@@ -181,7 +180,7 @@ void EditHotkeyDialog::updatePossibleActions()
     }
     auto currentText = this->ui_->actionPicker->currentData().toString();
     if (this->data_ &&
-        (currentText == "" || this->data_->category() == category))
+        (currentText.isEmpty() || this->data_->category() == category))
     {
         // is editing
         currentText = this->data_->action();
@@ -193,7 +192,7 @@ void EditHotkeyDialog::updatePossibleActions()
     if (actions != actionNames.end())
     {
         int indexToSet = -1;
-        for (const auto action : actions->second)
+        for (const auto &action : actions->second)
         {
             this->ui_->actionPicker->addItem(action.second.displayName,
                                              action.first);
