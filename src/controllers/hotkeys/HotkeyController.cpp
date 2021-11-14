@@ -232,7 +232,7 @@ void HotkeyController::loadHotkeys()
         {
             continue;
         }
-        auto category = HotkeyController::hotkeyCategoryFromName(categoryName);
+        auto category = this->hotkeyCategoryFromName(categoryName);
         if (!category)
         {
             continue;
