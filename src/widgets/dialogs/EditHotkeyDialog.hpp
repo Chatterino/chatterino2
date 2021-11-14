@@ -7,8 +7,10 @@
 #include <memory>
 
 namespace Ui {
+
 class EditHotkeyDialog;
-}
+
+}  // namespace Ui
 
 namespace chatterino {
 

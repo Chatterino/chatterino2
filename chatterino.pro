@@ -161,6 +161,7 @@ SOURCES += \
     src/controllers/highlights/UserHighlightModel.cpp \
     src/controllers/hotkeys/Hotkey.cpp \
     src/controllers/hotkeys/HotkeyController.cpp \
+    src/controllers/hotkeys/HotkeyHelpers.cpp \
     src/controllers/hotkeys/HotkeyModel.cpp \
     src/controllers/ignores/IgnoreController.cpp \
     src/controllers/ignores/IgnoreModel.cpp \
@@ -393,11 +394,12 @@ HEADERS += \
     src/controllers/highlights/HighlightModel.hpp \
     src/controllers/highlights/HighlightPhrase.hpp \
     src/controllers/highlights/UserHighlightModel.hpp \
-    src/controllers/hotkeys/Hotkey.hpp \
-    src/controllers/hotkeys/HotkeyController.hpp \
     src/controllers/hotkeys/ActionNames.hpp \
-    src/controllers/hotkeys/HotkeyModel.hpp \
+    src/controllers/hotkeys/Hotkey.hpp \
     src/controllers/hotkeys/HotkeyCategory.hpp \
+    src/controllers/hotkeys/HotkeyController.hpp \
+    src/controllers/hotkeys/HotkeyHelpers.hpp \
+    src/controllers/hotkeys/HotkeyModel.hpp \
     src/controllers/ignores/IgnoreController.hpp \
     src/controllers/ignores/IgnoreModel.hpp \
     src/controllers/ignores/IgnorePhrase.hpp \

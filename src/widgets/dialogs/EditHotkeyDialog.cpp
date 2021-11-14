@@ -4,9 +4,11 @@
 #include "common/QLogging.hpp"
 #include "controllers/hotkeys/ActionNames.hpp"
 #include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/hotkeys/HotkeyHelpers.hpp"
 #include "ui_EditHotkeyDialog.h"
 
 namespace chatterino {
+
 EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
                                    bool isAdd, QWidget *parent)
     : QDialog(parent, Qt::WindowStaysOnTopHint)
@@ -32,7 +34,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
                                 "correct action before saving.");
         }
 
-        // editting a hotkey
+        // editing a hotkey
 
         // update pickers/input boxes to values from Hotkey object
         this->ui_->categoryPicker->setCurrentIndex(size_t(hotkey->category()));
@@ -75,17 +77,9 @@ std::shared_ptr<Hotkey> EditHotkeyDialog::data()
 
 void EditHotkeyDialog::afterEdit()
 {
-    std::vector<QString> arguments;
+    auto arguments =
+        parseHotkeyArguments(this->ui_->argumentsEdit->toPlainText());
 
-    auto argTemp = this->ui_->argumentsEdit->toPlainText().split("\n");
-    // if the arguments input is empty then make sure arguments are empty.
-    if (!(argTemp.size() == 1 && argTemp.at(0) == ""))
-    {
-        for (const auto arg : argTemp)
-        {
-            arguments.push_back(arg);
-        }
-    }
     auto category = getApp()->hotkeys->hotkeyCategoryFromName(
         this->ui_->categoryPicker->currentData().toString());
     if (!category)
@@ -297,4 +291,5 @@ void EditHotkeyDialog::showEditError(QString errorText)
     this->ui_->warningLabel->setText(errorText);
     this->ui_->warningLabel->show();
 }
+
 }  // namespace chatterino

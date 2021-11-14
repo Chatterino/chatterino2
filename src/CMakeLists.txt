@@ -88,14 +88,16 @@ set(SOURCE_FILES
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
 
+        controllers/hotkeys/ActionNames.hpp
         controllers/hotkeys/Hotkey.cpp
         controllers/hotkeys/Hotkey.hpp
+        controllers/hotkeys/HotkeyCategory.hpp
         controllers/hotkeys/HotkeyController.cpp
         controllers/hotkeys/HotkeyController.hpp
-        controllers/hotkeys/ActionNames.hpp
+        controllers/hotkeys/HotkeyHelpers.cpp
+        controllers/hotkeys/HotkeyHelpers.hpp
         controllers/hotkeys/HotkeyModel.cpp
         controllers/hotkeys/HotkeyModel.hpp
-        controllers/hotkeys/HotkeyCategory.hpp
 
         controllers/ignores/IgnoreController.cpp
         controllers/ignores/IgnoreController.hpp
