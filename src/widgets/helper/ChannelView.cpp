@@ -1949,7 +1949,6 @@ void ChannelView::addContextMenuItems(
             "turbo",          //
             "videos",         //
             "wallet",         //
-
         };
 
         auto twitchMatch =
