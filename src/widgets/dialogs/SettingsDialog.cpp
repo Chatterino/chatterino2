@@ -85,7 +85,7 @@ void SettingsDialog::initUi()
                     .withoutMargin()
                     .emplace<QLineEdit>()
                     .assign(&this->ui_.search);
-    edit->setPlaceholderText("Find in settings... (default Ctrl+F)");
+    edit->setPlaceholderText("Find in settings... (Ctrl+F by default)");
 
     QObject::connect(edit.getElement(), &QLineEdit::textChanged, this,
                      &SettingsDialog::filterElements);
