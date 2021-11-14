@@ -67,17 +67,15 @@ std::vector<QShortcut *> HotkeyController::shortcutsForCategory(
             auto s = new QShortcut(qs, parent);
             s->setContext(hotkey->getContext());
             auto functionPointer = target->second;
-            QObject::connect(
-                s, &QShortcut::activated, parent,
-                [functionPointer, hotkey, this]() {
-                    qCDebug(chatterinoHotkeys)
-                        << "Shortcut pressed: " << hotkey->action();
-                    QString output = functionPointer(hotkey->arguments());
-                    if (!output.isEmpty())
-                    {
-                        this->showHotkeyError(hotkey, output);
-                    }
-                });
+            QObject::connect(s, &QShortcut::activated, parent,
+                             [functionPointer, hotkey, this]() {
+                                 QString output =
+                                     functionPointer(hotkey->arguments());
+                                 if (!output.isEmpty())
+                                 {
+                                     this->showHotkeyError(hotkey, output);
+                                 }
+                             });
             output.push_back(s);
         };
         auto qs = QKeySequence(hotkey->keySequence());
