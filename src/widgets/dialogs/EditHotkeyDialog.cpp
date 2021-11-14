@@ -41,16 +41,15 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
             QKeySequence::fromString(hotkey->keySequence().toString()));
         this->ui_->nameEdit->setText(hotkey->name());
         // update arguments
-        bool isFirst = true;
         QString argsText;
-        for (const auto arg : hotkey->arguments())
+        for (int i = 0; i < hotkey->arguments(); I++)
         {
-            if (!isFirst)
+            if (I != 0)
             {
                 argsText += '\n';
             }
+            const auto &arg = hotkey->arguments().at(0);
             argsText += arg;
-            isFirst = false;
         }
         this->ui_->argumentsEdit->setPlainText(argsText);
     }
