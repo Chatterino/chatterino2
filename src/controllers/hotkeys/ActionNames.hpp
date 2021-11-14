@@ -101,9 +101,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
           }},
          {"showSearch", ActionDefinition{"Search"}},
          {"startWatching", ActionDefinition{"Start watching"}},
-#ifdef C_DEBUG
          {"debug", ActionDefinition{"Show debug popup"}},
-#endif
      }},
     {HotkeyCategory::SplitInput,
      {
