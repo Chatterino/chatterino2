@@ -42,7 +42,7 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
         this->ui_->nameEdit->setText(hotkey->name());
         // update arguments
         QString argsText;
-        for (int i = 0; i < hotkey->arguments(); I++)
+        for (int i = 0; i < hotkey->arguments().size(); i++)
         {
             if (I != 0)
             {
