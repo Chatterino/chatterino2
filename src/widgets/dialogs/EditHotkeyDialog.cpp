@@ -213,6 +213,7 @@ void EditHotkeyDialog::updatePossibleActions()
         qCDebug(chatterinoHotkeys) << "key missing!!!!";
     }
 }
+
 void EditHotkeyDialog::updateArgumentsInput()
 {
     auto currentText = this->ui_->actionPicker->currentData().toString();

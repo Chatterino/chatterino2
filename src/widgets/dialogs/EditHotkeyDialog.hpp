@@ -21,13 +21,30 @@ class EditHotkeyDialog : public QDialog
 public:
     explicit EditHotkeyDialog(const std::shared_ptr<Hotkey> data,
                               bool isAdd = false, QWidget *parent = nullptr);
-    ~EditHotkeyDialog();
+    ~EditHotkeyDialog() final;
 
     std::shared_ptr<Hotkey> data();
 
 protected slots:
+    /**
+     * @brief validates the hotkey
+     *
+     * fired by the ok button
+     **/
     void afterEdit();
+
+    /**
+     * @brief updates the list of actions based on the category
+     *
+     * fired by the category picker changing
+     **/
     void updatePossibleActions();
+
+    /**
+     * @brief updates the arguments description and input visibility
+     *
+     * fired by the action picker changing
+     **/
     void updateArgumentsInput();
 
 private:
