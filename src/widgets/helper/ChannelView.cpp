@@ -1936,7 +1936,7 @@ void ChannelView::addContextMenuItems(
         static QSet<QString> ignoredUsernames{
             "videos",   "settings",  "directory", "jobs",
             "friends",  "inventory", "payments",  "subscriptions",
-            "messages", "drops",     "wallet",
+            "messages", "drops",     "wallet",    "profile",
         };
 
         auto twitchMatch =
