@@ -22,7 +22,7 @@ Adding new hotkeys to a widget that already has hotkeys is quite easy.
 
 ### Add an action
 
-1.  Locate the call to `getApp()->hotkeys->shortcutsForcAtegory(...)`, it is located in the `addShortcuts()` method
+1.  Locate the call to `getApp()->hotkeys->shortcutsForCategory(...)`, it is located in the `addShortcuts()` method
 2.  Above that should be a `HotkeyController::HotkeyMap` named `actions`
 3.  Add your new action inside that map, it should return a non-empty QString only when configuration errors are found.
 4.  Go to `ActionNames.hpp` and add a definition for your hotkey with a nice user-friendly name. Be sure to double-check the argument count.
