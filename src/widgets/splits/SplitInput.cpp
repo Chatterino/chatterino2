@@ -226,8 +226,7 @@ void SplitInput::addShortcuts()
              }
              QTextCursor cursor = this->ui_.textEdit->textCursor();
              auto place = QTextCursor::Start;
-             auto stringPlace = arguments.at(0);
-             auto stringTakeSelection = arguments.at(1);
+             auto stringTakeSelection = arguments.at(0);
              bool select;
              if (stringTakeSelection == "withSelection")
              {
@@ -240,8 +239,8 @@ void SplitInput::addShortcuts()
              else
              {
                  qCWarning(chatterinoHotkeys)
-                     << "Invalid cursorToStart select argument (1)!";
-                 return "Invalid cursorToStart select argument (1)!";
+                     << "Invalid cursorToStart select argument (0)!";
+                 return "Invalid cursorToStart select argument (0)!";
              }
 
              cursor.movePosition(place,
@@ -262,8 +261,7 @@ void SplitInput::addShortcuts()
              }
              QTextCursor cursor = this->ui_.textEdit->textCursor();
              auto place = QTextCursor::End;
-             auto stringPlace = arguments.at(0);
-             auto stringTakeSelection = arguments.at(1);
+             auto stringTakeSelection = arguments.at(0);
              bool select;
              if (stringTakeSelection == "withSelection")
              {
@@ -276,8 +274,8 @@ void SplitInput::addShortcuts()
              else
              {
                  qCWarning(chatterinoHotkeys)
-                     << "Invalid cursorToEnd select argument (1)!";
-                 return "Invalid cursorToEnd select argument (1)!";
+                     << "Invalid cursorToEnd select argument (0)!";
+                 return "Invalid cursorToEnd select argument (0)!";
              }
 
              cursor.movePosition(place,
