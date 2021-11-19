@@ -820,6 +820,7 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
             menu->setAttribute(Qt::WA_DeleteOnClose);
             menu->popup(this->mapToGlobal(event->pos() + QPoint(0, 4)));
         }
+        break;
 
         case Qt::MiddleButton: {
             this->split_->openInBrowser();
