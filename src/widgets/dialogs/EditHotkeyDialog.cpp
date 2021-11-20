@@ -158,11 +158,26 @@ void EditHotkeyDialog::afterEdit()
         this->ui_->keyComboEdit->keySequence() != this->data()->keySequence();
     auto nameWasEdited = this->data() && nameText != this->data()->name();
 
-    if (isEditing && (keyComboWasEdited || nameWasEdited) &&
-        getApp()->hotkeys->isDuplicate(hotkey, this->data()->name()))
+    if (isEditing)
     {
-        this->showEditError("Keybinding needs to be unique in the category.");
-        return;
+        if (keyComboWasEdited || nameWasEdited)
+        {
+            if (getApp()->hotkeys->isDuplicate(hotkey, this->data()->name()))
+            {
+                this->showEditError(
+                    "Keybinding needs to be unique in the category.");
+                return;
+            }
+        }
+    }
+    else
+    {
+        if (getApp()->hotkeys->isDuplicate(hotkey, QString()))
+        {
+            this->showEditError(
+                "Keybinding needs to be unique in the category.");
+            return;
+        }
     }
 
     this->data_ = hotkey;
