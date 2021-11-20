@@ -18,6 +18,10 @@ IrcChannel::IrcChannel(const QString &name, IrcServer *server)
 void IrcChannel::sendMessage(const QString &message)
 {
     assertInGuiThread();
+    if (message.isEmpty())
+    {
+        return;
+    }
 
     if (message.startsWith("/"))
     {
