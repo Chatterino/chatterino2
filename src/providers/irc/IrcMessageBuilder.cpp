@@ -109,8 +109,7 @@ void IrcMessageBuilder::addWords(const QStringList &words)
 
         if (!i.hasNext())
         {
-            this->emplace<TextElement>(string, MessageElementFlag::Text,
-                                       textColor);
+            this->addText(string, textColor);
             continue;
         }
 
@@ -132,10 +131,9 @@ void IrcMessageBuilder::addWords(const QStringList &words)
                 {
                     textColor = defaultColor;
                 }
-                this->emplace<TextElement>(
-                        string.mid(lastPos, match.capturedStart() - lastPos),
-                        MessageElementFlag::Text, textColor)
-                    ->setTrailingSpace(false);
+                this->addText(
+                    string.mid(lastPos, match.capturedStart() - lastPos),
+                    textColor, false);
                 lastPos = match.capturedStart() + match.capturedLength();
             }
             if (!match.captured(1).isEmpty())
@@ -173,11 +171,28 @@ void IrcMessageBuilder::addWords(const QStringList &words)
         {
             textColor = defaultColor;
         }
-        this->emplace<TextElement>(string.mid(lastPos),
-                                   MessageElementFlag::Text, textColor);
+        this->addText(string.mid(lastPos), textColor);
     }
 
     this->message().elements.back()->setTrailingSpace(false);
+}
+
+void IrcMessageBuilder::addText(const QString &text, const QColor &color,
+                                bool addSpace)
+{
+    this->textColor_ = color;
+    for (auto &variant : getApp()->emotes->emojis.parse(text))
+    {
+        boost::apply_visitor(
+            [&](auto &&arg) {
+                this->addTextOrEmoji(arg);
+            },
+            variant);
+        if (!addSpace)
+        {
+            this->message().elements.back()->setTrailingSpace(false);
+        }
+    }
 }
 
 void IrcMessageBuilder::appendUsername()
