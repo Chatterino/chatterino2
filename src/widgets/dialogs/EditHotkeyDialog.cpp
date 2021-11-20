@@ -42,14 +42,17 @@ EditHotkeyDialog::EditHotkeyDialog(const std::shared_ptr<Hotkey> hotkey,
         this->ui_->nameEdit->setText(hotkey->name());
         // update arguments
         QString argsText;
-        for (int i = 0; i < hotkey->arguments().size(); i++)
+        bool first = true;
+        for (const auto &arg : hotkey->arguments())
         {
-            if (i != 0)
+            if (!first)
             {
                 argsText += '\n';
             }
-            const auto &arg = hotkey->arguments().at(0);
+
             argsText += arg;
+
+            first = false;
         }
         this->ui_->argumentsEdit->setPlainText(argsText);
     }
