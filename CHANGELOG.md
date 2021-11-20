@@ -33,6 +33,7 @@
 - Minor: IRC now parses/displays links like Twitch chat. (#3334)
 - Minor: Added button & label for copying login name of user instead of display name in the user info popout. (#3335)
 - Minor: Make `/delete` errors a bit more verbose (#3350)
+- Minor: Made join and part message have links to usercards. (#3358)
 - Minor: Show picked outcome in prediction badges. (#3357)
 - Minor: Add support for Emoji in IRC (#3354)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
