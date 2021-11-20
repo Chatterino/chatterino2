@@ -32,6 +32,7 @@
 - Minor: IRC now parses/displays links like Twitch chat. (#3334)
 - Minor: Added button & label for copying login name of user instead of display name in the user info popout. (#3335)
 - Minor: Make `/delete` errors a bit more verbose (#3350)
+- Minor: Add support for Emoji in IRC (#3354)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
