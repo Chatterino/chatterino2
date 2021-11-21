@@ -1,16 +1,17 @@
 #include "DankerinoBadges.hpp"
 
-#include <QJsonArray>
-#include <QJsonObject>
-#include <QJsonValue>
-#include <QThread>
 #include "common/NetworkRequest.hpp"
 #include "common/Outcome.hpp"
 #include "messages/Emote.hpp"
 
+#include <QJsonArray>
+#include <QJsonObject>
+#include <QJsonValue>
+#include <QThread>
 #include <QUrl>
 
 #include <map>
+#include <memory>
 
 namespace chatterino {
 void DankerinoBadges::initialize(Settings &settings, Paths &paths)

@@ -6,6 +6,7 @@
 #include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
@@ -21,9 +22,9 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
-#include "util/Shortcut.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
@@ -145,10 +146,47 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
     else
         this->setAttribute(Qt::WA_DeleteOnClose);
 
-    // Close the popup when Escape is pressed
-    createWindowShortcut(this, "Escape", [this] {
-        this->deleteLater();
-    });
+    HotkeyController::HotkeyMap actions{
+        {"delete",
+         [this](std::vector<QString>) -> QString {
+             this->deleteLater();
+             return "";
+         }},
+        {"scrollPage",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "scrollPage hotkey called without arguments!";
+                 return "scrollPage hotkey called without arguments!";
+             }
+             auto direction = arguments.at(0);
+
+             auto &scrollbar = this->ui_.latestMessages->getScrollBar();
+             if (direction == "up")
+             {
+                 scrollbar.offset(-scrollbar.getLargeChange());
+             }
+             else if (direction == "down")
+             {
+                 scrollbar.offset(scrollbar.getLargeChange());
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
+             }
+             return "";
+         }},
+
+        // these actions make no sense in the context of a usercard, so they aren't implemented
+        {"reject", nullptr},
+        {"accept", nullptr},
+        {"openTab", nullptr},
+        {"search", nullptr},
+    };
+
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+        HotkeyCategory::PopupWindow, actions, this);
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();

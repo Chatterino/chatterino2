@@ -6,6 +6,7 @@
 #include "common/Aliases.hpp"
 
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace chatterino {

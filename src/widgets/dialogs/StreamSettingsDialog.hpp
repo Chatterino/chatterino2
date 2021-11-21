@@ -3,6 +3,8 @@
 #include "providers/twitch/api/Helix.hpp"
 #include "widgets/BaseWidget.hpp"
 
+#include <QDialog>
+
 namespace Ui {
 class StreamSettingsDialog;
 }
