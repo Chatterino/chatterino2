@@ -114,6 +114,7 @@ private:
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
     void updateInputPlaceholder();
+    void addShortcuts() override;
 
     /**
      * @brief Opens Twitch channel stream in a browser player (opens a formatted link)
@@ -168,6 +169,7 @@ public slots:
     void openInStreamlink();
     void openWithCustomScheme();
     void copyToClipboard();
+    void startWatching();
     void setFiltersDialog();
     void showSearch();
     void showViewerList();

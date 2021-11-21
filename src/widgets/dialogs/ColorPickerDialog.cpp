@@ -106,6 +106,10 @@ ColorPickerDialog::ColorPickerDialog(const QColor &initial, QWidget *parent)
     this->selectColor(initial, false);
 }
 
+void ColorPickerDialog::addShortcuts()
+{
+}
+
 ColorPickerDialog::~ColorPickerDialog()
 {
     if (this->htmlColorValidator_)
