@@ -2,7 +2,9 @@
 
 #include "Application.hpp"
 #include "common/CompletionModel.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
@@ -10,13 +12,11 @@
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Emotes.hpp"
 #include "singletons/WindowManager.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 #include <QHBoxLayout>
-#include <QShortcut>
 #include <QTabWidget>
 
 namespace chatterino {
@@ -137,8 +137,8 @@ EmotePopup::EmotePopup(QWidget *parent)
     auto layout = new QVBoxLayout(this);
     this->getLayoutContainer()->setLayout(layout);
 
-    auto notebook = new Notebook(this);
-    layout->addWidget(notebook);
+    this->notebook_ = new Notebook(this);
+    layout->addWidget(this->notebook_);
     layout->setMargin(0);
 
     auto clicked = [this](const Link &link) {
@@ -152,7 +152,7 @@ EmotePopup::EmotePopup(QWidget *parent)
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
             MessageElementFlag::EmoteImages});
         view->setEnableScrollingToBottom(false);
-        notebook->addPage(view, tabTitle);
+        this->notebook_->addPage(view, tabTitle);
         view->linkClicked.connect(clicked);
 
         return view;
@@ -164,43 +164,99 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->viewEmojis_ = makeView("Emojis");
 
     this->loadEmojis();
+    this->addShortcuts();
+    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+                                       [this]() {
+                                           this->clearShortcuts();
+                                           this->addShortcuts();
+                                       });
+}
+void EmotePopup::addShortcuts()
+{
+    HotkeyController::HotkeyMap actions{
+        {"openTab",  // CTRL + 1-8 to open corresponding tab.
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "openTab shortcut called without arguments. Takes "
+                        "only one argument: tab specifier";
+                 return "openTab shortcut called without arguments. "
+                        "Takes only one argument: tab specifier";
+             }
+             auto target = arguments.at(0);
+             if (target == "last")
+             {
+                 this->notebook_->selectLastTab();
+             }
+             else if (target == "next")
+             {
+                 this->notebook_->selectNextTab();
+             }
+             else if (target == "previous")
+             {
+                 this->notebook_->selectPreviousTab();
+             }
+             else
+             {
+                 bool ok;
+                 int result = target.toInt(&ok);
+                 if (ok)
+                 {
+                     this->notebook_->selectIndex(result);
+                 }
+                 else
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "Invalid argument for openTab shortcut";
+                     return QString("Invalid argument for openTab "
+                                    "shortcut: \"%1\". Use \"last\", "
+                                    "\"next\", \"previous\" or an integer.")
+                         .arg(target);
+                 }
+             }
+             return "";
+         }},
+        {"delete",
+         [this](std::vector<QString>) -> QString {
+             this->close();
+             return "";
+         }},
+        {"scrollPage",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "scrollPage hotkey called without arguments!";
+                 return "scrollPage hotkey called without arguments!";
+             }
+             auto direction = arguments.at(0);
+             auto channelView = dynamic_cast<ChannelView *>(
+                 this->notebook_->getSelectedPage());
 
-    // CTRL + 1-8 to open corresponding tab
-    for (auto i = 0; i < 8; i++)
-    {
-        const auto openTab = [this, i, notebook] {
-            notebook->selectIndex(i);
-        };
-        createWindowShortcut(this, QString("CTRL+%1").arg(i + 1).toUtf8(),
-                             openTab);
-    }
+             auto &scrollbar = channelView->getScrollBar();
+             if (direction == "up")
+             {
+                 scrollbar.offset(-scrollbar.getLargeChange());
+             }
+             else if (direction == "down")
+             {
+                 scrollbar.offset(scrollbar.getLargeChange());
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
+             }
+             return "";
+         }},
 
-    // Open last tab (first one from right)
-    createWindowShortcut(this, "CTRL+9", [=] {
-        notebook->selectLastTab();
-    });
+        {"reject", nullptr},
+        {"accept", nullptr},
+        {"search", nullptr},
+    };
 
-    // Cycle through tabs
-    createWindowShortcut(this, "CTRL+Tab", [=] {
-        notebook->selectNextTab();
-    });
-    createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
-        notebook->selectPreviousTab();
-    });
-
-    // Scroll with Page Up / Page Down
-    createWindowShortcut(this, "PgUp", [=] {
-        auto &scrollbar =
-            dynamic_cast<ChannelView *>(notebook->getSelectedPage())
-                ->getScrollBar();
-        scrollbar.offset(-scrollbar.getLargeChange());
-    });
-    createWindowShortcut(this, "PgDown", [=] {
-        auto &scrollbar =
-            dynamic_cast<ChannelView *>(notebook->getSelectedPage())
-                ->getScrollBar();
-        scrollbar.offset(scrollbar.getLargeChange());
-    });
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+        HotkeyCategory::PopupWindow, actions, this);
 }
 
 void EmotePopup::loadChannel(ChannelPtr _channel)

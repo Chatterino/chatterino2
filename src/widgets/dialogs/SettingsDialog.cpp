@@ -3,9 +3,9 @@
 #include "Application.hpp"
 #include "common/Args.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "singletons/Resources.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/helper/Button.hpp"
 #include "widgets/settingspages/AboutPage.hpp"
 #include "widgets/settingspages/AccountsPage.hpp"
@@ -30,6 +30,7 @@ SettingsDialog::SettingsDialog(QWidget *parent)
           {BaseWindow::Flags::DisableCustomScaling, BaseWindow::Flags::Dialog},
           parent)
 {
+    this->setObjectName("SettingsDialog");
     this->setWindowTitle("Chatterino Settings");
     this->resize(915, 600);
     this->themeChangedEvent();
@@ -40,14 +41,35 @@ SettingsDialog::SettingsDialog(QWidget *parent)
     this->overrideBackgroundColor_ = QColor("#111111");
     this->scaleChangedEvent(this->scale());  // execute twice to width of item
 
-    createWindowShortcut(this, "CTRL+F", [this] {
-        this->ui_.search->setFocus();
-        this->ui_.search->selectAll();
-    });
-
     // Disable the ? button in the titlebar until we decide to use it
     this->setWindowFlags(this->windowFlags() &
                          ~Qt::WindowContextHelpButtonHint);
+    this->addShortcuts();
+    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+                                       [this]() {
+                                           this->clearShortcuts();
+                                           this->addShortcuts();
+                                       });
+}
+
+void SettingsDialog::addShortcuts()
+{
+    HotkeyController::HotkeyMap actions{
+        {"search",
+         [this](std::vector<QString>) -> QString {
+             this->ui_.search->setFocus();
+             this->ui_.search->selectAll();
+             return "";
+         }},
+        {"delete", nullptr},
+        {"accept", nullptr},
+        {"reject", nullptr},
+        {"scrollPage", nullptr},
+        {"openTab", nullptr},
+    };
+
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+        HotkeyCategory::PopupWindow, actions, this);
 }
 
 void SettingsDialog::initUi()
@@ -63,7 +85,7 @@ void SettingsDialog::initUi()
                     .withoutMargin()
                     .emplace<QLineEdit>()
                     .assign(&this->ui_.search);
-    edit->setPlaceholderText("Find in settings... (Ctrl+F)");
+    edit->setPlaceholderText("Find in settings... (Ctrl+F by default)");
 
     QObject::connect(edit.getElement(), &QLineEdit::textChanged, this,
                      &SettingsDialog::filterElements);
@@ -172,7 +194,7 @@ void SettingsDialog::addTabs()
     this->addTab([]{return new IgnoresPage;},          "Ignores",        ":/settings/ignore.svg");
     this->addTab([]{return new FiltersPage;},          "Filters",        ":/settings/filters.svg");
     this->ui_.tabContainer->addSpacing(16);
-    this->addTab([]{return new KeyboardSettingsPage;}, "Keybindings",    ":/settings/keybinds.svg");
+    this->addTab([]{return new KeyboardSettingsPage;}, "Hotkeys",        ":/settings/keybinds.svg");
     this->addTab([]{return new ModerationPage;},       "Moderation",     ":/settings/moderation.svg", SettingsTabId::Moderation);
     this->addTab([]{return new NotificationPage;},     "Live Notifications",  ":/settings/notification2.svg");
     this->addTab([]{return new ExternalToolsPage;},    "External tools", ":/settings/externaltools.svg");

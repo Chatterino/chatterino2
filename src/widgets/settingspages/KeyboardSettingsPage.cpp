@@ -1,81 +1,100 @@
 #include "KeyboardSettingsPage.hpp"
 
+#include "Application.hpp"
+#include "common/QLogging.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
+#include "controllers/hotkeys/HotkeyModel.hpp"
 #include "util/LayoutCreator.hpp"
+#include "widgets/dialogs/EditHotkeyDialog.hpp"
 
 #include <QFormLayout>
+#include <QHeaderView>
 #include <QLabel>
+#include <QTableView>
 
 namespace chatterino {
 
 KeyboardSettingsPage::KeyboardSettingsPage()
 {
-    auto layout =
-        LayoutCreator<KeyboardSettingsPage>(this).setLayoutType<QVBoxLayout>();
+    LayoutCreator<KeyboardSettingsPage> layoutCreator(this);
+    auto layout = layoutCreator.emplace<QVBoxLayout>();
 
-    auto scroll = layout.emplace<QScrollArea>();
+    auto model = getApp()->hotkeys->createModel(nullptr);
+    EditableModelView *view =
+        layout.emplace<EditableModelView>(model).getElement();
 
-    this->setStyleSheet("QLabel, #container { background: #333 }");
+    view->setTitles({"Hotkey name", "Keybinding"});
+    view->getTableView()->horizontalHeader()->setVisible(true);
+    view->getTableView()->horizontalHeader()->setStretchLastSection(false);
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        QHeaderView::ResizeToContents);
+    view->getTableView()->horizontalHeader()->setSectionResizeMode(
+        1, QHeaderView::Stretch);
 
-    auto form = new QFormLayout(this);
-    scroll->setWidgetResizable(true);
-    auto widget = new QWidget();
-    widget->setLayout(form);
-    widget->setObjectName("container");
-    scroll->setWidget(widget);
+    view->addButtonPressed.connect([view, model] {
+        EditHotkeyDialog dialog(nullptr);
+        bool wasAccepted = dialog.exec() == 1;
 
-    form->addRow(new QLabel("Hold Ctrl"), new QLabel("Show resize handles"));
-    form->addRow(new QLabel("Hold Ctrl + Alt"),
-                 new QLabel("Show split overlay"));
+        if (wasAccepted)
+        {
+            auto newHotkey = dialog.data();
+            int vectorIndex = getApp()->hotkeys->hotkeys_.append(newHotkey);
+            getApp()->hotkeys->save();
 
-    form->addItem(new QSpacerItem(16, 16));
-    form->addRow(new QLabel("Ctrl + ScrollDown/-"), new QLabel("Zoom out"));
-    form->addRow(new QLabel("Ctrl + ScrollUp/+"), new QLabel("Zoom in"));
-    form->addRow(new QLabel("Ctrl + 0"), new QLabel("Reset zoom size"));
+            // Select and scroll to newly added hotkey
+            auto modelRow = model->getModelIndexFromVectorIndex(vectorIndex);
+            auto modelIndex = model->index(modelRow, 0);
+            view->selectRow(modelRow);
+            view->getTableView()->scrollTo(modelIndex,
+                                           QAbstractItemView::PositionAtCenter);
+        }
+    });
 
-    form->addItem(new QSpacerItem(16, 16));
-    form->addRow(new QLabel("Ctrl + T"), new QLabel("Create new split"));
-    form->addRow(new QLabel("Ctrl + W"), new QLabel("Close current split"));
-    form->addRow(new QLabel("Ctrl + N"),
-                 new QLabel("Open current split as a popup"));
-    form->addRow(new QLabel("Ctrl + K"), new QLabel("Jump to split"));
-    form->addRow(new QLabel("Ctrl + G"),
-                 new QLabel("Reopen last closed split"));
+    QObject::connect(view->getTableView(), &QTableView::doubleClicked,
+                     [this, view, model](const QModelIndex &clicked) {
+                         this->tableCellClicked(clicked, view, model);
+                     });
 
-    form->addRow(new QLabel("Ctrl + Shift + T"), new QLabel("Create new tab"));
-    form->addRow(new QLabel("Ctrl + Shift + W"),
-                 new QLabel("Close current tab"));
-    form->addRow(new QLabel("Ctrl + Shift + N"),
-                 new QLabel("Open current tab as a popup"));
-    form->addRow(new QLabel("Ctrl + H"),
-                 new QLabel("Hide/Show similar messages (See General->R9K)"));
+    QPushButton *resetEverything = new QPushButton("Reset to defaults");
+    QObject::connect(resetEverything, &QPushButton::clicked, [this]() {
+        auto reply = QMessageBox::question(
+            this, "Reset hotkeys",
+            "Are you sure you want to reset hotkeys to defaults?",
+            QMessageBox::Yes | QMessageBox::Cancel);
 
-    form->addItem(new QSpacerItem(16, 16));
-    form->addRow(new QLabel("Ctrl + 1/2/3/..."),
-                 new QLabel("Select tab 1/2/3/..."));
-    form->addRow(new QLabel("Ctrl + 9"), new QLabel("Select last tab"));
-    form->addRow(new QLabel("Ctrl + Tab"), new QLabel("Select next tab"));
-    form->addRow(new QLabel("Ctrl + Shift + Tab"),
-                 new QLabel("Select previous tab"));
+        if (reply == QMessageBox::Yes)
+        {
+            getApp()->hotkeys->resetToDefaults();
+        }
+    });
+    view->addCustomButton(resetEverything);
+}
 
-    form->addRow(new QLabel("Alt + ←/↑/→/↓"),
-                 new QLabel("Select left/upper/right/bottom split"));
-    form->addRow(new QLabel("Ctrl + U"),
-                 new QLabel("Toggle visibility of tabs"));
+void KeyboardSettingsPage::tableCellClicked(const QModelIndex &clicked,
+                                            EditableModelView *view,
+                                            HotkeyModel *model)
+{
+    auto hotkey = getApp()->hotkeys->getHotkeyByName(
+        clicked.siblingAtColumn(0).data(Qt::EditRole).toString());
+    if (!hotkey)
+    {
+        return;  // clicked on header or invalid hotkey
+    }
+    EditHotkeyDialog dialog(hotkey);
+    bool wasAccepted = dialog.exec() == 1;
 
-    form->addItem(new QSpacerItem(16, 16));
-    form->addRow(new QLabel("Ctrl + R"), new QLabel("Change channel"));
-    form->addRow(new QLabel("Ctrl + F"),
-                 new QLabel("Search in current channel"));
-    form->addRow(new QLabel("Ctrl + E"), new QLabel("Open Emote menu"));
-    form->addRow(new QLabel("Ctrl + P"), new QLabel("Open Settings menu"));
-    form->addRow(new QLabel("F5"),
-                 new QLabel("Reload subscriber and channel emotes"));
-    form->addRow(new QLabel("Ctrl + F5"), new QLabel("Reconnect channels"));
-    form->addRow(new QLabel("Alt + X"), new QLabel("Create a clip"));
+    if (wasAccepted)
+    {
+        auto newHotkey = dialog.data();
+        auto vectorIndex =
+            getApp()->hotkeys->replaceHotkey(hotkey->name(), newHotkey);
+        getApp()->hotkeys->save();
 
-    form->addItem(new QSpacerItem(16, 16));
-    form->addRow(new QLabel("PageUp"), new QLabel("Scroll up"));
-    form->addRow(new QLabel("PageDown"), new QLabel("Scroll down"));
+        // Select the replaced hotkey
+        auto modelRow = model->getModelIndexFromVectorIndex(vectorIndex);
+        auto modelIndex = model->index(modelRow, 0);
+        view->selectRow(modelRow);
+    }
 }
 
 }  // namespace chatterino

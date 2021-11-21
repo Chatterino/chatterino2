@@ -1,6 +1,7 @@
 #pragma once
 
 #include "widgets/BasePopup.hpp"
+#include "widgets/Notebook.hpp"
 
 #include <pajlada/signals/signal.hpp>
 
@@ -28,6 +29,9 @@ private:
     ChannelView *channelEmotesView_{};
     ChannelView *subEmotesView_{};
     ChannelView *viewEmojis_{};
+
+    Notebook *notebook_;
+    void addShortcuts() override;
 };
 
 }  // namespace chatterino

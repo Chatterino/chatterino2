@@ -7,6 +7,7 @@
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/commands/CommandController.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "controllers/ignores/IgnoreController.hpp"
 #include "controllers/notifications/NotificationController.hpp"
 #include "debug/AssertInGuiThread.hpp"
@@ -56,6 +57,7 @@ Application::Application(Settings &_settings, Paths &_paths)
     , fonts(&this->emplace<Fonts>())
     , emotes(&this->emplace<Emotes>())
     , accounts(&this->emplace<AccountController>())
+    , hotkeys(&this->emplace<HotkeyController>())
     , windows(&this->emplace<WindowManager>())
     , toasts(&this->emplace<Toasts>())
 

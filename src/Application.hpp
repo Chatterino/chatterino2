@@ -15,6 +15,7 @@ class PubSub;
 class CommandController;
 class AccountController;
 class NotificationController;
+class HotkeyController;
 
 class Theme;
 class WindowManager;
@@ -52,6 +53,7 @@ public:
     Fonts *const fonts{};
     Emotes *const emotes{};
     AccountController *const accounts{};
+    HotkeyController *const hotkeys{};
     WindowManager *const windows{};
     Toasts *const toasts{};
 
