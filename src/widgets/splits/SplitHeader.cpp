@@ -821,6 +821,11 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
             menu->popup(this->mapToGlobal(event->pos() + QPoint(0, 4)));
         }
         break;
+
+        case Qt::MiddleButton: {
+            this->split_->openInBrowser();
+        }
+        break;
     }
 
     this->doubleClicked_ = false;

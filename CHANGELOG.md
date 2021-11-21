@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added middle click split to open in browser (#3356)
 - Minor: Added new search predicate to filter for messages matching a regex (#3282)
 - Minor: Add `{channel.name}`, `{channel.id}`, `{stream.game}`, `{stream.title}`, `{my.id}`, `{my.name}` placeholders for commands (#3155)
 - Minor: Remove TwitchEmotes.com attribution and the open/copy options when right-clicking a Twitch Emote. (#2214, #3136)
@@ -32,6 +33,9 @@
 - Minor: IRC now parses/displays links like Twitch chat. (#3334)
 - Minor: Added button & label for copying login name of user instead of display name in the user info popout. (#3335)
 - Minor: Make `/delete` errors a bit more verbose (#3350)
+- Minor: Made join and part message have links to usercards. (#3358)
+- Minor: Show picked outcome in prediction badges. (#3357)
+- Minor: Add support for Emoji in IRC (#3354)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
 - Bugfix: Notifications for moderators about other moderators deleting messages can now be disabled. (#3121)
@@ -54,6 +58,7 @@
 - Bugfix: Fixed IRC ACTION messages (/me) not being colorized properly. (#3341)
 - Bugfix: Fixed splits losing filters when closing and reopening them (#3351)
 - Bugfix: Fixed the first usercard being broken in `/mods` and `/vips` (#3349)
+- Bugfix: Fixed Chatterino attempting to send empty messages (#3355)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)

@@ -36,6 +36,8 @@ private:
     void appendUsername();
 
     void addWords(const QStringList &words);
+    void addText(const QString &text, const QColor &color,
+                 bool addSpace = true);
 };
 
 }  // namespace chatterino
