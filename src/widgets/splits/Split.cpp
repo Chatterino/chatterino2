@@ -108,6 +108,7 @@ Split::Split(QWidget *parent)
         getApp()->accounts->twitch.currentUserChanged, [this] {
             this->updateInputPlaceholder();
         });
+    this->updateInputPlaceholder();
 
     this->view_->mouseDown.connect([this](QMouseEvent *) {
         this->giveFocus(Qt::MouseFocusReason);
