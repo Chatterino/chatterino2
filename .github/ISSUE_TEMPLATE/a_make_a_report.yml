@@ -3,6 +3,21 @@ description: Report something that's missing, that you have trouble with or that
 labels: [issue-report]
 
 body:
+  - type: checkboxes
+    id: acknowledgments
+    attributes:
+        label: Checklist
+        description:
+        options:
+            - label: I'm reporting a problem with Chatterino
+              required: true
+            - label: I've verified that I'm running a recent nightly build or the *newest* stable release
+              required: true
+            - label: I've looked for my problem on the [wiki](https://wiki.chatterino.com/Help/)
+              required: true
+            - label: I've searched the [issues](https://github.com/Chatterino/chatterino2/issues?q=) for similar looking reports
+              required: true
+
   - type: textarea
     id: description
     validations:
