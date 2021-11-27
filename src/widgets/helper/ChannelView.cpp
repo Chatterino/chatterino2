@@ -1927,15 +1927,28 @@ void ChannelView::addContextMenuItems(
         crossPlatformCopy(copyString);
     });
 
-    // If is a link to a twitch user/stream
+    // If is a link to a Twitch user/stream
     if (hoveredElement->getLink().type == Link::Url)
     {
         static QRegularExpression twitchChannelRegex(
-            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]{3,}))",
+            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?:popout\/)?(?<username>[a-z0-9_]{3,}))",
             QRegularExpression::CaseInsensitiveOption);
         static QSet<QString> ignoredUsernames{
-            "videos",    "settings", "directory",     "jobs",     "friends",
-            "inventory", "payments", "subscriptions", "messages",
+            "directory",      //
+            "downloads",      //
+            "drops",          //
+            "friends",        //
+            "inventory",      //
+            "jobs",           //
+            "messages",       //
+            "payments",       //
+            "profile",        //
+            "security",       //
+            "settings",       //
+            "subscriptions",  //
+            "turbo",          //
+            "videos",         //
+            "wallet",         //
         };
 
         auto twitchMatch =
@@ -2101,12 +2114,24 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                 }
             }
 
-            value.replace("{user}", layout->getMessage()->loginName)
-                .replace("{channel}", this->channel_->getName())
-                .replace("{msg-id}", layout->getMessage()->id)
-                .replace("{message}", layout->getMessage()->messageText);
+            value = getApp()->commands->execCustomCommand(
+                QStringList(), Command{"(modaction)", value}, true, channel,
+                {
+                    {"user.name", layout->getMessage()->loginName},
+                    {"msg.id", layout->getMessage()->id},
+                    {"msg.text", layout->getMessage()->messageText},
+
+                    // old placeholders
+                    {"user", layout->getMessage()->loginName},
+                    {"msg-id", layout->getMessage()->id},
+                    {"message", layout->getMessage()->messageText},
+
+                    // new version of this is inside execCustomCommand
+                    {"channel", this->channel()->getName()},
+                });
 
             value = getApp()->commands->execCommand(value, channel, false);
+
             channel->sendMessage(value);
         }
         break;

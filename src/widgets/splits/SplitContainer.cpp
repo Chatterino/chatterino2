@@ -9,6 +9,7 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "widgets/Notebook.hpp"
+#include "widgets/Window.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/splits/ClosedSplits.hpp"
@@ -122,7 +123,7 @@ Split *SplitContainer::appendNewSplit(bool openChannelNameDialog)
 
     if (openChannelNameDialog)
     {
-        split->showChangeChannelPopup("Open channel name", true, [=](bool ok) {
+        split->showChangeChannelPopup("Open channel", true, [=](bool ok) {
             if (!ok)
             {
                 this->deleteSplit(split);
@@ -254,7 +255,8 @@ void SplitContainer::addSplit(Split *split)
                     tab->connect(tab, &QWidget::destroyed, [tab]() mutable {
                         ClosedSplits::invalidateTab(tab);
                     });
-                    ClosedSplits::push({split->getChannel()->getName(), tab});
+                    ClosedSplits::push({split->getChannel()->getName(),
+                                        split->getFilters(), tab});
                 }
                 break;
 
@@ -759,6 +761,33 @@ void SplitContainer::applyFromDescriptor(const NodeDescriptor &rootNode)
     this->applyFromDescriptorRecursively(rootNode, &this->baseNode_);
     this->disableLayouting_ = false;
     this->layout();
+}
+
+void SplitContainer::popup()
+{
+    Window &window = getApp()->windows->createWindow(WindowType::Popup);
+    auto popupContainer = window.getNotebook().getOrAddSelectedPage();
+
+    QJsonObject encodedTab;
+    WindowManager::encodeTab(this, true, encodedTab);
+    TabDescriptor tab = TabDescriptor::loadFromJSON(encodedTab);
+
+    // custom title
+    if (!tab.customTitle_.isEmpty())
+    {
+        popupContainer->getTab()->setCustomTitle(tab.customTitle_);
+    }
+
+    // highlighting on new messages
+    popupContainer->getTab()->setHighlightsEnabled(tab.highlightsEnabled_);
+
+    // splits
+    if (tab.rootNode_)
+    {
+        popupContainer->applyFromDescriptor(*tab.rootNode_);
+    }
+
+    window.show();
 }
 
 void SplitContainer::applyFromDescriptorRecursively(
