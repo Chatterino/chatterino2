@@ -61,6 +61,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
     QTimer::singleShot(1, [view] {
         view->getTableView()->resizeColumnsToContents();
         view->getTableView()->setColumnWidth(0, 200);
+        view->getTableView()->setColumnWidth(0, 100);
     });
 
     view->addButtonPressed.connect([] {
