@@ -827,18 +827,18 @@ void IrcMessageHandler::handleNoticeMessage(Communi::IrcNoticeMessage *message)
             {
                 return;
             }
-            auto &channelName = hostOn ? parts[2] : parts[0];
-            if (channelName.size() < 2)
+            auto &hostedChannelName = hostOn ? parts[2] : parts[0];
+            if (hostedChannelName.size() < 2)
             {
                 return;
             }
             if (hostOn)
             {
-                channelName.chop(1);
+                hostedChannelName.chop(1);
             }
             MessageBuilder builder;
-            TwitchMessageBuilder::hostingSystemMessage(channelName, &builder,
-                                                       hostOn);
+            TwitchMessageBuilder::hostingSystemMessage(hostedChannelName,
+                                                       &builder, hostOn);
             channel->addMessage(builder.release());
         }
         else if (tags == "room_mods" || tags == "vips_success")
