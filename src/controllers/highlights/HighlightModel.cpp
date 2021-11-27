@@ -253,7 +253,7 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 }
                 else if (rowIndex == 4)
                 {
-                    // getSettings()->enableFirstMessageHiglightTaskbar.setValue(
+                    // getSettings()->enableFirstMessageHighlightTaskbar.setValue(
                     //     value.toBool());
                 }
             }

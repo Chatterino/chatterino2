@@ -275,9 +275,9 @@ public:
 
     BoolSetting enableFirstMessageHighlight = {
         "/highlighting/firstMessageHighlight/highlighted", true};
-    //    BoolSetting enableFirstMessageHiglightSound = {
-    //        "/highlighting/firstMessageHiglight/enableSound", false};
-    //    BoolSetting enableFirstMessageHiglightTaskbar = {
+    //    BoolSetting enableFirstMessageHighlightSound = {
+    //        "/highlighting/firstMessageHighlight/enableSound", false};
+    //    BoolSetting enableFirstMessageHighlightTaskbar = {
     //        "/highlighting/firstMessageHighlight/enableTaskbarFlashing", false};
     QStringSetting firstMessageHighlightSoundUrl = {
         "/highlighting/firstMessageHighlightSoundUrl", ""};
