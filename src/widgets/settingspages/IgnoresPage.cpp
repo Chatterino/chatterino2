@@ -61,12 +61,12 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
     QTimer::singleShot(1, [view] {
         view->getTableView()->resizeColumnsToContents();
         view->getTableView()->setColumnWidth(0, 200);
-        view->getTableView()->setColumnWidth(0, 100);
+        view->getTableView()->setColumnWidth(0, 200);
     });
 
     view->addButtonPressed.connect([] {
         getSettings()->ignoredMessages.append(
-            IgnorePhrase{"my pattern", "user", false, false,
+            IgnorePhrase{"my pattern", "user1,user2", false, false,
                          getSettings()->ignoredPhraseReplace.getValue(), true});
     });
 }

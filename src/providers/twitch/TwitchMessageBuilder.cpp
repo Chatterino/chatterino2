@@ -781,7 +781,7 @@ void TwitchMessageBuilder::runIgnoreReplaces(
         }
         const auto &user = phrase.getUser();
         if (!user.isEmpty() &&
-            user.compare(this->userName, Qt::CaseInsensitive) != 0)
+            !user.split(',').contains(this->userName, Qt::CaseInsensitive))
         {
             continue;
         }
