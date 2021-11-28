@@ -113,7 +113,6 @@ void IrcMessageBuilder::addWords(const QStringList &words)
             continue;
         }
 
-        int pos = 0;
         int lastPos = 0;
 
         while (i.hasNext())

@@ -71,10 +71,10 @@ void ChannelChatters::addPartedUser(const QString &user)
 }
 
 void ChannelChatters::updateOnlineChatters(
-    const std::unordered_set<QString> &chatters)
+    const std::unordered_set<QString> &usernames)
 {
-    auto chatters_ = this->chatters_.access();
-    chatters_->updateOnlineChatters(chatters);
+    auto chatters = this->chatters_.access();
+    chatters->updateOnlineChatters(usernames);
 }
 
 size_t ChannelChatters::colorsSize() const

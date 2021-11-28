@@ -187,8 +187,8 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
         if (!builder.isIgnored())
         {
-            builder.triggerHighlights();
             channel->addMessage(builder.build());
+            builder.triggerHighlights();
         }
         else
         {
