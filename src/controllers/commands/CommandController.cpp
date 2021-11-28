@@ -951,8 +951,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
     }
 
-    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
-
     {
         // check if user command exists
         const auto it = this->userCommands_.find(commandName);
