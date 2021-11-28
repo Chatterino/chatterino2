@@ -159,10 +159,10 @@ void HighlightModel::afterInit()
     firstMessageRow[Column::Pattern]->setData("First Messages",
                                               Qt::DisplayRole);
     firstMessageRow[Column::ShowInMentions]->setFlags({});
-    //    setBoolItem(redeemedRow[Column::FlashTaskbar],
+    //    setBoolItem(firstMessageRow[Column::FlashTaskbar],
     //                getSettings()->enableFirstMessageHighlightTaskbar.getValue(),
     //                true, false);
-    //    setBoolItem(redeemedRow[Column::PlaySound],
+    //    setBoolItem(firstMessageRow[Column::PlaySound],
     //                getSettings()->enableFirstMessageHighlightSound.getValue(),
     //                true, false);
     firstMessageRow[Column::FlashTaskbar]->setFlags({});
