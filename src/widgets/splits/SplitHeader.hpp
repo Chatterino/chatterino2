@@ -59,7 +59,7 @@ private:
 
     void handleChannelChanged();
 
-	void redraw();
+    void redraw();
 
     Split *const split_{};
     QString tooltipText_{};

@@ -781,24 +781,26 @@ void SplitHeader::updateModerationModeIcon()
 
 void SplitHeader::paintEvent(QPaintEvent *)
 {
-	QPainter painter(this);
+    QPainter painter(this);
 
-	QColor background;
-	QColor border;
-	if (this->split_->hasFocus() && getSettings()->colorizeSplitHeader.getValue()) {
-		background = this->theme->splits.header.focusedBackground;
-		border = this->theme->splits.header.focusedBorder;
-	}
-	else {
-		background = this->theme->splits.header.background;
-		border = this->theme->splits.header.border;
-	}
+    QColor background;
+    QColor border;
+    if (this->split_->hasFocus() &&
+        getSettings()->colorizeSplitHeader.getValue())
+    {
+        background = this->theme->splits.header.focusedBackground;
+        border = this->theme->splits.header.focusedBorder;
+    }
+    else
+    {
+        background = this->theme->splits.header.background;
+        border = this->theme->splits.header.border;
+    }
 
     painter.fillRect(rect(), background);
     painter.setPen(border);
     painter.drawRect(0, 0, width() - 1, height() - 2);
     painter.fillRect(0, height() - 1, width(), 1, background);
-
 }
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)
@@ -894,7 +896,8 @@ void SplitHeader::themeChangedEvent()
 {
     auto palette = QPalette();
 
-    if (this->split_->hasFocus() && !getSettings()->colorizeSplitHeader.getValue())
+    if (this->split_->hasFocus() &&
+        !getSettings()->colorizeSplitHeader.getValue())
     {
         palette.setColor(QPalette::WindowText,
                          this->theme->splits.header.focusedText);
@@ -904,7 +907,7 @@ void SplitHeader::themeChangedEvent()
         palette.setColor(QPalette::WindowText, this->theme->splits.header.text);
     }
     this->titleLabel_->setPalette(palette);
-	this->update();
+    this->update();
 
     // --
     if (this->theme->isLightTheme())
