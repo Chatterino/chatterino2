@@ -81,6 +81,7 @@ public:
         "/appearance/messages/lastMessagePattern", Qt::SolidPattern};
     QStringSetting lastMessageColor = {"/appearance/messages/lastMessageColor",
                                        "#7f2026"};
+    BoolSetting colorizeSplitHeader = {"/appearance/colorizeSplitHeader", true};
     BoolSetting showEmptyInput = {"/appearance/showEmptyInputBox", true};
     BoolSetting showMessageLength = {"/appearance/messages/showMessageLength",
                                      false};
