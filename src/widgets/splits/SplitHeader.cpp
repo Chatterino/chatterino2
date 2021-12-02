@@ -781,13 +781,21 @@ void SplitHeader::updateModerationModeIcon()
 
 void SplitHeader::paintEvent(QPaintEvent *)
 {
-    QPainter painter(this);
+	QPainter painter(this);
 
-    painter.fillRect(rect(), this->theme->splits.header.background);
+	QColor background;
+	if (this->split_->hasFocus()) {
+		background = this->theme->splits.header.focusedBackground;
+	}
+	else {
+		background = this->theme->splits.header.background;
+	}
+
+    painter.fillRect(rect(), background);
     painter.setPen(this->theme->splits.header.border);
     painter.drawRect(0, 0, width() - 1, height() - 2);
-    painter.fillRect(0, height() - 1, width(), 1,
-                     this->theme->splits.background);
+    painter.fillRect(0, height() - 1, width(), 1, background);
+
 }
 
 void SplitHeader::mousePressEvent(QMouseEvent *event)
@@ -893,6 +901,7 @@ void SplitHeader::themeChangedEvent()
         palette.setColor(QPalette::WindowText, this->theme->splits.header.text);
     }
     this->titleLabel_->setPalette(palette);
+	this->update();
 
     // --
     if (this->theme->isLightTheme())
