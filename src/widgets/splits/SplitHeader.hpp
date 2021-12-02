@@ -59,8 +59,6 @@ private:
 
     void handleChannelChanged();
 
-    void redraw();
-
     Split *const split_{};
     QString tooltipText_{};
     bool isLive_{false};
