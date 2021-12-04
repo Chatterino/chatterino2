@@ -55,11 +55,24 @@ Outcome invokeIrcCommand(const QString &commandName, const QString &allParams,
     }
     else if (cmd == "kick")
     {
-        if (paramsAfter(1).isEmpty())
-            sendRaw("KICK " + params[0] + " " + params[1]);
+        if (params.size() < 2)
+        {
+            channel.addMessage(
+                makeSystemMessage("Usage: /kick <channel> <client> [message]"));
+            return Failure;
+        }
+        const auto &channelParam = params[0];
+        const auto &clientParam = params[1];
+        const auto &messageParam = paramsAfter(1);
+        if (messageParam.isEmpty())
+        {
+            sendRaw("KICK " + channelParam + " " + clientParam);
+        }
         else
-            sendRaw("KICK " + params[0] + " " + params[1] + " :" +
-                    paramsAfter(1));
+        {
+            sendRaw("KICK " + channelParam + " " + clientParam + " :" +
+                    messageParam);
+        }
     }
     else if (cmd == "wallops")
     {
