@@ -75,6 +75,8 @@ public:
 
     void setContainer(SplitContainer *container);
 
+    bool isSingleSplit();
+
     static pajlada::Signals::Signal<Qt::KeyboardModifiers>
         modifierStatusChanged;
     static Qt::KeyboardModifiers modifierStatus;

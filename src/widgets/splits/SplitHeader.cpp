@@ -783,18 +783,13 @@ void SplitHeader::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
 
-    QColor background;
-    QColor border;
-    if (this->split_->hasFocus() &&
-        getSettings()->colorizeSplitHeader.getValue())
+    QColor background = this->theme->splits.header.background;
+    QColor border = this->theme->splits.header.border;
+
+    if (this->split_->hasFocus() && !this->split_->isSingleSplit())
     {
         background = this->theme->splits.header.focusedBackground;
         border = this->theme->splits.header.focusedBorder;
-    }
-    else
-    {
-        background = this->theme->splits.header.background;
-        border = this->theme->splits.header.border;
     }
 
     painter.fillRect(rect(), background);
@@ -896,8 +891,7 @@ void SplitHeader::themeChangedEvent()
 {
     auto palette = QPalette();
 
-    if (this->split_->hasFocus() &&
-        !getSettings()->colorizeSplitHeader.getValue())
+    if (this->split_->hasFocus() && this->split_->isSingleSplit())
     {
         palette.setColor(QPalette::WindowText,
                          this->theme->splits.header.focusedText);
@@ -907,7 +901,6 @@ void SplitHeader::themeChangedEvent()
         palette.setColor(QPalette::WindowText, this->theme->splits.header.text);
     }
     this->titleLabel_->setPalette(palette);
-    this->update();
 
     // --
     if (this->theme->isLightTheme())
@@ -922,6 +915,8 @@ void SplitHeader::themeChangedEvent()
         this->dropdownButton_->setPixmap(getResources().buttons.menuLight);
         this->addButton_->setPixmap(getResources().buttons.addSplitDark);
     }
+
+    this->update();
 }
 
 void SplitHeader::reloadChannelEmotes()
