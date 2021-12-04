@@ -62,6 +62,7 @@
 - Bugfix: Fixed the first usercard being broken in `/mods` and `/vips` (#3349)
 - Bugfix: Fixed Chatterino attempting to send empty messages (#3355)
 - Bugfix: Fixed IRC highlights not triggering sounds or alerts properly. (#3368)
+- Bugfix: Fixed IRC /kick command crashing if parameters were malformed. (#3382)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
