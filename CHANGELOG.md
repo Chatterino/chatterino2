@@ -60,6 +60,7 @@
 - Bugfix: Fixed IRC ACTION messages (/me) not being colorized properly. (#3341)
 - Bugfix: Fixed splits losing filters when closing and reopening them (#3351)
 - Bugfix: Fixed the first usercard being broken in `/mods` and `/vips` (#3349)
+- Bugfix: Fixed IRC colors not being applied correctly to NOTICE messages. (#3383)
 - Bugfix: Fixed Chatterino attempting to send empty messages (#3355)
 - Bugfix: Fixed IRC highlights not triggering sounds or alerts properly. (#3368)
 - Bugfix: Fixed IRC /kick command crashing if parameters were malformed. (#3382)
