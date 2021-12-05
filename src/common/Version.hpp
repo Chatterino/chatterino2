@@ -3,7 +3,7 @@
 #include <QString>
 #include <QtGlobal>
 
-#define CHATTERINO_VERSION "2.3.3"
+#define CHATTERINO_VERSION "2.3.4"
 
 #if defined(Q_OS_WIN)
 #    define CHATTERINO_OS "win"
@@ -29,6 +29,7 @@ public:
     const QString &dateOfBuild() const;
     const QString &fullVersion() const;
     const bool &isSupportedOS() const;
+    bool isFlatpak() const;
 
 private:
     Version();

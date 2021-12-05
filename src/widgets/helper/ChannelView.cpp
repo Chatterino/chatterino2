@@ -37,6 +37,7 @@
 #include "singletons/WindowManager.hpp"
 #include "util/Clipboard.hpp"
 #include "util/DistanceBetweenPoints.hpp"
+#include "util/Helpers.hpp"
 #include "util/IncognitoBrowser.hpp"
 #include "util/StreamerMode.hpp"
 #include "util/Twitch.hpp"
@@ -48,6 +49,7 @@
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/SearchPopup.hpp"
 #include "widgets/splits/Split.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #define DRAW_WIDTH (this->width())
 #define SELECTION_RESUME_SCROLLING_MSG_THRESHOLD 3
@@ -106,11 +108,7 @@ namespace {
                                 });
         };
 
-        if (creatorFlags.has(MessageElementFlag::TwitchEmote))
-        {
-            addPageLink("TwitchEmotes");
-        }
-        else if (creatorFlags.has(MessageElementFlag::BttvEmote))
+        if (creatorFlags.has(MessageElementFlag::BttvEmote))
         {
             addPageLink("BTTV");
         }
@@ -752,7 +750,7 @@ bool ChannelView::shouldIncludeMessage(const MessagePtr &m) const
                 m->loginName, Qt::CaseInsensitive) == 0)
             return true;
 
-        return this->channelFilters_->filter(m);
+        return this->channelFilters_->filter(m, this->channel_);
     }
 
     return true;
@@ -1622,7 +1620,7 @@ void ChannelView::mousePressEvent(QMouseEvent *event)
                          hoverLayoutElement->getFlags().has(
                              MessageElementFlag::Username))
                     break;
-                else
+                else if (this->scrollBar_->isVisible())
                     this->enableScrolling(event->screenPos());
             }
         }
@@ -1696,7 +1694,7 @@ void ChannelView::mouseReleaseEvent(QMouseEvent *event)
     }
     else if (event->button() == Qt::MiddleButton)
     {
-        if (this->isScrolling_)
+        if (this->isScrolling_ && this->scrollBar_->isVisible())
         {
             if (event->screenPos() == this->lastMiddlePressPosition_)
                 this->enableScrolling(event->screenPos());
@@ -1804,8 +1802,9 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
         }
         break;
         case Qt::RightButton: {
+            auto split = dynamic_cast<Split *>(this->parentWidget());
             auto insertText = [=](QString text) {
-                if (auto split = dynamic_cast<Split *>(this->parentWidget()))
+                if (split)
                 {
                     split->insertTextToInput(text);
                 }
@@ -1815,7 +1814,11 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             if (link.type == Link::UserInfo)
             {
                 const bool commaMention = getSettings()->mentionUsersWithComma;
-                insertText("@" + link.value + (commaMention ? ", " : " "));
+                const bool isFirstWord =
+                    split && split->getInput().isEditFirstWord();
+                auto userMention =
+                    formatUserMention(link.value, isFirstWord, commaMention);
+                insertText("@" + userMention + " ");
             }
             else if (link.type == Link::UserWhisper)
             {
@@ -1924,15 +1927,28 @@ void ChannelView::addContextMenuItems(
         crossPlatformCopy(copyString);
     });
 
-    // Open in new split.
+    // If is a link to a Twitch user/stream
     if (hoveredElement->getLink().type == Link::Url)
     {
         static QRegularExpression twitchChannelRegex(
-            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?<username>[a-z0-9_]{3,}))",
+            R"(^(?:https?:\/\/)?(?:www\.|go\.)?twitch\.tv\/(?:popout\/)?(?<username>[a-z0-9_]{3,}))",
             QRegularExpression::CaseInsensitiveOption);
         static QSet<QString> ignoredUsernames{
-            "videos",    "settings", "directory",     "jobs",     "friends",
-            "inventory", "payments", "subscriptions", "messages",
+            "directory",      //
+            "downloads",      //
+            "drops",          //
+            "friends",        //
+            "inventory",      //
+            "jobs",           //
+            "messages",       //
+            "payments",       //
+            "profile",        //
+            "security",       //
+            "settings",       //
+            "subscriptions",  //
+            "turbo",          //
+            "videos",         //
+            "wallet",         //
         };
 
         auto twitchMatch =
@@ -1943,7 +1959,22 @@ void ChannelView::addContextMenuItems(
         {
             menu->addSeparator();
             menu->addAction("Open in new split", [twitchUsername, this] {
-                this->joinToChannel.invoke(twitchUsername);
+                this->openChannelIn.invoke(twitchUsername,
+                                           FromTwitchLinkOpenChannelIn::Split);
+            });
+            menu->addAction("Open in new tab", [twitchUsername, this] {
+                this->openChannelIn.invoke(twitchUsername,
+                                           FromTwitchLinkOpenChannelIn::Tab);
+            });
+
+            menu->addSeparator();
+            menu->addAction("Open player in browser", [twitchUsername, this] {
+                this->openChannelIn.invoke(
+                    twitchUsername, FromTwitchLinkOpenChannelIn::BrowserPlayer);
+            });
+            menu->addAction("Open in streamlink", [twitchUsername, this] {
+                this->openChannelIn.invoke(
+                    twitchUsername, FromTwitchLinkOpenChannelIn::Streamlink);
             });
         }
     }
@@ -2083,12 +2114,24 @@ void ChannelView::handleLinkClick(QMouseEvent *event, const Link &link,
                 }
             }
 
-            value.replace("{user}", layout->getMessage()->loginName)
-                .replace("{channel}", this->channel_->getName())
-                .replace("{msg-id}", layout->getMessage()->id)
-                .replace("{message}", layout->getMessage()->messageText);
+            value = getApp()->commands->execCustomCommand(
+                QStringList(), Command{"(modaction)", value}, true, channel,
+                {
+                    {"user.name", layout->getMessage()->loginName},
+                    {"msg.id", layout->getMessage()->id},
+                    {"msg.text", layout->getMessage()->messageText},
+
+                    // old placeholders
+                    {"user", layout->getMessage()->loginName},
+                    {"msg-id", layout->getMessage()->id},
+                    {"message", layout->getMessage()->messageText},
+
+                    // new version of this is inside execCustomCommand
+                    {"channel", this->channel()->getName()},
+                });
 
             value = getApp()->commands->execCommand(value, channel, false);
+
             channel->sendMessage(value);
         }
         break;

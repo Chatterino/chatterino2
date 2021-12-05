@@ -1,7 +1,6 @@
 #include "messages/layouts/MessageLayoutElement.hpp"
 
 #include "Application.hpp"
-#include "common/QLogging.hpp"
 #include "messages/Emote.hpp"
 #include "messages/Image.hpp"
 #include "messages/MessageElement.hpp"
@@ -111,7 +110,7 @@ void ImageLayoutElement::addCopyTextToString(QString &str, int from,
     if (emoteElement)
     {
         str += emoteElement->getEmote()->getCopyString();
-        str = TwitchEmotes::cleanUpEmoteCode(EmoteName{str});
+        str = TwitchEmotes::cleanUpEmoteCode(str);
         if (this->hasTrailingSpace())
         {
             str += " ";
@@ -403,43 +402,6 @@ int TextIconLayoutElement::getXFromIndex(int index)
     else
     {
         return this->getRect().right();
-    }
-}
-
-//
-// TEXT
-//
-
-MultiColorTextLayoutElement::MultiColorTextLayoutElement(
-    MessageElement &_creator, QString &_text, const QSize &_size,
-    std::vector<PajSegment> segments, FontStyle _style, float _scale)
-    : TextLayoutElement(_creator, _text, _size, QColor{}, _style, _scale)
-    , segments_(segments)
-{
-    this->setText(_text);
-}
-
-void MultiColorTextLayoutElement::paint(QPainter &painter)
-{
-    auto app = getApp();
-
-    painter.setPen(this->color_);
-
-    painter.setFont(app->fonts->getFont(this->style_, this->scale_));
-
-    int xOffset = 0;
-
-    auto metrics = app->fonts->getFontMetrics(this->style_, this->scale_);
-
-    for (const auto &segment : this->segments_)
-    {
-        qCDebug(chatterinoMessage) << "Draw segment:" << segment.text;
-        painter.setPen(segment.color);
-        painter.drawText(QRectF(this->getRect().x() + xOffset,
-                                this->getRect().y(), 10000, 10000),
-                         segment.text,
-                         QTextOption(Qt::AlignLeft | Qt::AlignTop));
-        xOffset += metrics.horizontalAdvance(segment.text);
     }
 }
 

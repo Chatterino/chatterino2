@@ -348,20 +348,8 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
     menu->addAction("Set filters", this->split_, &Split::setFiltersDialog);
     menu->addSeparator();
 #ifdef USEWEBENGINE
-    this->dropdownMenu.addAction("Start watching", this, [this] {
-        ChannelPtr _channel = this->split->getChannel();
-        TwitchChannel *tc = dynamic_cast<TwitchChannel *>(_channel.get());
-
-        if (tc != nullptr)
-        {
-            StreamView *view = new StreamView(
-                _channel,
-                "https://player.twitch.tv/?parent=twitch.tv&channel=" +
-                    tc->name);
-            view->setAttribute(Qt::WA_DeleteOnClose, true);
-            view->show();
-        }
-    });
+    this->dropdownMenu.addAction("Start watching", this->split_,
+                                 &Split::startWatching);
 #endif
 
     auto *twitchChannel =
@@ -821,6 +809,11 @@ void SplitHeader::mousePressEvent(QMouseEvent *event)
             menu->popup(this->mapToGlobal(event->pos() + QPoint(0, 4)));
         }
         break;
+
+        case Qt::MiddleButton: {
+            this->split_->openInBrowser();
+        }
+        break;
     }
 
     this->doubleClicked_ = false;
@@ -916,10 +909,6 @@ void SplitHeader::themeChangedEvent()
     }
 }
 
-void SplitHeader::moveSplit()
-{
-}
-
 void SplitHeader::reloadChannelEmotes()
 {
     auto channel = this->split_->getChannel();
@@ -933,7 +922,8 @@ void SplitHeader::reloadChannelEmotes()
 
 void SplitHeader::reloadSubscriberEmotes()
 {
-    getApp()->accounts->twitch.getCurrent()->loadEmotes();
+    auto channel = this->split_->getChannel();
+    getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
 }
 
 void SplitHeader::reconnect()

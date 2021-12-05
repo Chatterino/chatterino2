@@ -23,11 +23,15 @@ public:
     void addPartedUser(const QString &user);
     const QColor getUserColor(const QString &user);
     void setUserColor(const QString &user, const QColor &color);
-    void updateOnlineChatters(const std::unordered_set<QString> &chatters);
+    void updateOnlineChatters(const std::unordered_set<QString> &usernames);
 
-private:
+    // colorsSize returns the amount of colors stored in `chatterColors_`
+    // NOTE: This function is only meant to be used in tests and benchmarks
+    size_t colorsSize() const;
+
     static constexpr int maxChatterColorCount = 5000;
 
+private:
     Channel &channel_;
 
     // maps 2 char prefix to set of names

@@ -29,7 +29,7 @@ namespace chatterino {
 enum class WindowType;
 
 struct SplitDescriptor {
-    // twitch or mentions or watching or whispers or irc
+    // Twitch or mentions or watching or whispers or IRC
     QString type_;
 
     // Twitch Channel name or IRC channel name
@@ -67,6 +67,8 @@ struct ContainerNodeDescriptor {
 };
 
 struct TabDescriptor {
+    static TabDescriptor loadFromJSON(const QJsonObject &root);
+
     QString customTitle_;
     bool selected_{false};
     bool highlightsEnabled_{true};

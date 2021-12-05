@@ -30,8 +30,8 @@ private:
     QTimer reconnectTimer_;
     std::atomic<bool> recentlyReceivedMessage_{true};
 
-    // Reconnect with a base delay of 1 second and max out at 1 second * (2^4) (i.e. 16 seconds)
-    ExponentialBackoff<4> reconnectBackoff_{std::chrono::milliseconds{1000}};
+    // Reconnect with a base delay of 1 second and max out at 1 second * (2^(5-1)) (i.e. 16 seconds)
+    ExponentialBackoff<5> reconnectBackoff_{std::chrono::milliseconds{1000}};
 
     std::atomic<bool> expectConnectionLoss_{false};
 

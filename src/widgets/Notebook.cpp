@@ -6,7 +6,6 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/NotebookButton.hpp"
@@ -19,7 +18,6 @@
 #include <QFormLayout>
 #include <QLayout>
 #include <QList>
-#include <QShortcut>
 #include <QStandardPaths>
 #include <QUuid>
 #include <QWidget>
@@ -36,9 +34,12 @@ Notebook::Notebook(QWidget *parent)
 
     this->addButton_->setHidden(true);
 
-    this->menu_.addAction("Toggle visibility of tabs", [this]() {
-        this->setShowTabs(!this->getShowTabs());
-    });
+    this->menu_.addAction(
+        "Toggle visibility of tabs",
+        [this]() {
+            this->setShowTabs(!this->getShowTabs());
+        },
+        QKeySequence("Ctrl+U"));
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)

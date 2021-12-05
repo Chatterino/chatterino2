@@ -46,7 +46,8 @@ public:
     MessagePtr build() override;
 
     static void appendChannelPointRewardMessage(
-        const ChannelPointReward &reward, MessageBuilder *builder);
+        const ChannelPointReward &reward, MessageBuilder *builder, bool isMod,
+        bool isBroadcaster);
 
     // Message in the /live chat for channel going live
     static void liveMessage(const QString &channelName,
@@ -58,11 +59,14 @@ public:
     static void offlineSystemMessage(const QString &channelName,
                                      MessageBuilder *builder);
     static void hostingSystemMessage(const QString &channelName,
-                                     MessageBuilder *builder);
+                                     MessageBuilder *builder, bool hostOn);
     static void deletionMessage(const MessagePtr originalMessage,
                                 MessageBuilder *builder);
     static void deletionMessage(const DeleteAction &action,
                                 MessageBuilder *builder);
+    static void listOfUsersSystemMessage(QString prefix, QStringList users,
+                                         Channel *channel,
+                                         MessageBuilder *builder);
 
 private:
     void parseUsernameColor() override;
@@ -88,6 +92,8 @@ private:
     void appendChatterinoBadges();
     void appendFfzBadges();
     Outcome tryParseCheermote(const QString &string);
+
+    bool shouldAddModerationElements() const;
 
     QString roomID_;
     bool hasBits_ = false;
