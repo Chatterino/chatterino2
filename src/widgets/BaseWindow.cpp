@@ -238,8 +238,9 @@ void BaseWindow::init()
     {
         getSettings()->windowTopMost.connect(
             [this](bool topMost, auto) {
+                auto isVisible = this->isVisible();
                 this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
-                if (this->isVisible())
+                if (isVisible)
                 {
                     this->show();
                 }
