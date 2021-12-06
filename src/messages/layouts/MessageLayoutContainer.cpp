@@ -65,7 +65,8 @@ void MessageLayoutContainer::clear()
 
 void MessageLayoutContainer::addElement(MessageLayoutElement *element)
 {
-    bool isZeroWidth = element->getFlags().has(MessageElementFlag::ZeroWidthEmote);
+    bool isZeroWidth =
+        element->getFlags().has(MessageElementFlag::ZeroWidthEmote);
 
     if (!isZeroWidth && !this->fitsInLine(element->getRect().width()))
     {
