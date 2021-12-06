@@ -4,9 +4,9 @@
 
 This guide assumes you are on a 64-bit system. You might need to manually search out alternate download links should you desire to build Chatterino on a 32-bit system.
 
-## Visual Studio 2019
+## Visual Studio 2022
 
-Download and install [Visual Studio 2019 Community](https://visualstudio.microsoft.com/downloads/). In the installer, select "Desktop development with C++" and "Universal Windows Platform development".
+Download and install [Visual Studio 20122 Community](https://visualstudio.microsoft.com/downloads/). In the installer, select "Desktop development with C++" and "Universal Windows Platform development".
 
 Notes:
 
