@@ -34,7 +34,7 @@ public:
     void handleWhisperMessage(Communi::IrcMessage *message);
 
     // parseUserNoticeMessage parses a single IRC USERNOTICE message into 0+
-    // chatterino messages
+    // Chatterino messages
     std::vector<MessagePtr> parseUserNoticeMessage(
         Channel *channel, Communi::IrcMessage *message);
     void handleUserNoticeMessage(Communi::IrcMessage *message,

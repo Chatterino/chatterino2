@@ -195,7 +195,7 @@ HighlightingPage::HighlightingPage()
                         }
                         getSettings()->highlightedBadges.append(HighlightBadge{
                             s->badgeName(), s->displayName(), false, false, "",
-                            ColorProvider::instance().color(
+                            *ColorProvider::instance().color(
                                 ColorType::SelfHighlight)});
                     }
                 });
@@ -276,7 +276,7 @@ HighlightingPage::HighlightingPage()
         layout.append(createCheckBox(ALWAYS_PLAY,
                                      getSettings()->highlightAlwaysPlaySound));
         layout.append(createCheckBox(
-            "Flash taskbar only stops highlighting when chatterino is focused",
+            "Flash taskbar only stops highlighting when Chatterino is focused",
             getSettings()->longAlerts));
     }
 

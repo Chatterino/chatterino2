@@ -27,6 +27,7 @@ ResizingTextEdit::ResizingTextEdit()
     });
 
     this->setFocusPolicy(Qt::ClickFocus);
+    this->installEventFilter(this);
 }
 
 QSize ResizingTextEdit::sizeHint() const
@@ -38,6 +39,13 @@ bool ResizingTextEdit::hasHeightForWidth() const
 {
     return true;
 }
+
+bool ResizingTextEdit::isFirstWord() const
+{
+    QString plainText = this->toPlainText();
+    QString portionBeforeCursor = plainText.left(this->textCursor().position());
+    return !portionBeforeCursor.contains(' ');
+};
 
 int ResizingTextEdit::heightForWidth(int) const
 {
@@ -88,6 +96,22 @@ QString ResizingTextEdit::textUnderCursor(bool *hadSpace) const
     return lastWord;
 }
 
+bool ResizingTextEdit::eventFilter(QObject *, QEvent *event)
+{
+    // makes QShortcuts work in the ResizingTextEdit
+    if (event->type() != QEvent::ShortcutOverride)
+    {
+        return false;
+    }
+    auto ev = static_cast<QKeyEvent *>(event);
+    ev->ignore();
+    if ((ev->key() == Qt::Key_C || ev->key() == Qt::Key_Insert) &&
+        ev->modifiers() == Qt::ControlModifier)
+    {
+        return false;
+    }
+    return true;
+}
 void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 {
     event->ignore();
@@ -108,17 +132,6 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
         }
 
         QString currentCompletionPrefix = this->textUnderCursor();
-        bool isFirstWord = [&] {
-            QString plainText = this->toPlainText();
-            for (int i = this->textCursor().position(); i >= 0; i--)
-            {
-                if (plainText[i] == ' ')
-                {
-                    return false;
-                }
-            }
-            return true;
-        }();
 
         // check if there is something to complete
         if (currentCompletionPrefix.size() <= 1)
@@ -134,7 +147,8 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
             // First type pressing tab after modifying a message, we refresh our
             // completion model
             this->completer_->setModel(completionModel);
-            completionModel->refresh(currentCompletionPrefix, isFirstWord);
+            completionModel->refresh(currentCompletionPrefix,
+                                     this->isFirstWord());
             this->completionInProgress_ = true;
             this->completer_->setCompletionPrefix(currentCompletionPrefix);
             this->completer_->complete();

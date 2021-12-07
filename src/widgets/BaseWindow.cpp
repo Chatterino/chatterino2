@@ -5,7 +5,6 @@
 #include "boost/algorithm/algorithm.hpp"
 #include "util/DebugCount.hpp"
 #include "util/PostToThread.hpp"
-#include "util/Shortcut.hpp"
 #include "util/WindowsHelper.hpp"
 #include "widgets/Label.hpp"
 #include "widgets/TooltipWidget.hpp"
@@ -82,10 +81,6 @@ BaseWindow::BaseWindow(FlagsEnum<Flags> _flags, QWidget *parent)
         this->connections_);
 
     this->updateScale();
-
-    createWindowShortcut(this, "CTRL+0", [] {
-        getSettings()->uiScale.setValue(1);
-    });
 
     this->resize(300, 150);
 
@@ -243,8 +238,9 @@ void BaseWindow::init()
     {
         getSettings()->windowTopMost.connect(
             [this](bool topMost, auto) {
+                auto isVisible = this->isVisible();
                 this->setWindowFlag(Qt::WindowStaysOnTopHint, topMost);
-                if (this->isVisible())
+                if (isVisible)
                 {
                     this->show();
                 }
@@ -641,11 +637,7 @@ bool BaseWindow::nativeEvent(const QByteArray &eventType, void *message,
                              long *result)
 {
 #ifdef USEWINSDK
-#    if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
-    MSG *msg = *reinterpret_cast<MSG **>(message);
-#    else
     MSG *msg = reinterpret_cast<MSG *>(message);
-#    endif
 
     bool returnValue = false;
 

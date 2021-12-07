@@ -1,13 +1,15 @@
 #include "AttachedWindow.hpp"
 
 #include "Application.hpp"
+#include "ForwardDecl.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QTimer>
 #include <QVBoxLayout>
-#include "common/QLogging.hpp"
+#include <memory>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
@@ -93,6 +95,7 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
     window->fullscreen_ = args.fullscreen;
 
     window->x_ = args.x;
+    window->pixelRatio_ = args.pixelRatio;
 
     if (args.height != -1)
     {
@@ -276,7 +279,16 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
         // offset
         int o = this->fullscreen_ ? 0 : 8;
 
-        if (this->x_ != -1)
+        if (this->pixelRatio_ != -1.0)
+        {
+            ::MoveWindow(
+                hwnd,
+                int(rect.left + this->x_ * scale * this->pixelRatio_ + o - 2),
+                int(rect.bottom - this->height_ * scale - o),
+                int(this->width_ * scale), int(this->height_ * scale), true);
+        }
+        //support for old extension version 1.3
+        else if (this->x_ != -1.0)
         {
             ::MoveWindow(hwnd, int(rect.left + this->x_ * scale + o),
                          int(rect.bottom - this->height_ * scale - o),

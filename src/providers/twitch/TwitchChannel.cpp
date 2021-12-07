@@ -81,7 +81,7 @@ namespace {
             noticeMessage = "Chat has been cleared by a moderator.";
         }
 
-        // rebuild the raw irc message so we can convert it back to an ircmessage again!
+        // rebuild the raw IRC message so we can convert it back to an ircmessage again!
         // this could probably be done in a smarter way
 
         auto s = QString(":tmi.twitch.tv NOTICE %1 :%2")
@@ -286,7 +286,8 @@ void TwitchChannel::addChannelPointReward(const ChannelPointReward &reward)
     if (!reward.isUserInputRequired)
     {
         MessageBuilder builder;
-        TwitchMessageBuilder::appendChannelPointRewardMessage(reward, &builder);
+        TwitchMessageBuilder::appendChannelPointRewardMessage(
+            reward, &builder, this->isMod(), this->isBroadcaster());
         this->addMessage(builder.release());
         return;
     }
@@ -362,7 +363,7 @@ void TwitchChannel::sendMessage(const QString &message)
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
-    parsedMessage = parsedMessage.trimmed();
+    parsedMessage = parsedMessage.simplified();
 
     if (parsedMessage.isEmpty())
     {
@@ -375,7 +376,27 @@ void TwitchChannel::sendMessage(const QString &message)
         {
             if (parsedMessage == this->lastSentMessage_)
             {
-                parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
+                auto spaceIndex = parsedMessage.indexOf(' ');
+                // If the message starts with either '/' or '.' Twitch will treat it as a command, omitting
+                // first space and only rest of the arguments treated as actual message content
+                // In cases when user sends a message like ". .a b" first character and first space are omitted as well
+                bool ignoreFirstSpace =
+                    parsedMessage.at(0) == '/' || parsedMessage.at(0) == '.';
+                if (ignoreFirstSpace)
+                {
+                    spaceIndex = parsedMessage.indexOf(' ', spaceIndex + 1);
+                }
+
+                if (spaceIndex == -1)
+                {
+                    // no spaces found, fall back to old magic character
+                    parsedMessage.append(MAGIC_MESSAGE_SUFFIX);
+                }
+                else
+                {
+                    // replace the space we found in spaceIndex with two spaces
+                    parsedMessage.replace(spaceIndex, 1, "  ");
+                }
             }
         }
     }

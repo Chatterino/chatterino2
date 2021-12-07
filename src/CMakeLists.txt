@@ -88,6 +88,19 @@ set(SOURCE_FILES
         controllers/highlights/UserHighlightModel.cpp
         controllers/highlights/UserHighlightModel.hpp
 
+        controllers/hotkeys/ActionNames.hpp
+        controllers/hotkeys/Hotkey.cpp
+        controllers/hotkeys/Hotkey.hpp
+        controllers/hotkeys/HotkeyCategory.hpp
+        controllers/hotkeys/HotkeyController.cpp
+        controllers/hotkeys/HotkeyController.hpp
+        controllers/hotkeys/HotkeyHelpers.cpp
+        controllers/hotkeys/HotkeyHelpers.hpp
+        controllers/hotkeys/HotkeyModel.cpp
+        controllers/hotkeys/HotkeyModel.hpp
+
+        controllers/ignores/IgnoreController.cpp
+        controllers/ignores/IgnoreController.hpp
         controllers/ignores/IgnoreModel.cpp
         controllers/ignores/IgnoreModel.hpp
 
@@ -96,6 +109,10 @@ set(SOURCE_FILES
         controllers/moderationactions/ModerationActionModel.cpp
         controllers/moderationactions/ModerationActionModel.hpp
 
+        controllers/nicknames/NicknamesModel.cpp
+        controllers/nicknames/NicknamesModel.hpp
+        controllers/nicknames/Nickname.hpp
+
         controllers/notifications/NotificationController.cpp
         controllers/notifications/NotificationController.hpp
         controllers/notifications/NotificationModel.cpp
@@ -103,11 +120,6 @@ set(SOURCE_FILES
 
         controllers/pings/MutedChannelModel.cpp
         controllers/pings/MutedChannelModel.hpp
-
-        controllers/taggedusers/TaggedUser.cpp
-        controllers/taggedusers/TaggedUser.hpp
-        controllers/taggedusers/TaggedUsersModel.cpp
-        controllers/taggedusers/TaggedUsersModel.hpp
 
         debug/Benchmark.cpp
         debug/Benchmark.hpp
@@ -148,6 +160,8 @@ set(SOURCE_FILES
         messages/search/LinkPredicate.hpp
         messages/search/MessageFlagsPredicate.cpp
         messages/search/MessageFlagsPredicate.hpp
+        messages/search/RegexPredicate.cpp
+        messages/search/RegexPredicate.hpp
         messages/search/SubstringPredicate.cpp
         messages/search/SubstringPredicate.hpp
 
@@ -286,6 +300,8 @@ set(SOURCE_FILES
         util/NuulsUploader.hpp
         util/RapidjsonHelpers.cpp
         util/RapidjsonHelpers.hpp
+        util/RatelimitBucket.cpp
+        util/RatelimitBucket.hpp
         util/SplitCommand.cpp
         util/SplitCommand.hpp
         util/StreamLink.cpp
@@ -330,6 +346,8 @@ set(SOURCE_FILES
         widgets/dialogs/ChannelFilterEditorDialog.hpp
         widgets/dialogs/ColorPickerDialog.cpp
         widgets/dialogs/ColorPickerDialog.hpp
+        widgets/dialogs/EditHotkeyDialog.cpp
+        widgets/dialogs/EditHotkeyDialog.hpp
         widgets/dialogs/EmotePopup.cpp
         widgets/dialogs/EmotePopup.hpp
         widgets/dialogs/IrcConnectionEditor.cpp
@@ -428,6 +446,8 @@ set(SOURCE_FILES
         widgets/settingspages/KeyboardSettingsPage.hpp
         widgets/settingspages/ModerationPage.cpp
         widgets/settingspages/ModerationPage.hpp
+        widgets/settingspages/NicknamesPage.cpp
+        widgets/settingspages/NicknamesPage.hpp
         widgets/settingspages/NotificationPage.cpp
         widgets/settingspages/NotificationPage.hpp
         widgets/settingspages/SettingsPage.cpp
@@ -476,16 +496,15 @@ add_library(${LIBRARY_PROJECT} OBJECT ${SOURCE_FILES})
 
 target_link_libraries(${LIBRARY_PROJECT}
         PUBLIC
-        Qt5::Core
-        Qt5::Widgets
-        Qt5::Gui
-        Qt5::Network
-        Qt5::Multimedia
-        Qt5::Svg
-        Qt5::Concurrent
+        Qt${MAJOR_QT_VERSION}::Core
+        Qt${MAJOR_QT_VERSION}::Widgets
+        Qt${MAJOR_QT_VERSION}::Gui
+        Qt${MAJOR_QT_VERSION}::Network
+        Qt${MAJOR_QT_VERSION}::Multimedia
+        Qt${MAJOR_QT_VERSION}::Svg
+        Qt${MAJOR_QT_VERSION}::Concurrent
 
         LibCommuni::LibCommuni
-        qt5keychain
         Pajlada::Serialize
         Pajlada::Settings
         Pajlada::Signals
@@ -494,6 +513,17 @@ target_link_libraries(${LIBRARY_PROJECT}
         RapidJSON::RapidJSON
         LRUCache
         )
+if (BUILD_WITH_QTKEYCHAIN)
+    target_link_libraries(${LIBRARY_PROJECT}
+            PUBLIC
+            qt${MAJOR_QT_VERSION}keychain
+            )
+else()
+    target_compile_definitions(${LIBRARY_PROJECT}
+        PUBLIC
+        NO_QTKEYCHAIN
+        )
+endif()
 
 if (BUILD_APP)
     add_executable(${EXECUTABLE_PROJECT} main.cpp)
@@ -514,8 +544,8 @@ if (BUILD_APP)
         )
 
     if (MSVC)
-        get_target_property(Qt5_Core_Location Qt5::Core LOCATION)
-        get_filename_component(QT_BIN_DIR ${Qt5_Core_Location} DIRECTORY)
+        get_target_property(Qt_Core_Location Qt${MAJOR_QT_VERSION}::Core LOCATION)
+        get_filename_component(QT_BIN_DIR ${Qt_Core_Location} DIRECTORY)
         set(WINDEPLOYQT_COMMAND "${QT_BIN_DIR}/windeployqt.exe" $<TARGET_FILE:${EXECUTABLE_PROJECT}> --release --no-compiler-runtime --no-translations --no-opengl-sw)
 
         install(TARGETS ${EXECUTABLE_PROJECT}
@@ -549,7 +579,10 @@ if (BUILD_APP)
 endif ()
 
 if (USE_PRECOMPILED_HEADERS)
+    message(STATUS "Building with precompiled headers")
     target_precompile_headers(${LIBRARY_PROJECT} PRIVATE PrecompiledHeader.hpp)
+else ()
+    message(STATUS "Building without precompiled headers")
 endif ()
 
 # Enable autogeneration of Qts MOC/RCC/UIC
@@ -572,7 +605,7 @@ target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
     CHATTERINO_GIT_RELEASE=\"${GIT_RELEASE}\"
     CHATTERINO_GIT_COMMIT=\"${GIT_COMMIT}\"
     )
-if (USE_SYSTEM_QT5KEYCHAIN)
+if (USE_SYSTEM_QTKEYCHAIN)
     target_compile_definitions(${LIBRARY_PROJECT} PUBLIC
         CMAKE_BUILD
         )

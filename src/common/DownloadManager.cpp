@@ -1,21 +1,21 @@
 #include "DownloadManager.hpp"
 
+#include "common/QLogging.hpp"
 #include "singletons/Paths.hpp"
 
 #include <QDesktopServices>
-#include "common/QLogging.hpp"
 
 namespace chatterino {
 
 DownloadManager::DownloadManager(QObject *parent)
     : QObject(parent)
+    , manager_(new QNetworkAccessManager)
 {
-    manager = new QNetworkAccessManager;
 }
 
 DownloadManager::~DownloadManager()
 {
-    manager->deleteLater();
+    this->manager_->deleteLater();
 }
 
 void DownloadManager::setFile(QString fileURL, const QString &channelName)
@@ -25,18 +25,18 @@ void DownloadManager::setFile(QString fileURL, const QString &channelName)
         getPaths()->twitchProfileAvatars + "/twitch/" + channelName + ".png";
     QNetworkRequest request;
     request.setUrl(QUrl(fileURL));
-    reply = manager->get(request);
+    this->reply_ = this->manager_->get(request);
 
-    file = new QFile;
-    file->setFileName(saveFilePath);
-    file->open(QIODevice::WriteOnly);
+    this->file_ = new QFile;
+    this->file_->setFileName(saveFilePath);
+    this->file_->open(QIODevice::WriteOnly);
 
-    connect(reply, SIGNAL(downloadProgress(qint64, qint64)), this,
+    connect(this->reply_, SIGNAL(downloadProgress(qint64, qint64)), this,
             SLOT(onDownloadProgress(qint64, qint64)));
-    connect(manager, SIGNAL(finished(QNetworkReply *)), this,
+    connect(this->manager_, SIGNAL(finished(QNetworkReply *)), this,
             SLOT(onFinished(QNetworkReply *)));
-    connect(reply, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
-    connect(reply, SIGNAL(finished()), this, SLOT(onReplyFinished()));
+    connect(this->reply_, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    connect(this->reply_, SIGNAL(finished()), this, SLOT(onReplyFinished()));
 }
 
 void DownloadManager::onDownloadProgress(qint64 bytesRead, qint64 bytesTotal)
@@ -58,25 +58,26 @@ void DownloadManager::onFinished(QNetworkReply *reply)
         };
     }
 
-    if (file->isOpen())
+    if (this->file_->isOpen())
     {
-        file->close();
-        file->deleteLater();
+        this->file_->close();
+        this->file_->deleteLater();
     }
     emit downloadComplete();
 }
 
 void DownloadManager::onReadyRead()
 {
-    file->write(reply->readAll());
+    this->file_->write(this->reply_->readAll());
 }
 
 void DownloadManager::onReplyFinished()
 {
-    if (file->isOpen())
+    if (this->file_->isOpen())
     {
-        file->close();
-        file->deleteLater();
+        this->file_->close();
+        this->file_->deleteLater();
     }
 }
+
 }  // namespace chatterino

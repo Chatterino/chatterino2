@@ -1,12 +1,13 @@
 #include "FilterParser.hpp"
 
 #include "Application.hpp"
+#include "common/Channel.hpp"
 #include "controllers/filters/parser/Types.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 
 namespace filterparser {
 
-ContextMap buildContextMap(const MessagePtr &m)
+ContextMap buildContextMap(const MessagePtr &m, chatterino::Channel *channel)
 {
     auto watchingChannel =
         chatterino::getApp()->twitch.server->watchingChannel.get();
@@ -27,6 +28,8 @@ ContextMap buildContextMap(const MessagePtr &m)
      * flags.points_redeemed
      * flags.sub_message
      * flags.system_message
+     * flags.reward_message
+     * flags.first_message
      * flags.whisper
      *
      * message.content
@@ -61,8 +64,7 @@ ContextMap buildContextMap(const MessagePtr &m)
             subLength = m->badgeInfos.at(subBadge).toInt();
         }
     }
-
-    return {
+    ContextMap vars = {
         {"author.badges", std::move(badges)},
         {"author.color", m->usernameColor},
         {"author.name", m->displayName},
@@ -77,11 +79,27 @@ ContextMap buildContextMap(const MessagePtr &m)
         {"flags.points_redeemed", m->flags.has(MessageFlag::RedeemedHighlight)},
         {"flags.sub_message", m->flags.has(MessageFlag::Subscription)},
         {"flags.system_message", m->flags.has(MessageFlag::System)},
+        {"flags.reward_message",
+         m->flags.has(MessageFlag::RedeemedChannelPointReward)},
+        {"flags.first_message", m->flags.has(MessageFlag::FirstMessage)},
         {"flags.whisper", m->flags.has(MessageFlag::Whisper)},
 
         {"message.content", m->messageText},
         {"message.length", m->messageText.length()},
     };
+    {
+        using namespace chatterino;
+        auto *tc = dynamic_cast<TwitchChannel *>(channel);
+        if (channel && !channel->isEmpty() && tc)
+        {
+            vars["channel.live"] = tc->isLive();
+        }
+        else
+        {
+            vars["channel.live"] = false;
+        }
+    }
+    return vars;
 }
 
 FilterParser::FilterParser(const QString &text)
@@ -89,12 +107,6 @@ FilterParser::FilterParser(const QString &text)
     , tokenizer_(Tokenizer(text))
     , builtExpression_(this->parseExpression(true))
 {
-}
-
-bool FilterParser::execute(const MessagePtr &message) const
-{
-    auto context = buildContextMap(message);
-    return this->execute(context);
 }
 
 bool FilterParser::execute(const ContextMap &context) const

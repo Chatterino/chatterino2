@@ -8,6 +8,7 @@
 
 #include "common/Common.hpp"
 #include "providers/irc/IrcConnection2.hpp"
+#include "util/RatelimitBucket.hpp"
 
 namespace chatterino {
 
@@ -22,7 +23,7 @@ public:
     virtual ~AbstractIrcServer() = default;
 
     // initializeIrc must be called from the derived class
-    // this allows us to initialize the abstract irc server based on the derived class's parameters
+    // this allows us to initialize the abstract IRC server based on the derived class's parameters
     void initializeIrc();
 
     // connection
@@ -56,7 +57,7 @@ protected:
     virtual void initializeConnectionSignals(IrcConnection *connection,
                                              ConnectionType type){};
 
-    // initializeConnection is called every time before we try to connect to the irc server
+    // initializeConnection is called every time before we try to connect to the IRC server
     virtual void initializeConnection(IrcConnection *connection,
                                       ConnectionType type) = 0;
 
@@ -87,6 +88,10 @@ private:
 
     QObjectPtr<IrcConnection> writeConnection_ = nullptr;
     QObjectPtr<IrcConnection> readConnection_ = nullptr;
+
+    // Our rate limiting bucket for the Twitch join rate limits
+    // https://dev.twitch.tv/docs/irc/guide#rate-limits
+    QObjectPtr<RatelimitBucket> joinBucket_;
 
     QTimer reconnectTimer_;
     int falloffCounter_ = 1;

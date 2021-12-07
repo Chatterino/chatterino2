@@ -2,6 +2,7 @@ project(chatterino-test)
 
 set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/ChannelChatters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/AccessGuard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkCommon.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/NetworkRequest.cpp
@@ -10,6 +11,10 @@ set(test_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/ExponentialBackoff.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/TwitchAccount.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Helpers.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/RatelimitBucket.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Hotkeys.cpp
+    # Add your new file above this line!
     )
 
 add_executable(${PROJECT_NAME} ${test_SOURCES})

@@ -49,7 +49,7 @@ void addPhrasesTab(LayoutCreator<QVBoxLayout> layout)
                     ->initialized(&getSettings()->ignoredMessages))
             .getElement();
     view->setTitles(
-        {"Pattern", "Regex", "Case Sensitive", "Block", "Replacement"});
+        {"Pattern", "Regex", "Case-sensitive", "Block", "Replacement"});
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
         QHeaderView::Fixed);
     view->getTableView()->horizontalHeader()->setSectionResizeMode(
@@ -73,7 +73,7 @@ void addUsersTab(IgnoresPage &page, LayoutCreator<QVBoxLayout> users,
 {
     auto label = users.emplace<QLabel>(INFO);
     label->setWordWrap(true);
-    users.append(page.createCheckBox("Enable twitch blocked users",
+    users.append(page.createCheckBox("Enable Twitch blocked users",
                                      getSettings()->enableTwitchBlockedUsers));
 
     auto anyways = users.emplace<QHBoxLayout>().withoutMargin();

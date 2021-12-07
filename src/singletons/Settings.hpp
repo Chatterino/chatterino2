@@ -10,6 +10,7 @@
 #include "controllers/highlights/HighlightBadge.hpp"
 #include "controllers/highlights/HighlightPhrase.hpp"
 #include "controllers/moderationactions/ModerationAction.hpp"
+#include "controllers/nicknames/Nickname.hpp"
 #include "singletons/Toasts.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Notebook.hpp"
@@ -21,8 +22,8 @@ namespace chatterino {
 class HighlightPhrase;
 class HighlightBlacklistUser;
 class IgnorePhrase;
-class TaggedUser;
 class FilterRecord;
+class Nickname;
 
 /// Settings which are availlable for reading on all threads.
 class ConcurrentSettings
@@ -37,7 +38,7 @@ public:
     SignalVector<IgnorePhrase> &ignoredMessages;
     SignalVector<QString> &mutedChannels;
     SignalVector<FilterRecordPtr> &filterRecords;
-    //SignalVector<TaggedUser> &taggedUsers;
+    SignalVector<Nickname> &nicknames;
     SignalVector<ModerationAction> &moderationActions;
 
     bool isHighlightedUser(const QString &username);
@@ -272,6 +273,17 @@ public:
     QStringSetting redeemedHighlightColor = {
         "/highlighting/redeemedHighlightColor", ""};
 
+    BoolSetting enableFirstMessageHighlight = {
+        "/highlighting/firstMessageHighlight/highlighted", true};
+    //    BoolSetting enableFirstMessageHighlightSound = {
+    //        "/highlighting/firstMessageHighlight/enableSound", false};
+    //    BoolSetting enableFirstMessageHighlightTaskbar = {
+    //        "/highlighting/firstMessageHighlight/enableTaskbarFlashing", false};
+    QStringSetting firstMessageHighlightSoundUrl = {
+        "/highlighting/firstMessageHighlightSoundUrl", ""};
+    QStringSetting firstMessageHighlightColor = {
+        "/highlighting/firstMessageHighlightColor", ""};
+
     BoolSetting enableSubHighlight = {
         "/highlighting/subHighlight/subsHighlighted", true};
     BoolSetting enableSubHighlightSound = {
@@ -389,6 +401,8 @@ public:
     BoolSetting colorSimilarDisabled = {"/similarity/colorSimilarDisabled",
                                         true};
     BoolSetting hideSimilar = {"/similarity/hideSimilar", false};
+    BoolSetting hideSimilarBySameUser = {"/similarity/hideSimilarBySameUser",
+                                         true};
     BoolSetting hideSimilarMyself = {"/similarity/hideSimilarMyself", false};
     BoolSetting shownSimilarTriggerHighlights = {
         "/similarity/shownSimilarTriggerHighlights", false};

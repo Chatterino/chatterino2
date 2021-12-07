@@ -6,13 +6,14 @@
 #include <QVBoxLayout>
 
 #include "common/Channel.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
 #include "messages/search/AuthorPredicate.hpp"
 #include "messages/search/ChannelPredicate.hpp"
 #include "messages/search/LinkPredicate.hpp"
 #include "messages/search/MessageFlagsPredicate.hpp"
+#include "messages/search/RegexPredicate.hpp"
 #include "messages/search/SubstringPredicate.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
 namespace chatterino {
@@ -44,7 +45,7 @@ ChannelPtr SearchPopup::filter(const QString &text, const QString &channelName,
         }
 
         if (accept && filterSet)
-            accept = filterSet->filter(message);
+            accept = filterSet->filter(message, channel);
 
         // If all predicates match, add the message to the channel
         if (accept)
@@ -59,11 +60,32 @@ SearchPopup::SearchPopup(QWidget *parent)
 {
     this->initLayout();
     this->resize(400, 600);
+    this->addShortcuts();
+}
 
-    createShortcut(this, "CTRL+F", [this] {
-        this->searchInput_->setFocus();
-        this->searchInput_->selectAll();
-    });
+void SearchPopup::addShortcuts()
+{
+    HotkeyController::HotkeyMap actions{
+        {"search",
+         [this](std::vector<QString>) -> QString {
+             this->searchInput_->setFocus();
+             this->searchInput_->selectAll();
+             return "";
+         }},
+        {"delete",
+         [this](std::vector<QString>) -> QString {
+             this->close();
+             return "";
+         }},
+
+        {"reject", nullptr},
+        {"accept", nullptr},
+        {"openTab", nullptr},
+        {"scrollPage", nullptr},
+    };
+
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+        HotkeyCategory::PopupWindow, actions, this);
 }
 
 void SearchPopup::setChannelFilters(FilterSetPtr filters)
@@ -164,51 +186,56 @@ void SearchPopup::initLayout()
 std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
     const QString &input)
 {
-    static QRegularExpression predicateRegex(R"(^(\w+):([\w,]+)$)");
+    // This regex captures all name:value predicate pairs into named capturing
+    // groups and matches all other inputs seperated by spaces as normal
+    // strings.
+    // It also ignores whitespaces in values when being surrounded by quotation
+    // marks, to enable inputs like this => regex:"kappa 123"
+    static QRegularExpression predicateRegex(
+        R"lit((?:(?<name>\w+):(?<value>".+?"|[^\s]+))|[^\s]+?(?=$|\s))lit");
+    static QRegularExpression trimQuotationMarksRegex(R"(^"|"$)");
+
+    QRegularExpressionMatchIterator it = predicateRegex.globalMatch(input);
 
     std::vector<std::unique_ptr<MessagePredicate>> predicates;
-    auto words = input.split(' ', QString::SkipEmptyParts);
     QStringList authors;
     QStringList channels;
 
-    for (auto it = words.begin(); it != words.end();)
+    while (it.hasNext())
     {
-        if (auto match = predicateRegex.match(*it); match.hasMatch())
+        QRegularExpressionMatch match = it.next();
+
+        QString name = match.captured("name");
+
+        QString value = match.captured("value");
+        value.remove(trimQuotationMarksRegex);
+
+        // match predicates
+        if (name == "from")
         {
-            QString name = match.captured(1);
-            QString value = match.captured(2);
-
-            bool remove = true;
-
-            // match predicates
-            if (name == "from")
-            {
-                authors.append(value);
-            }
-            else if (name == "has" && value == "link")
-            {
-                predicates.push_back(std::make_unique<LinkPredicate>());
-            }
-            else if (name == "in")
-            {
-                channels.append(value);
-            }
-            else if (name == "is")
-            {
-                predicates.push_back(
-                    std::make_unique<MessageFlagsPredicate>(value));
-            }
-            else
-            {
-                remove = false;
-            }
-
-            // remove or advance
-            it = remove ? words.erase(it) : ++it;
+            authors.append(value);
+        }
+        else if (name == "has" && value == "link")
+        {
+            predicates.push_back(std::make_unique<LinkPredicate>());
+        }
+        else if (name == "in")
+        {
+            channels.append(value);
+        }
+        else if (name == "is")
+        {
+            predicates.push_back(
+                std::make_unique<MessageFlagsPredicate>(value));
+        }
+        else if (name == "regex")
+        {
+            predicates.push_back(std::make_unique<RegexPredicate>(value));
         }
         else
         {
-            ++it;
+            predicates.push_back(
+                std::make_unique<SubstringPredicate>(match.captured()));
         }
     }
 
@@ -217,10 +244,6 @@ std::vector<std::unique_ptr<MessagePredicate>> SearchPopup::parsePredicates(
 
     if (!channels.empty())
         predicates.push_back(std::make_unique<ChannelPredicate>(channels));
-
-    if (!words.empty())
-        predicates.push_back(
-            std::make_unique<SubstringPredicate>(words.join(" ")));
 
     return predicates;
 }
