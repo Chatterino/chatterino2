@@ -65,6 +65,23 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 
 `qmake-qt5 .. && make -j$(nproc)`
 
+## openSUSE Tumbleweed
+
+_Not tested in Leap, but the packages should be the same._
+
+1. Install all of the dependencies using `sudo zypper install libopenssl-devel libqt5-qtbase-devel libqt5-qtmultimedia-devel libqt5-qtsvg-devel libboost_filesystem-devel libboost_system-devel libsecret-devel boost-devel cmake`
+1. Go into the project directory
+1. Create a build folder and go into it (`mkdir build && cd build`)
+1. Use one of the options below to compile it
+
+### Using CMake
+
+`cmake .. && make -j$(nproc)`
+
+### Using QMake
+
+`qmake-qt5 .. && make -j$(nproc)`
+
 ## NixOS 18.09+
 
 1. Enter the development environment with all of the dependencies: `nix-shell -p openssl boost qt5.full pkg-config cmake`
