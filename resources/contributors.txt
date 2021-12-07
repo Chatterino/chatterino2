@@ -46,6 +46,7 @@ SLCH | https://github.com/SLCH | :/avatars/slch.png | Contributor
 ALazyMeme | https://github.com/alazymeme | :/avatars/alazymeme.png | Contributor
 xHeaveny_ | https://github.com/xHeaveny | :/avatars/xheaveny.png | Contributor
 1xelerate | https://github.com/1xelerate | :/avatars/_1xelerate.png | Contributor
+acdvs | https://github.com/acdvs | | Contributor
 
 # If you are a contributor add yourself above this line
 
