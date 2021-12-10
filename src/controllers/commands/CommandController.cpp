@@ -332,7 +332,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // Initialize setting manager for commands.json
     auto path = combinePath(paths.settingsDirectory, "commands.json");
     this->sm_ = std::make_shared<pajlada::Settings::SettingManager>();
-    this->sm_->setPath(path.toStdString());
+    this->sm_->setPath(qPrintable(path));
     this->sm_->setBackupEnabled(true);
     this->sm_->setBackupSlots(9);
 
