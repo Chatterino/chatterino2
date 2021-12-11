@@ -64,6 +64,7 @@
 - Bugfix: Fixed Chatterino attempting to send empty messages (#3355)
 - Bugfix: Fixed IRC highlights not triggering sounds or alerts properly. (#3368)
 - Bugfix: Fixed IRC /kick command crashing if parameters were malformed. (#3382)
+- Bugfix: Fixed IRC crash that would occurr if the user tries to modify the currently connected IRC connection. (#3398)
 - Bugfix: Fixed a crash that could occur on certain Linux systems when toggling the Always on Top flag. (#3385)
 - Bugfix: Fixed zero-width emotes sometimes wrapping lines incorrectly. (#3389)
 - Bugfix: Fixed using special chars in Windows username breaking the storage of custom commands (#3397)
