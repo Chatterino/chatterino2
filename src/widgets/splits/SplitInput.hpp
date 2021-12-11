@@ -69,7 +69,7 @@ private:
         QHBoxLayout *hbox;
     } ui_;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
     QStringList prevMsg_;
     QString currMsg_;
     int prevIndex_ = 0;

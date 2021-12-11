@@ -20,8 +20,6 @@ class AbstractIrcServer : public QObject
 public:
     enum ConnectionType { Read = 1, Write = 2, Both = 3 };
 
-    virtual ~AbstractIrcServer() = default;
-
     // initializeIrc must be called from the derived class
     // this allows us to initialize the abstract IRC server based on the derived class's parameters
     void initializeIrc();

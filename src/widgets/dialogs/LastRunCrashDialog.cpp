@@ -83,7 +83,7 @@ LastRunCrashDialog::LastRunCrashDialog()
     //    };
 
     //    updateUpdateLabel();
-    //    this->managedConnect(updateManager.statusUpdated,
+    //    this->signalHolder_.managedConnect(updateManager.statusUpdated,
     //    [updateUpdateLabel](auto) mutable {
     //        postToThread([updateUpdateLabel]() mutable { updateUpdateLabel();
     //        });
