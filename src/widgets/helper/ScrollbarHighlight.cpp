@@ -44,7 +44,7 @@ bool ScrollbarHighlight::isFirstMessageHighlight() const
 
 bool ScrollbarHighlight::isNull() const
 {
-    return this->style_ == None;
+    return this->style_ == None || !this->color_;
 }
 
 }  // namespace chatterino

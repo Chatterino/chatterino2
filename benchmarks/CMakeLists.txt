@@ -3,6 +3,7 @@ project(chatterino-benchmark)
 set(benchmark_SOURCES
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
     ${CMAKE_CURRENT_LIST_DIR}/src/Emojis.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/src/Highlights.cpp
     # Add your new file above this line!
     )
 

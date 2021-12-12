@@ -34,6 +34,7 @@ struct MessageParseArgs {
     bool isSentWhisper = false;
     bool trimSubscriberUsername = false;
     bool isStaffOrBroadcaster = false;
+    bool isSubscriptionMessage = false;
     QString channelPointRewardId = "";
 };
 

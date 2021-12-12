@@ -125,7 +125,7 @@ bool TwitchAccount::isAnon() const
 void TwitchAccount::loadBlocks()
 {
     getHelix()->loadBlocks(
-        getApp()->accounts->twitch.getCurrent()->userId_,
+        getIApp()->getAccounts()->twitch.getCurrent()->userId_,
         [this](std::vector<HelixBlock> blocks) {
             auto ignores = this->ignores_.access();
             auto userIds = this->ignoresUserIds_.access();
