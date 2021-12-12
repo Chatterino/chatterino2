@@ -37,6 +37,7 @@
 - Minor: Made join and part message have links to usercards. (#3358)
 - Minor: Show picked outcome in prediction badges. (#3357)
 - Minor: Add support for Emoji in IRC (#3354)
+- Minor: Moved `/live` logs to its own subdirectory. (Logs from before this change will still be available in `Channels -> live`). (#3393)
 - Minor: Colorize the entire split header when focused in a tab containing multiple splits (#3379)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
