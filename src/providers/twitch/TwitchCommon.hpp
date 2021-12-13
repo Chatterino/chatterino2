@@ -73,6 +73,6 @@ static const QStringList TWITCH_DEFAULT_COMMANDS{
     "delete",
 };
 
-static const QStringList WHISPER_COMMANDS{"/w", ".w"};
+static const QStringList TWITCH_WHISPER_COMMANDS{"/w", ".w"};
 
 }  // namespace chatterino

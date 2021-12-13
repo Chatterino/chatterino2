@@ -182,7 +182,7 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
 
     QString commandName = words[0];
 
-    if (WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
+    if (TWITCH_WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
     {
         if (words.length() > 2)
         {
@@ -902,7 +902,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     // works in a valid Twitch channel and /whispers, etc...
     if (!dryRun && channel->isTwitchChannel())
     {
-        if (WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
+        if (TWITCH_WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
         {
             if (words.length() > 2)
             {
