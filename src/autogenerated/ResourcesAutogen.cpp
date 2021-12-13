@@ -17,8 +17,10 @@ Resources2::Resources2()
     this->buttons.addSplitDark = QPixmap(":/buttons/addSplitDark.png");
     this->buttons.ban = QPixmap(":/buttons/ban.png");
     this->buttons.banRed = QPixmap(":/buttons/banRed.png");
-    this->buttons.clearSearchDisabled = QPixmap(":/buttons/clearSearchDisabled.png");
-    this->buttons.clearSearchEnabled = QPixmap(":/buttons/clearSearchEnabled.png");
+    this->buttons.clearSearchDisabled =
+        QPixmap(":/buttons/clearSearchDisabled.png");
+    this->buttons.clearSearchEnabled =
+        QPixmap(":/buttons/clearSearchEnabled.png");
     this->buttons.copyDark = QPixmap(":/buttons/copyDark.png");
     this->buttons.copyLight = QPixmap(":/buttons/copyLight.png");
     this->buttons.menuDark = QPixmap(":/buttons/menuDark.png");
