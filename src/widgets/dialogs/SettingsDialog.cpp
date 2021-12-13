@@ -87,8 +87,14 @@ void SettingsDialog::initUi()
                     .assign(&this->ui_.search);
     edit->setPlaceholderText("Find in settings... (Ctrl+F by default)");
 
+    QAction *clearAction =
+        edit->addAction(QPixmap(":/buttons/clearSearchDisabled.png"),
+                        QLineEdit::TrailingPosition);
+
     QObject::connect(edit.getElement(), &QLineEdit::textChanged, this,
                      &SettingsDialog::filterElements);
+    QObject::connect(clearAction, &QAction::triggered, this,
+                     &SettingsDialog::clearSearch);
 
     // CENTER
     auto centerBox =
@@ -172,6 +178,22 @@ void SettingsDialog::filterElements(const QString &text)
             shouldShowSpace |= item->widget()->isVisible();
         }
     }
+
+    if (text.length() > 0)
+    {
+        this->ui_.search->actions().last()->setIcon(
+            QPixmap(":/buttons/clearSearchEnabled.png"));
+    }
+    else
+    {
+        this->ui_.search->actions().last()->setIcon(
+            QPixmap(":/buttons/clearSearchDisabled.png"));
+    }
+}
+
+void SettingsDialog::clearSearch()
+{
+    this->ui_.search->clear();
 }
 
 void SettingsDialog::addTabs()

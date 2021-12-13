@@ -57,6 +57,7 @@ private:
     void selectTab(SettingsDialogTab *tab, const bool byUser = true);
     void selectTab(SettingsTabId id);
     void filterElements(const QString &query);
+    void clearSearch();
 
     void onOkClicked();
     void onCancelClicked();
