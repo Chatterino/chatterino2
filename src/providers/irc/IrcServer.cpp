@@ -90,23 +90,20 @@ void IrcServer::initializeConnectionSignals(IrcConnection *connection,
 
     QObject::connect(connection, &Communi::IrcConnection::noticeMessageReceived,
                      this, [this](Communi::IrcNoticeMessage *message) {
-                         // XD PAJLADA
-                         MessageBuilder builder;
+                         MessageParseArgs args;
+                         args.isReceivedWhisper = true;
 
-                         builder.emplace<TimestampElement>(
-                             calculateMessageTimestamp(message));
-                         builder.emplace<TextElement>(
-                             message->nick(), MessageElementFlag::Username);
-                         builder.emplace<TextElement>(
-                             "-> you:", MessageElementFlag::Username);
-                         builder.emplace<TextElement>(message->content(),
-                                                      MessageElementFlag::Text);
+                         IrcMessageBuilder builder(message, args);
 
-                         auto msg = builder.release();
+                         auto msg = builder.build();
 
                          for (auto &&weak : this->channels)
+                         {
                              if (auto shared = weak.lock())
+                             {
                                  shared->addMessage(msg);
+                             }
+                         }
                      });
 }
 
@@ -187,8 +184,8 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
         if (!builder.isIgnored())
         {
-            builder.triggerHighlights();
             channel->addMessage(builder.build());
+            builder.triggerHighlights();
         }
         else
         {

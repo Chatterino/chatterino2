@@ -3,8 +3,10 @@
 #include "Application.hpp"
 #include "common/Channel.hpp"
 #include "common/NetworkRequest.hpp"
+#include "common/QLogging.hpp"
 #include "controllers/accounts/AccountController.hpp"
 #include "controllers/highlights/HighlightBlacklistUser.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "providers/IvrApi.hpp"
@@ -18,9 +20,9 @@
 #include "util/Helpers.hpp"
 #include "util/LayoutCreator.hpp"
 #include "util/PostToThread.hpp"
-#include "util/Shortcut.hpp"
 #include "util/StreamerMode.hpp"
 #include "widgets/Label.hpp"
+#include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/Line.hpp"
@@ -33,19 +35,25 @@
 const QString TEXT_VIEWS("Views: %1");
 const QString TEXT_FOLLOWERS("Followers: %1");
 const QString TEXT_CREATED("Created: %1");
-const QString TEXT_TITLE("%1's Usercard");
+const QString TEXT_TITLE("%1's Usercard - #%2");
 #define TEXT_USER_ID "ID: "
 #define TEXT_UNAVAILABLE "(not available)"
 
 namespace chatterino {
 namespace {
-    Label *addCopyableLabel(LayoutCreator<QHBoxLayout> box)
+    Label *addCopyableLabel(LayoutCreator<QHBoxLayout> box, const char *tooltip,
+                            Button **copyButton = nullptr)
     {
         auto label = box.emplace<Label>();
         auto button = box.emplace<Button>();
+        if (copyButton != nullptr)
+        {
+            button.assign(copyButton);
+        }
         button->setPixmap(getApp()->themes->buttons.copy);
         button->setScaleIndependantSize(18, 18);
         button->setDim(Button::Dim::Lots);
+        button->setToolTip(tooltip);
         QObject::connect(
             button.getElement(), &Button::leftClicked,
             [label = label.getElement()] {
@@ -134,10 +142,47 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
     else
         this->setAttribute(Qt::WA_DeleteOnClose);
 
-    // Close the popup when Escape is pressed
-    createWindowShortcut(this, "Escape", [this] {
-        this->deleteLater();
-    });
+    HotkeyController::HotkeyMap actions{
+        {"delete",
+         [this](std::vector<QString>) -> QString {
+             this->deleteLater();
+             return "";
+         }},
+        {"scrollPage",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "scrollPage hotkey called without arguments!";
+                 return "scrollPage hotkey called without arguments!";
+             }
+             auto direction = arguments.at(0);
+
+             auto &scrollbar = this->ui_.latestMessages->getScrollBar();
+             if (direction == "up")
+             {
+                 scrollbar.offset(-scrollbar.getLargeChange());
+             }
+             else if (direction == "down")
+             {
+                 scrollbar.offset(scrollbar.getLargeChange());
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys) << "Unknown scroll direction";
+             }
+             return "";
+         }},
+
+        // these actions make no sense in the context of a usercard, so they aren't implemented
+        {"reject", nullptr},
+        {"accept", nullptr},
+        {"openTab", nullptr},
+        {"search", nullptr},
+    };
+
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+        HotkeyCategory::PopupWindow, actions, this);
 
     auto layout = LayoutCreator<QWidget>(this->getLayoutContainer())
                       .setLayoutType<QVBoxLayout>();
@@ -205,13 +250,27 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                 auto box = vbox.emplace<QHBoxLayout>()
                                .withoutMargin()
                                .withoutSpacing();
-                this->ui_.nameLabel = addCopyableLabel(box);
+
+                this->ui_.nameLabel = addCopyableLabel(box, "Copy name");
                 this->ui_.nameLabel->setFontStyle(FontStyle::UiMediumBold);
+                box->addSpacing(5);
                 box->addStretch(1);
+
+                this->ui_.localizedNameLabel =
+                    addCopyableLabel(box, "Copy localized name",
+                                     &this->ui_.localizedNameCopyButton);
+                this->ui_.localizedNameLabel->setFontStyle(
+                    FontStyle::UiMediumBold);
+                box->addSpacing(5);
+                box->addStretch(1);
+
                 auto palette = QPalette();
                 palette.setColor(QPalette::WindowText, QColor("#aaa"));
-                this->ui_.userIDLabel = addCopyableLabel(box);
+                this->ui_.userIDLabel = addCopyableLabel(box, "Copy ID");
                 this->ui_.userIDLabel->setPalette(palette);
+
+                this->ui_.localizedNameLabel->setVisible(false);
+                this->ui_.localizedNameCopyButton->setVisible(false);
             }
 
             // items on the left
@@ -434,10 +493,11 @@ void UserInfoPopup::installEvents()
                             reenableBlockCheckbox();
                         },
                         [this, reenableBlockCheckbox] {
-                            this->channel_->addMessage(
-                                makeSystemMessage(QString(
+                            this->channel_->addMessage(makeSystemMessage(
+                                QString(
                                     "User %1 couldn't be unblocked, an unknown "
-                                    "error occurred!")));
+                                    "error occurred!")
+                                    .arg(this->userName_)));
                             reenableBlockCheckbox();
                         });
                 }
@@ -513,7 +573,7 @@ void UserInfoPopup::setData(const QString &name, const ChannelPtr &channel)
 {
     this->userName_ = name;
     this->channel_ = channel;
-    this->setWindowTitle(TEXT_TITLE.arg(name));
+    this->setWindowTitle(TEXT_TITLE.arg(name, channel->getName()));
 
     this->ui_.nameLabel->setText(name);
     this->ui_.nameLabel->setProperty("copy-text", name);
@@ -597,8 +657,23 @@ void UserInfoPopup::updateUserData()
         this->userId_ = user.id;
         this->avatarUrl_ = user.profileImageUrl;
 
-        this->ui_.nameLabel->setText(user.displayName);
-        this->setWindowTitle(TEXT_TITLE.arg(user.displayName));
+        // copyable button for login name of users with a localized username
+        if (user.displayName.toLower() != user.login)
+        {
+            this->ui_.localizedNameLabel->setText(user.displayName);
+            this->ui_.localizedNameLabel->setProperty("copy-text",
+                                                      user.displayName);
+            this->ui_.localizedNameLabel->setVisible(true);
+            this->ui_.localizedNameCopyButton->setVisible(true);
+        }
+        else
+        {
+            this->ui_.nameLabel->setText(user.displayName);
+            this->ui_.nameLabel->setProperty("copy-text", user.displayName);
+        }
+
+        this->setWindowTitle(
+            TEXT_TITLE.arg(user.displayName, this->channel_->getName()));
         this->ui_.viewCountLabel->setText(
             TEXT_VIEWS.arg(localizeNumbers(user.viewCount)));
         this->ui_.createdDateLabel->setText(

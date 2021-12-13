@@ -1,7 +1,10 @@
 #pragma once
 
+#include "ForwardDecl.hpp"
+
 #include <QTimer>
 #include <QWidget>
+#include <memory>
 
 namespace chatterino {
 

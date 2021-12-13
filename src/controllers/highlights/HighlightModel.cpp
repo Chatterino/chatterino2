@@ -150,6 +150,36 @@ void HighlightModel::afterInit()
     setColorItem(redeemedRow[Column::Color], *RedeemedColor, false);
 
     this->insertCustomRow(redeemedRow, 3);
+
+    // Highlight settings for first messages
+    std::vector<QStandardItem *> firstMessageRow = this->createRow();
+    setBoolItem(firstMessageRow[Column::Pattern],
+                getSettings()->enableFirstMessageHighlight.getValue(), true,
+                false);
+    firstMessageRow[Column::Pattern]->setData("First Messages",
+                                              Qt::DisplayRole);
+    firstMessageRow[Column::ShowInMentions]->setFlags({});
+    //    setBoolItem(firstMessageRow[Column::FlashTaskbar],
+    //                getSettings()->enableFirstMessageHighlightTaskbar.getValue(),
+    //                true, false);
+    //    setBoolItem(firstMessageRow[Column::PlaySound],
+    //                getSettings()->enableFirstMessageHighlightSound.getValue(),
+    //                true, false);
+    firstMessageRow[Column::FlashTaskbar]->setFlags({});
+    firstMessageRow[Column::PlaySound]->setFlags({});
+    firstMessageRow[Column::UseRegex]->setFlags({});
+    firstMessageRow[Column::CaseSensitive]->setFlags({});
+
+    QUrl FirstMessageSound =
+        QUrl(getSettings()->firstMessageHighlightSoundUrl.getValue());
+    setFilePathItem(firstMessageRow[Column::SoundPath], FirstMessageSound,
+                    false);
+
+    auto FirstMessageColor =
+        ColorProvider::instance().color(ColorType::FirstMessageHighlight);
+    setColorItem(firstMessageRow[Column::Color], *FirstMessageColor, false);
+
+    this->insertCustomRow(firstMessageRow, 4);
 }
 
 void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
@@ -177,6 +207,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 3)
                 {
                     getSettings()->enableRedeemedHighlight.setValue(
+                        value.toBool());
+                }
+                else if (rowIndex == 4)
+                {
+                    getSettings()->enableFirstMessageHighlight.setValue(
                         value.toBool());
                 }
             }
@@ -216,6 +251,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     // getSettings()->enableRedeemedHighlightTaskbar.setValue(
                     //     value.toBool());
                 }
+                else if (rowIndex == 4)
+                {
+                    // getSettings()->enableFirstMessageHighlightTaskbar.setValue(
+                    //     value.toBool());
+                }
             }
         }
         break;
@@ -240,6 +280,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 3)
                 {
                     // getSettings()->enableRedeemedHighlightSound.setValue(
+                    //     value.toBool());
+                }
+                else if (rowIndex == 4)
+                {
+                    // getSettings()->enableFirstMessageHighlightSound.setValue(
                     //     value.toBool());
                 }
             }
@@ -277,6 +322,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->redeemedHighlightSoundUrl.setValue(
                         value.toString());
                 }
+                else if (rowIndex == 4)
+                {
+                    getSettings()->firstMessageHighlightSoundUrl.setValue(
+                        value.toString());
+                }
             }
         }
         break;
@@ -302,6 +352,14 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->redeemedHighlightColor.setValue(colorName);
                     const_cast<ColorProvider &>(ColorProvider::instance())
                         .updateColor(ColorType::RedeemedHighlight,
+                                     QColor(colorName));
+                }
+                else if (rowIndex == 4)
+                {
+                    getSettings()->firstMessageHighlightColor.setValue(
+                        colorName);
+                    const_cast<ColorProvider &>(ColorProvider::instance())
+                        .updateColor(ColorType::FirstMessageHighlight,
                                      QColor(colorName));
                 }
             }

@@ -2,6 +2,7 @@
 
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
+#include "providers/twitch/TwitchMessageBuilder.hpp"
 
 namespace chatterino {
 
@@ -34,8 +35,9 @@ void ChannelChatters::addJoinedUser(const QString &user)
         QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
             auto joinedUsers = this->joinedUsers_.access();
 
-            MessageBuilder builder(systemMessage,
-                                   "Users joined: " + joinedUsers->join(", "));
+            MessageBuilder builder;
+            TwitchMessageBuilder::listOfUsersSystemMessage(
+                "Users joined:", *joinedUsers, &this->channel_, &builder);
             builder->flags.set(MessageFlag::Collapsed);
             joinedUsers->clear();
             this->channel_.addMessage(builder.release());
@@ -56,8 +58,9 @@ void ChannelChatters::addPartedUser(const QString &user)
         QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
             auto partedUsers = this->partedUsers_.access();
 
-            MessageBuilder builder(systemMessage,
-                                   "Users parted: " + partedUsers->join(", "));
+            MessageBuilder builder;
+            TwitchMessageBuilder::listOfUsersSystemMessage(
+                "Users parted:", *partedUsers, &this->channel_, &builder);
             builder->flags.set(MessageFlag::Collapsed);
             this->channel_.addMessage(builder.release());
             partedUsers->clear();
@@ -68,10 +71,16 @@ void ChannelChatters::addPartedUser(const QString &user)
 }
 
 void ChannelChatters::updateOnlineChatters(
-    const std::unordered_set<QString> &chatters)
+    const std::unordered_set<QString> &usernames)
 {
-    auto chatters_ = this->chatters_.access();
-    chatters_->updateOnlineChatters(chatters);
+    auto chatters = this->chatters_.access();
+    chatters->updateOnlineChatters(usernames);
+}
+
+size_t ChannelChatters::colorsSize() const
+{
+    auto size = this->chatterColors_.access()->size();
+    return size;
 }
 
 const QColor ChannelChatters::getUserColor(const QString &user)
