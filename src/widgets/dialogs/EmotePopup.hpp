@@ -1,5 +1,6 @@
 #pragma once
 
+#include "providers/twitch/TwitchChannel.hpp"
 #include "widgets/BasePopup.hpp"
 #include "widgets/Notebook.hpp"
 
@@ -17,7 +18,8 @@ class EmotePopup : public BasePopup
 public:
     EmotePopup(QWidget *parent = nullptr);
 
-    void loadChannel(ChannelPtr channel);
+    void setChannel(ChannelPtr channel);
+    void loadChannel();
     void loadEmojis();
 
     virtual void closeEvent(QCloseEvent *event) override;
@@ -29,8 +31,17 @@ private:
     ChannelView *channelEmotesView_{};
     ChannelView *subEmotesView_{};
     ChannelView *viewEmojis_{};
+    ChannelView *searchView_{};
 
+    ChannelPtr channel_;
+    TwitchChannel *twitchChannel_;
+
+    QLineEdit *search_;
     Notebook *notebook_;
+
+    void filterEmotes(const QString &text);
+    EmoteMap *filterEmoteMap(const QString &text,
+                             std::shared_ptr<const EmoteMap> emotes);
     void addShortcuts() override;
 };
 
