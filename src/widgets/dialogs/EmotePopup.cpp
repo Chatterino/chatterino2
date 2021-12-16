@@ -155,30 +155,32 @@ EmotePopup::EmotePopup(QWidget *parent)
     QObject::connect(this->search_, &QLineEdit::textChanged, this,
                      &EmotePopup::filterEmotes);
 
-    this->searchView_ = new ChannelView();
-    this->searchView_->hide();
-    layout->addWidget(this->searchView_);
-
-    this->notebook_ = new Notebook(this);
-    layout->addWidget(this->notebook_);
-    layout->setMargin(0);
-
     auto clicked = [this](const Link &link) {
         this->linkClicked.invoke(link);
     };
 
-    auto makeView = [&](QString tabTitle) {
+    auto makeView = [&](QString tabTitle, bool addToNotebook = true) {
         auto view = new ChannelView();
 
         view->setOverrideFlags(MessageElementFlags{
             MessageElementFlag::Default, MessageElementFlag::AlwaysShow,
             MessageElementFlag::EmoteImages});
         view->setEnableScrollingToBottom(false);
-        this->notebook_->addPage(view, tabTitle);
         view->linkClicked.connect(clicked);
+
+        if (addToNotebook)
+            this->notebook_->addPage(view, tabTitle);
 
         return view;
     };
+
+    this->searchView_ = makeView("", false);
+    this->searchView_->hide();
+    layout->addWidget(this->searchView_);
+
+    this->notebook_ = new Notebook(this);
+    layout->addWidget(this->notebook_);
+    layout->setMargin(0);
 
     this->subEmotesView_ = makeView("Subs");
     this->channelEmotesView_ = makeView("Channel");
