@@ -369,33 +369,24 @@ void EmotePopup::filterEmotes(const QString &text)
 
         auto twitchEmoteSets =
             getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets;
-        // Start with a copy of the emote sets
         std::vector<std::shared_ptr<TwitchAccount::EmoteSet>>
             twitchGlobalEmotes{};
 
         for (const auto set : twitchEmoteSets)
         {
-            twitchGlobalEmotes.push_back(
-                std::make_shared<TwitchAccount::EmoteSet>(*set));
+            auto setCopy = std::make_shared<TwitchAccount::EmoteSet>(*set);
+            auto setIt =
+                std::remove_if(setCopy->emotes.begin(), setCopy->emotes.end(),
+                               [text](auto &emote) {
+                                   return !emote.name.string.contains(
+                                       text, Qt::CaseInsensitive);
+                               });
+            setCopy->emotes.resize(
+                std::distance(setCopy->emotes.begin(), setIt));
+
+            if (setCopy->emotes.size() > 0)
+                twitchGlobalEmotes.push_back(setCopy);
         }
-
-        // Remove sets without filtered emotes
-        auto allSetsIt = std::remove_if(
-            twitchGlobalEmotes.begin(), twitchGlobalEmotes.end(),
-            [text](auto &set) {
-                // Remove emotes not containing the text
-                auto setIt =
-                    std::remove_if(set->emotes.begin(), set->emotes.end(),
-                                   [text](auto &emote) {
-                                       return !emote.name.string.contains(
-                                           text, Qt::CaseInsensitive);
-                                   });
-                set->emotes.resize(std::distance(set->emotes.begin(), setIt));
-
-                return set->emotes.size() == 0;
-            });
-        twitchGlobalEmotes.resize(
-            std::distance(twitchGlobalEmotes.begin(), allSetsIt));
 
         auto bttvGlobalEmotes = this->filterEmoteMap(
             text, getApp()->twitch2->getBttvEmotes().emotes());
