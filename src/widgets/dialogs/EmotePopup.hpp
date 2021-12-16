@@ -18,8 +18,7 @@ class EmotePopup : public BasePopup
 public:
     EmotePopup(QWidget *parent = nullptr);
 
-    void setChannel(ChannelPtr channel);
-    void loadChannel();
+    void loadChannel(ChannelPtr channel);
     void loadEmojis();
 
     virtual void closeEvent(QCloseEvent *event) override;

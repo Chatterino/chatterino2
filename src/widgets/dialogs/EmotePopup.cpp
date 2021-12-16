@@ -284,15 +284,12 @@ void EmotePopup::addShortcuts()
         HotkeyCategory::PopupWindow, actions, this);
 }
 
-void EmotePopup::setChannel(ChannelPtr channel)
-{
-    this->channel_ = channel;
-    this->twitchChannel_ = dynamic_cast<TwitchChannel *>(this->channel_.get());
-}
-
-void EmotePopup::loadChannel()
+void EmotePopup::loadChannel(ChannelPtr channel)
 {
     BenchmarkGuard guard("loadChannel");
+
+    this->channel_ = channel;
+    this->twitchChannel_ = dynamic_cast<TwitchChannel *>(this->channel_.get());
 
     this->setWindowTitle("Emotes in #" + this->channel_->getName());
 
