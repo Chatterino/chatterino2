@@ -143,7 +143,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     auto layout = new QVBoxLayout(this);
     this->getLayoutContainer()->setLayout(layout);
 
-    QRegExp searchRegex("[A-Za-z0-9]*");
+    QRegExp searchRegex("\\S*");
     searchRegex.setCaseSensitivity(Qt::CaseInsensitive);
     QValidator *searchValidator = new QRegExpValidator(searchRegex);
 
