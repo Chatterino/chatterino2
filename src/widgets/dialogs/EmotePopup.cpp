@@ -370,8 +370,12 @@ void EmotePopup::filterEmotes(const QString &text)
         // Start with a copy of the emote sets
         std::vector<std::shared_ptr<TwitchAccount::EmoteSet>>
             twitchGlobalEmotes{};
-        twitchGlobalEmotes.assign(twitchEmoteSets.begin(),
-                                  twitchEmoteSets.end());
+
+        for (const auto set : twitchEmoteSets)
+        {
+            twitchGlobalEmotes.push_back(
+                std::make_shared<TwitchAccount::EmoteSet>(*set));
+        }
 
         // Remove sets without filtered emotes
         auto allSetsIt = std::remove_if(
