@@ -10,7 +10,7 @@
 4. Install the dependencies using `brew install boost openssl rapidjson`
 5. Install Qt5 using `brew install qt@5`
 6. Step 5 should output some directions to add Qt to your path, you will need to do this for qmake
-7. (_OPTIONAL_) Install ccache (used to speed up compilation by using cached results from previous builds) using `brew install ccache`
+7. (_OPTIONAL_) Install [ccache](https://ccache.dev) (used to speed up compilation by using cached results from previous builds) using `brew install ccache`
 8. Go into the project directory
 9. Create a build folder and go into it (`mkdir build && cd build`)
 10. Compile using `qmake .. && make`
