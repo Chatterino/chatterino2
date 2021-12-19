@@ -175,7 +175,7 @@ Split::Split(QWidget *parent)
                 this->input_->show();
             }
         },
-        this->managedConnections_);
+        this->signalHolder_);
 
     this->header_->updateModerationModeIcon();
     this->overlay_->hide();
@@ -183,29 +183,29 @@ Split::Split(QWidget *parent)
     this->setSizePolicy(QSizePolicy::MinimumExpanding,
                         QSizePolicy::MinimumExpanding);
 
-    this->managedConnect(modifierStatusChanged, [this](Qt::KeyboardModifiers
-                                                           status) {
-        if ((status ==
-             showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
-            this->isMouseOver_)
-        {
-            this->overlay_->show();
-        }
-        else
-        {
-            this->overlay_->hide();
-        }
+    this->signalHolder_.managedConnect(
+        modifierStatusChanged, [this](Qt::KeyboardModifiers status) {
+            if ((status ==
+                 showSplitOverlayModifiers /*|| status == showAddSplitRegions*/) &&
+                this->isMouseOver_)
+            {
+                this->overlay_->show();
+            }
+            else
+            {
+                this->overlay_->hide();
+            }
 
-        if (getSettings()->pauseChatModifier.getEnum() != Qt::NoModifier &&
-            status == getSettings()->pauseChatModifier.getEnum())
-        {
-            this->view_->pause(PauseReason::KeyboardModifier);
-        }
-        else
-        {
-            this->view_->unpause(PauseReason::KeyboardModifier);
-        }
-    });
+            if (getSettings()->pauseChatModifier.getEnum() != Qt::NoModifier &&
+                status == getSettings()->pauseChatModifier.getEnum())
+            {
+                this->view_->pause(PauseReason::KeyboardModifier);
+            }
+            else
+            {
+                this->view_->unpause(PauseReason::KeyboardModifier);
+            }
+        });
 
     this->input_->ui_.textEdit->focused.connect([this] {
         this->focused.invoke();
@@ -250,12 +250,13 @@ Split::Split(QWidget *parent)
         [this](const bool &val) {
             this->setAcceptDrops(val);
         },
-        this->managedConnections_);
+        this->signalHolder_);
     this->addShortcuts();
-    this->managedConnect(getApp()->hotkeys->onItemsUpdated, [this]() {
-        this->clearShortcuts();
-        this->addShortcuts();
-    });
+    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+                                       [this]() {
+                                           this->clearShortcuts();
+                                           this->addShortcuts();
+                                       });
 }
 
 void Split::addShortcuts()

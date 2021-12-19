@@ -188,34 +188,35 @@ void ChannelView::initializeScrollbar()
 
 void ChannelView::initializeSignals()
 {
-    this->connections_.push_back(
-        getApp()->windows->wordFlagsChanged.connect([this] {
-            this->queueLayout();
-            this->update();
-        }));
+    this->signalHolder_.managedConnect(getApp()->windows->wordFlagsChanged,
+                                       [this] {
+                                           this->queueLayout();
+                                           this->update();
+                                       });
 
     getSettings()->showLastMessageIndicator.connect(
         [this](auto, auto) {
             this->update();
         },
-        this->connections_);
+        this);
 
-    connections_.push_back(getApp()->windows->gifRepaintRequested.connect([&] {
-        this->queueUpdate();
-    }));
+    this->signalHolder_.managedConnect(getApp()->windows->gifRepaintRequested,
+                                       [&] {
+                                           this->queueUpdate();
+                                       });
 
-    connections_.push_back(
-        getApp()->windows->layoutRequested.connect([&](Channel *channel) {
+    this->signalHolder_.managedConnect(
+        getApp()->windows->layoutRequested, [&](Channel *channel) {
             if (this->isVisible() &&
                 (channel == nullptr || this->channel_.get() == channel))
             {
                 this->queueLayout();
             }
-        }));
+        });
 
-    connections_.push_back(getApp()->fonts->fontChanged.connect([this] {
+    this->signalHolder_.managedConnect(getApp()->fonts->fontChanged, [this] {
         this->queueLayout();
-    }));
+    });
 }
 
 bool ChannelView::pausable() const
@@ -601,87 +602,87 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     // Use a proxy channel to keep filtered messages past the time they are removed from their origin channel
     //
 
-    this->channelConnections_.push_back(
-        underlyingChannel->messageAppended.connect(
-            [this](MessagePtr &message,
-                   boost::optional<MessageFlags> overridingFlags) {
-                if (this->shouldIncludeMessage(message))
+    this->channelConnections_.managedConnect(
+        underlyingChannel->messageAppended,
+        [this](MessagePtr &message,
+               boost::optional<MessageFlags> overridingFlags) {
+            if (this->shouldIncludeMessage(message))
+            {
+                if (this->channel_->lastDate_ != QDate::currentDate())
                 {
-                    if (this->channel_->lastDate_ != QDate::currentDate())
-                    {
-                        this->channel_->lastDate_ = QDate::currentDate();
-                        auto msg = makeSystemMessage(
-                            QLocale().toString(QDate::currentDate(),
-                                               QLocale::LongFormat),
-                            QTime(0, 0));
-                        this->channel_->addMessage(msg);
-                    }
-                    // When the message was received in the underlyingChannel,
-                    // logging will be handled. Prevent duplications.
-                    if (overridingFlags)
-                    {
-                        overridingFlags.get().set(MessageFlag::DoNotLog);
-                    }
-                    else
-                    {
-                        overridingFlags = MessageFlags(message->flags);
-                        overridingFlags.get().set(MessageFlag::DoNotLog);
-                    }
-
-                    this->channel_->addMessage(message, overridingFlags);
+                    this->channel_->lastDate_ = QDate::currentDate();
+                    auto msg = makeSystemMessage(
+                        QLocale().toString(QDate::currentDate(),
+                                           QLocale::LongFormat),
+                        QTime(0, 0));
+                    this->channel_->addMessage(msg);
                 }
-            }));
+                // When the message was received in the underlyingChannel,
+                // logging will be handled. Prevent duplications.
+                if (overridingFlags)
+                {
+                    overridingFlags.get().set(MessageFlag::DoNotLog);
+                }
+                else
+                {
+                    overridingFlags = MessageFlags(message->flags);
+                    overridingFlags.get().set(MessageFlag::DoNotLog);
+                }
 
-    this->channelConnections_.push_back(
-        underlyingChannel->messagesAddedAtStart.connect(
-            [this](std::vector<MessagePtr> &messages) {
-                std::vector<MessagePtr> filtered;
-                std::copy_if(messages.begin(), messages.end(),
-                             std::back_inserter(filtered),
-                             [this](MessagePtr msg) {
-                                 return this->shouldIncludeMessage(msg);
-                             });
+                this->channel_->addMessage(message, overridingFlags);
+            }
+        });
 
-                if (!filtered.empty())
-                    this->channel_->addMessagesAtStart(filtered);
-            }));
+    this->channelConnections_.managedConnect(
+        underlyingChannel->messagesAddedAtStart,
+        [this](std::vector<MessagePtr> &messages) {
+            std::vector<MessagePtr> filtered;
+            std::copy_if(messages.begin(), messages.end(),
+                         std::back_inserter(filtered), [this](MessagePtr msg) {
+                             return this->shouldIncludeMessage(msg);
+                         });
 
-    this->channelConnections_.push_back(
-        underlyingChannel->messageReplaced.connect(
-            [this](size_t index, MessagePtr replacement) {
-                if (this->shouldIncludeMessage(replacement))
-                    this->channel_->replaceMessage(index, replacement);
-            }));
+            if (!filtered.empty())
+                this->channel_->addMessagesAtStart(filtered);
+        });
+
+    this->channelConnections_.managedConnect(
+        underlyingChannel->messageReplaced,
+        [this](size_t index, MessagePtr replacement) {
+            if (this->shouldIncludeMessage(replacement))
+                this->channel_->replaceMessage(index, replacement);
+        });
 
     //
     // Standard channel connections
     //
 
     // on new message
-    this->channelConnections_.push_back(this->channel_->messageAppended.connect(
+    this->channelConnections_.managedConnect(
+        this->channel_->messageAppended,
         [this](MessagePtr &message,
                boost::optional<MessageFlags> overridingFlags) {
             this->messageAppended(message, std::move(overridingFlags));
-        }));
+        });
 
-    this->channelConnections_.push_back(
-        this->channel_->messagesAddedAtStart.connect(
-            [this](std::vector<MessagePtr> &messages) {
-                this->messageAddedAtStart(messages);
-            }));
+    this->channelConnections_.managedConnect(
+        this->channel_->messagesAddedAtStart,
+        [this](std::vector<MessagePtr> &messages) {
+            this->messageAddedAtStart(messages);
+        });
 
     // on message removed
-    this->channelConnections_.push_back(
-        this->channel_->messageRemovedFromStart.connect(
-            [this](MessagePtr &message) {
-                this->messageRemoveFromStart(message);
-            }));
+    this->channelConnections_.managedConnect(
+        this->channel_->messageRemovedFromStart, [this](MessagePtr &message) {
+            this->messageRemoveFromStart(message);
+        });
 
     // on message replaced
-    this->channelConnections_.push_back(this->channel_->messageReplaced.connect(
+    this->channelConnections_.managedConnect(
+        this->channel_->messageReplaced,
         [this](size_t index, MessagePtr replacement) {
             this->messageReplaced(index, replacement);
-        }));
+        });
 
     auto snapshot = underlyingChannel->getMessageSnapshot();
 
@@ -719,9 +720,10 @@ void ChannelView::setChannel(ChannelPtr underlyingChannel)
     // Notifications
     if (auto tc = dynamic_cast<TwitchChannel *>(underlyingChannel.get()))
     {
-        this->connections_.push_back(tc->liveStatusChanged.connect([this]() {
-            this->liveStatusChanged.invoke();
-        }));
+        this->channelConnections_.managedConnect(
+            tc->liveStatusChanged, [this]() {
+                this->liveStatusChanged.invoke();
+            });
     }
 }
 

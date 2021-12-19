@@ -36,9 +36,7 @@ class BttvEmotes;
 
 class TwitchIrcServer;
 
-class TwitchChannel : public Channel,
-                      public ChannelChatters,
-                      pajlada::Signals::SignalHolder
+class TwitchChannel : public Channel, public ChannelChatters
 {
 public:
     struct StreamStatus {
@@ -188,6 +186,8 @@ private:
     QElapsedTimer titleRefreshedTimer_;
     QElapsedTimer clipCreationTimer_;
     bool isClipCreationInProgress{false};
+
+    pajlada::Signals::SignalHolder signalHolder_;
 
     friend class TwitchIrcServer;
     friend class TwitchMessageBuilder;

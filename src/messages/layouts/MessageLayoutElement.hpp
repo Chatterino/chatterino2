@@ -11,6 +11,8 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
+
 class QPainter;
 
 namespace chatterino {
@@ -114,7 +116,7 @@ protected:
     FontStyle style_;
     float scale_;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
 };
 
 // TEXT ICON
