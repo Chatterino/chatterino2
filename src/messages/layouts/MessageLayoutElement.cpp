@@ -224,8 +224,6 @@ void TextLayoutElement::listenToLinkChanges()
 {
     this->managedConnections_.managedConnect(
         static_cast<TextElement &>(this->getCreator()).linkChanged, [this]() {
-            // log("Old link: {}", this->getCreator().getLink().value);
-            // log("This link: {}", this->getLink().value);
             this->setLink(this->getCreator().getLink());
         });
 }
