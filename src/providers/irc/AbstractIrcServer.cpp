@@ -47,11 +47,12 @@ AbstractIrcServer::AbstractIrcServer()
                      &Communi::IrcConnection::connected, this, [this] {
                          this->onWriteConnected(this->writeConnection_.get());
                      });
-    this->writeConnection_->connectionLost.connect([this](bool timeout) {
-        qCDebug(chatterinoIrc)
-            << "Write connection reconnect requested. Timeout:" << timeout;
-        this->writeConnection_->smartReconnect.invoke();
-    });
+    this->connections_.managedConnect(
+        this->writeConnection_->connectionLost, [this](bool timeout) {
+            qCDebug(chatterinoIrc)
+                << "Write connection reconnect requested. Timeout:" << timeout;
+            this->writeConnection_->smartReconnect.invoke();
+        });
 
     // Listen to read connection message signals
     this->readConnection_.reset(new IrcConnection);
@@ -75,18 +76,19 @@ AbstractIrcServer::AbstractIrcServer()
                      &Communi::IrcConnection::disconnected, this, [this] {
                          this->onDisconnected();
                      });
-    this->readConnection_->connectionLost.connect([this](bool timeout) {
-        qCDebug(chatterinoIrc)
-            << "Read connection reconnect requested. Timeout:" << timeout;
-        if (timeout)
-        {
-            // Show additional message since this is going to interrupt a
-            // connection that is still "connected"
-            this->addGlobalSystemMessage(
-                "Server connection timed out, reconnecting");
-        }
-        this->readConnection_->smartReconnect.invoke();
-    });
+    this->connections_.managedConnect(
+        this->readConnection_->connectionLost, [this](bool timeout) {
+            qCDebug(chatterinoIrc)
+                << "Read connection reconnect requested. Timeout:" << timeout;
+            if (timeout)
+            {
+                // Show additional message since this is going to interrupt a
+                // connection that is still "connected"
+                this->addGlobalSystemMessage(
+                    "Server connection timed out, reconnecting");
+            }
+            this->readConnection_->smartReconnect.invoke();
+        });
 }
 
 void AbstractIrcServer::initializeIrc()
@@ -217,19 +219,18 @@ ChannelPtr AbstractIrcServer::getOrAddChannel(const QString &dirtyChannelName)
     }
 
     this->channels.insert(channelName, chan);
-    this->connections_.emplace_back(
-        chan->destroyed.connect([this, channelName] {
-            // fourtf: issues when the server itself is destroyed
+    this->connections_.managedConnect(chan->destroyed, [this, channelName] {
+        // fourtf: issues when the server itself is destroyed
 
-            qCDebug(chatterinoIrc) << "[AbstractIrcServer::addChannel]"
-                                   << channelName << "was destroyed";
-            this->channels.remove(channelName);
+        qCDebug(chatterinoIrc) << "[AbstractIrcServer::addChannel]"
+                               << channelName << "was destroyed";
+        this->channels.remove(channelName);
 
-            if (this->readConnection_)
-            {
-                this->readConnection_->sendRaw("PART #" + channelName);
-            }
-        }));
+        if (this->readConnection_)
+        {
+            this->readConnection_->sendRaw("PART #" + channelName);
+        }
+    });
 
     // join IRC channel
     {
