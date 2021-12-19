@@ -62,6 +62,24 @@ namespace {
 
         return builder.release();
     }
+    auto makeEmojiMessage(EmojiMap &emojiMap)
+    {
+        MessageBuilder builder;
+        builder->flags.set(MessageFlag::Centered);
+        builder->flags.set(MessageFlag::DisableCompactEmotes);
+
+        emojiMap.each([&builder](const auto &key, const auto &value) {
+            builder
+                .emplace<EmoteElement>(
+                    value->emote,
+                    MessageElementFlags{MessageElementFlag::AlwaysShow,
+                                        MessageElementFlag::EmojiAll})
+                ->setLink(Link(Link::Type::InsertText,
+                               ":" + value->shortCodes[0] + ":"));
+        });
+
+        return builder.release();
+    }
     void addEmoteSets(
         std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> sets,
         Channel &globalChannel, Channel &subChannel, QString currentChannelName)
@@ -187,7 +205,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->globalEmotesView_ = makeView("Global");
     this->viewEmojis_ = makeView("Emojis");
 
-    this->loadEmojis();
+    this->loadEmojis(*this->viewEmojis_, getApp()->emotes->emojis.emojis);
     this->addShortcuts();
     this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
                                        [this]() {
@@ -333,29 +351,19 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     }
 }
 
-void EmotePopup::loadEmojis()
+void EmotePopup::loadEmojis(ChannelView &view, EmojiMap &emojiMap)
 {
-    auto &emojis = getApp()->emotes->emojis.emojis;
-
     ChannelPtr emojiChannel(new Channel("", Channel::Type::None));
+    emojiChannel->addMessage(makeEmojiMessage(emojiMap));
 
-    // emojis
-    MessageBuilder builder;
-    builder->flags.set(MessageFlag::Centered);
-    builder->flags.set(MessageFlag::DisableCompactEmotes);
+    view.setChannel(emojiChannel);
+}
 
-    emojis.each([&builder](const auto &key, const auto &value) {
-        builder
-            .emplace<EmoteElement>(
-                value->emote,
-                MessageElementFlags{MessageElementFlag::AlwaysShow,
-                                    MessageElementFlag::EmojiAll})
-            ->setLink(
-                Link(Link::Type::InsertText, ":" + value->shortCodes[0] + ":"));
-    });
-    emojiChannel->addMessage(builder.release());
-
-    this->viewEmojis_->setChannel(emojiChannel);
+void EmotePopup::loadEmojis(Channel &channel, EmojiMap &emojiMap,
+                            const QString &title)
+{
+    channel.addMessage(makeTitleMessage(title));
+    channel.addMessage(makeEmojiMessage(emojiMap));
 }
 
 void EmotePopup::filterEmotes(const QString &text)
@@ -394,6 +402,18 @@ void EmotePopup::filterEmotes(const QString &text)
         auto ffzChannelEmotes =
             this->filterEmoteMap(text, this->twitchChannel_->ffzEmotes());
 
+        EmojiMap filteredEmojis{};
+        int emojiCount = 0;
+
+        getApp()->emotes->emojis.emojis.each(
+            [&, text](const auto &name, std::shared_ptr<EmojiData> &emoji) {
+                if (emoji->shortCodes[0].contains(text, Qt::CaseInsensitive))
+                {
+                    filteredEmojis.insert(name, emoji);
+                    emojiCount++;
+                }
+            });
+
         // twitch
         addEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,
                      this->channel_->getName());
@@ -413,6 +433,10 @@ void EmotePopup::filterEmotes(const QString &text)
         if (ffzChannelEmotes->size() > 0)
             addEmotes(*searchChannel, *ffzChannelEmotes,
                       "FrankerFaceZ (Channel)", MessageElementFlag::FfzEmote);
+
+        // emojis
+        if (emojiCount > 0)
+            this->loadEmojis(*searchChannel, filteredEmojis, "Emojis");
 
         this->searchView_->setChannel(searchChannel);
 

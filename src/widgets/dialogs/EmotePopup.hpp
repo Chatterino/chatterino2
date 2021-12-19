@@ -1,5 +1,6 @@
 #pragma once
 
+#include "providers/emoji/Emojis.hpp"
 #include "providers/twitch/TwitchChannel.hpp"
 #include "widgets/BasePopup.hpp"
 #include "widgets/Notebook.hpp"
@@ -19,7 +20,6 @@ public:
     EmotePopup(QWidget *parent = nullptr);
 
     void loadChannel(ChannelPtr channel);
-    void loadEmojis();
 
     virtual void closeEvent(QCloseEvent *event) override;
 
@@ -38,6 +38,8 @@ private:
     QLineEdit *search_;
     Notebook *notebook_;
 
+    void loadEmojis(ChannelView &view, EmojiMap &emojiMap);
+    void loadEmojis(Channel &channel, EmojiMap &emojiMap, const QString &title);
     void filterEmotes(const QString &text);
     EmoteMap *filterEmoteMap(const QString &text,
                              std::shared_ptr<const EmoteMap> emotes);
