@@ -168,6 +168,9 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->search_ = new QLineEdit();
     this->search_->setPlaceholderText("Search all emotes...");
     this->search_->setValidator(searchValidator);
+    this->search_->setClearButtonEnabled(true);
+    this->search_->findChild<QAbstractButton *>()->setIcon(
+        QPixmap(":/buttons/clearSearch.png"));
     layout->addWidget(this->search_);
 
     QObject::connect(this->search_, &QLineEdit::textChanged, this,
