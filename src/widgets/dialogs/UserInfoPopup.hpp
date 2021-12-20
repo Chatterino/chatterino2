@@ -3,6 +3,7 @@
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
+#include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
 
 class QCheckBox;
@@ -19,7 +20,6 @@ class UserInfoPopup final : public BaseWindow
 
 public:
     UserInfoPopup(bool closeAutomatically, QWidget *parent);
-    ~UserInfoPopup();
 
     void setData(const QString &name, const ChannelPtr &channel);
 
@@ -43,8 +43,7 @@ private:
 
     pajlada::Signals::NoArgSignal userStateChanged_;
 
-    // replace with ScopedConnection once https://github.com/pajlada/signals/pull/10 gets merged
-    pajlada::Signals::Connection refreshConnection_;
+    std::unique_ptr<pajlada::Signals::ScopedConnection> refreshConnection_;
 
     std::shared_ptr<bool> hack_;
 
