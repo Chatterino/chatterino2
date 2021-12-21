@@ -99,10 +99,10 @@ void SplitInput::initLayout()
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
 
-    this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
+    this->managedConnections_.managedConnect(app->fonts->fontChanged, [=]() {
         this->ui_.textEdit->setFont(
             app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
-    }));
+    });
 
     // open emote popup
     QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [=] {

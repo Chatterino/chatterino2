@@ -101,7 +101,7 @@ private:
     NotebookTabDirection tabDirection_ = NotebookTabDirection::Horizontal;
 };
 
-class SplitNotebook : public Notebook, pajlada::Signals::SignalHolder
+class SplitNotebook : public Notebook
 {
 public:
     SplitNotebook(Window *parent);
@@ -117,8 +117,6 @@ private:
     void addCustomButtons();
 
     pajlada::Signals::SignalHolder signalHolder_;
-
-    std::vector<pajlada::Signals::ScopedConnection> connections_;
 };
 
 }  // namespace chatterino

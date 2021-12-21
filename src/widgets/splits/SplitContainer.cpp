@@ -41,39 +41,40 @@ SplitContainer::SplitContainer(Notebook *parent)
 {
     this->refreshTabTitle();
 
-    this->managedConnect(Split::modifierStatusChanged, [this](auto modifiers) {
-        this->layout();
+    this->signalHolder_.managedConnect(
+        Split::modifierStatusChanged, [this](auto modifiers) {
+            this->layout();
 
-        if (modifiers == showResizeHandlesModifiers)
-        {
-            for (auto &handle : this->resizeHandles_)
+            if (modifiers == showResizeHandlesModifiers)
             {
-                handle->show();
-                handle->raise();
+                for (auto &handle : this->resizeHandles_)
+                {
+                    handle->show();
+                    handle->raise();
+                }
             }
-        }
-        else
-        {
-            for (auto &handle : this->resizeHandles_)
+            else
             {
-                handle->hide();
+                for (auto &handle : this->resizeHandles_)
+                {
+                    handle->hide();
+                }
             }
-        }
 
-        if (modifiers == showSplitOverlayModifiers)
-        {
-            this->setCursor(Qt::PointingHandCursor);
-        }
-        else
-        {
-            this->unsetCursor();
-        }
-    });
+            if (modifiers == showSplitOverlayModifiers)
+            {
+                this->setCursor(Qt::PointingHandCursor);
+            }
+            else
+            {
+                this->unsetCursor();
+            }
+        });
 
     this->setCursor(Qt::PointingHandCursor);
     this->setAcceptDrops(true);
 
-    this->managedConnect(this->overlay_.dragEnded, [this]() {
+    this->signalHolder_.managedConnect(this->overlay_.dragEnded, [this]() {
         this->isDragging_ = false;
         this->layout();
     });
