@@ -13,6 +13,7 @@ class IrcConnection : public Communi::IrcConnection
 {
 public:
     IrcConnection(QObject *parent = nullptr);
+    ~IrcConnection() override;
 
     // Signal to notify that we're unexpectedly no longer connected, either due
     // to a connection error or if we think we've timed out. It's up to the

@@ -229,7 +229,7 @@ void BaseWindow::init()
                                    0, 0, 0,
                                    SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
                 },
-                this->managedConnections_);
+                this->connections_);
         });
     }
 #else
@@ -245,7 +245,7 @@ void BaseWindow::init()
                     this->show();
                 }
             },
-            this->managedConnections_);
+            this->connections_);
     }
 #endif
 }

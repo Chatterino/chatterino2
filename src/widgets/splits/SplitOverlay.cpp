@@ -75,7 +75,7 @@ SplitOverlay::SplitOverlay(Split *parent)
     up->setCursor(Qt::PointingHandCursor);
     down->setCursor(Qt::PointingHandCursor);
 
-    this->managedConnect(this->scaleChanged, [=](float _scale) {
+    this->signalHolder_.managedConnect(this->scaleChanged, [=](float _scale) {
         int a = int(_scale * 30);
         QSize size(a, a);
 
