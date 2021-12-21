@@ -222,13 +222,10 @@ TextLayoutElement::TextLayoutElement(MessageElement &_creator, QString &_text,
 
 void TextLayoutElement::listenToLinkChanges()
 {
-    this->managedConnections_.emplace_back(
-        static_cast<TextElement &>(this->getCreator())
-            .linkChanged.connect([this]() {
-                // log("Old link: {}", this->getCreator().getLink().value);
-                // log("This link: {}", this->getLink().value);
-                this->setLink(this->getCreator().getLink());
-            }));
+    this->managedConnections_.managedConnect(
+        static_cast<TextElement &>(this->getCreator()).linkChanged, [this]() {
+            this->setLink(this->getCreator().getLink());
+        });
 }
 
 void TextLayoutElement::addCopyTextToString(QString &str, int from,

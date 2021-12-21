@@ -5,6 +5,7 @@
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
 #include "common/WindowDescriptors.hpp"
+
 #include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 

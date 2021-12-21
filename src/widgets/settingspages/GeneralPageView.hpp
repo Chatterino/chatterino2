@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <boost/variant.hpp>
+#include <pajlada/signals/signalholder.hpp>
 #include "Application.hpp"
 #include "common/ChatterinoSetting.hpp"
 #include "singletons/WindowManager.hpp"
@@ -218,7 +219,7 @@ private:
     QVBoxLayout *navigationLayout_;
 
     std::vector<Group> groups_;
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
 };
 
 }  // namespace chatterino

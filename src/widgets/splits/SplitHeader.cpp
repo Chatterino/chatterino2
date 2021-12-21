@@ -204,9 +204,10 @@ SplitHeader::SplitHeader(Split *_split)
         this->handleChannelChanged();
     });
 
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [this] {
-        this->updateModerationModeIcon();
-    });
+    this->managedConnections_.managedConnect(
+        getApp()->accounts->twitch.currentUserChanged, [this] {
+            this->updateModerationModeIcon();
+        });
 
     auto _ = [this](const auto &, const auto &) {
         this->updateChannelText();
@@ -302,19 +303,19 @@ void SplitHeader::initializeLayout()
     });
 
     // update moderation button when items changed
-    this->managedConnect(getSettings()->moderationActions.delayedItemsChanged,
-                         [this] {
-                             if (getSettings()->moderationActions.empty())
-                             {
-                                 if (this->split_->getModerationMode())
-                                     this->split_->setModerationMode(true);
-                             }
-                             else
-                             {
-                                 if (this->split_->getModerationMode())
-                                     this->split_->setModerationMode(true);
-                             }
-                         });
+    this->managedConnections_.managedConnect(
+        getSettings()->moderationActions.delayedItemsChanged, [this] {
+            if (getSettings()->moderationActions.empty())
+            {
+                if (this->split_->getModerationMode())
+                    this->split_->setModerationMode(true);
+            }
+            else
+            {
+                if (this->split_->getModerationMode())
+                    this->split_->setModerationMode(true);
+            }
+        });
 
     getSettings()->customURIScheme.connect(
         [this] {
@@ -519,7 +520,8 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
     menu->addAction(setR9k);
     menu->addAction(setFollowers);
 
-    this->managedConnections_.push_back(this->modeUpdateRequested_.connect(
+    this->managedConnections_.managedConnect(
+        this->modeUpdateRequested_,
         [this, setSub, setEmote, setSlow, setR9k, setFollowers]() {
             auto twitchChannel =
                 dynamic_cast<TwitchChannel *>(this->split_->getChannel().get());
@@ -536,7 +538,7 @@ std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
             setEmote->setChecked(roomModes->emoteOnly);
             setSub->setChecked(roomModes->submode);
             setFollowers->setChecked(roomModes->followerOnly != -1);
-        }));
+        });
 
     auto toggle = [this](const QString &command, QAction *action) mutable {
         this->split_->getChannel().get()->sendMessage(
@@ -652,10 +654,10 @@ void SplitHeader::handleChannelChanged()
     auto channel = this->split_->getChannel();
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
     {
-        this->channelConnections_.emplace_back(
-            twitchChannel->liveStatusChanged.connect([this]() {
+        this->channelConnections_.managedConnect(
+            twitchChannel->liveStatusChanged, [this]() {
                 this->updateChannelText();
-            }));
+            });
     }
 }
 

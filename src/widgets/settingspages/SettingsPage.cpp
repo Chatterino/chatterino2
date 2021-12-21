@@ -157,9 +157,11 @@ QSpinBox *SettingsPage::createSpinBox(pajlada::Settings::Setting<int> &setting,
     w->setMinimum(min);
     w->setMaximum(max);
 
-    setting.connect([w](const int &value, auto) {
-        w->setValue(value);
-    });
+    setting.connect(
+        [w](const int &value, auto) {
+            w->setValue(value);
+        },
+        this->managedConnections_);
     QObject::connect(w, QOverload<int>::of(&QSpinBox::valueChanged),
                      [&setting](int value) {
                          setting.setValue(value);

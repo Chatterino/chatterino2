@@ -759,7 +759,7 @@ void SplitNotebook::addCustomButtons()
         [settingsBtn](bool hide, auto) {
             settingsBtn->setVisible(!hide);
         },
-        this->connections_);
+        this->signalHolder_);
 
     settingsBtn->setIcon(NotebookButton::Settings);
 
@@ -774,7 +774,7 @@ void SplitNotebook::addCustomButtons()
         [userBtn](bool hide, auto) {
             userBtn->setVisible(!hide);
         },
-        this->connections_);
+        this->signalHolder_);
 
     userBtn->setIcon(NotebookButton::User);
     QObject::connect(userBtn, &NotebookButton::leftClicked, [this, userBtn] {
