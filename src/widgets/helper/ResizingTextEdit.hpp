@@ -49,8 +49,7 @@ private:
     const std::vector<Qt::Key> navKeys{
         Qt::Key_Backspace, Qt::Key_Delete,   Qt::Key_Home, Qt::Key_End,
         Qt::Key_PageUp,    Qt::Key_PageDown, Qt::Key_Left, Qt::Key_Up,
-        Qt::Key_Right,     Qt::Key_Down,
-    };
+        Qt::Key_Right,     Qt::Key_Down};
 private slots:
     void insertCompletion(const QString &completion);
 };

@@ -258,6 +258,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 0);
         });
+    layout.addCheckbox("Prevent typing past maximum message length",
+                       s.enforceMaxMessageLength);
     layout.addSeperator();
     layout.addCheckbox("Draw a line below the most recent message before "
                        "switching applications.",

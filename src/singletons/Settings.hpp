@@ -105,6 +105,8 @@ public:
     //    {"/appearance/messages/collapseLongMessages", false};
     IntSetting collpseMessagesMinLines = {
         "/appearance/messages/collapseMessagesMinLines", 0};
+    BoolSetting enforceMaxMessageLength = {
+        "/appearance/messages/enforceMaxMessageLength", false};
     BoolSetting alternateMessages = {
         "/appearance/messages/alternateMessageBackground", false};
     FloatSetting boldScale = {"/appearance/boldScale", 63};

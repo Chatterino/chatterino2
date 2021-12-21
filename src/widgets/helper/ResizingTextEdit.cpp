@@ -119,7 +119,8 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     this->keyPressed.invoke(event);
 
-    if (this->toPlainText().size() >= SplitInput::TWITCH_MESSAGE_LIMIT &&
+    if (getSettings()->enforceMaxMessageLength.getValue() &&
+        this->toPlainText().size() >= SplitInput::TWITCH_MESSAGE_LIMIT &&
         !keyIsNav(event->key()))
     {
         return;
@@ -319,21 +320,23 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
         }
     }
 
-    const int remainingSize =
-        SplitInput::TWITCH_MESSAGE_LIMIT - this->toPlainText().size();
+    if (getSettings()->enforceMaxMessageLength.getValue())
+    {
+        const int remainingSize =
+            SplitInput::TWITCH_MESSAGE_LIMIT - this->toPlainText().size();
 
-    if (remainingSize == 0)
-    {
-        return;
+        if (remainingSize == 0)
+        {
+            return;
+        }
+        else if (source->text().size() > remainingSize)
+        {
+            insertPlainText(source->text().left(remainingSize));
+            return;
+        }
     }
-    else if (source->text().size() > remainingSize)
-    {
-        insertPlainText(source->text().left(remainingSize));
-    }
-    else
-    {
-        insertPlainText(source->text());
-    }
+
+    insertPlainText(source->text());
 }
 
 QCompleter *ResizingTextEdit::getCompleter() const
