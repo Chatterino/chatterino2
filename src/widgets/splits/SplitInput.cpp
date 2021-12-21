@@ -27,7 +27,6 @@
 #include <QPainter>
 
 namespace chatterino {
-const int TWITCH_MESSAGE_LIMIT = 500;
 
 SplitInput::SplitInput(Split *_chatWidget)
     : BaseWidget(_chatWidget)

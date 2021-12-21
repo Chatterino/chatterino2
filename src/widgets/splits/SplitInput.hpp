@@ -32,6 +32,8 @@ public:
     QString getInputText() const;
     void insertText(const QString &text);
 
+    static const int TWITCH_MESSAGE_LIMIT = 500;
+
     pajlada::Signals::Signal<const QString &> textChanged;
 
 protected:

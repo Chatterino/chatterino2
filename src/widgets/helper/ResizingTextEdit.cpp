@@ -3,6 +3,7 @@
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
 #include "singletons/Settings.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #include <QMimeData>
 #include <QMimeDatabase>
@@ -118,6 +119,12 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     this->keyPressed.invoke(event);
 
+    if (this->toPlainText().size() >= SplitInput::TWITCH_MESSAGE_LIMIT &&
+        !keyIsNav(event->key()))
+    {
+        return;
+    }
+
     bool doComplete =
         (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Backtab) &&
         (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier &&
@@ -189,6 +196,13 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
     {
         QTextEdit::keyPressEvent(event);
     }
+}
+
+bool ResizingTextEdit::keyIsNav(int key)
+{
+    return std::any_of(navKeys.cbegin(), navKeys.cend(), [key](int navKey) {
+        return key == navKey;
+    });
 }
 
 void ResizingTextEdit::focusInEvent(QFocusEvent *event)
@@ -305,7 +319,21 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
         }
     }
 
-    insertPlainText(source->text());
+    const int remainingSize =
+        SplitInput::TWITCH_MESSAGE_LIMIT - this->toPlainText().size();
+
+    if (remainingSize == 0)
+    {
+        return;
+    }
+    else if (source->text().size() > remainingSize)
+    {
+        insertPlainText(source->text().left(remainingSize));
+    }
+    else
+    {
+        insertPlainText(source->text());
+    }
 }
 
 QCompleter *ResizingTextEdit::getCompleter() const
