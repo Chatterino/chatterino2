@@ -121,7 +121,7 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     if (getSettings()->enforceMaxMessageLength.getValue() &&
         this->toPlainText().size() >= SplitInput::TWITCH_MESSAGE_LIMIT &&
-        !keyIsNav(event->key()))
+        !keyEventIsNav(event))
     {
         return;
     }
@@ -199,11 +199,16 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
     }
 }
 
-bool ResizingTextEdit::keyIsNav(int key)
+bool ResizingTextEdit::keyEventIsNav(QKeyEvent *event)
 {
-    return std::any_of(navKeys.cbegin(), navKeys.cend(), [key](int navKey) {
-        return key == navKey;
-    });
+    const bool hasNavKey =
+        std::any_of(navKeys.cbegin(), navKeys.cend(), [event](int navKey) {
+            return event->key() == navKey;
+        });
+    const bool hasModifier = event->modifiers().testFlag(Qt::ControlModifier) ||
+                             event->modifiers().testFlag(Qt::MetaModifier);
+
+    return hasModifier || hasNavKey;
 }
 
 void ResizingTextEdit::focusInEvent(QFocusEvent *event)
