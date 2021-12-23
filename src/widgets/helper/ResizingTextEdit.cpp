@@ -20,6 +20,8 @@ ResizingTextEdit::ResizingTextEdit()
 
     QObject::connect(this, &QTextEdit::textChanged, this,
                      &QWidget::updateGeometry);
+    QObject::connect(this, &QTextEdit::textChanged, this,
+                     &ResizingTextEdit::editTextChanged);
 
     // Whenever the setting for emote completion changes, force a
     // refresh on the completion model the next time "Tab" is pressed
@@ -29,6 +31,17 @@ ResizingTextEdit::ResizingTextEdit()
 
     this->setFocusPolicy(Qt::ClickFocus);
     this->installEventFilter(this);
+}
+
+void ResizingTextEdit::editTextChanged()
+{
+    if (getSettings()->enforceMaxMessageLength.getValue() &&
+        this->toPlainText().length() > SplitInput::TWITCH_MESSAGE_LIMIT)
+    {
+        QTextCursor cursor = this->textCursor();
+        this->setTextCursor(cursor);
+        cursor.deletePreviousChar();
+    }
 }
 
 QSize ResizingTextEdit::sizeHint() const
@@ -119,13 +132,6 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
 
     this->keyPressed.invoke(event);
 
-    if (getSettings()->enforceMaxMessageLength.getValue() &&
-        this->toPlainText().size() >= SplitInput::TWITCH_MESSAGE_LIMIT &&
-        !keyEventIsNav(event))
-    {
-        return;
-    }
-
     bool doComplete =
         (event->key() == Qt::Key_Tab || event->key() == Qt::Key_Backtab) &&
         (event->modifiers() & Qt::ControlModifier) == Qt::NoModifier &&
@@ -197,18 +203,6 @@ void ResizingTextEdit::keyPressEvent(QKeyEvent *event)
     {
         QTextEdit::keyPressEvent(event);
     }
-}
-
-bool ResizingTextEdit::keyEventIsNav(QKeyEvent *event)
-{
-    const bool hasNavKey =
-        std::any_of(navKeys.cbegin(), navKeys.cend(), [event](int navKey) {
-            return event->key() == navKey;
-        });
-    const bool hasModifier = event->modifiers().testFlag(Qt::ControlModifier) ||
-                             event->modifiers().testFlag(Qt::MetaModifier);
-
-    return hasModifier || hasNavKey;
 }
 
 void ResizingTextEdit::focusInEvent(QFocusEvent *event)
@@ -321,22 +315,6 @@ void ResizingTextEdit::insertFromMimeData(const QMimeData *source)
         if (hasUploadable)
         {
             this->imagePasted.invoke(source);
-            return;
-        }
-    }
-
-    if (getSettings()->enforceMaxMessageLength.getValue())
-    {
-        const int remainingSize =
-            SplitInput::TWITCH_MESSAGE_LIMIT - this->toPlainText().size();
-
-        if (remainingSize == 0)
-        {
-            return;
-        }
-        else if (source->text().size() > remainingSize)
-        {
-            insertPlainText(source->text().left(remainingSize));
             return;
         }
     }
