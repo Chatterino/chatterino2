@@ -34,13 +34,18 @@ void ChannelChatters::addJoinedUser(const QString &user)
 
         QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
             auto joinedUsers = this->joinedUsers_.access();
+            joinedUsers->sort();
+            QString text = "Users joined: " + joinedUsers->join(", ");
 
             MessageBuilder builder;
             TwitchMessageBuilder::listOfUsersSystemMessage(
                 "Users joined:", *joinedUsers, &this->channel_, &builder);
             builder->flags.set(MessageFlag::Collapsed);
-            joinedUsers->clear();
+            builder->messageText = text;
+            builder->searchText = text;
             this->channel_.addMessage(builder.release());
+
+            joinedUsers->clear();
             this->joinedUsersMergeQueued_ = false;
         });
     }
@@ -57,14 +62,18 @@ void ChannelChatters::addPartedUser(const QString &user)
 
         QTimer::singleShot(500, &this->lifetimeGuard_, [this] {
             auto partedUsers = this->partedUsers_.access();
+            partedUsers->sort();
+            QString text = "Users parted: " + partedUsers->join(", ");
 
             MessageBuilder builder;
             TwitchMessageBuilder::listOfUsersSystemMessage(
                 "Users parted:", *partedUsers, &this->channel_, &builder);
             builder->flags.set(MessageFlag::Collapsed);
+            builder->messageText = text;
+            builder->searchText = text;
             this->channel_.addMessage(builder.release());
-            partedUsers->clear();
 
+            partedUsers->clear();
             this->partedUsersMergeQueued_ = false;
         });
     }
