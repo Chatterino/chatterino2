@@ -117,6 +117,12 @@ IrcConnection::IrcConnection(QObject *parent)
                      });
 }
 
+IrcConnection::~IrcConnection()
+{
+    // Prematurely disconnect all QObject connections
+    this->disconnect();
+}
+
 void IrcConnection::open()
 {
     this->expectConnectionLoss_ = false;
