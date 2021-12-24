@@ -35,7 +35,7 @@ ResizingTextEdit::ResizingTextEdit()
 
 void ResizingTextEdit::editTextChanged()
 {
-    if (getSettings()->enforceMaxMessageLength.getValue() &&
+    if (getSettings()->messageOverflow.getValue() == 1 &&
         this->toPlainText().length() > SplitInput::TWITCH_MESSAGE_LIMIT)
     {
         QTextCursor cursor = this->textCursor();

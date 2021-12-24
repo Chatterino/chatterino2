@@ -700,6 +700,28 @@ void SplitInput::editTextChanged()
             app->commands->execCommand(text, this->split_->getChannel(), true);
     }
 
+    if (getSettings()->messageOverflow.getValue() == 2)
+    {
+        if (text.length() > TWITCH_MESSAGE_LIMIT &&
+            text.length() > lastOverflowLength)
+        {
+            QTextCharFormat format;
+            format.setForeground(Qt::red);
+
+            QTextCursor cursor = this->ui_.textEdit->textCursor();
+            cursor.setPosition(lastOverflowLength, QTextCursor::MoveAnchor);
+            cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
+
+            lastOverflowLength = text.length();
+
+            cursor.setCharFormat(format);
+        }
+        else if (lastOverflowLength != TWITCH_MESSAGE_LIMIT)
+        {
+            lastOverflowLength = TWITCH_MESSAGE_LIMIT;
+        }
+    }
+
     QString labelText;
 
     if (text.length() > 0 && getSettings()->showMessageLength)

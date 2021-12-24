@@ -226,6 +226,15 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
     layout.addCheckbox("Allow sending duplicate messages",
                        s.allowDuplicateMessages);
+    layout.addDropdown<int>(
+        "Message overflow", {"Allow", "Prevent", "Highlight"},
+        s.messageOverflow,
+        [](auto index) {
+            return index;
+        },
+        [](auto args) {
+            return args.index;
+        });
 
     layout.addTitle("Messages");
     layout.addCheckbox("Separate with lines", s.separateMessages);
@@ -258,8 +267,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         [](auto args) {
             return fuzzyToInt(args.value, 0);
         });
-    layout.addCheckbox("Prevent typing past maximum message length",
-                       s.enforceMaxMessageLength);
     layout.addSeperator();
     layout.addCheckbox("Draw a line below the most recent message before "
                        "switching applications.",

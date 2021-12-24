@@ -76,6 +76,8 @@ private:
     QString currMsg_;
     int prevIndex_ = 0;
 
+    int lastOverflowLength = TWITCH_MESSAGE_LIMIT;
+
 private slots:
     void editTextChanged();
 
