@@ -8,6 +8,7 @@
 #include "providers/irc/Irc2.hpp"
 #include "providers/irc/IrcChannel2.hpp"
 #include "providers/irc/IrcMessageBuilder.hpp"
+#include "providers/twitch/TwitchIrcServer.hpp"  // NOTE: Included to access the mentions channel
 #include "singletons/Settings.hpp"
 #include "util/IrcHelpers.hpp"
 #include "util/QObjectRef.hpp"
@@ -184,8 +185,18 @@ void IrcServer::privateMessageReceived(Communi::IrcPrivateMessage *message)
 
         if (!builder.isIgnored())
         {
-            channel->addMessage(builder.build());
+            auto msg = builder.build();
+
+            channel->addMessage(msg);
             builder.triggerHighlights();
+            const auto highlighted = msg->flags.has(MessageFlag::Highlighted);
+            const auto showInMentions =
+                msg->flags.has(MessageFlag::ShowInMentions);
+
+            if (highlighted && showInMentions)
+            {
+                getApp()->twitch2->mentionsChannel->addMessage(msg);
+            }
         }
         else
         {
