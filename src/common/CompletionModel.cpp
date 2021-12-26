@@ -86,29 +86,40 @@ void CompletionModel::refresh(const QString &prefix, bool isFirstWord)
     // Twitch channel
     auto tc = dynamic_cast<TwitchChannel *>(&this->channel_);
 
-    std::function<void(const QString &str, TaggedString::Type type)> addString =
-        [=](const QString &str, TaggedString::Type type) {
-            // Special case for handling default Twitch commands
-            if (type == TaggedString::TwitchCommand)
+    auto addString = [=](const QString &str, TaggedString::Type type) {
+        // Special case for handling default Twitch commands
+        if (type == TaggedString::TwitchCommand)
+        {
+            if (prefix.size() < 2)
             {
-                if (prefix.size() > 1 &&
-                    (prefix.at(0) == '/' || prefix.at(0) == '.') &&
-                    prefix.at(1) != ' ')
-                {
-                    if (startsWithOrContains(
-                            (prefix.at(0) + str), prefix, Qt::CaseInsensitive,
-                            getSettings()->prefixOnlyEmoteCompletion))
-                    {
-                        this->items_.emplace((prefix.at(0) + str + " "), type);
-                    }
-                }
+                return;
             }
 
-            else if (startsWithOrContains(
-                         str, prefix, Qt::CaseInsensitive,
-                         getSettings()->prefixOnlyEmoteCompletion))
-                this->items_.emplace(str + " ", type);
-        };
+            auto prefixChar = prefix.at(0);
+
+            static std::set<QChar> validPrefixChars{'/', '.'};
+
+            if (validPrefixChars.find(prefixChar) == validPrefixChars.end())
+            {
+                return;
+            }
+
+            if (startsWithOrContains((prefixChar + str), prefix,
+                                     Qt::CaseInsensitive,
+                                     getSettings()->prefixOnlyEmoteCompletion))
+            {
+                this->items_.emplace((prefixChar + str + " "), type);
+            }
+
+            return;
+        }
+
+        if (startsWithOrContains(str, prefix, Qt::CaseInsensitive,
+                                 getSettings()->prefixOnlyEmoteCompletion))
+        {
+            this->items_.emplace(str + " ", type);
+        }
+    };
 
     if (auto account = getApp()->accounts->twitch.getCurrent())
     {
