@@ -1,5 +1,4 @@
-#include "widgets/settingspages/ModerationPage.hpp"
-#include "singletons/Paths.hpp"
+#include "util/Helpers.hpp"
 
 #include <benchmark/benchmark.h>
 #include <QDebug>
@@ -10,8 +9,11 @@
 
 using namespace chatterino;
 
-static QString logsDir = "/mnt/750/ch2logs";
+// XXX: Can we not hardcode the path? using singletons obviously crashes.
+static QString logsDir = "/home/zneix/.local/share/chatterino/Logs";
 
+// Old method of calculating directory size, No longer used in code
+// Only copied it here to use it as a comparison with new function
 qint64 dirSize(QString dirPath)
 {
     qint64 size = 0;
@@ -45,14 +47,7 @@ static void BM_LogsSizeCalculationNew(benchmark::State &state)
 
     for (auto _ : state)
     {
-        QDirIterator it(logsDir, QDirIterator::Subdirectories);
-        qint64 logsSize = 0;
-
-        while (it.hasNext())
-        {
-            logsSize += it.fileInfo().size();
-            it.next();
-        }
+        calculateDirectorySize(logsDir);
     }
 }
 

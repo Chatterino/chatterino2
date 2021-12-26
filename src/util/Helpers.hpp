@@ -30,4 +30,11 @@ QColor getRandomColor(const QString &userId);
 QString formatUserMention(const QString &userName, bool isFirstWord,
                           bool mentionUsersWithComma);
 
+/**
+ * @brief Sums up size of all files within the directory and all its subdirectories
+ *
+ * @param directoryPath path to the directory, could vary depending on the OS
+ **/
+qint64 calculateDirectorySize(const QString &directoryPath);
+
 }  // namespace chatterino

@@ -23,25 +23,6 @@
 
 namespace chatterino {
 
-qint64 dirSize(QString dirPath)
-{
-    qint64 size = 0;
-    QDir dir(dirPath);
-    // calculate total size of current directories' files
-    QDir::Filters fileFilters = QDir::Files | QDir::System | QDir::Hidden;
-    for (QString filePath : dir.entryList(fileFilters))
-    {
-        QFileInfo fi(dir, filePath);
-        size += fi.size();
-    }
-    // add size of child directories recursively
-    QDir::Filters dirFilters =
-        QDir::Dirs | QDir::NoDotAndDotDot | QDir::System | QDir::Hidden;
-    for (QString childDirPath : dir.entryList(dirFilters))
-        size += dirSize(dirPath + QDir::separator() + childDirPath);
-    return size;
-}
-
 QString formatSize(qint64 size)
 {
     QStringList units = {"Bytes", "KB", "MB", "GB", "TB", "PB"};
@@ -61,19 +42,9 @@ QString fetchLogDirectorySize()
     QString logPathDirectory = getSettings()->logPath.getValue().isEmpty()
                                    ? getPaths()->messageLogDirectory
                                    : getSettings()->logPath;
-    QDirIterator it(logPathDirectory, QDirIterator::Subdirectories);
-    qint64 logsSize = 0;
 
-    int i = 0;
-    while (it.hasNext())
-    {
-        logsSize += it.fileInfo().size();
-        it.next();
-        qDebug() << i++;
-    }
-    qDebug() << logsSize << i;
+    auto logsSize = calculateDirectorySize(logPathDirectory);
 
-    //    qint64 logsSize = dirSize(logPathDirectory);
     return QString("Your logs currently take up %1 of space")
         .arg(formatSize(logsSize));
 }
