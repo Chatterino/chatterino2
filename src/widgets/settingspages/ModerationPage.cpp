@@ -61,12 +61,21 @@ QString fetchLogDirectorySize()
     QString logPathDirectory = getSettings()->logPath.getValue().isEmpty()
                                    ? getPaths()->messageLogDirectory
                                    : getSettings()->logPath;
+    QDirIterator it(logPathDirectory, QDirIterator::Subdirectories);
+    qint64 logsSize = 0;
 
-    qint64 logsSize = dirSize(logPathDirectory);
-    QString logsSizeLabel = "Your logs currently take up ";
-    logsSizeLabel += formatSize(logsSize);
-    logsSizeLabel += " of space";
-    return logsSizeLabel;
+    int i = 0;
+    while (it.hasNext())
+    {
+        logsSize += it.fileInfo().size();
+        it.next();
+        qDebug() << i++;
+    }
+    qDebug() << logsSize << i;
+
+    //    qint64 logsSize = dirSize(logPathDirectory);
+    return QString("Your logs currently take up %1 of space")
+        .arg(formatSize(logsSize));
 }
 
 ModerationPage::ModerationPage()
