@@ -38,6 +38,7 @@
 - Minor: Show picked outcome in prediction badges. (#3357)
 - Minor: Add support for Emoji in IRC (#3354)
 - Minor: Moved `/live` logs to its own subdirectory. (Logs from before this change will still be available in `Channels -> live`). (#3393)
+- Minor: Added autocompletion for default Twitch commands starting with the dot (e.g. `.mods` which does the same as `/mods`). (#3144)
 - Minor: Sorted usernames in `Users joined/parted` messages alphabetically. (#3421)
 - Minor: Mod list, VIP list, and Users joined/parted messages are now searchable. (#3426)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
