@@ -73,7 +73,6 @@ static const QStringList TWITCH_DEFAULT_COMMANDS{
     "delete",
 };
 
-// XXX(zneix): Sort this out to get rid of leading slash and dot
 static const QStringList TWITCH_WHISPER_COMMANDS{"/w", ".w"};
 
 }  // namespace chatterino
