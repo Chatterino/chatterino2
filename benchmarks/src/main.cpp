@@ -10,15 +10,15 @@ using namespace chatterino;
 int main(int argc, char **argv)
 {
     QApplication app(argc, argv);
-    app.setApplicationName("chatterino");
 
+    // Initialize Paths and Settings instances - required for ModerationPage.cpp benchmark
     Paths *paths{};
-    // Initialize Paths and Settings instances
     try {
         paths = new Paths;
         Settings settings(paths->settingsDirectory);
     }
     catch (std::runtime_error &error) {
+        qDebug() << "Failed to initialize Paths and Settings singletons:" << error.what();
         return 1;
     }
 
