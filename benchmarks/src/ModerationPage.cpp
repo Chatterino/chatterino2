@@ -48,7 +48,6 @@ static void BM_LogsSizeCalculationNew(benchmark::State &state)
     QString logsDir = getSettings()->logPath.getValue().isEmpty()
             ? getPaths()->messageLogDirectory
             : getSettings()->logPath;
-    qDebug() << logsDir;
     for (auto _ : state)
     {
         calculateDirectorySize(logsDir);
