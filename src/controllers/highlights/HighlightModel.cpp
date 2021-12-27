@@ -151,6 +151,7 @@ void HighlightModel::afterInit()
 
     this->insertCustomRow(redeemedRow, 3);
 
+    // Highlight settings for first messages
     std::vector<QStandardItem *> firstMessageRow = this->createRow();
     setBoolItem(firstMessageRow[Column::Pattern],
                 getSettings()->enableFirstMessageHighlight.getValue(), true,
@@ -158,6 +159,12 @@ void HighlightModel::afterInit()
     firstMessageRow[Column::Pattern]->setData("First Messages",
                                               Qt::DisplayRole);
     firstMessageRow[Column::ShowInMentions]->setFlags({});
+    //    setBoolItem(firstMessageRow[Column::FlashTaskbar],
+    //                getSettings()->enableFirstMessageHighlightTaskbar.getValue(),
+    //                true, false);
+    //    setBoolItem(firstMessageRow[Column::PlaySound],
+    //                getSettings()->enableFirstMessageHighlightSound.getValue(),
+    //                true, false);
     firstMessageRow[Column::FlashTaskbar]->setFlags({});
     firstMessageRow[Column::PlaySound]->setFlags({});
     firstMessageRow[Column::UseRegex]->setFlags({});
@@ -202,6 +209,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     getSettings()->enableRedeemedHighlight.setValue(
                         value.toBool());
                 }
+                else if (rowIndex == 4)
+                {
+                    getSettings()->enableFirstMessageHighlight.setValue(
+                        value.toBool());
+                }
             }
         }
         break;
@@ -239,6 +251,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                     // getSettings()->enableRedeemedHighlightTaskbar.setValue(
                     //     value.toBool());
                 }
+                else if (rowIndex == 4)
+                {
+                    // getSettings()->enableFirstMessageHighlightTaskbar.setValue(
+                    //     value.toBool());
+                }
             }
         }
         break;
@@ -263,6 +280,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 3)
                 {
                     // getSettings()->enableRedeemedHighlightSound.setValue(
+                    //     value.toBool());
+                }
+                else if (rowIndex == 4)
+                {
+                    // getSettings()->enableFirstMessageHighlightSound.setValue(
                     //     value.toBool());
                 }
             }
@@ -298,6 +320,11 @@ void HighlightModel::customRowSetData(const std::vector<QStandardItem *> &row,
                 else if (rowIndex == 3)
                 {
                     getSettings()->redeemedHighlightSoundUrl.setValue(
+                        value.toString());
+                }
+                else if (rowIndex == 4)
+                {
+                    getSettings()->firstMessageHighlightSoundUrl.setValue(
                         value.toString());
                 }
             }

@@ -64,6 +64,9 @@ public:
                                 MessageBuilder *builder);
     static void deletionMessage(const DeleteAction &action,
                                 MessageBuilder *builder);
+    static void listOfUsersSystemMessage(QString prefix, QStringList users,
+                                         Channel *channel,
+                                         MessageBuilder *builder);
 
 private:
     void parseUsernameColor() override;

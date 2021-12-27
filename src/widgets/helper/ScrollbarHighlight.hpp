@@ -21,17 +21,20 @@ public:
     ScrollbarHighlight();
 
     ScrollbarHighlight(const std::shared_ptr<QColor> color,
-                       Style style = Default, bool isRedeemedHighlight = false);
+                       Style style = Default, bool isRedeemedHighlight = false,
+                       bool isFirstMessageHighlight = false);
 
     QColor getColor() const;
     Style getStyle() const;
     bool isRedeemedHighlight() const;
+    bool isFirstMessageHighlight() const;
     bool isNull() const;
 
 private:
     std::shared_ptr<QColor> color_;
     Style style_;
     bool isRedeemedHighlight_;
+    bool isFirstMessageHighlight_;
 };
 
 }  // namespace chatterino

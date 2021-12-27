@@ -33,7 +33,7 @@ Note: This installation will take about 1.5 GB of disk space.
 
 ### For our websocket library, we need OpenSSL 1.1
 
-1. Download OpenSSL for windows, version `1.1.1l`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1L.exe)**
+1. Download OpenSSL for windows, version `1.1.1m`: **[Download](https://slproweb.com/download/Win64OpenSSL-1_1_1m.exe)**
 2. When prompted, install OpenSSL to `C:\local\openssl`
 3. When prompted, copy the OpenSSL DLLs to "The OpenSSL binaries (/bin) directory".
 
@@ -67,7 +67,7 @@ Notes:
 3. Under this version, select the following entries:
    - `MSVC 2019 64-bit` (or alternative version if you are using that)
    - `Qt WebEngine` (optional)
-4. Under the "Tools" tree element (at the bottom), ensure that `Qt Creator X.X.X` and `Qt Creator X.X.X CDB Debugger Support` are selected. (they should be checked by default)
+4. Under the "Tools" tree element (at the bottom), ensure that `Qt Creator X.X.X` and `Debugging Tools for Windows` are selected. (they should be checked by default)
 5. Continue through the installer and let the installer finish installing Qt.
 
 Note: This installation will take about 2 GB of disk space.

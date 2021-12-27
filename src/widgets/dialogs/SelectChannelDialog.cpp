@@ -1,10 +1,11 @@
 #include "SelectChannelDialog.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Theme.hpp"
 #include "util/LayoutCreator.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/IrcConnectionEditor.hpp"
 #include "widgets/helper/NotebookTab.hpp"
@@ -51,7 +52,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         auto channel_btn = vbox.emplace<QRadioButton>("Channel").assign(
             &this->ui_.twitch.channel);
         auto channel_lbl =
-            vbox.emplace<QLabel>("Join a twitch channel by its name.").hidden();
+            vbox.emplace<QLabel>("Join a Twitch channel by its name.").hidden();
         channel_lbl->setWordWrap(true);
         auto channel_edit = vbox.emplace<QLineEdit>().hidden().assign(
             &this->ui_.twitch.channelName);
@@ -77,7 +78,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
                                 .assign(&this->ui_.twitch.whispers);
         auto whispers_lbl =
             vbox.emplace<QLabel>("Shows the whispers that you receive while "
-                                 "chatterino is running.")
+                                 "Chatterino is running.")
                 .hidden();
 
         whispers_lbl->setWordWrap(true);
@@ -108,7 +109,7 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
         auto watching_btn = vbox.emplace<QRadioButton>("Watching")
                                 .assign(&this->ui_.twitch.watching);
         auto watching_lbl =
-            vbox.emplace<QLabel>("Requires the chatterino browser extension.")
+            vbox.emplace<QLabel>("Requires the Chatterino browser extension.")
                 .hidden();
 
         watching_lbl->setWordWrap(true);
@@ -237,26 +238,14 @@ SelectChannelDialog::SelectChannelDialog(QWidget *parent)
     this->ui_.notebook->selectIndex(TAB_TWITCH);
     this->ui_.twitch.channel->setFocus();
 
-    // Shortcuts
-    createWindowShortcut(this, "Return", [=] {
-        this->ok();
-    });
-    createWindowShortcut(this, "Esc", [=] {
-        this->close();
-    });
-
     // restore ui state
     // fourtf: enable when releasing irc
     if (getSettings()->enableExperimentalIrc)
     {
         this->ui_.notebook->selectIndex(getSettings()->lastSelectChannelTab);
-        createWindowShortcut(this, "Ctrl+Tab", [=] {
-            this->ui_.notebook->selectNextTab();
-        });
-        createWindowShortcut(this, "CTRL+Shift+Tab", [=] {
-            this->ui_.notebook->selectPreviousTab();
-        });
     }
+
+    this->addShortcuts();
 
     this->ui_.irc.servers->getTableView()->selectRow(
         getSettings()->lastSelectIrcConn);
@@ -514,6 +503,82 @@ void SelectChannelDialog::themeChangedEvent()
         this->setStyleSheet(
             "QRadioButton { color: #fff } QLabel { color: #fff }");
     }
+}
+
+void SelectChannelDialog::addShortcuts()
+{
+    HotkeyController::HotkeyMap actions{
+        {"accept",
+         [this](std::vector<QString>) -> QString {
+             this->ok();
+             return "";
+         }},
+        {"reject",
+         [this](std::vector<QString>) -> QString {
+             this->close();
+             return "";
+         }},
+
+        // these make no sense, so they aren't implemented
+        {"scrollPage", nullptr},
+        {"search", nullptr},
+        {"delete", nullptr},
+    };
+
+    if (getSettings()->enableExperimentalIrc)
+    {
+        actions.insert(
+            {"openTab", [this](std::vector<QString> arguments) -> QString {
+                 if (arguments.size() == 0)
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "openTab shortcut called without arguments. "
+                            "Takes only "
+                            "one argument: tab specifier";
+                     return "openTab shortcut called without arguments. "
+                            "Takes only one argument: tab specifier";
+                 }
+                 auto target = arguments.at(0);
+                 if (target == "last")
+                 {
+                     this->ui_.notebook->selectLastTab();
+                 }
+                 else if (target == "next")
+                 {
+                     this->ui_.notebook->selectNextTab();
+                 }
+                 else if (target == "previous")
+                 {
+                     this->ui_.notebook->selectPreviousTab();
+                 }
+                 else
+                 {
+                     bool ok;
+                     int result = target.toInt(&ok);
+                     if (ok)
+                     {
+                         this->ui_.notebook->selectIndex(result);
+                     }
+                     else
+                     {
+                         qCWarning(chatterinoHotkeys)
+                             << "Invalid argument for openTab shortcut";
+                         return QString("Invalid argument for openTab "
+                                        "shortcut: \"%1\". Use \"last\", "
+                                        "\"next\", \"previous\" or an integer.")
+                             .arg(target);
+                     }
+                 }
+                 return "";
+             }});
+    }
+    else
+    {
+        actions.emplace("openTab", nullptr);
+    }
+
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+        HotkeyCategory::PopupWindow, actions, this);
 }
 
 }  // namespace chatterino

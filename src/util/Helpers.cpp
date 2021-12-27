@@ -7,6 +7,17 @@
 
 namespace chatterino {
 
+bool startsWithOrContains(const QString &str1, const QString &str2,
+                          Qt::CaseSensitivity caseSensitivity, bool startsWith)
+{
+    if (startsWith)
+    {
+        return str1.startsWith(str2, caseSensitivity);
+    }
+
+    return str1.contains(str2, caseSensitivity);
+}
+
 QString generateUuid()
 {
     auto uuid = QUuid::createUuid();

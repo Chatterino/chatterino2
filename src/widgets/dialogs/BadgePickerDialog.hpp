@@ -5,6 +5,7 @@
 #include <QComboBox>
 #include <QDialog>
 #include <boost/optional.hpp>
+#include <memory>
 
 namespace chatterino {
 

@@ -1,8 +1,9 @@
 #pragma once
 
-#include <QListView>
 #include "widgets/listview/GenericItemDelegate.hpp"
 #include "widgets/listview/GenericListItem.hpp"
+
+#include <QListView>
 
 namespace chatterino {
 
@@ -31,6 +32,28 @@ signals:
 
 private:
     bool invokeActionOnTab_{};
+
+    /**
+     * @brief Gets the currently selected item (if any) and calls its action
+     *
+     * @return true if an action was called on an item, false if no item was selected and thus no action was called
+     **/
+    bool acceptCompletion();
+
+    /**
+     * @brief Select the next item in the list. Wraps around if the bottom of the list has been reached.
+     **/
+    void focusNextCompletion();
+
+    /**
+     * @brief Select the previous item in the list. Wraps around if the top of the list has been reached.
+     **/
+    void focusPreviousCompletion();
+
+    /**
+     * @brief Request for the GUI powering this list view to be closed. Shorthand for emit this->closeRequested()
+     **/
+    void requestClose();
 };
 
 }  // namespace chatterino

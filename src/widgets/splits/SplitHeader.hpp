@@ -19,7 +19,7 @@ class EffectLabel;
 class Label;
 class Split;
 
-class SplitHeader final : public BaseWidget, pajlada::Signals::SignalHolder
+class SplitHeader final : public BaseWidget
 {
     Q_OBJECT
 
@@ -81,8 +81,8 @@ private:
 
     // signals
     pajlada::Signals::NoArgSignal modeUpdateRequested_;
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
-    std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
+    pajlada::Signals::SignalHolder channelConnections_;
 
 public slots:
     void reloadChannelEmotes();

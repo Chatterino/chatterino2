@@ -6,7 +6,6 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/NotebookButton.hpp"
@@ -19,7 +18,6 @@
 #include <QFormLayout>
 #include <QLayout>
 #include <QList>
-#include <QShortcut>
 #include <QStandardPaths>
 #include <QUuid>
 #include <QWidget>
@@ -761,7 +759,7 @@ void SplitNotebook::addCustomButtons()
         [settingsBtn](bool hide, auto) {
             settingsBtn->setVisible(!hide);
         },
-        this->connections_);
+        this->signalHolder_);
 
     settingsBtn->setIcon(NotebookButton::Settings);
 
@@ -776,7 +774,7 @@ void SplitNotebook::addCustomButtons()
         [userBtn](bool hide, auto) {
             userBtn->setVisible(!hide);
         },
-        this->connections_);
+        this->signalHolder_);
 
     userBtn->setIcon(NotebookButton::User);
     QObject::connect(userBtn, &NotebookButton::leftClicked, [this, userBtn] {

@@ -129,10 +129,10 @@ namespace {
 
 #ifdef Q_OS_MAC
             // On macOS, programs are bundled into ".app" Application bundles,
-            // when restarting chatterino that bundle should be opened with the "open"
+            // when restarting Chatterino that bundle should be opened with the "open"
             // terminal command instead of directly starting the underlying executable,
             // as those are 2 different things for the OS and i.e. do not use
-            // the same dock icon (resulting in a second chatterino icon on restarting)
+            // the same dock icon (resulting in a second Chatterino icon on restarting)
             CFURLRef appUrlRef = CFBundleCopyBundleURL(CFBundleGetMainBundle());
             CFStringRef macPath =
                 CFURLCopyFileSystemPath(appUrlRef, kCFURLPOSIXPathStyle);
@@ -140,7 +140,7 @@ namespace {
                 CFStringGetCStringPtr(macPath, CFStringGetSystemEncoding());
 
             proc.setProgram("open");
-            proc.setArguments({pathPtr, "--args", "--crash-recovery"});
+            proc.setArguments({pathPtr, "-n", "--args", "--crash-recovery"});
 
             CFRelease(appUrlRef);
             CFRelease(macPath);
@@ -155,7 +155,7 @@ namespace {
         _exit(signum);
     }
 
-    // We want to restart chatterino when it crashes and the setting is set to
+    // We want to restart Chatterino when it crashes and the setting is set to
     // true.
     void initSignalHandler()
     {
