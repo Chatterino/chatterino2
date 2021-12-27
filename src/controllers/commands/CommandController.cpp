@@ -8,6 +8,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
@@ -33,42 +34,6 @@
 
 namespace {
 using namespace chatterino;
-
-static const QStringList twitchDefaultCommands{
-    "/help",
-    "/w",
-    "/me",
-    "/disconnect",
-    "/mods",
-    "/vips",
-    "/color",
-    "/commercial",
-    "/mod",
-    "/unmod",
-    "/vip",
-    "/unvip",
-    "/ban",
-    "/unban",
-    "/timeout",
-    "/untimeout",
-    "/slow",
-    "/slowoff",
-    "/r9kbeta",
-    "/r9kbetaoff",
-    "/emoteonly",
-    "/emoteonlyoff",
-    "/clear",
-    "/subscribers",
-    "/subscribersoff",
-    "/followers",
-    "/followersoff",
-    "/host",
-    "/unhost",
-    "/raid",
-    "/unraid",
-};
-
-static const QStringList whisperCommands{"/w", ".w"};
 
 // stripUserName removes any @ prefix or , suffix to make it more suitable for command use
 void stripUserName(QString &userName)
@@ -217,7 +182,7 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
 
     QString commandName = words[0];
 
-    if (whisperCommands.contains(commandName, Qt::CaseInsensitive))
+    if (TWITCH_WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
     {
         if (words.length() > 2)
         {
@@ -298,13 +263,11 @@ namespace chatterino {
 
 void CommandController::initialize(Settings &, Paths &paths)
 {
-    this->commandAutoCompletions_ = twitchDefaultCommands;
-
     // Update commands map when the vector of commands has been updated
     auto addFirstMatchToMap = [this](auto args) {
         this->userCommands_.remove(args.item.name);
 
-        for (const Command &cmd : this->items_)
+        for (const Command &cmd : this->items)
         {
             if (cmd.name == args.item.name)
             {
@@ -315,7 +278,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         int maxSpaces = 0;
 
-        for (const Command &cmd : this->items_)
+        for (const Command &cmd : this->items)
         {
             auto localMaxSpaces = cmd.name.count(' ');
             if (localMaxSpaces > maxSpaces)
@@ -326,8 +289,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         this->maxSpaces_ = maxSpaces;
     };
-    this->items_.itemInserted.connect(addFirstMatchToMap);
-    this->items_.itemRemoved.connect(addFirstMatchToMap);
+    this->items.itemInserted.connect(addFirstMatchToMap);
+    this->items.itemRemoved.connect(addFirstMatchToMap);
 
     // Initialize setting manager for commands.json
     auto path = combinePath(paths.settingsDirectory, "commands.json");
@@ -343,8 +306,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)
-    this->items_.delayedItemsChanged.connect([this] {
-        this->commandsSetting_->setValue(this->items_.raw());
+    this->items.delayedItemsChanged.connect([this] {
+        this->commandsSetting_->setValue(this->items.raw());
     });
 
     // Load commands from commands.json
@@ -354,7 +317,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // of commands)
     for (const auto &command : this->commandsSetting_->getValue())
     {
-        this->items_.append(command);
+        this->items.append(command);
     }
 
     /// Deprecated commands
@@ -918,7 +881,7 @@ void CommandController::save()
 CommandModel *CommandController::createModel(QObject *parent)
 {
     CommandModel *model = new CommandModel(parent);
-    model->initialize(&this->items_);
+    model->initialize(&this->items);
 
     return model;
 }
@@ -939,7 +902,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
     // works in a valid Twitch channel and /whispers, etc...
     if (!dryRun && channel->isTwitchChannel())
     {
-        if (whisperCommands.contains(commandName, Qt::CaseInsensitive))
+        if (TWITCH_WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
         {
             if (words.length() > 2)
             {
@@ -1003,7 +966,7 @@ void CommandController::registerCommand(QString commandName,
 
     this->commands_[commandName] = commandFunction;
 
-    this->commandAutoCompletions_.append(commandName);
+    this->defaultChatterinoCommandAutoCompletions_.append(commandName);
 }
 
 QString CommandController::execCustomCommand(const QStringList &words,
@@ -1114,9 +1077,9 @@ QString CommandController::execCustomCommand(const QStringList &words,
     }
 }
 
-QStringList CommandController::getDefaultTwitchCommandList()
+QStringList CommandController::getDefaultChatterinoCommandList()
 {
-    return this->commandAutoCompletions_;
+    return this->defaultChatterinoCommandAutoCompletions_;
 }
 
 }  // namespace chatterino

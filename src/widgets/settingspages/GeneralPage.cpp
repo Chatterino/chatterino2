@@ -366,7 +366,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Extra information like \"youtube video stats\" or title of webpages "
         "can be loaded for all links if enabled. Optionally you can also show "
         "thumbnails for emotes, videos and more. The information is pulled "
-        "from our servers.");
+        "from our servers. The Link Previews are loaded through <a "
+        "href=\"https://github.com/Chatterino/api\">an API</a> hosted by the "
+        "Chatterino developers. These are the API <a "
+        "href=\"https://braize.pajlada.com/chatterino/legal/"
+        "terms-of-service\">Terms of Services</a> and <a "
+        "href=\"https://braize.pajlada.com/chatterino/legal/"
+        "privacy-policy\">Privacy Policy</a>.");
     layout.addCheckbox("Enable", s.linkInfoTooltip);
     layout.addDropdown<int>(
         "Also show thumbnails if available",

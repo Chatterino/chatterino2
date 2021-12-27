@@ -31,7 +31,7 @@ class SelectChannelDialog;
 //   - Responsible for rendering and handling user text input
 //
 // Each sub-element has a reference to the parent Chat Widget
-class Split : public BaseWidget, pajlada::Signals::SignalHolder
+class Split : public BaseWidget
 {
     friend class SplitInput;
 
@@ -151,8 +151,6 @@ private:
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
     pajlada::Signals::SignalHolder signalHolder_;
-
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
 public slots:
     void addSibling();
