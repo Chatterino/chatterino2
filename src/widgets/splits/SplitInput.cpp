@@ -682,8 +682,7 @@ void SplitInput::editTextChanged()
     QString text = this->ui_.textEdit->toPlainText();
 
     if (getSettings()->messageOverflow.getValue() == MessageOverflow::Prevent &&
-        text.length() > TWITCH_MESSAGE_LIMIT &&
-        text.length() != this->lastOverflowLength)
+        text.length() > TWITCH_MESSAGE_LIMIT)
     {
         this->ui_.textEdit->setPlainText(text.left(TWITCH_MESSAGE_LIMIT));
         this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
