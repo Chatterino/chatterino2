@@ -86,9 +86,11 @@ SubtitleLabel *GeneralPageView::addSubtitle(const QString &title)
 }
 
 QCheckBox *GeneralPageView::addCheckbox(const QString &text,
-                                        BoolSetting &setting, bool inverse)
+                                        BoolSetting &setting, bool inverse,
+                                        QString toolTipText)
 {
     auto check = new QCheckBox(text);
+    this->addToolTip(*check, toolTipText);
 
     // update when setting changes
     setting.connect(
@@ -112,7 +114,8 @@ QCheckBox *GeneralPageView::addCheckbox(const QString &text,
 }
 
 ComboBox *GeneralPageView::addDropdown(const QString &text,
-                                       const QStringList &list)
+                                       const QStringList &list,
+                                       QString toolTipText)
 {
     auto layout = new QHBoxLayout;
     auto combo = new ComboBox;
@@ -124,6 +127,7 @@ ComboBox *GeneralPageView::addDropdown(const QString &text,
     layout->addStretch(1);
     layout->addWidget(combo);
 
+    this->addToolTip(*label, toolTipText);
     this->addLayout(layout);
 
     // groups
@@ -135,9 +139,10 @@ ComboBox *GeneralPageView::addDropdown(const QString &text,
 
 ComboBox *GeneralPageView::addDropdown(
     const QString &text, const QStringList &items,
-    pajlada::Settings::Setting<QString> &setting, bool editable)
+    pajlada::Settings::Setting<QString> &setting, bool editable,
+    QString toolTipText)
 {
-    auto combo = this->addDropdown(text, items);
+    auto combo = this->addDropdown(text, items, toolTipText);
 
     if (editable)
         combo->setEditable(true);
@@ -160,15 +165,19 @@ ComboBox *GeneralPageView::addDropdown(
 
 ColorButton *GeneralPageView::addColorButton(
     const QString &text, const QColor &color,
-    pajlada::Settings::Setting<QString> &setting)
+    pajlada::Settings::Setting<QString> &setting, QString toolTipText)
 {
     auto colorButton = new ColorButton(color);
     auto layout = new QHBoxLayout();
     auto label = new QLabel(text + ":");
+
     layout->addWidget(label);
     layout->addStretch(1);
     layout->addWidget(colorButton);
+
+    this->addToolTip(*label, toolTipText);
     this->addLayout(layout);
+
     QObject::connect(
         colorButton, &ColorButton::clicked, [this, &setting, colorButton]() {
             auto dialog = new ColorPickerDialog(QColor(setting), this);
@@ -190,11 +199,13 @@ ColorButton *GeneralPageView::addColorButton(
 }
 
 QSpinBox *GeneralPageView::addIntInput(const QString &text, IntSetting &setting,
-                                       int min, int max, int step)
+                                       int min, int max, int step,
+                                       QString toolTipText)
 {
     auto layout = new QHBoxLayout;
 
     auto label = new QLabel(text + ":");
+    this->addToolTip(*label, toolTipText);
 
     auto input = new QSpinBox;
     input->setMinimum(min);
@@ -359,6 +370,19 @@ void GeneralPageView::updateNavigationHighlighting()
         {
             group.navigationLink->setStyleSheet("");
         }
+    }
+}
+
+void GeneralPageView::addToolTip(QWidget &widget, QString text)
+{
+    if (!text.isEmpty())
+    {
+        widget.setToolTip(text);
+        widget.setStyleSheet("QToolTip {"
+                             "padding: 2px;"
+                             "background-color: #333333;"
+                             "border: 1px solid #545454;"
+                             "}");
     }
 }
 
