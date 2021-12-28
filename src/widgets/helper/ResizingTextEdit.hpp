@@ -45,7 +45,6 @@ private:
 
     bool eventFilter(QObject *widget, QEvent *event) override;
 private slots:
-    void editTextChanged();
     void insertCompletion(const QString &completion);
 };
 

@@ -3,7 +3,6 @@
 #include "common/Common.hpp"
 #include "common/CompletionModel.hpp"
 #include "singletons/Settings.hpp"
-#include "widgets/splits/SplitInput.hpp"
 
 #include <QMimeData>
 #include <QMimeDatabase>
@@ -20,8 +19,6 @@ ResizingTextEdit::ResizingTextEdit()
 
     QObject::connect(this, &QTextEdit::textChanged, this,
                      &QWidget::updateGeometry);
-    QObject::connect(this, &QTextEdit::textChanged, this,
-                     &ResizingTextEdit::editTextChanged);
 
     // Whenever the setting for emote completion changes, force a
     // refresh on the completion model the next time "Tab" is pressed
@@ -31,17 +28,6 @@ ResizingTextEdit::ResizingTextEdit()
 
     this->setFocusPolicy(Qt::ClickFocus);
     this->installEventFilter(this);
-}
-
-void ResizingTextEdit::editTextChanged()
-{
-    if (getSettings()->messageOverflow.getValue() == 1 &&
-        this->toPlainText().length() > SplitInput::TWITCH_MESSAGE_LIMIT)
-    {
-        QTextCursor cursor = this->textCursor();
-        this->setTextCursor(cursor);
-        cursor.deletePreviousChar();
-    }
 }
 
 QSize ResizingTextEdit::sizeHint() const

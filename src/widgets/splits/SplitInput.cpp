@@ -681,6 +681,15 @@ void SplitInput::editTextChanged()
     // set textLengthLabel value
     QString text = this->ui_.textEdit->toPlainText();
 
+    if (getSettings()->messageOverflow.getValue() == MessageOverflow::Prevent &&
+        text.length() > TWITCH_MESSAGE_LIMIT &&
+        text.length() != this->lastOverflowLength)
+    {
+        this->ui_.textEdit->setPlainText(text.left(TWITCH_MESSAGE_LIMIT));
+        this->ui_.textEdit->moveCursor(QTextCursor::EndOfBlock);
+        return;
+    }
+
     if (text.startsWith("/r ", Qt::CaseInsensitive) &&
         this->split_->getChannel()->isTwitchChannel())
     {
@@ -703,7 +712,7 @@ void SplitInput::editTextChanged()
     if (getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
     {
         if (text.length() > TWITCH_MESSAGE_LIMIT &&
-            text.length() > lastOverflowLength)
+            text.length() > this->lastOverflowLength)
         {
             QTextCharFormat format;
             format.setForeground(Qt::red);
@@ -712,13 +721,13 @@ void SplitInput::editTextChanged()
             cursor.setPosition(lastOverflowLength, QTextCursor::MoveAnchor);
             cursor.movePosition(QTextCursor::End, QTextCursor::KeepAnchor);
 
-            lastOverflowLength = text.length();
+            this->lastOverflowLength = text.length();
 
             cursor.setCharFormat(format);
         }
-        else if (lastOverflowLength != TWITCH_MESSAGE_LIMIT)
+        else if (this->lastOverflowLength != TWITCH_MESSAGE_LIMIT)
         {
-            lastOverflowLength = TWITCH_MESSAGE_LIMIT;
+            this->lastOverflowLength = TWITCH_MESSAGE_LIMIT;
         }
     }
 
