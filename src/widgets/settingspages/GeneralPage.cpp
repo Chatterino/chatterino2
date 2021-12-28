@@ -18,6 +18,7 @@
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/Line.hpp"
 #include "widgets/settingspages/GeneralPageView.hpp"
+#include "widgets/splits/SplitInput.hpp"
 
 #include <QDesktopServices>
 #include <QFileDialog>
@@ -226,14 +227,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Show message length while typing", s.showMessageLength);
     layout.addCheckbox("Allow sending duplicate messages",
                        s.allowDuplicateMessages);
-    layout.addDropdown<int>(
-        "Message overflow", {"Allow", "Prevent", "Highlight"},
+    layout.addDropdown<std::underlying_type<MessageOverflow>::type>(
+        "Message overflow", {"Highlight", "Prevent", "Allow"},
         s.messageOverflow,
         [](auto index) {
             return index;
         },
         [](auto args) {
-            return args.index;
+            return static_cast<StreamerModeSetting>(args.index);
         });
 
     layout.addTitle("Messages");

@@ -20,6 +20,8 @@ class InputCompletionPopup;
 class EffectLabel;
 class ResizingTextEdit;
 
+enum MessageOverflow { Highlight, Prevent, Allow };
+
 class SplitInput : public BaseWidget
 {
     Q_OBJECT

@@ -700,7 +700,7 @@ void SplitInput::editTextChanged()
             app->commands->execCommand(text, this->split_->getChannel(), true);
     }
 
-    if (getSettings()->messageOverflow.getValue() == 2)
+    if (getSettings()->messageOverflow.getValue() == MessageOverflow::Highlight)
     {
         if (text.length() > TWITCH_MESSAGE_LIMIT &&
             text.length() > lastOverflowLength)
