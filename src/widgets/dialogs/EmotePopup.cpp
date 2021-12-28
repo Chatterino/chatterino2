@@ -165,7 +165,7 @@ EmotePopup::EmotePopup(QWidget *parent)
     this->getLayoutContainer()->setLayout(layout);
 
     QRegularExpression searchRegex("\\S*");
-    searchRegex.setCaseSensitivity(Qt::CaseInsensitive);
+    searchRegex.setPatternOptions(QRegularExpression::CaseInsensitiveOption);
     QValidator *searchValidator = new QRegularExpressionValidator(searchRegex);
 
     this->search_ = new QLineEdit();
