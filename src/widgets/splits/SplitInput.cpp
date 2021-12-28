@@ -135,6 +135,8 @@ void SplitInput::scaleChangedEvent(float scale)
     this->setMaximumHeight(int(150 * this->scale()));
     this->ui_.textEdit->setFont(
         getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+    this->ui_.textEditLength->setFont(
+        getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale()));
 }
 
 void SplitInput::themeChangedEvent()
