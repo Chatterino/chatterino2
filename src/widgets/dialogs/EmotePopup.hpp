@@ -7,6 +7,8 @@
 
 #include <pajlada/signals/signal.hpp>
 
+#include <QLineEdit>
+
 namespace chatterino {
 
 struct Link;
@@ -37,7 +39,7 @@ private:
     ChannelView *searchView_{};
 
     ChannelPtr channel_;
-    TwitchChannel *twitchChannel_;
+    TwitchChannel *twitchChannel_{};
 
     QLineEdit *search_;
     Notebook *notebook_;

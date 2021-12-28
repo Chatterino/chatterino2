@@ -16,7 +16,10 @@
 #include "widgets/Scrollbar.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
+#include <QAbstractButton>
 #include <QHBoxLayout>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 #include <QTabWidget>
 
 namespace chatterino {
@@ -161,9 +164,9 @@ EmotePopup::EmotePopup(QWidget *parent)
     auto layout = new QVBoxLayout(this);
     this->getLayoutContainer()->setLayout(layout);
 
-    QRegExp searchRegex("\\S*");
+    QRegularExpression searchRegex("\\S*");
     searchRegex.setCaseSensitivity(Qt::CaseInsensitive);
-    QValidator *searchValidator = new QRegExpValidator(searchRegex);
+    QValidator *searchValidator = new QRegularExpressionValidator(searchRegex);
 
     this->search_ = new QLineEdit();
     this->search_->setPlaceholderText("Search all emotes...");
@@ -190,7 +193,9 @@ EmotePopup::EmotePopup(QWidget *parent)
         view->linkClicked.connect(clicked);
 
         if (addToNotebook)
+        {
             this->notebook_->addPage(view, tabTitle);
+        }
 
         return view;
     };
@@ -369,88 +374,86 @@ void EmotePopup::loadEmojis(Channel &channel, EmojiMap &emojiMap,
     channel.addMessage(makeEmojiMessage(emojiMap));
 }
 
-void EmotePopup::filterEmotes(const QString &text)
+void EmotePopup::filterEmotes(const QString &searchText)
 {
-    if (text.length() > 0)
-    {
-        auto searchChannel = std::make_shared<Channel>("", Channel::Type::None);
-
-        auto twitchEmoteSets =
-            getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets;
-        std::vector<std::shared_ptr<TwitchAccount::EmoteSet>>
-            twitchGlobalEmotes{};
-
-        for (const auto set : twitchEmoteSets)
-        {
-            auto setCopy = std::make_shared<TwitchAccount::EmoteSet>(*set);
-            auto setIt =
-                std::remove_if(setCopy->emotes.begin(), setCopy->emotes.end(),
-                               [text](auto &emote) {
-                                   return !emote.name.string.contains(
-                                       text, Qt::CaseInsensitive);
-                               });
-            setCopy->emotes.resize(
-                std::distance(setCopy->emotes.begin(), setIt));
-
-            if (setCopy->emotes.size() > 0)
-                twitchGlobalEmotes.push_back(setCopy);
-        }
-
-        auto bttvGlobalEmotes = this->filterEmoteMap(
-            text, getApp()->twitch2->getBttvEmotes().emotes());
-        auto ffzGlobalEmotes = this->filterEmoteMap(
-            text, getApp()->twitch2->getFfzEmotes().emotes());
-        auto bttvChannelEmotes =
-            this->filterEmoteMap(text, this->twitchChannel_->bttvEmotes());
-        auto ffzChannelEmotes =
-            this->filterEmoteMap(text, this->twitchChannel_->ffzEmotes());
-
-        EmojiMap filteredEmojis{};
-        int emojiCount = 0;
-
-        getApp()->emotes->emojis.emojis.each(
-            [&, text](const auto &name, std::shared_ptr<EmojiData> &emoji) {
-                if (emoji->shortCodes[0].contains(text, Qt::CaseInsensitive))
-                {
-                    filteredEmojis.insert(name, emoji);
-                    emojiCount++;
-                }
-            });
-
-        // twitch
-        addEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,
-                     this->channel_->getName());
-
-        // global
-        if (bttvGlobalEmotes->size() > 0)
-            addEmotes(*searchChannel, *bttvGlobalEmotes, "BetterTTV (Global)",
-                      MessageElementFlag::BttvEmote);
-        if (ffzGlobalEmotes->size() > 0)
-            addEmotes(*searchChannel, *ffzGlobalEmotes, "FrankerFaceZ (Global)",
-                      MessageElementFlag::FfzEmote);
-
-        // channel
-        if (bttvChannelEmotes->size() > 0)
-            addEmotes(*searchChannel, *bttvChannelEmotes, "BetterTTV (Channel)",
-                      MessageElementFlag::BttvEmote);
-        if (ffzChannelEmotes->size() > 0)
-            addEmotes(*searchChannel, *ffzChannelEmotes,
-                      "FrankerFaceZ (Channel)", MessageElementFlag::FfzEmote);
-
-        // emojis
-        if (emojiCount > 0)
-            this->loadEmojis(*searchChannel, filteredEmojis, "Emojis");
-
-        this->searchView_->setChannel(searchChannel);
-
-        this->notebook_->hide();
-        this->searchView_->show();
-    }
-    else
+    if (searchText.length() == 0)
     {
         this->notebook_->show();
         this->searchView_->hide();
+
+        return;
     }
+
+    auto searchChannel = std::make_shared<Channel>("", Channel::Type::None);
+
+    auto twitchEmoteSets =
+        getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets;
+    std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> twitchGlobalEmotes{};
+
+    for (const auto set : twitchEmoteSets)
+    {
+        auto setCopy = std::make_shared<TwitchAccount::EmoteSet>(*set);
+        auto setIt =
+            std::remove_if(setCopy->emotes.begin(), setCopy->emotes.end(),
+                           [searchText](auto &emote) {
+                               return !emote.name.string.contains(
+                                   searchText, Qt::CaseInsensitive);
+                           });
+        setCopy->emotes.resize(std::distance(setCopy->emotes.begin(), setIt));
+
+        if (setCopy->emotes.size() > 0)
+            twitchGlobalEmotes.push_back(setCopy);
+    }
+
+    auto bttvGlobalEmotes = this->filterEmoteMap(
+        searchText, getApp()->twitch2->getBttvEmotes().emotes());
+    auto ffzGlobalEmotes = this->filterEmoteMap(
+        searchText, getApp()->twitch2->getFfzEmotes().emotes());
+    auto bttvChannelEmotes =
+        this->filterEmoteMap(searchText, this->twitchChannel_->bttvEmotes());
+    auto ffzChannelEmotes =
+        this->filterEmoteMap(searchText, this->twitchChannel_->ffzEmotes());
+
+    EmojiMap filteredEmojis{};
+    int emojiCount = 0;
+
+    getApp()->emotes->emojis.emojis.each(
+        [&, searchText](const auto &name, std::shared_ptr<EmojiData> &emoji) {
+            if (emoji->shortCodes[0].contains(searchText, Qt::CaseInsensitive))
+            {
+                filteredEmojis.insert(name, emoji);
+                emojiCount++;
+            }
+        });
+
+    // twitch
+    addEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,
+                 this->channel_->getName());
+
+    // global
+    if (bttvGlobalEmotes->size() > 0)
+        addEmotes(*searchChannel, *bttvGlobalEmotes, "BetterTTV (Global)",
+                  MessageElementFlag::BttvEmote);
+    if (ffzGlobalEmotes->size() > 0)
+        addEmotes(*searchChannel, *ffzGlobalEmotes, "FrankerFaceZ (Global)",
+                  MessageElementFlag::FfzEmote);
+
+    // channel
+    if (bttvChannelEmotes->size() > 0)
+        addEmotes(*searchChannel, *bttvChannelEmotes, "BetterTTV (Channel)",
+                  MessageElementFlag::BttvEmote);
+    if (ffzChannelEmotes->size() > 0)
+        addEmotes(*searchChannel, *ffzChannelEmotes, "FrankerFaceZ (Channel)",
+                  MessageElementFlag::FfzEmote);
+
+    // emojis
+    if (emojiCount > 0)
+        this->loadEmojis(*searchChannel, filteredEmojis, "Emojis");
+
+    this->searchView_->setChannel(searchChannel);
+
+    this->notebook_->hide();
+    this->searchView_->show();
 }
 
 EmoteMap *EmotePopup::filterEmoteMap(const QString &text,
