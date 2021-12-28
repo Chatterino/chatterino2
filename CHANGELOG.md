@@ -38,7 +38,7 @@
 - Minor: Show picked outcome in prediction badges. (#3357)
 - Minor: Add support for Emoji in IRC (#3354)
 - Minor: Moved `/live` logs to its own subdirectory. (Logs from before this change will still be available in `Channels -> live`). (#3393)
-- Minor: Add setting to limit message input length (#3418)
+- Minor: Add setting to limit message input length. (#3418)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
