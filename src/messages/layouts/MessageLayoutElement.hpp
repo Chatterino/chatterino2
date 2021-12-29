@@ -11,6 +11,8 @@
 #include "messages/MessageColor.hpp"
 #include "messages/MessageElement.hpp"
 
+#include <pajlada/signals/signalholder.hpp>
+
 class QPainter;
 
 namespace chatterino {
@@ -114,7 +116,7 @@ protected:
     FontStyle style_;
     float scale_;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
 };
 
 // TEXT ICON
@@ -138,27 +140,6 @@ private:
     float scale;
     QString line1;
     QString line2;
-};
-
-struct PajSegment {
-    QString text;
-    QColor color;
-};
-
-// TEXT
-class MultiColorTextLayoutElement : public TextLayoutElement
-{
-public:
-    MultiColorTextLayoutElement(MessageElement &creator_, QString &text,
-                                const QSize &size,
-                                std::vector<PajSegment> segments,
-                                FontStyle style_, float scale_);
-
-protected:
-    void paint(QPainter &painter) override;
-
-private:
-    std::vector<PajSegment> segments_;
 };
 
 }  // namespace chatterino

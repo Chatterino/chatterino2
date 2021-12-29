@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>EditHotkeyDialog</class>
+ <widget class="QDialog" name="EditHotkeyDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Edit Hotkey</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QLabel" name="warningLabel">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+       <kerning>true</kerning>
+      </font>
+     </property>
+     <property name="text">
+      <string>Something went wrong, you should never
+see this message :)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QFormLayout" name="formLayout">
+     <item row="0" column="0">
+      <widget class="QLabel" name="nameLabel">
+       <property name="text">
+        <string>Name:</string>
+       </property>
+       <property name="buddy">
+        <cstring>nameEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="nameEdit">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="frame">
+        <bool>true</bool>
+       </property>
+       <property name="readOnly">
+        <bool>false</bool>
+       </property>
+       <property name="placeholderText">
+        <string>A description of what the hotkey does.</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QLabel" name="categoryLabel">
+       <property name="text">
+        <string>Category:</string>
+       </property>
+       <property name="buddy">
+        <cstring>categoryPicker</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="actionLabel">
+       <property name="text">
+        <string>Action:</string>
+       </property>
+       <property name="buddy">
+        <cstring>actionPicker</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QComboBox" name="actionPicker">
+       <property name="editable">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QLabel" name="keyComboLabel">
+       <property name="text">
+        <string>Keybinding:</string>
+       </property>
+       <property name="buddy">
+        <cstring>keyComboEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QKeySequenceEdit" name="keyComboEdit"/>
+     </item>
+     <item row="4" column="0">
+      <widget class="QLabel" name="argumentsLabel">
+       <property name="text">
+        <string>Arguments:</string>
+       </property>
+       <property name="buddy">
+        <cstring>argumentsEdit</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
+      <widget class="QLabel" name="argumentsDescription">
+       <property name="text">
+        <string>You should never see this message :)</string>
+       </property>
+       <property name="buddy">
+        <cstring>argumentsDescription</cstring>
+       </property>
+      </widget>
+     </item>
+     <item row="5" column="1">
+      <widget class="QPlainTextEdit" name="argumentsEdit">
+       <property name="plainText">
+        <string/>
+       </property>
+       <property name="placeholderText">
+        <string>Newline separated arguments for the action</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QComboBox" name="categoryPicker"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttons">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <tabstops>
+  <tabstop>nameEdit</tabstop>
+  <tabstop>categoryPicker</tabstop>
+  <tabstop>actionPicker</tabstop>
+  <tabstop>keyComboEdit</tabstop>
+  <tabstop>argumentsEdit</tabstop>
+ </tabstops>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>buttons</sender>
+   <signal>accepted()</signal>
+   <receiver>EditHotkeyDialog</receiver>
+   <slot>afterEdit()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>257</x>
+     <y>290</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>157</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>buttons</sender>
+   <signal>rejected()</signal>
+   <receiver>EditHotkeyDialog</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>325</x>
+     <y>290</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>286</x>
+     <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>categoryPicker</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>EditHotkeyDialog</receiver>
+   <slot>updatePossibleActions()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>246</x>
+     <y>85</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>75</x>
+     <y>218</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionPicker</sender>
+   <signal>currentIndexChanged(int)</signal>
+   <receiver>EditHotkeyDialog</receiver>
+   <slot>updateArgumentsInput()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>148</x>
+     <y>119</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>74</x>
+     <y>201</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+ <slots>
+  <slot>afterEdit()</slot>
+  <slot>updatePossibleActions()</slot>
+  <slot>updateArgumentsInput()</slot>
+ </slots>
+</ui>

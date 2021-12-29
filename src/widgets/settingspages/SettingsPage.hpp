@@ -75,7 +75,7 @@ public:
 protected:
     SettingsDialogTab *tab_;
     pajlada::Signals::NoArgSignal onCancel_;
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
 };
 
 }  // namespace chatterino

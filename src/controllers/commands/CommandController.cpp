@@ -8,6 +8,7 @@
 #include "messages/Message.hpp"
 #include "messages/MessageBuilder.hpp"
 #include "messages/MessageElement.hpp"
+#include "providers/twitch/TwitchCommon.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "providers/twitch/api/Helix.hpp"
 #include "singletons/Emotes.hpp"
@@ -33,42 +34,6 @@
 
 namespace {
 using namespace chatterino;
-
-static const QStringList twitchDefaultCommands{
-    "/help",
-    "/w",
-    "/me",
-    "/disconnect",
-    "/mods",
-    "/vips",
-    "/color",
-    "/commercial",
-    "/mod",
-    "/unmod",
-    "/vip",
-    "/unvip",
-    "/ban",
-    "/unban",
-    "/timeout",
-    "/untimeout",
-    "/slow",
-    "/slowoff",
-    "/r9kbeta",
-    "/r9kbetaoff",
-    "/emoteonly",
-    "/emoteonlyoff",
-    "/clear",
-    "/subscribers",
-    "/subscribersoff",
-    "/followers",
-    "/followersoff",
-    "/host",
-    "/unhost",
-    "/raid",
-    "/unraid",
-};
-
-static const QStringList whisperCommands{"/w", ".w"};
 
 // stripUserName removes any @ prefix or , suffix to make it more suitable for command use
 void stripUserName(QString &userName)
@@ -127,7 +92,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
     auto emote = boost::optional<EmotePtr>{};
     for (int i = 2; i < words.length(); i++)
     {
-        {  // twitch emote
+        {  // Twitch emote
             auto it = accemotes.emotes.find({words[i]});
             if (it != accemotes.emotes.end())
             {
@@ -135,7 +100,7 @@ bool appendWhisperMessageWordsLocally(const QStringList &words)
                                         MessageElementFlag::TwitchEmote);
                 continue;
             }
-        }  // twitch emote
+        }  // Twitch emote
 
         {  // bttv/ffz emote
             if ((emote = bttvemotes.emote({words[i]})))
@@ -217,7 +182,7 @@ bool appendWhisperMessageStringLocally(const QString &textNoEmoji)
 
     QString commandName = words[0];
 
-    if (whisperCommands.contains(commandName, Qt::CaseInsensitive))
+    if (TWITCH_WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
     {
         if (words.length() > 2)
         {
@@ -298,13 +263,11 @@ namespace chatterino {
 
 void CommandController::initialize(Settings &, Paths &paths)
 {
-    this->commandAutoCompletions_ = twitchDefaultCommands;
-
     // Update commands map when the vector of commands has been updated
     auto addFirstMatchToMap = [this](auto args) {
         this->userCommands_.remove(args.item.name);
 
-        for (const Command &cmd : this->items_)
+        for (const Command &cmd : this->items)
         {
             if (cmd.name == args.item.name)
             {
@@ -315,7 +278,7 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         int maxSpaces = 0;
 
-        for (const Command &cmd : this->items_)
+        for (const Command &cmd : this->items)
         {
             auto localMaxSpaces = cmd.name.count(' ');
             if (localMaxSpaces > maxSpaces)
@@ -326,13 +289,13 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         this->maxSpaces_ = maxSpaces;
     };
-    this->items_.itemInserted.connect(addFirstMatchToMap);
-    this->items_.itemRemoved.connect(addFirstMatchToMap);
+    this->items.itemInserted.connect(addFirstMatchToMap);
+    this->items.itemRemoved.connect(addFirstMatchToMap);
 
     // Initialize setting manager for commands.json
     auto path = combinePath(paths.settingsDirectory, "commands.json");
     this->sm_ = std::make_shared<pajlada::Settings::SettingManager>();
-    this->sm_->setPath(path.toStdString());
+    this->sm_->setPath(qPrintable(path));
     this->sm_->setBackupEnabled(true);
     this->sm_->setBackupSlots(9);
 
@@ -343,8 +306,8 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     // Update the setting when the vector of commands has been updated (most
     // likely from the settings dialog)
-    this->items_.delayedItemsChanged.connect([this] {
-        this->commandsSetting_->setValue(this->items_.raw());
+    this->items.delayedItemsChanged.connect([this] {
+        this->commandsSetting_->setValue(this->items.raw());
     });
 
     // Load commands from commands.json
@@ -354,7 +317,7 @@ void CommandController::initialize(Settings &, Paths &paths)
     // of commands)
     for (const auto &command : this->commandsSetting_->getValue())
     {
-        this->items_.append(command);
+        this->items.append(command);
     }
 
     /// Deprecated commands
@@ -866,6 +829,43 @@ void CommandController::initialize(Settings &, Paths &paths)
 
         return "";
     });
+    this->registerCommand(
+        "/delete", [](const QStringList &words, ChannelPtr channel) -> QString {
+            // This is a wrapper over the standard Twitch /delete command
+            // We use this to ensure the user gets better error messages for missing or malformed arguments
+            if (words.size() < 2)
+            {
+                channel->addMessage(
+                    makeSystemMessage("Usage: /delete <msg-id> - Deletes the "
+                                      "specified message."));
+                return "";
+            }
+
+            auto messageID = words.at(1);
+            auto uuid = QUuid(messageID);
+            if (uuid.isNull())
+            {
+                // The message id must be a valid UUID
+                channel->addMessage(makeSystemMessage(
+                    QString("Invalid msg-id: \"%1\"").arg(messageID)));
+                return "";
+            }
+
+            auto msg = channel->findMessage(messageID);
+            if (msg != nullptr)
+            {
+                if (msg->loginName == channel->getName() &&
+                    !channel->isBroadcaster())
+                {
+                    channel->addMessage(makeSystemMessage(
+                        "You cannot delete the broadcaster's messages unless "
+                        "you are the broadcaster."));
+                    return "";
+                }
+            }
+
+            return QString("/delete ") + messageID;
+        });
 
     this->registerCommand("/raw", [](const QStringList &words, ChannelPtr) {
         getApp()->twitch2->sendRawMessage(words.mid(1).join(" "));
@@ -881,7 +881,7 @@ void CommandController::save()
 CommandModel *CommandController::createModel(QObject *parent)
 {
     CommandModel *model = new CommandModel(parent);
-    model->initialize(&this->items_);
+    model->initialize(&this->items);
 
     return model;
 }
@@ -899,10 +899,10 @@ QString CommandController::execCommand(const QString &textNoEmoji,
 
     QString commandName = words[0];
 
-    // works in a valid twitch channel and /whispers, etc...
+    // works in a valid Twitch channel and /whispers, etc...
     if (!dryRun && channel->isTwitchChannel())
     {
-        if (whisperCommands.contains(commandName, Qt::CaseInsensitive))
+        if (TWITCH_WHISPER_COMMANDS.contains(commandName, Qt::CaseInsensitive))
         {
             if (words.length() > 2)
             {
@@ -913,8 +913,6 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             return "";
         }
     }
-
-    auto *twitchChannel = dynamic_cast<TwitchChannel *>(channel.get());
 
     {
         // check if user command exists
@@ -935,7 +933,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         }
     }
 
-    // works only in a valid twitch channel
+    // works only in a valid Twitch channel
     if (!dryRun && channel->isTwitchChannel())
     {
         // check if command exists
@@ -968,7 +966,7 @@ void CommandController::registerCommand(QString commandName,
 
     this->commands_[commandName] = commandFunction;
 
-    this->commandAutoCompletions_.append(commandName);
+    this->defaultChatterinoCommandAutoCompletions_.append(commandName);
 }
 
 QString CommandController::execCustomCommand(const QStringList &words,
@@ -1079,9 +1077,9 @@ QString CommandController::execCustomCommand(const QStringList &words,
     }
 }
 
-QStringList CommandController::getDefaultTwitchCommandList()
+QStringList CommandController::getDefaultChatterinoCommandList()
 {
-    return this->commandAutoCompletions_;
+    return this->defaultChatterinoCommandAutoCompletions_;
 }
 
 }  // namespace chatterino

@@ -1,5 +1,6 @@
 # Ignore submodule files
 lib/*/
 conan-pkgs/*/
+cmake/sanitizers-cmake/
 
 .github/

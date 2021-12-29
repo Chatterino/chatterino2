@@ -7,7 +7,7 @@
 #include <QMenu>
 #include <QPropertyAnimation>
 #include <pajlada/settings/setting.hpp>
-#include <pajlada/signals/connection.hpp>
+#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 
@@ -105,7 +105,7 @@ private:
 
     QMenu menu_;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
 };
 
 }  // namespace chatterino

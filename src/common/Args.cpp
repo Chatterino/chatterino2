@@ -10,6 +10,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
+#include <QRegularExpression>
 #include <QStringList>
 #include <QUuid>
 
@@ -48,7 +49,7 @@ Args::Args(const QApplication &app)
     parser.addOption(QCommandLineOption(
         {"c", "channels"},
         "Joins only supplied channels on startup. Use letters with colons to "
-        "specify platform. Only twitch channels are supported at the moment.\n"
+        "specify platform. Only Twitch channels are supported at the moment.\n"
         "If platform isn't specified, default is Twitch.",
         "t:channel1;t:channel2;..."));
 

@@ -9,6 +9,7 @@ public:
     Resources2();
 
     struct {
+        QPixmap _1xelerate;
         QPixmap alazymeme;
         QPixmap fourtf;
         QPixmap kararty;
@@ -23,6 +24,7 @@ public:
         QPixmap addSplitDark;
         QPixmap ban;
         QPixmap banRed;
+        QPixmap clearSearch;
         QPixmap copyDark;
         QPixmap copyLight;
         QPixmap menuDark;

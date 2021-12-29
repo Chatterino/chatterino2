@@ -134,7 +134,6 @@ private:
 #endif
 
     pajlada::Signals::SignalHolder connections_;
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
 
     friend class BaseWidget;
 };
