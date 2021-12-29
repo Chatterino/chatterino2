@@ -8,6 +8,8 @@
 #include "widgets/helper/ColorButton.hpp"
 #include "widgets/helper/Line.hpp"
 
+#include "QRegularExpression"
+
 namespace chatterino {
 
 GeneralPageView::GeneralPageView(QWidget *parent)
