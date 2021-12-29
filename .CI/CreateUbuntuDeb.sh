@@ -28,7 +28,7 @@ EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
 echo "Reusing appdir..."
-cp -v appdir/* "$packaging_dir"
+cp -rv appdir/* "$packaging_dir"
 
 find "$packaging_dir/"
 echo ""
