@@ -27,9 +27,8 @@ Depends: libc6, libqt5concurrent5, libqt5core5a, libqt5dbus5, libqt5gui5, libqt5
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
-echo "Running make install in package dir"
-grep qmake Makefile > /dev/null && DESTDIR="$packaging_dir" make INSTALL_ROOT="$packaging_dir" -j"$(nproc)" install
-grep cmake Makefile > /dev/null && make -j"$(nproc)" DESTDIR="./package/" install
+echo "Reusing appdir..."
+cp -v appdir/* "$packaging_dir"
 
 find "$packaging_dir/"
 echo ""
