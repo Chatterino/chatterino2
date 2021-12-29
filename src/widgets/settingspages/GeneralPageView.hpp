@@ -99,17 +99,17 @@ public:
     SubtitleLabel *addSubtitle(const QString &text);
     /// @param inverse Inverses true to false and vice versa
     QCheckBox *addCheckbox(const QString &text, BoolSetting &setting,
-                           bool inverse = false, QString toolTipText = nullptr);
+                           bool inverse = false, QString toolTipText = {});
     ComboBox *addDropdown(const QString &text, const QStringList &items,
-                          QString toolTipText = nullptr);
+                          QString toolTipText = {});
     ComboBox *addDropdown(const QString &text, const QStringList &items,
                           pajlada::Settings::Setting<QString> &setting,
-                          bool editable = false, QString toolTipText = nullptr);
+                          bool editable = false, QString toolTipText = {});
     ColorButton *addColorButton(const QString &text, const QColor &color,
                                 pajlada::Settings::Setting<QString> &setting,
-                                QString toolTipText = nullptr);
+                                QString toolTipText = {});
     QSpinBox *addIntInput(const QString &text, IntSetting &setting, int min,
-                          int max, int step, QString toolTipText = nullptr);
+                          int max, int step, QString toolTipText = {});
     void addNavigationSpacing();
 
     template <typename OnClick>
@@ -138,7 +138,7 @@ public:
         pajlada::Settings::Setting<T> &setting,
         std::function<boost::variant<int, QString>(T)> getValue,
         std::function<T(DropdownArgs)> setValue, bool editable = true,
-        QString toolTipText = nullptr)
+        QString toolTipText = {})
     {
         auto items2 = items;
         auto selected = getValue(setting.getValue());
