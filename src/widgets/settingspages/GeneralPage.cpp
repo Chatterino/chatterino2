@@ -595,7 +595,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                        "e.g., prime, bits, sub gifter");
     layout.addCheckbox("Chatterino", s.showBadgesChatterino);
     layout.addCheckbox("FrankerFaceZ", s.showBadgesFfz, false,
-                       "e.g., bot, FFZ supporter, FFZ developer");
+                       "e.g., Bot, FFZ supporter, FFZ developer");
     layout.addSeperator();
     layout.addCheckbox("Use custom FrankerFaceZ moderator badges",
                        s.useCustomFfzModeratorBadges);
@@ -642,8 +642,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Color @usernames", s.colorUsernames);
     layout.addCheckbox("Try to find usernames without @ prefix",
                        s.findAllUsernames, false,
-                       "Attempt to autocomplete usernames "
-                       "without the @ prefix.");
+                       "Find mentions of users in chat without the @ prefix.");
     layout.addCheckbox("Show username autocompletion popup menu",
                        s.showUsernameCompletionMenu);
     const QStringList usernameDisplayModes = {"Username", "Localized name",
@@ -680,7 +679,9 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox(
         "Only search for emote autocompletion at the start of emote names",
         s.prefixOnlyEmoteCompletion, false,
-        "When disabled, autocomplete emotes based on any part of the name.");
+        "When disabled, emote tab-completion will complete based on any part "
+        "of the name."
+        "\ne.g., sheffy -> DatSheffy");
     layout.addCheckbox("Only search for username autocompletion with an @",
                        s.userCompletionOnlyWithAt);
 
@@ -710,7 +711,8 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         },
         false, "Combine consecutive timeout messages into a single message.");
     layout.addCheckbox("Combine multiple bit tips into one", s.stackBits, false,
-                       "Combine consecutive bit tips into a single message.");
+                       "Combine consecutive cheermotes (sent in a single "
+                       "message) into one cheermote.");
     layout.addCheckbox("Messages in /mentions highlights tab",
                        s.highlightMentions);
 
