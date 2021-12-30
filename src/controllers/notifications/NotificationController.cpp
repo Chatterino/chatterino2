@@ -20,6 +20,7 @@
 #include <QDir>
 #include <QMediaPlayer>
 #include <QUrl>
+#include <unordered_set>
 
 namespace chatterino {
 
@@ -127,6 +128,33 @@ NotificationModel *NotificationController::createModel(QObject *parent,
     return model;
 }
 
+namespace {
+    // TODO: combine this with getEmoteSetBatches in TwitchAccount.cpp, maybe some templated thing
+    std::vector<QStringList> getChannelsInBatches(QStringList channels)
+    {
+        constexpr int batchSize = 100;
+
+        int batchCount = (channels.size() / batchSize) + 1;
+
+        std::vector<QStringList> batches;
+        batches.reserve(batchCount);
+
+        for (int i = 0; i < batchCount; i++)
+        {
+            QStringList batch;
+
+            int last = std::min(batchSize, channels.size() - batchSize * i);
+            for (int j = 0; j < last; j++)
+            {
+                batch.push_back(channels.at(j + (batchSize * i)));
+            }
+            batches.emplace_back(batch);
+        }
+
+        return batches;
+    }
+}  // namespace
+
 void NotificationController::fetchFakeChannels()
 {
     qCDebug(chatterinoNotification) << "fetching fake channels";
@@ -139,31 +167,31 @@ void NotificationController::fetchFakeChannels()
         if (chan->isEmpty())
         {
             channels.push_back(channelMap[Platform::Twitch].raw()[i]);
-            //getFakeTwitchChannelLiveStatus(
-            //    channelMap[Platform::Twitch].raw()[i]);
         }
     }
-    getHelix()->fetchStreams(
-        QStringList(), channels,
-        [channels, this](std::vector<HelixStream> streams) {
-            std::map<QString, HelixStream> streamsByName;
-            for (const auto &stream : streams)
-            {
-                streamsByName[stream.userName] = stream;
-            }
+    for (const auto &batch : getChannelsInBatches(channels))
+    {
+        getHelix()->fetchStreams(
+            QStringList(), batch,
+            [batch, this](std::vector<HelixStream> streams) {
+                std::unordered_set<QString> liveStreams;
+                for (const auto &stream : streams)
+                {
+                    liveStreams.insert(stream.userName);
+                }
 
-            for (const auto &name : channels)
-            {
-                auto it = streamsByName.find(name);
-                this->checkStream(it != streamsByName.end(), name, it->second);
-            }
-        },
-        []() {
-            // we done fucked up.
-        });
+                for (const auto &name : batch)
+                {
+                    auto it = liveStreams.find(name);
+                    this->checkStream(it != liveStreams.end(), name);
+                }
+            },
+            []() {
+                // we done fucked up.
+            });
+    }
 }
-void NotificationController::checkStream(bool live, QString channelName,
-                                         const HelixStream &stream)
+void NotificationController::checkStream(bool live, QString channelName)
 {
     qCDebug(chatterinoNotification)
         << "[TwitchChannel" << channelName << "] Refreshing live status";
