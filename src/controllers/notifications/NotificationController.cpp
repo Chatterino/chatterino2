@@ -186,8 +186,10 @@ void NotificationController::fetchFakeChannels()
                     this->checkStream(it != liveStreams.end(), name);
                 }
             },
-            []() {
+            [batch]() {
                 // we done fucked up.
+                qCWarning(chatterinoNotification)
+                    << "Failed to fetch live status for " << batch;
             });
     }
 }
