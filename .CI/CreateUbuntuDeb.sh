@@ -27,8 +27,11 @@ Depends: libc6, libqt5concurrent5, libqt5core5a, libqt5dbus5, libqt5gui5, libqt5
 EOF
 echo "Version: $chatterino_version" >> "$packaging_dir/DEBIAN/control"
 
-echo "Reusing appdir..."
-cp -rv appdir/* "$packaging_dir"
+rm -rf appdir  # clean out static libraries
+echo "Installing into appdir"  # if using cmake, can't change install dir
+make INSTALL_ROOT=appdir -j"$(nproc)" install
+echo "Reusing appdir data..."
+cp -r appdir/* "$packaging_dir"/
 
 find "$packaging_dir/"
 echo ""
