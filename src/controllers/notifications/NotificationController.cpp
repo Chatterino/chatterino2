@@ -129,6 +129,8 @@ NotificationModel *NotificationController::createModel(QObject *parent,
 
 void NotificationController::fetchFakeChannels()
 {
+    qCDebug(chatterinoNotification) << "fetching fake channels";
+    QStringList channels;
     for (std::vector<int>::size_type i = 0;
          i != channelMap[Platform::Twitch].raw().size(); i++)
     {
@@ -136,69 +138,77 @@ void NotificationController::fetchFakeChannels()
             channelMap[Platform::Twitch].raw()[i]);
         if (chan->isEmpty())
         {
-            getFakeTwitchChannelLiveStatus(
-                channelMap[Platform::Twitch].raw()[i]);
+            channels.push_back(channelMap[Platform::Twitch].raw()[i]);
+            //getFakeTwitchChannelLiveStatus(
+            //    channelMap[Platform::Twitch].raw()[i]);
         }
     }
-}
-
-void NotificationController::getFakeTwitchChannelLiveStatus(
-    const QString &channelName)
-{
-    getHelix()->getStreamByName(
-        channelName,
-        [channelName, this](bool live, const auto &stream) {
-            qCDebug(chatterinoNotification) << "[TwitchChannel" << channelName
-                                            << "] Refreshing live status";
-
-            if (!live)
+    getHelix()->fetchStreams(
+        QStringList(), channels,
+        [channels, this](std::vector<HelixStream> streams) {
+            std::map<QString, HelixStream> streamsByName;
+            for (const auto &stream : streams)
             {
-                // Stream is offline
-                this->removeFakeChannel(channelName);
-                return;
+                streamsByName[stream.userName] = stream;
             }
 
-            // Stream is online
-            auto i = std::find(fakeTwitchChannels.begin(),
-                               fakeTwitchChannels.end(), channelName);
-
-            if (i != fakeTwitchChannels.end())
+            for (const auto &name : channels)
             {
-                // We have already pushed the live state of this stream
-                // Could not find stream in fake Twitch channels!
-                return;
+                auto it = streamsByName.find(name);
+                this->checkStream(it != streamsByName.end(), name, it->second);
             }
-
-            if (Toasts::isEnabled())
-            {
-                getApp()->toasts->sendChannelNotification(channelName,
-                                                          Platform::Twitch);
-            }
-            if (getSettings()->notificationPlaySound &&
-                !(isInStreamerMode() &&
-                  getSettings()->streamerModeSuppressLiveNotifications))
-            {
-                getApp()->notifications->playSound();
-            }
-            if (getSettings()->notificationFlashTaskbar &&
-                !(isInStreamerMode() &&
-                  getSettings()->streamerModeSuppressLiveNotifications))
-            {
-                getApp()->windows->sendAlert();
-            }
-            MessageBuilder builder;
-            TwitchMessageBuilder::liveMessage(channelName, &builder);
-            getApp()->twitch2->liveChannel->addMessage(builder.release());
-
-            // Indicate that we have pushed notifications for this stream
-            fakeTwitchChannels.push_back(channelName);
         },
-        [channelName, this] {
-            qCDebug(chatterinoNotification)
-                << "[TwitchChannel" << channelName
-                << "] Refreshing live status (Missing ID)";
-            this->removeFakeChannel(channelName);
+        []() {
+            // we done fucked up.
         });
+}
+void NotificationController::checkStream(bool live, QString channelName,
+                                         const HelixStream &stream)
+{
+    qCDebug(chatterinoNotification)
+        << "[TwitchChannel" << channelName << "] Refreshing live status";
+
+    if (!live)
+    {
+        // Stream is offline
+        this->removeFakeChannel(channelName);
+        return;
+    }
+
+    // Stream is online
+    auto i = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
+                       channelName);
+
+    if (i != fakeTwitchChannels.end())
+    {
+        // We have already pushed the live state of this stream
+        // Could not find stream in fake Twitch channels!
+        return;
+    }
+
+    if (Toasts::isEnabled())
+    {
+        getApp()->toasts->sendChannelNotification(channelName,
+                                                  Platform::Twitch);
+    }
+    if (getSettings()->notificationPlaySound &&
+        !(isInStreamerMode() &&
+          getSettings()->streamerModeSuppressLiveNotifications))
+    {
+        getApp()->notifications->playSound();
+    }
+    if (getSettings()->notificationFlashTaskbar &&
+        !(isInStreamerMode() &&
+          getSettings()->streamerModeSuppressLiveNotifications))
+    {
+        getApp()->windows->sendAlert();
+    }
+    MessageBuilder builder;
+    TwitchMessageBuilder::liveMessage(channelName, &builder);
+    getApp()->twitch2->liveChannel->addMessage(builder.release());
+
+    // Indicate that we have pushed notifications for this stream
+    fakeTwitchChannels.push_back(channelName);
 }
 
 void NotificationController::removeFakeChannel(const QString channelName)
