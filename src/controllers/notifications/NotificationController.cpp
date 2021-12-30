@@ -143,7 +143,8 @@ namespace {
         {
             QStringList batch;
 
-            int last = std::min(batchSize, channels.size() - batchSize * i);
+            // I hate you, msvc
+            int last = (std::min)(batchSize, channels.size() - batchSize * i);
             for (int j = 0; j < last; j++)
             {
                 batch.push_back(channels.at(j + (batchSize * i)));
