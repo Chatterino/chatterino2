@@ -42,7 +42,7 @@
 - Minor: Added autocompletion for default Twitch commands starting with the dot (e.g. `.mods` which does the same as `/mods`). (#3144)
 - Minor: Sorted usernames in `Users joined/parted` messages alphabetically. (#3421)
 - Minor: Mod list, VIP list, and Users joined/parted messages are now searchable. (#3426)
-- Minor: Check live status for all closed channels with notifications at once (#3442)
+- Minor: Batch checking live status for channels with live notifications that aren't connected. (#3442)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
