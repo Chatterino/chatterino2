@@ -220,6 +220,8 @@ EmotePopup::EmotePopup(QWidget *parent)
                                            this->clearShortcuts();
                                            this->addShortcuts();
                                        });
+
+    this->search_->setFocus();
 }
 
 void EmotePopup::addShortcuts()
