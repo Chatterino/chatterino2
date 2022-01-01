@@ -305,7 +305,12 @@ void EmotePopup::addShortcuts()
 
         {"reject", nullptr},
         {"accept", nullptr},
-        {"search", nullptr},
+        {"search",
+         [this](std::vector<QString>) -> QString {
+             this->search_->setFocus();
+             this->search_->selectAll();
+             return "";
+         }},
     };
 
     this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
