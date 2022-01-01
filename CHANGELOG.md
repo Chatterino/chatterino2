@@ -75,6 +75,7 @@
 - Bugfix: Fixed zero-width emotes sometimes wrapping lines incorrectly. (#3389)
 - Bugfix: Fixed using special chars in Windows username breaking the storage of custom commands (#3397)
 - Bugfix: Fixed character counter changing fonts after going over the limit. (#3422)
+- Bugfix: Fixed crash that could occur if the user opens/closes ChannelViews (e.g. EmotePopup, or Splits) then modifies the showLastMessageIndicator setting. (#3444)
 - Dev: Batch checking live status for channels with live notifications that aren't connected. (#3442)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
