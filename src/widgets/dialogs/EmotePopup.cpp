@@ -327,7 +327,9 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     this->setWindowTitle("Emotes in #" + this->channel_->getName());
 
     if (this->twitchChannel_ == nullptr)
+    {
         return;
+    }
 
     auto subChannel = std::make_shared<Channel>("", Channel::Type::None);
     auto globalChannel = std::make_shared<Channel>("", Channel::Type::None);
@@ -397,7 +399,7 @@ void EmotePopup::filterEmotes(const QString &searchText)
         getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets;
     std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> twitchGlobalEmotes{};
 
-    for (const auto set : twitchEmoteSets)
+    for (const auto &set : twitchEmoteSets)
     {
         auto setCopy = std::make_shared<TwitchAccount::EmoteSet>(*set);
         auto setIt =
@@ -468,7 +470,7 @@ EmoteMap *EmotePopup::filterEmoteMap(const QString &text,
 {
     auto filteredMap = new EmoteMap();
 
-    for (const auto emote : *emotes)
+    for (const auto &emote : *emotes)
     {
         if (emote.first.string.contains(text, Qt::CaseInsensitive))
         {
