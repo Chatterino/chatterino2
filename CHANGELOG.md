@@ -81,6 +81,7 @@
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 - Dev: Added CMake build option `BUILD_WITH_QTKEYCHAIN` to build with or without Qt5Keychain support (On by default). (#3318)
+- Dev: Added /fakemsg command for debugging (#3448)
 
 ## 2.3.4
 
