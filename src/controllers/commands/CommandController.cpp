@@ -871,7 +871,7 @@ void CommandController::initialize(Settings &, Paths &paths)
         getApp()->twitch2->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
-#ifdef NDEBUG
+#ifndef NDEBUG
     this->registerCommand(
         "/fakemsg",
         [](const QStringList &words, ChannelPtr channel) -> QString {
