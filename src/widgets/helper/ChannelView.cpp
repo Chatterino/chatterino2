@@ -198,7 +198,7 @@ void ChannelView::initializeSignals()
         [this](auto, auto) {
             this->update();
         },
-        this);
+        this->signalHolder_);
 
     this->signalHolder_.managedConnect(getApp()->windows->gifRepaintRequested,
                                        [&] {
