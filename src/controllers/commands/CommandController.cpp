@@ -871,6 +871,22 @@ void CommandController::initialize(Settings &, Paths &paths)
         getApp()->twitch2->sendRawMessage(words.mid(1).join(" "));
         return "";
     });
+#ifndef NDEBUG
+    this->registerCommand(
+        "/fakemsg",
+        [](const QStringList &words, ChannelPtr channel) -> QString {
+            if (words.size() < 2)
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /fakemsg (raw irc text) - injects raw irc text as "
+                    "if it was a message received from TMI"));
+                return "";
+            }
+            auto ircText = words.mid(1).join(" ");
+            getApp()->twitch2->addFakeMessage(ircText);
+            return "";
+        });
+#endif
 }
 
 void CommandController::save()
