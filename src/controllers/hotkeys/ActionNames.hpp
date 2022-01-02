@@ -143,7 +143,7 @@ inline const std::map<HotkeyCategory, ActionDefinitionMap> actionNames{
      }},
     {HotkeyCategory::Window,
      {
-#ifdef C_DEBUG
+#ifndef NDEBUG
          {"addCheerMessage", ActionDefinition{"Debug: Add cheer test message"}},
          {"addEmoteMessage", ActionDefinition{"Debug: Add emote test message"}},
          {"addLinkMessage",

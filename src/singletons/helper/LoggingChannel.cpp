@@ -26,6 +26,10 @@ LoggingChannel::LoggingChannel(const QString &_channelName,
     {
         this->subDirectory = "Mentions";
     }
+    else if (channelName.startsWith("/live"))
+    {
+        this->subDirectory = "Live";
+    }
     else
     {
         this->subDirectory =

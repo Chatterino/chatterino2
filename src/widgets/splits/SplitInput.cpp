@@ -99,10 +99,10 @@ void SplitInput::initLayout()
     QObject::connect(this->ui_.textEdit, &QTextEdit::textChanged, this,
                      &SplitInput::onTextChanged);
 
-    this->managedConnections_.push_back(app->fonts->fontChanged.connect([=]() {
+    this->managedConnections_.managedConnect(app->fonts->fontChanged, [=]() {
         this->ui_.textEdit->setFont(
             app->fonts->getFont(FontStyle::ChatMedium, this->scale()));
-    }));
+    });
 
     // open emote popup
     QObject::connect(this->ui_.emoteButton, &EffectLabel::leftClicked, [=] {
@@ -135,6 +135,8 @@ void SplitInput::scaleChangedEvent(float scale)
     // set maximum height
     this->setMaximumHeight(int(150 * this->scale()));
     this->ui_.textEdit->setFont(
+        getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale()));
+    this->ui_.textEditLength->setFont(
         getApp()->fonts->getFont(FontStyle::ChatMedium, this->scale()));
 }
 
