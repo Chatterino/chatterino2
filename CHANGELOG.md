@@ -42,6 +42,8 @@
 - Minor: Added autocompletion for default Twitch commands starting with the dot (e.g. `.mods` which does the same as `/mods`). (#3144)
 - Minor: Sorted usernames in `Users joined/parted` messages alphabetically. (#3421)
 - Minor: Mod list, VIP list, and Users joined/parted messages are now searchable. (#3426)
+- Minor: Add search to emote popup. (#3404)
+- Minor: Messages can now be highlighted by subscriber or founder badges. (#3445)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
@@ -75,10 +77,14 @@
 - Bugfix: Fixed zero-width emotes sometimes wrapping lines incorrectly. (#3389)
 - Bugfix: Fixed using special chars in Windows username breaking the storage of custom commands (#3397)
 - Bugfix: Fixed character counter changing fonts after going over the limit. (#3422)
+- Bugfix: Fixed crash that could occur if the user opens/closes ChannelViews (e.g. EmotePopup, or Splits) then modifies the showLastMessageIndicator setting. (#3444)
+- Dev: Batch checking live status for channels with live notifications that aren't connected. (#3442)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
 - Dev: Add benchmarks that can be compiled with the `BUILD_BENCHMARKS` CMake flag. Off by default. (#3038)
 - Dev: Added CMake build option `BUILD_WITH_QTKEYCHAIN` to build with or without Qt5Keychain support (On by default). (#3318)
+- Dev: Added /fakemsg command for debugging (#3448)
+- Dev: Notebook::select\* functions now take an optional `focusPage` parameter (true by default) which keeps the default behaviour of selecting the page after it has been selected. If set to false, the page is _not_ focused after being selected. (#3446)
 
 ## 2.3.4
 
