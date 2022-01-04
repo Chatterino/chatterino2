@@ -11,10 +11,8 @@ namespace chatterino {
 
 Version::Version()
 {
-    // Version
     this->version_ = CHATTERINO_VERSION;
 
-    // Commit hash
     this->commitHash_ =
         QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_HASH)).remove('"');
 
