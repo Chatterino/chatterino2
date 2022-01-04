@@ -18,12 +18,10 @@ Version::Version()
     this->commitHash_ =
         QString(FROM_EXTERNAL_DEFINE(CHATTERINO_GIT_HASH)).remove('"');
 
-    // Date of build, this is depended on the format not changing
-#ifdef CHATTERINO_NIGHTLY_VERSION_STRING
+    // Date of build file generation (≈ date of build)
+#ifdef CHATTERINO_CMAKE_GEN_DATE
     this->dateOfBuild_ =
-        QString(FROM_EXTERNAL_DEFINE(CHATTERINO_NIGHTLY_VERSION_STRING))
-            .remove('"')
-            .split(' ')[0];
+        QString(FROM_EXTERNAL_DEFINE(CHATTERINO_CMAKE_GEN_DATE)).remove('"');
 #endif
 
     // "Full" version string, as displayed in window title
