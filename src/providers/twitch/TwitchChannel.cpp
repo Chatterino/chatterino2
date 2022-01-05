@@ -365,6 +365,7 @@ void TwitchChannel::sendMessage(const QString &message)
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
+    parsedMessage.replace("\u200D", "\U000E0002");
     parsedMessage = parsedMessage.simplified();
 
     if (parsedMessage.isEmpty())
