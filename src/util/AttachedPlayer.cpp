@@ -12,14 +12,11 @@ void AttachedPlayer::closeStreamThread()
 {
     if (streamlinkProcess != nullptr)
     {
-        streamlinkProcess->terminate();
         streamlinkProcess->kill();
+        streamlinkProcess->terminate();
     }
-    if (attachedWindow != nullptr && attachedContainer != nullptr &&
-        attachedContainer->isVisible())
-    {
-        attachedContainer->close();
-    }
+    attachedWindow = nullptr;
+    attachedContainer = nullptr;
 }
 
 QString AttachedPlayer::getLastQualitySetting()
@@ -36,14 +33,15 @@ void AttachedPlayer::updateStreamLinkProcess(const QString &channel,
                                              const QString &command)
 {
     // Return doing nothing if the stream is already active and it is the same channel
-    if (getIfStreamActive() && channel == lastShownChannel)
+    bool isActive = getIfStreamActive();
+    if (isActive && channel == lastShownChannel)
     {
         return;
     }
 
     // Create the attached window we will stream the video into
     // TODO: we should try to dock this to the application main window??
-    if (!getIfStreamActive())
+    if (!isActive)
     {
         // create the window
         QWindow *mainWindow =
@@ -79,11 +77,12 @@ void AttachedPlayer::updateStreamLinkProcess(const QString &channel,
     // Now lets update our process
     if (streamlinkProcess != nullptr)
     {
-        streamlinkProcess->terminate();
         streamlinkProcess->kill();
+        streamlinkProcess->terminate();
     }
     streamlinkProcess = new QProcess;
     streamlinkProcess->start(commandEdited);
+    qInfo() << "STREAMLINK: " << commandEdited;
 
     // Update the last channel we displayed
     lastShownChannel = channel;
