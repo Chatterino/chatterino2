@@ -233,9 +233,10 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
     // See https://github.com/Chatterino/chatterino2/issues/3384
     const static QRegularExpression COMBINED_FIXER("(?<!\U000E0002)\U000E0002");
 
-    this->addMessage(message, message->target(),
-                     message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
-                     false, message->isAction());
+    this->addMessage(
+        message, message->target(),
+        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
+        false, message->isAction());
 }
 
 void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
