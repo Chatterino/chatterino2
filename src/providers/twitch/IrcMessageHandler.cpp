@@ -230,10 +230,11 @@ std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
                                           TwitchIrcServer &server)
 {
+    // See https://github.com/Chatterino/chatterino2/issues/3384
     const static QRegularExpression COMBINED_FIXER("(?<!\U000E0002)\U000E0002");
 
     this->addMessage(message, message->target(),
-                     message->content().replace(COMBINED_FIXER, "\u200D"), server,
+                     message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
                      false, message->isAction());
 }
 

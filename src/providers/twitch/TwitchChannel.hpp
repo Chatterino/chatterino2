@@ -23,6 +23,10 @@
 
 namespace chatterino {
 
+const QString ZERO_WIDTH_JOINER = "\u200D";
+// See https://github.com/Chatterino/chatterino2/issues/3384
+const QString ESCAPE_TAG = "\U000E0002";
+
 enum class HighlightState;
 
 struct Emote;
