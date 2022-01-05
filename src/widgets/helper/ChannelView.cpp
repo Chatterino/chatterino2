@@ -1951,6 +1951,7 @@ void ChannelView::addContextMenuItems(
             "profile",        //
             "security",       //
             "settings",       //
+            "signup",         //
             "subscriptions",  //
             "turbo",          //
             "videos",         //
