@@ -23,6 +23,20 @@
 
 namespace chatterino {
 
+qint64 dirSize(QString &dirPath)
+{
+    QDirIterator it(dirPath, QDirIterator::Subdirectories);
+    qint64 size = 0;
+
+    while (it.hasNext())
+    {
+        size += it.fileInfo().size();
+        it.next();
+    }
+
+    return size;
+}
+
 QString formatSize(qint64 size)
 {
     QStringList units = {"Bytes", "KB", "MB", "GB", "TB", "PB"};
@@ -39,18 +53,11 @@ QString formatSize(qint64 size)
 
 QString fetchLogDirectorySize()
 {
-    QString logPathDirectory = getSettings()->logPath.getValue().isEmpty()
-                                   ? getPaths()->messageLogDirectory
-                                   : getSettings()->logPath;
+    QString logsDirectoryPath = getSettings()->logPath.getValue().isEmpty()
+                                    ? getPaths()->messageLogDirectory
+                                    : getSettings()->logPath;
 
-    QDirIterator it(logPathDirectory, QDirIterator::Subdirectories);
-    qint64 logsSize = 0;
-
-    while (it.hasNext())
-    {
-        logsSize += it.fileInfo().size();
-        it.next();
-    }
+    auto logsSize = dirSize(logsDirectoryPath);
 
     return QString("Your logs currently take up %1 of space")
         .arg(formatSize(logsSize));
