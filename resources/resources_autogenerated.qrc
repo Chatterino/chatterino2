@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
+    <file>avatars/_1xelerate.png</file>
     <file>avatars/alazymeme.png</file>
     <file>avatars/fourtf.png</file>
     <file>avatars/kararty.png</file>
@@ -14,6 +15,7 @@
     <file>buttons/addSplitDark.png</file>
     <file>buttons/ban.png</file>
     <file>buttons/banRed.png</file>
+    <file>buttons/clearSearch.png</file>
     <file>buttons/copyDark.png</file>
     <file>buttons/copyDark.svg</file>
     <file>buttons/copyLight.png</file>

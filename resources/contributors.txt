@@ -6,8 +6,8 @@
 # Name | Link | Avatar (Loaded as a resource) | Title (description of work done).
 
 # Avatar should be located in avatars/ directory. Its size should be 128x128 (get it from https://github.com/username.png?size=128).
-# Make sure to reduce avatar's size as much as possible with tool like pngcrush or optipng and run ./generate_resources.py
-# Contributor is what we use for someone who has contributed in general (like sent a programming-related PR)
+# Make sure to reduce avatar's size as much as possible with tool like pngcrush or optipng (if the file is in png format) and run ./generate_resources.py
+# Contributor is what we use for someone who has contributed in general (like sent a programming-related PR).
 
 fourtf | https://fourtf.com | :/avatars/fourtf.png | Author, main developer
 pajlada | https://pajlada.se | :/avatars/pajlada.png | Collaborator, co-developer
@@ -45,6 +45,8 @@ Talen | https://github.com/talneoran | | Contributor
 SLCH | https://github.com/SLCH | :/avatars/slch.png | Contributor
 ALazyMeme | https://github.com/alazymeme | :/avatars/alazymeme.png | Contributor
 xHeaveny_ | https://github.com/xHeaveny | :/avatars/xheaveny.png | Contributor
+1xelerate | https://github.com/1xelerate | :/avatars/_1xelerate.png | Contributor
+acdvs | https://github.com/acdvs | | Contributor
 
 # If you are a contributor add yourself above this line
 

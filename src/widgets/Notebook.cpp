@@ -6,7 +6,6 @@
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/Window.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/helper/NotebookButton.hpp"
@@ -19,7 +18,6 @@
 #include <QFormLayout>
 #include <QLayout>
 #include <QList>
-#include <QShortcut>
 #include <QStandardPaths>
 #include <QUuid>
 #include <QWidget>
@@ -36,9 +34,12 @@ Notebook::Notebook(QWidget *parent)
 
     this->addButton_->setHidden(true);
 
-    this->menu_.addAction("Toggle visibility of tabs", [this]() {
-        this->setShowTabs(!this->getShowTabs());
-    });
+    this->menu_.addAction(
+        "Toggle visibility of tabs",
+        [this]() {
+            this->setShowTabs(!this->getShowTabs());
+        },
+        QKeySequence("Ctrl+U"));
 }
 
 NotebookTab *Notebook::addPage(QWidget *page, QString title, bool select)
@@ -130,7 +131,7 @@ int Notebook::indexOf(QWidget *page) const
     return -1;
 }
 
-void Notebook::select(QWidget *page)
+void Notebook::select(QWidget *page, bool focusPage)
 {
     if (page == this->selectedPage_)
     {
@@ -147,20 +148,23 @@ void Notebook::select(QWidget *page)
         item.tab->setSelected(true);
         item.tab->raise();
 
-        if (item.selectedWidget == nullptr)
+        if (focusPage)
         {
-            item.page->setFocus();
-        }
-        else
-        {
-            if (containsChild(page, item.selectedWidget))
+            if (item.selectedWidget == nullptr)
             {
-                item.selectedWidget->setFocus(Qt::MouseFocusReason);
+                item.page->setFocus();
             }
             else
             {
-                qCDebug(chatterinoWidget)
-                    << "Notebook: selected child of page doesn't exist anymore";
+                if (containsChild(page, item.selectedWidget))
+                {
+                    item.selectedWidget->setFocus(Qt::MouseFocusReason);
+                }
+                else
+                {
+                    qCDebug(chatterinoWidget) << "Notebook: selected child of "
+                                                 "page doesn't exist anymore";
+                }
             }
         }
     }
@@ -215,17 +219,17 @@ bool Notebook::containsChild(const QObject *obj, const QObject *child)
                        });
 }
 
-void Notebook::selectIndex(int index)
+void Notebook::selectIndex(int index, bool focusPage)
 {
     if (index < 0 || this->items_.count() <= index)
     {
         return;
     }
 
-    this->select(this->items_[index].page);
+    this->select(this->items_[index].page, focusPage);
 }
 
-void Notebook::selectNextTab()
+void Notebook::selectNextTab(bool focusPage)
 {
     if (this->items_.size() <= 1)
     {
@@ -235,10 +239,10 @@ void Notebook::selectNextTab()
     auto index =
         (this->indexOf(this->selectedPage_) + 1) % this->items_.count();
 
-    this->select(this->items_[index].page);
+    this->select(this->items_[index].page, focusPage);
 }
 
-void Notebook::selectPreviousTab()
+void Notebook::selectPreviousTab(bool focusPage)
 {
     if (this->items_.size() <= 1)
     {
@@ -252,10 +256,10 @@ void Notebook::selectPreviousTab()
         index += this->items_.count();
     }
 
-    this->select(this->items_[index].page);
+    this->select(this->items_[index].page, focusPage);
 }
 
-void Notebook::selectLastTab()
+void Notebook::selectLastTab(bool focusPage)
 {
     const auto size = this->items_.size();
     if (size <= 1)
@@ -263,7 +267,7 @@ void Notebook::selectLastTab()
         return;
     }
 
-    this->select(this->items_[size - 1].page);
+    this->select(this->items_[size - 1].page, focusPage);
 }
 
 int Notebook::getPageCount() const
@@ -758,7 +762,7 @@ void SplitNotebook::addCustomButtons()
         [settingsBtn](bool hide, auto) {
             settingsBtn->setVisible(!hide);
         },
-        this->connections_);
+        this->signalHolder_);
 
     settingsBtn->setIcon(NotebookButton::Settings);
 
@@ -773,7 +777,7 @@ void SplitNotebook::addCustomButtons()
         [userBtn](bool hide, auto) {
             userBtn->setVisible(!hide);
         },
-        this->connections_);
+        this->signalHolder_);
 
     userBtn->setIcon(NotebookButton::User);
     QObject::connect(userBtn, &NotebookButton::leftClicked, [this, userBtn] {
@@ -805,7 +809,7 @@ SplitContainer *SplitNotebook::getOrAddSelectedPage()
                                    : this->addPage();
 }
 
-void SplitNotebook::select(QWidget *page)
+void SplitNotebook::select(QWidget *page, bool focusPage)
 {
     if (auto selectedPage = this->getSelectedPage())
     {
@@ -817,7 +821,7 @@ void SplitNotebook::select(QWidget *page)
             }
         }
     }
-    this->Notebook::select(page);
+    this->Notebook::select(page, focusPage);
 }
 
 }  // namespace chatterino

@@ -231,8 +231,6 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Separate with lines", s.separateMessages);
     layout.addCheckbox("Alternate background color", s.alternateMessages);
     layout.addCheckbox("Show deleted messages", s.hideModerated, true);
-    layout.addCheckbox("Highlight messages redeemed with Channel Points",
-                       s.enableRedeemedHighlight);
     layout.addDropdown<QString>(
         "Timestamp format (a = am/pm, zzz = milliseconds)",
         {"Disable", "h:mm", "hh:mm", "h:mm a", "hh:mm a", "h:mm:ss", "hh:mm:ss",
@@ -368,7 +366,13 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         "Extra information like \"youtube video stats\" or title of webpages "
         "can be loaded for all links if enabled. Optionally you can also show "
         "thumbnails for emotes, videos and more. The information is pulled "
-        "from our servers.");
+        "from our servers. The Link Previews are loaded through <a "
+        "href=\"https://github.com/Chatterino/api\">an API</a> hosted by the "
+        "Chatterino developers. These are the API <a "
+        "href=\"https://braize.pajlada.com/chatterino/legal/"
+        "terms-of-service\">Terms of Services</a> and <a "
+        "href=\"https://braize.pajlada.com/chatterino/legal/"
+        "privacy-policy\">Privacy Policy</a>.");
     layout.addCheckbox("Enable", s.linkInfoTooltip);
     layout.addDropdown<int>(
         "Also show thumbnails if available",
@@ -434,14 +438,14 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     {
         layout.addDescription(
             "Your operating system is not officially supplied with builds. For "
-            "updates, please rebuild chatterino from sources. Report "
+            "updates, please rebuild Chatterino from sources. Report "
             "issues <a href='https://chatterino.com/link/issues'>here</a>.");
     }
 
 #ifdef Q_OS_WIN
     layout.addTitle("Browser Integration");
     layout.addDescription("The browser extension replaces the default "
-                          "Twitch.tv chat with chatterino.");
+                          "Twitch.tv chat with Chatterino.");
 
     {
         if (auto err = nmIpcError().get())
@@ -504,6 +508,20 @@ void GeneralPage::initLayout(GeneralPageView &layout)
         }));
         box->addWidget(layout.makeButton("Reset", []() {
             getSettings()->cachePath = "";
+        }));
+        box->addWidget(layout.makeButton("Clear Cache", [&layout]() {
+            auto reply = QMessageBox::question(
+                layout.window(), "Clear cache",
+                "Are you sure that you want to clear your cache? Emotes may "
+                "take longer to load next time Chatterino is started.",
+                QMessageBox::Yes | QMessageBox::No);
+
+            if (reply == QMessageBox::Yes)
+            {
+                auto cacheDir = QDir(getPaths()->cacheDirectory());
+                cacheDir.removeRecursively();
+                cacheDir.mkdir(getPaths()->cacheDirectory());
+            }
         }));
         box->addStretch(1);
 
@@ -586,7 +604,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
 
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
 
-#ifdef Q_OS_LINUX
+#if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
     if (!getPaths()->isPortable())
     {
         layout.addCheckbox(
@@ -651,7 +669,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addCheckbox("Only search for username autocompletion with an @",
                        s.userCompletionOnlyWithAt);
 
-    layout.addCheckbox("Show twitch whispers inline", s.inlineWhispers);
+    layout.addCheckbox("Show Twitch whispers inline", s.inlineWhispers);
     layout.addCheckbox("Highlight received inline whispers",
                        s.highlightInlineWhispers);
     layout.addCheckbox("Load message history on connect",

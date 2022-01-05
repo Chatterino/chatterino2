@@ -20,6 +20,7 @@
 #include <QDir>
 #include <QMediaPlayer>
 #include <QUrl>
+#include <unordered_set>
 
 namespace chatterino {
 
@@ -127,8 +128,38 @@ NotificationModel *NotificationController::createModel(QObject *parent,
     return model;
 }
 
+namespace {
+    // TODO: combine this with getEmoteSetBatches in TwitchAccount.cpp, maybe some templated thing
+    std::vector<QStringList> getChannelsInBatches(QStringList channels)
+    {
+        constexpr int batchSize = 100;
+
+        int batchCount = (channels.size() / batchSize) + 1;
+
+        std::vector<QStringList> batches;
+        batches.reserve(batchCount);
+
+        for (int i = 0; i < batchCount; i++)
+        {
+            QStringList batch;
+
+            // I hate you, msvc
+            int last = (std::min)(batchSize, channels.size() - batchSize * i);
+            for (int j = 0; j < last; j++)
+            {
+                batch.push_back(channels.at(j + (batchSize * i)));
+            }
+            batches.emplace_back(batch);
+        }
+
+        return batches;
+    }
+}  // namespace
+
 void NotificationController::fetchFakeChannels()
 {
+    qCDebug(chatterinoNotification) << "fetching fake channels";
+    QStringList channels;
     for (std::vector<int>::size_type i = 0;
          i != channelMap[Platform::Twitch].raw().size(); i++)
     {
@@ -136,69 +167,79 @@ void NotificationController::fetchFakeChannels()
             channelMap[Platform::Twitch].raw()[i]);
         if (chan->isEmpty())
         {
-            getFakeTwitchChannelLiveStatus(
-                channelMap[Platform::Twitch].raw()[i]);
+            channels.push_back(channelMap[Platform::Twitch].raw()[i]);
         }
     }
+    for (const auto &batch : getChannelsInBatches(channels))
+    {
+        getHelix()->fetchStreams(
+            QStringList(), batch,
+            [batch, this](std::vector<HelixStream> streams) {
+                std::unordered_set<QString> liveStreams;
+                for (const auto &stream : streams)
+                {
+                    liveStreams.insert(stream.userName);
+                }
+
+                for (const auto &name : batch)
+                {
+                    auto it = liveStreams.find(name);
+                    this->checkStream(it != liveStreams.end(), name);
+                }
+            },
+            [batch]() {
+                // we done fucked up.
+                qCWarning(chatterinoNotification)
+                    << "Failed to fetch live status for " << batch;
+            });
+    }
 }
-
-void NotificationController::getFakeTwitchChannelLiveStatus(
-    const QString &channelName)
+void NotificationController::checkStream(bool live, QString channelName)
 {
-    getHelix()->getStreamByName(
-        channelName,
-        [channelName, this](bool live, const auto &stream) {
-            qCDebug(chatterinoNotification) << "[TwitchChannel" << channelName
-                                            << "] Refreshing live status";
+    qCDebug(chatterinoNotification)
+        << "[TwitchChannel" << channelName << "] Refreshing live status";
 
-            if (!live)
-            {
-                // Stream is offline
-                this->removeFakeChannel(channelName);
-                return;
-            }
+    if (!live)
+    {
+        // Stream is offline
+        this->removeFakeChannel(channelName);
+        return;
+    }
 
-            // Stream is online
-            auto i = std::find(fakeTwitchChannels.begin(),
-                               fakeTwitchChannels.end(), channelName);
+    // Stream is online
+    auto i = std::find(fakeTwitchChannels.begin(), fakeTwitchChannels.end(),
+                       channelName);
 
-            if (i != fakeTwitchChannels.end())
-            {
-                // We have already pushed the live state of this stream
-                // Could not find stream in fake twitch channels!
-                return;
-            }
+    if (i != fakeTwitchChannels.end())
+    {
+        // We have already pushed the live state of this stream
+        // Could not find stream in fake Twitch channels!
+        return;
+    }
 
-            if (Toasts::isEnabled())
-            {
-                getApp()->toasts->sendChannelNotification(channelName,
-                                                          Platform::Twitch);
-            }
-            if (getSettings()->notificationPlaySound &&
-                !(isInStreamerMode() &&
-                  getSettings()->streamerModeSuppressLiveNotifications))
-            {
-                getApp()->notifications->playSound();
-            }
-            if (getSettings()->notificationFlashTaskbar &&
-                !(isInStreamerMode() &&
-                  getSettings()->streamerModeSuppressLiveNotifications))
-            {
-                getApp()->windows->sendAlert();
-            }
-            MessageBuilder builder;
-            TwitchMessageBuilder::liveMessage(channelName, &builder);
-            getApp()->twitch2->liveChannel->addMessage(builder.release());
+    if (Toasts::isEnabled())
+    {
+        getApp()->toasts->sendChannelNotification(channelName,
+                                                  Platform::Twitch);
+    }
+    if (getSettings()->notificationPlaySound &&
+        !(isInStreamerMode() &&
+          getSettings()->streamerModeSuppressLiveNotifications))
+    {
+        getApp()->notifications->playSound();
+    }
+    if (getSettings()->notificationFlashTaskbar &&
+        !(isInStreamerMode() &&
+          getSettings()->streamerModeSuppressLiveNotifications))
+    {
+        getApp()->windows->sendAlert();
+    }
+    MessageBuilder builder;
+    TwitchMessageBuilder::liveMessage(channelName, &builder);
+    getApp()->twitch2->liveChannel->addMessage(builder.release());
 
-            // Indicate that we have pushed notifications for this stream
-            fakeTwitchChannels.push_back(channelName);
-        },
-        [channelName, this] {
-            qCDebug(chatterinoNotification)
-                << "[TwitchChannel" << channelName
-                << "] Refreshing live status (Missing ID)";
-            this->removeFakeChannel(channelName);
-        });
+    // Indicate that we have pushed notifications for this stream
+    fakeTwitchChannels.push_back(channelName);
 }
 
 void NotificationController::removeFakeChannel(const QString channelName)

@@ -15,14 +15,21 @@ jobs:
         os: [windows-latest, ubuntu-latest, macos-latest]
         qt-version: [5.15.2, 5.12.10]
         build-system: [qmake, cmake]
+        pch: [true]
         exclude:
           - os: windows-latest
             qt-version: 5.12.10
             build-system: cmake
+            pch: true
         include:
           - os: windows-2016
             qt-version: 5.12.10
             build-system: cmake
+            pch: true
+          - os: ubuntu-latest
+            qt-version: 5.15.2
+            build-system: cmake
+            pch: false
       fail-fast: false
 
     steps:
@@ -38,14 +45,14 @@ jobs:
             echo "vs_version=2017" >> $GITHUB_ENV
         shell: bash
 
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
         with:
           submodules: true
           fetch-depth: 0  # allows for tags access
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2.1.7
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-20210109
@@ -66,7 +73,7 @@ jobs:
       # WINDOWS
       - name: Cache conan packages
         if: startsWith(matrix.os, 'windows')
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2.1.7
         with:
           key: ${{ runner.os }}-conan-${{ hashFiles('**/conanfile.txt') }}-20210412
           path: C:/.conan/
@@ -82,7 +89,7 @@ jobs:
         
       - name: Enable Developer Command Prompt
         if: startsWith(matrix.os, 'windows')
-        uses: ilammy/msvc-dev-cmd@v1.9.0
+        uses: ilammy/msvc-dev-cmd@v1.10.0
 
       - name: Build (Windows)
         if: startsWith(matrix.os, 'windows') && matrix.build-system == 'qmake'
@@ -114,7 +121,7 @@ jobs:
 
       - name: Upload artifact (Windows)
         if: startsWith(matrix.os, 'windows')
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ matrix.build-system }}.zip
           path: build/chatterino-windows-x86-64.zip
@@ -158,7 +165,12 @@ jobs:
         run: |
             mkdir build
             cd build
-            cmake -DCMAKE_INSTALL_PREFIX=appdir/usr/ -DCMAKE_BUILD_TYPE=Release -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On ..
+            cmake \
+              -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
+              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
+              ..
             make -j8
         shell: bash
 
@@ -178,14 +190,14 @@ jobs:
 
       - name: Upload artifact - AppImage (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
         if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: Chatterino-${{ matrix.qt-version }}-${{ matrix.build-system }}.deb
           path: build/Chatterino.deb
@@ -214,6 +226,7 @@ jobs:
             cmake \
                 -DCMAKE_BUILD_TYPE=Release \
                 -DOPENSSL_ROOT_DIR=/usr/local/opt/openssl \
+                -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
                 ..
             make -j8
         shell: bash
@@ -230,7 +243,7 @@ jobs:
 
       - name: Upload artifact (MacOS)
         if: startsWith(matrix.os, 'macos')
-        uses: actions/upload-artifact@v2.2.4
+        uses: actions/upload-artifact@v2.3.1
         with:
           name: chatterino-osx-${{ matrix.qt-version }}-${{ matrix.build-system }}.dmg
           path: build/chatterino-osx.dmg
@@ -254,42 +267,42 @@ jobs:
               Nightly Build
           prerelease: true
 
-      - uses: actions/download-artifact@v2.0.10
+      - uses: actions/download-artifact@v2.1.0
         with:
           name: chatterino-windows-x86-64-5.15.2-qmake.zip
           path: windows/
 
-      - uses: actions/download-artifact@v2.0.10
+      - uses: actions/download-artifact@v2.1.0
         with:
           name: chatterino-windows-x86-64-5.15.2-cmake.zip
           path: windows-cmake/
 
-      - uses: actions/download-artifact@v2.0.10
+      - uses: actions/download-artifact@v2.1.0
         with:
           name: Chatterino-x86_64-5.15.2-qmake.AppImage
           path: linux/
 
-      - uses: actions/download-artifact@v2.0.10
+      - uses: actions/download-artifact@v2.1.0
         with:
           name: Chatterino-x86_64-5.15.2-cmake.AppImage
           path: linux-cmake/
 
-      - uses: actions/download-artifact@v2.0.10
+      - uses: actions/download-artifact@v2.1.0
         with:
           name: Chatterino-5.15.2-qmake.deb
           path: ubuntu/
 
-      - uses: actions/download-artifact@v2.0.10
+      - uses: actions/download-artifact@v2.1.0
         with:
           name: Chatterino-5.15.2-cmake.deb
           path: ubuntu-cmake/
 
-      - uses: actions/download-artifact@v2.0.10
+      - uses: actions/download-artifact@v2.1.0
         with:
           name: chatterino-osx-5.15.2-qmake.dmg
           path: macos/
 
-      - uses: actions/download-artifact@v2.0.10
+      - uses: actions/download-artifact@v2.1.0
         with:
           name: chatterino-osx-5.15.2-cmake.dmg
           path: macos-cmake/

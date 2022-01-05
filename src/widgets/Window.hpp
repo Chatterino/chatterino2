@@ -33,8 +33,10 @@ protected:
 
 private:
     void addCustomTitlebarButtons();
-    void addDebugStuff();
-    void addShortcuts();
+    void addDebugStuff(
+        std::map<QString, std::function<QString(std::vector<QString>)>>
+            &actions);
+    void addShortcuts() override;
     void addLayout();
     void onAccountSelected();
     void addMenuBar();

@@ -108,10 +108,19 @@ IrcConnection::IrcConnection(QObject *parent)
 
     QObject::connect(this, &Communi::IrcConnection::messageReceived,
                      [this](Communi::IrcMessage *message) {
-                         // This connection is probably still alive
                          this->recentlyReceivedMessage_ = true;
-                         this->reconnectBackoff_.reset();
+
+                         if (message->command() == "372")  // MOTD
+                         {
+                             this->reconnectBackoff_.reset();
+                         }
                      });
+}
+
+IrcConnection::~IrcConnection()
+{
+    // Prematurely disconnect all QObject connections
+    this->disconnect();
 }
 
 void IrcConnection::open()

@@ -130,6 +130,7 @@ void SharedMessageBuilder::parseHighlights()
 {
     auto app = getApp();
 
+    // Highlight because it's a subscription
     if (this->message().flags.has(MessageFlag::Subscription) &&
         getSettings()->enableSubHighlight)
     {

@@ -23,7 +23,7 @@ public:
     void addPartedUser(const QString &user);
     const QColor getUserColor(const QString &user);
     void setUserColor(const QString &user, const QColor &color);
-    void updateOnlineChatters(const std::unordered_set<QString> &chatters);
+    void updateOnlineChatters(const std::unordered_set<QString> &usernames);
 
     // colorsSize returns the amount of colors stored in `chatterColors_`
     // NOTE: This function is only meant to be used in tests and benchmarks

@@ -13,13 +13,13 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.4.0
         with:
           submodules: recursive
 
       - name: Cache Qt
         id: cache-qt
-        uses: actions/cache@v2.1.6
+        uses: actions/cache@v2.1.7
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-20201005

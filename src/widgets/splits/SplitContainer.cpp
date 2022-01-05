@@ -41,39 +41,40 @@ SplitContainer::SplitContainer(Notebook *parent)
 {
     this->refreshTabTitle();
 
-    this->managedConnect(Split::modifierStatusChanged, [this](auto modifiers) {
-        this->layout();
+    this->signalHolder_.managedConnect(
+        Split::modifierStatusChanged, [this](auto modifiers) {
+            this->layout();
 
-        if (modifiers == showResizeHandlesModifiers)
-        {
-            for (auto &handle : this->resizeHandles_)
+            if (modifiers == showResizeHandlesModifiers)
             {
-                handle->show();
-                handle->raise();
+                for (auto &handle : this->resizeHandles_)
+                {
+                    handle->show();
+                    handle->raise();
+                }
             }
-        }
-        else
-        {
-            for (auto &handle : this->resizeHandles_)
+            else
             {
-                handle->hide();
+                for (auto &handle : this->resizeHandles_)
+                {
+                    handle->hide();
+                }
             }
-        }
 
-        if (modifiers == showSplitOverlayModifiers)
-        {
-            this->setCursor(Qt::PointingHandCursor);
-        }
-        else
-        {
-            this->unsetCursor();
-        }
-    });
+            if (modifiers == showSplitOverlayModifiers)
+            {
+                this->setCursor(Qt::PointingHandCursor);
+            }
+            else
+            {
+                this->unsetCursor();
+            }
+        });
 
     this->setCursor(Qt::PointingHandCursor);
     this->setAcceptDrops(true);
 
-    this->managedConnect(this->overlay_.dragEnded, [this]() {
+    this->signalHolder_.managedConnect(this->overlay_.dragEnded, [this]() {
         this->isDragging_ = false;
         this->layout();
     });
@@ -123,7 +124,7 @@ Split *SplitContainer::appendNewSplit(bool openChannelNameDialog)
 
     if (openChannelNameDialog)
     {
-        split->showChangeChannelPopup("Open channel name", true, [=](bool ok) {
+        split->showChangeChannelPopup("Open channel", true, [=](bool ok) {
             if (!ok)
             {
                 this->deleteSplit(split);
@@ -255,7 +256,8 @@ void SplitContainer::addSplit(Split *split)
                     tab->connect(tab, &QWidget::destroyed, [tab]() mutable {
                         ClosedSplits::invalidateTab(tab);
                     });
-                    ClosedSplits::push({split->getChannel()->getName(), tab});
+                    ClosedSplits::push({split->getChannel()->getName(),
+                                        split->getFilters(), tab});
                 }
                 break;
 
@@ -823,8 +825,6 @@ void SplitContainer::applyFromDescriptorRecursively(
         const auto &containerNode = *n;
 
         bool vertical = containerNode.vertical_;
-
-        Direction direction = vertical ? Direction::Below : Direction::Right;
 
         node->type_ =
             vertical ? Node::VerticalContainer : Node::HorizontalContainer;

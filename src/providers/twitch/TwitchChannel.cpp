@@ -81,7 +81,7 @@ namespace {
             noticeMessage = "Chat has been cleared by a moderator.";
         }
 
-        // rebuild the raw irc message so we can convert it back to an ircmessage again!
+        // rebuild the raw IRC message so we can convert it back to an ircmessage again!
         // this could probably be done in a smarter way
 
         auto s = QString(":tmi.twitch.tv NOTICE %1 :%2")
@@ -158,14 +158,16 @@ TwitchChannel::TwitchChannel(const QString &name)
 {
     qCDebug(chatterinoTwitch) << "[TwitchChannel" << name << "] Opened";
 
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [=] {
-        this->setMod(false);
-    });
+    this->signalHolder_.managedConnect(
+        getApp()->accounts->twitch.currentUserChanged, [=] {
+            this->setMod(false);
+        });
 
     // pubsub
-    this->managedConnect(getApp()->accounts->twitch.currentUserChanged, [=] {
-        this->refreshPubsub();
-    });
+    this->signalHolder_.managedConnect(
+        getApp()->accounts->twitch.currentUserChanged, [=] {
+            this->refreshPubsub();
+        });
     this->refreshPubsub();
     this->userStateChanged.connect([this] {
         this->refreshPubsub();
@@ -363,7 +365,7 @@ void TwitchChannel::sendMessage(const QString &message)
     // Do last message processing
     QString parsedMessage = app->emotes->emojis.replaceShortCodes(message);
 
-    parsedMessage = parsedMessage.trimmed();
+    parsedMessage = parsedMessage.simplified();
 
     if (parsedMessage.isEmpty())
     {
