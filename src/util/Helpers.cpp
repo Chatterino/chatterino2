@@ -93,18 +93,4 @@ QString formatUserMention(const QString &userName, bool isFirstWord,
     return result;
 }
 
-qint64 calculateDirectorySize(const QString &directoryPath)
-{
-    QDirIterator it(directoryPath, QDirIterator::Subdirectories);
-    qint64 size = 0;
-
-    while (it.hasNext())
-    {
-        size += it.fileInfo().size();
-        it.next();
-    }
-
-    return size;
-}
-
 }  // namespace chatterino

@@ -43,7 +43,14 @@ QString fetchLogDirectorySize()
                                    ? getPaths()->messageLogDirectory
                                    : getSettings()->logPath;
 
-    auto logsSize = calculateDirectorySize(logPathDirectory);
+    QDirIterator it(logPathDirectory, QDirIterator::Subdirectories);
+    qint64 logsSize = 0;
+
+    while (it.hasNext())
+    {
+        logsSize += it.fileInfo().size();
+        it.next();
+    }
 
     return QString("Your logs currently take up %1 of space")
         .arg(formatSize(logsSize));
