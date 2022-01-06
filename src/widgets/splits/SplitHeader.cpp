@@ -788,7 +788,7 @@ void SplitHeader::paintEvent(QPaintEvent *)
     QColor background = this->theme->splits.header.background;
     QColor border = this->theme->splits.header.border;
 
-    if (this->split_->hasFocus() && !this->split_->isSingleSplit())
+    if (this->split_->hasFocus())
     {
         background = this->theme->splits.header.focusedBackground;
         border = this->theme->splits.header.focusedBorder;
@@ -893,7 +893,7 @@ void SplitHeader::themeChangedEvent()
 {
     auto palette = QPalette();
 
-    if (this->split_->hasFocus() && this->split_->isSingleSplit())
+    if (this->split_->hasFocus())
     {
         palette.setColor(QPalette::WindowText,
                          this->theme->splits.header.focusedText);

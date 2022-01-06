@@ -1228,17 +1228,4 @@ void Split::drag()
     }
 }
 
-bool Split::isSingleSplit()
-{
-    if (auto container = dynamic_cast<SplitContainer *>(this->parentWidget()))
-    {
-        if (container->getSplits().size() == 1)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
 }  // namespace chatterino
