@@ -923,6 +923,15 @@ void SplitHeader::themeChangedEvent()
 
 void SplitHeader::reloadChannelEmotes()
 {
+    using namespace std::chrono_literals;
+
+    auto now = std::chrono::steady_clock::now();
+    if (this->lastReloadedChannelEmotes_ + 30s > now)
+    {
+        return;
+    }
+    this->lastReloadedChannelEmotes_ = now;
+
     auto channel = this->split_->getChannel();
 
     if (auto twitchChannel = dynamic_cast<TwitchChannel *>(channel.get()))
@@ -934,6 +943,15 @@ void SplitHeader::reloadChannelEmotes()
 
 void SplitHeader::reloadSubscriberEmotes()
 {
+    using namespace std::chrono_literals;
+
+    auto now = std::chrono::steady_clock::now();
+    if (this->lastReloadedSubEmotes_ + 30s > now)
+    {
+        return;
+    }
+    this->lastReloadedSubEmotes_ = now;
+
     auto channel = this->split_->getChannel();
     getApp()->accounts->twitch.getCurrent()->loadEmotes(channel);
 }

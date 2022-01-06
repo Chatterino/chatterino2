@@ -33,11 +33,11 @@ public:
     void removeCurrentPage();
 
     int indexOf(QWidget *page) const;
-    virtual void select(QWidget *page);
-    void selectIndex(int index);
-    void selectNextTab();
-    void selectPreviousTab();
-    void selectLastTab();
+    virtual void select(QWidget *page, bool focusPage = true);
+    void selectIndex(int index, bool focusPage = true);
+    void selectNextTab(bool focusPage = true);
+    void selectPreviousTab(bool focusPage = true);
+    void selectLastTab(bool focusPage = true);
 
     int getPageCount() const;
     QWidget *getPageAt(int index) const;
@@ -108,7 +108,7 @@ public:
 
     SplitContainer *addPage(bool select = false);
     SplitContainer *getOrAddSelectedPage();
-    void select(QWidget *page) override;
+    void select(QWidget *page, bool focusPage = true) override;
 
 protected:
     void showEvent(QShowEvent *event) override;

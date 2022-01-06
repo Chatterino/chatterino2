@@ -2,6 +2,7 @@
 
 #include "providers/twitch/TwitchCommon.hpp"
 
+#include <QDirIterator>
 #include <QLocale>
 #include <QUuid>
 
