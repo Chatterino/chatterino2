@@ -1942,6 +1942,7 @@ void ChannelView::addContextMenuItems(
             "friends",        //
             "inventory",      //
             "jobs",           //
+            "login",          //
             "messages",       //
             "payments",       //
             "profile",        //
