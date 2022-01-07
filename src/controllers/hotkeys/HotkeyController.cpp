@@ -271,6 +271,7 @@ void HotkeyController::saveHotkeys()
         pajlada::Settings::Setting<std::vector<QString>>::set(
             section + "/arguments", hotkey->arguments());
     }
+    pajlada::Settings::SettingManager::getInstance()->save();
 }
 
 void HotkeyController::addDefaults(std::set<QString> &addedHotkeys)
