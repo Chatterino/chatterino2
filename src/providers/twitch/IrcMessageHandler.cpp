@@ -230,7 +230,11 @@ std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
                                           TwitchIrcServer &server)
 {
-    // COMBINED_FIXER is defined in TwitchChannel.hpp
+    // This is to make sure that combined emoji go through properly, see
+    // https://github.com/Chatterino/chatterino2/issues/3384 and
+    // https://mm2pl.github.io/emoji_rfc.pdf for more details
+    // Constants used here are defined in TwitchChannel.hpp
+
     this->addMessage(
         message, message->target(),
         message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
