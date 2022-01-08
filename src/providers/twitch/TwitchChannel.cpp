@@ -106,9 +106,11 @@ namespace {
 
         for (const auto jsonMessage : jsonMessages)
         {
-            auto content = jsonMessage.toString().toUtf8();
+            auto content = jsonMessage.toString();
+            content.replace(COMBINED_FIXER, ZERO_WIDTH_JOINER);
 
-            auto message = Communi::IrcMessage::fromData(content, nullptr);
+            auto message =
+                Communi::IrcMessage::fromData(content.toUtf8(), nullptr);
 
             if (message->command() == "CLEARCHAT")
             {

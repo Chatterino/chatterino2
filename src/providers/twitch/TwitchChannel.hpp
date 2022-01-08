@@ -33,6 +33,10 @@ namespace {
 }
 const QString ESCAPE_TAG = QString(ESCAPE_TAG_CHARS, 2);
 
+const static QRegularExpression COMBINED_FIXER(
+    QString("(?<!%1)%1").arg(ESCAPE_TAG),
+    QRegularExpression::UseUnicodePropertiesOption);
+
 enum class HighlightState;
 
 struct Emote;

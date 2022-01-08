@@ -230,11 +230,7 @@ std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
                                           TwitchIrcServer &server)
 {
-    // See https://github.com/Chatterino/chatterino2/issues/3384
-    const static QRegularExpression COMBINED_FIXER(
-        QString("(?<!%1)%1").arg(ESCAPE_TAG),
-        QRegularExpression::UseUnicodePropertiesOption);
-
+    // COMBINED_FIXER is defined in TwitchChannel.hpp
     this->addMessage(
         message, message->target(),
         message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
