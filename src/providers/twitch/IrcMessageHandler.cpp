@@ -231,7 +231,9 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
                                           TwitchIrcServer &server)
 {
     // See https://github.com/Chatterino/chatterino2/issues/3384
-    const static QRegularExpression COMBINED_FIXER("(?<!\U000E0002)\U000E0002");
+    const static QRegularExpression COMBINED_FIXER(
+        "(?<!\U000E0002)\U000E0002",
+        QRegularExpression::UseUnicodePropertiesOption);
 
     this->addMessage(
         message, message->target(),
