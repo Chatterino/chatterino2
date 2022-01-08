@@ -567,8 +567,10 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     auto c = getApp()->twitch.server->whispersChannel.get();
 
-    TwitchMessageBuilder builder(c, message, args, message->parameter(1),
-                                 false);
+    TwitchMessageBuilder builder(
+        c, message, args,
+        message->parameter(1).replace(COMBINED_FIXER, ZERO_WIDTH_JOINER),
+        false);
 
     if (builder.isIgnored())
     {
