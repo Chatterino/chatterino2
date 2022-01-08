@@ -23,9 +23,9 @@
 
 namespace chatterino {
 
-const QString ZERO_WIDTH_JOINER = "\u200D";
+const QString ZERO_WIDTH_JOINER = QString(QChar(0x200D));
 // See https://github.com/Chatterino/chatterino2/issues/3384
-const QString ESCAPE_TAG = "\U000E0002";
+const QString ESCAPE_TAG = QString(QChar(0xE0002));
 
 enum class HighlightState;
 
