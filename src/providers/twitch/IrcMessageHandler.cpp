@@ -232,7 +232,7 @@ void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
 {
     // See https://github.com/Chatterino/chatterino2/issues/3384
     const static QRegularExpression COMBINED_FIXER(
-        "(?<!\U000E0002)\U000E0002",
+        QString("(?<!%1)%1").arg(QChar(0xE0002)),
         QRegularExpression::UseUnicodePropertiesOption);
 
     this->addMessage(
