@@ -23,9 +23,15 @@
 
 namespace chatterino {
 
-const QString ZERO_WIDTH_JOINER = QString(QChar(0x200D));
 // See https://github.com/Chatterino/chatterino2/issues/3384
-const QString ESCAPE_TAG = QString(QChar(0xE0002));
+const QString ZERO_WIDTH_JOINER = QString(QChar(0x200D));
+
+// Here be MSVC: Do NOT replace with "\U" literal, it will fail silently.
+namespace {
+    const QChar ESCAPE_TAG_CHARS[2] = {QChar::highSurrogate(0xE0002),
+                                       QChar::lowSurrogate(0xE0002)};
+}
+const QString ESCAPE_TAG = QString(ESCAPE_TAG_CHARS, 2);
 
 enum class HighlightState;
 
