@@ -925,6 +925,12 @@ QString CommandController::execCommand(const QString &textNoEmoji,
                 appendWhisperMessageWordsLocally(words);
                 sendWhisperMessage(text);
             }
+            else
+            {
+                channel->addMessage(
+                    makeSystemMessage("Can't send empty whisper message! "
+                                      "Usage: /w <username> <message>"));
+            }
 
             return "";
         }
@@ -970,6 +976,13 @@ QString CommandController::execCommand(const QString &textNoEmoji,
         {
             return this->execCustomCommand(words, it.value(), dryRun, channel);
         }
+    }
+
+    if (!dryRun && channel->getType() == Channel::Type::TwitchWhispers)
+    {
+        channel->addMessage(
+            makeSystemMessage("Use /w <username> <message> to whisper"));
+        return "";
     }
 
     return text;

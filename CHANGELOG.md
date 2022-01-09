@@ -77,6 +77,7 @@
 - Bugfix: Fixed zero-width emotes sometimes wrapping lines incorrectly. (#3389)
 - Bugfix: Fixed using special chars in Windows username breaking the storage of custom commands (#3397)
 - Bugfix: Fixed character counter changing fonts after going over the limit. (#3422)
+- Bugfix: Fixed /whispers split eating messages, now gives a usage feedback (#3439)
 - Bugfix: Fixed crash that could occur if the user opens/closes ChannelViews (e.g. EmotePopup, or Splits) then modifies the showLastMessageIndicator setting. (#3444)
 - Bugfix: Removed ability to reload emotes really fast (#3450)
 - Bugfix: Re-add date of build to the "About" page on nightly versions. (#3464)
