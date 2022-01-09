@@ -928,8 +928,7 @@ QString CommandController::execCommand(const QString &textNoEmoji,
             else
             {
                 channel->addMessage(
-                    makeSystemMessage("Can't send empty whisper message! "
-                                      "Usage: /w <username> <message>"));
+                    makeSystemMessage("Usage: /w <username> <message>"));
             }
 
             return "";
