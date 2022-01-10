@@ -155,4 +155,14 @@ struct AutomodInfoAction : PubSubAction {
     } type;
 };
 
+struct LowTrustUserMessageAction : PubSubAction {
+    using PubSubAction::PubSubAction;
+
+    ActionUser target;
+    QString message;
+    QString updater;
+    QString treatment;
+    QString msgID;
+}
+
 }  // namespace chatterino
