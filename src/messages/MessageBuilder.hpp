@@ -12,6 +12,7 @@ struct UnbanAction;
 struct AutomodAction;
 struct AutomodUserAction;
 struct AutomodInfoAction;
+struct LowTrustUserMessageAction;
 struct Message;
 using MessagePtr = std::shared_ptr<const Message>;
 
@@ -27,6 +28,9 @@ MessagePtr makeSystemMessage(const QString &text, const QTime &time);
 std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     const AutomodAction &action);
 MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action);
+
+std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
+    const LowTrustUserMessageAction &action);
 
 struct MessageParseArgs {
     bool disablePingSounds = false;
