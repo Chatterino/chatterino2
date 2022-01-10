@@ -975,6 +975,28 @@ void PubSub::listenToAutomod(const QString &channelID,
     this->listenToTopic(topic, account);
 }
 
+void PubSub::listenToLowTrustUser(const QString &channelID,
+                             std::shared_ptr<TwitchAccount> account)
+{
+    static const QString topicFormat("low-trust-users.%1.%2");
+    assert(!channelID.isEmpty());
+    assert(account != nullptr);
+    QString userID = account->getUserId();
+    if (userID.isEmpty())
+        return;
+
+    auto topic = topicFormat.arg(userID, channelID);
+
+    if (this->isListeningToTopic(topic))
+    {
+        return;
+    }
+
+    qCDebug(chatterinoPubsub) << "Listen to topic" << topic;
+
+    this->listenToTopic(topic, account);
+}
+
 void PubSub::listenToChannelPointRewards(const QString &channelID,
                                          std::shared_ptr<TwitchAccount> account)
 {
