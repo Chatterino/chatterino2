@@ -1983,6 +1983,17 @@ void ChannelView::addContextMenuItems(
         }
     }
 
+    Split *split = dynamic_cast<Split *>(this->parentWidget());
+    if (split != nullptr)
+    {
+        if (split->getModerationMode())
+        {
+            menu->addAction("Copy message id", [layout] {
+                crossPlatformCopy(layout->getMessage()->id);
+            });
+        }
+    }
+
     menu->popup(QCursor::pos());
     menu->raise();
 
