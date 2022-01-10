@@ -201,8 +201,7 @@ std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
         MessageElementFlag::Text, MessageColor::Text);*/
     
     builder.emplace<TextElement>(action.updater, MessageElementFlag::BoldUsername,
-                                 MessageColor::Text),
-                                 FontStyle::ChatMediumBold);
+                                 MessageColor::Text, FontStyle::ChatMediumBold);
     
     builder.emplace<TextElement>(
         (action.updater + ", thinks that there's an Impostor among us."),
