@@ -228,7 +228,7 @@ std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
     builder2.message().flags.set(MessageFlag::PubSub);
 
     
-    if (action.treatmentText == "RESTRICTED")
+    if (action.treatment == "RESTRICTED")
     {
     // hidden icon
         builder2
