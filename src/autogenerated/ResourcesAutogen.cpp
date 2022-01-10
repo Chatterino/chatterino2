@@ -15,11 +15,16 @@ Resources2::Resources2()
     this->avatars.zneix = QPixmap(":/avatars/zneix.png");
     this->buttons.addSplit = QPixmap(":/buttons/addSplit.png");
     this->buttons.addSplitDark = QPixmap(":/buttons/addSplitDark.png");
+    this->buttons.approveUser = QPixmap(":/buttons/approveUser.svg");
     this->buttons.ban = QPixmap(":/buttons/ban.png");
     this->buttons.banRed = QPixmap(":/buttons/banRed.png");
     this->buttons.clearSearch = QPixmap(":/buttons/clearSearch.png");
     this->buttons.copyDark = QPixmap(":/buttons/copyDark.png");
     this->buttons.copyLight = QPixmap(":/buttons/copyLight.png");
+    this->buttons.eye = QPixmap(":/buttons/eye.svg");
+    this->buttons.flag = QPixmap(":/buttons/flag.svg");
+    this->buttons.hidden = QPixmap(":/buttons/hidden.svg");
+    this->buttons.lock = QPixmap(":/buttons/lock.svg");
     this->buttons.menuDark = QPixmap(":/buttons/menuDark.png");
     this->buttons.menuLight = QPixmap(":/buttons/menuLight.png");
     this->buttons.mod = QPixmap(":/buttons/mod.png");
@@ -27,6 +32,7 @@ Resources2::Resources2()
     this->buttons.modModeDisabled2 = QPixmap(":/buttons/modModeDisabled2.png");
     this->buttons.modModeEnabled = QPixmap(":/buttons/modModeEnabled.png");
     this->buttons.modModeEnabled2 = QPixmap(":/buttons/modModeEnabled2.png");
+    this->buttons.safetyShieldAlert = QPixmap(":/buttons/safetyShieldAlert.svg");
     this->buttons.search = QPixmap(":/buttons/search.png");
     this->buttons.timeout = QPixmap(":/buttons/timeout.png");
     this->buttons.trashCan = QPixmap(":/buttons/trashCan.png");
