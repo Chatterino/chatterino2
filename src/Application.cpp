@@ -392,6 +392,23 @@ void Application::initPubsub()
             });
         });
 
+    this->twitch.pubsub->signals_.moderation.lowTrustUserMessage.connect(
+        [&](const auto &action) {
+            auto chan =
+                this->twitch.server->getChannelOrEmptyByID(action.roomID);
+
+            if (chan->isEmpty())
+            {
+                return;
+            }
+
+            postToThread([chan, action] {
+                const auto p = makeLowTrustUserMessage(action);
+                chan->addMessage(p.first);
+                chan->addMessage(p.second);
+            });
+        });
+
     this->twitch.pubsub->signals_.pointReward.redeemed.connect([&](auto &data) {
         QString channelId;
         if (rj::getSafe(data, "channel_id", channelId))
