@@ -418,10 +418,14 @@ void EmotePopup::filterEmotes(const QString &searchText)
             twitchGlobalEmotes.push_back(setCopy);
     }
 
+    auto seventvGlobalEmotes = this->filterEmoteMap(
+        searchText, getApp()->twitch2->getSeventvEmotes().emotes());
     auto bttvGlobalEmotes = this->filterEmoteMap(
         searchText, getApp()->twitch2->getBttvEmotes().emotes());
     auto ffzGlobalEmotes = this->filterEmoteMap(
         searchText, getApp()->twitch2->getFfzEmotes().emotes());
+    auto seventvChannelEmotes =
+        this->filterEmoteMap(searchText, this->twitchChannel_->seventvEmotes());
     auto bttvChannelEmotes =
         this->filterEmoteMap(searchText, this->twitchChannel_->bttvEmotes());
     auto ffzChannelEmotes =
@@ -444,6 +448,9 @@ void EmotePopup::filterEmotes(const QString &searchText)
                  this->channel_->getName());
 
     // global
+    if (seventvGlobalEmotes->size() > 0)
+        addEmotes(*searchChannel, *seventvGlobalEmotes, "SevenTV (Global)",
+                  MessageElementFlag::SeventvEmote);
     if (bttvGlobalEmotes->size() > 0)
         addEmotes(*searchChannel, *bttvGlobalEmotes, "BetterTTV (Global)",
                   MessageElementFlag::BttvEmote);
@@ -452,6 +459,9 @@ void EmotePopup::filterEmotes(const QString &searchText)
                   MessageElementFlag::FfzEmote);
 
     // channel
+    if (seventvChannelEmotes->size() > 0)
+        addEmotes(*searchChannel, *seventvChannelEmotes, "SevenTV (Channel)",
+                  MessageElementFlag::SeventvEmote);
     if (bttvChannelEmotes->size() > 0)
         addEmotes(*searchChannel, *bttvChannelEmotes, "BetterTTV (Channel)",
                   MessageElementFlag::BttvEmote);
