@@ -163,6 +163,6 @@ struct LowTrustUserMessageAction : PubSubAction {
     QString updater;
     QString treatment;
     QString msgID;
-}
+};
 
 }  // namespace chatterino
