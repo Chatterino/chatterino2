@@ -1693,7 +1693,6 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
             action.target = ActionUser{senderId, senderLogin,
                                         senderDisplayName, senderColor};
             this->signals_.moderation.lowTrustUserMessage.invoke(action);
-            }
         }
     }
     else
