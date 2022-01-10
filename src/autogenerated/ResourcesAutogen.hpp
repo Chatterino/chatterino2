@@ -22,11 +22,16 @@ public:
     struct {
         QPixmap addSplit;
         QPixmap addSplitDark;
+        QPixmap approveUser;
         QPixmap ban;
         QPixmap banRed;
         QPixmap clearSearch;
         QPixmap copyDark;
         QPixmap copyLight;
+        QPixmap eye;
+        QPixmap flag;
+        QPixmap hidden;
+        QPixmap lock;
         QPixmap menuDark;
         QPixmap menuLight;
         QPixmap mod;
@@ -34,6 +39,7 @@ public:
         QPixmap modModeDisabled2;
         QPixmap modModeEnabled;
         QPixmap modModeEnabled2;
+        QPixmap safetyShieldAlert;
         QPixmap search;
         QPixmap timeout;
         QPixmap trashCan;
