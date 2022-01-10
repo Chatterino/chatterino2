@@ -1560,6 +1560,142 @@ void PubSub::handleMessageResponse(const rapidjson::Value &outerData)
             // They are versions of automod_message_(denied|approved) but for mods.
         }
     }
+    else if (topic.startsWith("low-trust-users."))
+    {
+        auto topicParts = topic.split(".");
+        assert(topicParts.length() == 3);
+        auto &data = msg["data"];
+
+        QString lowTrustUserEventType;
+        if (!rj::getSafe(msg, "type", lowTrustUserEventType))
+        {
+            qCDebug(chatterinoPubsub) << "Bad low-trust-user event data";
+            return;
+        }
+
+        if (lowTrustUserEventType == "low_trust_user_new_message")
+        {
+            rapidjson::Value low_trust_user;
+            if (!rj::getSafe(data, "low_trust_user", low_trust_user))
+            {
+                qCDebug(chatterinoPubsub) << "Failed to get low_trust_user";
+                return;
+            }
+
+            LowTrustUserMessageAction action(data, topicParts[2]);
+            
+            rapidjson::Value updated_by;
+            if (!rj::getSafe(low_trust_user, "updated_by", updated_by))
+            {
+                qCDebug(chatterinoPubsub) << "Failed to get updated_by";
+                return;
+            }
+
+            if (!rj::getSafe(updated_by, "displayName", action.updater))
+            {
+                qCDebug(chatterinoPubsub) << "Failed to get displayName";
+                return;
+            }
+
+            if (!rj::getSafe(low_trust_user, "treatment", action.treatment))
+            {
+                qCDebug(chatterinoPubsub) << "Failed to get treatment";
+                return;
+            }
+
+            rapidjson::Value messageContent;
+            if (!rj::getSafeObject(data, "message_content", messageContent))
+            {
+                qCDebug(chatterinoPubsub)
+                    << "Failed to get message content";
+                return;
+            }
+
+            if (!rj::getSafe(data, "message_id", action.msgID))
+            {
+                qCDebug(chatterinoPubsub) << "Failed to get message id";
+                return;
+            }
+
+            if (!rj::getSafe(messageContent, "text", action.message))
+            {
+                qCDebug(chatterinoPubsub) << "Failed to get message text";
+                return;
+            }
+
+            // sender data
+            rapidjson::Value senderData;
+            if (!rj::getSafeObject(low_trust_user, "sender", senderData))
+            {
+                qCDebug(chatterinoPubsub) << "Failed to get sender";
+                return;
+            }
+
+            QString senderId;
+            if (!rj::getSafe(senderData, "user_id", senderId))
+            {
+                qCDebug(chatterinoPubsub) << "Failed to get sender user id";
+                return;
+            }
+
+            QString senderLogin;
+            if (!rj::getSafe(senderData, "login", senderLogin))
+            {
+                qCDebug(chatterinoPubsub) << "Failed to get sender login";
+                return;
+            }
+                
+            QString senderDisplayName = senderLogin;
+            bool hasLocalizedName = false;
+            if (rj::getSafe(senderData, "display_name", senderDisplayName))
+            {
+                // check for non-ascii display names
+                if (QString::compare(senderLogin, senderDisplayName,
+                                        Qt::CaseInsensitive) != 0)
+                {
+                    hasLocalizedName = true;
+                }
+            }
+            QColor senderColor;
+            QString senderColor_;
+            if (rj::getSafe(senderData, "chat_color", senderColor_))
+            {
+                senderColor = QColor(senderColor_);
+            }
+            else if (getSettings()->colorizeNicknames)
+            {
+                // color may be not present if user is a grey-name
+                senderColor = getRandomColor(senderId);
+            }
+            // handle username style based on prefered setting
+            switch (getSettings()->usernameDisplayMode.getValue())
+            {
+                case UsernameDisplayMode::Username: {
+                    if (hasLocalizedName)
+                    {
+                        senderDisplayName = senderLogin;
+                    }
+                    break;
+                }
+                case UsernameDisplayMode::LocalizedName: {
+                    break;
+                }
+                case UsernameDisplayMode::UsernameAndLocalizedName: {
+                    if (hasLocalizedName)
+                    {
+                        senderDisplayName = QString("%1(%2)").arg(
+                            senderLogin, senderDisplayName);
+                    }
+                    break;
+                }
+            }
+
+            action.target = ActionUser{senderId, senderLogin,
+                                        senderDisplayName, senderColor};
+            this->signals_.moderation.lowTrustUserMessage.invoke(action);
+            }
+        }
+    }
     else
     {
         qCDebug(chatterinoPubsub) << "Unknown topic:" << topic;
