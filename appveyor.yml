@@ -40,9 +40,9 @@ build_script:
 
     nmake /S /NOLOGO
 
-    windeployqt debug/chatterino.exe --debug --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
+    windeployqt release/chatterino.exe --release --no-compiler-runtime --no-translations --no-opengl-sw --dir Chatterino2/
 
-    cp debug/chatterino.exe Chatterino2/
+    cp release/chatterino.exe Chatterino2/
 
     echo nightly > Chatterino2/modes
 
