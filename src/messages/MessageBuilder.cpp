@@ -172,7 +172,7 @@ std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
     const LowTrustUserMessageAction &action)
 {
     MessageBuilder builder, builder2;
-    auto treatmentText;
+    QString treatmentText;
 
     if (action.treatment == "ACTIVE_MONITORING")
     {
