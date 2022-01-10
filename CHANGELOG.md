@@ -44,7 +44,7 @@
 - Minor: Mod list, VIP list, and Users joined/parted messages are now searchable. (#3426)
 - Minor: Add search to emote popup. (#3404)
 - Minor: Messages can now be highlighted by subscriber or founder badges. (#3445)
-- Minor: Add workaround for multipart emoji as described in [the RFC](https://mm2pl.github.io/emoji_rfc.pdf) (#3469)
+- Minor: Add workaround for multipart emoji as described in [the RFC](https://mm2pl.github.io/emoji_rfc.pdf). (#3469)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
