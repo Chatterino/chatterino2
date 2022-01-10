@@ -168,6 +168,100 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
     return std::make_pair(message1, message2);
 }
 
+std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
+    const LowTrustUserMessageAction &action)
+{
+    MessageBuilder builder, builder2;
+    auto treatmentText;
+
+    if (action.treatment == "ACTIVE_MONITORING")
+    {
+        treatmentText = "Monitored by ";
+    }
+    else if (action.treatment == "RESTRICTED")
+    {
+        treatmentText = "held for reason: Restricted by ";
+    }
+
+    builder.emplace<TimestampElement>();
+    //builder.message().loginName = "automod";
+    builder.message().flags.set(MessageFlag::PubSub);
+
+    // Safety Shield icon
+    builder
+        .emplace<ImageElement>(Image::fromPixmap(getResources().button.safetyShieldAlert),
+                               MessageElementFlag::BadgeChannelAuthority);
+    // Header message
+    /*builder.emplace<TextElement>("Suspicious User, ", MessageElementFlag::Text,
+                                 MessageColor::Text),
+                                 FontStyle::ChatMediumBold);
+    
+    builder.emplace<TextElement>(
+        (treatmentText + action.updater),
+        MessageElementFlag::Text, MessageColor::Text);*/
+    
+    builder.emplace<TextElement>(action.updater, MessageElementFlag::BoldUsername,
+                                 MessageColor::Text),
+                                 FontStyle::ChatMediumBold);
+    
+    builder.emplace<TextElement>(
+        (action.updater + ", thinks that there's an Impostor among us."),
+        MessageElementFlag::Text, MessageColor::Text);
+    
+    // ID of message caught
+    //    builder.emplace<TextElement>(action.msgID, MessageElementFlag::Text,
+    //                                 MessageColor::Text);
+    builder.message().flags.set(MessageFlag::AutoMod);
+    auto text1 =
+        QString("Suspicious User, " + treatmentText + "%1")
+            .arg(action.updater);
+    builder.message().messageText = text1;
+    builder.message().searchText = text1;
+
+    auto message1 = builder.release();
+
+    //
+    // Builder for offender's message
+    builder2.emplace<TimestampElement>();
+    builder2.emplace<TwitchModerationElement>();
+    builder2.message().loginName = action.target.login;
+    builder2.message().flags.set(MessageFlag::PubSub);
+
+    
+    if (action.treatmentText == "RESTRICTED")
+    {
+    // hidden icon
+        builder2
+            .emplace<ImageElement>(Image::fromPixmap(getResources().button.hidden),
+                                    MessageElementFlag::BadgeChannelAuthority)
+            ->setTooltip("Not Published to Chat");
+    }
+    
+    // sender username
+    builder2
+        .emplace<TextElement>(
+            action.target.displayName + ":", MessageElementFlag::BoldUsername,
+            MessageColor(action.target.color), FontStyle::ChatMediumBold)
+        ->setLink({Link::UserInfo, action.target.login});
+    builder2
+        .emplace<TextElement>(action.target.displayName + ":",
+                              MessageElementFlag::NonBoldUsername,
+                              MessageColor(action.target.color))
+        ->setLink({Link::UserInfo, action.target.login});
+    // sender's message caught
+    builder2.emplace<TextElement>(action.message, MessageElementFlag::Text,
+                                  MessageColor::Text);
+    builder2.message().flags.set(MessageFlag::AutoMod);
+    auto text2 =
+        QString("%1: %2").arg(action.target.displayName, action.message);
+    builder2.message().messageText = text2;
+    builder2.message().searchText = text2;
+
+    auto message2 = builder2.release();
+
+    return std::make_pair(message1, message2);
+}
+
 MessageBuilder::MessageBuilder()
     : message_(std::make_shared<Message>())
 {
