@@ -160,8 +160,7 @@ private:
                           const MessageLayoutElement *hoverLayoutElement,
                           MessageLayoutPtr layout);
     void addContextMenuItems(const MessageLayoutElement *hoveredElement,
-                             MessageLayoutPtr layout,
-                             QMouseEvent *event);
+                             MessageLayoutPtr layout, QMouseEvent *event);
     int getLayoutWidth() const;
     void updatePauses();
     void unpaused();

@@ -1845,7 +1845,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 }
 
 void ChannelView::addContextMenuItems(
-    const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout, QMouseEvent *event)
+    const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
+    QMouseEvent *event)
 {
     const auto &creator = hoveredElement->getCreator();
     auto creatorFlags = creator.getFlags();
@@ -1983,12 +1984,12 @@ void ChannelView::addContextMenuItems(
         }
     }
 
-    if (event->modifiers() == Qt::ShiftModifier && !layout->getMessage()->id.isEmpty())
+    if (event->modifiers() == Qt::ShiftModifier &&
+        !layout->getMessage()->id.isEmpty())
     {
         menu->addAction("Copy message id", [layout] {
             crossPlatformCopy(layout->getMessage()->id);
         });
-
     }
 
     menu->popup(QCursor::pos());
