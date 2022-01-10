@@ -139,6 +139,8 @@ public:
             Signal<AutomodAction> automodMessage;
             Signal<AutomodUserAction> automodUserMessage;
             Signal<AutomodInfoAction> automodInfoMessage;
+            
+            Signal<LowTrustUserMessageAction> lowTrustUserMessage;
         } moderation;
 
         struct {
