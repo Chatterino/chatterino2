@@ -1,6 +1,7 @@
 #pragma once
 
 #include "common/FlagsEnum.hpp"
+#include "messages/ImageSet.hpp"
 #include "messages/Link.hpp"
 #include "messages/MessageColor.hpp"
 #include "singletons/Fonts.hpp"
@@ -25,87 +26,105 @@ using ImagePtr = std::shared_ptr<Image>;
 struct Emote;
 using EmotePtr = std::shared_ptr<const Emote>;
 
-enum class MessageElementFlag {
-    None = 0,
-    Misc = (1 << 0),
-    Text = (1 << 1),
+enum class MessageElementFlag : int64_t {
+    None = 0LL,
+    Misc = (1LL << 0),
+    Text = (1LL << 1),
 
-    Username = (1 << 2),
-    Timestamp = (1 << 3),
+    Username = (1LL << 2),
+    Timestamp = (1LL << 3),
 
-    TwitchEmoteImage = (1 << 4),
-    TwitchEmoteText = (1 << 5),
+    TwitchEmoteImage = (1LL << 4),
+    TwitchEmoteText = (1LL << 5),
     TwitchEmote = TwitchEmoteImage | TwitchEmoteText,
-    BttvEmoteImage = (1 << 6),
-    BttvEmoteText = (1 << 7),
+    BttvEmoteImage = (1LL << 6),
+    BttvEmoteText = (1LL << 7),
     BttvEmote = BttvEmoteImage | BttvEmoteText,
-    FfzEmoteImage = (1 << 10),
-    FfzEmoteText = (1 << 11),
+
+    ChannelPointReward = (1LL << 8),
+    ChannelPointRewardImage = ChannelPointReward | TwitchEmoteImage,
+
+    FfzEmoteImage = (1LL << 9),
+    FfzEmoteText = (1LL << 10),
     FfzEmote = FfzEmoteImage | FfzEmoteText,
     EmoteImages = TwitchEmoteImage | BttvEmoteImage | FfzEmoteImage,
     EmoteText = TwitchEmoteText | BttvEmoteText | FfzEmoteText,
 
-    BitsStatic = (1 << 12),
-    BitsAnimated = (1 << 13),
+    BitsStatic = (1LL << 11),
+    BitsAnimated = (1LL << 12),
 
     // Slot 1: Twitch
     // - Staff badge
     // - Admin badge
     // - Global Moderator badge
-    BadgeGlobalAuthority = (1 << 14),
+    BadgeGlobalAuthority = (1LL << 13),
 
     // Slot 2: Twitch
-    // - Moderator badge
-    // - Broadcaster badge
-    BadgeChannelAuthority = (1 << 15),
+    // - Predictions badge
+    BadgePredictions = (1LL << 14),
 
     // Slot 3: Twitch
-    // - Subscription badges
-    BadgeSubscription = (1 << 16),
+    // - VIP badge
+    // - Moderator badge
+    // - Broadcaster badge
+    BadgeChannelAuthority = (1LL << 15),
 
     // Slot 4: Twitch
+    // - Subscription badges
+    BadgeSubscription = (1LL << 16),
+
+    // Slot 5: Twitch
     // - Turbo badge
     // - Prime badge
     // - Bit badges
     // - Game badges
-    BadgeVanity = (1 << 17),
+    BadgeVanity = (1LL << 17),
 
-    // Slot 5: Chatterino
+    // Slot 6: Chatterino
     // - Chatterino developer badge
+    // - Chatterino contributor badge
     // - Chatterino donator badge
     // - Chatterino top donator badge
-    BadgeChatterino = (1 << 18),
+    // - Chatterino special pepe badge
+    // - Chatterino gnome badge
+    BadgeChatterino = (1LL << 18),
 
-    Badges = BadgeGlobalAuthority | BadgeChannelAuthority | BadgeSubscription |
-             BadgeVanity | BadgeChatterino,
+    // Slot 7: FrankerFaceZ
+    // - FFZ developer badge
+    // - FFZ bot badge
+    // - FFZ donator badge
+    BadgeFfz = (1LL << 19),
 
-    ChannelName = (1 << 19),
+    Badges = BadgeGlobalAuthority | BadgePredictions | BadgeChannelAuthority |
+             BadgeSubscription | BadgeVanity | BadgeChatterino | BadgeFfz,
 
-    BitsAmount = (1 << 20),
+    ChannelName = (1LL << 20),
 
-    ModeratorTools = (1 << 21),
+    BitsAmount = (1LL << 21),
 
-    EmojiImage = (1 << 23),
-    EmojiText = (1 << 24),
+    ModeratorTools = (1LL << 22),
+
+    EmojiImage = (1LL << 23),
+    EmojiText = (1LL << 24),
     EmojiAll = EmojiImage | EmojiText,
 
-    AlwaysShow = (1 << 25),
+    AlwaysShow = (1LL << 25),
 
     // used in the ChannelView class to make the collapse buttons visible if
     // needed
-    Collapsed = (1 << 26),
+    Collapsed = (1LL << 26),
 
     // used for dynamic bold usernames
-    BoldUsername = (1 << 27),
-    NonBoldUsername = (1 << 28),
+    BoldUsername = (1LL << 27),
+    NonBoldUsername = (1LL << 28),
 
     // for links
-    LowercaseLink = (1 << 29),
-    OriginalLink = (1 << 30),
+    LowercaseLink = (1LL << 29),
+    OriginalLink = (1LL << 30),
 
     // ZeroWidthEmotes are emotes that are supposed to overlay over any pre-existing emotes
     // e.g. BTTV's SoSnowy during christmas season
-    ZeroWidthEmote = (1 << 31),
+    ZeroWidthEmote = (1LL << 31),
 
     Default = Timestamp | Badges | Username | BitsStatic | FfzEmoteImage |
               BttvEmoteImage | TwitchEmoteImage | BitsAmount | Text |
@@ -219,7 +238,8 @@ private:
 class EmoteElement : public MessageElement
 {
 public:
-    EmoteElement(const EmotePtr &data, MessageElementFlags flags_);
+    EmoteElement(const EmotePtr &data, MessageElementFlags flags_,
+                 const MessageColor &textElementColor = MessageColor::Text);
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags_) override;
@@ -262,6 +282,28 @@ protected:
                                                  const QSize &size) override;
 };
 
+class VipBadgeElement : public BadgeElement
+{
+public:
+    VipBadgeElement(const EmotePtr &data, MessageElementFlags flags_);
+
+protected:
+    MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
+                                                 const QSize &size) override;
+};
+
+class FfzBadgeElement : public BadgeElement
+{
+public:
+    FfzBadgeElement(const EmotePtr &data, MessageElementFlags flags_,
+                    QColor &color);
+
+protected:
+    MessageLayoutElement *makeImageLayoutElement(const ImagePtr &image,
+                                                 const QSize &size) override;
+    QColor color;
+};
+
 // contains a text, formated depending on the preferences
 class TimestampElement : public MessageElement
 {
@@ -291,34 +333,26 @@ public:
                         MessageElementFlags flags) override;
 };
 
-// contains a full message string that's split into words on space and parses irc colors that are then put into segments
-// these segments are later passed to "MultiColorTextLayoutElement" elements to be rendered :)
-class IrcTextElement : public MessageElement
+// Forces a linebreak
+class LinebreakElement : public MessageElement
 {
 public:
-    IrcTextElement(const QString &text, MessageElementFlags flags,
-                   FontStyle style = FontStyle::ChatMedium);
-    ~IrcTextElement() override = default;
+    LinebreakElement(MessageElementFlags flags);
+
+    void addToContainer(MessageLayoutContainer &container,
+                        MessageElementFlags flags) override;
+};
+
+// Image element which will pick the quality of the image based on ui scale
+class ScalingImageElement : public MessageElement
+{
+public:
+    ScalingImageElement(ImageSet images, MessageElementFlags flags);
 
     void addToContainer(MessageLayoutContainer &container,
                         MessageElementFlags flags) override;
 
 private:
-    FontStyle style_;
-
-    struct Segment {
-        QString text;
-        int fg = -1;
-        int bg = -1;
-    };
-
-    struct Word {
-        QString text;
-        int width = -1;
-        std::vector<Segment> segments;
-    };
-
-    std::vector<Word> words_;
+    ImageSet images_;
 };
-
 }  // namespace chatterino

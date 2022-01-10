@@ -1,8 +1,11 @@
 #pragma once
 
+#include <memory>
 #include "common/Channel.hpp"
 #include "common/FlagsEnum.hpp"
 #include "common/Singleton.hpp"
+#include "common/WindowDescriptors.hpp"
+
 #include "pajlada/settings/settinglistener.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
@@ -13,21 +16,29 @@ class Paths;
 class Window;
 class SplitContainer;
 
-enum class MessageElementFlag;
+enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 enum class WindowType;
 
 enum class SettingsDialogPreference;
+class FramelessEmbedWindow;
 
 class WindowManager final : public Singleton
 {
 public:
-    WindowManager();
+    static const QString WINDOW_LAYOUT_FILENAME;
 
+    WindowManager();
+    ~WindowManager() override;
+
+    static void encodeTab(SplitContainer *tab, bool isSelected,
+                          QJsonObject &obj);
     static void encodeChannel(IndirectChannel channel, QJsonObject &obj);
-    static IndirectChannel decodeChannel(const QJsonObject &obj);
+    static void encodeFilters(Split *split, QJsonArray &arr);
+    static IndirectChannel decodeChannel(const SplitDescriptor &descriptor);
 
     void showSettingsDialog(
+        QWidget *parent,
         SettingsDialogPreference preference = SettingsDialogPreference());
 
     // Show the account selector widget at point
@@ -48,8 +59,8 @@ public:
     Window &getSelectedWindow();
     Window &createWindow(WindowType type, bool show = true);
 
-    int windowCount();
-    Window *windowAt(int index);
+    void select(Split *split);
+    void select(SplitContainer *container);
 
     QPoint emotePopupPos();
     void setEmotePopupPos(QPoint pos);
@@ -87,8 +98,21 @@ public:
     // It is currently being used by the "Tooltip Preview Image" system to recheck if an image is ready to be rendered.
     pajlada::Signals::NoArgSignal miscUpdate;
 
+    pajlada::Signals::Signal<Split *> selectSplit;
+    pajlada::Signals::Signal<SplitContainer *> selectSplitContainer;
+
 private:
-    void encodeNodeRecusively(SplitContainer::Node *node, QJsonObject &obj);
+    static void encodeNodeRecursively(SplitContainer::Node *node,
+                                      QJsonObject &obj);
+
+    // Load window layout from the window-layout.json file
+    WindowLayout loadWindowLayoutFromFile() const;
+
+    // Apply a window layout for this window manager.
+    void applyWindowLayout(const WindowLayout &layout);
+
+    // Contains the full path to the window layout file, e.g. /home/pajlada/.local/share/Chatterino/Settings/window-layout.json
+    const QString windowLayoutFilePath;
 
     bool initialized_ = false;
 
@@ -98,6 +122,7 @@ private:
 
     std::vector<Window *> windows_;
 
+    std::unique_ptr<FramelessEmbedWindow> framelessEmbedWindow_;
     Window *mainWindow_{};
     Window *selectedWindow_{};
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "providers/twitch/ChatterinoWebSocketppLogger.hpp"
 #include "providers/twitch/PubsubActions.hpp"
 #include "providers/twitch/TwitchAccount.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
@@ -9,6 +10,8 @@
 #include <pajlada/signals/signal.hpp>
 #include <websocketpp/client.hpp>
 #include <websocketpp/config/asio_client.hpp>
+#include <websocketpp/extensions/permessage_deflate/disabled.hpp>
+#include <websocketpp/logger/basic.hpp>
 
 #include <atomic>
 #include <chrono>
@@ -21,13 +24,33 @@
 
 namespace chatterino {
 
-using WebsocketClient =
-    websocketpp::client<websocketpp::config::asio_tls_client>;
+struct chatterinoconfig : public websocketpp::config::asio_tls_client {
+    typedef websocketpp::log::chatterinowebsocketpplogger<
+        concurrency_type, websocketpp::log::elevel>
+        elog_type;
+    typedef websocketpp::log::chatterinowebsocketpplogger<
+        concurrency_type, websocketpp::log::alevel>
+        alog_type;
+
+    struct permessage_deflate_config {
+    };
+
+    typedef websocketpp::extensions::permessage_deflate::disabled<
+        permessage_deflate_config>
+        permessage_deflate_type;
+};
+
+using WebsocketClient = websocketpp::client<chatterinoconfig>;
 using WebsocketHandle = websocketpp::connection_hdl;
 using WebsocketErrorCode = websocketpp::lib::error_code;
 
 #define MAX_PUBSUB_LISTENS 50
 #define MAX_PUBSUB_CONNECTIONS 10
+
+struct RequestMessage {
+    QString payload;
+    int topicCount;
+};
 
 namespace detail {
 
@@ -106,6 +129,7 @@ public:
     struct {
         struct {
             Signal<ClearChatAction> chatCleared;
+            Signal<DeleteAction> messageDeleted;
             Signal<ModeChangedAction> modeChanged;
             Signal<ModerationStateAction> moderationStateChanged;
 
@@ -114,6 +138,7 @@ public:
 
             Signal<AutomodAction> automodMessage;
             Signal<AutomodUserAction> automodUserMessage;
+            Signal<AutomodInfoAction> automodInfoMessage;
         } moderation;
 
         struct {
@@ -122,6 +147,10 @@ public:
             Signal<const rapidjson::Value &> received;
             Signal<const rapidjson::Value &> sent;
         } whisper;
+
+        struct {
+            Signal<rapidjson::Value &> redeemed;
+        } pointReward;
     } signals_;
 
     void listenToWhispers(std::shared_ptr<TwitchAccount> account);
@@ -130,6 +159,11 @@ public:
 
     void listenToChannelModerationActions(
         const QString &channelID, std::shared_ptr<TwitchAccount> account);
+    void listenToAutomod(const QString &channelID,
+                         std::shared_ptr<TwitchAccount> account);
+
+    void listenToChannelPointRewards(const QString &channelID,
+                                     std::shared_ptr<TwitchAccount> account);
 
     std::vector<std::unique_ptr<rapidjson::Document>> requests;
 
@@ -143,6 +177,7 @@ private:
     bool isListeningToTopic(const QString &topic);
 
     void addClient();
+    std::atomic<bool> addingClient{false};
 
     State state = State::Connected;
 
@@ -150,16 +185,22 @@ private:
              std::owner_less<WebsocketHandle>>
         clients;
 
-    std::unordered_map<std::string, std::function<void(const rapidjson::Value &,
-                                                       const QString &)>>
+    std::unordered_map<
+        QString, std::function<void(const rapidjson::Value &, const QString &)>>
         moderationActionHandlers;
+
+    std::unordered_map<
+        QString, std::function<void(const rapidjson::Value &, const QString &)>>
+        channelTermsActionHandlers;
 
     void onMessage(websocketpp::connection_hdl hdl, WebsocketMessagePtr msg);
     void onConnectionOpen(websocketpp::connection_hdl hdl);
     void onConnectionClose(websocketpp::connection_hdl hdl);
     WebsocketContextPtr onTLSInit(websocketpp::connection_hdl hdl);
 
-    void handleListenResponse(const rapidjson::Document &msg);
+    void handleResponse(const rapidjson::Document &msg);
+    void handleListenResponse(const RequestMessage &msg, bool failed);
+    void handleUnlistenResponse(const RequestMessage &msg, bool failed);
     void handleMessageResponse(const rapidjson::Value &data);
 
     void runThread();

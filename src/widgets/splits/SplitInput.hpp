@@ -16,6 +16,7 @@ namespace chatterino {
 
 class Split;
 class EmotePopup;
+class InputCompletionPopup;
 class EffectLabel;
 class ResizingTextEdit;
 
@@ -27,6 +28,7 @@ public:
     SplitInput(Split *_chatWidget);
 
     void clearSelection();
+    bool isEditFirstWord() const;
     QString getInputText() const;
     void insertText(const QString &text);
 
@@ -42,13 +44,22 @@ protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
+    void addShortcuts() override;
     void initLayout();
+    bool eventFilter(QObject *obj, QEvent *event) override;
     void installKeyPressedEvent();
+    void onCursorPositionChanged();
+    void onTextChanged();
     void updateEmoteButton();
+    void updateCompletionPopup();
+    void showCompletionPopup(const QString &text, bool emoteCompletion);
+    void hideCompletionPopup();
+    void insertCompletionText(const QString &text);
     void openEmotePopup();
 
     Split *const split_;
     QObjectRef<EmotePopup> emotePopup_;
+    QObjectRef<InputCompletionPopup> inputCompletionPopup_;
 
     struct {
         ResizingTextEdit *textEdit;
@@ -58,7 +69,7 @@ private:
         QHBoxLayout *hbox;
     } ui_;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
     QStringList prevMsg_;
     QString currMsg_;
     int prevIndex_ = 0;

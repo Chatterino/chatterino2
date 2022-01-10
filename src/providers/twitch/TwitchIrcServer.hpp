@@ -7,7 +7,6 @@
 #include "providers/bttv/BttvEmotes.hpp"
 #include "providers/ffz/FfzEmotes.hpp"
 #include "providers/irc/AbstractIrcServer.hpp"
-#include "providers/twitch/TwitchBadges.hpp"
 
 #include <chrono>
 #include <memory>
@@ -36,6 +35,7 @@ public:
 
     const ChannelPtr whispersChannel;
     const ChannelPtr mentionsChannel;
+    const ChannelPtr liveChannel;
     IndirectChannel watchingChannel;
 
     PubSub *pubsub;
@@ -56,9 +56,6 @@ protected:
     virtual void writeConnectionMessageReceived(
         Communi::IrcMessage *message) override;
 
-    virtual void onReadConnected(IrcConnection *connection) override;
-    virtual void onWriteConnected(IrcConnection *connection) override;
-
     virtual std::shared_ptr<Channel> getCustomChannel(
         const QString &channelname) override;
 
@@ -75,7 +72,6 @@ private:
     std::chrono::steady_clock::time_point lastErrorTimeSpeed_;
     std::chrono::steady_clock::time_point lastErrorTimeAmount_;
 
-    TwitchBadges twitchBadges;
     BttvEmotes bttv;
     FfzEmotes ffz;
 

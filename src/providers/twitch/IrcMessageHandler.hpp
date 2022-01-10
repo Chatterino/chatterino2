@@ -30,10 +30,11 @@ public:
     void handleClearChatMessage(Communi::IrcMessage *message);
     void handleClearMessageMessage(Communi::IrcMessage *message);
     void handleUserStateMessage(Communi::IrcMessage *message);
+    void handleGlobalUserStateMessage(Communi::IrcMessage *message);
     void handleWhisperMessage(Communi::IrcMessage *message);
 
     // parseUserNoticeMessage parses a single IRC USERNOTICE message into 0+
-    // chatterino messages
+    // Chatterino messages
     std::vector<MessagePtr> parseUserNoticeMessage(
         Channel *channel, Communi::IrcMessage *message);
     void handleUserNoticeMessage(Communi::IrcMessage *message,

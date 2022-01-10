@@ -19,13 +19,30 @@ namespace rj {
         obj.AddMember(rapidjson::Value(key, a).Move(), value.Move(), a);
     }
 
-    std::string stringify(const rapidjson::Value &value)
+    QString stringify(const rapidjson::Value &value)
     {
         rapidjson::StringBuffer buffer;
         rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
         value.Accept(writer);
 
-        return std::string(buffer.GetString());
+        return buffer.GetString();
+    }
+
+    bool getSafeObject(rapidjson::Value &obj, const char *key,
+                       rapidjson::Value &out)
+    {
+        if (!checkJsonValue(obj, key))
+        {
+            return false;
+        }
+
+        out = obj[key].Move();
+        return true;
+    }
+
+    bool checkJsonValue(const rapidjson::Value &obj, const char *key)
+    {
+        return obj.IsObject() && !obj.IsNull() && obj.HasMember(key);
     }
 
 }  // namespace rj

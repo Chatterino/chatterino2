@@ -17,6 +17,8 @@ namespace chatterino {
 class MessagePredicate
 {
 public:
+    virtual ~MessagePredicate() = default;
+
     /**
      * @brief Checks whether this predicate applies to the passed message.
      *

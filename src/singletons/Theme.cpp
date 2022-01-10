@@ -1,11 +1,14 @@
-#define LOOKUP_COLOR_COUNT 360
 
 #include "singletons/Theme.hpp"
+
 #include "Application.hpp"
+#include "singletons/Resources.hpp"
 
 #include <QColor>
 
 #include <cmath>
+
+#define LOOKUP_COLOR_COUNT 360
 
 namespace chatterino {
 
@@ -13,8 +16,16 @@ Theme::Theme()
 {
     this->update();
 
-    this->themeName.connectSimple([this](auto) { this->update(); }, false);
-    this->themeHue.connectSimple([this](auto) { this->update(); }, false);
+    this->themeName.connectSimple(
+        [this](auto) {
+            this->update();
+        },
+        false);
+    this->themeHue.connectSimple(
+        [this](auto) {
+            this->update();
+        },
+        false);
 }
 
 // hue: theme color (0 - 1)
@@ -60,7 +71,7 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.input.styleSheet =
         "background:" + this->splits.input.background.name() + ";" +
         "border:" + this->tabs.selected.backgrounds.regular.color().name() +
-        ";" + "color:" + this->messages.textColors.regular.name() + ";" +  //
+        ";" + "color:" + this->messages.textColors.regular.name() + ";" +
         "selection-background-color:" +
         (isLight ? "#68B1FF"
                  : this->tabs.selected.backgrounds.regular.color().name());
@@ -72,6 +83,16 @@ void Theme::actuallyUpdate(double hue, double multiplier)
     this->splits.background = getColor(0, sat, 1);
     this->splits.dropPreview = QColor(0, 148, 255, 0x30);
     this->splits.dropPreviewBorder = QColor(0, 148, 255, 0xff);
+
+    // Copy button
+    if (this->isLightTheme())
+    {
+        this->buttons.copy = getResources().buttons.copyDark;
+    }
+    else
+    {
+        this->buttons.copy = getResources().buttons.copyLight;
+    }
 }
 
 void Theme::normalizeColor(QColor &color)

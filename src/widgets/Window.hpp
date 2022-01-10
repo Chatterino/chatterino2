@@ -28,14 +28,15 @@ public:
     pajlada::Signals::NoArgSignal closed;
 
 protected:
-    void showEvent(QShowEvent *) override;
     void closeEvent(QCloseEvent *event) override;
     bool event(QEvent *event) override;
 
 private:
     void addCustomTitlebarButtons();
-    void addDebugStuff();
-    void addShortcuts();
+    void addDebugStuff(
+        std::map<QString, std::function<QString(std::vector<QString>)>>
+            &actions);
+    void addShortcuts() override;
     void addLayout();
     void onAccountSelected();
     void addMenuBar();

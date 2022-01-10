@@ -4,6 +4,7 @@
 #include "common/FlagsEnum.hpp"
 #include "messages/LimitedQueue.hpp"
 
+#include <QDate>
 #include <QString>
 #include <QTimer>
 #include <boost/optional.hpp>
@@ -36,6 +37,7 @@ public:
         TwitchWhispers,
         TwitchWatching,
         TwitchMentions,
+        TwitchLive,
         TwitchEnd,
         Irc,
         Misc
@@ -53,10 +55,12 @@ public:
     pajlada::Signals::Signal<std::vector<MessagePtr> &> messagesAddedAtStart;
     pajlada::Signals::Signal<size_t, MessagePtr &> messageReplaced;
     pajlada::Signals::NoArgSignal destroyed;
+    pajlada::Signals::NoArgSignal displayNameChanged;
 
     Type getType() const;
     const QString &getName() const;
     virtual const QString &getDisplayName() const;
+    virtual const QString &getLocalizedName() const;
     bool isTwitchChannel() const;
     virtual bool isEmpty() const;
     LimitedQueueSnapshot<MessagePtr> getMessageSnapshot();
@@ -72,12 +76,11 @@ public:
     void addOrReplaceTimeout(MessagePtr message);
     void disableAllMessages();
     void replaceMessage(MessagePtr message, MessagePtr replacement);
+    void replaceMessage(size_t index, MessagePtr replacement);
     void deleteMessage(QString messageID);
-    void clearMessages();
+    MessagePtr findMessage(QString messageID);
 
     bool hasMessages() const;
-
-    QStringList modList;
 
     // CHANNEL INFO
     virtual bool canSendMessage() const;
@@ -94,6 +97,7 @@ public:
     static std::shared_ptr<Channel> getEmpty();
 
     CompletionModel completionModel;
+    QDate lastDate_;
 
 protected:
     virtual void onConnected();

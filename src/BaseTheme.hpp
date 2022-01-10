@@ -34,6 +34,8 @@ public:
         } line;
     };
 
+    QColor accent{"#00aeef"};
+
     /// WINDOW
     struct {
         QColor background;
@@ -49,7 +51,7 @@ public:
         TabColors highlighted;
         TabColors selected;
         QColor border;
-        QColor bottomLine;
+        QColor dividerLine;
     } tabs;
 
     /// MESSAGES
@@ -59,6 +61,7 @@ public:
             QColor caret;
             QColor link;
             QColor system;
+            QColor chatPlaceholder;
         } textColors;
 
         struct {

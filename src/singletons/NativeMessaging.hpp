@@ -1,6 +1,9 @@
 #pragma once
 
+#include <QString>
 #include <QThread>
+#include <boost/optional.hpp>
+#include <common/Atomic.hpp>
 
 namespace chatterino {
 
@@ -9,6 +12,8 @@ class Paths;
 
 void registerNmHost(Paths &paths);
 std::string &getNmQueueName(Paths &paths);
+
+Atomic<boost::optional<QString>> &nmIpcError();
 
 class NativeMessagingClient final
 {

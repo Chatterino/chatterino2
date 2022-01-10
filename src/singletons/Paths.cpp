@@ -44,7 +44,10 @@ QString Paths::cacheDirectory()
         QStringSetting cachePathSetting("/cache/path");
 
         cachePathSetting.connect([](const auto &newPath, auto) {
-            QDir().mkpath(newPath);  //
+            if (!newPath.isEmpty())
+            {
+                QDir().mkpath(newPath);
+            }
         });
 
         return cachePathSetting;
@@ -101,8 +104,8 @@ void Paths::initRootDirectory()
                                      path.toStdString() + "\"");
         }
 
-// create directory Chatterino2 instead of chatterino on windows because the
-// ladder one is takes by chatterino 1 already
+// create directory Chatterino2 instead of Chatterino on windows because the
+// ladder one is takes by Chatterino 1 already
 #ifdef Q_OS_WIN
         path.replace("chatterino", "Chatterino");
 

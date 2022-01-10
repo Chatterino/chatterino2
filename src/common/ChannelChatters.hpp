@@ -1,8 +1,12 @@
 #pragma once
 
 #include "common/Channel.hpp"
+#include "common/ChatterSet.hpp"
 #include "common/UniqueAccess.hpp"
-#include "common/UsernameSet.hpp"
+#include "lrucache/lrucache.hpp"
+#include "util/QStringHash.hpp"
+
+#include <QRgb>
 
 namespace chatterino {
 
@@ -12,18 +16,27 @@ public:
     ChannelChatters(Channel &channel);
     virtual ~ChannelChatters() = default;  // add vtable
 
-    AccessGuard<const UsernameSet> accessChatters() const;
+    SharedAccessGuard<const ChatterSet> accessChatters() const;
 
     void addRecentChatter(const QString &user);
     void addJoinedUser(const QString &user);
     void addPartedUser(const QString &user);
-    void setChatters(UsernameSet &&set);
+    const QColor getUserColor(const QString &user);
+    void setUserColor(const QString &user, const QColor &color);
+    void updateOnlineChatters(const std::unordered_set<QString> &usernames);
+
+    // colorsSize returns the amount of colors stored in `chatterColors_`
+    // NOTE: This function is only meant to be used in tests and benchmarks
+    size_t colorsSize() const;
+
+    static constexpr int maxChatterColorCount = 5000;
 
 private:
     Channel &channel_;
 
     // maps 2 char prefix to set of names
-    UniqueAccess<UsernameSet> chatters_;
+    UniqueAccess<ChatterSet> chatters_;
+    UniqueAccess<cache::lru_cache<QString, QRgb>> chatterColors_;
 
     // combines multiple joins/parts into one message
     UniqueAccess<QStringList> joinedUsers_;

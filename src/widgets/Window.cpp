@@ -3,20 +3,22 @@
 #include "Application.hpp"
 #include "common/Credentials.hpp"
 #include "common/Modes.hpp"
+#include "common/QLogging.hpp"
 #include "common/Version.hpp"
 #include "controllers/accounts/AccountController.hpp"
+#include "controllers/hotkeys/HotkeyController.hpp"
 #include "providers/twitch/TwitchIrcServer.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/Updates.hpp"
 #include "singletons/WindowManager.hpp"
 #include "util/InitUpdateButton.hpp"
-#include "util/Shortcut.hpp"
 #include "widgets/AccountSwitchPopup.hpp"
 #include "widgets/Notebook.hpp"
 #include "widgets/dialogs/SettingsDialog.hpp"
 #include "widgets/dialogs/UpdateDialog.hpp"
 #include "widgets/dialogs/WelcomeDialog.hpp"
+#include "widgets/dialogs/switcher/QuickSwitcherPopup.hpp"
 #include "widgets/helper/EffectLabel.hpp"
 #include "widgets/helper/NotebookTab.hpp"
 #include "widgets/helper/TitlebarButton.hpp"
@@ -24,7 +26,9 @@
 #include "widgets/splits/Split.hpp"
 #include "widgets/splits/SplitContainer.hpp"
 
-#ifdef C_DEBUG
+#ifndef NDEBUG
+#    include <rapidjson/document.h>
+#    include "providers/twitch/PubsubClient.hpp"
 #    include "util/SampleCheerMessages.hpp"
 #    include "util/SampleLinks.hpp"
 #endif
@@ -34,7 +38,6 @@
 #include <QHeaderView>
 #include <QMenuBar>
 #include <QPalette>
-#include <QShortcut>
 #include <QStandardItemModel>
 #include <QVBoxLayout>
 
@@ -46,7 +49,6 @@ Window::Window(WindowType type)
     , notebook_(new SplitNotebook(this))
 {
     this->addCustomTitlebarButtons();
-    this->addDebugStuff();
     this->addShortcuts();
     this->addLayout();
 
@@ -55,8 +57,9 @@ Window::Window(WindowType type)
 #endif
 
     this->signalHolder_.managedConnect(
-        getApp()->accounts->twitch.currentUserChanged,
-        [this] { this->onAccountSelected(); });
+        getApp()->accounts->twitch.currentUserChanged, [this] {
+            this->onAccountSelected();
+        });
     this->onAccountSelected();
 
     if (type == WindowType::Main)
@@ -66,6 +69,18 @@ Window::Window(WindowType type)
     else
     {
         this->resize(int(300 * this->scale()), int(500 * this->scale()));
+    }
+
+    this->signalHolder_.managedConnect(getApp()->hotkeys->onItemsUpdated,
+                                       [this]() {
+                                           this->clearShortcuts();
+                                           this->addShortcuts();
+                                       });
+    if (type == WindowType::Main || type == WindowType::Popup)
+    {
+        getSettings()->tabDirection.connect([this](int val) {
+            this->notebook_->setTabDirection(NotebookTabDirection(val));
+        });
     }
 }
 
@@ -113,35 +128,6 @@ bool Window::event(QEvent *event)
     return BaseWindow::event(event);
 }
 
-void Window::showEvent(QShowEvent *event)
-{
-    // Startup notification
-    /*if (getSettings()->startUpNotification.getValue() < 1)
-    {
-        getSettings()->startUpNotification = 1;
-    }*/
-
-    // Show changelog
-    if (getSettings()->currentVersion.getValue() != "" &&
-        getSettings()->currentVersion.getValue() != CHATTERINO_VERSION)
-    {
-        auto box = new QMessageBox(QMessageBox::Information, "Chatterino 2",
-                                   "Show changelog?",
-                                   QMessageBox::Yes | QMessageBox::No);
-        box->setAttribute(Qt::WA_DeleteOnClose);
-        if (box->exec() == QMessageBox::Yes)
-        {
-            QDesktopServices::openUrl(
-                QUrl("https://www.chatterino.com/changelog"));
-        }
-    }
-
-    getSettings()->currentVersion.setValue(CHATTERINO_VERSION);
-
-    // --
-    BaseWindow::showEvent(event);
-}
-
 void Window::closeEvent(QCloseEvent *)
 {
     if (this->type_ == WindowType::Main)
@@ -181,8 +167,9 @@ void Window::addCustomTitlebarButtons()
         return;
 
     // settings
-    this->addTitleBarButton(TitleBarButtonStyle::Settings,
-                            [] { getApp()->windows->showSettingsDialog(); });
+    this->addTitleBarButton(TitleBarButtonStyle::Settings, [this] {
+        getApp()->windows->showSettingsDialog(this);
+    });
 
     // updates
     auto update = this->addTitleBarButton(TitleBarButtonStyle::None, [] {});
@@ -197,10 +184,11 @@ void Window::addCustomTitlebarButtons()
     this->userLabel_->setMinimumWidth(20 * scale());
 }
 
-void Window::addDebugStuff()
+void Window::addDebugStuff(HotkeyController::HotkeyMap &actions)
 {
-#ifdef C_DEBUG
-    std::vector<QString> cheerMessages, subMessages, miscMessages, linkMessages;
+#ifndef NDEBUG
+    std::vector<QString> cheerMessages, subMessages, miscMessages, linkMessages,
+        emoteTestMessages;
 
     cheerMessages = getSampleCheerMessage();
     auto validLinks = getValidLinks();
@@ -235,127 +223,446 @@ void Window::addDebugStuff()
     miscMessages.emplace_back(R"(@badges=;color=#00AD2B;display-name=Iamme420\s;emotes=;id=d47a1e4b-a3c6-4b9e-9bf1-51b8f3dbc76e;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1529670347537;turbo=0;user-id=56422869;user-type= :iamme420!iamme420@iamme420.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");
     miscMessages.emplace_back(R"(@badge-info=founder/47;badges=moderator/1,founder/0,premium/1;color=#00FF80;display-name=gempir;emotes=;flags=;id=d4514490-202e-43cb-b429-ef01a9d9c2fe;mod=1;room-id=11148817;subscriber=0;tmi-sent-ts=1575198233854;turbo=0;user-id=77829817;user-type=mod :gempir!gempir@gempir.tmi.twitch.tv PRIVMSG #pajlada :offline chat gachiBASS)");
 
+    // "first time chat" message
+    miscMessages.emplace_back(R"(@badge-info=;badges=glhf-pledge/1;client-nonce=5d2627b0cbe56fa05faf5420def4807d;color=#1E90FF;display-name=oldcoeur;emote-only=1;emotes=84608:0-7;first-msg=1;flags=;id=7412fea4-8683-4cc9-a506-4228127a5c2d;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1623429859222;turbo=0;user-id=139147886;user-type= :oldcoeur!oldcoeur@oldcoeur.tmi.twitch.tv PRIVMSG #pajlada :cmonBruh)");
+
+    // Message with founder badge
+    miscMessages.emplace_back(R"(@badge-info=founder/72;badges=founder/0,bits/5000;color=#FF0000;display-name=TranRed;emotes=;first-msg=0;flags=;id=7482163f-493d-41d9-b36f-fba50e0701b7;mod=0;room-id=11148817;subscriber=0;tmi-sent-ts=1641123773885;turbo=0;user-id=57019243;user-type= :tranred!tranred@tranred.tmi.twitch.tv PRIVMSG #pajlada :GFMP pajaE)");
+
     // various link tests
     linkMessages.emplace_back(R"(@badge-info=subscriber/48;badges=broadcaster/1,subscriber/36,partner/1;color=#CC44FF;display-name=pajlada;emotes=;flags=;id=3c23cf3c-0864-4699-a76b-089350141147;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1577628844607;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada : Links that should pass: )" + getValidLinks().join(' '));
     linkMessages.emplace_back(R"(@badge-info=subscriber/48;badges=broadcaster/1,subscriber/36,partner/1;color=#CC44FF;display-name=pajlada;emotes=;flags=;id=3c23cf3c-0864-4699-a76b-089350141147;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1577628844607;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada : Links that should NOT pass: )" + getInvalidLinks().join(' '));
     linkMessages.emplace_back(R"(@badge-info=subscriber/48;badges=broadcaster/1,subscriber/36,partner/1;color=#CC44FF;display-name=pajlada;emotes=;flags=;id=3c23cf3c-0864-4699-a76b-089350141147;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1577628844607;turbo=0;user-id=11148817;user-type= :pajlada!pajlada@pajlada.tmi.twitch.tv PRIVMSG #pajlada : Links that should technically pass but we choose not to parse them: )" + getValidButIgnoredLinks().join(' '));
+
+    // channel point reward test
+    const char *channelRewardMessage = "{ \"type\": \"MESSAGE\", \"data\": { \"topic\": \"community-points-channel-v1.11148817\", \"message\": { \"type\": \"reward-redeemed\", \"data\": { \"timestamp\": \"2020-07-13T20:19:31.430785354Z\", \"redemption\": { \"id\": \"b9628798-1b4e-4122-b2a6-031658df6755\", \"user\": { \"id\": \"91800084\", \"login\": \"cranken1337\", \"display_name\": \"cranken1337\" }, \"channel_id\": \"11148817\", \"redeemed_at\": \"2020-07-13T20:19:31.345237005Z\", \"reward\": { \"id\": \"313969fe-cc9f-4a0a-83c6-172acbd96957\", \"channel_id\": \"11148817\", \"title\": \"annoying reward pogchamp\", \"prompt\": \"\", \"cost\": 3000, \"is_user_input_required\": true, \"is_sub_only\": false, \"image\": null, \"default_image\": { \"url_1x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-1.png\", \"url_2x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-2.png\", \"url_4x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-4.png\" }, \"background_color\": \"#52ACEC\", \"is_enabled\": true, \"is_paused\": false, \"is_in_stock\": true, \"max_per_stream\": { \"is_enabled\": false, \"max_per_stream\": 0 }, \"should_redemptions_skip_request_queue\": false, \"template_id\": null, \"updated_for_indicator_at\": \"2020-01-20T04:33:33.624956679Z\" }, \"user_input\": \"wow, amazing reward\", \"status\": \"UNFULFILLED\", \"cursor\": \"Yjk2Mjg3OTgtMWI0ZS00MTIyLWIyYTYtMDMxNjU4ZGY2NzU1X18yMDIwLTA3LTEzVDIwOjE5OjMxLjM0NTIzNzAwNVo=\" } } } } }";
+    const char *channelRewardMessage2 = "{ \"type\": \"MESSAGE\", \"data\": { \"topic\": \"community-points-channel-v1.11148817\", \"message\": { \"type\": \"reward-redeemed\", \"data\": { \"timestamp\": \"2020-07-13T20:19:31.430785354Z\", \"redemption\": { \"id\": \"b9628798-1b4e-4122-b2a6-031658df6755\", \"user\": { \"id\": \"91800084\", \"login\": \"cranken1337\", \"display_name\": \"cranken1337\" }, \"channel_id\": \"11148817\", \"redeemed_at\": \"2020-07-13T20:19:31.345237005Z\", \"reward\": { \"id\": \"313969fe-cc9f-4a0a-83c6-172acbd96957\", \"channel_id\": \"11148817\", \"title\": \"annoying reward pogchamp\", \"prompt\": \"\", \"cost\": 3000, \"is_user_input_required\": false, \"is_sub_only\": false, \"image\": null, \"default_image\": { \"url_1x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-1.png\", \"url_2x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-2.png\", \"url_4x\": \"https://static-cdn.jtvnw.net/custom-reward-images/default-4.png\" }, \"background_color\": \"#52ACEC\", \"is_enabled\": true, \"is_paused\": false, \"is_in_stock\": true, \"max_per_stream\": { \"is_enabled\": false, \"max_per_stream\": 0 }, \"should_redemptions_skip_request_queue\": false, \"template_id\": null, \"updated_for_indicator_at\": \"2020-01-20T04:33:33.624956679Z\" }, \"status\": \"UNFULFILLED\", \"cursor\": \"Yjk2Mjg3OTgtMWI0ZS00MTIyLWIyYTYtMDMxNjU4ZGY2NzU1X18yMDIwLTA3LTEzVDIwOjE5OjMxLjM0NTIzNzAwNVo=\" } } } } }";
+    const char *channelRewardIRCMessage(R"(@badge-info=subscriber/43;badges=subscriber/42;color=#1E90FF;custom-reward-id=313969fe-cc9f-4a0a-83c6-172acbd96957;display-name=Cranken1337;emotes=;flags=;id=3cee3f27-a1d0-44d1-a606-722cebdad08b;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1594756484132;turbo=0;user-id=91800084;user-type= :cranken1337!cranken1337@cranken1337.tmi.twitch.tv PRIVMSG #pajlada :wow, amazing reward)");
+
+    emoteTestMessages.emplace_back(R"(@badge-info=subscriber/3;badges=subscriber/3;color=#0000FF;display-name=Linkoping;emotes=25:40-44;flags=17-26:S.6;id=744f9c58-b180-4f46-bd9e-b515b5ef75c1;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1566335866017;turbo=0;user-id=91673457;user-type= :linkoping!linkoping@linkoping.tmi.twitch.tv PRIVMSG #pajlada :Då kan du begära skadestånd och förtal Kappa)");
+    emoteTestMessages.emplace_back(R"(@badge-info=subscriber/1;badges=subscriber/0;color=;display-name=jhoelsc;emotes=301683486:46-58,60-72,74-86/301683544:88-100;flags=0-4:S.6;id=1f1afcdd-d94c-4699-b35f-d214deb1e11a;mod=0;room-id=11148817;subscriber=1;tmi-sent-ts=1588640587462;turbo=0;user-id=505763008;user-type= :jhoelsc!jhoelsc@jhoelsc.tmi.twitch.tv PRIVMSG #pajlada :pensé que no habría directo que bueno que si staryuukiLove staryuukiLove staryuukiLove staryuukiBits)");
+    emoteTestMessages.emplace_back(R"(@badge-info=subscriber/34;badges=moderator/1,subscriber/24;color=#FF0000;display-name=테스트계정420;emotes=41:6-13,16-23;flags=;id=97c28382-e8d2-45a0-bb5d-2305fc4ef139;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1590922036771;turbo=0;user-id=117166826;user-type=mod :testaccount_420!testaccount_420@testaccount_420.tmi.twitch.tv PRIVMSG #pajlada :-tags Kreygasm, Kreygasm)");
+    emoteTestMessages.emplace_back(R"(@badge-info=subscriber/34;badges=moderator/1,subscriber/24;color=#FF0000;display-name=테스트계정420;emotes=25:24-28/41:6-13,15-22;flags=;id=5a36536b-a952-43f7-9c41-88c829371b7a;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1590922039721;turbo=0;user-id=117166826;user-type=mod :testaccount_420!testaccount_420@testaccount_420.tmi.twitch.tv PRIVMSG #pajlada :-tags Kreygasm,Kreygasm Kappa (no space then space))");
+    emoteTestMessages.emplace_back(R"(@badge-info=subscriber/34;badges=moderator/1,subscriber/24;color=#FF0000;display-name=테스트계정420;emotes=25:6-10/1902:12-16/88:18-25;flags=;id=aed9e67e-f8cd-493e-aa6b-da054edd7292;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1590922042881;turbo=0;user-id=117166826;user-type=mod :testaccount_420!testaccount_420@testaccount_420.tmi.twitch.tv PRIVMSG #pajlada :-tags Kappa.Keepo.PogChamp.extratext (3 emotes with extra text))");
+	emoteTestMessages.emplace_back(R"(@badge-info=;badges=moderator/1,partner/1;color=#5B99FF;display-name=StreamElements;emotes=86:30-39/822112:73-79;flags=22-27:S.5;id=03c3eec9-afd1-4858-a2e0-fccbf6ad8d1a;mod=1;room-id=11148817;subscriber=0;tmi-sent-ts=1588638345928;turbo=0;user-id=100135110;user-type=mod :streamelements!streamelements@streamelements.tmi.twitch.tv PRIVMSG #pajlada :╔ACTION A LOJA AINDA NÃO ESTÁ PRONTA BibleThump , AGUARDE... NOVIDADES EM BREVE FortOne╔)");
+	emoteTestMessages.emplace_back(R"(@badge-info=subscriber/20;badges=moderator/1,subscriber/12;color=#19E6E6;display-name=randers;emotes=25:39-43;flags=;id=3ea97f01-abb2-4acf-bdb8-f52e79cd0324;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1588837097115;turbo=0;user-id=40286300;user-type=mod :randers!randers@randers.tmi.twitch.tv PRIVMSG #pajlada :Då kan du begära skadestånd och förtal Kappa)");
+	emoteTestMessages.emplace_back(R"(@badge-info=subscriber/34;badges=moderator/1,subscriber/24;color=#FF0000;display-name=테스트계정420;emotes=41:6-13,15-22;flags=;id=a3196c7e-be4c-4b49-9c5a-8b8302b50c2a;mod=1;room-id=11148817;subscriber=1;tmi-sent-ts=1590922213730;turbo=0;user-id=117166826;user-type=mod :testaccount_420!testaccount_420@testaccount_420.tmi.twitch.tv PRIVMSG #pajlada :-tags Kreygasm,Kreygasm (no space))");
     // clang-format on
 
-    createWindowShortcut(this, "F6", [=] {
+    actions.emplace("addMiscMessage", [=](std::vector<QString>) -> QString {
         const auto &messages = miscMessages;
         static int index = 0;
         auto app = getApp();
         const auto &msg = messages[index++ % messages.size()];
         app->twitch.server->addFakeMessage(msg);
+        return "";
     });
 
-    createWindowShortcut(this, "F7", [=] {
+    actions.emplace("addCheerMessage", [=](std::vector<QString>) -> QString {
         const auto &messages = cheerMessages;
         static int index = 0;
         const auto &msg = messages[index++ % messages.size()];
         getApp()->twitch.server->addFakeMessage(msg);
+        return "";
     });
 
-    createWindowShortcut(this, "F8", [=] {
+    actions.emplace("addLinkMessage", [=](std::vector<QString>) -> QString {
         const auto &messages = linkMessages;
         static int index = 0;
         auto app = getApp();
         const auto &msg = messages[index++ % messages.size()];
         app->twitch.server->addFakeMessage(msg);
+        return "";
     });
 
-    createWindowShortcut(this, "F9", [=] {
-        auto *dialog = new WelcomeDialog();
-        dialog->setAttribute(Qt::WA_DeleteOnClose);
-        dialog->show();
+    actions.emplace("addRewardMessage", [=](std::vector<QString>) -> QString {
+        rapidjson::Document doc;
+        auto app = getApp();
+        static bool alt = true;
+        if (alt)
+        {
+            doc.Parse(channelRewardMessage);
+            app->twitch.server->addFakeMessage(channelRewardIRCMessage);
+            app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
+                doc["data"]["message"]["data"]["redemption"]);
+            alt = !alt;
+        }
+        else
+        {
+            doc.Parse(channelRewardMessage2);
+            app->twitch.pubsub->signals_.pointReward.redeemed.invoke(
+                doc["data"]["message"]["data"]["redemption"]);
+            alt = !alt;
+        }
+        return "";
     });
 
+    actions.emplace("addEmoteMessage", [=](std::vector<QString>) -> QString {
+        const auto &messages = emoteTestMessages;
+        static int index = 0;
+        const auto &msg = messages[index++ % messages.size()];
+        getApp()->twitch.server->addFakeMessage(msg);
+        return "";
+    });
 #endif
 }
 
 void Window::addShortcuts()
 {
-    /// Initialize program-wide hotkeys
-    // Open settings
-    createWindowShortcut(this, "CTRL+P", [] { SettingsDialog::showDialog(); });
+    HotkeyController::HotkeyMap actions{
+        {"openSettings",  // Open settings
+         [this](std::vector<QString>) -> QString {
+             SettingsDialog::showDialog(this);
+             return "";
+         }},
+        {"newSplit",  // Create a new split
+         [this](std::vector<QString>) -> QString {
+             this->notebook_->getOrAddSelectedPage()->appendNewSplit(true);
+             return "";
+         }},
+        {"openTab",  // CTRL + 1-8 to open corresponding tab.
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "openTab shortcut called without arguments. "
+                        "Takes only "
+                        "one argument: tab specifier";
+                 return "openTab shortcut called without arguments. "
+                        "Takes only "
+                        "one argument: tab specifier";
+             }
+             auto target = arguments.at(0);
+             if (target == "last")
+             {
+                 this->notebook_->selectLastTab();
+             }
+             else if (target == "next")
+             {
+                 this->notebook_->selectNextTab();
+             }
+             else if (target == "previous")
+             {
+                 this->notebook_->selectPreviousTab();
+             }
+             else
+             {
+                 bool ok;
+                 int result = target.toInt(&ok);
+                 if (ok)
+                 {
+                     this->notebook_->selectIndex(result);
+                 }
+                 else
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "Invalid argument for openTab shortcut";
+                     return QString("Invalid argument for openTab "
+                                    "shortcut: \"%1\". Use \"last\", "
+                                    "\"next\", \"previous\" or an integer.")
+                         .arg(target);
+                 }
+             }
+             return "";
+         }},
+        {"popup",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 return "popup action called without arguments. Takes only "
+                        "one: \"split\" or \"window\".";
+             }
+             if (arguments.at(0) == "split")
+             {
+                 if (auto page = dynamic_cast<SplitContainer *>(
+                         this->notebook_->getSelectedPage()))
+                 {
+                     if (auto split = page->getSelectedSplit())
+                     {
+                         split->popup();
+                     }
+                 }
+             }
+             else if (arguments.at(0) == "window")
+             {
+                 if (auto page = dynamic_cast<SplitContainer *>(
+                         this->notebook_->getSelectedPage()))
+                 {
+                     page->popup();
+                 }
+             }
+             else
+             {
+                 return "Invalid popup target. Use \"split\" or \"window\".";
+             }
+             return "";
+         }},
+        {"zoom",
+         [](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "zoom shortcut called without arguments. Takes "
+                        "only "
+                        "one argument: \"in\", \"out\", or \"reset\"";
+                 return "zoom shortcut called without arguments. Takes "
+                        "only "
+                        "one argument: \"in\", \"out\", or \"reset\"";
+             }
+             auto change = 0.0f;
+             auto direction = arguments.at(0);
+             if (direction == "reset")
+             {
+                 getSettings()->uiScale.setValue(1);
+                 return "";
+             }
 
-    // Switch tab
-    createWindowShortcut(this, "CTRL+T", [this] {
-        this->notebook_->getOrAddSelectedPage()->appendNewSplit(true);
-    });
+             if (direction == "in")
+             {
+                 change = 0.1f;
+             }
+             else if (direction == "out")
+             {
+                 change = -0.1f;
+             }
+             else
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid zoom direction, use \"in\", \"out\", or "
+                        "\"reset\"";
+                 return "Invalid zoom direction, use \"in\", \"out\", or "
+                        "\"reset\"";
+             }
+             getSettings()->setClampedUiScale(
+                 getSettings()->getClampedUiScale() + change);
+             return "";
+         }},
+        {"newTab",
+         [this](std::vector<QString>) -> QString {
+             this->notebook_->addPage(true);
+             return "";
+         }},
+        {"removeTab",
+         [this](std::vector<QString>) -> QString {
+             this->notebook_->removeCurrentPage();
+             return "";
+         }},
+        {"reopenSplit",
+         [this](std::vector<QString>) -> QString {
+             if (ClosedSplits::empty())
+             {
+                 return "";
+             }
+             ClosedSplits::SplitInfo si = ClosedSplits::pop();
+             SplitContainer *splitContainer{nullptr};
+             if (si.tab)
+             {
+                 splitContainer = dynamic_cast<SplitContainer *>(si.tab->page);
+             }
+             if (!splitContainer)
+             {
+                 splitContainer = this->notebook_->getOrAddSelectedPage();
+             }
+             this->notebook_->select(splitContainer);
+             Split *split = new Split(splitContainer);
+             split->setChannel(
+                 getApp()->twitch.server->getOrAddChannel(si.channelName));
+             split->setFilters(si.filters);
+             splitContainer->appendSplit(split);
+             return "";
+         }},
+        {"toggleLocalR9K",
+         [](std::vector<QString>) -> QString {
+             getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
+             getApp()->windows->forceLayoutChannelViews();
+             return "";
+         }},
+        {"openQuickSwitcher",
+         [](std::vector<QString>) -> QString {
+             auto quickSwitcher =
+                 new QuickSwitcherPopup(&getApp()->windows->getMainWindow());
+             quickSwitcher->show();
+             return "";
+         }},
+        {"quit",
+         [](std::vector<QString>) -> QString {
+             QApplication::exit();
+             return "";
+         }},
+        {"moveTab",
+         [this](std::vector<QString> arguments) -> QString {
+             if (arguments.size() == 0)
+             {
+                 qCWarning(chatterinoHotkeys)
+                     << "moveTab shortcut called without arguments. "
+                        "Takes only one argument: new index (number, "
+                        "\"next\" "
+                        "or \"previous\")";
+                 return "moveTab shortcut called without arguments. "
+                        "Takes only one argument: new index (number, "
+                        "\"next\" "
+                        "or \"previous\")";
+             }
+             int newIndex = -1;
+             bool indexIsGenerated =
+                 false;  // indicates if `newIndex` was generated using target="next" or target="previous"
 
-    // CTRL + 1-8 to open corresponding tab.
-    for (auto i = 0; i < 8; i++)
-    {
-        char hotkey[7];
-        std::sprintf(hotkey, "CTRL+%d", i + 1);
-        const auto openTab = [this, i] { this->notebook_->selectIndex(i); };
-        createWindowShortcut(this, hotkey, openTab);
-    }
+             auto target = arguments.at(0);
+             qCDebug(chatterinoHotkeys) << target;
+             if (target == "next")
+             {
+                 newIndex = this->notebook_->getSelectedIndex() + 1;
+                 indexIsGenerated = true;
+             }
+             else if (target == "previous")
+             {
+                 newIndex = this->notebook_->getSelectedIndex() - 1;
+                 indexIsGenerated = true;
+             }
+             else
+             {
+                 bool ok;
+                 int result = target.toInt(&ok);
+                 if (!ok)
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "Invalid argument for moveTab shortcut";
+                     return QString("Invalid argument for moveTab shortcut: "
+                                    "%1. Use \"next\" or \"previous\" or an "
+                                    "integer.")
+                         .arg(target);
+                 }
+                 newIndex = result;
+             }
+             if (newIndex >= this->notebook_->getPageCount() || 0 > newIndex)
+             {
+                 if (indexIsGenerated)
+                 {
+                     return "";  // don't error out on generated indexes, ie move tab right
+                 }
+                 qCWarning(chatterinoHotkeys)
+                     << "Invalid index for moveTab shortcut:" << newIndex;
+                 return QString("Invalid index for moveTab shortcut: %1.")
+                     .arg(newIndex);
+             }
+             this->notebook_->rearrangePage(this->notebook_->getSelectedPage(),
+                                            newIndex);
+             return "";
+         }},
+        {"setStreamerMode",
+         [](std::vector<QString> arguments) -> QString {
+             auto mode = 2;
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "off")
+                 {
+                     mode = 0;
+                 }
+                 else if (arg == "on")
+                 {
+                     mode = 1;
+                 }
+                 else if (arg == "toggle")
+                 {
+                     mode = 2;
+                 }
+                 else if (arg == "auto")
+                 {
+                     mode = 3;
+                 }
+                 else
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "Invalid argument for setStreamerMode hotkey: "
+                         << arg;
+                     return QString("Invalid argument for setStreamerMode "
+                                    "hotkey: %1. Use \"on\", \"off\", "
+                                    "\"toggle\" or \"auto\".")
+                         .arg(arg);
+                 }
+             }
 
-    createWindowShortcut(this, "CTRL+9",
-                         [this] { this->notebook_->selectLastTab(); });
+             if (mode == 0)
+             {
+                 getSettings()->enableStreamerMode.setValue(
+                     StreamerModeSetting::Disabled);
+             }
+             else if (mode == 1)
+             {
+                 getSettings()->enableStreamerMode.setValue(
+                     StreamerModeSetting::Enabled);
+             }
+             else if (mode == 2)
+             {
+                 if (isInStreamerMode())
+                 {
+                     getSettings()->enableStreamerMode.setValue(
+                         StreamerModeSetting::Disabled);
+                 }
+                 else
+                 {
+                     getSettings()->enableStreamerMode.setValue(
+                         StreamerModeSetting::Enabled);
+                 }
+             }
+             else if (mode == 3)
+             {
+                 getSettings()->enableStreamerMode.setValue(
+                     StreamerModeSetting::DetectObs);
+             }
+             return "";
+         }},
+        {"setTabVisibility",
+         [this](std::vector<QString> arguments) -> QString {
+             auto mode = 2;
+             if (arguments.size() != 0)
+             {
+                 auto arg = arguments.at(0);
+                 if (arg == "off")
+                 {
+                     mode = 0;
+                 }
+                 else if (arg == "on")
+                 {
+                     mode = 1;
+                 }
+                 else if (arg == "toggle")
+                 {
+                     mode = 2;
+                 }
+                 else
+                 {
+                     qCWarning(chatterinoHotkeys)
+                         << "Invalid argument for setStreamerMode hotkey: "
+                         << arg;
+                     return QString("Invalid argument for setTabVisibility "
+                                    "hotkey: %1. Use \"on\", \"off\" or "
+                                    "\"toggle\".")
+                         .arg(arg);
+                 }
+             }
 
-    createWindowShortcut(this, "CTRL+TAB",
-                         [this] { this->notebook_->selectNextTab(); });
-    createWindowShortcut(this, "CTRL+SHIFT+TAB",
-                         [this] { this->notebook_->selectPreviousTab(); });
+             if (mode == 0)
+             {
+                 this->notebook_->setShowTabs(false);
+             }
+             else if (mode == 1)
+             {
+                 this->notebook_->setShowTabs(true);
+             }
+             else if (mode == 2)
+             {
+                 this->notebook_->setShowTabs(!this->notebook_->getShowTabs());
+             }
+             return "";
+         }},
+    };
 
-    // Zoom in
-    {
-        auto s = new QShortcut(QKeySequence::ZoomIn, this);
-        s->setContext(Qt::WindowShortcut);
-        QObject::connect(s, &QShortcut::activated, this, [] {
-            getSettings()->setClampedUiScale(
-                getSettings()->getClampedUiScale() + 0.1f);
-        });
-    }
+    this->addDebugStuff(actions);
 
-    // Zoom out
-    {
-        auto s = new QShortcut(QKeySequence::ZoomOut, this);
-        s->setContext(Qt::WindowShortcut);
-        QObject::connect(s, &QShortcut::activated, this, [] {
-            getSettings()->setClampedUiScale(
-                getSettings()->getClampedUiScale() - 0.1f);
-        });
-    }
-
-    // New tab
-    createWindowShortcut(this, "CTRL+SHIFT+T",
-                         [this] { this->notebook_->addPage(true); });
-
-    // Close tab
-    createWindowShortcut(this, "CTRL+SHIFT+W",
-                         [this] { this->notebook_->removeCurrentPage(); });
-
-    // Reopen last closed split
-    createWindowShortcut(this, "CTRL+G", [this] {
-        if (ClosedSplits::empty())
-        {
-            return;
-        }
-        ClosedSplits::SplitInfo si = ClosedSplits::pop();
-        SplitContainer *splitContainer{nullptr};
-        if (si.tab)
-        {
-            splitContainer = dynamic_cast<SplitContainer *>(si.tab->page);
-        }
-        if (!splitContainer)
-        {
-            splitContainer = this->notebook_->getOrAddSelectedPage();
-        }
-        this->notebook_->select(splitContainer);
-        Split *split = new Split(splitContainer);
-        split->setChannel(
-            getApp()->twitch.server->getOrAddChannel(si.channelName));
-        splitContainer->appendSplit(split);
-    });
-
-    createWindowShortcut(this, "CTRL+H", [this] {
-        getSettings()->hideSimilar.setValue(!getSettings()->hideSimilar);
-        getApp()->windows->forceLayoutChannelViews();
-    });
+    this->shortcuts_ = getApp()->hotkeys->shortcutsForCategory(
+        HotkeyCategory::Window, actions, this);
 }
 
 void Window::addMenuBar()
@@ -367,21 +674,24 @@ void Window::addMenuBar()
     QMenu *menu = mainMenu->addMenu(QString());
     QAction *prefs = menu->addAction(QString());
     prefs->setMenuRole(QAction::PreferencesRole);
-    connect(prefs, &QAction::triggered, this,
-            [] { SettingsDialog::showDialog(); });
+    connect(prefs, &QAction::triggered, this, [this] {
+        SettingsDialog::showDialog(this);
+    });
 
     // Window menu.
     QMenu *windowMenu = mainMenu->addMenu(QString("Window"));
 
     QAction *nextTab = windowMenu->addAction(QString("Select next tab"));
     nextTab->setShortcuts({QKeySequence("Meta+Tab")});
-    connect(nextTab, &QAction::triggered, this,
-            [=] { this->notebook_->selectNextTab(); });
+    connect(nextTab, &QAction::triggered, this, [=] {
+        this->notebook_->selectNextTab();
+    });
 
     QAction *prevTab = windowMenu->addAction(QString("Select previous tab"));
     prevTab->setShortcuts({QKeySequence("Meta+Shift+Tab")});
-    connect(prevTab, &QAction::triggered, this,
-            [=] { this->notebook_->selectPreviousTab(); });
+    connect(prevTab, &QAction::triggered, this, [=] {
+        this->notebook_->selectPreviousTab();
+    });
 }
 
 void Window::onAccountSelected()

@@ -1,7 +1,6 @@
 #include "messages/MessageElement.hpp"
 
 #include "Application.hpp"
-#include "common/IrcColors.hpp"
 #include "debug/Benchmark.hpp"
 #include "messages/Emote.hpp"
 #include "messages/layouts/MessageLayoutContainer.hpp"
@@ -11,14 +10,6 @@
 #include "util/DebugCount.hpp"
 
 namespace chatterino {
-
-namespace {
-
-    QRegularExpression IRC_COLOR_PARSE_REGEX(
-        "(\u0003(\\d{1,2})?(,(\\d{1,2}))?|\u000f)",
-        QRegularExpression::UseUnicodePropertiesOption);
-
-}  // namespace
 
 MessageElement::MessageElement(MessageElementFlags flags)
     : flags_(flags)
@@ -142,12 +133,13 @@ void ImageElement::addToContainer(MessageLayoutContainer &container,
 }
 
 // EMOTE
-EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags)
+EmoteElement::EmoteElement(const EmotePtr &emote, MessageElementFlags flags,
+                           const MessageColor &textElementColor)
     : MessageElement(flags)
     , emote_(emote)
 {
-    this->textElement_.reset(
-        new TextElement(emote->getCopyString(), MessageElementFlag::Misc));
+    this->textElement_.reset(new TextElement(
+        emote->getCopyString(), MessageElementFlag::Misc, textElementColor));
 
     this->setTooltip(emote->tooltip.string);
 }
@@ -253,6 +245,40 @@ MessageLayoutElement *ModBadgeElement::makeImageLayoutElement(
     return element;
 }
 
+// VIP BADGE
+VipBadgeElement::VipBadgeElement(const EmotePtr &data,
+                                 MessageElementFlags flags_)
+    : BadgeElement(data, flags_)
+{
+}
+
+MessageLayoutElement *VipBadgeElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    auto element =
+        (new ImageLayoutElement(*this, image, size))->setLink(this->getLink());
+
+    return element;
+}
+
+// FFZ Badge
+FfzBadgeElement::FfzBadgeElement(const EmotePtr &data,
+                                 MessageElementFlags flags_, QColor &color)
+    : BadgeElement(data, flags_)
+{
+    this->color = color;
+}
+
+MessageLayoutElement *FfzBadgeElement::makeImageLayoutElement(
+    const ImagePtr &image, const QSize &size)
+{
+    auto element =
+        (new ImageWithBackgroundLayoutElement(*this, image, size, this->color))
+            ->setLink(this->getLink());
+
+    return element;
+}
+
 // TEXT
 TextElement::TextElement(const QString &text, MessageElementFlags flags,
                          const MessageColor &color, FontStyle style)
@@ -302,7 +328,7 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
             // fourtf: add again
             //            if (word.width == -1) {
-            word.width = metrics.width(word.text);
+            word.width = metrics.horizontalAdvance(word.text);
             //            }
 
             // see if the text fits in the current line
@@ -334,15 +360,16 @@ void TextElement::addToContainer(MessageLayoutContainer &container,
 
             // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
 
-            for (int i = 0; i < textLength; i++)  //
+            for (int i = 0; i < textLength; i++)
             {
                 auto isSurrogate = text.size() > i + 1 &&
                                    QChar::isHighSurrogate(text[i].unicode());
 
-                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
-                                             : metrics.width(text[i]);
+                auto charWidth = isSurrogate
+                                     ? metrics.horizontalAdvance(text.mid(i, 2))
+                                     : metrics.horizontalAdvance(text[i]);
 
-                if (!container.fitsInLine(width + charWidth))  //
+                if (!container.fitsInLine(width + charWidth))
                 {
                     container.addElementNoLineBreak(getTextLayoutElement(
                         text.mid(wordStart, i - wordStart), width, false));
@@ -436,243 +463,42 @@ void TwitchModerationElement::addToContainer(MessageLayoutContainer &container,
     }
 }
 
-// TEXT
-// IrcTextElement gets its color from the color code in the message, and can change from character to character.
-// This differs from the TextElement
-IrcTextElement::IrcTextElement(const QString &fullText,
-                               MessageElementFlags flags, FontStyle style)
+LinebreakElement::LinebreakElement(MessageElementFlags flags)
     : MessageElement(flags)
-    , style_(style)
 {
-    assert(IRC_COLOR_PARSE_REGEX.isValid());
+}
 
-    // Default pen colors. -1 = default theme colors
-    int fg = -1, bg = -1;
-
-    // Split up the message in words (space separated)
-    // Each word contains one or more colored segments.
-    // The color of that segment is "global", as in it can be decided by the word before it.
-    for (const auto &text : fullText.split(' '))
+void LinebreakElement::addToContainer(MessageLayoutContainer &container,
+                                      MessageElementFlags flags)
+{
+    if (flags.hasAny(this->getFlags()))
     {
-        std::vector<Segment> segments;
-
-        int pos = 0;
-        int lastPos = 0;
-
-        auto i = IRC_COLOR_PARSE_REGEX.globalMatch(text);
-
-        while (i.hasNext())
-        {
-            auto match = i.next();
-
-            if (lastPos != match.capturedStart() && match.capturedStart() != 0)
-            {
-                auto seg = Segment{};
-                seg.text = text.mid(lastPos, match.capturedStart() - lastPos);
-                seg.fg = fg;
-                seg.bg = bg;
-                segments.emplace_back(seg);
-                lastPos = match.capturedStart() + match.capturedLength();
-            }
-            if (!match.captured(1).isEmpty())
-            {
-                fg = -1;
-                bg = -1;
-            }
-
-            if (!match.captured(2).isEmpty())
-            {
-                fg = match.captured(2).toInt(nullptr);
-            }
-            else
-            {
-                fg = -1;
-            }
-            if (!match.captured(4).isEmpty())
-            {
-                bg = match.captured(4).toInt(nullptr);
-            }
-            else if (fg == -1)
-            {
-                bg = -1;
-            }
-
-            lastPos = match.capturedStart() + match.capturedLength();
-        }
-
-        auto seg = Segment{};
-        seg.text = text.mid(lastPos);
-        seg.fg = fg;
-        seg.bg = bg;
-        segments.emplace_back(seg);
-
-        QString n(text);
-
-        n.replace(IRC_COLOR_PARSE_REGEX, "");
-
-        Word w{
-            n,
-            -1,
-            segments,
-        };
-        this->words_.emplace_back(w);
+        container.breakLine();
     }
 }
 
-void IrcTextElement::addToContainer(MessageLayoutContainer &container,
-                                    MessageElementFlags flags)
+ScalingImageElement::ScalingImageElement(ImageSet images,
+                                         MessageElementFlags flags)
+    : MessageElement(flags)
+    , images_(images)
 {
-    auto app = getApp();
+}
 
-    MessageColor defaultColorType = MessageColor::Text;
-    auto defaultColor = defaultColorType.getColor(*app->themes);
+void ScalingImageElement::addToContainer(MessageLayoutContainer &container,
+                                         MessageElementFlags flags)
+{
     if (flags.hasAny(this->getFlags()))
     {
-        QFontMetrics metrics =
-            app->fonts->getFontMetrics(this->style_, container.getScale());
+        const auto &image =
+            this->images_.getImageOrLoaded(container.getScale());
+        if (image->isEmpty())
+            return;
 
-        for (auto &word : this->words_)
-        {
-            auto getTextLayoutElement = [&](QString text,
-                                            std::vector<Segment> segments,
-                                            int width, bool hasTrailingSpace) {
-                std::vector<PajSegment> xd{};
+        auto size = QSize(image->width() * container.getScale(),
+                          image->height() * container.getScale());
 
-                for (const auto &segment : segments)
-                {
-                    QColor color = defaultColor;
-                    if (segment.fg >= 0 && segment.fg <= 98)
-                    {
-                        color = IRC_COLORS[segment.fg];
-                    }
-                    app->themes->normalizeColor(color);
-                    xd.emplace_back(PajSegment{segment.text, color});
-                }
-
-                auto e = (new MultiColorTextLayoutElement(
-                              *this, text, QSize(width, metrics.height()), xd,
-                              this->style_, container.getScale()))
-                             ->setLink(this->getLink());
-                e->setTrailingSpace(true);
-                e->setText(text);
-
-                // If URL link was changed,
-                // Should update it in MessageLayoutElement too!
-                if (this->getLink().type == Link::Url)
-                {
-                    static_cast<TextLayoutElement *>(e)->listenToLinkChanges();
-                }
-                return e;
-            };
-
-            // fourtf: add again
-            //            if (word.width == -1) {
-            word.width = metrics.width(word.text);
-            //            }
-
-            // see if the text fits in the current line
-            if (container.fitsInLine(word.width))
-            {
-                container.addElementNoLineBreak(
-                    getTextLayoutElement(word.text, word.segments, word.width,
-                                         this->hasTrailingSpace()));
-                continue;
-            }
-
-            // see if the text fits in the next line
-            if (!container.atStartOfLine())
-            {
-                container.breakLine();
-
-                if (container.fitsInLine(word.width))
-                {
-                    container.addElementNoLineBreak(getTextLayoutElement(
-                        word.text, word.segments, word.width,
-                        this->hasTrailingSpace()));
-                    continue;
-                }
-            }
-
-            // we done goofed, we need to wrap the text
-            QString text = word.text;
-            std::vector<Segment> segments = word.segments;
-            int textLength = text.length();
-            int wordStart = 0;
-            int width = 0;
-
-            // QChar::isHighSurrogate(text[0].unicode()) ? 2 : 1
-
-            // XXX(pajlada): NOT TESTED
-            for (int i = 0; i < textLength; i++)  //
-            {
-                auto isSurrogate = text.size() > i + 1 &&
-                                   QChar::isHighSurrogate(text[i].unicode());
-
-                auto charWidth = isSurrogate ? metrics.width(text.mid(i, 2))
-                                             : metrics.width(text[i]);
-
-                if (!container.fitsInLine(width + charWidth))
-                {
-                    std::vector<Segment> pieceSegments;
-                    int charactersLeft = i - wordStart;
-                    assert(charactersLeft > 0);
-                    for (auto segmentIt = segments.begin();
-                         segmentIt != segments.end();)
-                    {
-                        assert(charactersLeft > 0);
-                        auto &segment = *segmentIt;
-                        if (charactersLeft >= segment.text.length())
-                        {
-                            // Entire segment fits in this piece
-                            pieceSegments.push_back(segment);
-                            charactersLeft -= segment.text.length();
-                            segmentIt = segments.erase(segmentIt);
-
-                            assert(charactersLeft >= 0);
-
-                            if (charactersLeft == 0)
-                            {
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            // Only part of the segment fits in this piece
-                            // We create a new segment with the characters that fit, and modify the segment we checked to only contain the characters we didn't consume
-                            Segment segmentThatFitsInPiece{
-                                segment.text.left(charactersLeft), segment.fg,
-                                segment.bg};
-                            pieceSegments.emplace_back(segmentThatFitsInPiece);
-                            segment.text = segment.text.mid(charactersLeft);
-
-                            break;
-                        }
-                    }
-
-                    container.addElementNoLineBreak(
-                        getTextLayoutElement(text.mid(wordStart, i - wordStart),
-                                             pieceSegments, width, false));
-                    container.breakLine();
-
-                    wordStart = i;
-                    width = charWidth;
-
-                    if (isSurrogate)
-                        i++;
-                    continue;
-                }
-
-                width += charWidth;
-
-                if (isSurrogate)
-                    i++;
-            }
-
-            // Add last remaining text & segments
-            container.addElementNoLineBreak(
-                getTextLayoutElement(text.mid(wordStart), segments, width,
-                                     this->hasTrailingSpace()));
-        }
+        container.addElement((new ImageLayoutElement(*this, image, size))
+                                 ->setLink(this->getLink()));
     }
 }
 

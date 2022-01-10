@@ -1,12 +1,15 @@
 #include "AttachedWindow.hpp"
 
 #include "Application.hpp"
+#include "ForwardDecl.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "util/DebugCount.hpp"
 #include "widgets/splits/Split.hpp"
 
 #include <QTimer>
 #include <QVBoxLayout>
+#include <memory>
 
 #ifdef USEWINSDK
 #    include "util/WindowsHelper.hpp"
@@ -91,6 +94,9 @@ AttachedWindow *AttachedWindow::get(void *target, const GetArgs &args)
 
     window->fullscreen_ = args.fullscreen;
 
+    window->x_ = args.x;
+    window->pixelRatio_ = args.pixelRatio;
+
     if (args.height != -1)
     {
         if (args.height == 0)
@@ -140,7 +146,7 @@ void AttachedWindow::detach(const QString &winId)
 
 void AttachedWindow::setChannel(ChannelPtr channel)
 {
-    this->ui_.split->setChannel(channel);
+    this->ui_.split->setChannel(std::move(channel));
 }
 
 void AttachedWindow::showEvent(QShowEvent *)
@@ -185,9 +191,13 @@ void AttachedWindow::attachToHwnd(void *_attachedPtr)
                 if (!qfilename.endsWith("chrome.exe") &&
                     !qfilename.endsWith("firefox.exe") &&
                     !qfilename.endsWith("vivaldi.exe") &&
-                    !qfilename.endsWith("opera.exe"))
+                    !qfilename.endsWith("opera.exe") &&
+                    !qfilename.endsWith("msedge.exe") &&
+                    !qfilename.endsWith("brave.exe"))
+
                 {
-                    qDebug() << "NM Illegal caller" << qfilename;
+                    qCWarning(chatterinoWidget)
+                        << "NM Illegal caller" << qfilename;
                     this->timer_.stop();
                     this->deleteLater();
                     return;
@@ -236,7 +246,7 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
 
     if (::GetLastError() != 0)
     {
-        qDebug() << "NM GetLastError()" << ::GetLastError();
+        qCWarning(chatterinoWidget) << "NM GetLastError()" << ::GetLastError();
 
         this->timer_.stop();
         this->deleteLater();
@@ -269,10 +279,30 @@ void AttachedWindow::updateWindowRect(void *_attachedPtr)
         // offset
         int o = this->fullscreen_ ? 0 : 8;
 
-        ::MoveWindow(hwnd, int(rect.right - this->width_ * scale - o),
-                     int(rect.bottom - this->height_ * scale - o),
-                     int(this->width_ * scale), int(this->height_ * scale),
-                     true);
+        if (this->pixelRatio_ != -1.0)
+        {
+            ::MoveWindow(
+                hwnd,
+                int(rect.left + this->x_ * scale * this->pixelRatio_ + o - 2),
+                int(rect.bottom - this->height_ * scale - o),
+                int(this->width_ * scale), int(this->height_ * scale), true);
+        }
+        //support for old extension version 1.3
+        else if (this->x_ != -1.0)
+        {
+            ::MoveWindow(hwnd, int(rect.left + this->x_ * scale + o),
+                         int(rect.bottom - this->height_ * scale - o),
+                         int(this->width_ * scale), int(this->height_ * scale),
+                         true);
+        }
+        //support for old extension version 1.2
+        else
+        {
+            ::MoveWindow(hwnd, int(rect.right - this->width_ * scale - o),
+                         int(rect.bottom - this->height_ * scale - o),
+                         int(this->width_ * scale), int(this->height_ * scale),
+                         true);
+        }
     }
 
 //    if (this->fullscreen_)

@@ -1,12 +1,18 @@
 #pragma once
 
+#include <memory>
+#include <unordered_map>
+
+#include <QColor>
+
 namespace chatterino {
 
 enum class ColorType {
     SelfHighlight,
     Subscription,
     Whisper,
-    RedeemedHighlight
+    RedeemedHighlight,
+    FirstMessageHighlight,
 };
 
 class ColorProvider

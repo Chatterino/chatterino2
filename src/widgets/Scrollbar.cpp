@@ -1,6 +1,7 @@
 #include "widgets/Scrollbar.hpp"
 
 #include "Application.hpp"
+#include "common/QLogging.hpp"
 #include "singletons/Settings.hpp"
 #include "singletons/Theme.hpp"
 #include "singletons/WindowManager.hpp"
@@ -187,6 +188,11 @@ qreal Scrollbar::getCurrentValue() const
     return this->currentValue_;
 }
 
+const QPropertyAnimation &Scrollbar::getCurrentValueAnimation() const
+{
+    return this->currentValueAnimation_;
+}
+
 void Scrollbar::offset(qreal value)
 {
     if (this->currentValueAnimation_.state() == QPropertyAnimation::Running)
@@ -228,11 +234,12 @@ void Scrollbar::setCurrentValue(qreal value)
 
 void Scrollbar::printCurrentState(const QString &prefix) const
 {
-    qDebug() << prefix                                         //
-             << "Current value: " << this->getCurrentValue()   //
-             << ". Maximum: " << this->getMaximum()            //
-             << ". Minimum: " << this->getMinimum()            //
-             << ". Large change: " << this->getLargeChange();  //
+    qCDebug(chatterinoWidget)
+        << prefix                                         //
+        << "Current value: " << this->getCurrentValue()   //
+        << ". Maximum: " << this->getMaximum()            //
+        << ". Minimum: " << this->getMinimum()            //
+        << ". Large change: " << this->getLargeChange();  //
 }
 
 void Scrollbar::paintEvent(QPaintEvent *)
@@ -244,6 +251,8 @@ void Scrollbar::paintEvent(QPaintEvent *)
     painter.fillRect(rect(), this->theme->scrollbars.background);
 
     bool enableRedeemedHighlights = getSettings()->enableRedeemedHighlight;
+    bool enableFirstMessageHighlights =
+        getSettings()->enableFirstMessageHighlight;
 
     //    painter.fillRect(QRect(xOffset, 0, width(), this->buttonHeight),
     //                     this->themeManager->ScrollbarArrow);
@@ -280,36 +289,44 @@ void Scrollbar::paintEvent(QPaintEvent *)
     int highlightHeight =
         int(std::ceil(std::max<float>(this->scale() * 2, dY)));
 
-    for (size_t i = 0; i < snapshotLength; i++)
+    for (size_t i = 0; i < snapshotLength; i++, y += dY)
     {
         ScrollbarHighlight const &highlight = snapshot[i];
 
-        if (!highlight.isNull())
+        if (highlight.isNull())
         {
-            if (!highlight.isRedeemedHighlight() || enableRedeemedHighlights)
-            {
-                QColor color = highlight.getColor();
-                color.setAlpha(255);
-
-                switch (highlight.getStyle())
-                {
-                    case ScrollbarHighlight::Default: {
-                        painter.fillRect(w / 8 * 3, int(y), w / 4,
-                                         highlightHeight, color);
-                    }
-                    break;
-
-                    case ScrollbarHighlight::Line: {
-                        painter.fillRect(0, int(y), w, 1, color);
-                    }
-                    break;
-
-                    case ScrollbarHighlight::None:;
-                }
-            }
+            continue;
         }
 
-        y += dY;
+        if (highlight.isRedeemedHighlight() && !enableRedeemedHighlights)
+        {
+            continue;
+        }
+
+        if (highlight.isFirstMessageHighlight() &&
+            !enableFirstMessageHighlights)
+        {
+            continue;
+        }
+
+        QColor color = highlight.getColor();
+        color.setAlpha(255);
+
+        switch (highlight.getStyle())
+        {
+            case ScrollbarHighlight::Default: {
+                painter.fillRect(w / 8 * 3, int(y), w / 4, highlightHeight,
+                                 color);
+            }
+            break;
+
+            case ScrollbarHighlight::Line: {
+                painter.fillRect(0, int(y), w, 1, color);
+            }
+            break;
+
+            case ScrollbarHighlight::None:;
+        }
     }
 }
 

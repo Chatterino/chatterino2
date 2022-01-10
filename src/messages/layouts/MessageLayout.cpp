@@ -39,7 +39,7 @@ namespace {
 }  // namespace
 
 MessageLayout::MessageLayout(MessagePtr message)
-    : message_(message)
+    : message_(std::move(message))
     , container_(std::make_shared<MessageLayoutContainer>())
 {
     DebugCount::increase("message layout");
@@ -115,12 +115,11 @@ bool MessageLayout::layout(int width, float scale, MessageElementFlags flags)
 void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 {
     this->layoutCount_++;
-
     auto messageFlags = this->message_->flags;
 
     if (this->flags.has(MessageLayoutFlag::Expanded) ||
         (flags.has(MessageElementFlag::ModeratorTools) &&
-         !this->message_->flags.has(MessageFlag::Disabled)))  //
+         !this->message_->flags.has(MessageFlag::Disabled)))
     {
         messageFlags.unset(MessageFlag::Collapsed);
     }
@@ -169,7 +168,7 @@ void MessageLayout::actuallyLayout(int width, MessageElementFlags flags)
 // Painting
 void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                           Selection &selection, bool isLastReadMessage,
-                          bool isWindowFocused)
+                          bool isWindowFocused, bool isMentions)
 {
     auto app = getApp();
     QPixmap *pixmap = this->buffer_.get();
@@ -220,6 +219,16 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                          app->themes->messages.disabled);
     }
 
+    if (!isMentions &&
+        (this->message_->flags.has(MessageFlag::RedeemedChannelPointReward) ||
+         this->message_->flags.has(MessageFlag::RedeemedHighlight)) &&
+        getSettings()->enableRedeemedHighlight.getValue())
+    {
+        painter.fillRect(
+            0, y, this->scale_ * 4, pixmap->height(),
+            *ColorProvider::instance().color(ColorType::RedeemedHighlight));
+    }
+
     // draw selection
     if (!selection.isEmpty())
     {
@@ -262,6 +271,9 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
 void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
                                  Selection & /*selection*/)
 {
+    if (buffer->isNull())
+        return;
+
     auto app = getApp();
     auto settings = getSettings();
 
@@ -281,9 +293,16 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
         }
     }();
 
-    if ((this->message_->flags.has(MessageFlag::Highlighted) ||
-         this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
-        !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
+    if (this->message_->flags.has(MessageFlag::FirstMessage) &&
+        getSettings()->enableFirstMessageHighlight.getValue())
+    {
+        backgroundColor = blendColors(
+            backgroundColor,
+            *ColorProvider::instance().color(ColorType::FirstMessageHighlight));
+    }
+    else if ((this->message_->flags.has(MessageFlag::Highlighted) ||
+              this->message_->flags.has(MessageFlag::HighlightedWhisper)) &&
+             !this->flags.has(MessageLayoutFlag::IgnoreHighlights))
     {
         // Blend highlight color with usual background color
         backgroundColor =
@@ -297,7 +316,9 @@ void MessageLayout::updateBuffer(QPixmap *buffer, int /*messageIndex*/,
             backgroundColor,
             *ColorProvider::instance().color(ColorType::Subscription));
     }
-    else if (this->message_->flags.has(MessageFlag::RedeemedHighlight) &&
+    else if ((this->message_->flags.has(MessageFlag::RedeemedHighlight) ||
+              this->message_->flags.has(
+                  MessageFlag::RedeemedChannelPointReward)) &&
              settings->enableRedeemedHighlight.getValue())
     {
         // Blend highlight color with usual background color

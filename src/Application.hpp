@@ -15,6 +15,7 @@ class PubSub;
 class CommandController;
 class AccountController;
 class NotificationController;
+class HotkeyController;
 
 class Theme;
 class WindowManager;
@@ -26,6 +27,7 @@ class Settings;
 class Fonts;
 class Toasts;
 class ChatterinoBadges;
+class FfzBadges;
 
 class Application
 {
@@ -49,14 +51,16 @@ public:
     Theme *const themes{};
     Fonts *const fonts{};
     Emotes *const emotes{};
+    AccountController *const accounts{};
+    HotkeyController *const hotkeys{};
     WindowManager *const windows{};
     Toasts *const toasts{};
 
-    AccountController *const accounts{};
     CommandController *const commands{};
     NotificationController *const notifications{};
     TwitchIrcServer *const twitch2{};
     ChatterinoBadges *const chatterinoBadges{};
+    FfzBadges *const ffzBadges{};
 
     /*[[deprecated]]*/ Logging *const logging{};
 

@@ -75,7 +75,7 @@ SplitOverlay::SplitOverlay(Split *parent)
     up->setCursor(Qt::PointingHandCursor);
     down->setCursor(Qt::PointingHandCursor);
 
-    this->managedConnect(this->scaleChanged, [=](float _scale) {
+    this->signalHolder_.managedConnect(this->scaleChanged, [=](float _scale) {
         int a = int(_scale * 30);
         QSize size(a, a);
 
@@ -220,18 +220,13 @@ bool SplitOverlay::ButtonEventFilter::eventFilter(QObject *watched,
         case QEvent::MouseButtonRelease: {
             if (this->hoveredElement != HoveredElement::SplitMove)
             {
-                SplitContainer *container =
-                    this->parent->split_->getContainer();
+                auto dir = SplitContainer::Direction(
+                    this->hoveredElement + SplitContainer::Left - SplitLeft);
 
-                if (container != nullptr)
-                {
-                    auto *_split = new Split(container);
-                    auto dir = SplitContainer::Direction(this->hoveredElement +
-                                                         SplitContainer::Left -
-                                                         SplitLeft);
-                    container->insertSplit(_split, dir, this->parent->split_);
-                    this->parent->hide();
-                }
+                this->parent->split_->insertSplitRequested.invoke(
+                    static_cast<int>(dir), this->parent->split_);
+
+                this->parent->hide();
             }
         }
         break;

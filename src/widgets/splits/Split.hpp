@@ -3,6 +3,7 @@
 #include "common/Aliases.hpp"
 #include "common/Channel.hpp"
 #include "common/NullablePtr.hpp"
+#include "pajlada/signals/signalholder.hpp"
 #include "widgets/BaseWidget.hpp"
 
 #include <QFont>
@@ -30,14 +31,13 @@ class SelectChannelDialog;
 //   - Responsible for rendering and handling user text input
 //
 // Each sub-element has a reference to the parent Chat Widget
-class Split : public BaseWidget, pajlada::Signals::SignalHolder
+class Split : public BaseWidget
 {
     friend class SplitInput;
 
     Q_OBJECT
 
 public:
-    explicit Split(SplitContainer *parent);
     explicit Split(QWidget *parent);
 
     ~Split() override;
@@ -47,11 +47,14 @@ public:
     pajlada::Signals::NoArgSignal focusLost;
 
     ChannelView &getChannelView();
-    SplitContainer *getContainer();
+    SplitInput &getInput();
 
     IndirectChannel getIndirectChannel();
     ChannelPtr getChannel();
     void setChannel(IndirectChannel newChannel);
+
+    void setFilters(const QList<QUuid> ids);
+    const QList<QUuid> getFilters() const;
 
     void setModerationMode(bool value);
     bool getModerationMode() const;
@@ -76,6 +79,24 @@ public:
         modifierStatusChanged;
     static Qt::KeyboardModifiers modifierStatus;
 
+    enum class Action {
+        RefreshTab,
+        ResetMouseStatus,
+        AppendNewSplit,
+        Delete,
+
+        SelectSplitLeft,
+        SelectSplitRight,
+        SelectSplitAbove,
+        SelectSplitBelow,
+    };
+
+    pajlada::Signals::Signal<Action> actionRequested;
+    pajlada::Signals::Signal<ChannelPtr> openSplitRequested;
+
+    // args: (SplitContainer::Direction dir, Split* parent)
+    pajlada::Signals::Signal<int, Split *> insertSplitRequested;
+
 protected:
     void paintEvent(QPaintEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
@@ -92,8 +113,22 @@ protected:
 private:
     void channelNameUpdated(const QString &newChannelName);
     void handleModifiers(Qt::KeyboardModifiers modifiers);
+    void updateInputPlaceholder();
+    void addShortcuts() override;
 
-    SplitContainer *container_;
+    /**
+     * @brief Opens Twitch channel stream in a browser player (opens a formatted link)
+     */
+    void openChannelInBrowserPlayer(ChannelPtr channel);
+    /**
+     * @brief Opens Twitch channel stream in streamlink app (if stream is live and streamlink is installed)
+     */
+    void openChannelInStreamlink(QString channelName);
+    /**
+     * @brief Opens Twitch channel chat in a new Chatterino tab
+     */
+    void joinChannelInNewTab(ChannelPtr channel);
+
     IndirectChannel channel_;
 
     bool moderationMode_{};
@@ -115,8 +150,7 @@ private:
     pajlada::Signals::Connection roomModeChangedConnection_;
 
     pajlada::Signals::Connection indirectChannelChangedConnection_;
-
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder signalHolder_;
 
 public slots:
     void addSibling();
@@ -127,14 +161,19 @@ public slots:
     void popup();
     void clear();
     void openInBrowser();
+    void openModViewInBrowser();
+    void openWhispersInBrowser();
     void openBrowserPlayer();
     void openInStreamlink();
     void openWithCustomScheme();
     void copyToClipboard();
+    void startWatching();
+    void setFiltersDialog();
     void showSearch();
     void showViewerList();
     void openSubPage();
     void reloadChannelAndSubscriberEmotes();
+    void reconnect();
 };
 
 }  // namespace chatterino

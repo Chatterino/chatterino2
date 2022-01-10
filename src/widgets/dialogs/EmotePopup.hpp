@@ -1,8 +1,13 @@
 #pragma once
 
+#include "providers/emoji/Emojis.hpp"
+#include "providers/twitch/TwitchChannel.hpp"
 #include "widgets/BasePopup.hpp"
+#include "widgets/Notebook.hpp"
 
 #include <pajlada/signals/signal.hpp>
+
+#include <QLineEdit>
 
 namespace chatterino {
 
@@ -17,7 +22,6 @@ public:
     EmotePopup(QWidget *parent = nullptr);
 
     void loadChannel(ChannelPtr channel);
-    void loadEmojis();
 
     virtual void closeEvent(QCloseEvent *event) override;
 
@@ -28,6 +32,24 @@ private:
     ChannelView *channelEmotesView_{};
     ChannelView *subEmotesView_{};
     ChannelView *viewEmojis_{};
+    /**
+     * @brief Visible only when the user has specified a search query into the `search_` input.
+     * Otherwise the `notebook_` and all other views are visible.
+     */
+    ChannelView *searchView_{};
+
+    ChannelPtr channel_;
+    TwitchChannel *twitchChannel_{};
+
+    QLineEdit *search_;
+    Notebook *notebook_;
+
+    void loadEmojis(ChannelView &view, EmojiMap &emojiMap);
+    void loadEmojis(Channel &channel, EmojiMap &emojiMap, const QString &title);
+    void filterEmotes(const QString &text);
+    EmoteMap *filterEmoteMap(const QString &text,
+                             std::shared_ptr<const EmoteMap> emotes);
+    void addShortcuts() override;
 };
 
 }  // namespace chatterino

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ForwardDecl.hpp"
+#include "controllers/filters/FilterSet.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
 #include "messages/search/MessagePredicate.hpp"
 #include "widgets/BasePopup.hpp"
@@ -14,9 +15,10 @@ namespace chatterino {
 class SearchPopup : public BasePopup
 {
 public:
-    SearchPopup();
+    SearchPopup(QWidget *parent);
 
     virtual void setChannel(const ChannelPtr &channel);
+    virtual void setChannelFilters(FilterSetPtr filters);
 
 protected:
     virtual void updateWindowTitle();
@@ -24,6 +26,7 @@ protected:
 private:
     void initLayout();
     void search();
+    void addShortcuts() override;
 
     /**
      * @brief Only retains those message from a list of messages that satisfy a
@@ -32,12 +35,14 @@ private:
      * @param text          the search query -- will be parsed for MessagePredicates
      * @param channelName   name of the channel to be returned
      * @param snapshot      list of messages to filter
+     * @param filterSet     channel filter to apply
      *
      * @return a ChannelPtr with "channelName" and the filtered messages from
      *         "snapshot"
      */
     static ChannelPtr filter(const QString &text, const QString &channelName,
-                             const LimitedQueueSnapshot<MessagePtr> &snapshot);
+                             const LimitedQueueSnapshot<MessagePtr> &snapshot,
+                             FilterSetPtr filterSet);
 
     /**
      * @brief Checks the input for tags and registers their corresponding
@@ -53,6 +58,7 @@ private:
     QLineEdit *searchInput_{};
     ChannelView *channelView_{};
     QString channelName_{};
+    FilterSetPtr channelFilters_;
 };
 
 }  // namespace chatterino

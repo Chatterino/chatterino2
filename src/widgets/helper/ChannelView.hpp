@@ -10,6 +10,7 @@
 #include <unordered_set>
 
 #include "common/FlagsEnum.hpp"
+#include "controllers/filters/FilterSet.hpp"
 #include "messages/Image.hpp"
 #include "messages/LimitedQueue.hpp"
 #include "messages/LimitedQueueSnapshot.hpp"
@@ -31,7 +32,7 @@ using MessageFlags = FlagsEnum<MessageFlag>;
 class MessageLayout;
 using MessageLayoutPtr = std::shared_ptr<MessageLayout>;
 
-enum class MessageElementFlag;
+enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 class Scrollbar;
@@ -44,6 +45,13 @@ enum class PauseReason {
     Selection,
     DoubleClick,
     KeyboardModifier,
+};
+
+enum class FromTwitchLinkOpenChannelIn {
+    Split,
+    Tab,
+    BrowserPlayer,
+    Streamlink,
 };
 
 using SteadyClock = std::chrono::steady_clock;
@@ -76,6 +84,10 @@ public:
     ChannelPtr channel();
     void setChannel(ChannelPtr channel_);
 
+    void setFilters(const QList<QUuid> &ids);
+    const QList<QUuid> getFilterIds() const;
+    FilterSetPtr getFilterSet() const;
+
     ChannelPtr sourceChannel() const;
     void setSourceChannel(ChannelPtr sourceChannel);
     bool hasSourceChannel() const;
@@ -91,7 +103,8 @@ public:
     pajlada::Signals::Signal<HighlightState> tabHighlightRequested;
     pajlada::Signals::NoArgSignal liveStatusChanged;
     pajlada::Signals::Signal<const Link &> linkClicked;
-    pajlada::Signals::Signal<QString> joinToChannel;
+    pajlada::Signals::Signal<QString, FromTwitchLinkOpenChannelIn>
+        openChannelIn;
 
 protected:
     void themeChangedEvent() override;
@@ -177,11 +190,20 @@ private:
 
     LimitedQueueSnapshot<MessageLayoutPtr> snapshot_;
 
-    ChannelPtr channel_;
-    ChannelPtr sourceChannel_;
+    ChannelPtr channel_ = nullptr;
+    ChannelPtr underlyingChannel_ = nullptr;
+    ChannelPtr sourceChannel_ = nullptr;
 
     Scrollbar *scrollBar_;
     EffectLabel *goToBottom_;
+
+    FilterSetPtr channelFilters_;
+
+    // Returns true if message should be included
+    bool shouldIncludeMessage(const MessagePtr &m) const;
+
+    // Returns whether the scrollbar should have highlights
+    bool showScrollbarHighlights() const;
 
     // This variable can be used to decide whether or not we should render the
     // "Show latest messages" button
@@ -216,8 +238,10 @@ private:
 
     LimitedQueue<MessageLayoutPtr> messages_;
 
-    std::vector<pajlada::Signals::ScopedConnection> connections_;
-    std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
+    pajlada::Signals::SignalHolder signalHolder_;
+
+    // channelConnections_ will be cleared when the underlying channel of the channelview changes
+    pajlada::Signals::SignalHolder channelConnections_;
 
     std::unordered_set<std::shared_ptr<MessageLayout>> messagesOnScreen_;
 

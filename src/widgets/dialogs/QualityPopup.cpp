@@ -1,55 +1,71 @@
 #include "QualityPopup.hpp"
+#include "Application.hpp"
+#include "common/QLogging.hpp"
+#include "singletons/WindowManager.hpp"
 #include "util/StreamLink.hpp"
+#include "widgets/Window.hpp"
 
 namespace chatterino {
 
-QualityPopup::QualityPopup(const QString &_channelName, QStringList options)
-    : channelName_(_channelName)
+QualityPopup::QualityPopup(const QString &channelURL, QStringList options)
+    : BasePopup({},
+                static_cast<QWidget *>(&(getApp()->windows->getMainWindow())))
+    , channelURL_(channelURL)
 {
-    this->ui_.okButton.setText("OK");
-    this->ui_.cancelButton.setText("Cancel");
+    this->ui_.selector = new QComboBox(this);
+    this->ui_.vbox = new QVBoxLayout(this);
+    this->ui_.buttonBox = new QDialogButtonBox(
+        QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
 
-    QObject::connect(&this->ui_.okButton, &QPushButton::clicked, this,
+    QObject::connect(this->ui_.buttonBox, &QDialogButtonBox::accepted, this,
                      &QualityPopup::okButtonClicked);
-    QObject::connect(&this->ui_.cancelButton, &QPushButton::clicked, this,
+    QObject::connect(this->ui_.buttonBox, &QDialogButtonBox::rejected, this,
                      &QualityPopup::cancelButtonClicked);
 
-    this->ui_.buttonBox.addButton(&this->ui_.okButton,
-                                  QDialogButtonBox::ButtonRole::AcceptRole);
-    this->ui_.buttonBox.addButton(&this->ui_.cancelButton,
-                                  QDialogButtonBox::ButtonRole::RejectRole);
+    this->ui_.selector->addItems(options);
 
-    this->ui_.selector.addItems(options);
+    this->ui_.vbox->addWidget(this->ui_.selector);
+    this->ui_.vbox->addWidget(this->ui_.buttonBox);
 
-    this->ui_.vbox.addWidget(&this->ui_.selector);
-    this->ui_.vbox.addWidget(&this->ui_.buttonBox);
-
-    this->setLayout(&this->ui_.vbox);
+    this->setLayout(this->ui_.vbox);
 }
 
-void QualityPopup::showDialog(const QString &channelName, QStringList options)
+void QualityPopup::showDialog(const QString &channelURL, QStringList options)
 {
-    QualityPopup *instance = new QualityPopup(channelName, options);
+    QualityPopup *instance = new QualityPopup(channelURL, options);
 
+    instance->window()->setWindowTitle("Chatterino - select stream quality");
     instance->setAttribute(Qt::WA_DeleteOnClose, true);
 
     instance->show();
     instance->activateWindow();
     instance->raise();
-    instance->setFocus();
+}
+
+void QualityPopup::keyPressEvent(QKeyEvent *e)
+{
+    if (this->handleEscape(e, this->ui_.buttonBox))
+    {
+        return;
+    }
+    if (this->handleEnter(e, this->ui_.buttonBox))
+    {
+        return;
+    }
+
+    BasePopup::keyPressEvent(e);
 }
 
 void QualityPopup::okButtonClicked()
 {
-    QString channelURL = "twitch.tv/" + this->channelName_;
-
     try
     {
-        openStreamlink(channelURL, this->ui_.selector.currentText());
+        openStreamlink(this->channelURL_, this->ui_.selector->currentText());
     }
     catch (const Exception &ex)
     {
-        qDebug() << "Exception caught trying to open streamlink:" << ex.what();
+        qCWarning(chatterinoWidget)
+            << "Exception caught trying to open streamlink:" << ex.what();
     }
 
     this->close();

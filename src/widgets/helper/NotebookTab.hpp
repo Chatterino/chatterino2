@@ -7,7 +7,7 @@
 #include <QMenu>
 #include <QPropertyAnimation>
 #include <pajlada/settings/setting.hpp>
-#include <pajlada/signals/connection.hpp>
+#include <pajlada/signals/signalholder.hpp>
 
 namespace chatterino {
 
@@ -50,6 +50,9 @@ public:
 
     QRect getDesiredRect() const;
     void hideTabXChanged();
+
+    void growWidth(int width);
+    int normalTabWidth();
 
 protected:
     virtual void themeChangedEvent() override;
@@ -98,9 +101,11 @@ private:
 
     bool isLive_{};
 
+    int growWidth_ = 0;
+
     QMenu menu_;
 
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
 };
 
 }  // namespace chatterino

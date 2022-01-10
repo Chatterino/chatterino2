@@ -10,6 +10,8 @@
 #include <pajlada/signals/signalholder.hpp>
 #include <vector>
 
+#include <QElapsedTimer>
+
 namespace chatterino {
 
 class Button;
@@ -17,7 +19,7 @@ class EffectLabel;
 class Label;
 class Split;
 
-class SplitHeader final : public BaseWidget, pajlada::Signals::SignalHolder
+class SplitHeader final : public BaseWidget
 {
     Q_OBJECT
 
@@ -25,6 +27,7 @@ public:
     explicit SplitHeader(Split *_chatWidget);
 
     void setAddButtonVisible(bool value);
+    void setViewersButtonVisible(bool value);
 
     void updateChannelText();
     void updateModerationModeIcon();
@@ -47,6 +50,13 @@ private:
     void initializeModeSignals(EffectLabel &label);
     std::unique_ptr<QMenu> createMainMenu();
     std::unique_ptr<QMenu> createChatModeMenu();
+
+    /**
+     * @brief   Reset the thumbnail data and timer so a new
+     *          thumbnail can be fetched
+     **/
+    void resetThumbnail();
+
     void handleChannelChanged();
 
     Split *const split_{};
@@ -54,12 +64,15 @@ private:
     bool isLive_{false};
     QString thumbnail_;
     QElapsedTimer lastThumbnail_;
+    std::chrono::steady_clock::time_point lastReloadedChannelEmotes_;
+    std::chrono::steady_clock::time_point lastReloadedSubEmotes_;
 
     // ui
     Button *dropdownButton_{};
     Label *titleLabel_{};
     EffectLabel *modeButton_{};
     Button *moderationButton_{};
+    Button *viewersButton_{};
     Button *addButton_{};
 
     // states
@@ -70,11 +83,10 @@ private:
 
     // signals
     pajlada::Signals::NoArgSignal modeUpdateRequested_;
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
-    std::vector<pajlada::Signals::ScopedConnection> channelConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
+    pajlada::Signals::SignalHolder channelConnections_;
 
 public slots:
-    void moveSplit();
     void reloadChannelEmotes();
     void reloadSubscriberEmotes();
     void reconnect();

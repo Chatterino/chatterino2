@@ -67,20 +67,12 @@ namespace rj {
         arr.PushBack(pajlada::Serialize<Type>::get(value, a), a);
     }
 
+    bool checkJsonValue(const rapidjson::Value &obj, const char *key);
+
     template <typename Type>
     bool getSafe(const rapidjson::Value &obj, const char *key, Type &out)
     {
-        if (!obj.IsObject())
-        {
-            return false;
-        }
-
-        if (!obj.HasMember(key))
-        {
-            return false;
-        }
-
-        if (obj.IsNull())
+        if (!checkJsonValue(obj, key))
         {
             return false;
         }
@@ -100,7 +92,10 @@ namespace rj {
         return !error;
     }
 
-    std::string stringify(const rapidjson::Value &value);
+    bool getSafeObject(rapidjson::Value &obj, const char *key,
+                       rapidjson::Value &out);
+
+    QString stringify(const rapidjson::Value &value);
 
 }  // namespace rj
 }  // namespace chatterino

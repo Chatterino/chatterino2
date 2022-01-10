@@ -3,6 +3,7 @@
 #include "widgets/BaseWindow.hpp"
 #include "widgets/helper/ChannelView.hpp"
 
+#include <pajlada/signals/scoped-connection.hpp>
 #include <pajlada/signals/signal.hpp>
 
 class QCheckBox;
@@ -18,7 +19,7 @@ class UserInfoPopup final : public BaseWindow
     Q_OBJECT
 
 public:
-    UserInfoPopup();
+    UserInfoPopup(bool closeAutomatically, QWidget *parent);
 
     void setData(const QString &name, const ChannelPtr &channel);
 
@@ -37,23 +38,29 @@ private:
 
     QString userName_;
     QString userId_;
+    QString avatarUrl_;
     ChannelPtr channel_;
 
     pajlada::Signals::NoArgSignal userStateChanged_;
+
+    std::unique_ptr<pajlada::Signals::ScopedConnection> refreshConnection_;
 
     std::shared_ptr<bool> hack_;
 
     struct {
         Button *avatarButton = nullptr;
+        Button *localizedNameCopyButton = nullptr;
 
         Label *nameLabel = nullptr;
+        Label *localizedNameLabel = nullptr;
         Label *viewCountLabel = nullptr;
         Label *followerCountLabel = nullptr;
         Label *createdDateLabel = nullptr;
         Label *userIDLabel = nullptr;
+        Label *followageLabel = nullptr;
+        Label *subageLabel = nullptr;
 
-        QCheckBox *follow = nullptr;
-        QCheckBox *ignore = nullptr;
+        QCheckBox *block = nullptr;
         QCheckBox *ignoreHighlights = nullptr;
 
         Label *noMessagesLabel = nullptr;

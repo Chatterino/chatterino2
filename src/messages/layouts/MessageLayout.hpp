@@ -17,7 +17,7 @@ struct Selection;
 struct MessageLayoutContainer;
 class MessageLayoutElement;
 
-enum class MessageElementFlag;
+enum class MessageElementFlag : int64_t;
 using MessageElementFlags = FlagsEnum<MessageElementFlag>;
 
 enum class MessageLayoutFlag : uint8_t {
@@ -47,7 +47,7 @@ public:
     // Painting
     void paint(QPainter &painter, int width, int y, int messageIndex,
                Selection &selection, bool isLastReadMessage,
-               bool isWindowFocused);
+               bool isWindowFocused, bool isMentions);
     void invalidateBuffer();
     void deleteBuffer();
     void deleteCache();

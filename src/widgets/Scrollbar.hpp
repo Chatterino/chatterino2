@@ -44,6 +44,8 @@ public:
     qreal getDesiredValue() const;
     qreal getCurrentValue() const;
 
+    const QPropertyAnimation &getCurrentValueAnimation() const;
+
     // offset the desired value without breaking smooth scolling
     void offset(qreal value);
     pajlada::Signals::NoArgSignal &getCurrentValueChanged();

@@ -18,23 +18,31 @@ ConcurrentSettings::ConcurrentSettings()
     // NOTE: these do not get deleted
     : highlightedMessages(*new SignalVector<HighlightPhrase>())
     , highlightedUsers(*new SignalVector<HighlightPhrase>())
+    , highlightedBadges(*new SignalVector<HighlightBadge>())
     , blacklistedUsers(*new SignalVector<HighlightBlacklistUser>())
     , ignoredMessages(*new SignalVector<IgnorePhrase>())
     , mutedChannels(*new SignalVector<QString>())
+    , filterRecords(*new SignalVector<FilterRecordPtr>())
+    , nicknames(*new SignalVector<Nickname>())
     , moderationActions(*new SignalVector<ModerationAction>)
 {
     persist(this->highlightedMessages, "/highlighting/highlights");
     persist(this->blacklistedUsers, "/highlighting/blacklist");
+    persist(this->highlightedBadges, "/highlighting/badges");
     persist(this->highlightedUsers, "/highlighting/users");
     persist(this->ignoredMessages, "/ignore/phrases");
     persist(this->mutedChannels, "/pings/muted");
+    persist(this->filterRecords, "/filtering/filters");
+    persist(this->nicknames, "/nicknames");
     // tagged users?
     persist(this->moderationActions, "/moderation/actions");
 }
 
 bool ConcurrentSettings::isHighlightedUser(const QString &username)
 {
-    for (const auto &highlightedUser : this->highlightedUsers)
+    auto items = this->highlightedUsers.readOnly();
+
+    for (const auto &highlightedUser : *items)
     {
         if (highlightedUser.isMatch(username))
             return true;
@@ -58,7 +66,9 @@ bool ConcurrentSettings::isBlacklistedUser(const QString &username)
 
 bool ConcurrentSettings::isMutedChannel(const QString &channelName)
 {
-    for (const auto &channel : this->mutedChannels)
+    auto items = this->mutedChannels.readOnly();
+
+    for (const auto &channel : *items)
     {
         if (channelName.toLower() == channel.toLower())
         {
@@ -119,7 +129,10 @@ Settings::Settings(const QString &settingsDirectory)
 #ifdef USEWINSDK
     this->autorun = isRegisteredForStartup();
     this->autorun.connect(
-        [](bool autorun) { setRegisteredForStartup(autorun); }, false);
+        [](bool autorun) {
+            setRegisteredForStartup(autorun);
+        },
+        false);
 #endif
 }
 

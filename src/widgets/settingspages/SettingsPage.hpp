@@ -8,6 +8,10 @@
 
 #include "singletons/Settings.hpp"
 
+#include <QLabel>
+#include <QPainter>
+#include <QPushButton>
+
 #define SETTINGS_PAGE_WIDGET_BOILERPLATE(type, parent) \
     class type : public parent                         \
     {                                                  \
@@ -71,7 +75,7 @@ public:
 protected:
     SettingsDialogTab *tab_;
     pajlada::Signals::NoArgSignal onCancel_;
-    std::vector<pajlada::Signals::ScopedConnection> managedConnections_;
+    pajlada::Signals::SignalHolder managedConnections_;
 };
 
 }  // namespace chatterino
