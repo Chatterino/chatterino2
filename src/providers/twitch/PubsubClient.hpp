@@ -163,6 +163,8 @@ public:
         const QString &channelID, std::shared_ptr<TwitchAccount> account);
     void listenToAutomod(const QString &channelID,
                          std::shared_ptr<TwitchAccount> account);
+    void listenToLowTrustUser(const QString &channelID,
+                         std::shared_ptr<TwitchAccount> account);
 
     void listenToChannelPointRewards(const QString &channelID,
                                      std::shared_ptr<TwitchAccount> account);
