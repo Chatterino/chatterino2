@@ -80,6 +80,7 @@
 - Bugfix: Fixed character counter changing fonts after going over the limit. (#3422)
 - Bugfix: Fixed crash that could occur if the user opens/closes ChannelViews (e.g. EmotePopup, or Splits) then modifies the showLastMessageIndicator setting. (#3444)
 - Bugfix: Removed ability to reload emotes really fast (#3450)
+- Bugfix: Re-add date of build to the "About" page on nightly versions. (#3464)
 - Dev: Batch checking live status for channels with live notifications that aren't connected. (#3442)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
