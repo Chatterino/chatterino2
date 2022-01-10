@@ -189,7 +189,7 @@ std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
 
     // Safety Shield icon
     builder
-        .emplace<ImageElement>(Image::fromPixmap(getResources().button.safetyShieldAlert),
+        .emplace<ImageElement>(Image::fromPixmap(getResources().buttons.safetyShieldAlert),
                                MessageElementFlag::BadgeChannelAuthority);
     // Header message
     /*builder.emplace<TextElement>("Suspicious User, ", MessageElementFlag::Text,
@@ -232,7 +232,7 @@ std::pair<MessagePtr, MessagePtr> makeLowTrustUserMessage(
     {
     // hidden icon
         builder2
-            .emplace<ImageElement>(Image::fromPixmap(getResources().button.hidden),
+            .emplace<ImageElement>(Image::fromPixmap(getResources().buttons.hidden),
                                     MessageElementFlag::BadgeChannelAuthority)
             ->setTooltip("Not Published to Chat");
     }
