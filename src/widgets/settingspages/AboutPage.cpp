@@ -93,7 +93,7 @@ AboutPage::AboutPage()
                                     version.commitHash() + "\">" +
                                     version.commitHash() + "</a>")
                                .arg(Modes::instance().isNightly
-                                        ? ", " + version.dateOfBuild()
+                                        ? ", built on " + version.dateOfBuild()
                                         : "");
 
             auto versionLabel = versionInfo.emplace<QLabel>(text);
