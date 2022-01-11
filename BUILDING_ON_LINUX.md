@@ -67,8 +67,6 @@ _Most likely works the same for other Red Hat-like distros. Substitute `dnf` wit
 
 ## openSUSE Tumbleweed
 
-_Not tested in Leap, but the packages should be the same._
-
 1. Install all of the dependencies using `sudo zypper install libopenssl-devel libqt5-qtbase-devel libqt5-qtmultimedia-devel libqt5-qtsvg-devel libboost_filesystem-devel libboost_system-devel libsecret-devel boost-devel cmake`
 1. Go into the project directory
 1. Create a build folder and go into it (`mkdir build && cd build`)
