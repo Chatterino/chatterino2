@@ -1987,7 +1987,7 @@ void ChannelView::addContextMenuItems(
     if (event->modifiers() == Qt::ShiftModifier &&
         !layout->getMessage()->id.isEmpty())
     {
-        menu->addAction("Copy message id", [layout] {
+        menu->addAction("Copy message ID", [layout] {
             crossPlatformCopy(layout->getMessage()->id);
         });
     }
