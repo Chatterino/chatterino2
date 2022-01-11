@@ -226,7 +226,7 @@ PubSub::PubSub()
     this->moderationActionHandlers["slow"] = [this](const auto &data,
                                                     const auto &roomID) {
         ModeChangedAction action(data, roomID);
-        assert("Hi" + roomID);
+        assert("Hi");
         qCDebug("Test");
 
         action.mode = ModeChangedAction::Mode::Slow;
