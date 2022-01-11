@@ -355,8 +355,8 @@ void EmotePopup::loadChannel(ChannelPtr channel)
     // channel
     if (getSettings()->enableLoadingSevenTV)
     {
-        addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(), "7TV",
-                  MessageElementFlag::SeventvEmote);
+        addEmotes(*channelChannel, *this->twitchChannel_->seventvEmotes(),
+                  "7TV", MessageElementFlag::SeventvEmote);
     }
     addEmotes(*channelChannel, *this->twitchChannel_->bttvEmotes(), "BetterTTV",
               MessageElementFlag::BttvEmote);
