@@ -22,7 +22,7 @@ jobs:
             build-system: cmake
             pch: true
         include:
-          - os: windows-2016
+          - os: windows-2019
             qt-version: 5.12.10
             build-system: cmake
             pch: true
