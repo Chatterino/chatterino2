@@ -8,9 +8,13 @@ Dankerino is a fork of Chatterino 2.
 
 ### Features of Dankerino
 
-- Editing stream settings straight from the client, with both commands (`/setgame`, `/settitle`) and graphical user interface.
 - Shortcuts for whispering Supibot `/$`.
-- Actually acknowledge Chatterino 2 and Dankerino contributors.
+- 7TV emotes, using the official implementation from [here](https://hithub.com/seventv/chatterino7), disabled by default
+- Adjust your spam speed. Useful with chats with slightly higher slow mode than the default 1s.
+- Stream settings window (beta)
+- A couple more appearance settings compared to upstream Chatterino 2:
+ - input placeholder toggle
+ - toggle for graying-out recent messages
 
 ### Screenshots
 
