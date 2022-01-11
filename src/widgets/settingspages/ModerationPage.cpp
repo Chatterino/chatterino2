@@ -23,22 +23,17 @@
 
 namespace chatterino {
 
-qint64 dirSize(QString dirPath)
+qint64 dirSize(QString &dirPath)
 {
+    QDirIterator it(dirPath, QDirIterator::Subdirectories);
     qint64 size = 0;
-    QDir dir(dirPath);
-    // calculate total size of current directories' files
-    QDir::Filters fileFilters = QDir::Files | QDir::System | QDir::Hidden;
-    for (QString filePath : dir.entryList(fileFilters))
+
+    while (it.hasNext())
     {
-        QFileInfo fi(dir, filePath);
-        size += fi.size();
+        size += it.fileInfo().size();
+        it.next();
     }
-    // add size of child directories recursively
-    QDir::Filters dirFilters =
-        QDir::Dirs | QDir::NoDotAndDotDot | QDir::System | QDir::Hidden;
-    for (QString childDirPath : dir.entryList(dirFilters))
-        size += dirSize(dirPath + QDir::separator() + childDirPath);
+
     return size;
 }
 
@@ -58,15 +53,14 @@ QString formatSize(qint64 size)
 
 QString fetchLogDirectorySize()
 {
-    QString logPathDirectory = getSettings()->logPath.getValue().isEmpty()
-                                   ? getPaths()->messageLogDirectory
-                                   : getSettings()->logPath;
+    QString logsDirectoryPath = getSettings()->logPath.getValue().isEmpty()
+                                    ? getPaths()->messageLogDirectory
+                                    : getSettings()->logPath;
 
-    qint64 logsSize = dirSize(logPathDirectory);
-    QString logsSizeLabel = "Your logs currently take up ";
-    logsSizeLabel += formatSize(logsSize);
-    logsSizeLabel += " of space";
-    return logsSizeLabel;
+    auto logsSize = dirSize(logsDirectoryPath);
+
+    return QString("Your logs currently take up %1 of space")
+        .arg(formatSize(logsSize));
 }
 
 ModerationPage::ModerationPage()

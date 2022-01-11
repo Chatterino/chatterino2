@@ -201,8 +201,15 @@ void HotkeyController::loadHotkeys()
     auto set = std::set<QString>(defaultHotkeysAdded.begin(),
                                  defaultHotkeysAdded.end());
 
+    // set is currently "defaults added in settings"
+    auto numDefaultsFromSettings = set.size();
+
     auto keys = pajlada::Settings::SettingManager::getObjectKeys("/hotkeys");
     this->addDefaults(set);
+
+    // set is currently "all defaults (defaults defined from application + defaults defined in settings)"
+    auto numCombinedDefaults = set.size();
+
     pajlada::Settings::Setting<std::vector<QString>>::set(
         "/hotkeys/addedDefaults", std::vector<QString>(set.begin(), set.end()));
 
@@ -238,6 +245,12 @@ void HotkeyController::loadHotkeys()
         this->hotkeys_.append(std::make_shared<Hotkey>(
             *category, QKeySequence(keySequence), action, arguments,
             QString::fromStdString(key)));
+    }
+
+    if (numDefaultsFromSettings != numCombinedDefaults)
+    {
+        // some default that the user was not aware of has been added to the application, force a save to ensure shared state between hotkey controller and settings
+        this->saveHotkeys();
     }
 }
 
