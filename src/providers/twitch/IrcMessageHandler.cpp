@@ -230,8 +230,15 @@ std::vector<MessagePtr> IrcMessageHandler::parsePrivMessage(
 void IrcMessageHandler::handlePrivMessage(Communi::IrcPrivateMessage *message,
                                           TwitchIrcServer &server)
 {
-    this->addMessage(message, message->target(), message->content(), server,
-                     false, message->isAction());
+    // This is to make sure that combined emoji go through properly, see
+    // https://github.com/Chatterino/chatterino2/issues/3384 and
+    // https://mm2pl.github.io/emoji_rfc.pdf for more details
+    // Constants used here are defined in TwitchChannel.hpp
+
+    this->addMessage(
+        message, message->target(),
+        message->content().replace(COMBINED_FIXER, ZERO_WIDTH_JOINER), server,
+        false, message->isAction());
 }
 
 void IrcMessageHandler::addMessage(Communi::IrcMessage *_message,
@@ -560,8 +567,10 @@ void IrcMessageHandler::handleWhisperMessage(Communi::IrcMessage *message)
 
     auto c = getApp()->twitch.server->whispersChannel.get();
 
-    TwitchMessageBuilder builder(c, message, args, message->parameter(1),
-                                 false);
+    TwitchMessageBuilder builder(
+        c, message, args,
+        message->parameter(1).replace(COMBINED_FIXER, ZERO_WIDTH_JOINER),
+        false);
 
     if (builder.isIgnored())
     {
