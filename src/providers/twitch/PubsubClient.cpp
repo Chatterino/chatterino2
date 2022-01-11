@@ -226,6 +226,7 @@ PubSub::PubSub()
     this->moderationActionHandlers["slow"] = [this](const auto &data,
                                                     const auto &roomID) {
         ModeChangedAction action(data, roomID);
+        assert("Hi" + data + roomID);
 
         action.mode = ModeChangedAction::Mode::Slow;
         action.state = ModeChangedAction::State::On;
