@@ -152,8 +152,10 @@ namespace detail {
             if (reader.read(&image))
             {
                 QPixmap::fromImage(image);
-
-                int duration = std::max(20, reader.nextImageDelay());
+                int duration = reader.nextImageDelay();
+                if (duration <= 10)
+                    duration = 100;
+                duration = std::max(20, duration);
                 frames.push_back(Frame<QImage>{image, duration});
             }
         }
