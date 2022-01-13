@@ -1860,6 +1860,7 @@ void ChannelView::addContextMenuItems(
     auto menu = new QMenu;
     previousMenu = menu;
 
+    // Badge actions
     if (creatorFlags.hasAny({MessageElementFlag::Badges}))
     {
         if (auto badgeElement = dynamic_cast<const BadgeElement *>(&creator))
