@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Added support for low-trust-users messages, to show highlighted in the chat. (#3502)
 - Major: Added customizable shortcuts. (#2340)
 - Minor: Added middle click split to open in browser (#3356)
 - Minor: Added new search predicate to filter for messages matching a regex (#3282)
