@@ -2,6 +2,7 @@
 
 ## Unversioned
 
+- Minor: Removed timestamp from AutoMod messages. (#3503)
 - Major: Added customizable shortcuts. (#2340)
 - Minor: Added middle click split to open in browser (#3356)
 - Minor: Added new search predicate to filter for messages matching a regex (#3282)
