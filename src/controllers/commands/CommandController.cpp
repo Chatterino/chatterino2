@@ -66,7 +66,15 @@ void sendWhisperMessage(const QString &text)
     // (hemirt) pajlada: "we should not be sending whispers through jtv, but
     // rather to your own username"
     auto app = getApp();
-    app->twitch.server->sendMessage("jtv", text.simplified());
+    QString toSend = text.simplified();
+
+    // This is to make sure that combined emoji go through properly, see
+    // https://github.com/Chatterino/chatterino2/issues/3384 and
+    // https://mm2pl.github.io/emoji_rfc.pdf for more details
+    // Constants used here are defined in TwitchChannel.hpp
+    toSend.replace(ZERO_WIDTH_JOINER, ESCAPE_TAG);
+
+    app->twitch.server->sendMessage("jtv", toSend);
 }
 
 bool appendWhisperMessageWordsLocally(const QStringList &words)
