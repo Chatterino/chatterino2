@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
+        os: [windows-latest, macos-latest]
         qt-version: [5.15.2, 5.12.10]
         build-system: [qmake, cmake]
         pch: [true]
@@ -56,11 +56,6 @@ jobs:
         with:
           path: ../Qt
           key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-20210109
-
-      # LINUX
-      - name: Install p7zip (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: sudo apt-get update && sudo apt-get -y install p7zip-full
 
       - name: Install Qt
         uses: jurplel/install-qt-action@v2
@@ -125,82 +120,6 @@ jobs:
         with:
           name: chatterino-windows-x86-64-${{ matrix.qt-version }}-${{ matrix.build-system }}.zip
           path: build/chatterino-windows-x86-64.zip
-
-      # LINUX
-      - name: Install dependencies (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-            sudo apt-get update
-            sudo apt-get -y install \
-                cmake \
-                virtualenv \
-                rapidjson-dev \
-                libssl-dev \
-                libboost-dev \
-                libxcb-randr0-dev \
-                libboost-system-dev \
-                libboost-filesystem-dev \
-                libpulse-dev \
-                libxkbcommon-x11-0 \
-                libgstreamer-plugins-base1.0-0 \
-                build-essential \
-                libgl1-mesa-dev \
-                libxcb-icccm4 \
-                libxcb-image0 \
-                libxcb-keysyms1 \
-                libxcb-render-util0 \
-                libxcb-xinerama0
-
-      - name: Build (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.build-system == 'qmake'
-        run: |
-            mkdir build
-            cd build
-            qmake PREFIX=/usr ..
-            make -j8
-        shell: bash
-
-      - name: Build with CMake (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.build-system == 'cmake'
-        run: |
-            mkdir build
-            cd build
-            cmake \
-              -DCMAKE_INSTALL_PREFIX=appdir/usr/ \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DPAJLADA_SETTINGS_USE_BOOST_FILESYSTEM=On \
-              -DUSE_PRECOMPILED_HEADERS=${{ matrix.pch }} \
-              ..
-            make -j8
-        shell: bash
-
-      - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-            cd build
-            sh ./../.CI/CreateAppImage.sh
-        shell: bash
-
-      - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        run: |
-            cd build
-            sh ./../.CI/CreateUbuntuDeb.sh
-        shell: bash
-
-      - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.3.1
-        with:
-          name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
-          path: build/Chatterino-x86_64.AppImage
-
-      - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
-        uses: actions/upload-artifact@v2.3.1
-        with:
-          name: Chatterino-${{ matrix.qt-version }}-${{ matrix.build-system }}.deb
-          path: build/Chatterino.deb
 
       # MACOS
       - name: Install dependencies (MacOS)
