@@ -250,7 +250,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                                  .getOrAddSelectedPage()
                                                  ->appendNewSplit(false);
                                 split->setChannel(app->twitch2->getOrAddChannel(
-                                    userName.toLower()));
+                                    loginName.toLower()));
                             });
 
                         menu->popup(QCursor::pos());
