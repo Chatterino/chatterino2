@@ -1860,19 +1860,19 @@ void ChannelView::addContextMenuItems(
     auto menu = new QMenu;
     previousMenu = menu;
 
+    // Badge actions
     if (creatorFlags.hasAny({MessageElementFlag::Badges}))
     {
-        auto badgeElement = dynamic_cast<const BadgeElement *>(&creator);
-        addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
-                                 *menu);
+        if (auto badgeElement = dynamic_cast<const BadgeElement *>(&creator))
+            addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
+                                     *menu);
     }
 
     // Emote actions
     if (creatorFlags.hasAny(
             {MessageElementFlag::EmoteImages, MessageElementFlag::EmojiImage}))
     {
-        const auto emoteElement = dynamic_cast<const EmoteElement *>(&creator);
-        if (emoteElement)
+        if (auto emoteElement = dynamic_cast<const EmoteElement *>(&creator))
             addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags,
                                      *menu);
     }
