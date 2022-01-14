@@ -152,6 +152,11 @@ namespace detail {
             if (reader.read(&image))
             {
                 QPixmap::fromImage(image);
+                // It seems that browsers have special logic for fast animations.
+                // This implments Chrome and Firefox's behavior which uses
+                // a duration of 100 ms for any frames that specify a duration of <= 10 ms.
+                // See <http://webkit.org/b/36082> for more information.
+                // https://github.com/SevenTV/chatterino7/issues/46#issuecomment-1010595231
                 int duration = reader.nextImageDelay();
                 if (duration <= 10)
                     duration = 100;
