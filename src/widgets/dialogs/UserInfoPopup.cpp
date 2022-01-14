@@ -238,11 +238,11 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                             crossPlatformCopy(avatarUrl);
                         });
 
-                        // try to make msvc happy?
-                        auto temporary = this->userName_.toLower();
+                        // we need to assign login name for msvc compilation
+                        auto loginName = this->userName_.toLower();
                         menu->addAction(
                             "Open channel in a new popup window", this,
-                            [userName = temporary] {
+                            [loginName] {
                                 auto app = getApp();
                                 auto &window = app->windows->createWindow(
                                     WindowType::Popup, true);
