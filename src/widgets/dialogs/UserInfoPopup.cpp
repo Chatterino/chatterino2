@@ -136,6 +136,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
+    this->setMouseTracking(true);
 
     if (closeAutomatically)
         this->setActionOnFocusLoss(BaseWindow::Delete);
@@ -451,6 +452,34 @@ void UserInfoPopup::scaleChangedEvent(float /*scale*/)
 
         this->setGeometry(geo);
     });
+}
+
+void UserInfoPopup::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::MouseButton::LeftButton)
+    {
+        this->isDragging_ = true;
+        this->startPosDrag_ = event->pos();
+    }
+}
+
+void UserInfoPopup::mouseReleaseEvent(QMouseEvent *event)
+{
+    this->isDragging_ = false;
+    this->isMoving_ = false;
+}
+
+void UserInfoPopup::mouseMoveEvent(QMouseEvent *event)
+{
+    // Drag the window by the amount changed from inital position
+    // Note that we provide a few *units* of deadzone so people don't
+    // start dragging the window if they are slow at clicking.
+    auto movePos = event->pos() - this->startPosDrag_;
+    if (this->isMoving_ || movePos.manhattanLength() > 10.0)
+    {
+        move(window()->pos() + movePos);
+        this->isMoving_ = true;
+    }
 }
 
 void UserInfoPopup::installEvents()

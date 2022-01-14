@@ -26,6 +26,9 @@ public:
 protected:
     virtual void themeChangedEvent() override;
     virtual void scaleChangedEvent(float scale) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
 
 private:
     void installEvents();
@@ -40,6 +43,10 @@ private:
     QString userId_;
     QString avatarUrl_;
     ChannelPtr channel_;
+
+    bool isDragging_ = false;
+    bool isMoving_ = false;
+    QPoint startPosDrag_;
 
     pajlada::Signals::NoArgSignal userStateChanged_;
 
