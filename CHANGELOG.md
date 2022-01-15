@@ -3,7 +3,7 @@
 ## Unversioned
 
 - Major: Added customizable shortcuts. (#2340)
-- Minor: Expand user card drag area to move its window (#3508)
+- Bugfix: Fixed being unable to drag the user card window from certain spots. (#3508)
 - Minor: Added middle click split to open in browser (#3356)
 - Minor: Added new search predicate to filter for messages matching a regex (#3282)
 - Minor: Add `{channel.name}`, `{channel.id}`, `{stream.game}`, `{stream.title}`, `{my.id}`, `{my.name}` placeholders for commands (#3155)
