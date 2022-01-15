@@ -670,8 +670,6 @@ void CommandController::initialize(Settings &, Paths &paths)
             }
 
             stripChannelName(target);
-            channel->addMessage(makeSystemMessage(
-                QString("Opening %1 in streamlink...").arg(target)));
             openStreamlinkForChannel(target);
 
             return "";
