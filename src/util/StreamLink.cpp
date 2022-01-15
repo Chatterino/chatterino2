@@ -209,10 +209,12 @@ void openStreamlink(const QString &channelURL, const QString &quality,
 
 void openStreamlinkForChannel(const QString &channel)
 {
+    static const QString INFO_TEMPLATE("Opening %1 in Streamlink ...");
+
     auto *currentPage = dynamic_cast<SplitContainer *>(
         getApp()->windows->getMainWindow().getNotebook().getSelectedPage());
     currentPage->getSelectedSplit()->getChannel()->addMessage(
-        makeSystemMessage(QString("Opening %1 in streamlink...").arg(channel)));
+        makeSystemMessage(INFO_TEMPLATE.arg(channel)));
 
     QString channelURL = "twitch.tv/" + channel;
 
