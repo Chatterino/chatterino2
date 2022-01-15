@@ -48,6 +48,7 @@
 - Minor: Add feedback when using the whisper command `/w` incorrectly. (#3439)
 - Minor: Add feedback when writing a non-command message in the `/whispers` split. (#3439)
 - Minor: Opening streamlink through hotkeys and/or split header menu matches `/streamlink` command and shows feedback in chat as well. (#3510)
+- Minor: Removed timestamp from AutoMod messages. (#3503)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
