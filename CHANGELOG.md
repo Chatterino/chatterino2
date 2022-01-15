@@ -3,7 +3,7 @@
 ## Unversioned
 
 - Major: Added customizable shortcuts. (#2340)
-- Bugfix: Fixed being unable to drag the user card window from certain spots. (#3508)
+- Minor: Make animated emote playback speed match browser (Firefox and Chrome) behaviour. (#3506)
 - Minor: Added middle click split to open in browser (#3356)
 - Minor: Added new search predicate to filter for messages matching a regex (#3282)
 - Minor: Add `{channel.name}`, `{channel.id}`, `{stream.game}`, `{stream.title}`, `{my.id}`, `{my.name}` placeholders for commands (#3155)
@@ -46,6 +46,11 @@
 - Minor: Add search to emote popup. (#3404)
 - Minor: Messages can now be highlighted by subscriber or founder badges. (#3445)
 - Minor: Add workaround for multipart emoji as described in [the RFC](https://mm2pl.github.io/emoji_rfc.pdf). (#3469)
+- Minor: Add feedback when using the whisper command `/w` incorrectly. (#3439)
+- Minor: Add feedback when writing a non-command message in the `/whispers` split. (#3439)
+- Minor: Opening streamlink through hotkeys and/or split header menu matches `/streamlink` command and shows feedback in chat as well. (#3510)
+- Minor: Removed timestamp from AutoMod messages. (#3503)
+- Bugfix: Fixed being unable to drag the user card window from certain spots. (#3508)
 - Bugfix: Fix Split Input hotkeys not being available when input is hidden (#3362)
 - Bugfix: Fixed colored usernames sometimes not working. (#3170)
 - Bugfix: Restored ability to send duplicate `/me` messages. (#3166)
