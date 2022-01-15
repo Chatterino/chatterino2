@@ -16,8 +16,7 @@ jobs:
         build-system: [qmake, cmake]
         pch: [true]
         include:
-          - os: ubuntu-latest
-            qt-version: 5.15.2
+          - qt-version: 5.15.2
             build-system: cmake
             pch: false
 
@@ -36,7 +35,6 @@ jobs:
 
       # LINUX
       - name: Install p7zip (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
         run: sudo apt-get update && sudo apt-get -y install p7zip-full
 
       - name: Install Qt
@@ -48,7 +46,6 @@ jobs:
           version: ${{ matrix.qt-version }}
 
       - name: Install dependencies (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
         run: |
             sudo apt-get update
             sudo apt-get -y install \
@@ -72,7 +69,6 @@ jobs:
                 libxcb-xinerama0
 
       - name: Build (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.build-system == 'qmake'
         run: |
             mkdir build
             cd build
@@ -81,7 +77,6 @@ jobs:
         shell: bash
 
       - name: Build with CMake (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu') && matrix.build-system == 'cmake'
         run: |
             mkdir build
             cd build
@@ -95,28 +90,24 @@ jobs:
         shell: bash
 
       - name: Package - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
         run: |
             cd build
             sh ./../.CI/CreateAppImage.sh
         shell: bash
 
       - name: Package - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
         run: |
             cd build
             sh ./../.CI/CreateUbuntuDeb.sh
         shell: bash
 
       - name: Upload artifact - AppImage (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v2.3.1
         with:
           name: Chatterino-x86_64-${{ matrix.qt-version }}-${{ matrix.build-system }}.AppImage
           path: build/Chatterino-x86_64.AppImage
 
       - name: Upload artifact - .deb (Ubuntu)
-        if: startsWith(matrix.os, 'ubuntu')
         uses: actions/upload-artifact@v2.3.1
         with:
           name: Chatterino-${{ matrix.qt-version }}-${{ matrix.build-system }}.deb
