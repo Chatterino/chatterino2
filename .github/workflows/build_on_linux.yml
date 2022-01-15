@@ -69,6 +69,7 @@ jobs:
                 libxcb-xinerama0
 
       - name: Build (Ubuntu)
+        if: matrix.build-system == 'qmake'
         run: |
             mkdir build
             cd build
@@ -77,6 +78,7 @@ jobs:
         shell: bash
 
       - name: Build with CMake (Ubuntu)
+        if: matrix.build-system == 'cmake'
         run: |
             mkdir build
             cd build
