@@ -31,7 +31,7 @@ jobs:
         uses: actions/cache@v2.1.7
         with:
           path: ../Qt
-          key: ${{ runner.os }}-QtCache-${{ matrix.qt-version }}-20210109
+          key: ubuntu-latest-QtCache-${{ matrix.qt-version }}-20210109
 
       # LINUX
       - name: Install p7zip (Ubuntu)
