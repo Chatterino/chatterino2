@@ -16,16 +16,7 @@ jobs:
         qt-version: [5.15.2, 5.12.10]
         build-system: [qmake, cmake]
         pch: [true]
-        exclude:
-          - os: windows-latest
-            qt-version: 5.12.10
-            build-system: cmake
-            pch: true
         include:
-          - os: windows-2016
-            qt-version: 5.12.10
-            build-system: cmake
-            pch: true
           - os: ubuntu-latest
             qt-version: 5.15.2
             build-system: cmake
@@ -37,12 +28,6 @@ jobs:
         if: matrix.os == 'windows-latest'
         run: |
             echo "vs_version=2019" >> $GITHUB_ENV
-        shell: bash
-
-      - name: Set environment variables for windows-2016
-        if: matrix.os == 'windows-2016'
-        run: |
-            echo "vs_version=2017" >> $GITHUB_ENV
         shell: bash
 
       - uses: actions/checkout@v2.4.0
