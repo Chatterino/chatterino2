@@ -336,7 +336,7 @@ void SplitHeader::initializeLayout()
 std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 {
     // top level menu
-    auto menu = std::make_unique<QMenu>();
+    auto menu = std::make_unique<QMenu>(this);
     menu->addAction("Change channel", this->split_, &Split::changeChannel,
                     QKeySequence("Ctrl+R"));
     menu->addAction("Close", this->split_, &Split::deleteFromContainer,
@@ -500,7 +500,7 @@ std::unique_ptr<QMenu> SplitHeader::createMainMenu()
 
 std::unique_ptr<QMenu> SplitHeader::createChatModeMenu()
 {
-    auto menu = std::make_unique<QMenu>();
+    auto menu = std::make_unique<QMenu>(this);
 
     auto setSub = new QAction("Subscriber only", this);
     auto setEmote = new QAction("Emote only", this);
