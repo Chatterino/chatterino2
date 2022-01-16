@@ -1,25 +1,23 @@
 #pragma once
 
-#include <QString>
-#include <functional>
-#include <set>
-#include <unordered_map>
-#include <unordered_set>
 #include "lrucache/lrucache.hpp"
 #include "util/QStringHash.hpp"
 
+#include <QString>
+
+#include <unordered_set>
+
 namespace chatterino {
 
-/// ChatterSet is a limited container that contains a list of recent chatters
-/// that can be referenced by name.
+/**
+ * @brief ChatterSet is a limited container that contains a list of recent chatters referenceable by name.
+ **/
 class ChatterSet
 {
-public:
     /// The limit of how many chatters can be saved for a channel.
-    static constexpr size_t chatterLimit = 2000;
+    static constexpr size_t CHATTER_LIMIT = 2000;
 
-    ChatterSet();
-
+public:
     /// Inserts a user name if it isn't contained. Doesn't replace the original
     /// if the casing hasn't changed.
     void addRecentChatter(const QString &userName);
@@ -29,7 +27,9 @@ public:
     void updateOnlineChatters(
         const std::unordered_set<QString> &lowerCaseUsernames);
 
-    /// Checks if a username is in the list.
+    /**
+     * @brief Checks if a username is in the list.
+     **/
     bool contains(const QString &userName) const;
 
     /// Get filtered usernames by a prefix for autocompletion. Contained items
@@ -38,9 +38,7 @@ public:
 
 private:
     // user name in lower case -> user name in normal case
-    cache::lru_cache<QString, QString> items;
+    cache::lru_cache<QString, QString> items_{CHATTER_LIMIT};
 };
-
-using ChatterSet = ChatterSet;
 
 }  // namespace chatterino
