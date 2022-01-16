@@ -87,6 +87,7 @@
 - Bugfix: Removed ability to reload emotes really fast (#3450)
 - Bugfix: Re-add date of build to the "About" page on nightly versions. (#3464)
 - Bugfix: Fixed crash that would occur if the user right-clicked AutoMod badge. (#3496)
+- Bugfix: Fixed being unable to drag the user card window from certain spots. (#3508)
 - Dev: Batch checking live status for channels with live notifications that aren't connected. (#3442)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)
