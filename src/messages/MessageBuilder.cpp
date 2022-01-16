@@ -28,6 +28,14 @@ MessagePtr makeSystemMessage(const QString &text, const QTime &time)
     return MessageBuilder(systemMessage, text, time).release();
 }
 
+EmotePtr makeAutoModBadge()
+{
+    return std::make_shared<Emote>(Emote{
+        EmoteName{}, ImageSet{Image::fromPixmap(getResources().twitch.automod)},
+        Tooltip{"AutoMod"},
+        Url{"https://dashboard.twitch.tv/settings/moderation/automod"}});
+}
+
 MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
 {
     auto builder = MessageBuilder();
@@ -37,10 +45,8 @@ MessagePtr makeAutomodInfoMessage(const AutomodInfoAction &action)
     builder.message().flags.set(MessageFlag::PubSub);
 
     // AutoMod shield badge
-    builder
-        .emplace<ImageElement>(Image::fromPixmap(getResources().twitch.automod),
-                               MessageElementFlag::BadgeChannelAuthority)
-        ->setTooltip("AutoMod");
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
     builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
                                  MessageColor(QColor("blue")),
@@ -90,15 +96,12 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
 
     //
     // Builder for AutoMod message with explanation
-    builder.emplace<TimestampElement>();
     builder.message().loginName = "automod";
     builder.message().flags.set(MessageFlag::PubSub);
 
     // AutoMod shield badge
-    builder
-        .emplace<ImageElement>(Image::fromPixmap(getResources().twitch.automod),
-                               MessageElementFlag::BadgeChannelAuthority)
-        ->setTooltip("AutoMod");
+    builder.emplace<BadgeElement>(makeAutoModBadge(),
+                                  MessageElementFlag::BadgeChannelAuthority);
     // AutoMod "username"
     builder.emplace<TextElement>("AutoMod:", MessageElementFlag::BoldUsername,
                                  MessageColor(QColor("blue")),
