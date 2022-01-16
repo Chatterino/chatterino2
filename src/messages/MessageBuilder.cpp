@@ -96,7 +96,6 @@ std::pair<MessagePtr, MessagePtr> makeAutomodMessage(
 
     //
     // Builder for AutoMod message with explanation
-    builder.emplace<TimestampElement>();
     builder.message().loginName = "automod";
     builder.message().flags.set(MessageFlag::PubSub);
 

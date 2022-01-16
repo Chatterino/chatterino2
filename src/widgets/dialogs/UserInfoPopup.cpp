@@ -133,6 +133,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                                     : userInfoPopupFlags,
                  parent)
     , hack_(new bool)
+    , dragTimer_(this)
 {
     this->setWindowTitle("Usercard");
     this->setStayInScreenRect(true);
@@ -428,6 +429,21 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
 
     this->installEvents();
     this->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Policy::Ignored);
+
+    this->dragTimer_.callOnTimeout(
+        [this, hack = std::weak_ptr<bool>(this->hack_)] {
+            if (!hack.lock())
+            {
+                // Ensure this timer is never called after the object has been destroyed
+                return;
+            }
+            if (!this->isMoving_)
+            {
+                return;
+            }
+
+            this->move(this->requestedDragPos_);
+        });
 }
 
 void UserInfoPopup::themeChangedEvent()
@@ -451,6 +467,36 @@ void UserInfoPopup::scaleChangedEvent(float /*scale*/)
 
         this->setGeometry(geo);
     });
+}
+
+void UserInfoPopup::mousePressEvent(QMouseEvent *event)
+{
+    if (event->button() == Qt::MouseButton::LeftButton)
+    {
+        this->dragTimer_.start(std::chrono::milliseconds(17));
+        this->startPosDrag_ = event->pos();
+        this->movingRelativePos = event->localPos();
+    }
+}
+
+void UserInfoPopup::mouseReleaseEvent(QMouseEvent *event)
+{
+    this->dragTimer_.stop();
+    this->isMoving_ = false;
+}
+
+void UserInfoPopup::mouseMoveEvent(QMouseEvent *event)
+{
+    // Drag the window by the amount changed from inital position
+    // Note that we provide a few *units* of deadzone so people don't
+    // start dragging the window if they are slow at clicking.
+    auto movePos = event->pos() - this->startPosDrag_;
+    if (this->isMoving_ || movePos.manhattanLength() > 10.0)
+    {
+        this->requestedDragPos_ =
+            (event->screenPos() - this->movingRelativePos).toPoint();
+        this->isMoving_ = true;
+    }
 }
 
 void UserInfoPopup::installEvents()
