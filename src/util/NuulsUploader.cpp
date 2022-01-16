@@ -149,6 +149,18 @@ void uploadImageToNuuls(RawImageData imageData, ChannelPtr channel,
     payload->setBoundary(boundary);
     payload->append(part);
 
+    for (const auto &extraFormField :
+         getSettings()->imageUploaderExtraFormFields.getValue())
+    {
+        QHttpPart extraPart;
+        extraPart.setHeader(
+            QNetworkRequest::ContentDispositionHeader,
+            QString("form-data; name=\"%1\"").arg(extraFormField.first));
+        extraPart.setBody(extraFormField.second.toUtf8());
+
+        payload->append(extraPart);
+    }
+
     NetworkRequest(url, NetworkRequestType::Post)
         .header("Content-Type", contentType)
         .headerList(extraHeaders)

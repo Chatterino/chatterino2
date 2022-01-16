@@ -131,6 +131,48 @@ ExternalToolsPage::ExternalToolsPage()
         groupLayout->addRow(
             "Form field: ",
             this->createLineEdit(getSettings()->imageUploaderFormField));
+        {
+            auto *edit = new QLineEdit(this);
+            auto &setting = getSettings()->imageUploaderExtraFormFields;
+
+            setting.connect(
+                [=](const auto &extraFormFields, auto) {
+                    qDebug() << "setting changed";
+                    QString finalString;
+                    for (const auto &ff : extraFormFields)
+                    {
+                        finalString +=
+                            QString("%1=%2|").arg(ff.first, ff.second);
+                    }
+                    edit->setText(finalString);
+                },
+                this->managedConnections_);
+
+            QObject::connect(
+                edit, &QLineEdit::editingFinished, [edit, &setting]() {
+                    auto newValue = edit->text();
+                    std::vector<std::pair<QString, QString>> finalValue;
+
+                    const auto &parts = newValue.split('|', Qt::SkipEmptyParts);
+                    for (const auto &part : parts)
+                    {
+                        const auto &key = part.section('=', 0, 0);
+                        const auto &value = part.section(
+                            '=', 1, -1, QString::SectionIncludeTrailingSep);
+
+                        if (key.isEmpty() || value.isEmpty())
+                        {
+                            // Both key and value must be set
+                            continue;
+                        }
+                        finalValue.emplace_back(key, value);
+                    }
+
+                    setting = finalValue;
+                });
+
+            groupLayout->addRow("Extra form fields: ", edit);
+        }
         groupLayout->addRow(
             "Extra Headers: ",
             this->createLineEdit(getSettings()->imageUploaderHeaders));

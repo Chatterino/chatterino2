@@ -358,6 +358,9 @@ public:
     QStringSetting imageUploaderLink = {"/external/imageUploader/link", ""};
     QStringSetting imageUploaderDeletionLink = {
         "/external/imageUploader/deletionLink", ""};
+    ChatterinoSetting<std::vector<std::pair<QString, QString>>>
+        imageUploaderExtraFormFields = {
+            "/external/imageUploader/extraFormFields", {}};
 
     /// Misc
     BoolSetting betaUpdates = {"/misc/beta", false};
