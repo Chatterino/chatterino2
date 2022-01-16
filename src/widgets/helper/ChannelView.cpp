@@ -1858,7 +1858,7 @@ void ChannelView::addContextMenuItems(
     {
         if (auto badgeElement = dynamic_cast<const BadgeElement *>(&creator))
             addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
-                                     *menu, menu);
+                                     *menu, this);
     }
 
     // Emote actions
@@ -1867,7 +1867,7 @@ void ChannelView::addContextMenuItems(
     {
         if (auto emoteElement = dynamic_cast<const EmoteElement *>(&creator))
             addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags,
-                                     *menu, menu);
+                                     *menu, this);
     }
 
     // add seperator
