@@ -221,7 +221,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
                             previousMenu = nullptr;
                         }
 
-                        auto menu = new QMenu;
+                        auto menu = new QMenu(this);
                         previousMenu = menu;
 
                         auto avatarUrl = this->avatarUrl_;
