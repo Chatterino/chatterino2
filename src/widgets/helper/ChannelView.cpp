@@ -1853,12 +1853,15 @@ void ChannelView::addContextMenuItems(
     auto menu = new QMenu(this);
     previousMenu = menu;
 
+    auto *mainWindow =
+        static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
+
     // Badge actions
     if (creatorFlags.hasAny({MessageElementFlag::Badges}))
     {
         if (auto badgeElement = dynamic_cast<const BadgeElement *>(&creator))
             addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
-                                     *menu, this);
+                                     *menu, mainWindow);
     }
 
     // Emote actions
@@ -1867,7 +1870,7 @@ void ChannelView::addContextMenuItems(
     {
         if (auto emoteElement = dynamic_cast<const EmoteElement *>(&creator))
             addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags,
-                                     *menu, this);
+                                     *menu, mainWindow);
     }
 
     // add seperator
@@ -1978,8 +1981,6 @@ void ChannelView::addContextMenuItems(
 
     menu->popup(QCursor::pos());
     menu->raise();
-
-    return;
 }
 
 void ChannelView::mouseDoubleClickEvent(QMouseEvent *event)
