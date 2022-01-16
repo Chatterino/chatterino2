@@ -58,15 +58,14 @@
 namespace chatterino {
 namespace {
     void addEmoteContextMenuItems(const Emote &emote,
-                                  MessageElementFlags creatorFlags, QMenu &menu)
+                                  MessageElementFlags creatorFlags, QMenu &menu,
+                                  QWidget *parent)
     {
-        auto openAction = menu.addAction("Open");
-        auto openMenu = new QMenu(&menu);
-        openAction->setMenu(openMenu);
+        auto openMenu = new QMenu("Open", parent);
+        menu.addMenu(openMenu);
 
-        auto copyAction = menu.addAction("Copy");
-        auto copyMenu = new QMenu(&menu);
-        copyAction->setMenu(copyMenu);
+        auto copyMenu = new QMenu("Copy", parent);
+        menu.addMenu(copyMenu);
 
         // Add copy and open links for 1x, 2x, 3x
         auto addImageLink = [&](const ImagePtr &image, char scale) {
@@ -1859,7 +1858,7 @@ void ChannelView::addContextMenuItems(
     {
         if (auto badgeElement = dynamic_cast<const BadgeElement *>(&creator))
             addEmoteContextMenuItems(*badgeElement->getEmote(), creatorFlags,
-                                     *menu);
+                                     *menu, menu);
     }
 
     // Emote actions
@@ -1868,7 +1867,7 @@ void ChannelView::addContextMenuItems(
     {
         if (auto emoteElement = dynamic_cast<const EmoteElement *>(&creator))
             addEmoteContextMenuItems(*emoteElement->getEmote(), creatorFlags,
-                                     *menu);
+                                     *menu, menu);
     }
 
     // add seperator
