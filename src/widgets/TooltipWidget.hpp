@@ -15,7 +15,10 @@ class TooltipWidget : public BaseWindow
 public:
     static TooltipWidget *instance();
 
-    TooltipWidget(BaseWidget *parent = nullptr);
+private:
+    TooltipWidget(QWidget *parent);
+
+public:
     ~TooltipWidget() override;
 
     void setText(QString text);

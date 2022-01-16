@@ -1,7 +1,10 @@
 #include "TooltipWidget.hpp"
 
+#include "Application.hpp"
 #include "BaseTheme.hpp"
 #include "singletons/Fonts.hpp"
+#include "singletons/WindowManager.hpp"
+#include "widgets/Window.hpp"
 
 #include <QDebug>
 #include <QDesktopWidget>
@@ -18,15 +21,18 @@ namespace chatterino {
 
 TooltipWidget *TooltipWidget::instance()
 {
-    static TooltipWidget *tooltipWidget = new TooltipWidget();
+    auto *mainWindow =
+        static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
+    static TooltipWidget *tooltipWidget = new TooltipWidget(mainWindow);
     return tooltipWidget;
 }
 
-TooltipWidget::TooltipWidget(BaseWidget *parent)
+TooltipWidget::TooltipWidget(QWidget *parent)
     : BaseWindow({BaseWindow::TopMost, BaseWindow::DontFocus}, parent)
     , displayImage_(new QLabel())
     , displayText_(new QLabel())
 {
+    assert(parent != nullptr);
     this->setStyleSheet("color: #fff; background: rgba(11, 11, 11, 0.8)");
     this->setAttribute(Qt::WA_TranslucentBackground);
     //this->setWindowOpacity(0.8);
