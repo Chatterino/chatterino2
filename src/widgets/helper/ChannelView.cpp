@@ -1828,7 +1828,7 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
             }
             else
             {
-                this->addContextMenuItems(hoveredElement, layout);
+                this->addContextMenuItems(hoveredElement, layout, event);
             }
         }
         break;
@@ -1845,7 +1845,8 @@ void ChannelView::handleMouseClick(QMouseEvent *event,
 }
 
 void ChannelView::addContextMenuItems(
-    const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout)
+    const MessageLayoutElement *hoveredElement, MessageLayoutPtr layout,
+    QMouseEvent *event)
 {
     const auto &creator = hoveredElement->getCreator();
     auto creatorFlags = creator.getFlags();
@@ -1983,6 +1984,15 @@ void ChannelView::addContextMenuItems(
         }
     }
 
+    if (event->modifiers() == Qt::ShiftModifier &&
+        !layout->getMessage()->id.isEmpty())
+    {
+        menu->addAction("Copy message ID",
+                        [messageID = layout->getMessage()->id] {
+                            crossPlatformCopy(messageID);
+                        });
+    }
+
     menu->popup(QCursor::pos());
     menu->raise();
 
@@ -2060,12 +2070,8 @@ void ChannelView::hideEvent(QHideEvent *)
 
 void ChannelView::showUserInfoPopup(const QString &userName)
 {
-    QWidget *userCardParent = this;
-#ifdef Q_OS_MACOS
-    // Order of closing/opening/killing widgets when the "Automatically close user info popups" setting is enabled is special on macOS, so user info popups should always use the main window as its parent
-    userCardParent =
+    QWidget *userCardParent =
         static_cast<QWidget *>(&(getApp()->windows->getMainWindow()));
-#endif
     auto *userPopup =
         new UserInfoPopup(getSettings()->autoCloseUserPopup, userCardParent);
     userPopup->setData(userName, this->hasSourceChannel()
