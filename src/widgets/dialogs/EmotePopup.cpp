@@ -392,36 +392,59 @@ void EmotePopup::filterEmotes(const QString &searchText)
 
         return;
     }
-
     auto searchChannel = std::make_shared<Channel>("", Channel::Type::None);
-
-    auto twitchEmoteSets =
-        getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets;
-    std::vector<std::shared_ptr<TwitchAccount::EmoteSet>> twitchGlobalEmotes{};
-
-    for (const auto &set : twitchEmoteSets)
+    if (this->twitchChannel_)
     {
-        auto setCopy = std::make_shared<TwitchAccount::EmoteSet>(*set);
-        auto setIt =
-            std::remove_if(setCopy->emotes.begin(), setCopy->emotes.end(),
-                           [searchText](auto &emote) {
-                               return !emote.name.string.contains(
-                                   searchText, Qt::CaseInsensitive);
-                           });
-        setCopy->emotes.resize(std::distance(setCopy->emotes.begin(), setIt));
+        auto twitchEmoteSets =
+            getApp()->accounts->twitch.getCurrent()->accessEmotes()->emoteSets;
+        std::vector<std::shared_ptr<TwitchAccount::EmoteSet>>
+            twitchGlobalEmotes{};
 
-        if (setCopy->emotes.size() > 0)
-            twitchGlobalEmotes.push_back(setCopy);
+        for (const auto &set : twitchEmoteSets)
+        {
+            auto setCopy = std::make_shared<TwitchAccount::EmoteSet>(*set);
+            auto setIt =
+                std::remove_if(setCopy->emotes.begin(), setCopy->emotes.end(),
+                               [searchText](auto &emote) {
+                                   return !emote.name.string.contains(
+                                       searchText, Qt::CaseInsensitive);
+                               });
+            setCopy->emotes.resize(
+                std::distance(setCopy->emotes.begin(), setIt));
+
+            if (setCopy->emotes.size() > 0)
+                twitchGlobalEmotes.push_back(setCopy);
+        }
+
+        auto bttvGlobalEmotes = this->filterEmoteMap(
+            searchText, getApp()->twitch2->getBttvEmotes().emotes());
+        auto ffzGlobalEmotes = this->filterEmoteMap(
+            searchText, getApp()->twitch2->getFfzEmotes().emotes());
+        auto bttvChannelEmotes = this->filterEmoteMap(
+            searchText, this->twitchChannel_->bttvEmotes());
+        auto ffzChannelEmotes =
+            this->filterEmoteMap(searchText, this->twitchChannel_->ffzEmotes());
+
+        // twitch
+        addEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,
+                     this->channel_->getName());
+
+        // global
+        if (bttvGlobalEmotes->size() > 0)
+            addEmotes(*searchChannel, *bttvGlobalEmotes, "BetterTTV (Global)",
+                      MessageElementFlag::BttvEmote);
+        if (ffzGlobalEmotes->size() > 0)
+            addEmotes(*searchChannel, *ffzGlobalEmotes, "FrankerFaceZ (Global)",
+                      MessageElementFlag::FfzEmote);
+
+        // channel
+        if (bttvChannelEmotes->size() > 0)
+            addEmotes(*searchChannel, *bttvChannelEmotes, "BetterTTV (Channel)",
+                      MessageElementFlag::BttvEmote);
+        if (ffzChannelEmotes->size() > 0)
+            addEmotes(*searchChannel, *ffzChannelEmotes,
+                      "FrankerFaceZ (Channel)", MessageElementFlag::FfzEmote);
     }
-
-    auto bttvGlobalEmotes = this->filterEmoteMap(
-        searchText, getApp()->twitch2->getBttvEmotes().emotes());
-    auto ffzGlobalEmotes = this->filterEmoteMap(
-        searchText, getApp()->twitch2->getFfzEmotes().emotes());
-    auto bttvChannelEmotes =
-        this->filterEmoteMap(searchText, this->twitchChannel_->bttvEmotes());
-    auto ffzChannelEmotes =
-        this->filterEmoteMap(searchText, this->twitchChannel_->ffzEmotes());
 
     EmojiMap filteredEmojis{};
     int emojiCount = 0;
@@ -434,27 +457,6 @@ void EmotePopup::filterEmotes(const QString &searchText)
                 emojiCount++;
             }
         });
-
-    // twitch
-    addEmoteSets(twitchGlobalEmotes, *searchChannel, *searchChannel,
-                 this->channel_->getName());
-
-    // global
-    if (bttvGlobalEmotes->size() > 0)
-        addEmotes(*searchChannel, *bttvGlobalEmotes, "BetterTTV (Global)",
-                  MessageElementFlag::BttvEmote);
-    if (ffzGlobalEmotes->size() > 0)
-        addEmotes(*searchChannel, *ffzGlobalEmotes, "FrankerFaceZ (Global)",
-                  MessageElementFlag::FfzEmote);
-
-    // channel
-    if (bttvChannelEmotes->size() > 0)
-        addEmotes(*searchChannel, *bttvChannelEmotes, "BetterTTV (Channel)",
-                  MessageElementFlag::BttvEmote);
-    if (ffzChannelEmotes->size() > 0)
-        addEmotes(*searchChannel, *ffzChannelEmotes, "FrankerFaceZ (Channel)",
-                  MessageElementFlag::FfzEmote);
-
     // emojis
     if (emojiCount > 0)
         this->loadEmojis(*searchChannel, filteredEmojis, "Emojis");
