@@ -697,6 +697,33 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
+    this->registerCommand(
+        "/popup", [](const QStringList &words, ChannelPtr channel) {
+            QString target(words.size() < 2 ? channel->getName() : words[1]);
+
+            if (words.size() < 2 &&
+                (!channel->isTwitchChannel() || channel->isEmpty()))
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /popup <channel>. You can also use the command "
+                    "without arguments to popup the currently focused split in "
+                    "a new window."));
+                return "";
+            }
+            stripChannelName(target);
+
+            auto app = getApp();
+            Window &window = app->windows->createWindow(WindowType::Popup);
+            Split *split = new Split(static_cast<SplitContainer *>(
+                window.getNotebook().getOrAddSelectedPage()));
+
+            split->setChannel(app->twitch.server->getOrAddChannel(target));
+            window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+            window.show();
+
+            return "";
+        });
+
     this->registerCommand("/clearmessages", [](const auto & /*words*/,
                                                ChannelPtr channel) {
         auto *currentPage = dynamic_cast<SplitContainer *>(
