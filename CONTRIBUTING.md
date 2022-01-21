@@ -223,7 +223,7 @@ Keep the element on the stack if possible. If you need a pointer or have complex
 When informing the user about how a command is supposed to be used, we aim to follow [this standard](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap12.html) where possible.
 
 - Square brackets are reserved for `[optional arguments]`.
-- Angle brackets are reserved for `<required arguments>`.
+- Angle brackets are reserved for `<required arguments>`. There are exemptions in such cases where using the command without a parameter also returns a valid response. In such cases, the parameter becomes required and we should inform users as such: `/streamlink <channel>`.
 - The word _Usage_ should be capitalized and must be followed by a colon.
 - If the usage deserves a description, put a dot after all parameters and explain it briefly.
 
