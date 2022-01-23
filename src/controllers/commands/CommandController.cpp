@@ -655,47 +655,47 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand(
-        "/streamlink", [](const QStringList &words, ChannelPtr channel) {
-            QString target(words.size() < 2 ? channel->getName() : words[1]);
+    this->registerCommand("/streamlink", [](const QStringList &words,
+                                            ChannelPtr channel) {
+        QString target(words.size() < 2 ? channel->getName() : words[1]);
 
-            if (words.size() < 2 &&
-                (!channel->isTwitchChannel() || channel->isEmpty()))
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: /streamlink <channel>. You can also use the "
-                    "command without arguments in any Twitch channel to open "
-                    "it in streamlink."));
-                return "";
-            }
-
-            stripChannelName(target);
-            openStreamlinkForChannel(target);
-
+        if (words.size() < 2 &&
+            (channel->getType() != Channel::Type::Twitch || channel->isEmpty()))
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: /streamlink <channel>. You can also use the "
+                "command without arguments in any Twitch channel to open "
+                "it in streamlink."));
             return "";
-        });
+        }
 
-    this->registerCommand(
-        "/popout", [](const QStringList &words, ChannelPtr channel) {
-            QString target(words.size() < 2 ? channel->getName() : words[1]);
+        stripChannelName(target);
+        openStreamlinkForChannel(target);
 
-            if (words.size() < 2 &&
-                (!channel->isTwitchChannel() || channel->isEmpty()))
-            {
-                channel->addMessage(makeSystemMessage(
-                    "Usage: /popout <channel>. You can also use the command "
-                    "without arguments in any Twitch channel to open its "
-                    "popout chat."));
-                return "";
-            }
+        return "";
+    });
 
-            stripChannelName(target);
-            QDesktopServices::openUrl(
-                QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
-                         .arg(target)));
+    this->registerCommand("/popout", [](const QStringList &words,
+                                        ChannelPtr channel) {
+        QString target(words.size() < 2 ? channel->getName() : words[1]);
 
+        if (words.size() < 2 &&
+            (channel->getType() != Channel::Type::Twitch || channel->isEmpty()))
+        {
+            channel->addMessage(makeSystemMessage(
+                "Usage: /popout <channel>. You can also use the command "
+                "without arguments in any Twitch channel to open its "
+                "popout chat."));
             return "";
-        });
+        }
+
+        stripChannelName(target);
+        QDesktopServices::openUrl(
+            QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
+                     .arg(target)));
+
+        return "";
+    });
 
     this->registerCommand("/clearmessages", [](const auto & /*words*/,
                                                ChannelPtr channel) {
