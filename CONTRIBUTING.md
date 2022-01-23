@@ -231,7 +231,7 @@ When informing the user about how a command is supposed to be used, we aim to fo
 
 - `Usage: /block <user>`
 - `Usage: /unblock <user>. Unblocks a user.`
-- `Usage: /streamlink <channel>`
+- `Usage: /streamlink [channel]`
 - `Usage: /usercard <user> [channel]`
 
 ##### Bad

@@ -669,9 +669,9 @@ void CommandController::initialize(Settings &, Paths &paths)
             else
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /streamlink <channel>. You can also use the "
-                    "command without arguments in any Twitch channel to open "
-                    "it in streamlink."));
+                    "/streamlink [channel]. Open specified Twitch channel in "
+                    "streamlink. If no channel argument is specified, open the "
+                    "current Twitch channel instead."));
                 return "";
             }
         }
