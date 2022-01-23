@@ -657,16 +657,23 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/streamlink", [](const QStringList &words,
                                             ChannelPtr channel) {
-        QString target(words.size() < 2 ? channel->getName() : words[1]);
+        QString target(words.value(1));
 
-        if (words.size() < 2 &&
-            (channel->getType() != Channel::Type::Twitch || channel->isEmpty()))
+        if (target.isEmpty())
         {
-            channel->addMessage(makeSystemMessage(
-                "Usage: /streamlink <channel>. You can also use the "
-                "command without arguments in any Twitch channel to open "
-                "it in streamlink."));
-            return "";
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /streamlink <channel>. You can also use the "
+                    "command without arguments in any Twitch channel to open "
+                    "it in streamlink."));
+                return "";
+            }
         }
 
         stripChannelName(target);
@@ -677,16 +684,23 @@ void CommandController::initialize(Settings &, Paths &paths)
 
     this->registerCommand("/popout", [](const QStringList &words,
                                         ChannelPtr channel) {
-        QString target(words.size() < 2 ? channel->getName() : words[1]);
+        QString target(words.value(1));
 
-        if (words.size() < 2 &&
-            (channel->getType() != Channel::Type::Twitch || channel->isEmpty()))
+        if (target.isEmpty())
         {
-            channel->addMessage(makeSystemMessage(
-                "Usage: /popout <channel>. You can also use the command "
-                "without arguments in any Twitch channel to open its "
-                "popout chat."));
-            return "";
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
+            {
+                channel->addMessage(makeSystemMessage(
+                    "Usage: /popout <channel>. You can also use the command "
+                    "without arguments in any Twitch channel to open its "
+                    "popout chat."));
+                return "";
+            }
         }
 
         stripChannelName(target);
