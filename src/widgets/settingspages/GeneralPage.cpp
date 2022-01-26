@@ -603,6 +603,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     }
 
     layout.addCheckbox("Restart on crash", s.restartOnCrash);
+    layout.addCheckbox("Use incremental search", s.incrementalSearch);
 
 #if defined(Q_OS_LINUX) && !defined(NO_QTKEYCHAIN)
     if (!getPaths()->isPortable())

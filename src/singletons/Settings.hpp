@@ -386,6 +386,7 @@ public:
     BoolSetting askOnImageUpload = {"/misc/askOnImageUpload", true};
     BoolSetting informOnTabVisibilityToggle = {"/misc/askOnTabVisibilityToggle",
                                                true};
+    BoolSetting incrementalSearch = {"/misc/incrementalSearch", false};
 
     /// Debug
     BoolSetting showUnhandledIrcMessages = {"/debug/showUnhandledIrcMessages",
