@@ -838,11 +838,16 @@ void TwitchChannel::loadRecentMessages()
 
             if (!getSettings()->grayOutHistory)
             {
-                const auto date = QDateTime::currentDateTime().toString("dd/MM/yy");
-                const auto time = QTime::currentTime().toString("hh:mm");
-                const auto msg = QString("[​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ▲ Chat history before %1 %2 ▲ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​]").arg(date).arg(time);
-                const auto block_line = makeSystemMessage(msg, QTime::currentTime());
-                allBuiltMessages.emplace_back(block_line);
+                const auto str =
+                    QString(
+                        "[​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ "
+                        "​ ​ ​ ​ ​ ​ ​ ​ ​ ▲ Chat history "
+                        "before %1 %2 ▲ ​ ​ ​ ​ ​ ​ ​ ​ ​ "
+                        "​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​]")
+                        .arg(QDateTime::currentDateTime().toString("dd/MM/yy"),
+                             QTime::currentTime().toString("hh:mm"));
+                const auto msg = makeSystemMessage(str);
+                allBuiltMessages.emplace_back(msg);
             }
 
             postToThread([this, shared, root,
