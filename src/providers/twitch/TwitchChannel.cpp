@@ -836,6 +836,15 @@ void TwitchChannel::loadRecentMessages()
                 }
             }
 
+            if (!getSettings()->grayOutHistory)
+            {
+                const auto date = QDateTime::currentDateTime().toString("dd/MM/yy");
+                const auto time = QTime::currentTime().toString("hh:mm");
+                const auto msg = QString("[​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ▲ Chat history before %1 %2 ▲ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​]").arg(date).arg(time);
+                const auto block_line = makeSystemMessage(msg, QTime::currentTime());
+                allBuiltMessages.emplace_back(block_line);
+            }
+
             postToThread([this, shared, root,
                           messages = std::move(allBuiltMessages)]() mutable {
                 shared->addMessagesAtStart(messages);

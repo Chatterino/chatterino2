@@ -86,6 +86,7 @@ public:
                                      false};
     BoolSetting separateMessages = {"/appearance/messages/separateMessages",
                                     false};
+    BoolSetting grayOutHistory = {"/appearance/messages/grayOutHistory", true};
     BoolSetting compactEmotes = {"/appearance/messages/compactEmotes", true};
     BoolSetting hideModerated = {"/appearance/messages/hideModerated", false};
     BoolSetting hideModerationActions = {

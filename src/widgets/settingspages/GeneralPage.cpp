@@ -288,6 +288,7 @@ void GeneralPage::initLayout(GeneralPageView &layout)
     layout.addColorButton("Line color",
                           QColor(getSettings()->lastMessageColor.getValue()),
                           getSettings()->lastMessageColor);
+    layout.addCheckbox("Gray-out message history before connecting.", s.grayOutHistory);
 
     layout.addTitle("Emotes");
     layout.addCheckbox("Enable", s.enableEmoteImages);
