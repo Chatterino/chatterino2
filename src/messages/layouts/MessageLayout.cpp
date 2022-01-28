@@ -266,6 +266,30 @@ void MessageLayout::paint(QPainter &painter, int width, int y, int messageIndex,
                          pixmap->width(), 1, brush);
     }
 
+    // draw last message before connecting line
+    if (this->message_->flags.has(MessageFlag::LastBeforeConnecting))
+    {
+        QColor color;
+        if (getSettings()->beforeConnectingColor != "")
+        {
+            color = QColor(getSettings()->beforeConnectingColor.getValue());
+        }
+        else
+        {
+            color =
+                isWindowFocused
+                    ? app->themes->tabs.selected.backgrounds.regular.color()
+                    : app->themes->tabs.selected.backgrounds.unfocused.color();
+        }
+
+        QBrush brush(color,
+                     static_cast<Qt::BrushStyle>(
+                         getSettings()->beforeConnectingPattern.getValue()));
+
+        painter.fillRect(0, y + this->container_->getHeight() - 1,
+                         pixmap->width(), 1, brush);
+    }
+
     this->bufferValid_ = true;
 }
 

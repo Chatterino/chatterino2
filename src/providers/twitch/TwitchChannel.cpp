@@ -836,18 +836,11 @@ void TwitchChannel::loadRecentMessages()
                 }
             }
 
-            if (!getSettings()->grayOutHistory)
+            if (!allBuiltMessages.empty() &&
+                getSettings()->showBeforeConnectingIndicator)
             {
-                const auto str =
-                    QString(
-                        "[​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ "
-                        "​ ​ ​ ​ ​ ​ ​ ​ ​ ▲ Chat history "
-                        "before %1 %2 ▲ ​ ​ ​ ​ ​ ​ ​ ​ ​ "
-                        "​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​ ​]")
-                        .arg(QDateTime::currentDateTime().toString("dd/MM/yy"),
-                             QTime::currentTime().toString("hh:mm"));
-                const auto msg = makeSystemMessage(str);
-                allBuiltMessages.emplace_back(msg);
+                auto &last_elem = allBuiltMessages.back();
+                last_elem->flags.set(MessageFlag::LastBeforeConnecting);
             }
 
             postToThread([this, shared, root,
