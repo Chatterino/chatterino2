@@ -697,32 +697,40 @@ void CommandController::initialize(Settings &, Paths &paths)
             return "";
         });
 
-    this->registerCommand(
-        "/popup", [](const QStringList &words, ChannelPtr channel) {
-            QString target(words.size() < 2 ? channel->getName() : words[1]);
+    this->registerCommand("/popup", [](const QStringList &words,
+                                       ChannelPtr channel) {
+        QString target(words.value(1));
 
-            if (words.size() < 2 &&
-                (!channel->isTwitchChannel() || channel->isEmpty()))
+        if (target.isEmpty())
+        {
+            if (channel->isTwitchChannel() && !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
             {
                 channel->addMessage(makeSystemMessage(
-                    "Usage: /popup <channel>. You can also use the command "
-                    "without arguments to popup the currently focused split in "
-                    "a new window."));
+                    "Usage: /popup [channel]. Open specified Twitch channel in "
+                    "a new window. If no channel argument is specified, open "
+                    "the "
+                    "currently focused split instead."));
                 return "";
             }
-            stripChannelName(target);
+        }
 
-            auto app = getApp();
-            Window &window = app->windows->createWindow(WindowType::Popup);
-            Split *split = new Split(static_cast<SplitContainer *>(
-                window.getNotebook().getOrAddSelectedPage()));
+        stripChannelName(target);
 
-            split->setChannel(app->twitch.server->getOrAddChannel(target));
-            window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
-            window.show();
+        auto app = getApp();
+        Window &window = app->windows->createWindow(WindowType::Popup);
+        Split *split = new Split(static_cast<SplitContainer *>(
+            window.getNotebook().getOrAddSelectedPage()));
 
-            return "";
-        });
+        split->setChannel(app->twitch.server->getOrAddChannel(target));
+        window.getNotebook().getOrAddSelectedPage()->appendSplit(split);
+        window.show();
+
+        return "";
+    });
 
     this->registerCommand("/clearmessages", [](const auto & /*words*/,
                                                ChannelPtr channel) {
