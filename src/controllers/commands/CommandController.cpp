@@ -655,12 +655,18 @@ void CommandController::initialize(Settings &, Paths &paths)
         return "";
     });
 
-    this->registerCommand(
-        "/streamlink", [](const QStringList &words, ChannelPtr channel) {
-            QString target(words.size() < 2 ? channel->getName() : words[1]);
+    this->registerCommand("/streamlink", [](const QStringList &words,
+                                            ChannelPtr channel) {
+        QString target(words.value(1));
 
-            if (words.size() < 2 &&
-                (!channel->isTwitchChannel() || channel->isEmpty()))
+        if (target.isEmpty())
+        {
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
             {
                 channel->addMessage(makeSystemMessage(
                     "/streamlink [channel]. Open specified Twitch channel in "
@@ -668,19 +674,26 @@ void CommandController::initialize(Settings &, Paths &paths)
                     "current Twitch channel instead."));
                 return "";
             }
+        }
 
-            stripChannelName(target);
-            openStreamlinkForChannel(target);
+        stripChannelName(target);
+        openStreamlinkForChannel(target);
 
-            return "";
-        });
+        return "";
+    });
 
-    this->registerCommand(
-        "/popout", [](const QStringList &words, ChannelPtr channel) {
-            QString target(words.size() < 2 ? channel->getName() : words[1]);
+    this->registerCommand("/popout", [](const QStringList &words,
+                                        ChannelPtr channel) {
+        QString target(words.value(1));
 
-            if (words.size() < 2 &&
-                (!channel->isTwitchChannel() || channel->isEmpty()))
+        if (target.isEmpty())
+        {
+            if (channel->getType() == Channel::Type::Twitch &&
+                !channel->isEmpty())
+            {
+                target = channel->getName();
+            }
+            else
             {
                 channel->addMessage(makeSystemMessage(
                     "Usage: /popout <channel>. You can also use the command "
@@ -688,14 +701,15 @@ void CommandController::initialize(Settings &, Paths &paths)
                     "popout chat."));
                 return "";
             }
+        }
 
-            stripChannelName(target);
-            QDesktopServices::openUrl(
-                QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
-                         .arg(target)));
+        stripChannelName(target);
+        QDesktopServices::openUrl(
+            QUrl(QString("https://www.twitch.tv/popout/%1/chat?popout=")
+                     .arg(target)));
 
-            return "";
-        });
+        return "";
+    });
 
     this->registerCommand("/clearmessages", [](const auto & /*words*/,
                                                ChannelPtr channel) {
