@@ -289,11 +289,10 @@ void GeneralPage::initLayout(GeneralPageView &layout)
                           QColor(getSettings()->lastMessageColor.getValue()),
                           getSettings()->lastMessageColor);
     layout.addSeperator();
-    layout.addCheckbox("Gray-out message history before connecting.",
-                       s.grayOutHistory);
-    layout.addCheckbox("Draw a line below the last message before "
-                       "connecting.",
-                       s.showBeforeConnectingIndicator);
+    layout.addCheckbox("Gray-out message history.", s.grayOutHistory);
+    layout.addCheckbox(
+        "Draw a line below the last message before connecting.",
+        s.showBeforeConnectingIndicator);
     layout.addDropdown<std::underlying_type<Qt::BrushStyle>::type>(
         "Line style", {"Dotted", "Solid"}, s.beforeConnectingPattern,
         [](int value) {
