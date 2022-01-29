@@ -712,8 +712,7 @@ void CommandController::initialize(Settings &, Paths &paths)
                 channel->addMessage(makeSystemMessage(
                     "Usage: /popup [channel]. Open specified Twitch channel in "
                     "a new window. If no channel argument is specified, open "
-                    "the "
-                    "currently focused split instead."));
+                    "the currently focused split instead."));
                 return "";
             }
         }
