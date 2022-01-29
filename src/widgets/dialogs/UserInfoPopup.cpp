@@ -175,7 +175,7 @@ UserInfoPopup::UserInfoPopup(bool closeAutomatically, QWidget *parent)
          }},
         {"execModeratorAction",
          [this](std::vector<QString> arguments) -> QString {
-             if (arguments.size() == 0)
+             if (arguments.empty())
              {
                  return "execModeratorAction action needs an argument, which "
                         "moderation action to execute, see description in the "
