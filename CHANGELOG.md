@@ -95,6 +95,7 @@
 - Bugfix: Usercards no longer close when the originating window (e.g. a search popup) is closed. (#3518)
 - Bugfix: Disabled /popout and /streamlink from working in non-twitch channels (e.g. /whispers) when supplied no arguments. (#3541)
 - Bugfix: Fixed automod and unban messages showing when moderation actions were disabled (#3548)
+- Bugfix: Fixed bttv modifier emotes not being on top of animated emotes (#3551)
 - Dev: Batch checking live status for channels with live notifications that aren't connected. (#3442)
 - Dev: Add GitHub action to test builds without precompiled headers enabled. (#3327)
 - Dev: Renamed CMake's build option `USE_SYSTEM_QT5KEYCHAIN` to `USE_SYSTEM_QTKEYCHAIN`. (#3103)

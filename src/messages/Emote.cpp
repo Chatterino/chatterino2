@@ -6,9 +6,9 @@ namespace chatterino {
 
 void Emote::animate() const
 {
-    images.getImage1().get()->setAnimated(true);
-    images.getImage2().get()->setAnimated(true);
-    images.getImage3().get()->setAnimated(true);
+    images.getImage1()->setAnimated(true);
+    images.getImage2()->setAnimated(true);
+    images.getImage3()->setAnimated(true);
 }
 
 bool operator==(const Emote &a, const Emote &b)
